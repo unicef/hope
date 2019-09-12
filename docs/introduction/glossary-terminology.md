@@ -40,6 +40,10 @@
         and how for a specific cycle. Can have multiple cash plans per cycle.</td>
     </tr>
     <tr>
+      <td style="text-align:left">Core Attribute</td>
+      <td style="text-align:left"></td>
+    </tr>
+    <tr>
       <td style="text-align:left">Country</td>
       <td style="text-align:left">Also will be Business Area code from AD.</td>
     </tr>
@@ -51,6 +55,10 @@
     <tr>
       <td style="text-align:left">DFAM</td>
       <td style="text-align:left">Division of Financial and Administrative Management</td>
+    </tr>
+    <tr>
+      <td style="text-align:left">Draft Cash Plan</td>
+      <td style="text-align:left"></td>
     </tr>
     <tr>
       <td style="text-align:left">EMOPS</td>
