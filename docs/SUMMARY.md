@@ -8,7 +8,8 @@
 
 * [Glossary / Terminology](introduction/glossary-terminology.md)
 * [FAQ](introduction/faq.md)
-* [Team](introduction/team.md)
+* [Team](introduction/team/README.md)
+  * [Project Team RACI](introduction/team/project-team-raci.md)
 * [Events](introduction/events.md)
 
 ## Product Specification
