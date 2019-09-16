@@ -1,0 +1,211 @@
+version: '1.0'
+mode: sequential
+stages:
+- build
+- test
+- push
+- deploy
+- run_jobs
+steps:
+
+    build_images:
+        type: parallel
+        stage: 'build'
+        steps:
+            build_backend:
+                type: build
+                image_name: unicef/hct-mis-backend
+                dockerfile: Dockerfile
+                working_directory: ${{main_clone}}/backend
+                tag: ${{CF_BRANCH}}
+                build_arguments:
+                    - env=${{ENV}}
+                    - GIT_VERSION=${{CF_REVISION}}
+
+            build_frontend:
+                type: build
+                image_name: unicef/hct-mis-frontend
+                dockerfile: Dockerfile
+                working_directory: ${{main_clone}}/frontend
+                tag: ${{CF_BRANCH}}
+
+            build_proxy:
+                type: build
+                image_name: unicef/hct-mis-proxy
+                dockerfile: Dockerfile
+                working_directory: ${{main_clone}}/proxy
+                tag: ${{CF_BRANCH}}
+
+    backend_tests:
+        stage: 'test'
+        type: composition
+        composition: 'unicef-hct-mis'
+        when:
+            condition:
+                all:
+                    noSkipTestInCommitMessage: 'includes(lower("${{CF_COMMIT_MESSAGE}}"), "skip tests") == false'
+        composition_candidates:
+            test:
+                image: ${{build_backend}}
+                depends_on:
+                    - backend
+                command: 'bash -c "/usr/local/bin/wait-for-it.sh backend:8000 -t 240 && python /code/manage.py test --parallel && flake8 /code/backend"'
+                environment:
+                    - ENV=dev
+                    - POSTGRES_DB=postgres
+                    - POSTGRES_USER=postgres
+                    - POSTGRES_PASSWORD=
+                    - POSTGRES_HOST=db
+                    - SECRET_KEY=asdfqwef124rf
+                    - DJANGO_ALLOWED_HOST="*"
+                    - FRONTEND_SERVICE_HOST=frontend
+                    - UNHCR_API_HOST=https://api.test/
+                    - UNHCR_API_USERNAME=user
+                    - UNHCR_API_PASSWORD=password
+                    - UNICEF_PARTNER_DETAILS_URL=https://api.test/
+                    - UNICEF_API_USERNAME=user
+                    - UNICEF_API_PASSWORD=password
+
+    push_images:
+        type: parallel
+        stage: 'push'
+        when:
+            branch:
+                only:
+                    - develop
+                    - master
+        steps:
+            push_backend_to_hub:
+                type: push
+                title: Pushing backend image to docker hub
+                registry: unicef-dockerhub
+                candidate: ${{build_backend}}
+                tags:
+                    - ${{CF_BRANCH}}
+                    - ${{CF_SHORT_REVISION}}
+                    - latest
+
+            push_frontend_to_hub:
+                type: push
+                title: Pushing frontend image to docker hub
+                registry: unicef-dockerhub
+                candidate: ${{build_frontend}}
+                tags:
+                    - ${{CF_BRANCH}}
+                    - ${{CF_SHORT_REVISION}}
+                    - latest
+
+            push_proxy_to_hub:
+                type: push
+                title: Pushing proxy image to docker hub
+                candidate: ${{build_proxy}}
+                registry: unicef-dockerhub
+                tags:
+                    - ${{CF_BRANCH}}
+                    - ${{CF_SHORT_REVISION}}
+                    - latest
+
+    deploy_services:
+        type: parallel
+        stage: 'deploy'
+        when:
+            branch:
+                only:
+                    - develop
+                    - master
+        steps:
+
+            deploy_redis:
+                title: Deploying Redis
+                image: codefresh/cf-deploy-kubernetes
+                tag: latest
+                working_directory: ${{main_clone}}
+                commands:
+                  - /cf-deploy-kubernetes ./kubernetes/redis/deployment.yml
+                environment:
+                  - KUBECONTEXT=${{KUBECONTEXT}}
+                  - KUBERNETES_NAMESPACE=${{NAMESPACE}}
+                  - KUBERNETES_DEPLOYMENT_TIMEOUT=500
+
+            deploy_backend:
+                title: Deploying backend
+                image: codefresh/cf-deploy-kubernetes
+                tag: latest
+                working_directory: ${{main_clone}}
+                commands:
+                  - /cf-deploy-kubernetes ./kubernetes/backend/deployment.yml
+                environment:
+                  - KUBECONTEXT=${{KUBECONTEXT}}
+                  - KUBERNETES_NAMESPACE=${{NAMESPACE}}
+                  - ENV=${{ENV}}
+                  - DJANGO_ALLOWED_HOST=${{DJANGO_ALLOWED_HOST}}
+                  - POSTGRES_USER=${{POSTGRES_USER}}
+                  - POSTGRES_DB=${{POSTGRES_DB}}
+                  - POSTGRES_HOST=${{POSTGRES_HOST}}
+                  - KUBERNETES_DEPLOYMENT_TIMEOUT=500
+
+            deploy_frontend:
+                title: Deploying frontend
+                image: codefresh/cf-deploy-kubernetes
+                tag: latest
+                working_directory: ${{main_clone}}
+                commands:
+                  - /cf-deploy-kubernetes ./kubernetes/frontend/deployment.yml
+                environment:
+                  - KUBECONTEXT=${{KUBECONTEXT}}
+                  - KUBERNETES_NAMESPACE=${{NAMESPACE}}
+                  - ENV=${{ENV}}
+                  - KUBERNETES_DEPLOYMENT_TIMEOUT=500
+
+            deploy_proxy:
+                title: Deploying nginx proxy
+                image: codefresh/cf-deploy-kubernetes
+                tag: latest
+                working_directory: ${{main_clone}}
+                commands:
+                  - /cf-deploy-kubernetes ./kubernetes/proxy/deployment.yml
+                environment:
+                  - KUBECONTEXT=${{KUBECONTEXT}}
+                  - KUBERNETES_NAMESPACE=${{NAMESPACE}}
+                  - ENV=${{ENV}}
+                  - KUBERNETES_DEPLOYMENT_TIMEOUT=500
+
+    delete_jobs:
+        stage: 'run_jobs'
+        title: Delete jobs with label redeploy
+        image: codefresh/kube-helm:master
+        environment:
+        - KUBECONTEXT=${{KUBECONTEXT}}
+        - NAMESPACE=${{NAMESPACE}}
+        commands:
+        - kubectl config get-contexts
+        - kubectl config use-context ${{KUBECONTEXT}}
+        - >-
+            kubectl --namespace ${{NAMESPACE}} delete job -lredeploy=true
+        when:
+            branch:
+                only:
+                - develop
+                - master
+
+    backend_jobs:
+        stage: 'run_jobs'
+        title: Creating backend jobs
+        image: codefresh/cf-deploy-kubernetes
+        tag: ${{CF_SHORT_REVISION}}
+        working_directory: ${{main_clone}}
+        commands:
+        - /cf-deploy-kubernetes ./kubernetes/backend/jobs.yml
+        environment:
+        - KUBECONTEXT=${{KUBECONTEXT}}
+        - KUBERNETES_NAMESPACE=${{NAMESPACE}}
+        - ENV=${{ENV}}
+        - DJANGO_ALLOWED_HOST=${{DJANGO_ALLOWED_HOST}}
+        - POSTGRES_USER=${{POSTGRES_USER}}
+        - POSTGRES_DB=${{POSTGRES_DB}}
+        - POSTGRES_HOST=${{POSTGRES_HOST}}
+        when:
+            branch:
+                only:
+                - develop
+                - master
