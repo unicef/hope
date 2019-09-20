@@ -1,4 +1,4 @@
-FROM python:3.7.3-alpine3.10
+FROM python:3.7.3-alpine3.9
 
 ARG env
 ENV ENV ${env:-dev}
