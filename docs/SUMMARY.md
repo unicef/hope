@@ -36,4 +36,5 @@
 
 * [Data Model](technical-specification/data-model.md)
 * [ID Management](technical-specification/id-management.md)
+* [Offline Capabilities](technical-specification/offline-capabilities.md)
 
