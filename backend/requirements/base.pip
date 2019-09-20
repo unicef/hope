@@ -11,6 +11,12 @@ dj-static==0.0.6
 django-redis==4.10.0
 django-background-tasks==1.2.0
 
+# API
+graphene-django==2.4.0
+graphene-file-upload==1.2.2
+django-graphql-jwt==0.2.1
+django-graphql-social-auth[jwt]==0.1.4
+
 # Other Python packages
 Pillow==6.1.0
 python-memcached==1.59
@@ -38,7 +44,10 @@ mock==2.0.0
 Faker==0.8.16
 httmock==1.2.6
 
+# Gunicorn
 gunicorn==19.9.0
+greenlet==0.4.15
+gevent==1.4.0
 
 # Sentry
 raven==6.4.0
