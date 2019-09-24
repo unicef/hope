@@ -12,6 +12,8 @@
 | Functional Specification | **A / C** | **I** | **C** | **C / I** | **R / A** | **C** | **C** | **C** |
 | Demonstrations | **I** | **I** | **I** | **I** | **R / A** | **R** | **R** | **R** |
 | Issue Bugs / Defects | **A / C** | **R** | **C** | **C** | **R / A** | **C** | **I** | **R** |
+| System Architecture |  |  |  |  |  |  |  |  |
+|  |  |  |  |  |  |  |  |  |
 
 
 
