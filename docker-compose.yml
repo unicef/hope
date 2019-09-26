@@ -44,23 +44,23 @@ services:
             - db
             - redis
 
-    backend-jobs:
-        image: unicef/hct-mis-backend
-        env_file:
-            - .env
-        environment:
-            - REDIS_INSTANCE=redis:6379
-        build:
-            context: ./backend
-            dockerfile: ./Dockerfile
-            args:
-                ENV: dev
-                REQUIREMENT_FILE: dev.pip
-        volumes:
-            - ./backend:/code/
-        depends_on:
-            - backend
-        command: bash -c "/./worker-entrypoint.sh"
+#    backend-jobs:
+#        image: unicef/hct-mis-backend
+#        env_file:
+#            - .env
+#        environment:
+#            - REDIS_INSTANCE=redis:6379
+#        build:
+#            context: ./backend
+#            dockerfile: ./Dockerfile
+#            args:
+#                ENV: dev
+#                REQUIREMENT_FILE: dev.pip
+#        volumes:
+#            - ./backend:/code/
+#        depends_on:
+#            - backend
+#        command: bash -c "/./worker-entrypoint.sh"
 
     db:
         image: postgres:9.5.15-alpine
