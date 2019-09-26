@@ -95,22 +95,6 @@ spec:
                             value: "{{EMAIL_HOST_USER}}"
                         -   name: MAP_BOX_KEY
                             value: {{MAP_BOX_KEY}}
-                        -   name: UNHCR_API_HOST
-                            value: "{{UNHCR_API_HOST}}"
-                        -   name: UNHCR_API_USERNAME
-                            value: "{{UNHCR_API_USERNAME}}"
-                        -   name: UNHCR_API_PASSWORD
-                            value: "{{UNHCR_API_PASSWORD}}"
-                        -   name: UNICEF_PARTNER_DETAILS_URL
-                            value: "{{UNICEF_PARTNER_DETAILS_URL}}"
-                        -   name: UNICEF_API_USERNAME
-                            value: "{{UNICEF_API_USERNAME}}"
-                        -   name: UNICEF_API_PASSWORD
-                            value: "{{UNICEF_API_PASSWORD}}"
-                        -   name: WFP_API_HOST
-                            value: "{{WFP_API_HOST}}"
-                        -   name: WFP_API_TOKEN
-                            value: "{{WFP_API_TOKEN}}"
                         -   name: SA_PASSWORD
                             value: "{{SA_PASSWORD}}"
                         -   name: AZURE_B2C_CLIENT_ID
@@ -168,22 +152,6 @@ spec:
                             value: "{{EMAIL_HOST_USER}}"
                         -   name: MAP_BOX_KEY
                             value: {{MAP_BOX_KEY}}
-                        -   name: UNHCR_API_HOST
-                            value: "{{UNHCR_API_HOST}}"
-                        -   name: UNHCR_API_USERNAME
-                            value: "{{UNHCR_API_USERNAME}}"
-                        -   name: UNHCR_API_PASSWORD
-                            value: "{{UNHCR_API_PASSWORD}}"
-                        -   name: UNICEF_PARTNER_DETAILS_URL
-                            value: "{{UNICEF_PARTNER_DETAILS_URL}}"
-                        -   name: UNICEF_API_USERNAME
-                            value: "{{UNICEF_API_USERNAME}}"
-                        -   name: UNICEF_API_PASSWORD
-                            value: "{{UNICEF_API_PASSWORD}}"
-                        -   name: WFP_API_HOST
-                            value: "{{WFP_API_HOST}}"
-                        -   name: WFP_API_TOKEN
-                            value: "{{WFP_API_TOKEN}}"
                         -   name: SA_PASSWORD
                             value: "{{SA_PASSWORD}}"
                         -   name: AZURE_B2C_CLIENT_ID
