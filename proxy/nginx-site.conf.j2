@@ -4,7 +4,7 @@ upstream backend {
 
 {% if FRONTEND_SERVICE_HOST is defined %}
     upstream frontend {
-      server {{ FRONTEND_SERVICE_HOST }}:8080;
+      server {{ FRONTEND_SERVICE_HOST }}:3000;
     }
 {% endif %}
 
