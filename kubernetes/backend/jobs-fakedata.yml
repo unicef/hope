@@ -1,0 +1,36 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+    name: backend-fakedata-migration
+    annotations:
+        revision: "{{CF_SHORT_REVISION}}"
+    namespace: {{NAMESPACE}}
+    labels:
+        redeploy: "false"
+spec:
+    template:
+        spec:
+            containers:
+                -   name: backend-fakedata
+                    image: unicef/hct-mis-backend:{{CF_SHORT_REVISION}}
+                    command: ["bash"]
+                    args: ["-c", "python /code/manage.py migrate && python /code/manage.py loaddata --app common initial.json && python /code/manage.py fakedata --clean_before"]
+                    env:
+                        -   name: SECRET_KEY
+                            valueFrom:
+                                secretKeyRef:
+                                    name: secret-key
+                                    key: password
+                        -   name: ENV
+                            value: {{ENV}}
+                        -   name: POSTGRES_DB
+                            value: {{POSTGRES_DB}}
+                        -   name: POSTGRES_USER
+                            value: {{POSTGRES_USER}}
+                        -   name: POSTGRES_HOST
+                            value: {{POSTGRES_HOST}}
+                        -   name: DJANGO_ALLOWED_HOST
+                            value: {{DJANGO_ALLOWED_HOST}}
+
+            restartPolicy: Never
+    backoffLimit: 4
