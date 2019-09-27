@@ -1,0 +1,81 @@
+version: '3'
+
+volumes:
+    backend-data:
+
+services:
+    proxy:
+        image: unicef/hct-mis-proxy
+        environment:
+            - DJANGO_APPLICATION_SERVICE_HOST=backend
+            - FRONTEND_SERVICE_HOST=frontend
+        build:
+            context: ./proxy
+            dockerfile: ./Dockerfile
+        ports:
+            - "8082:80"
+        depends_on:
+            - backend
+            - frontend
+        volumes:
+            - backend-data:/data
+
+    redis:
+        restart: always
+        image: redis:4.0.11-alpine3.8
+
+    backend:
+        image: unicef/hct-mis-backend
+        env_file:
+            - .env
+        environment:
+            - REDIS_INSTANCE=redis:6379
+        build:
+            context: ./backend
+            dockerfile: ./Dockerfile
+            args:
+                ENV: dev
+                REQUIREMENT_FILE: dev.pip
+        volumes:
+            - ./backend:/code/
+            - backend-data:/data
+        depends_on:
+            - db
+            - redis
+
+#    backend-jobs:
+#        image: unicef/hct-mis-backend
+#        env_file:
+#            - .env
+#        environment:
+#            - REDIS_INSTANCE=redis:6379
+#        build:
+#            context: ./backend
+#            dockerfile: ./Dockerfile
+#            args:
+#                ENV: dev
+#                REQUIREMENT_FILE: dev.pip
+#        volumes:
+#            - ./backend:/code/
+#        depends_on:
+#            - backend
+#        command: bash -c "/./worker-entrypoint.sh"
+
+    db:
+        image: postgres:9.5.15-alpine
+        env_file:
+            - .env
+
+    frontend:
+        image: unicef/hct-mis-frontend
+        env_file:
+            - .env
+        build:
+            context: ./frontend
+            dockerfile: ./Dockerfile
+            args:
+                ENV: dev
+        volumes:
+            - ./frontend/:/code
+            - /code/node_modules
+        command: bash -c "yarn run start"
