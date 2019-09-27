@@ -58,7 +58,7 @@
     </tr>
     <tr>
       <td style="text-align:left">Draft Cash Plan</td>
-      <td style="text-align:left"></td>
+      <td style="text-align:left">Something that country office could do for basic targeting and cash planning.</td>
     </tr>
     <tr>
       <td style="text-align:left">EMOPS</td>
@@ -170,6 +170,11 @@
       <td style="text-align:left">Send a list to FSP, to pay $X to this list of Y beneficiaries. FSP pays
         them, sends a list back with duplicates, exception list or payments that
         did not go through.</td>
+    </tr>
+    <tr>
+      <td style="text-align:left">Registration Campaign</td>
+      <td style="text-align:left">Campaign can be related to an intervention or not. This is the &quot;purpose&quot;
+        for why households are being registered.</td>
     </tr>
     <tr>
       <td style="text-align:left">Representative</td>
