@@ -1,0 +1,58 @@
+# Django packages
+Django==2.2.5
+django-nose==1.4.6
+nose-timer==0.7.5
+django-model-utils==3.2.0
+social-auth-app-django==3.1.0
+django-sequences==2.4
+django-mail-templated==2.6.5
+django-imagekit==4.0.1
+dj-static==0.0.6
+django-redis==4.10.0
+django-background-tasks==1.2.0
+
+# API
+graphene-django==2.4.0
+graphene-file-upload==1.2.2
+django-graphql-jwt==0.2.1
+django-graphql-social-auth[jwt]==0.1.4
+
+# Other Python packages
+Pillow==6.1.0
+python-memcached==1.59
+ipython==7.8.0
+psycopg2==2.8.3
+python-json-logger==0.1.11
+xmltodict==0.12.0
+requests==2.22.0
+python-dateutil==2.8.0
+XlsxWriter==1.0.2
+names==0.3.0
+coolname==1.0.4
+reportlab==3.4.0
+Babel==2.6.0
+defusedxml==0.5.0
+mapbox==0.17.1
+progress==1.4
+
+# Testing
+astroid==2.2.5
+isort==4.2.5
+pylint==1.7.1
+factory_boy==2.11.1
+mock==2.0.0
+Faker==0.8.16
+httmock==1.2.6
+
+# Gunicorn
+gunicorn==19.9.0
+greenlet==0.4.15
+gevent==1.4.0
+
+# Sentry
+raven==6.4.0
+
+# New Relic
+newrelic==2.106.1.88
+
+django-storages[azure]==1.7.1
