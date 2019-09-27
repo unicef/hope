@@ -22,6 +22,16 @@
 
 * x
 
+### Local Server
+
+#### **Benefits:**
+
+* x
+
+#### Limitations:
+
+* x
+
 ## Data Synchronization:
 
 ### Automatic Data Sync:
