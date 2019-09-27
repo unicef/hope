@@ -28,5 +28,7 @@ xyz
 
 ## Roles & Permissions
 
+To view the Roles & Permissions Matrix please click [**here**](https://docs.google.com/spreadsheets/d/1vF6zUwoqRQfu_9jsfxowdmEg7_1E7yePt6e_Dkx15fg/edit?usp=sharing)**.**
+
 
 
