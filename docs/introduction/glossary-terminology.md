@@ -53,6 +53,10 @@
         is given out.</td>
     </tr>
     <tr>
+      <td style="text-align:left">Cycle Monitoring</td>
+      <td style="text-align:left">Is process monitoring.</td>
+    </tr>
+    <tr>
       <td style="text-align:left">DFAM</td>
       <td style="text-align:left">Division of Financial and Administrative Management</td>
     </tr>
@@ -150,7 +154,7 @@
     </tr>
     <tr>
       <td style="text-align:left">Payment Verification</td>
-      <td style="text-align:left"></td>
+      <td style="text-align:left">Preference is to check 100% of payments. For other reasons we may sample.</td>
     </tr>
     <tr>
       <td style="text-align:left">Program</td>
@@ -159,7 +163,8 @@
     </tr>
     <tr>
       <td style="text-align:left">Programme</td>
-      <td style="text-align:left">Used interchangeably as the term Intervention (see above).</td>
+      <td style="text-align:left">Used interchangeably as the term Intervention (see above). This is a term
+        used at UNICEF more commonly than intervention.</td>
     </tr>
     <tr>
       <td style="text-align:left">Proof of Life</td>
@@ -167,9 +172,21 @@
     </tr>
     <tr>
       <td style="text-align:left">Reconciliation</td>
-      <td style="text-align:left">Send a list to FSP, to pay $X to this list of Y beneficiaries. FSP pays
-        them, sends a list back with duplicates, exception list or payments that
-        did not go through.</td>
+      <td style="text-align:left">
+        <p>Send a list to FSP, to pay $X to this list of Y beneficiaries. FSP pays
+          them, sends a list back with duplicates, exception list or payments that
+          did not go through.</p>
+        <p></p>
+        <p>It can be automated or manual if bank doesn&apos;t have capacity or if
+          low-tech deep field.</p>
+        <p></p>
+        <p>This would potentially happen in HCR. Will get read only view of it as
+          a payment record.</p>
+        <p></p>
+        <p>If its not a HCR FSP how we do it is tbd, but this has to reach back to
+          CashAssist potentially since the actual reconciliation has to happen in
+          CA.</p>
+      </td>
     </tr>
     <tr>
       <td style="text-align:left">Registration Campaign</td>

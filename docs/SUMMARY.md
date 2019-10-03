@@ -44,6 +44,8 @@
 * [Data Model](technical-specification/data-model.md)
 * [Offline Capabilities](technical-specification/offline-capabilities.md)
 * [DevOps / Infra](technical-specification/devops-infra.md)
+* [CashAssist Integration](technical-specification/cashassist-integration/README.md)
+  * [Open Issues](technical-specification/cashassist-integration/open-issues.md)
 
 ## Project Management
 
