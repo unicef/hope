@@ -14,18 +14,22 @@
 
 ## Product Specification
 
-* [HQ Reporting](product-specification/hq-reporting.md)
-* [HQ Dashboard](product-specification/dashboard.md)
-* [Registration](product-specification/untitled.md)
-* [Targeting](product-specification/targeting.md)
-* [Data Management](product-specification/data-management.md)
-* [User Management](product-specification/user-management.md)
-* [Payments](product-specification/payments/README.md)
-  * [Verification](product-specification/payments/verification.md)
-* [Cash+](product-specification/cash+.md)
-* [Grievance](product-specification/grivance.md)
-* [CO Reporting](product-specification/co-reporting.md)
-* [User Roles & Permissions](product-specification/user-roles-and-permissions.md)
+* [Country Office](product-specification/country-office/README.md)
+  * [Targeting](product-specification/country-office/targeting.md)
+  * [Payments](product-specification/country-office/payments/README.md)
+    * [Verification](product-specification/country-office/payments/verification.md)
+  * [Data Management](product-specification/country-office/data-management.md)
+  * [Grievance](product-specification/country-office/grivance.md)
+  * [CO Reporting](product-specification/country-office/co-reporting.md)
+  * [Cash+](product-specification/country-office/cash+.md)
+  * [HCT CO Settings](product-specification/country-office/hct-co-settings.md)
+* [HQ](product-specification/hq/README.md)
+  * [HQ Dashboard](product-specification/hq/dashboard.md)
+  * [HQ Reporting](product-specification/hq/hq-reporting.md)
+* [Partner](product-specification/partner/README.md)
+  * [Registration](product-specification/partner/untitled.md)
+* [User Management](product-specification/user-management/README.md)
+  * [User Roles & Permissions](product-specification/user-management/user-roles-and-permissions.md)
 
 ## Design Specification
 
