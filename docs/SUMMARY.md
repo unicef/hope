@@ -40,7 +40,7 @@
 ## Technical Specification
 
 * [Technical Architecture](technical-specification/technical-architecture.md)
-* [Development Setup](technical-specification/development-setup.md)
+* [Development Setup / Process](technical-specification/development-setup.md)
 * [Data Model](technical-specification/data-model.md)
 * [Offline Capabilities](technical-specification/offline-capabilities.md)
 * [DevOps / Infra](technical-specification/devops-infra.md)
