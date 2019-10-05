@@ -5,7 +5,9 @@
 
 ## Introduction
 
-* [Glossary / Terminology](introduction/glossary-terminology.md)
+* [Glossary / Terminology](introduction/glossary-terminology/README.md)
+  * [Technical](introduction/glossary-terminology/technical.md)
+  * [CashAssist](introduction/glossary-terminology/cashassist.md)
 * [FAQ](introduction/faq.md)
 * [Team](introduction/team/README.md)
   * [Project Team RACI](introduction/team/project-team-raci.md)
@@ -39,11 +41,13 @@
 
 ## Technical Specification
 
-* [Technical Architecture](technical-specification/technical-architecture.md)
-* [Development Setup / Process](technical-specification/development-setup.md)
+* [Technical Architecture](technical-specification/technical-architecture/README.md)
+  * [DevOps / Infra](technical-specification/technical-architecture/devops-infra.md)
+  * [Flexible Fields](technical-specification/technical-architecture/flexible-fields.md)
+* [Development Setup / Process](technical-specification/development-setup/README.md)
+  * [Testing Strategy](technical-specification/development-setup/testing-strategy.md)
 * [Data Model](technical-specification/data-model.md)
 * [Offline Capabilities](technical-specification/offline-capabilities.md)
-* [DevOps / Infra](technical-specification/devops-infra.md)
 * [CashAssist Integration](technical-specification/cashassist-integration/README.md)
   * [Open Issues](technical-specification/cashassist-integration/open-issues.md)
 
