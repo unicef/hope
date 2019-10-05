@@ -2,7 +2,7 @@
 
 ## Overview
 
-.......
+HCT MIS is UNICEF's humanitarian cash transfer platform that is being developed. It will be used by country offices, HQ users and on the ground partners \(for registration of households\).
 
 ### Communication
 
@@ -23,8 +23,8 @@
 ### Technical / product related
 
 * **Clubhouse** / ticketing: [https://app.clubhouse.io/hct-mis/projects](https://app.clubhouse.io/hct-mis/projects)
-* **Github** repo: 
-* Dev env
+* **Github** repo: [https://github.com/unicef/hct-mis](https://github.com/unicef/hct-mis)
+* Dev env: 
 * Staging env: 
 * Production env:
 
