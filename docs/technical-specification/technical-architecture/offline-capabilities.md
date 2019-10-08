@@ -22,59 +22,5 @@ We strongly suggest leveraging [https://github.com/redux-offline/redux-offline](
 
 Enabling the scenario where the same person may register their household multiple times during enrollment when all devices are offline is tricky and will require a local server based solution. This may not fit into our architecture.
 
-## Device Memory Options:
-
-### In Browser Cache
-
-#### Benefits:
-
-* x
-
-#### Limitations:
-
-* x
-
-### Device Storage
-
-#### Benefits:
-
-* x
-
-#### Limitations:
-
-* x
-
-### Local Server
-
-#### **Benefits:**
-
-* x
-
-#### Limitations:
-
-* x
-
-## Data Synchronization:
-
-### Automatic Data Sync:
-
-#### Benefits:
-
-* x
-
-#### Limitations:
-
-* x
-
-### Manual Data Sync:
-
-#### Benefits:
-
-* x
-
-#### Limitations:
-
-* x
-
 #### 
 
