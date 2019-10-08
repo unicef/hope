@@ -1,4 +1,4 @@
 # Site Map
 
-![](../.gitbook/assets/hct-mis-sitemap.png)
+![](../.gitbook/assets/screen-shot-2019-10-07-at-8.18.14-pm.png)
 
