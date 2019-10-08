@@ -26,6 +26,17 @@
 * What does CashAssist use for user management ticketing system? Does it have an API that can be exposed?
 * Can one user have access to multiple Country Office cash transfer programs?
 
+#### From Sebastian
+
+* CashAssist is Microsoft Dynamics 365 based,  which reduces the technical options to Azure AD as the IDP.
+* In order to fulfill the requirement of using UNICEFs own corporate accounts to interact with CashAssist, the Azure B2B collaboration feature of the UNHCR Azure AD, by means of which users from another Azure AD tenant can be invited, and through a process of redeeming that invite access the resources on the original tenant \(UNHCR in this case\).
+* In order to use Dynamics 365, these UNICEF B2B collaboration users will have to be licensed on te UNHCR tenant.
+* The process of inviting and licensing UNICEF users into UNHCRs IDP can be:
+  * Manual: Similar to the current agreement on role assignment, solved by rising a ticket through UNHCRs service management system.
+  * Automated: Via the Azure AD B2B guest invite APIs \(this needs discussion with UNHCR in terms of how to layout a solution that will imply accessing these IDPs  APIs\) 
+
+We need to validate with them all these technical assumptions and probe them on their availability to wok on the last API automation point.
+
 ### Misc.
 
 * Is there a glossary of terms available for CashAssist with their definitions?
