@@ -44,10 +44,11 @@
 * [Technical Architecture](technical-specification/technical-architecture/README.md)
   * [DevOps / Infra](technical-specification/technical-architecture/devops-infra.md)
   * [Flexible Fields](technical-specification/technical-architecture/flexible-fields.md)
+  * [DB Architecture](technical-specification/technical-architecture/db-architecture.md)
+  * [\(Offline\) Registration Module App](technical-specification/technical-architecture/offline-capabilities.md)
 * [Development Setup / Process](technical-specification/development-setup/README.md)
   * [Testing Strategy](technical-specification/development-setup/testing-strategy.md)
 * [Data Model](technical-specification/data-model.md)
-* [Offline Capabilities](technical-specification/offline-capabilities.md)
 * [CashAssist Integration](technical-specification/cashassist-integration/README.md)
   * [Open Issues](technical-specification/cashassist-integration/open-issues.md)
 
