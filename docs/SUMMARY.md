@@ -57,5 +57,4 @@
   * [Iteration 1](project-management/iterations-deliverables/iteration-1.md)
   * [Iteration 2](project-management/iterations-deliverables/iteration-2.md)
 * [CO / User testing](project-management/co-user-testing.md)
-* [Open Questions](project-management/open-questions.md)
 
