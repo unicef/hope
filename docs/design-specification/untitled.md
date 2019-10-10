@@ -1,6 +1,6 @@
 # User Personas
 
-## Peter - Program Staff
+## Peter - Programme Staff
 
 ![](../.gitbook/assets/peter.png)
 
