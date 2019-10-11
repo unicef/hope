@@ -97,6 +97,13 @@ Interventions
 
 * **O**pen **D**ata **K**it
 
+### INVISION FEEDBACK:
+
+> * For the 'biometric enabled' functions, ideally we would have place holders for elements like pictures, or biometric templates. **- AG**
+> * For picture, we have had various instance of projects where we registered the picture of the HoHH and Alternate so that would have to be considered already.  **- GE**
+> * There will be rapid response intervention where we wont register all the HH members yet we will start with the transfer, it would be good to have the flexibility to consider complete a HH even when there is only partial info from some members **- GE**
+> * for the mobile app, there should be a button for saving and a button for pushing the survey to the system right?
+
 ## 3.2.3 Languages
 
 Localization Required:
