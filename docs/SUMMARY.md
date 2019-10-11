@@ -50,7 +50,8 @@
   * [Testing Strategy](technical-specification/development-setup/testing-strategy.md)
 * [Data Model](technical-specification/data-model.md)
 * [CashAssist Integration](technical-specification/cashassist-integration/README.md)
-  * [Open Issues](technical-specification/cashassist-integration/open-issues.md)
+  * [Open Issues](technical-specification/cashassist-integration/open-issues/README.md)
+    * [Cash Assist](technical-specification/cashassist-integration/open-issues/cash-assist.md)
 
 ## Project Management
 
