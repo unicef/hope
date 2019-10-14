@@ -22,6 +22,10 @@
         to one household only.</td>
     </tr>
     <tr>
+      <td style="text-align:left">BCM</td>
+      <td style="text-align:left"></td>
+    </tr>
+    <tr>
       <td style="text-align:left">Cash+</td>
       <td style="text-align:left">In recognition of these limitations, several &#x2018;cash plus&#x2019;
         initiatives have been introduced, whereby cash transfers are combined with
@@ -73,6 +77,10 @@
       <td style="text-align:left">Means enrolling into an intervention (really a cycle).</td>
     </tr>
     <tr>
+      <td style="text-align:left">Entitlement</td>
+      <td style="text-align:left"></td>
+    </tr>
+    <tr>
       <td style="text-align:left">Financial Gateway</td>
       <td style="text-align:left">Communication module that connects payment list to the FSP. Also depending
         on FSP gets the data back as well, which then CashAssist picks up. If manual
@@ -90,6 +98,14 @@
       <td style="text-align:left">FSP</td>
       <td style="text-align:left">Financial Service Providers. These providers are the ones make the final
         payments to beneficiaries.</td>
+    </tr>
+    <tr>
+      <td style="text-align:left">Fund commitment</td>
+      <td style="text-align:left"></td>
+    </tr>
+    <tr>
+      <td style="text-align:left">Fund reservation</td>
+      <td style="text-align:left"></td>
     </tr>
     <tr>
       <td style="text-align:left">HCT</td>
@@ -157,6 +173,14 @@
       <td style="text-align:left">Preference is to check 100% of payments. For other reasons we may sample.</td>
     </tr>
     <tr>
+      <td style="text-align:left">PO</td>
+      <td style="text-align:left">Purchase Order.</td>
+    </tr>
+    <tr>
+      <td style="text-align:left">PR</td>
+      <td style="text-align:left"></td>
+    </tr>
+    <tr>
       <td style="text-align:left">Program</td>
       <td style="text-align:left">UNHCR concept. Defines approval, workflow etc. and different FSP&apos;s
         would be different program. Eg. program for WASH, program for Shelter.</td>
@@ -200,12 +224,17 @@
         member at all.</td>
     </tr>
     <tr>
+      <td style="text-align:left">Requisition</td>
+      <td style="text-align:left">Conceptually a bucket / budget for initiatives. PO&apos;s are issued associated
+        with a requisition.</td>
+    </tr>
+    <tr>
       <td style="text-align:left">SAP PO</td>
       <td style="text-align:left">Process orchestrator. Used as a middleware by ICTD.</td>
     </tr>
     <tr>
       <td style="text-align:left">SCOPE</td>
-      <td style="text-align:left"></td>
+      <td style="text-align:left">WFP cash program management platform. <a href="https://documents.wfp.org/stellent/groups/public/documents/communications/wfp272586.pdf">Link</a>.</td>
     </tr>
     <tr>
       <td style="text-align:left">Secondary</td>
