@@ -19,8 +19,8 @@
 
 | Name | Email | Role | Other |
 | :--- | :--- | :--- | :--- |
-| Thierry |  |  |  |
-| Khalid |  |  |  |
+| Thierry |  | Business Relationship Manager |  |
+| Khalid |  | Business Analyst |  |
 |  |  |  |  |
 
 ## Tivix
