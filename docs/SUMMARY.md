@@ -6,8 +6,8 @@
 ## Introduction
 
 * [Glossary / Terminology](introduction/glossary-terminology/README.md)
-  * [Technical](introduction/glossary-terminology/technical.md)
-  * [CashAssist](introduction/glossary-terminology/cashassist.md)
+  * [Technical glossary](introduction/glossary-terminology/technical.md)
+  * [CashAssist glossary](introduction/glossary-terminology/cashassist.md)
 * [FAQ](introduction/faq.md)
 * [Team](introduction/team/README.md)
   * [Project Team RACI](introduction/team/project-team-raci.md)
@@ -31,6 +31,8 @@
   * [Registration](product-specification/partner/untitled.md)
 * [User Management](product-specification/user-management/README.md)
   * [User Roles & Permissions](product-specification/user-management/user-roles-and-permissions.md)
+* [External Integrations](product-specification/external-integrations/README.md)
+  * [CashAssist](product-specification/external-integrations/cashassist.md)
 
 ## Design Specification
 
@@ -50,8 +52,9 @@
   * [Testing Strategy](technical-specification/development-setup/testing-strategy.md)
 * [Data Model](technical-specification/data-model.md)
 * [CashAssist Integration](technical-specification/cashassist-integration/README.md)
-  * [Open Issues](technical-specification/cashassist-integration/open-issues/README.md)
-    * [Cash Assist](technical-specification/cashassist-integration/open-issues/cash-assist.md)
+  * [Cash Assist](technical-specification/cashassist-integration/cash-assist.md)
+  * [Open Issues](technical-specification/cashassist-integration/open-issues.md)
+  * [Access Management Portal](technical-specification/cashassist-integration/access-management-portal.md)
 
 ## Project Management
 
