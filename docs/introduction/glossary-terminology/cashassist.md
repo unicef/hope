@@ -21,6 +21,11 @@ For an overview of CashAssist you may look at this slide deck: [https://drive.go
         can be extended to UNICEF as well then. First phase goes live in December,</td>
     </tr>
     <tr>
+      <td style="text-align:left">Assistance Package</td>
+      <td style="text-align:left">Target population + distribution modalities. One cash plan can have many
+        assistance packages.</td>
+    </tr>
+    <tr>
       <td style="text-align:left">BU</td>
       <td style="text-align:left">&apos;Business Unit&apos;, which will be named &quot;UNICEF Jordan&quot;,
         &quot;UNICEF Somalia&quot;, etc. and programs/users/beneficiary data are
@@ -52,6 +57,10 @@ For an overview of CashAssist you may look at this slide deck: [https://drive.go
       <td style="text-align:left"></td>
     </tr>
     <tr>
+      <td style="text-align:left">Household data</td>
+      <td style="text-align:left">Doesn&apos;t have individual level data. Just primary + 2 adults/3 kids.</td>
+    </tr>
+    <tr>
       <td style="text-align:left">NPO</td>
       <td style="text-align:left">Kind of a confirmation that payment has been sent. Fetches data from the
         ERP. UNICEF doesn&apos;t have an NPO. Its at the cash plan level.</td>
@@ -63,6 +72,10 @@ For an overview of CashAssist you may look at this slide deck: [https://drive.go
     <tr>
       <td style="text-align:left">Progres</td>
       <td style="text-align:left">v4 - beneficiary management system (registration system sort of).</td>
+    </tr>
+    <tr>
+      <td style="text-align:left">Registration group</td>
+      <td style="text-align:left">Groups of associated individuals. Can assign multiple entitlement cards...</td>
     </tr>
     <tr>
       <td style="text-align:left">Rule Engine</td>
@@ -80,6 +93,10 @@ For an overview of CashAssist you may look at this slide deck: [https://drive.go
     <tr>
       <td style="text-align:left">Staging area</td>
       <td style="text-align:left">On-prem currently. MS SQL server. Push of data to it is not allowed.</td>
+    </tr>
+    <tr>
+      <td style="text-align:left">Target Population/List</td>
+      <td style="text-align:left">List of either registration group, individuals or households.</td>
     </tr>
   </tbody>
 </table>
