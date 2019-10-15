@@ -39,6 +39,10 @@ For an overview of CashAssist you may look at this slide deck: [https://drive.go
       <td style="text-align:left">The name of the financial service provider</td>
     </tr>
     <tr>
+      <td style="text-align:left">Assistance type</td>
+      <td style="text-align:left">How we&apos;re going to pay.</td>
+    </tr>
+    <tr>
       <td style="text-align:left">BU</td>
       <td style="text-align:left">&apos;Business Unit&apos;, which will be named &quot;UNICEF Jordan&quot;,
         &quot;UNICEF Somalia&quot;, etc. and programs/users/beneficiary data are
@@ -93,6 +97,19 @@ For an overview of CashAssist you may look at this slide deck: [https://drive.go
       <td style="text-align:left"></td>
     </tr>
     <tr>
+      <td style="text-align:left">Global Distribution Tool (GDT)</td>
+      <td style="text-align:left">
+        <p>Loads down payment records to a local environment and go to village on
+          a truck for example. Have downloaded biometric data. Will pull payment
+          record. Offline tool on a laptop and biometrics.</p>
+        <p>
+          <br />Also used to distributing cards.
+          <br />
+        </p>
+        <p>Can be used for non-food items as well. Its linked to Progres v4.</p>
+      </td>
+    </tr>
+    <tr>
       <td style="text-align:left">Golden Record</td>
       <td style="text-align:left">Core fields required for household and beneficiary.</td>
     </tr>
@@ -129,7 +146,8 @@ For an overview of CashAssist you may look at this slide deck: [https://drive.go
     </tr>
     <tr>
       <td style="text-align:left">Progres</td>
-      <td style="text-align:left">v4 - beneficiary management system (registration system sort of).</td>
+      <td style="text-align:left">v4 - beneficiary management system (registration system sort of). Its
+        built on MSFT Dynamics.</td>
     </tr>
     <tr>
       <td style="text-align:left">Reception Group</td>
