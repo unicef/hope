@@ -21,6 +21,10 @@ Built for UNHCR Cash Distribution.
 * Hosted by MS.
 * On the cloud as SaaS.
 
+### CashAssist Data Flow
+
+![CashAssist data flow](../../.gitbook/assets/image-2019-10-15-at-2.12.39-pm.png)
+
 ## **UNHCR Project Timeline**
 
 Early March - Country Operation - collect info - built plan - business process - discover - requirements - etc. 550 Requirements deemed classified.
