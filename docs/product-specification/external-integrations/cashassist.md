@@ -20,3 +20,7 @@ The implementation for UNICEF in CashAssist will be a separate "App".
 
 
 
+### Cash Plan
+
+![](../../.gitbook/assets/image-2019-10-15-at-11.17.15-am.png)
+

@@ -21,9 +21,22 @@ For an overview of CashAssist you may look at this slide deck: [https://drive.go
         can be extended to UNICEF as well then. First phase goes live in December,</td>
     </tr>
     <tr>
+      <td style="text-align:left">Assistance Measurement</td>
+      <td style="text-align:left">It is the currency for entitlement</td>
+    </tr>
+    <tr>
       <td style="text-align:left">Assistance Package</td>
-      <td style="text-align:left">Target population + distribution modalities. One cash plan can have many
-        assistance packages.</td>
+      <td style="text-align:left">
+        <p>Target population + distribution modalities. One cash plan can have many
+          assistance packages.</p>
+        <p></p>
+        <p>A hierarchical model (see fig. 1) that pairs target list with distribution
+          modality (which is explained below)</p>
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align:left">Assistance through</td>
+      <td style="text-align:left">The name of the financial service provider</td>
     </tr>
     <tr>
       <td style="text-align:left">BU</td>
@@ -31,6 +44,20 @@ For an overview of CashAssist you may look at this slide deck: [https://drive.go
         &quot;UNICEF Somalia&quot;, etc. and programs/users/beneficiary data are
         associated with this BU on CashAssist side. In the UNICEF terminology this
         somewhat maps to the &apos;Business Area&apos;.</td>
+    </tr>
+    <tr>
+      <td style="text-align:left">Card Size</td>
+      <td style="text-align:left">The number of people covered</td>
+    </tr>
+    <tr>
+      <td style="text-align:left">Cash Plan</td>
+      <td style="text-align:left">Grouping of assistance packages for a program. Mixed delivery types in
+        the same cash plan are not allowed, so a program can have multiple cash
+        plans for instance when delivering voucher and cash-in-hand.</td>
+    </tr>
+    <tr>
+      <td style="text-align:left">Conditional Values</td>
+      <td style="text-align:left"></td>
     </tr>
     <tr>
       <td style="text-align:left">Corticon</td>
@@ -45,8 +72,25 @@ For an overview of CashAssist you may look at this slide deck: [https://drive.go
       </td>
     </tr>
     <tr>
+      <td style="text-align:left">Delivery Type</td>
+      <td style="text-align:left">Deposit to card, transfer or cash</td>
+    </tr>
+    <tr>
+      <td style="text-align:left">Distribution Modality</td>
+      <td style="text-align:left">Grouping of assistance measurement (currency), delivery type, entitlement
+        formula and FSP</td>
+    </tr>
+    <tr>
+      <td style="text-align:left">Distribution Level</td>
+      <td style="text-align:left">Registration Groups (households) or Individuals</td>
+    </tr>
+    <tr>
       <td style="text-align:left">Eligible</td>
       <td style="text-align:left">Person who is associated with a program (not targeted to it).</td>
+    </tr>
+    <tr>
+      <td style="text-align:left">Entitlement Formula</td>
+      <td style="text-align:left"></td>
     </tr>
     <tr>
       <td style="text-align:left">Golden Record</td>
@@ -61,6 +105,20 @@ For an overview of CashAssist you may look at this slide deck: [https://drive.go
       <td style="text-align:left">Doesn&apos;t have individual level data. Just primary + 2 adults/3 kids.</td>
     </tr>
     <tr>
+      <td style="text-align:left">Import View</td>
+      <td style="text-align:left">To import data based on some filtered list/data.</td>
+    </tr>
+    <tr>
+      <td style="text-align:left">Master Cash Plan</td>
+      <td style="text-align:left">Allows to bundle several cash plans into one, in those instances in which
+        we want to send the payment instructions of multiple cash plans all at
+        the same time to the FSPs</td>
+    </tr>
+    <tr>
+      <td style="text-align:left">No-pay lists</td>
+      <td style="text-align:left">Blacklisted registration groups or individuals</td>
+    </tr>
+    <tr>
       <td style="text-align:left">NPO</td>
       <td style="text-align:left">Kind of a confirmation that payment has been sent. Fetches data from the
         ERP. UNICEF doesn&apos;t have an NPO. Its at the cash plan level.</td>
@@ -72,6 +130,11 @@ For an overview of CashAssist you may look at this slide deck: [https://drive.go
     <tr>
       <td style="text-align:left">Progres</td>
       <td style="text-align:left">v4 - beneficiary management system (registration system sort of).</td>
+    </tr>
+    <tr>
+      <td style="text-align:left">Reception Group</td>
+      <td style="text-align:left">Comes from v3 Progres. Something like a reception record. Eg. refugee
+        coming in on their own. Would not be needed as a concept in HCT MIS.</td>
     </tr>
     <tr>
       <td style="text-align:left">Registration group</td>
