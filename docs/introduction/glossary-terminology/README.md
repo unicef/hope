@@ -284,6 +284,10 @@
       <td style="text-align:left">UNICEF ERP system</td>
     </tr>
     <tr>
+      <td style="text-align:left">Voucher</td>
+      <td style="text-align:left">Tokenized cash on a chip card. Similar to what WFP SCOPE does.</td>
+    </tr>
+    <tr>
       <td style="text-align:left">Vulnerabilities</td>
       <td style="text-align:left">Categories used to identify households. Attributes on a household and
         beneficiary typically taken in at registration time.</td>
