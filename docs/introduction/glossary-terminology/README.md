@@ -226,7 +226,7 @@
     <tr>
       <td style="text-align:left">Requisition</td>
       <td style="text-align:left">Conceptually a bucket / budget for initiatives. PO&apos;s are issued associated
-        with a requisition.</td>
+        with a requisition. You typically fill it with fund reservations.</td>
     </tr>
     <tr>
       <td style="text-align:left">SAP PO</td>
