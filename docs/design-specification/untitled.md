@@ -12,11 +12,7 @@
 
 ![](../.gitbook/assets/karen.png)
 
-## Country User
-
-TBD
-
-## Country Register User
+## Beneficiary Registration User
 
 TBD
 
