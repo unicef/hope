@@ -19,6 +19,7 @@ HCT MIS is UNICEF's humanitarian cash transfer platform that is being developed.
 * **Invision** mockups: [https://tivix.invisionapp.com/share/UCSUBQ0YNVP\#/371576796\_Dashboard](https://tivix.invisionapp.com/share/UCSUBQ0YNVP#/371576796_Dashboard)
 * **Data model**: [https://www.lucidchart.com/documents/edit/3b49d149-829d-4d96-9592-db64a516ae9c/0\_0?shared=true](https://www.lucidchart.com/documents/edit/3b49d149-829d-4d96-9592-db64a516ae9c/0_0?shared=true)
 * **Clubhouse:** [https://app.clubhouse.io/hct-mis/projects](https://app.clubhouse.io/hct-mis/projects)
+* **CashAssist Training Site:** [http://cashassist-trn.unhcr.org/](http://cashassist-trn.unhcr.org/)
 
 ### Technical / product related
 
