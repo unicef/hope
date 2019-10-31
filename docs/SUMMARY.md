@@ -56,6 +56,7 @@
   * [Cash Assist](technical-specification/cashassist-integration/cash-assist.md)
   * [Open Issues](technical-specification/cashassist-integration/open-issues.md)
   * [Access Management Portal](technical-specification/cashassist-integration/access-management-portal.md)
+  * [CashAssist - Training Site](technical-specification/cashassist-integration/cashassist-training-site.md)
 
 ## Project Management
 
