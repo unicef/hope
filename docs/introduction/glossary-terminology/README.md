@@ -81,6 +81,10 @@
       <td style="text-align:left"></td>
     </tr>
     <tr>
+      <td style="text-align:left">Enumerator</td>
+      <td style="text-align:left">A person who registers individuals.</td>
+    </tr>
+    <tr>
       <td style="text-align:left">Financial Gateway</td>
       <td style="text-align:left">Communication module that connects payment list to the FSP. Also depending
         on FSP gets the data back as well, which then CashAssist picks up. If manual
