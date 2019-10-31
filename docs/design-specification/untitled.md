@@ -24,6 +24,10 @@
 
 **RECORDINGS:**
 
+{% embed url="https://tivix.zoom.us/recording/detail?meeting\_id=99hJezTlQ%2BGU5%2F9cxf8odw%3D%3D" %}
+
+\*\*\*\*
+
 ![](../.gitbook/assets/karen.png)
 
 ## Beneficiary Registration User
