@@ -89,6 +89,10 @@ For an overview of CashAssist you may look at this slide deck: [https://drive.go
       <td style="text-align:left">Registration Groups (households) or Individuals</td>
     </tr>
     <tr>
+      <td style="text-align:left">DM</td>
+      <td style="text-align:left">Distribution Modality - Acronym in Rule Engine.</td>
+    </tr>
+    <tr>
       <td style="text-align:left">Eligible</td>
       <td style="text-align:left">Person who is associated with a program (not targeted to it).</td>
     </tr>
@@ -148,6 +152,11 @@ For an overview of CashAssist you may look at this slide deck: [https://drive.go
       <td style="text-align:left">Progres</td>
       <td style="text-align:left">v4 - beneficiary management system (registration system sort of). Its
         built on MSFT Dynamics.</td>
+    </tr>
+    <tr>
+      <td style="text-align:left">PMT -</td>
+      <td style="text-align:left">Acronym in Rule Engine for &quot;Payment&quot; - A generic Payment Service
+        in Rule Server.</td>
     </tr>
     <tr>
       <td style="text-align:left">Reception Group</td>
