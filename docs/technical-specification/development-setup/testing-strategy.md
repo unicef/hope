@@ -1,4 +1,4 @@
-# Testing Strategy
+# HCT-MIS: Testing Strategy
 
 ## **Quality Assurance / E2E /** Unit Testing
 
