@@ -6,6 +6,8 @@
 
 {% embed url="https://tivix.zoom.us/recording/detail?meeting\_id=meSCz%2F99TIy6Sb%2Fwp96KPA%3D%3D" %}
 
+{% embed url="https://tivix.zoom.us/recording/detail?meeting\_id=I6GoRIp2Te2XDZWbEApTxA%3D%3D" %}
+
 \*\*\*\*
 
 ![](../.gitbook/assets/peter.png)
