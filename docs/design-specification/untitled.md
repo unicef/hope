@@ -1,6 +1,6 @@
 # User Personas
 
-## Peter - Programme Staff
+## Peter - Program Staff
 
 **RECORDINGS:**
 
