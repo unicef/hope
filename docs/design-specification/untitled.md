@@ -4,7 +4,7 @@
 
 **RECORDINGS:**
 
-{% embed url="https://tivix.zoom.us/recording/detail?meeting\_id=meSCz%2F99TIy6Sb%2Fwp96KPA%3D%3D" %}
+{% embed url="https://tivix.zoom.us/recording/share/Mwq85vkqHn06xfzRD3-Y2-Tn8nxunbgBcOs2VlZYM5CwIumekTziMw?startTime=1572354331000" %}
 
 \*\*\*\*
 
@@ -14,9 +14,11 @@
 
 **RECORDINGS:**
 
-{% embed url="https://tivix.zoom.us/recording/detail?meeting\_id=37gwHC%2BOTs2b7ftRtSzw7A%3D%3D" %}
+{% embed url="https://tivix.zoom.us/recording/share/zSgIAy3EaWmVARh400tKNPq\_Qwj9m7E6u1WSnixI13GwIumekTziMw?startTime=1572269870000" caption="Victor" %}
 
-{% embed url="https://tivix.zoom.us/recording/detail?meeting\_id=I6GoRIp2Te2XDZWbEApTxA%3D%3D" caption="Haitham Altaweel - Jordan" %}
+{% embed url="https://tivix.zoom.us/recording/share/zSgIAy3EaWmVARh400tKNPq\_Qwj9m7E6u1WSnixI13GwIumekTziMw" caption="Haitham Altaweel - Jordan" %}
+
+
 
 ![](../.gitbook/assets/janice.png)
 
@@ -24,7 +26,9 @@
 
 **RECORDINGS:**
 
-{% embed url="https://tivix.zoom.us/recording/detail?meeting\_id=99hJezTlQ%2BGU5%2F9cxf8odw%3D%3D" %}
+{% embed url="https://tivix.zoom.us/recording/share/KBSll6iHIah2hHgJRDSc1TlCxalIMV\_MOvwGYWQgSJWwIumekTziMw?startTime=1572527032000" %}
+
+\*\*\*\*
 
 \*\*\*\*
 
@@ -34,7 +38,7 @@
 
 **RECORDINGS:**
 
-{% embed url="https://tivix.zoom.us/recording/detail?meeting\_id=VE6IZrCYQGWFkA%2BGNiCwoA%3D%3D" caption="Guilio" %}
+{% embed url="https://tivix.zoom.us/recording/share/iLz1mK3vMbbOtZ0l2qw4Gndu2HIWdBOEBXV1HcUouHewIumekTziMw?startTime=1572532453000" caption="Giulio" %}
 
 {% embed url="https://tivix.zoom.us/recording/share/qY8tNl2Z9Hnq9w7Zo7mBE280yLXOaeOCmlSKIbAkfjCwIumekTziMw" caption="Gabriele" %}
 
@@ -46,7 +50,9 @@
 
 **RECORDINGS:**
 
-{% embed url="https://tivix.zoom.us/recording/detail?meeting\_id=6rQJJ8FdQdSfot68kKqgEQ%3D%3D" %}
+{% embed url="https://tivix.zoom.us/recording/share/4hP-rmLTH8E9uEIwy9jBCgD5V1wGm8vdoncG9qhJspGwIumekTziMw?startTime=1572451409000" %}
+
+\*\*\*\*
 
 \*\*\*\*
 
