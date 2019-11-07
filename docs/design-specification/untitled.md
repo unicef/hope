@@ -4,7 +4,9 @@
 
 **RECORDINGS:**
 
-{% embed url="https://tivix.zoom.us/recording/share/Mwq85vkqHn06xfzRD3-Y2-Tn8nxunbgBcOs2VlZYM5CwIumekTziMw?startTime=1572354331000" %}
+{% embed url="https://tivix.zoom.us/recording/share/WXea9VNQC\_hDDz7TKZpolPry46rQ2xkypBe-ZiBMLrCwIumekTziMw?startTime=1572445805000" caption="Giulio Franco" %}
+
+\*\*\*\*
 
 {% embed url="https://tivix.zoom.us/recording/share/b6SX8rGW0\_lSzwldPUDvvi4AaVZdxA5MSCArutSYmr-wIumekTziMw?startTime=1572962361000" caption="Maxime" %}
 
