@@ -6,7 +6,7 @@ HCT MIS is UNICEF's humanitarian cash transfer platform that is being developed.
 
 ### Communication
 
-* **Slack**: \#unicef-hct-mis-tivix
+* **Slack**: [\#unicef-hct-mis-tivix](https://app.slack.com/client/T025EUUSK/CMSM0S7BN)
 * **Email Mailing lists**: Tivix team \( [unicef-hct-mis-internal@tivix.com](mailto:unicef-hct-mis-internal@tivix.com) \) / Everyone \( [unicef-hct-mis@tivix.com](mailto:unicef-hct-mis@tivix.com) \)
 
 ## Quick Links
