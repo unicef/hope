@@ -1,3 +1,7 @@
+---
+description: User Personas were build based on user interviews.
+---
+
 # User Personas
 
 ## Peter - Program Staff
@@ -12,7 +16,7 @@
 
 \*\*\*\*
 
-![](../.gitbook/assets/peter.png)
+![Program Staff Persona](../.gitbook/assets/screenshot-2019-11-15-at-17.33.29.png)
 
 ## Janice - Finance Officer
 
@@ -24,7 +28,7 @@
 
 
 
-![](../.gitbook/assets/janice.png)
+![Financial Officer Persona](../.gitbook/assets/screenshot-2019-11-15-at-17.33.37.png)
 
 ## Karen - Deputy Representative of Operations
 
@@ -36,7 +40,7 @@
 
 \*\*\*\*
 
-![](../.gitbook/assets/karen.png)
+![Deputy Representative of Operations Persona](../.gitbook/assets/screenshot-2019-11-15-at-17.33.47.png)
 
 ## Beneficiary Registration User
 
@@ -46,7 +50,7 @@
 
 {% embed url="https://tivix.zoom.us/recording/share/qY8tNl2Z9Hnq9w7Zo7mBE280yLXOaeOCmlSKIbAkfjCwIumekTziMw" caption="Gabriele" %}
 
-
+![Enumerator Persona](../.gitbook/assets/screenshot-2019-11-15-at-17.34.04.png)
 
 \*\*\*\*
 
@@ -58,9 +62,7 @@
 
 \*\*\*\*
 
-\*\*\*\*
-
-TBD
+![HQ User Persona](../.gitbook/assets/screenshot-2019-11-15-at-17.33.55.png)
 
 
 
