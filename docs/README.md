@@ -72,7 +72,7 @@ HCT MIS is UNICEF's humanitarian cash transfer platform that is being developed.
 
 ## Phase by Phase Approach
 
-For delivery of this project, multiple phases will be completed. Phase 1 included a breakdown of the project goals and details. Deliverable can be referenced [here](project-management/iterations-deliverables/).
+For delivery of this project, multiple phases have been identified for completion. Phase 1 included a breakdown of the project goals and details. The following iteration are subject to be be planned in the preceding Iteration. List of identified Iterations and Deliverables can be viewed [here](project-management/iterations-deliverables/).
 
 
 
