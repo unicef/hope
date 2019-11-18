@@ -6,7 +6,7 @@ description: UNHCR's cash transfer platform.
 
 See [CA glossary](../../introduction/glossary-terminology/cashassist.md) for some overview/quick information.
 
-### Overview
+## Overview
 
 Its an app on top of Dynamics.
 
@@ -23,4 +23,24 @@ The implementation for UNICEF in CashAssist will be a separate "App".
 ### Cash Plan
 
 ![](../../.gitbook/assets/image-2019-10-15-at-11.17.15-am.png)
+
+## HCT-MIS Sitemap Integration
+
+### Target Population
+
+![](../../.gitbook/assets/target-population.png)
+
+### Programe Management
+
+![](../../.gitbook/assets/program-management.png)
+
+### Payment Verification
+
+![](../../.gitbook/assets/payment-verification.png)
+
+## HCT-MIS Data Model Integration
+
+
+
+
 

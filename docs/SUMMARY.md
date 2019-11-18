@@ -1,6 +1,7 @@
 # Table of contents
 
 * [UNICEF HCT MIS](README.md)
+* [Current Process](current-process.md)
 * [Change Log](change-log.md)
 
 ## Introduction
