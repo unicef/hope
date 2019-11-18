@@ -1,4 +1,10 @@
+---
+description: HCT MIS related glossary and terms
+---
+
 # Glossary / Terminology
+
+
 
 <table>
   <thead>
