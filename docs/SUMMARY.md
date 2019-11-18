@@ -2,6 +2,7 @@
 
 * [UNICEF HCT MIS](README.md)
 * [Current Process](current-process.md)
+* [Quick Links](quick-links.md)
 * [Change Log](change-log.md)
 
 ## Introduction
@@ -9,6 +10,7 @@
 * [Glossary / Terminology](introduction/glossary-terminology/README.md)
   * [Technical glossary](introduction/glossary-terminology/technical.md)
   * [CashAssist glossary](introduction/glossary-terminology/cashassist.md)
+  * [Kobo glossary](introduction/glossary-terminology/kobo-glossary.md)
 * [FAQ](introduction/faq.md)
 * [Team](introduction/team/README.md)
   * [Project Team RACI](introduction/team/project-team-raci.md)
@@ -34,6 +36,7 @@
   * [User Roles & Permissions](product-specification/user-management/user-roles-and-permissions.md)
 * [External Integrations](product-specification/external-integrations/README.md)
   * [CashAssist](product-specification/external-integrations/cashassist.md)
+  * [Kobo](product-specification/external-integrations/kobo.md)
 
 ## Design Specification
 
@@ -59,11 +62,13 @@
   * [Open Issues](technical-specification/cashassist-integration/open-issues.md)
   * [Access Management Portal](technical-specification/cashassist-integration/access-management-portal.md)
   * [CashAssist - Training Site](technical-specification/cashassist-integration/cashassist-training-site.md)
+* [Kobo Integration](technical-specification/kobo-integration.md)
 
 ## Project Management
 
 * [Iterations/Deliverables](project-management/iterations-deliverables/README.md)
   * [Iteration 1](project-management/iterations-deliverables/iteration-1.md)
   * [Iteration 2](project-management/iterations-deliverables/iteration-2.md)
+  * [Iteration 3](project-management/iterations-deliverables/iteration-3.md)
 * [CO / User testing](project-management/co-user-testing.md)
 
