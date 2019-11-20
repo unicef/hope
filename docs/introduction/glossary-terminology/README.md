@@ -33,9 +33,16 @@ description: HCT MIS related glossary and terms
     </tr>
     <tr>
       <td style="text-align:left">Cash+</td>
-      <td style="text-align:left">In recognition of these limitations, several &#x2018;cash plus&#x2019;
-        initiatives have been introduced, whereby cash transfers are combined with
-        one or more types of complementary support. <a href="https://www.unicef-irc.org/publications/915-how-to-make-cash-plus-work-linking-cash-transfers-to-services-and-sectors.html">Link</a>.</td>
+      <td style="text-align:left">
+        <p>In recognition of these limitations, several &#x2018;cash plus&#x2019;
+          initiatives have been introduced, whereby cash transfers are combined with
+          one or more types of complementary support. <a href="https://www.unicef-irc.org/publications/915-how-to-make-cash-plus-work-linking-cash-transfers-to-services-and-sectors.html">Link</a>.</p>
+        <p>Cash can be combined with existing services offered. Information from
+          these additional services can be brought into the HCT database. Eg. &quot;School
+          attendance being monitored for a set of children in the HCT MIS database&quot;
+          or &quot;Linking these children with case management procedures (social
+          worker going to address their needs)&quot;.</p>
+      </td>
     </tr>
     <tr>
       <td style="text-align:left">CashAssist</td>
