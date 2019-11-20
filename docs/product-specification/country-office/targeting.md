@@ -1,7 +1,3 @@
----
-description: 3.2.4 Targeting
----
-
 # Targeting
 
 ## Organization
