@@ -24,10 +24,12 @@ Expected delivery date: Feb. 14, 2020
   * CashAssist Datahub
 * Import of XML Xform to define the global catalog of household and individual flex fields.
 * Generation of fake data to drive the HCT MIS user interface and testing.
+* Implementation v1 of program management including program creation. The cash plan and payment records would be leveraging fake data generated.
 
 #### **UX / UI Design Deliverables**
 
 * User testing of V 2.X mockups
-* 
+* Ideation on duplicate management in imports and against the golden records.
+
 
 
