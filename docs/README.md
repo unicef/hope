@@ -43,11 +43,6 @@ HCT MIS is UNICEF's humanitarian cash transfer platform that is being developed.
 * Alignment with interagency reporting standards.
 * Reporting Indicators to measure success \(Globally / Locally\)
 
-### Communication
-
-* **Slack**: [\#unicef-hct-mis-tivix](https://app.slack.com/client/T025EUUSK/CMSM0S7BN)
-* **Email Mailing lists**: Tivix team \( [unicef-hct-mis-internal@tivix.com](mailto:unicef-hct-mis-internal@tivix.com) \) / Everyone \( [unicef-hct-mis@tivix.com](mailto:unicef-hct-mis@tivix.com) \)
-
 ## Phase by Phase Approach
 
 For delivery of this project, multiple phases have been identified for completion. Phase 1 included a breakdown of the project goals and details. The following iteration are subject to be be planned in the preceding Iteration. List of identified Iterations and Deliverables can be viewed [here](project-management/iterations-deliverables/).
