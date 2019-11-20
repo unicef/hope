@@ -1,2 +1,2 @@
-# HCT CO Settings
+# CO Settings
 
