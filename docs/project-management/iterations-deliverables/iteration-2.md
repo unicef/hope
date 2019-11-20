@@ -11,7 +11,7 @@ The goal of Iteration Two is to refine, elaborate and finalize on our current un
 * Discuss with UNHCR Cash Assist team and develop a document outlining the integration points with Cash Assist and other UNCHR systems.
 * Finalize User Persona  for the system. 
 * Elaborate and finalize the roles and permissions matrix for all user personas who will use the HCT MIS platform.
-* Faciliate and Organize Demo workshop with country office users \(mid-November\) to review the iteration 2  mockups and overall specification/strategy for HCT-MIS functional implementation. Any gathered feedback will be documented and then included in the scope for any future iterations or development sprints. 
+* Facilitate and Organize Demo workshop with country office users \(mid-November\) to review the iteration 2  mockups and overall specification/strategy for HCT-MIS functional implementation. Any gathered feedback will be documented and then included in the scope for any future iterations or development sprints. 
 * Documentation for iteration 2 is available on Gitbook and delivered at the end of the iteration with content which is reflective of all the deliverables in this iteration, whether embedded in it or linked to the right external resource.
 * Develop roadmap for Iteration 3 including user stories.
 * Submit proposal for iteration 3 deliverables.
