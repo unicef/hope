@@ -3,7 +3,6 @@
 * [UNICEF HCT MIS](README.md)
 * [Current Process](current-process.md)
 * [Quick Links](quick-links.md)
-* [Change Log](change-log.md)
 
 ## Introduction
 
@@ -19,11 +18,13 @@
 ## Product Specification
 
 * [Country Office](product-specification/country-office/README.md)
+  * [Registration Data Import](product-specification/country-office/registration-data-import/README.md)
+    * [De-duplicating data](product-specification/country-office/registration-data-import/de-duplicating-data.md)
   * [Targeting](product-specification/country-office/targeting.md)
   * [Payments](product-specification/country-office/payments/README.md)
     * [Verification](product-specification/country-office/payments/verification.md)
   * [Data Management](product-specification/country-office/data-management.md)
-  * [Grievance](product-specification/country-office/grivance.md)
+  * [Grievance & Feedback](product-specification/country-office/grivance.md)
   * [CO Reporting](product-specification/country-office/co-reporting.md)
   * [Cash+](product-specification/country-office/cash+.md)
   * [HCT CO Settings](product-specification/country-office/hct-co-settings.md)

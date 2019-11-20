@@ -1,5 +1,10 @@
 # Quick Links
 
+### Communication
+
+* **Slack**: [\#unicef-hct-mis-tivix](https://app.slack.com/client/T025EUUSK/CMSM0S7BN)
+* **Email Mailing lists**: Tivix team \( [unicef-hct-mis-internal@tivix.com](mailto:unicef-hct-mis-internal@tivix.com) \) / Everyone \( [unicef-hct-mis@tivix.com](mailto:unicef-hct-mis@tivix.com) \)
+
 ### Spec / Documentation related
 
 * Shared **Google Docs** folder: [link](https://drive.google.com/drive/u/0/folders/1ECFUsb82eF983KMlcyf0onANl3bs03jK)

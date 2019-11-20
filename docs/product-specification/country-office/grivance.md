@@ -1,4 +1,4 @@
-# Grievance
+# Grievance & Feedback
 
 ## Grievances / Feedback Model
 
