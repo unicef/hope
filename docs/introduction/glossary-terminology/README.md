@@ -175,6 +175,10 @@ description: HCT MIS related glossary and terms
       <td style="text-align:left">Beneficiaries listed as already receiving funds. Similar to a blacklist.</td>
     </tr>
     <tr>
+      <td style="text-align:left">PDM</td>
+      <td style="text-align:left"></td>
+    </tr>
+    <tr>
       <td style="text-align:left">Payment List</td>
       <td style="text-align:left">Actual instruction of list of people, how much, when to send to the FSP.</td>
     </tr>
@@ -188,7 +192,8 @@ description: HCT MIS related glossary and terms
     </tr>
     <tr>
       <td style="text-align:left">PR</td>
-      <td style="text-align:left"></td>
+      <td style="text-align:left">Acronym for <b>Post distribution Monitoring</b>
+      </td>
     </tr>
     <tr>
       <td style="text-align:left">Program</td>
