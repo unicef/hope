@@ -25,6 +25,7 @@ Expected delivery date: Feb. 14, 2020
 * Import of XML Xform to define the global catalog of household and individual flex fields.
 * Generation of fake data to drive the HCT MIS user interface and testing.
 * Implementation v1 of program management including program creation. The cash plan and payment records would be leveraging fake data generated.
+* Provide access to quality assurance team to development environment and possibility to start testing. 
 
 #### **UX / UI Design Deliverables**
 
