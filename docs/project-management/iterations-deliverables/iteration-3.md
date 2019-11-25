@@ -6,18 +6,20 @@ description: 'Starting Dec. 9, 2019'
 
 The overall goal of this iteration is to begin software development work for HCT MIS.
 
-Expected delivery date: Feb. 14, 2020
+Expected delivery date: Feb. 28, 2020
 
 ####  **Product / Project Management Deliverables**
 
 * Work with UNICEF team on finalizing KPI's for dashboards.
 * Potential participation in Jordan pilot and/or in Geneva briefing to guide HCT MIS development work.
-* Execution on X sprints for the iteration deliverable, including bi-weekly demos and scrum ceremonies.
+* Execution on 5 sprints for the iteration deliverable, including bi-weekly demos and scrum ceremonies.
+* Identify I.4 Deliverables 
+* Maintain Project Roadmap
 
 ####  **Technical Deliverables**
 
-* Integration with AD for a unicef user to be able to login.
-* Build + Release pipelines working with staging kubernetes cluster.
+* Integration with AD for a UNICEF user to be able to login.
+* Build + Release pipelines working with staging Kubernetes cluster.
 * Implement in code the models \(database structure\) for all 3 db's:
   * HCT MIS
   * Registration Datahub
