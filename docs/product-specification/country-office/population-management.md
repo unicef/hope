@@ -1,4 +1,4 @@
-# Population Management
+# Population
 
 ## Overview
 
