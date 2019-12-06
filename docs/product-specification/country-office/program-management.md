@@ -6,10 +6,6 @@ description: >-
 
 # Program Management
 
-## Overview
-
-xzy
-
 ## Program Overview Page
 
 ![](../../.gitbook/assets/image-2019-11-25-at-5.36.28-pm.png)
