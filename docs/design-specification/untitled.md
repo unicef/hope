@@ -4,6 +4,13 @@ description: User Personas were build based on user interviews.
 
 # User Personas
 
+## Summary
+
+To view the summary of the User Persona Workshops, please follow the links below:
+
+* \*\*\*\*[**Summary Deck**](https://drive.google.com/open?id=0B7oE_2JBVjD0cHlqc1BXdlFSRFFQV3BGWHdDLVRUT0NBTEM0)\*\*\*\*
+* \*\*\*\*[**Data Spreadsheet w/ Transcripts**](https://docs.google.com/spreadsheets/d/1n02EvJi8FrlLmjnP1zvDHecP7f5eTGfn_-eUzATP6gw/edit?usp=sharing)\*\*\*\*
+
 ## Peter - Program Staff
 
 **RECORDINGS:**
