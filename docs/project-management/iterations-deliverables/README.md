@@ -4,7 +4,7 @@
 
 ## [Iteration 2](iteration-2.md#iteration-2-deliverables)
 
-## Iteration 3
+## [Iteration 3](iteration-3.md)
 
 ## Iteration 4
 

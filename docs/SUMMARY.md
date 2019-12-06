@@ -61,9 +61,9 @@
 * [Data Model](technical-specification/data-model.md)
 * [CashAssist Integration](technical-specification/cashassist-integration/README.md)
   * [Cash Assist](technical-specification/cashassist-integration/cash-assist.md)
-  * [Open Issues](technical-specification/cashassist-integration/open-issues.md)
   * [Access Management Portal](technical-specification/cashassist-integration/access-management-portal.md)
   * [CashAssist - Training Site](technical-specification/cashassist-integration/cashassist-training-site.md)
+  * [Open Issues](technical-specification/cashassist-integration/open-issues.md)
 * [Kobo Integration](technical-specification/kobo-integration.md)
 
 ## Project Management
