@@ -14,6 +14,7 @@ resources:
 variables:
   frontendDockerFilePath: "**/frontend/Dockerfile"
   backendDockerFilePath: "**/backend/Dockerfile"
+  azureSubscription: "UNICEF_APP RS-UNI-APPS-K8S-DEV"
 
 stages:
   - stage: Build
@@ -28,7 +29,8 @@ stages:
               command: buildAndPush
               repository: $(imageRepository)
               dockerfile: $(backendDockerFilePath)
-              containerRegistry: $(dockerRegistryServiceConnection)
+              azureSubscription: $(azureSubscription)
+              azureContainerRegistry: $(azureContainerRegistry)
               imageName: hct-mis-backend
               tags: |
                 $(commitId)
@@ -39,6 +41,7 @@ stages:
               repository: $(imageRepository)
               dockerfile: $(frontendDockerFilePath)
               imageName: hct-mis-frontend
-              containerRegistry: $(dockerRegistryServiceConnection)
+              azureSubscription: $(azureSubscription)
+              azureContainerRegistry: $(azureContainerRegistry)
               tags: |
                 $(commitId)
