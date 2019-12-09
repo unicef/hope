@@ -31,9 +31,9 @@ stages:
               containerRegistry: $(dockerRegistryServiceConnection)
               imageName: hct-mis-backend
               tags: |
-                $(commitHash)
+                $(commitId)
           - task: Docker@0
-            displayName: Build and frontend image
+            displayName: Build and push frontend image
             inputs:
               command: buildAndPush
               repository: $(imageRepository)
@@ -41,4 +41,4 @@ stages:
               imageName: hct-mis-frontend
               containerRegistry: $(dockerRegistryServiceConnection)
               tags: |
-                $(commitHash)
+                $(commitId)
