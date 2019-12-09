@@ -62,6 +62,6 @@ stages:
               arguments: '--install --wait --namespace'
               chartType: 'FilePath'
               chartPath: '**/ops/helm'
-              overrideValues: 'backend.env.SECRET_KEY=$(SECRET_KEY),backend.env.ENV=$(ENV),backend.env.POSTGRES_DB=$(POSTGRES_DB),backend.env.POSTGRES_USER=$(POSTGRES_USER),backend.env.POSTGRES_PASSWORD=$(POSTGRES_PASSWORD),backend.env.POSTGRES_HOST=$(POSTGRES_PASSWORD),backend.env.DJANGO_ALLOWED_HOST=$(DJANGO_ALLOWED_HOST),backend.env.DOMAIN=$(DOMAIN),postgres.env.POSTGRES_DB=$(POSTGRES_DB),postgres.env.POSTGRES_USER=$(POSTGRES_USER),postgres.env.POSTGRES_PASSWORD=$(POSTGRES_PASSWORD),'
+              overrideValues: 'backend.image=uniappsk8sdevacr.azurecr.io/hct-mis/backend:$(Build.BuildId),backend.secret.SECRET_KEY=$(SECRET_KEY),backend.secret.ENV=$(ENV),backend.secret.POSTGRES_DB=$(POSTGRES_DB),backend.secret.POSTGRES_USER=$(POSTGRES_USER),backend.secret.POSTGRES_PASSWORD=$(POSTGRES_PASSWORD),backend.secret.POSTGRES_HOST=$(POSTGRES_PASSWORD),backend.secret.DJANGO_ALLOWED_HOST=$(DJANGO_ALLOWED_HOST),backend.secret.DOMAIN=$(DOMAIN),postgres.secret.POSTGRES_DB=$(POSTGRES_DB),postgres.secret.POSTGRES_USER=$(POSTGRES_USER),postgres.secret.POSTGRES_PASSWORD=$(POSTGRES_PASSWORD),'
 
 
