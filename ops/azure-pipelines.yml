@@ -11,6 +11,10 @@ trigger:
 resources:
   - repo: self
 
+variables:
+  frontendDockerFilePath: "**/frontend/Dockerfile"
+  backendDockerFilePath: "**/backend/Dockerfile"
+
 stages:
   - stage: Build
     displayName: Build and push images
@@ -25,8 +29,8 @@ stages:
               repository: $(imageRepository)
               dockerfile: $(backendDockerFilePath)
               containerRegistry: $(dockerRegistryServiceConnection)
+              imageName: hct-mis-backend
               tags: |
-                backend
                 $(commitHash)
           - task: Docker@0
             displayName: Build and frontend image
@@ -34,7 +38,7 @@ stages:
               command: buildAndPush
               repository: $(imageRepository)
               dockerfile: $(frontendDockerFilePath)
+              imageName: hct-mis-frontend
               containerRegistry: $(dockerRegistryServiceConnection)
               tags: |
-                frontend
                 $(commitHash)
