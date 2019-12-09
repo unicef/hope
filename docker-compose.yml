@@ -33,12 +33,12 @@ services:
         build:
             context: ./backend
             dockerfile: ./Dockerfile
-            args:
-                ENV: dev
-                REQUIREMENT_FILE: dev.pip
+        ports:
+            - "8080:8000"
         volumes:
             - ./backend:/code/
             - backend-data:/data
+        command: bash -c "python manage.py runserver 0.0.0.0:8000"
         depends_on:
             - db
             - redis

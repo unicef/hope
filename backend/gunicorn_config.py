@@ -12,3 +12,4 @@ bind = ':8000'
 loglevel = 'debug' if IS_DEV else 'info'
 workers = 1
 disable_redirect_access_to_syslog = False
+worker_class = 'gevent'
