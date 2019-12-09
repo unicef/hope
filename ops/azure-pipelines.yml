@@ -17,7 +17,6 @@ stages:
     jobs:
       - job: Build
         displayName: Build
-        pool:
         steps:
           - task: Docker@0
             displayName: Build and push backend image
