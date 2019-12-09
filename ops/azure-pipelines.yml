@@ -31,8 +31,7 @@ stages:
               repository: 'hct-mis'
               containerRegistry: $(containerRegistry)
               imageName: hct-mis-backend
-              tags: |
-                $(commitId)
+
           - task: Docker@2
             displayName: Build and push frontend image
             inputs:
@@ -41,5 +40,4 @@ stages:
               imageName: hct-mis-frontend
               repository: 'hct-mis'
               containerRegistry: $(containerRegistry)
-              tags: |
-                $(commitId)
+
