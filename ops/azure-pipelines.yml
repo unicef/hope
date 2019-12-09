@@ -1,0 +1,41 @@
+trigger:
+  batch: true
+  branches:
+    include:
+    - master
+    - develop
+  paths:
+    exclude:
+    -  docs/*
+
+resources:
+  - repo: self
+
+stages:
+  - stage: Build
+    displayName: Build and push images
+    jobs:
+      - job: Build
+        displayName: Build
+        pool:
+        steps:
+          - task: Docker@0
+            displayName: Build and push backend image
+            input:
+              command: buildAndPush
+              repository: $(imageRepository)
+              dockerfile: $(backendDockerFilePath)
+              containerRegistry: $(dockerRegistryServiceConnection)
+              tags: |
+                backend
+                $(commitHash)
+          - task: Docker@0
+            displayName: Build and frontend image
+            input:
+              command: buildAndPush
+              repository: $(imageRepository)
+              dockerfile: $(frontendDockerFilePath)
+              containerRegistry: $(dockerRegistryServiceConnection)
+              tags: |
+                frontend
+                $(commitHash)
