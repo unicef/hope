@@ -27,8 +27,8 @@ stages:
             displayName: Build and push backend image
             inputs:
               command: buildAndPush
-              repository: $(imageRepository)
               dockerfile: $(backendDockerFilePath)
+              repository: 'hct-mis'
               containerRegistry: $(containerRegistry)
               imageName: hct-mis-backend
               tags: |
@@ -37,9 +37,9 @@ stages:
             displayName: Build and push frontend image
             inputs:
               command: buildAndPush
-              repository: $(imageRepository)
               dockerfile: $(frontendDockerFilePath)
               imageName: hct-mis-frontend
+              repository: 'hct-mis'
               containerRegistry: $(containerRegistry)
               tags: |
                 $(commitId)
