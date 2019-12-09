@@ -1,0 +1,110 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: backend
+    labels:
+        app: backend
+    annotations:
+        revision: {{ .Values.revision }}
+spec:
+    strategy:
+        type: RollingUpdate
+        rollingUpdate:
+            maxUnavilable: {{ .Values.backend.maxUnavilable }}
+            maxSurge: {{ .Values.backend.maxSurge}}
+    replicas: {{ .Values.backend.replicas }}
+    selector:
+        matchLabels:
+            app: backend
+
+    spec:
+        containers:
+            name: backend
+            image: {{ .Values.backend.image }}
+            ports:
+                containerPort: {{ .Values.backend.port }}
+            envFrom:
+              - secretRef:
+                name: postgres-secret
+---
+apiVersion: app/v1
+kind: Deployment
+metadata:
+    name: frontend
+    labels:
+        app: frontend
+    annotations:
+      revision: {{ .Values.revision }}
+spec:
+    strategy:
+        type: RollingUpdate
+        rollingUpdate:
+            maxUnavilable: {{ .Values.frontend.maxUnavilable }}
+            maxSurge: {{ .Values.frontend.maxSurge }}
+    replicas: {{ .Values.frontend.replicas }}
+    selector:
+        matchLabels:
+            app: frontend
+    spec:
+        containers:
+            name: frontend
+            image: {{ .Values.frontend.image }}
+            command: ["/bin/sh"]
+            args: ["-c", {{ .Values.frontend.command }}]
+            ports:
+                containerPort: {{ .Values.frontend.port }}
+---
+apiVersion: app/v1
+kind: Deployment
+metadata:
+  name: redis
+  labels:
+    app: redis
+  annotations:
+    revision:  {{ .Values.revision }}
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavilable: 1
+      maxSurge: 1
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  spec:
+    containers:
+      name: redis
+      image: {{ .Values.redis.image }}
+      ports:
+        containerPort: {{ .Values.redis.port }}
+---
+apiVersion: app/v1
+kind: Deployment
+metadata:
+  name: postgres
+  labels:
+    app: postgres
+  annotations:
+    revision: {{ .Values.revision }}
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavilable: 1
+      maxSurge: 1
+    replicas: 1
+    selector:
+      matchLabels:
+        app: postgres
+  spec:
+    containers:
+      name: postgres
+      image: {{ .Values.postgres.image }}
+      ports:
+        containerPort: {{ .Values.postgres.port }}
+      envFrom:
+        - secretRef:
+          name: postgres-secret
+---

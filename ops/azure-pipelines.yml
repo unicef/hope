@@ -46,3 +46,22 @@ stages:
               containerRegistry: $(containerRegistry)
               tags: |
                 $(Build.BuildId)
+
+  - stage: Deploy
+    displayName: Deploy app to K8S cluster.
+    jobs:
+      - job: Deploy
+        displayName: Deploy helm chart
+        steps:
+          - task: HelmDeploy@0
+            displayName: Deploy Helm chart
+            inputs:
+              kubernetesServiceConnection: 'ICTD-HCT-MIS-Demo-uni-apps-K8s-dev-hct-ims-dev-1574767480012'
+              namespace: 'hct-mis-$(ENV)'
+              command: 'upgrade'
+              arguments: '--install --wait --namespace'
+              chartType: 'FilePath'
+              chartPath: '**/ops/helm'
+              overrideValues: 'backend.env.SECRET_KEY=$(SECRET_KEY),backend.env.ENV=$(ENV),backend.env.POSTGRES_DB=$(POSTGRES_DB),backend.env.POSTGRES_USER=$(POSTGRES_USER),backend.env.POSTGRES_PASSWORD=$(POSTGRES_PASSWORD),backend.env.POSTGRES_HOST=$(POSTGRES_PASSWORD),backend.env.DJANGO_ALLOWED_HOST=$(DJANGO_ALLOWED_HOST),backend.env.DOMAIN=$(DOMAIN),postgres.env.POSTGRES_DB=$(POSTGRES_DB),postgres.env.POSTGRES_USER=$(POSTGRES_USER),postgres.env.POSTGRES_PASSWORD=$(POSTGRES_PASSWORD),'
+
+
