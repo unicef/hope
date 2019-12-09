@@ -20,7 +20,7 @@ stages:
         steps:
           - task: Docker@0
             displayName: Build and push backend image
-            input:
+            inputs:
               command: buildAndPush
               repository: $(imageRepository)
               dockerfile: $(backendDockerFilePath)
@@ -30,7 +30,7 @@ stages:
                 $(commitHash)
           - task: Docker@0
             displayName: Build and frontend image
-            input:
+            inputs:
               command: buildAndPush
               repository: $(imageRepository)
               dockerfile: $(frontendDockerFilePath)
