@@ -56,6 +56,7 @@ stages:
           - task: HelmDeploy@0
             displayName: Deploy Helm chart
             inputs:
+              connectionType: 'Kubernetes Service Connection'
               kubernetesServiceConnection: 'ICTD-HCT-MIS-Demo-uni-apps-K8s-dev-hct-ims-dev-1574767480012'
               namespace: 'hct-mis-$(ENV)'
               command: 'upgrade'
