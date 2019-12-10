@@ -42,7 +42,7 @@ spec:
       - name: job-static-container
         image: {{ .Values.backend.image }}
         command: ["/bin/sh"]
-        args: ["-c", "python3 /code/manage.py collectstatic --noinput && python3 /code/manage.py compress"]
+        args: ["-c", "python3 /code/manage.py collectstatic --noinput"]
         envFrom:
           - secretRef:
               name: backend-secret
