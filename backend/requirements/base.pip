@@ -1,6 +1,6 @@
 # Django packages
 Django==2.2.8
-django_compressor==1.0.1
+django_compressor==2.3
 
 # ETC
 Pillow==6.2.1
