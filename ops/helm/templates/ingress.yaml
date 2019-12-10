@@ -5,19 +5,14 @@ metadata:
   name: hct-mis
   annotations:
     kubernetes.io/ingress.class: azure/application-gateway
-    appgw.ingress.kubernetes.io/ssl-redirect: "true"
     
 spec:
-  tls:
-    - hosts:
-      - dev-hct.unitst.org
-      secretName: aks-unitst-tls
-  
   rules:
-    - host: api.dev-hct.unitst.org
+    - host: tivix-dev.unitst.org
       http:
         paths:
-        - backend:
+        - path: /
+          backend:
             serviceName: backend
             servicePort: 8000
 ---
