@@ -126,13 +126,6 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django.contrib.sitemaps',
     'django.contrib.staticfiles',
-
-    'imagekit',
-    'mail_templated',
-    'social_django',
-    'sequences.apps.SequencesConfig',
-    'django_nose',
-    'background_task',
 ]
 
 AUTH_PASSWORD_VALIDATORS = [

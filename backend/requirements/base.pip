@@ -1,6 +1,10 @@
 # Django packages
 Django==2.2.8
 
+# ETC
+Pillow==6.2.1
+psycopg2==2.8.4
+
 # API
 graphene-django==2.7.1
 

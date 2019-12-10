@@ -29,7 +29,7 @@ spec:
             - containerPort: {{ .Values.backend.port }}
           envFrom:
           - secretRef:
-              name: postgres-secret
+              name: backend-secret
 ---
 # apiVersion: apps/v1
 # kind: Deployment
