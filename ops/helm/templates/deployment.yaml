@@ -31,36 +31,36 @@ spec:
           - secretRef:
               name: postgres-secret
 ---
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-    name: frontend
-    labels:
-        app: frontend
-    annotations:
-      revision: "{{ .Values.revision }}"
-spec:
-    strategy:
-        type: RollingUpdate
-        rollingUpdate:
-            maxUnavailable: {{ .Values.frontend.maxUnavilable }}
-            maxSurge: {{ .Values.frontend.maxSurge }}
-    replicas: {{ .Values.frontend.replicas }}
-    selector:
-        matchLabels:
-            app: frontend
-    template:
-      metadata:
-        labels:
-          app: frontend
-      spec:
-        containers:
-        - name: frontend
-          image: {{ .Values.frontend.image }}
-          command: ["/bin/sh"]
-          args: ["-c", {{ .Values.frontend.command }}]
-          ports:
-            - containerPort: {{ .Values.frontend.port }}
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#     name: frontend
+#     labels:
+#         app: frontend
+#     annotations:
+#       revision: "{{ .Values.revision }}"
+# spec:
+#     strategy:
+#         type: RollingUpdate
+#         rollingUpdate:
+#             maxUnavailable: {{ .Values.frontend.maxUnavilable }}
+#             maxSurge: {{ .Values.frontend.maxSurge }}
+#     replicas: {{ .Values.frontend.replicas }}
+#     selector:
+#         matchLabels:
+#             app: frontend
+#     template:
+#       metadata:
+#         labels:
+#           app: frontend
+#       spec:
+#         containers:
+#         - name: frontend
+#           image: {{ .Values.frontend.image }}
+#           command: ["/bin/sh"]
+#           args: ["-c", {{ .Values.frontend.command }}]
+#           ports:
+#             - containerPort: {{ .Values.frontend.port }}
 ---
 apiVersion: apps/v1
 kind: Deployment
