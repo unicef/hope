@@ -8,7 +8,7 @@ metadata:
     
 spec:
   rules:
-    - host: tivix-dev.unitst.org
+    - host: dev-hct.unitst.org
       http:
         paths:
         - path: /
