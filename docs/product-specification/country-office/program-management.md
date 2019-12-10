@@ -1,12 +1,12 @@
 ---
 description: >-
-  The Program Management module is responsible for managing all programs held by
-  UNICEF. It's responsible for creating, editing, and ending programs.
+  The Programme Management module is responsible for managing all programs held
+  by UNICEF. It's responsible for creating, editing, and ending programs.
 ---
 
-# Program Management
+# Programme Management
 
-## Program Overview Page
+## Programme Overview Page
 
 ![](../../.gitbook/assets/image-2019-11-25-at-5.36.28-pm.png)
 
@@ -14,7 +14,7 @@ description: >-
 
 #### Card States
 
-Located on the top right hand corner of each Program card, displays a status. Each program has the following state:
+Located on the top right hand corner of each Programme card, displays a status. Each programme has the following state:
 
 * Draft
 * _Pending_
@@ -26,7 +26,7 @@ Located on the top right hand corner of each Program card, displays a status. Ea
 Card items also consists of:
 
 * planned timeframe - on the top left hand corner
-* name of the program - in the middle of a card
+* name of the programme - in the middle of a card
 
 In the down half of a card is information about:
 
@@ -41,15 +41,15 @@ In the down half of a card is information about:
 
 ### Create New Program
 
-To create a New Program, click on the "New Program" button on the top right hand corner of the page.
+To create a New Program, click on the "New Programme" button on the top right hand corner of the page.
 
-#### Creating New Program
+#### Creating New Programme
 
-To create a New Program, you have to provide information. 
+To create a New Programme, you have to provide information. 
 
 Required information is:
 
-* Name of the Program
+* Name of the Programme
 * CashAssist Scope
 * Start and End date
 
@@ -62,9 +62,9 @@ Optional information is:
 * Population Goal
 * Sector
 
-#### Program created
+#### Programme created
 
-When Program is created, the following information is presented on the screen:
+When Programme is created, the following information is presented on the screen:
 
 * status
 * start and end date
@@ -84,7 +84,7 @@ To Activate Program, click on the "Activate" button on the top right-hand corner
 
 #### Activated Program
 
-When Program is activated, additionally to information presented to the drafted Program, a list of assigned Cash Plans is displayed on the screen. The Cash Plans list consists of the following columns:
+When Programme is activated, additionally to information presented to the drafted Program, a list of assigned Cash Plans is displayed on the screen. The Cash Plans list consists of the following columns:
 
 * Cash Plan ID
 * number of households
@@ -97,17 +97,17 @@ When Program is activated, additionally to information presented to the drafted 
 
 ### Edit Program
 
-To Edit Program, click on the "Edit" button in the down right-hand corner of a Program Tile or on the top right-hand corner of the preview page.
+To Edit Program, click on the "Edit" button in the down right-hand corner of a Programme Tile or on the top right-hand corner of the preview page.
 
 ### Finish Program
 
-To Finish Program open an Active Program, click on the "Open in CashAssist" button in the top right-hand corner, and proceed further within CashAssist.
+To Finish Programme open an Active Program, click on the "Open in CashAssist" button in the top right-hand corner, and proceed further within CashAssist.
 
 ![](../../.gitbook/assets/screen-recording-2019-11-28-at-04.58-pm.gif)
 
 ### Cash Plan
 
-To preview a list of Cash Plans, click on the Program tile, and to preview Cash Plan details click on one of the Cash Plans from the list.
+To preview a list of Cash Plans, click on the Programme tile, and to preview Cash Plan details click on one of the Cash Plans from the list.
 
 #### **Cash Plan Details**
 
@@ -127,7 +127,7 @@ Cash Plan details consists of:
 
 ### Payment Records
 
-To preview the Payment Record details, go to Program Details, click on the particular Cash Plan ID on the list, and click on the chosen Payment Record from the list.
+To preview the Payment Record details, go to Programme Details, click on the particular Cash Plan ID on the list, and click on the chosen Payment Record from the list.
 
 #### Payment Records details
 
