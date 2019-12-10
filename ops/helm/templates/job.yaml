@@ -1,0 +1,51 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-migrations
+  annotations:
+    revision: ""{{ .Values.revision }}""
+  labels:
+    redeploy: "true"
+  namespace: {{ .Values.namespace }}
+spec:
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 1
+  template:
+    spec:
+      containers:
+      - name: job-migrations-container
+        image: {{ .Values.backend.image }}
+        command: ["bash"]
+        args: ["-c", "python3 /code/manage.py migrate --noinput"]
+        envFrom:
+          - secretRef:
+              name: postgres-secret
+      restartPolicy: Never
+  backoffLimit: 4
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-static
+  annotations:
+    revision: ""{{ .Values.revision }}""
+  labels:
+    redeploy: "true"
+  namespace: {{ .Values.namespace }}
+spec:
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 1
+  template:
+    spec:
+      containers:
+      - name: job-static-container
+        image: {{ .Values.backend.image }}
+        command: ["bash"]
+        args: ["-c", "python3 /code/manage.py collectstatic --noinput && python3 /code/manage.py compress"]
+        envFrom:
+          - secretRef:
+              name: postgres-secret
+      restartPolicy: Never
+  backoffLimit: 4
+---

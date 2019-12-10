@@ -6,7 +6,7 @@ metadata:
     labels:
         app: backend
     annotations:
-        revision: {{ .Values.revision }}
+        revision: "{{ .Values.revision }}"
 spec:
     strategy:
         type: RollingUpdate
@@ -38,7 +38,7 @@ metadata:
     labels:
         app: frontend
     annotations:
-      revision: {{ .Values.revision }}
+      revision: "{{ .Values.revision }}"
 spec:
     strategy:
         type: RollingUpdate
@@ -69,7 +69,7 @@ metadata:
   labels:
     app: redis
   annotations:
-    revision:  {{ .Values.revision }}
+    revision:  "{{ .Values.revision }}"
 spec:
   strategy:
     type: RollingUpdate
@@ -98,7 +98,7 @@ metadata:
   labels:
     app: postgres
   annotations:
-    revision: {{ .Values.revision }}
+    revision: "{{ .Values.revision }}"
 spec:
   strategy:
     type: RollingUpdate
