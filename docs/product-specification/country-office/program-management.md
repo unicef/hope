@@ -12,6 +12,12 @@ description: >-
 
 ### Cards
 
+#### Card Order
+
+The cards displayed on the Programme Overview screen are ordered first by **Programme State** \(as correctly listed above\), then secondly by **Last Modified Date.**
+
+#### 
+
 #### Card States
 
 Located on the top right hand corner of each Programme card, displays a status. Each programme has the following state:
@@ -20,6 +26,34 @@ Located on the top right hand corner of each Programme card, displays a status. 
 * _Pending_
 * Active
 * Finished
+
+#### 
+
+#### Draft Programme
+
+Draft Programmes are newly created Programmes that have not yet been activated. This feature allows users to have the flexibility get started on a programme, even if they are not yet ready to activate it.
+
+A unique feature to Draft Programmes is the **ability to delete the draft programme.**
+
+A useful feature for Draft Programmes is the ability to see the last modified date.
+
+
+
+**Active Programme**
+
+Active programmes are programmes that have been activated by a user and sent to Cash Assist for further monitoring.
+
+Active programmes cannot be deleted once started. 
+
+#### 
+
+#### Finished Programme
+
+A finished Programme is one that has either lived past "end by date" or has been manually finished by user. 
+
+A finished programme has the ability to be reactivated by a user if needed, by opening the finished Programme card and clicking the "re-activate" card. To complete the re-activation process, the user must first update the "end by date" before proceeding. 
+
+#### \*\*\*\*
 
 #### **Card items**
 
@@ -40,6 +74,10 @@ In the down half of a card is information about:
 
 
 ### Create New Program
+
+**See Data Dictionary for detailed requirements:**
+
+{% embed url="https://unicef.sharepoint.com/:x:/r/teams/EMOPS-HCT-MIS/DocumentLibrary2/Overarching%20Documentation/Requirements/Data%20Dictionary.xlsx?d=w41de76b5566c42c9b96533d8ed4fbc4f&csf=1&e=hSLqdj" %}
 
 To create a New Program, click on the "New Programme" button on the top right hand corner of the page.
 
