@@ -58,12 +58,9 @@ stages:
             inputs:
               connectionType: 'Kubernetes Service Connection'
               kubernetesServiceConnection: 'ICTD-HCT-MIS-Demo-uni-apps-K8s-dev-hct-ims-dev-1574767480012'
-              namespace: 'hct-mis-$(ENV)'
+              namespace: 'hct-ims-dev'
               command: 'upgrade'
-              arguments: '--install --wait --namespace'
               chartType: 'FilePath'
               chartPath: '**/ops/helm'
               releaseName: 'hct-mis'
-              overrideValues: 'env=dev,revision=$(Build.BuildId),backend.image=uniappsk8sdevacr.azurecr.io/hct-mis/backend:$(Build.BuildId),backend.secret.SECRET_KEY=$(SECRET_KEY),backend.secret.ENV=$(ENV),backend.secret.POSTGRES_DB=$(POSTGRES_DB),backend.secret.POSTGRES_USER=$(POSTGRES_USER),backend.secret.POSTGRES_PASSWORD=$(POSTGRES_PASSWORD),backend.secret.POSTGRES_HOST=$(POSTGRES_PASSWORD),backend.secret.DJANGO_ALLOWED_HOST=$(DJANGO_ALLOWED_HOST),backend.secret.DOMAIN=$(DOMAIN),postgres.secret.POSTGRES_DB=$(POSTGRES_DB),postgres.secret.POSTGRES_USER=$(POSTGRES_USER),postgres.secret.POSTGRES_PASSWORD=$(POSTGRES_PASSWORD),'
-
-
+              overrideValues: 'namespace=hct-ims-dev,env=dev,revision=$(Build.BuildId),backend.image=uniappsk8sdevacr.azurecr.io/hct-mis/backend:$(Build.BuildId),backend.secret.SECRET_KEY=$(SECRET_KEY),backend.secret.ENV=$(ENV),backend.secret.POSTGRES_DB=$(POSTGRES_DB),backend.secret.POSTGRES_USER=$(POSTGRES_USER),backend.secret.POSTGRES_PASSWORD=$(POSTGRES_PASSWORD),backend.secret.POSTGRES_HOST=$(POSTGRES_PASSWORD),backend.secret.DJANGO_ALLOWED_HOST=$(DJANGO_ALLOWED_HOST),backend.secret.DOMAIN=$(DOMAIN),postgres.secret.POSTGRES_DB=$(POSTGRES_DB),postgres.secret.POSTGRES_USER=$(POSTGRES_USER),postgres.secret.POSTGRES_PASSWORD=$(POSTGRES_PASSWORD),'
