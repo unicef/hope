@@ -16,7 +16,7 @@ spec:
       containers:
       - name: job-migrations-container
         image: {{ .Values.backend.image }}
-        command: ["bash"]
+        command: ["/bin/sh"]
         args: ["-c", "python3 /code/manage.py migrate --noinput"]
         envFrom:
           - secretRef:
@@ -41,7 +41,7 @@ spec:
       containers:
       - name: job-static-container
         image: {{ .Values.backend.image }}
-        command: ["bash"]
+        command: ["/bin/sh"]
         args: ["-c", "python3 /code/manage.py collectstatic --noinput && python3 /code/manage.py compress"]
         envFrom:
           - secretRef:
