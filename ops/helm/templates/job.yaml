@@ -4,7 +4,7 @@ kind: Job
 metadata:
   name: job-migrations
   annotations:
-    revision: ""{{ .Values.revision }}""
+    revision: "{{ .Values.revision }}"
   labels:
     redeploy: "true"
   namespace: {{ .Values.namespace }}
@@ -29,7 +29,7 @@ kind: Job
 metadata:
   name: job-static
   annotations:
-    revision: ""{{ .Values.revision }}""
+    revision: "{{ .Values.revision }}"
   labels:
     redeploy: "true"
   namespace: {{ .Values.namespace }}
