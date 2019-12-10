@@ -11,24 +11,27 @@ spec:
     strategy:
         type: RollingUpdate
         rollingUpdate:
-            maxUnavilable: {{ .Values.backend.maxUnavilable }}
+            maxUnavailable: {{ .Values.backend.maxUnavilable }}
             maxSurge: {{ .Values.backend.maxSurge}}
     replicas: {{ .Values.backend.replicas }}
     selector:
         matchLabels:
             app: backend
-
-    spec:
+    template:
+      metadata:
+        labels:
+          app: backend
+      spec:
         containers:
-            name: backend
-            image: {{ .Values.backend.image }}
-            ports:
-                containerPort: {{ .Values.backend.port }}
-            envFrom:
-              - secretRef:
-                name: postgres-secret
+        - name: backend
+          image: {{ .Values.backend.image }}
+          ports:
+            - containerPort: {{ .Values.backend.port }}
+          envFrom:
+          - secretRef:
+              name: postgres-secret
 ---
-apiVersion: app/v1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
     name: frontend
@@ -40,22 +43,26 @@ spec:
     strategy:
         type: RollingUpdate
         rollingUpdate:
-            maxUnavilable: {{ .Values.frontend.maxUnavilable }}
+            maxUnavailable: {{ .Values.frontend.maxUnavilable }}
             maxSurge: {{ .Values.frontend.maxSurge }}
     replicas: {{ .Values.frontend.replicas }}
     selector:
         matchLabels:
             app: frontend
-    spec:
+    template:
+      metadata:
+        labels:
+          app: frontend
+      spec:
         containers:
-            name: frontend
-            image: {{ .Values.frontend.image }}
-            command: ["/bin/sh"]
-            args: ["-c", {{ .Values.frontend.command }}]
-            ports:
-                containerPort: {{ .Values.frontend.port }}
+        - name: frontend
+          image: {{ .Values.frontend.image }}
+          command: ["/bin/sh"]
+          args: ["-c", {{ .Values.frontend.command }}]
+          ports:
+            - containerPort: {{ .Values.frontend.port }}
 ---
-apiVersion: app/v1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: redis
@@ -67,20 +74,24 @@ spec:
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxUnavilable: 1
+      maxUnavailable: 1
       maxSurge: 1
   replicas: 1
   selector:
     matchLabels:
       app: redis
-  spec:
-    containers:
-      name: redis
-      image: {{ .Values.redis.image }}
-      ports:
-        containerPort: {{ .Values.redis.port }}
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+        - name: redis
+          image: {{ .Values.redis.image }}
+          ports:
+            - containerPort: {{ .Values.redis.port }}
 ---
-apiVersion: app/v1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: postgres
@@ -92,19 +103,23 @@ spec:
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxUnavilable: 1
+      maxUnavailable: 1
       maxSurge: 1
-    replicas: 1
-    selector:
-      matchLabels:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
         app: postgres
-  spec:
-    containers:
-      name: postgres
-      image: {{ .Values.postgres.image }}
-      ports:
-        containerPort: {{ .Values.postgres.port }}
-      envFrom:
-        - secretRef:
-          name: postgres-secret
+    spec:
+      containers:
+        - name: postgres
+          image: {{ .Values.postgres.image }}
+          ports:
+            - containerPort: {{ .Values.postgres.port }}
+          envFrom:
+          - secretRef:
+              name: postgres-secret
 ---

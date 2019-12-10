@@ -3,13 +3,11 @@ kind: Service
 apiVersion: v1
 metadata:
   name: backend
-  annotations:
-    revision: {{ .Values.revision }}
   namespace: {{ .Values.namespace }}
 spec:
   ports:
-    protocol: TCP
-    port: {{ .Values.backend.port }}
+    - protocol: TCP
+      port: {{ .Values.backend.port }}
   selector:
       app: backend
 ---
@@ -17,13 +15,11 @@ kind: Service
 apiVersion: v1
 metadata:
   name: frontend
-  annotations:
-    revision: {{ .Values.revision }}
   namespace: {{ .Values.namespace }}
 spec:
   ports:
-    protocol: TCP
-    port: {{ .Values.frontend.port }}
+    - protocol: TCP
+      port: {{ .Values.frontend.port }}
   selector:
     app: frontend
 ---
@@ -31,13 +27,11 @@ kind: Service
 apiVersion: v1
 metadata:
   name: redis
-  annotations:
-    revision: {{ .Values.revision }}
   namespace: {{ .Values.namespace }}
 spec:
   ports:
-    protocol: TCP
-    port: {{ .Values.redis.port }}
+    - protocol: TCP
+      port: {{ .Values.redis.port }}
   selector:
     app: redis
 --- 
@@ -45,13 +39,11 @@ kind: Service
 apiVersion: v1
 metadata:
   name: postgres
-  annotations:
-    revision: {{ .Values.revision }}
   namespace: {{ .Values.namespace }}
 spec:
   ports:
-    protocol: TCP
-    port: {{ .Values.postgres.port }}
+    - protocol: TCP
+      port: {{ .Values.postgres.port }}
   selector:
     app: postgres
 ---
