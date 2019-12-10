@@ -16,6 +16,7 @@ backend:
     POSTGRES_HOST: ""
     DJANGO_ALLOWED_HOST: ""
     DOMAIN: ""
+    ENV: ""
 
 frontend:
   image:
