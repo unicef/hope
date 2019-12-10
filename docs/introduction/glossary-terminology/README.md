@@ -204,8 +204,9 @@ description: HCT MIS related glossary and terms
     </tr>
     <tr>
       <td style="text-align:left">Program</td>
-      <td style="text-align:left">UNHCR concept. Defines approval, workflow etc. and different FSP&apos;s
-        would be different program. Eg. program for WASH, program for Shelter.</td>
+      <td style="text-align:left">Referred to as Programme (See below). UNHCR concept. Defines approval,
+        workflow etc. and different FSP&apos;s would be different program. Eg.
+        program for WASH, program for Shelter.</td>
     </tr>
     <tr>
       <td style="text-align:left">Programme</td>
