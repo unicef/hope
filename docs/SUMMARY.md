@@ -22,7 +22,7 @@
     * [De-duplicating data](product-specification/country-office/registration-data-import/de-duplicating-data.md)
   * [Population](product-specification/country-office/population-management.md)
   * [Targeting](product-specification/country-office/targeting.md)
-  * [Program Management](product-specification/country-office/program-management.md)
+  * [Programme Management](product-specification/country-office/program-management.md)
   * [Payments](product-specification/country-office/payments/README.md)
     * [Verification](product-specification/country-office/payments/verification.md)
   * [Grievance & Feedback](product-specification/country-office/grivance.md)
