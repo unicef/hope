@@ -1,11 +1,11 @@
 from __future__ import absolute_import
+
 import os
 import sys
 
 ####
 # Change per project
 ####
-from django.urls import reverse_lazy
 from django.utils.text import slugify
 
 PROJECT_NAME = 'hct_mis_api'
@@ -138,6 +138,8 @@ OTHER_APPS = [
     'sequences.apps.SequencesConfig',
     'django_nose',
     'background_task',
+    'django_countries',
+    'phonenumber_field',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
