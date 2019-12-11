@@ -16,8 +16,12 @@ spec:
     - host: dev-hct.unitst.org
       http:
         paths:
-        - path: /
+        - path: /api
           backend:
             serviceName: backend
             servicePort: {{ .Values.backend.port }}
+        - path: /
+          backend:
+            serviceName: frontend:
+            servicePort: {{ .Values.frontend.port }}
 ---
