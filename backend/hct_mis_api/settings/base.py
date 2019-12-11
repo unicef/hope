@@ -115,8 +115,11 @@ TEMPLATES = [
         },
     },
 ]
+PROJECT_APPS = [
+    'account',
+]
 
-INSTALLED_APPS = [
+DJANGO_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.humanize',
@@ -126,7 +129,9 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django.contrib.sitemaps',
     'django.contrib.staticfiles',
+]
 
+OTHER_APPS = [
     'imagekit',
     'mail_templated',
     'social_django',
@@ -134,6 +139,8 @@ INSTALLED_APPS = [
     'django_nose',
     'background_task',
 ]
+
+INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -251,3 +258,4 @@ else:
 
 SESSION_COOKIE_HTTPONLY = True
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
+AUTH_USER_MODEL = 'account.User'
