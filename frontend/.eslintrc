@@ -1,0 +1,9 @@
+{
+    "extends": [ "tivix-typescript"],
+    "env": {
+        "browser": true
+    },
+    "rules": {
+        "import/extensions": [".js", ".jsx", ".json", ".ts", ".tsx"]
+    }
+}
