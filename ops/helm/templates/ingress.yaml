@@ -19,5 +19,5 @@ spec:
         - path: /
           backend:
             serviceName: backend
-            servicePort: 8000
+            servicePort: {{ .Values.backend.port }}
 ---
