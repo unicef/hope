@@ -129,6 +129,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'compressor',
+
+    'core',
 ]
 
 AUTH_PASSWORD_VALIDATORS = [
