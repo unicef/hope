@@ -15,7 +15,8 @@ def test_raise_exception_view(request):
 
 urlpatterns = [
     path('api/admin/', admin.site.urls),
-    path('', homepage)
+    path('', homepage),
+    path('api/', homepage)
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 urlpatterns += staticfiles_urlpatterns()
