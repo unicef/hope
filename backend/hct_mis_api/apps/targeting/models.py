@@ -7,7 +7,8 @@ from model_utils.models import UUIDModel
 class TargetPopulation(UUIDModel):
     name = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='target_populations')
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+                                   related_name='target_populations', null=True)
     rules = JSONField()
     households = models.ManyToManyField('household.Household', related_name='target_populations')
 

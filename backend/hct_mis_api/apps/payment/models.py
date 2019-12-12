@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.translation import ugettext_lazy as _
 
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 
@@ -16,5 +17,5 @@ class PaymentRecord(TimeStampedUUIDModel):
         max_length=255,
         choices=DELIVERY_TYPE_CHOICE,
     )
-    cash_plan = models.ForeignKey('Program.', related_name='payment_records', on_delete=models.CASCADE)
-    household = models.ForeignKey('Program.', related_name='payment_records', on_delete=models.CASCADE)
+    cash_plan = models.ForeignKey('program.CashPlan', on_delete=models.CASCADE, related_name='payment_records')
+    household = models.ForeignKey('household.Household', on_delete=models.CASCADE, related_name='payment_records')
