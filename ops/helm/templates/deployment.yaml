@@ -28,12 +28,12 @@ spec:
           ports:
             - containerPort: {{ .Values.backend.port }}
           env:
-            - name: AZURE_ACCOUNT_KEY
+            - name: STORAGE_AZURE_ACCOUNT_KEY
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.backend.staticStorage.secretName }}
                   key: password
-            - name: AZURE_ACCOUNT_NAME
+            - name: STORAGE_AZURE_ACCOUNT_NAME
               value: {{ .Values.backend.staticStorage.accountName }}
           envFrom:
           - secretRef:
