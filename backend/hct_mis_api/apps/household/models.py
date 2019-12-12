@@ -1,19 +1,20 @@
 from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from model_utils.models import UUIDModel
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
 
 from hct_mis_api.apps.household.const import NATIONALITIES
+from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 
 
-class Household(UUIDModel):
-    PERMANENT = 'PERMANENT'
-    SETTLED = 'SETTLED'
+class Household(TimeStampedUUIDModel):
     RESIDENCE_STATUS_CHOICE = (
-        (PERMANENT, _('Permanent')),
-        (SETTLED, _('Settled')),
+        ('REFUGEE', _('Refugee')),
+        ('MIGRANT', _('Migrant')),
+        ('CITIZEN', _('Citizen')),
+        ('IDP', _('IDP')),
+        ('OTHER', _('Other')),
     )
 
     household_ca_id = models.CharField(max_length=255)
@@ -28,27 +29,31 @@ class Household(UUIDModel):
     )
     family_size = models.PositiveIntegerField(blank=True, null=True)
     address = models.CharField(max_length=255, blank=True, null=True)
-    location = models.ForeignKey('core.Location', related_name='households')
-    registration_data_import_id = models.ForeignKey('RegistrationDataImport', related_name='households')
+    location = models.ForeignKey('core.Location', related_name='households', on_delete=models.CASCADE)
+    registration_data_import_id = models.ForeignKey('RegistrationDataImport', related_name='households',
+                                                    on_delete=models.CASCADE)
 
 
-class Individual(UUIDModel):
+class Individual(TimeStampedUUIDModel):
     SEX_CHOICE = (
         ('MALE', _('Male')),
         ('FEMALE', _('Female')),
-        ('OTHER', _('Other')),
     )
     MARTIAL_STATUS_CHOICE = (
-        ('DIVORCED', _('Divorced')),
+        ('SINGLE', _('SINGLE')),
         ('MARRIED', _('Married')),
+        ('WIDOW', _('Widow')),
+        ('DIVORCED', _('Divorced')),
         ('SEPARATED', _('Separated')),
-        ('UNMARRIED', _('Unmarried')),
-        ('WIDOWER', _('Widow/Widower')),
     )
+    # N/A, Birth Certificate, Driving License, UNHCR ID card, National ID, National Passport
     IDENTIFICATION_TYPE_CHOICE = (
-        ('ID_CARD', _('Id Card')),
-        ('PASSPORT', _('Passport')),
-        ('DRIVERS_LICENSE', _('Driver\'s License'))
+        ('NA', _('N/A')),
+        ('BIRTH_CERTIFICATE', _('Birth Certificate')),
+        ('DRIVING_LICENSE', _('Driving License')),
+        ('UNHCR_ID_CARD', _('UNHCR ID card')),
+        ('NATIONAL_ID', _('National ID')),
+        ('NATIONAL_PASSPORT', _('National Passport')),
     )
     individual_ca_id = models.CharField(max_length=255)
     full_name = models.CharField(max_length=255)
@@ -74,14 +79,15 @@ class Individual(UUIDModel):
         choices=IDENTIFICATION_TYPE_CHOICE,
     )
     identification_number = models.CharField(max_length=255)
-    household = models.ForeignKey('Household', related_name='individuals')
-    registration_data_import_id = models.ForeignKey('RegistrationDataImport', related_name='individuals')
+    household = models.ForeignKey('Household', related_name='individuals', on_delete=models.CASCADE)
+    registration_data_import_id = models.ForeignKey('RegistrationDataImport', related_name='individuals',
+                                                    on_delete=models.CASCADE)
 
     def __str__(self):
         return self.full_name
 
 
-class RegistrationDataImport(UUIDModel):
+class RegistrationDataImport(TimeStampedUUIDModel):
     IN_PROGRESS = 'IN_PROGRESS'
     DONE = 'DONE'
     STATUS_CHOICE = (
@@ -100,7 +106,8 @@ class RegistrationDataImport(UUIDModel):
         choices=STATUS_CHOICE,
     )
     import_date = models.DateTimeField()
-    imported_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='registration_data_imports')
+    imported_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='registration_data_imports',
+                                    on_delete=models.CASCADE)
     data_source = models.CharField(
         max_length=255,
         choices=DATA_SOURCE_CHOICE,
