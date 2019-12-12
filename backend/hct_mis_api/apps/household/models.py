@@ -91,8 +91,8 @@ class RegistrationDataImport(TimeStampedUUIDModel):
     IN_PROGRESS = 'IN_PROGRESS'
     DONE = 'DONE'
     STATUS_CHOICE = (
-        IN_PROGRESS, _('In progress'),
-        DONE, _('Done'),
+        (IN_PROGRESS, _('In progress')),
+        (DONE, _('Done')),
     )
     DATA_SOURCE_CHOICE = (
         ('XLS', 'Excel'),
