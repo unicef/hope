@@ -117,6 +117,15 @@ TEMPLATES = [
 ]
 PROJECT_APPS = [
     'account',
+    'core',
+    'grievance',
+    'household',
+    'id_management',
+    'intervention',
+    'payment',
+    'program',
+    'targeting',
+    'utils'
 ]
 
 DJANGO_APPS = [
