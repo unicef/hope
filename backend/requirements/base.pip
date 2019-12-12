@@ -1,8 +1,9 @@
 # Django packages
 Django==2.2.8
 django_compressor==2.3
+django-storages[azure]==1.8
 
-# ETC
+# Etc
 Pillow==6.2.1
 psycopg2==2.8.4
 

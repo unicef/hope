@@ -17,6 +17,9 @@ backend:
     DJANGO_ALLOWED_HOST: ""
     DOMAIN: ""
     ENV: ""
+  staticStorage:
+    secretName: ""
+    accountName: ""
 
 frontend:
   image:
