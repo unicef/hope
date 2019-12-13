@@ -1,0 +1,49 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: backend
+  namespace: {{ .Values.namespace }}
+spec:
+  ports:
+    - protocol: TCP
+      port: {{ .Values.backend.port }}
+  selector:
+      app: backend
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: frontend
+  namespace: {{ .Values.namespace }}
+spec:
+  ports:
+    - protocol: TCP
+      port: {{ .Values.frontend.port }}
+  selector:
+    app: frontend
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: redis
+  namespace: {{ .Values.namespace }}
+spec:
+  ports:
+    - protocol: TCP
+      port: {{ .Values.redis.port }}
+  selector:
+    app: redis
+--- 
+kind: Service
+apiVersion: v1
+metadata:
+  name: postgres
+  namespace: {{ .Values.namespace }}
+spec:
+  ports:
+    - protocol: TCP
+      port: {{ .Values.postgres.port }}
+  selector:
+    app: postgres
+---
