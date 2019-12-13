@@ -55,6 +55,7 @@ STATIC_ROOT = f'{DATA_VOLUME}/staticserve'
 STATICFILES_FINDERS = (
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+    'compressor.finders.CompressorFinder'
 )
 
 DEBUG = True
@@ -82,7 +83,7 @@ DATABASES = {
         'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
         'HOST': os.getenv('POSTGRES_HOST'),
         'PORT': 5432,
-    }
+    },
 }
 
 POSTGRES_SSL_MODE = os.getenv('POSTGRES_SSL_MODE', 'off')
@@ -149,6 +150,7 @@ OTHER_APPS = [
     'background_task',
     'django_countries',
     'phonenumber_field',
+    'compressor',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
