@@ -55,6 +55,7 @@ STATIC_ROOT = f'{DATA_VOLUME}/staticserve'
 STATICFILES_FINDERS = (
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+    'compressor.finders.CompressorFinder'
 )
 
 DEBUG = True
@@ -127,12 +128,9 @@ INSTALLED_APPS = [
     'django.contrib.sitemaps',
     'django.contrib.staticfiles',
 
-    'imagekit',
-    'mail_templated',
-    'social_django',
-    'sequences.apps.SequencesConfig',
-    'django_nose',
-    'background_task',
+    'compressor',
+
+    'core',
 ]
 
 AUTH_PASSWORD_VALIDATORS = [
