@@ -6,6 +6,8 @@ from django.conf import settings
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
+from core.views import homepage
+
 
 def test_raise_exception_view(request):
     raise Exception('Testing Error Reporting')
@@ -13,6 +15,8 @@ def test_raise_exception_view(request):
 
 urlpatterns = [
     path('api/admin/', admin.site.urls),
+    path('', homepage),
+    path('api/', homepage)
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 urlpatterns += staticfiles_urlpatterns()

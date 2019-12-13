@@ -1,0 +1,44 @@
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: hct-mis-backend
+  annotations:
+    kubernetes.io/ingress.class: azure/application-gateway
+    appgw.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  tls:
+    - hosts:
+      - dev-hct.unitst.org
+      secretName: aks-unitst-tls
+
+  rules:
+    - host: dev-hct.unitst.org
+      http:
+        paths:
+        - path: /api/*
+          backend:
+            serviceName: backend
+            servicePort: {{ .Values.backend.port }}
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: hct-mis-frontend
+  annotations:
+    kubernetes.io/ingress.class: azure/application-gateway
+    appgw.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  tls:
+    - hosts:
+      - dev-hct.unitst.org
+      secretName: aks-unitst-tls
+  rules:
+    - host: dev-hct.unitst.org
+      http:
+        paths:
+        - path: /
+          backend:
+            serviceName: frontend
+            servicePort: {{ .Values.frontend.port }}
+---

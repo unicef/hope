@@ -20,8 +20,8 @@
 
 * **Clubhouse** / ticketing: [https://app.clubhouse.io/hct-mis/projects](https://app.clubhouse.io/hct-mis/projects)
 * **Github** repo: [https://github.com/unicef/hct-mis](https://github.com/unicef/hct-mis)
-* Dev env: 
-* Staging env: 
+* Dev env: [https://dev-hct.unitst.org/](https://dev-hct.unitst.org/)
+* Staging env: [https://staging-hct.unitst.org/](https://staging-hct.unitst.org/)
 * Production env:
 * Azure DevOps: [https://unicef.visualstudio.com/ICTD-HCT%20IMS](https://unicef.visualstudio.com/ICTD-HCT%20IMS)
 
