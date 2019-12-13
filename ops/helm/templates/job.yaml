@@ -24,6 +24,14 @@ spec:
         envFrom:
           - secretRef:
               name: backend-secret
+        env:
+          - name: STORAGE_AZURE_ACCOUNT_KEY
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.backend.staticStorage.secretName }}
+                key: password
+          - name: STORAGE_AZURE_ACCOUNT_NAME
+            value: {{ .Values.backend.staticStorage.accountName }}
       restartPolicy: Never
   backoffLimit: 4
 ---
@@ -48,7 +56,15 @@ spec:
       - name: job-static-container
         image: {{ .Values.backend.image }}
         command: ["/bin/sh"]
-        args: ["-c", "python3 /code/manage.py collectstatic --noinput"]
+        args: ["-c", "python3 /code/manage.py collectstatic --noinput"]  
+        env:
+          - name: STORAGE_AZURE_ACCOUNT_KEY
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.backend.staticStorage.secretName }}
+                key: password
+          - name: STORAGE_AZURE_ACCOUNT_NAME
+            value: {{ .Values.backend.staticStorage.accountName }}
         envFrom:
           - secretRef:
               name: backend-secret
