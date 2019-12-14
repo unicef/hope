@@ -84,7 +84,31 @@ DATABASES = {
         'HOST': os.getenv('POSTGRES_HOST'),
         'PORT': 5432,
     },
+    'cash_assist_datahub': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': os.getenv('POSTGRES_DB'),
+        'USER': os.getenv('POSTGRES_USER'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+        'HOST': os.getenv('CASH_ASSIST_DATAHUB_POSTGRES_HOST'),
+        'PORT': 5432,
+    },
+    'registration_datahub': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': os.getenv('POSTGRES_DB'),
+        'USER': os.getenv('POSTGRES_USER'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+        'HOST': os.getenv('REGISTRATION_POSTGRES_HOST'),
+        'PORT': 5432,
+    },
+
 }
+
+# If app is not specified here it will use default db
+DATABASE_APPS_MAPPING = {
+    'cash_assist_datahub': 'cash_assist_datahub',
+}
+
+DATABASE_ROUTERS = ('core.dbrouters.DbRouter',)
 
 POSTGRES_SSL_MODE = os.getenv('POSTGRES_SSL_MODE', 'off')
 if POSTGRES_SSL_MODE == 'on':
@@ -126,7 +150,8 @@ PROJECT_APPS = [
     'payment',
     'program',
     'targeting',
-    'utils'
+    'utils',
+    'cash_assist_datahub'
 ]
 
 DJANGO_APPS = [
@@ -142,12 +167,6 @@ DJANGO_APPS = [
 ]
 
 OTHER_APPS = [
-    'imagekit',
-    'mail_templated',
-    'social_django',
-    'sequences.apps.SequencesConfig',
-    'django_nose',
-    'background_task',
     'django_countries',
     'phonenumber_field',
     'compressor',
