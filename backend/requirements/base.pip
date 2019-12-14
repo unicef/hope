@@ -4,6 +4,7 @@ django_compressor==2.3
 django-storages[azure]==1.8
 django-countries==5.5
 sorl-thumbnail==12.5.0
+django-model-utils==4.0.0
 django-phonenumber-field==4.0.0
 phonenumbers==8.11.1
 
