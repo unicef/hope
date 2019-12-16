@@ -1,6 +1,6 @@
 revision: 1
 namespace: staging
-env: 
+env:
 
 backend:
   image:
@@ -36,6 +36,10 @@ redis:
 postgres:
   port: 5432
   image: postgres:9.5.15-alpine
+  instances:
+    - name: postgres_cash_assist_datahub_db
+    - name: postgres_registration_datahub
+    - name: postgres
   secret:
     POSTGRES_DB: ""
     POSTGRES_USER: ""
