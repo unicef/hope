@@ -1,7 +1,7 @@
 from django.conf import settings
 
 
-class DbRouter(object):
+class DbRouter:
     @staticmethod
     def select_db(model):
         db = settings.DATABASE_APPS_MAPPING.get(model._meta.app_label)

@@ -97,14 +97,15 @@ spec:
           ports:
             - containerPort: {{ .Values.redis.port }}
 ---
+{{- range .Values.postgres.instances }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: postgres
+  name: {{ .name }}
   labels:
-    app: postgres
+    app: {{ .name }}
   annotations:
-    revision: "{{ .Values.revision }}"
+    revision: "{{ $.Values.revision }}"
 spec:
   strategy:
     type: RollingUpdate
@@ -114,18 +115,19 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: postgres
+      app: {{ .name }}
   template:
     metadata:
       labels:
-        app: postgres
+        app: {{ .name }}
     spec:
       containers:
-        - name: postgres
-          image: {{ .Values.postgres.image }}
+        - name: {{ .name }}
+          image: {{ $.Values.postgres.image }}
           ports:
-            - containerPort: {{ .Values.postgres.port }}
+            - containerPort: {{ $.Values.postgres.port }}
           envFrom:
-          - secretRef:
-              name: postgres-secret
+            - secretRef:
+                name: postgres-secret
 ---
+{{- end }}
