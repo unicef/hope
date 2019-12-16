@@ -1,10 +1,8 @@
-import logging
-
 from django.conf import settings
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
 
-logger = logging.getLogger(__name__)
+GREEN = '\033[92m'
 
 
 class Command(BaseCommand):
@@ -12,5 +10,5 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         for db in settings.DATABASES:
-            logger.info(f'Migrating {db} database')
+            print(f'{GREEN}Migrating {db} database')
             call_command('migrate', database=db)
