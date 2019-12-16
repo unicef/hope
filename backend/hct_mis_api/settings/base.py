@@ -106,6 +106,7 @@ DATABASES = {
 # If app is not specified here it will use default db
 DATABASE_APPS_MAPPING = {
     'cash_assist_datahub': 'cash_assist_datahub',
+    'registration_datahub': 'registration_datahub',
 }
 
 DATABASE_ROUTERS = ('core.dbrouters.DbRouter',)
@@ -151,7 +152,8 @@ PROJECT_APPS = [
     'program',
     'targeting',
     'utils',
-    'cash_assist_datahub'
+    'cash_assist_datahub',
+    'registration_datahub',
 ]
 
 DJANGO_APPS = [
