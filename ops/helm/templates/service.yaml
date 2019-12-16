@@ -47,3 +47,17 @@ spec:
   selector:
     app: postgres
 ---
+{{- range .Values.postgres.instances }}
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ .name }}
+  namespace: {{ $.Values.namespace }}
+spec:
+  ports:
+    - protocol: TCP
+      port: {{ $.Values.postgres.port }}
+  selector:
+    app: {{ .name }}
+---
+{{- end }}
