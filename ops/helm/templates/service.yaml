@@ -39,7 +39,7 @@ spec:
 kind: Service
 apiVersion: v1
 metadata:
-  name: {{ $key }}
+  name: {{ lower $key }}
   namespace: {{ $.Values.namespace }}
 spec:
   ports:
