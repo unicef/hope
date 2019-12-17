@@ -10,5 +10,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         for db in settings.DATABASES:
-            print(f'{GREEN}Migrating {db} database')
+            self.stdout.write(
+                self.style.WARNING(
+                    f'Migrating {db} database'
+                )
+            )
             call_command('migrate', database=db)
