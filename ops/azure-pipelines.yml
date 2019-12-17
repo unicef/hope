@@ -66,14 +66,14 @@ stages:
               releaseName: 'hct-mis'
               install: true
               force: true
-              overrideValues: >-
+              overrideValues: "
                 backend.staticStorage.secretName=$(staticStorageSecretName),
                 backend.staticStorage.accountName=$(staticStorageAccountName),
                 frontend.image=uniappsk8sdevacr.azurecr.io/$(frontendImageRepository):$(Build.BuildId),
                 namespace=hct-ims-dev,
                 env=DEV,
                 backend.secret.env=DEV,
-                revision="$(Build.BuildId)",
+                revision=\"$(Build.BuildId)\",
                 backend.image=uniappsk8sdevacr.azurecr.io/$(backendImageRepository):$(Build.BuildId),
                 backend.secret.SECRET_KEY=$(SECRET_KEY),
                 backend.secret.ENV=$(ENV),
@@ -97,4 +97,4 @@ stages:
                 databases.registrationDatahubDB.secret.POSTGRES_PASSWORD=$(REGISTRATION_DATAHUB_POSTGRES_PASSWORD),
                 databases.postgresCashAssistDatahubDB.secret.POSTGRES_DB=$(CASH_ASSIST_DATAHUB_POSTGRES_DB),
                 databases.postgresCashAssistDatahubDB.secret.POSTGRES_USER=$(CASH_ASSIST_REGISTRATION_DATAHUB_POSTGRES_USER),
-                databases.postgresCashAssistDatahubDB.secret.POSTGRES_PASSWORD=$(CASH_ASSIST_REGISTRATION_DATAHUB_POSTGRES_PASSWORD),
+                databases.postgresCashAssistDatahubDB.secret.POSTGRES_PASSWORD=$(CASH_ASSIST_REGISTRATION_DATAHUB_POSTGRES_PASSWORD),"
