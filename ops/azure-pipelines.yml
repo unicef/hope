@@ -49,6 +49,7 @@ stages:
 
   - stage: Deploy
     displayName: Deploy app to K8S cluster.
+    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
     jobs:
       - job: Deploy
         displayName: Deploy helm chart
