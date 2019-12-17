@@ -1,85 +1,97 @@
 version: '3.7'
 
 volumes:
-    backend-data:
+  backend-data:
 
 services:
-    proxy:
-        image: unicef/hct-mis-proxy
-        environment:
-            - DJANGO_APPLICATION_SERVICE_HOST=backend
-            - FRONTEND_SERVICE_HOST=frontend
-        build:
-            context: ./proxy
-            dockerfile: ./Dockerfile
-        ports:
-            - "8082:80"
-        depends_on:
-            - backend
-            - frontend
-        volumes:
-            - backend-data:/data
+  proxy:
+    image: unicef/hct-mis-proxy
+    environment:
+      - DJANGO_APPLICATION_SERVICE_HOST=backend
+      - FRONTEND_SERVICE_HOST=frontend
+    build:
+      context: ./proxy
+      dockerfile: ./Dockerfile
+    ports:
+      - "8082:80"
+    depends_on:
+      - backend
+      - frontend
+    volumes:
+      - backend-data:/data
 
-    redis:
-        restart: always
-        image: redis:4.0.11-alpine3.8
+  redis:
+    restart: always
+    image: redis:4.0.11-alpine3.8
 
-    backend:
-        image: unicef/hct-mis-backend
-        env_file:
-            - .env
-        environment:
-            - REDIS_INSTANCE=redis:6379
-        build:
-            context: ./backend
-            dockerfile: ./Dockerfile
-        ports:
-            - "8080:8000"
-        volumes:
-            - ./backend:/code/
-            - backend-data:/data
-        command: bash -c "python manage.py runserver 0.0.0.0:8000"
-        depends_on:
-            - db
-            - redis
+  backend:
+    image: unicef/hct-mis-backend
+    env_file:
+      - .env
+    environment:
+      - REDIS_INSTANCE=redis:6379
+    build:
+      context: ./backend
+      dockerfile: ./Dockerfile
+    ports:
+      - "8080:8000"
+    volumes:
+      - ./backend:/code/
+      - backend-data:/data
+    command: bash -c "python manage.py runserver 0.0.0.0:8000"
+    depends_on:
+      - db
+      - redis
+      - cash_assist_datahub_db
+      - registration_datahub_db
 
-#    backend-jobs:
-#        image: unicef/hct-mis-backend
-#        env_file:
-#            - .env
-#        environment:
-#            - REDIS_INSTANCE=redis:6379
-#        build:
-#            context: ./backend
-#            dockerfile: ./Dockerfile
-#            args:
-#                ENV: dev
-#                REQUIREMENT_FILE: dev.pip
-#        volumes:
-#            - ./backend:/code/
-#        depends_on:
-#            - backend
-#        command: bash -c "/./worker-entrypoint.sh"
+  #    backend-jobs:
+  #        image: unicef/hct-mis-backend
+  #        env_file:
+  #            - .env
+  #        environment:
+  #            - REDIS_INSTANCE=redis:6379
+  #        build:
+  #            context: ./backend
+  #            dockerfile: ./Dockerfile
+  #            args:
+  #                ENV: dev
+  #                REQUIREMENT_FILE: dev.pip
+  #        volumes:
+  #            - ./backend:/code/
+  #        depends_on:
+  #            - backend
+  #        command: bash -c "/./worker-entrypoint.sh"
 
-    db:
-        image: postgres:9.5.15-alpine
-        env_file:
-            - .env
+  db:
+    image: postgres:9.5.15-alpine
+    env_file:
+      - .env
 
-    frontend:
-        image: unicef/hct-mis-frontend
-        env_file:
-            - .env
-        build:
-            context: ./frontend
-            dockerfile: ./Dockerfile
-            target: dev
-            args:
-                ENV: dev
-        ports:
-            - "8088:80"
-            - "3000:3000"
-        volumes:
-            - ./frontend/:/code
-            - /code/node_modules
-        command: npm start
+  cash_assist_datahub_db:
+    image: postgres:9.5.15-alpine
+    env_file:
+      - .env
+
+  registration_datahub_db:
+    image: postgres:9.5.15-alpine
+    env_file:
+      - .env
+
+  frontend:
+    image: unicef/hct-mis-frontend
+    env_file:
+      - .env
+    build:
+      context: ./frontend
+      dockerfile: ./Dockerfile
+      target: dev
+      args:
+        ENV: dev
+    ports:
+      - "8088:80"
+      - "3000:3000"
+    volumes:
+      - ./frontend/:/code
+      - /code/node_modules
+    command: npm start
