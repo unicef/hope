@@ -1,0 +1,3 @@
+{
+  "extends": ["@tivix/eslint-config/typescript-react"]
+}
