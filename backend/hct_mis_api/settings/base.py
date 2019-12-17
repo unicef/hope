@@ -89,7 +89,7 @@ DATABASES = {
         'NAME': os.getenv('POSTGRES_DB'),
         'USER': os.getenv('POSTGRES_USER'),
         'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
-        'HOST': os.getenv('CASH_ASSIST_DATAHUB_POSTGRES_HOST'),
+        'HOST': os.getenv('POSTGRES_HOST_CASHASSIST_DATAHUB'),
         'PORT': 5432,
     },
     'registration_datahub': {
@@ -97,7 +97,7 @@ DATABASES = {
         'NAME': os.getenv('POSTGRES_DB'),
         'USER': os.getenv('POSTGRES_USER'),
         'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
-        'HOST': os.getenv('REGISTRATION_POSTGRES_HOST'),
+        'HOST': os.getenv('POSTGRES_HOST_REGISTRATION_DATAHUB'),
         'PORT': 5432,
     },
 
