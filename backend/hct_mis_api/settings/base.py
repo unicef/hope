@@ -1,11 +1,11 @@
 from __future__ import absolute_import
+
 import os
 import sys
 
 ####
 # Change per project
 ####
-from django.urls import reverse_lazy
 from django.utils.text import slugify
 
 PROJECT_NAME = 'hct_mis_api'
@@ -83,8 +83,33 @@ DATABASES = {
         'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
         'HOST': os.getenv('POSTGRES_HOST'),
         'PORT': 5432,
-    }
+    },
+    'cash_assist_datahub': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': os.getenv('POSTGRES_CASHASSIST_DATAHUB_DB'),
+        'USER': os.getenv('POSTGRES_CASHASSIST_DATAHUB_USER'),
+        'PASSWORD': os.getenv('POSTGRES_CASHASSIST_DATAHUB_PASSWORD'),
+        'HOST': os.getenv('POSTGRES_CASHASSIST_DATAHUB_HOST'),
+        'PORT': 5432,
+    },
+    'registration_datahub': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': os.getenv('POSTGRES_REGISTRATION_DATAHUB_DB'),
+        'USER': os.getenv('POSTGRES_REGISTRATION_DATAHUB_USER'),
+        'PASSWORD': os.getenv('POSTGRES_REGISTRATION_DATAHUB_PASSWORD'),
+        'HOST': os.getenv('POSTGRES_REGISTRATION_DATAHUB_HOST'),
+        'PORT': 5432,
+    },
+
 }
+
+# If app is not specified here it will use default db
+DATABASE_APPS_MAPPING = {
+    'cash_assist_datahub': 'cash_assist_datahub',
+    'registration_datahub': 'registration_datahub',
+}
+
+DATABASE_ROUTERS = ('core.dbrouters.DbRouter',)
 
 POSTGRES_SSL_MODE = os.getenv('POSTGRES_SSL_MODE', 'off')
 if POSTGRES_SSL_MODE == 'on':
@@ -116,8 +141,22 @@ TEMPLATES = [
         },
     },
 ]
+PROJECT_APPS = [
+    'account',
+    'core',
+    'grievance',
+    'household',
+    'id_management',
+    'intervention',
+    'payment',
+    'program',
+    'targeting',
+    'utils',
+    'cash_assist_datahub',
+    'registration_datahub',
+]
 
-INSTALLED_APPS = [
+DJANGO_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.humanize',
@@ -127,11 +166,15 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django.contrib.sitemaps',
     'django.contrib.staticfiles',
-
-    'compressor',
-
-    'core',
 ]
+
+OTHER_APPS = [
+    'django_countries',
+    'phonenumber_field',
+    'compressor',
+]
+
+INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -249,3 +292,4 @@ else:
 
 SESSION_COOKIE_HTTPONLY = True
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
+AUTH_USER_MODEL = 'account.User'
