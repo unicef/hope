@@ -58,12 +58,31 @@ stages:
             displayName: Deploy Helm chart
             inputs:
               connectionType: 'Kubernetes Service Connection'
-              kubernetesServiceConnection: 'ICTD-HCT-MIS-Demo-uni-apps-K8s-dev-hct-ims-dev-1574767480012'
+              kubernetesServiceConnection: 'ICTD-HCT-MIS-Demo-uni-apps-K8s-dev-hct-ims-dev-1574767480012'''
               namespace: 'hct-ims-dev'
               command: 'upgrade'
               chartType: 'FilePath'
               chartPath: '**/ops/helm'
               releaseName: 'hct-mis'
-              overrideValues: 'backend.staticStorage.secretName=$(staticStorageSecretName),backend.staticStorage.accountName=$(staticStorageAccountName),frontend.image=uniappsk8sdevacr.azurecr.io/$(frontendImageRepository):$(Build.BuildId),namespace=hct-ims-dev,env=DEV,backend.secret.env=DEV,revision="$(Build.BuildId)",backend.image=uniappsk8sdevacr.azurecr.io/$(backendImageRepository):$(Build.BuildId),backend.secret.SECRET_KEY=$(SECRET_KEY),backend.secret.ENV=$(ENV),backend.secret.POSTGRES_DB=$(POSTGRES_DB),backend.secret.POSTGRES_USER=$(POSTGRES_USER),backend.secret.POSTGRES_PASSWORD=$(POSTGRES_PASSWORD),backend.secret.POSTGRES_HOST=$(POSTGRES_HOST),backend.secret.DJANGO_ALLOWED_HOST=$(DJANGO_ALLOWED_HOST),backend.secret.DOMAIN=$(DOMAIN),postgres.secret.POSTGRES_DB=$(POSTGRES_DB),postgres.secret.POSTGRES_USER=$(POSTGRES_USER),postgres.secret.POSTGRES_PASSWORD=$(POSTGRES_PASSWORD),'
               install: true
               force: true
+              overrideValues: >-
+                backend.staticStorage.secretName=$(staticStorageSecretName),
+                backend.staticStorage.accountName=$(staticStorageAccountName),
+                frontend.image=uniappsk8sdevacr.azurecr.io/$(frontendImageRepository):$(Build.BuildId),
+                namespace=hct-ims-dev,
+                env=DEV,
+                backend.secret.env=DEV,
+                revision="$(Build.BuildId)",
+                backend.image=uniappsk8sdevacr.azurecr.io/$(backendImageRepository):$(Build.BuildId),
+                backend.secret.SECRET_KEY=$(SECRET_KEY),
+                backend.secret.ENV=$(ENV),
+                backend.secret.POSTGRES_DB=$(POSTGRES_DB),
+                backend.secret.POSTGRES_USER=$(POSTGRES_USER),
+                backend.secret.POSTGRES_PASSWORD=$(POSTGRES_PASSWORD),
+                backend.secret.POSTGRES_HOST=$(POSTGRES_HOST),
+                backend.secret.DJANGO_ALLOWED_HOST=$(DJANGO_ALLOWED_HOST),
+                backend.secret.DOMAIN=$(DOMAIN),
+                postgres.secret.POSTGRES_DB=$(POSTGRES_DB),
+                postgres.secret.POSTGRES_USER=$(POSTGRES_USER),
+                postgres.secret.POSTGRES_PASSWORD=$(POSTGRES_PASSWORD),
