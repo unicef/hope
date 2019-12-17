@@ -73,7 +73,7 @@ stages:
                 namespace=hct-ims-dev,
                 env=DEV,
                 backend.secret.env=DEV,
-                revision="$(Build.BuildId)",
+                revision=\"$(Build.BuildId)\",
                 backend.image=uniappsk8sdevacr.azurecr.io/$(backendImageRepository):$(Build.BuildId),
                 backend.secret.SECRET_KEY=$(SECRET_KEY),
                 backend.secret.ENV=$(ENV),
