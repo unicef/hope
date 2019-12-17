@@ -86,18 +86,18 @@ DATABASES = {
     },
     'cash_assist_datahub': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.getenv('POSTGRES_DB'),
-        'USER': os.getenv('POSTGRES_USER'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
-        'HOST': os.getenv('CASH_ASSIST_DATAHUB_POSTGRES_HOST'),
+        'NAME': os.getenv('POSTGRES_CASHASSIST_DATAHUB_DB'),
+        'USER': os.getenv('POSTGRES_CASHASSIST_DATAHUB_USER'),
+        'PASSWORD': os.getenv('POSTGRES_CASHASSIST_DATAHUB_PASSWORD'),
+        'HOST': os.getenv('POSTGRES_CASHASSIST_DATAHUB_HOST'),
         'PORT': 5432,
     },
     'registration_datahub': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.getenv('POSTGRES_DB'),
-        'USER': os.getenv('POSTGRES_USER'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
-        'HOST': os.getenv('REGISTRATION_POSTGRES_HOST'),
+        'NAME': os.getenv('POSTGRES_REGISTRATION_DATAHUB_DB'),
+        'USER': os.getenv('POSTGRES_REGISTRATION_DATAHUB_USER'),
+        'PASSWORD': os.getenv('POSTGRES_REGISTRATION_DATAHUB_PASSWORD'),
+        'HOST': os.getenv('POSTGRES_REGISTRATION_DATAHUB_HOST'),
         'PORT': 5432,
     },
 
@@ -106,6 +106,7 @@ DATABASES = {
 # If app is not specified here it will use default db
 DATABASE_APPS_MAPPING = {
     'cash_assist_datahub': 'cash_assist_datahub',
+    'registration_datahub': 'registration_datahub',
 }
 
 DATABASE_ROUTERS = ('core.dbrouters.DbRouter',)
@@ -151,7 +152,8 @@ PROJECT_APPS = [
     'program',
     'targeting',
     'utils',
-    'cash_assist_datahub'
+    'cash_assist_datahub',
+    'registration_datahub',
 ]
 
 DJANGO_APPS = [
