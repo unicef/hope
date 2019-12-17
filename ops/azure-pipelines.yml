@@ -83,6 +83,27 @@ stages:
                 backend.secret.POSTGRES_HOST=$(POSTGRES_HOST),
                 backend.secret.DJANGO_ALLOWED_HOST=$(DJANGO_ALLOWED_HOST),
                 backend.secret.DOMAIN=$(DOMAIN),
-                postgres.secret.POSTGRES_DB=$(POSTGRES_DB),
-                postgres.secret.POSTGRES_USER=$(POSTGRES_USER),
-                postgres.secret.POSTGRES_PASSWORD=$(POSTGRES_PASSWORD),
+                backend.secret.POSTGRES_REGISTRATION_DATAHUB_DB=$(REGISTRATION_DATAHUB_POSTGRES_DB),
+                backend.secret.POSTGRES_REGISTRATION_DATAHUB_USER=$(REGISTRATION_DATAHUB_POSTGRES_USER),
+                backend.secret.POSTGRES_REGISTRATION_DATAHUB_PASSWORD=$(REGISTRATION_DATAHUB_POSTGRES_PASSWORD),
+                backend.secret.POSTGRES_CASHASSIST_DATAHUB_DB=$(CASH_ASSIST_DATAHUB_POSTGRES_DB),
+                backend.secret.POSTGRES_CASHASSIST_DATAHUB_USER=$(CASH_ASSIST_REGISTRATION_DATAHUB_POSTGRES_USER),
+                backend.secret.POSTGRES_CASHASSIST_DATAHUB_PASSWORD=$(CASH_ASSIST_REGISTRATION_DATAHUB_POSTGRES_PASSWORD),
+                databases.backendDB.secret.POSTGRES_DB=$(POSTGRES_DB),
+                databases.backendDB.secret.POSTGRES_USER=$(POSTGRES_USER),
+                databases.backendDB.secret.POSTGRES_PASSWORD=$(POSTGRES_PASSWORD),
+                databases.registrationDatahubDB.secret.POSTGRES_DB=$(REGISTRATION_DATAHUB_POSTGRES_DB),
+                databases.registrationDatahubDB.secret.POSTGRES_USER=$(REGISTRATION_DATAHUB_POSTGRES_USER),
+                databases.registrationDatahubDB.secret.POSTGRES_PASSWORD=$(REGISTRATION_DATAHUB_POSTGRES_PASSWORD),
+                databases.postgresCashAssistDatahubDB.secret.POSTGRES_DB=$(CASH_ASSIST_DATAHUB_POSTGRES_DB),
+                databases.postgresCashAssistDatahubDB.secret.POSTGRES_USER=$(CASH_ASSIST_REGISTRATION_DATAHUB_POSTGRES_USER),
+                databases.postgresCashAssistDatahubDB.secret.POSTGRES_PASSWORD=$(CASH_ASSIST_REGISTRATION_DATAHUB_POSTGRES_PASSWORD),
+
+    POSTGRES_CASHASSIST_DATAHUB_HOST: "postgresCashAssistDatahubDB"
+    POSTGRES_REGISTRATION_DATAHUB_DB: ""
+    POSTGRES_REGISTRATION_DATAHUB_USER: ""
+    POSTGRES_REGISTRATION_DATAHUB_PASSWORD: ""
+    POSTGRES_REGISTRATION_DATAHUB_HOST: "registrationDatahubDB"
+        : ""
+   : ""
+    

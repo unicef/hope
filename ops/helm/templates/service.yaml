@@ -35,29 +35,17 @@ spec:
   selector:
     app: redis
 --- 
+{{- range $key, $value :=  .Values.databases }}
 kind: Service
 apiVersion: v1
 metadata:
-  name: postgres
-  namespace: {{ .Values.namespace }}
-spec:
-  ports:
-    - protocol: TCP
-      port: {{ .Values.postgres.port }}
-  selector:
-    app: postgres
----
-{{- range .Values.postgres.instances }}
-kind: Service
-apiVersion: v1
-metadata:
-  name: {{ .name }}
+  name: {{ $key }}
   namespace: {{ $.Values.namespace }}
 spec:
   ports:
     - protocol: TCP
-      port: {{ $.Values.postgres.port }}
+      port: {{ $value.port }}
   selector:
-    app: {{ .name }}
+    app: {{ $key }}
 ---
 {{- end }}
