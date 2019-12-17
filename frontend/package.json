@@ -28,6 +28,7 @@
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-config-prettier": "^6.7.0",
     "eslint-import-resolver-ts": "^0.4.2",
+    "eslint-loader": "^3.0.3",
     "eslint-plugin-import": "^2.18.2",
     "eslint-plugin-jest": "^23.0.5",
     "eslint-plugin-jsx-a11y": "^6.2.3",
@@ -71,7 +72,7 @@
     "start": "node scripts/start.js",
     "build": "node scripts/build.js",
     "test": "node scripts/test.js",
-    "lint-fix": "eslint --fix src/**/*.tsx"
+    "lint": "eslint src/**/*.tsx"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -89,8 +90,8 @@
     ]
   },
   "devDependencies": {
-    "@tivix/prettier-config": "git+ssh://git@github.com/Tivix/js-standard-prettier-config.git",
     "@tivix/eslint-config": "git+ssh://git@github.com:Tivix/js-standard-eslint-config.git",
+    "@tivix/prettier-config": "git+ssh://git@github.com/Tivix/js-standard-prettier-config.git",
     "eslint": ">=6.6.0 <7",
     "prettier": "^1.19.1"
   },
@@ -105,14 +106,6 @@
     "setupFiles": [
       "react-app-polyfill/jsdom"
     ],
-    "setupFilesAfterEnv": [
-      "<rootDir>/src/setupTests.ts"
-    ],
-    "testMatch": [
-      "<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}",
-      "<rootDir>/src/**/*.{spec,test}.{js,jsx,ts,tsx}"
-    ],
-    "testEnvironment": "jest-environment-jsdom-fourteen",
     "transform": {
       "^.+\\.(js|jsx|ts|tsx)$": "<rootDir>/node_modules/babel-jest",
       "^.+\\.css$": "<rootDir>/config/jest/cssTransform.js",
