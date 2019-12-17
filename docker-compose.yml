@@ -1,4 +1,4 @@
-version: '3'
+version: '3.7'
 
 volumes:
     backend-data:
@@ -33,12 +33,12 @@ services:
         build:
             context: ./backend
             dockerfile: ./Dockerfile
-            args:
-                ENV: dev
-                REQUIREMENT_FILE: dev.pip
+        ports:
+            - "8080:8000"
         volumes:
             - ./backend:/code/
             - backend-data:/data
+        command: bash -c "python manage.py runserver 0.0.0.0:8000"
         depends_on:
             - db
             - redis
@@ -73,9 +73,13 @@ services:
         build:
             context: ./frontend
             dockerfile: ./Dockerfile
+            target: dev
             args:
                 ENV: dev
+        ports:
+            - "8088:80"
+            - "3000:3000"
         volumes:
             - ./frontend/:/code
             - /code/node_modules
-        command: bash -c "yarn run start"
+        command: npm start

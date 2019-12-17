@@ -1,0 +1,131 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: backend
+    labels:
+        app: backend
+    annotations:
+        revision: "{{ .Values.revision }}"
+spec:
+    strategy:
+        type: RollingUpdate
+        rollingUpdate:
+            maxUnavailable: {{ .Values.backend.maxUnavilable }}
+            maxSurge: {{ .Values.backend.maxSurge}}
+    replicas: {{ .Values.backend.replicas }}
+    selector:
+        matchLabels:
+            app: backend
+    template:
+      metadata:
+        labels:
+          app: backend
+      spec:
+        containers:
+        - name: backend
+          image: {{ .Values.backend.image }}
+          ports:
+            - containerPort: {{ .Values.backend.port }}
+          env:
+            - name: STORAGE_AZURE_ACCOUNT_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.backend.staticStorage.secretName }}
+                  key: password
+            - name: STORAGE_AZURE_ACCOUNT_NAME
+              value: {{ .Values.backend.staticStorage.accountName }}
+          envFrom:
+          - secretRef:
+              name: backend-secret
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: frontend
+    labels:
+        app: frontend
+    annotations:
+      revision: "{{ .Values.revision }}"
+spec:
+    strategy:
+        type: RollingUpdate
+        rollingUpdate:
+            maxUnavailable: {{ .Values.frontend.maxUnavilable }}
+            maxSurge: {{ .Values.frontend.maxSurge }}
+    replicas: {{ .Values.frontend.replicas }}
+    selector:
+        matchLabels:
+            app: frontend
+    template:
+      metadata:
+        labels:
+          app: frontend
+      spec:
+        containers:
+        - name: frontend
+          image: {{ .Values.frontend.image }}
+          ports:
+            - containerPort: {{ .Values.frontend.port }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  labels:
+    app: redis
+  annotations:
+    revision:  "{{ .Values.revision }}"
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+        - name: redis
+          image: {{ .Values.redis.image }}
+          ports:
+            - containerPort: {{ .Values.redis.port }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  labels:
+    app: postgres
+  annotations:
+    revision: "{{ .Values.revision }}"
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: {{ .Values.postgres.image }}
+          ports:
+            - containerPort: {{ .Values.postgres.port }}
+          envFrom:
+          - secretRef:
+              name: postgres-secret
+---
