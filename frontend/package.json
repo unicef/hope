@@ -90,6 +90,7 @@
   },
   "devDependencies": {
     "@tivix/prettier-config": "git+ssh://git@github.com/Tivix/js-standard-prettier-config.git",
+    "@tivix/eslint-config": "git+ssh://git@github.com:Tivix/js-standard-eslint-config.git",
     "eslint": ">=6.6.0 <7",
     "prettier": "^1.19.1"
   },
