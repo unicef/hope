@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from phonenumber_field.modelfields import PhoneNumberField
@@ -29,9 +28,11 @@ class Household(TimeStampedUUIDModel):
     )
     family_size = models.PositiveIntegerField(blank=True, null=True)
     address = models.CharField(max_length=255, blank=True, null=True)
-    location = models.ForeignKey('core.Location', related_name='households', on_delete=models.CASCADE)
+    # TODO where to point datahub foreign key
+    # location = models.ForeignKey('core.Location', related_name='households', on_delete=models.CASCADE)
     registration_data_import_id = models.ForeignKey('RegistrationDataImport', related_name='households',
                                                     on_delete=models.CASCADE)
+    is_active = models.BooleanField()
 
 
 class Individual(TimeStampedUUIDModel):
@@ -58,6 +59,7 @@ class Individual(TimeStampedUUIDModel):
     full_name = models.CharField(max_length=255)
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
+    middle_name = models.CharField(max_length=255)
     sex = models.CharField(
         max_length=255,
         choices=SEX_CHOICE,
@@ -79,8 +81,6 @@ class Individual(TimeStampedUUIDModel):
     )
     identification_number = models.CharField(max_length=255)
     household = models.ForeignKey('Household', related_name='individuals', on_delete=models.CASCADE)
-    registration_data_import_id = models.ForeignKey('RegistrationDataImport', related_name='individuals',
-                                                    on_delete=models.CASCADE)
 
     def __str__(self):
         return self.full_name
@@ -105,8 +105,8 @@ class RegistrationDataImport(TimeStampedUUIDModel):
         choices=STATUS_CHOICE,
     )
     import_date = models.DateTimeField()
-    imported_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='registration_data_imports',
-                                    on_delete=models.CASCADE)
+    # TODO  what type
+    imported_by = models.CharField(max_length=255)
     data_source = models.CharField(
         max_length=255,
         choices=DATA_SOURCE_CHOICE,
