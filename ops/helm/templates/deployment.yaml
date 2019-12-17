@@ -104,7 +104,7 @@ kind: Deployment
 metadata:
   name: {{ lower $key }}
   labels:
-    app: {{ lower $key }}
+    app: {{ $key }}
   annotations:
     revision: "{{ $.Values.revision }}"
 spec:
@@ -116,14 +116,14 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: {{ lower $key }}
+      app: {{ $key }}
   template:
     metadata:
       labels:
-        app: {{ lower $key }}
+        app: {{ $key }}
     spec:
       containers:
-        - name: {{ $.name }}
+        - name: {{ $key }}
           image: {{ $value.image }}
           ports:
             - containerPort: {{ $value.port }}
