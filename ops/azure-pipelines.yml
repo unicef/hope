@@ -98,12 +98,3 @@ stages:
                 databases.postgresCashAssistDatahubDB.secret.POSTGRES_DB=$(CASH_ASSIST_DATAHUB_POSTGRES_DB),
                 databases.postgresCashAssistDatahubDB.secret.POSTGRES_USER=$(CASH_ASSIST_REGISTRATION_DATAHUB_POSTGRES_USER),
                 databases.postgresCashAssistDatahubDB.secret.POSTGRES_PASSWORD=$(CASH_ASSIST_REGISTRATION_DATAHUB_POSTGRES_PASSWORD),
-
-    POSTGRES_CASHASSIST_DATAHUB_HOST: "postgresCashAssistDatahubDB"
-    POSTGRES_REGISTRATION_DATAHUB_DB: ""
-    POSTGRES_REGISTRATION_DATAHUB_USER: ""
-    POSTGRES_REGISTRATION_DATAHUB_PASSWORD: ""
-    POSTGRES_REGISTRATION_DATAHUB_HOST: "registrationDatahubDB"
-        : ""
-   : ""
-    
