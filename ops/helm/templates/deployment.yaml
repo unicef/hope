@@ -129,6 +129,6 @@ spec:
             - containerPort: {{ $value.port }}
           envFrom:
             - secretRef:
-                name: {{ $key }}-secret
+                name: {{ lower $key }}-secret
 ---
 {{- end }}
