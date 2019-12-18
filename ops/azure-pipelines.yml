@@ -92,9 +92,9 @@ stages:
                 databases.backendDB.secret.POSTGRES_DB=$(POSTGRES_DB),\
                 databases.backendDB.secret.POSTGRES_USER=$(POSTGRES_USER),\
                 databases.backendDB.secret.POSTGRES_PASSWORD=$(POSTGRES_PASSWORD),\
-                databases.registrationDatahubDB.secret.POSTGRES_DB=$(REGISTRATION_DATAHUB_POSTGRES_DB),\
-                databases.registrationDatahubDB.secret.POSTGRES_USER=$(REGISTRATION_DATAHUB_POSTGRES_USER),\
-                databases.registrationDatahubDB.secret.POSTGRES_PASSWORD=$(REGISTRATION_DATAHUB_POSTGRES_PASSWORD),\
-                databases.postgresCashAssistDatahubDB.secret.POSTGRES_DB=$(CASH_ASSIST_DATAHUB_POSTGRES_DB),\
-                databases.postgresCashAssistDatahubDB.secret.POSTGRES_USER=$(CASH_ASSIST_REGISTRATION_DATAHUB_POSTGRES_USER),\
-                databases.postgresCashAssistDatahubDB.secret.POSTGRES_PASSWORD=$(CASH_ASSIST_REGISTRATION_DATAHUB_POSTGRES_PASSWORD),"
+                databases.registration-datahub-db.secret.POSTGRES_DB=$(REGISTRATION_DATAHUB_POSTGRES_DB),\
+                databases.registration-datahub-db.secret.POSTGRES_USER=$(REGISTRATION_DATAHUB_POSTGRES_USER),\
+                databases.registration-datahub-db.secret.POSTGRES_PASSWORD=$(REGISTRATION_DATAHUB_POSTGRES_PASSWORD),\
+                databases.postgres-cash-assist-datahub-db.secret.POSTGRES_DB=$(CASH_ASSIST_DATAHUB_POSTGRES_DB),\
+                databases.postgres-cash-assist-datahub-db.secret.POSTGRES_USER=$(CASH_ASSIST_REGISTRATION_DATAHUB_POSTGRES_USER),\
+                databases.postgres-cash-assist-datahub-db.secret.POSTGRES_PASSWORD=$(CASH_ASSIST_REGISTRATION_DATAHUB_POSTGRES_PASSWORD),"
