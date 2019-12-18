@@ -15,10 +15,11 @@ def test_raise_exception_view(request):
 
 
 urlpatterns = [
-        path('admin/', admin.site.urls),
-        path('', homepage),
-        path('graphql', GraphQLView.as_view(graphiql=True)),
-        path('graphql/schema.graphql', schema)
-    ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path('api/admin/', admin.site.urls),
+    path('', homepage),
+    path('api/graphql', GraphQLView.as_view(graphiql=True)),
+    path('api/graphql/schema.graphql', schema),
+    path('api/', include('social_django.urls', namespace='social')),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 urlpatterns += staticfiles_urlpatterns()
