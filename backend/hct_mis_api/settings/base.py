@@ -172,6 +172,7 @@ OTHER_APPS = [
     'django_countries',
     'phonenumber_field',
     'compressor',
+    'graphene_django',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
@@ -293,3 +294,9 @@ else:
 SESSION_COOKIE_HTTPONLY = True
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 AUTH_USER_MODEL = 'account.User'
+
+GRAPHENE = {
+    'SCHEMA': 'hct_mis_api.schema.schema',
+    'SCHEMA_OUTPUT': 'schema.json',
+    'SCHEMA_INDENT': 2
+}
