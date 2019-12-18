@@ -14,8 +14,7 @@ def test_raise_exception_view(request):
     raise Exception('Testing Error Reporting')
 
 
-urlpatterns = \
-    [
+urlpatterns = [
         path('admin/', admin.site.urls),
         path('', homepage),
         path('graphql', GraphQLView.as_view(graphiql=True)),
