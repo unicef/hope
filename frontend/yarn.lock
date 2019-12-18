@@ -8710,6 +8710,11 @@ rc@^1.2.7:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
+react-adal@^0.5.0:
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/react-adal/-/react-adal-0.5.0.tgz#8a156812ed6475d18fe84052a184227dfb2b662e"
+  integrity sha512-etlKmBwux6vzYbl6hvFSCQkuHMpbE2Qn3MTP2EHz3xtifiP1tRacaIi1QtVlHtcCbt3KDjDTqu2uKZUjiPuyOA==
+
 react-app-polyfill@^1.0.5:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/react-app-polyfill/-/react-app-polyfill-1.0.5.tgz#59c7377a0b9ed25692eeaca7ad9b12ef2d064709"
