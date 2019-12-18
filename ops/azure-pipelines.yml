@@ -89,9 +89,9 @@ stages:
                 backend.secret.POSTGRES_CASHASSIST_DATAHUB_DB=$(CASH_ASSIST_DATAHUB_POSTGRES_DB),\
                 backend.secret.POSTGRES_CASHASSIST_DATAHUB_USER=$(CASH_ASSIST_REGISTRATION_DATAHUB_POSTGRES_USER),\
                 backend.secret.POSTGRES_CASHASSIST_DATAHUB_PASSWORD=$(CASH_ASSIST_REGISTRATION_DATAHUB_POSTGRES_PASSWORD),\
-                databases.backendDB.secret.POSTGRES_DB=$(POSTGRES_DB),\
-                databases.backendDB.secret.POSTGRES_USER=$(POSTGRES_USER),\
-                databases.backendDB.secret.POSTGRES_PASSWORD=$(POSTGRES_PASSWORD),\
+                databases.backend-db.secret.POSTGRES_DB=$(POSTGRES_DB),\
+                databases.backend-db.secret.POSTGRES_USER=$(POSTGRES_USER),\
+                databases.backend-db.secret.POSTGRES_PASSWORD=$(POSTGRES_PASSWORD),\
                 databases.registration-datahub-db.secret.POSTGRES_DB=$(REGISTRATION_DATAHUB_POSTGRES_DB),\
                 databases.registration-datahub-db.secret.POSTGRES_USER=$(REGISTRATION_DATAHUB_POSTGRES_USER),\
                 databases.registration-datahub-db.secret.POSTGRES_PASSWORD=$(REGISTRATION_DATAHUB_POSTGRES_PASSWORD),\
