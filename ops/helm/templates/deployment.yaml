@@ -102,7 +102,7 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ lower $key }}
+  name: {{ $key }}
   labels:
     app: {{ $key }}
   annotations:
@@ -123,12 +123,12 @@ spec:
         app: {{ $key }}
     spec:
       containers:
-        - name: {{ lower $key }}
+        - name: {{ $key }}
           image: {{ $value.image }}
           ports:
             - containerPort: {{ $value.port }}
           envFrom:
             - secretRef:
-                name: {{ lower $key }}-secret
+                name: {{ $key }}-secret
 ---
 {{- end }}
