@@ -18,6 +18,7 @@
 ## Product Specification
 
 * [Country Office](product-specification/country-office/README.md)
+  * [Login](product-specification/country-office/login.md)
   * [Registration Data Import](product-specification/country-office/registration-data-import/README.md)
     * [De-duplicating data](product-specification/country-office/registration-data-import/de-duplicating-data.md)
   * [Population](product-specification/country-office/population-management.md)
@@ -49,7 +50,10 @@
 
 ## Technical Specification
 
+* [GraphQL mutation and queries](technical-specification/graphql-mutation-and-queries.md)
 * [Technical Architecture](technical-specification/technical-architecture/README.md)
+  * [App configuration and secrets](technical-specification/technical-architecture/app-configuration-and-secrets.md)
+  * [Identity and Access](technical-specification/technical-architecture/identity-and-access.md)
   * [DevOps / Infra](technical-specification/technical-architecture/devops-infra.md)
   * [Flexible Fields](technical-specification/technical-architecture/flexible-fields.md)
   * [DB Architecture](technical-specification/technical-architecture/db-architecture.md)
@@ -65,6 +69,8 @@
   * [CashAssist - Training Site](technical-specification/cashassist-integration/cashassist-training-site.md)
   * [Open Issues](technical-specification/cashassist-integration/open-issues.md)
 * [Kobo Integration](technical-specification/kobo-integration.md)
+* [Coding Guidelines](technical-specification/coding-guidelines.md)
+* [Input Validation Rules](technical-specification/input-validation-rules.md)
 
 ## Project Management
 
