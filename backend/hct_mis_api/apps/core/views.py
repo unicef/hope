@@ -8,7 +8,7 @@ from graphene_django.settings import graphene_settings
 from graphql.utils import schema_printer
 
 def homepage(request):
-    return HttpResponse("", status=200)
+    return HttpResponse('', status=200)
 
 
 def schema(request):
