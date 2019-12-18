@@ -13,15 +13,15 @@ backend:
     POSTGRES_DB: ""
     POSTGRES_USER: ""
     POSTGRES_PASSWORD: ""
-    POSTGRES_HOST: "backendDB"
+    POSTGRES_HOST: "backend-db"
     POSTGRES_CASHASSIST_DATAHUB_DB: ""
     POSTGRES_CASHASSIST_DATAHUB_USER: ""
     POSTGRES_CASHASSIST_DATAHUB_PASSWORD: ""
-    POSTGRES_CASHASSIST_DATAHUB_HOST: "postgresCashAssistDatahubDB"
+    POSTGRES_CASHASSIST_DATAHUB_HOST: "postgres-cash-assist-datahub-db"
     POSTGRES_REGISTRATION_DATAHUB_DB: ""
     POSTGRES_REGISTRATION_DATAHUB_USER: ""
     POSTGRES_REGISTRATION_DATAHUB_PASSWORD: ""
-    POSTGRES_REGISTRATION_DATAHUB_HOST: "registrationDatahubDB"
+    POSTGRES_REGISTRATION_DATAHUB_HOST: "registration-datahub-db"
     DJANGO_ALLOWED_HOST: ""
     DOMAIN: ""
     ENV: ""
@@ -42,21 +42,21 @@ redis:
 
 
 databases:
-  postgresCashAssistDatahubDB:
+  postgres-cash-assist-datahub-db:
     image: postgres:9.5.15-alpine
     port: 5432
     secret:
       POSTGRES_DB: ""
       POSTGRES_USER: ""
       POSTGRES_PASSWORD: ""
-  backendDB:
+  backend-db:
     image: postgres:9.5.15-alpine
     port: 5432
     secret:
       POSTGRES_DB: ""
       POSTGRES_USER: ""
       POSTGRES_PASSWORD: ""
-  registrationDatahubDB:
+  registration-datahub-db:
     image: postgres:9.5.15-alpine
     port: 5432
     secret:
