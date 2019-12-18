@@ -9,8 +9,7 @@ from payment.models import PaymentRecord
 class PaymentRecordNode(DjangoObjectType):
     class Meta:
         model = PaymentRecord
-        filter_fields = ['cash_plan',
-                         'household']
+        filter_fields = ['cash_plan', 'household']
         interfaces = (relay.Node,)
 
 
