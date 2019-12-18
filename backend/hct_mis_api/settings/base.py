@@ -137,6 +137,9 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.static',
                 'django.template.context_processors.request',
+                # Social auth context_processors
+                'social_django.context_processors.backends',
+                'social_django.context_processors.login_redirect',
             ],
         },
     },
@@ -173,6 +176,7 @@ OTHER_APPS = [
     'phonenumber_field',
     'compressor',
     'graphene_django',
+    'social_django',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
@@ -201,6 +205,7 @@ ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 7
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
+    'social_core.backends.azuread_tenant.AzureADTenantOAuth2',
 ]
 
 TEST_RUNNER = os.getenv('DJANGO_TEST_RUNNER', 'django.test.runner.DiscoverRunner')
@@ -300,3 +305,33 @@ GRAPHENE = {
     'SCHEMA_OUTPUT': 'schema.json',
     'SCHEMA_INDENT': 2
 }
+
+# Social Auth settings.
+SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_KEY = os.environ.get('AZURE_CLIENT_ID')
+SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET = os.environ.get('AZURE_CLIENT_SECRET')
+SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID = os.environ.get('AZURE_TENANT_KEY')
+SOCIAL_AUTH_ADMIN_USER_SEARCH_FIELDS = ['username', 'first_name', 'last_name', 'email']
+SOCIAL_AUTH_POSTGRES_JSONFIELD = True
+
+SOCIAL_AUTH_PIPELINE = (
+    # 'account.authentication.social_details',
+    'social_core.pipeline.social_auth.social_uid',
+    'social_core.pipeline.social_auth.auth_allowed',
+    'social_core.pipeline.social_auth.social_user',
+    'social_core.pipeline.user.get_username',
+    # 'account.authentication.require_email',
+    'social_core.pipeline.social_auth.associate_by_email',
+    # 'account.authentication.create_user',
+    'social_core.pipeline.social_auth.associate_user',
+    'social_core.pipeline.social_auth.load_extra_data',
+    # 'account.authentication.user_details',
+)
+SOCIAL_AUTH_AZUREAD_B2C_OAUTH2_USER_FIELDS = [
+    'email', 'fullname',
+]
+
+SOCIAL_AUTH_AZUREAD_B2C_OAUTH2_SCOPE = [
+    'openid', 'email', 'profile',
+]
+
+SOCIAL_AUTH_SANITIZE_REDIRECTS = True
