@@ -116,6 +116,7 @@ if POSTGRES_SSL_MODE == 'on':
     DATABASES['default'].update({'OPTIONS': {"sslmode": 'require'}})
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -177,6 +178,7 @@ OTHER_APPS = [
     'compressor',
     'graphene_django',
     'social_django',
+    'corsheaders',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS

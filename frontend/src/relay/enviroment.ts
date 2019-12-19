@@ -1,7 +1,8 @@
 import { Environment, Network, RecordSource, Store } from "relay-runtime";
+import {GRAPHQL_URL} from "../config";
 
 function fetchQuery(operation, variables) {
-  return fetch("/graphql", {
+  return fetch(GRAPHQL_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
