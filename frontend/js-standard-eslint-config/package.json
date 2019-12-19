@@ -1,0 +1,31 @@
+{
+  "name": "@tivix/eslint-config",
+  "version": "1.0.0",
+  "description": "Tivix's ESLint config",
+  "main": "index.js",
+  "author": "tivix",
+  "license": "UNLICENSED",
+  "private": false,
+  "homepage": "https://github.com/tivix/js-standard-eslint-config",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tivix/js-standard-eslint-config.git"
+  },
+  "dependencies": {
+    "@typescript-eslint/eslint-plugin": "^2.9.0",
+    "@typescript-eslint/parser": "^2.9.0",
+    "eslint-config-airbnb": "^18.0.1",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-config-prettier": "^6.7.0",
+    "eslint-import-resolver-ts": "^0.4.2",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-jest": "^23.0.5",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
+    "eslint-plugin-react": "^7.16.0",
+    "eslint-plugin-react-hooks": "^2.3.0"
+  },
+  "peerDependencies": {
+    "@tivix/prettier-config": "git@github.com:Tivix/js-standard-prettier-config.git",
+    "eslint": ">=6.6.0 <7"
+  }
+}
