@@ -7,6 +7,7 @@ sorl-thumbnail==12.5.0
 django-model-utils==4.0.0
 django-phonenumber-field==4.0.0
 phonenumbers==8.11.1
+social-auth-app-django==3.1.0
 
 # Etc
 Pillow==6.2.1
@@ -14,6 +15,8 @@ psycopg2==2.8.4
 
 # API
 graphene-django==2.7.1
+django-filter==2.2.0
+django-cors-headers==3.2.0
 
 # Gunicorn
 gunicorn==20.0.4
