@@ -79,7 +79,6 @@
     "test": "node scripts/test.js",
     "lint": "eslint src/**/*.tsx",
     "relay": "curl http://127.0.0.1:8082/api/graphql/schema.graphql >data/schema.graphql&&relay-compiler --config relay.config.js"
-
   },
   "browserslist": {
     "production": [
@@ -94,8 +93,8 @@
     ]
   },
   "devDependencies": {
-    "@tivix/eslint-config": "git+ssh://git@github.com:Tivix/js-standard-eslint-config.git",
-    "@tivix/prettier-config": "git+ssh://git@github.com:Tivix/js-standard-prettier-config.git",
+    "@tivix/eslint-config": "file:./js-standard-eslint-config",
+    "@tivix/prettier-config": "file:./js-standard-prettier-config",
     "@types/react-relay": "^7.0.3",
     "babel-plugin-relay": "^7.1.0",
     "eslint": ">=6.6.0 <7",
