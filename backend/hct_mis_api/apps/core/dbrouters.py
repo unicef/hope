@@ -4,10 +4,7 @@ from django.conf import settings
 class DbRouter:
     @staticmethod
     def select_db(model):
-        db = settings.DATABASE_APPS_MAPPING.get(model._meta.app_label)
-        if db is not None:
-            return db
-        return None
+        return settings.DATABASE_APPS_MAPPING.get(model._meta.app_label)
 
     def db_for_read(self, model, **hints):
         return DbRouter.select_db(model)
