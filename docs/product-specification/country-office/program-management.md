@@ -23,11 +23,10 @@ The cards displayed on the Programme Overview screen are ordered first by **Prog
 Located on the top right hand corner of each Programme card, displays a status. Each programme has the following state:
 
 * Draft
-* _Pending_
 * Active
 * Finished
 
-#### 
+Once the programme is finished we can set it active again.
 
 #### Draft Programme
 
