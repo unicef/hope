@@ -4,8 +4,8 @@ from django.utils.translation import ugettext_lazy as _
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
 
-from hct_mis_api.apps.household.const import NATIONALITIES
-from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
+from household.const import NATIONALITIES
+from utils.models import TimeStampedUUIDModel
 
 
 class Household(TimeStampedUUIDModel):
