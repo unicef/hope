@@ -123,7 +123,7 @@ spec:
         app: {{ $key }}
     spec:
       containers:
-        - name: {{ $.name }}
+        - name: {{ $key }}
           image: {{ $value.image }}
           ports:
             - containerPort: {{ $value.port }}
