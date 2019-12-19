@@ -6,11 +6,13 @@ from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 
 
 class Program(TimeStampedUUIDModel):
+    DRAFT = 'DRAFT'
     ACTIVE = 'ACTIVE'
-    COMPLETED = 'COMPLETED'
+    FINISHED = 'FINISHED'
     STATUS_CHOICE = (
-        (ACTIVE, _('In progress')),
-        (COMPLETED, _('Done')),
+        (DRAFT, _('Draft')),
+        (ACTIVE, _('Active')),
+        (FINISHED, _('Finished')),
     )
     name = models.CharField(max_length=255)
     status = models.CharField(
