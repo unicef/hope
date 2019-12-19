@@ -2,7 +2,7 @@ from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
+from utils.models import TimeStampedUUIDModel
 
 
 class Program(TimeStampedUUIDModel):
