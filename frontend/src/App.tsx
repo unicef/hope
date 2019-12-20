@@ -2,18 +2,28 @@ import React from 'react';
 import { RelayEnvironmentProvider } from 'relay-hooks';
 import { environment } from './relay/enviroment';
 import { ThemeProvider } from '@material-ui/core';
-import { Route, Switch, BrowserRouter as Router } from 'react-router-dom';
+import {
+  Route,
+  Switch,
+  BrowserRouter as Router,
+  Redirect,
+} from 'react-router-dom';
 import { theme } from './theme';
-import { Home } from './containers/Home';
+import { HomeRouter } from './containers/HomeRouter';
+import { LoginPage } from './containers/LoginPage';
 
 export const App: React.FC = () => {
+  const authenticated = true;
   return (
     <RelayEnvironmentProvider environment={environment}>
       <ThemeProvider theme={theme}>
         <Router>
           <Switch>
+            <Route path='/login'>
+              <LoginPage />
+            </Route>
             <Route path='/'>
-              <Home />
+              {!authenticated ? <Redirect to='/login' /> : <HomeRouter />}
             </Route>
           </Switch>
         </Router>

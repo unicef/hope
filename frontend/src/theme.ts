@@ -1,20 +1,34 @@
 import { red } from '@material-ui/core/colors';
-import { createMuiTheme } from '@material-ui/core/styles';
+import { createMuiTheme, Theme } from '@material-ui/core/styles';
+import { DARK_GRAY, NAVY_BLUE } from './config/colors';
 
 // A custom theme for this app
-export const theme = createMuiTheme({
-    palette: {
-        primary: {
-            main: '#233944',
-        },
-        secondary: {
-            main: '#19857b',
-        },
-        error: {
-            main: red.A400,
-        },
-        background: {
-            default: '#fff',
-        },
+const muiTheme = createMuiTheme({
+  palette: {
+    primary: {
+      main: NAVY_BLUE,
     },
+    secondary: {
+      main: DARK_GRAY,
+    },
+    error: {
+      main: red.A400,
+    },
+    background: {
+      default: '#EEEEEE',
+    },
+  },
 });
+
+export const theme = {
+  ...muiTheme,
+  drawer: {
+    width: 260,
+  },
+};
+
+export interface MiśTheme extends Theme {
+  drawer: {
+    width: number;
+  };
+}

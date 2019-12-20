@@ -1,1 +1,2 @@
-export const DRAWER_TOP_COLOR='#003C8F';
+export const NAVY_BLUE='#003C8F';
+export const DARK_GRAY='#233944';
