@@ -7,8 +7,6 @@ from social_core.pipeline import social_auth
 from social_core.pipeline import user as social_core_user
 
 
-# currently unused but may be useful in future
-
 logger = logging.getLogger('console')
 
 
@@ -30,8 +28,10 @@ def user_details(strategy, details, user=None, *args, **kwargs):
     logger.debug(f'user_details for user {user} details:\n{details}')
 
     if user:
-        user.first_name = details['first_name']
-        user.last_name = details['last_name']
+        fullname = details['fullname'].split('.')
+        user.first_name = fullname[0].capitalize()
+        user.last_name = fullname[-1].capitalize()
+        user.username = details['fullname']
         user.save()
 
     return social_core_user.user_details(strategy, details, user, *args, **kwargs)
@@ -48,10 +48,13 @@ def create_user(strategy, details, backend, user=None, *args, **kwargs):
     if user:
         return {'is_new': False}
 
+    fullname = details['fullname'].split('.')
+
     user = get_user_model().objects.create(
         email=details['email'],
-        first_name=details.get('first_name'),
-        last_name=details.get('last_name'),
+        username=details['fullname'],
+        first_name=fullname[0].capitalize(),
+        last_name=fullname[-1].capitalize(),
     )
     user.set_unusable_password()
     user.save()
