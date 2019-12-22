@@ -52,8 +52,17 @@ const useStyles = makeStyles((theme: MiśTheme) => ({
     },
   },
 }));
+interface Props {
+  open: boolean;
+  handleDrawerClose: () => void;
+  currentLocation: string;
+}
 
-export function Drawer({ open, handleDrawerClose }): React.ReactElement {
+export function Drawer({
+  open,
+  handleDrawerClose,
+  currentLocation,
+}: Props): React.ReactElement {
   const classes = useStyles({});
   return (
     <DrawerMaterial
@@ -77,7 +86,7 @@ export function Drawer({ open, handleDrawerClose }): React.ReactElement {
       </div>
       <Divider />
       <List>
-        <DrawerItems />
+        <DrawerItems currentLocation={currentLocation} />
       </List>
     </DrawerMaterial>
   );
