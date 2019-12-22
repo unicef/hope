@@ -23,7 +23,22 @@ const muiTheme = createMuiTheme({
 export const theme = {
   ...muiTheme,
   drawer: {
-    width: 260,
+    width: 270,
+  },
+  hctPalette: {
+    oragne: '#FC942A',
+    green: '#10CB16',
+    gray: '#4E606A',
+  },
+  hctTypography: {
+    label: {
+      color: 'rgba(37,59,70,0.6)',
+      fontFamily: 'Roboto',
+      fontSize: '11px',
+      fontWeight: 500,
+      letterSpacing: '0.39px',
+      lineHeight: '16px',
+    },
   },
 };
 

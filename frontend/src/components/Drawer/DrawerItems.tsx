@@ -16,51 +16,70 @@ import React from 'react';
 const menuItems = [
   {
     name: 'Country Dashboard',
+    href: '/#',
     icon: <DashboardIcon />,
   },
   {
     name: 'Registration Data Import',
+    href: '/#',
     icon: <AutorenewIcon />,
   },
   {
     name: 'Population',
+    href: '/#',
     icon: <PeopleIcon />,
   },
   {
     name: 'Target Population',
+    href: '/#',
     icon: <ListAltRounded />,
   },
   {
     name: 'Programme Management',
+    href: '/programs',
     icon: <FlashOnRounded />,
   },
   {
     name: 'Payment Verification',
+    href: '/#',
     icon: <AttachMoney />,
   },
   {
     name: 'Grievance and Feedback',
+    href: '/#',
     icon: <Feedback />,
   },
   {
     name: 'Reporting',
+    href: '/#',
     icon: <TrendingUpRounded />,
   },
   {
     name: 'User Management',
+    href: '/#',
     icon: <SupervisedUserCircle />,
   },
   {
     name: 'Settings',
+    href: '/#',
     icon: <SettingsRounded />,
   },
 ];
-export function DrawerItems(): React.ReactElement {
+interface Props {
+  currentLocation: string;
+}
+export function DrawerItems({ currentLocation }: Props): React.ReactElement {
   return (
     <div>
       {menuItems.map((item) => {
         return (
-          <ListItem button>
+          <ListItem
+            button
+            component="a"
+            key={item.name}
+            href={item.href}
+            selected={currentLocation === item.href}
+          >
             <ListItemIcon>{item.icon}</ListItemIcon>
             <ListItemText primary={item.name} />
           </ListItem>
