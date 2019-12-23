@@ -7,9 +7,9 @@ import DrawerMaterial from '@material-ui/core/Drawer';
 import React from 'react';
 import { makeStyles } from '@material-ui/core';
 import { DrawerItems } from './DrawerItems';
-import { MiśTheme } from '../../theme';
+import { MiśTheme, theme as themeObj } from '../../theme';
 
-const useStyles = makeStyles((theme: MiśTheme) => ({
+const useStyles = makeStyles((theme: typeof themeObj) => ({
   toolbarHeader: {
     display: 'flex',
     alignItems: 'center',
@@ -26,7 +26,7 @@ const useStyles = makeStyles((theme: MiśTheme) => ({
     opacity: 0.54,
   },
   hctMisLogo: {
-    fontFamily: 'Roboto',
+    ...theme.hctTypography.font,
     fontSize: '16px',
     fontWeight: 500,
     lineHeight: '19px',

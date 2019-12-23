@@ -20,6 +20,7 @@ const muiTheme = createMuiTheme({
   },
 });
 
+const FONT = 'Roboto';
 export const theme = {
   ...muiTheme,
   drawer: {
@@ -31,9 +32,12 @@ export const theme = {
     gray: '#4E606A',
   },
   hctTypography: {
+    font: {
+      fontFamily: FONT,
+    },
     label: {
       color: 'rgba(37,59,70,0.6)',
-      fontFamily: 'Roboto',
+      fontFamily: FONT,
       fontSize: '11px',
       fontWeight: 500,
       letterSpacing: '0.39px',

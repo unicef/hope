@@ -10,7 +10,7 @@ import {
 } from 'react-router-dom';
 import { theme } from './theme';
 import { HomeRouter } from './containers/HomeRouter';
-import { LoginPage } from './containers/LoginPage';
+import { LoginPage } from './containers/pages/LoginPage';
 
 export const App: React.FC = () => {
   const authenticated = true;
