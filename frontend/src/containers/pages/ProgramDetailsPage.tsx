@@ -1,7 +1,7 @@
 import React from 'react';
-import { ProgramCard } from '../components/programs/ProgramCard';
+import { ProgramCard } from '../../components/programs/ProgramCard';
 import { makeStyles } from '@material-ui/core/styles';
-import { PageHeader } from '../components/PageHeader';
+import { PageHeader } from '../../components/PageHeader';
 import Container from '@material-ui/core/Container';
 import { Button } from '@material-ui/core';
 

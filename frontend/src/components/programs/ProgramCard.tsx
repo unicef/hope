@@ -7,20 +7,9 @@ import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import { theme as themeObj } from '../../theme';
 import { Grid } from '@material-ui/core';
-
-function statusToColor(theme: typeof themeObj, status: string) {
-  switch (status) {
-    case 'ACTIVE':
-      return theme.hctPalette.green;
-    case 'FINISHED':
-      return theme.hctPalette.gray;
-    default:
-      return theme.hctPalette.oragne;
-  }
-}
-
-const HEX_OPACITY = Math.floor(0.15 * 0xff).toString(16);
-console.log('HEX_OPACITY', HEX_OPACITY);
+import { programStatusToColor } from '../../utils/utils';
+import { LabelizedField } from '../LabelizedField';
+import { StatusBox } from '../StatusBox';
 
 const useStyles = makeStyles((theme: typeof themeObj) => ({
   card: {
@@ -47,29 +36,15 @@ const useStyles = makeStyles((theme: typeof themeObj) => ({
     padding: 0,
     justifyContent: 'flex-end',
   },
-  bullet: {
-    display: 'inline-block',
-    margin: '0 2px',
-    transform: 'scale(0.8)',
-  },
-  pos: {
-    marginBottom: 12,
-  },
   statusBar: {
     width: '4px',
     height: '100%',
     backgroundColor: ({ status }: { status: string }) =>
-      statusToColor(theme, status),
+      programStatusToColor(theme, status),
   },
   label: {
     ...theme.hctTypography.label,
     textTransform: 'uppercase',
-  },
-  value: {
-    color: '#253B46',
-    fontFamily: 'Roboto',
-    fontSize: '14px',
-    lineHeight: '19px',
   },
   tittleBox: {
     backgroundColor: '#EEEEEE6B',
@@ -77,48 +52,11 @@ const useStyles = makeStyles((theme: typeof themeObj) => ({
   },
   tittle: {
     color: '#253B46',
-    fontFamily: 'Roboto',
+    ...theme.hctTypography.font,
     fontSize: '20px',
     lineHeight: '26px',
   },
-  statusBox: {
-    color: ({ status }: { status: string }) => statusToColor(theme, status),
-    backgroundColor: ({ status }: { status: string }) =>
-      `${statusToColor(theme, status)}${HEX_OPACITY}`,
-    borderRadius: '16px',
-    fontFamily: 'Roboto',
-    fontSize: '10px',
-    fontWeight: 500,
-    letterSpacing: '1.2px',
-    lineHeight: '16px',
-    padding: '3px',
-    textAlign: 'center',
-  },
 }));
-interface LabelizedFieldProps {
-  value?: React.ReactNode;
-  children?: React.ReactElement;
-  label: string;
-}
-
-function LabelizedField({ value, children, label }: LabelizedFieldProps) {
-  const classes = useStyles({ status: null });
-
-  return (
-    <div>
-      <Typography className={classes.label} color='textSecondary'>
-        {label}
-      </Typography>
-      <div>
-        {children || (
-          <Typography className={classes.value} color='textSecondary'>
-            {value}
-          </Typography>
-        )}
-      </div>
-    </div>
-  );
-}
 
 export function ProgramCard() {
   const classes = useStyles({ status: 'ACTIVE' });
@@ -137,7 +75,10 @@ export function ProgramCard() {
             </Grid>
             <Grid item xs={5}>
               <LabelizedField label='status'>
-                <div className={classes.statusBox}>ACTIVE</div>
+                <StatusBox
+                  status='ACTIVE'
+                  statusToColor={programStatusToColor}
+                />
               </LabelizedField>
             </Grid>
             <Grid item xs={12}>
