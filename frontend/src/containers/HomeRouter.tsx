@@ -7,8 +7,8 @@ import { Drawer } from '../components/Drawer/Drawer';
 import { MiśTheme } from '../theme';
 import { AppBar } from '../components/AppBar';
 import { Route, Switch, useLocation } from 'react-router-dom';
-import { DashboardPage } from './DashboardPage';
-import { ProgramsPage } from './ProgramsPage';
+import { DashboardPage } from './pages/DashboardPage';
+import { ProgramsPage } from './pages/ProgramsPage';
 
 const useStyles = makeStyles((theme: MiśTheme) => ({
   root: {
