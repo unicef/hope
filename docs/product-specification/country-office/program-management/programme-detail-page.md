@@ -70,7 +70,32 @@ In the Programme Details section the user will see the following high-level data
 
 ## Cash Plans
 
+#### **List Details**
 
+![](../../../.gitbook/assets/image-2020-01-06-at-1.46.34-pm.png)
+
+Cash Plan details consists of:
+
+* Cash Plan ID
+* Status
+* No. of Households
+* Currency
+* Total Entitled Quantity
+* Total Delivered Quantity
+* Total Undelivered Quantity
+* Dispersion Date
+
+A user has the option to click and view the detailed page for any Cash Plan in the Table.
 
 ## Activity Log
+
+The **Activity Log** section is a collapsible area that allows to the user to review all the recorded activities associated to the project in the form of an audit list.
+
+When collapsed, the section will look like this \(default\):
+
+![](../../../.gitbook/assets/image-2020-01-06-at-1.53.17-pm.png)
+
+When expanded, the section will look like this:
+
+![](../../../.gitbook/assets/image-2020-01-06-at-1.51.42-pm.png)
 
