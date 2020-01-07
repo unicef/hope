@@ -1421,8 +1421,10 @@
   resolved "https://registry.yarnpkg.com/@testing-library/user-event/-/user-event-7.2.1.tgz#2ad4e844175a3738cb9e7064be5ea070b8863a1c"
   integrity sha512-oZ0Ib5I4Z2pUEcoo95cT1cr6slco9WY7yiPpG+RGNkj8YcYgJnM7pXmYmorNOReh8MIGcKSqXyeGjxnr8YiZbA==
 
-"@tivix/eslint-config@file:./js-standard-eslint-config":
+"@tivix/eslint-config@^1.0.0":
   version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@tivix/eslint-config/-/eslint-config-1.0.0.tgz#fcaeacfb9ae5aaee0ba045b8cc009202c55599ba"
+  integrity sha512-E5BRvc8EoDfpVoYW0XinYC1WbBBcyhJBbq6AnYSrV2D0IZHn8zTRRXXh7zt0nPnmxEDp0jiobglHyqo7weVtjw==
   dependencies:
     "@typescript-eslint/eslint-plugin" "^2.9.0"
     "@typescript-eslint/parser" "^2.9.0"
@@ -1436,8 +1438,10 @@
     eslint-plugin-react "^7.16.0"
     eslint-plugin-react-hooks "^2.3.0"
 
-"@tivix/prettier-config@file:./js-standard-prettier-config":
+"@tivix/prettier-config@^1.0.0":
   version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@tivix/prettier-config/-/prettier-config-1.0.0.tgz#97096045803a5b193176576e2da42c2f6f897cba"
+  integrity sha512-UlisC5JkWcBcZEZ3BD+nBKLhMLWgwjTu6NwyvF634hIRdfIa5g7IZXnHUxQSrPEFjf4KO98DJ6/Bz6YGjHM+Lw==
   dependencies:
     prettier "^1.19.1"
 
