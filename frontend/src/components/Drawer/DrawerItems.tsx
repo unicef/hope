@@ -17,51 +17,61 @@ const menuItems = [
   {
     name: 'Country Dashboard',
     href: '/#',
+    selectedRegexp: /^\/test.*$/,
     icon: <DashboardIcon />,
   },
   {
     name: 'Registration Data Import',
     href: '/#',
+    selectedRegexp: /^\/test.*$/,
     icon: <AutorenewIcon />,
   },
   {
     name: 'Population',
     href: '/#',
+    selectedRegexp: /^\/test.*$/,
     icon: <PeopleIcon />,
   },
   {
     name: 'Target Population',
     href: '/#',
+    selectedRegexp: /^\/test.*$/,
     icon: <ListAltRounded />,
   },
   {
     name: 'Programme Management',
     href: '/programs',
+    selectedRegexp: /^\/programs.*$/,
     icon: <FlashOnRounded />,
   },
   {
     name: 'Payment Verification',
     href: '/#',
+    selectedRegexp: /^\/test.*$/,
     icon: <AttachMoney />,
   },
   {
     name: 'Grievance and Feedback',
     href: '/#',
+    selectedRegexp: /^\/test.*$/,
     icon: <Feedback />,
   },
   {
     name: 'Reporting',
     href: '/#',
+    selectedRegexp: /^\/test.*$/,
     icon: <TrendingUpRounded />,
   },
   {
     name: 'User Management',
     href: '/#',
+    selectedRegexp: /^\/test.*$/,
     icon: <SupervisedUserCircle />,
   },
   {
     name: 'Settings',
     href: '/#',
+    selectedRegexp: /^\/test.*$/,
     icon: <SettingsRounded />,
   },
 ];
@@ -75,10 +85,10 @@ export function DrawerItems({ currentLocation }: Props): React.ReactElement {
         return (
           <ListItem
             button
-            component="a"
+            component='a'
             key={item.name}
             href={item.href}
-            selected={currentLocation === item.href}
+            selected={Boolean(item.selectedRegexp.exec(currentLocation))}
           >
             <ListItemIcon>{item.icon}</ListItemIcon>
             <ListItemText primary={item.name} />

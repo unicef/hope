@@ -20,6 +20,9 @@ const useStyles = makeStyles((theme: typeof themeObj) => ({
     display: 'flex',
     flexDirection: 'row',
   },
+  aContainer:{
+    textDecoration: 'none',
+  },
   container: {
     display: 'flex',
     flexDirection: 'column',
@@ -62,61 +65,63 @@ export function ProgramCard() {
   const classes = useStyles({ status: 'ACTIVE' });
 
   return (
-    <Card className={classes.card}>
-      <div className={classes.statusBar} />
-      <div className={classes.container}>
-        <CardContent className={classes.content}>
-          <Grid container spacing={3}>
-            <Grid item xs={7}>
-              <LabelizedField
-                label='TIMEFRAME'
-                value='01 Jan 2019 - 31 Dec 2020'
-              />
-            </Grid>
-            <Grid item xs={5}>
-              <LabelizedField label='status'>
-                <StatusBox
-                  status='ACTIVE'
-                  statusToColor={programStatusToColor}
+    <a href='/programs/1' className={classes.aContainer}>
+      <Card className={classes.card}>
+        <div className={classes.statusBar} />
+        <div className={classes.container}>
+          <CardContent className={classes.content}>
+            <Grid container spacing={3}>
+              <Grid item xs={7}>
+                <LabelizedField
+                  label='TIMEFRAME'
+                  value='01 Jan 2019 - 31 Dec 2020'
                 />
-              </LabelizedField>
-            </Grid>
-            <Grid item xs={12}>
-              <div className={classes.tittleBox}>
-                <Typography className={classes.label} color='textSecondary'>
-                  Programme
-                </Typography>
-                <Typography className={classes.tittle} color='textSecondary'>
-                  Helping young children in remote locations
-                </Typography>
-              </div>
-            </Grid>
+              </Grid>
+              <Grid item xs={5}>
+                <LabelizedField label='status'>
+                  <StatusBox
+                    status='ACTIVE'
+                    statusToColor={programStatusToColor}
+                  />
+                </LabelizedField>
+              </Grid>
+              <Grid item xs={12}>
+                <div className={classes.tittleBox}>
+                  <Typography className={classes.label}>
+                    Programme
+                  </Typography>
+                  <Typography className={classes.tittle}>
+                    Helping young children in remote locations
+                  </Typography>
+                </div>
+              </Grid>
 
-            <Grid item xs={6}>
-              <LabelizedField label='Frequency of payments' value='Regular' />
-            </Grid>
-            <Grid item xs={6}>
-              <LabelizedField label='Budget' value='2,500,000.00 USD' />
-            </Grid>
+              <Grid item xs={6}>
+                <LabelizedField label='Frequency of payments' value='Regular' />
+              </Grid>
+              <Grid item xs={6}>
+                <LabelizedField label='Budget' value='2,500,000.00 USD' />
+              </Grid>
 
-            <Grid item xs={6}>
-              <LabelizedField label='Population Goal' value='25,000' />
-            </Grid>
-            <Grid item xs={6}>
-              <LabelizedField label='no. of households' value='-' />
-            </Grid>
+              <Grid item xs={6}>
+                <LabelizedField label='Population Goal' value='25,000' />
+              </Grid>
+              <Grid item xs={6}>
+                <LabelizedField label='no. of households' value='-' />
+              </Grid>
 
-            <Grid item xs={6}>
-              <LabelizedField label='SECTOR' value='Nutricion' />
+              <Grid item xs={6}>
+                <LabelizedField label='SECTOR' value='Nutricion' />
+              </Grid>
             </Grid>
-          </Grid>
-        </CardContent>
-        <CardActions className={classes.actions}>
-          <Button size='medium' color='primary'>
-            EDIT
-          </Button>
-        </CardActions>
-      </div>
-    </Card>
+          </CardContent>
+          <CardActions className={classes.actions}>
+            <Button size='medium' color='primary' component="a" href="/programs/1/edit">
+              EDIT
+            </Button>
+          </CardActions>
+        </div>
+      </Card>{' '}
+    </a>
   );
 }
