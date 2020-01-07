@@ -1,34 +1,34 @@
 import React from 'react';
 import { ProgramCard } from '../../components/programs/ProgramCard';
-import { makeStyles } from '@material-ui/core/styles';
 import { PageHeader } from '../../components/PageHeader';
 import Container from '@material-ui/core/Container';
 import { Button } from '@material-ui/core';
+import styled from 'styled-components';
 
-const useStyles = makeStyles({
-  container: {
-    display: 'flex',
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-});
+const PageContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+`;
+const Container1 = styled(Container)`
+margin-top: 20px;
+`;
 export function ProgramsPage() {
-  const classes = useStyles({});
   return (
     <div>
-        <PageHeader title='Programme Management' >
-            <Button variant="contained" color="primary">
-                NEW PROGRAMME
-            </Button>
-        </PageHeader>
-      <Container maxWidth='lg' className={classes.container}>
-        <div className={classes.container}>
+      <PageHeader title='Programme Management'>
+        <Button variant='contained' color='primary'>
+          NEW PROGRAMME
+        </Button>
+      </PageHeader>
+      <Container1>
+        <PageContainer>
           <ProgramCard />
           <ProgramCard />
           <ProgramCard />
           <ProgramCard />
-        </div>
-      </Container>
+        </PageContainer>
+      </Container1>
     </div>
   );
 }
