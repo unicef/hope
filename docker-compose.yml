@@ -93,5 +93,5 @@ services:
       - "3000:3000"
     volumes:
       - ./frontend/:/code
-      - /code/node_modules
+      - ggjhgj:/code/node_modules
     command: npm start

@@ -1,20 +1,20 @@
 import React from 'react';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
-import { theme as themeObj } from '../theme';
+import { MiśTheme, theme as themeObj } from '../theme';
+import styled from 'styled-components';
 
-const useStyles = makeStyles((theme: typeof themeObj) => ({
-  label: {
-    ...theme.hctTypography.label,
-    textTransform: 'uppercase',
-  },
-  value: {
-    color: '#253B46',
-    ...theme.hctTypography.font,
-    fontSize: '14px',
-    lineHeight: '19px',
-  },
-}));
+const Label = styled.span`
+  ${({ theme }: { theme: MiśTheme }) => theme.styledMixins.label}
+`;
+
+const Value = styled.span`
+  font-family: ${({ theme }: { theme: MiśTheme }) =>
+    theme.hctTypography.fontFamily};
+  color: #253b46;
+  font-size: 14px;
+  line-height: 19px;
+`;
 
 export interface Props {
   value?: React.ReactNode;
@@ -23,20 +23,10 @@ export interface Props {
 }
 
 export function LabelizedField({ value, children, label }: Props) {
-  const classes = useStyles({ status: null });
-
   return (
     <div>
-      <Typography className={classes.label} color='textSecondary'>
-        {label}
-      </Typography>
-      <div>
-        {children || (
-          <Typography className={classes.value} color='textSecondary'>
-            {value}
-          </Typography>
-        )}
-      </div>
+      <Label color='textSecondary'>{label}</Label>
+      <div>{children || <Value color='textSecondary'>{value}</Value>}</div>
     </div>
   );
 }
