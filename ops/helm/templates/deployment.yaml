@@ -27,6 +27,10 @@ spec:
           image: {{ .Values.backend.image }}
           ports:
             - containerPort: {{ .Values.backend.port }}
+          readinessProbe:
+            httpGet:
+                path: {{ .Values.backend.healthCheckPath }}
+                port: {{ .Values.backend.port }}
           env:
             - name: STORAGE_AZURE_ACCOUNT_KEY
               valueFrom:
