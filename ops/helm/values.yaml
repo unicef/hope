@@ -8,6 +8,7 @@ backend:
   maxSurge: 1
   replicas: 1
   port: 8000
+  healthCheckPath: "/api/_health"
   secret:
     SECRET_KEY: ""
     POSTGRES_DB: ""
