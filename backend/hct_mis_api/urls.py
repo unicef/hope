@@ -18,6 +18,7 @@ urlpatterns = [
     path('api/admin/', admin.site.urls),
     path('', homepage),
     path('_health', homepage),
+    path('api/_health', homepage),
     path('api/graphql', GraphQLView.as_view(graphiql=True)),
     path('api/graphql/schema.graphql', schema),
     path('api/', include('social_django.urls', namespace='social')),
