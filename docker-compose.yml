@@ -2,6 +2,7 @@ version: '3.7'
 
 volumes:
   backend-data:
+  node_modules:
 
 services:
   proxy:
@@ -93,5 +94,5 @@ services:
       - "3000:3000"
     volumes:
       - ./frontend/:/code
-      - ggjhgj:/code/node_modules
+      - node_modules:/code/node_modules
     command: npm start
