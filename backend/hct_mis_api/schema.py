@@ -3,6 +3,7 @@ from graphene_django.debug import DjangoDebug
 
 import core.schema
 import program.schema
+import program.mutations
 import payment.schema
 
 
@@ -15,8 +16,8 @@ class Query(
     debug = graphene.Field(DjangoDebug, name="_debug")
 
 
-class Mutations(graphene.ObjectType):
+class Mutations(program.mutations.Mutations, graphene.ObjectType):
     pass
 
 
-schema = graphene.Schema(query=Query)
+schema = graphene.Schema(query=Query, mutation=Mutations)
