@@ -12,7 +12,7 @@ snapshots['TestUpdateProgram::test_update_program_authenticated 1'] = {
         'updateProgram': {
             'program': {
                 'name': 'updated name',
-                'status': 'FINISHED'
+                'status': 'ACTIVE'
             }
         }
     }
