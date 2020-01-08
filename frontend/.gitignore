@@ -11,7 +11,7 @@
 # production
 /build
 /src/__generated__
-/data/
+/data/schema.graphql
 
 # misc
 .DS_Store
