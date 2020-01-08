@@ -95,4 +95,4 @@ services:
     volumes:
       - ./frontend/:/code
       - node_modules:/code/node_modules
-    command: npm start
+    command: npm run relay&&npm start
