@@ -6,6 +6,7 @@ RUN apk add --upgrade --no-cache g++ linux-headers gcc make libffi-dev git wget 
 RUN pip install --upgrade pip
 
 ADD ./requirements/* /tmp/
+
 WORKDIR /tmp
 
 RUN pip install -r base.pip
