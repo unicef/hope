@@ -1,0 +1,6 @@
+{
+  "presets": [
+    "react-app"
+  ],
+  "plugins": [["relay", { "artifactDirectory": "./src/__generated__" }]]
+}
