@@ -1,0 +1,22 @@
+{
+  "extends": ["@tivix/eslint-config/typescript-react"],
+  "rules": {
+    "@typescript-eslint/explicit-function-return-type": [
+      "warn",
+      {
+        "allowTypedFunctionExpressions": true,
+        "allowExpressions": true,
+        "allowHigherOrderFunctions": true
+      }
+    ],
+    "@typescript-eslint/prefer-optional-chain": "warn",
+    "react/jsx-max-props-per-line": [
+      "warn",
+      {
+        "maximum": 1,
+        "when": "always"
+      }
+    ],
+    "react/destructuring-assignment": 1
+  }
+}
