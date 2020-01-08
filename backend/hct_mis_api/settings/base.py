@@ -337,3 +337,7 @@ SOCIAL_AUTH_AZUREAD_B2C_OAUTH2_SCOPE = [
 ]
 
 SOCIAL_AUTH_SANITIZE_REDIRECTS = True
+
+LOGIN_URL = '/api/login/azuread-tenant-oauth2'
+
+TEST_RUNNER = 'snapshottest.django.TestRunner'

@@ -1,5 +1,4 @@
-from datetime import date, datetime, timedelta
-from random import random
+from datetime import timedelta
 
 import factory
 from factory import fuzzy
