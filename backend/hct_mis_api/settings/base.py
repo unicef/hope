@@ -316,17 +316,17 @@ SOCIAL_AUTH_ADMIN_USER_SEARCH_FIELDS = ['username', 'first_name', 'last_name', '
 SOCIAL_AUTH_POSTGRES_JSONFIELD = True
 
 SOCIAL_AUTH_PIPELINE = (
-    # 'account.authentication.social_details',
+    'account.authentication.social_details',
     'social_core.pipeline.social_auth.social_uid',
     'social_core.pipeline.social_auth.auth_allowed',
     'social_core.pipeline.social_auth.social_user',
     'social_core.pipeline.user.get_username',
-    # 'account.authentication.require_email',
+    'account.authentication.require_email',
     'social_core.pipeline.social_auth.associate_by_email',
-    # 'account.authentication.create_user',
+    'account.authentication.create_user',
     'social_core.pipeline.social_auth.associate_user',
     'social_core.pipeline.social_auth.load_extra_data',
-    # 'account.authentication.user_details',
+    'account.authentication.user_details',
 )
 SOCIAL_AUTH_AZUREAD_B2C_OAUTH2_USER_FIELDS = [
     'email', 'fullname',
