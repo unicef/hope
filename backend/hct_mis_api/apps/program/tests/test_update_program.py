@@ -51,7 +51,7 @@ class TestUpdateProgram(APITestCase):
                 "programData": {
                     "id": self.id_to_base64(program.id, 'program'),
                     "name": "updated name",
-                    "status": "FINISHED"
+                    "status": "ACTIVE"
                 }
             },
         )
