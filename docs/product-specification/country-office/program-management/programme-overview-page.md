@@ -1,14 +1,8 @@
----
-description: >-
-  The Programme Management module is responsible for managing all programs held
-  by UNICEF. It's responsible for creating, editing, and ending programs.
----
+# Programme: Overview Page
 
-# Programme Management
+## Overview
 
-## Programme Overview Page
-
-![](../../.gitbook/assets/image-2019-11-25-at-5.36.28-pm.png)
+![](../../../.gitbook/assets/image-2019-11-25-at-5.36.28-pm.png)
 
 ### Cards
 
@@ -113,7 +107,7 @@ When Programme is created, the following information is presented on the screen:
 * description
 * total number of households
 
-![](../../.gitbook/assets/screen-recording-2019-11-25-at-05.37-pm.gif)
+![](../../../.gitbook/assets/screen-recording-2019-11-25-at-05.37-pm.gif)
 
 ### Activate Program
 
@@ -130,7 +124,7 @@ When Programme is activated, additionally to information presented to the drafte
 * cash disbursed
 * timeframe
 
-![](../../.gitbook/assets/screen-recording-2019-11-28-at-03.54-pm.gif)
+![](../../../.gitbook/assets/screen-recording-2019-11-28-at-03.54-pm.gif)
 
 ### Edit Program
 
@@ -140,7 +134,7 @@ To Edit Program, click on the "Edit" button in the down right-hand corner of a P
 
 To Finish Programme open an Active Program, click on the "Open in CashAssist" button in the top right-hand corner, and proceed further within CashAssist.
 
-![](../../.gitbook/assets/screen-recording-2019-11-28-at-04.58-pm.gif)
+![](../../../.gitbook/assets/screen-recording-2019-11-28-at-04.58-pm.gif)
 
 ### Cash Plan
 
@@ -160,7 +154,7 @@ Cash Plan details consists of:
 * date created
 * created by
 
-![](../../.gitbook/assets/screen-recording-2019-12-05-at-05.00-pm.gif)
+![](../../../.gitbook/assets/screen-recording-2019-12-05-at-05.00-pm.gif)
 
 ### Payment Records
 
@@ -195,5 +189,7 @@ Entitlement Details under Payment Record consist of:
 * entitlement card issue date
 * payment through
 
-![](../../.gitbook/assets/screen-recording-2019-11-28-at-05.36-pm.gif)
+![](../../../.gitbook/assets/screen-recording-2019-11-28-at-05.36-pm.gif)
+
+x
 
