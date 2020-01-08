@@ -65,6 +65,23 @@ class UpdateProgram(graphene.Mutation):
 
         for attrib, value in program_data.items():
             if hasattr(program, attrib):
+                if attrib == 'status':
+                    current_status = program.status
+                    if current_status == 'DRAFT' and value != 'ACTIVE':
+                        raise AttributeError(
+                            'Failed to change status. '
+                            'Draft status can only be changed to Active'
+                        )
+                    elif current_status == 'ACTIVE' and value != 'FINISHED':
+                        raise AttributeError(
+                            'Failed to change status. '
+                            'Active status can only be changed to Finished'
+                        )
+                    elif current_status == 'FINISHED' and value != 'ACTIVE':
+                        raise AttributeError(
+                            'Failed to change status. '
+                            'Finished status can only be changed to Active'
+                        )
                 setattr(program, attrib, value)
         return UpdateProgram(program)
 
