@@ -60,7 +60,7 @@
     "react-dom": "^16.12.0",
     "react-relay": "^7.1.0",
     "react-router-dom": "^5.1.2",
-    "relay-compiler": "^7.1.0",
+    "relay-compiler": "^8.0.0",
     "relay-hooks": "^2.0.0",
     "relay-runtime": "^7.1.0",
     "resolve": "1.12.2",
@@ -81,10 +81,10 @@
   },
   "scripts": {
     "start": "node scripts/start.js",
-    "build": "node scripts/build.js",
+    "build": "npm run relay&&node scripts/build.js",
     "test": "node scripts/test.js",
     "lint": "eslint src/**/*.tsx",
-    "relay": "curl http://127.0.0.1:8082/api/graphql/schema.graphql >data/schema.graphql&&relay-compiler --config relay.config.js"
+    "relay": "wget --no-check-certificate -O data/schema.graphql https://dev-hct.unitst.org/api/graphql/schema.graphql&&relay-compiler --config relay.config.js"
   },
   "browserslist": {
     "production": [
