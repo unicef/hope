@@ -11,6 +11,7 @@ social-auth-app-django==3.1.0
 
 # Tests and Fixtures
 factory-boy==2.12.0
+snapshottest==0.5.1
 
 # Etc
 Pillow==6.2.1
