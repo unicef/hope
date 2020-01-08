@@ -28,7 +28,7 @@ def user_details(strategy, details, user=None, *args, **kwargs):
     logger.debug(f'user_details for user {user} details:\n{details}')
 
     if user:
-        fullname = details['fullname'].split('.')
+        fullname = details['fullname'].split(' ')
         user.first_name = fullname[0].capitalize()
         user.last_name = fullname[-1].capitalize()
         user.username = details['fullname']
@@ -48,7 +48,7 @@ def create_user(strategy, details, backend, user=None, *args, **kwargs):
     if user:
         return {'is_new': False}
 
-    fullname = details['fullname'].split('.')
+    fullname = details['fullname'].split(' ')
 
     user = get_user_model().objects.create(
         email=details['email'],
