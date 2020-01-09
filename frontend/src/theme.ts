@@ -19,6 +19,12 @@ const muiTheme = createMuiTheme({
       default: '#EEEEEE',
     },
   },
+  typography: {
+    h6: {
+      fontSize: '20px',
+      fontWeight: 400,
+    },
+  },
 });
 
 const FONT = 'Roboto';
