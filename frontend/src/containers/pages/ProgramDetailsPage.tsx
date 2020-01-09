@@ -15,7 +15,10 @@ export function ProgramDetailsPage(): React.ReactElement {
   const classes = useStyles({});
   return (
     <div>
-      <PageHeader title='DETAILS'>
+      <PageHeader
+        title='Helping young children in remote locations'
+        category='Programme Management'
+      >
         <Button variant='contained' color='primary'>
           EDIT
         </Button>
