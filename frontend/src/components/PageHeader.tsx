@@ -1,11 +1,6 @@
-import { makeStyles } from '@material-ui/core/styles';
-import { theme as themeObj } from '../theme';
 import React from 'react';
 import { Typography } from '@material-ui/core';
 import styled from 'styled-components';
-
-import ArrowBackRounded from '@material-ui/icons/ArrowBackRounded';
-
 
 const Container = styled.div`
   background-color: #fff;
@@ -22,7 +17,11 @@ interface Props {
   children?: React.ReactElement;
 }
 
-export function PageHeader({ title, category, children }: Props) {
+export function PageHeader({
+  title,
+  category,
+  children,
+}: Props): React.ReactElement {
   return (
     <Container>
       <div>

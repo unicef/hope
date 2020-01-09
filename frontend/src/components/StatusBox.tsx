@@ -1,8 +1,7 @@
-import { makeStyles } from '@material-ui/core/styles';
-import { theme as themeObj } from '../theme';
-import { opacityToHex } from '../utils/utils';
 import React from 'react';
 import styled from 'styled-components';
+import { theme as themeObj } from '../theme';
+import { opacityToHex } from '../utils/utils';
 
 interface Props {
   status: string;
@@ -23,7 +22,10 @@ const StatusBoxContainer = styled.div`
   text-align: center;
 `;
 
-export function StatusBox({ status, statusToColor }: Props) {
+export function StatusBox({
+  status,
+  statusToColor,
+}: Props): React.ReactElement {
   return (
     <StatusBoxContainer status={status} statusToColor={statusToColor}>
       {status}

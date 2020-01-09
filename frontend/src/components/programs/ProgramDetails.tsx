@@ -1,15 +1,9 @@
+import React from 'react';
 import styled from 'styled-components';
 import { Grid } from '@material-ui/core';
-import { LabelizedField } from '../LabelizedField';
 import { StatusBox } from '../StatusBox';
 import { programStatusToColor } from '../../utils/utils';
-import Typography from '@material-ui/core/Typography';
-import CardContent from '@material-ui/core/CardContent';
-import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import { theme as themeObj } from '../../theme';
-
-
+import { LabelizedField } from '../LabelizedField';
 
 const Container = styled.div`
   flex: 1;
@@ -17,13 +11,15 @@ const Container = styled.div`
   background-color: #fff;
 `;
 
-export function ProgramDetails() {
+export function ProgramDetails(): React.ReactElement {
   return (
     <Container>
-      {' '}
       <Grid container spacing={3}>
         <Grid item xs={7}>
-          <LabelizedField label='TIMEFRAME' value='01 Jan 2019 - 31 Dec 2020' />
+          <LabelizedField
+            label='TIMEFRAME'
+            value='01 Jan 2019 - 31 Dec 20202'
+          />
         </Grid>
         <Grid item xs={5}>
           <LabelizedField label='status'>
