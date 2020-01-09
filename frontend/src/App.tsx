@@ -1,15 +1,14 @@
 import React from 'react';
 import { RelayEnvironmentProvider } from 'relay-hooks';
-import { environment } from './relay/enviroment';
 import { ThemeProvider } from '@material-ui/core';
 import { ThemeProvider as StyledThemeProvider } from 'styled-components';
-import { ThemeProvider as StyledJssThemeProvider } from 'styled-jss';
 import {
   Route,
   Switch,
   BrowserRouter as Router,
   Redirect,
 } from 'react-router-dom';
+import { environment } from './relay/enviroment';
 import { theme } from './theme';
 import { HomeRouter } from './containers/HomeRouter';
 import { LoginPage } from './containers/pages/LoginPage';
@@ -20,7 +19,6 @@ export const App: React.FC = () => {
     <RelayEnvironmentProvider environment={environment}>
       <ThemeProvider theme={theme}>
         <StyledThemeProvider theme={theme}>
-          <StyledJssThemeProvider theme={theme}>
             <Router>
               <Switch>
                 <Route path='/login'>
@@ -31,7 +29,6 @@ export const App: React.FC = () => {
                 </Route>
               </Switch>
             </Router>
-          </StyledJssThemeProvider>
         </StyledThemeProvider>
       </ThemeProvider>
     </RelayEnvironmentProvider>

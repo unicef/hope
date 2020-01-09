@@ -1,9 +1,7 @@
 import React from 'react';
-import { ProgramCard } from '../../components/programs/ProgramCard';
 import { makeStyles } from '@material-ui/core/styles';
-import { PageHeader } from '../../components/PageHeader';
-import Container from '@material-ui/core/Container';
 import { Button } from '@material-ui/core';
+import { PageHeader } from '../../components/PageHeader';
 import { ProgramDetails } from '../../components/programs/ProgramDetails';
 
 const useStyles = makeStyles({
@@ -13,7 +11,7 @@ const useStyles = makeStyles({
     width: '100%',
   },
 });
-export function ProgramDetailsPage() {
+export function ProgramDetailsPage(): React.ReactElement {
   const classes = useStyles({});
   return (
     <div>
