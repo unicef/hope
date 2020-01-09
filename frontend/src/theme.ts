@@ -1,7 +1,7 @@
 import { red } from '@material-ui/core/colors';
-import { createMuiTheme, Theme } from '@material-ui/core/styles';
-import { DARK_GRAY, NAVY_BLUE } from './config/colors';
+import { createMuiTheme } from '@material-ui/core/styles';
 import { css } from 'styled-components';
+import { DARK_GRAY, NAVY_BLUE } from './config/colors';
 
 // A custom theme for this app
 const muiTheme = createMuiTheme({
@@ -49,15 +49,14 @@ export const theme = {
   },
   styledMixins: {
     label: css`
-        color: rgba(37, 59, 70, 0.6);
-        font-family: ${FONT};
-        font-size: 11px;
-        font-weight: 500;
-        letter-spacing: 0.39px;
-        line-height: 16px;
-        text-transform: uppercase;
-      `,
+      color: rgba(37, 59, 70, 0.6);
+      font-family: ${FONT};
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.39px;
+      line-height: 16px;
+      text-transform: uppercase;
+    `,
   },
 };
-console.log('tpppp', theme.mixins.toolbar);
 export type MiśTheme = typeof theme;

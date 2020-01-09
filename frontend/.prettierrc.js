@@ -1,3 +1,3 @@
 module.exports = {
-  ...require("@tivix/prettier-config")
+  ...require("@tivix/prettier-config"),
 };
