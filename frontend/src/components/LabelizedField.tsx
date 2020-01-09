@@ -1,8 +1,6 @@
 import React from 'react';
-import Typography from '@material-ui/core/Typography';
-import { makeStyles } from '@material-ui/core/styles';
-import { MiśTheme, theme as themeObj } from '../theme';
 import styled from 'styled-components';
+import { MiśTheme } from '../theme';
 
 const Label = styled.span`
   ${({ theme }: { theme: MiśTheme }) => theme.styledMixins.label}
@@ -22,7 +20,11 @@ export interface Props {
   label: string;
 }
 
-export function LabelizedField({ value, children, label }: Props) {
+export function LabelizedField({
+  value,
+  children,
+  label,
+}: Props): React.ReactElement {
   return (
     <div>
       <Label color='textSecondary'>{label}</Label>
