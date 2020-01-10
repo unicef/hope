@@ -49,7 +49,7 @@ snapshots['TestChangeProgramStatus::test_active_to_draft 1'] = {
                     'line': 3
                 }
             ],
-            'message': 'Failed to change status. Active status can only be changed to Finished',
+            'message': 'Active status can only be changed to Finished',
             'path': [
                 'updateProgram'
             ]
@@ -69,7 +69,7 @@ snapshots['TestChangeProgramStatus::test_draft_to_finished 1'] = {
                     'line': 3
                 }
             ],
-            'message': 'Failed to change status. Draft status can only be changed to Active',
+            'message': 'Draft status can only be changed to Active',
             'path': [
                 'updateProgram'
             ]
@@ -89,7 +89,7 @@ snapshots['TestChangeProgramStatus::test_finished_to_draft 1'] = {
                     'line': 3
                 }
             ],
-            'message': 'Failed to change status. Finished status can only be changed to Active',
+            'message': 'Finished status can only be changed to Active',
             'path': [
                 'updateProgram'
             ]

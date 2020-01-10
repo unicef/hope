@@ -55,3 +55,8 @@ class TestUpdateProgram(APITestCase):
                 }
             },
         )
+
+        updated_program = Program.objects.get(id=program.id)
+
+        assert updated_program.status == 'ACTIVE'
+        assert updated_program.name == 'updated name'

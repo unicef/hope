@@ -6,6 +6,7 @@ from core.permissions import is_authenticated
 from core.utils import decode_id_string
 from program.models import Program
 from program.schema import ProgramNode
+from program.validators import ProgramValidator
 
 
 class CreateProgramInput(graphene.InputObjectType):
@@ -49,7 +50,7 @@ class CreateProgram(graphene.Mutation):
         return CreateProgram(program)
 
 
-class UpdateProgram(graphene.Mutation):
+class UpdateProgram(ProgramValidator, graphene.Mutation):
     program = graphene.Field(ProgramNode)
 
     class Arguments:
@@ -63,26 +64,14 @@ class UpdateProgram(graphene.Mutation):
 
         program = Program.objects.select_for_update().get(id=program_id)
 
+        ProgramValidator().validate(program_data=program_data, program=program)
+
         for attrib, value in program_data.items():
             if hasattr(program, attrib):
-                if attrib == 'status':
-                    current_status = program.status
-                    if current_status == 'DRAFT' and value != 'ACTIVE':
-                        raise AttributeError(
-                            'Failed to change status. '
-                            'Draft status can only be changed to Active'
-                        )
-                    elif current_status == 'ACTIVE' and value != 'FINISHED':
-                        raise AttributeError(
-                            'Failed to change status. '
-                            'Active status can only be changed to Finished'
-                        )
-                    elif current_status == 'FINISHED' and value != 'ACTIVE':
-                        raise AttributeError(
-                            'Failed to change status. '
-                            'Finished status can only be changed to Active'
-                        )
                 setattr(program, attrib, value)
+
+        program.save()
+
         return UpdateProgram(program)
 
 
