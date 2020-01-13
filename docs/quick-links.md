@@ -19,7 +19,6 @@
 ### Technical / product related
 
 * **Data Dictionary:** [**https://unicef.sharepoint.com/:x:/r/teams/EMOPS-HCT-MIS/DocumentLibrary2/Overarching%20Documentation/Requirements/Data%20Dictionary.xlsx?d=w41de76b5566c42c9b96533d8ed4fbc4f&csf=1&e=9u97LV**](https://unicef.sharepoint.com/:x:/r/teams/EMOPS-HCT-MIS/DocumentLibrary2/Overarching%20Documentation/Requirements/Data%20Dictionary.xlsx?d=w41de76b5566c42c9b96533d8ed4fbc4f&csf=1&e=9u97LV)\*\*\*\*
-* **Azure DevOps - Boards:** [https://unicef.visualstudio.com/ICTD-HCT-MIS/\_boards/directory](https://unicef.visualstudio.com/ICTD-HCT-MIS/_boards/directory)
 * **Github** repo: [https://github.com/unicef/hct-mis](https://github.com/unicef/hct-mis)
 * Dev env: [https://dev-hct.unitst.org/](https://dev-hct.unitst.org/)
 * Staging env: [https://staging-hct.unitst.org/](https://staging-hct.unitst.org/)
