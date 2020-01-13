@@ -51,7 +51,12 @@ class TestUpdateProgram(APITestCase):
                 "programData": {
                     "id": self.id_to_base64(program.id, 'program'),
                     "name": "updated name",
-                    "status": "FINISHED"
+                    "status": "ACTIVE"
                 }
             },
         )
+
+        updated_program = Program.objects.get(id=program.id)
+
+        assert updated_program.status == 'ACTIVE'
+        assert updated_program.name == 'updated name'
