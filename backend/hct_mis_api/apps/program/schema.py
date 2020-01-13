@@ -25,3 +25,7 @@ class Query(graphene.ObjectType):
     all_programs = DjangoFilterConnectionField(ProgramNode)
     cash_plan = relay.Node.Field(CashPlan)
     all_cash_plans = DjangoFilterConnectionField(CashPlan)
+    program_status_choices = graphene.List(graphene.List(graphene.String))
+
+    def resolve_program_status_choices(self, info, **kwargs):
+        return Program.STATUS_CHOICE
