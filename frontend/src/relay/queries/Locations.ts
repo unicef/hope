@@ -1,6 +1,6 @@
 import { graphql } from "react-relay";
 
-export const Locations = graphql`
+export const locationsQuery = graphql`
   query LocationsQuery {
       allLocations{
           edges {
