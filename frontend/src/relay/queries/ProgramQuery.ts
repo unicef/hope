@@ -18,6 +18,13 @@ export const ProgramQuery = graphql`
           startCursor
           endCursor
         }
+        edges{
+          node{
+            cashAssistId
+            numberOfHouseholds
+            
+          }
+        }
       }
     }
   }
