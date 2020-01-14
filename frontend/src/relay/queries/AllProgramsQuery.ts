@@ -1,6 +1,6 @@
 import { graphql } from "react-relay";
 
-export const allProgramsQuery = graphql`
+export const AllProgramsQuery = graphql`
     query AllProgramsQuery {
         allPrograms{
             pageInfo{

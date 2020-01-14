@@ -4,6 +4,7 @@ import { Grid, Typography } from '@material-ui/core';
 import { StatusBox } from '../StatusBox';
 import { programStatusToColor } from '../../utils/utils';
 import { LabelizedField } from '../LabelizedField';
+import { ProgramQueryResponse } from '../../__generated__/ProgramQuery.graphql';
 
 const Container = styled.div`
   display: flex;
@@ -36,7 +37,11 @@ const Title = styled.div`
   margin: 7px 0px 25px 0px;
 `;
 
-export function ProgramDetails(): React.ReactElement {
+interface ProgramDetailsProps {
+  program: ProgramQueryResponse['program'];
+}
+
+export function ProgramDetails({program}:ProgramDetailsProps): React.ReactElement {
   return (
     <Container>
       <Title>
@@ -48,17 +53,17 @@ export function ProgramDetails(): React.ReactElement {
             <LabelizedField label='status'>
               <StatusContainer>
                 <StatusBox
-                  status='ACTIVE'
+                  status={program.status}
                   statusToColor={programStatusToColor}
                 />
               </StatusContainer>
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>
-            <LabelizedField label='START DATE' value='01 Jan 2019' />
+            <LabelizedField label='START DATE' value={program.startDate} />
           </Grid>
           <Grid item xs={4}>
-            <LabelizedField label='END DATE' value='31 Jan 2019' />
+            <LabelizedField label='END DATE' value={program.endDate} />
           </Grid>
 
           <Grid item xs={4}>
@@ -80,7 +85,7 @@ export function ProgramDetails(): React.ReactElement {
           <Grid item xs={4}>
             <LabelizedField
               label='Description'
-              value='Description of how to help young children in remote locations'
+              value={program.description}
             />
           </Grid>
           <Grid item xs={4}>
