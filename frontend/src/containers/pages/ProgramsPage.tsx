@@ -4,8 +4,7 @@ import { Button } from '@material-ui/core';
 import styled from 'styled-components';
 import { ProgramCard } from '../../components/programs/ProgramCard';
 import { PageHeader } from '../../components/PageHeader';
-import { allProgramsQuery } from '../../relay/queries/allProgramsQuery';
-import { AllProgramsQuery } from '../../__generated__/AllProgramsQuery.graphql';
+import allProgramsQuery,{ AllProgramsQuery } from '../../__generated__/AllProgramsQuery.graphql';
 import { useQuery } from 'relay-hooks/lib';
 
 const PageContainer = styled.div`
@@ -36,7 +35,6 @@ export function ProgramsPage(): React.ReactElement {
       </div>
     );
   }
-  console.log('all', props);
   const programsList = props.allPrograms.edges.map((node) => {
     const program = node.node;
     return <ProgramCard key={program.id} program={program} />;

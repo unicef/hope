@@ -1,12 +1,13 @@
 import React, { ReactElement } from 'react';
-import { TableComponent } from '../table/TableComponent';
-import { HeadCell } from '../table/EnhancedTableHead';
+import { TableComponent } from '../components/table/TableComponent';
+import { HeadCell } from '../components/table/EnhancedTableHead';
 import styled from 'styled-components';
 import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
-import { StatusBox } from '../StatusBox';
-import { programStatusToColor } from '../../utils/utils';
-import { LabelizedField } from '../LabelizedField';
+import { StatusBox } from '../components/StatusBox';
+import { programStatusToColor } from '../utils/utils';
+import { LabelizedField } from '../components/LabelizedField';
+import { ProgramQueryResponse } from '../__generated__/ProgramQuery.graphql';
 
 interface CashPlan {
   id: string;
@@ -122,13 +123,16 @@ const StatusContainer = styled.div`
   width: 120px;
 `;
 
-
-export function CashPlanTable(): ReactElement {
+interface CashPlanTableProps {
+  cashPlans: ProgramQueryResponse['program']['cashPlans'];
+}
+export function CashPlanTable({ cashPlans }: CashPlanTableProps): ReactElement {
+  console.log('cashPlans', cashPlans);
   /* eslint-disable @typescript-eslint/no-empty-function */
   return (
-    <TableComponent<CashPlan>
+    <TableComponent<CashPlanTableProps['cashPlans']['edges'][number]['node']>
       title='Cash Plans'
-      data={data}
+      data={cashPlans.edges}
       renderRow={(row) => {
         return (
           <TableRow
@@ -141,10 +145,11 @@ export function CashPlanTable(): ReactElement {
             <TableCell align='left'>
               <StatusContainer>
                 <StatusBox
-                    status='ACTIVE'
-                    statusToColor={programStatusToColor}
+                  status='ACTIVE'
+                  statusToColor={programStatusToColor}
                 />
-              </StatusContainer></TableCell>
+              </StatusContainer>
+            </TableCell>
             <TableCell align='right'>{row.householdsCount}</TableCell>
             <TableCell align='left'>{row.currency}</TableCell>
             <TableCell align='right'>{row.totalEntitledQuantity}</TableCell>

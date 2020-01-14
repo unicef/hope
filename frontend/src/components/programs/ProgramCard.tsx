@@ -64,7 +64,7 @@ interface ProgramCardProps {
 }
 
 export function ProgramCard({ program }: ProgramCardProps): React.ReactElement {
-  const classes = useStyles({ status: 'ACTIVE' });
+  const classes = useStyles({ status: program.status });
 
   return (
     <a href={`/programs/${program.id}`} className={classes.aContainer}>
