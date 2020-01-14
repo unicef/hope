@@ -1,5 +1,7 @@
 {
   "extends": ["@tivix/eslint-config/typescript-react"],
+
+  "ignorePatterns": ["src/__generated__/"],
   "rules": {
     "@typescript-eslint/explicit-function-return-type": [
       "warn",
