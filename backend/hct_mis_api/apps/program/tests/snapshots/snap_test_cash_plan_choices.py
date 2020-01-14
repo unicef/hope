@@ -7,20 +7,20 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['TestProgramStatusChoices::test_status_choices_query 1'] = {
+snapshots['TestCashPlanChoices::test_status_choices_query 1'] = {
     'data': {
-        'programStatusChoices': [
+        'cashPlanStatusChoices': [
             [
-                'DRAFT',
-                'Draft'
+                'NOT_STARTED',
+                'NOT_STARTED'
             ],
             [
-                'ACTIVE',
-                'Active'
+                'STARTED',
+                'STARTED'
             ],
             [
-                'FINISHED',
-                'Finished'
+                'COMPLETE',
+                'COMPLETE'
             ]
         ]
     }
