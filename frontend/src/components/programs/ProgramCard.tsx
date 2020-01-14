@@ -8,6 +8,7 @@ import { theme as themeObj } from '../../theme';
 import { programStatusToColor } from '../../utils/utils';
 import { LabelizedField } from '../LabelizedField';
 import { StatusBox } from '../StatusBox';
+import { AllProgramsQueryResponse } from '../../__generated__/AllProgramsQuery.graphql';
 
 const useStyles = makeStyles((theme: typeof themeObj) => ({
   card: {
@@ -58,12 +59,15 @@ const useStyles = makeStyles((theme: typeof themeObj) => ({
     lineHeight: '26px',
   },
 }));
+interface ProgramCardProps {
+  program: AllProgramsQueryResponse['allPrograms']['edges'][number]['node'];
+}
 
-export function ProgramCard(): React.ReactElement {
+export function ProgramCard({ program }: ProgramCardProps): React.ReactElement {
   const classes = useStyles({ status: 'ACTIVE' });
 
   return (
-    <a href='/programs/1' className={classes.aContainer}>
+    <a href={`/programs/${program.id}`} className={classes.aContainer}>
       <Card className={classes.card}>
         <div className={classes.statusBar} />
         <div className={classes.container}>
@@ -78,7 +82,7 @@ export function ProgramCard(): React.ReactElement {
               <Grid item xs={5}>
                 <LabelizedField label='status'>
                   <StatusBox
-                    status='ACTIVE'
+                    status={program.status}
                     statusToColor={programStatusToColor}
                   />
                 </LabelizedField>
@@ -87,7 +91,7 @@ export function ProgramCard(): React.ReactElement {
                 <div className={classes.tittleBox}>
                   <Typography className={classes.label}>Programme</Typography>
                   <Typography className={classes.tittle}>
-                    Helping young children in remote locations
+                    {program.name}
                   </Typography>
                 </div>
               </Grid>
@@ -96,7 +100,10 @@ export function ProgramCard(): React.ReactElement {
                 <LabelizedField label='Frequency of payments' value='Regular' />
               </Grid>
               <Grid item xs={6}>
-                <LabelizedField label='Budget' value='2,500,000.00 USD' />
+                <LabelizedField
+                  label='Budget'
+                  value={`${program.budget} USD`}
+                />
               </Grid>
 
               <Grid item xs={6}>
