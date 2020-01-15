@@ -16,3 +16,9 @@ class PaymentRecordNode(DjangoObjectType):
 class Query(graphene.ObjectType):
     payment_record = relay.Node.Field(PaymentRecordNode)
     all_payment_records = DjangoFilterConnectionField(PaymentRecordNode)
+    payment_delivery_type_choices = graphene.List(graphene.List(
+        graphene.String)
+    )
+
+    def resolve_payment_delivery_type_choices(self, info, **kwargs):
+        return PaymentRecord.DELIVERY_TYPE_CHOICE
