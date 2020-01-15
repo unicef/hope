@@ -17,8 +17,8 @@ class TestDeleteProgram(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.DELETE_PROGRAM_MUTATION,
             variables={
-                "programId": "UHJvZ3JhbU5vZGU6MDBkMmU4ZWQtOThm"
-                             "My00YTM5LWJiZWYtZmI5YWUwNWYyOThh"
+                'programId': 'UHJvZ3JhbU5vZGU6MDBkMmU4ZWQtOThm'
+                             'My00YTM5LWJiZWYtZmI5YWUwNWYyOThh'
             },
         )
 
@@ -27,20 +27,25 @@ class TestDeleteProgram(APITestCase):
         location = LocationFactory.create()
 
         program = Program.objects.create(
-            name="Test",
-            status="DRAFT",
-            start_date="2019-12-20T15:00:00",
-            end_date="2021-12-20T15:00:00",
+            name='Test',
+            status='DRAFT',
+            start_date='2019-12-20T15:00:00',
+            end_date='2021-12-20T15:00:00',
             location_id=location.id,
-            program_ca_id="5e0a38c6-7bcb-4b4a-b8e0-311e8c694ae3",
+            program_ca_id='5e0a38c6-7bcb-4b4a-b8e0-311e8c694ae3',
             budget=20000000,
-            description="my description of program"
+            description='my description of program',
+            frequency_of_payments='REGULAR',
+            sector='EDUCATION',
+            scope='FULL',
+            cash_plus=True,
+            population_goal=150000,
         )
 
         self.snapshot_graphql_request(
             request_string=self.DELETE_PROGRAM_MUTATION,
             context={'user': user},
             variables={
-                "programId": self.id_to_base64(program.id, 'program')
+                'programId': self.id_to_base64(program.id, 'Program')
             },
         )

@@ -20,18 +20,23 @@ class TestChangeProgramStatus(APITestCase):
         self.user = UserFactory.create()
         self.location = LocationFactory.create()
         self.base_program_data = {
-            'name': "Test",
-            'start_date': "2019-12-20T15:00:00",
-            'end_date': "2021-12-20T15:00:00",
+            'name': 'Test',
+            'start_date': '2019-12-20T15:00:00',
+            'end_date': '2021-12-20T15:00:00',
             'location_id': self.location.id,
-            'program_ca_id': "5e0a38c6-7bcb-4b4a-b8e0-311e8c694ae3",
+            'program_ca_id': '5e0a38c6-7bcb-4b4a-b8e0-311e8c694ae3',
             'budget': 20000000,
-            'description': "my description of program"
+            'description': 'my description of program',
+            'frequency_of_payments': 'REGULAR',
+            'sector': 'EDUCATION',
+            'scope': 'FULL',
+            'cash_plus': True,
+            'population_goal': 150000,
         }
 
     def test_draft_to_active(self):
         program = Program.objects.create(
-            status="DRAFT",
+            status='DRAFT',
             **self.base_program_data,
         )
 
@@ -39,16 +44,16 @@ class TestChangeProgramStatus(APITestCase):
             request_string=self.UPDATE_PROGRAM_MUTATION,
             context={'user': self.user},
             variables={
-                "programData": {
-                    "id": self.id_to_base64(program.id, 'program'),
-                    "status": "ACTIVE"
+                'programData': {
+                    'id': self.id_to_base64(program.id, 'Program'),
+                    'status': 'ACTIVE'
                 }
             },
         )
 
     def test_active_to_finished(self):
         program = Program.objects.create(
-            status="ACTIVE",
+            status='ACTIVE',
             **self.base_program_data,
         )
 
@@ -56,16 +61,16 @@ class TestChangeProgramStatus(APITestCase):
             request_string=self.UPDATE_PROGRAM_MUTATION,
             context={'user': self.user},
             variables={
-                "programData": {
-                    "id": self.id_to_base64(program.id, 'program'),
-                    "status": "FINISHED"
+                'programData': {
+                    'id': self.id_to_base64(program.id, 'Program'),
+                    'status': 'FINISHED'
                 }
             },
         )
 
     def test_finished_to_active(self):
         program = Program.objects.create(
-            status="FINISHED",
+            status='FINISHED',
             **self.base_program_data,
         )
 
@@ -73,16 +78,16 @@ class TestChangeProgramStatus(APITestCase):
             request_string=self.UPDATE_PROGRAM_MUTATION,
             context={'user': self.user},
             variables={
-                "programData": {
-                    "id": self.id_to_base64(program.id, 'program'),
-                    "status": "ACTIVE"
+                'programData': {
+                    'id': self.id_to_base64(program.id, 'Program'),
+                    'status': 'ACTIVE'
                 }
             },
         )
 
     def test_draft_to_finished(self):
         program = Program.objects.create(
-            status="DRAFT",
+            status='DRAFT',
             **self.base_program_data,
         )
 
@@ -90,16 +95,16 @@ class TestChangeProgramStatus(APITestCase):
             request_string=self.UPDATE_PROGRAM_MUTATION,
             context={'user': self.user},
             variables={
-                "programData": {
-                    "id": self.id_to_base64(program.id, 'program'),
-                    "status": "FINISHED"
+                'programData': {
+                    'id': self.id_to_base64(program.id, 'Program'),
+                    'status': 'FINISHED'
                 }
             },
         )
 
     def test_active_to_draft(self):
         program = Program.objects.create(
-            status="ACTIVE",
+            status='ACTIVE',
             **self.base_program_data,
         )
 
@@ -107,16 +112,16 @@ class TestChangeProgramStatus(APITestCase):
             request_string=self.UPDATE_PROGRAM_MUTATION,
             context={'user': self.user},
             variables={
-                "programData": {
-                    "id": self.id_to_base64(program.id, 'program'),
-                    "status": "DRAFT"
+                'programData': {
+                    'id': self.id_to_base64(program.id, 'Program'),
+                    'status': 'DRAFT'
                 }
             },
         )
 
     def test_finished_to_draft(self):
         program = Program.objects.create(
-            status="FINISHED",
+            status='FINISHED',
             **self.base_program_data,
         )
 
@@ -124,9 +129,9 @@ class TestChangeProgramStatus(APITestCase):
             request_string=self.UPDATE_PROGRAM_MUTATION,
             context={'user': self.user},
             variables={
-                "programData": {
-                    "id": self.id_to_base64(program.id, 'program'),
-                    "status": "DRAFT"
+                'programData': {
+                    'id': self.id_to_base64(program.id, 'Program'),
+                    'status': 'DRAFT'
                 }
             },
         )
