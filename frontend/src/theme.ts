@@ -59,5 +59,5 @@ export const theme = {
       `,
   },
 };
-console.log('tpppp', theme.mixins.toolbar);
+
 export type MiśTheme = typeof theme;
