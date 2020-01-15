@@ -18,6 +18,11 @@ class CreateProgramInput(graphene.InputObjectType):
     program_ca_id = graphene.String()
     location_id = graphene.String()
     budget = graphene.Float()
+    frequency_of_payments = graphene.String()
+    sector = graphene.String()
+    scope = graphene.String()
+    cash_plus = graphene.Boolean()
+    population_goal = graphene.Int()
 
 
 class UpdateProgramInput(graphene.InputObjectType):
@@ -30,6 +35,11 @@ class UpdateProgramInput(graphene.InputObjectType):
     program_ca_id = graphene.String()
     location_id = graphene.String()
     budget = graphene.Float()
+    frequency_of_payments = graphene.String()
+    sector = graphene.String()
+    scope = graphene.String()
+    cash_plus = graphene.Boolean()
+    population_goal = graphene.Int()
 
 
 class CreateProgram(graphene.Mutation):

@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 import factory
 from factory import fuzzy
@@ -46,6 +46,20 @@ class ProgramFactory(factory.DjangoModelFactory):
     program_ca_id = factory.Faker('uuid4')
     location = factory.SubFactory(LocationFactory)
     budget = factory.fuzzy.FuzzyDecimal(1000000.0, 900000000.0)
+    frequency_of_payments = fuzzy.FuzzyChoice(
+        Program.FREQUENCY_OF_PAYMENTS_CHOICE,
+        getter=lambda c: c[0],
+    )
+    sector = fuzzy.FuzzyChoice(
+        Program.SECTOR_CHOICE,
+        getter=lambda c: c[0],
+    )
+    scope = fuzzy.FuzzyChoice(
+        Program.SCOPE_CHOICE,
+        getter=lambda c: c[0],
+    )
+    cash_plus = fuzzy.FuzzyChoice((True, False))
+    population_goal = factory.fuzzy.FuzzyDecimal(50000.0, 600000.0)
 
 
 class CashPlanFactory(factory.DjangoModelFactory):
@@ -91,3 +105,15 @@ class CashPlanFactory(factory.DjangoModelFactory):
       string_format="###-##",
     )
     fsp = factory.Faker('company')
+    status = fuzzy.FuzzyChoice(
+        CashPlan.STATUS_CHOICE,
+        getter=lambda c: c[0],
+    )
+    currency = factory.Faker('currency_name')
+    total_entitled_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
+    total_delivered_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
+    total_undelivered_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
+    dispersion_date = fuzzy.FuzzyDate(
+        start_date=datetime.now() + timedelta(days=30),
+        end_date=datetime.now() + timedelta(days=365),
+    )
