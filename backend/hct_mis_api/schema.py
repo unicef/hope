@@ -5,9 +5,11 @@ import core.schema
 import program.schema
 import program.mutations
 import payment.schema
+import targeting.schema
 
 
 class Query(
+    targeting.schema.Query,
     program.schema.Query,
     core.schema.Query,
     payment.schema.Query,
