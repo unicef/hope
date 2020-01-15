@@ -22,3 +22,7 @@ class ProgramValidator(BaseValidator):
             raise ValidationError(
                 'Finished status can only be changed to Active'
             )
+
+
+class CashPlanValidator(BaseValidator):
+    pass

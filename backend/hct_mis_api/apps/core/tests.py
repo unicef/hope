@@ -38,10 +38,9 @@ class APITestCase(TestCase):
         return context_value
 
     @staticmethod
-    def id_to_base64(id, name, add_node_suffix=True):
+    def id_to_base64(id, name):
         return base64.b64encode(
-            f'{name}'
-            f'{"Node" if add_node_suffix else ""}:{str(id)}'.encode('utf-8')
+            f'{name}Node:{str(id)}'.encode('utf-8')
         ).decode()
 
     @staticmethod
