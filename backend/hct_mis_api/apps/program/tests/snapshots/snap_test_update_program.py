@@ -7,17 +7,6 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['TestUpdateProgram::test_update_program_authenticated 1'] = {
-    'data': {
-        'updateProgram': {
-            'program': {
-                'name': 'updated name',
-                'status': 'ACTIVE'
-            }
-        }
-    }
-}
-
 snapshots['TestUpdateProgram::test_update_program_not_authenticated 1'] = {
     'data': {
         'updateProgram': None
@@ -36,4 +25,15 @@ snapshots['TestUpdateProgram::test_update_program_not_authenticated 1'] = {
             ]
         }
     ]
+}
+
+snapshots['TestUpdateProgram::test_update_program_authenticated 1'] = {
+    'data': {
+        'updateProgram': {
+            'program': {
+                'name': 'updated name',
+                'status': 'ACTIVE'
+            }
+        }
+    }
 }
