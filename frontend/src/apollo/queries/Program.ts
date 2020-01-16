@@ -1,7 +1,7 @@
 import { gql } from 'apollo-boost';
 
 export const Program = gql`
-  query Program($id: ID!, $after: String) {
+  query Program($id: ID!) {
     program(id: $id) {
       id
       name
@@ -11,22 +11,17 @@ export const Program = gql`
       programCaId
       description
       budget
-      cashPlans(program: $id, after: $after,first: 2) {
-        pageInfo {
-          hasNextPage
-          hasPreviousPage
-          startCursor
-          endCursor
-        }
-        edges{
-          node{
-            id
-            cashAssistId
-            numberOfHouseholds
-            disbursementDate
-          }
-        }
+      frequencyOfPayments
+      cashPlus
+      location {
+        country
+        id
+        name
       }
+      populationGoal
+      scope
+      sector
+      totalNumberOfHouseholds
     }
   }
 `;
