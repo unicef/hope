@@ -66,7 +66,8 @@ In the Programme Details section the user will see the following high-level data
 * Administrative Areas of Implementation
 * Description
 * Cash+
-* Total Number of Households.
+* Total Number of Households
+* Population Goal.
 
 ## Cash Plans
 

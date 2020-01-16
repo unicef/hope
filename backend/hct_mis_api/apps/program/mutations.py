@@ -6,6 +6,7 @@ from core.permissions import is_authenticated
 from core.utils import decode_id_string
 from program.models import Program
 from program.schema import ProgramNode
+from program.validators import ProgramValidator
 
 
 class CreateProgramInput(graphene.InputObjectType):
@@ -17,6 +18,11 @@ class CreateProgramInput(graphene.InputObjectType):
     program_ca_id = graphene.String()
     location_id = graphene.String()
     budget = graphene.Float()
+    frequency_of_payments = graphene.String()
+    sector = graphene.String()
+    scope = graphene.String()
+    cash_plus = graphene.Boolean()
+    population_goal = graphene.Int()
 
 
 class UpdateProgramInput(graphene.InputObjectType):
@@ -29,6 +35,11 @@ class UpdateProgramInput(graphene.InputObjectType):
     program_ca_id = graphene.String()
     location_id = graphene.String()
     budget = graphene.Float()
+    frequency_of_payments = graphene.String()
+    sector = graphene.String()
+    scope = graphene.String()
+    cash_plus = graphene.Boolean()
+    population_goal = graphene.Int()
 
 
 class CreateProgram(graphene.Mutation):
@@ -49,7 +60,7 @@ class CreateProgram(graphene.Mutation):
         return CreateProgram(program)
 
 
-class UpdateProgram(graphene.Mutation):
+class UpdateProgram(ProgramValidator, graphene.Mutation):
     program = graphene.Field(ProgramNode)
 
     class Arguments:
@@ -63,9 +74,14 @@ class UpdateProgram(graphene.Mutation):
 
         program = Program.objects.select_for_update().get(id=program_id)
 
+        ProgramValidator().validate(program_data=program_data, program=program)
+
         for attrib, value in program_data.items():
             if hasattr(program, attrib):
                 setattr(program, attrib, value)
+
+        program.save()
+
         return UpdateProgram(program)
 
 
