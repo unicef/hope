@@ -8,7 +8,7 @@ import { theme as themeObj } from '../../theme';
 import { programStatusToColor } from '../../utils/utils';
 import { LabelizedField } from '../LabelizedField';
 import { StatusBox } from '../StatusBox';
-import { AllProgramsQueryResponse } from '../../__generated__/AllProgramsQuery.graphql';
+import { ProgramNode } from '../../__generated__/graphql';
 
 const useStyles = makeStyles((theme: typeof themeObj) => ({
   card: {
@@ -60,7 +60,7 @@ const useStyles = makeStyles((theme: typeof themeObj) => ({
   },
 }));
 interface ProgramCardProps {
-  program: AllProgramsQueryResponse['allPrograms']['edges'][number]['node'];
+  program: ProgramNode; // AllProgramsQueryResponse['allPrograms']['edges'][number]['node'];
 }
 
 export function ProgramCard({ program }: ProgramCardProps): React.ReactElement {
