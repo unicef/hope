@@ -19,6 +19,10 @@ export const AllPrograms = gql`
                     programCaId
                     description
                     budget
+                    frequencyOfPayments
+                    populationGoal
+                    sector
+                    totalNumberOfHouseholds
                 }
             }
         }
