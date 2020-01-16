@@ -19,6 +19,11 @@ export const AllCashPlans = gql`
                     cashAssistId
                     numberOfHouseholds
                     disbursementDate
+                    currency
+                    status
+                    totalEntitledQuantity
+                    totalDeliveredQuantity
+                    totalUndeliveredQuantity
                 }
             }
         }
