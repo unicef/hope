@@ -13,7 +13,7 @@ const PageContainer = styled.div`
   justify-content: center;
 `;
 export function ProgramsPage(): React.ReactElement {
-  const {  data } = useAllProgramsQuery();
+  const { data } = useAllProgramsQuery();
 
   const toolbar = (
     <PageHeader title='Programme Management'>
@@ -24,11 +24,7 @@ export function ProgramsPage(): React.ReactElement {
   );
 
   if (!data || !data.allPrograms) {
-    return (
-      <div>
-        {toolbar}
-      </div>
-    );
+    return <div>{toolbar}</div>;
   }
   const programsList = data.allPrograms.edges.map((node) => {
     const program = node.node as ProgramNode;

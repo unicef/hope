@@ -116,6 +116,7 @@ export function TableComponent<T>({
           page={page}
           onChangePage={handleChangePage}
           onChangeRowsPerPage={handleChangeRowsPerPage}
+
         />
       </Paper>
     </div>

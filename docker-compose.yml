@@ -94,5 +94,5 @@ services:
       - "3000:3000"
     volumes:
       - ./frontend/:/code
-      - node_modules:/code/node_modules
-    command: sh -c 'npm run relay&&npm start'
+      - /code/node_modules
+    command: sh -c 'npm run generate-types&&npm start'
