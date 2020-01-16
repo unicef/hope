@@ -1,5 +1,3 @@
-// import { graphql } from 'relay-runtime';
-//
 import { gql } from 'apollo-boost';
 
 export const AllCashPlans = gql`
