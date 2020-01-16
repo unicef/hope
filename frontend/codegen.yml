@@ -1,0 +1,15 @@
+overwrite: true
+schema: './data/schema.graphql'
+documents: 'src/apollo/**/*.ts'
+generates:
+  src/__generated__/introspection-result.ts:
+    plugins:
+      - fragment-matcher
+  src/__generated__/graphql.tsx:
+    config:
+      withHooks: true
+    plugins:
+      - typescript
+      - typescript-operations
+      - typescript-react-apollo
+      - typescript-resolvers

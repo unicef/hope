@@ -1,14 +1,14 @@
 import React from 'react';
+import styled from 'styled-components';
+import { makeStyles } from '@material-ui/core';
 import CssBaseline from '@material-ui/core/CssBaseline';
+import { Route, Switch, useLocation } from 'react-router-dom';
+import { MiśTheme } from '../theme';
 import { Drawer } from '../components/Drawer/Drawer';
 import { AppBar } from '../components/AppBar';
-import { Route, Switch, useLocation } from 'react-router-dom';
 import { DashboardPage } from './pages/DashboardPage';
 import { ProgramsPage } from './pages/ProgramsPage';
 import { ProgramDetailsPage } from './pages/ProgramDetailsPage';
-import styled from 'styled-components';
-import styledJSS from 'styled-jss';
-
 
 const Root = styled.div`
   display: flex;
@@ -18,17 +18,18 @@ const MainContent = styled.div`
   height: 100vh;
   overflow: auto;
 `;
-const AppBarSpacer = styledJSS('div')(({ theme }) => ({
-  ...theme.mixins.toolbar,
+const useStyles = makeStyles((theme: MiśTheme) => ({
+  appBarSpacer: theme.mixins.toolbar,
 }));
 
 export function HomeRouter(): React.ReactElement {
   const [open, setOpen] = React.useState(true);
+  const classes = useStyles({});
   const location = useLocation();
-  const handleDrawerOpen = () => {
+  const handleDrawerOpen = (): void => {
     setOpen(true);
   };
-  const handleDrawerClose = () => {
+  const handleDrawerClose = (): void => {
     setOpen(false);
   };
   return (
@@ -41,7 +42,7 @@ export function HomeRouter(): React.ReactElement {
         currentLocation={location.pathname}
       />
       <MainContent>
-        <AppBarSpacer/>
+        <div className={classes.appBarSpacer} />
         <Switch>
           <Route path='/programs/:id'>
             <ProgramDetailsPage />
