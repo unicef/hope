@@ -25,7 +25,7 @@ export const App: React.FC = () => {
                 <LoginPage />
               </Route>
               <Route path='/'>
-                {!authenticated ? <Redirect to='/login' /> : <HomeRouter />}
+                {authenticated ? <HomeRouter /> : <Redirect to='/login' />}
               </Route>
             </Switch>
           </Router>
