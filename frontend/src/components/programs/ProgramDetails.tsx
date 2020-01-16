@@ -4,7 +4,7 @@ import { Grid, Typography } from '@material-ui/core';
 import { StatusBox } from '../StatusBox';
 import { programStatusToColor } from '../../utils/utils';
 import { LabelizedField } from '../LabelizedField';
-import { ProgramQueryResponse } from '../../__generated__/ProgramQuery.graphql';
+import { ProgramNode } from '../../__generated__/graphql';
 
 const Container = styled.div`
   display: flex;
@@ -38,10 +38,12 @@ const Title = styled.div`
 `;
 
 interface ProgramDetailsProps {
-  program: ProgramQueryResponse['program'];
+  program: ProgramNode;
 }
 
-export function ProgramDetails({program}:ProgramDetailsProps): React.ReactElement {
+export function ProgramDetails({
+  program,
+}: ProgramDetailsProps): React.ReactElement {
   return (
     <Container>
       <Title>
@@ -83,10 +85,7 @@ export function ProgramDetails({program}:ProgramDetailsProps): React.ReactElemen
             />
           </Grid>
           <Grid item xs={4}>
-            <LabelizedField
-              label='Description'
-              value={program.description}
-            />
+            <LabelizedField label='Description' value={program.description} />
           </Grid>
           <Grid item xs={4}>
             <LabelizedField label='CASH+' value='No' />

@@ -1,11 +1,9 @@
 import React from 'react';
-import Container from '@material-ui/core/Container';
 import { Button } from '@material-ui/core';
 import styled from 'styled-components';
 import { ProgramCard } from '../../components/programs/ProgramCard';
 import { PageHeader } from '../../components/PageHeader';
-import allProgramsQuery,{ AllProgramsQuery } from '../../__generated__/AllProgramsQuery.graphql';
-import { useQuery } from 'relay-hooks/lib';
+import { ProgramNode, useAllProgramsQuery } from '../../__generated__/graphql';
 
 const PageContainer = styled.div`
   display: flex;
@@ -15,11 +13,8 @@ const PageContainer = styled.div`
   justify-content: center;
 `;
 export function ProgramsPage(): React.ReactElement {
-  const { props, error, retry, cached } = useQuery<AllProgramsQuery>(
-    allProgramsQuery,
-    {},
-    {},
-  );
+  const {  data } = useAllProgramsQuery();
+
   const toolbar = (
     <PageHeader title='Programme Management'>
       <Button variant='contained' color='primary'>
@@ -28,15 +23,15 @@ export function ProgramsPage(): React.ReactElement {
     </PageHeader>
   );
 
-  if (!props || !props.allPrograms) {
+  if (!data || !data.allPrograms) {
     return (
       <div>
         {toolbar}
       </div>
     );
   }
-  const programsList = props.allPrograms.edges.map((node) => {
-    const program = node.node;
+  const programsList = data.allPrograms.edges.map((node) => {
+    const program = node.node as ProgramNode;
     return <ProgramCard key={program.id} program={program} />;
   });
   return (
