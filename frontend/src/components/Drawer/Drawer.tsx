@@ -6,8 +6,8 @@ import List from '@material-ui/core/List';
 import DrawerMaterial from '@material-ui/core/Drawer';
 import React from 'react';
 import { makeStyles } from '@material-ui/core';
+import { theme as themeObj } from '../../theme';
 import { DrawerItems } from './DrawerItems';
-import { MiśTheme, theme as themeObj } from '../../theme';
 
 const useStyles = makeStyles((theme: typeof themeObj) => ({
   toolbarHeader: {
