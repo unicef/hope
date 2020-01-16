@@ -1,15 +1,12 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { Button } from '@material-ui/core';
-import { PageHeader } from '../../components/PageHeader';
-import { ProgramDetails } from '../../components/programs/ProgramDetails';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
+import { PageHeader } from '../../components/PageHeader';
+import { ProgramDetails } from '../../components/programs/ProgramDetails';
 import { CashPlanTable } from '../CashPlanTable';
-import { useQuery } from 'relay-hooks/lib';
-import programQuery, {
-  ProgramQuery,
-} from '../../__generated__/ProgramQuery.graphql';
+import { ProgramNode, useProgramQuery } from '../../__generated__/graphql';
 
 const useStyles = makeStyles({
   container: {
@@ -28,16 +25,14 @@ const PageContainer = styled.div`
 
 export function ProgramDetailsPage(): React.ReactElement {
   const { id } = useParams();
-  const { props, error, retry, cached } = useQuery<ProgramQuery>(
-    programQuery,
-    { id },
-    {},
-  );
+  const { data } = useProgramQuery({
+    variables: { id },
+  });
   const classes = useStyles({});
-  if(!props){
+  if (!data) {
     return null;
   }
-  const { program } = props;
+  const program = data.program as ProgramNode;
   return (
     <div>
       <PageHeader
@@ -49,9 +44,9 @@ export function ProgramDetailsPage(): React.ReactElement {
         </Button>
       </PageHeader>
       <div className={classes.container}>
-        <ProgramDetails program={program}/>
+        <ProgramDetails program={program} />
         <PageContainer>
-          <CashPlanTable cashPlans={program.cashPlans} />
+          <CashPlanTable program={program} />
         </PageContainer>
       </div>
     </div>

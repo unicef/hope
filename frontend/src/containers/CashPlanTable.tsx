@@ -1,139 +1,77 @@
 import React, { ReactElement } from 'react';
-import { TableComponent } from '../components/table/TableComponent';
-import { HeadCell } from '../components/table/EnhancedTableHead';
-import styled from 'styled-components';
 import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
-import { StatusBox } from '../components/StatusBox';
-import { programStatusToColor } from '../utils/utils';
-import { LabelizedField } from '../components/LabelizedField';
-import { ProgramQueryResponse } from '../__generated__/ProgramQuery.graphql';
+import { CashPlanNode, ProgramNode } from '../__generated__/graphql';
+import { TableComponent } from '../components/table/TableComponent';
+import { HeadCell } from '../components/table/EnhancedTableHead';
 
-interface CashPlan {
-  id: string;
-  cashPlanId: string;
-  status: string;
-  householdsCount: number;
-  currency: string;
-  totalEntitledQuantity: number;
-  totalDeliveredQuantity: number;
-  totalUndeliveredQuantity: number;
-  dispersionDate: string;
-}
 
-const data: CashPlan[] = [
-  {
-    id: '1',
-    cashPlanId: '183-19-CSH-00102',
-    status: 'active',
-    householdsCount: 123,
-    currency: 'PHP',
-    totalDeliveredQuantity: 112123,
-    totalEntitledQuantity: 123123,
-    totalUndeliveredQuantity: 123132,
-    dispersionDate: '09/01/2020',
-  },
-  {
-    id: '1',
-    cashPlanId: '183-19-CSH-00102',
-    status: 'active',
-    householdsCount: 123,
-    currency: 'PHP',
-    totalDeliveredQuantity: 112123,
-    totalEntitledQuantity: 123123,
-    totalUndeliveredQuantity: 123132,
-    dispersionDate: '09/01/2020',
-  },
-  {
-    id: '1',
-    cashPlanId: '183-19-CSH-00102',
-    status: 'active',
-    householdsCount: 123,
-    currency: 'PHP',
-    totalDeliveredQuantity: 112123,
-    totalEntitledQuantity: 123123,
-    totalUndeliveredQuantity: 123132,
-    dispersionDate: '09/01/2020',
-  },
-  {
-    id: '1',
-    cashPlanId: '183-19-CSH-00102',
-    status: 'active',
-    householdsCount: 123,
-    currency: 'PHP',
-    totalDeliveredQuantity: 112123,
-    totalEntitledQuantity: 123123,
-    totalUndeliveredQuantity: 123132,
-    dispersionDate: '09/01/2020',
-  },
-];
-
-const headCells: HeadCell<CashPlan>[] = [
+const headCells: HeadCell<CashPlanNode>[] = [
   {
     disablePadding: false,
     label: 'Cash Plan ID',
-    id: 'cashPlanId',
+    id: 'cashAssistId',
     numeric: false,
   },
-  {
-    disablePadding: false,
-    label: 'Status',
-    id: 'cashPlanId',
-    numeric: false,
-  },
+  // {
+  //   disablePadding: false,
+  //   label: 'Status',
+  //   id: 'cashPlanId',
+  //   numeric: false,
+  // },
   {
     disablePadding: false,
     label: 'No. of Households',
-    id: 'householdsCount',
+    id: 'numberOfHouseholds',
     numeric: true,
   },
-  {
-    disablePadding: false,
-    label: 'Currency',
-    id: 'currency',
-    numeric: false,
-  },
-  {
-    disablePadding: false,
-    label: 'Total Entitled Quantity',
-    id: 'totalEntitledQuantity',
-    numeric: true,
-  },
-  {
-    disablePadding: false,
-    label: 'Total Delivered Quantity',
-    id: 'totalDeliveredQuantity',
-    numeric: true,
-  },
-  {
-    disablePadding: false,
-    label: 'Total Undelivered Quantity',
-    id: 'totalUndeliveredQuantity',
-    numeric: true,
-  },
+  // {
+  //   disablePadding: false,
+  //   label: 'Currency',
+  //   id: 'currency',
+  //   numeric: false,
+  // },
+  // {
+  //   disablePadding: false,
+  //   label: 'Total Entitled Quantity',
+  //   id: 'totalEntitledQuantity',
+  //   numeric: true,
+  // },
+  // {
+  //   disablePadding: false,
+  //   label: 'Total Delivered Quantity',
+  //   id: 'totalDeliveredQuantity',
+  //   numeric: true,
+  // },
+  // {
+  //   disablePadding: false,
+  //   label: 'Total Undelivered Quantity',
+  //   id: 'totalUndeliveredQuantity',
+  //   numeric: true,
+  // },
   {
     disablePadding: false,
     label: 'Dispersion Date',
-    id: 'dispersionDate',
+    id: 'disbursementDate',
     numeric: false,
   },
 ];
+// const StatusContainer = styled.div`
+//   width: 120px;
+// `;
 
-const StatusContainer = styled.div`
-  width: 120px;
-`;
 
 interface CashPlanTableProps {
-  cashPlans: ProgramQueryResponse['program']['cashPlans'];
+  program: ProgramNode;
 }
-export function CashPlanTable({ cashPlans }: CashPlanTableProps): ReactElement {
-  console.log('cashPlans', cashPlans);
+export function CashPlanTable({ program }: CashPlanTableProps): ReactElement {
+  const cashPlans = program.cashPlans.edges.map((edge) => edge.node);
   /* eslint-disable @typescript-eslint/no-empty-function */
   return (
-    <TableComponent<CashPlanTableProps['cashPlans']['edges'][number]['node']>
+    <TableComponent<CashPlanNode>
       title='Cash Plans'
-      data={cashPlans.edges}
-      renderRow={(row) => {
+      data={cashPlans}
+      renderRow={(row ) => {
         return (
           <TableRow
             hover
@@ -141,21 +79,21 @@ export function CashPlanTable({ cashPlans }: CashPlanTableProps): ReactElement {
             role='checkbox'
             key={row.id}
           >
-            <TableCell align='left'>{row.cashPlanId}</TableCell>
-            <TableCell align='left'>
-              <StatusContainer>
-                <StatusBox
-                  status='ACTIVE'
-                  statusToColor={programStatusToColor}
-                />
-              </StatusContainer>
-            </TableCell>
-            <TableCell align='right'>{row.householdsCount}</TableCell>
-            <TableCell align='left'>{row.currency}</TableCell>
-            <TableCell align='right'>{row.totalEntitledQuantity}</TableCell>
-            <TableCell align='right'>{row.totalDeliveredQuantity}</TableCell>
-            <TableCell align='right'>{row.totalUndeliveredQuantity}</TableCell>
-            <TableCell align='left'>{row.dispersionDate}</TableCell>
+            <TableCell align='left'>{row.cashAssistId}</TableCell>
+            {/*<TableCell align='left'>*/}
+            {/*  <StatusContainer>*/}
+            {/*    <StatusBox*/}
+            {/*      status='ACTIVE'*/}
+            {/*      statusToColor={programStatusToColor}*/}
+            {/*    />*/}
+            {/*  </StatusContainer>*/}
+            {/*</TableCell>*/}
+            <TableCell align='right'>{row.numberOfHouseholds}</TableCell>
+            {/*<TableCell align='left'>{row.currency}</TableCell>*/}
+            {/*<TableCell align='right'>{row.totalEntitledQuantity}</TableCell>*/}
+            {/*<TableCell align='right'>{row.totalDeliveredQuantity}</TableCell>*/}
+            {/*<TableCell align='right'>{row.totalUndeliveredQuantity}</TableCell>*/}
+            <TableCell align='left'>{row.disbursementDate}</TableCell>
           </TableRow>
         );
       }}
@@ -164,9 +102,9 @@ export function CashPlanTable({ cashPlans }: CashPlanTableProps): ReactElement {
       rowsPerPage={5}
       page={0}
       itemsCount={50}
-      handleChangePage={(event) => {}}
-      handleChangeRowsPerPage={(event) => {}}
-      handleRequestSort={(event, property) => {}}
+      handleChangePage={() => {}}
+      handleChangeRowsPerPage={() => {}}
+      handleRequestSort={() => {}}
       orderBy={null}
       order='asc'
     />
