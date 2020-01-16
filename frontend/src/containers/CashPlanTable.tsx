@@ -1,6 +1,8 @@
 import React, { ReactElement, useState } from 'react';
 import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
+import  styled from 'styled-components';
+import Moment from 'react-moment';
 import {
   CashPlanNode,
   ProgramNode,
@@ -8,6 +10,8 @@ import {
 } from '../__generated__/graphql';
 import { TableComponent } from '../components/table/TableComponent';
 import { HeadCell } from '../components/table/EnhancedTableHead';
+import { StatusBox } from '../components/StatusBox';
+import { programStatusToColor } from '../utils/utils';
 
 const headCells: HeadCell<CashPlanNode>[] = [
   {
@@ -16,42 +20,42 @@ const headCells: HeadCell<CashPlanNode>[] = [
     id: 'cashAssistId',
     numeric: false,
   },
-  // {
-  //   disablePadding: false,
-  //   label: 'Status',
-  //   id: 'cashPlanId',
-  //   numeric: false,
-  // },
+  {
+    disablePadding: false,
+    label: 'Status',
+    id: 'status',
+    numeric: false,
+  },
   {
     disablePadding: false,
     label: 'No. of Households',
     id: 'numberOfHouseholds',
     numeric: true,
   },
-  // {
-  //   disablePadding: false,
-  //   label: 'Currency',
-  //   id: 'currency',
-  //   numeric: false,
-  // },
-  // {
-  //   disablePadding: false,
-  //   label: 'Total Entitled Quantity',
-  //   id: 'totalEntitledQuantity',
-  //   numeric: true,
-  // },
-  // {
-  //   disablePadding: false,
-  //   label: 'Total Delivered Quantity',
-  //   id: 'totalDeliveredQuantity',
-  //   numeric: true,
-  // },
-  // {
-  //   disablePadding: false,
-  //   label: 'Total Undelivered Quantity',
-  //   id: 'totalUndeliveredQuantity',
-  //   numeric: true,
-  // },
+  {
+    disablePadding: false,
+    label: 'Currency',
+    id: 'currency',
+    numeric: false,
+  },
+  {
+    disablePadding: false,
+    label: 'Total Entitled Quantity',
+    id: 'totalEntitledQuantity',
+    numeric: true,
+  },
+  {
+    disablePadding: false,
+    label: 'Total Delivered Quantity',
+    id: 'totalDeliveredQuantity',
+    numeric: true,
+  },
+  {
+    disablePadding: false,
+    label: 'Total Undelivered Quantity',
+    id: 'totalUndeliveredQuantity',
+    numeric: true,
+  },
   {
     disablePadding: false,
     label: 'Dispersion Date',
@@ -59,9 +63,9 @@ const headCells: HeadCell<CashPlanNode>[] = [
     numeric: false,
   },
 ];
-// const StatusContainer = styled.div`
-//   width: 120px;
-// `;
+const StatusContainer = styled.div`
+  width: 120px;
+`;
 
 interface CashPlanTableProps {
   program: ProgramNode;
@@ -82,12 +86,6 @@ export function CashPlanTable({ program }: CashPlanTableProps): ReactElement {
   let { edges } = data.allCashPlans;
   edges = edges.slice(rowsPerPage * page, rowsPerPage * page + rowsPerPage);
   const cashPlans = edges.map((edge) => edge.node as CashPlanNode);
-  console.log(
-    'data',
-    data.allCashPlans,
-    data.allCashPlans.edges.length,
-    cashPlans,
-  );
   /* eslint-disable @typescript-eslint/no-empty-function */
   return (
     <TableComponent<CashPlanNode>
@@ -102,20 +100,20 @@ export function CashPlanTable({ program }: CashPlanTableProps): ReactElement {
             key={row.id}
           >
             <TableCell align='left'>{row.cashAssistId}</TableCell>
-            {/*<TableCell align='left'>*/}
-            {/*  <StatusContainer>*/}
-            {/*    <StatusBox*/}
-            {/*      status='ACTIVE'*/}
-            {/*      statusToColor={programStatusToColor}*/}
-            {/*    />*/}
-            {/*  </StatusContainer>*/}
-            {/*</TableCell>*/}
+            <TableCell align='left'>
+              <StatusContainer>
+                <StatusBox
+                  status={row.status}
+                  statusToColor={programStatusToColor}
+                />
+              </StatusContainer>
+            </TableCell>
             <TableCell align='right'>{row.numberOfHouseholds}</TableCell>
-            {/*<TableCell align='left'>{row.currency}</TableCell>*/}
-            {/*<TableCell align='right'>{row.totalEntitledQuantity}</TableCell>*/}
-            {/*<TableCell align='right'>{row.totalDeliveredQuantity}</TableCell>*/}
-            {/*<TableCell align='right'>{row.totalUndeliveredQuantity}</TableCell>*/}
-            <TableCell align='left'>{row.disbursementDate}</TableCell>
+            <TableCell align='left'>{row.currency}</TableCell>
+            <TableCell align='right'>{row.totalEntitledQuantity}</TableCell>
+            <TableCell align='right'>{row.totalDeliveredQuantity}</TableCell>
+            <TableCell align='right'>{row.totalUndeliveredQuantity}</TableCell>
+            <TableCell align='left'><Moment format="MM/DD/YYYY">{row.disbursementDate}</Moment></TableCell>
           </TableRow>
         );
       }}
@@ -145,7 +143,6 @@ export function CashPlanTable({ program }: CashPlanTableProps): ReactElement {
               ...prev.allCashPlans.edges,
               ...fetchMoreResult.allCashPlans.edges,
             ];
-            console.log('updateQuery', newData);
             return newData;
           },
         });

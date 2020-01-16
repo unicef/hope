@@ -3,6 +3,9 @@ version: '3.7'
 volumes:
   backend-data:
   node_modules:
+  db:
+  db_ca:
+  db_reg:
 
 services:
   proxy:
@@ -66,16 +69,22 @@ services:
 
   db:
     image: postgres:9.5.15-alpine
+    volumes:
+       - db:/data/postgres
     env_file:
       - .env
 
   cash_assist_datahub_db:
     image: postgres:9.5.15-alpine
+    volumes:
+       - db_ca:/data/postgres
     env_file:
       - .env
 
   registration_datahub_db:
     image: postgres:9.5.15-alpine
+    volumes:
+       - db_reg:/data/postgres
     env_file:
       - .env
 
