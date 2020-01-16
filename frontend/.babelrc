@@ -2,5 +2,5 @@
   "presets": [
     "react-app"
   ],
-  "plugins": [["relay", { "artifactDirectory": "./src/__generated__" }]]
+  "plugins": []
 }
