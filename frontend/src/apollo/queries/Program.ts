@@ -11,7 +11,7 @@ export const Program = gql`
       programCaId
       description
       budget
-      cashPlans(program: $id, after: $after) {
+      cashPlans(program: $id, after: $after,first: 2) {
         pageInfo {
           hasNextPage
           hasPreviousPage

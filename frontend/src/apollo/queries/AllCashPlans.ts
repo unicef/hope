@@ -13,6 +13,7 @@ export const AllCashPlans = gql`
                 endCursor
             }
             edges{
+                cursor
                 node{
                     id
                     cashAssistId
