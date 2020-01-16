@@ -1,15 +1,14 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
-import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
-import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
-import { theme as themeObj } from '../../theme';
 import { Grid } from '@material-ui/core';
+import { theme as themeObj } from '../../theme';
 import { programStatusToColor } from '../../utils/utils';
 import { LabelizedField } from '../LabelizedField';
 import { StatusBox } from '../StatusBox';
+import { ProgramNode } from '../../__generated__/graphql';
 
 const useStyles = makeStyles((theme: typeof themeObj) => ({
   card: {
@@ -20,7 +19,7 @@ const useStyles = makeStyles((theme: typeof themeObj) => ({
     display: 'flex',
     flexDirection: 'row',
   },
-  aContainer:{
+  aContainer: {
     textDecoration: 'none',
   },
   container: {
@@ -60,12 +59,15 @@ const useStyles = makeStyles((theme: typeof themeObj) => ({
     lineHeight: '26px',
   },
 }));
+interface ProgramCardProps {
+  program: ProgramNode; // AllProgramsQueryResponse['allPrograms']['edges'][number]['node'];
+}
 
-export function ProgramCard() {
-  const classes = useStyles({ status: 'ACTIVE' });
+export function ProgramCard({ program }: ProgramCardProps): React.ReactElement {
+  const classes = useStyles({ status: program.status });
 
   return (
-    <a href='/programs/1' className={classes.aContainer}>
+    <a href={`/programs/${program.id}`} className={classes.aContainer}>
       <Card className={classes.card}>
         <div className={classes.statusBar} />
         <div className={classes.container}>
@@ -80,18 +82,16 @@ export function ProgramCard() {
               <Grid item xs={5}>
                 <LabelizedField label='status'>
                   <StatusBox
-                    status='ACTIVE'
+                    status={program.status}
                     statusToColor={programStatusToColor}
                   />
                 </LabelizedField>
               </Grid>
               <Grid item xs={12}>
                 <div className={classes.tittleBox}>
-                  <Typography className={classes.label}>
-                    Programme
-                  </Typography>
+                  <Typography className={classes.label}>Programme</Typography>
                   <Typography className={classes.tittle}>
-                    Helping young children in remote locations
+                    {program.name}
                   </Typography>
                 </div>
               </Grid>
@@ -100,7 +100,10 @@ export function ProgramCard() {
                 <LabelizedField label='Frequency of payments' value='Regular' />
               </Grid>
               <Grid item xs={6}>
-                <LabelizedField label='Budget' value='2,500,000.00 USD' />
+                <LabelizedField
+                  label='Budget'
+                  value={`${program.budget} USD`}
+                />
               </Grid>
 
               <Grid item xs={6}>
@@ -115,11 +118,6 @@ export function ProgramCard() {
               </Grid>
             </Grid>
           </CardContent>
-          <CardActions className={classes.actions}>
-            <Button size='medium' color='primary' component="a" href="/programs/1/edit">
-              EDIT
-            </Button>
-          </CardActions>
         </div>
       </Card>{' '}
     </a>

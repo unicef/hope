@@ -1,5 +1,5 @@
 import React from 'react';
 
-export function LoginPage() {
+export function LoginPage(): React.ReactElement {
   return <div>Login</div>;
 }
