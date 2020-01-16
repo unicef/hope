@@ -9,6 +9,7 @@ import { programStatusToColor } from '../../utils/utils';
 import { LabelizedField } from '../LabelizedField';
 import { StatusBox } from '../StatusBox';
 import { ProgramNode } from '../../__generated__/graphql';
+import moment from 'moment';
 
 const useStyles = makeStyles((theme: typeof themeObj) => ({
   card: {
@@ -76,7 +77,7 @@ export function ProgramCard({ program }: ProgramCardProps): React.ReactElement {
               <Grid item xs={7}>
                 <LabelizedField
                   label='TIMEFRAME'
-                  value='01 Jan 2019 - 31 Dec 2020'
+                  value={`${moment(program.startDate).format('DD MMM YYYY')} - ${moment(program.endDate).format('DD MMM YYYY')}`}
                 />
               </Grid>
               <Grid item xs={5}>
@@ -107,14 +108,14 @@ export function ProgramCard({ program }: ProgramCardProps): React.ReactElement {
               </Grid>
 
               <Grid item xs={6}>
-                <LabelizedField label='Population Goal' value='25,000' />
+                <LabelizedField label='Population Goal' value={program.populationGoal} />
               </Grid>
               <Grid item xs={6}>
-                <LabelizedField label='no. of households' value='-' />
+                <LabelizedField label='no. of households' value={program.totalNumberOfHouseholds} />
               </Grid>
 
               <Grid item xs={6}>
-                <LabelizedField label='SECTOR' value='Nutricion' />
+                <LabelizedField label='SECTOR' value={program.sector} />
               </Grid>
             </Grid>
           </CardContent>
