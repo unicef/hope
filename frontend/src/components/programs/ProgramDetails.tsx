@@ -5,6 +5,7 @@ import { StatusBox } from '../StatusBox';
 import { programStatusToColor } from '../../utils/utils';
 import { LabelizedField } from '../LabelizedField';
 import { ProgramNode } from '../../__generated__/graphql';
+import moment from 'moment';
 
 const Container = styled.div`
   display: flex;
@@ -62,37 +63,46 @@ export function ProgramDetails({
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>
-            <LabelizedField label='START DATE' value={program.startDate} />
+            <LabelizedField label='START DATE' value={moment(program.startDate).format('MM/DD/YYYY')} />
           </Grid>
           <Grid item xs={4}>
-            <LabelizedField label='END DATE' value={program.endDate} />
+            <LabelizedField label='END DATE' value={moment(program.endDate).format('MM/DD/YYYY')} />
           </Grid>
 
           <Grid item xs={4}>
-            <LabelizedField label='Sector' value='Child Protection' />
+            <LabelizedField label='Sector' value={program.sector} />
           </Grid>
           <Grid item xs={4}>
-            <LabelizedField label='Scope' value='Full' />
+            <LabelizedField label='Scope' value={program.scope} />
           </Grid>
           <Grid item xs={4}>
-            <LabelizedField label='Frequency of Payment' value='Regular' />
+            <LabelizedField
+              label='Frequency of Payment'
+              value={program.frequencyOfPayments}
+            />
           </Grid>
 
           <Grid item xs={4}>
             <LabelizedField
               label='Administrative Areas of implementation'
-              value='Lorem ipsum'
+              value={program.location.name}
             />
           </Grid>
           <Grid item xs={4}>
             <LabelizedField label='Description' value={program.description} />
           </Grid>
           <Grid item xs={4}>
-            <LabelizedField label='CASH+' value='No' />
+            <LabelizedField
+              label='CASH+'
+              value={program.cashPlus ? 'Yes' : 'No'}
+            />
           </Grid>
         </Grid>
         <NumberOfHouseHolds>
-          <LabelizedField label='Total Number of Households' value='-' />
+          <LabelizedField
+            label='Total Number of Households'
+            value={program.totalNumberOfHouseholds}
+          />
         </NumberOfHouseHolds>
       </OverviewContainer>
     </Container>
