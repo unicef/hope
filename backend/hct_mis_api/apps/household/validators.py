@@ -1,4 +1,3 @@
-from PIL import Image
 from django.core.exceptions import ValidationError
 
 from core.validators import BaseValidator
@@ -13,5 +12,7 @@ class HouseholdValidator(BaseValidator):
         if len(files) > 1:
             raise ValidationError('You can upload only one image.')
 
-        for name, file in files.items():
-            import ipdb; ipdb.set_trace()
+        file = next(iter(files.values()))
+
+        if file and 'image' not in file.content_type:
+            raise ValidationError('File is not a valid image')

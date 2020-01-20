@@ -1,7 +1,7 @@
 import io
+import sys
 
 from PIL import Image
-from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
 from account.fixtures import UserFactory
@@ -48,51 +48,62 @@ class TestHouseholdCreate(APITestCase):
             }
         }
 
-        img = Image.new('RGB', (60, 30), color='red')
-
-        self.image = InMemoryUploadedFile(
-            img,
-            'consent',
-            'consent.jpg',
-            "'image/jpeg'",
-            img.size,
-            None,
+        img = io.BytesIO(
+            Image.new('RGB', (60, 30), color='red').tobytes()
         )
 
-        self.file = io.BytesIO(b'Hello')
+        self.image = InMemoryUploadedFile(
+            file=img,
+            field_name='consent',
+            name='consent.jpg',
+            content_type="'image/jpeg'",
+            size=(60, 30),
+            charset=None,
+        )
 
-    def test_household_image_authenticated(self):
+        text_file = io.BytesIO(b'Hello')
+
+        self.file = InMemoryUploadedFile(
+            file=text_file,
+            field_name='consent',
+            name='consent.txt',
+            content_type="'text/plain'",
+            size=sys.getsizeof(text_file),
+            charset=None,
+        )
+
+    def test_household_create_authenticated(self):
         self.snapshot_graphql_request(
             request_string=self.CREATE_HOUSEHOLD_MUTATION,
             context={
                 'user': self.user,
-                'files': {'consent.jpg': self.image},
+                'files': {'1': self.image},
             },
             variables=self.household_data,
         )
-    #
-    # def test_household_image_not_authenticated(self):
-    #     self.snapshot_graphql_request(
-    #         request_string=self.CREATE_HOUSEHOLD_MUTATION,
-    #         context={
-    #             'files': {'consent.jpg': self.image},
-    #         },
-    #         variables=self.household_data,
-    #     )
-    #
-    # def test_household_consent_validation_no_file(self):
-    #     self.snapshot_graphql_request(
-    #         request_string=self.CREATE_HOUSEHOLD_MUTATION,
-    #         context={'user': self.user},
-    #         variables=self.household_data,
-    #     )
-    #
-    # def test_household_consent_validation_not_image(self):
-    #     self.snapshot_graphql_request(
-    #         request_string=self.CREATE_HOUSEHOLD_MUTATION,
-    #         context={
-    #             'user': self.user,
-    #             'files': {'consent.jpg': self.file},
-    #         },
-    #         variables=self.household_data,
+
+    def test_household_create_not_authenticated(self):
+        self.snapshot_graphql_request(
+            request_string=self.CREATE_HOUSEHOLD_MUTATION,
+            context={
+                'files': {'1': self.image},
+            },
+            variables=self.household_data,
+        )
+
+    def test_household_consent_validation_no_file(self):
+        self.snapshot_graphql_request(
+            request_string=self.CREATE_HOUSEHOLD_MUTATION,
+            context={'user': self.user},
+            variables=self.household_data,
+        )
+
+    def test_household_consent_validation_not_image(self):
+        self.snapshot_graphql_request(
+            request_string=self.CREATE_HOUSEHOLD_MUTATION,
+            context={
+                'user': self.user,
+                'files': {'1': self.file},
+            },
+            variables=self.household_data,
         )

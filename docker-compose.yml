@@ -29,8 +29,6 @@ services:
     image: redis:4.0.11-alpine3.8
 
   backend:
-    stdin_open: true
-    tty: true
     image: unicef/hct-mis-backend
     env_file:
       - .env
