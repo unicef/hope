@@ -29,9 +29,16 @@ class Household(TimeStampedUUIDModel):
     )
     family_size = models.PositiveIntegerField(blank=True, null=True)
     address = models.CharField(max_length=255, blank=True, null=True)
-    location = models.ForeignKey('core.Location', related_name='households', on_delete=models.CASCADE)
-    registration_data_import_id = models.ForeignKey('RegistrationDataImport', related_name='households',
-                                                    on_delete=models.CASCADE)
+    location = models.ForeignKey(
+        'core.Location',
+        related_name='households',
+        on_delete=models.CASCADE,
+    )
+    registration_data_import_id = models.ForeignKey(
+        'RegistrationDataImport',
+        related_name='households',
+        on_delete=models.CASCADE,
+    )
 
 
 class Individual(TimeStampedUUIDModel):
@@ -78,9 +85,16 @@ class Individual(TimeStampedUUIDModel):
         choices=IDENTIFICATION_TYPE_CHOICE,
     )
     identification_number = models.CharField(max_length=255)
-    household = models.ForeignKey('Household', related_name='individuals', on_delete=models.CASCADE)
-    registration_data_import_id = models.ForeignKey('RegistrationDataImport', related_name='individuals',
-                                                    on_delete=models.CASCADE)
+    household = models.ForeignKey(
+        'Household',
+        related_name='individuals',
+        on_delete=models.CASCADE,
+    )
+    registration_data_import_id = models.ForeignKey(
+        'RegistrationDataImport',
+        related_name='individuals',
+        on_delete=models.CASCADE,
+    )
 
     def __str__(self):
         return self.full_name
@@ -105,8 +119,11 @@ class RegistrationDataImport(TimeStampedUUIDModel):
         choices=STATUS_CHOICE,
     )
     import_date = models.DateTimeField()
-    imported_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='registration_data_imports',
-                                    on_delete=models.CASCADE)
+    imported_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name='registration_data_imports',
+        on_delete=models.CASCADE,
+    )
     data_source = models.CharField(
         max_length=255,
         choices=DATA_SOURCE_CHOICE,

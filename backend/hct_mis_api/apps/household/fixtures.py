@@ -1,4 +1,5 @@
 import factory
+from factory import fuzzy
 from pytz import utc
 
 from account.fixtures import UserFactory
@@ -7,7 +8,6 @@ from household.models import Household, RegistrationDataImport
 
 
 class RegistrationDataImportFactory(factory.DjangoModelFactory):
-
     class Meta:
         model = RegistrationDataImport
 
@@ -36,7 +36,6 @@ class RegistrationDataImportFactory(factory.DjangoModelFactory):
 
 
 class HouseholdFactory(factory.DjangoModelFactory):
-
     class Meta:
         model = Household
 
