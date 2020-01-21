@@ -1,7 +1,7 @@
 import React, { ReactElement, useState } from 'react';
 import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
-import  styled from 'styled-components';
+import styled from 'styled-components';
 import Moment from 'react-moment';
 import {
   CashPlanNode,
@@ -113,7 +113,9 @@ export function CashPlanTable({ program }: CashPlanTableProps): ReactElement {
             <TableCell align='right'>{row.totalEntitledQuantity}</TableCell>
             <TableCell align='right'>{row.totalDeliveredQuantity}</TableCell>
             <TableCell align='right'>{row.totalUndeliveredQuantity}</TableCell>
-            <TableCell align='left'><Moment format="MM/DD/YYYY">{row.disbursementDate}</Moment></TableCell>
+            <TableCell align='left'>
+              <Moment format='MM/DD/YYYY'>{row.disbursementDate}</Moment>
+            </TableCell>
           </TableRow>
         );
       }}
@@ -121,7 +123,7 @@ export function CashPlanTable({ program }: CashPlanTableProps): ReactElement {
       rowsPerPageOptions={[5, 10, 15]}
       rowsPerPage={rowsPerPage}
       page={page}
-      itemsCount={50}
+      itemsCount={data.allCashPlans.totalCount}
       handleChangePage={(event, newPage) => {
         if (newPage < page) {
           setPage(newPage);
@@ -139,8 +141,13 @@ export function CashPlanTable({ program }: CashPlanTableProps): ReactElement {
           updateQuery: (prev, { fetchMoreResult }) => {
             const newData = { ...prev };
             newData.allCashPlans = { ...prev.allCashPlans };
+            const newIds = fetchMoreResult.allCashPlans.edges.map(
+              ({ node }) => node.id,
+            );
             newData.allCashPlans.edges = [
-              ...prev.allCashPlans.edges,
+              ...prev.allCashPlans.edges.filter((node) =>
+                !newIds.includes(node.node.id),
+              ),
               ...fetchMoreResult.allCashPlans.edges,
             ];
             return newData;
