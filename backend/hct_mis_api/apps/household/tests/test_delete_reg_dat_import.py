@@ -24,9 +24,8 @@ class TestDeleteRegistrationDataImport(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.DELETE_PROGRAM_MUTATION,
             variables={
-                'registrationDataImportId': self.id_to_base64(
-                    self.reg_data_import.id,
-                    'RegistrationDataImport',
+                "registrationDataImportId": self.id_to_base64(
+                    self.reg_data_import.id, "RegistrationDataImport",
                 )
             },
         )
@@ -34,11 +33,10 @@ class TestDeleteRegistrationDataImport(APITestCase):
     def test_delete_reg_data_import_authenticated(self):
         self.snapshot_graphql_request(
             request_string=self.DELETE_PROGRAM_MUTATION,
-            context={'user': self.user},
+            context={"user": self.user},
             variables={
-                'registrationDataImportId': self.id_to_base64(
-                    self.reg_data_import.id,
-                    'RegistrationDataImport',
+                "registrationDataImportId": self.id_to_base64(
+                    self.reg_data_import.id, "RegistrationDataImport",
                 )
             },
         )

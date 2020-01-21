@@ -22,97 +22,85 @@ class TestChangeProgramStatus(APITestCase):
         self.location = LocationFactory.create()
 
     def test_draft_to_active(self):
-        program = ProgramFactory.create(
-            status='DRAFT',
-        )
+        program = ProgramFactory.create(status="DRAFT",)
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
-            context={'user': self.user},
+            context={"user": self.user},
             variables={
-                'programData': {
-                    'id': self.id_to_base64(program.id, 'Program'),
-                    'status': 'ACTIVE'
+                "programData": {
+                    "id": self.id_to_base64(program.id, "Program"),
+                    "status": "ACTIVE",
                 }
             },
         )
 
     def test_active_to_finished(self):
-        program = ProgramFactory.create(
-            status='ACTIVE',
-        )
+        program = ProgramFactory.create(status="ACTIVE",)
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
-            context={'user': self.user},
+            context={"user": self.user},
             variables={
-                'programData': {
-                    'id': self.id_to_base64(program.id, 'Program'),
-                    'status': 'FINISHED'
+                "programData": {
+                    "id": self.id_to_base64(program.id, "Program"),
+                    "status": "FINISHED",
                 }
             },
         )
 
     def test_finished_to_active(self):
-        program = ProgramFactory.create(
-            status='FINISHED',
-        )
+        program = ProgramFactory.create(status="FINISHED",)
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
-            context={'user': self.user},
+            context={"user": self.user},
             variables={
-                'programData': {
-                    'id': self.id_to_base64(program.id, 'Program'),
-                    'status': 'ACTIVE'
+                "programData": {
+                    "id": self.id_to_base64(program.id, "Program"),
+                    "status": "ACTIVE",
                 }
             },
         )
 
     def test_draft_to_finished(self):
-        program = ProgramFactory.create(
-            status='DRAFT',
-        )
+        program = ProgramFactory.create(status="DRAFT",)
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
-            context={'user': self.user},
+            context={"user": self.user},
             variables={
-                'programData': {
-                    'id': self.id_to_base64(program.id, 'Program'),
-                    'status': 'FINISHED'
+                "programData": {
+                    "id": self.id_to_base64(program.id, "Program"),
+                    "status": "FINISHED",
                 }
             },
         )
 
     def test_active_to_draft(self):
-        program = ProgramFactory.create(
-            status='ACTIVE',
-        )
+        program = ProgramFactory.create(status="ACTIVE",)
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
-            context={'user': self.user},
+            context={"user": self.user},
             variables={
-                'programData': {
-                    'id': self.id_to_base64(program.id, 'Program'),
-                    'status': 'DRAFT'
+                "programData": {
+                    "id": self.id_to_base64(program.id, "Program"),
+                    "status": "DRAFT",
                 }
             },
         )
 
     def test_finished_to_draft(self):
-        program = ProgramFactory.create(
-            status='FINISHED',
-        )
+        program = ProgramFactory.create(status="FINISHED",)
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
-            context={'user': self.user},
+            context={"user": self.user},
             variables={
-                'programData': {
-                    'id': self.id_to_base64(program.id, 'Program'),
-                    'status': 'DRAFT'
+                "programData": {
+                    "id": self.id_to_base64(program.id, "Program"),
+                    "status": "DRAFT",
                 }
             },
         )

@@ -22,16 +22,16 @@ class TestDeleteLocation(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.DELETE_LOCATION_MUTATION,
             variables={
-                'locationId': self.id_to_base64(self.location.id, 'Location'),
+                "locationId": self.id_to_base64(self.location.id, "Location"),
             },
         )
 
     def test_delete_location_authenticated(self):
         self.snapshot_graphql_request(
             request_string=self.DELETE_LOCATION_MUTATION,
-            context={'user': self.user},
+            context={"user": self.user},
             variables={
-                'locationId': self.id_to_base64(self.location.id, 'Location'),
+                "locationId": self.id_to_base64(self.location.id, "Location"),
             },
         )
 

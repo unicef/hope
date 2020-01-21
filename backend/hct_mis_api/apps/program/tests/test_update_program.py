@@ -21,11 +21,11 @@ class TestUpdateProgram(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
             variables={
-                'programData': {
-                    'id': 'UHJvZ3JhbU5vZGU6MTc4MWEwMGMtMjhl'
-                          'OS00OGRmLTlhOTUtZDg5ZWVmYWM1ZmY0',
-                    'name': 'updated name',
-                    'status': 'FINISHED'
+                "programData": {
+                    "id": "UHJvZ3JhbU5vZGU6MTc4MWEwMGMtMjhl"
+                    "OS00OGRmLTlhOTUtZDg5ZWVmYWM1ZmY0",
+                    "name": "updated name",
+                    "status": "FINISHED",
                 }
             },
         )
@@ -33,21 +33,21 @@ class TestUpdateProgram(APITestCase):
     def test_update_program_authenticated(self):
         user = UserFactory.create()
 
-        program = ProgramFactory.create(status='DRAFT')
+        program = ProgramFactory.create(status="DRAFT")
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
-            context={'user': user},
+            context={"user": user},
             variables={
-                'programData': {
-                    'id': self.id_to_base64(program.id, 'Program'),
-                    'name': 'updated name',
-                    'status': 'ACTIVE'
+                "programData": {
+                    "id": self.id_to_base64(program.id, "Program"),
+                    "name": "updated name",
+                    "status": "ACTIVE",
                 }
             },
         )
 
         updated_program = Program.objects.get(id=program.id)
 
-        assert updated_program.status == 'ACTIVE'
-        assert updated_program.name == 'updated name'
+        assert updated_program.status == "ACTIVE"
+        assert updated_program.name == "updated name"

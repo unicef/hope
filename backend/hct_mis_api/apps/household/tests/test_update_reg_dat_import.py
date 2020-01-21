@@ -28,18 +28,17 @@ class TestUpdateRegistrationDataImport(APITestCase):
         self.user = UserFactory.create()
         self.registration_data_import = RegistrationDataImportFactory.create()
         self.registration_data_import_variables = {
-            'registrationDataImportData': {
-                'id': self.id_to_base64(
-                    self.registration_data_import.id,
-                    'RegistrationDataImport',
+            "registrationDataImportData": {
+                "id": self.id_to_base64(
+                    self.registration_data_import.id, "RegistrationDataImport",
                 ),
-                'name': 'Test name',
-                'status': 'DONE',
-                'importDate': '2019-12-20T15:00:00',
-                'importedById': self.id_to_base64(self.user.id, 'User'),
-                'dataSource': 'XLS',
-                'numberOfIndividuals': 300,
-                'numberOfHouseholds': 67,
+                "name": "Test name",
+                "status": "DONE",
+                "importDate": "2019-12-20T15:00:00",
+                "importedById": self.id_to_base64(self.user.id, "User"),
+                "dataSource": "XLS",
+                "numberOfIndividuals": 300,
+                "numberOfHouseholds": 67,
             }
         }
 
@@ -52,6 +51,6 @@ class TestUpdateRegistrationDataImport(APITestCase):
     def test_update_reg_data_import_authenticated(self):
         self.snapshot_graphql_request(
             request_string=self.UPDATE_REGISTRATION_DATA_IMPORT_MUTATION,
-            context={'user': self.user},
+            context={"user": self.user},
             variables=self.registration_data_import_variables,
         )

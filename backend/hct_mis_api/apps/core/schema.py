@@ -9,7 +9,7 @@ from core.models import Location
 class LocationNode(DjangoObjectType):
     class Meta:
         model = Location
-        filter_fields = ['country']
+        filter_fields = ["country"]
         interfaces = (relay.Node,)
 
 

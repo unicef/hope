@@ -16,8 +16,8 @@ class TestDeleteCashPlan(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.DELETE_CASH_PLAN_MUTATION,
             variables={
-                'cashPlanId': 'Q2FzaFBsYW5Ob2RlOjAwZDJlOGVkLT'
-                              'k4ZjMtNGEzOS1iYmVmLWZiOWFlMDVmMjk4YQ=='
+                "cashPlanId": "Q2FzaFBsYW5Ob2RlOjAwZDJlOGVkLT"
+                "k4ZjMtNGEzOS1iYmVmLWZiOWFlMDVmMjk4YQ=="
             },
         )
 
@@ -27,8 +27,8 @@ class TestDeleteCashPlan(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.DELETE_CASH_PLAN_MUTATION,
-            context={'user': user},
+            context={"user": user},
             variables={
-                'cashPlanId': self.id_to_base64(cash_plan.id, 'CashPlan')
+                "cashPlanId": self.id_to_base64(cash_plan.id, "CashPlan")
             },
         )

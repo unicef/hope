@@ -16,8 +16,8 @@ class TestDeleteProgram(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.DELETE_PROGRAM_MUTATION,
             variables={
-                'programId': 'UHJvZ3JhbU5vZGU6MDBkMmU4ZWQtOThm'
-                             'My00YTM5LWJiZWYtZmI5YWUwNWYyOThh'
+                "programId": "UHJvZ3JhbU5vZGU6MDBkMmU4ZWQtOThm"
+                "My00YTM5LWJiZWYtZmI5YWUwNWYyOThh"
             },
         )
 
@@ -27,8 +27,6 @@ class TestDeleteProgram(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.DELETE_PROGRAM_MUTATION,
-            context={'user': user},
-            variables={
-                'programId': self.id_to_base64(program.id, 'Program')
-            },
+            context={"user": user},
+            variables={"programId": self.id_to_base64(program.id, "Program")},
         )

@@ -95,18 +95,16 @@ class CreateProgram(CommonValidator, graphene.Mutation):
     @classmethod
     @is_authenticated
     def mutate(cls, root, info, program_data):
-        location_id = decode_id_string(program_data.pop('location_id', None))
+        location_id = decode_id_string(program_data.pop("location_id", None))
         location = Location.objects.get(id=location_id)
 
         cls.validate(
-            start_date=program_data.get('start_date'),
-            end_date=program_data.get('end_date'),
+            start_date=program_data.get("start_date"),
+            end_date=program_data.get("end_date"),
         )
 
         program = Program.objects.create(
-            **program_data,
-            location=location,
-            status='DRAFT',
+            **program_data, location=location, status="DRAFT",
         )
 
         return CreateProgram(program)
@@ -122,11 +120,11 @@ class UpdateProgram(CommonValidator, ProgramValidator, graphene.Mutation):
     @transaction.atomic
     @is_authenticated
     def mutate(cls, root, info, program_data):
-        program_id = decode_id_string(program_data.pop('id', None))
+        program_id = decode_id_string(program_data.pop("id", None))
 
         program = Program.objects.select_for_update().get(id=program_id)
 
-        location_id = decode_id_string(program_data.pop('location_id', None))
+        location_id = decode_id_string(program_data.pop("location_id", None))
 
         if location_id:
             location = Location.objects.get(id=location_id)
@@ -135,8 +133,8 @@ class UpdateProgram(CommonValidator, ProgramValidator, graphene.Mutation):
         cls.validate(
             program_data=program_data,
             program=program,
-            start_date=program_data.get('start_date'),
-            end_date=program_data.get('end_date'),
+            start_date=program_data.get("start_date"),
+            end_date=program_data.get("end_date"),
         )
 
         for attrib, value in program_data.items():
@@ -157,7 +155,7 @@ class DeleteProgram(graphene.Mutation):
     @classmethod
     @is_authenticated
     def mutate(cls, root, info, **kwargs):
-        decoded_id = decode_id_string(kwargs.get('program_id'))
+        decoded_id = decode_id_string(kwargs.get("program_id"))
         Program.objects.get(id=decoded_id).delete()
         return cls(ok=True)
 
@@ -172,15 +170,15 @@ class CreateCashPlan(CommonValidator, graphene.Mutation):
     @is_authenticated
     def mutate(cls, root, info, cash_plan_data):
         user = info.context.user
-        program_id = decode_id_string(cash_plan_data.pop('program_id', None))
+        program_id = decode_id_string(cash_plan_data.pop("program_id", None))
         target_population_id = decode_id_string(
-            cash_plan_data.pop('target_population_id', None)
+            cash_plan_data.pop("target_population_id", None)
         )
 
         cls.validate(
             cash_plan_data=cash_plan_data,
-            start_date=cash_plan_data.get('start_date'),
-            end_date=cash_plan_data.get('end_date'),
+            start_date=cash_plan_data.get("start_date"),
+            end_date=cash_plan_data.get("end_date"),
         )
 
         cash_plan = CashPlan.objects.create(
@@ -205,16 +203,16 @@ class UpdateCashPlan(CommonValidator, CashPlanValidator, graphene.Mutation):
     @transaction.atomic
     @is_authenticated
     def mutate(cls, root, info, cash_plan_data):
-        cash_plan_id = decode_id_string(cash_plan_data.pop('id', None))
+        cash_plan_id = decode_id_string(cash_plan_data.pop("id", None))
 
         cash_plan = CashPlan.objects.select_for_update().get(id=cash_plan_id)
 
-        program_id = decode_id_string(cash_plan_data.pop('program_id', None))
+        program_id = decode_id_string(cash_plan_data.pop("program_id", None))
         if program_id:
             cash_plan.program = Program.objects.get(id=program_id)
 
         target_population_id = decode_id_string(
-            cash_plan_data.pop('target_population_id', None)
+            cash_plan_data.pop("target_population_id", None)
         )
         if target_population_id:
             cash_plan.target_population = TargetPopulation.objects.get(
@@ -223,8 +221,8 @@ class UpdateCashPlan(CommonValidator, CashPlanValidator, graphene.Mutation):
 
         cls.validate(
             cash_plan_data=cash_plan_data,
-            start_date=cash_plan_data.get('start_date'),
-            end_date=cash_plan_data.get('end_date'),
+            start_date=cash_plan_data.get("start_date"),
+            end_date=cash_plan_data.get("end_date"),
         )
 
         for attrib, value in cash_plan_data.items():
@@ -245,7 +243,7 @@ class DeleteCashPlan(graphene.Mutation):
     @classmethod
     @is_authenticated
     def mutate(cls, root, info, **kwargs):
-        decoded_id = decode_id_string(kwargs.get('cash_plan_id'))
+        decoded_id = decode_id_string(kwargs.get("cash_plan_id"))
         CashPlan.objects.get(id=decoded_id).delete()
         return cls(ok=True)
 

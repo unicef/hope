@@ -20,10 +20,10 @@ class TestUpdateLocation(APITestCase):
         self.user = UserFactory.create()
         self.location = LocationFactory.create()
         self.location_data = {
-            'locationData': {
-                'id': self.id_to_base64(self.location.id, 'Location'),
-                'name': 'Test Location',
-                'country': 'PL',
+            "locationData": {
+                "id": self.id_to_base64(self.location.id, "Location"),
+                "name": "Test Location",
+                "country": "PL",
             }
         }
 
@@ -36,6 +36,6 @@ class TestUpdateLocation(APITestCase):
     def test_update_location_authenticated(self):
         self.snapshot_graphql_request(
             request_string=self.UPDATE_LOCATION_MUTATION,
-            context={'user': self.user},
+            context={"user": self.user},
             variables=self.location_data,
         )

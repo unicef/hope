@@ -30,22 +30,20 @@ class TestHouseholdUpdate(APITestCase):
         self.user = UserFactory.create()
         self.household = HouseholdFactory()
         self.household_data = {
-            'householdData': {
-                'id': self.id_to_base64(self.household.id, 'Household'),
-                'householdCaId': '2b7f0db7-9010-4d1d-8b1f-19357b29c7b0',
-                'residenceStatus': 'REFUGEE',
-                'nationality': 'AD',
-                'familySize': 6,
-                'address': 'this is my address',
+            "householdData": {
+                "id": self.id_to_base64(self.household.id, "Household"),
+                "householdCaId": "2b7f0db7-9010-4d1d-8b1f-19357b29c7b0",
+                "residenceStatus": "REFUGEE",
+                "nationality": "AD",
+                "familySize": 6,
+                "address": "this is my address",
             }
         }
 
     def test_household_update_authenticated(self):
         self.snapshot_graphql_request(
             request_string=self.CREATE_HOUSEHOLD_MUTATION,
-            context={
-                'user': self.user,
-            },
+            context={"user": self.user,},
             variables=self.household_data,
         )
 

@@ -24,9 +24,9 @@ class TestUpdateCashPlan(APITestCase):
             variables={
                 "cashPlanData": {
                     "id": "Q2FzaFBsYW5Ob2RlOjVmNmQyODFhLWEyYz"
-                          "QtNDgzZC05NGY1LWFhYmY1M2I4MjVlMw==",
+                    "QtNDgzZC05NGY1LWFhYmY1M2I4MjVlMw==",
                     "programId": "UHJvZ3JhbU5vZGU6Y2U0Yzk4MDMtN"
-                                 "zUyMC00ZDYwLTliMGYtNDdiZWIyZjZkMTFm",
+                    "zUyMC00ZDYwLTliMGYtNDdiZWIyZjZkMTFm",
                     "name": "Test Cash Plan",
                     "startDate": "2020-12-16T13:15:32",
                     "endDate": "2023-10-23T15:00:32",
@@ -35,8 +35,8 @@ class TestUpdateCashPlan(APITestCase):
                     "coverageDuration": 45,
                     "coverageUnits": "Day(s)",
                     "targetPopulationId": "VGFyZ2V0UG9wdWxhdGlvbk"
-                                          "5vZGU6NTZlMDllMjAtYmRkN"
-                                          "i00ZWIzLWE1OTQtZjliYTc5MDRiMDRk",
+                    "5vZGU6NTZlMDllMjAtYmRkN"
+                    "i00ZWIzLWE1OTQtZjliYTc5MDRiMDRk",
                     "cashAssistId": "2b7f0db7-9010-4d1d-8b1f-19357b29c7b0",
                     "distributionModality": "363-39",
                     "fsp": "Hayes LLC",
@@ -45,7 +45,7 @@ class TestUpdateCashPlan(APITestCase):
                     "totalEntitledQuantity": 30000,
                     "totalDeliveredQuantity": 10000,
                     "totalUndeliveredQuantity": 20000,
-                    "dispersionDate": "2023-10-22"
+                    "dispersionDate": "2023-10-22",
                 }
             },
         )
@@ -57,19 +57,19 @@ class TestUpdateCashPlan(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_CASH_PLAN_MUTATION,
-            context={'user': user},
+            context={"user": user},
             variables={
-                'cashPlanData': {
-                    'id': self.id_to_base64(cash_plan.id, 'CashPlan'),
-                    'name': 'updated name',
-                    'status': 'STARTED',
-                    'fsp': 'updated fsp',
-                    'numberOfHouseholds': 618,
+                "cashPlanData": {
+                    "id": self.id_to_base64(cash_plan.id, "CashPlan"),
+                    "name": "updated name",
+                    "status": "STARTED",
+                    "fsp": "updated fsp",
+                    "numberOfHouseholds": 618,
                 }
             },
         )
 
         updated_cash_plan = CashPlan.objects.get(id=cash_plan.id)
 
-        assert updated_cash_plan.status == 'STARTED'
-        assert updated_cash_plan.name == 'updated name'
+        assert updated_cash_plan.status == "STARTED"
+        assert updated_cash_plan.name == "updated name"

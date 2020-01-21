@@ -19,10 +19,7 @@ class TestCreateLocation(APITestCase):
         super().setUp()
         self.user = UserFactory.create()
         self.location_data = {
-            'locationData': {
-                'name': 'Test Location',
-                'country': 'PL',
-            }
+            "locationData": {"name": "Test Location", "country": "PL",}
         }
 
     def test_create_location_not_authenticated(self):
@@ -34,6 +31,6 @@ class TestCreateLocation(APITestCase):
     def test_create_location_authenticated(self):
         self.snapshot_graphql_request(
             request_string=self.CREATE_LOCATION_MUTATION,
-            context={'user': self.user},
+            context={"user": self.user},
             variables=self.location_data,
         )

@@ -35,23 +35,23 @@ class TestProgramChoices(APITestCase):
     def test_status_choices_query(self):
         self.snapshot_graphql_request(
             request_string=self.QUERY_PROGRAM_STATUS_CHOICES,
-            context={'user': self.user}
+            context={"user": self.user},
         )
 
     def test_program_frequency_of_payments_choices(self):
         self.snapshot_graphql_request(
             request_string=self.QUERY_PROGRAM_FREQUENCY_OF_PAYMENTS_CHOICES,
-            context={'user': self.user}
+            context={"user": self.user},
         )
 
     def test_program_sector_choices(self):
         self.snapshot_graphql_request(
             request_string=self.QUERY_PROGRAM_SECTOR_CHOICES,
-            context={'user': self.user}
+            context={"user": self.user},
         )
 
     def test_program_scope_choices(self):
         self.snapshot_graphql_request(
             request_string=self.QUERY_PROGRAM_SCOPE_CHOICES,
-            context={'user': self.user}
+            context={"user": self.user},
         )

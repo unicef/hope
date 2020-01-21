@@ -12,14 +12,14 @@ from core.views import homepage
 
 
 urlpatterns = [
-  path('api/admin/', admin.site.urls),
-  path('', homepage),
-  path('_health', homepage),
-  path('api/_health', homepage),
-  path('api/graphql', csrf_exempt(
-      FileUploadGraphQLView.as_view(graphiql=True)
-  )),
-  path('api/', include('social_django.urls', namespace='social')),
+    path("api/admin/", admin.site.urls),
+    path("", homepage),
+    path("_health", homepage),
+    path("api/_health", homepage),
+    path(
+        "api/graphql", csrf_exempt(FileUploadGraphQLView.as_view(graphiql=True))
+    ),
+    path("api/", include("social_django.urls", namespace="social")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 urlpatterns += staticfiles_urlpatterns()

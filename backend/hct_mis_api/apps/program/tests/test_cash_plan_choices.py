@@ -17,5 +17,5 @@ class TestCashPlanChoices(APITestCase):
     def test_status_choices_query(self):
         self.snapshot_graphql_request(
             request_string=self.QUERY_CASH_PLAN_STATUS_CHOICES,
-            context={'user': self.user}
+            context={"user": self.user},
         )

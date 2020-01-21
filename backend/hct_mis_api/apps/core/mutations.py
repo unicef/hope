@@ -42,7 +42,7 @@ class UpdateLocation(graphene.Mutation):
     @transaction.atomic
     @is_authenticated
     def mutate(cls, root, info, location_data):
-        location_id = decode_id_string(location_data.pop('id', None))
+        location_id = decode_id_string(location_data.pop("id", None))
 
         location = Location.objects.get(id=location_id)
 
@@ -64,7 +64,7 @@ class DeleteLocation(graphene.Mutation):
     @classmethod
     @is_authenticated
     def mutate(cls, root, info, **kwargs):
-        decoded_id = decode_id_string(kwargs.get('location_id'))
+        decoded_id = decode_id_string(kwargs.get("location_id"))
         Location.objects.get(id=decoded_id).delete()
         return cls(ok=True)
 

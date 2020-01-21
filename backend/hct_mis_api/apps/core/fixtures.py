@@ -7,6 +7,6 @@ class LocationFactory(factory.DjangoModelFactory):
     class Meta:
         model = Location
 
-    name = factory.Faker('address')
+    name = factory.Faker("address")
 
-    country = factory.Faker('country_code', representation="alpha-2")
+    country = factory.Faker("country_code", representation="alpha-2")

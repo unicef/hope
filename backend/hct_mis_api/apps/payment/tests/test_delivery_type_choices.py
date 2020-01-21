@@ -16,5 +16,5 @@ class TestDeliveryTypeChoices(APITestCase):
     def test_delivery_type_choices_query(self):
         self.snapshot_graphql_request(
             request_string=self.QUERY_DELIVERY_TYPE_CHOICES,
-            context={'user': self.user}
+            context={"user": self.user},
         )

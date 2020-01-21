@@ -21,7 +21,7 @@ class ProgramNode(DjangoObjectType):
 class CashPlanNode(DjangoObjectType):
     class Meta:
         model = CashPlan
-        filter_fields = ['program']
+        filter_fields = ["program"]
         interfaces = (relay.Node,)
 
 

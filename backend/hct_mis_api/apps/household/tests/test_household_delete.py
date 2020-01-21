@@ -22,16 +22,16 @@ class TestDeleteHousehold(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.DELETE_PROGRAM_MUTATION,
             variables={
-                'householdId': self.id_to_base64(self.household.id, 'Household')
+                "householdId": self.id_to_base64(self.household.id, "Household")
             },
         )
 
     def test_delete_household_authenticated(self):
         self.snapshot_graphql_request(
             request_string=self.DELETE_PROGRAM_MUTATION,
-            context={'user': self.user},
+            context={"user": self.user},
             variables={
-                'householdId': self.id_to_base64(self.household.id, 'Household')
+                "householdId": self.id_to_base64(self.household.id, "Household")
             },
         )
 
