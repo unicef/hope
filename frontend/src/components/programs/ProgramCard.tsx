@@ -3,13 +3,13 @@ import { makeStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import Typography from '@material-ui/core/Typography';
+import moment from 'moment';
 import { Grid } from '@material-ui/core';
 import { theme as themeObj } from '../../theme';
 import { programStatusToColor } from '../../utils/utils';
 import { LabelizedField } from '../LabelizedField';
 import { StatusBox } from '../StatusBox';
 import { ProgramNode } from '../../__generated__/graphql';
-import moment from 'moment';
 
 const useStyles = makeStyles((theme: typeof themeObj) => ({
   card: {
