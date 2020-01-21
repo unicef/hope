@@ -1,13 +1,17 @@
-import React, {ReactElement, useState} from 'react';
+import React, { ReactElement, useState } from 'react';
 import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
 import styled from 'styled-components';
 import Moment from 'react-moment';
-import {CashPlanNode, ProgramNode, useAllCashPlansQuery,} from '../__generated__/graphql';
-import {TableComponent} from '../components/table/TableComponent';
-import {HeadCell} from '../components/table/EnhancedTableHead';
-import {StatusBox} from '../components/StatusBox';
-import {cashPlanStatusToColor} from '../utils/utils';
+import {
+  CashPlanNode,
+  ProgramNode,
+  useAllCashPlansQuery,
+} from '../__generated__/graphql';
+import { TableComponent } from '../components/table/TableComponent';
+import { HeadCell } from '../components/table/EnhancedTableHead';
+import { StatusBox } from '../components/StatusBox';
+import { cashPlanStatusToColor } from '../utils/utils';
 
 const headCells: HeadCell<CashPlanNode>[] = [
   {
@@ -106,9 +110,24 @@ export function CashPlanTable({ program }: CashPlanTableProps): ReactElement {
             </TableCell>
             <TableCell align='right'>{row.numberOfHouseholds}</TableCell>
             <TableCell align='left'>{row.currency}</TableCell>
-            <TableCell align='right'>{row.totalEntitledQuantity}</TableCell>
-            <TableCell align='right'>{row.totalDeliveredQuantity}</TableCell>
-            <TableCell align='right'>{row.totalUndeliveredQuantity}</TableCell>
+            <TableCell align='right'>
+              {row.totalEntitledQuantity.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </TableCell>
+            <TableCell align='right'>
+              {row.totalDeliveredQuantity.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </TableCell>
+            <TableCell align='right'>
+              {row.totalUndeliveredQuantity.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </TableCell>
             <TableCell align='left'>
               <Moment format='MM/DD/YYYY'>{row.disbursementDate}</Moment>
             </TableCell>
@@ -141,8 +160,8 @@ export function CashPlanTable({ program }: CashPlanTableProps): ReactElement {
               ({ node }) => node.id,
             );
             newData.allCashPlans.edges = [
-              ...prev.allCashPlans.edges.filter((node) =>
-                !newIds.includes(node.node.id),
+              ...prev.allCashPlans.edges.filter(
+                (node) => !newIds.includes(node.node.id),
               ),
               ...fetchMoreResult.allCashPlans.edges,
             ];
