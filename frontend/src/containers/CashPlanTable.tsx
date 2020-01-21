@@ -1,17 +1,13 @@
-import React, { ReactElement, useState } from 'react';
+import React, {ReactElement, useState} from 'react';
 import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
 import styled from 'styled-components';
 import Moment from 'react-moment';
-import {
-  CashPlanNode,
-  ProgramNode,
-  useAllCashPlansQuery,
-} from '../__generated__/graphql';
-import { TableComponent } from '../components/table/TableComponent';
-import { HeadCell } from '../components/table/EnhancedTableHead';
-import { StatusBox } from '../components/StatusBox';
-import { programStatusToColor } from '../utils/utils';
+import {CashPlanNode, ProgramNode, useAllCashPlansQuery,} from '../__generated__/graphql';
+import {TableComponent} from '../components/table/TableComponent';
+import {HeadCell} from '../components/table/EnhancedTableHead';
+import {StatusBox} from '../components/StatusBox';
+import {cashPlanStatusToColor} from '../utils/utils';
 
 const headCells: HeadCell<CashPlanNode>[] = [
   {
@@ -104,7 +100,7 @@ export function CashPlanTable({ program }: CashPlanTableProps): ReactElement {
               <StatusContainer>
                 <StatusBox
                   status={row.status}
-                  statusToColor={programStatusToColor}
+                  statusToColor={cashPlanStatusToColor}
                 />
               </StatusContainer>
             </TableCell>
