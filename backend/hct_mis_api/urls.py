@@ -8,7 +8,7 @@ from django.urls import path, include
 from django.views.decorators.csrf import csrf_exempt
 from graphene_file_upload.django import FileUploadGraphQLView
 
-from core.views import homepage
+from core.views import homepage, schema
 
 
 urlpatterns = [
@@ -16,6 +16,7 @@ urlpatterns = [
     path("", homepage),
     path("_health", homepage),
     path("api/_health", homepage),
+    path('api/graphql/schema.graphql', schema),
     path(
         "api/graphql", csrf_exempt(FileUploadGraphQLView.as_view(graphiql=True))
     ),

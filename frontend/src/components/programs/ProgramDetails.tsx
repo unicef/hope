@@ -1,11 +1,11 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Grid, Typography } from '@material-ui/core';
+import moment from 'moment';
 import { StatusBox } from '../StatusBox';
 import { programStatusToColor } from '../../utils/utils';
 import { LabelizedField } from '../LabelizedField';
 import { ProgramNode } from '../../__generated__/graphql';
-import moment from 'moment';
 import { MiśTheme } from '../../theme';
 
 const Container = styled.div`
