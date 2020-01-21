@@ -3,6 +3,7 @@ from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
+from core.schema import ExtendedConnection
 from payment.models import PaymentRecord
 
 
@@ -11,6 +12,7 @@ class PaymentRecordNode(DjangoObjectType):
         model = PaymentRecord
         filter_fields = ["cash_plan", "household"]
         interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
 
 
 class Query(graphene.ObjectType):

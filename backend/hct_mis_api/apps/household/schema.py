@@ -3,6 +3,7 @@ from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
+from core.schema import ExtendedConnection
 from household.models import Household, RegistrationDataImport
 
 
@@ -11,6 +12,7 @@ class HouseholdNode(DjangoObjectType):
         model = Household
         filter_fields = []
         interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
 
 
 class RegistrationDataImportNode(DjangoObjectType):
@@ -18,6 +20,7 @@ class RegistrationDataImportNode(DjangoObjectType):
         model = RegistrationDataImport
         filter_fields = []
         interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
 
 
 class Query(graphene.ObjectType):
