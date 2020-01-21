@@ -6,7 +6,7 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 
 from account.fixtures import UserFactory
 from core.fixtures import LocationFactory
-from core.tests import APITestCase
+from core.base_test_case import APITestCase
 from household.fixtures import RegistrationDataImportFactory
 
 

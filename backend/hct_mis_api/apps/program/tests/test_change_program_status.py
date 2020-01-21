@@ -1,6 +1,6 @@
 from account.fixtures import UserFactory
 from core.fixtures import LocationFactory
-from core.tests import APITestCase
+from core.base_test_case import APITestCase
 from program.fixtures import ProgramFactory
 from program.models import Program
 

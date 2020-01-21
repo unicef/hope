@@ -1,5 +1,5 @@
 from account.fixtures import UserFactory
-from core.tests import APITestCase
+from core.base_test_case import APITestCase
 from program.fixtures import CashPlanFactory
 from program.models import CashPlan
 
