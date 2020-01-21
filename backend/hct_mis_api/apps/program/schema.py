@@ -3,6 +3,7 @@ from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
+from core.schema import ExtendedConnection
 from program.models import Program, CashPlan
 
 
@@ -13,6 +14,7 @@ class ProgramNode(DjangoObjectType):
         model = Program
         filter_fields = []
         interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
 
     def resolve_total_number_of_households(self, info, **kwargs):
         return self.total_number_of_households
@@ -21,8 +23,9 @@ class ProgramNode(DjangoObjectType):
 class CashPlanNode(DjangoObjectType):
     class Meta:
         model = CashPlan
-        filter_fields = ['program']
+        filter_fields = ["program"]
         interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
 
 
 class Query(graphene.ObjectType):
