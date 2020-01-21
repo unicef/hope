@@ -10,22 +10,37 @@ class BaseValidator:
 
     Custom validate method have to takes *args, **kwargs parameters.
 
-    Custom Validator Class needs to be initialized and validate method with
-    parameters have to be called in mutate method. If there are validation
-    errors they will be all returned as error message.
+    validate method with parameters have to be called in mutate method.
+    If there are validation errors they will be all
+    returned as one error message.
     """
 
-    def validate(self, *args, **kwargs):
+    @classmethod
+    def validate(cls, excluded_validators=None, *args, **kwargs):
+        if not excluded_validators:
+            excluded_validators = []
+
         validate_methods = [
-            getattr(self, m) for m in dir(self) if m.startswith('validate_')
+            getattr(cls, m)
+            for m in dir(cls)
+            if m.startswith("validate_") and m not in excluded_validators
         ]
 
         errors_list = []
         for method in validate_methods:
             try:
-                method(self, *args, **kwargs)
+                method(cls, *args, **kwargs)
             except ValidationError as e:
                 errors_list.append(e.message)
 
         if errors_list:
-            raise Exception(', '.join(errors_list))
+            raise Exception(", ".join(errors_list))
+
+
+class CommonValidator(BaseValidator):
+    def validate_start_end_date(self, start_date, end_date, *args, **kwargs):
+        if start_date and end_date:
+            if start_date > end_date:
+                raise ValidationError(
+                    "Start date cannot be greater than the end date."
+                )

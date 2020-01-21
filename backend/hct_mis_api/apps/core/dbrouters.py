@@ -13,7 +13,7 @@ class DbRouter:
         return DbRouter.select_db(model)
 
     def allow_migrate(self, db, app_label, model_name=None, **hints):
-        if db == 'default' and app_label not in settings.DATABASE_APPS_MAPPING:
+        if db == "default" and app_label not in settings.DATABASE_APPS_MAPPING:
             return True
         mapped_db = settings.DATABASE_APPS_MAPPING.get(app_label)
         return mapped_db == db
