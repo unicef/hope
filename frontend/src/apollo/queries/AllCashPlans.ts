@@ -10,6 +10,7 @@ export const AllCashPlans = gql`
                 startCursor
                 endCursor
             }
+            totalCount
             edges{
                 cursor
                 node{
