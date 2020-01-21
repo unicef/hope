@@ -22,6 +22,11 @@ export const Program = gql`
       scope
       sector
       totalNumberOfHouseholds
+      location{
+        name
+      }
+      cashPlus
+      frequencyOfPayments
     }
   }
 `;
