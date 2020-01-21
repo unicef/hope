@@ -9,9 +9,18 @@ import {
   MenuItem,
   InputLabel,
   Select,
+  FormLabel,
+  FormControlLabel,
+  Radio,
+  RadioGroup,
 } from '@material-ui/core';
 import styled from 'styled-components';
 import { Formik, Form, Field } from 'formik';
+import {
+  useFrequencyOfPaymentsQuery,
+  useProgramScopeChoicesQuery,
+  useProgramSectorChoicesQuery,
+} from '../../../__generated__/graphql';
 
 const DialogTitle = styled.div`
   padding: 16px;
@@ -37,8 +46,15 @@ const MediumLabel = styled.div`
   margin: 12px 0;
 `;
 
+const DateFields = styled.div`
+  display: flex;
+`;
+
 export function Programme() {
   const [open, setOpen] = React.useState(false);
+  const programFrequencyOfPaymentsChoices = useFrequencyOfPaymentsQuery();
+  const programSectorChoices = useProgramSectorChoicesQuery();
+  const programScopeChoices = useProgramScopeChoicesQuery();
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -108,14 +124,58 @@ export function Programme() {
                         <MenuItem value=''>
                           <em>None</em>
                         </MenuItem>
-                        <MenuItem value={10}>Ten</MenuItem>
-                        <MenuItem value={20}>Twenty</MenuItem>
-                        <MenuItem value={30}>Thirty</MenuItem>
+                        {programScopeChoices.data.programScopeChoices.map(
+                          (each) => (
+                            <MenuItem value={each[0]}>{each[1]}</MenuItem>
+                          ),
+                        )}
                       </Select>
                     </FormControl>
                   </MediumLabel>
                 )}
               </Field>
+
+              <DateFields>
+                <Field name='dateFrom'>
+                  {({ field, form, meta }) => (
+                    <TextField
+                      {...field}
+                      id='from'
+                      label='Start Date'
+                      type='date'
+                      margin='dense'
+                      variant='filled'
+                      name='dateFrom'
+                      required
+                      fullWidth
+                      value={form.values.dateFrom}
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                    />
+                  )}
+                </Field>
+
+                <Field name='dateTo'>
+                  {({ field, form, meta }) => (
+                    <TextField
+                      {...field}
+                      id='to'
+                      label='End Date'
+                      type='date'
+                      margin='dense'
+                      variant='filled'
+                      name='dateTo'
+                      required
+                      fullWidth
+                      value={form.values.dateTo}
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                    />
+                  )}
+                </Field>
+              </DateFields>
 
               <Field name='description'>
                 {({ field, form, meta }) => (
@@ -147,21 +207,25 @@ export function Programme() {
                   </MediumLabel>
                 )}
               </Field>
+
               <Field name='frequencyOfPayment'>
                 {({ field, form, meta }) => (
-                  <MediumLabel>
-                    <FormControl variant='filled' margin='dense' fullWidth>
-                      <InputLabel>Frequency of Payment</InputLabel>
-                      <Select {...field} name='frequencyOfPayment'>
-                        <MenuItem value=''>
-                          <em>None</em>
-                        </MenuItem>
-                        <MenuItem value={10}>Ten</MenuItem>
-                        <MenuItem value={20}>Twenty</MenuItem>
-                        <MenuItem value={30}>Thirty</MenuItem>
-                      </Select>
-                    </FormControl>
-                  </MediumLabel>
+                  <FormControl component='fieldset'>
+                    <FormLabel component='legend'>
+                      Frequency of Payment
+                    </FormLabel>
+                    <RadioGroup {...field} aria-label='gender' name='gender1'>
+                      {programFrequencyOfPaymentsChoices.data.programFrequencyOfPaymentsChoices.map(
+                        (each) => (
+                          <FormControlLabel
+                            value={each[0]}
+                            label={each[1]}
+                            control={<Radio />}
+                          />
+                        ),
+                      )}
+                    </RadioGroup>
+                  </FormControl>
                 )}
               </Field>
 
@@ -204,9 +268,9 @@ export function Programme() {
                         <MenuItem value=''>
                           <em>None</em>
                         </MenuItem>
-                        <MenuItem value={10}>Ten</MenuItem>
-                        <MenuItem value={20}>Twenty</MenuItem>
-                        <MenuItem value={30}>Thirty</MenuItem>
+                        {programSectorChoices.data.programSectorChoices.map(each => (
+                          <MenuItem value={each[0]}>{each[1]}</MenuItem>
+                        ))}
                       </Select>
                     </FormControl>
                   </MediumLabel>
