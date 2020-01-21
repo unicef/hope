@@ -17,3 +17,16 @@ export function programStatusToColor(
       return theme.hctPalette.oragne;
   }
 }
+export function cashPlanStatusToColor(
+    theme: typeof themeObj,
+    status: string,
+): string {
+  switch (status) {
+    case 'STARTED':
+      return theme.hctPalette.green;
+    case 'COMPLETE':
+      return theme.hctPalette.gray;
+    default:
+      return theme.hctPalette.oragne;
+  }
+}
