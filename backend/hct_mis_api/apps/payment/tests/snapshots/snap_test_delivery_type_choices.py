@@ -10,14 +10,14 @@ snapshots = Snapshot()
 snapshots['TestDeliveryTypeChoices::test_delivery_type_choices_query 1'] = {
     'data': {
         'paymentDeliveryTypeChoices': [
-            [
-                'DELIVERED',
-                'Delivered'
-            ],
-            [
-                'IN_PROGRESS',
-                'In Progress'
-            ]
+            {
+                'name': 'Delivered',
+                'value': 'DELIVERED'
+            },
+            {
+                'name': 'In Progress',
+                'value': 'IN_PROGRESS'
+            }
         ]
     }
 }
