@@ -10,14 +10,14 @@ snapshots = Snapshot()
 snapshots['TestProgramChoices::test_program_frequency_of_payments_choices 1'] = {
     'data': {
         'programFrequencyOfPaymentsChoices': [
-            [
-                'REGULAR',
-                'Regular'
-            ],
-            [
-                'ONE_OFF',
-                'One-off'
-            ]
+            {
+                'name': 'Regular',
+                'value': 'REGULAR'
+            },
+            {
+                'name': 'One-off',
+                'value': 'ONE_OFF'
+            }
         ]
     }
 }
@@ -25,18 +25,18 @@ snapshots['TestProgramChoices::test_program_frequency_of_payments_choices 1'] = 
 snapshots['TestProgramChoices::test_program_scope_choices 1'] = {
     'data': {
         'programScopeChoices': [
-            [
-                'FULL',
-                'Full'
-            ],
-            [
-                'PARTIAL',
-                'Partial'
-            ],
-            [
-                'NO_INTEGRATION',
-                'No Integration'
-            ]
+            {
+                'name': 'Full',
+                'value': 'FULL'
+            },
+            {
+                'name': 'Partial',
+                'value': 'PARTIAL'
+            },
+            {
+                'name': 'No Integration',
+                'value': 'NO_INTEGRATION'
+            }
         ]
     }
 }
@@ -44,46 +44,46 @@ snapshots['TestProgramChoices::test_program_scope_choices 1'] = {
 snapshots['TestProgramChoices::test_program_sector_choices 1'] = {
     'data': {
         'programSectorChoices': [
-            [
-                'CHILD',
-                'Child'
-            ],
-            [
-                'PROTECTION',
-                'Protection'
-            ],
-            [
-                'EDUCATION',
-                'Education'
-            ],
-            [
-                'GENDER',
-                'Gender'
-            ],
-            [
-                'HEALTH',
-                'Health'
-            ],
-            [
-                'HIV_AIDS',
-                'HIV / AIDS'
-            ],
-            [
-                'MULTI_PURPOSE',
-                'Multi Purpose'
-            ],
-            [
-                'NUTRITION',
-                'Nutrition'
-            ],
-            [
-                'SOCIAL_POLICY',
-                'Social Policy'
-            ],
-            [
-                'WASH',
-                'WASH'
-            ]
+            {
+                'name': 'Child',
+                'value': 'CHILD'
+            },
+            {
+                'name': 'Protection',
+                'value': 'PROTECTION'
+            },
+            {
+                'name': 'Education',
+                'value': 'EDUCATION'
+            },
+            {
+                'name': 'Gender',
+                'value': 'GENDER'
+            },
+            {
+                'name': 'Health',
+                'value': 'HEALTH'
+            },
+            {
+                'name': 'HIV / AIDS',
+                'value': 'HIV_AIDS'
+            },
+            {
+                'name': 'Multi Purpose',
+                'value': 'MULTI_PURPOSE'
+            },
+            {
+                'name': 'Nutrition',
+                'value': 'NUTRITION'
+            },
+            {
+                'name': 'Social Policy',
+                'value': 'SOCIAL_POLICY'
+            },
+            {
+                'name': 'WASH',
+                'value': 'WASH'
+            }
         ]
     }
 }
@@ -91,18 +91,18 @@ snapshots['TestProgramChoices::test_program_sector_choices 1'] = {
 snapshots['TestProgramChoices::test_status_choices_query 1'] = {
     'data': {
         'programStatusChoices': [
-            [
-                'DRAFT',
-                'Draft'
-            ],
-            [
-                'ACTIVE',
-                'Active'
-            ],
-            [
-                'FINISHED',
-                'Finished'
-            ]
+            {
+                'name': 'Draft',
+                'value': 'DRAFT'
+            },
+            {
+                'name': 'Active',
+                'value': 'ACTIVE'
+            },
+            {
+                'name': 'Finished',
+                'value': 'FINISHED'
+            }
         ]
     }
 }

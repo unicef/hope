@@ -5,7 +5,10 @@ from core.base_test_case import APITestCase
 class TestDeliveryTypeChoices(APITestCase):
     QUERY_DELIVERY_TYPE_CHOICES = """
     query DeliveryTypeChoices {
-        paymentDeliveryTypeChoices
+        paymentDeliveryTypeChoices{
+            name
+            value
+        }
     }
     """
 
