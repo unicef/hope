@@ -10,7 +10,7 @@ interface EnhancedTableToolbarProps {
 const useToolbarStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
-      paddingLeft: theme.spacing(2),
+      paddingLeft: theme.spacing(6),
       paddingRight: theme.spacing(1),
     },
     highlight:
