@@ -5,4 +5,4 @@ from core.models import Location
 
 @admin.register(Location)
 class LocationAdmin(admin.ModelAdmin):
-    list_display = ('name', 'country')
+    list_display = ("name", "country")

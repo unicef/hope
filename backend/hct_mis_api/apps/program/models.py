@@ -10,112 +10,98 @@ from utils.models import TimeStampedUUIDModel
 
 
 class Program(TimeStampedUUIDModel):
-    DRAFT = 'DRAFT'
-    ACTIVE = 'ACTIVE'
-    FINISHED = 'FINISHED'
+    DRAFT = "DRAFT"
+    ACTIVE = "ACTIVE"
+    FINISHED = "FINISHED"
     STATUS_CHOICE = (
-        (DRAFT, _('Draft')),
-        (ACTIVE, _('Active')),
-        (FINISHED, _('Finished')),
+        (DRAFT, _("Draft")),
+        (ACTIVE, _("Active")),
+        (FINISHED, _("Finished")),
     )
 
-    REGULAR = 'REGULAR'
-    ONE_OFF = 'ONE_OFF'
+    REGULAR = "REGULAR"
+    ONE_OFF = "ONE_OFF"
 
     FREQUENCY_OF_PAYMENTS_CHOICE = (
-        (REGULAR, _('Regular')),
-        (ONE_OFF, _('One-off'))
+        (REGULAR, _("Regular")),
+        (ONE_OFF, _("One-off")),
     )
 
-    CHILD = 'CHILD'
-    PROTECTION = 'PROTECTION'
-    EDUCATION = 'EDUCATION'
-    GENDER = 'GENDER'
-    HEALTH = 'HEALTH'
-    HIV_AIDS = 'HIV_AIDS'
-    MULTI_PURPOSE = 'MULTI_PURPOSE'
-    NUTRITION = 'NUTRITION'
-    SOCIAL_POLICY = 'SOCIAL_POLICY'
-    WASH = 'WASH'
+    CHILD = "CHILD"
+    PROTECTION = "PROTECTION"
+    EDUCATION = "EDUCATION"
+    GENDER = "GENDER"
+    HEALTH = "HEALTH"
+    HIV_AIDS = "HIV_AIDS"
+    MULTI_PURPOSE = "MULTI_PURPOSE"
+    NUTRITION = "NUTRITION"
+    SOCIAL_POLICY = "SOCIAL_POLICY"
+    WASH = "WASH"
 
     SECTOR_CHOICE = (
-        (CHILD, _('Child')),
-        (PROTECTION, _('Protection')),
-        (EDUCATION, _('Education')),
-        (GENDER, _('Gender')),
-        (HEALTH, _('Health')),
-        (HIV_AIDS, _('HIV / AIDS')),
-        (MULTI_PURPOSE, _('Multi Purpose')),
-        (NUTRITION, _('Nutrition')),
-        (SOCIAL_POLICY, _('Social Policy')),
-        (WASH, _('WASH')),
+        (CHILD, _("Child")),
+        (PROTECTION, _("Protection")),
+        (EDUCATION, _("Education")),
+        (GENDER, _("Gender")),
+        (HEALTH, _("Health")),
+        (HIV_AIDS, _("HIV / AIDS")),
+        (MULTI_PURPOSE, _("Multi Purpose")),
+        (NUTRITION, _("Nutrition")),
+        (SOCIAL_POLICY, _("Social Policy")),
+        (WASH, _("WASH")),
     )
 
-    FULL = 'FULL'
-    PARTIAL = 'PARTIAL'
-    NO_INTEGRATION = 'NO_INTEGRATION'
+    FULL = "FULL"
+    PARTIAL = "PARTIAL"
+    NO_INTEGRATION = "NO_INTEGRATION"
     SCOPE_CHOICE = (
-        (FULL, _('Full')),
-        (PARTIAL, _('Partial')),
-        (NO_INTEGRATION, _('No Integration')),
+        (FULL, _("Full")),
+        (PARTIAL, _("Partial")),
+        (NO_INTEGRATION, _("No Integration")),
     )
 
     name = models.CharField(max_length=255)
-    status = models.CharField(
-        max_length=255,
-        choices=STATUS_CHOICE,
-    )
+    status = models.CharField(max_length=255, choices=STATUS_CHOICE,)
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
     description = models.CharField(max_length=255)
     program_ca_id = models.CharField(max_length=255)
     location = models.ForeignKey(
-        'core.Location',
-        on_delete=models.CASCADE,
-        related_name='programs',
+        "core.Location", on_delete=models.CASCADE, related_name="programs",
     )
     budget = models.DecimalField(
         decimal_places=2,
         max_digits=12,
-        validators=[MinValueValidator(Decimal('0.01'))],
+        validators=[MinValueValidator(Decimal("0.01"))],
     )
     frequency_of_payments = models.CharField(
-        max_length=50,
-        choices=FREQUENCY_OF_PAYMENTS_CHOICE,
+        max_length=50, choices=FREQUENCY_OF_PAYMENTS_CHOICE,
     )
-    sector = models.CharField(
-        max_length=50,
-        choices=SECTOR_CHOICE,
-    )
-    scope = models.CharField(
-        max_length=50,
-        choices=SCOPE_CHOICE,
-    )
+    sector = models.CharField(max_length=50, choices=SECTOR_CHOICE,)
+    scope = models.CharField(max_length=50, choices=SCOPE_CHOICE,)
     cash_plus = models.BooleanField()
     population_goal = models.PositiveIntegerField()
 
     @property
     def total_number_of_households(self):
         return self.cash_plans.aggregate(
-            households=Sum('number_of_households'),
-        )['households']
+            households=Sum("number_of_households"),
+        )["households"]
 
 
 class CashPlan(TimeStampedUUIDModel):
-    NOT_STARTED = 'NOT_STARTED'
-    STARTED = 'STARTED'
-    COMPLETE = 'COMPLETE'
+    NOT_STARTED = "NOT_STARTED"
+    STARTED = "STARTED"
+    COMPLETE = "COMPLETE"
 
     STATUS_CHOICE = (
-        (NOT_STARTED, _('NOT_STARTED')),
-        (STARTED, _('STARTED')),
-        ('COMPLETE', _('COMPLETE')),
+        (NOT_STARTED, _("NOT_STARTED")),
+        (STARTED, _("STARTED")),
+        ("COMPLETE", _("COMPLETE")),
     )
 
     program = models.ForeignKey(
-        'Program',
-        on_delete=models.CASCADE,
-        related_name='cash_plans',
+        "Program", on_delete=models.CASCADE, related_name="cash_plans",
     )
     name = models.CharField(max_length=255)
     start_date = models.DateTimeField()
@@ -126,15 +112,15 @@ class CashPlan(TimeStampedUUIDModel):
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
-        related_name='cash_plans',
+        related_name="cash_plans",
         null=True,
     )
     coverage_duration = models.PositiveIntegerField()
     coverage_units = models.CharField(max_length=255)
     target_population = models.ForeignKey(
-        'targeting.TargetPopulation',
+        "targeting.TargetPopulation",
         on_delete=models.CASCADE,
-        related_name='cash_plans',
+        related_name="cash_plans",
     )
     cash_assist_id = models.CharField(max_length=255)
     distribution_modality = models.CharField(max_length=255)
@@ -144,16 +130,16 @@ class CashPlan(TimeStampedUUIDModel):
     total_entitled_quantity = models.DecimalField(
         decimal_places=2,
         max_digits=12,
-        validators=[MinValueValidator(Decimal('0.01'))],
+        validators=[MinValueValidator(Decimal("0.01"))],
     )
     total_delivered_quantity = models.DecimalField(
         decimal_places=2,
         max_digits=12,
-        validators=[MinValueValidator(Decimal('0.01'))],
+        validators=[MinValueValidator(Decimal("0.01"))],
     )
     total_undelivered_quantity = models.DecimalField(
         decimal_places=2,
         max_digits=12,
-        validators=[MinValueValidator(Decimal('0.01'))],
+        validators=[MinValueValidator(Decimal("0.01"))],
     )
     dispersion_date = models.DateField()

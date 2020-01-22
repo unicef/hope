@@ -1,18 +1,20 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Grid, Typography } from '@material-ui/core';
+import moment from 'moment';
 import { StatusBox } from '../StatusBox';
 import { programStatusToColor } from '../../utils/utils';
 import { LabelizedField } from '../LabelizedField';
 import { ProgramNode } from '../../__generated__/graphql';
-import moment from 'moment';
+import { MiśTheme } from '../../theme';
 
 const Container = styled.div`
   display: flex;
   flex: 1;
   width: 100%;
   background-color: #fff;
-  padding: 20px;
+  padding: ${({ theme }) => theme.spacing(8)}px
+    ${({ theme }) => theme.spacing(11)}px;
   flex-direction: column;
   border-color: #b1b1b5;
   border-bottom-width: 1px;
@@ -29,13 +31,22 @@ const StatusContainer = styled.div`
 `;
 
 const NumberOfHouseHolds = styled.div`
-  padding: 25px;
+  padding: ${({ theme }) => theme.spacing(8)}px;
   border-color: #b1b1b5;
   border-left-width: 1px;
   border-left-style: solid;
 `;
+const NumberOfHouseHoldsValue = styled.div`
+  font-family: ${({ theme }: { theme: MiśTheme }) =>
+    theme.hctTypography.fontFamily};
+  color: #253b46;
+  font-size: 36px;
+  line-height: 32px;
+  margin-top: ${({ theme }) => theme.spacing(2)}px;
+`;
+
 const Title = styled.div`
-  margin: 7px 0px 25px 0px;
+  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
 interface ProgramDetailsProps {
@@ -51,7 +62,7 @@ export function ProgramDetails({
         <Typography variant='h6'>Programme Details</Typography>
       </Title>
       <OverviewContainer>
-        <Grid container spacing={3}>
+        <Grid container spacing={6}>
           <Grid item xs={4}>
             <LabelizedField label='status'>
               <StatusContainer>
@@ -63,10 +74,16 @@ export function ProgramDetails({
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>
-            <LabelizedField label='START DATE' value={moment(program.startDate).format('MM/DD/YYYY')} />
+            <LabelizedField
+              label='START DATE'
+              value={moment(program.startDate).format('MM/DD/YYYY')}
+            />
           </Grid>
           <Grid item xs={4}>
-            <LabelizedField label='END DATE' value={moment(program.endDate).format('MM/DD/YYYY')} />
+            <LabelizedField
+              label='END DATE'
+              value={moment(program.endDate).format('MM/DD/YYYY')}
+            />
           </Grid>
 
           <Grid item xs={4}>
@@ -99,10 +116,11 @@ export function ProgramDetails({
           </Grid>
         </Grid>
         <NumberOfHouseHolds>
-          <LabelizedField
-            label='Total Number of Households'
-            value={program.totalNumberOfHouseholds}
-          />
+          <LabelizedField label='Total Number of Households'>
+            <NumberOfHouseHoldsValue>
+              {program.totalNumberOfHouseholds}
+            </NumberOfHouseHoldsValue>
+          </LabelizedField>
         </NumberOfHouseHolds>
       </OverviewContainer>
     </Container>

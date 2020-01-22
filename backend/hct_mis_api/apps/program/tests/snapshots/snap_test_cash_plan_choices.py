@@ -10,18 +10,18 @@ snapshots = Snapshot()
 snapshots['TestCashPlanChoices::test_status_choices_query 1'] = {
     'data': {
         'cashPlanStatusChoices': [
-            [
-                'NOT_STARTED',
-                'NOT_STARTED'
-            ],
-            [
-                'STARTED',
-                'STARTED'
-            ],
-            [
-                'COMPLETE',
-                'COMPLETE'
-            ]
+            {
+                'name': 'Draft',
+                'value': 'DRAFT'
+            },
+            {
+                'name': 'Active',
+                'value': 'ACTIVE'
+            },
+            {
+                'name': 'Finished',
+                'value': 'FINISHED'
+            }
         ]
     }
 }
