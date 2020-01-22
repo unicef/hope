@@ -88,10 +88,11 @@
   },
   "scripts": {
     "start": "node scripts/start.js",
-    "build": "npm run generate-types&&node scripts/build.js",
+    "build": "node scripts/build.js",
     "test": "node scripts/test.js",
     "lint": "eslint src/**/*.tsx",
-    "generate-types": "wget --no-check-certificate -O data/schema.graphql https://dev-hct.unitst.org/api/graphql/schema.graphql&&graphql-codegen --config codegen.yml --debug"
+    "generate-types": "wget --no-check-certificate -O data/schema.graphql https://dev-hct.unitst.org/api/graphql/schema.graphql&&graphql-codegen --config codegen.yml --debug",
+    "generate-types-local": "wget --no-check-certificate -O data/schema.graphql http://localhost:8080/api/graphql/schema.graphql&&graphql-codegen --config codegen.yml --debug"
   },
   "browserslist": {
     "production": [
