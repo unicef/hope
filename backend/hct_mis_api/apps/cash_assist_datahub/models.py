@@ -8,17 +8,16 @@ from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 class Household(TimeStampedUUIDModel):
     # TODO Get correct RECEPTION_TYPE_CHOICE
     RECEPTION_TYPE_CHOICE = (
-        ('REFUGEE', _('Refugee')),
-        ('MIGRANT', _('Migrant')),
-        ('CITIZEN', _('Citizen')),
-        ('IDP', _('IDP')),
-        ('OTHER', _('Other')),
+        ("REFUGEE", _("Refugee")),
+        ("MIGRANT", _("Migrant")),
+        ("CITIZEN", _("Citizen")),
+        ("IDP", _("IDP")),
+        ("OTHER", _("Other")),
     )
 
     household_ca_id = models.CharField(max_length=255)
     reception_type = models.CharField(
-        max_length=255,
-        choices=RECEPTION_TYPE_CHOICE,
+        max_length=255, choices=RECEPTION_TYPE_CHOICE,
     )
     family_name = models.CharField(max_length=255)
     household_size = models.PositiveIntegerField(blank=True, null=True)
@@ -30,17 +29,16 @@ class Household(TimeStampedUUIDModel):
 
 class Individual(TimeStampedUUIDModel):
     SEX_CHOICE = (
-        ('MALE', _('Male')),
-        ('FEMALE', _('Female')),
+        ("MALE", _("Male")),
+        ("FEMALE", _("Female")),
     )
 
-    household = models.ForeignKey('Household', related_name='individuals', on_delete=models.CASCADE)
+    household = models.ForeignKey(
+        "Household", related_name="individuals", on_delete=models.CASCADE
+    )
     individual_ca_id = models.CharField(max_length=255)
     family_name = models.CharField(max_length=255)
-    sex = models.CharField(
-        max_length=255,
-        choices=SEX_CHOICE,
-    )
+    sex = models.CharField(max_length=255, choices=SEX_CHOICE,)
     date_of_birth = models.DateField(blank=True, null=True)
     estimated_date_of_birth = models.DateField(blank=True, null=True)
     country_of_origin = CountryField()
@@ -54,18 +52,20 @@ class TargetPopulation(TimeStampedUUIDModel):
     population_type = models.PositiveIntegerField()
     description = models.CharField(max_length=255, blank=True)
     target_type = models.CharField(max_length=255)
-    households = models.ManyToManyField('Household', related_name='target_populations')
+    households = models.ManyToManyField(
+        "Household", related_name="target_populations"
+    )
 
     def __str__(self):
         return self.name
 
 
 class Program(TimeStampedUUIDModel):
-    ACTIVE = 'ACTIVE'
-    COMPLETED = 'COMPLETED'
+    ACTIVE = "ACTIVE"
+    COMPLETED = "COMPLETED"
     STATUS_CHOICE = (
-        (ACTIVE, _('In progress')),
-        (COMPLETED, _('Done')),
+        (ACTIVE, _("In progress")),
+        (COMPLETED, _("Done")),
     )
     program_ca_id = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
@@ -76,7 +76,9 @@ class Program(TimeStampedUUIDModel):
 
 
 class CashPlan(TimeStampedUUIDModel):
-    program = models.ForeignKey('Program', on_delete=models.CASCADE, related_name='cash_plans')
+    program = models.ForeignKey(
+        "Program", on_delete=models.CASCADE, related_name="cash_plans"
+    )
     cash_assist_id = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
     distribution_level = models.CharField(max_length=255)
