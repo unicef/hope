@@ -1,9 +1,9 @@
 import graphene
-from graphene import relay, String
+from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
-from core.schema import ExtendedConnection
+from core.schema import ExtendedConnection, ChoiceObject
 from program.models import Program, CashPlan
 
 
@@ -28,11 +28,6 @@ class CashPlanNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
-class ChoiceObject(graphene.ObjectType):
-    name = String()
-    value = String()
-
-
 class Query(graphene.ObjectType):
     program = relay.Node.Field(ProgramNode)
     all_programs = DjangoFilterConnectionField(ProgramNode)
@@ -45,16 +40,31 @@ class Query(graphene.ObjectType):
     cash_plan_status_choices = graphene.List(ChoiceObject)
 
     def resolve_program_status_choices(self, info, **kwargs):
-        return [{'name': name, 'value': value} for value, name in Program.STATUS_CHOICE]
+        return [
+            {"name": name, "value": value}
+            for value, name in Program.STATUS_CHOICE
+        ]
 
     def resolve_program_frequency_of_payments_choices(self, info, **kwargs):
-        return [{'name': name, 'value': value} for value, name in Program.FREQUENCY_OF_PAYMENTS_CHOICE]
+        return [
+            {"name": name, "value": value}
+            for value, name in Program.FREQUENCY_OF_PAYMENTS_CHOICE
+        ]
 
     def resolve_program_sector_choices(self, info, **kwargs):
-        return [{'name': name, 'value': value} for value, name in Program.SECTOR_CHOICE]
+        return [
+            {"name": name, "value": value}
+            for value, name in Program.SECTOR_CHOICE
+        ]
 
     def resolve_program_scope_choices(self, info, **kwargs):
-        return [{'name': name, 'value': value} for value, name in Program.SCOPE_CHOICE]
+        return [
+            {"name": name, "value": value}
+            for value, name in Program.SCOPE_CHOICE
+        ]
 
     def resolve_cash_plan_status_choices(self, info, **kwargs):
-        return [{'name': name, 'value': value} for value, name in Program.STATUS_CHOICE]
+        return [
+            {"name": name, "value": value}
+            for value, name in Program.STATUS_CHOICE
+        ]
