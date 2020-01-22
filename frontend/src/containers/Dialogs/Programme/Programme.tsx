@@ -6,9 +6,6 @@ import {
   DialogContent,
   Typography,
   FormControl,
-  MenuItem,
-  InputLabel,
-  Select,
   FormLabel,
   FormControlLabel,
   Radio,
@@ -16,11 +13,9 @@ import {
 } from '@material-ui/core';
 import styled from 'styled-components';
 import { Formik, Form, Field } from 'formik';
-import {
-  useFrequencyOfPaymentsQuery,
-  useProgramScopeChoicesQuery,
-  useProgramSectorChoicesQuery,
-} from '../../../__generated__/graphql';
+import { FormikTextField } from '../../../shared/Formik/FormikTextField';
+import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
+import { useProgrammeChoiceDataQuery } from '../../../__generated__/graphql';
 
 const DialogTitle = styled.div`
   padding: 16px;
@@ -52,9 +47,7 @@ const DateFields = styled.div`
 
 export function Programme() {
   const [open, setOpen] = React.useState(false);
-  const programFrequencyOfPaymentsChoices = useFrequencyOfPaymentsQuery();
-  const programSectorChoices = useProgramSectorChoicesQuery();
-  const programScopeChoices = useProgramScopeChoicesQuery();
+  const { data } = useProgrammeChoiceDataQuery();
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -65,12 +58,10 @@ export function Programme() {
   };
 
   const submitForm = (values) => {
-    // eslint-disable-next-line
-    debugger;
-    console.error('blah blah submit', values);
+    console.log('blah blah submit', values);
   };
 
-  return (
+  return data ? (
     <div>
       <Button variant='contained' color='primary' onClick={handleClickOpen}>
         new programme
@@ -86,8 +77,6 @@ export function Programme() {
         <Formik
           initialValues={{}}
           onSubmit={(values) => {
-            // eslint-disable-next-line
-            debugger;
             return submitForm(values);
           }}
         >
@@ -98,42 +87,24 @@ export function Programme() {
                 here. We will send updates occasionally.
               </DialogDescription>
 
-              <Field name='programmeName'>
-                {({ field, form, meta }) => (
-                  <TextField
-                    {...field}
-                    autoFocus
-                    margin='dense'
-                    id='name'
-                    label='Programme Name'
-                    type='text'
-                    variant='filled'
-                    name='programmeName'
-                    fullWidth
-                    required
-                  />
-                )}
-              </Field>
+              <Field
+                name='programmeName'
+                label='Programme Name'
+                type='text'
+                fullWidth
+                required
+                component={FormikTextField}
+              />
 
-              <Field name='cashAssist'>
-                {({ field, form, meta }) => (
-                  <MediumLabel>
-                    <FormControl variant='filled' margin='dense' fullWidth>
-                      <InputLabel>CashAssist Scope</InputLabel>
-                      <Select {...field} name='cashAssist'>
-                        <MenuItem value=''>
-                          <em>None</em>
-                        </MenuItem>
-                        {programScopeChoices.data.programScopeChoices.map(
-                          (each) => (
-                            <MenuItem value={each[0]}>{each[1]}</MenuItem>
-                          ),
-                        )}
-                      </Select>
-                    </FormControl>
-                  </MediumLabel>
-                )}
-              </Field>
+              <MediumLabel>
+                <Field
+                  name='cashAssisst'
+                  label='CashAssist Scope'
+                  fullWidth
+                  choices={data.programScopeChoices}
+                  component={FormikSelectField}
+                />
+              </MediumLabel>
 
               <DateFields>
                 <Field name='dateFrom'>
@@ -157,8 +128,8 @@ export function Programme() {
                 </Field>
 
                 <Field name='dateTo'>
-                  {({ field, form, meta }) => (
-                    <TextField
+                  {({ field, form, meta }) => {
+                    return (<TextField
                       {...field}
                       id='to'
                       label='End Date'
@@ -172,42 +143,29 @@ export function Programme() {
                       InputLabelProps={{
                         shrink: true,
                       }}
-                    />
-                  )}
+                    />)
+                  }}
                 </Field>
               </DateFields>
 
-              <Field name='description'>
-                {({ field, form, meta }) => (
-                  <TextField
-                    {...field}
-                    autoFocus
-                    margin='dense'
-                    id='description'
-                    label='Description'
-                    type='text'
-                    variant='filled'
-                    fullWidth
-                  />
-                )}
-              </Field>
-              <Field name='budget'>
-                {({ field, form, meta }) => (
-                  <MediumLabel>
-                    <TextField
-                      {...field}
-                      autoFocus
-                      margin='dense'
-                      id='name'
-                      label='Budget'
-                      type='number'
-                      variant='filled'
-                      fullWidth
-                    />
-                  </MediumLabel>
-                )}
-              </Field>
+              <Field
+                name='description'
+                label='Description'
+                type='text'
+                fullWidth
+                component={FormikTextField}
+              />
 
+              <MediumLabel>
+                <Field
+                  name='budget'
+                  label='Budget'
+                  type='number'
+                  required
+                  fullWidth
+                  component={FormikTextField}
+                />
+              </MediumLabel>
               <Field name='frequencyOfPayment'>
                 {({ field, form, meta }) => (
                   <FormControl component='fieldset'>
@@ -215,7 +173,7 @@ export function Programme() {
                       Frequency of Payment
                     </FormLabel>
                     <RadioGroup {...field} aria-label='gender' name='gender1'>
-                      {programFrequencyOfPaymentsChoices.data.programFrequencyOfPaymentsChoices.map(
+                      {data.programFrequencyOfPaymentsChoices.map(
                         (each) => (
                           <FormControlLabel
                             value={each[0]}
@@ -229,53 +187,34 @@ export function Programme() {
                 )}
               </Field>
 
-              <Field name='areasOfImplementation'>
-                {({ field, form, meta }) => (
-                  <TextField
-                    {...field}
-                    autoFocus
-                    margin='dense'
-                    id='areas'
-                    label='Administrative Areas of Implementation'
-                    type='text'
-                    variant='filled'
-                    fullWidth
-                  />
-                )}
-              </Field>
-              <Field name='populationGoal'>
-                {({ field, form, meta }) => (
-                  <MediumLabel>
-                    <TextField
-                      {...field}
-                      autoFocus
-                      margin='dense'
-                      id='name'
-                      label='Population goal'
-                      type='number'
-                      variant='filled'
-                      fullWidth
-                    />
-                  </MediumLabel>
-                )}
-              </Field>
-              <Field name='sector'>
-                {({ field, form, meta }) => (
-                  <MediumLabel>
-                    <FormControl variant='filled' margin='dense' fullWidth>
-                      <InputLabel>Sector</InputLabel>
-                      <Select {...field} name='sector'>
-                        <MenuItem value=''>
-                          <em>None</em>
-                        </MenuItem>
-                        {programSectorChoices.data.programSectorChoices.map(each => (
-                          <MenuItem value={each[0]}>{each[1]}</MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  </MediumLabel>
-                )}
-              </Field>
+              <Field
+                name='areasOfImplementation'
+                label='Administrative Areas of Implementation'
+                type='text'
+                required
+                fullWidth
+                component={FormikTextField}
+              />
+              <MediumLabel>
+                <Field
+                  name='populationGoal'
+                  label='Population goal'
+                  type='number'
+                  required
+                  fullWidth
+                  component={FormikTextField}
+                />
+              </MediumLabel>
+
+              <MediumLabel>
+                <Field
+                  name='sector'
+                  label='Sector'
+                  fullWidth
+                  choices={data.programSectorChoices}
+                  component={FormikSelectField}
+                />
+              </MediumLabel>
             </DialogContent>
 
             <DialogFooter>
@@ -290,5 +229,7 @@ export function Programme() {
         </Formik>
       </Dialog>
     </div>
+  ) : (
+    <div> Loading ... </div>
   );
 }
