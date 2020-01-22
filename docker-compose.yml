@@ -104,4 +104,4 @@ services:
     volumes:
       - ./frontend/:/code
       - /code/node_modules
-    command: sh -c 'npm run generate-types&&npm start'
+    command: sh -c 'npm start'
