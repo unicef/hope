@@ -1,5 +1,11 @@
 import React from 'react';
-import { FormControl, MenuItem, InputLabel, Select } from '@material-ui/core';
+import {
+  FormControl,
+  FormHelperText,
+  MenuItem,
+  InputLabel,
+  Select,
+} from '@material-ui/core';
 
 export const FormikSelectField = ({
   field,
@@ -9,24 +15,28 @@ export const FormikSelectField = ({
   ...otherProps
 }) => {
   const isInvalid = form.errors[field.name] && form.touched[field.name];
+  //eslint-disable-next-line
+  //debugger
   return (
     <>
-      <FormControl variant='filled' margin='dense' fullWidth>
+      <FormControl variant='filled' margin='dense' fullWidth {...otherProps}>
         <InputLabel>{otherProps.label}</InputLabel>
         <Select
           {...field}
+          {...otherProps}
           name={field.name}
+          value={field.value}
           id={`textField-${field.name}`}
           error={isInvalid}
           helperText={isInvalid && form.errors[field.name]}
         >
-          <MenuItem value=''>
-            <em>None</em>
-          </MenuItem>
-          {otherProps.choices.map((each) => (
-            <MenuItem value={each[0]}>{each[1]}</MenuItem>
+          {otherProps.choices.map((each, index) => (
+            <MenuItem key={each.value} value={each.value}>
+              {each.name}
+            </MenuItem>
           ))}
         </Select>
+          {isInvalid && form.errors[field.name] && <FormHelperText error>{form.errors[field.name]}</FormHelperText>}
       </FormControl>
     </>
   );

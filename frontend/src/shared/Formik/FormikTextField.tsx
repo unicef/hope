@@ -20,6 +20,8 @@ export const FormikTextField = ({
   return (
     <>
       <TextField
+        {...field}
+        {...otherProps}
         name={field.name}
         id={`textField-${field.name}`}
         variant='filled'
@@ -29,7 +31,6 @@ export const FormikTextField = ({
         onBlur={form.handleBlur}
         error={isInvalid}
         autoComplete='off'
-        autoFocus
         helperText={isInvalid && form.errors[field.name]}
         InputProps={{
           onKeyPress: handleKeyPress,
@@ -41,7 +42,7 @@ export const FormikTextField = ({
           ),
         }}
         
-        {...otherProps}
+        
       />
     </>
   );
