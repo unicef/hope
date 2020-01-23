@@ -28,6 +28,7 @@ class CreateProgramInput(graphene.InputObjectType):
     scope = graphene.String()
     cash_plus = graphene.Boolean()
     population_goal = graphene.Int()
+    administrative_areas_of_implementation = graphene.String()
 
 
 class UpdateProgramInput(graphene.InputObjectType):
@@ -45,6 +46,7 @@ class UpdateProgramInput(graphene.InputObjectType):
     scope = graphene.String()
     cash_plus = graphene.Boolean()
     population_goal = graphene.Int()
+    administrative_areas_of_implementation = graphene.String()
 
 
 class CreateCashPlanInput(graphene.InputObjectType):
