@@ -27,3 +27,10 @@ export function getCookie(name): string | null {
       .shift();
   return null;
 }
+
+export function isAuthenticated() {
+  return Boolean(localStorage.getItem('AUTHENTICATED'));
+}
+export function setAuthenticated(authenticated: boolean) {
+  localStorage.setItem('AUTHENTICATED', `${authenticated}`);
+}
