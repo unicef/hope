@@ -13,33 +13,23 @@ import { HomeRouter } from './containers/HomeRouter';
 import { LoginPage } from './containers/pages/LoginPage';
 import { client } from './apollo/client';
 import { LOGIN_URL } from './config';
-import { getCookie } from './utils/utils';
+import { getCookie, isAuthenticated } from './utils/utils';
+
+
+
 
 export const App: React.FC = () => {
-  const sessionid = getCookie('sessionid');
-  const authenticated =  true;// Boolean(sessionid);
-
-  useEffect(() => {
-    if (!authenticated) {
-      console.log('auth',authenticated,getCookie('sessionid'));
-      //window.location.replace(LOGIN_URL);
-    }
-  }, [authenticated]);
   return (
     <ApolloProvider client={client}>
       <ThemeProvider theme={theme}>
         <StyledThemeProvider theme={theme}>
           <Router>
             <Switch>
-              <Route path='/login'>
+              <Route path='/accounts/profile/'>
                 <LoginPage />
               </Route>
-              <Route path='/' push>
-                {authenticated ? (
+              <Route path='/'>
                   <HomeRouter />
-                ) : (
-                  <Redirect to={LOGIN_URL} push />
-                )}
               </Route>
             </Switch>
           </Router>
