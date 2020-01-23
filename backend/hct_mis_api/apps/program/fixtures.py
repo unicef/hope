@@ -37,6 +37,9 @@ class ProgramFactory(factory.DjangoModelFactory):
     scope = fuzzy.FuzzyChoice(Program.SCOPE_CHOICE, getter=lambda c: c[0],)
     cash_plus = fuzzy.FuzzyChoice((True, False))
     population_goal = factory.fuzzy.FuzzyDecimal(50000.0, 600000.0)
+    administrative_areas_of_implementation = factory.Faker(
+        "sentence", nb_words=3, variable_nb_words=True, ext_word_list=None,
+    )
 
 
 class CashPlanFactory(factory.DjangoModelFactory):

@@ -11,6 +11,7 @@ snapshots['TestCreateProgram::test_create_program_authenticated 1'] = {
     'data': {
         'createProgram': {
             'program': {
+                'administrativeAreasOfImplementation': 'Lorem Ipsum',
                 'budget': 20000000.0,
                 'cashPlus': True,
                 'description': 'my description of program',
