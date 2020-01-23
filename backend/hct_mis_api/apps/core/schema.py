@@ -1,9 +1,14 @@
 import graphene
-from graphene import relay
+from graphene import relay, String
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
 from core.models import Location
+
+
+class ChoiceObject(graphene.ObjectType):
+    name = String()
+    value = String()
 
 
 class ExtendedConnection(graphene.Connection):

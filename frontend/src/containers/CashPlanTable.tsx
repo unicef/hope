@@ -169,9 +169,10 @@ export function CashPlanTable({ program }: CashPlanTableProps): ReactElement {
           },
         });
       }}
-      handleChangeRowsPerPage={(event) =>
-        setRowsPerPage(parseInt(event.target.value, 10))
-      }
+      handleChangeRowsPerPage={(event) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0);
+      }}
       handleRequestSort={() => {}}
       orderBy={null}
       order='asc'
