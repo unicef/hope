@@ -1,6 +1,7 @@
 import graphene
 from graphene_django.debug import DjangoDebug
 
+import account.schema
 import core.mutations
 import core.schema
 import household.mutations
@@ -12,6 +13,7 @@ import targeting.schema
 
 
 class Query(
+    account.schema.Query,
     household.schema.Query,
     targeting.schema.Query,
     program.schema.Query,

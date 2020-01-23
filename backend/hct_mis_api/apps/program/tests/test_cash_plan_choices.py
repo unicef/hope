@@ -6,7 +6,10 @@ class TestCashPlanChoices(APITestCase):
 
     QUERY_CASH_PLAN_STATUS_CHOICES = """
     query CashPlanStatusChoices {
-        cashPlanStatusChoices
+        cashPlanStatusChoices{
+            name
+            value
+        }
     }
     """
 
