@@ -11,7 +11,7 @@ import {
 import { TableComponent } from '../components/table/TableComponent';
 import { HeadCell } from '../components/table/EnhancedTableHead';
 import { StatusBox } from '../components/StatusBox';
-import { programStatusToColor } from '../utils/utils';
+import { cashPlanStatusToColor } from '../utils/utils';
 
 const headCells: HeadCell<CashPlanNode>[] = [
   {
@@ -104,15 +104,30 @@ export function CashPlanTable({ program }: CashPlanTableProps): ReactElement {
               <StatusContainer>
                 <StatusBox
                   status={row.status}
-                  statusToColor={programStatusToColor}
+                  statusToColor={cashPlanStatusToColor}
                 />
               </StatusContainer>
             </TableCell>
             <TableCell align='right'>{row.numberOfHouseholds}</TableCell>
             <TableCell align='left'>{row.currency}</TableCell>
-            <TableCell align='right'>{row.totalEntitledQuantity}</TableCell>
-            <TableCell align='right'>{row.totalDeliveredQuantity}</TableCell>
-            <TableCell align='right'>{row.totalUndeliveredQuantity}</TableCell>
+            <TableCell align='right'>
+              {row.totalEntitledQuantity.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </TableCell>
+            <TableCell align='right'>
+              {row.totalDeliveredQuantity.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </TableCell>
+            <TableCell align='right'>
+              {row.totalUndeliveredQuantity.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </TableCell>
             <TableCell align='left'>
               <Moment format='MM/DD/YYYY'>{row.disbursementDate}</Moment>
             </TableCell>
