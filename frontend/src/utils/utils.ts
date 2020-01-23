@@ -30,3 +30,20 @@ export function cashPlanStatusToColor(
       return theme.hctPalette.oragne;
   }
 }
+export function getCookie(name): string | null {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2)
+    return parts
+      .pop()
+      .split(';')
+      .shift();
+  return null;
+}
+
+export function isAuthenticated() {
+  return Boolean(localStorage.getItem('AUTHENTICATED'));
+}
+export function setAuthenticated(authenticated: boolean) {
+  localStorage.setItem('AUTHENTICATED', `${authenticated}`);
+}

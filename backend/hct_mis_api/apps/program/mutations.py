@@ -7,7 +7,11 @@ from core.utils import decode_id_string
 from core.validators import CommonValidator
 from program.models import Program, CashPlan
 from program.schema import ProgramNode, CashPlanNode
-from program.validators import ProgramValidator, CashPlanValidator
+from program.validators import (
+    ProgramValidator,
+    CashPlanValidator,
+    ProgramDeletionValidator,
+)
 from targeting.models import TargetPopulation
 
 
@@ -146,7 +150,7 @@ class UpdateProgram(CommonValidator, ProgramValidator, graphene.Mutation):
         return UpdateProgram(program)
 
 
-class DeleteProgram(graphene.Mutation):
+class DeleteProgram(ProgramDeletionValidator, graphene.Mutation):
     ok = graphene.Boolean()
 
     class Arguments:
@@ -156,7 +160,12 @@ class DeleteProgram(graphene.Mutation):
     @is_authenticated
     def mutate(cls, root, info, **kwargs):
         decoded_id = decode_id_string(kwargs.get("program_id"))
-        Program.objects.get(id=decoded_id).delete()
+        program = Program.objects.get(id=decoded_id)
+
+        cls.validate(program=program)
+
+        program.delete()
+
         return cls(ok=True)
 
 

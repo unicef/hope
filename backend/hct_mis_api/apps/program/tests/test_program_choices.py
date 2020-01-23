@@ -6,25 +6,37 @@ class TestProgramChoices(APITestCase):
 
     QUERY_PROGRAM_STATUS_CHOICES = """
     query ProgramStatusChoices {
-        programStatusChoices
+        programStatusChoices{
+            name
+            value
+        }
     }
     """
 
     QUERY_PROGRAM_FREQUENCY_OF_PAYMENTS_CHOICES = """
     query ProgramFrequencyOfPaymentsChoices {
-        programFrequencyOfPaymentsChoices
+        programFrequencyOfPaymentsChoices{
+            name
+            value
+        }
     }
     """
 
     QUERY_PROGRAM_SECTOR_CHOICES = """
     query ProgramSectorChoices {
-        programSectorChoices
+        programSectorChoices{
+            name
+            value
+        }
     }    
     """
 
     QUERY_PROGRAM_SCOPE_CHOICES = """
     query ProgramScopeChoices {
-        programScopeChoices
+        programScopeChoices{
+            name
+            value
+        }
     }
     """
 
