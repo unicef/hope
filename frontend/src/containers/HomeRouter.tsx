@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -9,6 +9,8 @@ import { AppBar } from '../components/AppBar';
 import { DashboardPage } from './pages/DashboardPage';
 import { ProgramsPage } from './pages/ProgramsPage';
 import { ProgramDetailsPage } from './pages/ProgramDetailsPage';
+import { isAuthenticated } from '../utils/utils';
+import { LOGIN_URL } from '../config';
 
 const Root = styled.div`
   display: flex;
@@ -23,6 +25,14 @@ const useStyles = makeStyles((theme: MiśTheme) => ({
 }));
 
 export function HomeRouter(): React.ReactElement {
+
+  const authenticated = isAuthenticated();
+
+  useEffect(() => {
+    if (!authenticated) {
+      window.location.replace(LOGIN_URL);
+    }
+  }, [authenticated]);
   const [open, setOpen] = React.useState(true);
   const classes = useStyles({});
   const location = useLocation();
@@ -32,6 +42,10 @@ export function HomeRouter(): React.ReactElement {
   const handleDrawerClose = (): void => {
     setOpen(false);
   };
+
+  if (!authenticated) {
+    return null;
+  }
   return (
     <Root>
       <CssBaseline />
