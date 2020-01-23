@@ -14,6 +14,7 @@ type CashPlanNode implements Node {
   disbursementDate: DateTime!
   numberOfHouseholds: Int!
   createdDate: DateTime!
+  createdBy: UserObjectType
   coverageDuration: Int!
   coverageUnits: String!
   targetPopulation: TargetPopulationNode!
@@ -45,6 +46,11 @@ enum CashPlanStatus {
   NOT_STARTED
   STARTED
   COMPLETE
+}
+
+type ChoiceObject {
+  name: String
+  value: String
 }
 
 type CreateCashPlan {
@@ -781,24 +787,25 @@ enum ProgramStatus {
 type Query {
   paymentRecord(id: ID!): PaymentRecordNode
   allPaymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection
-  paymentDeliveryTypeChoices: [[String]]
+  paymentDeliveryTypeChoices: [ChoiceObject]
   location(id: ID!): LocationNode
   allLocations(before: String, after: String, first: Int, last: Int, country: String): LocationNodeConnection
   program(id: ID!): ProgramNode
   allPrograms(before: String, after: String, first: Int, last: Int): ProgramNodeConnection
   cashPlan(id: ID!): CashPlanNode
   allCashPlans(before: String, after: String, first: Int, last: Int, program: ID): CashPlanNodeConnection
-  programStatusChoices: [[String]]
-  programFrequencyOfPaymentsChoices: [[String]]
-  programSectorChoices: [[String]]
-  programScopeChoices: [[String]]
-  cashPlanStatusChoices: [[String]]
+  programStatusChoices: [ChoiceObject]
+  programFrequencyOfPaymentsChoices: [ChoiceObject]
+  programSectorChoices: [ChoiceObject]
+  programScopeChoices: [ChoiceObject]
+  cashPlanStatusChoices: [ChoiceObject]
   targetPopulation(id: ID!): TargetPopulationNode
   allTargetPopulation(before: String, after: String, first: Int, last: Int): TargetPopulationNodeConnection
   household(id: ID!): HouseholdNode
   allHouseholds(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection
   registrationDataImport(id: ID!): RegistrationDataImportNode
   allRegistrationDataImports(before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection
+  me: UserObjectType
   _debug: DjangoDebug
 }
 
@@ -816,6 +823,7 @@ type RegistrationDataImportNode implements Node {
   name: String!
   status: RegistrationDataImportStatus!
   importDate: DateTime!
+  importedBy: UserObjectType!
   dataSource: RegistrationDataImportDataSource!
   numberOfIndividuals: Int!
   numberOfHouseholds: Int!
@@ -843,6 +851,7 @@ type TargetPopulationNode implements Node {
   id: ID!
   name: String!
   createdAt: DateTime!
+  createdBy: UserObjectType
   rules: JSONString!
   households(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   cashPlans(before: String, after: String, first: Int, last: Int, program: ID): CashPlanNodeConnection!
@@ -859,6 +868,8 @@ type TargetPopulationNodeEdge {
   node: TargetPopulationNode
   cursor: String!
 }
+
+scalar UUID
 
 type UpdateCashPlan {
   cashPlan: CashPlanNode
@@ -946,4 +957,20 @@ input UpdateRegistrationDataImportInput {
   dataSource: String
   numberOfIndividuals: Int
   numberOfHouseholds: Int
+}
+
+type UserObjectType {
+  lastLogin: DateTime
+  isSuperuser: Boolean!
+  username: String!
+  firstName: String!
+  lastName: String!
+  email: String!
+  isStaff: Boolean!
+  isActive: Boolean!
+  dateJoined: DateTime!
+  id: UUID!
+  registrationDataImports(before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
+  cashPlans(before: String, after: String, first: Int, last: Int, program: ID): CashPlanNodeConnection!
+  targetPopulations(before: String, after: String, first: Int, last: Int): TargetPopulationNodeConnection!
 }

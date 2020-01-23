@@ -103,7 +103,10 @@ export function ProgramCard({ program }: ProgramCardProps): React.ReactElement {
               <Grid item xs={6}>
                 <LabelizedField
                   label='Budget'
-                  value={`${program.budget} USD`}
+                  value={`${program.budget.toLocaleString('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })} USD`}
                 />
               </Grid>
 
