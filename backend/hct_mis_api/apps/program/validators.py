@@ -21,5 +21,11 @@ class ProgramValidator(BaseValidator):
             )
 
 
+class ProgramDeletionValidator(BaseValidator):
+    def validate_is_deletable(self, program, *args, **kwargs):
+        if program.status != "DRAFT":
+            raise ValidationError("Only Draft Program can be deleted.")
+
+
 class CashPlanValidator(BaseValidator):
     pass
