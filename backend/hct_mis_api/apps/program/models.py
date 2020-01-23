@@ -81,6 +81,7 @@ class Program(TimeStampedUUIDModel):
     scope = models.CharField(max_length=50, choices=SCOPE_CHOICE,)
     cash_plus = models.BooleanField()
     population_goal = models.PositiveIntegerField()
+    administrative_areas_of_implementation = models.CharField(max_length=255)
 
     @property
     def total_number_of_households(self):

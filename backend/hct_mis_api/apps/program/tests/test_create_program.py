@@ -20,6 +20,7 @@ class TestCreateProgram(APITestCase):
           scope
           cashPlus
           populationGoal
+          administrativeAreasOfImplementation
         }
       }
     }
@@ -71,6 +72,7 @@ class TestCreateProgram(APITestCase):
                     "scope": "FULL",
                     "cashPlus": True,
                     "populationGoal": 150000,
+                    "administrativeAreasOfImplementation": "Lorem Ipsum",
                 }
             },
         )
@@ -93,6 +95,7 @@ class TestCreateProgram(APITestCase):
                     "scope": "FULL",
                     "cashPlus": True,
                     "populationGoal": 150000,
+                    "administrativeAreasOfImplementation": "Lorem Ipsum",
                 }
             },
         )
