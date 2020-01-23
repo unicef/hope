@@ -4,6 +4,7 @@ export const CreateProgrm = gql`
     mutation CreateProgram($programData: CreateProgramInput!) {
       createProgram(programData: $programData) {
         program {
+          id
           name
           status
           startDate
