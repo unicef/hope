@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import { Route, Switch, useLocation } from 'react-router-dom';
+import { Redirect, Route, Switch, useLocation } from 'react-router-dom';
 import { MiśTheme } from '../theme';
 import { Drawer } from '../components/Drawer/Drawer';
 import { AppBar } from '../components/AppBar';
@@ -10,7 +10,6 @@ import { DashboardPage } from './pages/DashboardPage';
 import { ProgramsPage } from './pages/ProgramsPage';
 import { ProgramDetailsPage } from './pages/ProgramDetailsPage';
 import { isAuthenticated } from '../utils/utils';
-import { LOGIN_URL } from '../config';
 
 const Root = styled.div`
   display: flex;
@@ -25,14 +24,7 @@ const useStyles = makeStyles((theme: MiśTheme) => ({
 }));
 
 export function HomeRouter(): React.ReactElement {
-
   const authenticated = isAuthenticated();
-
-  useEffect(() => {
-    if (!authenticated) {
-      window.location.replace(LOGIN_URL);
-    }
-  }, [authenticated]);
   const [open, setOpen] = React.useState(true);
   const classes = useStyles({});
   const location = useLocation();
@@ -44,7 +36,7 @@ export function HomeRouter(): React.ReactElement {
   };
 
   if (!authenticated) {
-    return null;
+    return <Redirect to='/login' />;
   }
   return (
     <Root>
