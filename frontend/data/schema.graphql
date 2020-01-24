@@ -118,6 +118,7 @@ input CreateProgramInput {
   scope: String
   cashPlus: Boolean
   populationGoal: Int
+  administrativeAreasOfImplementation: String
 }
 
 type CreateRegistrationDataImport {
@@ -743,6 +744,7 @@ type ProgramNode implements Node {
   scope: ProgramScope!
   cashPlus: Boolean!
   populationGoal: Int!
+  administrativeAreasOfImplementation: String!
   cashPlans(before: String, after: String, first: Int, last: Int, program: ID): CashPlanNodeConnection!
   totalNumberOfHouseholds: Int
 }
@@ -942,6 +944,7 @@ input UpdateProgramInput {
   scope: String
   cashPlus: Boolean
   populationGoal: Int
+  administrativeAreasOfImplementation: String
 }
 
 type UpdateRegistrationDataImport {
