@@ -1,7 +1,7 @@
 import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
 import gql from 'graphql-tag';
-import * as React from 'react';
 import * as ApolloReactCommon from '@apollo/react-common';
+import * as React from 'react';
 import * as ApolloReactComponents from '@apollo/react-components';
 import * as ApolloReactHoc from '@apollo/react-hoc';
 import * as ApolloReactHooks from '@apollo/react-hooks';
@@ -155,6 +155,7 @@ export type CreateProgramInput = {
   scope?: Maybe<Scalars['String']>,
   cashPlus?: Maybe<Scalars['Boolean']>,
   populationGoal?: Maybe<Scalars['Int']>,
+  administrativeAreasOfImplementation?: Maybe<Scalars['String']>,
 };
 
 export type CreateRegistrationDataImport = {
@@ -905,6 +906,7 @@ export type ProgramNode = Node & {
   scope: ProgramScope,
   cashPlus: Scalars['Boolean'],
   populationGoal: Scalars['Int'],
+  administrativeAreasOfImplementation: Scalars['String'],
   cashPlans: CashPlanNodeConnection,
   totalNumberOfHouseholds?: Maybe<Scalars['Int']>,
 };
@@ -1244,6 +1246,7 @@ export type UpdateProgramInput = {
   scope?: Maybe<Scalars['String']>,
   cashPlus?: Maybe<Scalars['Boolean']>,
   populationGoal?: Maybe<Scalars['Int']>,
+  administrativeAreasOfImplementation?: Maybe<Scalars['String']>,
 };
 
 export type UpdateRegistrationDataImport = {
@@ -1305,6 +1308,22 @@ export type UserObjectTypeTargetPopulationsArgs = {
 };
 
 
+export type CreateProgramMutationVariables = {
+  programData: CreateProgramInput
+};
+
+
+export type CreateProgramMutation = (
+  { __typename?: 'Mutations' }
+  & { createProgram: Maybe<(
+    { __typename?: 'CreateProgram' }
+    & { program: Maybe<(
+      { __typename?: 'ProgramNode' }
+      & Pick<ProgramNode, 'id' | 'name' | 'status' | 'startDate' | 'endDate' | 'programCaId' | 'budget' | 'description' | 'frequencyOfPayments' | 'sector' | 'scope' | 'cashPlus' | 'populationGoal'>
+    )> }
+  )> }
+);
+
 export type AllCashPlansQueryVariables = {
   program: Scalars['ID'],
   after?: Maybe<Scalars['String']>,
@@ -1351,6 +1370,23 @@ export type AllProgramsQuery = (
   )> }
 );
 
+export type AllLocationsQueryVariables = {};
+
+
+export type AllLocationsQuery = (
+  { __typename?: 'Query' }
+  & { allLocations: Maybe<(
+    { __typename?: 'LocationNodeConnection' }
+    & { edges: Array<Maybe<(
+      { __typename?: 'LocationNodeEdge' }
+      & { node: Maybe<(
+        { __typename?: 'LocationNode' }
+        & Pick<LocationNode, 'id'>
+      )> }
+    )>> }
+  )> }
+);
+
 export type MeQueryVariables = {};
 
 
@@ -1379,7 +1415,90 @@ export type ProgramQuery = (
   )> }
 );
 
+export type ProgrammeChoiceDataQueryVariables = {};
 
+
+export type ProgrammeChoiceDataQuery = (
+  { __typename?: 'Query' }
+  & { programFrequencyOfPaymentsChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, programScopeChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, programSectorChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, programStatusChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>> }
+);
+
+
+export const CreateProgramDocument = gql`
+    mutation CreateProgram($programData: CreateProgramInput!) {
+  createProgram(programData: $programData) {
+    program {
+      id
+      name
+      status
+      startDate
+      endDate
+      programCaId
+      budget
+      description
+      frequencyOfPayments
+      sector
+      scope
+      cashPlus
+      populationGoal
+    }
+  }
+}
+    `;
+export type CreateProgramMutationFn = ApolloReactCommon.MutationFunction<CreateProgramMutation, CreateProgramMutationVariables>;
+export type CreateProgramComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<CreateProgramMutation, CreateProgramMutationVariables>, 'mutation'>;
+
+    export const CreateProgramComponent = (props: CreateProgramComponentProps) => (
+      <ApolloReactComponents.Mutation<CreateProgramMutation, CreateProgramMutationVariables> mutation={CreateProgramDocument} {...props} />
+    );
+    
+export type CreateProgramProps<TChildProps = {}> = ApolloReactHoc.MutateProps<CreateProgramMutation, CreateProgramMutationVariables> & TChildProps;
+export function withCreateProgram<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CreateProgramMutation,
+  CreateProgramMutationVariables,
+  CreateProgramProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, CreateProgramMutation, CreateProgramMutationVariables, CreateProgramProps<TChildProps>>(CreateProgramDocument, {
+      alias: 'createProgram',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCreateProgramMutation__
+ *
+ * To run a mutation, you first call `useCreateProgramMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateProgramMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createProgramMutation, { data, loading, error }] = useCreateProgramMutation({
+ *   variables: {
+ *      programData: // value for 'programData'
+ *   },
+ * });
+ */
+export function useCreateProgramMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateProgramMutation, CreateProgramMutationVariables>) {
+        return ApolloReactHooks.useMutation<CreateProgramMutation, CreateProgramMutationVariables>(CreateProgramDocument, baseOptions);
+      }
+export type CreateProgramMutationHookResult = ReturnType<typeof useCreateProgramMutation>;
+export type CreateProgramMutationResult = ApolloReactCommon.MutationResult<CreateProgramMutation>;
+export type CreateProgramMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateProgramMutation, CreateProgramMutationVariables>;
 export const AllCashPlansDocument = gql`
     query AllCashPlans($program: ID!, $after: String, $count: Int) {
   allCashPlans(program: $program, after: $after, first: $count) {
@@ -1522,6 +1641,59 @@ export function useAllProgramsLazyQuery(baseOptions?: ApolloReactHooks.LazyQuery
 export type AllProgramsQueryHookResult = ReturnType<typeof useAllProgramsQuery>;
 export type AllProgramsLazyQueryHookResult = ReturnType<typeof useAllProgramsLazyQuery>;
 export type AllProgramsQueryResult = ApolloReactCommon.QueryResult<AllProgramsQuery, AllProgramsQueryVariables>;
+export const AllLocationsDocument = gql`
+    query allLocations {
+  allLocations {
+    edges {
+      node {
+        id
+      }
+    }
+  }
+}
+    `;
+export type AllLocationsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllLocationsQuery, AllLocationsQueryVariables>, 'query'>;
+
+    export const AllLocationsComponent = (props: AllLocationsComponentProps) => (
+      <ApolloReactComponents.Query<AllLocationsQuery, AllLocationsQueryVariables> query={AllLocationsDocument} {...props} />
+    );
+    
+export type AllLocationsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllLocationsQuery, AllLocationsQueryVariables> & TChildProps;
+export function withAllLocations<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllLocationsQuery,
+  AllLocationsQueryVariables,
+  AllLocationsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllLocationsQuery, AllLocationsQueryVariables, AllLocationsProps<TChildProps>>(AllLocationsDocument, {
+      alias: 'allLocations',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllLocationsQuery__
+ *
+ * To run a query within a React component, call `useAllLocationsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllLocationsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllLocationsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useAllLocationsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllLocationsQuery, AllLocationsQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllLocationsQuery, AllLocationsQueryVariables>(AllLocationsDocument, baseOptions);
+      }
+export function useAllLocationsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllLocationsQuery, AllLocationsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllLocationsQuery, AllLocationsQueryVariables>(AllLocationsDocument, baseOptions);
+        }
+export type AllLocationsQueryHookResult = ReturnType<typeof useAllLocationsQuery>;
+export type AllLocationsLazyQueryHookResult = ReturnType<typeof useAllLocationsLazyQuery>;
+export type AllLocationsQueryResult = ApolloReactCommon.QueryResult<AllLocationsQuery, AllLocationsQueryVariables>;
 export const MeDocument = gql`
     query Me {
   me {
@@ -1648,6 +1820,68 @@ export function useProgramLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHook
 export type ProgramQueryHookResult = ReturnType<typeof useProgramQuery>;
 export type ProgramLazyQueryHookResult = ReturnType<typeof useProgramLazyQuery>;
 export type ProgramQueryResult = ApolloReactCommon.QueryResult<ProgramQuery, ProgramQueryVariables>;
+export const ProgrammeChoiceDataDocument = gql`
+    query ProgrammeChoiceData {
+  programFrequencyOfPaymentsChoices {
+    name
+    value
+  }
+  programScopeChoices {
+    name
+    value
+  }
+  programSectorChoices {
+    name
+    value
+  }
+  programStatusChoices {
+    name
+    value
+  }
+}
+    `;
+export type ProgrammeChoiceDataComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<ProgrammeChoiceDataQuery, ProgrammeChoiceDataQueryVariables>, 'query'>;
+
+    export const ProgrammeChoiceDataComponent = (props: ProgrammeChoiceDataComponentProps) => (
+      <ApolloReactComponents.Query<ProgrammeChoiceDataQuery, ProgrammeChoiceDataQueryVariables> query={ProgrammeChoiceDataDocument} {...props} />
+    );
+    
+export type ProgrammeChoiceDataProps<TChildProps = {}> = ApolloReactHoc.DataProps<ProgrammeChoiceDataQuery, ProgrammeChoiceDataQueryVariables> & TChildProps;
+export function withProgrammeChoiceData<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ProgrammeChoiceDataQuery,
+  ProgrammeChoiceDataQueryVariables,
+  ProgrammeChoiceDataProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, ProgrammeChoiceDataQuery, ProgrammeChoiceDataQueryVariables, ProgrammeChoiceDataProps<TChildProps>>(ProgrammeChoiceDataDocument, {
+      alias: 'programmeChoiceData',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useProgrammeChoiceDataQuery__
+ *
+ * To run a query within a React component, call `useProgrammeChoiceDataQuery` and pass it any options that fit your needs.
+ * When your component renders, `useProgrammeChoiceDataQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useProgrammeChoiceDataQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useProgrammeChoiceDataQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<ProgrammeChoiceDataQuery, ProgrammeChoiceDataQueryVariables>) {
+        return ApolloReactHooks.useQuery<ProgrammeChoiceDataQuery, ProgrammeChoiceDataQueryVariables>(ProgrammeChoiceDataDocument, baseOptions);
+      }
+export function useProgrammeChoiceDataLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<ProgrammeChoiceDataQuery, ProgrammeChoiceDataQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<ProgrammeChoiceDataQuery, ProgrammeChoiceDataQueryVariables>(ProgrammeChoiceDataDocument, baseOptions);
+        }
+export type ProgrammeChoiceDataQueryHookResult = ReturnType<typeof useProgrammeChoiceDataQuery>;
+export type ProgrammeChoiceDataLazyQueryHookResult = ReturnType<typeof useProgrammeChoiceDataLazyQuery>;
+export type ProgrammeChoiceDataQueryResult = ApolloReactCommon.QueryResult<ProgrammeChoiceDataQuery, ProgrammeChoiceDataQueryVariables>;
 
 
 export type ResolverTypeWrapper<T> = Promise<T> | T;
@@ -2116,6 +2350,7 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   scope?: Resolver<ResolversTypes['ProgramScope'], ParentType, ContextType>,
   cashPlus?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   populationGoal?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  administrativeAreasOfImplementation?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   cashPlans?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, ProgramNodeCashPlansArgs>,
   totalNumberOfHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };

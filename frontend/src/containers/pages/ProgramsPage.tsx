@@ -1,8 +1,8 @@
 import React from 'react';
-import { Button } from '@material-ui/core';
 import styled from 'styled-components';
 import { ProgramCard } from '../../components/programs/ProgramCard';
 import { PageHeader } from '../../components/PageHeader';
+import { Programme } from '../Dialogs/Programme/Programme';
 import { ProgramNode, useAllProgramsQuery } from '../../__generated__/graphql';
 
 const PageContainer = styled.div`
@@ -17,9 +17,7 @@ export function ProgramsPage(): React.ReactElement {
 
   const toolbar = (
     <PageHeader title='Programme Management'>
-      <Button variant='contained' color='primary'>
-        NEW PROGRAMME
-      </Button>
+      <Programme />
     </PageHeader>
   );
 
