@@ -1324,6 +1324,22 @@ export type CreateProgramMutation = (
   )> }
 );
 
+export type UpdateProgramMutationVariables = {
+  programData: UpdateProgramInput
+};
+
+
+export type UpdateProgramMutation = (
+  { __typename?: 'Mutations' }
+  & { updateProgram: Maybe<(
+    { __typename?: 'UpdateProgram' }
+    & { program: Maybe<(
+      { __typename?: 'ProgramNode' }
+      & Pick<ProgramNode, 'id' | 'name' | 'status' | 'startDate' | 'endDate' | 'programCaId' | 'budget' | 'description' | 'frequencyOfPayments' | 'sector' | 'scope' | 'cashPlus' | 'populationGoal'>
+    )> }
+  )> }
+);
+
 export type AllCashPlansQueryVariables = {
   program: Scalars['ID'],
   after?: Maybe<Scalars['String']>,
@@ -1499,6 +1515,69 @@ export function useCreateProgramMutation(baseOptions?: ApolloReactHooks.Mutation
 export type CreateProgramMutationHookResult = ReturnType<typeof useCreateProgramMutation>;
 export type CreateProgramMutationResult = ApolloReactCommon.MutationResult<CreateProgramMutation>;
 export type CreateProgramMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateProgramMutation, CreateProgramMutationVariables>;
+export const UpdateProgramDocument = gql`
+    mutation UpdateProgram($programData: UpdateProgramInput!) {
+  updateProgram(programData: $programData) {
+    program {
+      id
+      name
+      status
+      startDate
+      endDate
+      programCaId
+      budget
+      description
+      frequencyOfPayments
+      sector
+      scope
+      cashPlus
+      populationGoal
+    }
+  }
+}
+    `;
+export type UpdateProgramMutationFn = ApolloReactCommon.MutationFunction<UpdateProgramMutation, UpdateProgramMutationVariables>;
+export type UpdateProgramComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<UpdateProgramMutation, UpdateProgramMutationVariables>, 'mutation'>;
+
+    export const UpdateProgramComponent = (props: UpdateProgramComponentProps) => (
+      <ApolloReactComponents.Mutation<UpdateProgramMutation, UpdateProgramMutationVariables> mutation={UpdateProgramDocument} {...props} />
+    );
+    
+export type UpdateProgramProps<TChildProps = {}> = ApolloReactHoc.MutateProps<UpdateProgramMutation, UpdateProgramMutationVariables> & TChildProps;
+export function withUpdateProgram<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  UpdateProgramMutation,
+  UpdateProgramMutationVariables,
+  UpdateProgramProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, UpdateProgramMutation, UpdateProgramMutationVariables, UpdateProgramProps<TChildProps>>(UpdateProgramDocument, {
+      alias: 'updateProgram',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useUpdateProgramMutation__
+ *
+ * To run a mutation, you first call `useUpdateProgramMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateProgramMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateProgramMutation, { data, loading, error }] = useUpdateProgramMutation({
+ *   variables: {
+ *      programData: // value for 'programData'
+ *   },
+ * });
+ */
+export function useUpdateProgramMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdateProgramMutation, UpdateProgramMutationVariables>) {
+        return ApolloReactHooks.useMutation<UpdateProgramMutation, UpdateProgramMutationVariables>(UpdateProgramDocument, baseOptions);
+      }
+export type UpdateProgramMutationHookResult = ReturnType<typeof useUpdateProgramMutation>;
+export type UpdateProgramMutationResult = ApolloReactCommon.MutationResult<UpdateProgramMutation>;
+export type UpdateProgramMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdateProgramMutation, UpdateProgramMutationVariables>;
 export const AllCashPlansDocument = gql`
     query AllCashPlans($program: ID!, $after: String, $count: Int) {
   allCashPlans(program: $program, after: $after, first: $count) {

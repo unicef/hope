@@ -1,6 +1,6 @@
 import { gql } from 'apollo-boost';
 
-export const CreateProgrm = gql`
+export const CreateProgram = gql`
     mutation CreateProgram($programData: CreateProgramInput!) {
       createProgram(programData: $programData) {
         program {

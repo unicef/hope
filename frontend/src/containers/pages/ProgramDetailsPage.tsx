@@ -1,20 +1,24 @@
 import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
 import { Button } from '@material-ui/core';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { PageHeader } from '../../components/PageHeader';
 import { ProgramDetails } from '../../components/programs/ProgramDetails';
 import { CashPlanTable } from '../CashPlanTable';
-import { ProgramNode, useProgramQuery } from '../../__generated__/graphql';
+import {
+  ProgramNode,
+  ProgramStatus,
+  useProgramQuery,
+} from '../../__generated__/graphql';
+import CloseIcon from '@material-ui/icons/CloseRounded';
+import EditIcon from '@material-ui/icons/EditRounded';
+import { ActivateProgram } from '../Dialogs/Programme/ActivateProgramme';
 
-const useStyles = makeStyles({
-  container: {
-    display: 'flex',
-    flexDirection: 'column',
-    width: '100%',
-  },
-});
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+`;
 
 const PageContainer = styled.div`
   display: flex;
@@ -22,13 +26,20 @@ const PageContainer = styled.div`
   flex-wrap: wrap;
   padding: 20px;
 `;
+const ButtonContainer = styled.span`
+  margin: 0 ${({ theme }) => theme.spacing(2)}px;
+`;
+const RemoveButton = styled(Button)`
+  && {
+    color: ${({ theme }) => theme.palette.error.main};
+  }
+`;
 
 export function ProgramDetailsPage(): React.ReactElement {
   const { id } = useParams();
   const { data } = useProgramQuery({
     variables: { id },
   });
-  const classes = useStyles({});
   if (!data) {
     return null;
   }
@@ -36,19 +47,31 @@ export function ProgramDetailsPage(): React.ReactElement {
   return (
     <div>
       <PageHeader
-        title='Helping young children in remote locations'
+        title={program.name}
         category='Programme Management'
       >
-        <Button variant='contained' color='primary'>
-          EDIT
-        </Button>
+        <div>
+          <ButtonContainer>
+            <RemoveButton startIcon={<CloseIcon />}>REMOVE</RemoveButton>
+          </ButtonContainer>
+          <ButtonContainer>
+            <Button variant='outlined' color='primary' startIcon={<EditIcon />}>
+              EDIT PROGRAMME
+            </Button>
+          </ButtonContainer>
+          {program.status === ProgramStatus.Draft ? (
+            <ButtonContainer>
+              <ActivateProgram program={program}/>
+            </ButtonContainer>
+          ) : null}
+        </div>
       </PageHeader>
-      <div className={classes.container}>
+      <Container>
         <ProgramDetails program={program} />
         <PageContainer>
           <CashPlanTable program={program} />
         </PageContainer>
-      </div>
+      </Container>
     </div>
   );
 }
