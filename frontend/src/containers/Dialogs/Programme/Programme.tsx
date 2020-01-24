@@ -1,4 +1,8 @@
 import React, { useState } from 'react';
+import moment from 'moment';
+import * as Yup from 'yup';
+import styled from 'styled-components';
+import { useHistory } from 'react-router-dom';
 import {
   Button,
   TextField,
@@ -13,9 +17,6 @@ import {
   Radio,
   RadioGroup,
 } from '@material-ui/core';
-import * as Yup from 'yup';
-import styled from 'styled-components';
-import moment from 'moment';
 import { Formik, Form, Field } from 'formik';
 import { FormikTextField } from '../../../shared/Formik/FormikTextField';
 import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
@@ -65,43 +66,43 @@ const validationSchema = Yup.object().shape({
   sector: Yup.string().required('Sector is required'),
 });
 
-export function Programme() {
+export function Programme(): React.ReactElement {
+  const history = useHistory();
   const [open, setOpen] = useState(false);
   const [toggle, setToggle] = useState(false);
   const { data } = useProgrammeChoiceDataQuery();
   const [mutate] = useCreateProgramMutation();
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
 
   const handleToggle = () => {
     return toggle ? setToggle(false) : setToggle(true);
   };
 
-  const submitFormHandler = (values) => {
-    console.log('blah blah submit', values);
-    mutate({
+  const submitFormHandler = async (values) => {
+    const response = await mutate({
       variables: {
         programData: {
           ...values,
           startDate: moment(values.startDate).toISOString(),
           endDate: moment(values.endDate).toISOString(),
           locationId:
-            'TG9jYXRpb25Ob2RlOmNiMjkzZmY0LTM4MzEtNDFmNy1iYWEzLTMxZjQzMGIwMDUzMQ==',
+            'TG9jYXRpb246MzkyZmI5NDYtM2U4Ni0xMWVhLWI3N2YtMmU3MjhjZTg4MTI1',
         },
       },
     });
-    //eslint-disable-next-line
-    debugger;
+    if (!response.errors && response.data.createProgram) {
+      history.push(`/programs/${response.data.createProgram.program.id}`);
+    }
   };
-
-  return data ? (
+  if (!data) {
+    return (
+      <Button variant='contained' color='primary' disabled>
+        new programme
+      </Button>
+    );
+  }
+  return (
     <div>
-      <Button variant='contained' color='primary' onClick={handleClickOpen}>
+      <Button variant='contained' color='primary' onClick={() => setOpen(true)}>
         new programme
       </Button>
       <Formik
@@ -126,7 +127,7 @@ export function Programme() {
           <Form>
             <Dialog
               open={open}
-              onClose={handleClose}
+              onClose={() => setOpen(false)}
               scroll='paper'
               aria-labelledby='form-dialog-title'
             >
@@ -271,7 +272,7 @@ export function Programme() {
                   <Field
                     name='cashPlus'
                     label='Cash+'
-                    color="primary"
+                    color='primary'
                     component={FormikSwitchField}
                     checked={toggle}
                     onChange={handleToggle}
@@ -280,7 +281,7 @@ export function Programme() {
               </DialogContent>
               <DialogFooter>
                 <DialogActions>
-                  <Button onClick={handleClose} color='primary'>
+                  <Button onClick={() => setOpen(false)} color='primary'>
                     Cancel
                   </Button>
                   <Button
@@ -298,7 +299,5 @@ export function Programme() {
         )}
       </Formik>
     </div>
-  ) : (
-    <div> Loading ... </div>
   );
 }

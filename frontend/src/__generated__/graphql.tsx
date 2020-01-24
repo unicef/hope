@@ -1319,7 +1319,7 @@ export type CreateProgramMutation = (
     { __typename?: 'CreateProgram' }
     & { program: Maybe<(
       { __typename?: 'ProgramNode' }
-      & Pick<ProgramNode, 'name' | 'status' | 'startDate' | 'endDate' | 'programCaId' | 'budget' | 'description' | 'frequencyOfPayments' | 'sector' | 'scope' | 'cashPlus' | 'populationGoal'>
+      & Pick<ProgramNode, 'id' | 'name' | 'status' | 'startDate' | 'endDate' | 'programCaId' | 'budget' | 'description' | 'frequencyOfPayments' | 'sector' | 'scope' | 'cashPlus' | 'populationGoal'>
     )> }
   )> }
 );
@@ -1440,6 +1440,7 @@ export const CreateProgramDocument = gql`
     mutation CreateProgram($programData: CreateProgramInput!) {
   createProgram(programData: $programData) {
     program {
+      id
       name
       status
       startDate
