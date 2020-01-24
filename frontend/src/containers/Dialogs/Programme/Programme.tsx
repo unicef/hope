@@ -11,11 +11,6 @@ import {
   DialogContent,
   DialogActions,
   Typography,
-  FormControl,
-  FormLabel,
-  FormControlLabel,
-  Radio,
-  RadioGroup,
 } from '@material-ui/core';
 import { Formik, Form, Field } from 'formik';
 import { FormikTextField } from '../../../shared/Formik/FormikTextField';
@@ -25,6 +20,7 @@ import {
   useProgrammeChoiceDataQuery,
   useCreateProgramMutation,
 } from '../../../__generated__/graphql';
+import { FormikRadioGroup } from '../../../shared/Formik/FormikRadioGroup';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid #e4e4e4;
@@ -115,6 +111,7 @@ export function Programme(): React.ReactElement {
           budget: 0,
           administrativeAreasOfImplementation: '',
           populationGoal: 0,
+          frequencyOfPayment: 'REGULAR',
           sector: '',
           cashPlus: false,
         }}
@@ -219,29 +216,12 @@ export function Programme(): React.ReactElement {
                     component={FormikTextField}
                   />
                 </MediumLabel>
-                <Field name='frequencyOfPayment'>
-                  {({ field }) => (
-                    <FormControl component='fieldset'>
-                      <FormLabel component='legend'>
-                        Frequency of Payment
-                      </FormLabel>
-                      <RadioGroup
-                        {...field}
-                        aria-label='gender'
-                        name='frequencyOfPayments'
-                      >
-                        {data.programFrequencyOfPaymentsChoices.map((each) => (
-                          <FormControlLabel
-                            key={each.value}
-                            value={each.value}
-                            label={each.name}
-                            control={<Radio />}
-                          />
-                        ))}
-                      </RadioGroup>
-                    </FormControl>
-                  )}
-                </Field>
+                <Field
+                  name='frequencyOfPayment'
+                  label='Frequency of Payment'
+                  choices={data.programFrequencyOfPaymentsChoices}
+                  component={FormikRadioGroup}
+                />
                 <Field
                   name='administrativeAreasOfImplementation'
                   label='Administrative Areas of Implementation'

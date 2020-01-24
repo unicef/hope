@@ -15,8 +15,6 @@ export const FormikSelectField = ({
   ...otherProps
 }) => {
   const isInvalid = form.errors[field.name] && form.touched[field.name];
-  //eslint-disable-next-line
-  //debugger
   return (
     <>
       <FormControl variant='filled' margin='dense' fullWidth {...otherProps}>
