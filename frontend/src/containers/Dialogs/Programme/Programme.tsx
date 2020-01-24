@@ -85,7 +85,7 @@ export function Programme(): React.ReactElement {
           startDate: moment(values.startDate).toISOString(),
           endDate: moment(values.endDate).toISOString(),
           locationId:
-            'TG9jYXRpb246MzkyZmI5NDYtM2U4Ni0xMWVhLWI3N2YtMmU3MjhjZTg4MTI1',
+            'TG9jYXRpb25Ob2RlOjBkZTJiYjkxLTZlYWUtNGVlZC04YzQ5LTBmMGYwZGM3YWQzMA==',
         },
       },
     });
