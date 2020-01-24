@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   FormControl,
-  FormHelperText,
   FormControlLabel,
   FormLabel,
   RadioGroup,
@@ -17,7 +16,7 @@ export const FormikRadioGroup = ({
 }) => {
   return (
     <>
-      <FormControl {...otherProps} component="fieldset">
+      <FormControl {...otherProps} component='fieldset'>
         <FormLabel component='legend'>{otherProps.label}</FormLabel>
         <RadioGroup
           {...field}
@@ -31,7 +30,7 @@ export const FormikRadioGroup = ({
               key={each.value}
               value={each.value}
               label={each.name}
-              control={<Radio />}
+              control={<Radio color='primary' />}
             />
           ))}
         </RadioGroup>

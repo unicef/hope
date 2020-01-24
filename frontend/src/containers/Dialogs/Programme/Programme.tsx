@@ -19,6 +19,7 @@ import { FormikSwitchField } from '../../../shared/Formik/FormikSwitchField';
 import {
   useProgrammeChoiceDataQuery,
   useCreateProgramMutation,
+  useAllLocationsQuery,
 } from '../../../__generated__/graphql';
 import { FormikRadioGroup } from '../../../shared/Formik/FormikRadioGroup';
 
@@ -67,6 +68,7 @@ export function Programme(): React.ReactElement {
   const [open, setOpen] = useState(false);
   const [toggle, setToggle] = useState(false);
   const { data } = useProgrammeChoiceDataQuery();
+  const { data: locationsData } = useAllLocationsQuery();
   const [mutate] = useCreateProgramMutation();
 
   const handleToggle = () => {
@@ -74,14 +76,14 @@ export function Programme(): React.ReactElement {
   };
 
   const submitFormHandler = async (values) => {
+    const { id } = locationsData.allLocations.edges[0].node;
     const response = await mutate({
       variables: {
         programData: {
           ...values,
           startDate: moment(values.startDate).toISOString(),
           endDate: moment(values.endDate).toISOString(),
-          locationId:
-            'TG9jYXRpb25Ob2RlOjBkZTJiYjkxLTZlYWUtNGVlZC04YzQ5LTBmMGYwZGM3YWQzMA==',
+          locationId: id,
         },
       },
     });
@@ -96,6 +98,7 @@ export function Programme(): React.ReactElement {
       </Button>
     );
   }
+
   return (
     <div>
       <Button variant='contained' color='primary' onClick={() => setOpen(true)}>
@@ -111,7 +114,7 @@ export function Programme(): React.ReactElement {
           budget: 0,
           administrativeAreasOfImplementation: '',
           populationGoal: 0,
-          frequencyOfPayment: 'REGULAR',
+          frequencyOfPayments: 'REGULAR',
           sector: '',
           cashPlus: false,
         }}
@@ -217,7 +220,7 @@ export function Programme(): React.ReactElement {
                   />
                 </MediumLabel>
                 <Field
-                  name='frequencyOfPayment'
+                  name='frequencyOfPayments'
                   label='Frequency of Payment'
                   choices={data.programFrequencyOfPaymentsChoices}
                   component={FormikRadioGroup}

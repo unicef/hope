@@ -26,7 +26,7 @@ export const FormikSwitchField = ({
     <>
       <StyledSwitch>
         <StyledLabel>{otherProps.label}</StyledLabel>
-        <Switch {...otherProps} value={otherProps.value} />
+        <Switch {...otherProps} />
       </StyledSwitch>
       {isInvalid && form.errors[field.name] && (
         <FormHelperText error>{form.errors[field.name]}</FormHelperText>
