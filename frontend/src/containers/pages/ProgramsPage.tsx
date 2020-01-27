@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { ProgramCard } from '../../components/programs/ProgramCard';
 import { PageHeader } from '../../components/PageHeader';
-import { Programme } from '../Dialogs/Programme/Programme';
+import { Programme } from '../dialogs/programs/Programme';
 import { ProgramNode, useAllProgramsQuery } from '../../__generated__/graphql';
 
 const PageContainer = styled.div`

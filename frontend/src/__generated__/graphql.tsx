@@ -1324,6 +1324,19 @@ export type CreateProgramMutation = (
   )> }
 );
 
+export type DeleteProgramMutationVariables = {
+  programId: Scalars['String']
+};
+
+
+export type DeleteProgramMutation = (
+  { __typename?: 'Mutations' }
+  & { deleteProgram: Maybe<(
+    { __typename?: 'DeleteProgram' }
+    & Pick<DeleteProgram, 'ok'>
+  )> }
+);
+
 export type UpdateProgramMutationVariables = {
   programData: UpdateProgramInput
 };
@@ -1335,7 +1348,11 @@ export type UpdateProgramMutation = (
     { __typename?: 'UpdateProgram' }
     & { program: Maybe<(
       { __typename?: 'ProgramNode' }
-      & Pick<ProgramNode, 'id' | 'name' | 'status' | 'startDate' | 'endDate' | 'programCaId' | 'budget' | 'description' | 'frequencyOfPayments' | 'sector' | 'scope' | 'cashPlus' | 'populationGoal'>
+      & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'programCaId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds'>
+      & { location: (
+        { __typename?: 'LocationNode' }
+        & Pick<LocationNode, 'country' | 'id' | 'name'>
+      ) }
     )> }
   )> }
 );
@@ -1515,23 +1532,83 @@ export function useCreateProgramMutation(baseOptions?: ApolloReactHooks.Mutation
 export type CreateProgramMutationHookResult = ReturnType<typeof useCreateProgramMutation>;
 export type CreateProgramMutationResult = ApolloReactCommon.MutationResult<CreateProgramMutation>;
 export type CreateProgramMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateProgramMutation, CreateProgramMutationVariables>;
+export const DeleteProgramDocument = gql`
+    mutation DeleteProgram($programId: String!) {
+  deleteProgram(programId: $programId) {
+    ok
+  }
+}
+    `;
+export type DeleteProgramMutationFn = ApolloReactCommon.MutationFunction<DeleteProgramMutation, DeleteProgramMutationVariables>;
+export type DeleteProgramComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<DeleteProgramMutation, DeleteProgramMutationVariables>, 'mutation'>;
+
+    export const DeleteProgramComponent = (props: DeleteProgramComponentProps) => (
+      <ApolloReactComponents.Mutation<DeleteProgramMutation, DeleteProgramMutationVariables> mutation={DeleteProgramDocument} {...props} />
+    );
+    
+export type DeleteProgramProps<TChildProps = {}> = ApolloReactHoc.MutateProps<DeleteProgramMutation, DeleteProgramMutationVariables> & TChildProps;
+export function withDeleteProgram<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  DeleteProgramMutation,
+  DeleteProgramMutationVariables,
+  DeleteProgramProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, DeleteProgramMutation, DeleteProgramMutationVariables, DeleteProgramProps<TChildProps>>(DeleteProgramDocument, {
+      alias: 'deleteProgram',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useDeleteProgramMutation__
+ *
+ * To run a mutation, you first call `useDeleteProgramMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteProgramMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteProgramMutation, { data, loading, error }] = useDeleteProgramMutation({
+ *   variables: {
+ *      programId: // value for 'programId'
+ *   },
+ * });
+ */
+export function useDeleteProgramMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<DeleteProgramMutation, DeleteProgramMutationVariables>) {
+        return ApolloReactHooks.useMutation<DeleteProgramMutation, DeleteProgramMutationVariables>(DeleteProgramDocument, baseOptions);
+      }
+export type DeleteProgramMutationHookResult = ReturnType<typeof useDeleteProgramMutation>;
+export type DeleteProgramMutationResult = ApolloReactCommon.MutationResult<DeleteProgramMutation>;
+export type DeleteProgramMutationOptions = ApolloReactCommon.BaseMutationOptions<DeleteProgramMutation, DeleteProgramMutationVariables>;
 export const UpdateProgramDocument = gql`
     mutation UpdateProgram($programData: UpdateProgramInput!) {
   updateProgram(programData: $programData) {
     program {
       id
       name
-      status
       startDate
       endDate
+      status
       programCaId
-      budget
       description
+      budget
       frequencyOfPayments
-      sector
-      scope
       cashPlus
+      location {
+        country
+        id
+        name
+      }
       populationGoal
+      scope
+      sector
+      totalNumberOfHouseholds
+      location {
+        name
+      }
+      cashPlus
+      frequencyOfPayments
     }
   }
 }

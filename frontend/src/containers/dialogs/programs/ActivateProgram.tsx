@@ -99,7 +99,7 @@ export function ActivateProgram({
         <DialogFooter>
           <DialogActions>
             <Button onClick={() => setOpen(false)} color='primary'>
-              Cancel
+              CANCEL
             </Button>
             <Button
               type='submit'
@@ -107,7 +107,7 @@ export function ActivateProgram({
               variant='contained'
               onClick={activateProgram}
             >
-              Activate
+              ACTIVATE
             </Button>
           </DialogActions>
         </DialogFooter>
