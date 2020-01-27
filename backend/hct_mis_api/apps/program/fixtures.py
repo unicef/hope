@@ -1,4 +1,5 @@
 from datetime import timedelta, datetime
+from random import randint
 
 import factory
 from factory import fuzzy
@@ -19,10 +20,10 @@ class ProgramFactory(factory.DjangoModelFactory):
     )
     status = fuzzy.FuzzyChoice(Program.STATUS_CHOICE, getter=lambda c: c[0],)
     start_date = factory.Faker(
-        "date_time_this_century", before_now=False, after_now=True, tzinfo=utc,
+        "date_time_this_decade", before_now=False, after_now=True, tzinfo=utc,
     )
-    end_date = factory.Faker(
-        "date_time_this_century", before_now=False, after_now=True, tzinfo=utc,
+    end_date = factory.LazyAttribute(
+        lambda o: o.start_date + timedelta(days=randint(60, 1000))
     )
     description = factory.Faker(
         "sentence", nb_words=10, variable_nb_words=True, ext_word_list=None,
@@ -51,10 +52,10 @@ class CashPlanFactory(factory.DjangoModelFactory):
         "sentence", nb_words=6, variable_nb_words=True, ext_word_list=None,
     )
     start_date = factory.Faker(
-        "date_time_this_century", before_now=False, after_now=True, tzinfo=utc,
+        "date_time_this_decade", before_now=False, after_now=True, tzinfo=utc,
     )
-    end_date = factory.Faker(
-        "date_time_this_century", before_now=False, after_now=True, tzinfo=utc,
+    end_date = factory.LazyAttribute(
+        lambda o: o.start_date + timedelta(days=randint(60, 1000))
     )
     disbursement_date = factory.LazyAttribute(
         lambda o: o.end_date - timedelta(days=5)
