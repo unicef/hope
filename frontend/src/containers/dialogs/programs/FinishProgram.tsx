@@ -16,13 +16,13 @@ import {
 import { PROGRAM_QUERY } from '../../../apollo/queries/Program';
 
 const DialogTitleWrapper = styled.div`
-  border-bottom: 1px solid #e4e4e4;
+  border-bottom: 1px solid ${({theme})=>theme.hctPalette.lighterGray};
 `;
 
 const DialogFooter = styled.div`
   padding: 12px 16px;
   margin: 0;
-  border-top: 1px solid #e4e4e4;
+  border-top: 1px solid ${({theme})=>theme.hctPalette.lighterGray};
   text-align: right;
 `;
 

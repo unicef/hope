@@ -16,18 +16,18 @@ import {
 } from '../../../__generated__/graphql';
 
 const DialogTitleWrapper = styled.div`
-  border-bottom: 1px solid #e4e4e4;
+  border-bottom: 1px solid ${({theme})=>theme.hctPalette.lighterGray};
 `;
 
 const DialogFooter = styled.div`
-  padding: 12px 16px;
+  padding: ${({theme})=>theme.spacing(3)}px ${({theme})=>theme.spacing(4)}px;
   margin: 0;
-  border-top: 1px solid #e4e4e4;
+  border-top: 1px solid ${({theme})=>theme.hctPalette.lighterGray};
   text-align: right;
 `;
 
 const DialogDescription = styled.div`
-  margin: 20px 0;
+  margin: ${({theme})=>theme.spacing(5)}px 0;
   font-size: 14px;
   color: rgba(0, 0, 0, 0.54);
 `;

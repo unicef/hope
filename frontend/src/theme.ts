@@ -38,7 +38,8 @@ export const theme = {
     oragne: '#FC942A',
     green: '#10CB16',
     gray: '#4E606A',
-    lightGray: '#d8d8d8'
+    lightGray: '#d8d8d8',
+    lighterGray: '#e4e4e4',
   },
   hctTypography: {
     fontFamily: FONT,

@@ -21,7 +21,7 @@ import { FormikDateField } from '../../shared/Formik/FormikDateField';
 import { selectFields } from '../../utils/utils';
 
 const DialogTitleWrapper = styled.div`
-  border-bottom: 1px solid #e4e4e4;
+  border-bottom: 1px solid ${({theme})=>theme.hctPalette.lighterGray};
 `;
 
 const DialogDescription = styled.div`
