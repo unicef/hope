@@ -1,6 +1,7 @@
 from django.core.management import BaseCommand
 
 from account.fixtures import UserFactory
+from payment.fixtures import PaymentRecordFactory
 from program.fixtures import CashPlanFactory, ProgramFactory
 
 
@@ -30,19 +31,39 @@ class Command(BaseCommand):
             help="Creates provided amount of cash plans for one program.",
         )
 
+        parser.add_argument(
+            "--payment-record",
+            dest="payment_record_amount",
+            const=10,
+            default=10,
+            action="store",
+            nargs="?",
+            type=int,
+            help="Creates provided amount of payment records assigned to "
+            "household and cash plan.",
+        )
+
     def handle(self, *args, **options):
         cash_plans_amount = options["cash_plans_amount"]
         programs_amount = options["programs_amount"]
+        payment_record_amount = options["payment_record_amount"]
 
-        for program in range(programs_amount):
+        for _ in range(programs_amount):
             user = UserFactory.create()
-            program_obj = ProgramFactory()
+            program = ProgramFactory()
 
-            for cash_plan in range(cash_plans_amount):
-                CashPlanFactory.create(program=program_obj, created_by=user)
+            for _ in range(cash_plans_amount):
+                cash_plan = CashPlanFactory.create(
+                    program=program, created_by=user
+                )
+                for _ in range(payment_record_amount):
+                    PaymentRecordFactory.create(cash_plan=cash_plan)
 
         self.stdout.write(
             f"Generated {programs_amount} Programs "
-            f" and {cash_plans_amount} Cash Plans for each Program"
+            f" {cash_plans_amount} Cash Plans for each Program"
             f" (total Cash Plans: {cash_plans_amount * programs_amount})"
+            f" {payment_record_amount} Payment Records for each Cash Plan"
+            f" (total Payment Record: "
+            f"{(cash_plans_amount * programs_amount) * payment_record_amount})"
         )
