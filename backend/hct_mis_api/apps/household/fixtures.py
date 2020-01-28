@@ -18,7 +18,7 @@ class RegistrationDataImportFactory(factory.DjangoModelFactory):
         RegistrationDataImport.STATUS_CHOICE, getter=lambda c: c[0],
     )
     import_date = factory.Faker(
-        "date_time_this_century", before_now=True, tzinfo=utc,
+        "date_time_this_decade", before_now=True, tzinfo=utc,
     )
     imported_by = factory.SubFactory(UserFactory)
     data_source = factory.fuzzy.FuzzyChoice(
