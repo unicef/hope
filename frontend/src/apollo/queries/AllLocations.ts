@@ -6,6 +6,8 @@ export const allLocations = gql`
       edges {
         node {
           id
+          name
+          country
         }
       }
     }

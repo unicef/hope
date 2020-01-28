@@ -40,7 +40,9 @@ export function getCookie(name): string | null {
       .shift();
   return null;
 }
-
+export function getCurrentLocation(): string {
+  return localStorage.getItem('LocationId');
+}
 export function isAuthenticated(): boolean {
   return Boolean(localStorage.getItem('AUTHENTICATED'));
 }

@@ -3,6 +3,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import Typography from '@material-ui/core/Typography';
+import { Link } from 'react-router-dom';
 import moment from 'moment';
 import { Grid } from '@material-ui/core';
 import { theme as themeObj } from '../../theme';
@@ -59,9 +60,9 @@ const useStyles = makeStyles((theme: typeof themeObj) => ({
     fontSize: '20px',
     lineHeight: '26px',
   },
-  gridElement:{
+  gridElement: {
     marginBottom: theme.spacing(2),
-  }
+  },
 }));
 interface ProgramCardProps {
   program: ProgramNode; // AllProgramsQueryResponse['allPrograms']['edges'][number]['node'];
@@ -71,7 +72,7 @@ export function ProgramCard({ program }: ProgramCardProps): React.ReactElement {
   const classes = useStyles({ status: program.status });
 
   return (
-    <a href={`/programs/${program.id}`} className={classes.aContainer}>
+    <Link to={`/programs/${program.id}`} className={classes.aContainer}>
       <Card className={classes.card}>
         <div className={classes.statusBar} />
         <div className={classes.container}>
@@ -80,10 +81,12 @@ export function ProgramCard({ program }: ProgramCardProps): React.ReactElement {
               <Grid className={classes.gridElement} item xs={7}>
                 <LabelizedField
                   label='TIMEFRAME'
-                  value={`${moment(program.startDate).format('DD MMM YYYY')} - ${moment(program.endDate).format('DD MMM YYYY')}`}
+                  value={`${moment(program.startDate).format(
+                    'DD MMM YYYY',
+                  )} - ${moment(program.endDate).format('DD MMM YYYY')}`}
                 />
               </Grid>
-              <Grid className={classes.gridElement}  item xs={5}>
+              <Grid className={classes.gridElement} item xs={5}>
                 <LabelizedField label='status'>
                   <StatusBox
                     status={program.status}
@@ -91,7 +94,7 @@ export function ProgramCard({ program }: ProgramCardProps): React.ReactElement {
                   />
                 </LabelizedField>
               </Grid>
-              <Grid className={classes.gridElement}  item xs={12}>
+              <Grid className={classes.gridElement} item xs={12}>
                 <div className={classes.tittleBox}>
                   <Typography className={classes.label}>Programme</Typography>
                   <Typography className={classes.tittle}>
@@ -100,10 +103,10 @@ export function ProgramCard({ program }: ProgramCardProps): React.ReactElement {
                 </div>
               </Grid>
 
-              <Grid className={classes.gridElement}  item xs={6}>
+              <Grid className={classes.gridElement} item xs={6}>
                 <LabelizedField label='Frequency of payments' value='Regular' />
               </Grid>
-              <Grid className={classes.gridElement}  item xs={6}>
+              <Grid className={classes.gridElement} item xs={6}>
                 <LabelizedField
                   label='Budget'
                   value={`${program.budget.toLocaleString('en-US', {
@@ -113,20 +116,26 @@ export function ProgramCard({ program }: ProgramCardProps): React.ReactElement {
                 />
               </Grid>
 
-              <Grid className={classes.gridElement}  item xs={6}>
-                <LabelizedField label='Population Goal' value={program.populationGoal} />
+              <Grid className={classes.gridElement} item xs={6}>
+                <LabelizedField
+                  label='Population Goal'
+                  value={program.populationGoal}
+                />
               </Grid>
-              <Grid className={classes.gridElement}  item xs={6}>
-                <LabelizedField label='no. of households' value={program.totalNumberOfHouseholds} />
+              <Grid className={classes.gridElement} item xs={6}>
+                <LabelizedField
+                  label='no. of households'
+                  value={program.totalNumberOfHouseholds}
+                />
               </Grid>
 
-              <Grid className={classes.gridElement}  item xs={6}>
+              <Grid className={classes.gridElement} item xs={6}>
                 <LabelizedField label='SECTOR' value={program.sector} />
               </Grid>
             </Grid>
           </CardContent>
         </div>
       </Card>{' '}
-    </a>
+    </Link>
   );
 }

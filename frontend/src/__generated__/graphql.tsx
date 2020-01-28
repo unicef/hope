@@ -1383,6 +1383,23 @@ export type AllCashPlansQuery = (
   )> }
 );
 
+export type AllLocationsQueryVariables = {};
+
+
+export type AllLocationsQuery = (
+  { __typename?: 'Query' }
+  & { allLocations: Maybe<(
+    { __typename?: 'LocationNodeConnection' }
+    & { edges: Array<Maybe<(
+      { __typename?: 'LocationNodeEdge' }
+      & { node: Maybe<(
+        { __typename?: 'LocationNode' }
+        & Pick<LocationNode, 'id' | 'name' | 'country'>
+      )> }
+    )>> }
+  )> }
+);
+
 export type AllProgramsQueryVariables = {};
 
 
@@ -1398,23 +1415,6 @@ export type AllProgramsQuery = (
       & { node: Maybe<(
         { __typename?: 'ProgramNode' }
         & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'programCaId' | 'description' | 'budget' | 'frequencyOfPayments' | 'populationGoal' | 'sector' | 'totalNumberOfHouseholds'>
-      )> }
-    )>> }
-  )> }
-);
-
-export type AllLocationsQueryVariables = {};
-
-
-export type AllLocationsQuery = (
-  { __typename?: 'Query' }
-  & { allLocations: Maybe<(
-    { __typename?: 'LocationNodeConnection' }
-    & { edges: Array<Maybe<(
-      { __typename?: 'LocationNodeEdge' }
-      & { node: Maybe<(
-        { __typename?: 'LocationNode' }
-        & Pick<LocationNode, 'id'>
       )> }
     )>> }
   )> }
@@ -1727,6 +1727,61 @@ export function useAllCashPlansLazyQuery(baseOptions?: ApolloReactHooks.LazyQuer
 export type AllCashPlansQueryHookResult = ReturnType<typeof useAllCashPlansQuery>;
 export type AllCashPlansLazyQueryHookResult = ReturnType<typeof useAllCashPlansLazyQuery>;
 export type AllCashPlansQueryResult = ApolloReactCommon.QueryResult<AllCashPlansQuery, AllCashPlansQueryVariables>;
+export const AllLocationsDocument = gql`
+    query allLocations {
+  allLocations {
+    edges {
+      node {
+        id
+        name
+        country
+      }
+    }
+  }
+}
+    `;
+export type AllLocationsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllLocationsQuery, AllLocationsQueryVariables>, 'query'>;
+
+    export const AllLocationsComponent = (props: AllLocationsComponentProps) => (
+      <ApolloReactComponents.Query<AllLocationsQuery, AllLocationsQueryVariables> query={AllLocationsDocument} {...props} />
+    );
+    
+export type AllLocationsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllLocationsQuery, AllLocationsQueryVariables> & TChildProps;
+export function withAllLocations<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllLocationsQuery,
+  AllLocationsQueryVariables,
+  AllLocationsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllLocationsQuery, AllLocationsQueryVariables, AllLocationsProps<TChildProps>>(AllLocationsDocument, {
+      alias: 'allLocations',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllLocationsQuery__
+ *
+ * To run a query within a React component, call `useAllLocationsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllLocationsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllLocationsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useAllLocationsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllLocationsQuery, AllLocationsQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllLocationsQuery, AllLocationsQueryVariables>(AllLocationsDocument, baseOptions);
+      }
+export function useAllLocationsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllLocationsQuery, AllLocationsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllLocationsQuery, AllLocationsQueryVariables>(AllLocationsDocument, baseOptions);
+        }
+export type AllLocationsQueryHookResult = ReturnType<typeof useAllLocationsQuery>;
+export type AllLocationsLazyQueryHookResult = ReturnType<typeof useAllLocationsLazyQuery>;
+export type AllLocationsQueryResult = ApolloReactCommon.QueryResult<AllLocationsQuery, AllLocationsQueryVariables>;
 export const AllProgramsDocument = gql`
     query AllPrograms {
   allPrograms {
@@ -1797,59 +1852,6 @@ export function useAllProgramsLazyQuery(baseOptions?: ApolloReactHooks.LazyQuery
 export type AllProgramsQueryHookResult = ReturnType<typeof useAllProgramsQuery>;
 export type AllProgramsLazyQueryHookResult = ReturnType<typeof useAllProgramsLazyQuery>;
 export type AllProgramsQueryResult = ApolloReactCommon.QueryResult<AllProgramsQuery, AllProgramsQueryVariables>;
-export const AllLocationsDocument = gql`
-    query allLocations {
-  allLocations {
-    edges {
-      node {
-        id
-      }
-    }
-  }
-}
-    `;
-export type AllLocationsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllLocationsQuery, AllLocationsQueryVariables>, 'query'>;
-
-    export const AllLocationsComponent = (props: AllLocationsComponentProps) => (
-      <ApolloReactComponents.Query<AllLocationsQuery, AllLocationsQueryVariables> query={AllLocationsDocument} {...props} />
-    );
-    
-export type AllLocationsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllLocationsQuery, AllLocationsQueryVariables> & TChildProps;
-export function withAllLocations<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
-  TProps,
-  AllLocationsQuery,
-  AllLocationsQueryVariables,
-  AllLocationsProps<TChildProps>>) {
-    return ApolloReactHoc.withQuery<TProps, AllLocationsQuery, AllLocationsQueryVariables, AllLocationsProps<TChildProps>>(AllLocationsDocument, {
-      alias: 'allLocations',
-      ...operationOptions
-    });
-};
-
-/**
- * __useAllLocationsQuery__
- *
- * To run a query within a React component, call `useAllLocationsQuery` and pass it any options that fit your needs.
- * When your component renders, `useAllLocationsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useAllLocationsQuery({
- *   variables: {
- *   },
- * });
- */
-export function useAllLocationsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllLocationsQuery, AllLocationsQueryVariables>) {
-        return ApolloReactHooks.useQuery<AllLocationsQuery, AllLocationsQueryVariables>(AllLocationsDocument, baseOptions);
-      }
-export function useAllLocationsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllLocationsQuery, AllLocationsQueryVariables>) {
-          return ApolloReactHooks.useLazyQuery<AllLocationsQuery, AllLocationsQueryVariables>(AllLocationsDocument, baseOptions);
-        }
-export type AllLocationsQueryHookResult = ReturnType<typeof useAllLocationsQuery>;
-export type AllLocationsLazyQueryHookResult = ReturnType<typeof useAllLocationsLazyQuery>;
-export type AllLocationsQueryResult = ApolloReactCommon.QueryResult<AllLocationsQuery, AllLocationsQueryVariables>;
 export const MeDocument = gql`
     query Me {
   me {
