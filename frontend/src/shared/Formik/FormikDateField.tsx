@@ -16,7 +16,6 @@ export const FormikDateField = ({
   if (formattedValue) {
     formattedValue = moment(formattedValue).toISOString();
   }
-  console.log('error', form.errors);
   return (
     <DatePicker
       {...field}
