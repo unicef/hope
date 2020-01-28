@@ -26,6 +26,9 @@ backend:
     DJANGO_ALLOWED_HOST: ""
     DOMAIN: ""
     ENV: ""
+    AZURE_CLIENT_ID: ""
+    AZURE_CLIENT_SECRET: ""
+    AZURE_TENANT_KEY: ""
   staticStorage:
     secretName: ""
     accountName: ""
