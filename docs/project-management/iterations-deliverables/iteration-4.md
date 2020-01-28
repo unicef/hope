@@ -20,7 +20,8 @@ The goal of Iteration Four is to develop the three major components for registra
 * Import of beneficiary data including households by Excel, 3rd Party \(Kobo\), XML.
 * Continued Generation of fake data to drive the HCT MIS user interface and testing.
 * Implementation of v1 Registration Data Import Module
-* Implementation of  v1 deduplication requirements and flows. _****_
+* Implementation of  v1 deduplication requirements and flows.
+* KOBO Integration into HCT-MIS system.  _****_
 
 #### **UX / UI Design Deliverables**
 
