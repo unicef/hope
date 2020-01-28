@@ -63,6 +63,7 @@ interface ProgramFormPropTypes {
   renderSubmit: (submit: () => Promise<void>) => void;
   open: boolean;
   onClose: () => void;
+  title: string;
 }
 
 export function ProgramForm({
@@ -71,6 +72,7 @@ export function ProgramForm({
   renderSubmit,
   open,
   onClose,
+  title,
 }: ProgramFormPropTypes): React.ReactElement {
   const { data } = useProgrammeChoiceDataQuery();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -111,7 +113,7 @@ export function ProgramForm({
             >
               <DialogTitleWrapper>
                 <DialogTitle id='scroll-dialog-title' disableTypography>
-                  <Typography variant='h6'>Set-up a new Programme</Typography>
+                  <Typography variant='h6'>{title}</Typography>
                 </DialogTitle>
               </DialogTitleWrapper>
               <DialogContent>

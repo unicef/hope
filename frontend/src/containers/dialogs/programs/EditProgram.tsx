@@ -79,6 +79,7 @@ export function EditProgram({ program }: EditProgramProps): React.ReactElement {
         program={program}
         open={open}
         onClose={() => setOpen(false)}
+        title='Edit Programme Details'
       />
     </span>
   );
