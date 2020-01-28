@@ -6,6 +6,7 @@ import React from 'react';
 import { ProgramNode } from '../../../__generated__/graphql';
 import { PageHeader } from '../../../components/PageHeader';
 import { FinishProgram } from '../../dialogs/programs/FinishProgram';
+import { EditProgram } from '../../dialogs/programs/EditProgram';
 
 const ButtonContainer = styled.span`
   margin: 0 ${({ theme }) => theme.spacing(2)}px;
@@ -24,9 +25,7 @@ export function ActiveProgramDetailsPageHeader({
           <FinishProgram program={program}/>
         </ButtonContainer>
         <ButtonContainer>
-          <Button variant='outlined' color='primary' startIcon={<EditIcon />}>
-            EDIT PROGRAMME
-          </Button>
+          <EditProgram program={program}/>
         </ButtonContainer>
         <ButtonContainer>
           <Button

@@ -6,6 +6,7 @@ import { ActivateProgram } from '../../dialogs/programs/ActivateProgram';
 import React from 'react';
 import { DeleteProgram } from '../../dialogs/programs/DeleteProgram';
 import { ProgramNode } from '../../../__generated__/graphql';
+import { EditProgram } from '../../dialogs/programs/EditProgram';
 
 const ButtonContainer = styled.span`
   margin: 0 ${({ theme }) => theme.spacing(2)}px;
@@ -24,9 +25,7 @@ export function DraftProgramDetailsPageHeader({
           <DeleteProgram program={program}/>
         </ButtonContainer>
         <ButtonContainer>
-          <Button variant='outlined' color='primary' startIcon={<EditIcon />}>
-            EDIT PROGRAMME
-          </Button>
+          <EditProgram program={program}/>
         </ButtonContainer>
         <ButtonContainer>
           <ActivateProgram program={program} />

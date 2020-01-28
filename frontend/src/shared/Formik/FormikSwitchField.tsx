@@ -26,7 +26,15 @@ export const FormikSwitchField = ({
     <>
       <StyledSwitch>
         <StyledLabel>{otherProps.label}</StyledLabel>
-        <Switch {...otherProps} />
+        <Switch
+          {...otherProps}
+          checked={field.value}
+          onChange={(e) => {
+            form.handleChange({
+              target: { name: field.name, value: e.target.checked },
+            });
+          }}
+        />
       </StyledSwitch>
       {isInvalid && form.errors[field.name] && (
         <FormHelperText error>{form.errors[field.name]}</FormHelperText>

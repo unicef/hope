@@ -18,8 +18,8 @@ export function programStatusToColor(
   }
 }
 export function cashPlanStatusToColor(
-    theme: typeof themeObj,
-    status: string,
+  theme: typeof themeObj,
+  status: string,
 ): string {
   switch (status) {
     case 'STARTED':
@@ -46,4 +46,11 @@ export function isAuthenticated() {
 }
 export function setAuthenticated(authenticated: boolean) {
   localStorage.setItem('AUTHENTICATED', `${authenticated}`);
+}
+
+export function selectFields(fullObject, keys: string[]) {
+  return keys.reduce((acc, current) => {
+    acc[current] = fullObject[current];
+    return acc;
+  }, {});
 }

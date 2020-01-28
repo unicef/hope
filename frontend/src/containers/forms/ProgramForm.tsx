@@ -1,37 +1,31 @@
 import React, { useState } from 'react';
-import moment from 'moment';
 import * as Yup from 'yup';
 import styled from 'styled-components';
-import { useHistory } from 'react-router-dom';
 import {
   Button,
-  TextField,
   Dialog,
-  DialogTitle,
   DialogContent,
-  DialogActions,
+  DialogTitle,
+  TextField,
   Typography,
 } from '@material-ui/core';
-import { Formik, Form, Field } from 'formik';
-import { FormikTextField } from '../../../shared/Formik/FormikTextField';
-import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
-import { FormikSwitchField } from '../../../shared/Formik/FormikSwitchField';
+import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
+import { Field, Form, Formik } from 'formik';
+import { FormikTextField } from '../../shared/Formik/FormikTextField';
+import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
+import { FormikSwitchField } from '../../shared/Formik/FormikSwitchField';
 import {
+  ProgramNode,
   useProgrammeChoiceDataQuery,
-  useCreateProgramMutation,
-  useAllLocationsQuery,
-} from '../../../__generated__/graphql';
-import { FormikRadioGroup } from '../../../shared/Formik/FormikRadioGroup';
+} from '../../__generated__/graphql';
+import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
+import { DatePicker } from '@material-ui/pickers';
+import moment from 'moment';
+import { FormikDateField } from '../../shared/Formik/FormikDateField';
+import { selectFields } from '../../utils/utils';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid #e4e4e4;
-`;
-
-const DialogFooter = styled.div`
-  padding: 12px 16px;
-  margin: 0;
-  border-top: 1px solid #e4e4e4;
-  text-align: right;
 `;
 
 const DialogDescription = styled.div`
@@ -55,6 +49,10 @@ const DateField = styled.div`
   width: 48%;
 `;
 
+const DialogContainer = styled.div`
+  position: absolute;
+`;
+
 const validationSchema = Yup.object().shape({
   name: Yup.string().required('Programme name is required'),
   scope: Yup.string().required('CashAssist Scope is required'),
@@ -63,71 +61,55 @@ const validationSchema = Yup.object().shape({
   sector: Yup.string().required('Sector is required'),
 });
 
-export function Programme(): React.ReactElement {
-  const history = useHistory();
-  const [open, setOpen] = useState(false);
-  const [toggle, setToggle] = useState(false);
+interface ProgramFormPropTypes {
+  program?: ProgramNode;
+  onSubmit: (values) => Promise<void>;
+  renderSubmit: (submit: () => Promise<void>) => void;
+  open: boolean;
+  onClose: () => void;
+}
+
+export function ProgramForm({
+  program,
+  onSubmit,
+  renderSubmit,
+  open,
+  onClose,
+}: ProgramFormPropTypes): React.ReactElement {
   const { data } = useProgrammeChoiceDataQuery();
-  const { data: locationsData } = useAllLocationsQuery();
-  const [mutate] = useCreateProgramMutation();
-
-  const handleToggle = () => {
-    return toggle ? setToggle(false) : setToggle(true);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let initialValue: { [key: string]: any } = {
+    name: '',
+    scope: '',
+    startDate: '',
+    endDate: '',
+    description: '',
+    budget: 0,
+    administrativeAreasOfImplementation: '',
+    populationGoal: 0,
+    frequencyOfPayments: 'REGULAR',
+    sector: '',
+    cashPlus: false,
   };
 
-  const submitFormHandler = async (values) => {
-    const { id } = locationsData.allLocations.edges[0].node;
-    const response = await mutate({
-      variables: {
-        programData: {
-          ...values,
-          startDate: moment(values.startDate).toISOString(),
-          endDate: moment(values.endDate).toISOString(),
-          locationId: id,
-        },
-      },
-    });
-    if (!response.errors && response.data.createProgram) {
-      history.push(`/programs/${response.data.createProgram.program.id}`);
-    }
-  };
-  if (!data) {
-    return (
-      <Button variant='contained' color='primary' disabled>
-        new programme
-      </Button>
-    );
+  if (program) {
+    initialValue = selectFields(program, Object.keys(initialValue));
   }
-
+  if (!data) return null;
   return (
-    <div>
-      <Button variant='contained' color='primary' onClick={() => setOpen(true)}>
-        new programme
-      </Button>
+    <DialogContainer>
       <Formik
-        initialValues={{
-          name: '',
-          scope: '',
-          startDate: '',
-          endDate: '',
-          description: '',
-          budget: 0,
-          administrativeAreasOfImplementation: '',
-          populationGoal: 0,
-          frequencyOfPayments: 'REGULAR',
-          sector: '',
-          cashPlus: false,
-        }}
+        initialValues={initialValue}
         onSubmit={(values) => {
-          return submitFormHandler(values);
+          return onSubmit(values);
         }}
         validationSchema={validationSchema}
       >
-        {({ submitForm }) => (
+        {({ submitForm, values }) => (
           <Form>
             <Dialog
               open={open}
-              onClose={() => setOpen(false)}
+              onClose={onClose}
               scroll='paper'
               aria-labelledby='form-dialog-title'
             >
@@ -166,41 +148,28 @@ export function Programme(): React.ReactElement {
                     <Field
                       name='startDate'
                       label='Start Date'
+                      component={FormikDateField}
                       required
                       fullWidth
-                      component={FormikTextField}
-                      type='date'
-                      InputLabelProps={{
-                        shrink: true,
-                      }}
+                      decoratorEnd={
+                        <CalendarTodayRoundedIcon color='disabled' />
+                      }
                     />
                   </DateField>
                   <DateField>
-                    <Field name='endDate'>
-                      {({ field, form, meta }) => {
-                        return (
-                          <TextField
-                            {...field}
-                            id='to'
-                            label='End Date'
-                            type='date'
-                            margin='dense'
-                            variant='filled'
-                            name='endDate'
-                            required
-                            fullWidth
-                            disabled={!form.values.startDate}
-                            value={form.values.endDate}
-                            InputLabelProps={{
-                              shrink: true,
-                            }}
-                            inputProps={{
-                              min: form.values.startDate,
-                            }}
-                          />
-                        );
-                      }}
-                    </Field>
+                    <Field
+                      name='endDate'
+                      label='End Date'
+                      component={FormikDateField}
+                      required
+                      disabled={!values.startDate}
+                      initialFocusedDate={values.startDate}
+                      fullWidth
+                      decoratorEnd={
+                        <CalendarTodayRoundedIcon color='disabled' />
+                      }
+                      minDate={values.startDate}
+                    />
                   </DateField>
                 </DateFields>
                 <Field
@@ -257,30 +226,14 @@ export function Programme(): React.ReactElement {
                     label='Cash+'
                     color='primary'
                     component={FormikSwitchField}
-                    checked={toggle}
-                    onChange={handleToggle}
                   />
                 </MediumLabel>
               </DialogContent>
-              <DialogFooter>
-                <DialogActions>
-                  <Button onClick={() => setOpen(false)} color='primary'>
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={submitForm}
-                    type='submit'
-                    color='primary'
-                    variant='contained'
-                  >
-                    Save
-                  </Button>
-                </DialogActions>
-              </DialogFooter>
+              {renderSubmit(submitForm)}
             </Dialog>
           </Form>
         )}
       </Formik>
-    </div>
+    </DialogContainer>
   );
 }
