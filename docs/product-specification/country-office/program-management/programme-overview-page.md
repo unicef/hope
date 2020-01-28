@@ -44,15 +44,9 @@ Active programmes cannot be deleted once started.
 
 A finished Programme is one that has either lived past "end by date" or has been manually finished by user. 
 
-A finished programme has the ability to be reactivated by a user if needed, by comleting the following steps:
+A finished programme has the ability to be reactivated by a user if needed, by opening the finished Programme card and clicking the "re-activate" card. To complete the re-activation process, the user must first update the "end by date" before proceeding. 
 
-1. Opening the Programme with `finished` status and click the "re-activate" button. 
-2. Next, the user will be prompted to update the "end by date" before proceeding, if the Programme has expired.
-3. Lastly, they will click the "re-open" button to proceed with the action, or "cancel" button to exit without saving changes.
-
-   \*\*\*\*
-
-\*\*\*\*
+#### \*\*\*\*
 
 #### **Card items**
 
