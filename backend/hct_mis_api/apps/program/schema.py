@@ -1,4 +1,5 @@
 import graphene
+from django.db.models import Case, When, Value, IntegerField
 from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
@@ -38,6 +39,16 @@ class Query(graphene.ObjectType):
     program_sector_choices = graphene.List(ChoiceObject)
     program_scope_choices = graphene.List(ChoiceObject)
     cash_plan_status_choices = graphene.List(ChoiceObject)
+
+    def resolve_all_programs(self, info, **kwardgs):
+        return Program.objects.annotate(
+            custom_order=Case(
+                When(status=Program.DRAFT, then=Value(1)),
+                When(status=Program.ACTIVE, then=Value(2)),
+                When(status=Program.FINISHED, then=Value(3)),
+                output_field=IntegerField(),
+            )
+        ).order_by("custom_order")
 
     def resolve_program_status_choices(self, info, **kwargs):
         return [
