@@ -7,9 +7,9 @@ export const FormikTextField = ({
   decoratorStart,
   decoratorEnd,
   ...otherProps
-}) => {
+}): React.ReactElement => {
   const isInvalid = form.errors[field.name] && form.touched[field.name];
-  const handleKeyPress = (evt) => {
+  const handleKeyPress = (evt): void => {
     if (
       otherProps.type === 'number' &&
       ['e', 'E', '+', '-'].includes(evt.key)
@@ -41,8 +41,6 @@ export const FormikTextField = ({
             <InputAdornment position='end'>{decoratorEnd}</InputAdornment>
           ),
         }}
-        
-        
       />
     </>
   );
