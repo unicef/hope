@@ -17,6 +17,7 @@ snapshottest==0.5.1
 # Etc
 Pillow==7.0.0
 psycopg2==2.8.4
+openpyxl==3.0.3
 
 # API
 graphene-django==2.7.1
