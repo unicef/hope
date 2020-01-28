@@ -1,6 +1,5 @@
 import { Button } from '@material-ui/core';
 import styled from 'styled-components';
-import EditIcon from '@material-ui/icons/EditRounded';
 import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
 import React from 'react';
 import { ProgramNode } from '../../../__generated__/graphql';
@@ -17,7 +16,7 @@ export interface ActiveProgramDetailsPageHeaderPropTypes {
 }
 export function ActiveProgramDetailsPageHeader({
   program,
-}: ActiveProgramDetailsPageHeaderPropTypes) {
+}: ActiveProgramDetailsPageHeaderPropTypes):React.ReactElement {
   return (
     <PageHeader title={program.name} category='Programme Management'>
       <div>

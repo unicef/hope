@@ -1,5 +1,5 @@
 import React from 'react';
-import { TextField, InputAdornment } from '@material-ui/core';
+import { InputAdornment } from '@material-ui/core';
 import { DatePicker } from '@material-ui/pickers';
 import moment from 'moment';
 
@@ -9,7 +9,7 @@ export const FormikDateField = ({
   decoratorStart,
   decoratorEnd,
   ...otherProps
-}) => {
+}): React.ReactElement => {
   const isInvalid = form.errors[field.name] && form.touched[field.name];
   const dateFormat = 'DD/MM/YYYY';
   let formattedValue = field.value === '' ? null : field.value;
@@ -41,7 +41,6 @@ export const FormikDateField = ({
       }}
       format={dateFormat}
       InputProps={{
-
         startAdornment: decoratorStart && (
           <InputAdornment position='start'>{decoratorStart}</InputAdornment>
         ),

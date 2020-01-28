@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import moment from 'moment';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import { Button, Dialog, DialogActions } from '@material-ui/core';
+import { Button, DialogActions } from '@material-ui/core';
 import {
   useAllLocationsQuery,
   useCreateProgramMutation,
@@ -22,7 +22,7 @@ export function CreateProgram(): React.ReactElement {
   const [mutate] = useCreateProgramMutation();
   const { data: locationsData } = useAllLocationsQuery();
 
-  const submitFormHandler = async (values) => {
+  const submitFormHandler = async (values): Promise<void> => {
     const { id: locationId } = locationsData.allLocations.edges[0].node;
     const response = await mutate({
       variables: {
@@ -39,7 +39,7 @@ export function CreateProgram(): React.ReactElement {
     }
   };
 
-  const renderSubmit = (submit) => {
+  const renderSubmit = (submit): React.ReactElement => {
     return (
       <DialogFooter>
         <DialogActions>

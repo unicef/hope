@@ -2,15 +2,13 @@ import React, { useState } from 'react';
 import moment from 'moment';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import { Button, Dialog, DialogActions } from '@material-ui/core';
+import { Button, DialogActions } from '@material-ui/core';
+import EditIcon from '@material-ui/icons/EditRounded';
 import {
   ProgramNode,
-  useAllLocationsQuery,
-  useCreateProgramMutation,
   useUpdateProgramMutation,
 } from '../../../__generated__/graphql';
 import { ProgramForm } from '../../forms/ProgramForm';
-import EditIcon from '@material-ui/icons/EditRounded';
 
 const DialogFooter = styled.div`
   padding: 12px 16px;
@@ -28,7 +26,7 @@ export function EditProgram({ program }: EditProgramProps): React.ReactElement {
   const [open, setOpen] = useState(false);
   const [mutate] = useUpdateProgramMutation();
 
-  const submitFormHandler = async (values) => {
+  const submitFormHandler = async (values): Promise<void> => {
     const response = await mutate({
       variables: {
         programData: {
@@ -45,7 +43,7 @@ export function EditProgram({ program }: EditProgramProps): React.ReactElement {
     setOpen(false);
   };
 
-  const renderSubmit = (submit) => {
+  const renderSubmit = (submit): React.ReactElement => {
     return (
       <DialogFooter>
         <DialogActions>

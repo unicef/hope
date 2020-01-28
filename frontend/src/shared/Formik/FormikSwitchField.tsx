@@ -17,10 +17,8 @@ const StyledLabel = styled.span`
 export const FormikSwitchField = ({
   field,
   form,
-  decoratorStart,
-  decoratorEnd,
   ...otherProps
-}) => {
+}): React.ReactElement => {
   const isInvalid = form.errors[field.name] && form.touched[field.name];
   return (
     <>

@@ -1,12 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import * as Yup from 'yup';
 import styled from 'styled-components';
 import {
-  Button,
   Dialog,
   DialogContent,
   DialogTitle,
-  TextField,
   Typography,
 } from '@material-ui/core';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
@@ -19,8 +17,6 @@ import {
   useProgrammeChoiceDataQuery,
 } from '../../__generated__/graphql';
 import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
-import { DatePicker } from '@material-ui/pickers';
-import moment from 'moment';
 import { FormikDateField } from '../../shared/Formik/FormikDateField';
 import { selectFields } from '../../utils/utils';
 
@@ -114,7 +110,7 @@ export function ProgramForm({
               aria-labelledby='form-dialog-title'
             >
               <DialogTitleWrapper>
-                <DialogTitle id='scroll-dialog-title'>
+                <DialogTitle id='scroll-dialog-title' disableTypography>
                   <Typography variant='h6'>Set-up a new Programme</Typography>
                 </DialogTitle>
               </DialogTitleWrapper>

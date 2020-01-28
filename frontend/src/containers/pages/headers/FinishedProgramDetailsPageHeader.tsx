@@ -1,8 +1,8 @@
-import { PageHeader } from '../../../components/PageHeader';
-import styled from 'styled-components';
-import { Button } from '@material-ui/core';
 import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
 import React from 'react';
+import styled from 'styled-components';
+import { Button } from '@material-ui/core';
+import { PageHeader } from '../../../components/PageHeader';
 import { ProgramNode } from '../../../__generated__/graphql';
 
 const ButtonContainer = styled.span`
@@ -14,7 +14,7 @@ export interface FinishedProgramDetailsPageHeaderPropTypes {
 
 export function FinishedProgramDetailsPageHeader({
   program,
-}: FinishedProgramDetailsPageHeaderPropTypes) {
+}: FinishedProgramDetailsPageHeaderPropTypes): React.ReactElement {
   return (
     <PageHeader title={program.name} category='Programme Management'>
       <div>

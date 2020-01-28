@@ -1,8 +1,8 @@
 import React from 'react';
+import { ProgramNode, ProgramStatus } from '../../../__generated__/graphql';
 import { FinishedProgramDetailsPageHeader } from './FinishedProgramDetailsPageHeader';
 import { ActiveProgramDetailsPageHeader } from './ActiveProgramDetailsPageHeader';
 import { DraftProgramDetailsPageHeader } from './DraftProgramDetailsPageHeader';
-import { ProgramNode, ProgramStatus } from '../../../__generated__/graphql';
 
 export interface ProgramDetailsPageHeaderPropTypes {
     program: ProgramNode;
@@ -10,7 +10,7 @@ export interface ProgramDetailsPageHeaderPropTypes {
 
 export function ProgramDetailsPageHeader({
                                              program,
-                                         }: ProgramDetailsPageHeaderPropTypes) {
+                                         }: ProgramDetailsPageHeaderPropTypes):React.ReactElement {
     switch (program.status) {
         case ProgramStatus.Active:
             return <ActiveProgramDetailsPageHeader program={program}/>;

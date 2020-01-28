@@ -1,30 +1,18 @@
 import React, { useState } from 'react';
-import moment from 'moment';
-import * as Yup from 'yup';
 import styled from 'styled-components';
-import { useHistory } from 'react-router-dom';
 import {
   Button,
-  TextField,
   Dialog,
-  DialogTitle,
-  DialogContent,
   DialogActions,
+  DialogContent,
+  DialogTitle,
   Typography,
 } from '@material-ui/core';
-import { Formik, Form, Field } from 'formik';
-import { FormikTextField } from '../../../shared/Formik/FormikTextField';
-import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
-import { FormikSwitchField } from '../../../shared/Formik/FormikSwitchField';
 import {
-  useProgrammeChoiceDataQuery,
-  useCreateProgramMutation,
-  useAllLocationsQuery,
-  useUpdateProgramMutation,
   ProgramNode,
   ProgramStatus,
+  useUpdateProgramMutation,
 } from '../../../__generated__/graphql';
-import { FormikRadioGroup } from '../../../shared/Formik/FormikRadioGroup';
 import { PROGRAM_QUERY } from '../../../apollo/queries/Program';
 
 const DialogTitleWrapper = styled.div`
@@ -63,7 +51,7 @@ export function FinishProgram({
       });
     },
   });
-  const finishProgram = async () => {
+  const finishProgram = async (): Promise<void> => {
     await mutate({
       variables: {
         programData: {

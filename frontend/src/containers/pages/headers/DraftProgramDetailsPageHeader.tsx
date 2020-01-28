@@ -1,9 +1,7 @@
-import { PageHeader } from '../../../components/PageHeader';
-import { Button } from '@material-ui/core';
 import styled from 'styled-components';
-import EditIcon from '@material-ui/icons/EditRounded';
-import { ActivateProgram } from '../../dialogs/programs/ActivateProgram';
 import React from 'react';
+import { PageHeader } from '../../../components/PageHeader';
+import { ActivateProgram } from '../../dialogs/programs/ActivateProgram';
 import { DeleteProgram } from '../../dialogs/programs/DeleteProgram';
 import { ProgramNode } from '../../../__generated__/graphql';
 import { EditProgram } from '../../dialogs/programs/EditProgram';
@@ -17,15 +15,15 @@ export interface DraftProgramDetailsPageHeaderPropTypes {
 }
 export function DraftProgramDetailsPageHeader({
   program,
-}: DraftProgramDetailsPageHeaderPropTypes) {
+}: DraftProgramDetailsPageHeaderPropTypes): React.ReactElement {
   return (
     <PageHeader title={program.name} category='Programme Management'>
       <div>
         <ButtonContainer>
-          <DeleteProgram program={program}/>
+          <DeleteProgram program={program} />
         </ButtonContainer>
         <ButtonContainer>
-          <EditProgram program={program}/>
+          <EditProgram program={program} />
         </ButtonContainer>
         <ButtonContainer>
           <ActivateProgram program={program} />

@@ -41,14 +41,18 @@ export function getCookie(name): string | null {
   return null;
 }
 
-export function isAuthenticated() {
+export function isAuthenticated(): boolean {
   return Boolean(localStorage.getItem('AUTHENTICATED'));
 }
-export function setAuthenticated(authenticated: boolean) {
+export function setAuthenticated(authenticated: boolean): void {
   localStorage.setItem('AUTHENTICATED', `${authenticated}`);
 }
 
-export function selectFields(fullObject, keys: string[]) {
+export function selectFields(
+  fullObject,
+  keys: string[],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): { [key: string]: any } {
   return keys.reduce((acc, current) => {
     acc[current] = fullObject[current];
     return acc;

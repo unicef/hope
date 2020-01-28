@@ -1,9 +1,19 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useHistory } from 'react-router-dom';
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, fade, Typography, } from '@material-ui/core';
-import { ProgramNode, useDeleteProgramMutation, } from '../../../__generated__/graphql';
 import CloseIcon from '@material-ui/icons/CloseRounded';
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Typography,
+} from '@material-ui/core';
+import {
+  ProgramNode,
+  useDeleteProgramMutation,
+} from '../../../__generated__/graphql';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid #e4e4e4;
@@ -50,7 +60,7 @@ export function DeleteProgram({
       programId: program.id,
     },
   });
-  const deleteProgram = async () => {
+  const deleteProgram = async (): Promise<void> => {
     await mutate();
     history.push('/programs/');
     setOpen(false);

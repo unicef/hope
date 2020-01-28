@@ -6,10 +6,10 @@ import { Redirect, Route, Switch, useLocation } from 'react-router-dom';
 import { MiśTheme } from '../theme';
 import { Drawer } from '../components/Drawer/Drawer';
 import { AppBar } from '../components/AppBar';
+import { isAuthenticated } from '../utils/utils';
 import { DashboardPage } from './pages/DashboardPage';
 import { ProgramsPage } from './pages/ProgramsPage';
 import { ProgramDetailsPage } from './pages/ProgramDetailsPage';
-import { isAuthenticated } from '../utils/utils';
 
 const Root = styled.div`
   display: flex;
