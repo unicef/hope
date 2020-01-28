@@ -4,6 +4,7 @@ import { ProgramCard } from '../../components/programs/ProgramCard';
 import { PageHeader } from '../../components/PageHeader';
 import { ProgramNode, useAllProgramsQuery } from '../../__generated__/graphql';
 import { CreateProgram } from '../dialogs/programs/CreateProgram';
+import { getCurrentLocation } from '../../utils/utils';
 
 const PageContainer = styled.div`
   display: flex;
@@ -13,7 +14,7 @@ const PageContainer = styled.div`
   justify-content: center;
 `;
 export function ProgramsPage(): React.ReactElement {
-  const { data } = useAllProgramsQuery();
+  const { data } = useAllProgramsQuery( );
 
   const toolbar = (
     <PageHeader title='Programme Management'>

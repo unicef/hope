@@ -727,7 +727,8 @@ export type LocationNodeProgramsArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
+  last?: Maybe<Scalars['Int']>,
+  location?: Maybe<Scalars['ID']>
 };
 
 export type LocationNodeConnection = {
@@ -1024,7 +1025,8 @@ export type QueryAllProgramsArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
+  last?: Maybe<Scalars['Int']>,
+  location?: Maybe<Scalars['ID']>
 };
 
 

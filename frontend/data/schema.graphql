@@ -648,7 +648,7 @@ type LocationNode implements Node {
   name: String!
   country: LocationCountry!
   households(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
-  programs(before: String, after: String, first: Int, last: Int): ProgramNodeConnection!
+  programs(before: String, after: String, first: Int, last: Int, location: ID): ProgramNodeConnection!
 }
 
 type LocationNodeConnection {
@@ -793,7 +793,7 @@ type Query {
   location(id: ID!): LocationNode
   allLocations(before: String, after: String, first: Int, last: Int, country: String): LocationNodeConnection
   program(id: ID!): ProgramNode
-  allPrograms(before: String, after: String, first: Int, last: Int): ProgramNodeConnection
+  allPrograms(before: String, after: String, first: Int, last: Int, location: ID): ProgramNodeConnection
   cashPlan(id: ID!): CashPlanNode
   allCashPlans(before: String, after: String, first: Int, last: Int, program: ID): CashPlanNodeConnection
   programStatusChoices: [ChoiceObject]

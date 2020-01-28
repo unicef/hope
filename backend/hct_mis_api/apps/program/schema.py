@@ -13,7 +13,7 @@ class ProgramNode(DjangoObjectType):
 
     class Meta:
         model = Program
-        filter_fields = []
+        filter_fields = ['location']
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
