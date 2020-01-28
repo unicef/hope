@@ -17,16 +17,22 @@ const StyledLabel = styled.span`
 export const FormikSwitchField = ({
   field,
   form,
-  decoratorStart,
-  decoratorEnd,
   ...otherProps
-}) => {
+}): React.ReactElement => {
   const isInvalid = form.errors[field.name] && form.touched[field.name];
   return (
     <>
       <StyledSwitch>
         <StyledLabel>{otherProps.label}</StyledLabel>
-        <Switch {...otherProps} />
+        <Switch
+          {...otherProps}
+          checked={field.value}
+          onChange={(e) => {
+            form.handleChange({
+              target: { name: field.name, value: e.target.checked },
+            });
+          }}
+        />
       </StyledSwitch>
       {isInvalid && form.errors[field.name] && (
         <FormHelperText error>{form.errors[field.name]}</FormHelperText>
