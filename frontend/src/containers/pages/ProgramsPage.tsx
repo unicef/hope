@@ -2,8 +2,8 @@ import React from 'react';
 import styled from 'styled-components';
 import { ProgramCard } from '../../components/programs/ProgramCard';
 import { PageHeader } from '../../components/PageHeader';
-import { Programme } from '../Dialogs/Programme/Programme';
 import { ProgramNode, useAllProgramsQuery } from '../../__generated__/graphql';
+import { CreateProgram } from '../dialogs/programs/CreateProgram';
 
 const PageContainer = styled.div`
   display: flex;
@@ -17,7 +17,7 @@ export function ProgramsPage(): React.ReactElement {
 
   const toolbar = (
     <PageHeader title='Programme Management'>
-      <Programme />
+      <CreateProgram />
     </PageHeader>
   );
 

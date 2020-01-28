@@ -1,7 +1,7 @@
 import React from 'react';
+import { Button, Typography } from '@material-ui/core';
 import styled from 'styled-components';
 import { LOGIN_URL } from '../../config';
-import { Button, Typography } from '@material-ui/core';
 
 const Container = styled.div`
   width: 100vw;

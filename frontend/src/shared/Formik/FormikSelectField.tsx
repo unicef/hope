@@ -10,10 +10,8 @@ import {
 export const FormikSelectField = ({
   field,
   form,
-  decoratorStart,
-  decoratorEnd,
   ...otherProps
-}) => {
+}): React.ReactElement => {
   const isInvalid = form.errors[field.name] && form.touched[field.name];
   return (
     <>
@@ -26,15 +24,16 @@ export const FormikSelectField = ({
           value={field.value}
           id={`textField-${field.name}`}
           error={isInvalid}
-          helperText={isInvalid && form.errors[field.name]}
         >
-          {otherProps.choices.map((each, index) => (
+          {otherProps.choices.map((each) => (
             <MenuItem key={each.value} value={each.value}>
               {each.name}
             </MenuItem>
           ))}
         </Select>
-          {isInvalid && form.errors[field.name] && <FormHelperText error>{form.errors[field.name]}</FormHelperText>}
+        {isInvalid && form.errors[field.name] && (
+          <FormHelperText error>{form.errors[field.name]}</FormHelperText>
+        )}
       </FormControl>
     </>
   );

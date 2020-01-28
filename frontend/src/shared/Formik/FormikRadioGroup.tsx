@@ -10,10 +10,8 @@ import {
 export const FormikRadioGroup = ({
   field,
   form,
-  decoratorStart,
-  decoratorEnd,
   ...otherProps
-}) => {
+}): React.ReactElement => {
   return (
     <>
       <FormControl {...otherProps} component='fieldset'>
@@ -25,7 +23,7 @@ export const FormikRadioGroup = ({
           value={form.values[field.name]}
           id={`radioGroup-${field.name}`}
         >
-          {otherProps.choices.map((each, index) => (
+          {otherProps.choices.map((each) => (
             <FormControlLabel
               key={each.value}
               value={each.value}

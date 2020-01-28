@@ -8,7 +8,8 @@ class ProgramValidator(BaseValidator):
         status_to_set = kwargs.get("program_data").get("status")
         program = kwargs.get("program")
         current_status = program.status
-
+        if status_to_set is None or status_to_set == current_status:
+            return
         if current_status == "DRAFT" and status_to_set != "ACTIVE":
             raise ValidationError("Draft status can only be changed to Active")
         elif current_status == "ACTIVE" and status_to_set != "FINISHED":
