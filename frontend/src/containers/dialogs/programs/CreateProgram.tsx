@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import moment from 'moment';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import { Button, DialogActions, Typography } from '@material-ui/core';
+import { Button, DialogActions } from '@material-ui/core';
 import {
   useAllLocationsQuery,
   useCreateProgramMutation,
@@ -70,7 +70,7 @@ export function CreateProgram(): React.ReactElement {
         renderSubmit={renderSubmit}
         open={open}
         onClose={() => setOpen(false)}
-        title="Set-up a new Programme"
+        title='Set-up a new Programme'
       />
     </div>
   );
