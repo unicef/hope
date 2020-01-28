@@ -11,6 +11,10 @@ const Container = styled.div`
     0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12);
   position: relative;
 `;
+const ActionsContainer = styled.div`
+display: flex;
+align-items: center;
+`;
 
 interface Props {
   title: string;
@@ -31,7 +35,7 @@ export function PageHeader({
           <Typography variant='h5'>{title}</Typography>
         </div>
       </div>
-      <div>{children || null}</div>
+      <ActionsContainer>{children || null}</ActionsContainer>
     </Container>
   );
 }
