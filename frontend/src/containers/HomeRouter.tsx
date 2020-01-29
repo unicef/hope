@@ -10,6 +10,7 @@ import { isAuthenticated } from '../utils/utils';
 import { DashboardPage } from './pages/DashboardPage';
 import { ProgramsPage } from './pages/ProgramsPage';
 import { ProgramDetailsPage } from './pages/ProgramDetailsPage';
+import { PaymentRecordDetailsPage } from './pages/PaymentRecordDetailsPage';
 
 const Root = styled.div`
   display: flex;
@@ -52,6 +53,9 @@ export function HomeRouter(): React.ReactElement {
         <Switch>
           <Route path='/programs/:id'>
             <ProgramDetailsPage />
+          </Route>
+          <Route path='/payment_records/:id'>
+            <PaymentRecordDetailsPage />
           </Route>
           <Route path='/programs'>
             <ProgramsPage />

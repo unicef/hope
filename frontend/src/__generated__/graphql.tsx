@@ -1431,6 +1431,23 @@ export type MeQuery = (
   )> }
 );
 
+export type PaymentRecordQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type PaymentRecordQuery = (
+  { __typename?: 'Query' }
+  & { paymentRecord: Maybe<(
+    { __typename?: 'PaymentRecordNode' }
+    & Pick<PaymentRecordNode, 'id' | 'startDate' | 'cashAssistId' | 'deliveryType'>
+    & { household: (
+      { __typename?: 'HouseholdNode' }
+      & Pick<HouseholdNode, 'householdCaId' | 'familySize'>
+    ) }
+  )> }
+);
+
 export type ProgramQueryVariables = {
   id: Scalars['ID']
 };
@@ -1905,6 +1922,63 @@ export function useMeLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptio
 export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
 export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
 export type MeQueryResult = ApolloReactCommon.QueryResult<MeQuery, MeQueryVariables>;
+export const PaymentRecordDocument = gql`
+    query PaymentRecord($id: ID!) {
+  paymentRecord(id: $id) {
+    id
+    startDate
+    cashAssistId
+    deliveryType
+    household {
+      householdCaId
+      familySize
+    }
+  }
+}
+    `;
+export type PaymentRecordComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<PaymentRecordQuery, PaymentRecordQueryVariables>, 'query'> & ({ variables: PaymentRecordQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const PaymentRecordComponent = (props: PaymentRecordComponentProps) => (
+      <ApolloReactComponents.Query<PaymentRecordQuery, PaymentRecordQueryVariables> query={PaymentRecordDocument} {...props} />
+    );
+    
+export type PaymentRecordProps<TChildProps = {}> = ApolloReactHoc.DataProps<PaymentRecordQuery, PaymentRecordQueryVariables> & TChildProps;
+export function withPaymentRecord<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  PaymentRecordQuery,
+  PaymentRecordQueryVariables,
+  PaymentRecordProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, PaymentRecordQuery, PaymentRecordQueryVariables, PaymentRecordProps<TChildProps>>(PaymentRecordDocument, {
+      alias: 'paymentRecord',
+      ...operationOptions
+    });
+};
+
+/**
+ * __usePaymentRecordQuery__
+ *
+ * To run a query within a React component, call `usePaymentRecordQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePaymentRecordQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePaymentRecordQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function usePaymentRecordQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<PaymentRecordQuery, PaymentRecordQueryVariables>) {
+        return ApolloReactHooks.useQuery<PaymentRecordQuery, PaymentRecordQueryVariables>(PaymentRecordDocument, baseOptions);
+      }
+export function usePaymentRecordLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<PaymentRecordQuery, PaymentRecordQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<PaymentRecordQuery, PaymentRecordQueryVariables>(PaymentRecordDocument, baseOptions);
+        }
+export type PaymentRecordQueryHookResult = ReturnType<typeof usePaymentRecordQuery>;
+export type PaymentRecordLazyQueryHookResult = ReturnType<typeof usePaymentRecordLazyQuery>;
+export type PaymentRecordQueryResult = ApolloReactCommon.QueryResult<PaymentRecordQuery, PaymentRecordQueryVariables>;
 export const ProgramDocument = gql`
     query Program($id: ID!) {
   program(id: $id) {
