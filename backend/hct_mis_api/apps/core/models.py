@@ -31,7 +31,7 @@ class Country(UUIDModel):
 class BusinessArea(UUIDModel):
     """
     BusinessArea (EPRP called Workspace, also synonym was
-    emergency/country) model.
+    emergency/country/region) model.
     It's used for drop down menu in top bar in the UI. Many times
     workspace is associated with only one country.
     """
