@@ -4,14 +4,15 @@ import TableCell from '@material-ui/core/TableCell';
 import styled from 'styled-components';
 import Moment from 'react-moment';
 import {
+  AllCashPlansQueryVariables,
   CashPlanNode,
   ProgramNode,
   useAllCashPlansQuery,
 } from '../__generated__/graphql';
-import { TableComponent } from '../components/table/TableComponent';
+import { Order, TableComponent } from '../components/table/TableComponent';
 import { HeadCell } from '../components/table/EnhancedTableHead';
 import { StatusBox } from '../components/StatusBox';
-import { cashPlanStatusToColor } from '../utils/utils';
+import { cashPlanStatusToColor, columnToOrderBy } from '../utils/utils';
 
 const headCells: HeadCell<CashPlanNode>[] = [
   {
@@ -59,7 +60,7 @@ const headCells: HeadCell<CashPlanNode>[] = [
   {
     disablePadding: false,
     label: 'Dispersion Date',
-    id: 'disbursementDate',
+    id: 'dispersionDate',
     numeric: false,
   },
 ];
@@ -73,6 +74,8 @@ interface CashPlanTableProps {
 export function CashPlanTable({ program }: CashPlanTableProps): ReactElement {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [orderBy, setOrderBy] = useState(null);
+  const [orderDirection, setOrderDirection] = useState('asc');
   const { data, fetchMore } = useAllCashPlansQuery({
     variables: {
       program: program.id,
@@ -83,10 +86,8 @@ export function CashPlanTable({ program }: CashPlanTableProps): ReactElement {
   if (!data) {
     return null;
   }
-  let { edges } = data.allCashPlans;
-  edges = edges.slice(rowsPerPage * page, rowsPerPage * page + rowsPerPage);
+  const { edges } = data.allCashPlans;
   const cashPlans = edges.map((edge) => edge.node as CashPlanNode);
-  /* eslint-disable @typescript-eslint/no-empty-function */
   return (
     <TableComponent<CashPlanNode>
       title='Cash Plans'
@@ -129,7 +130,7 @@ export function CashPlanTable({ program }: CashPlanTableProps): ReactElement {
               })}
             </TableCell>
             <TableCell align='left'>
-              <Moment format='MM/DD/YYYY'>{row.disbursementDate}</Moment>
+              <Moment format='MM/DD/YYYY'>{row.dispersionDate}</Moment>
             </TableCell>
           </TableRow>
         );
@@ -140,42 +141,75 @@ export function CashPlanTable({ program }: CashPlanTableProps): ReactElement {
       page={page}
       itemsCount={data.allCashPlans.totalCount}
       handleChangePage={(event, newPage) => {
+        let variables;
         if (newPage < page) {
-          setPage(newPage);
-          return;
-        }
-
-        setPage(newPage);
-        const after = data.allCashPlans.edges[cashPlans.length - 1].cursor;
-        fetchMore({
-          variables: {
+          const before = edges[0].cursor;
+          variables = {
+            before,
+            program: program.id,
+            count: rowsPerPage,
+          };
+        } else {
+          const after = edges[cashPlans.length - 1].cursor;
+          variables = {
             after,
             program: program.id,
             count: rowsPerPage,
-          },
+          };
+        }
+        if (orderBy) {
+          variables.orderBy = columnToOrderBy(orderBy, orderDirection);
+        }
+        setPage(newPage);
+        fetchMore({
+          variables,
           updateQuery: (prev, { fetchMoreResult }) => {
-            const newData = { ...prev };
-            newData.allCashPlans = { ...prev.allCashPlans };
-            const newIds = fetchMoreResult.allCashPlans.edges.map(
-              ({ node }) => node.id,
-            );
-            newData.allCashPlans.edges = [
-              ...prev.allCashPlans.edges.filter(
-                (node) => !newIds.includes(node.node.id),
-              ),
-              ...fetchMoreResult.allCashPlans.edges,
-            ];
-            return newData;
+            return fetchMoreResult;
           },
         });
       }}
       handleChangeRowsPerPage={(event) => {
-        setRowsPerPage(parseInt(event.target.value, 10));
+        const value = parseInt(event.target.value, 10);
+        setRowsPerPage(value);
         setPage(0);
+        const variables: AllCashPlansQueryVariables = {
+          program: program.id,
+          count: value,
+        };
+        if (orderBy) {
+          variables.orderBy = columnToOrderBy(orderBy, orderDirection);
+        }
+        fetchMore({
+          variables,
+          updateQuery: (prev, { fetchMoreResult }) => {
+            return fetchMoreResult;
+          },
+        });
       }}
-      handleRequestSort={() => {}}
-      orderBy={null}
-      order='asc'
+      handleRequestSort={(event, property) => {
+        let direction = 'asc';
+        if (property === orderBy) {
+          direction = orderDirection === 'asc' ? 'desc' : 'asc';
+        }
+        setOrderBy(property);
+        setOrderDirection(direction);
+        if (edges.length < 0) {
+          return;
+        }
+
+        fetchMore({
+          variables: {
+            program: program.id,
+            count: rowsPerPage,
+            orderBy: columnToOrderBy(property, direction),
+          },
+          updateQuery: (prev, { fetchMoreResult }) => {
+            return fetchMoreResult;
+          },
+        });
+      }}
+      orderBy={orderBy}
+      order={orderDirection as Order}
     />
   );
 }

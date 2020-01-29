@@ -745,7 +745,7 @@ type ProgramNode implements Node {
   cashPlus: Boolean!
   populationGoal: Int!
   administrativeAreasOfImplementation: String!
-  cashPlans(before: String, after: String, first: Int, last: Int, program: ID): CashPlanNodeConnection!
+  cashPlans(before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
   totalNumberOfHouseholds: Int
 }
 
@@ -795,7 +795,7 @@ type Query {
   program(id: ID!): ProgramNode
   allPrograms(before: String, after: String, first: Int, last: Int): ProgramNodeConnection
   cashPlan(id: ID!): CashPlanNode
-  allCashPlans(before: String, after: String, first: Int, last: Int, program: ID): CashPlanNodeConnection
+  allCashPlans(before: String, after: String, first: Int, last: Int, program: ID, orderBy: String): CashPlanNodeConnection
   programStatusChoices: [ChoiceObject]
   programFrequencyOfPaymentsChoices: [ChoiceObject]
   programSectorChoices: [ChoiceObject]
@@ -856,7 +856,7 @@ type TargetPopulationNode implements Node {
   createdBy: UserObjectType
   rules: JSONString!
   households(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
-  cashPlans(before: String, after: String, first: Int, last: Int, program: ID): CashPlanNodeConnection!
+  cashPlans(before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
 }
 
 type TargetPopulationNodeConnection {
@@ -974,6 +974,6 @@ type UserObjectType {
   dateJoined: DateTime!
   id: UUID!
   registrationDataImports(before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
-  cashPlans(before: String, after: String, first: Int, last: Int, program: ID): CashPlanNodeConnection!
+  cashPlans(before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
   targetPopulations(before: String, after: String, first: Int, last: Int): TargetPopulationNodeConnection!
 }
