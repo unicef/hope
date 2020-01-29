@@ -8,11 +8,11 @@ Expected delivery date: May. 29, 2020
 
 ####  **Product / Project Management Deliverables**
 
-The goal of Iteration Four is to develop the three major components for registration, which include Kobo Integration, Registration Data Import Module, and Deduplication functionality. 
+The goal of Iteration Four is to develop the three major app components around **Population**, **Registration** which include Kobo Integration, Registration Data Import Module, and Deduplication functionality; and **Target Population.**
 
-* Finalize Dashboards feature requirements and designs for development. 
+* Finalize Specification documentation around Population, Registration, and Target Population in GitBook.
 * Execution on 7 two-week sprints for the iteration deliverable, including bi-weekly demos and scrum ceremonies.
-* Identify I.5 Deliverables
+* Identify & Sign off on I.5 Deliverables & Designs.
 * Maintain Project Roadmap
 
 ####  **Technical Deliverables**
