@@ -112,6 +112,10 @@ description: HCT MIS related glossary and terms
       <td style="text-align:left">Non-Core attributes associated with a household / beneficiary</td>
     </tr>
     <tr>
+      <td style="text-align:left">FC</td>
+      <td style="text-align:left">Fund Commitment related to business area.</td>
+    </tr>
+    <tr>
       <td style="text-align:left">FSP</td>
       <td style="text-align:left">Financial Service Providers. These providers are the ones make the final
         payments to beneficiaries.</td>
