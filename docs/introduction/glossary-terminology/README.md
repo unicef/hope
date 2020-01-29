@@ -78,6 +78,10 @@ description: HCT MIS related glossary and terms
       <td style="text-align:left">Division of Financial and Administrative Management</td>
     </tr>
     <tr>
+      <td style="text-align:left">Down Payment</td>
+      <td style="text-align:left">Accounting entry or an expenditure. References an FC.</td>
+    </tr>
+    <tr>
       <td style="text-align:left">Draft Cash Plan</td>
       <td style="text-align:left">Something that country office could do for basic targeting and cash planning.</td>
     </tr>
@@ -113,7 +117,9 @@ description: HCT MIS related glossary and terms
     </tr>
     <tr>
       <td style="text-align:left">FC</td>
-      <td style="text-align:left">Fund Commitment related to business area.</td>
+      <td style="text-align:left">Fund Commitment related to business area. The $ amount against it does
+        not change over time. Has things like posted date, local amount, $ amount,
+        WSB Element etc.</td>
     </tr>
     <tr>
       <td style="text-align:left">FSP</td>
@@ -122,7 +128,7 @@ description: HCT MIS related glossary and terms
     </tr>
     <tr>
       <td style="text-align:left">Fund commitment</td>
-      <td style="text-align:left"></td>
+      <td style="text-align:left">FC above</td>
     </tr>
     <tr>
       <td style="text-align:left">Fund reservation</td>
