@@ -10,7 +10,7 @@ import Paper from '@material-ui/core/Paper';
 import { EnhancedTableToolbar } from './EnhancedTableToolbar';
 import { EnhancedTableHead, HeadCell } from './EnhancedTableHead';
 
-type Order = 'asc' | 'desc';
+export type Order = 'asc' | 'desc';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
