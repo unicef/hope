@@ -1,4 +1,5 @@
 import { theme as themeObj } from '../theme';
+import { Order } from '../components/table/TableComponent';
 
 export function opacityToHex(opacity: number): string {
   return Math.floor(opacity * 0xff).toString(16);
@@ -57,4 +58,15 @@ export function selectFields(
     acc[current] = fullObject[current];
     return acc;
   }, {});
+}
+
+export function camelToUnderscore(key): string {
+  return key.replace(/([A-Z])/g, '_$1').toLowerCase();
+}
+
+export function columnToOrderBy(
+  column: string,
+  orderDirection: string,
+): string {
+  return camelToUnderscore(`${orderDirection === 'desc' ? '-' : ''}${column}`);
 }
