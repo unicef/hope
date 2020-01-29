@@ -916,8 +916,7 @@ export type ProgramNodeCashPlansArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>,
-  program?: Maybe<Scalars['ID']>
+  last?: Maybe<Scalars['Int']>
 };
 
 export type ProgramNodeConnection = {
@@ -1038,7 +1037,8 @@ export type QueryAllCashPlansArgs = {
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  program?: Maybe<Scalars['ID']>
+  program?: Maybe<Scalars['ID']>,
+  orderBy?: Maybe<Scalars['String']>
 };
 
 
@@ -1153,8 +1153,7 @@ export type TargetPopulationNodeCashPlansArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>,
-  program?: Maybe<Scalars['ID']>
+  last?: Maybe<Scalars['Int']>
 };
 
 export type TargetPopulationNodeConnection = {
@@ -1295,8 +1294,7 @@ export type UserObjectTypeCashPlansArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>,
-  program?: Maybe<Scalars['ID']>
+  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -1360,7 +1358,9 @@ export type UpdateProgramMutation = (
 export type AllCashPlansQueryVariables = {
   program: Scalars['ID'],
   after?: Maybe<Scalars['String']>,
-  count?: Maybe<Scalars['Int']>
+  before?: Maybe<Scalars['String']>,
+  count?: Maybe<Scalars['Int']>,
+  orderBy?: Maybe<Scalars['String']>
 };
 
 
@@ -1656,8 +1656,8 @@ export type UpdateProgramMutationHookResult = ReturnType<typeof useUpdateProgram
 export type UpdateProgramMutationResult = ApolloReactCommon.MutationResult<UpdateProgramMutation>;
 export type UpdateProgramMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdateProgramMutation, UpdateProgramMutationVariables>;
 export const AllCashPlansDocument = gql`
-    query AllCashPlans($program: ID!, $after: String, $count: Int) {
-  allCashPlans(program: $program, after: $after, first: $count) {
+    query AllCashPlans($program: ID!, $after: String, $before: String, $count: Int, $orderBy: String) {
+  allCashPlans(program: $program, after: $after, before: $before, first: $count, orderBy: $orderBy) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -1714,7 +1714,9 @@ export function withAllCashPlans<TProps, TChildProps = {}>(operationOptions?: Ap
  *   variables: {
  *      program: // value for 'program'
  *      after: // value for 'after'
+ *      before: // value for 'before'
  *      count: // value for 'count'
+ *      orderBy: // value for 'orderBy'
  *   },
  * });
  */
