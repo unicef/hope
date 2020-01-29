@@ -3,6 +3,7 @@ import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
 import styled from 'styled-components';
 import Moment from 'react-moment';
+import { useHistory } from 'react-router-dom';
 import {
   AllCashPlansQueryVariables,
   CashPlanNode,
@@ -72,6 +73,7 @@ interface CashPlanTableProps {
   program: ProgramNode;
 }
 export function CashPlanTable({ program }: CashPlanTableProps): ReactElement {
+  const history = useHistory();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [orderBy, setOrderBy] = useState(null);
@@ -83,6 +85,9 @@ export function CashPlanTable({ program }: CashPlanTableProps): ReactElement {
     },
     fetchPolicy: 'network-only',
   });
+  const handleClick = (row) => {
+    history.push(`/cashplans/${row.id}`);
+  };
   if (!data) {
     return null;
   }
@@ -96,7 +101,7 @@ export function CashPlanTable({ program }: CashPlanTableProps): ReactElement {
         return (
           <TableRow
             hover
-            // onClick={(event) => handleClick(event, row.)}
+            onClick={() => handleClick(row)}
             role='checkbox'
             key={row.id}
           >
