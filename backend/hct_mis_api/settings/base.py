@@ -170,6 +170,7 @@ PROJECT_APPS = [
     "utils",
     "cash_assist_datahub",
     "registration_datahub",
+    'mptt',
 ]
 
 DJANGO_APPS = [
