@@ -51,6 +51,8 @@ When a Programme is in the **FINISHED** Status, the user will see the following 
 
 Here the user does not have many options other than being able to open an external link to view the Programme in CashAssist
 
+
+
 ## Programme Details
 
 In the Programme Details section the user will see the following high-level data displayed:
