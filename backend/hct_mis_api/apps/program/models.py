@@ -27,8 +27,7 @@ class Program(TimeStampedUUIDModel):
         (ONE_OFF, _("One-off")),
     )
 
-    CHILD = "CHILD"
-    PROTECTION = "PROTECTION"
+    CHILD_PROTECTION = "CHILD PROTECTION"
     EDUCATION = "EDUCATION"
     GENDER = "GENDER"
     HEALTH = "HEALTH"
@@ -39,8 +38,7 @@ class Program(TimeStampedUUIDModel):
     WASH = "WASH"
 
     SECTOR_CHOICE = (
-        (CHILD, _("Child")),
-        (PROTECTION, _("Protection")),
+        (CHILD_PROTECTION, _("Child Protection")),
         (EDUCATION, _("Education")),
         (GENDER, _("Gender")),
         (HEALTH, _("Health")),
@@ -66,8 +64,11 @@ class Program(TimeStampedUUIDModel):
     end_date = models.DateTimeField()
     description = models.CharField(max_length=255)
     program_ca_id = models.CharField(max_length=255)
-    location = models.ForeignKey(
-        "core.Location", on_delete=models.CASCADE, related_name="programs",
+    locations = models.ManyToManyField(
+        "core.Location", related_name="programs", blank=True
+    )
+    business_area = models.ForeignKey(
+        "core.BusinessArea", on_delete=models.CASCADE
     )
     budget = models.DecimalField(
         decimal_places=2,

@@ -29,7 +29,9 @@ RUN apt-get install -y --no-install-recommends \
     python-gdal \
     gdal-bin \
     libgdal-dev \
-    libgdal20
+    libgdal20 \
+    graphviz
+
 RUN pip install --upgrade pip
 
 ADD ./requirements/* /tmp/

@@ -26,7 +26,7 @@ class Household(TimeStampedUUIDModel):
     nationality = models.CharField(max_length=255, choices=NATIONALITIES,)
     family_size = models.PositiveIntegerField(blank=True, null=True)
     address = models.CharField(max_length=255, blank=True, null=True)
-    location = models.ForeignKey(
+    locations = models.ForeignKey(
         "core.Location", related_name="households", on_delete=models.CASCADE,
     )
     registration_data_import_id = models.ForeignKey(
@@ -129,5 +129,8 @@ class EntitlementCard(TimeStampedUUIDModel):
     card_custodian = models.CharField(max_length=255)
     service_provider = models.CharField(max_length=255)
     household = models.ForeignKey(
-        "household.Household", related_name="entitlement_cards", on_delete=models.CASCADE,
+        "Household",
+        related_name="entitlement_cards",
+        on_delete=models.SET_NULL,
+        null=True,
     )

@@ -10,3 +10,4 @@ class LocationFactory(factory.DjangoModelFactory):
     name = factory.Faker("address")
 
     country = factory.Faker("country_code", representation="alpha-2")
+

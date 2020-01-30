@@ -90,7 +90,7 @@ if not ENV:
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "ENGINE": "django.contrib.gis.db.backends.postgis",
         "NAME": os.getenv("POSTGRES_DB"),
         "USER": os.getenv("POSTGRES_USER"),
         "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
@@ -170,7 +170,8 @@ PROJECT_APPS = [
     "utils",
     "cash_assist_datahub",
     "registration_datahub",
-    'mptt',
+    "mptt",
+    "django_extensions",
 ]
 
 DJANGO_APPS = [
@@ -356,3 +357,8 @@ SOCIAL_AUTH_SANITIZE_REDIRECTS = True
 LOGIN_URL = "/api/login/azuread-tenant-oauth2"
 
 TEST_RUNNER = "snapshottest.django.TestRunner"
+
+GRAPH_MODELS = {
+  'all_applications': True,
+  'group_models': True,
+}
