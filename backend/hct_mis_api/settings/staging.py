@@ -7,8 +7,8 @@ DEBUG = False
 IS_STAGING = True
 
 # domains/hosts etc.
-DOMAIN_NAME = "localhost:8000"
-WWW_ROOT = "http://%s/" % DOMAIN_NAME
+DOMAIN_NAME = "dev-hct.unitst.org"
+WWW_ROOT = "https://%s/" % DOMAIN_NAME
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
@@ -41,3 +41,4 @@ MEDIA_URL = f"https://{AZURE_CUSTOM_DOMAIN}/{MEDIA_LOCATION}/"
 
 DEFAULT_FILE_STORAGE = "core.storage.AzureMediaStorage"
 STATICFILES_STORAGE = "core.storage.AzureStaticStorage"
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
