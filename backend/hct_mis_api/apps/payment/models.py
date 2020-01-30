@@ -1,21 +1,23 @@
+from decimal import Decimal
+
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from model_utils import Choices
 
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 
 
 class PaymentRecord(TimeStampedUUIDModel):
-    DELIVERY_TYPE_CHOICE = (
-        ("DELIVERED", _("Delivered")),
-        ("IN_PROGRESS", _("In Progress")),
+    STATUS_CHOICE = (
+        ("SUCCESS", _("Sucess")),
+        ("PENDING", _("Pending")),
+        ("ERROR", _("Error")),
     )
+    status = models.CharField(max_length=255, choices=STATUS_CHOICE,)
     name = models.CharField(max_length=255)
-    start_date = models.DateTimeField()
-    end_date = models.DateTimeField()
+    status_date = models.DateTimeField()
     cash_assist_id = models.CharField(max_length=255)
-    delivery_type = models.CharField(
-        max_length=255, choices=DELIVERY_TYPE_CHOICE,
-    )
     cash_plan = models.ForeignKey(
         "program.CashPlan",
         on_delete=models.CASCADE,
@@ -26,3 +28,54 @@ class PaymentRecord(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
         related_name="payment_records",
     )
+
+    distribution_modality = models.CharField(max_length=255,)
+
+    transaction_reference_id = models.CharField(max_length=255)
+
+    registration_data_import_id = models.ForeignKey(
+        "RegistrationDataImport",
+        related_name="households",
+        on_delete=models.CASCADE,
+    )
+
+    target_population = models.ForeignKey(
+        "targeting.TargetPopulation",
+        related_name="payment_records",
+        on_delete=models.CASCADE,
+    )
+
+
+class PaymentEntitlement(TimeStampedUUIDModel):
+    DELIVERY_TYPE_CHOICE = (
+        ("CASH", _("Cash")),
+        ("DEPOSIT_TO_CARD", _("Deposit to Card")),
+        ("TRANSFER", _("Transfer")),
+    )
+    STATUS_CHOICE = Choices(
+        ("ACTIVE", _("Active")),
+        ("ERRONEOUS", _("Erroneous")),
+        ("CLOSED", _("Closed")),
+    )
+    delivery_type = models.CharField(
+        max_length=255, choices=DELIVERY_TYPE_CHOICE,
+    )
+    entitlement_quantity = models.DecimalField(
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0.01"))],
+    )
+    delivered_qQuantity = models.DecimalField(
+        decimal_places=2,
+        max_digits=12,
+        blank=True,
+        null=True,
+        validators=[MinValueValidator(Decimal("0.01"))],
+    )
+    entitlement_card_status = models.CharField(
+        max_length=255, choices=STATUS_CHOICE,
+    )
+    entitlement_card_issue_date = models.DateTimeField(blank=True, null=True)
+    currency = models.CharField(max_length=255)
+    delivery_date = models.DateTimeField(blank=True, null=True)
+    fsp = models.CharField(max_length=255)
