@@ -2,16 +2,14 @@
 
 **Tracker link**: ....
 
-The overall goal of this iteration is to continue development sprints on Registration integration with Kobo, Registration Data Import Module and Deduplication.
+The goal of Iteration Four is to develop the three major app components around **Population**, **Registration Data Import Module** and **Target Population.**
 
-Expected delivery date: Feb. 23 - May 29, 2020
+Expected delivery date: Feb. 23 - May XX, 2020
 
 ####  **Product / Project Management Deliverables**
 
-The goal of Iteration Four is to develop the three major app components around **Population**, **Registration** which include Kobo Integration, Registration Data Import Module, and ~~Deduplication~~ functionality; and **Target Population.**
-
-* Finalize Specification documentation around Population, Registration, and Target Population in GitBook.
-* Execution on 7 two-week sprints for the iteration deliverable, including bi-weekly demos and scrum ceremonies.
+* Specification support around Population, Registration, and Target Population in GitBook.
+* Execution on $Y two-week sprints for the iteration deliverable, including bi-weekly demos and scrum ceremonies.
 * Identify & Sign off on I.5 Deliverables & Designs.
 * Maintain Project Roadmap
 
@@ -23,12 +21,12 @@ The goal of Iteration Four is to develop the three major app components around *
 * Refinement of deduplication requirements and flows.
 * Implementation of **Target Population** Module, allowing users to create new target populations and the associated approval process needed for it.
 * Continued Generation of fake data to drive the HCT MIS user interface and testing.
-* Refinement / selection of data integration tool for pushing and pulling data from the Registration and CashAssist data-hubs.
-
-  
-  __
+* Refinement / selection of data integration tool for pushing and pulling data from the Registration and CashAssist data-hubs. __
 
 #### **UX / UI Design Deliverables**
 
-* Continued refinement of of V 3.X mockups. Delivery of V.4.X of mockups to help understanding of elaboration efforts for remaining modules. 
+* Design support as required to support this iterations deliverables.
+* Continued refinement of of V 3.X mockups. Delivery of V.4.X of mockups to help understanding of elaboration efforts for remaining modules \(dashboards, payment verification, grievances & feedback, user management etc.\)
+
+
 
