@@ -29,5 +29,7 @@ Investigation - conducted by third party, when a variance is found during reconc
 
 Flags for beneficiaries to indicate notes on account \(ie: Ben. no longer living, missing payment, etc.\) - !! Flags can be applied to payment related
 
-Payments can potentially be collected by others in a household
+Payments can potentially be collected by others in a household.
+
+Ideal outcome: RapidPro for most of the users is ideal if we can make it happen. PDM is happening in the field all the time though.
 
