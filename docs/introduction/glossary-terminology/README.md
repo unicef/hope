@@ -193,8 +193,7 @@ description: HCT MIS related glossary and terms
     </tr>
     <tr>
       <td style="text-align:left">PDM</td>
-      <td style="text-align:left">Post Distribution Monitoring - data for monitoring purposes more or less
-        same indicators during registration.</td>
+      <td style="text-align:left"></td>
     </tr>
     <tr>
       <td style="text-align:left">Payment List</td>
