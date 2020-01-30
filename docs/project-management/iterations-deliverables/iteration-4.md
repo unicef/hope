@@ -11,7 +11,7 @@ Expected delivery date: Feb. 23 - May XX, 2020
 * Specification support around Population, Registration, and Target Population in GitBook.
 * Execution on $Y two-week sprints for the iteration deliverable, including bi-weekly demos and scrum ceremonies.
 * Identify & Sign off on I.5 Deliverables & Designs.
-* Maintain Project Roadmap
+* Maintain Project Roadmap / timeline.
 
 ## **Technical Deliverables**
 
