@@ -1,5 +1,7 @@
 # HQ Dashboard
 
+**DECISION \(Jan. 30, 2020\):** To leverage PowerBI either external to app or embedded into the HCT interface.
+
 #### Purpose
 
 Consolidation layer and reporting platform with non-personally identifiable information \(PII\) data intake from country offices. 

@@ -6,7 +6,7 @@
 
 ## [Iteration 3](iteration-3.md)
 
-## Iteration 4
+## [Iteration 4](iteration-4.md)
 
 ## Iteration 5
 
