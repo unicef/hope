@@ -26,5 +26,5 @@ Expected delivery date: Feb. 23 - May XX, 2020
 ## **UX / UI Design Deliverables**
 
 * Design support as required to support this iterations deliverables.
-* Continued refinement of of V 3.X mockups. Delivery of V.4.X of mockups to help understanding of elaboration efforts for remaining modules \(deduplication process, payment verification, grievances & feedback, dashboards, user management etc.\) 
+* Continued refinement of V 3.X mockups. Delivery of V.4.X of mockups to help understanding of elaboration efforts for remaining modules \(deduplication process, payment verification, grievances & feedback, dashboards, user management etc.\) 
 
