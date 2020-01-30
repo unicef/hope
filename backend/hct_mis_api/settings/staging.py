@@ -7,8 +7,8 @@ DEBUG = False
 IS_STAGING = True
 
 # domains/hosts etc.
-DOMAIN_NAME = "localhost:8000"
-WWW_ROOT = "http://%s/" % DOMAIN_NAME
+DOMAIN_NAME = "dev-hct.unitst.org"
+WWW_ROOT = "https://%s/" % DOMAIN_NAME
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
