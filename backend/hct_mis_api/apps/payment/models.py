@@ -23,26 +23,27 @@ class PaymentRecord(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
         related_name="payment_records",
     )
+
     household = models.ForeignKey(
         "household.Household",
         on_delete=models.CASCADE,
         related_name="payment_records",
     )
+    head_of_household = models.CharField(max_length=255)
+    total_person_covered = models.PositiveIntegerField()
 
     distribution_modality = models.CharField(max_length=255,)
-
-    transaction_reference_id = models.CharField(max_length=255)
-
-    registration_data_import_id = models.ForeignKey(
-        "RegistrationDataImport",
-        related_name="households",
-        on_delete=models.CASCADE,
-    )
 
     target_population = models.ForeignKey(
         "targeting.TargetPopulation",
         related_name="payment_records",
         on_delete=models.CASCADE,
+    )
+    entitlement = models.OneToOneField(
+        "PaymentEntitlement",
+        on_delete=models.SET_NULL,
+        related_name="payment_record",
+        null=True,
     )
 
 
@@ -52,11 +53,6 @@ class PaymentEntitlement(TimeStampedUUIDModel):
         ("DEPOSIT_TO_CARD", _("Deposit to Card")),
         ("TRANSFER", _("Transfer")),
     )
-    STATUS_CHOICE = Choices(
-        ("ACTIVE", _("Active")),
-        ("ERRONEOUS", _("Erroneous")),
-        ("CLOSED", _("Closed")),
-    )
     delivery_type = models.CharField(
         max_length=255, choices=DELIVERY_TYPE_CHOICE,
     )
@@ -65,17 +61,18 @@ class PaymentEntitlement(TimeStampedUUIDModel):
         max_digits=12,
         validators=[MinValueValidator(Decimal("0.01"))],
     )
-    delivered_qQuantity = models.DecimalField(
+    delivered_quantity = models.DecimalField(
         decimal_places=2,
         max_digits=12,
         blank=True,
         null=True,
         validators=[MinValueValidator(Decimal("0.01"))],
     )
-    entitlement_card_status = models.CharField(
-        max_length=255, choices=STATUS_CHOICE,
-    )
     entitlement_card_issue_date = models.DateTimeField(blank=True, null=True)
+    entitlement_card_number = models.CharField(
+        max_length=255, choices=DELIVERY_TYPE_CHOICE,
+    )
     currency = models.CharField(max_length=255)
     delivery_date = models.DateTimeField(blank=True, null=True)
+    transaction_reference_id = models.CharField(max_length=255)
     fsp = models.CharField(max_length=255)
