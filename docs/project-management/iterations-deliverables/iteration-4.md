@@ -1,6 +1,6 @@
 # Iteration 4 \(DRAFT v.1\)
 
-v **Tracker link**: ....
+**Tracker link**: ....
 
 The goal of Iteration Four is to develop the three major app components around **Population**, **Registration Data Import Module** and **Target Population.**
 
