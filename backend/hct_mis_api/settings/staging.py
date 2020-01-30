@@ -41,3 +41,4 @@ MEDIA_URL = f"https://{AZURE_CUSTOM_DOMAIN}/{MEDIA_LOCATION}/"
 
 DEFAULT_FILE_STORAGE = "core.storage.AzureMediaStorage"
 STATICFILES_STORAGE = "core.storage.AzureStaticStorage"
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
