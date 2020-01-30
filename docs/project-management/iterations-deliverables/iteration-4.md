@@ -16,7 +16,7 @@ Expected delivery date: Feb. 23 - May XX, 2020
 ## **Technical Deliverables**
 
 * **Registration data import** of household/individual data as scoped, including data by **Excel**, including the excel template download based on core / flex fields for households and individuals. Kobo and duplicate data management to be handled later.
-* Documentation of Kobo DevOps, API usage needed etc.
+* Documentation/refined/POC of Kobo DevOps, API usage needed etc.
 * Implementation of **Population Tab**
 * Refinement of deduplication requirements and flows.
 * Implementation of **Target Population** Module, allowing users to create new target populations and the associated approval process needed for it.
