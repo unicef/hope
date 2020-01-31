@@ -145,3 +145,5 @@ class CashPlan(TimeStampedUUIDModel):
         validators=[MinValueValidator(Decimal("0.01"))],
     )
     dispersion_date = models.DateField()
+    deliveryType = models.CharField(max_length=255)
+    assistanceThrough = models.CharField(max_length=255)

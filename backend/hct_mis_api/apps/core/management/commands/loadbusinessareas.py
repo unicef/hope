@@ -3,8 +3,6 @@ from core.models import BusinessArea
 
 import xml.etree.ElementTree as ET
 
-from core.utils import unique_slugify
-
 
 class Command(BaseCommand):
     help = "load_business_areas"
@@ -50,6 +48,4 @@ class Command(BaseCommand):
                 region_name=business_area_tag.find("REGION_NAME").text,
             )
             business_area.save()
-        self.stdout.write(
-            f"Imported business areas from {file}"
-        )
+        self.stdout.write(f"Imported business areas from {file}")

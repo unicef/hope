@@ -80,7 +80,7 @@ class PaymentEntitlement(TimeStampedUUIDModel):
         null=True,
         validators=[MinValueValidator(Decimal("0.01"))],
     )
-    entitlement_card_issue_date = models.DateTimeField(blank=True, null=True)
+    entitlement_card_issue_date = models.DateField(blank=True, null=True)
     entitlement_card_number = models.CharField(
         max_length=255, choices=DELIVERY_TYPE_CHOICE,
     )

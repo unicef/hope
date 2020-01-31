@@ -146,6 +146,12 @@ class Location(MPTTModel):
         core.GatewayType: "gateway"
     """
 
+    class Meta:
+        unique_together = ("title", "p_code")
+        ordering = ["title"]
+
+    objects = LocationManager()
+
     title = models.CharField(max_length=255)
     business_area = models.ForeignKey(
         "BusinessArea",
@@ -166,7 +172,6 @@ class Location(MPTTModel):
         null=True,
         on_delete=models.CASCADE,
     )
-
     latitude = models.DecimalField(
         null=True,
         blank=True,
@@ -190,7 +195,6 @@ class Location(MPTTModel):
     p_code = models.CharField(
         max_length=32, blank=True, null=True, verbose_name="Postal Code"
     )
-
     parent = TreeForeignKey(
         "self",
         verbose_name=_("Parent"),
@@ -200,14 +204,8 @@ class Location(MPTTModel):
         db_index=True,
         on_delete=models.CASCADE,
     )
-
     geom = models.MultiPolygonField(null=True, blank=True)
     point = models.PointField(null=True, blank=True)
-    objects = LocationManager()
-
-    class Meta:
-        unique_together = ("title", "p_code")
-        ordering = ["title"]
 
     def __str__(self):
         if self.p_code:
@@ -245,6 +243,9 @@ class CartoDBTable(MPTTModel):
         core.Country: 'country'
     """
 
+    class Meta:
+        verbose_name_plural = "CartoDB tables"
+
     domain = models.CharField(max_length=254, verbose_name=_("Domain"))
     table_name = models.CharField(max_length=254, verbose_name=_("Table Name"))
     display_name = models.CharField(
@@ -274,13 +275,9 @@ class CartoDBTable(MPTTModel):
         verbose_name=_("Parent"),
         on_delete=models.CASCADE,
     )
-
     country = models.ForeignKey(
         Country, related_name="carto_db_tables", on_delete=models.CASCADE
     )
-
-    class Meta:
-        verbose_name_plural = "CartoDB tables"
 
     def __str__(self):
         return self.table_name

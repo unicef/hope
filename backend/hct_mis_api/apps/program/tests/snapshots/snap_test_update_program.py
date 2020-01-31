@@ -26,14 +26,3 @@ snapshots['TestUpdateProgram::test_update_program_not_authenticated 1'] = {
         }
     ]
 }
-
-snapshots['TestUpdateProgram::test_update_program_authenticated 1'] = {
-    'data': {
-        'updateProgram': {
-            'program': {
-                'name': 'updated name',
-                'status': 'ACTIVE'
-            }
-        }
-    }
-}

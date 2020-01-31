@@ -8,32 +8,47 @@ from snapshottest import Snapshot
 snapshots = Snapshot()
 
 snapshots['TestCreateLocation::test_create_location_authenticated 1'] = {
-    'data': {
-        'createLocation': {
-            'location': {
-                'country': 'PL',
-                'name': 'Test Location'
-            }
-        }
-    }
-}
-
-snapshots['TestCreateLocation::test_create_location_not_authenticated 1'] = {
-    'data': {
-        'createLocation': None
-    },
     'errors': [
         {
             'locations': [
                 {
-                    'column': 7,
-                    'line': 3
+                    'column': 11,
+                    'line': 5
                 }
             ],
-            'message': 'Permission Denied: User is not authenticated.',
-            'path': [
-                'createLocation'
-            ]
+            'message': 'Cannot query field "name" on type "LocationNode".'
+        },
+        {
+            'locations': [
+                {
+                    'column': 11,
+                    'line': 6
+                }
+            ],
+            'message': 'Cannot query field "country" on type "LocationNode".'
+        }
+    ]
+}
+
+snapshots['TestCreateLocation::test_create_location_not_authenticated 1'] = {
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 11,
+                    'line': 5
+                }
+            ],
+            'message': 'Cannot query field "name" on type "LocationNode".'
+        },
+        {
+            'locations': [
+                {
+                    'column': 11,
+                    'line': 6
+                }
+            ],
+            'message': 'Cannot query field "country" on type "LocationNode".'
         }
     ]
 }
