@@ -5,7 +5,7 @@ from .models import Program, CashPlan
 
 @admin.register(Program)
 class ProgramAdmin(admin.ModelAdmin):
-    list_display = ("name", "status", "start_date", "end_date", "location")
+    list_display = ("name", "status", "start_date", "end_date", "business_area")
 
 
 @admin.register(CashPlan)

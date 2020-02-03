@@ -14,20 +14,11 @@ export const UPDATE_PROGRAM_MUTATION = gql`
         budget
         frequencyOfPayments
         cashPlus
-        location {
-          country
-          id
-          name
-        }
         populationGoal
         scope
         sector
         totalNumberOfHouseholds
-        location {
-          name
-        }
-        cashPlus
-        frequencyOfPayments
+        administrativeAreasOfImplementation
       }
     }
   }

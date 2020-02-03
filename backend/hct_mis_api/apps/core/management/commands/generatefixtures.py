@@ -1,6 +1,7 @@
 from django.core.management import BaseCommand
 
 from account.fixtures import UserFactory
+from core.models import BusinessArea
 from payment.fixtures import PaymentRecordFactory
 from program.fixtures import CashPlanFactory, ProgramFactory
 
@@ -50,7 +51,9 @@ class Command(BaseCommand):
 
         for _ in range(programs_amount):
             user = UserFactory.create()
-            program = ProgramFactory()
+            program = ProgramFactory(
+                business_area=BusinessArea.objects.order_by("?").first()
+            )
 
             for _ in range(cash_plans_amount):
                 cash_plan = CashPlanFactory.create(
