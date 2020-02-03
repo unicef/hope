@@ -78,6 +78,10 @@ description: HCT MIS related glossary and terms
       <td style="text-align:left">Division of Financial and Administrative Management</td>
     </tr>
     <tr>
+      <td style="text-align:left">Down Payment</td>
+      <td style="text-align:left">Accounting entry or an expenditure. References an FC.</td>
+    </tr>
+    <tr>
       <td style="text-align:left">Draft Cash Plan</td>
       <td style="text-align:left">Something that country office could do for basic targeting and cash planning.</td>
     </tr>
@@ -112,13 +116,19 @@ description: HCT MIS related glossary and terms
       <td style="text-align:left">Non-Core attributes associated with a household / beneficiary</td>
     </tr>
     <tr>
+      <td style="text-align:left">FC</td>
+      <td style="text-align:left">Fund Commitment related to business area. The $ amount against it does
+        not change over time. Has things like posted date, local amount, $ amount,
+        WSB Element etc.</td>
+    </tr>
+    <tr>
       <td style="text-align:left">FSP</td>
       <td style="text-align:left">Financial Service Providers. These providers are the ones make the final
         payments to beneficiaries.</td>
     </tr>
     <tr>
       <td style="text-align:left">Fund commitment</td>
-      <td style="text-align:left"></td>
+      <td style="text-align:left">FC above</td>
     </tr>
     <tr>
       <td style="text-align:left">Fund reservation</td>
@@ -183,7 +193,8 @@ description: HCT MIS related glossary and terms
     </tr>
     <tr>
       <td style="text-align:left">PDM</td>
-      <td style="text-align:left"></td>
+      <td style="text-align:left">Post Distribution Monitoring - data for monitoring purposes more or less
+        same indicators during registration.</td>
     </tr>
     <tr>
       <td style="text-align:left">Payment List</td>
