@@ -25,6 +25,8 @@ class TestCashPlanQueries(APITestCase):
         totalDeliveredQuantity
         totalUndeliveredQuantity
         dispersionDate
+        deliveryType
+        assistanceThrough
       }
     }
     """
@@ -50,6 +52,8 @@ class TestCashPlanQueries(APITestCase):
             totalDeliveredQuantity
             totalUndeliveredQuantity
             dispersionDate
+            deliveryType
+            assistanceThrough
           }
         }
       }
@@ -81,6 +85,8 @@ class TestCashPlanQueries(APITestCase):
             "total_delivered_quantity": 53477453.27,
             "total_entitled_quantity": 56657648.82,
             "total_undelivered_quantity": 55497021.04,
+            "deliveryType": "Deposit to Card",
+            "assistanceThrough": "Cairo Amman Bank",
         },
         {
             "cash_assist_id": "04b9d44b-67fe-425c-9095-509e31ba7494",
@@ -105,6 +111,8 @@ class TestCashPlanQueries(APITestCase):
             "total_delivered_quantity": 41935107.03,
             "total_entitled_quantity": 38204833.92,
             "total_undelivered_quantity": 63098825.46,
+            "deliveryType": "Deposit to Card",
+            "assistanceThrough": "Cairo Amman Bank",
         },
         {
             "cash_assist_id": "e02e9e29-a9bc-4d72-9c95-23fe123662c4",
@@ -129,6 +137,8 @@ class TestCashPlanQueries(APITestCase):
             "total_delivered_quantity": 67021407.24,
             "total_entitled_quantity": 71574231.27,
             "total_undelivered_quantity": 68666170.96,
+            "deliveryType": "Deposit to Card",
+            "assistanceThrough": "Cairo Amman Bank",
         },
         {
             "cash_assist_id": "0772b884-0ae1-4d4b-823d-80037eef00af",
@@ -153,6 +163,8 @@ class TestCashPlanQueries(APITestCase):
             "total_delivered_quantity": 77590217.09,
             "total_entitled_quantity": 45129411.47,
             "total_undelivered_quantity": 31657176.41,
+            "deliveryType": "Deposit to Card",
+            "assistanceThrough": "Cairo Amman Bank",
         },
         {
             "cash_assist_id": "357eeb74-f76d-4f12-a02b-8e67f0f90813",
@@ -177,6 +189,8 @@ class TestCashPlanQueries(APITestCase):
             "total_delivered_quantity": 41956165.06,
             "total_entitled_quantity": 23032305.51,
             "total_undelivered_quantity": 71567447.8,
+            "deliveryType": "Deposit to Card",
+            "assistanceThrough": "Cairo Amman Bank",
         },
         {
             "cash_assist_id": "be4fcbf6-40ba-405d-86be-0010c19a91c4",
@@ -201,6 +215,8 @@ class TestCashPlanQueries(APITestCase):
             "total_delivered_quantity": 75231429.04,
             "total_entitled_quantity": 6478697.79,
             "total_undelivered_quantity": 19931436.71,
+            "deliveryType": "Deposit to Card",
+            "assistanceThrough": "Cairo Amman Bank",
         },
         {
             "cash_assist_id": "17502569-0613-44f2-94d0-916ad6a7b860",
@@ -225,6 +241,8 @@ class TestCashPlanQueries(APITestCase):
             "total_delivered_quantity": 58925502.75,
             "total_entitled_quantity": 71489015.63,
             "total_undelivered_quantity": 58316677.75,
+            "deliveryType": "Deposit to Card",
+            "assistanceThrough": "Cairo Amman Bank",
         },
         {
             "cash_assist_id": "ccd0b2b1-85dc-44c2-82f3-906b33a16645",
@@ -249,6 +267,8 @@ class TestCashPlanQueries(APITestCase):
             "total_delivered_quantity": 47098878.58,
             "total_entitled_quantity": 24371399.57,
             "total_undelivered_quantity": 31178307.82,
+            "deliveryType": "Deposit to Card",
+            "assistanceThrough": "Cairo Amman Bank",
         },
         {
             "cash_assist_id": "0d4f1c5e-7f83-4f8a-9a9c-82a2af883a83",
@@ -273,6 +293,8 @@ class TestCashPlanQueries(APITestCase):
             "total_delivered_quantity": 63827276.43,
             "total_entitled_quantity": 41776487.16,
             "total_undelivered_quantity": 76468590.87,
+            "deliveryType": "Deposit to Card",
+            "assistanceThrough": "Cairo Amman Bank",
         },
         {
             "cash_assist_id": "056d6d6e-2562-4f1e-a37d-00017020a869",
@@ -297,6 +319,8 @@ class TestCashPlanQueries(APITestCase):
             "total_delivered_quantity": 21181440.08,
             "total_entitled_quantity": 73287521.63,
             "total_undelivered_quantity": 29600156.58,
+            "deliveryType": "Deposit to Card",
+            "assistanceThrough": "Cairo Amman Bank",
         },
     ]
 

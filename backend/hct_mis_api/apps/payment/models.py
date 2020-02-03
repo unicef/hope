@@ -2,6 +2,7 @@ from decimal import Decimal
 
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.db.models import Sum
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 
@@ -46,6 +47,12 @@ class PaymentRecord(TimeStampedUUIDModel):
         null=True,
     )
 
+    payment_record_verification = models.OneToOneField(
+        "payment.PaymentRecordVerification",
+        on_delete=models.SET_NULL,
+        null=True,
+    )
+
 
 class PaymentEntitlement(TimeStampedUUIDModel):
     DELIVERY_TYPE_CHOICE = (
@@ -68,7 +75,7 @@ class PaymentEntitlement(TimeStampedUUIDModel):
         null=True,
         validators=[MinValueValidator(Decimal("0.01"))],
     )
-    entitlement_card_issue_date = models.DateTimeField(blank=True, null=True)
+    entitlement_card_issue_date = models.DateField(blank=True, null=True)
     entitlement_card_number = models.CharField(
         max_length=255, choices=DELIVERY_TYPE_CHOICE,
     )
@@ -76,3 +83,44 @@ class PaymentEntitlement(TimeStampedUUIDModel):
     delivery_date = models.DateTimeField(blank=True, null=True)
     transaction_reference_id = models.CharField(max_length=255)
     fsp = models.CharField(max_length=255)
+
+
+class VerificationProcess(TimeStampedUUIDModel):
+    VERIFICATION_TYPE_CHOICE = Choices(
+        ("RAPIDPRO", _("RapidPro")),
+        ("MANUAL", _("Manual")),
+        ("OTHER", _("Other")),
+    )
+    STATUS_CHOICE = Choices(
+        ("PENDING", _("Pending")),
+        ("ERROR", _("Error")),
+        ("SUCCESS", _("Success")),
+    )
+    payment_records_to_verify = models.PositiveIntegerField()
+    verification_type = models.CharField(
+        choices=VERIFICATION_TYPE_CHOICE, max_length=10,
+    )
+    status = models.CharField(choices=STATUS_CHOICE, max_length=10,)
+
+
+class PaymentRecordVerification(TimeStampedUUIDModel):
+    STATUS_CHOICE = Choices(("STARTED", _("Started")), ("ENDED", _("Ended")),)
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField()
+    sample_size = models.PositiveIntegerField()
+    responded = models.PositiveIntegerField()
+    received = models.PositiveIntegerField()
+    not_received = models.PositiveIntegerField()
+    received_correct_amount = models.PositiveIntegerField()
+    received_wrong_amount = models.PositiveIntegerField()
+    verification_process = models.ForeignKey(
+        "payment.VerificationProcess",
+        related_name="verification_processes",
+        on_delete=models.CASCADE,
+    )
+
+    @property
+    def total_number(self):
+        return self.paymentrecord.aggregate(total_number=Sum("household"),)[
+            "total_number"
+        ]

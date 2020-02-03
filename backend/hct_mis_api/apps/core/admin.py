@@ -1,8 +1,8 @@
 from django.contrib import admin
 
-from core.models import Location
+from core.models import BusinessArea
 
 
-@admin.register(Location)
-class LocationAdmin(admin.ModelAdmin):
-    list_display = ("name", "country")
+@admin.register(BusinessArea)
+class BusinessAreaAdmin(admin.ModelAdmin):
+    list_display = ("name", "slug")

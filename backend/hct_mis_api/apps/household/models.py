@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from model_utils import Choices
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
 
@@ -27,6 +28,12 @@ class Household(TimeStampedUUIDModel):
     address = models.CharField(max_length=255, blank=True, null=True)
     location = models.ForeignKey(
         "core.Location", related_name="households", on_delete=models.CASCADE,
+    )
+    representative = models.ForeignKey(
+        "Individual",
+        on_delete=models.SET_NULL,
+        related_name="represented_households",
+        null=True,
     )
     registration_data_import_id = models.ForeignKey(
         "RegistrationDataImport",
@@ -112,3 +119,25 @@ class RegistrationDataImport(TimeStampedUUIDModel):
 
     def __str__(self):
         return self.name
+
+
+class EntitlementCard(TimeStampedUUIDModel):
+    STATUS_CHOICE = Choices(
+        ("ACTIVE", _("Active")),
+        ("ERRONEOUS", _("Erroneous")),
+        ("CLOSED", _("Closed")),
+    )
+    card_number = models.CharField(max_length=255)
+    status = models.CharField(
+        choices=STATUS_CHOICE, default=STATUS_CHOICE.ACTIVE, max_length=10,
+    )
+    card_type = models.CharField(max_length=255)
+    current_card_size = models.CharField(max_length=255)
+    card_custodian = models.CharField(max_length=255)
+    service_provider = models.CharField(max_length=255)
+    household = models.ForeignKey(
+        "Household",
+        related_name="entitlement_cards",
+        on_delete=models.SET_NULL,
+        null=True,
+    )

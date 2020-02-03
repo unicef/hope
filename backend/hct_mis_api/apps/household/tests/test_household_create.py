@@ -5,8 +5,8 @@ from PIL import Image
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
 from account.fixtures import UserFactory
-from core.fixtures import LocationFactory
 from core.base_test_case import APITestCase
+from core.fixtures import LocationFactory
 from household.fixtures import RegistrationDataImportFactory
 
 
