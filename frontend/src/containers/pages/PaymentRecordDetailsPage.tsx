@@ -1,7 +1,10 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
-import { PaymentRecordNode, usePaymentRecordQuery, } from '../../__generated__/graphql';
+import {
+  PaymentRecordNode,
+  usePaymentRecordQuery,
+} from '../../__generated__/graphql';
 import { PageHeader } from '../../components/PageHeader';
 import { PaymentRecordDetails } from '../../components/payments/PaymentRecordDetails';
 
@@ -9,13 +12,6 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
-`;
-
-const PageContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  padding: 20px;
 `;
 
 export function PaymentRecordDetailsPage(): React.ReactElement {
@@ -32,7 +28,6 @@ export function PaymentRecordDetailsPage(): React.ReactElement {
       <PageHeader title={`Payment ID ${paymentRecord.cashAssistId}`} />
       <Container>
         <PaymentRecordDetails paymentRecord={paymentRecord} />
-
       </Container>
     </div>
   );

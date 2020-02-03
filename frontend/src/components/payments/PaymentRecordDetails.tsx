@@ -1,11 +1,11 @@
 import React from 'react';
 import styled from 'styled-components';
+import moment from 'moment';
 import { Grid, Paper, Typography } from '@material-ui/core';
 import { StatusBox } from '../StatusBox';
 import { paymentRecordStatusToColor } from '../../utils/utils';
 import { LabelizedField } from '../LabelizedField';
 import { PaymentRecordNode } from '../../__generated__/graphql';
-import moment from 'moment';
 
 const Container = styled.div`
   display: flex;
@@ -124,7 +124,10 @@ export function PaymentRecordDetails({
                   />
                 </LabelizedFieldContainer>
                 <LabelizedFieldContainer>
-                  <LabelizedField label='total person covered' value={paymentRecord.totalPersonCovered} />
+                  <LabelizedField
+                    label='total person covered'
+                    value={paymentRecord.totalPersonCovered}
+                  />
                 </LabelizedFieldContainer>
               </HouseholdDataContainer>
             </Card>
