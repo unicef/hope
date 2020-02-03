@@ -1,5 +1,8 @@
+from django.core.management import call_command
+
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
+from core.models import BusinessArea
 from program.fixtures import ProgramFactory
 from program.models import Program
 
@@ -15,6 +18,10 @@ class TestUpdateProgram(APITestCase):
       }
     }
     """
+
+    def setUp(self):
+        super().setUp()
+        call_command("loadbusinessareas")
 
     def test_update_program_not_authenticated(self):
         self.snapshot_graphql_request(
@@ -32,7 +39,10 @@ class TestUpdateProgram(APITestCase):
     def test_update_program_authenticated(self):
         user = UserFactory.create()
 
-        program = ProgramFactory.create(status="DRAFT")
+        program = ProgramFactory.create(
+            status="DRAFT",
+            business_area=BusinessArea.objects.order_by("?").first(),
+        )
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,

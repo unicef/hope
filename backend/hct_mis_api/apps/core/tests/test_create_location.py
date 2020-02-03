@@ -1,7 +1,10 @@
+import unittest
+
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
 
 
+@unittest.skip("Not supporting locations")
 class TestCreateLocation(APITestCase):
 
     CREATE_LOCATION_MUTATION = """

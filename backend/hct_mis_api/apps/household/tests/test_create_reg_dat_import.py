@@ -1,7 +1,10 @@
+import unittest
+
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
 
 
+@unittest.skip("Not supporting creating Registration Data Import")
 class TestCreateRegistrationDataImport(APITestCase):
     CREATE_REGISTRATION_DATA_IMPORT_MUTATION = """
     mutation CreateRegistrationDataImport(

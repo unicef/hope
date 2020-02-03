@@ -4,29 +4,10 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
-snapshots['TestChangeProgramStatus::test_active_to_finished 1'] = {
-    'data': {
-        'updateProgram': {
-            'program': {
-                'status': 'FINISHED'
-            }
-        }
-    }
-}
-
 snapshots['TestChangeProgramStatus::test_draft_to_active 1'] = {
-    'data': {
-        'updateProgram': {
-            'program': {
-                'status': 'ACTIVE'
-            }
-        }
-    }
-}
-
-snapshots['TestChangeProgramStatus::test_finished_to_active 1'] = {
     'data': {
         'updateProgram': {
             'program': {
@@ -56,6 +37,16 @@ snapshots['TestChangeProgramStatus::test_active_to_draft 1'] = {
     ]
 }
 
+snapshots['TestChangeProgramStatus::test_active_to_finished 1'] = {
+    'data': {
+        'updateProgram': {
+            'program': {
+                'status': 'FINISHED'
+            }
+        }
+    }
+}
+
 snapshots['TestChangeProgramStatus::test_draft_to_finished 1'] = {
     'data': {
         'updateProgram': None
@@ -74,6 +65,16 @@ snapshots['TestChangeProgramStatus::test_draft_to_finished 1'] = {
             ]
         }
     ]
+}
+
+snapshots['TestChangeProgramStatus::test_finished_to_active 1'] = {
+    'data': {
+        'updateProgram': {
+            'program': {
+                'status': 'ACTIVE'
+            }
+        }
+    }
 }
 
 snapshots['TestChangeProgramStatus::test_finished_to_draft 1'] = {

@@ -65,7 +65,7 @@ class Program(TimeStampedUUIDModel):
     description = models.CharField(max_length=255)
     program_ca_id = models.CharField(max_length=255)
     locations = models.ManyToManyField(
-        "core.Location", related_name="programs", blank=True
+        "core.Location", related_name="programs", blank=True,
     )
     business_area = models.ForeignKey(
         "core.BusinessArea", on_delete=models.CASCADE
@@ -145,5 +145,5 @@ class CashPlan(TimeStampedUUIDModel):
         validators=[MinValueValidator(Decimal("0.01"))],
     )
     dispersion_date = models.DateField()
-    deliveryType = models.CharField(max_length=255)
-    assistanceThrough = models.CharField(max_length=255)
+    delivery_type = models.CharField(max_length=255)
+    assistance_through = models.CharField(max_length=255)
