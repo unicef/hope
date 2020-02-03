@@ -198,7 +198,6 @@ export type CreateProgramInput = {
   endDate?: Maybe<Scalars['DateTime']>,
   description?: Maybe<Scalars['String']>,
   programCaId?: Maybe<Scalars['String']>,
-  locationId?: Maybe<Scalars['String']>,
   budget?: Maybe<Scalars['Float']>,
   frequencyOfPayments?: Maybe<Scalars['String']>,
   sector?: Maybe<Scalars['String']>,
@@ -206,6 +205,7 @@ export type CreateProgramInput = {
   cashPlus?: Maybe<Scalars['Boolean']>,
   populationGoal?: Maybe<Scalars['Int']>,
   administrativeAreasOfImplementation?: Maybe<Scalars['String']>,
+  businessAreaId?: Maybe<Scalars['String']>,
 };
 
 export type CreateRegistrationDataImport = {
@@ -672,6 +672,12 @@ export enum PaymentEntitlementDeliveryType {
   Transfer = 'TRANSFER'
 }
 
+export enum PaymentEntitlementEntitlementCardNumber {
+  Cash = 'CASH',
+  DepositToCard = 'DEPOSIT_TO_CARD',
+  Transfer = 'TRANSFER'
+}
+
 export type PaymentEntitlementNode = {
    __typename?: 'PaymentEntitlementNode',
   id: Scalars['UUID'],
@@ -681,7 +687,7 @@ export type PaymentEntitlementNode = {
   entitlementQuantity: Scalars['Float'],
   deliveredQuantity?: Maybe<Scalars['Float']>,
   entitlementCardIssueDate?: Maybe<Scalars['Date']>,
-  entitlementCardNumber: Scalars['String'],
+  entitlementCardNumber: PaymentEntitlementEntitlementCardNumber,
   currency: Scalars['String'],
   deliveryDate?: Maybe<Scalars['DateTime']>,
   transactionReferenceId: Scalars['String'],
@@ -1113,7 +1119,6 @@ export type UpdateProgramInput = {
   endDate?: Maybe<Scalars['DateTime']>,
   description?: Maybe<Scalars['String']>,
   programCaId?: Maybe<Scalars['String']>,
-  locationId?: Maybe<Scalars['String']>,
   budget?: Maybe<Scalars['Float']>,
   frequencyOfPayments?: Maybe<Scalars['String']>,
   sector?: Maybe<Scalars['String']>,
@@ -1121,6 +1126,7 @@ export type UpdateProgramInput = {
   cashPlus?: Maybe<Scalars['Boolean']>,
   populationGoal?: Maybe<Scalars['Int']>,
   administrativeAreasOfImplementation?: Maybe<Scalars['String']>,
+  businessAreaId?: Maybe<Scalars['String']>,
 };
 
 export type UpdateRegistrationDataImport = {
@@ -2117,6 +2123,7 @@ export type ResolversTypes = {
   Date: ResolverTypeWrapper<Scalars['Date']>,
   PaymentEntitlementNode: ResolverTypeWrapper<PaymentEntitlementNode>,
   PaymentEntitlementDeliveryType: PaymentEntitlementDeliveryType,
+  PaymentEntitlementEntitlementCardNumber: PaymentEntitlementEntitlementCardNumber,
   ChoiceObject: ResolverTypeWrapper<ChoiceObject>,
   DjangoDebug: ResolverTypeWrapper<DjangoDebug>,
   DjangoDebugSQL: ResolverTypeWrapper<DjangoDebugSql>,
@@ -2200,6 +2207,7 @@ export type ResolversParentTypes = {
   Date: Scalars['Date'],
   PaymentEntitlementNode: PaymentEntitlementNode,
   PaymentEntitlementDeliveryType: PaymentEntitlementDeliveryType,
+  PaymentEntitlementEntitlementCardNumber: PaymentEntitlementEntitlementCardNumber,
   ChoiceObject: ChoiceObject,
   DjangoDebug: DjangoDebug,
   DjangoDebugSQL: DjangoDebugSql,
@@ -2478,7 +2486,7 @@ export type PaymentEntitlementNodeResolvers<ContextType = any, ParentType extend
   entitlementQuantity?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   deliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   entitlementCardIssueDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
-  entitlementCardNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  entitlementCardNumber?: Resolver<ResolversTypes['PaymentEntitlementEntitlementCardNumber'], ParentType, ContextType>,
   currency?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   deliveryDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   transactionReferenceId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,

@@ -93,9 +93,9 @@ class CashPlanFactory(factory.DjangoModelFactory):
         start_date=datetime.now() + timedelta(days=30),
         end_date=datetime.now() + timedelta(days=365),
     )
-    deliveryType = factory.Faker(
+    delivery_type = factory.Faker(
         "random_element", elements=["Deposit to Card", "Transfer", "Cash"]
     )
-    assistanceThrough = factory.LazyAttribute(
+    assistance_through = factory.LazyAttribute(
         lambda o: f"{factory.Faker('company')} Bank"
     )

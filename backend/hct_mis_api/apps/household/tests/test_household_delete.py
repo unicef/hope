@@ -1,9 +1,12 @@
+import unittest
+
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
 from household.fixtures import HouseholdFactory
 from household.models import Household
 
 
+@unittest.skip("Not supporting deleting Household")
 class TestDeleteHousehold(APITestCase):
     DELETE_PROGRAM_MUTATION = """
     mutation DeleteHousehold($householdId: String!) {

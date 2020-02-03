@@ -1,8 +1,11 @@
+import unittest
+
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
 from core.fixtures import LocationFactory
 
 
+@unittest.skip("Not supporting locations")
 class TestUpdateLocation(APITestCase):
     UPDATE_LOCATION_MUTATION = """
     mutation UpdateLocation($locationData: UpdateLocationInput) {

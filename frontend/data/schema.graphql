@@ -141,7 +141,6 @@ input CreateProgramInput {
   endDate: DateTime
   description: String
   programCaId: String
-  locationId: String
   budget: Float
   frequencyOfPayments: String
   sector: String
@@ -149,6 +148,7 @@ input CreateProgramInput {
   cashPlus: Boolean
   populationGoal: Int
   administrativeAreasOfImplementation: String
+  businessAreaId: String
 }
 
 type CreateRegistrationDataImport {
@@ -485,6 +485,12 @@ enum PaymentEntitlementDeliveryType {
   TRANSFER
 }
 
+enum PaymentEntitlementEntitlementCardNumber {
+  CASH
+  DEPOSIT_TO_CARD
+  TRANSFER
+}
+
 type PaymentEntitlementNode {
   id: UUID!
   createdAt: DateTime!
@@ -493,7 +499,7 @@ type PaymentEntitlementNode {
   entitlementQuantity: Float!
   deliveredQuantity: Float
   entitlementCardIssueDate: Date
-  entitlementCardNumber: String!
+  entitlementCardNumber: PaymentEntitlementEntitlementCardNumber!
   currency: String!
   deliveryDate: DateTime
   transactionReferenceId: String!
@@ -754,7 +760,6 @@ input UpdateProgramInput {
   endDate: DateTime
   description: String
   programCaId: String
-  locationId: String
   budget: Float
   frequencyOfPayments: String
   sector: String
@@ -762,6 +767,7 @@ input UpdateProgramInput {
   cashPlus: Boolean
   populationGoal: Int
   administrativeAreasOfImplementation: String
+  businessAreaId: String
 }
 
 type UpdateRegistrationDataImport {

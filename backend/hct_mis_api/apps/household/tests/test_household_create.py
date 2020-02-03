@@ -1,5 +1,6 @@
 import io
 import sys
+import unittest
 
 from PIL import Image
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -10,6 +11,7 @@ from core.fixtures import LocationFactory
 from household.fixtures import RegistrationDataImportFactory
 
 
+@unittest.skip("Not supporting creating Household")
 class TestHouseholdCreate(APITestCase):
     CREATE_HOUSEHOLD_MUTATION = """
     mutation CreateHousehold($householdData: CreateHouseholdInput) {

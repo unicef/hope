@@ -8,9 +8,9 @@ from payment.models import PaymentRecord, PaymentEntitlement
 
 
 class PaymentEntitlementNode(DjangoObjectType):
-
     class Meta:
         model = PaymentEntitlement
+
 
 class PaymentRecordNode(DjangoObjectType):
     class Meta:
@@ -25,6 +25,7 @@ class Query(graphene.ObjectType):
     all_payment_records = DjangoFilterConnectionField(PaymentRecordNode)
     payment_record_status_choices = graphene.List(ChoiceObject)
     all_payment_entitlements = graphene.List(PaymentEntitlementNode)
+
     def resolve_payment_record_status_choices(self, info, **kwargs):
         return [
             {"name": name, "value": value}
