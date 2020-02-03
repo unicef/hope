@@ -16,9 +16,26 @@ class Grievance(TimeStampedUUIDModel):
     assigned_user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
-        related_name="grievances",
+        related_name="grievances_assigned",
+        null=True,
+    )
+
+    createdBy = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="grievance_created",
         null=True,
     )
 
     def __str__(self):
         return self.name
+
+
+class Note(TimeStampedUUIDModel):
+    createdBy = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="notes_created",
+        null=True,
+    )
+    description = models.TextField(null=True, blank=True)

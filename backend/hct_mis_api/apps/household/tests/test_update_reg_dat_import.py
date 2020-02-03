@@ -1,8 +1,11 @@
+import unittest
+
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
 from household.fixtures import RegistrationDataImportFactory
 
 
+@unittest.skip("Not supporting updating Registration Data Import")
 class TestUpdateRegistrationDataImport(APITestCase):
     UPDATE_REGISTRATION_DATA_IMPORT_MUTATION = """
     mutation UpdateRegistrationDataImport(

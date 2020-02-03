@@ -1,7 +1,7 @@
 import graphene
 from django.db import transaction
 
-from core.models import Location
+from core.models import Location, BusinessArea
 from core.permissions import is_authenticated
 from core.utils import decode_id_string
 from core.validators import CommonValidator
@@ -21,7 +21,6 @@ class CreateProgramInput(graphene.InputObjectType):
     end_date = graphene.DateTime()
     description = graphene.String()
     program_ca_id = graphene.String()
-    location_id = graphene.String()
     budget = graphene.Float()
     frequency_of_payments = graphene.String()
     sector = graphene.String()
@@ -29,6 +28,7 @@ class CreateProgramInput(graphene.InputObjectType):
     cash_plus = graphene.Boolean()
     population_goal = graphene.Int()
     administrative_areas_of_implementation = graphene.String()
+    business_area_id = graphene.String()
 
 
 class UpdateProgramInput(graphene.InputObjectType):
@@ -39,7 +39,6 @@ class UpdateProgramInput(graphene.InputObjectType):
     end_date = graphene.DateTime()
     description = graphene.String()
     program_ca_id = graphene.String()
-    location_id = graphene.String()
     budget = graphene.Float()
     frequency_of_payments = graphene.String()
     sector = graphene.String()
@@ -47,6 +46,7 @@ class UpdateProgramInput(graphene.InputObjectType):
     cash_plus = graphene.Boolean()
     population_goal = graphene.Int()
     administrative_areas_of_implementation = graphene.String()
+    business_area_id = graphene.String()
 
 
 class CreateCashPlanInput(graphene.InputObjectType):
@@ -101,8 +101,10 @@ class CreateProgram(CommonValidator, graphene.Mutation):
     @classmethod
     @is_authenticated
     def mutate(cls, root, info, program_data):
-        location_id = decode_id_string(program_data.pop("location_id", None))
-        location = Location.objects.get(id=location_id)
+        business_area_id = decode_id_string(
+            program_data.pop("business_area_id", None)
+        )
+        business_area = BusinessArea.objects.get(id=business_area_id)
 
         cls.validate(
             start_date=program_data.get("start_date"),
@@ -110,7 +112,9 @@ class CreateProgram(CommonValidator, graphene.Mutation):
         )
 
         program = Program.objects.create(
-            **program_data, location=location, status="DRAFT",
+            **program_data,
+            status="DRAFT",
+            business_area=business_area,
         )
 
         return CreateProgram(program)
@@ -130,11 +134,13 @@ class UpdateProgram(CommonValidator, ProgramValidator, graphene.Mutation):
 
         program = Program.objects.select_for_update().get(id=program_id)
 
-        location_id = decode_id_string(program_data.pop("location_id", None))
+        business_area_id = decode_id_string(
+            program_data.pop("business_area_id", None)
+        )
 
-        if location_id:
-            location = Location.objects.get(id=location_id)
-            program.location = location
+        if business_area_id:
+            business_area = BusinessArea.objects.get(id=business_area_id)
+            program.business_area = business_area
 
         cls.validate(
             program_data=program_data,
