@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['TestCreateCashPlan::test_create_cash_plan_not_authenticated 1'] = {

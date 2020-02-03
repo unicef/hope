@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['TestCreateRegistrationDataImport::test_create_reg_data_import_authenticated 1'] = {
