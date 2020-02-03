@@ -1,8 +1,11 @@
+import unittest
+
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
 from program.fixtures import CashPlanFactory
 
 
+@unittest.skip("Not supporting deleting Cash Plans")
 class TestDeleteCashPlan(APITestCase):
     DELETE_CASH_PLAN_MUTATION = """
     mutation DeleteCashPlan($cashPlanId: String!) {

@@ -4,21 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
-
-snapshots['TestUpdateCashPlan::test_update_cash_plan_authenticated 1'] = {
-    'data': {
-        'updateCashPlan': {
-            'cashPlan': {
-                'fsp': 'updated fsp',
-                'name': 'updated name',
-                'numberOfHouseholds': 618,
-                'status': 'STARTED'
-            }
-        }
-    }
-}
 
 snapshots['TestUpdateCashPlan::test_update_cash_plan_not_authenticated 1'] = {
     'data': {

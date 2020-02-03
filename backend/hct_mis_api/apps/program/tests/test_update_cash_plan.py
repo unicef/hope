@@ -1,9 +1,12 @@
+import unittest
+
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
 from program.fixtures import CashPlanFactory
 from program.models import CashPlan
 
 
+@unittest.skip("Not supporting updating Cash Plans")
 class TestUpdateCashPlan(APITestCase):
     UPDATE_CASH_PLAN_MUTATION = """
     mutation UpdateCashPlan($cashPlanData: UpdateCashPlanInput) {
