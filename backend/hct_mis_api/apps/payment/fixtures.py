@@ -13,27 +13,7 @@ from payment.models import (
     PaymentRecordVerification,
 )
 from program.fixtures import CashPlanFactory
-
-
-class PaymentRecordFactory(factory.DjangoModelFactory):
-    class Meta:
-        model = PaymentRecord
-
-    name = factory.Faker(
-        "sentence", nb_words=6, variable_nb_words=True, ext_word_list=None,
-    )
-    start_date = factory.Faker(
-        "date_time_this_decade", before_now=False, after_now=True, tzinfo=utc,
-    )
-    end_date = factory.LazyAttribute(
-        lambda o: o.start_date + timedelta(days=randint(60, 1000))
-    )
-    cash_assist_id = factory.Faker("uuid4")
-    delivery_type = fuzzy.FuzzyChoice(
-        PaymentRecord.DELIVERY_TYPE_CHOICE, getter=lambda c: c[0],
-    )
-    cash_plan = factory.SubFactory(CashPlanFactory)
-    household = factory.SubFactory(HouseholdFactory)
+from targeting.fixtures import TargetPopulationFactory
 
 
 class PaymentEntitlementFactory(factory.DjangoModelFactory):
@@ -41,7 +21,7 @@ class PaymentEntitlementFactory(factory.DjangoModelFactory):
         model = PaymentEntitlement
 
     delivery_type = fuzzy.FuzzyChoice(
-        PaymentEntitlement.STATUS_CHOICE, getter=lambda c: c[0],
+        PaymentEntitlement.DELIVERY_TYPE_CHOICE, getter=lambda c: c[0],
     )
     entitlement_quantity = factory.fuzzy.FuzzyInteger(90, 100)
     delivered_quantity = factory.LazyAttribute(
@@ -58,6 +38,29 @@ class PaymentEntitlementFactory(factory.DjangoModelFactory):
     transaction_reference_id = factory.Faker("itin")
     fsp = factory.Faker("company")
 
+class PaymentRecordFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = PaymentRecord
+
+    status = fuzzy.FuzzyChoice(
+        PaymentRecord.STATUS_CHOICE, getter=lambda c: c[0],
+    )
+    name = factory.Faker(
+        "sentence", nb_words=6, variable_nb_words=True, ext_word_list=None,
+    )
+    status_date = factory.Faker(
+        "date_time_this_decade", before_now=False, after_now=True, tzinfo=utc,
+    )
+    cash_assist_id = factory.Faker("uuid4")
+    cash_plan = factory.SubFactory(CashPlanFactory)
+    household = factory.SubFactory(HouseholdFactory)
+    head_of_household = factory.Faker("name")
+    total_person_covered = factory.fuzzy.FuzzyInteger(1, 7)
+    distribution_modality = factory.Faker(
+        "sentence", nb_words=6, variable_nb_words=True, ext_word_list=None,
+    )
+    target_population = factory.SubFactory(TargetPopulationFactory)
+    entitlement = factory.SubFactory(PaymentEntitlementFactory)
 
 class VerificationProcessFactory(factory.DjangoModelFactory):
     class Meta:

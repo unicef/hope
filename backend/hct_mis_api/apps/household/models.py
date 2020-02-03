@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.db import models
-from model_utils import Choices
 from django.utils.translation import ugettext_lazy as _
+from model_utils import Choices
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
 
@@ -26,8 +26,14 @@ class Household(TimeStampedUUIDModel):
     nationality = models.CharField(max_length=255, choices=NATIONALITIES,)
     family_size = models.PositiveIntegerField(blank=True, null=True)
     address = models.CharField(max_length=255, blank=True, null=True)
-    locations = models.ForeignKey(
+    location = models.ForeignKey(
         "core.Location", related_name="households", on_delete=models.CASCADE,
+    )
+    representative = models.ForeignKey(
+        "Individual",
+        on_delete=models.SET_NULL,
+        related_name="represented_households",
+        null=True,
     )
     registration_data_import_id = models.ForeignKey(
         "RegistrationDataImport",

@@ -1,5 +1,7 @@
 import re
+
 from django.template.defaultfilters import slugify
+
 
 def decode_id_string(id_string):
     if not id_string:

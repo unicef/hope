@@ -1,7 +1,8 @@
-from django.core.management import BaseCommand
-from core.models import BusinessArea
-
 import xml.etree.ElementTree as ET
+
+from django.core.management import BaseCommand
+
+from core.models import BusinessArea
 
 
 class Command(BaseCommand):

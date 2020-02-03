@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from core.models import Location, BusinessArea
+from core.models import BusinessArea
 
 
 @admin.register(BusinessArea)

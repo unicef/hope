@@ -1,15 +1,8 @@
-from django.db import models
-from django.db.models import Sum
-from django.utils.translation import ugettext_lazy as _
-
-from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
-from model_utils import Choices
-
-
 from decimal import Decimal
 
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.db.models import Sum
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 
@@ -55,7 +48,9 @@ class PaymentRecord(TimeStampedUUIDModel):
     )
 
     payment_record_verification = models.OneToOneField(
-        "payment.PaymentRecordVerification", on_delete=models.CASCADE,
+        "payment.PaymentRecordVerification",
+        on_delete=models.SET_NULL,
+        null=True,
     )
 
 
@@ -105,9 +100,7 @@ class VerificationProcess(TimeStampedUUIDModel):
     verification_type = models.CharField(
         choices=VERIFICATION_TYPE_CHOICE, max_length=10,
     )
-    status = models.CharField(
-        choices=STATUS_CHOICE, max_length=10,
-    )
+    status = models.CharField(choices=STATUS_CHOICE, max_length=10,)
 
 
 class PaymentRecordVerification(TimeStampedUUIDModel):

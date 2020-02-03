@@ -1,6 +1,6 @@
 from account.fixtures import UserFactory
-from core.fixtures import LocationFactory
 from core.base_test_case import APITestCase
+from core.fixtures import LocationFactory
 
 
 class TestCreateProgram(APITestCase):
