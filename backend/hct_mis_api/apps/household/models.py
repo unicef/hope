@@ -40,7 +40,12 @@ class Household(TimeStampedUUIDModel):
         related_name="households",
         on_delete=models.CASCADE,
     )
-    head_of_household = models.OneToOneField('Individual', on_delete=models.CASCADE)
+    head_of_household = models.OneToOneField(
+        "Individual",
+        on_delete=models.CASCADE,
+        related_name="heading_household",
+        null=True,
+    )
 
 
 class Individual(TimeStampedUUIDModel):

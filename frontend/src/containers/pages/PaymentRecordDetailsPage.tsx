@@ -1,15 +1,7 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
-import { ProgramDetails } from '../../components/programs/ProgramDetails';
-import { CashPlanTable } from '../CashPlanTable';
-import {
-  PaymentRecordNode,
-  ProgramNode,
-  usePaymentRecordQuery,
-  useProgramQuery,
-} from '../../__generated__/graphql';
-import { ProgramDetailsPageHeader } from './headers/ProgramDetailsPageHeader';
+import { PaymentRecordNode, usePaymentRecordQuery, } from '../../__generated__/graphql';
 import { PageHeader } from '../../components/PageHeader';
 import { PaymentRecordDetails } from '../../components/payments/PaymentRecordDetails';
 

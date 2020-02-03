@@ -55,6 +55,8 @@ type CashPlanNode implements Node {
   totalDeliveredQuantity: Float!
   totalUndeliveredQuantity: Float!
   dispersionDate: Date!
+  deliveryType: String!
+  assistanceThrough: String!
   paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
 }
 
@@ -391,7 +393,7 @@ type HouseholdNode implements Node {
   nationality: HouseholdNationality!
   familySize: Int
   address: String
-  locations: LocationNode!
+  location: LocationNode!
   registrationDataImportId: RegistrationDataImportNode!
   paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
   targetPopulations(before: String, after: String, first: Int, last: Int): TargetPopulationNodeConnection!
@@ -477,6 +479,28 @@ type PageInfo {
   endCursor: String
 }
 
+enum PaymentEntitlementDeliveryType {
+  CASH
+  DEPOSIT_TO_CARD
+  TRANSFER
+}
+
+type PaymentEntitlementNode {
+  id: UUID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deliveryType: PaymentEntitlementDeliveryType!
+  entitlementQuantity: Float!
+  deliveredQuantity: Float
+  entitlementCardIssueDate: Date
+  entitlementCardNumber: String!
+  currency: String!
+  deliveryDate: DateTime
+  transactionReferenceId: String!
+  fsp: String!
+  paymentRecord: PaymentRecordNode
+}
+
 type PaymentRecordNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -491,6 +515,7 @@ type PaymentRecordNode implements Node {
   totalPersonCovered: Int!
   distributionModality: String!
   targetPopulation: TargetPopulationNode!
+  entitlement: PaymentEntitlementNode
 }
 
 type PaymentRecordNodeConnection {
@@ -535,7 +560,7 @@ type ProgramNode implements Node {
   cashPlus: Boolean!
   populationGoal: Int!
   administrativeAreasOfImplementation: String!
-  cashPlans(before: String, after: String, first: Int, last: Int, program: ID): CashPlanNodeConnection!
+  cashPlans(before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
   totalNumberOfHouseholds: Int
 }
 
@@ -578,14 +603,15 @@ enum ProgramStatus {
 type Query {
   paymentRecord(id: ID!): PaymentRecordNode
   allPaymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection
-  paymentDeliveryTypeChoices: [ChoiceObject]
+  paymentRecordStatusChoices: [ChoiceObject]
+  allPaymentEntitlements: [PaymentEntitlementNode]
   location(id: ID!): LocationNode
   allLocations(before: String, after: String, first: Int, last: Int, id: ID): LocationNodeConnection
   allBusinessAreas(before: String, after: String, first: Int, last: Int, id: UUID): BusinessAreaNodeConnection
   program(id: ID!): ProgramNode
   allPrograms(before: String, after: String, first: Int, last: Int): ProgramNodeConnection
   cashPlan(id: ID!): CashPlanNode
-  allCashPlans(before: String, after: String, first: Int, last: Int, program: ID): CashPlanNodeConnection
+  allCashPlans(before: String, after: String, first: Int, last: Int, program: ID, orderBy: String): CashPlanNodeConnection
   programStatusChoices: [ChoiceObject]
   programFrequencyOfPaymentsChoices: [ChoiceObject]
   programSectorChoices: [ChoiceObject]
@@ -647,7 +673,7 @@ type TargetPopulationNode implements Node {
   rules: JSONString!
   households(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
-  cashPlans(before: String, after: String, first: Int, last: Int, program: ID): CashPlanNodeConnection!
+  cashPlans(before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
 }
 
 type TargetPopulationNodeConnection {
@@ -766,6 +792,6 @@ type UserObjectType {
   id: UUID!
   businessAreas(before: String, after: String, first: Int, last: Int, id: UUID): BusinessAreaNodeConnection!
   registrationDataImports(before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
-  cashPlans(before: String, after: String, first: Int, last: Int, program: ID): CashPlanNodeConnection!
+  cashPlans(before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
   targetPopulations(before: String, after: String, first: Int, last: Int): TargetPopulationNodeConnection!
 }

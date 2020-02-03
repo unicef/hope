@@ -4,12 +4,30 @@ export const PAYMENT_RECORD_QUERY = gql`
   query PaymentRecord($id: ID!) {
     paymentRecord(id: $id) {
       id
-      startDate
+      status
+      statusDate
       cashAssistId
-      deliveryType
       household {
         householdCaId
         familySize
+      }
+      headOfHousehold
+      distributionModality
+      totalPersonCovered
+      targetPopulation {
+        name
+      }
+      entitlement {
+        id
+        currency
+        entitlementQuantity
+        deliveredQuantity
+        deliveryType
+        deliveryDate
+        entitlementCardIssueDate
+        transactionReferenceId
+        fsp
+        entitlementCardNumber
       }
     }
   }

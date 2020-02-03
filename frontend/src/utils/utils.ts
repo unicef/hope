@@ -18,6 +18,8 @@ export function programStatusToColor(
       return theme.hctPalette.oragne;
   }
 }
+
+
 export function cashPlanStatusToColor(
   theme: typeof themeObj,
   status: string,
@@ -29,6 +31,19 @@ export function cashPlanStatusToColor(
       return theme.hctPalette.gray;
     default:
       return theme.hctPalette.oragne;
+  }
+}
+export function paymentRecordStatusToColor(
+    theme: typeof themeObj,
+    status: string,
+): string {
+  switch (status) {
+    case 'SUCCESS':
+      return theme.hctPalette.green;
+    case 'PENDING':
+      return theme.hctPalette.oragne;
+    default:
+      return theme.palette.error.main;
   }
 }
 export function getCookie(name): string | null {

@@ -1,12 +1,11 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Grid, Paper, Typography } from '@material-ui/core';
-import moment from 'moment';
 import { StatusBox } from '../StatusBox';
-import { programStatusToColor } from '../../utils/utils';
+import { paymentRecordStatusToColor } from '../../utils/utils';
 import { LabelizedField } from '../LabelizedField';
-import { PaymentRecordNode, ProgramNode } from '../../__generated__/graphql';
-import { MiśTheme } from '../../theme';
+import { PaymentRecordNode } from '../../__generated__/graphql';
+import moment from 'moment';
 
 const Container = styled.div`
   display: flex;
@@ -77,30 +76,30 @@ export function PaymentRecordDetails({
               <LabelizedField label='status'>
                 <StatusContainer>
                   <StatusBox
-                    status='COMPLETE'
-                    statusToColor={programStatusToColor}
+                    status={paymentRecord.status}
+                    statusToColor={paymentRecordStatusToColor}
                   />
                 </StatusContainer>
               </LabelizedField>
             </Grid>
-            <Grid item xs={4}>
-              <LabelizedField label='Registration Group' value='183-19-13723' />
-            </Grid>
-            <Grid item xs={4}>
-              <LabelizedField label='Distribution Modality' value='183-31' />
-            </Grid>
 
             <Grid item xs={4}>
-              <LabelizedField label='Business Unit' value='Greece - CO' />
+              <LabelizedField
+                label='Status date'
+                value={moment(paymentRecord.statusDate).format('DD MMM YYYY')}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <LabelizedField
+                label='Distribution Modality'
+                value={paymentRecord.distributionModality}
+              />
             </Grid>
             <Grid item xs={4}>
               <LabelizedField
                 label='Target Population'
-                value='GDT Greece Groups'
+                value={paymentRecord.targetPopulation.name}
               />
-            </Grid>
-            <Grid item xs={4}>
-              <LabelizedField label='Comments' value='TEST TEST TEST TEST' />
             </Grid>
           </OverviewGrid>
         </OverviewContainer>
@@ -121,11 +120,11 @@ export function PaymentRecordDetails({
                 <LabelizedFieldContainer>
                   <LabelizedField
                     label='head of household'
-                    value='Jan Romaniak'
+                    value={paymentRecord.headOfHousehold}
                   />
                 </LabelizedFieldContainer>
                 <LabelizedFieldContainer>
-                  <LabelizedField label='total person covered' value='4' />
+                  <LabelizedField label='total person covered' value={paymentRecord.totalPersonCovered} />
                 </LabelizedFieldContainer>
               </HouseholdDataContainer>
             </Card>
@@ -139,41 +138,62 @@ export function PaymentRecordDetails({
                   <Grid item xs={4}>
                     <LabelizedField
                       label='Entitlement quantity'
-                      value='20.00'
+                      value={paymentRecord.entitlement.entitlementQuantity}
                     />
                   </Grid>
                   <Grid item xs={4}>
-                    <LabelizedField label='Currency' value='Idian Ruple' />
+                    <LabelizedField
+                      label='Currency'
+                      value={paymentRecord.entitlement.currency}
+                    />
                   </Grid>
                   <Grid item xs={4}>
                     <LabelizedField
                       label='Delivery type'
-                      value={paymentRecord.deliveryType}
+                      value={paymentRecord.entitlement.deliveryType}
                     />
                   </Grid>
 
                   <Grid item xs={4}>
-                    <LabelizedField label='Delivered quantity' value='20.00' />
+                    <LabelizedField
+                      label='Delivered quantity'
+                      value={paymentRecord.entitlement.deliveredQuantity}
+                    />
                   </Grid>
                   <Grid item xs={4}>
-                    <LabelizedField label='Delivery date' value='14 Oct 2019' />
+                    <LabelizedField
+                      label='Delivery date'
+                      value={moment(
+                        paymentRecord.entitlement.deliveryDate,
+                      ).format('DD MMM YYYY')}
+                    />
                   </Grid>
-                  <Grid item xs={4} />
+                  <Grid item xs={4}>
+                    <LabelizedField
+                      label='Transaction Reference ID'
+                      value={paymentRecord.entitlement.transactionReferenceId}
+                    />
+                  </Grid>
 
                   <Grid item xs={4}>
                     <LabelizedField
-                      label='Entitlement Card Status'
-                      value='Active'
+                      label='Entitlement Card Number'
+                      value={paymentRecord.entitlement.entitlementCardNumber}
                     />
                   </Grid>
                   <Grid item xs={4}>
                     <LabelizedField
                       label='Entitlement Card Issue Date'
-                      value='14 Oct 2019'
+                      value={moment(
+                        paymentRecord.entitlement.entitlementCardIssueDate,
+                      ).format('DD MMM YYYY')}
                     />
                   </Grid>
                   <Grid item xs={4}>
-                    <LabelizedField label='FSP' value='14 Oct 2019' />
+                    <LabelizedField
+                      label='FSP'
+                      value={paymentRecord.entitlement.fsp}
+                    />
                   </Grid>
                 </Grid>
               </EntitlementDataContainer>
