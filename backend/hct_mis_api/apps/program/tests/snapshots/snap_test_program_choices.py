@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['TestProgramChoices::test_program_frequency_of_payments_choices 1'] = {
@@ -45,7 +46,7 @@ snapshots['TestProgramChoices::test_program_sector_choices 1'] = {
         'programSectorChoices': [
             {
                 'name': 'Child Protection',
-                'value': 'CHILD PROTECTION'
+                'value': 'CHILD_PROTECTION'
             },
             {
                 'name': 'Education',

@@ -8,6 +8,15 @@ export const Me = gql`
       email
       firstName
       lastName
+      businessAreas {
+        edges {
+          node {
+            id
+            name
+            slug
+          }
+        }
+      }
     }
   }
 `;
