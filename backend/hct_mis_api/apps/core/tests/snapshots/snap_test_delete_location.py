@@ -6,9 +6,17 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['TestUpdateProgram::test_update_program_not_authenticated 1'] = {
+snapshots['TestDeleteLocation::test_delete_location_authenticated 1'] = {
     'data': {
-        'updateProgram': None
+        'deleteLocation': {
+            'ok': True
+        }
+    }
+}
+
+snapshots['TestDeleteLocation::test_delete_location_not_authenticated 1'] = {
+    'data': {
+        'deleteLocation': None
     },
     'errors': [
         {
@@ -20,7 +28,7 @@ snapshots['TestUpdateProgram::test_update_program_not_authenticated 1'] = {
             ],
             'message': 'Permission Denied: User is not authenticated.',
             'path': [
-                'updateProgram'
+                'deleteLocation'
             ]
         }
     ]
