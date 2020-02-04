@@ -1,9 +1,11 @@
 import React from 'react';
-import { Button } from '@material-ui/core';
 import styled from 'styled-components';
 import { ProgramCard } from '../../components/programs/ProgramCard';
 import { PageHeader } from '../../components/PageHeader';
 import { ProgramNode, useAllProgramsQuery } from '../../__generated__/graphql';
+import { CreateProgram } from '../dialogs/programs/CreateProgram';
+import { getCurrentLocation } from '../../utils/utils';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
 
 const PageContainer = styled.div`
   display: flex;
@@ -13,13 +15,16 @@ const PageContainer = styled.div`
   justify-content: center;
 `;
 export function ProgramsPage(): React.ReactElement {
-  const { data } = useAllProgramsQuery();
+  const businessArea = useBusinessArea();
+  const { data } = useAllProgramsQuery({
+    variables: {
+      businessArea,
+    },
+  });
 
   const toolbar = (
     <PageHeader title='Programme Management'>
-      <Button variant='contained' color='primary'>
-        NEW PROGRAMME
-      </Button>
+      <CreateProgram />
     </PageHeader>
   );
 

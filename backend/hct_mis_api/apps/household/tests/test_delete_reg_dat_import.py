@@ -1,9 +1,12 @@
+import unittest
+
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
 from household.fixtures import RegistrationDataImportFactory
 from household.models import RegistrationDataImport
 
 
+@unittest.skip("Not supporting deleting Registration Data Import")
 class TestDeleteRegistrationDataImport(APITestCase):
     DELETE_PROGRAM_MUTATION = """
     mutation DeleteRegistrationDataImport($registrationDataImportId: String!) {

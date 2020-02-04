@@ -17,8 +17,11 @@ const useStyles = makeStyles((theme: typeof themeObj) => ({
     padding: '0 0 0 31px',
     backgroundColor: theme.palette.primary.main,
     color: 'white',
+    borderRightWidth: 2,
+    borderRightColor: '#02367D',
+    borderRightStyle: 'solid',
     boxShadow:
-      '0px 2px 4px -1px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 1px 10px 0px rgba(0,0,0,0.12)',
+      '0px 2px 4px 0px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 1px 10px 0px rgba(0,0,0,0.12)',
     ...theme.mixins.toolbar,
   },
   collapseIcon: {
@@ -39,6 +42,7 @@ const useStyles = makeStyles((theme: typeof themeObj) => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
+    borderWidth: 0,
   },
   drawerPaperClose: {
     overflowX: 'hidden',
@@ -46,10 +50,16 @@ const useStyles = makeStyles((theme: typeof themeObj) => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
     }),
-    width: theme.spacing(7),
+    width: theme.spacing(16),
     [theme.breakpoints.up('sm')]: {
-      width: theme.spacing(9),
+      width: theme.spacing(14),
     },
+  },
+  list: {
+    borderRightWidth: 2,
+    borderRightColor: '#E1E1E1',
+    borderRightStyle: 'solid',
+    height: '100%',
   },
 }));
 interface Props {
@@ -85,7 +95,7 @@ export function Drawer({
         </IconButton>
       </div>
       <Divider />
-      <List>
+      <List className={classes.list}>
         <DrawerItems currentLocation={currentLocation} />
       </List>
     </DrawerMaterial>

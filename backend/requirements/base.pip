@@ -9,6 +9,11 @@ django-phonenumber-field==4.0.0
 phonenumbers==8.11.1
 social-auth-app-django==3.1.0
 graphene-file-upload==1.2.2
+django-mptt==0.11.0
+django-extensions==2.2.6
+pygraphviz==1.5
+
+
 
 # Tests and Fixtures
 factory-boy==2.12.0
@@ -17,6 +22,7 @@ snapshottest==0.5.1
 # Etc
 Pillow==7.0.0
 psycopg2==2.8.4
+pycountry==19.8.18
 openpyxl==3.0.3
 
 # API

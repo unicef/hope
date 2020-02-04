@@ -1,6 +1,6 @@
 import { gql } from 'apollo-boost';
 
-export const Program = gql`
+export const PROGRAM_QUERY = gql`
   query Program($id: ID!) {
     program(id: $id) {
       id
@@ -13,20 +13,11 @@ export const Program = gql`
       budget
       frequencyOfPayments
       cashPlus
-      location {
-        country
-        id
-        name
-      }
       populationGoal
       scope
       sector
       totalNumberOfHouseholds
-      location{
-        name
-      }
-      cashPlus
-      frequencyOfPayments
+      administrativeAreasOfImplementation
     }
   }
 `;

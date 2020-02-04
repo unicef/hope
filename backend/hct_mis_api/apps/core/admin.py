@@ -11,15 +11,17 @@ from openpyxl.utils.cell import coordinate_from_string
 
 from core.models import Location, FlexibleField
 
+from core.models import BusinessArea
+
 
 class XLSImportForm(forms.Form):
     location = ModelChoiceField(queryset=Location.objects.all())
     xls_file = forms.FileField()
 
 
-@admin.register(Location)
-class LocationAdmin(admin.ModelAdmin):
-    list_display = ("name", "country")
+@admin.register(BusinessArea)
+class BusinessAreaAdmin(admin.ModelAdmin):
+    list_display = ("name", "slug")
 
 
 @admin.register(FlexibleField)

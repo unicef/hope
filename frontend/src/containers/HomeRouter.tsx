@@ -1,16 +1,16 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import { Route, Switch, useLocation } from 'react-router-dom';
+import { Redirect, Route, Switch, useLocation } from 'react-router-dom';
 import { MiśTheme } from '../theme';
 import { Drawer } from '../components/Drawer/Drawer';
 import { AppBar } from '../components/AppBar';
+import { isAuthenticated } from '../utils/utils';
 import { DashboardPage } from './pages/DashboardPage';
 import { ProgramsPage } from './pages/ProgramsPage';
 import { ProgramDetailsPage } from './pages/ProgramDetailsPage';
-import { isAuthenticated } from '../utils/utils';
-import { LOGIN_URL } from '../config';
+import { PaymentRecordDetailsPage } from './pages/PaymentRecordDetailsPage';
 
 const Root = styled.div`
   display: flex;
@@ -25,14 +25,7 @@ const useStyles = makeStyles((theme: MiśTheme) => ({
 }));
 
 export function HomeRouter(): React.ReactElement {
-
   const authenticated = isAuthenticated();
-
-  useEffect(() => {
-    if (!authenticated) {
-      window.location.replace(LOGIN_URL);
-    }
-  }, [authenticated]);
   const [open, setOpen] = React.useState(true);
   const classes = useStyles({});
   const location = useLocation();
@@ -44,7 +37,7 @@ export function HomeRouter(): React.ReactElement {
   };
 
   if (!authenticated) {
-    return null;
+    return <Redirect to='/login' />;
   }
   return (
     <Root>
@@ -58,10 +51,16 @@ export function HomeRouter(): React.ReactElement {
       <MainContent>
         <div className={classes.appBarSpacer} />
         <Switch>
-          <Route path='/programs/:id'>
+          <Route path='/:businessArea/programs/:id'>
             <ProgramDetailsPage />
           </Route>
-          <Route path='/programs'>
+          <Route path='/:businessArea/payment_records/:id'>
+            <PaymentRecordDetailsPage />
+          </Route>
+          <Route path='/:businessArea/payment_records/:id'>
+            <PaymentRecordDetailsPage />
+          </Route>
+          <Route path='/:businessArea/programs'>
             <ProgramsPage />
           </Route>
           <Route path='/'>

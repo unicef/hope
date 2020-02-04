@@ -1,38 +1,43 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { ThemeProvider } from '@material-ui/core';
 import { ThemeProvider as StyledThemeProvider } from 'styled-components';
-import {
-  BrowserRouter as Router,
-  Redirect,
-  Route,
-  Switch,
-} from 'react-router-dom';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import CssBaseline from '@material-ui/core/CssBaseline';
+import { MuiPickersUtilsProvider } from '@material-ui/pickers';
+import moment from 'moment';
+import MomentUtils from '@date-io/moment';
 import { ApolloProvider } from '@apollo/react-hooks';
 import { theme } from './theme';
 import { HomeRouter } from './containers/HomeRouter';
-import { LoginPage } from './containers/pages/LoginPage';
+import { ProfilePage } from './containers/pages/ProfilePage';
 import { client } from './apollo/client';
-import { LOGIN_URL } from './config';
-import { getCookie, isAuthenticated } from './utils/utils';
-
-
-
+import { LoginPage } from './containers/pages/LoginPage';
+import { DefaultRoute } from './containers/DefaultRoute';
 
 export const App: React.FC = () => {
   return (
     <ApolloProvider client={client}>
       <ThemeProvider theme={theme}>
         <StyledThemeProvider theme={theme}>
-          <Router>
-            <Switch>
-              <Route path='/accounts/profile/'>
-                <LoginPage />
-              </Route>
-              <Route path='/'>
+          <MuiPickersUtilsProvider libInstance={moment} utils={MomentUtils}>
+            <CssBaseline />
+            <Router>
+              <Switch>
+                <Route path='/login'>
+                  <LoginPage />
+                </Route>
+                <Route path='/accounts/profile/'>
+                  <ProfilePage />
+                </Route>
+                <Route path='/:businessArea/'>
                   <HomeRouter />
-              </Route>
-            </Switch>
-          </Router>
+                </Route>
+                <Route path='/'>
+                  <DefaultRoute />
+                </Route>
+              </Switch>
+            </Router>
+          </MuiPickersUtilsProvider>
         </StyledThemeProvider>
       </ThemeProvider>
     </ApolloProvider>

@@ -4,16 +4,17 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['TestCashPlanQueries::test_get_single_cash_plan 1'] = {
     'data': {
         'cashPlan': {
+            'assistanceThrough': 'Cairo Amman Bank',
             'cashAssistId': '7ff3542c-8c48-4ed4-8283-41966093995b',
             'coverageDuration': 21,
             'coverageUnits': 'Day(s)',
             'currency': 'Syrian pound',
+            'deliveryType': 'Deposit to Card',
             'disbursementDate': '2064-03-09T22:52:54',
             'dispersionDate': '2020-04-25',
             'distributionModality': '994-94',
@@ -36,10 +37,12 @@ snapshots['TestCashPlanQueries::test_get_all_cash_plans 1'] = {
             'edges': [
                 {
                     'node': {
+                        'assistanceThrough': 'Cairo Amman Bank',
                         'cashAssistId': '7ff3542c-8c48-4ed4-8283-41966093995b',
                         'coverageDuration': 21,
                         'coverageUnits': 'Day(s)',
                         'currency': 'Syrian pound',
+                        'deliveryType': 'Deposit to Card',
                         'disbursementDate': '2064-03-09T22:52:54',
                         'dispersionDate': '2020-04-25',
                         'distributionModality': '994-94',
@@ -56,10 +59,12 @@ snapshots['TestCashPlanQueries::test_get_all_cash_plans 1'] = {
                 },
                 {
                     'node': {
+                        'assistanceThrough': 'Cairo Amman Bank',
                         'cashAssistId': '04b9d44b-67fe-425c-9095-509e31ba7494',
                         'coverageDuration': 19,
                         'coverageUnits': 'Week(s)',
                         'currency': 'Cuban peso',
+                        'deliveryType': 'Deposit to Card',
                         'disbursementDate': '2028-03-26T18:44:15',
                         'dispersionDate': '2020-02-22',
                         'distributionModality': '513-17',
@@ -76,10 +81,12 @@ snapshots['TestCashPlanQueries::test_get_all_cash_plans 1'] = {
                 },
                 {
                     'node': {
+                        'assistanceThrough': 'Cairo Amman Bank',
                         'cashAssistId': 'e02e9e29-a9bc-4d72-9c95-23fe123662c4',
                         'coverageDuration': 29,
                         'coverageUnits': 'Day(s)',
                         'currency': 'Swazi lilangeni',
+                        'deliveryType': 'Deposit to Card',
                         'disbursementDate': '2077-02-25T19:04:32',
                         'dispersionDate': '2020-08-13',
                         'distributionModality': '126-33',
@@ -96,10 +103,12 @@ snapshots['TestCashPlanQueries::test_get_all_cash_plans 1'] = {
                 },
                 {
                     'node': {
+                        'assistanceThrough': 'Cairo Amman Bank',
                         'cashAssistId': '0772b884-0ae1-4d4b-823d-80037eef00af',
                         'coverageDuration': 24,
                         'coverageUnits': 'Week(s)',
                         'currency': 'Peruvian sol',
+                        'deliveryType': 'Deposit to Card',
                         'disbursementDate': '2024-04-17T10:59:34',
                         'dispersionDate': '2021-01-04',
                         'distributionModality': '581-10',
@@ -116,10 +125,12 @@ snapshots['TestCashPlanQueries::test_get_all_cash_plans 1'] = {
                 },
                 {
                     'node': {
+                        'assistanceThrough': 'Cairo Amman Bank',
                         'cashAssistId': '357eeb74-f76d-4f12-a02b-8e67f0f90813',
                         'coverageDuration': 17,
                         'coverageUnits': 'Day(s)',
                         'currency': 'Philippine peso',
+                        'deliveryType': 'Deposit to Card',
                         'disbursementDate': '2032-08-04T19:20:26',
                         'dispersionDate': '2020-07-03',
                         'distributionModality': '388-88',
@@ -136,10 +147,12 @@ snapshots['TestCashPlanQueries::test_get_all_cash_plans 1'] = {
                 },
                 {
                     'node': {
+                        'assistanceThrough': 'Cairo Amman Bank',
                         'cashAssistId': 'be4fcbf6-40ba-405d-86be-0010c19a91c4',
                         'coverageDuration': 26,
                         'coverageUnits': 'Week(s)',
                         'currency': 'Serbian dinar',
+                        'deliveryType': 'Deposit to Card',
                         'disbursementDate': '2020-04-15T17:51:54',
                         'dispersionDate': '2020-05-13',
                         'distributionModality': '857-37',
@@ -156,10 +169,12 @@ snapshots['TestCashPlanQueries::test_get_all_cash_plans 1'] = {
                 },
                 {
                     'node': {
+                        'assistanceThrough': 'Cairo Amman Bank',
                         'cashAssistId': '17502569-0613-44f2-94d0-916ad6a7b860',
                         'coverageDuration': 14,
                         'coverageUnits': 'Month(s)',
                         'currency': 'Albanian lek',
+                        'deliveryType': 'Deposit to Card',
                         'disbursementDate': '2036-06-24T11:08:43',
                         'dispersionDate': '2020-07-25',
                         'distributionModality': '386-44',
@@ -176,10 +191,12 @@ snapshots['TestCashPlanQueries::test_get_all_cash_plans 1'] = {
                 },
                 {
                     'node': {
+                        'assistanceThrough': 'Cairo Amman Bank',
                         'cashAssistId': 'ccd0b2b1-85dc-44c2-82f3-906b33a16645',
                         'coverageDuration': 12,
                         'coverageUnits': 'Week(s)',
                         'currency': 'Falkland Islands pound',
+                        'deliveryType': 'Deposit to Card',
                         'disbursementDate': '2093-10-02T09:41:06',
                         'dispersionDate': '2020-03-27',
                         'distributionModality': '053-54',
@@ -196,10 +213,12 @@ snapshots['TestCashPlanQueries::test_get_all_cash_plans 1'] = {
                 },
                 {
                     'node': {
+                        'assistanceThrough': 'Cairo Amman Bank',
                         'cashAssistId': '0d4f1c5e-7f83-4f8a-9a9c-82a2af883a83',
                         'coverageDuration': 18,
                         'coverageUnits': 'Year(s)',
                         'currency': 'Hong Kong dollar',
+                        'deliveryType': 'Deposit to Card',
                         'disbursementDate': '2045-12-16T00:24:00',
                         'dispersionDate': '2020-03-25',
                         'distributionModality': '361-32',
@@ -216,10 +235,12 @@ snapshots['TestCashPlanQueries::test_get_all_cash_plans 1'] = {
                 },
                 {
                     'node': {
+                        'assistanceThrough': 'Cairo Amman Bank',
                         'cashAssistId': '056d6d6e-2562-4f1e-a37d-00017020a869',
                         'coverageDuration': 27,
                         'coverageUnits': 'Month(s)',
                         'currency': 'Seborga luigino',
+                        'deliveryType': 'Deposit to Card',
                         'disbursementDate': '2034-06-28T03:05:26',
                         'dispersionDate': '2020-03-19',
                         'distributionModality': '949-96',

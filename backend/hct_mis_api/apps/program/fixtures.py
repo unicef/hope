@@ -1,4 +1,5 @@
 from datetime import timedelta, datetime
+from random import randint
 
 import factory
 from factory import fuzzy
@@ -19,16 +20,16 @@ class ProgramFactory(factory.DjangoModelFactory):
     )
     status = fuzzy.FuzzyChoice(Program.STATUS_CHOICE, getter=lambda c: c[0],)
     start_date = factory.Faker(
-        "date_time_this_century", before_now=False, after_now=True, tzinfo=utc,
+        "date_time_this_decade", before_now=False, after_now=True, tzinfo=utc,
     )
-    end_date = factory.Faker(
-        "date_time_this_century", before_now=False, after_now=True, tzinfo=utc,
+    end_date = factory.LazyAttribute(
+        lambda o: o.start_date + timedelta(days=randint(60, 1000))
     )
     description = factory.Faker(
         "sentence", nb_words=10, variable_nb_words=True, ext_word_list=None,
     )
     program_ca_id = factory.Faker("uuid4")
-    location = factory.SubFactory(LocationFactory)
+    locations = factory.SubFactory(LocationFactory)
     budget = factory.fuzzy.FuzzyDecimal(1000000.0, 900000000.0)
     frequency_of_payments = fuzzy.FuzzyChoice(
         Program.FREQUENCY_OF_PAYMENTS_CHOICE, getter=lambda c: c[0],
@@ -37,6 +38,18 @@ class ProgramFactory(factory.DjangoModelFactory):
     scope = fuzzy.FuzzyChoice(Program.SCOPE_CHOICE, getter=lambda c: c[0],)
     cash_plus = fuzzy.FuzzyChoice((True, False))
     population_goal = factory.fuzzy.FuzzyDecimal(50000.0, 600000.0)
+    administrative_areas_of_implementation = factory.Faker(
+        "sentence", nb_words=3, variable_nb_words=True, ext_word_list=None,
+    )
+
+    @factory.post_generation
+    def locations(self, create, extracted, **kwargs):
+        if not create:
+            self.locations.add(LocationFactory())
+
+        if extracted:
+            for location in extracted:
+                self.locations.add(location)
 
 
 class CashPlanFactory(factory.DjangoModelFactory):
@@ -48,10 +61,10 @@ class CashPlanFactory(factory.DjangoModelFactory):
         "sentence", nb_words=6, variable_nb_words=True, ext_word_list=None,
     )
     start_date = factory.Faker(
-        "date_time_this_century", before_now=False, after_now=True, tzinfo=utc,
+        "date_time_this_decade", before_now=False, after_now=True, tzinfo=utc,
     )
-    end_date = factory.Faker(
-        "date_time_this_century", before_now=False, after_now=True, tzinfo=utc,
+    end_date = factory.LazyAttribute(
+        lambda o: o.start_date + timedelta(days=randint(60, 1000))
     )
     disbursement_date = factory.LazyAttribute(
         lambda o: o.end_date - timedelta(days=5)
@@ -79,4 +92,10 @@ class CashPlanFactory(factory.DjangoModelFactory):
     dispersion_date = fuzzy.FuzzyDate(
         start_date=datetime.now() + timedelta(days=30),
         end_date=datetime.now() + timedelta(days=365),
+    )
+    delivery_type = factory.Faker(
+        "random_element", elements=["Deposit to Card", "Transfer", "Cash"]
+    )
+    assistance_through = factory.LazyAttribute(
+        lambda o: f"{factory.Faker('company')} Bank"
     )

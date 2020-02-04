@@ -1,15 +1,11 @@
-import io
-import sys
-
-from PIL import Image
-from django.core.files.uploadedfile import InMemoryUploadedFile
+import unittest
 
 from account.fixtures import UserFactory
-from core.fixtures import LocationFactory
 from core.base_test_case import APITestCase
 from household.fixtures import HouseholdFactory
 
 
+@unittest.skip("Not supporting updating Household")
 class TestHouseholdUpdate(APITestCase):
     CREATE_HOUSEHOLD_MUTATION = """
     mutation UpdateHousehold($householdData: UpdateHouseholdInput) {

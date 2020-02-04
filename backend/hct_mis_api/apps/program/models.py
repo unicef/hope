@@ -27,8 +27,7 @@ class Program(TimeStampedUUIDModel):
         (ONE_OFF, _("One-off")),
     )
 
-    CHILD = "CHILD"
-    PROTECTION = "PROTECTION"
+    CHILD_PROTECTION = "CHILD_PROTECTION"
     EDUCATION = "EDUCATION"
     GENDER = "GENDER"
     HEALTH = "HEALTH"
@@ -39,8 +38,7 @@ class Program(TimeStampedUUIDModel):
     WASH = "WASH"
 
     SECTOR_CHOICE = (
-        (CHILD, _("Child")),
-        (PROTECTION, _("Protection")),
+        (CHILD_PROTECTION, _("Child Protection")),
         (EDUCATION, _("Education")),
         (GENDER, _("Gender")),
         (HEALTH, _("Health")),
@@ -66,8 +64,11 @@ class Program(TimeStampedUUIDModel):
     end_date = models.DateTimeField()
     description = models.CharField(max_length=255)
     program_ca_id = models.CharField(max_length=255)
-    location = models.ForeignKey(
-        "core.Location", on_delete=models.CASCADE, related_name="programs",
+    locations = models.ManyToManyField(
+        "core.Location", related_name="programs", blank=True,
+    )
+    business_area = models.ForeignKey(
+        "core.BusinessArea", on_delete=models.CASCADE
     )
     budget = models.DecimalField(
         decimal_places=2,
@@ -81,6 +82,7 @@ class Program(TimeStampedUUIDModel):
     scope = models.CharField(max_length=50, choices=SCOPE_CHOICE,)
     cash_plus = models.BooleanField()
     population_goal = models.PositiveIntegerField()
+    administrative_areas_of_implementation = models.CharField(max_length=255)
 
     @property
     def total_number_of_households(self):
@@ -143,3 +145,5 @@ class CashPlan(TimeStampedUUIDModel):
         validators=[MinValueValidator(Decimal("0.01"))],
     )
     dispersion_date = models.DateField()
+    delivery_type = models.CharField(max_length=255)
+    assistance_through = models.CharField(max_length=255)
