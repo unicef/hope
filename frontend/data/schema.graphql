@@ -15,8 +15,8 @@ type BusinessAreaNode implements Node {
   koboToken: String
   slug: String!
   userSet: [UserObjectType!]!
-  locations(before: String, after: String, first: Int, last: Int, id: ID): LocationNodeConnection!
-  programSet(before: String, after: String, first: Int, last: Int): ProgramNodeConnection!
+  locations(before: String, after: String, first: Int, last: Int, title: String): LocationNodeConnection!
+  programSet(before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
 }
 
 type BusinessAreaNodeConnection {
@@ -148,7 +148,7 @@ input CreateProgramInput {
   cashPlus: Boolean
   populationGoal: Int
   administrativeAreasOfImplementation: String
-  businessAreaId: String
+  businessAreaSlug: String
 }
 
 type CreateRegistrationDataImport {
@@ -433,9 +433,9 @@ type LocationNode implements Node {
   rght: Int!
   treeId: Int!
   level: Int!
-  children(before: String, after: String, first: Int, last: Int, id: ID): LocationNodeConnection!
+  children(before: String, after: String, first: Int, last: Int, title: String): LocationNodeConnection!
   households(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
-  programs(before: String, after: String, first: Int, last: Int): ProgramNodeConnection!
+  programs(before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
 }
 
 type LocationNodeConnection {
@@ -551,7 +551,7 @@ type ProgramNode implements Node {
   endDate: DateTime!
   description: String!
   programCaId: String!
-  locations(before: String, after: String, first: Int, last: Int, id: ID): LocationNodeConnection!
+  locations(before: String, after: String, first: Int, last: Int, title: String): LocationNodeConnection!
   businessArea: BusinessAreaNode!
   budget: Float!
   frequencyOfPayments: ProgramFrequencyOfPayments!
@@ -606,10 +606,10 @@ type Query {
   paymentRecordStatusChoices: [ChoiceObject]
   allPaymentEntitlements: [PaymentEntitlementNode]
   location(id: ID!): LocationNode
-  allLocations(before: String, after: String, first: Int, last: Int, id: ID): LocationNodeConnection
+  allLocations(before: String, after: String, first: Int, last: Int, title: String): LocationNodeConnection
   allBusinessAreas(before: String, after: String, first: Int, last: Int, id: UUID): BusinessAreaNodeConnection
   program(id: ID!): ProgramNode
-  allPrograms(before: String, after: String, first: Int, last: Int): ProgramNodeConnection
+  allPrograms(before: String, after: String, first: Int, last: Int, id: UUID, businessArea: String): ProgramNodeConnection
   cashPlan(id: ID!): CashPlanNode
   allCashPlans(before: String, after: String, first: Int, last: Int, program: ID, orderBy: String): CashPlanNodeConnection
   programStatusChoices: [ChoiceObject]
@@ -761,7 +761,7 @@ input UpdateProgramInput {
   cashPlus: Boolean
   populationGoal: Int
   administrativeAreasOfImplementation: String
-  businessAreaId: String
+  businessAreaSlug: String
 }
 
 type UpdateRegistrationDataImport {

@@ -51,13 +51,16 @@ export function HomeRouter(): React.ReactElement {
       <MainContent>
         <div className={classes.appBarSpacer} />
         <Switch>
-          <Route path='/programs/:id'>
+          <Route path='/:businessArea/programs/:id'>
             <ProgramDetailsPage />
           </Route>
-          <Route path='/payment_records/:id'>
+          <Route path='/:businessArea/payment_records/:id'>
             <PaymentRecordDetailsPage />
           </Route>
-          <Route path='/programs'>
+          <Route path='/:businessArea/payment_records/:id'>
+            <PaymentRecordDetailsPage />
+          </Route>
+          <Route path='/:businessArea/programs'>
             <ProgramsPage />
           </Route>
           <Route path='/'>

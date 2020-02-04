@@ -45,7 +45,7 @@ export type BusinessAreaNodeLocationsArgs = {
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  id?: Maybe<Scalars['ID']>
+  title?: Maybe<Scalars['String']>
 };
 
 
@@ -53,7 +53,8 @@ export type BusinessAreaNodeProgramSetArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>
 };
 
 export type BusinessAreaNodeConnection = {
@@ -205,7 +206,7 @@ export type CreateProgramInput = {
   cashPlus?: Maybe<Scalars['Boolean']>,
   populationGoal?: Maybe<Scalars['Int']>,
   administrativeAreasOfImplementation?: Maybe<Scalars['String']>,
-  businessAreaId?: Maybe<Scalars['String']>,
+  businessAreaSlug?: Maybe<Scalars['String']>,
 };
 
 export type CreateRegistrationDataImport = {
@@ -527,7 +528,7 @@ export type LocationNodeChildrenArgs = {
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  id?: Maybe<Scalars['ID']>
+  title?: Maybe<Scalars['String']>
 };
 
 
@@ -543,7 +544,8 @@ export type LocationNodeProgramsArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>
 };
 
 export type LocationNodeConnection = {
@@ -762,7 +764,7 @@ export type ProgramNodeLocationsArgs = {
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  id?: Maybe<Scalars['ID']>
+  title?: Maybe<Scalars['String']>
 };
 
 
@@ -865,7 +867,7 @@ export type QueryAllLocationsArgs = {
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  id?: Maybe<Scalars['ID']>
+  title?: Maybe<Scalars['String']>
 };
 
 
@@ -887,7 +889,9 @@ export type QueryAllProgramsArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
+  last?: Maybe<Scalars['Int']>,
+  id?: Maybe<Scalars['UUID']>,
+  businessArea?: Maybe<Scalars['String']>
 };
 
 
@@ -1120,7 +1124,7 @@ export type UpdateProgramInput = {
   cashPlus?: Maybe<Scalars['Boolean']>,
   populationGoal?: Maybe<Scalars['Int']>,
   administrativeAreasOfImplementation?: Maybe<Scalars['String']>,
-  businessAreaId?: Maybe<Scalars['String']>,
+  businessAreaSlug?: Maybe<Scalars['String']>,
 };
 
 export type UpdateRegistrationDataImport = {
@@ -1236,6 +1240,26 @@ export type UpdateProgramMutation = (
   )> }
 );
 
+export type AllBusinessAreasQueryVariables = {};
+
+
+export type AllBusinessAreasQuery = (
+  { __typename?: 'Query' }
+  & { allBusinessAreas: Maybe<(
+    { __typename?: 'BusinessAreaNodeConnection' }
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'endCursor' | 'startCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'BusinessAreaNodeEdge' }
+      & { node: Maybe<(
+        { __typename?: 'BusinessAreaNode' }
+        & Pick<BusinessAreaNode, 'id' | 'name' | 'slug'>
+      )> }
+    )>> }
+  )> }
+);
+
 export type AllCashPlansQueryVariables = {
   program: Scalars['ID'],
   after?: Maybe<Scalars['String']>,
@@ -1264,7 +1288,9 @@ export type AllCashPlansQuery = (
   )> }
 );
 
-export type AllProgramsQueryVariables = {};
+export type AllProgramsQueryVariables = {
+  businessArea?: Maybe<Scalars['String']>
+};
 
 
 export type AllProgramsQuery = (
@@ -1284,23 +1310,6 @@ export type AllProgramsQuery = (
   )> }
 );
 
-export type AllLocationsQueryVariables = {};
-
-
-export type AllLocationsQuery = (
-  { __typename?: 'Query' }
-  & { allLocations: Maybe<(
-    { __typename?: 'LocationNodeConnection' }
-    & { edges: Array<Maybe<(
-      { __typename?: 'LocationNodeEdge' }
-      & { node: Maybe<(
-        { __typename?: 'LocationNode' }
-        & Pick<LocationNode, 'id'>
-      )> }
-    )>> }
-  )> }
-);
-
 export type MeQueryVariables = {};
 
 
@@ -1309,6 +1318,16 @@ export type MeQuery = (
   & { me: Maybe<(
     { __typename?: 'UserObjectType' }
     & Pick<UserObjectType, 'id' | 'username' | 'email' | 'firstName' | 'lastName'>
+    & { businessAreas: (
+      { __typename?: 'BusinessAreaNodeConnection' }
+      & { edges: Array<Maybe<(
+        { __typename?: 'BusinessAreaNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'BusinessAreaNode' }
+          & Pick<BusinessAreaNode, 'id' | 'name' | 'slug'>
+        )> }
+      )>> }
+    ) }
   )> }
 );
 
@@ -1546,6 +1565,67 @@ export function useUpdateProgramMutation(baseOptions?: ApolloReactHooks.Mutation
 export type UpdateProgramMutationHookResult = ReturnType<typeof useUpdateProgramMutation>;
 export type UpdateProgramMutationResult = ApolloReactCommon.MutationResult<UpdateProgramMutation>;
 export type UpdateProgramMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdateProgramMutation, UpdateProgramMutationVariables>;
+export const AllBusinessAreasDocument = gql`
+    query AllBusinessAreas {
+  allBusinessAreas {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      endCursor
+      startCursor
+    }
+    edges {
+      node {
+        id
+        name
+        slug
+      }
+    }
+  }
+}
+    `;
+export type AllBusinessAreasComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllBusinessAreasQuery, AllBusinessAreasQueryVariables>, 'query'>;
+
+    export const AllBusinessAreasComponent = (props: AllBusinessAreasComponentProps) => (
+      <ApolloReactComponents.Query<AllBusinessAreasQuery, AllBusinessAreasQueryVariables> query={AllBusinessAreasDocument} {...props} />
+    );
+    
+export type AllBusinessAreasProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllBusinessAreasQuery, AllBusinessAreasQueryVariables> & TChildProps;
+export function withAllBusinessAreas<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllBusinessAreasQuery,
+  AllBusinessAreasQueryVariables,
+  AllBusinessAreasProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllBusinessAreasQuery, AllBusinessAreasQueryVariables, AllBusinessAreasProps<TChildProps>>(AllBusinessAreasDocument, {
+      alias: 'allBusinessAreas',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllBusinessAreasQuery__
+ *
+ * To run a query within a React component, call `useAllBusinessAreasQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllBusinessAreasQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllBusinessAreasQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useAllBusinessAreasQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllBusinessAreasQuery, AllBusinessAreasQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllBusinessAreasQuery, AllBusinessAreasQueryVariables>(AllBusinessAreasDocument, baseOptions);
+      }
+export function useAllBusinessAreasLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllBusinessAreasQuery, AllBusinessAreasQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllBusinessAreasQuery, AllBusinessAreasQueryVariables>(AllBusinessAreasDocument, baseOptions);
+        }
+export type AllBusinessAreasQueryHookResult = ReturnType<typeof useAllBusinessAreasQuery>;
+export type AllBusinessAreasLazyQueryHookResult = ReturnType<typeof useAllBusinessAreasLazyQuery>;
+export type AllBusinessAreasQueryResult = ApolloReactCommon.QueryResult<AllBusinessAreasQuery, AllBusinessAreasQueryVariables>;
 export const AllCashPlansDocument = gql`
     query AllCashPlans($program: ID!, $after: String, $before: String, $count: Int, $orderBy: String) {
   allCashPlans(program: $program, after: $after, before: $before, first: $count, orderBy: $orderBy) {
@@ -1621,8 +1701,8 @@ export type AllCashPlansQueryHookResult = ReturnType<typeof useAllCashPlansQuery
 export type AllCashPlansLazyQueryHookResult = ReturnType<typeof useAllCashPlansLazyQuery>;
 export type AllCashPlansQueryResult = ApolloReactCommon.QueryResult<AllCashPlansQuery, AllCashPlansQueryVariables>;
 export const AllProgramsDocument = gql`
-    query AllPrograms {
-  allPrograms {
+    query AllPrograms($businessArea: String) {
+  allPrograms(businessArea: $businessArea) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -1678,6 +1758,7 @@ export function withAllPrograms<TProps, TChildProps = {}>(operationOptions?: Apo
  * @example
  * const { data, loading, error } = useAllProgramsQuery({
  *   variables: {
+ *      businessArea: // value for 'businessArea'
  *   },
  * });
  */
@@ -1690,59 +1771,6 @@ export function useAllProgramsLazyQuery(baseOptions?: ApolloReactHooks.LazyQuery
 export type AllProgramsQueryHookResult = ReturnType<typeof useAllProgramsQuery>;
 export type AllProgramsLazyQueryHookResult = ReturnType<typeof useAllProgramsLazyQuery>;
 export type AllProgramsQueryResult = ApolloReactCommon.QueryResult<AllProgramsQuery, AllProgramsQueryVariables>;
-export const AllLocationsDocument = gql`
-    query allLocations {
-  allLocations {
-    edges {
-      node {
-        id
-      }
-    }
-  }
-}
-    `;
-export type AllLocationsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllLocationsQuery, AllLocationsQueryVariables>, 'query'>;
-
-    export const AllLocationsComponent = (props: AllLocationsComponentProps) => (
-      <ApolloReactComponents.Query<AllLocationsQuery, AllLocationsQueryVariables> query={AllLocationsDocument} {...props} />
-    );
-    
-export type AllLocationsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllLocationsQuery, AllLocationsQueryVariables> & TChildProps;
-export function withAllLocations<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
-  TProps,
-  AllLocationsQuery,
-  AllLocationsQueryVariables,
-  AllLocationsProps<TChildProps>>) {
-    return ApolloReactHoc.withQuery<TProps, AllLocationsQuery, AllLocationsQueryVariables, AllLocationsProps<TChildProps>>(AllLocationsDocument, {
-      alias: 'allLocations',
-      ...operationOptions
-    });
-};
-
-/**
- * __useAllLocationsQuery__
- *
- * To run a query within a React component, call `useAllLocationsQuery` and pass it any options that fit your needs.
- * When your component renders, `useAllLocationsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useAllLocationsQuery({
- *   variables: {
- *   },
- * });
- */
-export function useAllLocationsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllLocationsQuery, AllLocationsQueryVariables>) {
-        return ApolloReactHooks.useQuery<AllLocationsQuery, AllLocationsQueryVariables>(AllLocationsDocument, baseOptions);
-      }
-export function useAllLocationsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllLocationsQuery, AllLocationsQueryVariables>) {
-          return ApolloReactHooks.useLazyQuery<AllLocationsQuery, AllLocationsQueryVariables>(AllLocationsDocument, baseOptions);
-        }
-export type AllLocationsQueryHookResult = ReturnType<typeof useAllLocationsQuery>;
-export type AllLocationsLazyQueryHookResult = ReturnType<typeof useAllLocationsLazyQuery>;
-export type AllLocationsQueryResult = ApolloReactCommon.QueryResult<AllLocationsQuery, AllLocationsQueryVariables>;
 export const MeDocument = gql`
     query Me {
   me {
@@ -1751,6 +1779,15 @@ export const MeDocument = gql`
     email
     firstName
     lastName
+    businessAreas {
+      edges {
+        node {
+          id
+          name
+          slug
+        }
+      }
+    }
   }
 }
     `;
