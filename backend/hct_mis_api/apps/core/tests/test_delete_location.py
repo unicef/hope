@@ -1,9 +1,12 @@
+import unittest
+
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
 from core.fixtures import LocationFactory
 from core.models import Location
 
 
+@unittest.skip("Not supporting locations")
 class TestDeleteLocation(APITestCase):
     DELETE_LOCATION_MUTATION = """
     mutation DeleteLocation($locationId: String!) {

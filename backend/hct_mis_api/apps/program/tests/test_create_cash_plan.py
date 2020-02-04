@@ -1,9 +1,12 @@
+import unittest
+
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
 from program.fixtures import ProgramFactory
 from targeting.fixtures import TargetPopulationFactory
 
 
+@unittest.skip("Not supporting creating Cash Plans")
 class TestCreateCashPlan(APITestCase):
     CREATE_CASH_PLAN_MUTATION = """
     mutation CreateCashPlan($cashPlanData: CreateCashPlanInput!) {

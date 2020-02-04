@@ -4,7 +4,7 @@ from pytz import utc
 
 from account.fixtures import UserFactory
 from core.fixtures import LocationFactory
-from household.models import Household, RegistrationDataImport
+from household.models import Household, RegistrationDataImport, EntitlementCard
 
 
 class RegistrationDataImportFactory(factory.DjangoModelFactory):
@@ -44,3 +44,18 @@ class HouseholdFactory(factory.DjangoModelFactory):
     registration_data_import_id = factory.SubFactory(
         RegistrationDataImportFactory,
     )
+
+
+class EntitlementCardFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = EntitlementCard
+
+    card_number = factory.Faker("credit_card_number")
+    status = fuzzy.FuzzyChoice(
+        EntitlementCard.STATUS_CHOICE, getter=lambda c: c[0],
+    )
+    card_type = factory.Faker("credit_card_provider")
+    current_card_size = "Lorem"
+    card_custodian = factory.Faker("name")
+    service_provider = factory.Faker("company")
+    household = factory.SubFactory(HouseholdFactory)
