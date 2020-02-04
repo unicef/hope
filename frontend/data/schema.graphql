@@ -485,12 +485,6 @@ enum PaymentEntitlementDeliveryType {
   TRANSFER
 }
 
-enum PaymentEntitlementEntitlementCardNumber {
-  CASH
-  DEPOSIT_TO_CARD
-  TRANSFER
-}
-
 type PaymentEntitlementNode {
   id: UUID!
   createdAt: DateTime!
@@ -499,7 +493,7 @@ type PaymentEntitlementNode {
   entitlementQuantity: Float!
   deliveredQuantity: Float
   entitlementCardIssueDate: Date
-  entitlementCardNumber: PaymentEntitlementEntitlementCardNumber!
+  entitlementCardNumber: String!
   currency: String!
   deliveryDate: DateTime
   transactionReferenceId: String!

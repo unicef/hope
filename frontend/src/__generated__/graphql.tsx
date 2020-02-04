@@ -672,12 +672,6 @@ export enum PaymentEntitlementDeliveryType {
   Transfer = 'TRANSFER'
 }
 
-export enum PaymentEntitlementEntitlementCardNumber {
-  Cash = 'CASH',
-  DepositToCard = 'DEPOSIT_TO_CARD',
-  Transfer = 'TRANSFER'
-}
-
 export type PaymentEntitlementNode = {
    __typename?: 'PaymentEntitlementNode',
   id: Scalars['UUID'],
@@ -687,7 +681,7 @@ export type PaymentEntitlementNode = {
   entitlementQuantity: Scalars['Float'],
   deliveredQuantity?: Maybe<Scalars['Float']>,
   entitlementCardIssueDate?: Maybe<Scalars['Date']>,
-  entitlementCardNumber: PaymentEntitlementEntitlementCardNumber,
+  entitlementCardNumber: Scalars['String'],
   currency: Scalars['String'],
   deliveryDate?: Maybe<Scalars['DateTime']>,
   transactionReferenceId: Scalars['String'],
@@ -2123,7 +2117,6 @@ export type ResolversTypes = {
   Date: ResolverTypeWrapper<Scalars['Date']>,
   PaymentEntitlementNode: ResolverTypeWrapper<PaymentEntitlementNode>,
   PaymentEntitlementDeliveryType: PaymentEntitlementDeliveryType,
-  PaymentEntitlementEntitlementCardNumber: PaymentEntitlementEntitlementCardNumber,
   ChoiceObject: ResolverTypeWrapper<ChoiceObject>,
   DjangoDebug: ResolverTypeWrapper<DjangoDebug>,
   DjangoDebugSQL: ResolverTypeWrapper<DjangoDebugSql>,
@@ -2207,7 +2200,6 @@ export type ResolversParentTypes = {
   Date: Scalars['Date'],
   PaymentEntitlementNode: PaymentEntitlementNode,
   PaymentEntitlementDeliveryType: PaymentEntitlementDeliveryType,
-  PaymentEntitlementEntitlementCardNumber: PaymentEntitlementEntitlementCardNumber,
   ChoiceObject: ChoiceObject,
   DjangoDebug: DjangoDebug,
   DjangoDebugSQL: DjangoDebugSql,
@@ -2486,7 +2478,7 @@ export type PaymentEntitlementNodeResolvers<ContextType = any, ParentType extend
   entitlementQuantity?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   deliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   entitlementCardIssueDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
-  entitlementCardNumber?: Resolver<ResolversTypes['PaymentEntitlementEntitlementCardNumber'], ParentType, ContextType>,
+  entitlementCardNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   currency?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   deliveryDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   transactionReferenceId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
