@@ -27,7 +27,7 @@ class Program(TimeStampedUUIDModel):
         (ONE_OFF, _("One-off")),
     )
 
-    CHILD_PROTECTION = "CHILD PROTECTION"
+    CHILD_PROTECTION = "CHILD_PROTECTION"
     EDUCATION = "EDUCATION"
     GENDER = "GENDER"
     HEALTH = "HEALTH"

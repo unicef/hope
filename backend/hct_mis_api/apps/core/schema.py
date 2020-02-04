@@ -32,7 +32,7 @@ class LocationNode(DjangoObjectType):
             "geom",
             "point"
         ]
-        filter_fields = ["id"]
+        filter_fields = ['title']
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
