@@ -12,6 +12,7 @@ import { HomeRouter } from './containers/HomeRouter';
 import { ProfilePage } from './containers/pages/ProfilePage';
 import { client } from './apollo/client';
 import { LoginPage } from './containers/pages/LoginPage';
+import { DefaultRoute } from './containers/DefaultRoute';
 
 export const App: React.FC = () => {
   return (
@@ -28,8 +29,11 @@ export const App: React.FC = () => {
                 <Route path='/accounts/profile/'>
                   <ProfilePage />
                 </Route>
-                <Route path='/'>
+                <Route path='/:businessArea/'>
                   <HomeRouter />
+                </Route>
+                <Route path='/'>
+                  <DefaultRoute />
                 </Route>
               </Switch>
             </Router>

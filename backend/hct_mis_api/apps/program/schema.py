@@ -6,7 +6,15 @@ from graphene_django.filter import DjangoFilterConnectionField
 
 from core.schema import ExtendedConnection, ChoiceObject
 from program.models import Program, CashPlan
-from django_filters import FilterSet, OrderingFilter
+from django_filters import FilterSet, OrderingFilter, CharFilter
+
+
+class ProgramFilter(FilterSet):
+    business_area = CharFilter(field_name="business_area__slug")
+
+    class Meta:
+        fields = ("id",)
+        model = Program
 
 
 class ProgramNode(DjangoObjectType):
@@ -14,7 +22,9 @@ class ProgramNode(DjangoObjectType):
 
     class Meta:
         model = Program
-        filter_fields = []
+        filter_fields = [
+            "name",
+        ]
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
@@ -50,7 +60,9 @@ class CashPlanNode(DjangoObjectType):
 
 class Query(graphene.ObjectType):
     program = relay.Node.Field(ProgramNode)
-    all_programs = DjangoFilterConnectionField(ProgramNode)
+    all_programs = DjangoFilterConnectionField(
+        ProgramNode, filterset_class=ProgramFilter
+    )
     cash_plan = relay.Node.Field(CashPlanNode)
     all_cash_plans = DjangoFilterConnectionField(
         CashPlanNode, filterset_class=CashPlanFilter
