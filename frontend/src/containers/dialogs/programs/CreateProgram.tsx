@@ -3,10 +3,7 @@ import moment from 'moment';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { Button, DialogActions } from '@material-ui/core';
-import {
-  useAllLocationsQuery,
-  useCreateProgramMutation,
-} from '../../../__generated__/graphql';
+import { useAllBusinessAreasQuery, useCreateProgramMutation, } from '../../../__generated__/graphql';
 import { ProgramForm } from '../../forms/ProgramForm';
 
 const DialogFooter = styled.div`
@@ -20,17 +17,17 @@ export function CreateProgram(): React.ReactElement {
   const history = useHistory();
   const [open, setOpen] = useState(false);
   const [mutate] = useCreateProgramMutation();
-  const { data: locationsData } = useAllLocationsQuery();
+  const { data: businessData } = useAllBusinessAreasQuery();
 
   const submitFormHandler = async (values): Promise<void> => {
-    const { id: locationId } = locationsData.allLocations.edges[0].node;
+    const { id: businessAreaId } = businessData.allBusinessAreas.edges[0].node;
     const response = await mutate({
       variables: {
         programData: {
           ...values,
           startDate: moment(values.startDate).toISOString(),
           endDate: moment(values.endDate).toISOString(),
-          locationId,
+          businessAreaId,
         },
       },
     });

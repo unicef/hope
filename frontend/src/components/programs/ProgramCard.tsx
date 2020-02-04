@@ -11,6 +11,7 @@ import { programStatusToColor } from '../../utils/utils';
 import { LabelizedField } from '../LabelizedField';
 import { StatusBox } from '../StatusBox';
 import { ProgramNode } from '../../__generated__/graphql';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
 
 const useStyles = makeStyles((theme: typeof themeObj) => ({
   card: {
@@ -70,9 +71,12 @@ interface ProgramCardProps {
 
 export function ProgramCard({ program }: ProgramCardProps): React.ReactElement {
   const classes = useStyles({ status: program.status });
-
+  const businessArea = useBusinessArea();
   return (
-    <Link to={`/programs/${program.id}`} className={classes.aContainer}>
+    <Link
+      to={`/${businessArea}/programs/${program.id}`}
+      className={classes.aContainer}
+    >
       <Card className={classes.card}>
         <div className={classes.statusBar} />
         <div className={classes.container}>

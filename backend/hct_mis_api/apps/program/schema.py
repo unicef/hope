@@ -8,13 +8,30 @@ from core.schema import ExtendedConnection, ChoiceObject
 from program.models import Program, CashPlan
 from django_filters import FilterSet, OrderingFilter
 
+class CashPlanFilter(FilterSet):
+    class Meta:
+        fields = ("program",)
+        model = CashPlan
+
+    order_by = OrderingFilter(
+        fields=(
+            "cash_assist_id",
+            "status",
+            "number_of_households",
+            "currency",
+            "total_entitled_quantity",
+            "total_delivered_quantity",
+            "total_undelivered_quantity",
+            "dispersion_date",
+        )
+    )
 
 class ProgramNode(DjangoObjectType):
     total_number_of_households = graphene.Int()
 
     class Meta:
         model = Program
-        filter_fields = ['location']
+        filter_fields = ['name',]
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 

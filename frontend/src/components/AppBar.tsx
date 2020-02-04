@@ -4,9 +4,10 @@ import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import MuiAppBar from '@material-ui/core/AppBar';
+import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core';
 import { MiśTheme } from '../theme';
-import { CountryCombo } from './CountryCombo';
+import { BusinessAreaSelect } from '../containers/BusinessAreaSelect';
 
 const useStyles = makeStyles((theme: MiśTheme) => ({
   root: {
@@ -49,6 +50,9 @@ const useStyles = makeStyles((theme: MiśTheme) => ({
   },
   appBarSpacer: theme.mixins.toolbar,
 }));
+const BusinessAreaContainer = styled.div`
+  margin-left: ${({ theme }) => theme.spacing(11)}px;
+`;
 
 export function AppBar({ open, handleDrawerOpen }): React.ReactElement {
   const classes = useStyles({});
@@ -67,7 +71,9 @@ export function AppBar({ open, handleDrawerOpen }): React.ReactElement {
         >
           <MenuIcon />
         </IconButton>
-        <CountryCombo />
+        <BusinessAreaContainer>
+          <BusinessAreaSelect />
+        </BusinessAreaContainer>
       </Toolbar>
     </MuiAppBar>
   );
