@@ -3,13 +3,17 @@ import moment from 'moment';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { Button, DialogActions } from '@material-ui/core';
-import { useAllBusinessAreasQuery, useCreateProgramMutation, } from '../../../__generated__/graphql';
+import {
+  useAllBusinessAreasQuery,
+  useCreateProgramMutation,
+} from '../../../__generated__/graphql';
 import { ProgramForm } from '../../forms/ProgramForm';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
 
 const DialogFooter = styled.div`
   padding: 12px 16px;
   margin: 0;
-  border-top: 1px solid ${({theme})=>theme.hctPalette.lighterGray};
+  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
   text-align: right;
 `;
 
@@ -17,22 +21,23 @@ export function CreateProgram(): React.ReactElement {
   const history = useHistory();
   const [open, setOpen] = useState(false);
   const [mutate] = useCreateProgramMutation();
-  const { data: businessData } = useAllBusinessAreasQuery();
+  const businessArea = useBusinessArea();
 
   const submitFormHandler = async (values): Promise<void> => {
-    const { id: businessAreaId } = businessData.allBusinessAreas.edges[0].node;
     const response = await mutate({
       variables: {
         programData: {
           ...values,
           startDate: moment(values.startDate).toISOString(),
           endDate: moment(values.endDate).toISOString(),
-          businessAreaId,
+          businessAreaSlug: businessArea,
         },
       },
     });
     if (!response.errors && response.data.createProgram) {
-      history.push(`/programs/${response.data.createProgram.program.id}`);
+      history.push(
+        `/${businessArea}/programs/${response.data.createProgram.program.id}`,
+      );
     }
   };
 

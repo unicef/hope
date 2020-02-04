@@ -148,7 +148,7 @@ input CreateProgramInput {
   cashPlus: Boolean
   populationGoal: Int
   administrativeAreasOfImplementation: String
-  businessAreaId: String
+  businessAreaSlug: String
 }
 
 type CreateRegistrationDataImport {
@@ -609,7 +609,7 @@ type Query {
   allLocations(before: String, after: String, first: Int, last: Int, title: String): LocationNodeConnection
   allBusinessAreas(before: String, after: String, first: Int, last: Int, id: UUID): BusinessAreaNodeConnection
   program(id: ID!): ProgramNode
-  allPrograms(before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection
+  allPrograms(before: String, after: String, first: Int, last: Int, id: UUID, businessArea: String): ProgramNodeConnection
   cashPlan(id: ID!): CashPlanNode
   allCashPlans(before: String, after: String, first: Int, last: Int, program: ID, orderBy: String): CashPlanNodeConnection
   programStatusChoices: [ChoiceObject]
@@ -761,7 +761,7 @@ input UpdateProgramInput {
   cashPlus: Boolean
   populationGoal: Int
   administrativeAreasOfImplementation: String
-  businessAreaId: String
+  businessAreaSlug: String
 }
 
 type UpdateRegistrationDataImport {

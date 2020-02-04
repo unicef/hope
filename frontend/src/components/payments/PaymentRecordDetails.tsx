@@ -6,7 +6,6 @@ import { StatusBox } from '../StatusBox';
 import { paymentRecordStatusToColor } from '../../utils/utils';
 import { LabelizedField } from '../LabelizedField';
 import { PaymentRecordNode } from '../../__generated__/graphql';
-import { MiśTheme } from '../../theme';
 
 const Container = styled.div`
   display: flex;
@@ -31,7 +30,7 @@ const StatusContainer = styled.div`
 `;
 
 const Title = styled.div`
-  padding-bottom: ${({ theme }: { theme: MiśTheme }) => theme.spacing(8)}px;
+  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
 const OverviewGrid = styled(Grid)`

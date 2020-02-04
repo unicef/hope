@@ -28,7 +28,7 @@ class CreateProgramInput(graphene.InputObjectType):
     cash_plus = graphene.Boolean()
     population_goal = graphene.Int()
     administrative_areas_of_implementation = graphene.String()
-    business_area_id = graphene.String()
+    business_area_slug = graphene.String()
 
 
 class UpdateProgramInput(graphene.InputObjectType):
@@ -46,7 +46,7 @@ class UpdateProgramInput(graphene.InputObjectType):
     cash_plus = graphene.Boolean()
     population_goal = graphene.Int()
     administrative_areas_of_implementation = graphene.String()
-    business_area_id = graphene.String()
+    business_area_slug = graphene.String()
 
 
 class CreateCashPlanInput(graphene.InputObjectType):
@@ -101,10 +101,8 @@ class CreateProgram(CommonValidator, graphene.Mutation):
     @classmethod
     @is_authenticated
     def mutate(cls, root, info, program_data):
-        business_area_id = decode_id_string(
-            program_data.pop("business_area_id", None)
-        )
-        business_area = BusinessArea.objects.get(id=business_area_id)
+        business_area_slug = program_data.pop("business_area_slug", None)
+        business_area = BusinessArea.objects.get(slug=business_area_slug)
 
         cls.validate(
             start_date=program_data.get("start_date"),
@@ -112,9 +110,7 @@ class CreateProgram(CommonValidator, graphene.Mutation):
         )
 
         program = Program.objects.create(
-            **program_data,
-            status="DRAFT",
-            business_area=business_area,
+            **program_data, status="DRAFT", business_area=business_area,
         )
 
         return CreateProgram(program)
@@ -134,12 +130,10 @@ class UpdateProgram(CommonValidator, ProgramValidator, graphene.Mutation):
 
         program = Program.objects.select_for_update().get(id=program_id)
 
-        business_area_id = decode_id_string(
-            program_data.pop("business_area_id", None)
-        )
+        business_area_slug = program_data.pop("business_area_slug", None)
 
-        if business_area_id:
-            business_area = BusinessArea.objects.get(id=business_area_id)
+        if business_area_slug:
+            business_area = BusinessArea.objects.get(slug=business_area_slug)
             program.business_area = business_area
 
         cls.validate(

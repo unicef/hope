@@ -370,7 +370,17 @@
                 "defaultValue": null
               },
               {
-                "name": "name",
+                "name": "id",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "UUID",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "businessArea",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -7382,7 +7392,7 @@
             "defaultValue": null
           },
           {
-            "name": "businessAreaId",
+            "name": "businessAreaSlug",
             "description": null,
             "type": {
               "kind": "SCALAR",
@@ -7570,7 +7580,7 @@
             "defaultValue": null
           },
           {
-            "name": "businessAreaId",
+            "name": "businessAreaSlug",
             "description": null,
             "type": {
               "kind": "SCALAR",

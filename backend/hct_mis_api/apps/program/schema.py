@@ -6,32 +6,25 @@ from graphene_django.filter import DjangoFilterConnectionField
 
 from core.schema import ExtendedConnection, ChoiceObject
 from program.models import Program, CashPlan
-from django_filters import FilterSet, OrderingFilter
+from django_filters import FilterSet, OrderingFilter, CharFilter
 
-class CashPlanFilter(FilterSet):
+
+class ProgramFilter(FilterSet):
+    business_area = CharFilter(field_name="business_area__slug")
+
     class Meta:
-        fields = ("program",)
-        model = CashPlan
+        fields = ("id",)
+        model = Program
 
-    order_by = OrderingFilter(
-        fields=(
-            "cash_assist_id",
-            "status",
-            "number_of_households",
-            "currency",
-            "total_entitled_quantity",
-            "total_delivered_quantity",
-            "total_undelivered_quantity",
-            "dispersion_date",
-        )
-    )
 
 class ProgramNode(DjangoObjectType):
     total_number_of_households = graphene.Int()
 
     class Meta:
         model = Program
-        filter_fields = ['name',]
+        filter_fields = [
+            "name",
+        ]
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
@@ -67,7 +60,9 @@ class CashPlanNode(DjangoObjectType):
 
 class Query(graphene.ObjectType):
     program = relay.Node.Field(ProgramNode)
-    all_programs = DjangoFilterConnectionField(ProgramNode)
+    all_programs = DjangoFilterConnectionField(
+        ProgramNode, filterset_class=ProgramFilter
+    )
     cash_plan = relay.Node.Field(CashPlanNode)
     all_cash_plans = DjangoFilterConnectionField(
         CashPlanNode, filterset_class=CashPlanFilter

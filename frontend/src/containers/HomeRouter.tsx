@@ -57,6 +57,9 @@ export function HomeRouter(): React.ReactElement {
           <Route path='/:businessArea/payment_records/:id'>
             <PaymentRecordDetailsPage />
           </Route>
+          <Route path='/:businessArea/payment_records/:id'>
+            <PaymentRecordDetailsPage />
+          </Route>
           <Route path='/:businessArea/programs'>
             <ProgramsPage />
           </Route>

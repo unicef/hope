@@ -1,8 +1,8 @@
 import { gql } from 'apollo-boost';
 
 export const AllPrograms = gql`
-  query AllPrograms{
-    allPrograms {
+  query AllPrograms($businessArea: String) {
+    allPrograms(businessArea: $businessArea) {
       pageInfo {
         hasNextPage
         hasPreviousPage

@@ -206,7 +206,7 @@ export type CreateProgramInput = {
   cashPlus?: Maybe<Scalars['Boolean']>,
   populationGoal?: Maybe<Scalars['Int']>,
   administrativeAreasOfImplementation?: Maybe<Scalars['String']>,
-  businessAreaId?: Maybe<Scalars['String']>,
+  businessAreaSlug?: Maybe<Scalars['String']>,
 };
 
 export type CreateRegistrationDataImport = {
@@ -890,7 +890,8 @@ export type QueryAllProgramsArgs = {
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  name?: Maybe<Scalars['String']>
+  id?: Maybe<Scalars['UUID']>,
+  businessArea?: Maybe<Scalars['String']>
 };
 
 
@@ -1123,7 +1124,7 @@ export type UpdateProgramInput = {
   cashPlus?: Maybe<Scalars['Boolean']>,
   populationGoal?: Maybe<Scalars['Int']>,
   administrativeAreasOfImplementation?: Maybe<Scalars['String']>,
-  businessAreaId?: Maybe<Scalars['String']>,
+  businessAreaSlug?: Maybe<Scalars['String']>,
 };
 
 export type UpdateRegistrationDataImport = {
@@ -1287,7 +1288,9 @@ export type AllCashPlansQuery = (
   )> }
 );
 
-export type AllProgramsQueryVariables = {};
+export type AllProgramsQueryVariables = {
+  businessArea?: Maybe<Scalars['String']>
+};
 
 
 export type AllProgramsQuery = (
@@ -1698,8 +1701,8 @@ export type AllCashPlansQueryHookResult = ReturnType<typeof useAllCashPlansQuery
 export type AllCashPlansLazyQueryHookResult = ReturnType<typeof useAllCashPlansLazyQuery>;
 export type AllCashPlansQueryResult = ApolloReactCommon.QueryResult<AllCashPlansQuery, AllCashPlansQueryVariables>;
 export const AllProgramsDocument = gql`
-    query AllPrograms {
-  allPrograms {
+    query AllPrograms($businessArea: String) {
+  allPrograms(businessArea: $businessArea) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -1755,6 +1758,7 @@ export function withAllPrograms<TProps, TChildProps = {}>(operationOptions?: Apo
  * @example
  * const { data, loading, error } = useAllProgramsQuery({
  *   variables: {
+ *      businessArea: // value for 'businessArea'
  *   },
  * });
  */
