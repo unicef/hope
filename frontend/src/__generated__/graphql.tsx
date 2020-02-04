@@ -95,6 +95,8 @@ export type CashPlanNode = Node & {
   totalDeliveredQuantity: Scalars['Float'],
   totalUndeliveredQuantity: Scalars['Float'],
   dispersionDate: Scalars['Date'],
+  deliveryType: Scalars['String'],
+  assistanceThrough: Scalars['String'],
   paymentRecords: PaymentRecordNodeConnection,
 };
 
@@ -196,7 +198,6 @@ export type CreateProgramInput = {
   endDate?: Maybe<Scalars['DateTime']>,
   description?: Maybe<Scalars['String']>,
   programCaId?: Maybe<Scalars['String']>,
-  locationId?: Maybe<Scalars['String']>,
   budget?: Maybe<Scalars['Float']>,
   frequencyOfPayments?: Maybe<Scalars['String']>,
   sector?: Maybe<Scalars['String']>,
@@ -204,6 +205,7 @@ export type CreateProgramInput = {
   cashPlus?: Maybe<Scalars['Boolean']>,
   populationGoal?: Maybe<Scalars['Int']>,
   administrativeAreasOfImplementation?: Maybe<Scalars['String']>,
+  businessAreaId?: Maybe<Scalars['String']>,
 };
 
 export type CreateRegistrationDataImport = {
@@ -454,7 +456,7 @@ export type HouseholdNode = Node & {
   nationality: HouseholdNationality,
   familySize?: Maybe<Scalars['Int']>,
   address?: Maybe<Scalars['String']>,
-  locations: LocationNode,
+  location: LocationNode,
   registrationDataImportId: RegistrationDataImportNode,
   paymentRecords: PaymentRecordNodeConnection,
   targetPopulations: TargetPopulationNodeConnection,
@@ -664,6 +666,29 @@ export type PageInfo = {
   endCursor?: Maybe<Scalars['String']>,
 };
 
+export enum PaymentEntitlementDeliveryType {
+  Cash = 'CASH',
+  DepositToCard = 'DEPOSIT_TO_CARD',
+  Transfer = 'TRANSFER'
+}
+
+export type PaymentEntitlementNode = {
+   __typename?: 'PaymentEntitlementNode',
+  id: Scalars['UUID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  deliveryType: PaymentEntitlementDeliveryType,
+  entitlementQuantity: Scalars['Float'],
+  deliveredQuantity?: Maybe<Scalars['Float']>,
+  entitlementCardIssueDate?: Maybe<Scalars['Date']>,
+  entitlementCardNumber: Scalars['String'],
+  currency: Scalars['String'],
+  deliveryDate?: Maybe<Scalars['DateTime']>,
+  transactionReferenceId: Scalars['String'],
+  fsp: Scalars['String'],
+  paymentRecord?: Maybe<PaymentRecordNode>,
+};
+
 export type PaymentRecordNode = Node & {
    __typename?: 'PaymentRecordNode',
   id: Scalars['ID'],
@@ -679,6 +704,7 @@ export type PaymentRecordNode = Node & {
   totalPersonCovered: Scalars['Int'],
   distributionModality: Scalars['String'],
   targetPopulation: TargetPopulationNode,
+  entitlement?: Maybe<PaymentEntitlementNode>,
 };
 
 export type PaymentRecordNodeConnection = {
@@ -789,7 +815,8 @@ export type Query = {
    __typename?: 'Query',
   paymentRecord?: Maybe<PaymentRecordNode>,
   allPaymentRecords?: Maybe<PaymentRecordNodeConnection>,
-  paymentDeliveryTypeChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  paymentRecordStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  allPaymentEntitlements?: Maybe<Array<Maybe<PaymentEntitlementNode>>>,
   location?: Maybe<LocationNode>,
   allLocations?: Maybe<LocationNodeConnection>,
   allBusinessAreas?: Maybe<BusinessAreaNodeConnection>,
@@ -1086,7 +1113,6 @@ export type UpdateProgramInput = {
   endDate?: Maybe<Scalars['DateTime']>,
   description?: Maybe<Scalars['String']>,
   programCaId?: Maybe<Scalars['String']>,
-  locationId?: Maybe<Scalars['String']>,
   budget?: Maybe<Scalars['Float']>,
   frequencyOfPayments?: Maybe<Scalars['String']>,
   sector?: Maybe<Scalars['String']>,
@@ -1094,6 +1120,7 @@ export type UpdateProgramInput = {
   cashPlus?: Maybe<Scalars['Boolean']>,
   populationGoal?: Maybe<Scalars['Int']>,
   administrativeAreasOfImplementation?: Maybe<Scalars['String']>,
+  businessAreaId?: Maybe<Scalars['String']>,
 };
 
 export type UpdateRegistrationDataImport = {
@@ -1282,6 +1309,29 @@ export type MeQuery = (
   & { me: Maybe<(
     { __typename?: 'UserObjectType' }
     & Pick<UserObjectType, 'id' | 'username' | 'email' | 'firstName' | 'lastName'>
+  )> }
+);
+
+export type PaymentRecordQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type PaymentRecordQuery = (
+  { __typename?: 'Query' }
+  & { paymentRecord: Maybe<(
+    { __typename?: 'PaymentRecordNode' }
+    & Pick<PaymentRecordNode, 'id' | 'status' | 'statusDate' | 'cashAssistId' | 'headOfHousehold' | 'distributionModality' | 'totalPersonCovered'>
+    & { household: (
+      { __typename?: 'HouseholdNode' }
+      & Pick<HouseholdNode, 'householdCaId' | 'familySize'>
+    ), targetPopulation: (
+      { __typename?: 'TargetPopulationNode' }
+      & Pick<TargetPopulationNode, 'name'>
+    ), entitlement: Maybe<(
+      { __typename?: 'PaymentEntitlementNode' }
+      & Pick<PaymentEntitlementNode, 'id' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryType' | 'deliveryDate' | 'entitlementCardIssueDate' | 'transactionReferenceId' | 'fsp' | 'entitlementCardNumber'>
+    )> }
   )> }
 );
 
@@ -1746,6 +1796,81 @@ export function useMeLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptio
 export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
 export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
 export type MeQueryResult = ApolloReactCommon.QueryResult<MeQuery, MeQueryVariables>;
+export const PaymentRecordDocument = gql`
+    query PaymentRecord($id: ID!) {
+  paymentRecord(id: $id) {
+    id
+    status
+    statusDate
+    cashAssistId
+    household {
+      householdCaId
+      familySize
+    }
+    headOfHousehold
+    distributionModality
+    totalPersonCovered
+    targetPopulation {
+      name
+    }
+    entitlement {
+      id
+      currency
+      entitlementQuantity
+      deliveredQuantity
+      deliveryType
+      deliveryDate
+      entitlementCardIssueDate
+      transactionReferenceId
+      fsp
+      entitlementCardNumber
+    }
+  }
+}
+    `;
+export type PaymentRecordComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<PaymentRecordQuery, PaymentRecordQueryVariables>, 'query'> & ({ variables: PaymentRecordQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const PaymentRecordComponent = (props: PaymentRecordComponentProps) => (
+      <ApolloReactComponents.Query<PaymentRecordQuery, PaymentRecordQueryVariables> query={PaymentRecordDocument} {...props} />
+    );
+    
+export type PaymentRecordProps<TChildProps = {}> = ApolloReactHoc.DataProps<PaymentRecordQuery, PaymentRecordQueryVariables> & TChildProps;
+export function withPaymentRecord<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  PaymentRecordQuery,
+  PaymentRecordQueryVariables,
+  PaymentRecordProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, PaymentRecordQuery, PaymentRecordQueryVariables, PaymentRecordProps<TChildProps>>(PaymentRecordDocument, {
+      alias: 'paymentRecord',
+      ...operationOptions
+    });
+};
+
+/**
+ * __usePaymentRecordQuery__
+ *
+ * To run a query within a React component, call `usePaymentRecordQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePaymentRecordQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePaymentRecordQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function usePaymentRecordQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<PaymentRecordQuery, PaymentRecordQueryVariables>) {
+        return ApolloReactHooks.useQuery<PaymentRecordQuery, PaymentRecordQueryVariables>(PaymentRecordDocument, baseOptions);
+      }
+export function usePaymentRecordLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<PaymentRecordQuery, PaymentRecordQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<PaymentRecordQuery, PaymentRecordQueryVariables>(PaymentRecordDocument, baseOptions);
+        }
+export type PaymentRecordQueryHookResult = ReturnType<typeof usePaymentRecordQuery>;
+export type PaymentRecordLazyQueryHookResult = ReturnType<typeof usePaymentRecordLazyQuery>;
+export type PaymentRecordQueryResult = ApolloReactCommon.QueryResult<PaymentRecordQuery, PaymentRecordQueryVariables>;
 export const ProgramDocument = gql`
     query Program($id: ID!) {
   program(id: $id) {
@@ -1990,6 +2115,8 @@ export type ResolversTypes = {
   ProgramScope: ProgramScope,
   CashPlanStatus: CashPlanStatus,
   Date: ResolverTypeWrapper<Scalars['Date']>,
+  PaymentEntitlementNode: ResolverTypeWrapper<PaymentEntitlementNode>,
+  PaymentEntitlementDeliveryType: PaymentEntitlementDeliveryType,
   ChoiceObject: ResolverTypeWrapper<ChoiceObject>,
   DjangoDebug: ResolverTypeWrapper<DjangoDebug>,
   DjangoDebugSQL: ResolverTypeWrapper<DjangoDebugSql>,
@@ -2071,6 +2198,8 @@ export type ResolversParentTypes = {
   ProgramScope: ProgramScope,
   CashPlanStatus: CashPlanStatus,
   Date: Scalars['Date'],
+  PaymentEntitlementNode: PaymentEntitlementNode,
+  PaymentEntitlementDeliveryType: PaymentEntitlementDeliveryType,
   ChoiceObject: ChoiceObject,
   DjangoDebug: DjangoDebug,
   DjangoDebugSQL: DjangoDebugSql,
@@ -2155,6 +2284,8 @@ export type CashPlanNodeResolvers<ContextType = any, ParentType extends Resolver
   totalDeliveredQuantity?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   totalUndeliveredQuantity?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   dispersionDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
+  deliveryType?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  assistanceThrough?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, CashPlanNodePaymentRecordsArgs>,
 };
 
@@ -2258,7 +2389,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   nationality?: Resolver<ResolversTypes['HouseholdNationality'], ParentType, ContextType>,
   familySize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   address?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  locations?: Resolver<ResolversTypes['LocationNode'], ParentType, ContextType>,
+  location?: Resolver<ResolversTypes['LocationNode'], ParentType, ContextType>,
   registrationDataImportId?: Resolver<ResolversTypes['RegistrationDataImportNode'], ParentType, ContextType>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, HouseholdNodePaymentRecordsArgs>,
   targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, HouseholdNodeTargetPopulationsArgs>,
@@ -2339,6 +2470,22 @@ export type PageInfoResolvers<ContextType = any, ParentType extends ResolversPar
   endCursor?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
+export type PaymentEntitlementNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentEntitlementNode'] = ResolversParentTypes['PaymentEntitlementNode']> = {
+  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  deliveryType?: Resolver<ResolversTypes['PaymentEntitlementDeliveryType'], ParentType, ContextType>,
+  entitlementQuantity?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
+  deliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  entitlementCardIssueDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
+  entitlementCardNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  currency?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  deliveryDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  transactionReferenceId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  fsp?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType>,
+};
+
 export type PaymentRecordNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentRecordNode'] = ResolversParentTypes['PaymentRecordNode']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
@@ -2353,6 +2500,7 @@ export type PaymentRecordNodeResolvers<ContextType = any, ParentType extends Res
   totalPersonCovered?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   distributionModality?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   targetPopulation?: Resolver<ResolversTypes['TargetPopulationNode'], ParentType, ContextType>,
+  entitlement?: Resolver<Maybe<ResolversTypes['PaymentEntitlementNode']>, ParentType, ContextType>,
 };
 
 export type PaymentRecordNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentRecordNodeConnection'] = ResolversParentTypes['PaymentRecordNodeConnection']> = {
@@ -2405,7 +2553,8 @@ export type ProgramNodeEdgeResolvers<ContextType = any, ParentType extends Resol
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType, RequireFields<QueryPaymentRecordArgs, 'id'>>,
   allPaymentRecords?: Resolver<Maybe<ResolversTypes['PaymentRecordNodeConnection']>, ParentType, ContextType, QueryAllPaymentRecordsArgs>,
-  paymentDeliveryTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  paymentRecordStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  allPaymentEntitlements?: Resolver<Maybe<Array<Maybe<ResolversTypes['PaymentEntitlementNode']>>>, ParentType, ContextType>,
   location?: Resolver<Maybe<ResolversTypes['LocationNode']>, ParentType, ContextType, RequireFields<QueryLocationArgs, 'id'>>,
   allLocations?: Resolver<Maybe<ResolversTypes['LocationNodeConnection']>, ParentType, ContextType, QueryAllLocationsArgs>,
   allBusinessAreas?: Resolver<Maybe<ResolversTypes['BusinessAreaNodeConnection']>, ParentType, ContextType, QueryAllBusinessAreasArgs>,
@@ -2551,6 +2700,7 @@ export type Resolvers<ContextType = any> = {
   Mutations?: MutationsResolvers<ContextType>,
   Node?: NodeResolvers,
   PageInfo?: PageInfoResolvers<ContextType>,
+  PaymentEntitlementNode?: PaymentEntitlementNodeResolvers<ContextType>,
   PaymentRecordNode?: PaymentRecordNodeResolvers<ContextType>,
   PaymentRecordNodeConnection?: PaymentRecordNodeConnectionResolvers<ContextType>,
   PaymentRecordNodeEdge?: PaymentRecordNodeEdgeResolvers<ContextType>,

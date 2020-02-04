@@ -6,21 +6,21 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['TestUpdateProgram::test_update_program_not_authenticated 1'] = {
+snapshots['TestDeliveryTypeChoices::test_delivery_type_choices_query 1'] = {
     'data': {
-        'updateProgram': None
+        'paymentDeliveryTypeChoices': None
     },
     'errors': [
         {
             'locations': [
                 {
-                    'column': 7,
+                    'column': 9,
                     'line': 3
                 }
             ],
-            'message': 'Permission Denied: User is not authenticated.',
+            'message': "type object 'PaymentRecord' has no attribute 'DELIVERY_TYPE_CHOICE'",
             'path': [
-                'updateProgram'
+                'paymentDeliveryTypeChoices'
             ]
         }
     ]

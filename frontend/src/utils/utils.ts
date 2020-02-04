@@ -1,5 +1,4 @@
 import { theme as themeObj } from '../theme';
-import { Order } from '../components/table/TableComponent';
 
 export function opacityToHex(opacity: number): string {
   return Math.floor(opacity * 0xff).toString(16);
@@ -18,6 +17,8 @@ export function programStatusToColor(
       return theme.hctPalette.oragne;
   }
 }
+
+
 export function cashPlanStatusToColor(
   theme: typeof themeObj,
   status: string,
@@ -31,6 +32,19 @@ export function cashPlanStatusToColor(
       return theme.hctPalette.oragne;
   }
 }
+export function paymentRecordStatusToColor(
+         theme: typeof themeObj,
+         status: string,
+       ): string {
+         switch (status) {
+           case 'SUCCESS':
+             return theme.hctPalette.green;
+           case 'PENDING':
+             return theme.hctPalette.oragne;
+           default:
+             return theme.palette.error.main;
+         }
+       }
 export function getCookie(name): string | null {
   const value = `; ${document.cookie}`;
   const parts = value.split(`; ${name}=`);
