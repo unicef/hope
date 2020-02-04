@@ -46,10 +46,7 @@ class TestCreateProgram(APITestCase):
                 "cashPlus": True,
                 "populationGoal": 150000,
                 "administrativeAreasOfImplementation": "Lorem Ipsum",
-                "businessAreaId": self.id_to_base64(
-                    BusinessArea.objects.order_by("?").first().id,
-                    "BusinessArea",
-                ),
+                "businessAreaSlug":  BusinessArea.objects.order_by("?").first().slug,
             }
         }
 
