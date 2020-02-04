@@ -11,6 +11,7 @@ import { DashboardPage } from './pages/DashboardPage';
 import { ProgramsPage } from './pages/ProgramsPage';
 import { ProgramDetailsPage } from './pages/ProgramDetailsPage';
 import { CashPlanDetailsPage } from './pages/CashPlanDetailsPage';
+import { PaymentRecordDetailsPage } from './pages/PaymentRecordDetailsPage';
 
 const Root = styled.div`
   display: flex;
@@ -54,10 +55,16 @@ export function HomeRouter(): React.ReactElement {
           <Route path="/cashplans/:id">
             <CashPlanDetailsPage />
           </Route>
-          <Route path='/programs/:id'>
+          <Route path='/:businessArea/programs/:id'>
             <ProgramDetailsPage />
           </Route>
-          <Route path='/programs'>
+          <Route path='/:businessArea/payment_records/:id'>
+            <PaymentRecordDetailsPage />
+          </Route>
+          <Route path='/:businessArea/payment_records/:id'>
+            <PaymentRecordDetailsPage />
+          </Route>
+          <Route path='/:businessArea/programs'>
             <ProgramsPage />
           </Route>
           <Route path='/'>

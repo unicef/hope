@@ -68,7 +68,7 @@ services:
   #        command: bash -c "/./worker-entrypoint.sh"
 
   db:
-    image: postgres:9.5.15-alpine
+    image: mdillon/postgis:9.5-alpine
     volumes:
        - db:/data/postgres
     env_file:

@@ -3,7 +3,7 @@ from graphene import relay, String
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
-from core.models import Location
+from core.models import Location, BusinessArea
 
 
 class ChoiceObject(graphene.ObjectType):
@@ -28,7 +28,18 @@ class ExtendedConnection(graphene.Connection):
 class LocationNode(DjangoObjectType):
     class Meta:
         model = Location
-        filter_fields = ["country"]
+        exclude_fields = [
+            "geom",
+            "point"
+        ]
+        filter_fields = ['title']
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+class BusinessAreaNode(DjangoObjectType):
+    class Meta:
+        model = BusinessArea
+        filter_fields = ["id"]
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
@@ -36,3 +47,4 @@ class LocationNode(DjangoObjectType):
 class Query(graphene.ObjectType):
     location = relay.Node.Field(LocationNode)
     all_locations = DjangoFilterConnectionField(LocationNode)
+    all_business_areas = DjangoFilterConnectionField(BusinessAreaNode)

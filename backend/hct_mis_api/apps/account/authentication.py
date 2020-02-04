@@ -3,9 +3,7 @@ import logging
 from django.contrib.auth import get_user_model
 from social_core.exceptions import InvalidEmail
 from social_core.pipeline import social_auth
-
 from social_core.pipeline import user as social_core_user
-
 
 logger = logging.getLogger("console")
 

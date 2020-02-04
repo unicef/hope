@@ -45,12 +45,8 @@ snapshots['TestProgramChoices::test_program_sector_choices 1'] = {
     'data': {
         'programSectorChoices': [
             {
-                'name': 'Child',
-                'value': 'CHILD'
-            },
-            {
-                'name': 'Protection',
-                'value': 'PROTECTION'
+                'name': 'Child Protection',
+                'value': 'CHILD_PROTECTION'
             },
             {
                 'name': 'Education',

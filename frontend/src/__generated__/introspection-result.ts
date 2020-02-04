@@ -30,10 +30,13 @@
             "name": "LocationNode"
           },
           {
-            "name": "HouseholdNode"
+            "name": "BusinessAreaNode"
           },
           {
             "name": "RegistrationDataImportNode"
+          },
+          {
+            "name": "HouseholdNode"
           },
           {
             "name": "TargetPopulationNode"

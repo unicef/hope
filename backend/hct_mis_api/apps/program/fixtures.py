@@ -29,7 +29,7 @@ class ProgramFactory(factory.DjangoModelFactory):
         "sentence", nb_words=10, variable_nb_words=True, ext_word_list=None,
     )
     program_ca_id = factory.Faker("uuid4")
-    location = factory.SubFactory(LocationFactory)
+    locations = factory.SubFactory(LocationFactory)
     budget = factory.fuzzy.FuzzyDecimal(1000000.0, 900000000.0)
     frequency_of_payments = fuzzy.FuzzyChoice(
         Program.FREQUENCY_OF_PAYMENTS_CHOICE, getter=lambda c: c[0],
@@ -41,6 +41,15 @@ class ProgramFactory(factory.DjangoModelFactory):
     administrative_areas_of_implementation = factory.Faker(
         "sentence", nb_words=3, variable_nb_words=True, ext_word_list=None,
     )
+
+    @factory.post_generation
+    def locations(self, create, extracted, **kwargs):
+        if not create:
+            self.locations.add(LocationFactory())
+
+        if extracted:
+            for location in extracted:
+                self.locations.add(location)
 
 
 class CashPlanFactory(factory.DjangoModelFactory):
@@ -83,4 +92,10 @@ class CashPlanFactory(factory.DjangoModelFactory):
     dispersion_date = fuzzy.FuzzyDate(
         start_date=datetime.now() + timedelta(days=30),
         end_date=datetime.now() + timedelta(days=365),
+    )
+    delivery_type = factory.Faker(
+        "random_element", elements=["Deposit to Card", "Transfer", "Cash"]
+    )
+    assistance_through = factory.LazyAttribute(
+        lambda o: f"{factory.Faker('company')} Bank"
     )

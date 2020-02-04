@@ -102,7 +102,7 @@ export function ProgramDetails({
           <Grid item xs={4}>
             <LabelizedField
               label='Administrative Areas of implementation'
-              value={program.location.name}
+              value={program.administrativeAreasOfImplementation}
             />
           </Grid>
           <Grid item xs={4}>

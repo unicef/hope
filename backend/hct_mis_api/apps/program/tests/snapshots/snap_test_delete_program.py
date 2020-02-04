@@ -27,14 +27,6 @@ snapshots['TestDeleteProgram::test_delete_program_not_authenticated 1'] = {
     ]
 }
 
-snapshots['TestDeleteProgram::test_delete_program_authenticated 1'] = {
-    'data': {
-        'deleteProgram': {
-            'ok': True
-        }
-    }
-}
-
 snapshots['TestDeleteProgram::test_delete_active_program 1'] = {
     'data': {
         'deleteProgram': None
@@ -53,4 +45,12 @@ snapshots['TestDeleteProgram::test_delete_active_program 1'] = {
             ]
         }
     ]
+}
+
+snapshots['TestDeleteProgram::test_delete_program_authenticated 1'] = {
+    'data': {
+        'deleteProgram': {
+            'ok': True
+        }
+    }
 }

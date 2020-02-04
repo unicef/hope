@@ -9,11 +9,13 @@ import {
   useUpdateProgramMutation,
 } from '../../../__generated__/graphql';
 import { ProgramForm } from '../../forms/ProgramForm';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { PROGRAM_QUERY } from '../../../apollo/queries/Program';
 
 const DialogFooter = styled.div`
   padding: 12px 16px;
   margin: 0;
-  border-top: 1px solid ${({theme})=>theme.hctPalette.lighterGray};
+  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
   text-align: right;
 `;
 
@@ -24,7 +26,18 @@ interface EditProgramProps {
 export function EditProgram({ program }: EditProgramProps): React.ReactElement {
   const history = useHistory();
   const [open, setOpen] = useState(false);
-  const [mutate] = useUpdateProgramMutation();
+  const [mutate] = useUpdateProgramMutation({
+    update(cache, { data: { updateProgram } }) {
+      cache.writeQuery({
+        query: PROGRAM_QUERY,
+        variables: {
+          id: program.id,
+        },
+        data: { program: updateProgram.program },
+      });
+    },
+  });
+  const businessArea = useBusinessArea();
 
   const submitFormHandler = async (values): Promise<void> => {
     const response = await mutate({
@@ -38,7 +51,9 @@ export function EditProgram({ program }: EditProgramProps): React.ReactElement {
       },
     });
     if (!response.errors && response.data.updateProgram) {
-      history.push(`/programs/${response.data.updateProgram.program.id}`);
+      history.push(
+        `/${businessArea}/programs/${response.data.updateProgram.program.id}`,
+      );
     }
     setOpen(false);
   };

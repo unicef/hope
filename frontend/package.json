@@ -95,8 +95,11 @@
     "build": "node scripts/build.js",
     "test": "node scripts/test.js",
     "lint": "eslint src/**/*.tsx",
-    "generate-types": "wget --no-check-certificate -O data/schema.graphql https://dev-hct.unitst.org/api/graphql/schema.graphql&&graphql-codegen --config codegen.yml --debug",
-    "generate-types-local": "wget --no-check-certificate -O data/schema.graphql http://localhost:8080/api/graphql/schema.graphql&&graphql-codegen --config codegen.yml --debug"
+    "download-dev-schema": "wget --no-check-certificate -O data/schema.graphql https://dev-hct.unitst.org/api/graphql/schema.graphql",
+    "download-local-schema": "wget --no-check-certificate -O data/schema.graphql http://localhost:8080/api/graphql/schema.graphql",
+    "generate-apollo-schema": "apollo schema:download data/schema.json",
+    "generate-types": "yarn download-dev-schema&&yarn generate-apollo-schema&&graphql-codegen --config codegen.yml --debug",
+    "generate-types-local": "yarn download-local-schema&&yarn generate-apollo-schema&&graphql-codegen --config codegen.yml --debug"
   },
   "browserslist": {
     "production": [
@@ -120,6 +123,7 @@
     "@graphql-codegen/typescript-resolvers": "^1.11.2",
     "@tivix/eslint-config": "^1.0.0",
     "@tivix/prettier-config": "^1.0.0",
+    "apollo": "^2.16.0",
     "eslint": ">=6.6.0 <7",
     "prettier": "^1.19.1"
   }
