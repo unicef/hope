@@ -83,6 +83,7 @@ class LocationFactory(factory.DjangoModelFactory):
 
     class Meta:
         model = Location
+        django_get_or_create = ("title", "p_code",)
 
     title = factory.LazyFunction(faker.city)
     # We are going to fill location type manually
