@@ -52,7 +52,7 @@ export function HomeRouter(): React.ReactElement {
       <MainContent>
         <div className={classes.appBarSpacer} />
         <Switch>
-          <Route path="/cashplans/:id">
+          <Route path="/:businessArea/cashplans/:id">
             <CashPlanDetailsPage />
           </Route>
           <Route path='/:businessArea/programs/:id'>

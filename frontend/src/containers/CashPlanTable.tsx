@@ -86,7 +86,8 @@ export function CashPlanTable({ program }: CashPlanTableProps): ReactElement {
     fetchPolicy: 'network-only',
   });
   const handleClick = (row) => {
-    history.push(`/cashplans/${row.id}`);
+    const path = `/${history.location.pathname.split('/')[1]}/cashplans/${row.id}`
+    history.push(path);
   };
   if (!data) {
     return null;

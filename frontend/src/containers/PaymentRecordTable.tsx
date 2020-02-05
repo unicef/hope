@@ -87,7 +87,8 @@ export function PaymentRecordTable({
     fetchPolicy: 'network-only',
   });
   const handleClick = (row) => {
-    //history.push(`/cashplans/`);
+    const path = `/${history.location.pathname.split('/')[1]}/payment_records/${row.id}`
+    history.push(path);
   };
   if (!data) {
     return null;
