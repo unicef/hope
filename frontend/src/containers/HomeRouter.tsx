@@ -10,6 +10,7 @@ import { isAuthenticated } from '../utils/utils';
 import { DashboardPage } from './pages/DashboardPage';
 import { ProgramsPage } from './pages/ProgramsPage';
 import { ProgramDetailsPage } from './pages/ProgramDetailsPage';
+import { CashPlanDetailsPage } from './pages/CashPlanDetailsPage';
 import { PaymentRecordDetailsPage } from './pages/PaymentRecordDetailsPage';
 
 const Root = styled.div`
@@ -51,6 +52,9 @@ export function HomeRouter(): React.ReactElement {
       <MainContent>
         <div className={classes.appBarSpacer} />
         <Switch>
+          <Route path="/:businessArea/cashplans/:id">
+            <CashPlanDetailsPage />
+          </Route>
           <Route path='/:businessArea/programs/:id'>
             <ProgramDetailsPage />
           </Route>
