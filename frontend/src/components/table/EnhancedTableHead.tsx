@@ -12,7 +12,7 @@ type Order = 'asc' | 'desc';
 
 export interface HeadCell<T> {
   disablePadding: boolean;
-  id: keyof T;
+  id: string;
   label: string;
   numeric: boolean;
 }
@@ -47,7 +47,7 @@ interface EnhancedTableProps<T> {
   classes: ReturnType<typeof useStyles>;
   onRequestSort:  (
       event: React.MouseEvent<unknown>,
-      property: keyof T,
+      property: string,
   ) => void;
   order: Order;
   orderBy: keyof T;
@@ -66,7 +66,7 @@ export function EnhancedTableHead<T>(props: EnhancedTableProps<T>) : React.React
     headCells,
     onRequestSort,
   } = props;
-  const createSortHandler = (property: keyof T) => (
+  const createSortHandler = (property: string) => (
     event: React.MouseEvent<unknown>,
   ) => {
     onRequestSort(event, property);

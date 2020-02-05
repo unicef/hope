@@ -602,7 +602,7 @@ enum ProgramStatus {
 
 type Query {
   paymentRecord(id: ID!): PaymentRecordNode
-  allPaymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection
+  allPaymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID, orderBy: String): PaymentRecordNodeConnection
   paymentRecordStatusChoices: [ChoiceObject]
   allPaymentEntitlements: [PaymentEntitlementNode]
   location(id: ID!): LocationNode
