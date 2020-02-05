@@ -5,6 +5,8 @@ from social_core.exceptions import InvalidEmail
 from social_core.pipeline import social_auth
 from social_core.pipeline import user as social_core_user
 
+from core.models import BusinessArea
+
 logger = logging.getLogger("console")
 
 
@@ -58,6 +60,7 @@ def create_user(strategy, details, backend, user=None, *args, **kwargs):
         first_name=fullname[0].capitalize(),
         last_name=fullname[-1].capitalize(),
     )
+    user.business_areas.add(BusinessArea.objects.first())
     user.set_unusable_password()
     user.save()
 
