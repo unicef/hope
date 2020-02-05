@@ -1,8 +1,21 @@
 import { gql } from 'apollo-boost';
 
 export const AllPaymentRecords = gql`
-  query AllPaymentRecords($cashPlan: ID!, $after: String, $first: Int) {
-    allPaymentRecords(cashPlan: $cashPlan, after: $after, first: $first) {
+  query AllPaymentRecords(
+    $cashPlan: ID!
+    $after: String
+    $before: String
+    $first: Int
+    $orderBy: String
+    $count: Int
+  ) {
+    allPaymentRecords(
+      cashPlan: $cashPlan
+      after: $after
+      before: $before
+      first: $count
+      orderBy: $orderBy
+    ) {
       pageInfo {
         hasNextPage
         hasPreviousPage
@@ -16,10 +29,8 @@ export const AllPaymentRecords = gql`
           createdAt
           updatedAt
           name
-          startDate
-          endDate
+          statusDate
           cashAssistId
-          deliveryType
           household {
             householdCaId
           }

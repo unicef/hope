@@ -853,7 +853,8 @@ export type QueryAllPaymentRecordsArgs = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   cashPlan?: Maybe<Scalars['ID']>,
-  household?: Maybe<Scalars['ID']>
+  household?: Maybe<Scalars['ID']>,
+  orderBy?: Maybe<Scalars['String']>
 };
 
 
@@ -1288,6 +1289,39 @@ export type AllCashPlansQuery = (
   )> }
 );
 
+export type AllPaymentRecordsQueryVariables = {
+  cashPlan: Scalars['ID'],
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  orderBy?: Maybe<Scalars['String']>,
+  count?: Maybe<Scalars['Int']>
+};
+
+
+export type AllPaymentRecordsQuery = (
+  { __typename?: 'Query' }
+  & { allPaymentRecords: Maybe<(
+    { __typename?: 'PaymentRecordNodeConnection' }
+    & Pick<PaymentRecordNodeConnection, 'totalCount' | 'edgeCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'startCursor' | 'endCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'PaymentRecordNodeEdge' }
+      & Pick<PaymentRecordNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'PaymentRecordNode' }
+        & Pick<PaymentRecordNode, 'id' | 'createdAt' | 'updatedAt' | 'name' | 'statusDate' | 'cashAssistId'>
+        & { household: (
+          { __typename?: 'HouseholdNode' }
+          & Pick<HouseholdNode, 'householdCaId'>
+        ) }
+      )> }
+    )>> }
+  )> }
+);
+
 export type AllProgramsQueryVariables = {
   businessArea?: Maybe<Scalars['String']>
 };
@@ -1330,7 +1364,6 @@ export type CashPlanQuery = (
   )> }
 );
 
-export type AllLocationsQueryVariables = {};
 export type MeQueryVariables = {};
 
 
@@ -1722,8 +1755,8 @@ export type AllCashPlansQueryHookResult = ReturnType<typeof useAllCashPlansQuery
 export type AllCashPlansLazyQueryHookResult = ReturnType<typeof useAllCashPlansLazyQuery>;
 export type AllCashPlansQueryResult = ApolloReactCommon.QueryResult<AllCashPlansQuery, AllCashPlansQueryVariables>;
 export const AllPaymentRecordsDocument = gql`
-    query AllPaymentRecords($cashPlan: ID!, $after: String, $first: Int) {
-  allPaymentRecords(cashPlan: $cashPlan, after: $after, first: $first) {
+    query AllPaymentRecords($cashPlan: ID!, $after: String, $before: String, $first: Int, $orderBy: String, $count: Int) {
+  allPaymentRecords(cashPlan: $cashPlan, after: $after, before: $before, first: $count, orderBy: $orderBy) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -1737,10 +1770,8 @@ export const AllPaymentRecordsDocument = gql`
         createdAt
         updatedAt
         name
-        startDate
-        endDate
+        statusDate
         cashAssistId
-        deliveryType
         household {
           householdCaId
         }
@@ -1783,7 +1814,10 @@ export function withAllPaymentRecords<TProps, TChildProps = {}>(operationOptions
  *   variables: {
  *      cashPlan: // value for 'cashPlan'
  *      after: // value for 'after'
+ *      before: // value for 'before'
  *      first: // value for 'first'
+ *      orderBy: // value for 'orderBy'
+ *      count: // value for 'count'
  *   },
  * });
  */
@@ -1930,59 +1964,6 @@ export function useCashPlanLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHoo
 export type CashPlanQueryHookResult = ReturnType<typeof useCashPlanQuery>;
 export type CashPlanLazyQueryHookResult = ReturnType<typeof useCashPlanLazyQuery>;
 export type CashPlanQueryResult = ApolloReactCommon.QueryResult<CashPlanQuery, CashPlanQueryVariables>;
-export const AllLocationsDocument = gql`
-    query allLocations {
-  allLocations {
-    edges {
-      node {
-        id
-      }
-    }
-  }
-}
-    `;
-export type AllLocationsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllLocationsQuery, AllLocationsQueryVariables>, 'query'>;
-
-    export const AllLocationsComponent = (props: AllLocationsComponentProps) => (
-      <ApolloReactComponents.Query<AllLocationsQuery, AllLocationsQueryVariables> query={AllLocationsDocument} {...props} />
-    );
-    
-export type AllLocationsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllLocationsQuery, AllLocationsQueryVariables> & TChildProps;
-export function withAllLocations<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
-  TProps,
-  AllLocationsQuery,
-  AllLocationsQueryVariables,
-  AllLocationsProps<TChildProps>>) {
-    return ApolloReactHoc.withQuery<TProps, AllLocationsQuery, AllLocationsQueryVariables, AllLocationsProps<TChildProps>>(AllLocationsDocument, {
-      alias: 'allLocations',
-      ...operationOptions
-    });
-};
-
-/**
- * __useAllLocationsQuery__
- *
- * To run a query within a React component, call `useAllLocationsQuery` and pass it any options that fit your needs.
- * When your component renders, `useAllLocationsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useAllLocationsQuery({
- *   variables: {
- *   },
- * });
- */
-export function useAllLocationsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllLocationsQuery, AllLocationsQueryVariables>) {
-        return ApolloReactHooks.useQuery<AllLocationsQuery, AllLocationsQueryVariables>(AllLocationsDocument, baseOptions);
-      }
-export function useAllLocationsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllLocationsQuery, AllLocationsQueryVariables>) {
-          return ApolloReactHooks.useLazyQuery<AllLocationsQuery, AllLocationsQueryVariables>(AllLocationsDocument, baseOptions);
-        }
-export type AllLocationsQueryHookResult = ReturnType<typeof useAllLocationsQuery>;
-export type AllLocationsLazyQueryHookResult = ReturnType<typeof useAllLocationsLazyQuery>;
-export type AllLocationsQueryResult = ApolloReactCommon.QueryResult<AllLocationsQuery, AllLocationsQueryVariables>;
 export const MeDocument = gql`
     query Me {
   me {
