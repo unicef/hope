@@ -56,7 +56,7 @@ class Command(BaseCommand):
         user = UserFactory.create()
 
         program = ProgramFactory(
-            business_area=BusinessArea.objects.order_by("?").first()
+            business_area=BusinessArea.objects.first()
         )
 
         for _ in range(cash_plans_amount):
