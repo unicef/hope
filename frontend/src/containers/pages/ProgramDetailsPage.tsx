@@ -7,12 +7,14 @@ import { ProgramNode, useProgramQuery, } from '../../__generated__/graphql';
 import { ProgramDetailsPageHeader } from './headers/ProgramDetailsPageHeader';
 
 const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
+  && {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
 `;
 
-const PageContainer = styled.div`
+const TableWrapper = styled.div`
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -33,9 +35,9 @@ export function ProgramDetailsPage(): React.ReactElement {
       <ProgramDetailsPageHeader program={program} />
       <Container>
         <ProgramDetails program={program} />
-        <PageContainer>
+        <TableWrapper>
           <CashPlanTable program={program} />
-        </PageContainer>
+        </TableWrapper>
       </Container>
     </div>
   );
