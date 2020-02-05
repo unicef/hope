@@ -1,25 +1,25 @@
-import React, { ReactElement, useState } from 'react';
+import React, {ReactElement, useState} from 'react';
 import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
 import styled from 'styled-components';
+import {useHistory} from 'react-router-dom';
 import Moment from 'react-moment';
-import { useHistory } from 'react-router-dom';
 import {
-  AllCashPlansQueryVariables,
+  AllPaymentRecordsQueryVariables,
   CashPlanNode,
-  ProgramNode,
-  useAllCashPlansQuery,
+  PaymentRecordNode,
+  useAllPaymentRecordsQuery,
 } from '../__generated__/graphql';
-import { Order, TableComponent } from '../components/table/TableComponent';
-import { HeadCell } from '../components/table/EnhancedTableHead';
-import { StatusBox } from '../components/StatusBox';
-import { cashPlanStatusToColor, columnToOrderBy } from '../utils/utils';
-import { useBusinessArea } from '../hooks/useBusinessArea';
+import {Order, TableComponent} from '../components/table/TableComponent';
+import {HeadCell} from '../components/table/EnhancedTableHead';
+import {StatusBox} from '../components/StatusBox';
+import {columnToOrderBy, paymentRecordStatusToColor,} from '../utils/utils';
+import {useBusinessArea} from '../hooks/useBusinessArea';
 
-const headCells: HeadCell<CashPlanNode>[] = [
+const headCells: HeadCell<PaymentRecordNode>[] = [
   {
     disablePadding: false,
-    label: 'Cash Plan ID',
+    label: 'Payment ID',
     id: 'cashAssistId',
     numeric: false,
   },
@@ -31,75 +31,76 @@ const headCells: HeadCell<CashPlanNode>[] = [
   },
   {
     disablePadding: false,
-    label: 'No. of Households',
-    id: 'numberOfHouseholds',
-    numeric: true,
-  },
-  {
-    disablePadding: false,
-    label: 'Currency',
-    id: 'currency',
+    label: 'Head of Household',
+    id: 'headOfHousehold',
     numeric: false,
   },
   {
     disablePadding: false,
-    label: 'Total Entitled Quantity',
-    id: 'totalEntitledQuantity',
-    numeric: true,
-  },
-  {
-    disablePadding: false,
-    label: 'Total Delivered Quantity',
-    id: 'totalDeliveredQuantity',
-    numeric: true,
-  },
-  {
-    disablePadding: false,
-    label: 'Total Undelivered Quantity',
-    id: 'totalUndeliveredQuantity',
-    numeric: true,
-  },
-  {
-    disablePadding: false,
-    label: 'Dispersion Date',
-    id: 'dispersionDate',
+    label: 'Household ID',
+    id: 'household__household_ca_id',
     numeric: false,
+  },
+  {
+    disablePadding: false,
+    label: 'Household Size',
+    id: 'totalPersonCovered',
+    numeric: false,
+  },
+  {
+    disablePadding: false,
+    label: 'Entitlement',
+    id: 'entitlement__entitlement_quantity',
+    numeric: true,
+  },
+  {
+    disablePadding: false,
+    label: 'Delivered Amount',
+    id: 'entitlement__delivered_quantity',
+    numeric: true,
+  },
+  {
+    disablePadding: false,
+    label: 'Delivery Date',
+    id: 'entitlement__delivery_date',
+    numeric: true,
   },
 ];
 const StatusContainer = styled.div`
   width: 120px;
 `;
-
 interface CashPlanTableProps {
-  program: ProgramNode;
+  cashPlan: CashPlanNode;
 }
-export function CashPlanTable({ program }: CashPlanTableProps): ReactElement {
+export function PaymentRecordTable({
+  cashPlan,
+}: CashPlanTableProps): ReactElement {
   const history = useHistory();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [orderBy, setOrderBy] = useState(null);
   const [orderDirection, setOrderDirection] = useState('asc');
   const businessArea = useBusinessArea();
-  const { data, fetchMore } = useAllCashPlansQuery({
+  const { data, fetchMore } = useAllPaymentRecordsQuery({
     variables: {
-      program: program.id,
+      cashPlan: cashPlan.id,
       count: rowsPerPage,
     },
     fetchPolicy: 'network-only',
   });
   const handleClick = (row) => {
-    const path = `/${businessArea}/cashplans/${row.id}`;
+    const path = `/${businessArea}/payment_records/${row.id}`;
     history.push(path);
   };
   if (!data) {
     return null;
   }
-  const { edges } = data.allCashPlans;
-  const cashPlans = edges.map((edge) => edge.node as CashPlanNode);
+  const { edges } = data.allPaymentRecords;
+  const paymentRecords = edges.map((edge) => edge.node as PaymentRecordNode);
   return (
-    <TableComponent<CashPlanNode>
-      title='Cash Plans'
-      data={cashPlans}
+    <TableComponent<PaymentRecordNode>
+      title='Payment Records'
+      data={paymentRecords}
       renderRow={(row) => {
         return (
           <TableRow
@@ -113,32 +114,29 @@ export function CashPlanTable({ program }: CashPlanTableProps): ReactElement {
               <StatusContainer>
                 <StatusBox
                   status={row.status}
-                  statusToColor={cashPlanStatusToColor}
+                  statusToColor={paymentRecordStatusToColor}
                 />
               </StatusContainer>
             </TableCell>
-            <TableCell align='right'>{row.numberOfHouseholds}</TableCell>
-            <TableCell align='left'>{row.currency}</TableCell>
+            <TableCell align='left'>{row.headOfHousehold}</TableCell>
+            <TableCell align='left'>{row.household.householdCaId}</TableCell>
+            <TableCell align='left'>{row.totalPersonCovered}</TableCell>
             <TableCell align='right'>
-              {row.totalEntitledQuantity.toLocaleString('en-US', {
+              {row.entitlement.entitlementQuantity.toLocaleString('en-US', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
               })}
             </TableCell>
             <TableCell align='right'>
-              {row.totalDeliveredQuantity.toLocaleString('en-US', {
+              {row.entitlement.deliveredQuantity.toLocaleString('en-US', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
               })}
             </TableCell>
             <TableCell align='right'>
-              {row.totalUndeliveredQuantity.toLocaleString('en-US', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}
-            </TableCell>
-            <TableCell align='left'>
-              <Moment format='MM/DD/YYYY'>{row.dispersionDate}</Moment>
+              <Moment format='MM/DD/YYYY'>
+                {row.entitlement.deliveryDate}
+              </Moment>
             </TableCell>
           </TableRow>
         );
@@ -147,21 +145,21 @@ export function CashPlanTable({ program }: CashPlanTableProps): ReactElement {
       rowsPerPageOptions={[5, 10, 15]}
       rowsPerPage={rowsPerPage}
       page={page}
-      itemsCount={data.allCashPlans.totalCount}
+      itemsCount={data.allPaymentRecords.totalCount}
       handleChangePage={(event, newPage) => {
         let variables;
         if (newPage < page) {
           const before = edges[0].cursor;
           variables = {
             before,
-            program: program.id,
+            cashPlan: cashPlan.id,
             count: rowsPerPage,
           };
         } else {
-          const after = edges[cashPlans.length - 1].cursor;
+          const after = edges[paymentRecords.length - 1].cursor;
           variables = {
             after,
-            program: program.id,
+            cashPlan: cashPlan.id,
             count: rowsPerPage,
           };
         }
@@ -180,9 +178,9 @@ export function CashPlanTable({ program }: CashPlanTableProps): ReactElement {
         const value = parseInt(event.target.value, 10);
         setRowsPerPage(value);
         setPage(0);
-        const variables: AllCashPlansQueryVariables = {
-          program: program.id,
-          count: value,
+        const variables: AllPaymentRecordsQueryVariables = {
+          cashPlan: cashPlan.id,
+          count: rowsPerPage,
         };
         if (orderBy) {
           variables.orderBy = columnToOrderBy(orderBy, orderDirection);
@@ -204,10 +202,9 @@ export function CashPlanTable({ program }: CashPlanTableProps): ReactElement {
         if (edges.length < 0) {
           return;
         }
-
         fetchMore({
           variables: {
-            program: program.id,
+            cashPlan: cashPlan.id,
             count: rowsPerPage,
             orderBy: columnToOrderBy(property, direction),
           },
