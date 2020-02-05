@@ -14,7 +14,7 @@ import { Order, TableComponent } from '../components/table/TableComponent';
 import { HeadCell } from '../components/table/EnhancedTableHead';
 import { StatusBox } from '../components/StatusBox';
 import { cashPlanStatusToColor, columnToOrderBy } from '../utils/utils';
-import {useBusinessArea} from "../hooks/useBusinessArea";
+import { useBusinessArea } from '../hooks/useBusinessArea';
 
 const headCells: HeadCell<CashPlanNode>[] = [
   {
@@ -88,7 +88,7 @@ export function CashPlanTable({ program }: CashPlanTableProps): ReactElement {
     fetchPolicy: 'network-only',
   });
   const handleClick = (row) => {
-    const path = `/${businessArea}/cashplans/${row.id}`
+    const path = `/${businessArea}/cashplans/${row.id}`;
     history.push(path);
   };
   if (!data) {
