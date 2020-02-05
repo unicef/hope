@@ -21,7 +21,7 @@ Expected delivery date: Feb. 23 - May XX, 2020
 * Refinement of deduplication requirements and flows.
 * Implementation of **Target Population** Module, allowing users to create new target populations and the associated approval process needed for it.
 * Continued Generation of fake data to drive the HCT MIS user interface and testing.
-* Refinement / selection of data integration tool for pushing and pulling data from the Registration and CashAssist data-hubs.
+* _Refinement / selection of data integration tool for pushing and pulling data from the Registration and CashAssist data-hubs. **\(Possibly I.5\)**_
 
 ## **UX / UI Design Deliverables**
 
