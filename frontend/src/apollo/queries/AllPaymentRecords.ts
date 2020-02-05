@@ -32,6 +32,7 @@ export const AllPaymentRecords = gql`
           status
           headOfHousehold
           cashAssistId
+          totalPersonCovered
           household {
             householdCaId
             familySize

@@ -50,7 +50,7 @@ interface TableComponentProps<T> {
   handleChangeRowsPerPage: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleRequestSort: (
     event: React.MouseEvent<unknown>,
-    property: keyof T,
+    property: string,
   ) => void;
   orderBy: keyof T;
   order: Order;

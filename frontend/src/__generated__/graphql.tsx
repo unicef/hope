@@ -1311,7 +1311,7 @@ export type AllPaymentRecordsQuery = (
       & Pick<PaymentRecordNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'PaymentRecordNode' }
-        & Pick<PaymentRecordNode, 'id' | 'createdAt' | 'updatedAt' | 'name' | 'statusDate' | 'status' | 'headOfHousehold' | 'cashAssistId'>
+        & Pick<PaymentRecordNode, 'id' | 'createdAt' | 'updatedAt' | 'name' | 'statusDate' | 'status' | 'headOfHousehold' | 'cashAssistId' | 'totalPersonCovered'>
         & { household: (
           { __typename?: 'HouseholdNode' }
           & Pick<HouseholdNode, 'householdCaId' | 'familySize'>
@@ -1776,6 +1776,7 @@ export const AllPaymentRecordsDocument = gql`
         status
         headOfHousehold
         cashAssistId
+        totalPersonCovered
         household {
           householdCaId
           familySize

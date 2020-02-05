@@ -1,8 +1,8 @@
-import React, { ReactElement, useState } from 'react';
+import React, {ReactElement, useState} from 'react';
 import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
 import styled from 'styled-components';
-import { useHistory } from 'react-router-dom';
+import {useHistory} from 'react-router-dom';
 import Moment from 'react-moment';
 import {
   AllPaymentRecordsQueryVariables,
@@ -10,16 +10,17 @@ import {
   PaymentRecordNode,
   useAllPaymentRecordsQuery,
 } from '../__generated__/graphql';
-import { Order, TableComponent } from '../components/table/TableComponent';
-import { HeadCell } from '../components/table/EnhancedTableHead';
-import { StatusBox } from '../components/StatusBox';
-import { cashPlanStatusToColor, columnToOrderBy } from '../utils/utils';
+import {Order, TableComponent} from '../components/table/TableComponent';
+import {HeadCell} from '../components/table/EnhancedTableHead';
+import {StatusBox} from '../components/StatusBox';
+import {columnToOrderBy, paymentRecordStatusToColor,} from '../utils/utils';
+import {useBusinessArea} from '../hooks/useBusinessArea';
 
 const headCells: HeadCell<PaymentRecordNode>[] = [
   {
     disablePadding: false,
     label: 'Payment ID',
-    id: 'id',
+    id: 'cashAssistId',
     numeric: false,
   },
   {
@@ -37,31 +38,31 @@ const headCells: HeadCell<PaymentRecordNode>[] = [
   {
     disablePadding: false,
     label: 'Household ID',
-    id: 'household',
+    id: 'household__household_ca_id',
     numeric: false,
   },
   {
     disablePadding: false,
     label: 'Household Size',
-    id: 'household',
+    id: 'totalPersonCovered',
     numeric: false,
   },
   {
     disablePadding: false,
     label: 'Entitlement',
-    id: 'entitlement',
+    id: 'entitlement__entitlement_quantity',
     numeric: true,
   },
   {
     disablePadding: false,
     label: 'Delivered Amount',
-    id: 'entitlement',
+    id: 'entitlement__delivered_quantity',
     numeric: true,
   },
   {
     disablePadding: false,
     label: 'Delivery Date',
-    id: 'entitlement',
+    id: 'entitlement__delivery_date',
     numeric: true,
   },
 ];
@@ -79,6 +80,7 @@ export function PaymentRecordTable({
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [orderBy, setOrderBy] = useState(null);
   const [orderDirection, setOrderDirection] = useState('asc');
+  const businessArea = useBusinessArea();
   const { data, fetchMore } = useAllPaymentRecordsQuery({
     variables: {
       cashPlan: cashPlan.id,
@@ -87,7 +89,7 @@ export function PaymentRecordTable({
     fetchPolicy: 'network-only',
   });
   const handleClick = (row) => {
-    const path = `/${history.location.pathname.split('/')[1]}/payment_records/${row.id}`
+    const path = `/${businessArea}/payment_records/${row.id}`;
     history.push(path);
   };
   if (!data) {
@@ -112,13 +114,13 @@ export function PaymentRecordTable({
               <StatusContainer>
                 <StatusBox
                   status={row.status}
-                  statusToColor={cashPlanStatusToColor}
+                  statusToColor={paymentRecordStatusToColor}
                 />
               </StatusContainer>
             </TableCell>
             <TableCell align='left'>{row.headOfHousehold}</TableCell>
             <TableCell align='left'>{row.household.householdCaId}</TableCell>
-            <TableCell align='left'>{row.household.familySize}</TableCell>
+            <TableCell align='left'>{row.totalPersonCovered}</TableCell>
             <TableCell align='right'>
               {row.entitlement.entitlementQuantity.toLocaleString('en-US', {
                 minimumFractionDigits: 2,
