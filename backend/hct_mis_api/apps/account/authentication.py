@@ -61,6 +61,7 @@ def create_user(strategy, details, backend, user=None, *args, **kwargs):
         last_name=fullname[-1].capitalize(),
     )
     user.business_areas.add(BusinessArea.objects.first())
+    user.business_areas.add(BusinessArea.objects.all()[1])
     user.set_unusable_password()
     user.save()
 
