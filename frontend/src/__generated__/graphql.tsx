@@ -1293,7 +1293,6 @@ export type AllPaymentRecordsQueryVariables = {
   cashPlan: Scalars['ID'],
   after?: Maybe<Scalars['String']>,
   before?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>,
   count?: Maybe<Scalars['Int']>
 };
@@ -1312,11 +1311,14 @@ export type AllPaymentRecordsQuery = (
       & Pick<PaymentRecordNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'PaymentRecordNode' }
-        & Pick<PaymentRecordNode, 'id' | 'createdAt' | 'updatedAt' | 'name' | 'statusDate' | 'cashAssistId'>
+        & Pick<PaymentRecordNode, 'id' | 'createdAt' | 'updatedAt' | 'name' | 'statusDate' | 'status' | 'headOfHousehold' | 'cashAssistId'>
         & { household: (
           { __typename?: 'HouseholdNode' }
-          & Pick<HouseholdNode, 'householdCaId'>
-        ) }
+          & Pick<HouseholdNode, 'householdCaId' | 'familySize'>
+        ), entitlement: Maybe<(
+          { __typename?: 'PaymentEntitlementNode' }
+          & Pick<PaymentEntitlementNode, 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate'>
+        )> }
       )> }
     )>> }
   )> }
@@ -1755,7 +1757,7 @@ export type AllCashPlansQueryHookResult = ReturnType<typeof useAllCashPlansQuery
 export type AllCashPlansLazyQueryHookResult = ReturnType<typeof useAllCashPlansLazyQuery>;
 export type AllCashPlansQueryResult = ApolloReactCommon.QueryResult<AllCashPlansQuery, AllCashPlansQueryVariables>;
 export const AllPaymentRecordsDocument = gql`
-    query AllPaymentRecords($cashPlan: ID!, $after: String, $before: String, $first: Int, $orderBy: String, $count: Int) {
+    query AllPaymentRecords($cashPlan: ID!, $after: String, $before: String, $orderBy: String, $count: Int) {
   allPaymentRecords(cashPlan: $cashPlan, after: $after, before: $before, first: $count, orderBy: $orderBy) {
     pageInfo {
       hasNextPage
@@ -1771,9 +1773,17 @@ export const AllPaymentRecordsDocument = gql`
         updatedAt
         name
         statusDate
+        status
+        headOfHousehold
         cashAssistId
         household {
           householdCaId
+          familySize
+        }
+        entitlement {
+          entitlementQuantity
+          deliveredQuantity
+          deliveryDate
         }
       }
     }
@@ -1815,7 +1825,6 @@ export function withAllPaymentRecords<TProps, TChildProps = {}>(operationOptions
  *      cashPlan: // value for 'cashPlan'
  *      after: // value for 'after'
  *      before: // value for 'before'
- *      first: // value for 'first'
  *      orderBy: // value for 'orderBy'
  *      count: // value for 'count'
  *   },

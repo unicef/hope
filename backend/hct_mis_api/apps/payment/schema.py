@@ -44,7 +44,9 @@ class PaymentRecordNode(DjangoObjectType):
 
 class Query(graphene.ObjectType):
     payment_record = relay.Node.Field(PaymentRecordNode)
-    all_payment_records = DjangoFilterConnectionField(PaymentRecordNode)
+    all_payment_records = DjangoFilterConnectionField(
+        PaymentRecordNode, filterset_class=PaymentRecordFilter,
+    )
     payment_record_status_choices = graphene.List(ChoiceObject)
     all_payment_entitlements = graphene.List(PaymentEntitlementNode)
 

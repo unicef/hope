@@ -5,7 +5,6 @@ export const AllPaymentRecords = gql`
     $cashPlan: ID!
     $after: String
     $before: String
-    $first: Int
     $orderBy: String
     $count: Int
   ) {
@@ -30,9 +29,17 @@ export const AllPaymentRecords = gql`
           updatedAt
           name
           statusDate
+          status
+          headOfHousehold
           cashAssistId
           household {
             householdCaId
+            familySize
+          }
+          entitlement {
+            entitlementQuantity
+            deliveredQuantity
+            deliveryDate
           }
         }
       }

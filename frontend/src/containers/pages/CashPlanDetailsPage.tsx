@@ -4,6 +4,7 @@ import { Button } from '@material-ui/core';
 import { useParams } from 'react-router-dom';
 import { PageHeader } from '../../components/PageHeader';
 import { CashPlanDetails } from '../../components/CashPlanDetails';
+import { PaymentRecordTable } from '../PaymentRecordTable';
 import { useCashPlanQuery, CashPlanNode } from '../../__generated__/graphql';
 
 const Container = styled.div`
@@ -12,6 +13,13 @@ const Container = styled.div`
     flex-direction: column;
     width: 100%;
   }
+`;
+
+const TableWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  padding: 20px;
 `;
 
 export function CashPlanDetailsPage(): React.ReactElement {
@@ -23,9 +31,7 @@ export function CashPlanDetailsPage(): React.ReactElement {
   if (!data) {
     return null;
   }
-  const cashPlan = data.cashPlan as CashPlanNode
-  //eslint-disable-next-line
-  console.log(cashPlan)
+  const cashPlan = data.cashPlan as CashPlanNode;
   return (
     <div>
       <PageHeader
@@ -37,7 +43,10 @@ export function CashPlanDetailsPage(): React.ReactElement {
         </Button>
       </PageHeader>
       <Container>
-        <CashPlanDetails cashPlan={cashPlan}/>
+        <CashPlanDetails cashPlan={cashPlan} />
+        <TableWrapper>
+          <PaymentRecordTable cashPlan={cashPlan} />
+        </TableWrapper>
       </Container>
     </div>
   );
