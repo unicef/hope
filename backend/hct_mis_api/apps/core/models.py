@@ -2,7 +2,7 @@ from decimal import Decimal
 
 import mptt
 import pycountry
-from django.contrib.gis.db import models
+from django.contrib.gis.db.models import MultiPolygonField, PointField
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.translation import ugettext_lazy as _
 from mptt.fields import TreeForeignKey
@@ -10,7 +10,6 @@ from mptt.managers import TreeManager
 from mptt.models import MPTTModel
 from django.contrib.postgres.fields import JSONField
 from django.db import models
-from django_countries.fields import CountryField
 from model_utils.models import UUIDModel
 from core.coutries import COUNTRY_NAME_TO_ALPHA2_CODE
 from core.utils import unique_slugify
@@ -59,9 +58,6 @@ class Country(TimeStampedUUIDModel):
                 pass
 
 
-class Location(UUIDModel):
-    name = models.CharField(max_length=255)
-    country = CountryField()
 class BusinessArea(TimeStampedUUIDModel):
     """
     BusinessArea (EPRP called Workspace, also synonym was
@@ -96,22 +92,6 @@ class BusinessArea(TimeStampedUUIDModel):
 
     def __str__(self):
         return self.name
-
-
-class FlexibleField(UUIDModel):
-    type = models.CharField(max_length=255)
-    name = models.CharField(max_length=255)
-    required = models.BooleanField()
-    relevant = models.TextField(blank=True)
-    calculation = models.TextField(blank=True)
-    constraint_message = models.TextField(blank=True)
-    default = models.TextField(blank=True)
-    label = JSONField()
-    hint = JSONField()
-    choice_filter = models.TextField(blank=True)
-    repeat_count = models.CharField(max_length=255, blank=True)
-    read_only = models.BooleanField()
-    location = models.ForeignKey(Location, on_delete=models.CASCADE)
 
     @property
     def can_import_ocha_response_plans(self):
@@ -225,8 +205,8 @@ class Location(MPTTModel):
         db_index=True,
         on_delete=models.CASCADE,
     )
-    geom = models.MultiPolygonField(null=True, blank=True)
-    point = models.PointField(null=True, blank=True)
+    geom = MultiPolygonField(null=True, blank=True)
+    point = PointField(null=True, blank=True)
 
     def __str__(self):
         if self.p_code:
@@ -304,5 +284,65 @@ class CartoDBTable(MPTTModel):
         return self.table_name
 
 
+class FlexibleAttribute(models.Model):
+    type = models.CharField(max_length=255)
+    name = models.CharField(max_length=255)
+    required = models.BooleanField(default=False)
+    relevant = models.TextField(blank=True)
+    calculation = models.TextField(blank=True)
+    constraint = models.TextField(blank=True)
+    constraint_message = models.TextField(blank=True)
+    label = JSONField(default=dict)
+    hint = JSONField(default=dict)
+    choice_filter = models.TextField(blank=True)
+    business_area = models.ForeignKey(
+        "core.BusinessArea",
+        on_delete=models.CASCADE,
+        related_name="flex_attributes",
+    )
+    group = models.ForeignKey(
+        "core.FlexibleAttributeGroup",
+        on_delete=models.CASCADE,
+        related_name="flex_attributes",
+        null=True,
+    )
+
+
+class FlexibleAttributeGroup(MPTTModel):
+    name = models.CharField(max_length=255)
+    label = JSONField(default=dict)
+    required = models.BooleanField(default=False)
+    relevant = models.TextField(blank=True)
+    repeatable = models.BooleanField(default=False)
+    parent = TreeForeignKey(
+        "self",
+        verbose_name=_("Parent"),
+        null=True,
+        blank=True,
+        related_name="children",
+        db_index=True,
+        on_delete=models.CASCADE,
+    )
+    business_area = models.ForeignKey(
+        "core.BusinessArea",
+        on_delete=models.CASCADE,
+        related_name="flex_groups",
+    )
+
+
+class FlexibleAttributeChoice(models.Model):
+    list_name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255)
+    label = JSONField(default=dict)
+    admin = models.CharField(max_length=255)
+    flex_attributes = models.ManyToManyField("core.FlexibleAttribute",)
+    business_area = models.ForeignKey(
+        "core.BusinessArea",
+        on_delete=models.CASCADE,
+        related_name="flex_choices",
+    )
+
+
 mptt.register(Location, order_insertion_by=["title"])
 mptt.register(CartoDBTable, order_insertion_by=["table_name"])
+mptt.register(FlexibleAttributeGroup, order_insertion_by=["name"])
