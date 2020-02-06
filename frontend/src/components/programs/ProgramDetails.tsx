@@ -76,13 +76,13 @@ export function ProgramDetails({
           <Grid item xs={4}>
             <LabelizedField
               label='START DATE'
-              value={moment(program.startDate).format('MM/DD/YYYY')}
+              value={moment(program.startDate).format('DD MMM YYYY')}
             />
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
               label='END DATE'
-              value={moment(program.endDate).format('MM/DD/YYYY')}
+              value={moment(program.endDate).format('DD MMM YYYY')}
             />
           </Grid>
 
