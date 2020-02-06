@@ -2,7 +2,7 @@ import React from 'react';
 import { ThemeProvider } from '@material-ui/core';
 import { ThemeProvider as StyledThemeProvider } from 'styled-components';
 import { theme } from '../../theme';
-import { StatusBox } from '../StatusBox';
+import { StatusBox } from './StatusBox';
 import styled from 'styled-components';
 import {
   programStatusToColor,
