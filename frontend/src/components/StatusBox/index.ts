@@ -1,3 +1,3 @@
 import { StatusBox } from './StatusBox';
 
-export { StatusBox };
+export { StatusBox }
