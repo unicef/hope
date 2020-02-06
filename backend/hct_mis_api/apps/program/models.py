@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+from auditlog.models import AuditlogHistoryField
 from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -7,6 +8,7 @@ from django.db.models import Sum
 from django.utils.translation import ugettext_lazy as _
 
 from utils.models import TimeStampedUUIDModel
+from auditlog.registry import auditlog
 
 
 class Program(TimeStampedUUIDModel):
@@ -83,6 +85,7 @@ class Program(TimeStampedUUIDModel):
     cash_plus = models.BooleanField()
     population_goal = models.PositiveIntegerField()
     administrative_areas_of_implementation = models.CharField(max_length=255)
+    history = AuditlogHistoryField(pk_indexable=False)
 
     @property
     def total_number_of_households(self):
@@ -147,3 +150,7 @@ class CashPlan(TimeStampedUUIDModel):
     dispersion_date = models.DateField()
     delivery_type = models.CharField(max_length=255)
     assistance_through = models.CharField(max_length=255)
+
+
+
+auditlog.register(Program)
