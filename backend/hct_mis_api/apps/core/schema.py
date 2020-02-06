@@ -60,6 +60,11 @@ class LogEntryObject(DjangoObjectType):
 
 
 class LogEntryObjectConnection(Connection):
+    total_count = graphene.Int()
+
+    def resolve_total_count(self, info, **kwargs):
+        return self.iterable.count()
+
     class Meta:
         node = LogEntryObject
 
