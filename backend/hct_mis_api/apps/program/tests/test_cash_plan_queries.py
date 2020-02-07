@@ -30,6 +30,8 @@ class TestCashPlanQueries(APITestCase):
         dispersionDate
         deliveryType
         assistanceThrough
+        fcId
+        dpId
       }
     }
     """
@@ -57,6 +59,8 @@ class TestCashPlanQueries(APITestCase):
             dispersionDate
             deliveryType
             assistanceThrough
+            fcId
+            dpId
           }
         }
       }
@@ -90,6 +94,8 @@ class TestCashPlanQueries(APITestCase):
             "total_undelivered_quantity": 55497021.04,
             "delivery_type": "Deposit to Card",
             "assistance_through": "Cairo Amman Bank",
+            "fc_id": "965-79-7961",
+            "dp_id": "951-84-9815",
         },
         {
             "cash_assist_id": "04b9d44b-67fe-425c-9095-509e31ba7494",
@@ -116,6 +122,8 @@ class TestCashPlanQueries(APITestCase):
             "total_undelivered_quantity": 63098825.46,
             "delivery_type": "Deposit to Card",
             "assistance_through": "Cairo Amman Bank",
+            "fc_id": "913-72-9949",
+            "dp_id": "966-76-0951",
         },
         {
             "cash_assist_id": "e02e9e29-a9bc-4d72-9c95-23fe123662c4",
@@ -142,6 +150,8 @@ class TestCashPlanQueries(APITestCase):
             "total_undelivered_quantity": 68666170.96,
             "delivery_type": "Deposit to Card",
             "assistance_through": "Cairo Amman Bank",
+            "fc_id": "964-90-7586",
+            "dp_id": "901-88-1631",
         },
         {
             "cash_assist_id": "0772b884-0ae1-4d4b-823d-80037eef00af",
@@ -168,6 +178,8 @@ class TestCashPlanQueries(APITestCase):
             "total_undelivered_quantity": 31657176.41,
             "delivery_type": "Deposit to Card",
             "assistance_through": "Cairo Amman Bank",
+            "fc_id": "908-94-6201",
+            "dp_id": "920-92-3896",
         },
         {
             "cash_assist_id": "357eeb74-f76d-4f12-a02b-8e67f0f90813",
@@ -194,6 +206,8 @@ class TestCashPlanQueries(APITestCase):
             "total_undelivered_quantity": 71567447.8,
             "delivery_type": "Deposit to Card",
             "assistance_through": "Cairo Amman Bank",
+            "fc_id": "936-79-6145",
+            "dp_id": "910-84-7232",
         },
         {
             "cash_assist_id": "be4fcbf6-40ba-405d-86be-0010c19a91c4",
@@ -220,6 +234,8 @@ class TestCashPlanQueries(APITestCase):
             "total_undelivered_quantity": 19931436.71,
             "delivery_type": "Deposit to Card",
             "assistance_through": "Cairo Amman Bank",
+            "fc_id": "907-71-7905",
+            "dp_id": "940-88-0908",
         },
         {
             "cash_assist_id": "17502569-0613-44f2-94d0-916ad6a7b860",
@@ -246,6 +262,8 @@ class TestCashPlanQueries(APITestCase):
             "total_undelivered_quantity": 58316677.75,
             "delivery_type": "Deposit to Card",
             "assistance_through": "Cairo Amman Bank",
+            "fc_id": "996-79-0175",
+            "dp_id": "925-82-8201",
         },
         {
             "cash_assist_id": "ccd0b2b1-85dc-44c2-82f3-906b33a16645",
@@ -272,6 +290,8 @@ class TestCashPlanQueries(APITestCase):
             "total_undelivered_quantity": 31178307.82,
             "delivery_type": "Deposit to Card",
             "assistance_through": "Cairo Amman Bank",
+            "fc_id": "975-71-8876",
+            "dp_id": "901-83-9734",
         },
         {
             "cash_assist_id": "0d4f1c5e-7f83-4f8a-9a9c-82a2af883a83",
@@ -298,6 +318,8 @@ class TestCashPlanQueries(APITestCase):
             "total_undelivered_quantity": 76468590.87,
             "delivery_type": "Deposit to Card",
             "assistance_through": "Cairo Amman Bank",
+            "fc_id": "987-92-6540",
+            "dp_id": "994-79-6154",
         },
         {
             "cash_assist_id": "056d6d6e-2562-4f1e-a37d-00017020a869",
@@ -324,6 +346,8 @@ class TestCashPlanQueries(APITestCase):
             "total_undelivered_quantity": 29600156.58,
             "delivery_type": "Deposit to Card",
             "assistance_through": "Cairo Amman Bank",
+            "fc_id": "921-81-6446",
+            "dp_id": "915-92-3393",
         },
     ]
 
