@@ -4,10 +4,16 @@ from itertools import repeat
 
 from django.core.management import BaseCommand
 
-from account.fixtures import UserFactory
+from core.fixtures import LocationFactory
 from core.models import BusinessArea
+from household.fixtures import (
+    EntitlementCardFactory,
+    HouseholdFactory,
+    IndividualFactory,
+)
 from payment.fixtures import PaymentRecordFactory
 from program.fixtures import CashPlanFactory, ProgramFactory
+from targeting.fixtures import TargetPopulationFactory
 
 
 class Command(BaseCommand):
@@ -52,24 +58,28 @@ class Command(BaseCommand):
     def _generate_program_with_dependencies(options):
         cash_plans_amount = options["cash_plans_amount"]
         payment_record_amount = options["payment_record_amount"]
+        business_area = BusinessArea.objects.first()
 
-        user = UserFactory.create()
-
-        program = ProgramFactory(
-            business_area=BusinessArea.objects.first()
-        )
+        program = ProgramFactory.create(business_area=business_area)
 
         for _ in range(cash_plans_amount):
-            cash_plan = CashPlanFactory.create(program=program, created_by=user)
-            PaymentRecordFactory.create_batch(
-                payment_record_amount, cash_plan=cash_plan,
-            )
+            cash_plan = CashPlanFactory.create(program=program)
+            for _ in range(payment_record_amount):
+                location = LocationFactory.create(business_area=business_area)
+                household = HouseholdFactory.create(location=location)
+                individuals = IndividualFactory.create_batch(
+                    4, household=household,
+                )
+                household = HouseholdFactory.create(location=location)
+                PaymentRecordFactory.create(
+                    cash_plan=cash_plan, household=household
+                )
+                EntitlementCardFactory.create(household=household)
+                TargetPopulationFactory.create(households=household)
 
     def handle(self, *args, **options):
         start_time = time.time()
-        cash_plans_amount = options["cash_plans_amount"]
         programs_amount = options["programs_amount"]
-        payment_record_amount = options["payment_record_amount"]
 
         pool = multiprocessing.Pool(processes=7)
         pool.map(
@@ -80,11 +90,5 @@ class Command(BaseCommand):
         pool.join()
 
         self.stdout.write(
-            f"Generated {programs_amount} Programs "
-            f" {cash_plans_amount} Cash Plans for each Program"
-            f" (total Cash Plans: {cash_plans_amount * programs_amount})"
-            f" {payment_record_amount} Payment Records for each Cash Plan"
-            f" (total Payment Record: "
-            f"{(cash_plans_amount * programs_amount) * payment_record_amount})"
-            f" {(time.time() - start_time)} seconds"
+            f"Generated fixtures in {(time.time() - start_time)} seconds"
         )

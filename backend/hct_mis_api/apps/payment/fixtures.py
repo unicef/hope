@@ -38,6 +38,7 @@ class PaymentEntitlementFactory(factory.DjangoModelFactory):
     transaction_reference_id = factory.Faker("itin")
     fsp = factory.Faker("company")
 
+
 class PaymentRecordFactory(factory.DjangoModelFactory):
     class Meta:
         model = PaymentRecord
@@ -61,6 +62,7 @@ class PaymentRecordFactory(factory.DjangoModelFactory):
     )
     target_population = factory.SubFactory(TargetPopulationFactory)
     entitlement = factory.SubFactory(PaymentEntitlementFactory)
+
 
 class VerificationProcessFactory(factory.DjangoModelFactory):
     class Meta:
