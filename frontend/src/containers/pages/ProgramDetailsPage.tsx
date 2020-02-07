@@ -5,12 +5,13 @@ import { ProgramDetails } from '../../components/programs/ProgramDetails';
 import { CashPlanTable } from '../CashPlanTable';
 import { ProgramNode, useProgramQuery, } from '../../__generated__/graphql';
 import { ProgramDetailsPageHeader } from './headers/ProgramDetailsPageHeader';
+import { ProgramActivityLogTable } from '../ProgramActivityLogTable';
 
 const Container = styled.div`
   && {
     display: flex;
     flex-direction: column;
-    width: 100%;
+    min-width: 100%;
   }
 `;
 
@@ -19,6 +20,7 @@ const TableWrapper = styled.div`
   flex-direction: row;
   flex-wrap: wrap;
   padding: 20px;
+  padding-bottom: 0;
 `;
 
 export function ProgramDetailsPage(): React.ReactElement {
@@ -37,6 +39,9 @@ export function ProgramDetailsPage(): React.ReactElement {
         <ProgramDetails program={program} />
         <TableWrapper>
           <CashPlanTable program={program} />
+        </TableWrapper>
+        <TableWrapper>
+          <ProgramActivityLogTable program={program} />
         </TableWrapper>
       </Container>
     </div>

@@ -3,6 +3,7 @@ import json
 import graphene
 from auditlog.models import LogEntry
 from django.core.serializers.json import DjangoJSONEncoder
+from django.db.models import Q
 from django.utils.encoding import force_text
 from django.utils.functional import Promise
 from graphene import String, DateTime, Scalar
@@ -110,4 +111,4 @@ class Query(graphene.ObjectType):
 
     def resolve_all_log_entries(self, info, object_id, **kwargs):
         id = decode_id_string(object_id)
-        return LogEntry.objects.filter(object_pk=id).all()
+        return LogEntry.objects.filter(~Q(action=0), object_pk=id).all()
