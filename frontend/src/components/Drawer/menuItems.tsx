@@ -28,6 +28,21 @@ export const menuItems = [
         href: '/#',
         selectedRegexp: /^\/test.*$/,
         icon: <PeopleIcon />,
+        collapsable: true,
+        secondaryActions: [
+            {
+                name: 'Household',
+                href: '/population/household/1',
+                selectedRegexp: /^\/test.*$/,
+                icon: <PeopleIcon />,
+            },
+            {
+                name: 'Individuals',
+                href: '/#',
+                selectedRegexp: /^\/test.*$/,
+                icon: <PeopleIcon />,
+            },
+        ]
     },
     {
         name: 'Target Population',
