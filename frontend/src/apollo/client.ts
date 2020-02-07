@@ -6,6 +6,7 @@ import { onError } from 'apollo-link-error';
 import { ApolloLink } from 'apollo-link';
 
 const errorLink = onError(({ graphQLErrors, networkError }) => {
+  console.log("here");
   if (graphQLErrors)
     graphQLErrors.forEach(({ message, locations, path }) => {
       if (message.toLowerCase().includes('user is not authenticated')) {
