@@ -65,13 +65,17 @@ const useStyles = makeStyles((theme: typeof themeObj) => ({
 interface Props {
   open: boolean;
   handleDrawerClose: () => void;
+  handleItemCollapse: (index: number) => void;
+  itemsCollapse: { id: number, open: boolean}[];
   currentLocation: string;
 }
 
 export function Drawer({
   open,
+  itemsCollapse,
   handleDrawerClose,
   currentLocation,
+  handleItemCollapse
 }: Props): React.ReactElement {
   const classes = useStyles({});
   return (
@@ -96,7 +100,7 @@ export function Drawer({
       </div>
       <Divider />
       <List className={classes.list}>
-        <DrawerItems currentLocation={currentLocation} />
+        <DrawerItems itemsCollapse={itemsCollapse} handleItemCollapse={handleItemCollapse} currentLocation={currentLocation} />
       </List>
     </DrawerMaterial>
   );
