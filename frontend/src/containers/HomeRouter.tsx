@@ -67,7 +67,8 @@ export function HomeRouter(): React.ReactElement {
         <Switch>
           <Route path="/:businessArea/cashplans/:id">
             <CashPlanDetailsPage />
-          <Route path='/:businessArea/population/household/:id'>
+          </Route>
+          <Route path='/:businessArea/population/household'>
             <PopulationHouseholdPage />
           </Route>
           <Route path='/:businessArea/programs/:id'>

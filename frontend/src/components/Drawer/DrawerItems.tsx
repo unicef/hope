@@ -7,8 +7,8 @@ import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import { Link } from 'react-router-dom';
 import React from 'react';
-import { menuItems } from './menuItems';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { menuItems } from './menuItems';
 
 interface Props {
   currentLocation: string;
@@ -17,10 +17,8 @@ interface Props {
 }
 export function DrawerItems({ currentLocation, handleItemCollapse, itemsCollapse }: Props): React.ReactElement {
   const businessArea = useBusinessArea();
-  const testBoolean = true;
 
   const checkCollapse = (index: number): boolean => {
-    console.log(itemsCollapse)
     if (!itemsCollapse) return false;
     if (itemsCollapse.find(x => x.id === index)) return itemsCollapse.find(x => x.id === index).open;
     return false;
@@ -45,7 +43,7 @@ export function DrawerItems({ currentLocation, handleItemCollapse, itemsCollapse
             {itemsCollapse && itemsCollapse[index] ? <ExpandLess /> : <ExpandMore />}
           </ListItem>
             <Collapse in={checkCollapse(index)}>
-              <List component="div" disablePadding>
+              <List component="div" style={{paddingLeft: "56px"}}>
                 { item.secondaryActions && item.secondaryActions.map(secondary => (
                   <ListItem
                   button
