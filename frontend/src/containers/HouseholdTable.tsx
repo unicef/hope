@@ -4,7 +4,7 @@ import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
 import { Order, TableComponent } from '../components/table/TableComponent';
 import { HeadCell } from '../components/table/EnhancedTableHead';
-import {HouseholdNode} from '../__generated__/graphql';
+import { HouseholdNode } from '../__generated__/graphql';
 
 const headCells: HeadCell<HouseholdNode>[] = [
     {
@@ -58,6 +58,7 @@ export const HouseholdTable = (): React.ReactElement => {
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [orderBy, setOrderBy] = useState(null);
     const [orderDirection, setOrderDirection] = useState('asc');
+    // const test = allHouseholds()
 
     return (
         <TableWrapper>
