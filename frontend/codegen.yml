@@ -1,4 +1,3 @@
-debug: 1
 overwrite: true
 schema: './data/schema.json'
 documents: 'src/apollo/**/*.ts'

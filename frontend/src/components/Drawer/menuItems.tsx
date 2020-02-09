@@ -3,6 +3,7 @@ import AutorenewIcon from '@material-ui/icons/AutorenewRounded';
 import PeopleIcon from '@material-ui/icons/PeopleRounded';
 import ListAltRounded from '@material-ui/icons/ListAltRounded';
 import FlashOnRounded from '@material-ui/icons/FlashOnRounded';
+import FaceIcon from '@material-ui/icons/Face';
 import AttachMoney from '@material-ui/icons/AttachMoney';
 import Feedback from '@material-ui/icons/Feedback';
 import TrendingUpRounded from '@material-ui/icons/TrendingUpRounded';
@@ -32,7 +33,7 @@ export const menuItems = [
         secondaryActions: [
             {
                 name: 'Household',
-                href: '/population/household/1',
+                href: '/population/household',
                 selectedRegexp: /^\/test.*$/,
                 icon: <PeopleIcon />,
             },
@@ -40,7 +41,7 @@ export const menuItems = [
                 name: 'Individuals',
                 href: '/#',
                 selectedRegexp: /^\/test.*$/,
-                icon: <PeopleIcon />,
+                icon: <FaceIcon />,
             },
         ]
     },
