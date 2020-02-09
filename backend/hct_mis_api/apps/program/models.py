@@ -147,3 +147,5 @@ class CashPlan(TimeStampedUUIDModel):
     dispersion_date = models.DateField()
     delivery_type = models.CharField(max_length=255)
     assistance_through = models.CharField(max_length=255)
+    fc_id = models.CharField(max_length=255)
+    dp_id = models.CharField(max_length=255)
