@@ -3,18 +3,19 @@ import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
 import styled from 'styled-components';
 import Moment from 'react-moment';
-import { useHistory } from 'react-router-dom';
 import {
   AllCashPlansQueryVariables,
   CashPlanNode,
   ProgramNode,
   useAllCashPlansQuery,
 } from '../__generated__/graphql';
+import { useHistory } from 'react-router-dom';
 import { Order, TableComponent } from '../components/table/TableComponent';
 import { HeadCell } from '../components/table/EnhancedTableHead';
 import { StatusBox } from '../components/StatusBox';
 import { cashPlanStatusToColor, columnToOrderBy } from '../utils/utils';
 import { useBusinessArea } from '../hooks/useBusinessArea';
+import { Link } from '../components/Link';
 
 const headCells: HeadCell<CashPlanNode>[] = [
   {
@@ -87,10 +88,6 @@ export function CashPlanTable({ program }: CashPlanTableProps): ReactElement {
     },
     fetchPolicy: 'network-only',
   });
-  const handleClick = (row) => {
-    const path = `/${businessArea}/cashplans/${row.id}`;
-    history.push(path);
-  };
   if (!data) {
     return null;
   }
@@ -105,8 +102,10 @@ export function CashPlanTable({ program }: CashPlanTableProps): ReactElement {
         return (
           <TableRow
             hover
-            onClick={() => handleClick(row)}
-            role='checkbox'
+            component={Link}
+            // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+            // @ts-ignore
+            to={`/${businessArea}/cashplans/${row.id}`}
             key={row.id}
           >
             <TableCell align='left'>
