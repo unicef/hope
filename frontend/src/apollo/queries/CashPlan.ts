@@ -8,6 +8,11 @@ export const CashPlan = gql`
       startDate
       endDate
       status
+      deliveryType
+      fcId
+      dpId
+      dispersionDate
+      assistanceThrough
       cashAssistId
       dispersionDate
       targetPopulation {

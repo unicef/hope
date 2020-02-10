@@ -1357,7 +1357,7 @@ export type CashPlanQuery = (
   { __typename?: 'Query' }
   & { cashPlan: Maybe<(
     { __typename?: 'CashPlanNode' }
-    & Pick<CashPlanNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'cashAssistId' | 'dispersionDate'>
+    & Pick<CashPlanNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'deliveryType' | 'fcId' | 'dpId' | 'dispersionDate' | 'assistanceThrough' | 'cashAssistId'>
     & { targetPopulation: (
       { __typename?: 'TargetPopulationNode' }
       & Pick<TargetPopulationNode, 'name'>
@@ -1933,6 +1933,11 @@ export const CashPlanDocument = gql`
     startDate
     endDate
     status
+    deliveryType
+    fcId
+    dpId
+    dispersionDate
+    assistanceThrough
     cashAssistId
     dispersionDate
     targetPopulation {
