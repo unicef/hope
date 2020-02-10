@@ -1,8 +1,8 @@
-import React, {ReactElement, useState} from 'react';
+import React, { ReactElement, useState } from 'react';
 import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
 import styled from 'styled-components';
-import {useHistory} from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import Moment from 'react-moment';
 import {
   AllPaymentRecordsQueryVariables,
@@ -10,11 +10,11 @@ import {
   PaymentRecordNode,
   useAllPaymentRecordsQuery,
 } from '../__generated__/graphql';
-import {Order, TableComponent} from '../components/table/TableComponent';
-import {HeadCell} from '../components/table/EnhancedTableHead';
-import {StatusBox} from '../components/StatusBox';
-import {columnToOrderBy, paymentRecordStatusToColor,} from '../utils/utils';
-import {useBusinessArea} from '../hooks/useBusinessArea';
+import { Order, TableComponent } from '../components/table/TableComponent';
+import { HeadCell } from '../components/table/EnhancedTableHead';
+import { StatusBox } from '../components/StatusBox';
+import { columnToOrderBy, paymentRecordStatusToColor } from '../utils/utils';
+import { useBusinessArea } from '../hooks/useBusinessArea';
 
 const headCells: HeadCell<PaymentRecordNode>[] = [
   {
@@ -81,7 +81,7 @@ export function PaymentRecordTable({
   const [orderBy, setOrderBy] = useState(null);
   const [orderDirection, setOrderDirection] = useState('asc');
   const businessArea = useBusinessArea();
-  const { data, fetchMore } = useAllPaymentRecordsQuery({
+  const { data, fetchMore, error } = useAllPaymentRecordsQuery({
     variables: {
       cashPlan: cashPlan.id,
       count: rowsPerPage,
@@ -170,6 +170,7 @@ export function PaymentRecordTable({
         fetchMore({
           variables,
           updateQuery: (prev, { fetchMoreResult }) => {
+            console.log('fetchMoreResult');
             return fetchMoreResult;
           },
         });
@@ -188,6 +189,7 @@ export function PaymentRecordTable({
         fetchMore({
           variables,
           updateQuery: (prev, { fetchMoreResult }) => {
+            console.log('fetchMoreResult');
             return fetchMoreResult;
           },
         });
