@@ -13,6 +13,10 @@ export const CashPlan = gql`
       targetPopulation {
         name
       }
+      program {
+        id
+        name
+      }
       paymentRecords {
         totalCount
         edgeCount
