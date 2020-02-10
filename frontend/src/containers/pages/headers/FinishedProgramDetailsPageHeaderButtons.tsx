@@ -12,22 +12,20 @@ export interface FinishedProgramDetailsPageHeaderPropTypes {
   program: ProgramNode;
 }
 
-export function FinishedProgramDetailsPageHeader({
+export function FinishedProgramDetailsPageHeaderButtons({
   program,
 }: FinishedProgramDetailsPageHeaderPropTypes): React.ReactElement {
   return (
-    <PageHeader title={program.name} category='Programme Management'>
-      <div>
-        <ButtonContainer>
-          <Button
-            variant='contained'
-            color='primary'
-            startIcon={<OpenInNewRoundedIcon />}
-          >
-            OPEN IN CASHSSIST
-          </Button>
-        </ButtonContainer>
-      </div>
-    </PageHeader>
+    <div>
+      <ButtonContainer>
+        <Button
+          variant='contained'
+          color='primary'
+          startIcon={<OpenInNewRoundedIcon />}
+        >
+          OPEN IN CASHSSIST
+        </Button>
+      </ButtonContainer>
+    </div>
   );
 }

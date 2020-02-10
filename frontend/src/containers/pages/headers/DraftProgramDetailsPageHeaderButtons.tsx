@@ -13,22 +13,20 @@ const ButtonContainer = styled.span`
 export interface DraftProgramDetailsPageHeaderPropTypes {
   program: ProgramNode;
 }
-export function DraftProgramDetailsPageHeader({
+export function DraftProgramDetailsPageHeaderButtons({
   program,
 }: DraftProgramDetailsPageHeaderPropTypes): React.ReactElement {
   return (
-    <PageHeader title={program.name} category='Programme Management'>
-      <div>
-        <ButtonContainer>
-          <DeleteProgram program={program} />
-        </ButtonContainer>
-        <ButtonContainer>
-          <EditProgram program={program} />
-        </ButtonContainer>
-        <ButtonContainer>
-          <ActivateProgram program={program} />
-        </ButtonContainer>
-      </div>
-    </PageHeader>
+    <div>
+      <ButtonContainer>
+        <DeleteProgram program={program} />
+      </ButtonContainer>
+      <ButtonContainer>
+        <EditProgram program={program} />
+      </ButtonContainer>
+      <ButtonContainer>
+        <ActivateProgram program={program} />
+      </ButtonContainer>
+    </div>
   );
 }
