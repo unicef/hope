@@ -80,7 +80,7 @@ export function CashPlanTable({ program }: CashPlanTableProps): ReactElement {
   const [orderBy, setOrderBy] = useState(null);
   const [orderDirection, setOrderDirection] = useState('asc');
   const businessArea = useBusinessArea();
-  const { data, fetchMore } = useAllCashPlansQuery({
+  const { data, fetchMore, loading } = useAllCashPlansQuery({
     variables: {
       program: program.id,
       count: rowsPerPage,
@@ -100,6 +100,7 @@ export function CashPlanTable({ program }: CashPlanTableProps): ReactElement {
     <TableComponent<CashPlanNode>
       title='Cash Plans'
       data={cashPlans}
+      loading={loading}
       renderRow={(row) => {
         return (
           <TableRow
@@ -108,7 +109,15 @@ export function CashPlanTable({ program }: CashPlanTableProps): ReactElement {
             role='checkbox'
             key={row.id}
           >
-            <TableCell align='left'>{row.cashAssistId}</TableCell>
+            <TableCell align='left'>
+              <div
+                style={{
+                  textOverflow: 'ellipsis',
+                }}
+              >
+                {row.cashAssistId}
+              </div>
+            </TableCell>
             <TableCell align='left'>
               <StatusContainer>
                 <StatusBox

@@ -10,6 +10,7 @@ import {
 import { CreateProgram } from '../dialogs/programs/CreateProgram';
 import { getCurrentLocation } from '../../utils/utils';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { LoadingComponent } from '../../components/LoadingComponent';
 
 const PageContainer = styled.div`
   display: flex;
@@ -20,19 +21,24 @@ const PageContainer = styled.div`
 `;
 export function ProgramsPage(): React.ReactElement {
   const businessArea = useBusinessArea();
-  const { data } = useAllProgramsQuery({
+  const { data, loading } = useAllProgramsQuery({
     variables: {
       businessArea,
     },
   });
 
-  const { data: choices } = useProgrammeChoiceDataQuery();
+  const {
+    data: choices,
+    loading: choicesLoading,
+  } = useProgrammeChoiceDataQuery();
   const toolbar = (
     <PageHeader title='Programme Management'>
       <CreateProgram />
     </PageHeader>
   );
-
+  if (loading || choicesLoading) {
+    return <LoadingComponent />;
+  }
   if (!data || !data.allPrograms || !choices) {
     return <div>{toolbar}</div>;
   }
