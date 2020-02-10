@@ -2,12 +2,6 @@
 
 ## UNICEF
 
-### EMOPS
-
-### Supply Division
-
-### Office of Innovation
-
 ### ICTD Solution Delivery
 
 | Name | Email | Role | Other |
@@ -24,7 +18,6 @@
 | :--- | :--- | :--- | :--- |
 | Thierry |  | Business Relationship Manager |  |
 | Khalid |  | Business Analyst |  |
-|  |  |  |  |
 
 ## Tivix
 
@@ -41,6 +34,12 @@
 | Wojtek Nosal | wojtek.nosal@tivix.com | Backend Software Engineer |
 | Marcin Skorek | marcin.skorek@tivix.com | Frontend Software Engineer |
 | Michal Kopacki | michal.kopacki@tivix.com | DevOps Specialist |
+
+### EMOPS
+
+### Supply Division
+
+### Office of Innovation
 
 
 
