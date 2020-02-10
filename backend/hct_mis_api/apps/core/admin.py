@@ -61,7 +61,6 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
 
     object_fields = {}
 
-    parent_group = None
     group_tree = [None]
 
     def get_urls(self):
@@ -88,22 +87,25 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
                 self.json_fields[field_name].update(
                     {language: cleared_value if value else ""}
                 )
-        else:
-            if header_name == "required":
-                if value == "true":
-                    self.object_fields[header_name] = True
-                else:
-                    self.object_fields[header_name] = False
+            return
+
+        if header_name == "required":
+            if value == "true":
+                self.object_fields[header_name] = True
             else:
-                if header_name in model_fields:
-                    self.object_fields[header_name] = value if value else ""
-                elif header_name.startswith("admin"):
-                    self.object_fields["admin"] = value if value else ""
+                self.object_fields[header_name] = False
+            return
+
+        if header_name in model_fields:
+            self.object_fields[header_name] = value if value else ""
+        elif header_name.startswith("admin"):
+            self.object_fields["admin"] = value if value else ""
 
     def check_if_can_add(self, value, row):
         is_core_field = isinstance(value, str) and any(
             value.endswith(i) for i in self.core_field_suffixes
         ) and not row[0].value.endswith('_group')
+
         is_in_excluded = value in self.fields_to_exclude
 
         is_end_info = any(value == i for i in ("end_repeat", "end_group"))
