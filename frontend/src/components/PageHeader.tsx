@@ -44,9 +44,13 @@ export function PageHeader({
   const history = useHistory();
   return (
     <Container>
-      <BackButton onClick={() => history.goBack()}>
-        <ArrowBackRoundedIcon fontSize='large' />
-      </BackButton>
+      {breadCrumbs && breadCrumbs.length !== 0 ? (
+        <BackButton
+          onClick={() => history.push(breadCrumbs[breadCrumbs.length - 1].to)}
+        >
+          <ArrowBackRoundedIcon fontSize='large' />
+        </BackButton>
+      ) : null}
       <HeaderContainer>
         <div>
           <div>
