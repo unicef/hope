@@ -8,6 +8,7 @@ import { PaymentRecordTable } from '../PaymentRecordTable';
 import { useCashPlanQuery, CashPlanNode } from '../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { LoadingComponent } from '../../components/LoadingComponent';
 
 const Container = styled.div`
   && {
@@ -26,13 +27,16 @@ const TableWrapper = styled.div`
 
 export function CashPlanDetailsPage(): React.ReactElement {
   const { id } = useParams();
-  const { data } = useCashPlanQuery({
+  const { data, loading } = useCashPlanQuery({
     variables: { id },
   });
   const businessArea = useBusinessArea();
 
   if (!data) {
     return null;
+  }
+  if (loading) {
+    return <LoadingComponent />;
   }
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
