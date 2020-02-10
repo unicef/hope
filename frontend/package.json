@@ -68,6 +68,7 @@
     "postcss-preset-env": "6.7.0",
     "postcss-safe-parser": "4.0.1",
     "react": "^16.12.0",
+    "react-scripts": "3.3.1",
     "react-apollo": "^3.1.3",
     "react-app-polyfill": "^1.0.5",
     "react-dev-utils": "^10.0.0",
@@ -100,7 +101,9 @@
     "download-local-schema": "wget --no-check-certificate -O data/schema.graphql http://localhost:8080/api/graphql/schema.graphql",
     "generate-apollo-schema": "apollo schema:download data/schema.json",
     "generate-types": "yarn download-dev-schema&&yarn generate-apollo-schema&&graphql-codegen --config codegen.yml --debug",
-    "generate-types-local": "yarn download-local-schema&&yarn generate-apollo-schema&&graphql-codegen --config codegen.yml --debug"
+    "generate-types-local": "yarn download-local-schema&&yarn generate-apollo-schema&&graphql-codegen --config codegen.yml --debug",
+    "storybook": "start-storybook -p 9009",
+    "build-storybook": "build-storybook"
   },
   "browserslist": {
     "production": [
@@ -124,6 +127,11 @@
     "@graphql-codegen/typescript-resolvers": "^1.11.2",
     "@tivix/eslint-config": "^1.0.0",
     "@tivix/prettier-config": "^1.0.0",
+    "@storybook/addon-actions": "^6.0.0-alpha.6",
+    "@storybook/addon-links": "^6.0.0-alpha.6",
+    "@storybook/addons": "^6.0.0-alpha.6",
+    "@storybook/preset-create-react-app": "^1.5.2",
+    "@storybook/react": "^6.0.0-alpha.6",
     "apollo": "^2.16.0",
     "eslint": ">=6.6.0 <7",
     "prettier": "^1.19.1"
