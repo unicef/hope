@@ -62,6 +62,7 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
     object_fields = {}
 
     parent_group = None
+    group_tree = [None]
 
     def get_urls(self):
         urls = super().get_urls()
@@ -99,16 +100,16 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
                 elif header_name.startswith("admin"):
                     self.object_fields["admin"] = value if value else ""
 
-    def check_if_can_add(self, value):
+    def check_if_can_add(self, value, row):
         is_core_field = isinstance(value, str) and any(
             value.endswith(i) for i in self.core_field_suffixes
-        )
+        ) and not row[0].value.endswith('_group')
         is_in_excluded = value in self.fields_to_exclude
 
         is_end_info = any(value == i for i in ("end_repeat", "end_group"))
 
         if is_end_info:
-            self.parent_group = None
+            self.group_tree.pop()
             return False
 
         if is_core_field or is_in_excluded:
@@ -118,6 +119,7 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
 
     @transaction.atomic
     def import_xls(self, request):
+        # TODO: Break this code into smaller pieces (functions)
         if request.method == "POST":
             xls_file = request.FILES["xls_file"]
             business_area_id = request.POST.get("business_area")
@@ -147,9 +149,11 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
             for row_number in range(1, sheets["survey"].nrows):
                 row = sheets["survey"].row(row_number)
                 object_type_to_add = (
-                    "group" if "_group" in row[0].value else "attribute"
+                    "group"
+                    if row[0].value in ("begin_group", "begin_repeat")
+                    else "attribute"
                 )
-                repeatable = False
+                repeatable = True if row[0].value == "begin_repeat" else False
                 can_add_flag = True
                 self.json_fields = defaultdict(dict)
                 self.object_fields = {}
@@ -157,7 +161,7 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
                 for cell, header_name in zip(row, headers_map):
                     value = cell.value
 
-                    if not self.check_if_can_add(value):
+                    if not self.check_if_can_add(value, row):
                         can_add_flag = False
                         break
 
@@ -176,27 +180,27 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
                                 name=self.object_fields["name"],
                                 **self.json_fields,
                                 repeatable=repeatable,
-                                parent=self.parent_group,
+                                parent=self.group_tree[-1],
                             )
                             group = FlexibleAttributeGroup.objects.get(
                                 name=self.object_fields["name"],
                                 business_area=business_area,
                             )
-                            self.parent_group = group
+                            self.group_tree.append(group)
                         else:
                             group = FlexibleAttributeGroup.objects.create(
                                 **self.object_fields,
                                 **self.json_fields,
                                 repeatable=repeatable,
-                                parent=self.parent_group,
+                                parent=self.group_tree[-1],
                                 business_area=business_area,
                                 lft=1,
                                 rght=1,
                                 tree_id=1,
                                 level=1,
                             )
-                            self.parent_group = group
-                        all_groups.append(self.parent_group)
+                            self.group_tree.append(group)
+                        all_groups.append(group)
                     elif object_type_to_add == "attribute":
                         obj = FlexibleAttribute.objects.filter(
                             name=self.object_fields["name"],
@@ -205,7 +209,7 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
                         )
                         if obj:
                             obj.update(
-                                group=self.parent_group,
+                                group=self.group_tree[-1],
                                 **self.object_fields,
                                 **self.json_fields,
                             )
@@ -220,7 +224,7 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
                             all_attrs.append(
                                 FlexibleAttribute(
                                     business_area=business_area,
-                                    group=self.parent_group,
+                                    group=self.group_tree[-1],
                                     **self.object_fields,
                                     **self.json_fields,
                                 )
@@ -277,7 +281,7 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
                             name=self.object_fields["name"],
                         )
                     )
-                    obj.flex_attributes.set(flex_attrs)
+                    obj.first().flex_attributes.set(flex_attrs)
 
                 created = FlexibleAttributeChoice.objects.create(
                     business_area=business_area,
