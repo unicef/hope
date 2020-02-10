@@ -25,6 +25,7 @@ export function ProgramsPage(): React.ReactElement {
     variables: {
       businessArea,
     },
+    fetchPolicy: 'cache-and-network',
   });
 
   const {
