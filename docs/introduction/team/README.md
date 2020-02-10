@@ -14,6 +14,9 @@
 | :--- | :--- | :--- | :--- |
 | Evan Wheeler | ewheeler@unicef.org |  |  |
 | Sammy Njoe | snjoe@unicef.org |  |  |
+| Juhipriya Nath \(Juhi\) |  | QA Analyst |  |
+| Felim McMahon |  | PMO and QA Manager |  |
+| Stefano Apostolico |  | Solution Architect |  |
 
 ### ICTD BRM-EMOPS
 
@@ -31,6 +34,7 @@
 | Dave Strohl | dave.strohl@tivix.com | Sr. Software Engineer |
 | Katarzyna Lanecka | katarzyna.lanecka@tivix.com | Design Lead |
 | Artur Potyrala | artur.potyrala@tivix.com | UX Designer |
+| Przemek Adamski | przemek.adamski@tivix.com | UX Designer |
 | Sumit Chachra | sumit@tivix.com | Technical Delivery Lead |
 | Jakub Krasnowski | jakub.krasnowski@tivix.com | Project Manager |
 | Jan Romaniak | jan.romaniak@tivix.com | Full-stack Sr. Software Engineer |
