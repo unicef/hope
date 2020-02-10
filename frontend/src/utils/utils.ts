@@ -1,4 +1,12 @@
 import { theme as themeObj } from '../theme';
+import {
+  AllProgramsQuery,
+  ChoiceObject,
+  ProgramNode,
+  ProgramNodeEdge,
+  ProgramQuery,
+  ProgramStatus,
+} from '../__generated__/graphql';
 
 export function opacityToHex(opacity: number): string {
   return Math.floor(opacity * 0xff).toString(16);
@@ -18,7 +26,6 @@ export function programStatusToColor(
   }
 }
 
-
 export function cashPlanStatusToColor(
   theme: typeof themeObj,
   status: string,
@@ -33,18 +40,18 @@ export function cashPlanStatusToColor(
   }
 }
 export function paymentRecordStatusToColor(
-         theme: typeof themeObj,
-         status: string,
-       ): string {
-         switch (status) {
-           case 'SUCCESS':
-             return theme.hctPalette.green;
-           case 'PENDING':
-             return theme.hctPalette.oragne;
-           default:
-             return theme.palette.error.main;
-         }
-       }
+  theme: typeof themeObj,
+  status: string,
+): string {
+  switch (status) {
+    case 'SUCCESS':
+      return theme.hctPalette.green;
+    case 'PENDING':
+      return theme.hctPalette.oragne;
+    default:
+      return theme.palette.error.main;
+  }
+}
 export function getCookie(name): string | null {
   const value = `; ${document.cookie}`;
   const parts = value.split(`; ${name}=`);
@@ -85,4 +92,32 @@ export function columnToOrderBy(
   orderDirection: string,
 ): string {
   return camelToUnderscore(`${orderDirection === 'desc' ? '-' : ''}${column}`);
+}
+
+export function choicesToDict(choices: ChoiceObject[]) {
+  return choices.reduce((previousValue, currentValue, currentIndex, array) => {
+    const newDict = { ...previousValue };
+    newDict[currentValue.value] = currentValue.name;
+    return newDict;
+  }, {});
+}
+
+export function programStatusToPriority(status: ProgramStatus) {
+  switch (status) {
+    case ProgramStatus.Draft:
+      return 1;
+    case ProgramStatus.Active:
+      return 2;
+    default:
+      return 3;
+  }
+}
+
+export function programCompare(
+  a: AllProgramsQuery['allPrograms']['edges'][number],
+  b: AllProgramsQuery['allPrograms']['edges'][number],
+): number {
+  const statusA = programStatusToPriority(a.node.status);
+  const statusB = programStatusToPriority(b.node.status);
+  return statusA > statusB ? 1 : -1;
 }
