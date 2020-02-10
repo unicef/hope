@@ -10,6 +10,7 @@ import {
   useProgramQuery,
 } from '../../__generated__/graphql';
 import { ProgramDetailsPageHeader } from './headers/ProgramDetailsPageHeader';
+import { LoadingComponent } from '../../components/LoadingComponent';
 
 const Container = styled.div`
   && {
@@ -44,10 +45,16 @@ const NoCashPlansSubTitle = styled.div`
 
 export function ProgramDetailsPage(): React.ReactElement {
   const { id } = useParams();
-  const { data } = useProgramQuery({
+  const { data, loading } = useProgramQuery({
     variables: { id },
   });
-  const { data: choices } = useProgrammeChoiceDataQuery();
+  const {
+    data: choices,
+    loading: choicesLoading,
+  } = useProgrammeChoiceDataQuery();
+  if (loading || choicesLoading) {
+    return <LoadingComponent />;
+  }
   if (!data || !choices) {
     return null;
   }
@@ -56,7 +63,7 @@ export function ProgramDetailsPage(): React.ReactElement {
     <div>
       <ProgramDetailsPageHeader program={program} />
       <Container>
-        <ProgramDetails program={program} choices={choices}/>
+        <ProgramDetails program={program} choices={choices} />
         {program.status === ProgramStatus.Draft ? (
           <NoCashPlansContainer>
             <NoCashPlansTitle>
