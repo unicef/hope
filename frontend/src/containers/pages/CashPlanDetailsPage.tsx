@@ -6,6 +6,8 @@ import { PageHeader } from '../../components/PageHeader';
 import { CashPlanDetails } from '../../components/CashPlanDetails';
 import { PaymentRecordTable } from '../PaymentRecordTable';
 import { useCashPlanQuery, CashPlanNode } from '../../__generated__/graphql';
+import { BreadCrumbsItem } from '../../components/BreadCrumbs';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
 
 const Container = styled.div`
   && {
@@ -27,16 +29,27 @@ export function CashPlanDetailsPage(): React.ReactElement {
   const { data } = useCashPlanQuery({
     variables: { id },
   });
+  const businessArea = useBusinessArea();
 
   if (!data) {
     return null;
   }
+  const breadCrumbsItems: BreadCrumbsItem[] = [
+    {
+      title: 'Programme Managment',
+      to: `/${businessArea}/programs/`,
+    },
+    {
+      title: data.cashPlan.program.name,
+      to: `/${businessArea}/programs/${data.cashPlan.program.id}/`,
+    },
+  ];
   const cashPlan = data.cashPlan as CashPlanNode;
   return (
     <div>
       <PageHeader
         title={`Cash Plan #${data.cashPlan.cashAssistId}`}
-        category='Programme Management'
+        breadCrumbs={breadCrumbsItems}
       >
         <Button variant='contained' color='primary'>
           open in cashassist

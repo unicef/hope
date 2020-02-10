@@ -8,6 +8,7 @@ export const PAYMENT_RECORD_QUERY = gql`
       statusDate
       cashAssistId
       household {
+        id
         householdCaId
         familySize
       }
@@ -15,7 +16,16 @@ export const PAYMENT_RECORD_QUERY = gql`
       distributionModality
       totalPersonCovered
       targetPopulation {
+        id
         name
+      }
+      cashPlan {
+        id
+        cashAssistId
+        program {
+          id
+          name
+        }
       }
       entitlement {
         id
