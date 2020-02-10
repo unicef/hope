@@ -9,6 +9,7 @@ import { PageHeader } from '../../components/PageHeader';
 import { PaymentRecordDetails } from '../../components/payments/PaymentRecordDetails';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { LoadingComponent } from '../../components/LoadingComponent';
 
 const Container = styled.div`
   display: flex;
@@ -18,11 +19,15 @@ const Container = styled.div`
 
 export function PaymentRecordDetailsPage(): React.ReactElement {
   const { id } = useParams();
-  const { data, error } = usePaymentRecordQuery({
+  const { data, loading } = usePaymentRecordQuery({
     variables: { id },
   });
   const businessArea = useBusinessArea();
-  console.log('data', data, error);
+
+  if (loading) {
+    return <LoadingComponent />;
+  }
+
   if (!data) {
     return null;
   }

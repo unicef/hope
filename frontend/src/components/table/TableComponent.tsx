@@ -9,6 +9,7 @@ import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import { EnhancedTableToolbar } from './EnhancedTableToolbar';
 import { EnhancedTableHead, HeadCell } from './EnhancedTableHead';
+import { LoadingComponent } from '../LoadingComponent';
 
 export type Order = 'asc' | 'desc';
 
@@ -55,6 +56,7 @@ interface TableComponentProps<T> {
   orderBy: keyof T;
   order: Order;
   title: string;
+  loading?: boolean;
 }
 
 export function TableComponent<T>({
@@ -71,11 +73,36 @@ export function TableComponent<T>({
   handleRequestSort,
   order,
   orderBy,
+  loading,
 }: TableComponentProps<T>): React.ReactElement {
   const classes = useStyles({});
 
-  const emptyRows =
-    rowsPerPage - Math.min(rowsPerPage, itemsCount - page * rowsPerPage);
+  const emptyRows = itemsCount
+    ? rowsPerPage - Math.min(rowsPerPage, itemsCount - page * rowsPerPage)
+    : rowsPerPage;
+  let body;
+  if (loading) {
+    body = (
+      <TableRow style={{ height: 53 * emptyRows, minHeight: 53 }}>
+        <TableCell colSpan={headCells.length}>
+          <LoadingComponent />
+        </TableCell>
+      </TableRow>
+    );
+  } else {
+    body = (
+      <>
+        {data.map((row) => {
+          return renderRow(row);
+        })}
+        {emptyRows > 0 && (
+          <TableRow style={{ height: 53 * emptyRows }}>
+            <TableCell colSpan={headCells.length} />
+          </TableRow>
+        )}
+      </>
+    );
+  }
 
   return (
     <div className={classes.root}>
@@ -96,16 +123,7 @@ export function TableComponent<T>({
               onRequestSort={handleRequestSort}
               rowCount={itemsCount}
             />
-            <TableBody>
-              {data.map((row) => {
-                return renderRow(row);
-              })}
-              {emptyRows > 0 && (
-                <TableRow style={{ height: 53 * emptyRows }}>
-                  <TableCell colSpan={6} />
-                </TableRow>
-              )}
-            </TableBody>
+            <TableBody>{body}</TableBody>
           </Table>
         </TableContainer>
         <TablePagination
@@ -116,7 +134,6 @@ export function TableComponent<T>({
           page={page}
           onChangePage={handleChangePage}
           onChangeRowsPerPage={handleChangeRowsPerPage}
-
         />
       </Paper>
     </div>

@@ -81,7 +81,7 @@ export function PaymentRecordTable({
   const [orderBy, setOrderBy] = useState(null);
   const [orderDirection, setOrderDirection] = useState('asc');
   const businessArea = useBusinessArea();
-  const { data, fetchMore, error } = useAllPaymentRecordsQuery({
+  const { data, fetchMore, loading } = useAllPaymentRecordsQuery({
     variables: {
       cashPlan: cashPlan.id,
       count: rowsPerPage,
@@ -101,6 +101,7 @@ export function PaymentRecordTable({
     <TableComponent<PaymentRecordNode>
       title='Payment Records'
       data={paymentRecords}
+      loading={loading}
       renderRow={(row) => {
         return (
           <TableRow
