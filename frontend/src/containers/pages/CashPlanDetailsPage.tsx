@@ -32,11 +32,11 @@ export function CashPlanDetailsPage(): React.ReactElement {
   });
   const businessArea = useBusinessArea();
 
-  if (!data) {
-    return null;
-  }
   if (loading) {
     return <LoadingComponent />;
+  }
+  if (!data) {
+    return null;
   }
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
