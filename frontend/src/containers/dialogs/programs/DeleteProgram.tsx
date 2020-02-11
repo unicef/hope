@@ -11,23 +11,29 @@ import {
   Typography,
 } from '@material-ui/core';
 import {
+  AllProgramsQuery,
   ProgramNode,
   useDeleteProgramMutation,
 } from '../../../__generated__/graphql';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { PROGRAM_QUERY } from '../../../apollo/queries/Program';
+import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/AllPrograms';
+import { programCompare } from '../../../utils/utils';
 
 const DialogTitleWrapper = styled.div`
-  border-bottom: 1px solid ${({theme})=>theme.hctPalette.lighterGray};
+  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
 `;
 
 const DialogFooter = styled.div`
-  padding: ${({theme})=>theme.spacing(3)}px ${({theme})=>theme.spacing(4)}px;
+  padding: ${({ theme }) => theme.spacing(3)}px
+    ${({ theme }) => theme.spacing(4)}px;
   margin: 0;
-  border-top: 1px solid ${({theme})=>theme.hctPalette.lighterGray};
+  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
   text-align: right;
 `;
 
 const DialogDescription = styled.div`
-  margin: ${({theme})=>theme.spacing(5)}px 0;
+  margin: ${({ theme }) => theme.spacing(5)}px 0;
   font-size: 14px;
   color: rgba(0, 0, 0, 0.54);
 `;
@@ -55,14 +61,32 @@ export function DeleteProgram({
 }: DeleteProgramProps): React.ReactElement {
   const history = useHistory();
   const [open, setOpen] = useState(false);
+  const businessArea = useBusinessArea();
   const [mutate] = useDeleteProgramMutation({
     variables: {
       programId: program.id,
     },
   });
   const deleteProgram = async (): Promise<void> => {
-    await mutate();
-    history.push('/programs/');
+    await mutate({
+      update(cache) {
+        const allProgramsData = cache.readQuery<AllProgramsQuery>({
+          query: ALL_PROGRAMS_QUERY,
+          variables: { businessArea },
+        });
+        const filtred = allProgramsData.allPrograms.edges.filter((item) => {
+          return item.node.id !== program.id;
+        });
+        const newAllProgramsData = { ...allProgramsData };
+        newAllProgramsData.allPrograms.edges = filtred;
+        cache.writeQuery({
+          query: ALL_PROGRAMS_QUERY,
+          variables: { businessArea },
+          data: newAllProgramsData,
+        });
+      },
+    });
+    history.push(`/${businessArea}/programs/`);
     setOpen(false);
   };
   return (

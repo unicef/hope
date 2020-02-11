@@ -9,20 +9,24 @@ import {
   Typography,
 } from '@material-ui/core';
 import {
+  AllProgramsQuery,
   ProgramNode,
   ProgramStatus,
   useUpdateProgramMutation,
 } from '../../../__generated__/graphql';
 import { PROGRAM_QUERY } from '../../../apollo/queries/Program';
+import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/AllPrograms';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { programCompare } from '../../../utils/utils';
 
 const DialogTitleWrapper = styled.div`
-  border-bottom: 1px solid ${({theme})=>theme.hctPalette.lighterGray};
+  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
 `;
 
 const DialogFooter = styled.div`
   padding: 12px 16px;
   margin: 0;
-  border-top: 1px solid ${({theme})=>theme.hctPalette.lighterGray};
+  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
   text-align: right;
 `;
 
@@ -40,6 +44,7 @@ export function FinishProgram({
   program,
 }: FinishProgramProps): React.ReactElement {
   const [open, setOpen] = useState(false);
+  const businessArea = useBusinessArea();
   const [mutate] = useUpdateProgramMutation({
     update(cache, { data: { updateProgram } }) {
       cache.writeQuery({
@@ -48,6 +53,16 @@ export function FinishProgram({
           id: program.id,
         },
         data: { program: updateProgram.program },
+      });
+      const allProgramsData: AllProgramsQuery = cache.readQuery({
+        query: ALL_PROGRAMS_QUERY,
+        variables: { businessArea },
+      });
+      allProgramsData.allPrograms.edges.sort(programCompare);
+      cache.writeQuery({
+        query: ALL_PROGRAMS_QUERY,
+        variables: { businessArea },
+        data: allProgramsData,
       });
     },
   });

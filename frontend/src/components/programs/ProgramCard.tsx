@@ -7,10 +7,13 @@ import { Link } from 'react-router-dom';
 import moment from 'moment';
 import { Grid } from '@material-ui/core';
 import { theme as themeObj } from '../../theme';
-import { programStatusToColor } from '../../utils/utils';
+import { choicesToDict, programStatusToColor } from '../../utils/utils';
 import { LabelizedField } from '../LabelizedField';
 import { StatusBox } from '../StatusBox';
-import { ProgramNode } from '../../__generated__/graphql';
+import {
+  ProgrammeChoiceDataQuery,
+  ProgramNode,
+} from '../../__generated__/graphql';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 
 const useStyles = makeStyles((theme: typeof themeObj) => ({
@@ -66,12 +69,21 @@ const useStyles = makeStyles((theme: typeof themeObj) => ({
   },
 }));
 interface ProgramCardProps {
-  program: ProgramNode; // AllProgramsQueryResponse['allPrograms']['edges'][number]['node'];
+  program: ProgramNode;
+  choices: ProgrammeChoiceDataQuery;
 }
 
-export function ProgramCard({ program }: ProgramCardProps): React.ReactElement {
+export function ProgramCard({
+  program,
+  choices,
+}: ProgramCardProps): React.ReactElement {
   const classes = useStyles({ status: program.status });
   const businessArea = useBusinessArea();
+  const { programFrequencyOfPaymentsChoices, programSectorChoices } = choices;
+  const programFrequencyOfPaymentsChoicesDict = choicesToDict(
+    programFrequencyOfPaymentsChoices,
+  );
+  const programSectorChoicesDict = choicesToDict(programSectorChoices);
   return (
     <Link
       to={`/${businessArea}/programs/${program.id}`}
@@ -108,7 +120,14 @@ export function ProgramCard({ program }: ProgramCardProps): React.ReactElement {
               </Grid>
 
               <Grid className={classes.gridElement} item xs={6}>
-                <LabelizedField label='Frequency of payments' value='Regular' />
+                <LabelizedField
+                  label='Frequency of payments'
+                  value={
+                    programFrequencyOfPaymentsChoicesDict[
+                      program.frequencyOfPayments
+                    ]
+                  }
+                />
               </Grid>
               <Grid className={classes.gridElement} item xs={6}>
                 <LabelizedField
@@ -134,7 +153,10 @@ export function ProgramCard({ program }: ProgramCardProps): React.ReactElement {
               </Grid>
 
               <Grid className={classes.gridElement} item xs={6}>
-                <LabelizedField label='SECTOR' value={program.sector} />
+                <LabelizedField
+                  label='SECTOR'
+                  value={programSectorChoicesDict[program.sector]}
+                />
               </Grid>
             </Grid>
           </CardContent>

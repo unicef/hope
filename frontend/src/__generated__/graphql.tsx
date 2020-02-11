@@ -77,6 +77,7 @@ export type BusinessAreaNodeEdge = {
 };
 
 export type CashPlanNode = Node & {
+<<<<<<< HEAD
   __typename?: 'CashPlanNode';
   id: Scalars['ID'];
   createdAt: Scalars['DateTime'];
@@ -104,6 +105,37 @@ export type CashPlanNode = Node & {
   deliveryType: Scalars['String'];
   assistanceThrough: Scalars['String'];
   paymentRecords: PaymentRecordNodeConnection;
+=======
+   __typename?: 'CashPlanNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  program: ProgramNode,
+  name: Scalars['String'],
+  startDate: Scalars['DateTime'],
+  endDate: Scalars['DateTime'],
+  disbursementDate: Scalars['DateTime'],
+  numberOfHouseholds: Scalars['Int'],
+  createdDate: Scalars['DateTime'],
+  createdBy?: Maybe<UserObjectType>,
+  coverageDuration: Scalars['Int'],
+  coverageUnits: Scalars['String'],
+  targetPopulation: TargetPopulationNode,
+  cashAssistId: Scalars['String'],
+  distributionModality: Scalars['String'],
+  fsp: Scalars['String'],
+  status: CashPlanStatus,
+  currency: Scalars['String'],
+  totalEntitledQuantity: Scalars['Float'],
+  totalDeliveredQuantity: Scalars['Float'],
+  totalUndeliveredQuantity: Scalars['Float'],
+  dispersionDate: Scalars['Date'],
+  deliveryType: Scalars['String'],
+  assistanceThrough: Scalars['String'],
+  fcId: Scalars['String'],
+  dpId: Scalars['String'],
+  paymentRecords: PaymentRecordNodeConnection,
+>>>>>>> develop
 };
 
 export type CashPlanNodePaymentRecordsArgs = {
@@ -1293,6 +1325,7 @@ export type AllCashPlansQuery = { __typename?: 'Query' } & {
 };
 
 export type AllPaymentRecordsQueryVariables = {
+<<<<<<< HEAD
   cashPlan: Scalars['ID'];
   after?: Maybe<Scalars['String']>;
   before?: Maybe<Scalars['String']>;
@@ -1349,6 +1382,41 @@ export type AllPaymentRecordsQuery = { __typename?: 'Query' } & {
       }
   >;
 };
+=======
+  cashPlan: Scalars['ID'],
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>,
+  count?: Maybe<Scalars['Int']>
+};
+
+
+export type AllPaymentRecordsQuery = (
+  { __typename?: 'Query' }
+  & { allPaymentRecords: Maybe<(
+    { __typename?: 'PaymentRecordNodeConnection' }
+    & Pick<PaymentRecordNodeConnection, 'totalCount' | 'edgeCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'startCursor' | 'endCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'PaymentRecordNodeEdge' }
+      & Pick<PaymentRecordNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'PaymentRecordNode' }
+        & Pick<PaymentRecordNode, 'id' | 'createdAt' | 'updatedAt' | 'name' | 'statusDate' | 'status' | 'headOfHousehold' | 'cashAssistId' | 'totalPersonCovered'>
+        & { household: (
+          { __typename?: 'HouseholdNode' }
+          & Pick<HouseholdNode, 'id' | 'householdCaId' | 'familySize'>
+        ), entitlement: Maybe<(
+          { __typename?: 'PaymentEntitlementNode' }
+          & Pick<PaymentEntitlementNode, 'id' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate'>
+        )> }
+      )> }
+    )>> }
+  )> }
+);
+>>>>>>> develop
 
 export type AllProgramsQueryVariables = {
   businessArea?: Maybe<Scalars['String']>;
@@ -1389,6 +1457,7 @@ export type AllProgramsQuery = { __typename?: 'Query' } & {
 };
 
 export type CashPlanQueryVariables = {
+<<<<<<< HEAD
   id: Scalars['ID'];
 };
 
@@ -1415,6 +1484,29 @@ export type CashPlanQuery = { __typename?: 'Query' } & {
       }
   >;
 };
+=======
+  id: Scalars['ID']
+};
+
+
+export type CashPlanQuery = (
+  { __typename?: 'Query' }
+  & { cashPlan: Maybe<(
+    { __typename?: 'CashPlanNode' }
+    & Pick<CashPlanNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'deliveryType' | 'fcId' | 'dpId' | 'dispersionDate' | 'assistanceThrough' | 'cashAssistId'>
+    & { targetPopulation: (
+      { __typename?: 'TargetPopulationNode' }
+      & Pick<TargetPopulationNode, 'name'>
+    ), program: (
+      { __typename?: 'ProgramNode' }
+      & Pick<ProgramNode, 'id' | 'name'>
+    ), paymentRecords: (
+      { __typename?: 'PaymentRecordNodeConnection' }
+      & Pick<PaymentRecordNodeConnection, 'totalCount' | 'edgeCount'>
+    ) }
+  )> }
+);
+>>>>>>> develop
 
 export type MeQueryVariables = {};
 
@@ -1443,6 +1535,7 @@ export type MeQuery = { __typename?: 'Query' } & {
 };
 
 export type PaymentRecordQueryVariables = {
+<<<<<<< HEAD
   id: Scalars['ID'];
 };
 
@@ -1484,6 +1577,36 @@ export type PaymentRecordQuery = { __typename?: 'Query' } & {
       }
   >;
 };
+=======
+  id: Scalars['ID']
+};
+
+
+export type PaymentRecordQuery = (
+  { __typename?: 'Query' }
+  & { paymentRecord: Maybe<(
+    { __typename?: 'PaymentRecordNode' }
+    & Pick<PaymentRecordNode, 'id' | 'status' | 'statusDate' | 'cashAssistId' | 'headOfHousehold' | 'distributionModality' | 'totalPersonCovered'>
+    & { household: (
+      { __typename?: 'HouseholdNode' }
+      & Pick<HouseholdNode, 'id' | 'householdCaId' | 'familySize'>
+    ), targetPopulation: (
+      { __typename?: 'TargetPopulationNode' }
+      & Pick<TargetPopulationNode, 'id' | 'name'>
+    ), cashPlan: (
+      { __typename?: 'CashPlanNode' }
+      & Pick<CashPlanNode, 'id' | 'cashAssistId'>
+      & { program: (
+        { __typename?: 'ProgramNode' }
+        & Pick<ProgramNode, 'id' | 'name'>
+      ) }
+    ), entitlement: Maybe<(
+      { __typename?: 'PaymentEntitlementNode' }
+      & Pick<PaymentEntitlementNode, 'id' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryType' | 'deliveryDate' | 'entitlementCardIssueDate' | 'transactionReferenceId' | 'fsp' | 'entitlementCardNumber'>
+    )> }
+  )> }
+);
+>>>>>>> develop
 
 export type ProgramQueryVariables = {
   id: Scalars['ID'];
@@ -2093,6 +2216,7 @@ export type AllCashPlansQueryResult = ApolloReactCommon.QueryResult<
   AllCashPlansQueryVariables
 >;
 export const AllPaymentRecordsDocument = gql`
+<<<<<<< HEAD
   query AllPaymentRecords(
     $cashPlan: ID!
     $after: String
@@ -2134,6 +2258,38 @@ export const AllPaymentRecordsDocument = gql`
             deliveredQuantity
             deliveryDate
           }
+=======
+    query AllPaymentRecords($cashPlan: ID!, $after: String, $before: String, $orderBy: String, $count: Int) {
+  allPaymentRecords(cashPlan: $cashPlan, after: $after, before: $before, first: $count, orderBy: $orderBy) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+    edges {
+      cursor
+      node {
+        id
+        createdAt
+        updatedAt
+        name
+        statusDate
+        status
+        headOfHousehold
+        cashAssistId
+        totalPersonCovered
+        household {
+          id
+          householdCaId
+          familySize
+        }
+        entitlement {
+          id
+          entitlementQuantity
+          deliveredQuantity
+          deliveryDate
+>>>>>>> develop
         }
       }
       totalCount
@@ -2355,6 +2511,7 @@ export type AllProgramsQueryResult = ApolloReactCommon.QueryResult<
   AllProgramsQueryVariables
 >;
 export const CashPlanDocument = gql`
+<<<<<<< HEAD
   query CashPlan($id: ID!) {
     cashPlan(id: $id) {
       id
@@ -2371,6 +2528,32 @@ export const CashPlanDocument = gql`
         totalCount
         edgeCount
       }
+=======
+    query CashPlan($id: ID!) {
+  cashPlan(id: $id) {
+    id
+    name
+    startDate
+    endDate
+    status
+    deliveryType
+    fcId
+    dpId
+    dispersionDate
+    assistanceThrough
+    cashAssistId
+    dispersionDate
+    targetPopulation {
+      name
+    }
+    program {
+      id
+      name
+    }
+    paymentRecords {
+      totalCount
+      edgeCount
+>>>>>>> develop
     }
   }
 `;
@@ -2557,8 +2740,38 @@ export type MeQueryResult = ApolloReactCommon.QueryResult<
   MeQueryVariables
 >;
 export const PaymentRecordDocument = gql`
+<<<<<<< HEAD
   query PaymentRecord($id: ID!) {
     paymentRecord(id: $id) {
+=======
+    query PaymentRecord($id: ID!) {
+  paymentRecord(id: $id) {
+    id
+    status
+    statusDate
+    cashAssistId
+    household {
+      id
+      householdCaId
+      familySize
+    }
+    headOfHousehold
+    distributionModality
+    totalPersonCovered
+    targetPopulation {
+      id
+      name
+    }
+    cashPlan {
+      id
+      cashAssistId
+      program {
+        id
+        name
+      }
+    }
+    entitlement {
+>>>>>>> develop
       id
       status
       statusDate
@@ -3096,6 +3309,7 @@ export type ResolversTypes = {
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
+<<<<<<< HEAD
   Query: {};
   ID: Scalars['ID'];
   PaymentRecordNode: PaymentRecordNode;
@@ -3401,6 +3615,187 @@ export type CreateRegistrationDataImportResolvers<
 export interface DateScalarConfig
   extends GraphQLScalarTypeConfig<ResolversTypes['Date'], any> {
   name: 'Date';
+=======
+  Query: {},
+  ID: Scalars['ID'],
+  PaymentRecordNode: PaymentRecordNode,
+  Node: Node,
+  DateTime: Scalars['DateTime'],
+  PaymentRecordStatus: PaymentRecordStatus,
+  String: Scalars['String'],
+  CashPlanNode: CashPlanNode,
+  ProgramNode: ProgramNode,
+  ProgramStatus: ProgramStatus,
+  Int: Scalars['Int'],
+  LocationNodeConnection: LocationNodeConnection,
+  PageInfo: PageInfo,
+  Boolean: Scalars['Boolean'],
+  LocationNodeEdge: LocationNodeEdge,
+  LocationNode: LocationNode,
+  BusinessAreaNode: BusinessAreaNode,
+  UserObjectType: UserObjectType,
+  UUID: Scalars['UUID'],
+  BusinessAreaNodeConnection: BusinessAreaNodeConnection,
+  BusinessAreaNodeEdge: BusinessAreaNodeEdge,
+  RegistrationDataImportNodeConnection: RegistrationDataImportNodeConnection,
+  RegistrationDataImportNodeEdge: RegistrationDataImportNodeEdge,
+  RegistrationDataImportNode: RegistrationDataImportNode,
+  RegistrationDataImportStatus: RegistrationDataImportStatus,
+  RegistrationDataImportDataSource: RegistrationDataImportDataSource,
+  HouseholdNodeConnection: HouseholdNodeConnection,
+  HouseholdNodeEdge: HouseholdNodeEdge,
+  HouseholdNode: HouseholdNode,
+  HouseholdResidenceStatus: HouseholdResidenceStatus,
+  HouseholdNationality: HouseholdNationality,
+  PaymentRecordNodeConnection: PaymentRecordNodeConnection,
+  PaymentRecordNodeEdge: PaymentRecordNodeEdge,
+  TargetPopulationNodeConnection: TargetPopulationNodeConnection,
+  TargetPopulationNodeEdge: TargetPopulationNodeEdge,
+  TargetPopulationNode: TargetPopulationNode,
+  JSONString: Scalars['JSONString'],
+  CashPlanNodeConnection: CashPlanNodeConnection,
+  CashPlanNodeEdge: CashPlanNodeEdge,
+  ProgramNodeConnection: ProgramNodeConnection,
+  ProgramNodeEdge: ProgramNodeEdge,
+  Float: Scalars['Float'],
+  ProgramFrequencyOfPayments: ProgramFrequencyOfPayments,
+  ProgramSector: ProgramSector,
+  ProgramScope: ProgramScope,
+  CashPlanStatus: CashPlanStatus,
+  Date: Scalars['Date'],
+  PaymentEntitlementNode: PaymentEntitlementNode,
+  PaymentEntitlementDeliveryType: PaymentEntitlementDeliveryType,
+  ChoiceObject: ChoiceObject,
+  DjangoDebug: DjangoDebug,
+  DjangoDebugSQL: DjangoDebugSql,
+  Mutations: {},
+  CreateProgramInput: CreateProgramInput,
+  CreateProgram: CreateProgram,
+  UpdateProgramInput: UpdateProgramInput,
+  UpdateProgram: UpdateProgram,
+  DeleteProgram: DeleteProgram,
+  CreateCashPlanInput: CreateCashPlanInput,
+  Decimal: Scalars['Decimal'],
+  CreateCashPlan: CreateCashPlan,
+  UpdateCashPlanInput: UpdateCashPlanInput,
+  UpdateCashPlan: UpdateCashPlan,
+  DeleteCashPlan: DeleteCashPlan,
+  CreateHouseholdInput: CreateHouseholdInput,
+  CreateHousehold: CreateHousehold,
+  UpdateHouseholdInput: UpdateHouseholdInput,
+  UpdateHousehold: UpdateHousehold,
+  DeleteHousehold: DeleteHousehold,
+  CreateRegistrationDataImportInput: CreateRegistrationDataImportInput,
+  CreateRegistrationDataImport: CreateRegistrationDataImport,
+  UpdateRegistrationDataImportInput: UpdateRegistrationDataImportInput,
+  UpdateRegistrationDataImport: UpdateRegistrationDataImport,
+  DeleteRegistrationDataImport: DeleteRegistrationDataImport,
+  CreateLocationInput: CreateLocationInput,
+  CreateLocation: CreateLocation,
+  UpdateLocationInput: UpdateLocationInput,
+  UpdateLocation: UpdateLocation,
+  DeleteLocation: DeleteLocation,
+};
+
+export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['BusinessAreaNode'] = ResolversParentTypes['BusinessAreaNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  code?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  longName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  regionCode?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  regionName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  koboToken?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  slug?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  userSet?: Resolver<Array<ResolversTypes['UserObjectType']>, ParentType, ContextType>,
+  locations?: Resolver<ResolversTypes['LocationNodeConnection'], ParentType, ContextType, BusinessAreaNodeLocationsArgs>,
+  programSet?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, BusinessAreaNodeProgramSetArgs>,
+};
+
+export type BusinessAreaNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['BusinessAreaNodeConnection'] = ResolversParentTypes['BusinessAreaNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['BusinessAreaNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type BusinessAreaNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['BusinessAreaNodeEdge'] = ResolversParentTypes['BusinessAreaNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['BusinessAreaNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type CashPlanNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['CashPlanNode'] = ResolversParentTypes['CashPlanNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  program?: Resolver<ResolversTypes['ProgramNode'], ParentType, ContextType>,
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  startDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  endDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  disbursementDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  numberOfHouseholds?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  createdDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  createdBy?: Resolver<Maybe<ResolversTypes['UserObjectType']>, ParentType, ContextType>,
+  coverageDuration?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  coverageUnits?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  targetPopulation?: Resolver<ResolversTypes['TargetPopulationNode'], ParentType, ContextType>,
+  cashAssistId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  distributionModality?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  fsp?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  status?: Resolver<ResolversTypes['CashPlanStatus'], ParentType, ContextType>,
+  currency?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  totalEntitledQuantity?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
+  totalDeliveredQuantity?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
+  totalUndeliveredQuantity?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
+  dispersionDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
+  deliveryType?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  assistanceThrough?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  fcId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  dpId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, CashPlanNodePaymentRecordsArgs>,
+};
+
+export type CashPlanNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['CashPlanNodeConnection'] = ResolversParentTypes['CashPlanNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['CashPlanNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type CashPlanNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['CashPlanNodeEdge'] = ResolversParentTypes['CashPlanNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type ChoiceObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['ChoiceObject'] = ResolversParentTypes['ChoiceObject']> = {
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  value?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
+export type CreateCashPlanResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateCashPlan'] = ResolversParentTypes['CreateCashPlan']> = {
+  cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
+};
+
+export type CreateHouseholdResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateHousehold'] = ResolversParentTypes['CreateHousehold']> = {
+  household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
+};
+
+export type CreateLocationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateLocation'] = ResolversParentTypes['CreateLocation']> = {
+  location?: Resolver<Maybe<ResolversTypes['LocationNode']>, ParentType, ContextType>,
+};
+
+export type CreateProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateProgram'] = ResolversParentTypes['CreateProgram']> = {
+  program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
+};
+
+export type CreateRegistrationDataImportResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateRegistrationDataImport'] = ResolversParentTypes['CreateRegistrationDataImport']> = {
+  registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
+};
+
+export interface DateScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Date'], any> {
+  name: 'Date'
+>>>>>>> develop
 }
 
 export interface DateTimeScalarConfig
