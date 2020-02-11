@@ -1,10 +1,28 @@
 import graphene
+from django_filters import FilterSet, OrderingFilter
 from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
 from core.schema import ExtendedConnection
 from household.models import Household, RegistrationDataImport
+
+
+class HouseholdFilter(FilterSet):
+    class Meta:
+        fields = ("location__business_area",)
+        model = Household
+
+    order_by = OrderingFilter(
+        fields=(
+            "household_ca_id",
+            "residence_status",
+            "nationality",
+            "family_size",
+            "representative__full_name",
+            "registration_data_import_id__name",
+        )
+    )
 
 
 class HouseholdNode(DjangoObjectType):
@@ -25,7 +43,9 @@ class RegistrationDataImportNode(DjangoObjectType):
 
 class Query(graphene.ObjectType):
     household = relay.Node.Field(HouseholdNode)
-    all_households = DjangoFilterConnectionField(HouseholdNode)
+    all_households = DjangoFilterConnectionField(
+        HouseholdNode, filterset_class=HouseholdFilter
+    )
     registration_data_import = relay.Node.Field(RegistrationDataImportNode)
     all_registration_data_imports = DjangoFilterConnectionField(
         RegistrationDataImportNode
