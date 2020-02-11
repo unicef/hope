@@ -21,7 +21,7 @@ Expected delivery date: Feb. 24 - May 1, 2020
 * POC of Kobo DevOps and documentation refinements, API usage needed etc.
 * Implementation of **Target Population** Module, allowing users to create new target populations and the associated approval process needed for it.
 * Continued Generation of fake data to drive the HCT MIS user interface and testing.
-* _Refinement / selection of data integration tool for pushing and pulling data from the Registration and CashAssist data-hubs. **\(Possibly I.5\)**_
+* Refinement of technical specs / selection of data integration tool for pushing and pulling data from the Registration and CashAssist data-hubs.
 
 ## **UX / UI Design Deliverables**
 
