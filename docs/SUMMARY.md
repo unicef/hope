@@ -1,7 +1,6 @@
 # Table of contents
 
 * [UNICEF HCT MIS](README.md)
-* [Current Process](current-process.md)
 * [Quick Links](quick-links.md)
 
 ## Introduction
@@ -35,6 +34,7 @@
 * [HQ](product-specification/hq/README.md)
   * [HQ Dashboard](product-specification/hq/dashboard.md)
   * [HQ Reporting](product-specification/hq/hq-reporting.md)
+  * [Uploading and Managing Flex Fields](product-specification/hq/uploading-and-managing-flex-fields.md)
 * [Partner](product-specification/partner/README.md)
   * [Registration](product-specification/partner/untitled.md)
 * [External Integrations](product-specification/external-integrations/README.md)
@@ -68,7 +68,9 @@
   * [Access Management Portal](technical-specification/cashassist-integration/access-management-portal.md)
   * [CashAssist - Training Site](technical-specification/cashassist-integration/cashassist-training-site.md)
   * [Open Issues](technical-specification/cashassist-integration/open-issues.md)
-* [Kobo Integration](technical-specification/kobo-integration.md)
+* [Kobo Integration](technical-specification/kobo-integration/README.md)
+  * [Kobo hosting](technical-specification/kobo-integration/kobo-hosting.md)
+  * [Open issues](technical-specification/kobo-integration/open-issues.md)
 * [Coding Guidelines](technical-specification/coding-guidelines.md)
 * [Input Validation Rules](technical-specification/input-validation-rules.md)
 
@@ -78,6 +80,6 @@
   * [Iteration 1](project-management/iterations-deliverables/iteration-1.md)
   * [Iteration 2](project-management/iterations-deliverables/iteration-2.md)
   * [Iteration 3](project-management/iterations-deliverables/iteration-3.md)
-  * [Iteration 4 \(DRAFT v.1\)](project-management/iterations-deliverables/iteration-4.md)
+  * [Iteration 4](project-management/iterations-deliverables/iteration-4.md)
 * [CO / User testing](project-management/co-user-testing.md)
 

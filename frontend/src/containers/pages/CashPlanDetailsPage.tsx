@@ -6,6 +6,9 @@ import { PageHeader } from '../../components/PageHeader';
 import { CashPlanDetails } from '../../components/CashPlanDetails';
 import { PaymentRecordTable } from '../PaymentRecordTable';
 import { useCashPlanQuery, CashPlanNode } from '../../__generated__/graphql';
+import { BreadCrumbsItem } from '../../components/BreadCrumbs';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { LoadingComponent } from '../../components/LoadingComponent';
 
 const Container = styled.div`
   && {
@@ -24,19 +27,33 @@ const TableWrapper = styled.div`
 
 export function CashPlanDetailsPage(): React.ReactElement {
   const { id } = useParams();
-  const { data } = useCashPlanQuery({
+  const { data, loading } = useCashPlanQuery({
     variables: { id },
   });
+  const businessArea = useBusinessArea();
 
+  if (loading) {
+    return <LoadingComponent />;
+  }
   if (!data) {
     return null;
   }
+  const breadCrumbsItems: BreadCrumbsItem[] = [
+    {
+      title: 'Programme Managment',
+      to: `/${businessArea}/programs/`,
+    },
+    {
+      title: data.cashPlan.program.name,
+      to: `/${businessArea}/programs/${data.cashPlan.program.id}/`,
+    },
+  ];
   const cashPlan = data.cashPlan as CashPlanNode;
   return (
     <div>
       <PageHeader
         title={`Cash Plan #${data.cashPlan.cashAssistId}`}
-        category='Programme Management'
+        breadCrumbs={breadCrumbsItems}
       >
         <Button variant='contained' color='primary'>
           open in cashassist

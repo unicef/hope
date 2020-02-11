@@ -96,6 +96,6 @@ class CashPlanFactory(factory.DjangoModelFactory):
     delivery_type = factory.Faker(
         "random_element", elements=["Deposit to Card", "Transfer", "Cash"]
     )
-    assistance_through = factory.LazyAttribute(
-        lambda o: f"{factory.Faker('company')} Bank"
-    )
+    assistance_through = factory.Faker('company')
+    fc_id = factory.Faker("itin")
+    dp_id = factory.Faker("itin")

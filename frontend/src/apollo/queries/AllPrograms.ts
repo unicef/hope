@@ -1,6 +1,6 @@
 import { gql } from 'apollo-boost';
 
-export const AllPrograms = gql`
+export const ALL_PROGRAMS_QUERY = gql`
   query AllPrograms($businessArea: String) {
     allPrograms(businessArea: $businessArea) {
       pageInfo {

@@ -2,10 +2,15 @@ import React from 'react';
 import styled from 'styled-components';
 import { ProgramCard } from '../../components/programs/ProgramCard';
 import { PageHeader } from '../../components/PageHeader';
-import { ProgramNode, useAllProgramsQuery } from '../../__generated__/graphql';
+import {
+  ProgramNode,
+  useAllProgramsQuery,
+  useProgrammeChoiceDataQuery,
+} from '../../__generated__/graphql';
 import { CreateProgram } from '../dialogs/programs/CreateProgram';
 import { getCurrentLocation } from '../../utils/utils';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { LoadingComponent } from '../../components/LoadingComponent';
 
 const PageContainer = styled.div`
   display: flex;
@@ -16,24 +21,30 @@ const PageContainer = styled.div`
 `;
 export function ProgramsPage(): React.ReactElement {
   const businessArea = useBusinessArea();
-  const { data } = useAllProgramsQuery({
+  const { data, loading } = useAllProgramsQuery({
     variables: {
       businessArea,
     },
   });
 
+  const {
+    data: choices,
+    loading: choicesLoading,
+  } = useProgrammeChoiceDataQuery();
   const toolbar = (
     <PageHeader title='Programme Management'>
       <CreateProgram />
     </PageHeader>
   );
-
-  if (!data || !data.allPrograms) {
+  if (loading || choicesLoading) {
+    return <LoadingComponent />;
+  }
+  if (!data || !data.allPrograms || !choices) {
     return <div>{toolbar}</div>;
   }
   const programsList = data.allPrograms.edges.map((node) => {
     const program = node.node as ProgramNode;
-    return <ProgramCard key={program.id} program={program} />;
+    return <ProgramCard key={program.id} program={program} choices={choices} />;
   });
   return (
     <div>

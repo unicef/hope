@@ -14,8 +14,6 @@ django-extensions==2.2.6
 pygraphviz==1.5
 django-auditlog==0.4.7
 
-
-
 # Tests and Fixtures
 factory-boy==2.12.0
 snapshottest==0.5.1
@@ -24,6 +22,9 @@ snapshottest==0.5.1
 Pillow==7.0.0
 psycopg2==2.8.4
 pycountry==19.8.18
+openpyxl==3.0.3
+xlrd
+ipdb
 
 # API
 graphene-django==2.7.1

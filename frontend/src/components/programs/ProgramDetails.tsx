@@ -3,9 +3,12 @@ import styled from 'styled-components';
 import { Grid, Typography } from '@material-ui/core';
 import moment from 'moment';
 import { StatusBox } from '../StatusBox';
-import { programStatusToColor } from '../../utils/utils';
+import { choicesToDict, programStatusToColor } from '../../utils/utils';
 import { LabelizedField } from '../LabelizedField';
-import { ProgramNode } from '../../__generated__/graphql';
+import {
+  ProgrammeChoiceDataQuery,
+  ProgramNode,
+} from '../../__generated__/graphql';
 import { MiśTheme } from '../../theme';
 
 const Container = styled.div`
@@ -51,11 +54,23 @@ const Title = styled.div`
 
 interface ProgramDetailsProps {
   program: ProgramNode;
+  choices: ProgrammeChoiceDataQuery;
 }
 
 export function ProgramDetails({
   program,
+  choices,
 }: ProgramDetailsProps): React.ReactElement {
+  const {
+    programFrequencyOfPaymentsChoices,
+    programSectorChoices,
+    programScopeChoices,
+  } = choices;
+  const programFrequencyOfPaymentsChoicesDict = choicesToDict(
+    programFrequencyOfPaymentsChoices,
+  );
+  const programSectorChoicesDict = choicesToDict(programSectorChoices);
+  const programScopeChoicesDict = choicesToDict(programScopeChoices);
   return (
     <Container>
       <Title>
@@ -87,15 +102,25 @@ export function ProgramDetails({
           </Grid>
 
           <Grid item xs={4}>
-            <LabelizedField label='Sector' value={program.sector} />
+            <LabelizedField
+              label='Sector'
+              value={programSectorChoicesDict[program.sector]}
+            />
           </Grid>
           <Grid item xs={4}>
-            <LabelizedField label='Scope' value={program.scope} />
+            <LabelizedField
+              label='Scope'
+              value={programScopeChoicesDict[program.scope]}
+            />
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
               label='Frequency of Payment'
-              value={program.frequencyOfPayments}
+              value={
+                programFrequencyOfPaymentsChoicesDict[
+                  program.frequencyOfPayments
+                ]
+              }
             />
           </Grid>
 

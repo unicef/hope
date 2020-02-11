@@ -99,6 +99,8 @@ export type CashPlanNode = Node & {
   dispersionDate: Scalars['Date'],
   deliveryType: Scalars['String'],
   assistanceThrough: Scalars['String'],
+  fcId: Scalars['String'],
+  dpId: Scalars['String'],
   paymentRecords: PaymentRecordNodeConnection,
 };
 
@@ -1395,10 +1397,10 @@ export type AllPaymentRecordsQuery = (
         & Pick<PaymentRecordNode, 'id' | 'createdAt' | 'updatedAt' | 'name' | 'statusDate' | 'status' | 'headOfHousehold' | 'cashAssistId' | 'totalPersonCovered'>
         & { household: (
           { __typename?: 'HouseholdNode' }
-          & Pick<HouseholdNode, 'householdCaId' | 'familySize'>
+          & Pick<HouseholdNode, 'id' | 'householdCaId' | 'familySize'>
         ), entitlement: Maybe<(
           { __typename?: 'PaymentEntitlementNode' }
-          & Pick<PaymentEntitlementNode, 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate'>
+          & Pick<PaymentEntitlementNode, 'id' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate'>
         )> }
       )> }
     )>> }
@@ -1436,10 +1438,13 @@ export type CashPlanQuery = (
   { __typename?: 'Query' }
   & { cashPlan: Maybe<(
     { __typename?: 'CashPlanNode' }
-    & Pick<CashPlanNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'cashAssistId' | 'dispersionDate'>
+    & Pick<CashPlanNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'deliveryType' | 'fcId' | 'dpId' | 'dispersionDate' | 'assistanceThrough' | 'cashAssistId'>
     & { targetPopulation: (
       { __typename?: 'TargetPopulationNode' }
       & Pick<TargetPopulationNode, 'name'>
+    ), program: (
+      { __typename?: 'ProgramNode' }
+      & Pick<ProgramNode, 'id' | 'name'>
     ), paymentRecords: (
       { __typename?: 'PaymentRecordNodeConnection' }
       & Pick<PaymentRecordNodeConnection, 'totalCount' | 'edgeCount'>
@@ -1480,10 +1485,17 @@ export type PaymentRecordQuery = (
     & Pick<PaymentRecordNode, 'id' | 'status' | 'statusDate' | 'cashAssistId' | 'headOfHousehold' | 'distributionModality' | 'totalPersonCovered'>
     & { household: (
       { __typename?: 'HouseholdNode' }
-      & Pick<HouseholdNode, 'householdCaId' | 'familySize'>
+      & Pick<HouseholdNode, 'id' | 'householdCaId' | 'familySize'>
     ), targetPopulation: (
       { __typename?: 'TargetPopulationNode' }
-      & Pick<TargetPopulationNode, 'name'>
+      & Pick<TargetPopulationNode, 'id' | 'name'>
+    ), cashPlan: (
+      { __typename?: 'CashPlanNode' }
+      & Pick<CashPlanNode, 'id' | 'cashAssistId'>
+      & { program: (
+        { __typename?: 'ProgramNode' }
+        & Pick<ProgramNode, 'id' | 'name'>
+      ) }
     ), entitlement: Maybe<(
       { __typename?: 'PaymentEntitlementNode' }
       & Pick<PaymentEntitlementNode, 'id' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryType' | 'deliveryDate' | 'entitlementCardIssueDate' | 'transactionReferenceId' | 'fsp' | 'entitlementCardNumber'>
@@ -1925,10 +1937,12 @@ export const AllPaymentRecordsDocument = gql`
         cashAssistId
         totalPersonCovered
         household {
+          id
           householdCaId
           familySize
         }
         entitlement {
+          id
           entitlementQuantity
           deliveredQuantity
           deliveryDate
@@ -2066,9 +2080,18 @@ export const CashPlanDocument = gql`
     startDate
     endDate
     status
+    deliveryType
+    fcId
+    dpId
+    dispersionDate
+    assistanceThrough
     cashAssistId
     dispersionDate
     targetPopulation {
+      name
+    }
+    program {
+      id
       name
     }
     paymentRecords {
@@ -2191,6 +2214,7 @@ export const PaymentRecordDocument = gql`
     statusDate
     cashAssistId
     household {
+      id
       householdCaId
       familySize
     }
@@ -2198,7 +2222,16 @@ export const PaymentRecordDocument = gql`
     distributionModality
     totalPersonCovered
     targetPopulation {
+      id
       name
+    }
+    cashPlan {
+      id
+      cashAssistId
+      program {
+        id
+        name
+      }
     }
     entitlement {
       id
@@ -2683,6 +2716,8 @@ export type CashPlanNodeResolvers<ContextType = any, ParentType extends Resolver
   dispersionDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   deliveryType?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   assistanceThrough?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  fcId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  dpId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, CashPlanNodePaymentRecordsArgs>,
 };
 
