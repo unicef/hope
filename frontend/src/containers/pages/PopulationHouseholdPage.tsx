@@ -1,8 +1,8 @@
 import React from 'react';
-import Paper from '@material-ui/core/Paper';
 import styled from 'styled-components';
 import { PageHeader } from '../../components/PageHeader';
 import { HouseholdTable } from '../HouseholdTable';
+import { HouseholdFilters } from '../../components/population/HouseholdFilter';
 
 const Container = styled.div`
   display: flex;
@@ -14,7 +14,7 @@ export function PopulationHouseholdPage(): React.ReactElement {
   return (
     <div>
       <PageHeader title='Households' />
-      <Paper>test</Paper>
+      <HouseholdFilters />
       <Container>
         <HouseholdTable />
       </Container>

@@ -3,12 +3,9 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-<<<<<<< HEAD
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
-=======
 import styled from 'styled-components';
->>>>>>> develop
 import { Link } from 'react-router-dom';
 import React from 'react';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
@@ -23,25 +20,30 @@ const Text = styled(ListItemText)`
   }
 `;
 const Icon = styled(ListItemIcon)`
-  &&  {
+  && {
     min-width: 0;
-    padding-right: ${({theme})=>theme.spacing(4)}px;
+    padding-right: ${({ theme }) => theme.spacing(4)}px;
   }
 `;
 
 interface Props {
   currentLocation: string;
   handleItemCollapse: (index: number) => void;
-  itemsCollapse: { id: number, open: boolean }[]
+  itemsCollapse: { id: number; open: boolean }[];
 }
-export function DrawerItems({ currentLocation, handleItemCollapse, itemsCollapse }: Props): React.ReactElement {
+export function DrawerItems({
+  currentLocation,
+  handleItemCollapse,
+  itemsCollapse,
+}: Props): React.ReactElement {
   const businessArea = useBusinessArea();
 
   const checkCollapse = (index: number): boolean => {
     if (!itemsCollapse) return false;
-    if (itemsCollapse.find(x => x.id === index)) return itemsCollapse.find(x => x.id === index).open;
+    if (itemsCollapse.find((x) => x.id === index))
+      return itemsCollapse.find((x) => x.id === index).open;
     return false;
-  }
+  };
 
   return (
     <div>
@@ -49,40 +51,45 @@ export function DrawerItems({ currentLocation, handleItemCollapse, itemsCollapse
         if (item.collapsable) {
           return (
             <>
-            <ListItem
-            button
-            onClick={() => handleItemCollapse(index)}
-            component={Link}
-            key={item.name}
-            to={`/${businessArea}${item.href}`}
-            selected={Boolean(item.selectedRegexp.exec(currentLocation))}
-          >
-            <ListItemIcon>{item.icon}</ListItemIcon>
-            <ListItemText primary={item.name} />
-            {itemsCollapse && itemsCollapse[index] ? <ExpandLess /> : <ExpandMore />}
-          </ListItem>
-            <Collapse in={checkCollapse(index)}>
-              <List component="div" style={{paddingLeft: "56px"}}>
-                { item.secondaryActions && item.secondaryActions.map(secondary => (
-                  <ListItem
-                  button
-                  component={Link}
-                  key={secondary.name}
-                  to={`/${businessArea}${secondary.href}`}
-                  selected={Boolean(secondary.selectedRegexp.exec(currentLocation))}
-                >
-                  <ListItemIcon>{secondary.icon}</ListItemIcon>
-                  <ListItemText primary={secondary.name} />
-                </ListItem>
-                
-                )
+              <ListItem
+                button
+                onClick={() => handleItemCollapse(index)}
+                component={Link}
+                key={item.name}
+                to={`/${businessArea}${item.href}`}
+                selected={Boolean(item.selectedRegexp.exec(currentLocation))}
+              >
+                <ListItemIcon>{item.icon}</ListItemIcon>
+                <ListItemText primary={item.name} />
+                {itemsCollapse && itemsCollapse[index] ? (
+                  <ExpandLess />
+                ) : (
+                  <ExpandMore />
                 )}
-              </List>
-            </Collapse>
+              </ListItem>
+              <Collapse in={checkCollapse(index)}>
+                <List component='div' style={{ paddingLeft: '56px' }}>
+                  {item.secondaryActions &&
+                    item.secondaryActions.map((secondary) => (
+                      <ListItem
+                        button
+                        component={Link}
+                        key={secondary.name}
+                        to={`/${businessArea}${secondary.href}`}
+                        selected={Boolean(
+                          secondary.selectedRegexp.exec(currentLocation),
+                        )}
+                      >
+                        <ListItemIcon>{secondary.icon}</ListItemIcon>
+                        <ListItemText primary={secondary.name} />
+                      </ListItem>
+                    ))}
+                </List>
+              </Collapse>
             </>
-          )
+          );
         }
-          return (
+        return (
           <ListItem
             button
             component={Link}
