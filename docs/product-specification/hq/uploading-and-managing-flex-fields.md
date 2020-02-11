@@ -2,11 +2,17 @@
 
 **Feature**: [https://unicef.visualstudio.com/ICTD-HCT-MIS/\_boards/board/t/Software%20Engineering/Features/?workitem=49446](https://unicef.visualstudio.com/ICTD-HCT-MIS/_boards/board/t/Software%20Engineering/Features/?workitem=49446)
 
+**Technical specification**: [Kobo integration](../../technical-specification/kobo-integration/)
+
+**Glossary**: [Kobo glossary](../../introduction/glossary-terminology/kobo-glossary.md)
+
 ### Motivation
 
-HCT would like to maintain a global set of flex fields in the system that are needed. These fields are associated with a household or individual level data. The data for these will be imported via [Kobo](../external-integrations/kobo.md) or an excel file upload.
+HCT would like to maintain a global set of flex fields in the system that are needed. These fields are associated with a household or individual level data. The data for these will be imported via [Kobo](../external-integrations/kobo.md) or an excel file upload \(when data has been attained via pre-existing registration methods or a partner etc.\). See  [Registration Data Import](../country-office/registration-data-import/) for more details.
 
 The way this "catalog" of fields is maintained in the system will be centralized and apply to all business areas in the same manner. This will allow a shared set of variables across business areas and permit unification of the registration and targeting process, but also allow reporting ease at a HQ level potentially if required.
+
+For ease of generating this excel file \(to be used for importing in flex field metadata\), it will be generated via export of a form/project from Kobo.
 
 ### User Permissions
 
