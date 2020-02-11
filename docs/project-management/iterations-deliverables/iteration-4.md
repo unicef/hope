@@ -11,7 +11,7 @@ Expected delivery date: Feb. 24 - May 1, 2020
 * Specification support around Population, Registration, and Target Population in GitBook.
 * Execution on 5 two-week sprints for the iteration deliverable, including bi-weekly demos and scrum ceremonies.
 * Refinement of deduplication requirements and flows.
-* Identify & Sign off on iteration \#5 Deliverables & Designs.
+* Identify, develop product specifications for & sign off on iteration \#5 Deliverables & Designs.
 * Maintain Project Roadmap / Timeline.
 
 ## **Technical Deliverables**
@@ -27,5 +27,5 @@ Expected delivery date: Feb. 24 - May 1, 2020
 
 * Design support as required to support this iterations deliverables.
 * Continued refinement of V 3.X mockups. Delivery of V.4.X of mockups to help understanding of elaboration efforts for remaining modules \(deduplication process, payment verification, grievances & feedback, dashboards, user management etc.\)
-* Demo / webinar for peer review with country offices.
+* Demo / webinar for peer review with country offices \(if feasible\).
 
