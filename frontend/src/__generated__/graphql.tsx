@@ -1366,7 +1366,11 @@ export type AllLogEntriesQuery = (
       & Pick<LogEntryObjectEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'LogEntryObject' }
-        & Pick<LogEntryObject, 'action' | 'changesDisplayDict'>
+        & Pick<LogEntryObject, 'id' | 'action' | 'changesDisplayDict' | 'timestamp'>
+        & { actor: Maybe<(
+          { __typename?: 'UserObjectType' }
+          & Pick<UserObjectType, 'id' | 'firstName' | 'lastName'>
+        )> }
       )> }
     )>> }
   )> }
@@ -1862,8 +1866,15 @@ export const AllLogEntriesDocument = gql`
     edges {
       cursor
       node {
+        id
         action
         changesDisplayDict
+        timestamp
+        actor {
+          id
+          firstName
+          lastName
+        }
       }
     }
   }

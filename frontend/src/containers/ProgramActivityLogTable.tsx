@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import { useHistory } from 'react-router-dom';
 import {
   AllCashPlansQueryVariables,
+  AllLogEntriesQuery,
   CashPlanNode,
   LogEntryAction,
   LogEntryObject,
@@ -53,6 +54,30 @@ const StatusContainer = styled.div`
   width: 120px;
 `;
 
+interface LogRowProps {
+  logEntry: LogEntryObject;
+}
+
+function LogRow({ logEntry }: LogRowProps): ReactElement {
+  console.log('logEntry.changesDisplayDict', logEntry.changesDisplayDict);
+  return (
+    <TableRow hover role='checkbox' key={logEntry.id}>
+      <TableCell align='left'>
+        {moment(logEntry.timestamp).format('DD MMM YYYY')}
+      </TableCell>
+      <TableCell align='left'>
+        {logEntry.actor
+          ? `${logEntry.actor.firstName} ${logEntry.actor.lastName}`
+          : null}
+      </TableCell>
+      <TableCell align='left'>
+        {logEntry.action === LogEntryAction.A_1 ? 'Update' : 'Create'}
+      </TableCell>
+      <TableCell colSpan={2}>{}</TableCell>
+    </TableRow>
+  );
+}
+
 interface ProgramActivityLogTableProps {
   program: ProgramNode;
 }
@@ -72,13 +97,10 @@ export function ProgramActivityLogTable({
     },
     fetchPolicy: 'network-only',
   });
-  const handleClick = (row) => {
-    const path = `/${businessArea}/cashplans/${row.id}`;
-    history.push(path);
-  };
   if (!data) {
     return null;
   }
+  console.log('activity log', data);
   const { edges } = data.allLogEntries;
   const cashPlans = edges.map((edge) => edge.node as LogEntryObject);
   return (
@@ -86,30 +108,7 @@ export function ProgramActivityLogTable({
       title='Activity Log'
       data={cashPlans}
       renderRow={(row) => {
-        const changes =[];
-        return (
-          <TableRow
-            hover
-            onClick={() => handleClick(row)}
-            role='checkbox'
-            key={row.id}
-          >
-            <TableCell align='left'>
-              {moment(row.timestamp).format('DD MMM YYYY')}
-            </TableCell>
-            <TableCell align='right'>
-              {row.actor
-                ? `${row.actor.firstName} ${row.actor.lastName}`
-                : null}
-            </TableCell>
-            <TableCell align='left'>
-              {row.action === LogEntryAction.A_1 ? 'Update' : 'Create'}
-            </TableCell>
-            <TableCell colSpan={2}>
-              {}
-            </TableCell>
-          </TableRow>
-        );
+        return <LogRow logEntry={row} />;
       }}
       headCells={headCells}
       rowsPerPageOptions={[5, 10, 15]}
