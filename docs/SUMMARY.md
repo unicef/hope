@@ -19,6 +19,7 @@
 * [Country Office](product-specification/country-office/README.md)
   * [Login](product-specification/country-office/login.md)
   * [Registration Data Import](product-specification/country-office/registration-data-import/README.md)
+    * [Detail screen / approval process](product-specification/country-office/registration-data-import/detail-screen-approval-process.md)
     * [Via Excel import](product-specification/country-office/registration-data-import/via-excel-import.md)
     * [Via Kobo API](product-specification/country-office/registration-data-import/via-kobo-api.md)
     * [De-duplicating data](product-specification/country-office/registration-data-import/de-duplicating-data.md)
