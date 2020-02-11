@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
@@ -8,6 +9,7 @@ import { HouseholdNode } from '../__generated__/graphql';
 import { useQuery } from '@apollo/react-hooks';
 import { AllHouseholds } from '../apollo/queries/AllHouseholds';
 import Moment from 'react-moment';
+import { useBusinessArea } from '../hooks/useBusinessArea';
 
 const headCells: HeadCell<HouseholdNode>[] = [
   {
@@ -67,13 +69,23 @@ const formatCurrency = (amount: number) =>
   });
 
 export const HouseholdTable = (): React.ReactElement => {
+  const history = useHistory();
+  const businessArea = useBusinessArea();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [orderBy, setOrderBy] = useState(null);
   const [orderDirection, setOrderDirection] = useState('asc');
 
-  const { loading, data } = useQuery(AllHouseholds, { variables: { id } });
+  const { loading, data, fetchMore } = useQuery(AllHouseholds, {
+    variables: { businessArea, first: rowsPerPage },
+  });
+
   if (loading) return null;
+
+  const handleClick = (row) => {
+    const path = `/${businessArea}/population/household/${row.id}`;
+    history.push(path);
+  };
 
   console.log(data);
   const { edges } = data.allHouseholds;
@@ -96,7 +108,7 @@ export const HouseholdTable = (): React.ReactElement => {
           return (
             <TableRow
               hover
-              // onClick={(event) => handleClick(event, row.)}
+              onClick={() => handleClick(row)}
               role='checkbox'
               key={row.id}
             >
@@ -113,17 +125,36 @@ export const HouseholdTable = (): React.ReactElement => {
                     .totalDeliveredQuantity,
                 )}
               </TableCell>
-              <TableCell align='left'>
+              <TableCell align='right'>
                 <Moment format='MM/DD/YYYY'>{row.createdAt}</Moment>
               </TableCell>
             </TableRow>
           );
         }}
         handleChangeRowsPerPage={(e) => {
-          console.log(e);
+          setRowsPerPage(Number(e.target.value));
         }}
-        handleChangePage={(e) => {
-          console.log(e);
+        handleChangePage={(event, newPage) => {
+          let variables;
+          if (newPage < page) {
+            console.log('here');
+            const before = edges[0].cursor;
+            variables = {
+              before,
+            };
+          } else {
+            const after = edges[result.length - 1].cursor;
+            variables = {
+              after,
+            };
+          }
+          setPage(newPage);
+          fetchMore({
+            variables,
+            updateQuery: (prev, { fetchMoreResult }) => {
+              return fetchMoreResult;
+            },
+          });
         }}
         headCells={headCells}
         rowsPerPageOptions={[5, 10, 15]}
