@@ -34,10 +34,12 @@ export const AllPaymentRecords = gql`
           cashAssistId
           totalPersonCovered
           household {
+            id
             householdCaId
             familySize
           }
           entitlement {
+            id
             entitlementQuantity
             deliveredQuantity
             deliveryDate

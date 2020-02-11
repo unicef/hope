@@ -1,6 +1,0 @@
-# Current Process
-
-## Registration
-
-## 
-

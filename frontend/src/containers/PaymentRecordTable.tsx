@@ -1,8 +1,8 @@
-import React, {ReactElement, useState} from 'react';
+import React, { ReactElement, useState } from 'react';
 import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
 import styled from 'styled-components';
-import {useHistory} from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import Moment from 'react-moment';
 import {
   AllPaymentRecordsQueryVariables,
@@ -10,11 +10,12 @@ import {
   PaymentRecordNode,
   useAllPaymentRecordsQuery,
 } from '../__generated__/graphql';
-import {Order, TableComponent} from '../components/table/TableComponent';
-import {HeadCell} from '../components/table/EnhancedTableHead';
-import {StatusBox} from '../components/StatusBox';
-import {columnToOrderBy, paymentRecordStatusToColor,} from '../utils/utils';
-import {useBusinessArea} from '../hooks/useBusinessArea';
+import { Order, TableComponent } from '../components/table/TableComponent';
+import { HeadCell } from '../components/table/EnhancedTableHead';
+import { StatusBox } from '../components/StatusBox';
+import { columnToOrderBy, paymentRecordStatusToColor } from '../utils/utils';
+import { useBusinessArea } from '../hooks/useBusinessArea';
+import { Link } from '../components/Link';
 
 const headCells: HeadCell<PaymentRecordNode>[] = [
   {
@@ -81,7 +82,7 @@ export function PaymentRecordTable({
   const [orderBy, setOrderBy] = useState(null);
   const [orderDirection, setOrderDirection] = useState('asc');
   const businessArea = useBusinessArea();
-  const { data, fetchMore } = useAllPaymentRecordsQuery({
+  const { data, fetchMore, loading } = useAllPaymentRecordsQuery({
     variables: {
       cashPlan: cashPlan.id,
       count: rowsPerPage,
@@ -101,12 +102,15 @@ export function PaymentRecordTable({
     <TableComponent<PaymentRecordNode>
       title='Payment Records'
       data={paymentRecords}
+      loading={loading}
       renderRow={(row) => {
         return (
           <TableRow
             hover
-            onClick={() => handleClick(row)}
-            role='checkbox'
+            component={Link}
+            // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+            // @ts-ignore
+            to={`/${businessArea}/payment_records/${row.id}`}
             key={row.id}
           >
             <TableCell align='left'>{row.cashAssistId}</TableCell>
@@ -170,6 +174,7 @@ export function PaymentRecordTable({
         fetchMore({
           variables,
           updateQuery: (prev, { fetchMoreResult }) => {
+            console.log('fetchMoreResult');
             return fetchMoreResult;
           },
         });
@@ -188,6 +193,7 @@ export function PaymentRecordTable({
         fetchMore({
           variables,
           updateQuery: (prev, { fetchMoreResult }) => {
+            console.log('fetchMoreResult');
             return fetchMoreResult;
           },
         });
