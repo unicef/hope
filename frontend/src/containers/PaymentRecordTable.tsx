@@ -15,7 +15,6 @@ import { HeadCell } from '../components/table/EnhancedTableHead';
 import { StatusBox } from '../components/StatusBox';
 import { columnToOrderBy, paymentRecordStatusToColor } from '../utils/utils';
 import { useBusinessArea } from '../hooks/useBusinessArea';
-import { Link } from '../components/Link';
 
 const headCells: HeadCell<PaymentRecordNode>[] = [
   {
@@ -107,10 +106,8 @@ export function PaymentRecordTable({
         return (
           <TableRow
             hover
-            component={Link}
-            // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-            // @ts-ignore
-            to={`/${businessArea}/payment_records/${row.id}`}
+            onClick={() => handleClick(row)}
+            role='checkbox'
             key={row.id}
           >
             <TableCell align='left'>{row.cashAssistId}</TableCell>
