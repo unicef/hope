@@ -20,11 +20,11 @@ This interface/functionality is a way to search and view all the households and 
 
 ### Individual Search
 
-![](../../.gitbook/assets/image-2019-11-25-at-2.52.54-pm.png)
+![](../../.gitbook/assets/image-2020-02-10-at-6.17.05-pm.png)
 
 ### Individual Details
 
-![](../../.gitbook/assets/t.png)
+![](../../.gitbook/assets/image-2020-02-10-at-6.15.58-pm.png)
 
 
 

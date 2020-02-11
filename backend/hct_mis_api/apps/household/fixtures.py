@@ -4,7 +4,13 @@ from pytz import utc
 
 from account.fixtures import UserFactory
 from core.fixtures import LocationFactory
-from household.models import Household, RegistrationDataImport, EntitlementCard
+from household.const import NATIONALITIES
+from household.models import (
+    Household,
+    RegistrationDataImport,
+    EntitlementCard,
+    Individual,
+)
 
 
 class RegistrationDataImportFactory(factory.DjangoModelFactory):
@@ -43,6 +49,40 @@ class HouseholdFactory(factory.DjangoModelFactory):
     location = factory.SubFactory(LocationFactory)
     registration_data_import_id = factory.SubFactory(
         RegistrationDataImportFactory,
+    )
+    # set it manually
+    head_of_household = None
+
+
+class IndividualFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = Individual
+
+    individual_ca_id = factory.Faker("uuid4")
+    full_name = factory.LazyAttribute(lambda o: f"{o.first_name} {o.last_name}")
+    first_name = factory.Faker("first_name")
+    last_name = factory.Faker("last_name")
+    sex = factory.fuzzy.FuzzyChoice(
+        Individual.SEX_CHOICE, getter=lambda c: c[0],
+    )
+    dob = factory.Faker(
+        "date_of_birth", tzinfo=utc, minimum_age=16, maximum_age=90
+    )
+    estimated_dob = None
+    nationality = factory.fuzzy.FuzzyChoice(
+        NATIONALITIES, getter=lambda c: c[0],
+    )
+    martial_status = factory.fuzzy.FuzzyChoice(
+        Individual.MARTIAL_STATUS_CHOICE, getter=lambda c: c[0],
+    )
+    phone_number = factory.Faker("phone_number")
+    identification_type = factory.fuzzy.FuzzyChoice(
+        Individual.IDENTIFICATION_TYPE_CHOICE, getter=lambda c: c[0],
+    )
+    identification_number = factory.Faker("uuid4")
+    household = factory.SubFactory(HouseholdFactory)
+    registration_data_import_id = factory.SubFactory(
+        RegistrationDataImportFactory
     )
 
 

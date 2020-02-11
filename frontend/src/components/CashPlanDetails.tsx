@@ -56,6 +56,7 @@ interface CashPlanProps {
 export function CashPlanDetails({
     cashPlan
 }: CashPlanProps): React.ReactElement {
+
     return (
         <Container>
         <Title>
@@ -75,18 +76,33 @@ export function CashPlanDetails({
             </Grid>
             <Grid item xs={4}>
               <LabelizedField
-                label='START DATE'
+                label='plan start date'
                 value={moment(cashPlan.startDate).format('DD MMM YYYY')}
               />
             </Grid>
             <Grid item xs={4}>
               <LabelizedField
-                label='END DATE'
+                label='plan end date'
                 value={moment(cashPlan.endDate).format('DD MMM YYYY')}
               />
             </Grid>
             <Grid item xs={4}>
-                <LabelizedField label='dispertion date' value={cashPlan.dispersionDate} />
+                <LabelizedField label='cash plan name' value={cashPlan.name} />
+            </Grid>
+            <Grid item xs={4}>
+                <LabelizedField label='delivery type' value={cashPlan.deliveryType} />
+            </Grid>
+            <Grid item xs={4}>
+                <LabelizedField label='assistance through' value={cashPlan.assistanceThrough} />
+            </Grid>
+            <Grid item xs={4}>
+                <LabelizedField label='dispertion date' value={moment(cashPlan.dispersionDate).format('DD MMM YYYY')} />
+            </Grid>
+            <Grid item xs={4}>
+                <LabelizedField label='fc id' value={cashPlan.fcId} />
+            </Grid>
+            <Grid item xs={4}>
+                <LabelizedField label='dp id' value={cashPlan.dpId} />
             </Grid>
             <Grid item xs={4}>
                 <LabelizedField label='target population' value={cashPlan.targetPopulation.name} />
