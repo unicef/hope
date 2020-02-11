@@ -15,6 +15,7 @@ export interface HeadCell<T> {
   id: string;
   label: string;
   numeric: boolean;
+  weight?: number;
 }
 
 const useStyles = makeStyles((theme: Theme) =>
