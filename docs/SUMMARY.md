@@ -1,7 +1,6 @@
 # Table of contents
 
 * [UNICEF HCT MIS](README.md)
-* [Current Process](current-process.md)
 * [Quick Links](quick-links.md)
 
 ## Introduction
@@ -35,6 +34,7 @@
 * [HQ](product-specification/hq/README.md)
   * [HQ Dashboard](product-specification/hq/dashboard.md)
   * [HQ Reporting](product-specification/hq/hq-reporting.md)
+  * [Uploading and Managing Flex Fields](product-specification/hq/uploading-and-managing-flex-fields.md)
 * [Partner](product-specification/partner/README.md)
   * [Registration](product-specification/partner/untitled.md)
 * [External Integrations](product-specification/external-integrations/README.md)
