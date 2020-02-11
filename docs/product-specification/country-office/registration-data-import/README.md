@@ -4,7 +4,7 @@
 
 The Registration Data Import module is the gateway for importing new data to the HCT-MIS database, shared with other applications.
 
-Users will have the ability to import registered data from external tools and applications, deduplicate and clean the information in a staging environment before having the ability to accept new data into HCT-MIS database.
+Users will have the ability to import registered data from external tools and applications \(like Kobo\) or a raw import \(via an excel file that follows a specific template\), deduplicate and clean the information in a staging environment before having the ability to accept new data into HCT-MIS database.
 
 ## Import
 

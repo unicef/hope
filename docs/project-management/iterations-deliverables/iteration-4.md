@@ -19,6 +19,7 @@ Expected delivery date: Feb. 24 - May 1, 2020
 * Implementation of **Population Tab**
 * **Registration data import** of household/individual data as scoped, including data by **Excel**, including the excel template download based on core / flex fields for households and individuals. Kobo and duplicate data management to be handled later.
 * Implementation of **Target Population** Module, allowing users to create new target populations and the associated approval process needed for it.
+* CO users to be able to view flex fields somewhere in the interface.
 * POC of Kobo DevOps and documentation refinements, API usage needed etc.
 * Continued Generation of fake data to drive the HCT MIS user interface and testing.
 * Refinement of technical specs / selection of data integration tool for pushing and pulling data from the Registration and CashAssist data-hubs.
