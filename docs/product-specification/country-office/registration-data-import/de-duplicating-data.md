@@ -1,5 +1,11 @@
 # De-duplicating data
 
+{% hint style="info" %}
+The current plans for deduplication within HCT-MIS can be found in this document, [**here**](https://unicef.sharepoint.com/:w:/r/teams/EMOPS-HCT-MIS/DocumentLibrary2/Modules%20-%20Components/Registration/Deduplication%20scenarios_ge.docx?d=w34184c05b28243ee81a9819410909daf&csf=1&e=x4R8n0)**.**
+{% endhint %}
+
+
+
 The goal of de-duplicating data is not to have duplicate households and individuals in the HCT MIS database.
 
 ### What is a duplicate?

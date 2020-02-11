@@ -3,12 +3,31 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
+<<<<<<< HEAD
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
+=======
+import styled from 'styled-components';
+>>>>>>> develop
 import { Link } from 'react-router-dom';
 import React from 'react';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { menuItems } from './menuItems';
+
+const Text = styled(ListItemText)`
+  .MuiTypography-body1 {
+    color: #233944;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 16px;
+  }
+`;
+const Icon = styled(ListItemIcon)`
+  &&  {
+    min-width: 0;
+    padding-right: ${({theme})=>theme.spacing(4)}px;
+  }
+`;
 
 interface Props {
   currentLocation: string;
@@ -71,8 +90,8 @@ export function DrawerItems({ currentLocation, handleItemCollapse, itemsCollapse
             to={`/${businessArea}${item.href}`}
             selected={Boolean(item.selectedRegexp.exec(currentLocation))}
           >
-            <ListItemIcon>{item.icon}</ListItemIcon>
-            <ListItemText primary={item.name} />
+            <Icon>{item.icon}</Icon>
+            <Text primary={item.name} />
           </ListItem>
         );
       })}
