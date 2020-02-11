@@ -16,6 +16,10 @@ Within each tab there will be set of columns, one set for core fields and one fo
 
 Additionally household tab will have a "**unique\_id**" as its first column. This will then be referenced in the individuals tab as a "household\_unique\_id" reference since individuals being imported have to belong to a \(valid\) household always.
 
-### Acceptance Criteria
+### Import process
+
+Modal where user uploads...
+
+### Acceptance Criteria / Validation
 
 * [ ] 
