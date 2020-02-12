@@ -33,6 +33,10 @@ export const AllHouseholds = gql`
                 id
                 headOfHousehold
                 cashPlan {
+                  program {
+                    id
+                    name
+                  }
                   totalDeliveredQuantity
                 }
               }
