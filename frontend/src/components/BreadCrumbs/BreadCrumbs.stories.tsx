@@ -16,7 +16,7 @@ const propsData = [
   { title: 'Payment Record', to: '/third-url' },
 ];
 
-export const ProgramStatuses = () => {
+export const BreadCrumb = () => {
   return (
     <ThemeProvider theme={theme}>
       <StyledThemeProvider theme={theme}>
