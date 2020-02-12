@@ -1326,6 +1326,10 @@ export type AllHouseholdsQuery = (
               & { cashPlan: (
                 { __typename?: 'CashPlanNode' }
                 & Pick<CashPlanNode, 'totalDeliveredQuantity'>
+                & { program: (
+                  { __typename?: 'ProgramNode' }
+                  & Pick<ProgramNode, 'name' | 'id'>
+                ) }
               ) }
             )> }
           )>> }
@@ -1840,6 +1844,10 @@ export const AllHouseholdsDocument = gql`
               id
               headOfHousehold
               cashPlan {
+                program {
+                  name
+                  id
+                }
                 totalDeliveredQuantity
               }
             }
