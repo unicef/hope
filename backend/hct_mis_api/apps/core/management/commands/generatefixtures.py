@@ -11,6 +11,7 @@ from household.fixtures import (
     HouseholdFactory,
     IndividualFactory,
 )
+from household.models import Household
 from payment.fixtures import PaymentRecordFactory
 from program.fixtures import CashPlanFactory, ProgramFactory
 from targeting.fixtures import TargetPopulationFactory
@@ -90,6 +91,9 @@ class Command(BaseCommand):
         )
         pool.close()
         pool.join()
+
+        # quick fix for households without payment_records
+        Household.objects.filter(payment_records=None).delete()
 
         self.stdout.write(
             f"Generated fixtures in {(time.time() - start_time)} seconds"
