@@ -59,8 +59,8 @@ export function DrawerItems({
                 to={`/${businessArea}${item.href}`}
                 selected={Boolean(item.selectedRegexp.exec(currentLocation))}
               >
-                <ListItemIcon>{item.icon}</ListItemIcon>
-                <ListItemText primary={item.name} />
+                <Icon>{item.icon}</Icon>
+                <Text primary={item.name} />
                 {itemsCollapse && itemsCollapse[index] ? (
                   <ExpandLess />
                 ) : (
@@ -68,7 +68,7 @@ export function DrawerItems({
                 )}
               </ListItem>
               <Collapse in={checkCollapse(index)}>
-                <List component='div' style={{ paddingLeft: '56px' }}>
+                <List component='div' style={{ paddingLeft: '40px' }}>
                   {item.secondaryActions &&
                     item.secondaryActions.map((secondary) => (
                       <ListItem
@@ -80,8 +80,8 @@ export function DrawerItems({
                           secondary.selectedRegexp.exec(currentLocation),
                         )}
                       >
-                        <ListItemIcon>{secondary.icon}</ListItemIcon>
-                        <ListItemText primary={secondary.name} />
+                        <Icon>{secondary.icon}</Icon>
+                        <Text primary={secondary.name} />
                       </ListItem>
                     ))}
                 </List>

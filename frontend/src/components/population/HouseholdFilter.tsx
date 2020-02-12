@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { MenuItem, Select, TextField, InputAdornment } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
 import GroupIcon from '@material-ui/icons/Group';
+import { ProgramNode } from '../../__generated__/graphql';
 
 const Container = styled.div`
   display: flex;
@@ -98,12 +99,22 @@ const SelectContainer = styled(Select)`
   }
 `;
 
-export function HouseholdFilters(): React.ReactElement {
+interface HouseholdFiltersProps {
+  householdMinSizeFilter: (value: number) => void;
+  householdMaxSizeFilter: (value: number) => void;
+  householdTextFilter: (value: string) => void;
+}
+export function HouseholdFilters({
+  householdMinSizeFilter,
+  householdMaxSizeFilter,
+  householdTextFilter,
+}: HouseholdFiltersProps): React.ReactElement {
   return (
     <Container>
       <TextContainer
         placeholder='Search'
         variant='filled'
+        onChange={(e) => householdTextFilter(e.target.value)}
         InputProps={{
           startAdornment: (
             <InputAdornment position='start'>
@@ -112,14 +123,10 @@ export function HouseholdFilters(): React.ReactElement {
           ),
         }}
       />
-      <SelectContainer variant='filled' placeholder='Household size'>
-        <MenuItem value='' disabled>
-          Placeholder
-        </MenuItem>
-      </SelectContainer>
       <TextContainer
         variant='filled'
         placeholder='Household size'
+        onChange={(e) => householdMinSizeFilter(e.target.value)}
         InputProps={{
           startAdornment: (
             <InputAdornment position='start'>
@@ -132,6 +139,7 @@ export function HouseholdFilters(): React.ReactElement {
       <TextContainer
         variant='filled'
         placeholder='Household size'
+        onChange={(e) => householdMaxSizeFilter(e.target.value)}
         InputProps={{
           startAdornment: (
             <InputAdornment position='start'>
