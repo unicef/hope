@@ -307,6 +307,9 @@ class FlexibleAttribute(models.Model):
         null=True,
     )
 
+    def __str__(self):
+        return f"type: {self.type}, name: {self.name}"
+
 
 class FlexibleAttributeGroup(MPTTModel):
     name = models.CharField(max_length=255)
@@ -329,6 +332,9 @@ class FlexibleAttributeGroup(MPTTModel):
         related_name="flex_groups",
     )
 
+    def __str__(self):
+        return f"name: {self.name}"
+
 
 class FlexibleAttributeChoice(models.Model):
     list_name = models.CharField(max_length=255)
@@ -341,6 +347,9 @@ class FlexibleAttributeChoice(models.Model):
         on_delete=models.CASCADE,
         related_name="flex_choices",
     )
+
+    def __str__(self):
+        return f"listname: {self.list_name}, name: {self.name}"
 
 
 mptt.register(Location, order_insertion_by=["title"])
