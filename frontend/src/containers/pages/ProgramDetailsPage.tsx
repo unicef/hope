@@ -9,9 +9,9 @@ import {
   useProgrammeChoiceDataQuery,
   useProgramQuery,
 } from '../../__generated__/graphql';
-import { ProgramDetailsPageHeader } from './headers/ProgramDetailsPageHeader';
 import { ProgramActivityLogTable } from '../ProgramActivityLogTable';
 import { LoadingComponent } from '../../components/LoadingComponent';
+import { ProgramDetailsPageHeader } from './headers/ProgramDetailsPageHeader';
 
 const Container = styled.div`
   && {

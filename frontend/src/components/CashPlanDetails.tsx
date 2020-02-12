@@ -3,10 +3,10 @@ import styled from 'styled-components';
 import moment from 'moment';
 import { Grid, Typography } from '@material-ui/core';
 import { CashPlanNode } from '../__generated__/graphql';
-import { LabelizedField } from './LabelizedField';
-import { StatusBox } from './StatusBox';
 import { MiśTheme } from '../theme';
 import { cashPlanStatusToColor } from '../utils/utils';
+import { LabelizedField } from './LabelizedField';
+import { StatusBox } from './StatusBox';
 
 const Container = styled.div`
   display: flex;
@@ -50,72 +50,81 @@ const Title = styled.div`
 `;
 
 interface CashPlanProps {
-    cashPlan: CashPlanNode
+  cashPlan: CashPlanNode;
 }
 
 export function CashPlanDetails({
-    cashPlan
+  cashPlan,
 }: CashPlanProps): React.ReactElement {
-
-    return (
-        <Container>
-        <Title>
-          <Typography variant='h6'>Cash Plan Details</Typography>
-        </Title>
-        <OverviewContainer>
-          <Grid container spacing={6}>
-            <Grid item xs={4}>
-              <LabelizedField label='status'>
-                <StatusContainer>
-                  <StatusBox
-                    status={cashPlan.status}
-                    statusToColor={cashPlanStatusToColor}
-                  />
-                </StatusContainer>
-              </LabelizedField>
-            </Grid>
-            <Grid item xs={4}>
-              <LabelizedField
-                label='plan start date'
-                value={moment(cashPlan.startDate).format('DD MMM YYYY')}
-              />
-            </Grid>
-            <Grid item xs={4}>
-              <LabelizedField
-                label='plan end date'
-                value={moment(cashPlan.endDate).format('DD MMM YYYY')}
-              />
-            </Grid>
-            <Grid item xs={4}>
-                <LabelizedField label='cash plan name' value={cashPlan.name} />
-            </Grid>
-            <Grid item xs={4}>
-                <LabelizedField label='delivery type' value={cashPlan.deliveryType} />
-            </Grid>
-            <Grid item xs={4}>
-                <LabelizedField label='assistance through' value={cashPlan.assistanceThrough} />
-            </Grid>
-            <Grid item xs={4}>
-                <LabelizedField label='dispertion date' value={moment(cashPlan.dispersionDate).format('DD MMM YYYY')} />
-            </Grid>
-            <Grid item xs={4}>
-                <LabelizedField label='fc id' value={cashPlan.fcId} />
-            </Grid>
-            <Grid item xs={4}>
-                <LabelizedField label='dp id' value={cashPlan.dpId} />
-            </Grid>
-            <Grid item xs={4}>
-                <LabelizedField label='target population' value={cashPlan.targetPopulation.name} />
-            </Grid>
-          </Grid>
-          <NumberOfHouseHolds>
-            <LabelizedField label='Total Number of Households'>
-              <NumberOfHouseHoldsValue>
-                123
-              </NumberOfHouseHoldsValue>
+  return (
+    <Container>
+      <Title>
+        <Typography variant='h6'>Cash Plan Details</Typography>
+      </Title>
+      <OverviewContainer>
+        <Grid container spacing={6}>
+          <Grid item xs={4}>
+            <LabelizedField label='status'>
+              <StatusContainer>
+                <StatusBox
+                  status={cashPlan.status}
+                  statusToColor={cashPlanStatusToColor}
+                />
+              </StatusContainer>
             </LabelizedField>
-          </NumberOfHouseHolds>
-        </OverviewContainer>
-      </Container>
-    )
+          </Grid>
+          <Grid item xs={4}>
+            <LabelizedField
+              label='plan start date'
+              value={moment(cashPlan.startDate).format('DD MMM YYYY')}
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <LabelizedField
+              label='plan end date'
+              value={moment(cashPlan.endDate).format('DD MMM YYYY')}
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <LabelizedField label='cash plan name' value={cashPlan.name} />
+          </Grid>
+          <Grid item xs={4}>
+            <LabelizedField
+              label='delivery type'
+              value={cashPlan.deliveryType}
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <LabelizedField
+              label='assistance through'
+              value={cashPlan.assistanceThrough}
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <LabelizedField
+              label='dispertion date'
+              value={moment(cashPlan.dispersionDate).format('DD MMM YYYY')}
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <LabelizedField label='fc id' value={cashPlan.fcId} />
+          </Grid>
+          <Grid item xs={4}>
+            <LabelizedField label='dp id' value={cashPlan.dpId} />
+          </Grid>
+          <Grid item xs={4}>
+            <LabelizedField
+              label='target population'
+              value={cashPlan.targetPopulation.name}
+            />
+          </Grid>
+        </Grid>
+        <NumberOfHouseHolds>
+          <LabelizedField label='Total Number of Households'>
+            <NumberOfHouseHoldsValue>123</NumberOfHouseHoldsValue>
+          </LabelizedField>
+        </NumberOfHouseHolds>
+      </OverviewContainer>
+    </Container>
+  );
 }

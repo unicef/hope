@@ -1,5 +1,4 @@
 import React, { ReactElement, useState } from 'react';
-import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
 import styled from 'styled-components';
 import { useHistory } from 'react-router-dom';
@@ -15,6 +14,7 @@ import { HeadCell } from '../components/table/EnhancedTableHead';
 import { StatusBox } from '../components/StatusBox';
 import { columnToOrderBy, paymentRecordStatusToColor } from '../utils/utils';
 import { useBusinessArea } from '../hooks/useBusinessArea';
+import { ClickableTableRow } from '../components/table/ClickableTableRow';
 
 const headCells: HeadCell<PaymentRecordNode>[] = [
   {
@@ -69,6 +69,7 @@ const headCells: HeadCell<PaymentRecordNode>[] = [
 const StatusContainer = styled.div`
   width: 120px;
 `;
+
 interface CashPlanTableProps {
   cashPlan: CashPlanNode;
 }
@@ -88,7 +89,7 @@ export function PaymentRecordTable({
     },
     fetchPolicy: 'network-only',
   });
-  const handleClick = (row) => {
+  const handleClick = (row): void => {
     const path = `/${businessArea}/payment_records/${row.id}`;
     history.push(path);
   };
@@ -104,7 +105,7 @@ export function PaymentRecordTable({
       loading={loading}
       renderRow={(row) => {
         return (
-          <TableRow
+          <ClickableTableRow
             hover
             onClick={() => handleClick(row)}
             role='checkbox'
@@ -139,7 +140,7 @@ export function PaymentRecordTable({
                 {row.entitlement.deliveryDate}
               </Moment>
             </TableCell>
-          </TableRow>
+          </ClickableTableRow>
         );
       }}
       headCells={headCells}
@@ -171,7 +172,6 @@ export function PaymentRecordTable({
         fetchMore({
           variables,
           updateQuery: (prev, { fetchMoreResult }) => {
-            console.log('fetchMoreResult');
             return fetchMoreResult;
           },
         });
@@ -190,7 +190,6 @@ export function PaymentRecordTable({
         fetchMore({
           variables,
           updateQuery: (prev, { fetchMoreResult }) => {
-            console.log('fetchMoreResult');
             return fetchMoreResult;
           },
         });

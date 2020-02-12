@@ -2,6 +2,7 @@ import React from 'react';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
+import styled from 'styled-components';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 
@@ -44,6 +45,12 @@ const useStyles = makeStyles((theme: Theme) =>
     }),
 );
 
+const TableSortLabelStyled = styled(TableSortLabel)`
+  &{
+  font-size: 12px;
+  }
+`;
+
 interface EnhancedTableProps<T> {
   classes: ReturnType<typeof useStyles>;
   onRequestSort:  (
@@ -83,7 +90,7 @@ export function EnhancedTableHead<T>(props: EnhancedTableProps<T>) : React.React
             padding={headCell.disablePadding ? 'none' : 'default'}
             sortDirection={orderBy === headCell.id ? order : false}
           >
-            <TableSortLabel
+            <TableSortLabelStyled
               active={orderBy === headCell.id}
               direction={orderBy === headCell.id ? order : 'asc'}
               onClick={createSortHandler(headCell.id)}
@@ -94,7 +101,7 @@ export function EnhancedTableHead<T>(props: EnhancedTableProps<T>) : React.React
                   {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
                 </span>
               ) : null}
-            </TableSortLabel>
+            </TableSortLabelStyled>
           </TableCell>
         ))}
       </TableRow>
