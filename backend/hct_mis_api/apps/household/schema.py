@@ -10,11 +10,20 @@ from household.models import Household, RegistrationDataImport
 
 class HouseholdFilter(FilterSet):
     business_area = CharFilter(field_name="location__business_area__slug")
-    family_size_gte = NumberFilter(field_name="family_size__gte")
-    family_size_lte = NumberFilter(field_name="family_size__lte")
+    family_size_greater = NumberFilter(
+        field_name="family_size", lookup_expr="gte"
+    )
+    family_size_lower = NumberFilter(
+        field_name="family_size", lookup_expr="lte"
+    )
 
     class Meta:
         model = Household
+        fields = (
+            "business_area",
+            "family_size_greater",
+            "family_size_lower",
+        )
 
     order_by = OrderingFilter(
         fields=(
