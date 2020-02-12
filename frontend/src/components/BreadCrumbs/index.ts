@@ -1,3 +1,1 @@
-import { BreadCrumbs } from './BreadCrumbs';
-
-export { BreadCrumbs }
+export * from './BreadCrumbs';
