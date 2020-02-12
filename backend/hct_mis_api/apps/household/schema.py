@@ -1,5 +1,5 @@
 import graphene
-from django_filters import FilterSet, OrderingFilter
+from django_filters import FilterSet, OrderingFilter, CharFilter, NumberFilter
 from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
@@ -9,8 +9,11 @@ from household.models import Household, RegistrationDataImport
 
 
 class HouseholdFilter(FilterSet):
+    business_area = CharFilter(field_name="location__business_area__slug")
+    family_size_gte = NumberFilter(field_name="family_size__gte")
+    family_size_lte = NumberFilter(field_name="family_size__lte")
+
     class Meta:
-        fields = ("location__business_area",)
         model = Household
 
     order_by = OrderingFilter(
