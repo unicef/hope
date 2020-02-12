@@ -1,5 +1,11 @@
 # Target Population \(Targeting\)
 
+**Feature details:** 
+
+* List: [https://unicef.visualstudio.com/ICTD-HCT-MIS/\_boards/board/t/Software%20Engineering/Features/?workitem=50083](https://unicef.visualstudio.com/ICTD-HCT-MIS/_boards/board/t/Software%20Engineering/Features/?workitem=50083)
+* View/finalization: [https://unicef.visualstudio.com/ICTD-HCT-MIS/\_boards/board/t/Software%20Engineering/Features/?workitem=50084](https://unicef.visualstudio.com/ICTD-HCT-MIS/_boards/board/t/Software%20Engineering/Features/?workitem=50084)
+* Copy/delete: [https://unicef.visualstudio.com/ICTD-HCT-MIS/\_boards/board/t/Software%20Engineering/Features/?workitem=50085](https://unicef.visualstudio.com/ICTD-HCT-MIS/_boards/board/t/Software%20Engineering/Features/?workitem=50085)
+
 ## Organization
 
 ### RACI
@@ -28,7 +34,7 @@ In the Targeting Module you can do xyz
 
 ### Name A Target:
 
-![](../../.gitbook/assets/screen-recording-2019-11-06-at-11.48-am.gif)
+![](../../../.gitbook/assets/screen-recording-2019-11-06-at-11.48-am.gif)
 
 ## Business Rules
 
