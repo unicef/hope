@@ -5,11 +5,8 @@ import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
 import { Order, TableComponent } from '../components/table/TableComponent';
 import { HeadCell } from '../components/table/EnhancedTableHead';
-import { HouseholdNode } from '../__generated__/graphql';
-import { useQuery } from '@apollo/react-hooks';
-import { AllHouseholds } from '../apollo/queries/AllHouseholds';
+import { HouseholdNode, useAllHouseholdsQuery } from '../__generated__/graphql';
 import Moment from 'react-moment';
-import { useBusinessArea } from '../hooks/useBusinessArea';
 
 const headCells: HeadCell<HouseholdNode>[] = [
   {
@@ -68,16 +65,26 @@ const formatCurrency = (amount: number) =>
     maximumFractionDigits: 2,
   });
 
-export const HouseholdTable = (): React.ReactElement => {
+interface HouseholdTableProps {
+  sizeFilter: { min: number | undefined; max: number | undefined };
+  textFilter: string;
+  businessArea: string;
+}
+
+export const HouseholdTable = ({
+  sizeFilter,
+  textFilter,
+  businessArea,
+}: HouseholdTableProps): React.ReactElement => {
   const history = useHistory();
-  const businessArea = useBusinessArea();
+
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [orderBy, setOrderBy] = useState(null);
   const [orderDirection, setOrderDirection] = useState('asc');
 
-  const { loading, data, fetchMore } = useQuery(AllHouseholds, {
-    variables: { businessArea, first: rowsPerPage },
+  const { loading, data, fetchMore } = useAllHouseholdsQuery({
+    variables: { first: rowsPerPage },
   });
 
   if (loading) return null;
@@ -87,7 +94,22 @@ export const HouseholdTable = (): React.ReactElement => {
     history.push(path);
   };
 
-  console.log(data);
+  if (sizeFilter.min || sizeFilter.max) {
+    let variables;
+    if (sizeFilter.min) {
+      variables = { ...variables, familySizeGreater: sizeFilter.min };
+    }
+    if (sizeFilter.max) {
+      variables = { ...variables, familySizeLower: sizeFilter.max };
+    }
+    fetchMore({
+      variables,
+      updateQuery: (prev, { fetchMoreResult }) => {
+        return fetchMoreResult;
+      },
+    });
+  }
+
   const { edges } = data.allHouseholds;
   const houseHolds = edges.map((edge) => edge.node as HouseholdNode);
   const result = houseHolds.filter(
@@ -101,8 +123,26 @@ export const HouseholdTable = (): React.ReactElement => {
         page={page}
         data={result}
         itemsCount={data.allHouseholds.totalCount}
-        handleRequestSort={(e) => {
-          console.log(e);
+        handleRequestSort={(e, property) => {
+          let direction = 'asc';
+          if (property === orderBy) {
+            direction = orderDirection === 'asc' ? 'desc' : 'asc';
+          }
+          setOrderBy(property);
+          setOrderDirection(direction);
+          if (edges.length < 0) {
+            return;
+          }
+
+          fetchMore({
+            variables: {
+              first: rowsPerPage,
+              // orderBy: columnToOrderBy(property, direction),
+            },
+            updateQuery: (prev, { fetchMoreResult }) => {
+              return fetchMoreResult;
+            },
+          });
         }}
         renderRow={(row) => {
           return (
@@ -137,7 +177,6 @@ export const HouseholdTable = (): React.ReactElement => {
         handleChangePage={(event, newPage) => {
           let variables;
           if (newPage < page) {
-            console.log('here');
             const before = edges[0].cursor;
             variables = {
               before,
