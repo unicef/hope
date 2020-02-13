@@ -1512,6 +1512,40 @@ export type CashPlanQuery = (
   )> }
 );
 
+export type HouseholdQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type HouseholdQuery = (
+  { __typename?: 'Query' }
+  & { household: Maybe<(
+    { __typename?: 'HouseholdNode' }
+    & Pick<HouseholdNode, 'id' | 'createdAt' | 'familySize' | 'residenceStatus'>
+    & { location: (
+      { __typename?: 'LocationNode' }
+      & Pick<LocationNode, 'id' | 'title'>
+    ), paymentRecords: (
+      { __typename?: 'PaymentRecordNodeConnection' }
+      & { edges: Array<Maybe<(
+        { __typename?: 'PaymentRecordNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'PaymentRecordNode' }
+          & Pick<PaymentRecordNode, 'id' | 'headOfHousehold'>
+          & { cashPlan: (
+            { __typename?: 'CashPlanNode' }
+            & Pick<CashPlanNode, 'id' | 'totalDeliveredQuantity' | 'currency'>
+            & { program: (
+              { __typename?: 'ProgramNode' }
+              & Pick<ProgramNode, 'id' | 'name'>
+            ) }
+          ) }
+        )> }
+      )>> }
+    ) }
+  )> }
+);
+
 export type MeQueryVariables = {};
 
 
@@ -2303,6 +2337,80 @@ export function useCashPlanLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHoo
 export type CashPlanQueryHookResult = ReturnType<typeof useCashPlanQuery>;
 export type CashPlanLazyQueryHookResult = ReturnType<typeof useCashPlanLazyQuery>;
 export type CashPlanQueryResult = ApolloReactCommon.QueryResult<CashPlanQuery, CashPlanQueryVariables>;
+export const HouseholdDocument = gql`
+    query Household($id: ID!) {
+  household(id: $id) {
+    id
+    createdAt
+    familySize
+    location {
+      id
+      title
+    }
+    residenceStatus
+    paymentRecords {
+      edges {
+        node {
+          id
+          headOfHousehold
+          cashPlan {
+            id
+            program {
+              id
+              name
+            }
+            totalDeliveredQuantity
+            currency
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export type HouseholdComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<HouseholdQuery, HouseholdQueryVariables>, 'query'> & ({ variables: HouseholdQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const HouseholdComponent = (props: HouseholdComponentProps) => (
+      <ApolloReactComponents.Query<HouseholdQuery, HouseholdQueryVariables> query={HouseholdDocument} {...props} />
+    );
+    
+export type HouseholdProps<TChildProps = {}> = ApolloReactHoc.DataProps<HouseholdQuery, HouseholdQueryVariables> & TChildProps;
+export function withHousehold<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  HouseholdQuery,
+  HouseholdQueryVariables,
+  HouseholdProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, HouseholdQuery, HouseholdQueryVariables, HouseholdProps<TChildProps>>(HouseholdDocument, {
+      alias: 'household',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useHouseholdQuery__
+ *
+ * To run a query within a React component, call `useHouseholdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useHouseholdQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useHouseholdQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useHouseholdQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<HouseholdQuery, HouseholdQueryVariables>) {
+        return ApolloReactHooks.useQuery<HouseholdQuery, HouseholdQueryVariables>(HouseholdDocument, baseOptions);
+      }
+export function useHouseholdLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<HouseholdQuery, HouseholdQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<HouseholdQuery, HouseholdQueryVariables>(HouseholdDocument, baseOptions);
+        }
+export type HouseholdQueryHookResult = ReturnType<typeof useHouseholdQuery>;
+export type HouseholdLazyQueryHookResult = ReturnType<typeof useHouseholdLazyQuery>;
+export type HouseholdQueryResult = ApolloReactCommon.QueryResult<HouseholdQuery, HouseholdQueryVariables>;
 export const MeDocument = gql`
     query Me {
   me {
