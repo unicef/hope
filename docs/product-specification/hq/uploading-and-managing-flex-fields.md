@@ -46,7 +46,7 @@ Following are all the edge cases / acceptance criteria, associated with the uplo
 * [ ] Show error to user if the file format is not compatible with the system.
 * [ ] Type, name and label are required in the excel file being uploaded. Show error to users.
 * [ ] Name of the field needs to be unique.
-* [ ] If a new excel file is uploaded following things need to be checked:
+* [ ] If a new excel file is uploaded, the following list of criteria needs to be checked:
   * [ ] if new fields being introduced then import them.
   * [ ] if the **type** of an existing field \(name\) is changed, we will throw an error.
   * [ ] if a choice has been added to an existing \(single and multiple select\)

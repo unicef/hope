@@ -2,7 +2,9 @@
 
 **Feature details**: [https://unicef.visualstudio.com/ICTD-HCT-MIS/\_boards/board/t/Software%20Engineering/Features/?workitem=50072](https://unicef.visualstudio.com/ICTD-HCT-MIS/_boards/board/t/Software%20Engineering/Features/?workitem=50072)
 
-
+{% hint style="danger" %}
+Deduplication Features & Functionalities are currently being discussed - TBD
+{% endhint %}
 
 {% hint style="info" %}
 The current plans for deduplication within HCT-MIS can be found in this document, [**here**](https://unicef.sharepoint.com/:w:/r/teams/EMOPS-HCT-MIS/DocumentLibrary2/Modules%20-%20Components/Registration/Deduplication%20scenarios_ge.docx?d=w34184c05b28243ee81a9819410909daf&csf=1&e=x4R8n0)**.**
