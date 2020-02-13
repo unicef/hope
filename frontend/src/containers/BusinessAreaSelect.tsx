@@ -49,7 +49,6 @@ export function BusinessAreaSelect(): React.ReactElement {
   const businessArea = useBusinessArea();
   const history = useHistory();
   const onChange = (e): void => {
-    localStorage.setItem('LocationId', e.target.value);
     history.push(`/${e.target.value}`);
   };
   if (!data) {
