@@ -7,9 +7,9 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
+import { LoadingComponent } from '../LoadingComponent';
 import { EnhancedTableToolbar } from './EnhancedTableToolbar';
 import { EnhancedTableHead, HeadCell } from './EnhancedTableHead';
-import { LoadingComponent } from '../LoadingComponent';
 
 export type Order = 'asc' | 'desc';
 

@@ -2,9 +2,6 @@ import { theme as themeObj } from '../theme';
 import {
   AllProgramsQuery,
   ChoiceObject,
-  ProgramNode,
-  ProgramNodeEdge,
-  ProgramQuery,
   ProgramStatus,
 } from '../__generated__/graphql';
 
@@ -94,15 +91,17 @@ export function columnToOrderBy(
   return camelToUnderscore(`${orderDirection === 'desc' ? '-' : ''}${column}`);
 }
 
-export function choicesToDict(choices: ChoiceObject[]) {
-  return choices.reduce((previousValue, currentValue, currentIndex, array) => {
+export function choicesToDict(
+  choices: ChoiceObject[],
+): { [key: string]: string } {
+  return choices.reduce((previousValue, currentValue) => {
     const newDict = { ...previousValue };
     newDict[currentValue.value] = currentValue.name;
     return newDict;
   }, {});
 }
 
-export function programStatusToPriority(status: ProgramStatus) {
+export function programStatusToPriority(status: ProgramStatus): number {
   switch (status) {
     case ProgramStatus.Draft:
       return 1;
