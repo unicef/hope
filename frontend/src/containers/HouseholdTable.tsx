@@ -100,6 +100,7 @@ export const HouseholdTable = ({
       businessArea,
       familySizeGreater: Number(sizeFilter.min),
       familySizeLower: Number(sizeFilter.max),
+      orderBy,
     },
   });
 
@@ -116,6 +117,7 @@ export const HouseholdTable = ({
 
   const { edges, pageInfo } = data.allHouseholds;
   const houseHolds = edges.map((edge) => edge.node as HouseholdNode);
+
   return (
     <TableWrapper>
       <TableComponent<HouseholdNode>
@@ -131,19 +133,6 @@ export const HouseholdTable = ({
           }
           setOrderBy(property);
           setOrderDirection(direction);
-          if (edges.length < 0) {
-            return;
-          }
-
-          fetchMore({
-            variables: {
-              first: rowsPerPage,
-              orderBy: columnToOrderBy(property, direction),
-            },
-            updateQuery: (prev, { fetchMoreResult }) => {
-              return fetchMoreResult;
-            },
-          });
         }}
         renderRow={(row) => {
           return (
@@ -175,6 +164,10 @@ export const HouseholdTable = ({
         handleChangeRowsPerPage={(e) => {
           setPage(0);
           setRowsPerPage(Number(e.target.value));
+          setAfter(null);
+          setFirst(rowsPerPage);
+          setLast(null);
+          setBefore(null);
         }}
         handleChangePage={(event, newPage) => {
           if (newPage === 0) {
