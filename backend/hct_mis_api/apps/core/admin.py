@@ -2,8 +2,9 @@ from collections import defaultdict
 
 import xlrd
 from django.contrib import admin
+from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.forms import forms, ModelChoiceField
+from django.forms import forms
 from django.shortcuts import redirect, render
 from django.urls import path
 from django.utils.html import strip_tags
@@ -17,7 +18,6 @@ from core.models import (
 
 
 class XLSImportForm(forms.Form):
-    business_area = ModelChoiceField(queryset=BusinessArea.objects.all())
     xls_file = forms.FileField()
 
 
@@ -29,39 +29,46 @@ class BusinessAreaAdmin(admin.ModelAdmin):
 @admin.register(FlexibleAttribute)
 class FlexibleAttributeAdmin(admin.ModelAdmin):
     change_list_template = "core/flexible_fields_changelist.html"
-    attribute_model_fields = [
+
+    TYPE_CHOICE_MAP = {
+        "note": "STRING",
+        "image": "IMAGE",
+        "calculate": "DECIMAL",
+        "select_one": "SELECT_ONE",
+        "text": "STRING",
+        "integer": "INTEGER",
+        "date": "DATETIME",
+        "select_multiple": "SELECT_MANY",
+    }
+
+    # Constants for xls import
+    ATTRIBUTE_MODEL_FIELDS = [
         field.name for field in FlexibleAttribute._meta.get_fields()
     ]
 
-    group_model_fields = [
+    GROUP_MODEL_FIELDS = [
         field.name for field in FlexibleAttributeGroup._meta.get_fields()
     ]
 
-    choice_model_fields = [
+    CHOICE_MODEL_FIELDS = [
         field.name for field in FlexibleAttributeChoice._meta.get_fields()
     ]
 
-    core_field_suffixes = (
+    CORE_FIELD_SUFFIXES = (
         "_h_c",
         "_i_c",
     )
 
-    language_fields = (
+    JSON_MODEL_FIELDS = (
         "label",
         "hint",
     )
 
-    fields_to_exclude = (
+    EXCLUDED_MODEL_FIELDS = (
         "start",
         "end",
         "deviceid",
     )
-
-    json_fields = defaultdict(dict)
-
-    object_fields = {}
-
-    group_tree = [None]
 
     def get_urls(self):
         urls = super().get_urls()
@@ -70,69 +77,308 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
         ]
         return my_urls + urls
 
-    def assign_field_value(
+    def _validate_file_has_required_core_fields(self, sheet):
+        required_fields = [
+            "consent_h_c",
+            "residence_status_h_c",
+            "nationality_h_c",
+            "f_0_5_age_group_h_c",
+            "f_6_11_age_group_h_c",
+            "f_12_17_age_group_h_c",
+            "f_adults_h_c",
+            "m_0_5_age_group_h_c",
+            "m_6_11_age_group_h_c",
+            "m_12_17_age_group_h_c",
+            "m_adults_h_c",
+            "hh_size_h_c",
+            "head_of_hh_i_c",
+            "marital_status_i_c",
+            "status_head_of_hh_i_c",
+            "contact_details_i_c",
+            "address_i_c",
+            "admin1_i_c",
+            "admin2_i_c",
+            "phone_no_i_c",
+            "phone_no_alternative_i_c",
+            "given_name_i_c",
+            "middle_name_i_c",
+            "family_name_i_c",
+            "full_name_i_c",
+            "sex_i_c",
+            "birth_date_i_c",
+            "estimated_birth_date_i_c",
+            "work_status_i_c",
+            "disability_i_c",
+        ]
+
+        core_fields_from_xls = []
+        for row_number in range(1, sheet.nrows):
+            field_name = sheet.row(row_number)[1].value
+            if any(field_name.endswith(i) for i in self.CORE_FIELD_SUFFIXES):
+                core_fields_from_xls.append(field_name)
+
+        missing = set(required_fields).difference(set(core_fields_from_xls))
+        if missing:
+            raise ValidationError(f"XLS File is missing core fields: {missing}")
+
+    def _get_model_fields(self, object_type_to_add):
+        return {
+            "attribute": self.ATTRIBUTE_MODEL_FIELDS,
+            "group": self.GROUP_MODEL_FIELDS,
+            "choice": self.CHOICE_MODEL_FIELDS,
+        }.get(object_type_to_add)
+
+    def _assign_field_values(
         self, value, header_name, object_type_to_add="choice",
     ):
-        if object_type_to_add == "attribute":
-            model_fields = self.attribute_model_fields
-        elif object_type_to_add == "group":
-            model_fields = self.group_model_fields
-        else:
-            model_fields = self.choice_model_fields
+        model_fields = self._get_model_fields(object_type_to_add)
 
-        if any(header_name.startswith(i) for i in self.language_fields):
+        if any(header_name.startswith(i) for i in self.JSON_MODEL_FIELDS):
             field_name, language = header_name.split("::")
             if field_name in model_fields:
                 cleared_value = strip_tags(value).replace("#", "").strip()
-                self.json_fields[field_name].update(
+                self.json_fields_to_create[field_name].update(
                     {language: cleared_value if value else ""}
                 )
             return
 
         if header_name == "required":
             if value == "true":
-                self.object_fields[header_name] = True
+                self.object_fields_to_create[header_name] = True
             else:
-                self.object_fields[header_name] = False
+                self.object_fields_to_create[header_name] = False
             return
 
         if header_name in model_fields:
-            self.object_fields[header_name] = value if value else ""
+            if header_name == "type":
+                if not value:
+                    raise ValidationError("Type is required")
+                choice_key = value.split(" ")[0]
+
+                if choice_key in self.TYPE_CHOICE_MAP.keys():
+                    self.object_fields_to_create[
+                        "type"
+                    ] = self.TYPE_CHOICE_MAP.get(choice_key)
+            else:
+                # TODO: Uncomment when question is resolved
+                # if header_name == "name" and not value:
+                #     raise ValidationError("Name is required")
+                self.object_fields_to_create[header_name] = (
+                    value if value else ""
+                )
         elif header_name.startswith("admin"):
-            self.object_fields["admin"] = value if value else ""
+            self.object_fields_to_create["admin"] = value if value else ""
 
-    def check_if_can_add(self, value, row):
-        is_core_field = isinstance(value, str) and any(
-            value.endswith(i) for i in self.core_field_suffixes
-        ) and not row[0].value.endswith('_group')
+    def _set_can_add_flag(self, value, row):
+        is_core_field = (
+            isinstance(value, str)
+            and any(value.endswith(i) for i in self.CORE_FIELD_SUFFIXES)
+            and not row[0].value.endswith("_group")
+        )
 
-        is_in_excluded = value in self.fields_to_exclude
+        is_in_excluded = row[0].value in self.EXCLUDED_MODEL_FIELDS
+
+        is_version_field = row[1].value == "__version__"
 
         is_end_info = any(value == i for i in ("end_repeat", "end_group"))
 
         if is_end_info:
-            self.group_tree.pop()
-            return False
+            self.current_group_tree.pop()
+            self.can_add_flag = False
+            return
 
-        if is_core_field or is_in_excluded:
-            return False
+        if is_core_field or is_in_excluded or is_version_field:
+            self.can_add_flag = False
+            return
 
-        return True
+        self.can_add_flag = True
+
+    def _get_list_of_field_choices(self, sheet):
+        fields_with_choices = []
+        for row_number in range(1, sheet.nrows):
+            row = sheet.row(row_number)
+            if row[0].value.startswith("select"):
+                fields_with_choices.append(row)
+
+        return [row[0].value.split(" ")[1] for row in fields_with_choices]
+
+    def _get_field_choice_name(self, row):
+        has_choice = row[0].value.startswith("select")
+        if has_choice:
+            return row[0].value.split(" ")[1]
+        return
+
+    def _reset_model_fields_variables(self):
+        self.json_fields_to_create = defaultdict(dict)
+        self.object_fields_to_create = {}
+        self.can_add_flag = True
+
+    def _handle_choices(self, sheet):
+        choices_assigned_to_fields = self._get_list_of_field_choices(sheet)
+        choices_from_db = FlexibleAttributeChoice.objects.all()
+        choices_first_row = sheet.row(0)
+        choices_headers_map = [col.value for col in choices_first_row]
+        to_create_choices = []
+        updated_choices = []
+        for row_number in range(1, sheet.nrows):
+            row = sheet.row(row_number)
+            self._reset_model_fields_variables()
+
+            if row[0].value in choices_assigned_to_fields:
+                raise ValidationError("Choice is not assigned to any field!")
+
+            for cell, header_name in zip(row, choices_headers_map):
+                self._assign_field_values(
+                    cell.value, header_name,
+                )
+
+            obj = FlexibleAttributeChoice.objects.filter(
+                list_name=self.object_fields_to_create["list_name"],
+                name=self.object_fields_to_create["name"],
+            ).first()
+
+            if obj:
+                obj.update(
+                    **self.object_fields_to_create,
+                    **self.json_fields_to_create,
+                )
+                updated_choices.append(
+                    FlexibleAttributeChoice.objects.filter(
+                        list_name=self.object_fields_to_create["list_name"],
+                        name=self.object_fields_to_create["name"],
+                    )
+                )
+            else:
+                choice = FlexibleAttributeChoice(
+                    **self.object_fields_to_create,
+                    **self.json_fields_to_create,
+                )
+                to_create_choices.append(choice)
+
+        created_choices = FlexibleAttributeChoice.objects.bulk_create(
+            to_create_choices,
+        )
+
+        choices_to_delete = set(choices_from_db).difference(
+            set(created_choices + updated_choices)
+        )
+
+        for choice in choices_to_delete:
+            choice.delete()
+
+    def _handle_groups_and_fields(self, sheet):
+        groups_from_db, attrs_from_db = (
+            FlexibleAttributeGroup.objects.all(),
+            FlexibleAttribute.objects.all(),
+        )
+
+        first_row = sheet.row(0)
+
+        headers_map = [col.value for col in first_row]
+
+        all_attrs = []
+        all_groups = []
+        for row_number in range(1, sheet.nrows):
+            row = sheet.row(row_number)
+            object_type_to_add = (
+                "group"
+                if row[0].value in ("begin_group", "begin_repeat")
+                else "attribute"
+            )
+            repeatable = True if row[0].value == "begin_repeat" else False
+            self._reset_model_fields_variables()
+
+            for cell, header_name in zip(row, headers_map):
+                value = cell.value
+
+                self._set_can_add_flag(value, row)
+                if not self.can_add_flag:
+                    break
+
+                self._assign_field_values(
+                    value, header_name, object_type_to_add
+                )
+
+            if self.can_add_flag:
+                if object_type_to_add == "group":
+                    from_db = FlexibleAttributeGroup.objects.filter(
+                        name=self.object_fields_to_create["name"],
+                    )
+                    if from_db:
+                        from_db.update(
+                            name=self.object_fields_to_create["name"],
+                            **self.json_fields_to_create,
+                            repeatable=repeatable,
+                            parent=self.current_group_tree[-1],
+                        )
+                        group = from_db.first()
+                        self.current_group_tree.append(group)
+                    else:
+                        group = FlexibleAttributeGroup.objects.create(
+                            **self.object_fields_to_create,
+                            **self.json_fields_to_create,
+                            repeatable=repeatable,
+                            parent=self.current_group_tree[-1],
+                            lft=1,
+                            rght=1,
+                            tree_id=1,
+                            level=1,
+                        )
+                        self.current_group_tree.append(group)
+                    all_groups.append(group)
+                elif object_type_to_add == "attribute":
+                    choice_name = self._get_field_choice_name(row)
+                    obj = FlexibleAttribute.objects.filter(
+                        name=self.object_fields_to_create["name"],
+                        type=self.object_fields_to_create.get("type", ""),
+                    ).first()
+                    if obj:
+                        if obj.type != self.object_fields_to_create["type"]:
+                            raise ValidationError(
+                                "Type of the attribute cannot be changed!"
+                            )
+                        obj.type = self.object_fields_to_create["type"]
+                        obj.name = self.object_fields_to_create["name"]
+                        obj.required = self.object_fields_to_create["required"]
+                        obj.label = self.json_fields_to_create["label"]
+                        obj.hint = self.json_fields_to_create["hint"]
+                        obj.save()
+                        field = obj
+
+                    else:
+                        field = FlexibleAttribute.objects.create(
+                            group=self.current_group_tree[-1],
+                            **self.object_fields_to_create,
+                            **self.json_fields_to_create,
+                        )
+                    if choice_name:
+                        choices = FlexibleAttributeChoice.objects.filter(
+                            list_name=choice_name,
+                        )
+                        field.flexibleattributechoice_set.set(choices)
+
+                    all_attrs.append(field)
+
+        groups_to_delete = set(groups_from_db).difference(set(all_groups))
+
+        for group in groups_to_delete:
+            group.delete()
+
+        attrs_to_delete = set(attrs_from_db).difference(set(all_attrs))
+
+        for attr in attrs_to_delete:
+            attr.delete()
+
+    # variables re-initialized for each model creation
+    json_fields_to_create = defaultdict(dict)
+    object_fields_to_create = {}
+    current_group_tree = [None]
+    can_add_flag = True
 
     @transaction.atomic
     def import_xls(self, request):
-        # TODO: Break this code into smaller pieces (functions)
         if request.method == "POST":
             xls_file = request.FILES["xls_file"]
-            business_area_id = request.POST.get("business_area")
-            business_area = BusinessArea.objects.get(id=business_area_id)
-
-            groups_from_db = FlexibleAttributeGroup.objects.filter(
-                business_area=business_area
-            )
-            attrs_from_db = FlexibleAttribute.objects.filter(
-                business_area=business_area
-            )
 
             wb = xlrd.open_workbook(file_contents=xls_file.read())
 
@@ -141,164 +387,11 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
                 "choices": wb.sheet_by_name("choices"),
             }
 
-            first_row = sheets["survey"].row(0)
+            self._validate_file_has_required_core_fields(sheets["survey"])
 
-            headers_map = [col.value for col in first_row]
+            self._handle_choices(sheets["choices"])
 
-            all_attrs = []
-            all_groups = []
-            updated_attrs = []
-            for row_number in range(1, sheets["survey"].nrows):
-                row = sheets["survey"].row(row_number)
-                object_type_to_add = (
-                    "group"
-                    if row[0].value in ("begin_group", "begin_repeat")
-                    else "attribute"
-                )
-                repeatable = True if row[0].value == "begin_repeat" else False
-                can_add_flag = True
-                self.json_fields = defaultdict(dict)
-                self.object_fields = {}
-
-                for cell, header_name in zip(row, headers_map):
-                    value = cell.value
-
-                    if not self.check_if_can_add(value, row):
-                        can_add_flag = False
-                        break
-
-                    self.assign_field_value(
-                        value, header_name, object_type_to_add
-                    )
-
-                if can_add_flag:
-                    if object_type_to_add == "group":
-                        from_db = FlexibleAttributeGroup.objects.filter(
-                            name=self.object_fields["name"],
-                            business_area=business_area,
-                        )
-                        if from_db:
-                            from_db.update(
-                                name=self.object_fields["name"],
-                                **self.json_fields,
-                                repeatable=repeatable,
-                                parent=self.group_tree[-1],
-                            )
-                            group = FlexibleAttributeGroup.objects.get(
-                                name=self.object_fields["name"],
-                                business_area=business_area,
-                            )
-                            self.group_tree.append(group)
-                        else:
-                            group = FlexibleAttributeGroup.objects.create(
-                                **self.object_fields,
-                                **self.json_fields,
-                                repeatable=repeatable,
-                                parent=self.group_tree[-1],
-                                business_area=business_area,
-                                lft=1,
-                                rght=1,
-                                tree_id=1,
-                                level=1,
-                            )
-                            self.group_tree.append(group)
-                        all_groups.append(group)
-                    elif object_type_to_add == "attribute":
-                        obj = FlexibleAttribute.objects.filter(
-                            name=self.object_fields["name"],
-                            type=self.object_fields["type"],
-                            business_area=business_area,
-                        )
-                        if obj:
-                            obj.update(
-                                group=self.group_tree[-1],
-                                **self.object_fields,
-                                **self.json_fields,
-                            )
-                            updated_attrs.append(
-                                FlexibleAttribute.objects.get(
-                                    name=self.object_fields["name"],
-                                    type=self.object_fields["type"],
-                                    business_area=business_area,
-                                )
-                            )
-                        else:
-                            all_attrs.append(
-                                FlexibleAttribute(
-                                    business_area=business_area,
-                                    group=self.group_tree[-1],
-                                    **self.object_fields,
-                                    **self.json_fields,
-                                )
-                            )
-
-            groups_to_delete = set(groups_from_db).difference(set(all_groups))
-
-            for group in groups_to_delete:
-                group.delete()
-
-            created_attribs = FlexibleAttribute.objects.bulk_create(all_attrs)
-            attrs_to_delete = set(attrs_from_db).difference(
-                set(created_attribs + updated_attrs)
-            )
-
-            for attr in attrs_to_delete:
-                attr.delete()
-
-            choices_first_row = sheets["choices"].row(0)
-            choices_headers_map = [col.value for col in choices_first_row]
-            choices_from_db = FlexibleAttributeChoice.objects.all()
-            created_choices = []
-            updated_choices = []
-            for row_number in range(1, sheets["choices"].nrows):
-                row = sheets["choices"].row(row_number)
-                self.json_fields = defaultdict(dict)
-                self.object_fields = {}
-
-                for cell, header_name in zip(row, choices_headers_map):
-                    self.assign_field_value(
-                        cell.value, header_name,
-                    )
-
-                flex_attrs = FlexibleAttribute.objects.filter(
-                    type__contains=self.object_fields["list_name"],
-                    business_area=business_area,
-                )
-
-                obj = FlexibleAttributeChoice.objects.filter(
-                    list_name=self.object_fields["list_name"],
-                    name=self.object_fields["name"],
-                    business_area=business_area,
-                )
-
-                if obj:
-                    obj.update(
-                        business_area=business_area,
-                        **self.object_fields,
-                        **self.json_fields,
-                    )
-                    updated_choices.append(
-                        FlexibleAttributeChoice.objects.filter(
-                            list_name=self.object_fields["list_name"],
-                            name=self.object_fields["name"],
-                        )
-                    )
-                    obj.first().flex_attributes.set(flex_attrs)
-
-                created = FlexibleAttributeChoice.objects.create(
-                    business_area=business_area,
-                    **self.object_fields,
-                    **self.json_fields,
-                )
-                created.flex_attributes.set(flex_attrs)
-                created_choices.append(created)
-
-            choices_to_delete = set(choices_from_db).difference(
-                set(created_choices + updated_choices)
-            )
-
-            for choice in choices_to_delete:
-                choice.delete()
+            self._handle_groups_and_fields(sheets["survey"])
 
             self.message_user(request, "Your xls file has been imported, ")
             return redirect("..")
