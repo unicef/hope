@@ -9,6 +9,7 @@ import Feedback from '@material-ui/icons/Feedback';
 import TrendingUpRounded from '@material-ui/icons/TrendingUpRounded';
 import SupervisedUserCircle from '@material-ui/icons/SupervisedUserCircle';
 import SettingsRounded from '@material-ui/icons/SettingsRounded';
+import PeopleAltRoundedIcon from '@material-ui/icons/PeopleAltRounded';
 import React from 'react';
 
 export const menuItems = [
@@ -34,8 +35,8 @@ export const menuItems = [
       {
         name: 'Household',
         href: '/population/household',
-        selectedRegexp: /^\/household.*$/,
-        icon: <PeopleIcon />,
+        selectedRegexp: /^\/population\/household.*$/,
+        icon: <PeopleAltRoundedIcon />,
       },
       {
         name: 'Individuals',
