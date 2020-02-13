@@ -9,6 +9,7 @@ import {
 } from '@material-ui/core';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
 import { Field, Form, Formik } from 'formik';
+import moment from 'moment';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikSwitchField } from '../../shared/Formik/FormikSwitchField';
@@ -21,7 +22,7 @@ import { FormikDateField } from '../../shared/Formik/FormikDateField';
 import { selectFields } from '../../utils/utils';
 
 const DialogTitleWrapper = styled.div`
-  border-bottom: 1px solid ${({theme})=>theme.hctPalette.lighterGray};
+  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
 `;
 
 const DialogDescription = styled.div`
@@ -52,9 +53,21 @@ const DialogContainer = styled.div`
 const validationSchema = Yup.object().shape({
   name: Yup.string().required('Programme name is required'),
   scope: Yup.string().required('CashAssist Scope is required'),
-  startDate: Yup.string().required('Start Date is required'),
-  endDate: Yup.string().required('End Date is required'),
+  startDate: Yup.date().required(),
+  endDate: Yup.date().when(
+    'startDate',
+    (startDate, schema) =>
+      startDate &&
+      schema.min(
+        startDate,
+        `End date have to be grater than ${moment(startDate).format(
+          'DD/MM/YYYY',
+        )}`,
+      ),
+    '',
+  ),
   sector: Yup.string().required('Sector is required'),
+  budget: Yup.number().min(0),
 });
 
 interface ProgramFormPropTypes {
@@ -93,12 +106,15 @@ export function ProgramForm({
   if (program) {
     initialValue = selectFields(program, Object.keys(initialValue));
   }
+  // initialValue.budget =
   if (!data) return null;
   return (
     <DialogContainer>
       <Formik
         initialValues={initialValue}
         onSubmit={(values) => {
+          const newValues = { ...values };
+          newValues.budget = Number(values.budget).toFixed(2);
           return onSubmit(values);
         }}
         validationSchema={validationSchema}
@@ -183,6 +199,7 @@ export function ProgramForm({
                     label='Budget'
                     type='number'
                     fullWidth
+                    precision={2}
                     component={FormikTextField}
                   />
                 </MediumLabel>

@@ -134,6 +134,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    'auditlog.middleware.AuditlogMiddleware',
 ]
 
 TEMPLATES = [
@@ -172,6 +173,7 @@ PROJECT_APPS = [
     "registration_datahub",
     "mptt",
     "django_extensions",
+    "auditlog",
 ]
 
 DJANGO_APPS = [
