@@ -2,7 +2,7 @@ import { MenuItem, Select } from '@material-ui/core';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import { useAllBusinessAreasQuery, useMeQuery } from '../__generated__/graphql';
+import { useMeQuery } from '../__generated__/graphql';
 import { useBusinessArea } from '../hooks/useBusinessArea';
 
 const CountrySelect = styled(Select)`
@@ -42,7 +42,7 @@ const CountrySelect = styled(Select)`
   }
 `;
 
-export function BusinessAreaSelect() {
+export function BusinessAreaSelect(): React.ReactElement {
   const { data } = useMeQuery({
     fetchPolicy: 'cache-and-network',
   });

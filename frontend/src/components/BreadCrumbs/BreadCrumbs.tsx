@@ -49,7 +49,14 @@ export function BreadCrumbs({
 }: BreadCrumbsProps): React.ReactElement {
   const breadCrumbsElements = breadCrumbs.map((item, index) => {
     const last = index === breadCrumbs.length - 1;
-    return <BreadCrumbsElement title={item.title} to={item.to} last={last} />;
+    return (
+      <BreadCrumbsElement
+        key={item.title}
+        title={item.title}
+        to={item.to}
+        last={last}
+      />
+    );
   });
   return <Container>{breadCrumbsElements}</Container>;
 }

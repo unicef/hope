@@ -16,9 +16,7 @@ import {
   useDeleteProgramMutation,
 } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { PROGRAM_QUERY } from '../../../apollo/queries/Program';
 import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/AllPrograms';
-import { programCompare } from '../../../utils/utils';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
