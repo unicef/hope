@@ -12,7 +12,8 @@ import { ProgramsPage } from './pages/ProgramsPage';
 import { ProgramDetailsPage } from './pages/ProgramDetailsPage';
 import { CashPlanDetailsPage } from './pages/CashPlanDetailsPage';
 import { PaymentRecordDetailsPage } from './pages/PaymentRecordDetailsPage';
-import { PopulationHouseholdPage } from "./pages/PopulationHouseholdPage";
+import { PopulationHouseholdPage } from './pages/PopulationHouseholdPage';
+import { PopulationHouseholdDetailsPage } from './pages/PopulationHouseholdDetailsPage';
 
 const Root = styled.div`
   display: flex;
@@ -53,7 +54,10 @@ export function HomeRouter(): React.ReactElement {
       <MainContent>
         <div className={classes.appBarSpacer} />
         <Switch>
-          <Route path="/:businessArea/cashplans/:id">
+          <Route path='/:businessArea/population/household/:id'>
+            <PopulationHouseholdDetailsPage />
+          </Route>
+          <Route path='/:businessArea/cashplans/:id'>
             <CashPlanDetailsPage />
           </Route>
           <Route path='/:businessArea/population/household'>

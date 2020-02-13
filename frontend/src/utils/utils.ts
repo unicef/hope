@@ -118,3 +118,12 @@ export function programCompare(
   const statusB = programStatusToPriority(b.node.status);
   return statusA > statusB ? 1 : -1;
 }
+
+export function formatCurrency(amount: number): string {
+  return amount.toLocaleString('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
