@@ -989,7 +989,11 @@ export type QueryAllHouseholdsArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
+  last?: Maybe<Scalars['Int']>,
+  businessArea?: Maybe<Scalars['String']>,
+  familySizeGreater?: Maybe<Scalars['Float']>,
+  familySizeLower?: Maybe<Scalars['Float']>,
+  orderBy?: Maybe<Scalars['String']>
 };
 
 
@@ -1340,6 +1344,58 @@ export type AllCashPlansQuery = (
       & { node: Maybe<(
         { __typename?: 'CashPlanNode' }
         & Pick<CashPlanNode, 'id' | 'cashAssistId' | 'numberOfHouseholds' | 'disbursementDate' | 'currency' | 'status' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity'>
+      )> }
+    )>> }
+  )> }
+);
+
+export type AllHouseholdsQueryVariables = {
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  businessArea?: Maybe<Scalars['String']>,
+  familySizeGreater?: Maybe<Scalars['Float']>,
+  familySizeLower?: Maybe<Scalars['Float']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type AllHouseholdsQuery = (
+  { __typename?: 'Query' }
+  & { allHouseholds: Maybe<(
+    { __typename?: 'HouseholdNodeConnection' }
+    & Pick<HouseholdNodeConnection, 'totalCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'startCursor' | 'endCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'HouseholdNodeEdge' }
+      & Pick<HouseholdNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'HouseholdNode' }
+        & Pick<HouseholdNode, 'id' | 'createdAt' | 'householdCaId' | 'residenceStatus' | 'familySize'>
+        & { location: (
+          { __typename?: 'LocationNode' }
+          & Pick<LocationNode, 'id' | 'title'>
+        ), paymentRecords: (
+          { __typename?: 'PaymentRecordNodeConnection' }
+          & { edges: Array<Maybe<(
+            { __typename?: 'PaymentRecordNodeEdge' }
+            & { node: Maybe<(
+              { __typename?: 'PaymentRecordNode' }
+              & Pick<PaymentRecordNode, 'id' | 'headOfHousehold'>
+              & { cashPlan: (
+                { __typename?: 'CashPlanNode' }
+                & Pick<CashPlanNode, 'totalDeliveredQuantity'>
+                & { program: (
+                  { __typename?: 'ProgramNode' }
+                  & Pick<ProgramNode, 'id' | 'name'>
+                ) }
+              ) }
+            )> }
+          )>> }
+        ) }
       )> }
     )>> }
   )> }
@@ -1853,6 +1909,98 @@ export function useAllCashPlansLazyQuery(baseOptions?: ApolloReactHooks.LazyQuer
 export type AllCashPlansQueryHookResult = ReturnType<typeof useAllCashPlansQuery>;
 export type AllCashPlansLazyQueryHookResult = ReturnType<typeof useAllCashPlansLazyQuery>;
 export type AllCashPlansQueryResult = ApolloReactCommon.QueryResult<AllCashPlansQuery, AllCashPlansQueryVariables>;
+export const AllHouseholdsDocument = gql`
+    query AllHouseholds($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $familySizeGreater: Float, $familySizeLower: Float, $orderBy: String) {
+  allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, familySizeGreater: $familySizeGreater, familySizeLower: $familySizeLower, orderBy: $orderBy) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+    totalCount
+    edges {
+      cursor
+      node {
+        id
+        createdAt
+        householdCaId
+        residenceStatus
+        familySize
+        location {
+          id
+          title
+        }
+        paymentRecords {
+          edges {
+            node {
+              id
+              headOfHousehold
+              cashPlan {
+                program {
+                  id
+                  name
+                }
+                totalDeliveredQuantity
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export type AllHouseholdsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllHouseholdsQuery, AllHouseholdsQueryVariables>, 'query'>;
+
+    export const AllHouseholdsComponent = (props: AllHouseholdsComponentProps) => (
+      <ApolloReactComponents.Query<AllHouseholdsQuery, AllHouseholdsQueryVariables> query={AllHouseholdsDocument} {...props} />
+    );
+    
+export type AllHouseholdsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllHouseholdsQuery, AllHouseholdsQueryVariables> & TChildProps;
+export function withAllHouseholds<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllHouseholdsQuery,
+  AllHouseholdsQueryVariables,
+  AllHouseholdsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllHouseholdsQuery, AllHouseholdsQueryVariables, AllHouseholdsProps<TChildProps>>(AllHouseholdsDocument, {
+      alias: 'allHouseholds',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllHouseholdsQuery__
+ *
+ * To run a query within a React component, call `useAllHouseholdsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllHouseholdsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllHouseholdsQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      businessArea: // value for 'businessArea'
+ *      familySizeGreater: // value for 'familySizeGreater'
+ *      familySizeLower: // value for 'familySizeLower'
+ *      orderBy: // value for 'orderBy'
+ *   },
+ * });
+ */
+export function useAllHouseholdsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllHouseholdsQuery, AllHouseholdsQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllHouseholdsQuery, AllHouseholdsQueryVariables>(AllHouseholdsDocument, baseOptions);
+      }
+export function useAllHouseholdsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllHouseholdsQuery, AllHouseholdsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllHouseholdsQuery, AllHouseholdsQueryVariables>(AllHouseholdsDocument, baseOptions);
+        }
+export type AllHouseholdsQueryHookResult = ReturnType<typeof useAllHouseholdsQuery>;
+export type AllHouseholdsLazyQueryHookResult = ReturnType<typeof useAllHouseholdsLazyQuery>;
+export type AllHouseholdsQueryResult = ApolloReactCommon.QueryResult<AllHouseholdsQuery, AllHouseholdsQueryVariables>;
 export const AllLogEntriesDocument = gql`
     query AllLogEntries($objectId: String!, $after: String, $before: String, $count: Int) {
   allLogEntries(after: $after, before: $before, first: $count, objectId: $objectId) {
