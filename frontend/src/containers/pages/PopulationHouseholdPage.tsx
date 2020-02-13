@@ -23,7 +23,11 @@ export function PopulationHouseholdPage(): React.ReactElement {
     setSizeFilter({ ...sizeFilter, min: value });
   };
   const handleMaxSizeFilter = (value: number) => {
-    setSizeFilter({ ...sizeFilter, max: value });
+    if (value < sizeFilter.min) {
+      setSizeFilter({ ...sizeFilter, min: sizeFilter.min + 1 });
+    } else {
+      setSizeFilter({ ...sizeFilter, max: value });
+    }
   };
 
   const handleTextFilter = (value: string) => {
@@ -38,6 +42,8 @@ export function PopulationHouseholdPage(): React.ReactElement {
     <div>
       <PageHeader title='Households' />
       <HouseholdFilters
+        minValue={sizeFilter.min}
+        maxValue={sizeFilter.max}
         householdMaxSizeFilter={handleMaxSizeFilter}
         householdMinSizeFilter={handleMinSizeFilter}
         householdTextFilter={handleTextFilter}
