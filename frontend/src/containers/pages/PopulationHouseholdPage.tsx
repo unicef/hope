@@ -19,10 +19,10 @@ export function PopulationHouseholdPage(): React.ReactElement {
   const [textFilter, setTextFilter] = useState('');
   const businessArea = useBusinessArea();
 
-  const handleMinSizeFilter = (value: number) => {
+  const handleMinSizeFilter = (value: number): void => {
     setSizeFilter({ ...sizeFilter, min: value });
   };
-  const handleMaxSizeFilter = (value: number) => {
+  const handleMaxSizeFilter = (value: number): void => {
     if (value < sizeFilter.min) {
       setSizeFilter({ ...sizeFilter, min: sizeFilter.min + 1 });
     } else {
@@ -30,7 +30,7 @@ export function PopulationHouseholdPage(): React.ReactElement {
     }
   };
 
-  const handleTextFilter = (value: string) => {
+  const handleTextFilter = (value: string): void => {
     if (value.length > 3) {
       setTextFilter(value);
     } else {

@@ -1,9 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
-import { MenuItem, Select, TextField, InputAdornment } from '@material-ui/core';
+import { TextField, InputAdornment } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
 import GroupIcon from '@material-ui/icons/Group';
-import { ProgramNode } from '../../__generated__/graphql';
 
 const Container = styled.div`
   display: flex;

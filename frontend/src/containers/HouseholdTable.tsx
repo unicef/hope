@@ -1,13 +1,13 @@
+import TableRow from '@material-ui/core/TableRow';
+import TableCell from '@material-ui/core/TableCell';
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import TableRow from '@material-ui/core/TableRow';
-import TableCell from '@material-ui/core/TableCell';
+import Moment from 'react-moment';
+import { HouseholdNode, useAllHouseholdsQuery } from '../__generated__/graphql';
+import { columnToOrderBy } from '../utils/utils';
 import { Order, TableComponent } from '../components/table/TableComponent';
 import { HeadCell } from '../components/table/EnhancedTableHead';
-import { HouseholdNode, useAllHouseholdsQuery } from '../__generated__/graphql';
-import Moment from 'react-moment';
-import { columnToOrderBy } from '../utils/utils';
 
 const headCells: HeadCell<HouseholdNode>[] = [
   {
@@ -58,7 +58,7 @@ const TableWrapper = styled.div`
   padding: 20px;
 `;
 
-const formatCurrency = (amount: number) =>
+const formatCurrency = (amount: number): string =>
   amount.toLocaleString('en-US', {
     style: 'currency',
     currency: 'USD',
@@ -74,7 +74,6 @@ interface HouseholdTableProps {
 
 export const HouseholdTable = ({
   sizeFilter,
-  textFilter,
   businessArea,
 }: HouseholdTableProps): React.ReactElement => {
   const history = useHistory();
@@ -87,7 +86,7 @@ export const HouseholdTable = ({
   const [first, setFirst] = useState(rowsPerPage);
   const [last, setLast] = useState(rowsPerPage);
 
-  const { loading, data, fetchMore, refetch } = useAllHouseholdsQuery({
+  const { loading, data, refetch } = useAllHouseholdsQuery({
     variables: {
       first,
       last,
@@ -100,7 +99,7 @@ export const HouseholdTable = ({
     },
   });
 
-  const handleClick = (row) => {
+  const handleClick = (row: HouseholdNode): void => {
     const path = `/${businessArea}/population/household/${row.id}`;
     history.push(path);
   };
