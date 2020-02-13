@@ -6,8 +6,21 @@ export const AllHouseholds = gql`
     $before: String
     $first: Int
     $last: Int
+    $businessArea: String
+    $familySizeGreater: Float
+    $familySizeLower: Float
+    $orderBy: String
   ) {
-    allHouseholds(after: $after, before: $before, first: $first, last: $last) {
+    allHouseholds(
+      after: $after
+      before: $before
+      first: $first
+      last: $last
+      businessArea: $businessArea
+      familySizeGreater: $familySizeGreater
+      familySizeLower: $familySizeLower
+      orderBy: $orderBy
+    ) {
       pageInfo {
         hasNextPage
         hasPreviousPage

@@ -622,7 +622,7 @@ type Query {
   targetPopulation(id: ID!): TargetPopulationNode
   allTargetPopulation(before: String, after: String, first: Int, last: Int): TargetPopulationNodeConnection
   household(id: ID!): HouseholdNode
-  allHouseholds(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection
+  allHouseholds(before: String, after: String, first: Int, last: Int, businessArea: String, familySizeGreater: Float, familySizeLower: Float, orderBy: String): HouseholdNodeConnection
   registrationDataImport(id: ID!): RegistrationDataImportNode
   allRegistrationDataImports(before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection
   me: UserObjectType

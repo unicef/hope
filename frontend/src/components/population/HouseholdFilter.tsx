@@ -24,11 +24,13 @@ const Container = styled.div`
 `;
 
 const TextContainer = styled(TextField)`
+  .MuiFilledInput-root {
+    border-radius: 4px;
+  }
   && {
     width: 232px;
     color: #5f6368;
     border-bottom: 0;
-    border-radius: 4px;
   }
   .MuiFilledInput-underline:before {
     border-bottom: 0;
@@ -63,48 +65,16 @@ const TextContainer = styled(TextField)`
   }
 `;
 
-const SelectContainer = styled(Select)`
-  && {
-    width: 232px;
-    background-color: rgba(0, 0, 0, 0.08);
-    color: #5f6368;
-    border-bottom-width: 0;
-    border-radius: 4px;
-    height: 40px;
-  }
-  .MuiInput-underline:before {
-    border-bottom: none;
-  }
-  .MuiInput-underline:after {
-    border-bottom: none;
-  }
-  &&:hover {
-    border-bottom-width: 0;
-    border-radius: 4px;
-  }
-  &&:hover::before {
-    border-bottom-width: 0;
-  }
-  &&::before {
-    border-bottom-width: 0;
-  }
-  &&::after {
-    border-bottom-width: 0;
-  }
-  &&::after:hover {
-    border-bottom-width: 0;
-  }
-  .MuiSvgIcon-root {
-    color: #5f6368;
-  }
-`;
-
 interface HouseholdFiltersProps {
+  minValue: number;
+  maxValue: number;
   householdMinSizeFilter: (value: number) => void;
   householdMaxSizeFilter: (value: number) => void;
   householdTextFilter: (value: string) => void;
 }
 export function HouseholdFilters({
+  minValue,
+  maxValue,
   householdMinSizeFilter,
   householdMaxSizeFilter,
   householdTextFilter,
@@ -124,9 +94,11 @@ export function HouseholdFilters({
         }}
       />
       <TextContainer
+        value={minValue}
         variant='filled'
         placeholder='Household size'
         onChange={(e) => householdMinSizeFilter(e.target.value)}
+        type='number'
         InputProps={{
           startAdornment: (
             <InputAdornment position='start'>
@@ -137,9 +109,11 @@ export function HouseholdFilters({
       />
       to
       <TextContainer
+        value={maxValue}
         variant='filled'
         placeholder='Household size'
         onChange={(e) => householdMaxSizeFilter(e.target.value)}
+        type='number'
         InputProps={{
           startAdornment: (
             <InputAdornment position='start'>
