@@ -42,19 +42,13 @@ export function DrawerItems({ currentLocation }: Props): React.ReactElement {
     }
     return (
       item.secondaryActions.findIndex((secondaryItem) => {
-        console.log(
-          'Boolean(secondaryItem.selectedRegexp.exec(clearLocation)',
-          Boolean(secondaryItem.selectedRegexp.exec(clearLocation)),
-        );
         return Boolean(secondaryItem.selectedRegexp.exec(clearLocation));
       }) !== -1
     );
   });
-  console.log('initialIndex', initialIndex);
   const [expandedItem, setExpandedItem] = React.useState(
     initialIndex !== -1 ? initialIndex : null,
   );
-  console.log('clearLocation', clearLocation);
 
   return (
     <div>
@@ -69,7 +63,6 @@ export function DrawerItems({ currentLocation }: Props): React.ReactElement {
                     ? setExpandedItem(null)
                     : setExpandedItem(index)
                 }
-                component={Link}
                 key={item.name}
               >
                 <Icon>{item.icon}</Icon>
