@@ -8,7 +8,7 @@ Expected delivery date: Feb. 24 - May 1, 2020
 
 ## **Product / Project Management Deliverables**
 
-* Specification support around Population, Registration, and Target Population in GitBook.
+* Specification support around Population, Registration, and Target Population in GitBook and Azure DevOps,
 * Execution on 5 two-week sprints for the iteration deliverable, including bi-weekly demos and scrum ceremonies.
 * Refinement of deduplication requirements and flows.
 * Identify, develop product specifications for & sign off on iteration \#5 Deliverables & Designs.
