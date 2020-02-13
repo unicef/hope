@@ -136,6 +136,7 @@
     "@tivix/prettier-config": "^1.0.0",
     "apollo": "^2.16.0",
     "eslint": ">=6.6.0 <7",
+    "graphql-codegen-compiler": "^0.13.0",
     "prettier": "^1.19.1"
   }
 }
