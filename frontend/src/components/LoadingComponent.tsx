@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { CircularProgress } from '@material-ui/core';
 
@@ -14,7 +14,9 @@ interface LoadingComponentProps {
   isLoading?: boolean;
 }
 
-export function LoadingComponent({ isLoading = true }) {
+export function LoadingComponent({
+  isLoading = true,
+}: LoadingComponentProps): React.ReactElement {
   if (!isLoading) {
     return null;
   }

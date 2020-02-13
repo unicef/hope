@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import { useTranslation } from 'react-i18next';
 import { ProgramCard } from '../../components/programs/ProgramCard';
 import { PageHeader } from '../../components/PageHeader';
 import {
@@ -8,7 +9,6 @@ import {
   useProgrammeChoiceDataQuery,
 } from '../../__generated__/graphql';
 import { CreateProgram } from '../dialogs/programs/CreateProgram';
-import { getCurrentLocation } from '../../utils/utils';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { LoadingComponent } from '../../components/LoadingComponent';
 
@@ -25,14 +25,17 @@ export function ProgramsPage(): React.ReactElement {
     variables: {
       businessArea,
     },
+    fetchPolicy: 'cache-and-network',
   });
 
   const {
     data: choices,
     loading: choicesLoading,
   } = useProgrammeChoiceDataQuery();
+  const { t } = useTranslation();
+
   const toolbar = (
-    <PageHeader title='Programme Management'>
+    <PageHeader title={t('Programme Management')}>
       <CreateProgram />
     </PageHeader>
   );

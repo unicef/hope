@@ -1,6 +1,5 @@
 import styled from 'styled-components';
 import React from 'react';
-import { PageHeader } from '../../../components/PageHeader';
 import { ActivateProgram } from '../../dialogs/programs/ActivateProgram';
 import { DeleteProgram } from '../../dialogs/programs/DeleteProgram';
 import { ProgramNode } from '../../../__generated__/graphql';

@@ -9,14 +9,15 @@ import {
   useProgrammeChoiceDataQuery,
   useProgramQuery,
 } from '../../__generated__/graphql';
-import { ProgramDetailsPageHeader } from './headers/ProgramDetailsPageHeader';
+import { ProgramActivityLogTable } from '../ProgramActivityLogTable';
 import { LoadingComponent } from '../../components/LoadingComponent';
+import { ProgramDetailsPageHeader } from './headers/ProgramDetailsPageHeader';
 
 const Container = styled.div`
   && {
     display: flex;
     flex-direction: column;
-    width: 100%;
+    min-width: 100%;
   }
 `;
 
@@ -25,6 +26,7 @@ const TableWrapper = styled.div`
   flex-direction: row;
   flex-wrap: wrap;
   padding: 20px;
+  padding-bottom: 0;
 `;
 
 const NoCashPlansContainer = styled.div`
@@ -79,6 +81,9 @@ export function ProgramDetailsPage(): React.ReactElement {
             <CashPlanTable program={program} />
           </TableWrapper>
         )}
+        <TableWrapper>
+          <ProgramActivityLogTable program={program} />
+        </TableWrapper>
       </Container>
     </div>
   );

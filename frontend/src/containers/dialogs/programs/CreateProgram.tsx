@@ -3,10 +3,7 @@ import moment from 'moment';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { Button, DialogActions } from '@material-ui/core';
-import {
-  useAllBusinessAreasQuery,
-  useCreateProgramMutation,
-} from '../../../__generated__/graphql';
+import { useCreateProgramMutation } from '../../../__generated__/graphql';
 import { ProgramForm } from '../../forms/ProgramForm';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 
