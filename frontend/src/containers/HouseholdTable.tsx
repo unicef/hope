@@ -5,11 +5,7 @@ import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
 import { Order, TableComponent } from '../components/table/TableComponent';
 import { HeadCell } from '../components/table/EnhancedTableHead';
-import {
-  HouseholdNode,
-  useAllHouseholdsQuery,
-  AllHouseholdsQueryVariables,
-} from '../__generated__/graphql';
+import { HouseholdNode, useAllHouseholdsQuery } from '../__generated__/graphql';
 import Moment from 'react-moment';
 import { columnToOrderBy } from '../utils/utils';
 
