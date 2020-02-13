@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import { useTranslation } from 'react-i18next';
 import { ProgramCard } from '../../components/programs/ProgramCard';
 import { PageHeader } from '../../components/PageHeader';
 import {
@@ -32,8 +33,10 @@ export function ProgramsPage(): React.ReactElement {
     data: choices,
     loading: choicesLoading,
   } = useProgrammeChoiceDataQuery();
+  const { t } = useTranslation();
+
   const toolbar = (
-    <PageHeader title='Programme Management'>
+    <PageHeader title={t('Programme Management')}>
       <CreateProgram />
     </PageHeader>
   );
