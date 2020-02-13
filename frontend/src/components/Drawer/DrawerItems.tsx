@@ -4,8 +4,8 @@ import ListItemText from '@material-ui/core/ListItemText';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import React from 'react';
-import { menuItems } from './menuItems';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { menuItems } from './menuItems';
 
 const Text = styled(ListItemText)`
   .MuiTypography-body1 {
@@ -16,9 +16,9 @@ const Text = styled(ListItemText)`
   }
 `;
 const Icon = styled(ListItemIcon)`
-  &&  {
+  && {
     min-width: 0;
-    padding-right: ${({theme})=>theme.spacing(4)}px;
+    padding-right: ${({ theme }) => theme.spacing(4)}px;
   }
 `;
 
