@@ -1,6 +1,8 @@
 # Registration Data Import
 
-## Overview
+**Feature:** [https://unicef.visualstudio.com/ICTD-HCT-MIS/\_boards/board/t/Software%20Engineering/Features/?workitem=50069](https://unicef.visualstudio.com/ICTD-HCT-MIS/_boards/board/t/Software%20Engineering/Features/?workitem=50069)
+
+## Motivation
 
 The Registration Data Import module is the gateway for importing new data to the HCT-MIS database, shared with other applications.
 
@@ -25,16 +27,22 @@ The states of an import:
 
 The system will allow the user to download a CSV file of a particular import, minus any PII.
 
-## Cleaning
+## Cleaning / Deduplication
 
-Cleaning data is basically editing the data imported.
+{% hint style="danger" %}
+Feature Details TBD
+{% endhint %}
 
-From a system perspective cleaning is comparing, reporting, and accepting new data to data that is stored in both the staging and golden record of the HCT-MIS System.
+~~~~
 
-The system will potentially highlight any issues with the data such as \(_these are ideas_\):
+~~Cleaning data is basically editing the data imported.~~
 
-* Blank fields such as name or address.
-* Deviation in numerical values from standard deviation in an import. Not a high priority.
+~~From a system perspective cleaning is comparing, reporting, and accepting new data to data that is stored in both the staging and golden record of the HCT-MIS System.~~
+
+~~The system will potentially highlight any issues with the data such as \(_these are ideas_\):~~
+
+* ~~Blank fields such as name or address.~~
+* ~~Deviation in numerical values from standard deviation in an import. Not a high priority.~~
 
 ## Flagging
 

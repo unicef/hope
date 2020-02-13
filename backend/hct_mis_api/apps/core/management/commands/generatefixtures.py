@@ -11,6 +11,7 @@ from household.fixtures import (
     HouseholdFactory,
     IndividualFactory,
 )
+from household.models import Household
 from payment.fixtures import PaymentRecordFactory
 from program.fixtures import CashPlanFactory, ProgramFactory
 from targeting.fixtures import TargetPopulationFactory
@@ -60,22 +61,24 @@ class Command(BaseCommand):
         payment_record_amount = options["payment_record_amount"]
         business_area = BusinessArea.objects.first()
 
-        program = ProgramFactory.create(business_area=business_area)
+        program = ProgramFactory(business_area=business_area)
 
         for _ in range(cash_plans_amount):
-            cash_plan = CashPlanFactory.create(program=program)
+            cash_plan = CashPlanFactory(program=program)
             for _ in range(payment_record_amount):
-                location = LocationFactory.create(business_area=business_area)
-                household = HouseholdFactory.create(location=location)
+                location = LocationFactory(business_area=business_area)
+
+                household = HouseholdFactory(location=location)
                 individuals = IndividualFactory.create_batch(
-                    4, household=household,
+                    4, household=household
                 )
-                household = HouseholdFactory.create(location=location)
-                PaymentRecordFactory.create(
-                    cash_plan=cash_plan, household=household
-                )
-                EntitlementCardFactory.create(household=household)
-                TargetPopulationFactory.create(households=household)
+                household.head_of_household = individuals[0]
+                household.representative = individuals[0]
+                household.save()
+
+                PaymentRecordFactory(cash_plan=cash_plan, household=household)
+                EntitlementCardFactory(household=household)
+                TargetPopulationFactory(households=household)
 
     def handle(self, *args, **options):
         start_time = time.time()
@@ -88,6 +91,9 @@ class Command(BaseCommand):
         )
         pool.close()
         pool.join()
+
+        # quick fix for households without payment_records
+        Household.objects.filter(payment_records=None).delete()
 
         self.stdout.write(
             f"Generated fixtures in {(time.time() - start_time)} seconds"
