@@ -28,7 +28,6 @@ const useStyles = makeStyles((theme: MiśTheme) => ({
 
 export function HomeRouter(): React.ReactElement {
   const authenticated = isAuthenticated();
-  const [itemsCollapse, setItemsCollapse] = React.useState([]);
   const [open, setOpen] = React.useState(true);
   const classes = useStyles({});
   const location = useLocation();
@@ -39,15 +38,6 @@ export function HomeRouter(): React.ReactElement {
     setOpen(false);
   };
 
-  const handleItemCollapse = (index: number): void => {
-    const option = itemsCollapse.findIndex(x => x.id === index);
-    if (option !== -1) {
-      itemsCollapse[option].open = !itemsCollapse[option].open;
-    } else {
-      setItemsCollapse([...itemsCollapse, { id: index, open: true }]);
-    }
-  }
-
   if (!authenticated) {
     return <Redirect to='/login' />;
   }
@@ -57,9 +47,7 @@ export function HomeRouter(): React.ReactElement {
       <AppBar open={open} handleDrawerOpen={handleDrawerOpen} />
       <Drawer
         open={open}
-        itemsCollapse={itemsCollapse}
         handleDrawerClose={handleDrawerClose}
-        handleItemCollapse={handleItemCollapse}
         currentLocation={location.pathname}
       />
       <MainContent>
