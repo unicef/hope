@@ -1,11 +1,11 @@
 import React from 'react';
 import { ProgramNode, ProgramStatus } from '../../../__generated__/graphql';
-import { FinishedProgramDetailsPageHeaderButtons } from './FinishedProgramDetailsPageHeaderButtons';
-import { ActiveProgramDetailsPageHeaderButtons } from './ActiveProgramDetailsPageHeaderButtons';
-import { DraftProgramDetailsPageHeaderButtons } from './DraftProgramDetailsPageHeaderButtons';
 import { PageHeader } from '../../../components/PageHeader';
 import { BreadCrumbsItem } from '../../../components/BreadCrumbs';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { FinishedProgramDetailsPageHeaderButtons } from './FinishedProgramDetailsPageHeaderButtons';
+import { ActiveProgramDetailsPageHeaderButtons } from './ActiveProgramDetailsPageHeaderButtons';
+import { DraftProgramDetailsPageHeaderButtons } from './DraftProgramDetailsPageHeaderButtons';
 
 export interface ProgramDetailsPageHeaderPropTypes {
   program: ProgramNode;
@@ -32,5 +32,9 @@ export function ProgramDetailsPageHeader({
       to: `/${businessArea}/programs/`,
     },
   ];
-  return <PageHeader title={program.name} breadCrumbs={breadCrumbsItems}>{buttons}</PageHeader>;
+  return (
+    <PageHeader title={program.name} breadCrumbs={breadCrumbsItems}>
+      {buttons}
+    </PageHeader>
+  );
 }

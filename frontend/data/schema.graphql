@@ -421,6 +421,8 @@ enum HouseholdResidenceStatus {
   OTHER
 }
 
+scalar JSONLazyString
+
 scalar JSONString
 
 type LocationNode implements Node {
@@ -449,6 +451,36 @@ type LocationNodeConnection {
 
 type LocationNodeEdge {
   node: LocationNode
+  cursor: String!
+}
+
+enum LogEntryAction {
+  A_0
+  A_1
+  A_2
+}
+
+type LogEntryObject {
+  id: ID!
+  objectPk: String!
+  objectId: Int
+  objectRepr: String!
+  action: LogEntryAction!
+  changes: String!
+  actor: UserObjectType
+  remoteAddr: String
+  timestamp: DateTime
+  changesDisplayDict: JSONLazyString
+}
+
+type LogEntryObjectConnection {
+  pageInfo: PageInfo!
+  edges: [LogEntryObjectEdge]!
+  totalCount: Int
+}
+
+type LogEntryObjectEdge {
+  node: LogEntryObject
   cursor: String!
 }
 
@@ -564,6 +596,7 @@ type ProgramNode implements Node {
   administrativeAreasOfImplementation: String!
   cashPlans(before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
   totalNumberOfHouseholds: Int
+  history(before: String, after: String, first: Int, last: Int): LogEntryObjectConnection
 }
 
 type ProgramNodeConnection {
@@ -610,6 +643,7 @@ type Query {
   location(id: ID!): LocationNode
   allLocations(before: String, after: String, first: Int, last: Int, title: String): LocationNodeConnection
   allBusinessAreas(before: String, after: String, first: Int, last: Int, id: UUID): BusinessAreaNodeConnection
+  allLogEntries(objectId: String!, before: String, after: String, first: Int, last: Int): LogEntryObjectConnection
   program(id: ID!): ProgramNode
   allPrograms(before: String, after: String, first: Int, last: Int, id: UUID, businessArea: String): ProgramNodeConnection
   cashPlan(id: ID!): CashPlanNode

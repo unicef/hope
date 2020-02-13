@@ -1,10 +1,10 @@
 import graphene
 from django.db.models import Case, When, Value, IntegerField
-from graphene import relay
-from graphene_django import DjangoObjectType
+from graphene import relay, ConnectionField, Connection
+from graphene_django import DjangoObjectType, DjangoConnectionField
 from graphene_django.filter import DjangoFilterConnectionField
 
-from core.schema import ExtendedConnection, ChoiceObject
+from core.schema import ExtendedConnection, ChoiceObject, LogEntryObject, LogEntryObjectConnection
 from program.models import Program, CashPlan
 from django_filters import FilterSet, OrderingFilter, CharFilter
 
@@ -19,6 +19,7 @@ class ProgramFilter(FilterSet):
 
 class ProgramNode(DjangoObjectType):
     total_number_of_households = graphene.Int()
+    history = ConnectionField(LogEntryObjectConnection)
 
     class Meta:
         model = Program
@@ -27,6 +28,9 @@ class ProgramNode(DjangoObjectType):
         ]
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
+
+    def resolve_history(self, info):
+        return self.history.all()
 
     def resolve_total_number_of_households(self, info, **kwargs):
         return self.total_number_of_households

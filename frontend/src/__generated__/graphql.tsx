@@ -18,6 +18,7 @@ export type Scalars = {
   DateTime: any,
   UUID: any,
   JSONString: any,
+  JSONLazyString: any,
   Date: any,
   Decimal: any,
 };
@@ -506,6 +507,7 @@ export enum HouseholdResidenceStatus {
 }
 
 
+
 export type LocationNode = Node & {
    __typename?: 'LocationNode',
   id: Scalars['ID'],
@@ -561,6 +563,39 @@ export type LocationNodeConnection = {
 export type LocationNodeEdge = {
    __typename?: 'LocationNodeEdge',
   node?: Maybe<LocationNode>,
+  cursor: Scalars['String'],
+};
+
+export enum LogEntryAction {
+  A_0 = 'A_0',
+  A_1 = 'A_1',
+  A_2 = 'A_2'
+}
+
+export type LogEntryObject = {
+   __typename?: 'LogEntryObject',
+  id: Scalars['ID'],
+  objectPk: Scalars['String'],
+  objectId?: Maybe<Scalars['Int']>,
+  objectRepr: Scalars['String'],
+  action: LogEntryAction,
+  changes: Scalars['String'],
+  actor?: Maybe<UserObjectType>,
+  remoteAddr?: Maybe<Scalars['String']>,
+  timestamp?: Maybe<Scalars['DateTime']>,
+  changesDisplayDict?: Maybe<Scalars['JSONLazyString']>,
+};
+
+export type LogEntryObjectConnection = {
+   __typename?: 'LogEntryObjectConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<LogEntryObjectEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+};
+
+export type LogEntryObjectEdge = {
+   __typename?: 'LogEntryObjectEdge',
+  node?: Maybe<LogEntryObject>,
   cursor: Scalars['String'],
 };
 
@@ -758,6 +793,7 @@ export type ProgramNode = Node & {
   administrativeAreasOfImplementation: Scalars['String'],
   cashPlans: CashPlanNodeConnection,
   totalNumberOfHouseholds?: Maybe<Scalars['Int']>,
+  history?: Maybe<LogEntryObjectConnection>,
 };
 
 
@@ -771,6 +807,14 @@ export type ProgramNodeLocationsArgs = {
 
 
 export type ProgramNodeCashPlansArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type ProgramNodeHistoryArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -824,6 +868,7 @@ export type Query = {
   location?: Maybe<LocationNode>,
   allLocations?: Maybe<LocationNodeConnection>,
   allBusinessAreas?: Maybe<BusinessAreaNodeConnection>,
+  allLogEntries?: Maybe<LogEntryObjectConnection>,
   program?: Maybe<ProgramNode>,
   allPrograms?: Maybe<ProgramNodeConnection>,
   cashPlan?: Maybe<CashPlanNode>,
@@ -880,6 +925,15 @@ export type QueryAllBusinessAreasArgs = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   id?: Maybe<Scalars['UUID']>
+};
+
+
+export type QueryAllLogEntriesArgs = {
+  objectId: Scalars['String'],
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -1286,6 +1340,37 @@ export type AllCashPlansQuery = (
       & { node: Maybe<(
         { __typename?: 'CashPlanNode' }
         & Pick<CashPlanNode, 'id' | 'cashAssistId' | 'numberOfHouseholds' | 'disbursementDate' | 'currency' | 'status' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity'>
+      )> }
+    )>> }
+  )> }
+);
+
+export type AllLogEntriesQueryVariables = {
+  objectId: Scalars['String'],
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  count?: Maybe<Scalars['Int']>
+};
+
+
+export type AllLogEntriesQuery = (
+  { __typename?: 'Query' }
+  & { allLogEntries: Maybe<(
+    { __typename?: 'LogEntryObjectConnection' }
+    & Pick<LogEntryObjectConnection, 'totalCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'startCursor' | 'endCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'LogEntryObjectEdge' }
+      & Pick<LogEntryObjectEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'LogEntryObject' }
+        & Pick<LogEntryObject, 'id' | 'action' | 'changesDisplayDict' | 'timestamp'>
+        & { actor: Maybe<(
+          { __typename?: 'UserObjectType' }
+          & Pick<UserObjectType, 'id' | 'firstName' | 'lastName'>
+        )> }
       )> }
     )>> }
   )> }
@@ -1768,6 +1853,79 @@ export function useAllCashPlansLazyQuery(baseOptions?: ApolloReactHooks.LazyQuer
 export type AllCashPlansQueryHookResult = ReturnType<typeof useAllCashPlansQuery>;
 export type AllCashPlansLazyQueryHookResult = ReturnType<typeof useAllCashPlansLazyQuery>;
 export type AllCashPlansQueryResult = ApolloReactCommon.QueryResult<AllCashPlansQuery, AllCashPlansQueryVariables>;
+export const AllLogEntriesDocument = gql`
+    query AllLogEntries($objectId: String!, $after: String, $before: String, $count: Int) {
+  allLogEntries(after: $after, before: $before, first: $count, objectId: $objectId) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+    totalCount
+    edges {
+      cursor
+      node {
+        id
+        action
+        changesDisplayDict
+        timestamp
+        actor {
+          id
+          firstName
+          lastName
+        }
+      }
+    }
+  }
+}
+    `;
+export type AllLogEntriesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllLogEntriesQuery, AllLogEntriesQueryVariables>, 'query'> & ({ variables: AllLogEntriesQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const AllLogEntriesComponent = (props: AllLogEntriesComponentProps) => (
+      <ApolloReactComponents.Query<AllLogEntriesQuery, AllLogEntriesQueryVariables> query={AllLogEntriesDocument} {...props} />
+    );
+    
+export type AllLogEntriesProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllLogEntriesQuery, AllLogEntriesQueryVariables> & TChildProps;
+export function withAllLogEntries<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllLogEntriesQuery,
+  AllLogEntriesQueryVariables,
+  AllLogEntriesProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllLogEntriesQuery, AllLogEntriesQueryVariables, AllLogEntriesProps<TChildProps>>(AllLogEntriesDocument, {
+      alias: 'allLogEntries',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllLogEntriesQuery__
+ *
+ * To run a query within a React component, call `useAllLogEntriesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllLogEntriesQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllLogEntriesQuery({
+ *   variables: {
+ *      objectId: // value for 'objectId'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      count: // value for 'count'
+ *   },
+ * });
+ */
+export function useAllLogEntriesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllLogEntriesQuery, AllLogEntriesQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllLogEntriesQuery, AllLogEntriesQueryVariables>(AllLogEntriesDocument, baseOptions);
+      }
+export function useAllLogEntriesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllLogEntriesQuery, AllLogEntriesQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllLogEntriesQuery, AllLogEntriesQueryVariables>(AllLogEntriesDocument, baseOptions);
+        }
+export type AllLogEntriesQueryHookResult = ReturnType<typeof useAllLogEntriesQuery>;
+export type AllLogEntriesLazyQueryHookResult = ReturnType<typeof useAllLogEntriesLazyQuery>;
+export type AllLogEntriesQueryResult = ApolloReactCommon.QueryResult<AllLogEntriesQuery, AllLogEntriesQueryVariables>;
 export const AllPaymentRecordsDocument = gql`
     query AllPaymentRecords($cashPlan: ID!, $after: String, $before: String, $orderBy: String, $count: Int) {
   allPaymentRecords(cashPlan: $cashPlan, after: $after, before: $before, first: $count, orderBy: $orderBy) {
@@ -2386,6 +2544,11 @@ export type ResolversTypes = {
   ProgramFrequencyOfPayments: ProgramFrequencyOfPayments,
   ProgramSector: ProgramSector,
   ProgramScope: ProgramScope,
+  LogEntryObjectConnection: ResolverTypeWrapper<LogEntryObjectConnection>,
+  LogEntryObjectEdge: ResolverTypeWrapper<LogEntryObjectEdge>,
+  LogEntryObject: ResolverTypeWrapper<LogEntryObject>,
+  LogEntryAction: LogEntryAction,
+  JSONLazyString: ResolverTypeWrapper<Scalars['JSONLazyString']>,
   CashPlanStatus: CashPlanStatus,
   Date: ResolverTypeWrapper<Scalars['Date']>,
   PaymentEntitlementNode: ResolverTypeWrapper<PaymentEntitlementNode>,
@@ -2469,6 +2632,11 @@ export type ResolversParentTypes = {
   ProgramFrequencyOfPayments: ProgramFrequencyOfPayments,
   ProgramSector: ProgramSector,
   ProgramScope: ProgramScope,
+  LogEntryObjectConnection: LogEntryObjectConnection,
+  LogEntryObjectEdge: LogEntryObjectEdge,
+  LogEntryObject: LogEntryObject,
+  LogEntryAction: LogEntryAction,
+  JSONLazyString: Scalars['JSONLazyString'],
   CashPlanStatus: CashPlanStatus,
   Date: Scalars['Date'],
   PaymentEntitlementNode: PaymentEntitlementNode,
@@ -2682,6 +2850,10 @@ export type HouseholdNodeEdgeResolvers<ContextType = any, ParentType extends Res
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
 };
 
+export interface JsonLazyStringScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['JSONLazyString'], any> {
+  name: 'JSONLazyString'
+}
+
 export interface JsonStringScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['JSONString'], any> {
   name: 'JSONString'
 }
@@ -2712,6 +2884,30 @@ export type LocationNodeConnectionResolvers<ContextType = any, ParentType extend
 
 export type LocationNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['LocationNodeEdge'] = ResolversParentTypes['LocationNodeEdge']> = {
   node?: Resolver<Maybe<ResolversTypes['LocationNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type LogEntryObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['LogEntryObject'] = ResolversParentTypes['LogEntryObject']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  objectPk?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  objectId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  objectRepr?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  action?: Resolver<ResolversTypes['LogEntryAction'], ParentType, ContextType>,
+  changes?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  actor?: Resolver<Maybe<ResolversTypes['UserObjectType']>, ParentType, ContextType>,
+  remoteAddr?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  timestamp?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  changesDisplayDict?: Resolver<Maybe<ResolversTypes['JSONLazyString']>, ParentType, ContextType>,
+};
+
+export type LogEntryObjectConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['LogEntryObjectConnection'] = ResolversParentTypes['LogEntryObjectConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['LogEntryObjectEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type LogEntryObjectEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['LogEntryObjectEdge'] = ResolversParentTypes['LogEntryObjectEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['LogEntryObject']>, ParentType, ContextType>,
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
 };
 
@@ -2811,6 +3007,7 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   administrativeAreasOfImplementation?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   cashPlans?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, ProgramNodeCashPlansArgs>,
   totalNumberOfHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  history?: Resolver<Maybe<ResolversTypes['LogEntryObjectConnection']>, ParentType, ContextType, ProgramNodeHistoryArgs>,
 };
 
 export type ProgramNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ProgramNodeConnection'] = ResolversParentTypes['ProgramNodeConnection']> = {
@@ -2833,6 +3030,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   location?: Resolver<Maybe<ResolversTypes['LocationNode']>, ParentType, ContextType, RequireFields<QueryLocationArgs, 'id'>>,
   allLocations?: Resolver<Maybe<ResolversTypes['LocationNodeConnection']>, ParentType, ContextType, QueryAllLocationsArgs>,
   allBusinessAreas?: Resolver<Maybe<ResolversTypes['BusinessAreaNodeConnection']>, ParentType, ContextType, QueryAllBusinessAreasArgs>,
+  allLogEntries?: Resolver<Maybe<ResolversTypes['LogEntryObjectConnection']>, ParentType, ContextType, RequireFields<QueryAllLogEntriesArgs, 'objectId'>>,
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType, RequireFields<QueryProgramArgs, 'id'>>,
   allPrograms?: Resolver<Maybe<ResolversTypes['ProgramNodeConnection']>, ParentType, ContextType, QueryAllProgramsArgs>,
   cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType, RequireFields<QueryCashPlanArgs, 'id'>>,
@@ -2968,10 +3166,14 @@ export type Resolvers<ContextType = any> = {
   HouseholdNode?: HouseholdNodeResolvers<ContextType>,
   HouseholdNodeConnection?: HouseholdNodeConnectionResolvers<ContextType>,
   HouseholdNodeEdge?: HouseholdNodeEdgeResolvers<ContextType>,
+  JSONLazyString?: GraphQLScalarType,
   JSONString?: GraphQLScalarType,
   LocationNode?: LocationNodeResolvers<ContextType>,
   LocationNodeConnection?: LocationNodeConnectionResolvers<ContextType>,
   LocationNodeEdge?: LocationNodeEdgeResolvers<ContextType>,
+  LogEntryObject?: LogEntryObjectResolvers<ContextType>,
+  LogEntryObjectConnection?: LogEntryObjectConnectionResolvers<ContextType>,
+  LogEntryObjectEdge?: LogEntryObjectEdgeResolvers<ContextType>,
   Mutations?: MutationsResolvers<ContextType>,
   Node?: NodeResolvers,
   PageInfo?: PageInfoResolvers<ContextType>,
