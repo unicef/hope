@@ -2,7 +2,6 @@ import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
 import React from 'react';
 import styled from 'styled-components';
 import { Button } from '@material-ui/core';
-import { PageHeader } from '../../../components/PageHeader';
 import { ProgramNode } from '../../../__generated__/graphql';
 
 const ButtonContainer = styled.span`
@@ -21,6 +20,8 @@ export function FinishedProgramDetailsPageHeaderButtons({
         <Button
           variant='contained'
           color='primary'
+          component='a'
+          href={`/cashassist/${program.programCaId}`}
           startIcon={<OpenInNewRoundedIcon />}
         >
           OPEN IN CASHSSIST

@@ -3,7 +3,6 @@ import styled from 'styled-components';
 import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
 import React from 'react';
 import { ProgramNode } from '../../../__generated__/graphql';
-import { PageHeader } from '../../../components/PageHeader';
 import { FinishProgram } from '../../dialogs/programs/FinishProgram';
 import { EditProgram } from '../../dialogs/programs/EditProgram';
 

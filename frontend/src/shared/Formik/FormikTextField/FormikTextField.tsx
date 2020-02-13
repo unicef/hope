@@ -6,6 +6,8 @@ export const FormikTextField = ({
   form,
   decoratorStart,
   decoratorEnd,
+  type,
+  precision,
   ...otherProps
 }): React.ReactElement => {
   const isInvalid = form.errors[field.name] && form.touched[field.name];
@@ -17,6 +19,15 @@ export const FormikTextField = ({
       evt.preventDefault();
     }
   };
+
+  const onBlur = (e): void => {
+    const newEvent = { ...e };
+    if (type === 'number' && precision !== undefined) {
+      newEvent.target.value = parseFloat(e.target.value).toFixed(2);
+    }
+    form.handleBlur(newEvent);
+  };
+
   return (
     <>
       <TextField
@@ -28,9 +39,10 @@ export const FormikTextField = ({
         margin='dense'
         value={field.value}
         onChange={form.handleChange}
-        onBlur={form.handleBlur}
+        onBlur={onBlur}
         error={isInvalid}
         autoComplete='off'
+        type={type}
         helperText={isInvalid && form.errors[field.name]}
         InputProps={{
           onKeyPress: handleKeyPress,

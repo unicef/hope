@@ -9,7 +9,6 @@ import {
   useProgrammeChoiceDataQuery,
 } from '../../__generated__/graphql';
 import { CreateProgram } from '../dialogs/programs/CreateProgram';
-import { getCurrentLocation } from '../../utils/utils';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { LoadingComponent } from '../../components/LoadingComponent';
 
