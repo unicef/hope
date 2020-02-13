@@ -1,28 +1,14 @@
 # Target Population \(Targeting\)
 
-**Feature details:** 
+#### **Feature details:** 
 
 * List: [https://unicef.visualstudio.com/ICTD-HCT-MIS/\_boards/board/t/Software%20Engineering/Features/?workitem=50083](https://unicef.visualstudio.com/ICTD-HCT-MIS/_boards/board/t/Software%20Engineering/Features/?workitem=50083)
 * View/finalization: [https://unicef.visualstudio.com/ICTD-HCT-MIS/\_boards/board/t/Software%20Engineering/Features/?workitem=50084](https://unicef.visualstudio.com/ICTD-HCT-MIS/_boards/board/t/Software%20Engineering/Features/?workitem=50084)
 * Copy/delete: [https://unicef.visualstudio.com/ICTD-HCT-MIS/\_boards/board/t/Software%20Engineering/Features/?workitem=50085](https://unicef.visualstudio.com/ICTD-HCT-MIS/_boards/board/t/Software%20Engineering/Features/?workitem=50085)
 
-## Organization
+### Motivation:
 
-### RACI
-
-#### **Responsible:**
-
-**Accountable:**
-
-**Consult:**
-
-**Informed:**
-
-## Functional Spec:
-
-### Overview:
-
-In the Targeting Module you can do xyz
+The purpose of this section is to allow HCT users to draw up potential scenarios with realistic data in order to prepare Cash Plans against a target population of households and individuals. 
 
 ### How to Target:
 
@@ -31,10 +17,6 @@ In the Targeting Module you can do xyz
 * Add Rules
 * Save
 * Send to Cash Assist
-
-### Name A Target:
-
-![](../../../.gitbook/assets/screen-recording-2019-11-06-at-11.48-am.gif)
 
 ## Business Rules
 
