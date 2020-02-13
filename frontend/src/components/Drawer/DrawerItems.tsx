@@ -26,24 +26,35 @@ const Icon = styled(ListItemIcon)`
   }
 `;
 
+const SubList = styled(List)`
+  padding-left: ${({ theme }) => theme.spacing(10)};
+`;
+
 interface Props {
   currentLocation: string;
-  handleItemCollapse: (index: number) => void;
-  itemsCollapse: { id: number; open: boolean }[];
 }
-export function DrawerItems({
-  currentLocation,
-  handleItemCollapse,
-  itemsCollapse,
-}: Props): React.ReactElement {
+export function DrawerItems({ currentLocation }: Props): React.ReactElement {
   const businessArea = useBusinessArea();
-
-  const checkCollapse = (index: number): boolean => {
-    if (!itemsCollapse) return false;
-    if (itemsCollapse.find((x) => x.id === index))
-      return itemsCollapse.find((x) => x.id === index).open;
-    return false;
-  };
+  const clearLocation = currentLocation.replace(`/${businessArea}`, '');
+  const initialIndex = menuItems.findIndex((item) => {
+    if (!item.secondaryActions) {
+      return false;
+    }
+    return (
+      item.secondaryActions.findIndex((secondaryItem) => {
+        console.log(
+          'Boolean(secondaryItem.selectedRegexp.exec(clearLocation)',
+          Boolean(secondaryItem.selectedRegexp.exec(clearLocation)),
+        );
+        return Boolean(secondaryItem.selectedRegexp.exec(clearLocation));
+      }) !== -1
+    );
+  });
+  console.log('initialIndex', initialIndex);
+  const [expandedItem, setExpandedItem] = React.useState(
+    initialIndex !== -1 ? initialIndex : null,
+  );
+  console.log('clearLocation', clearLocation);
 
   return (
     <div>
@@ -53,22 +64,24 @@ export function DrawerItems({
             <>
               <ListItem
                 button
-                onClick={() => handleItemCollapse(index)}
+                onClick={() =>
+                  index === expandedItem
+                    ? setExpandedItem(null)
+                    : setExpandedItem(index)
+                }
                 component={Link}
                 key={item.name}
-                to={`/${businessArea}${item.href}`}
-                selected={Boolean(item.selectedRegexp.exec(currentLocation))}
               >
                 <Icon>{item.icon}</Icon>
                 <Text primary={item.name} />
-                {itemsCollapse && itemsCollapse[index] ? (
+                {expandedItem !== null && expandedItem === index ? (
                   <ExpandLess />
                 ) : (
                   <ExpandMore />
                 )}
               </ListItem>
-              <Collapse in={checkCollapse(index)}>
-                <List component='div' style={{ paddingLeft: '40px' }}>
+              <Collapse in={expandedItem !== null && expandedItem === index}>
+                <SubList component='div'>
                   {item.secondaryActions &&
                     item.secondaryActions.map((secondary) => (
                       <ListItem
@@ -77,14 +90,14 @@ export function DrawerItems({
                         key={secondary.name}
                         to={`/${businessArea}${secondary.href}`}
                         selected={Boolean(
-                          secondary.selectedRegexp.exec(currentLocation),
+                          secondary.selectedRegexp.exec(clearLocation),
                         )}
                       >
                         <Icon>{secondary.icon}</Icon>
                         <Text primary={secondary.name} />
                       </ListItem>
                     ))}
-                </List>
+                </SubList>
               </Collapse>
             </>
           );
@@ -95,7 +108,10 @@ export function DrawerItems({
             component={Link}
             key={item.name}
             to={`/${businessArea}${item.href}`}
-            selected={Boolean(item.selectedRegexp.exec(currentLocation))}
+            onClick={() => {
+              setExpandedItem(null);
+            }}
+            selected={Boolean(item.selectedRegexp.exec(clearLocation))}
           >
             <Icon>{item.icon}</Icon>
             <Text primary={item.name} />
