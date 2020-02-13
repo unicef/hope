@@ -935,7 +935,11 @@ export type QueryAllHouseholdsArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
+  last?: Maybe<Scalars['Int']>,
+  businessArea?: Maybe<Scalars['String']>,
+  familySizeGreater?: Maybe<Scalars['Float']>,
+  familySizeLower?: Maybe<Scalars['Float']>,
+  orderBy?: Maybe<Scalars['String']>
 };
 
 
@@ -1295,7 +1299,11 @@ export type AllHouseholdsQueryVariables = {
   after?: Maybe<Scalars['String']>,
   before?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
+  last?: Maybe<Scalars['Int']>,
+  businessArea?: Maybe<Scalars['String']>,
+  familySizeGreater?: Maybe<Scalars['Float']>,
+  familySizeLower?: Maybe<Scalars['Float']>,
+  orderBy?: Maybe<Scalars['String']>
 };
 
 
@@ -1303,7 +1311,7 @@ export type AllHouseholdsQuery = (
   { __typename?: 'Query' }
   & { allHouseholds: Maybe<(
     { __typename?: 'HouseholdNodeConnection' }
-    & Pick<HouseholdNodeConnection, 'totalCount'>
+    & Pick<HouseholdNodeConnection, 'totalCount' | 'edgeCount'>
     & { pageInfo: (
       { __typename?: 'PageInfo' }
       & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'startCursor' | 'endCursor'>
@@ -1328,7 +1336,7 @@ export type AllHouseholdsQuery = (
                 & Pick<CashPlanNode, 'totalDeliveredQuantity'>
                 & { program: (
                   { __typename?: 'ProgramNode' }
-                  & Pick<ProgramNode, 'name' | 'id'>
+                  & Pick<ProgramNode, 'id' | 'name'>
                 ) }
               ) }
             )> }
@@ -1817,8 +1825,8 @@ export type AllCashPlansQueryHookResult = ReturnType<typeof useAllCashPlansQuery
 export type AllCashPlansLazyQueryHookResult = ReturnType<typeof useAllCashPlansLazyQuery>;
 export type AllCashPlansQueryResult = ApolloReactCommon.QueryResult<AllCashPlansQuery, AllCashPlansQueryVariables>;
 export const AllHouseholdsDocument = gql`
-    query AllHouseholds($after: String, $before: String, $first: Int, $last: Int) {
-  allHouseholds(after: $after, before: $before, first: $first, last: $last) {
+    query AllHouseholds($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $familySizeGreater: Float, $familySizeLower: Float, $orderBy: String) {
+  allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, familySizeGreater: $familySizeGreater, familySizeLower: $familySizeLower, orderBy: $orderBy) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -1826,6 +1834,7 @@ export const AllHouseholdsDocument = gql`
       endCursor
     }
     totalCount
+    edgeCount
     edges {
       cursor
       node {
@@ -1845,8 +1854,8 @@ export const AllHouseholdsDocument = gql`
               headOfHousehold
               cashPlan {
                 program {
-                  name
                   id
+                  name
                 }
                 totalDeliveredQuantity
               }
@@ -1892,6 +1901,10 @@ export function withAllHouseholds<TProps, TChildProps = {}>(operationOptions?: A
  *      before: // value for 'before'
  *      first: // value for 'first'
  *      last: // value for 'last'
+ *      businessArea: // value for 'businessArea'
+ *      familySizeGreater: // value for 'familySizeGreater'
+ *      familySizeLower: // value for 'familySizeLower'
+ *      orderBy: // value for 'orderBy'
  *   },
  * });
  */

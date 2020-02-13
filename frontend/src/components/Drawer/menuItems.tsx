@@ -12,79 +12,79 @@ import SettingsRounded from '@material-ui/icons/SettingsRounded';
 import React from 'react';
 
 export const menuItems = [
-    {
-        name: 'Country Dashboard',
-        href: '/#',
-        selectedRegexp: /^\/test.*$/,
-        icon: <DashboardIcon />,
-    },
-    {
-        name: 'Registration Data Import',
-        href: '/#',
-        selectedRegexp: /^\/test.*$/,
-        icon: <AutorenewIcon />,
-    },
-    {
-        name: 'Population',
-        href: '/#',
-        selectedRegexp: /^\/test.*$/,
+  {
+    name: 'Country Dashboard',
+    href: '/#',
+    selectedRegexp: /^\/test.*$/,
+    icon: <DashboardIcon />,
+  },
+  {
+    name: 'Registration Data Import',
+    href: '/#',
+    selectedRegexp: /^\/test.*$/,
+    icon: <AutorenewIcon />,
+  },
+  {
+    name: 'Population',
+    href: '/#',
+    selectedRegexp: /^\/population.*$/,
+    icon: <PeopleIcon />,
+    collapsable: true,
+    secondaryActions: [
+      {
+        name: 'Household',
+        href: '/population/household',
+        selectedRegexp: /^\/household.*$/,
         icon: <PeopleIcon />,
-        collapsable: true,
-        secondaryActions: [
-            {
-                name: 'Household',
-                href: '/population/household',
-                selectedRegexp: /^\/test.*$/,
-                icon: <PeopleIcon />,
-            },
-            {
-                name: 'Individuals',
-                href: '/#',
-                selectedRegexp: /^\/test.*$/,
-                icon: <FaceIcon />,
-            },
-        ]
-    },
-    {
-        name: 'Target Population',
+      },
+      {
+        name: 'Individuals',
         href: '/#',
         selectedRegexp: /^\/test.*$/,
-        icon: <ListAltRounded />,
-    },
-    {
-        name: 'Programme Management',
-        href: '/programs',
-        selectedRegexp: /^\/programs.*$/,
-        icon: <FlashOnRounded />,
-    },
-    {
-        name: 'Payment Verification',
-        href: '/#',
-        selectedRegexp: /^\/test.*$/,
-        icon: <AttachMoney />,
-    },
-    {
-        name: 'Grievance and Feedback',
-        href: '/#',
-        selectedRegexp: /^\/test.*$/,
-        icon: <Feedback />,
-    },
-    {
-        name: 'Reporting',
-        href: '/#',
-        selectedRegexp: /^\/test.*$/,
-        icon: <TrendingUpRounded />,
-    },
-    {
-        name: 'User Management',
-        href: '/#',
-        selectedRegexp: /^\/test.*$/,
-        icon: <SupervisedUserCircle />,
-    },
-    {
-        name: 'Settings',
-        href: '/#',
-        selectedRegexp: /^\/test.*$/,
-        icon: <SettingsRounded />,
-    },
+        icon: <FaceIcon />,
+      },
+    ],
+  },
+  {
+    name: 'Target Population',
+    href: '/#',
+    selectedRegexp: /^\/test.*$/,
+    icon: <ListAltRounded />,
+  },
+  {
+    name: 'Programme Management',
+    href: '/programs',
+    selectedRegexp: /^\/programs.*$/,
+    icon: <FlashOnRounded />,
+  },
+  {
+    name: 'Payment Verification',
+    href: '/#',
+    selectedRegexp: /^\/test.*$/,
+    icon: <AttachMoney />,
+  },
+  {
+    name: 'Grievance and Feedback',
+    href: '/#',
+    selectedRegexp: /^\/test.*$/,
+    icon: <Feedback />,
+  },
+  {
+    name: 'Reporting',
+    href: '/#',
+    selectedRegexp: /^\/test.*$/,
+    icon: <TrendingUpRounded />,
+  },
+  {
+    name: 'User Management',
+    href: '/#',
+    selectedRegexp: /^\/test.*$/,
+    icon: <SupervisedUserCircle />,
+  },
+  {
+    name: 'Settings',
+    href: '/#',
+    selectedRegexp: /^\/test.*$/,
+    icon: <SettingsRounded />,
+  },
 ];

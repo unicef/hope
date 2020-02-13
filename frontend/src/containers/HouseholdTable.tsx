@@ -1,12 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
 import { Order, TableComponent } from '../components/table/TableComponent';
 import { HeadCell } from '../components/table/EnhancedTableHead';
-import { HouseholdNode, useAllHouseholdsQuery } from '../__generated__/graphql';
+import {
+  HouseholdNode,
+  useAllHouseholdsQuery,
+  AllHouseholdsQueryVariables,
+} from '../__generated__/graphql';
 import Moment from 'react-moment';
+import { columnToOrderBy } from '../utils/utils';
 
 const headCells: HeadCell<HouseholdNode>[] = [
   {
@@ -77,51 +82,47 @@ export const HouseholdTable = ({
   businessArea,
 }: HouseholdTableProps): React.ReactElement => {
   const history = useHistory();
-
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [orderBy, setOrderBy] = useState(null);
   const [orderDirection, setOrderDirection] = useState('asc');
+  const [after, setAfter] = useState();
+  const [before, setBefore] = useState();
+  const [first, setFirst] = useState(rowsPerPage);
+  const [last, setLast] = useState(rowsPerPage);
 
-  const { loading, data, fetchMore } = useAllHouseholdsQuery({
-    variables: { first: rowsPerPage },
+  const { loading, data, fetchMore, refetch } = useAllHouseholdsQuery({
+    variables: {
+      first,
+      last,
+      after,
+      before,
+      businessArea,
+      familySizeGreater: Number(sizeFilter.min),
+      familySizeLower: Number(sizeFilter.max),
+    },
   });
-
-  if (loading) return null;
 
   const handleClick = (row) => {
     const path = `/${businessArea}/population/household/${row.id}`;
     history.push(path);
   };
 
-  if (sizeFilter.min || sizeFilter.max) {
-    let variables;
-    if (sizeFilter.min) {
-      variables = { ...variables, familySizeGreater: sizeFilter.min };
-    }
-    if (sizeFilter.max) {
-      variables = { ...variables, familySizeLower: sizeFilter.max };
-    }
-    fetchMore({
-      variables,
-      updateQuery: (prev, { fetchMoreResult }) => {
-        return fetchMoreResult;
-      },
-    });
-  }
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
 
-  const { edges } = data.allHouseholds;
+  if (loading) return null;
+
+  const { edges, pageInfo } = data.allHouseholds;
   const houseHolds = edges.map((edge) => edge.node as HouseholdNode);
-  const result = houseHolds.filter(
-    (x: HouseholdNode) => x.paymentRecords.edges.length,
-  );
-
   return (
     <TableWrapper>
       <TableComponent<HouseholdNode>
+        loading={loading}
         title='Households'
         page={page}
-        data={result}
+        data={houseHolds}
         itemsCount={data.allHouseholds.totalCount}
         handleRequestSort={(e, property) => {
           let direction = 'asc';
@@ -137,7 +138,7 @@ export const HouseholdTable = ({
           fetchMore({
             variables: {
               first: rowsPerPage,
-              // orderBy: columnToOrderBy(property, direction),
+              orderBy: columnToOrderBy(property, direction),
             },
             updateQuery: (prev, { fetchMoreResult }) => {
               return fetchMoreResult;
@@ -172,28 +173,35 @@ export const HouseholdTable = ({
           );
         }}
         handleChangeRowsPerPage={(e) => {
+          setPage(0);
           setRowsPerPage(Number(e.target.value));
         }}
         handleChangePage={(event, newPage) => {
-          let variables;
-          if (newPage < page) {
-            const before = edges[0].cursor;
-            variables = {
-              before,
-            };
+          if (newPage === 0) {
+            setFirst(rowsPerPage);
+            setLast(null);
+            setAfter(null);
+            setBefore(null);
+          } else if (newPage === data.allHouseholds.totalCount / rowsPerPage) {
+            setLast(rowsPerPage);
+            setFirst(null);
+            setAfter(null);
+            setBefore(null);
+          } else if (newPage > page) {
+            setAfter(pageInfo.endCursor);
+            setFirst(rowsPerPage);
+            setBefore(null);
+            setLast(null);
           } else {
-            const after = edges[result.length - 1].cursor;
-            variables = {
-              after,
-            };
+            setBefore(pageInfo.startCursor);
+            setLast(rowsPerPage);
+            setAfter(null);
+            setFirst(null);
+          }
+          if (orderBy) {
+            setOrderBy(columnToOrderBy(orderBy, orderDirection));
           }
           setPage(newPage);
-          fetchMore({
-            variables,
-            updateQuery: (prev, { fetchMoreResult }) => {
-              return fetchMoreResult;
-            },
-          });
         }}
         headCells={headCells}
         rowsPerPageOptions={[5, 10, 15]}
