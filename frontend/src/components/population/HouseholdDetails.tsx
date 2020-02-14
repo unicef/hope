@@ -63,6 +63,11 @@ export function HouseholdDetails({
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>
+            <LabelizedField label='Family Nationality'>
+              <div>{houseHold.nationality}</div>
+            </LabelizedField>
+          </Grid>
+          <Grid item xs={4}>
             <LabelizedField label='Household Size'>
               <div>
                 {paymentRecords.edges.length
