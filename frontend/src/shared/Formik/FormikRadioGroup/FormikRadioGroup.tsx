@@ -8,7 +8,9 @@ import {
 } from '@material-ui/core';
 import styled from 'styled-components';
 
-const StyledFormLabel = styled(FormLabel)`
+const FormLabelContainer = styled.div`
+  margin-bottom: ${({ theme }) => theme.spacing(3)}px;
+
   .MuiFormLabel-root {
     color: ${({ theme }) => theme.palette.text.primary};
   }
@@ -19,8 +21,8 @@ const StyledFormLabel = styled(FormLabel)`
     color: ${({ theme }) => theme.palette.text.primary};
   }
 `;
-
-const FormLabelContainer = styled.div`
+const StyledFormControl = styled.div`
+  margin-top: ${({ theme }) => theme.spacing(4)}px;
   margin-bottom: ${({ theme }) => theme.spacing(2)}px;
 `;
 
@@ -31,10 +33,10 @@ export const FormikRadioGroup = ({
 }): React.ReactElement => {
   return (
     <>
-      <FormControl {...otherProps} component='fieldset'>
-        <StyledFormLabel>
+      <StyledFormControl {...otherProps} component='fieldset'>
+        <FormLabelContainer>
           <FormLabel component='legend'>{otherProps.label}</FormLabel>
-        </StyledFormLabel>
+        </FormLabelContainer>
         <RadioGroup
           {...field}
           {...otherProps}
@@ -51,7 +53,7 @@ export const FormikRadioGroup = ({
             />
           ))}
         </RadioGroup>
-      </FormControl>
+      </StyledFormControl>
     </>
   );
 };
