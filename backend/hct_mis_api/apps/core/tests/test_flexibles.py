@@ -1,5 +1,6 @@
 from django.contrib.admin import AdminSite
 from django.contrib.messages.storage.fallback import FallbackStorage
+from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, RequestFactory
 
@@ -22,9 +23,9 @@ class TestFlexibles(TestCase):
         site = AdminSite()
         self.admin = FlexibleAttributeAdmin(FlexibleAttribute, site)
 
-    def test_flexible_init_update_delete(self):
+    def load_xls(self, name):
         with open(
-            f"hct_mis_api/apps/core/tests/test_files/flex_init.xls", "rb"
+            f"hct_mis_api/apps/core/tests/test_files/{name}", "rb",
         ) as f:
             file_upload = SimpleUploadedFile(
                 "xls_file", f.read(), content_type="text/html"
@@ -33,12 +34,13 @@ class TestFlexibles(TestCase):
         request = self.factory.post(
             "import-xls/", data=data, format="multipart"
         )
-        request.user = MockSuperUser()
         setattr(request, "session", "session")
         messages = FallbackStorage(request)
         setattr(request, "_messages", messages)
         self.admin.import_xls(request)
 
+    def test_flexible_init_update_delete(self):
+        self.load_xls("flex_init.xls")
         # Check if created correct amount of objects
         expected_attributes_count = 65
         expected_groups_count = 10
@@ -49,11 +51,12 @@ class TestFlexibles(TestCase):
         groups_from_db = FlexibleAttributeGroup.objects.all()
         choices_from_db = FlexibleAttributeChoice.objects.all()
 
-        assert expected_attributes_count == len(attrs_from_db)
-        assert expected_groups_count == len(groups_from_db)
-        assert expected_choices_count == len(choices_from_db)
-        assert expected_repeated_groups == len(
-            groups_from_db.filter(repeatable=True)
+        self.assertEqual(expected_attributes_count, len(attrs_from_db))
+        self.assertEqual(expected_groups_count, len(groups_from_db))
+        self.assertEqual(expected_choices_count, len(choices_from_db))
+        self.assertEqual(
+            expected_repeated_groups,
+            len(groups_from_db.filter(repeatable=True)),
         )
 
         """
@@ -125,44 +128,96 @@ class TestFlexibles(TestCase):
 
         for name, label in zip(selected_attribs, attrib_english_labels):
             attrib = FlexibleAttribute.objects.get(name=name)
-            assert attrib.label["English(EN)"] == label
-            assert yes_choice.flex_attributes.filter(id=attrib.id).exists()
-            assert no_choice.flex_attributes.filter(id=attrib.id).exists()
+            self.assertEqual(attrib.label["English(EN)"], label)
+            self.assertTrue(
+                yes_choice.flex_attributes.filter(id=attrib.id).exists()
+            )
+            self.assertTrue(
+                no_choice.flex_attributes.filter(id=attrib.id).exists()
+            )
 
-        # # Test updating/deleting values
-        # with open(
-        #     f"hct_mis_api/apps/core/tests/test_files/flex_updated.xls", "rb"
-        # ) as f:
-        #     file_upload = SimpleUploadedFile(
-        #         "xls_file", f.read(), content_type="text/html"
-        #     )
-        #     data = {"xls_file": file_upload}
-        # request = self.factory.post(
-        #     "import-xls/", data=data, format="multipart"
-        # )
-        # setattr(request, "session", "session")
-        # messages = FallbackStorage(request)
-        # setattr(request, "_messages", messages)
-        # self.admin.import_xls(request)
-        #
-        # deleted_groups = [
-        #     "household_questions",
-        #     "header_hh_size",
-        #     "composition_female",
-        #     "composition_male",
-        #     "household_vulnerabilities",
-        # ]
-        #
-        # groups_from_db = FlexibleAttributeGroup.objects.filter(
-        #     name__in=deleted_groups
-        # )
-        #
-        # assert len(groups_from_db) == 0
-        #
-        # consent_group = FlexibleAttributeGroup.objects.get(name="consent")
-        # assert consent_group.label["English(EN)"] == "Consent Edited"
-        #
-        # introduction = FlexibleAttribute.objects.filter(
-        #     type="note", name="introduction"
-        # ).exists()
-        # assert introduction is False
+        # Test updating/deleting values
+        self.load_xls("flex_updated.xls")
+
+        deleted_groups = [
+            "household_questions",
+            "header_hh_size",
+            "composition_female",
+            "composition_male",
+            "household_vulnerabilities",
+        ]
+
+        groups_from_db = FlexibleAttributeGroup.objects.filter(
+            name__in=deleted_groups
+        )
+
+        deleted_groups_from_db = FlexibleAttributeGroup.all_objects.filter(
+            name__in=deleted_groups
+        )
+        self.assertEqual(len(groups_from_db), 0)
+
+        # check if they are soft deleted
+        self.assertEqual(len(deleted_groups_from_db), 5)
+
+        consent_group = FlexibleAttributeGroup.objects.get(name="consent")
+        self.assertEqual(consent_group.label["English(EN)"], "Consent Edited")
+
+        introduction = FlexibleAttribute.objects.filter(
+            type="note", name="introduction"
+        ).exists()
+        self.assertFalse(introduction)
+
+    def test_flexibles_type_validation(self):
+        # import valid file
+        self.load_xls("flex_init_valid_types.xls")
+
+        groups_from_db = FlexibleAttributeGroup.objects.all()
+        flex_attrs_from_db = FlexibleAttribute.objects.all()
+
+        self.assertEqual(len(groups_from_db), 1)
+        self.assertEqual(len(flex_attrs_from_db), 1)
+
+        assert flex_attrs_from_db.filter(
+            type="STRING",
+            name="introduction",
+            label={
+                "French(FR)": "",
+                "English(EN)": "1) Greeting    "
+                "2) Introduce yourself politely    "
+                "3) I represent UNICEF    "
+                "4) You have been selected to help us conduct "
+                "a household needs assessment in your area.    "
+                "5) This survey is voluntary and the information"
+                " you provide will remain strictly "
+                "confidential.    "
+                "6) Participating in the evaluation does not "
+                "mean that you are entitled to assistance. "
+                "UNICEF will analyze the data for "
+                "possible eligibility.    "
+                "7) I will ask you a few questions "
+                "and observe your installations in the house.",
+            },
+        )
+
+        self.load_xls("flex_update_invalid_types.xls")
+        group = FlexibleAttributeGroup.objects.all()
+        attribs = FlexibleAttribute.objects.all()
+        self.assertEqual(len(group), 1)
+        self.assertEqual(len(attribs), 1)
+
+    def test_flexibles_missing_name(self):
+        self.load_xls("flex_field_missing_name.xls")
+        group = FlexibleAttributeGroup.objects.all()
+        attribs = FlexibleAttribute.objects.all()
+        self.assertEqual(len(group), 0)
+        self.assertEqual(len(attribs), 0)
+
+    def test_flexibles_missing_english_label(self):
+        self.load_xls("flex_field_missing_english_label.xls")
+        group = FlexibleAttributeGroup.objects.all()
+        attribs = FlexibleAttribute.objects.all()
+        self.assertEqual(len(group), 0)
+        self.assertEqual(len(attribs), 0)
+
+    def test_load_invalid_file(self):
+        self.load_xls("erd arrows.jpg")

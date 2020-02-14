@@ -354,7 +354,7 @@ class FlexibleAttributeChoice(SoftDeletableModel, TimeStampedUUIDModel):
 
 mptt.register(Location, order_insertion_by=["title"])
 mptt.register(CartoDBTable, order_insertion_by=["table_name"])
-mptt.register(FlexibleAttributeGroup, order_insertion_by=["name"])
+mptt.register(FlexibleAttributeGroup)
 
 auditlog.register(FlexibleAttributeChoice)
 auditlog.register(FlexibleAttributeGroup)

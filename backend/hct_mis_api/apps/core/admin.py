@@ -5,9 +5,10 @@ from django.contrib import admin
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.forms import forms
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, render_to_response
 from django.urls import path
 from django.utils.html import strip_tags
+from xlrd import XLRDError
 
 from core.models import (
     BusinessArea,
@@ -129,7 +130,7 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
         }.get(object_type_to_add)
 
     def _assign_field_values(
-        self, value, header_name, object_type_to_add="choice",
+        self, value, header_name, object_type_to_add, row, row_number
     ):
         model_fields = self._get_model_fields(object_type_to_add)
 
@@ -137,6 +138,19 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
             field_name, language = header_name.split("::")
             if field_name in model_fields:
                 cleared_value = strip_tags(value).replace("#", "").strip()
+
+                if field_name == "label" and language == "English(EN)":
+                    is_index_field = row[1].value.endswith("_index")
+                    # only index fields and group labels can be empty
+                    if (
+                        not value
+                        and not is_index_field
+                        and not object_type_to_add == "group"
+                    ):
+                        raise ValidationError(
+                            f"Row {row_number}: Label for {row[1].value} cannot be empty"
+                        )
+
                 self.json_fields_to_create[field_name].update(
                     {language: cleared_value if value else ""}
                 )
@@ -152,7 +166,7 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
         if header_name in model_fields:
             if header_name == "type":
                 if not value:
-                    raise ValidationError("Type is required")
+                    raise ValidationError(f"Row {row_number}: Type is required")
                 choice_key = value.split(" ")[0]
 
                 if choice_key in self.TYPE_CHOICE_MAP.keys():
@@ -160,9 +174,8 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
                         "type"
                     ] = self.TYPE_CHOICE_MAP.get(choice_key)
             else:
-                # TODO: Uncomment when question is resolved
-                # if header_name == "name" and not value:
-                #     raise ValidationError("Name is required")
+                if header_name == "name" and not value:
+                    raise ValidationError(f"Row {row_number}: Name is required")
                 self.object_fields_to_create[header_name] = (
                     value if value else ""
                 )
@@ -225,11 +238,13 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
             self._reset_model_fields_variables()
 
             if row[0].value in choices_assigned_to_fields:
-                raise ValidationError("Choice is not assigned to any field!")
+                raise ValidationError(
+                    f"Row {row_number}: Choice is not assigned to any field!"
+                )
 
             for cell, header_name in zip(row, choices_headers_map):
                 self._assign_field_values(
-                    cell.value, header_name,
+                    cell.value, header_name, "choice", row, row_number,
                 )
 
             obj = FlexibleAttributeChoice.objects.filter(
@@ -238,16 +253,10 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
             ).first()
 
             if obj:
-                obj.update(
-                    **self.object_fields_to_create,
-                    **self.json_fields_to_create,
-                )
-                updated_choices.append(
-                    FlexibleAttributeChoice.objects.filter(
-                        list_name=self.object_fields_to_create["list_name"],
-                        name=self.object_fields_to_create["name"],
-                    )
-                )
+                obj.label = self.json_fields_to_create["label"]
+                obj.admin = self.object_fields_to_create["admin"]
+                obj.save()
+                updated_choices.append(obj)
             else:
                 choice = FlexibleAttributeChoice(
                     **self.object_fields_to_create,
@@ -296,22 +305,23 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
                     break
 
                 self._assign_field_values(
-                    value, header_name, object_type_to_add
+                    value, header_name, object_type_to_add, row, row_number,
                 )
 
             if self.can_add_flag:
                 if object_type_to_add == "group":
-                    from_db = FlexibleAttributeGroup.objects.filter(
+                    obj = FlexibleAttributeGroup.objects.filter(
                         name=self.object_fields_to_create["name"],
-                    )
-                    if from_db:
-                        from_db.update(
-                            name=self.object_fields_to_create["name"],
-                            **self.json_fields_to_create,
-                            repeatable=repeatable,
-                            parent=self.current_group_tree[-1],
-                        )
-                        group = from_db.first()
+                    ).first()
+
+                    if obj:
+                        parent = self.current_group_tree[-1]
+                        obj.label = self.json_fields_to_create["label"]
+                        obj.hint = self.json_fields_to_create["hint"]
+                        obj.repeatable = repeatable
+                        obj.parent = parent
+                        obj.save()
+                        group = obj
                         self.current_group_tree.append(group)
                     else:
                         group = FlexibleAttributeGroup.objects.create(
@@ -319,23 +329,22 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
                             **self.json_fields_to_create,
                             repeatable=repeatable,
                             parent=self.current_group_tree[-1],
-                            lft=1,
-                            rght=1,
-                            tree_id=1,
-                            level=1,
                         )
                         self.current_group_tree.append(group)
+
+                    FlexibleAttributeGroup.objects.rebuild()
+
                     all_groups.append(group)
                 elif object_type_to_add == "attribute":
                     choice_name = self._get_field_choice_name(row)
                     obj = FlexibleAttribute.objects.filter(
                         name=self.object_fields_to_create["name"],
-                        type=self.object_fields_to_create.get("type", ""),
                     ).first()
                     if obj:
                         if obj.type != self.object_fields_to_create["type"]:
                             raise ValidationError(
-                                "Type of the attribute cannot be changed!"
+                                f"Row {row_number}: Type of the "
+                                f"attribute cannot be changed!"
                             )
                         obj.type = self.object_fields_to_create["type"]
                         obj.name = self.object_fields_to_create["name"]
@@ -369,32 +378,44 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
         for attr in attrs_to_delete:
             attr.delete()
 
+    current_group_tree = None
     # variables re-initialized for each model creation
     json_fields_to_create = defaultdict(dict)
     object_fields_to_create = {}
-    current_group_tree = [None]
     can_add_flag = True
 
     @transaction.atomic
     def import_xls(self, request):
         if request.method == "POST":
+            form = XLSImportForm(request.POST, request.FILES)
+
             xls_file = request.FILES["xls_file"]
 
-            wb = xlrd.open_workbook(file_contents=xls_file.read())
+            # Disabled till we now what core fields we should have
+            # self._validate_file_has_required_core_fields(sheets["survey"])
+            self.current_group_tree = [None]
 
-            sheets = {
-                "survey": wb.sheet_by_name("survey"),
-                "choices": wb.sheet_by_name("choices"),
-            }
+            try:
+                wb = xlrd.open_workbook(file_contents=xls_file.read())
+                sheets = {
+                    "survey": wb.sheet_by_name("survey"),
+                    "choices": wb.sheet_by_name("choices"),
+                }
+                self._handle_choices(sheets["choices"])
+                self._handle_groups_and_fields(sheets["survey"])
+            except ValidationError as validation_error:
+                form.add_error("xls_file", validation_error)
+                transaction.set_rollback(True)
+            except XLRDError as file_error:
+                form.add_error("xls_file", file_error)
+                transaction.set_rollback(True)
 
-            self._validate_file_has_required_core_fields(sheets["survey"])
-
-            self._handle_choices(sheets["choices"])
-
-            self._handle_groups_and_fields(sheets["survey"])
-
-            self.message_user(request, "Your xls file has been imported, ")
-            return redirect("..")
+            if form.is_valid():
+                self.message_user(request, "Your xls file has been imported, ")
+                return redirect("..")
+            else:
+                payload = {"form": form}
+                return render(request, "core/xls_form.html", payload)
 
         form = XLSImportForm()
         payload = {"form": form}
