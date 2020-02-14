@@ -28,10 +28,12 @@ The following field types will be supported:
 
 * Integer
 * Decimal
-* Date Time Stamp
-* Geo location
+* DateTime Stamp
+* Geo location/Point
 * Select one
 * Select many
+* File field \(audio/video/photo\)
+* Text field
 
 Any grouping of fields and choices associated with the select one/many fields will also be stored.
 
