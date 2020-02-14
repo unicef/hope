@@ -6,6 +6,7 @@ export const HOUSEHOLD_QUERY = gql`
       id
       createdAt
       familySize
+      nationality
       location {
         id
         title

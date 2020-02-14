@@ -1521,7 +1521,7 @@ export type HouseholdQuery = (
   { __typename?: 'Query' }
   & { household: Maybe<(
     { __typename?: 'HouseholdNode' }
-    & Pick<HouseholdNode, 'id' | 'createdAt' | 'familySize' | 'residenceStatus'>
+    & Pick<HouseholdNode, 'id' | 'createdAt' | 'familySize' | 'nationality' | 'residenceStatus'>
     & { location: (
       { __typename?: 'LocationNode' }
       & Pick<LocationNode, 'id' | 'title'>
@@ -2343,6 +2343,7 @@ export const HouseholdDocument = gql`
     id
     createdAt
     familySize
+    nationality
     location {
       id
       title
