@@ -6,6 +6,23 @@ import {
   RadioGroup,
   Radio,
 } from '@material-ui/core';
+import styled from 'styled-components';
+
+const StyledFormLabel = styled(FormLabel)`
+  .MuiFormLabel-root {
+    color: ${({ theme }) => theme.palette.text.primary};
+  }
+  .MuiFormLabel-root.Mui-focused {
+    color: ${({ theme }) => theme.palette.text.primary};
+  }
+  .MuiFormLabel-root:focus {
+    color: ${({ theme }) => theme.palette.text.primary};
+  }
+`;
+
+const FormLabelContainer = styled.div`
+  margin-bottom: ${({ theme }) => theme.spacing(2)}px;
+`;
 
 export const FormikRadioGroup = ({
   field,
@@ -15,7 +32,9 @@ export const FormikRadioGroup = ({
   return (
     <>
       <FormControl {...otherProps} component='fieldset'>
-        <FormLabel component='legend'>{otherProps.label}</FormLabel>
+        <StyledFormLabel>
+          <FormLabel component='legend'>{otherProps.label}</FormLabel>
+        </StyledFormLabel>
         <RadioGroup
           {...field}
           {...otherProps}

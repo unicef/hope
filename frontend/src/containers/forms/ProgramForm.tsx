@@ -191,6 +191,7 @@ export function ProgramForm({
                   label='Description'
                   type='text'
                   fullWidth
+                  multiline
                   component={FormikTextField}
                 />
                 <MediumLabel>
