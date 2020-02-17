@@ -65,7 +65,7 @@ const validationSchema = Yup.object().shape({
         )}`,
       ),
     '',
-  ),
+  ).required(),
   sector: Yup.string().required('Sector is required'),
   budget: Yup.number().min(0),
 });
