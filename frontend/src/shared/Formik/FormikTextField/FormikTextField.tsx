@@ -1,6 +1,18 @@
 import React from 'react';
 import { TextField, InputAdornment } from '@material-ui/core';
 
+import styled from 'styled-components'
+
+const StyledTextField = styled(TextField)`
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+}
+input[type=number] {
+  -moz-appearance:textfield;
+}
+`;
+
 export const FormikTextField = ({
   field,
   form,
@@ -30,7 +42,7 @@ export const FormikTextField = ({
 
   return (
     <>
-      <TextField
+      <StyledTextField
         {...field}
         {...otherProps}
         name={field.name}

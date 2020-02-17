@@ -101,7 +101,7 @@ export function FinishProgram({
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button onClick={() => setOpen(false)} color='primary'>
+            <Button onClick={() => setOpen(false)}>
               CANCEL
             </Button>
             <Button
