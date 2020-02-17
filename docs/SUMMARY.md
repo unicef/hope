@@ -77,6 +77,7 @@
   * [Open issues](technical-specification/kobo-integration/open-issues.md)
 * [Coding Guidelines](technical-specification/coding-guidelines.md)
 * [Input Validation Rules](technical-specification/input-validation-rules.md)
+* [Snackbar Notifications](technical-specification/snackbar-notifications.md)
 
 ## Project Management
 
