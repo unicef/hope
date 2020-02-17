@@ -221,3 +221,22 @@ class TestFlexibles(TestCase):
 
     def test_load_invalid_file(self):
         self.load_xls("erd arrows.jpg")
+
+    def test_reimport_soft_deleted_objects(self):
+        self.load_xls("flex_init_valid_types.xls")
+
+        field = FlexibleAttribute.objects.get(name="introduction")
+        group = FlexibleAttributeGroup.objects.get(name="consent")
+
+        self.assertTrue(field)
+        self.assertTrue(group)
+
+        field.delete()
+        group.delete()
+
+        self.assertTrue(field.is_removed)
+        self.assertTrue(group.is_removed)
+
+        self.load_xls("flex_init_valid_types.xls")
+
+        self.assertEqual(field.group, group)

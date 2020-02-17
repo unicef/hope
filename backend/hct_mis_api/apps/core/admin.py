@@ -247,7 +247,7 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
                     cell.value, header_name, "choice", row, row_number,
                 )
 
-            obj = FlexibleAttributeChoice.objects.filter(
+            obj = FlexibleAttributeChoice.all_objects.filter(
                 list_name=self.object_fields_to_create["list_name"],
                 name=self.object_fields_to_create["name"],
             ).first()
@@ -255,6 +255,7 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
             if obj:
                 obj.label = self.json_fields_to_create["label"]
                 obj.admin = self.object_fields_to_create["admin"]
+                obj.is_removed = False
                 obj.save()
                 updated_choices.append(obj)
             else:
@@ -310,7 +311,7 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
 
             if self.can_add_flag:
                 if object_type_to_add == "group":
-                    obj = FlexibleAttributeGroup.objects.filter(
+                    obj = FlexibleAttributeGroup.all_objects.filter(
                         name=self.object_fields_to_create["name"],
                     ).first()
 
@@ -320,6 +321,7 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
                         obj.hint = self.json_fields_to_create["hint"]
                         obj.repeatable = repeatable
                         obj.parent = parent
+                        obj.is_removed = False
                         obj.save()
                         group = obj
                         self.current_group_tree.append(group)
@@ -337,7 +339,7 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
                     all_groups.append(group)
                 elif object_type_to_add == "attribute":
                     choice_name = self._get_field_choice_name(row)
-                    obj = FlexibleAttribute.objects.filter(
+                    obj = FlexibleAttribute.all_objects.filter(
                         name=self.object_fields_to_create["name"],
                     ).first()
                     if obj:
@@ -351,6 +353,7 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
                         obj.required = self.object_fields_to_create["required"]
                         obj.label = self.json_fields_to_create["label"]
                         obj.hint = self.json_fields_to_create["hint"]
+                        obj.is_removed = False
                         obj.save()
                         field = obj
 
