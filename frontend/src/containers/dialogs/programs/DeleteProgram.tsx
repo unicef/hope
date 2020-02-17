@@ -49,6 +49,11 @@ const RemoveModalButton = styled(Button)`
     background-color: ${({ theme }) => theme.palette.error.dark};
   }
 `;
+const MidDialog = styled(Dialog)`
+  .MuiDialog-paperWidthSm {
+    min-width: ${({ theme }) => theme.spacing(120)}px;
+  }
+`;
 
 interface DeleteProgramProps {
   program: ProgramNode;
@@ -92,7 +97,7 @@ export function DeleteProgram({
       <RemoveButton startIcon={<CloseIcon />} onClick={() => setOpen(true)}>
         REMOVE
       </RemoveButton>
-      <Dialog
+      <MidDialog
         open={open}
         onClose={() => setOpen(false)}
         scroll='paper'
@@ -110,7 +115,7 @@ export function DeleteProgram({
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button onClick={() => setOpen(false)} color='primary'>
+            <Button onClick={() => setOpen(false)} >
               CANCEL
             </Button>
             <RemoveModalButton
@@ -123,7 +128,7 @@ export function DeleteProgram({
             </RemoveModalButton>
           </DialogActions>
         </DialogFooter>
-      </Dialog>
+      </MidDialog>
     </span>
   );
 }
