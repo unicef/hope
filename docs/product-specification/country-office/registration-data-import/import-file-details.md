@@ -1,4 +1,4 @@
-# Import File Details
+# Import Data Details
 
 ## Motivation
 
@@ -74,6 +74,9 @@ If everything looks good, and the user would like to proceed to merge this file 
 
 ## Acceptance Criteria
 
+* [ ] Approve Button should only appear if the import is in review state.
+* [ ] Once the population has been merged, there are no further actions that can be taken on this data import.
+* [ ] 
 ## User Permissions
 
 

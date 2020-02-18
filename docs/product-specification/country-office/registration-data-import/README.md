@@ -26,9 +26,9 @@ This import goes into a 'staging area' and not usable for targeting right away.
 
 The states of an import:
 
-* Pending
 * In Review
 * Approved
+* Merged
 
 
 

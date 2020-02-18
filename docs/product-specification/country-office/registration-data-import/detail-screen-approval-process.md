@@ -51,7 +51,7 @@ When there is no data to be displayed, there will be a message on the card where
 
 
 
-**Import**
+#### **Starting an Import**
 
 On the top right hand side of this screen there is a button labeled `Import` 
 
@@ -60,20 +60,12 @@ When clicked, a modal will pop up, instructing the user to select a file to impo
 The user will have the following choices to choose from to import data from:
 
 * \*\*\*\*[**Excel**](via-excel-import.md)\*\*\*\*
-* 3rd Party\*\*
-* XML\*\*
-* Other\*\*
-
-{% hint style="warning" %}
-\*\* Will be implemented in further iterations beyond Iteration 4 scope. Only XLS files will be built in Iteration 4.
-{% endhint %}
-
-
+* \*\*\*\*[**KoBo**](via-kobo-api.md)\*\*\*\*
 
 ## Acceptance Criteria
 
-* [ ] File import data must match the format of the approved Import Template.
-* [ ] The system must allow file types to include both XLS & XLSx
+* [ ] Filtering
+* [ ] Modal
 
 ## _Data Source_
 
