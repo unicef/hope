@@ -25,8 +25,8 @@ export function CreateProgram(): React.ReactElement {
       variables: {
         programData: {
           ...values,
-          startDate: moment(values.startDate).toISOString(),
-          endDate: moment(values.endDate).toISOString(),
+          startDate: moment(values.startDate).format('YYYY-MM-DD'),
+          endDate: moment(values.endDate).format('YYYY-MM-DD'),
           businessAreaSlug: businessArea,
         },
       },

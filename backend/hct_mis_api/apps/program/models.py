@@ -62,8 +62,8 @@ class Program(TimeStampedUUIDModel):
 
     name = models.CharField(max_length=255)
     status = models.CharField(max_length=255, choices=STATUS_CHOICE,)
-    start_date = models.DateTimeField()
-    end_date = models.DateTimeField()
+    start_date = models.DateField()
+    end_date = models.DateField()
     description = models.CharField(max_length=255)
     program_ca_id = models.CharField(max_length=255)
     locations = models.ManyToManyField(

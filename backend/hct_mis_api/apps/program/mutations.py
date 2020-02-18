@@ -17,8 +17,8 @@ from targeting.models import TargetPopulation
 
 class CreateProgramInput(graphene.InputObjectType):
     name = graphene.String()
-    start_date = graphene.DateTime()
-    end_date = graphene.DateTime()
+    start_date = graphene.Date()
+    end_date = graphene.Date()
     description = graphene.String()
     program_ca_id = graphene.String()
     budget = graphene.Float()
@@ -35,8 +35,8 @@ class UpdateProgramInput(graphene.InputObjectType):
     id = graphene.String(required=True)
     name = graphene.String()
     status = graphene.String()
-    start_date = graphene.DateTime()
-    end_date = graphene.DateTime()
+    start_date = graphene.Date()
+    end_date = graphene.Date()
     description = graphene.String()
     program_ca_id = graphene.String()
     budget = graphene.Float()
