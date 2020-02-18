@@ -89,7 +89,7 @@ export function DeleteProgram({
         });
       },
     });
-    history.push(`/${businessArea}/programs/`);
+    history.push({pathname: `/${businessArea}/programs/`, state: {showSnackbar: true, message: 'Programme removed.'}});
     setOpen(false);
   };
   return (
