@@ -12,7 +12,7 @@ snapshots['TestCreateProgram::test_create_program_authenticated 1'] = {
         'createProgram': {
             'program': {
                 'administrativeAreasOfImplementation': 'Lorem Ipsum',
-                'budget': 20000000.0,
+                'budget': '20000000',
                 'cashPlus': True,
                 'description': 'my description of program',
                 'endDate': '2021-12-20T15:00:00',
@@ -54,7 +54,7 @@ snapshots['TestCreateProgram::test_create_program_invalid_dates 1'] = {
         'createProgram': {
             'program': {
                 'administrativeAreasOfImplementation': 'Lorem Ipsum',
-                'budget': 20000000.0,
+                'budget': '20000000',
                 'cashPlus': True,
                 'description': 'my description of program',
                 'endDate': '2021-12-20T15:00:00',
