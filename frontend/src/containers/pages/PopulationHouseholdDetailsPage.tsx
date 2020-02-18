@@ -9,7 +9,6 @@ import {
   useHouseholdQuery,
   HouseholdNode,
   CashPlanNode,
-  IndividualNode,
 } from '../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
