@@ -69,57 +69,6 @@ export function HouseholdVulnerabilities(): React.ReactElement {
           </Grid>
         </Grid>
       </Overview>
-      <Overview>
-        <Title>
-          <Typography variant='h6'>Registration Details</Typography>
-        </Title>
-        <Grid container spacing={6}>
-          <Grid item xs={4}>
-            <LabelizedField label='Source'>
-              <div> </div>
-            </LabelizedField>
-          </Grid>
-          <Grid item xs={4}>
-            <LabelizedField label='Intake group name'>
-              <div> </div>
-            </LabelizedField>
-          </Grid>
-          <Grid item xs={4}>
-            <LabelizedField label='Registered Date'>
-              <div> </div>
-            </LabelizedField>
-          </Grid>
-          <Grid item xs={4}>
-            <LabelizedField label='Number of Rooms'>
-              <div> </div>
-            </LabelizedField>
-          </Grid>
-        </Grid>
-        <hr />
-        <Typography variant='h6'>Data Collection</Typography>
-        <Grid container spacing={6}>
-          <Grid item xs={4}>
-            <LabelizedField label='Start time'>
-              <div> </div>
-            </LabelizedField>
-          </Grid>
-          <Grid item xs={4}>
-            <LabelizedField label='End time'>
-              <div> </div>
-            </LabelizedField>
-          </Grid>
-          <Grid item xs={4}>
-            <LabelizedField label='Device ID'>
-              <div> </div>
-            </LabelizedField>
-          </Grid>
-          <Grid item xs={4}>
-            <LabelizedField label='User name'>
-              <div> </div>
-            </LabelizedField>
-          </Grid>
-        </Grid>
-      </Overview>
     </div>
   );
 }
