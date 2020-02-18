@@ -123,7 +123,12 @@ export function HouseholdIndividualsTable({
         setPage(0);
       }}
       handleRequestSort={(event, property) => {
-        console.log(event);
+        let direction = 'asc';
+        if (property === orderBy) {
+          direction = orderDirection === 'asc' ? 'desc' : 'asc';
+        }
+        setOrderBy(property);
+        setOrderDirection(direction);
       }}
       orderBy={orderBy}
       order={orderDirection as Order}
