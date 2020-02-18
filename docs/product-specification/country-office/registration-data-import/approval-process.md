@@ -13,7 +13,49 @@ HCT must be able to restrict the information that is being ingested into the sys
 
 ## Functional Specifications
 
-#### I
+Starting from any given [**Import File Details**](import-file-details.md) screen, a user will be able to see a button located at the top-right of the page, titled "Approve".
+
+Clicking on this button will prompt a modal with the following details.
+
+### Approve Modal Details
+
+#### Card Title
+
+The title of this modal will be:
+
+* **Approve Import File**
+
+
+
+#### Body Content
+
+Within the body of this card, users will have a final chance to review a summarized details of the file they are attempting to merge with the Golden Records.
+
+Security check 1:
+
+A message will display asking the user the following question:
+
+_"Are you sure you want to approve this data import?"_
+
+Below this question, the system will have the following summary:
+
+_**\[\#\] Households and \[\#\] Individuals will be approved. Do you want to Proceed?**_ 
+
+If the entire file is not approved, the following message will appear. 
+
+_**\[\#\] Households have not been validated, move to new import?**_
+
+In order to proceed, the user must first name the new import file that will be added to the [**Import Management**](detail-screen-approval-process.md) ****screen to repeat the process.
+
+Once all is reviewed and confirmed, the user will be able to click either the `Cancel` button or `Approve` button.
+
+### Notifications
+
+A snackbar message will then appear for approx. 5 seconds confirming whether or not the import was successful or not. 
+
+_\*\*\*\*_
+
+#### 
 
 ## User Permissions
 
