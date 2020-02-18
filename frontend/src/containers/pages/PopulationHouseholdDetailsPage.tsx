@@ -1,16 +1,21 @@
 import React from 'react';
 import styled from 'styled-components';
 import Paper from '@material-ui/core/Paper';
-import ExpandLess from '@material-ui/icons/ExpandLess';
-import ExpandMore from '@material-ui/icons/ExpandMore';
-import { Typography, Button } from '@material-ui/core';
+import { Typography, Grid } from '@material-ui/core';
 import { useParams } from 'react-router-dom';
 import { HouseholdDetails } from '../../components/population/HouseholdDetails';
 import { PageHeader } from '../../components/PageHeader';
-import { useHouseholdQuery, HouseholdNode } from '../../__generated__/graphql';
+import {
+  useHouseholdQuery,
+  HouseholdNode,
+  CashPlanNode,
+} from '../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { HouseholdVulnerabilities } from '../../components/population/HouseholdVulnerabilities';
+import { HouseholdActivityTable } from '../HouseholdActivityTable';
+import { LabelizedField } from '../../components/LabelizedField';
+import { PaymentRecordTable } from '../PaymentRecordTable';
 
 const Container = styled.div`
 padding 20px;
@@ -34,10 +39,8 @@ const Overview = styled(Paper)`
     margin-top: 0px;
   }
 `;
-
-const ButtonContainer = styled.span`
-  margin: 0 ${({ theme }) => theme.spacing(2)}px;
-  float: right;
+const Content = styled.div`
+  margin-top: 20px;
 `;
 
 export function PopulationHouseholdDetailsPage(): React.ReactElement {
@@ -56,6 +59,9 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
     },
   ];
 
+  const cashPlan = data.household.paymentRecords.edges[0].node
+    .cashPlan as CashPlanNode;
+
   return (
     <div>
       <PageHeader
@@ -64,23 +70,62 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
       />
       <HouseholdDetails houseHold={data.household as HouseholdNode} />
       <Container>
+        <PaymentRecordTable cashPlan={cashPlan} />
         <HouseholdVulnerabilities />
         <Overview>
           <Title>
-            <Typography variant='h6' style={{ display: 'inline-block' }}>
-              Activity Log
-            </Typography>
-            <ButtonContainer>
-              <Button
-                variant='outlined'
-                color='primary'
-                startIcon={<ExpandMore />}
-              >
-                Show
-              </Button>
-            </ButtonContainer>
+            <Typography variant='h6'>Registration Details</Typography>
           </Title>
+          <Grid container spacing={6}>
+            <Grid item xs={4}>
+              <LabelizedField label='Source'>
+                <div> </div>
+              </LabelizedField>
+            </Grid>
+            <Grid item xs={4}>
+              <LabelizedField label='Intake group name'>
+                <div> </div>
+              </LabelizedField>
+            </Grid>
+            <Grid item xs={4}>
+              <LabelizedField label='Registered Date'>
+                <div> </div>
+              </LabelizedField>
+            </Grid>
+            <Grid item xs={4}>
+              <LabelizedField label='Number of Rooms'>
+                <div> </div>
+              </LabelizedField>
+            </Grid>
+          </Grid>
+          <hr />
+          <Typography variant='h6'>Data Collection</Typography>
+          <Grid container spacing={6}>
+            <Grid item xs={4}>
+              <LabelizedField label='Start time'>
+                <div> </div>
+              </LabelizedField>
+            </Grid>
+            <Grid item xs={4}>
+              <LabelizedField label='End time'>
+                <div> </div>
+              </LabelizedField>
+            </Grid>
+            <Grid item xs={4}>
+              <LabelizedField label='Device ID'>
+                <div> </div>
+              </LabelizedField>
+            </Grid>
+            <Grid item xs={4}>
+              <LabelizedField label='User name'>
+                <div> </div>
+              </LabelizedField>
+            </Grid>
+          </Grid>
         </Overview>
+        <Content>
+          <HouseholdActivityTable household={data.household as HouseholdNode} />
+        </Content>
       </Container>
     </div>
   );
