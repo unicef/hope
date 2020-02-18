@@ -18,6 +18,10 @@ Within each tab there will be set of columns, one set for core fields and one fo
 
 Additionally household tab will have a "**unique\_id**" as its first column. This will then be referenced in the individuals tab as a "household\_unique\_id" reference since individuals being imported have to belong to a \(valid\) household always.
 
+\*\*\*\*[**Registration Data Import XLS Template**](https://docs.google.com/spreadsheets/d/1uNXQmOJd7eZC8Q-4IJ0iYGpvOjvfjRIe43eIN6dkFDg/edit?usp=sharing)\*\*\*\*
+
+
+
 \*\*\*\*
 
 ### **Import Process**
@@ -49,4 +53,6 @@ Furthermore, for the user's convenience, and to ensure consistency in data is be
 
 ### Acceptance Criteria / Validation
 
-* [ ] 
+* [ ] File import data must match the format of the approved Import Template.
+* [ ] The system must allow file types to include XLSx
+

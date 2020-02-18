@@ -41,13 +41,19 @@ Below this question, the system will have the following summary:
 
 _**\[\#\] Households and \[\#\] Individuals will be approved. Do you want to Proceed?**_ 
 
-If the entire file is not approved, the following message will appear. 
+~~If the entire file is not approved, the following message will appear.~~ 
 
-_**\[\#\] Households have not been validated, move to new import?**_
+~~_**\[\#\] Households have not been validated, move to new import?**_~~
 
-In order to proceed, the user must first name the new import file that will be added to the [**Import Management**](detail-screen-approval-process.md) ****screen to repeat the process.
+~~In order to proceed, the user must first name the new import file that will be added to the~~ [~~**Import Management**~~](detail-screen-approval-process.md) ~~****screen to repeat the process.~~
 
-Once all is reviewed and confirmed, the user will be able to click either the `Cancel` button or `Approve` button.
+~~Once all is reviewed and confirmed, the user will be able to click either the `Cancel` button or `Approve` button.~~
+
+
+
+### Un-Approval
+
+### Merge to population
 
 ### Notifications
 
@@ -57,24 +63,27 @@ _\*\*\*\*_
 
 #### 
 
-## User Permissions
-
-[**Roles & Permissions**](../user-management/user-roles-and-permissions.md)\*\*\*\*
-
-The following users should be able to interact with the following Populations features and functionalities.
-
-* &lt;User type 1&gt;
-* &lt;User type 2&gt;
-
-#### &lt;User Type 1&gt;
-
-This user has the ability to import registered beneficiary data into the HCT-MIS Staging Environment 
-
-#### &lt;User Type 2&gt;
-
-This user has the ability to review and approve all import batches of Registered beneficiary data from the Staging environment to the Golden Records.
-
 ## Acceptance Criteria
+
+* [ ] 
+## ~~User Permissions~~
+
+~~~~[~~**Roles & Permissions**~~](../user-management/user-roles-and-permissions.md)~~\*\*\*\*~~
+
+~~The following users should be able to interact with the following Populations features and functionalities.~~
+
+* ~~&lt;User type 1&gt;~~
+* ~~&lt;User type 2&gt;~~
+
+#### ~~&lt;User Type 1&gt;~~
+
+~~This user has the ability to import registered beneficiary data into the HCT-MIS Staging Environment~~ 
+
+#### ~~&lt;User Type 2&gt;~~
+
+~~This user has the ability to review and approve all import batches of Registered beneficiary data from the Staging environment to the Golden Records.~~
+
+
 
 
 
