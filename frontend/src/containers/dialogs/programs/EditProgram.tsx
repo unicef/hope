@@ -57,6 +57,7 @@ export function EditProgram({ program }: EditProgramProps): React.ReactElement {
           ...values,
           startDate: moment(values.startDate).format('YYYY-MM-DD'),
           endDate: moment(values.endDate).format('YYYY-MM-DD'),
+          budget: values.budget.toFixed(2),
         },
       },
     });
@@ -72,9 +73,7 @@ export function EditProgram({ program }: EditProgramProps): React.ReactElement {
     return (
       <DialogFooter>
         <DialogActions>
-          <Button onClick={() => setOpen(false)}>
-            Cancel
-          </Button>
+          <Button onClick={() => setOpen(false)}>Cancel</Button>
           <Button
             onClick={submit}
             type='submit'
