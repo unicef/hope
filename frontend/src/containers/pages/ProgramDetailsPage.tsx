@@ -1,6 +1,7 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
+import { Snackbar, SnackbarContent } from '@material-ui/core';
 import { ProgramDetails } from '../../components/programs/ProgramDetails';
 import { CashPlanTable } from '../CashPlanTable';
 import {
@@ -12,6 +13,7 @@ import {
 import { ProgramActivityLogTable } from '../ProgramActivityLogTable';
 import { LoadingComponent } from '../../components/LoadingComponent';
 import { ProgramDetailsPageHeader } from './headers/ProgramDetailsPageHeader';
+import { useSnackbarHelper } from '../../hooks/useBreadcrumbHelper';
 
 const Container = styled.div`
   && {
@@ -54,6 +56,7 @@ export function ProgramDetailsPage(): React.ReactElement {
     data: choices,
     loading: choicesLoading,
   } = useProgrammeChoiceDataQuery();
+  const snackBar = useSnackbarHelper();
   if (loading || choicesLoading) {
     return <LoadingComponent />;
   }
@@ -85,6 +88,15 @@ export function ProgramDetailsPage(): React.ReactElement {
           <ProgramActivityLogTable program={program} />
         </TableWrapper>
       </Container>
+      {snackBar.show && (
+        <Snackbar
+          open={snackBar.show}
+          autoHideDuration={2000}
+          onClose={() => snackBar.setShow(false)}
+        >
+          <SnackbarContent message={snackBar.message} />
+        </Snackbar>
+      )}
     </div>
   );
 }
