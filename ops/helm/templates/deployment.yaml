@@ -101,38 +101,38 @@ spec:
           ports:
             - containerPort: {{ .Values.redis.port }}
 
-{{- range $key, $value :=  .Values.databases }}
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: {{ $key }}
-  labels:
-    app: {{ $key }}
-  annotations:
-    revision: "{{ $.Values.revision }}"
-spec:
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxUnavailable: 1
-      maxSurge: 1
-  replicas: 1
-  selector:
-    matchLabels:
-      app: {{ $key }}
-  template:
-    metadata:
-      labels:
-        app: {{ $key }}
-    spec:
-      containers:
-        - name: {{ $key }}
-          image: {{ $value.image }}
-          ports:
-            - containerPort: {{ $value.port }}
-          envFrom:
-            - secretRef:
-                name: {{ $key }}-secret
----
-{{- end }}
+# {{- range $key, $value :=  .Values.databases }}
+# ---
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: {{ $key }}
+#   labels:
+#     app: {{ $key }}
+#   annotations:
+#     revision: "{{ $.Values.revision }}"
+# spec:
+#   strategy:
+#     type: RollingUpdate
+#     rollingUpdate:
+#       maxUnavailable: 1
+#       maxSurge: 1
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: {{ $key }}
+#   template:
+#     metadata:
+#       labels:
+#         app: {{ $key }}
+#     spec:
+#       containers:
+#         - name: {{ $key }}
+#           image: {{ $value.image }}
+#           ports:
+#             - containerPort: {{ $value.port }}
+#           envFrom:
+#             - secretRef:
+#                 name: {{ $key }}-secret
+# ---
+# {{- end }}
