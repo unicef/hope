@@ -42,9 +42,7 @@ export function CreateProgram(): React.ReactElement {
     return (
       <DialogFooter>
         <DialogActions>
-          <Button onClick={() => setOpen(false)} color='primary'>
-            Cancel
-          </Button>
+          <Button onClick={() => setOpen(false)}>Cancel</Button>
           <Button
             onClick={submit}
             type='submit'

@@ -2,18 +2,22 @@ from decimal import Decimal
 
 import mptt
 import pycountry
+from auditlog.models import AuditlogHistoryField
+from auditlog.registry import auditlog
 from django.contrib.gis.db.models import MultiPolygonField, PointField
+from django.contrib.postgres.fields import JSONField
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from model_utils import Choices
+from model_utils.models import UUIDModel, SoftDeletableModel
 from mptt.fields import TreeForeignKey
 from mptt.managers import TreeManager
 from mptt.models import MPTTModel
-from django.contrib.postgres.fields import JSONField
-from django.db import models
-from model_utils.models import UUIDModel
+
 from core.coutries import COUNTRY_NAME_TO_ALPHA2_CODE
 from core.utils import unique_slugify
-from utils.models import TimeStampedUUIDModel
+from utils.models import TimeStampedUUIDModel, SoftDeletionTreeModel
 
 
 class Country(TimeStampedUUIDModel):
@@ -284,38 +288,39 @@ class CartoDBTable(MPTTModel):
         return self.table_name
 
 
-class FlexibleAttribute(models.Model):
-    type = models.CharField(max_length=255)
-    name = models.CharField(max_length=255)
+class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
+    TYPE_CHOICE = Choices(
+        ("STRING", _("String")),
+        ("IMAGE", _("Image")),
+        ("INTEGER", _("Integer")),
+        ("DECIMAL", _("Decimal")),
+        ("SELECT_ONE", _("Select One")),
+        ("SELECT_MANY", _("Select Many")),
+        ("DATETIME", _("Datetime")),
+        ("GEOPOINT", _("Geopoint")),
+    )
+
+    type = models.CharField(max_length=16, choices=TYPE_CHOICE)
+    name = models.CharField(max_length=255, unique=True)
     required = models.BooleanField(default=False)
-    relevant = models.TextField(blank=True)
-    calculation = models.TextField(blank=True)
-    constraint = models.TextField(blank=True)
-    constraint_message = models.TextField(blank=True)
     label = JSONField(default=dict)
     hint = JSONField(default=dict)
-    choice_filter = models.TextField(blank=True)
-    business_area = models.ForeignKey(
-        "core.BusinessArea",
-        on_delete=models.CASCADE,
-        related_name="flex_attributes",
-    )
     group = models.ForeignKey(
         "core.FlexibleAttributeGroup",
         on_delete=models.CASCADE,
         related_name="flex_attributes",
         null=True,
     )
+    history = AuditlogHistoryField(pk_indexable=False)
 
     def __str__(self):
         return f"type: {self.type}, name: {self.name}"
 
 
-class FlexibleAttributeGroup(MPTTModel):
-    name = models.CharField(max_length=255)
+class FlexibleAttributeGroup(SoftDeletionTreeModel):
+    name = models.CharField(max_length=255, unique=True)
     label = JSONField(default=dict)
     required = models.BooleanField(default=False)
-    relevant = models.TextField(blank=True)
     repeatable = models.BooleanField(default=False)
     parent = TreeForeignKey(
         "self",
@@ -326,32 +331,31 @@ class FlexibleAttributeGroup(MPTTModel):
         db_index=True,
         on_delete=models.CASCADE,
     )
-    business_area = models.ForeignKey(
-        "core.BusinessArea",
-        on_delete=models.CASCADE,
-        related_name="flex_groups",
-    )
+    history = AuditlogHistoryField(pk_indexable=False)
 
     def __str__(self):
         return f"name: {self.name}"
 
 
-class FlexibleAttributeChoice(models.Model):
+class FlexibleAttributeChoice(SoftDeletableModel, TimeStampedUUIDModel):
+    class Meta:
+        unique_together = ["list_name", "name"]
+
     list_name = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
     label = JSONField(default=dict)
     admin = models.CharField(max_length=255)
     flex_attributes = models.ManyToManyField("core.FlexibleAttribute",)
-    business_area = models.ForeignKey(
-        "core.BusinessArea",
-        on_delete=models.CASCADE,
-        related_name="flex_choices",
-    )
+    history = AuditlogHistoryField(pk_indexable=False)
 
     def __str__(self):
-        return f"listname: {self.list_name}, name: {self.name}"
+        return f"list name: {self.list_name}, name: {self.name}"
 
 
 mptt.register(Location, order_insertion_by=["title"])
 mptt.register(CartoDBTable, order_insertion_by=["table_name"])
-mptt.register(FlexibleAttributeGroup, order_insertion_by=["name"])
+mptt.register(FlexibleAttributeGroup)
+
+auditlog.register(FlexibleAttributeChoice)
+auditlog.register(FlexibleAttributeGroup)
+auditlog.register(FlexibleAttribute)

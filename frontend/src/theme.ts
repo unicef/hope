@@ -14,7 +14,7 @@ const muiTheme = createMuiTheme({
       main: DARK_GRAY,
     },
     error: {
-      main: red.A400,
+      main: red['600'],
     },
     background: {
       default: '#EEEEEE',

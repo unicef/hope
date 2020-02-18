@@ -19,10 +19,12 @@
 * [Country Office](product-specification/country-office/README.md)
   * [Login](product-specification/country-office/login.md)
   * [Registration Data Import](product-specification/country-office/registration-data-import/README.md)
-    * [Detail screen / approval process](product-specification/country-office/registration-data-import/detail-screen-approval-process.md)
-    * [Via Excel import](product-specification/country-office/registration-data-import/via-excel-import.md)
-    * [Via Kobo API](product-specification/country-office/registration-data-import/via-kobo-api.md)
-    * [De-duplicating data](product-specification/country-office/registration-data-import/de-duplicating-data.md)
+    * [Import Management](product-specification/country-office/registration-data-import/detail-screen-approval-process.md)
+    * [Excel Import](product-specification/country-office/registration-data-import/via-excel-import.md)
+    * [Kobo Import API](product-specification/country-office/registration-data-import/via-kobo-api.md)
+    * [Import File Details](product-specification/country-office/registration-data-import/import-file-details.md)
+    * [De-duplicating Data](product-specification/country-office/registration-data-import/de-duplicating-data.md)
+    * [Approval Process](product-specification/country-office/registration-data-import/approval-process.md)
   * [Population](product-specification/country-office/population-management.md)
   * [Target Population \(Targeting\)](product-specification/country-office/targeting/README.md)
     * [Targeting Criteria](product-specification/country-office/targeting/targeting-criteria.md)
@@ -77,6 +79,7 @@
   * [Open issues](technical-specification/kobo-integration/open-issues.md)
 * [Coding Guidelines](technical-specification/coding-guidelines.md)
 * [Input Validation Rules](technical-specification/input-validation-rules.md)
+* [Snackbar Notifications](technical-specification/snackbar-notifications.md)
 
 ## Project Management
 
