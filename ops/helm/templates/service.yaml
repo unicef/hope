@@ -5,6 +5,7 @@ metadata:
   name: backend
   namespace: {{ .Values.namespace }}
 spec:
+  externalTrafficPolicy: "Local"
   ports:
     - protocol: TCP
       port: {{ .Values.backend.port }}
@@ -17,6 +18,7 @@ metadata:
   name: frontend
   namespace: {{ .Values.namespace }}
 spec:
+  externalTrafficPolicy: "Local"
   ports:
     - protocol: TCP
       port: {{ .Values.frontend.port }}
