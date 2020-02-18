@@ -9,6 +9,7 @@ import {
   useHouseholdQuery,
   HouseholdNode,
   CashPlanNode,
+  IndividualNode,
 } from '../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
@@ -16,6 +17,7 @@ import { HouseholdVulnerabilities } from '../../components/population/HouseholdV
 import { HouseholdActivityTable } from '../HouseholdActivityTable';
 import { LabelizedField } from '../../components/LabelizedField';
 import { PaymentRecordTable } from '../PaymentRecordTable';
+import { HouseholdIndividualsTable } from '../HouseholdIndividualsTable';
 
 const Container = styled.div`
 padding 20px;
@@ -59,7 +61,8 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
     },
   ];
 
-  const cashPlan = data.household.paymentRecords.edges[0].node
+  const { household } = data;
+  const cashPlan = household.paymentRecords.edges[0].node
     .cashPlan as CashPlanNode;
 
   return (
@@ -68,8 +71,9 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
         title={`Household ID: ${id}`}
         breadCrumbs={breadCrumbsItems}
       />
-      <HouseholdDetails houseHold={data.household as HouseholdNode} />
+      <HouseholdDetails houseHold={household as HouseholdNode} />
       <Container>
+        <HouseholdIndividualsTable household={household as HouseholdNode} />
         <PaymentRecordTable cashPlan={cashPlan} />
         <HouseholdVulnerabilities />
         <Overview>
