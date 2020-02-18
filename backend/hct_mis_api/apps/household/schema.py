@@ -5,7 +5,7 @@ from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
 from core.schema import ExtendedConnection
-from household.models import Household, RegistrationDataImport
+from household.models import Household, RegistrationDataImport, Individual
 
 
 class HouseholdFilter(FilterSet):
@@ -45,6 +45,14 @@ class HouseholdNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
+class IndividualNode(DjangoObjectType):
+    class Meta:
+        model = Individual
+        filter_fields = []
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
 class RegistrationDataImportNode(DjangoObjectType):
     class Meta:
         model = RegistrationDataImport
@@ -62,3 +70,5 @@ class Query(graphene.ObjectType):
     all_registration_data_imports = DjangoFilterConnectionField(
         RegistrationDataImportNode
     )
+    individual = relay.Node.Field(IndividualNode)
+    all_individuals = DjangoFilterConnectionField(IndividualNode)

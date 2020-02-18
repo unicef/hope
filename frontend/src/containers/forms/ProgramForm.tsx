@@ -65,7 +65,7 @@ const validationSchema = Yup.object().shape({
         )}`,
       ),
     '',
-  ),
+  ).required(),
   sector: Yup.string().required('Sector is required'),
   budget: Yup.number().min(0),
 });
@@ -95,7 +95,7 @@ export function ProgramForm({
     startDate: '',
     endDate: '',
     description: '',
-    budget: 0,
+    budget: '0.00',
     administrativeAreasOfImplementation: '',
     populationGoal: 0,
     frequencyOfPayments: 'REGULAR',
@@ -105,6 +105,9 @@ export function ProgramForm({
 
   if (program) {
     initialValue = selectFields(program, Object.keys(initialValue));
+  }
+  if (initialValue.budget === 0) {
+    initialValue.budget = '0.00';
   }
   // initialValue.budget =
   if (!data) return null;
@@ -191,6 +194,7 @@ export function ProgramForm({
                   label='Description'
                   type='text'
                   fullWidth
+                  multiline
                   component={FormikTextField}
                 />
                 <MediumLabel>

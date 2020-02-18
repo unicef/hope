@@ -11,6 +11,7 @@ import {
 import { ProgramForm } from '../../forms/ProgramForm';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { PROGRAM_QUERY } from '../../../apollo/queries/Program';
+import { ALL_LOG_ENTRIES_QUERY } from '../../../apollo/queries/AllLogEntries';
 
 const DialogFooter = styled.div`
   padding: 12px 16px;
@@ -27,6 +28,15 @@ export function EditProgram({ program }: EditProgramProps): React.ReactElement {
   const history = useHistory();
   const [open, setOpen] = useState(false);
   const [mutate] = useUpdateProgramMutation({
+    refetchQueries: [
+      {
+        query: ALL_LOG_ENTRIES_QUERY,
+        variables: {
+          objectId: program.id,
+          count: 5,
+        },
+      },
+    ],
     update(cache, { data: { updateProgram } }) {
       cache.writeQuery({
         query: PROGRAM_QUERY,
@@ -45,8 +55,9 @@ export function EditProgram({ program }: EditProgramProps): React.ReactElement {
         programData: {
           id: program.id,
           ...values,
-          startDate: moment(values.startDate).toISOString(),
-          endDate: moment(values.endDate).toISOString(),
+          startDate: moment(values.startDate).format('YYYY-MM-DD'),
+          endDate: moment(values.endDate).format('YYYY-MM-DD'),
+          budget: values.budget.toFixed(2),
         },
       },
     });
@@ -62,9 +73,7 @@ export function EditProgram({ program }: EditProgramProps): React.ReactElement {
     return (
       <DialogFooter>
         <DialogActions>
-          <Button onClick={() => setOpen(false)} color='primary'>
-            Cancel
-          </Button>
+          <Button onClick={() => setOpen(false)}>Cancel</Button>
           <Button
             onClick={submit}
             type='submit'
