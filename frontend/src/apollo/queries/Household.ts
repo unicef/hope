@@ -7,6 +7,19 @@ export const HOUSEHOLD_QUERY = gql`
       createdAt
       familySize
       nationality
+      individuals {
+        edges {
+          node {
+            id
+            individualCaId
+            fullName
+            sex
+            dob
+            nationality
+            identificationType
+          }
+        }
+      }
       location {
         id
         title
@@ -19,6 +32,7 @@ export const HOUSEHOLD_QUERY = gql`
             headOfHousehold
             cashPlan {
               id
+              numberOfHouseholds
               program {
                 id
                 name
