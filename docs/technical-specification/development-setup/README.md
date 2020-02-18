@@ -8,6 +8,7 @@
 
 ```bash
 docker-compose build
+docker-compose up
 docker-compose exec backend bash
 # in docker container
 ./manage.py reset_db
