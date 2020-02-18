@@ -50,7 +50,7 @@ export function LogRow({ logEntry }: LogRowProps): ReactElement {
             ? `${logEntry.actor.firstName} ${logEntry.actor.lastName}`
             : null}
         </Cell>
-        <Cell weight={headCells[2].weight}>{keys[0].toUpperCase()}</Cell>
+        <Cell weight={headCells[2].weight}>{keys[0]}</Cell>
         <Cell weight={headCells[3].weight}>{changes[keys[0]][0]}</Cell>
         <Cell weight={headCells[4].weight}>{changes[keys[0]][1]}</Cell>
         <ButtonPlaceHolder />
