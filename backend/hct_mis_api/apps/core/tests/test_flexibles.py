@@ -1,6 +1,5 @@
 from django.contrib.admin import AdminSite
 from django.contrib.messages.storage.fallback import FallbackStorage
-from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, RequestFactory
 
@@ -37,7 +36,7 @@ class TestFlexibles(TestCase):
         setattr(request, "session", "session")
         messages = FallbackStorage(request)
         setattr(request, "_messages", messages)
-        self.admin.import_xls(request)
+        return self.admin.import_xls(request)
 
     def test_flexible_init_update_delete(self):
         self.load_xls("flex_init.xls")
@@ -206,21 +205,28 @@ class TestFlexibles(TestCase):
         self.assertEqual(len(attribs), 1)
 
     def test_flexibles_missing_name(self):
-        self.load_xls("flex_field_missing_name.xls")
+        response = self.load_xls("flex_field_missing_name.xls")
+        self.assertContains(response, "Name is required")
         group = FlexibleAttributeGroup.objects.all()
         attribs = FlexibleAttribute.objects.all()
         self.assertEqual(len(group), 0)
         self.assertEqual(len(attribs), 0)
 
     def test_flexibles_missing_english_label(self):
-        self.load_xls("flex_field_missing_english_label.xls")
+        response = self.load_xls("flex_field_missing_english_label.xls")
+        self.assertContains(response, "English label cannot be empty")
         group = FlexibleAttributeGroup.objects.all()
         attribs = FlexibleAttribute.objects.all()
         self.assertEqual(len(group), 0)
         self.assertEqual(len(attribs), 0)
 
     def test_load_invalid_file(self):
-        self.load_xls("erd arrows.jpg")
+        response = self.load_xls("erd arrows.jpg")
+        self.assertContains(response, "Unsupported format, or corrupt file")
+
+    def test_choice_not_assigned_to_field(self):
+        response = self.load_xls("flex_choice_without_field.xls")
+        self.assertContains(response, "Choice is not assigned to any field")
 
     def test_reimport_soft_deleted_objects(self):
         self.load_xls("flex_init_valid_types.xls")
