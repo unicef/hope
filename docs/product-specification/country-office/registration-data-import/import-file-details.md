@@ -1,5 +1,7 @@
 # Import Data Details
 
+**Feature details**: [https://unicef.visualstudio.com/ICTD-HCT-MIS/\_boards/board/t/Software%20Engineering/Features/?workitem=50071](https://unicef.visualstudio.com/ICTD-HCT-MIS/_boards/board/t/Software%20Engineering/Features/?workitem=50071)
+
 ## Motivation
 
 HCT users have the need to ensure all information is being imported accurately from the field into the system. The Import File Details screen allows user to directly see what has been imported, with simple views that consolidate information into a summary and allow users to see rows of beneficiary household and individual data to be validated and [**approved**](approval-process.md). 
@@ -75,8 +77,7 @@ If everything looks good, and the user would like to proceed to merge this file 
 ## Acceptance Criteria
 
 * [ ] Approve Button should only appear if the import is in review state.
-* [ ] Once the population has been merged, there are no further actions that can be taken on this data import.
-* [ ] 
+* [ ] * [ ] 
 ## User Permissions
 
 
