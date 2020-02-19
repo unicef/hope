@@ -1,4 +1,4 @@
-# Targeting Criteria \[Create / Edit\]
+# Targeting Criteria \[Create\]
 
 **Feature details:** [https://unicef.visualstudio.com/ICTD-HCT-MIS/\_boards/board/t/Software%20Engineering/Features/?workitem=50086](https://unicef.visualstudio.com/ICTD-HCT-MIS/_boards/board/t/Software%20Engineering/Features/?workitem=50086)
 
@@ -65,20 +65,6 @@ Along side of the previously selected criteria, a new box with a "+" sign will b
 Once criteria is added and saved to the Target Population, the system will return data to be seen in the [**Results**](view-copy-delete.md) card and the [**Target Population Entries**](view-copy-delete.md) list. This data will continue to update until the user clicks the **`Save`** button on the [**Target Populations Details**](view-copy-delete.md) screen to end the creation of the new Target Population.
 
 
-
-### Editing Criteria
-
-In order to edit a Target Population's criteria, a user must first visit the Target Population Details page of their selected Target Population and click the **`Edit`** button located on the top-right of the screen. 
-
-This will enable the user to edit the Title of the Target Population as well as it's Targeting Criteria.
-
-A user may **delete** a group of **AND** criteria by simply clicking on the _trash can symbol_ in the top-right corner of the selected criteria box. 
-
-Alternatively, a user can **edit** the selected **AND** criteria by selecting the edit button, which will bring up the Add Criteria modal and all it's pre-set rules available to adjust/change.
-
-The user may also add more **OR** criteria if desired.
-
-The UI will not change from what was previously seen on the [**Create New Target Population**](targeting-criteria.md#create-new-target-population) screens.
 
 ### 
 
