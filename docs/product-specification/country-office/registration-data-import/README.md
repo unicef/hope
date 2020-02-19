@@ -7,8 +7,6 @@ description: >-
 
 # Registration Data Import
 
-**Feature:** [https://unicef.visualstudio.com/ICTD-HCT-MIS/\_boards/board/t/Software%20Engineering/Features/?workitem=50069](https://unicef.visualstudio.com/ICTD-HCT-MIS/_boards/board/t/Software%20Engineering/Features/?workitem=50069)
-
 ## Motivation
 
 The Registration Data Import module is the gateway for importing new data to the HCT-MIS database, shared with other applications.
@@ -26,9 +24,9 @@ This import goes into a 'staging area' and not usable for targeting right away.
 
 The states of an import:
 
-* In Review
-* Approved
-* Merged
+* **In Review**
+* **Approved**
+* **Merged**
 
 
 
