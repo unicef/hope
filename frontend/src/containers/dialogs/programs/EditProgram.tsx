@@ -51,9 +51,10 @@ export function EditProgram({ program }: EditProgramProps): React.ReactElement {
       },
     });
     if (!response.errors && response.data.updateProgram) {
-      history.push(
-        `/${businessArea}/programs/${response.data.updateProgram.program.id}`,
-      );
+      history.replace({
+        pathname: `/${businessArea}/programs/${response.data.updateProgram.program.id}`,
+        state: { showSnackbar: true, message: 'Programme edited.' },
+      });
     }
     setOpen(false);
   };
@@ -62,9 +63,7 @@ export function EditProgram({ program }: EditProgramProps): React.ReactElement {
     return (
       <DialogFooter>
         <DialogActions>
-          <Button onClick={() => setOpen(false)}>
-            Cancel
-          </Button>
+          <Button onClick={() => setOpen(false)}>Cancel</Button>
           <Button
             onClick={submit}
             type='submit'
