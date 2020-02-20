@@ -9,6 +9,9 @@ from payment.models import PaymentRecord, PaymentEntitlement
 
 
 class PaymentEntitlementNode(DjangoObjectType):
+    entitlement_quantity = graphene.Decimal()
+    delivered_quantity = graphene.Decimal()
+
     class Meta:
         model = PaymentEntitlement
 
