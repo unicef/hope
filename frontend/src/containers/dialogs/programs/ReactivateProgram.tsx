@@ -79,7 +79,7 @@ export function ReactivateProgram({
   };
   return (
     <span>
-      <Button variant='contained' color='primary' onClick={() => setOpen(true)}>
+      <Button variant='outlined' color='primary' onClick={() => setOpen(true)}>
         Reactivate
       </Button>
       <Dialog
@@ -100,9 +100,7 @@ export function ReactivateProgram({
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button onClick={() => setOpen(false)} >
-              CANCEL
-            </Button>
+            <Button onClick={() => setOpen(false)}>CANCEL</Button>
             <Button
               type='submit'
               color='primary'
