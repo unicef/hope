@@ -8,6 +8,8 @@ import {
   DialogContent,
   DialogTitle,
   Typography,
+  Snackbar,
+  SnackbarContent,
 } from '@material-ui/core';
 import {
   AllProgramsQuery,
@@ -19,6 +21,7 @@ import { PROGRAM_QUERY } from '../../../apollo/queries/Program';
 import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/AllPrograms';
 import { programCompare } from '../../../utils/utils';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useSnackbarHelper } from '../../../hooks/useBreadcrumbHelper';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -46,6 +49,7 @@ export function ActivateProgram({
 }: ActivateProgramProps): React.ReactElement {
   const history = useHistory();
   const [open, setOpen] = useState(false);
+  const snackBar = useSnackbarHelper();
   const businessArea = useBusinessArea();
   const [mutate] = useUpdateProgramMutation({
     update(cache, { data: { updateProgram } }) {
@@ -82,8 +86,13 @@ export function ActivateProgram({
         pathname: `/${businessArea}/programs/${response.data.updateProgram.program.id}`,
         state: { showSnackbar: true, message: 'Programme activated.' },
       });
+      setOpen(false);
+    } else {
+      history.replace({
+        pathname: history.location.pathname,
+        state: {showSnackbar: true, message: 'Programme activate action failed.'}
+      })
     }
-    setOpen(false);
   };
   return (
     <span>
@@ -109,9 +118,7 @@ export function ActivateProgram({
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button onClick={() => setOpen(false)} >
-              CANCEL
-            </Button>
+            <Button onClick={() => setOpen(false)}>CANCEL</Button>
             <Button
               type='submit'
               color='primary'
@@ -123,6 +130,15 @@ export function ActivateProgram({
           </DialogActions>
         </DialogFooter>
       </Dialog>
+      {snackBar.show && (
+        <Snackbar
+          open={snackBar.show}
+          autoHideDuration={2000}
+          onClose={() => snackBar.setShow(false)}
+        >
+          <SnackbarContent message={snackBar.message} />
+        </Snackbar>
+      )}
     </span>
   );
 }
