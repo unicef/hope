@@ -9,6 +9,8 @@ import {
   DialogContent,
   DialogTitle,
   Typography,
+  Snackbar,
+  SnackbarContent,
 } from '@material-ui/core';
 import {
   AllProgramsQuery,
@@ -17,6 +19,7 @@ import {
 } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/AllPrograms';
+import { useSnackbarHelper } from '../../../hooks/useBreadcrumbHelper';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -64,6 +67,7 @@ export function DeleteProgram({
 }: DeleteProgramProps): React.ReactElement {
   const history = useHistory();
   const [open, setOpen] = useState(false);
+  const snackBar = useSnackbarHelper();
   const businessArea = useBusinessArea();
   const [mutate] = useDeleteProgramMutation({
     variables: {
@@ -71,7 +75,7 @@ export function DeleteProgram({
     },
   });
   const deleteProgram = async (): Promise<void> => {
-    await mutate({
+    const response = await mutate({
       update(cache) {
         const allProgramsData = cache.readQuery<AllProgramsQuery>({
           query: ALL_PROGRAMS_QUERY,
@@ -89,8 +93,18 @@ export function DeleteProgram({
         });
       },
     });
-    history.push(`/${businessArea}/programs/`);
-    setOpen(false);
+    if (!response.errors && response.data.deleteProgram) {
+      history.push({
+        pathname: `/${businessArea}/programs/`,
+        state: { showSnackbar: true, message: 'Programme removed.' },
+      });
+      setOpen(false);
+    } else {
+      history.replace({
+        pathname: history.location.pathname,
+        state: {showSnackbar: true, message: 'Programme remove action failed.'}
+      })
+    }
   };
   return (
     <span>
@@ -115,9 +129,7 @@ export function DeleteProgram({
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button onClick={() => setOpen(false)} >
-              CANCEL
-            </Button>
+            <Button onClick={() => setOpen(false)}>CANCEL</Button>
             <RemoveModalButton
               type='submit'
               color='primary'
@@ -129,6 +141,15 @@ export function DeleteProgram({
           </DialogActions>
         </DialogFooter>
       </MidDialog>
+      {snackBar.show && (
+        <Snackbar
+          open={snackBar.show}
+          autoHideDuration={2000}
+          onClose={() => snackBar.setShow(false)}
+        >
+          <SnackbarContent message={snackBar.message} />
+        </Snackbar>
+      )}
     </span>
   );
 }

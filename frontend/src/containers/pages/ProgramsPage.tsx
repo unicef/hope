@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
+import { Snackbar, SnackbarContent } from '@material-ui/core';
 import { ProgramCard } from '../../components/programs/ProgramCard';
 import { PageHeader } from '../../components/PageHeader';
 import {
@@ -11,6 +12,7 @@ import {
 import { CreateProgram } from '../dialogs/programs/CreateProgram';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { LoadingComponent } from '../../components/LoadingComponent';
+import { useSnackbarHelper } from '../../hooks/useBreadcrumbHelper'
 
 const PageContainer = styled.div`
   display: flex;
@@ -20,6 +22,7 @@ const PageContainer = styled.div`
   justify-content: center;
 `;
 export function ProgramsPage(): React.ReactElement {
+  const snackBar = useSnackbarHelper()
   const businessArea = useBusinessArea();
   const { data, loading } = useAllProgramsQuery({
     variables: {
@@ -53,6 +56,15 @@ export function ProgramsPage(): React.ReactElement {
     <div>
       {toolbar}
       <PageContainer>{programsList}</PageContainer>
+      {snackBar.show && (
+        <Snackbar
+          open={snackBar.show}
+          autoHideDuration={2000}
+          onClose={() => snackBar.setShow(false)}
+        >
+          <SnackbarContent message={snackBar.message} />
+        </Snackbar>
+      )}
     </div>
   );
 }
