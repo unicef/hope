@@ -8,11 +8,11 @@ The Population tab is an essential are within the HCT-MIS system, which allows u
 
 In this section we will review the many features of the Population Tab in detail.
 
-![Population Features 2/14/20](../../.gitbook/assets/screen-recording-2020-02-14-at-01.09-pm.gif)
+![Population Features 2/14/20](../../../.gitbook/assets/screen-recording-2020-02-14-at-01.09-pm.gif)
 
 ### Households
 
-\*\*\*\*[**See Glossary**](../../introduction/glossary-terminology/)\*\*\*\*
+\*\*\*\*[**See Glossary**](../../../introduction/glossary-terminology/)\*\*\*\*
 
 Households are comprised of individual beneficiaries or groups of beneficiaries under a single location / address. In this section of the HCT-MIS, users can sort/filter and view detailed information regarding the households registered in the system.
 
@@ -22,7 +22,7 @@ Households are comprised of individual beneficiaries or groups of beneficiaries 
 
 This interface/functionality is a way to search and view all the households and individuals in HCT MIS.
 
-![Household List View 2/14/20](../../.gitbook/assets/image-2020-02-14-at-1.12.40-pm.png)
+![Household List View 2/14/20](../../../.gitbook/assets/image-2020-02-14-at-1.12.40-pm.png)
 
 HCT user will be able to use the search field to quickly pull up households that reflect the information that is entered in their search query. Users will be able to search households on the following fields:
 
@@ -58,7 +58,7 @@ This table will display up to 10 rows upon default.
 
 This interface / functionality is a way to view all the household details that are kept in the HCT-MIS system for a particular household.
 
-![Household Details Page 2/14/20](../../.gitbook/assets/image-2020-02-14-at-1.24.15-pm.png)
+![Household Details Page 2/14/20](../../../.gitbook/assets/image-2020-02-14-at-1.24.15-pm.png)
 
 Users on this screen will be able to navigate through lists of data, separated into the following categories:
 
@@ -134,7 +134,7 @@ This table will display up to 10 rows upon default.
 
 #### Registration Details
 
-![Registration Details Card - 2/14/20](../../.gitbook/assets/image-2020-02-14-at-1.59.12-pm.png)
+![Registration Details Card - 2/14/20](../../../.gitbook/assets/image-2020-02-14-at-1.59.12-pm.png)
 
 In the **Registration Details** card a user will be presented with a list with two sections of the following details:
 
@@ -154,7 +154,7 @@ This table will display up to 10 rows upon default.
 
 ### Individuals
 
-\*\*\*\*[**See Glossary**](../../introduction/glossary-terminology/)\*\*\*\*
+\*\*\*\*[**See Glossary**](../../../introduction/glossary-terminology/)\*\*\*\*
 
 Individuals are individual beneficiaries registered in the HCT-MIS Database. In this section of the HCT-MIS, users can sort/filter and view detailed information regarding individuals registered in the system.
 
@@ -162,7 +162,7 @@ Individuals are individual beneficiaries registered in the HCT-MIS Database. In 
 
 > **Features:** [https://unicef.visualstudio.com/ICTD-HCT-MIS/\_boards/board/t/Software%20Engineering/Features/?workitem=49437](https://unicef.visualstudio.com/ICTD-HCT-MIS/_boards/board/t/Software%20Engineering/Features/?workitem=49437)
 
-![](../../.gitbook/assets/image-2020-02-14-at-2.23.04-pm.png)
+![](../../../.gitbook/assets/image-2020-02-14-at-2.23.04-pm.png)
 
 HCT user will be able to use the search field to quickly pull up Individuals that reflect the information that is entered in their search query. Users will be able to search Individuals based on the following fields:
 
@@ -198,7 +198,7 @@ This table will display up to 10 rows upon default.
 
 This interface / functionality is a way to view all the individual beneficiaries' details that are kept in the HCT-MIS system for a particular Individual.
 
-![](../../.gitbook/assets/image-2020-02-14-at-3.08.21-pm.png)
+![](../../../.gitbook/assets/image-2020-02-14-at-3.08.21-pm.png)
 
 Users on this screen will be able to navigate through lists of data, separated into the following categories:
 
@@ -274,7 +274,7 @@ The global navigation for this product must include the following:
 * [ ] 
 ## User Permissions
 
-\*\*\*\*[**Roles & Permissions**](user-management/user-roles-and-permissions.md)\*\*\*\*
+\*\*\*\*[**Roles & Permissions**](../user-management/user-roles-and-permissions.md)\*\*\*\*
 
 The following users should be able to interact with the following Populations features and functionalities.
 
