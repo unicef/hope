@@ -57,7 +57,7 @@ export function EditProgram({ program }: EditProgramProps): React.ReactElement {
           ...values,
           startDate: moment(values.startDate).format('YYYY-MM-DD'),
           endDate: moment(values.endDate).format('YYYY-MM-DD'),
-          budget: values.budget.toFixed(2),
+          budget: parseFloat(values.budget).toFixed(2),
         },
       },
     });
