@@ -135,7 +135,7 @@ export function FinishProgram({
       {snackBar.show && (
         <Snackbar
           open={snackBar.show}
-          autoHideDuration={2000}
+          autoHideDuration={5000}
           onClose={() => snackBar.setShow(false)}
         >
           <SnackbarContent message={snackBar.message} />
