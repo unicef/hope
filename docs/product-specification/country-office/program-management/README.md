@@ -53,7 +53,7 @@ This user has the ability to create / edit / remove and finalize Programmes.
 
 ## Notifications
 
-See [**Programme Notications**](../../../technical-specification/snackbar-notifications.md#programme-management)\*\*\*\*
+See [**Programme Notications**](../../snackbar-notifications.md#programme-management)\*\*\*\*
 
 ## Technical Notes
 

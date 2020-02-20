@@ -9,7 +9,6 @@
   * [Technical glossary](introduction/glossary-terminology/technical.md)
   * [CashAssist glossary](introduction/glossary-terminology/cashassist.md)
   * [Kobo glossary](introduction/glossary-terminology/kobo-glossary.md)
-* [FAQ](introduction/faq.md)
 * [Team](introduction/team/README.md)
   * [Project Team RACI](introduction/team/project-team-raci.md)
 * [Events](introduction/events.md)
@@ -48,6 +47,8 @@
 * [External Integrations](product-specification/external-integrations/README.md)
   * [CashAssist](product-specification/external-integrations/cashassist.md)
   * [Kobo](product-specification/external-integrations/kobo.md)
+* [Input Validation Rules](product-specification/input-validation-rules.md)
+* [Snackbar Notifications](product-specification/snackbar-notifications.md)
 
 ## Design Specification
 
@@ -70,6 +71,7 @@
 * [Development Setup / Process](technical-specification/development-setup/README.md)
   * [HCT-MIS: Testing Strategy](technical-specification/development-setup/testing-strategy.md)
   * [UNHCR QA/Testing](technical-specification/development-setup/unhcr-qa-testing.md)
+  * [Coding Guidelines](technical-specification/development-setup/coding-guidelines.md)
 * [Data Model](technical-specification/data-model.md)
 * [CashAssist Integration](technical-specification/cashassist-integration/README.md)
   * [Cash Assist](technical-specification/cashassist-integration/cash-assist.md)
@@ -79,9 +81,6 @@
 * [Kobo Integration](technical-specification/kobo-integration/README.md)
   * [Kobo hosting](technical-specification/kobo-integration/kobo-hosting.md)
   * [Open issues](technical-specification/kobo-integration/open-issues.md)
-* [Coding Guidelines](technical-specification/coding-guidelines.md)
-* [Input Validation Rules](technical-specification/input-validation-rules.md)
-* [Snackbar Notifications](technical-specification/snackbar-notifications.md)
 
 ## Project Management
 
