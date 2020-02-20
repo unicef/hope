@@ -148,7 +148,7 @@ export function ProgramCard({
               <Grid className={classes.gridElement} item xs={6}>
                 <LabelizedField
                   label='no. of households'
-                  value={program.totalNumberOfHouseholds}
+                  value={program.totalNumberOfHouseholds || 0}
                 />
               </Grid>
 

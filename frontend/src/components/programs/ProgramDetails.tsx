@@ -143,7 +143,7 @@ export function ProgramDetails({
         <NumberOfHouseHolds>
           <LabelizedField label='Total Number of Households'>
             <NumberOfHouseHoldsValue>
-              {program.totalNumberOfHouseholds}
+              {program.totalNumberOfHouseholds || 0}
             </NumberOfHouseHoldsValue>
           </LabelizedField>
         </NumberOfHouseHolds>
