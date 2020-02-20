@@ -1,10 +1,12 @@
-# Via Excel import
+# Excel Import
 
 **Feature details:** [https://unicef.visualstudio.com/ICTD-HCT-MIS/\_boards/board/t/Software%20Engineering/Features/?workitem=50070](https://unicef.visualstudio.com/ICTD-HCT-MIS/_boards/board/t/Software%20Engineering/Features/?workitem=50070)
 
-### Motivation
+## Motivation
 
 Many times data for households and individuals is obtained via flat or CSV or excel files.
+
+## **Functional Specifications**
 
 ### Import template
 
@@ -16,10 +18,41 @@ Within each tab there will be set of columns, one set for core fields and one fo
 
 Additionally household tab will have a "**unique\_id**" as its first column. This will then be referenced in the individuals tab as a "household\_unique\_id" reference since individuals being imported have to belong to a \(valid\) household always.
 
-### Import process
+\*\*\*\*[**Registration Data Import XLS Template**](https://docs.google.com/spreadsheets/d/1uNXQmOJd7eZC8Q-4IJ0iYGpvOjvfjRIe43eIN6dkFDg/edit?usp=sharing)\*\*\*\*
 
-Modal where user uploads...
+
+
+\*\*\*\*
+
+### **Import Process**
+
+When selecting `Excel` as the file type for information to be imported from, an Upload File field will be made present, allowing a user to select a file from their local drive to be ingested into the HCT-MIS staging database.
+
+Before being able to complete the import process, the following criteria must be met:
+
+* File Data must comply with HCT-MIS data [import template](via-excel-import.md#import-template).
+* Import batch must be named.
+
+The following options are also available to the user during File Import:
+
+* \(Optional\) Tags may be applied to the file for future referencing.
+* \(Optional\) The ability to select an existing Programme within the HCT-MIS system for this this file should be associated with.
+
+Once a file is selected to be imported, a load screen will be presented where the `Upload File` message once was.
+
+During this time, the selected file will be analyzed for any potential issues and will display the following details for the user's convenience:
+
+* **\[\#\] Households** Available to Import
+* **\[\#\] Individuals** Available to Import
+* **Registration Start Date** - Earliest Registered Date recorded
+* **Registration End Date** - Last Registered Date recorded
+
+Furthermore, for the user's convenience, and to ensure consistency in data is being met, the users will have the ability to download the approved data [import template](via-excel-import.md#import-template) by clicking a button on the bottom right of the modal.
+
+
 
 ### Acceptance Criteria / Validation
 
-* [ ] 
+* [ ] File import data must match the format of the approved Import Template.
+* [ ] The system must allow file types to include XLSx
+
