@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { useHistory } from 'react-router-dom';
 import {
   Button,
   Dialog,
@@ -43,6 +44,7 @@ interface ActivateProgramProps {
 export function ActivateProgram({
   program,
 }: ActivateProgramProps): React.ReactElement {
+  const history = useHistory();
   const [open, setOpen] = useState(false);
   const businessArea = useBusinessArea();
   const [mutate] = useUpdateProgramMutation({
@@ -67,7 +69,7 @@ export function ActivateProgram({
     },
   });
   const activateProgram = async (): Promise<void> => {
-    await mutate({
+    const response = await mutate({
       variables: {
         programData: {
           id: program.id,
@@ -75,6 +77,12 @@ export function ActivateProgram({
         },
       },
     });
+    if (!response.errors && response.data.updateProgram) {
+      history.replace({
+        pathname: `/${businessArea}/programs/${response.data.updateProgram.program.id}`,
+        state: { showSnackbar: true, message: 'Programme activated.' },
+      });
+    }
     setOpen(false);
   };
   return (

@@ -1,23 +1,22 @@
 import { useState, useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
-
-//TODO:
-// - add constant with all messages
+import { useLocation, useHistory } from 'react-router-dom';
 
 export function useSnackbarHelper() {
   const history = useHistory();
+  const location = useLocation();
   const [show, setShow] = useState(
-    history.location.state ? history.location.state.showSnackbar : false,
+    location.state ? location.state.showSnackbar : false,
   );
-  const message = history.location.state ? history.location.state.message : '';
-
+  const message = location.state ? location.state.message : '';
   useEffect(() => {
-    if (history.location.state && history.location.state.showSnackbar) {
-        const state = { ...history.location.state };
-        delete state.showSnackbar;
-        history.replace({ ...history.location, state });
+    if (location.state && location.state.showSnackbar) {
+      setShow(true);
+      history.replace({
+        ...location,
+        state: { ...location.state, showSnackbar: false },
+      });
     }
-  })
+  }, [location, history]);
 
   return {
     show,
