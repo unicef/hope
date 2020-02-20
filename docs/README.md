@@ -1,6 +1,6 @@
 # UNICEF HCT MIS
 
-{% page-ref page="technical-specification/development-setup/" %}
+#### [Development environment setup instructions](technical-specification/development-setup/)
 
 ## Overview
 
