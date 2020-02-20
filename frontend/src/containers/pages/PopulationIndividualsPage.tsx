@@ -18,26 +18,26 @@ export function PopulationIndividualsPage(): React.ReactElement {
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
-      title: 'Individuals',
+      title: 'Population',
       to: `/${businessArea}/`,
     },
   ];
 
-  const handleMinAgeFilter = (event): void => {
-    setAgeFilter({ ...ageFilter, min: event.target.value });
+  const handleMinAgeFilter = (value: number): void => {
+    setAgeFilter({ ...ageFilter, min: value });
   };
-  const handleMaxAgeFilter = (event): void => {
-    setAgeFilter({ ...ageFilter, max: event.target.value });
+  const handleMaxAgeFilter = (value: number): void => {
+    setAgeFilter({ ...ageFilter, max: value });
   };
-  const handleTextFilter = (event): string => {
-    return event.target.value;
+  const handleTextFilter = (value: string): string => {
+    return value;
   };
-  const handleSexFilter = (event): string => {
-    return event.target.value;
+  const handleSexFilter = (value: string): string => {
+    return value;
   };
   return (
     <>
-      <PageHeader title='Individuals' />
+      <PageHeader title='Individuals' breadCrumbs={breadCrumbsItems} />
       <IndividualsFilter
         individualSexFilter={handleSexFilter}
         individualMaxAgeFilter={handleMaxAgeFilter}
