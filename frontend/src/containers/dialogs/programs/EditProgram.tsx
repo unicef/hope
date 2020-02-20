@@ -2,7 +2,12 @@ import React, { useState } from 'react';
 import moment from 'moment';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import { Button, DialogActions } from '@material-ui/core';
+import {
+  Button,
+  DialogActions,
+  Snackbar,
+  SnackbarContent,
+} from '@material-ui/core';
 import EditIcon from '@material-ui/icons/EditRounded';
 import {
   ProgramNode,
@@ -11,6 +16,7 @@ import {
 import { ProgramForm } from '../../forms/ProgramForm';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { PROGRAM_QUERY } from '../../../apollo/queries/Program';
+import { useSnackbarHelper } from '../../../hooks/useBreadcrumbHelper';
 
 const DialogFooter = styled.div`
   padding: 12px 16px;
@@ -26,6 +32,7 @@ interface EditProgramProps {
 export function EditProgram({ program }: EditProgramProps): React.ReactElement {
   const history = useHistory();
   const [open, setOpen] = useState(false);
+  const snackBar = useSnackbarHelper();
   const [mutate] = useUpdateProgramMutation({
     update(cache, { data: { updateProgram } }) {
       cache.writeQuery({
@@ -55,8 +62,13 @@ export function EditProgram({ program }: EditProgramProps): React.ReactElement {
         pathname: `/${businessArea}/programs/${response.data.updateProgram.program.id}`,
         state: { showSnackbar: true, message: 'Programme edited.' },
       });
+      setOpen(false);
+    } else {
+      history.replace({
+        pathname: history.location.pathname,
+        state: {showSnackbar: true, message: 'Programme edit action failed.'}
+      })
     }
-    setOpen(false);
   };
 
   const renderSubmit = (submit): React.ReactElement => {
@@ -95,6 +107,15 @@ export function EditProgram({ program }: EditProgramProps): React.ReactElement {
         onClose={() => setOpen(false)}
         title='Edit Programme Details'
       />
+      {snackBar.show && (
+        <Snackbar
+          open={snackBar.show}
+          autoHideDuration={2000}
+          onClose={() => snackBar.setShow(false)}
+        >
+          <SnackbarContent message={snackBar.message} />
+        </Snackbar>
+      )}
     </span>
   );
 }
