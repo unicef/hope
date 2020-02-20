@@ -73,7 +73,7 @@ Finally, users will have the ability to sync approved data to the Golden Records
 
 A snackbar message will then appear for approx. 5 seconds confirming whether or not the import was successful or not. 
 
-For further details on notifications please see [**documentation here**](../../../technical-specification/snackbar-notifications.md#registration-data-import).
+For further details on notifications please see [**documentation here**](../../snackbar-notifications.md#registration-data-import).
 
 _\*\*\*\*_
 
