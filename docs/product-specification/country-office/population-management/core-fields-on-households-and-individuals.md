@@ -29,8 +29,8 @@ Flex fields can change over time and managed [differently](../../hq/uploading-an
 * birthdate - date \(**required**\)
 * age - calculated
 * estimated birth date - select one
-* work status - select on
-* disability - select on
+* work status - select one
+* disability - select one
 
 ### Open issues
 
