@@ -2,6 +2,7 @@ import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
 import React from 'react';
 import styled from 'styled-components';
 import { Button } from '@material-ui/core';
+import { ReactivateProgram } from '../../dialogs/programs/ReactivateProgram';
 import { ProgramNode } from '../../../__generated__/graphql';
 
 const ButtonContainer = styled.span`
@@ -16,6 +17,9 @@ export function FinishedProgramDetailsPageHeaderButtons({
 }: FinishedProgramDetailsPageHeaderPropTypes): React.ReactElement {
   return (
     <div>
+      <ButtonContainer>
+        <ReactivateProgram program={program}/>
+      </ButtonContainer>
       <ButtonContainer>
         <Button
           variant='contained'
