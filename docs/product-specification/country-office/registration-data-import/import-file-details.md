@@ -43,6 +43,8 @@ The import Preview card is a table list view of all the data separated by two ta
 
 #### Households
 
+![](../../../.gitbook/assets/image-2020-02-18-at-1.47.33-pm.png)
+
 Within the **Household** tab, HCT users will be able to view the following details of the file that was imported:
 
 * **Source ID**
@@ -54,6 +56,8 @@ Within the **Household** tab, HCT users will be able to view the following detai
 \*\*\*\*
 
 #### **Individuals**
+
+![](../../../.gitbook/assets/image-2020-02-18-at-1.46.57-pm.png)
 
 Within the **Individuals** tab, HCT users will be able to view the following details of the file that was imported:
 
