@@ -1,4 +1,9 @@
 from django.conf import settings
+from django.core.validators import (
+    validate_image_file_extension,
+    MinLengthValidator,
+    MaxLengthValidator,
+)
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
@@ -19,7 +24,7 @@ class Household(TimeStampedUUIDModel):
     )
 
     household_ca_id = models.CharField(max_length=255)
-    consent = ImageField()
+    consent = ImageField(validators=[validate_image_file_extension])
     residence_status = models.CharField(
         max_length=255, choices=RESIDENCE_STATUS_CHOICE,
     )
@@ -69,9 +74,18 @@ class Individual(TimeStampedUUIDModel):
         ("NATIONAL_PASSPORT", _("National Passport")),
     )
     individual_ca_id = models.CharField(max_length=255)
-    full_name = models.CharField(max_length=255)
-    first_name = models.CharField(max_length=255)
-    last_name = models.CharField(max_length=255)
+    full_name = models.CharField(
+        max_length=255,
+        validators=[MinLengthValidator(3), MaxLengthValidator(255)],
+    )
+    first_name = models.CharField(
+        max_length=125,
+        validators=[MinLengthValidator(3), MaxLengthValidator(125)],
+    )
+    last_name = models.CharField(
+        max_length=125,
+        validators=[MinLengthValidator(3), MaxLengthValidator(125)],
+    )
     sex = models.CharField(max_length=255, choices=SEX_CHOICE,)
     dob = models.DateField(blank=True, null=True)
     estimated_dob = models.DateField(blank=True, null=True)

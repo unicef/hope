@@ -1,6 +1,11 @@
-# Registration Data Import
+---
+description: >-
+  HCT user will be able to import Registered Beneficiary data in a variety of
+  ways. In this section we will break down the process for getting that
+  information from the field into the HCT-MIS system and
+---
 
-**Feature:** [https://unicef.visualstudio.com/ICTD-HCT-MIS/\_boards/board/t/Software%20Engineering/Features/?workitem=50069](https://unicef.visualstudio.com/ICTD-HCT-MIS/_boards/board/t/Software%20Engineering/Features/?workitem=50069)
+# Registration Data Import
 
 ## Motivation
 
@@ -19,34 +24,13 @@ This import goes into a 'staging area' and not usable for targeting right away.
 
 The states of an import:
 
-* Pending
-* In Review
-* Approved
+* **In Review**
+* **Approved**
+* **Merged**
 
-## Data Export
 
-The system will allow the user to download a CSV file of a particular import, minus any PII.
 
-## Cleaning / Deduplication
-
-{% hint style="danger" %}
-Feature Details TBD
-{% endhint %}
-
-~~~~
-
-~~Cleaning data is basically editing the data imported.~~
-
-~~From a system perspective cleaning is comparing, reporting, and accepting new data to data that is stored in both the staging and golden record of the HCT-MIS System.~~
-
-~~The system will potentially highlight any issues with the data such as \(_these are ideas_\):~~
-
-* ~~Blank fields such as name or address.~~
-* ~~Deviation in numerical values from standard deviation in an import. Not a high priority.~~
-
-## Flagging
-
-The user will also be able to mark an imported household as being non-compliant. Hence it would not be synced with HCT MIS core population dataset.
+**See more details on how HCT-MIS system Handles the** [**Import Process**](detail-screen-approval-process.md)**.**
 
 
 
