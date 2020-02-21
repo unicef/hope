@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { useHistory } from 'react-router-dom';
 import {
   Button,
   Dialog,
@@ -8,8 +7,6 @@ import {
   DialogContent,
   DialogTitle,
   Typography,
-  Snackbar,
-  SnackbarContent,
 } from '@material-ui/core';
 import {
   AllProgramsQuery,
@@ -19,9 +16,8 @@ import {
 } from '../../../__generated__/graphql';
 import { PROGRAM_QUERY } from '../../../apollo/queries/Program';
 import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/AllPrograms';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { programCompare } from '../../../utils/utils';
-import { useSnackbarHelper } from '../../../hooks/useBreadcrumbHelper';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -40,16 +36,14 @@ const DialogDescription = styled.div`
   color: rgba(0, 0, 0, 0.54);
 `;
 
-interface FinishProgramProps {
+interface ReactivateProgramProps {
   program: ProgramNode;
 }
 
-export function FinishProgram({
+export function ReactivateProgram({
   program,
-}: FinishProgramProps): React.ReactElement {
-  const history = useHistory();
+}: ReactivateProgramProps): React.ReactElement {
   const [open, setOpen] = useState(false);
-  const snackBar = useSnackbarHelper();
   const businessArea = useBusinessArea();
   const [mutate] = useUpdateProgramMutation({
     update(cache, { data: { updateProgram } }) {
@@ -72,32 +66,21 @@ export function FinishProgram({
       });
     },
   });
-  const finishProgram = async (): Promise<void> => {
-    const response = await mutate({
+  const reactivateProgram = async (): Promise<void> => {
+    await mutate({
       variables: {
         programData: {
           id: program.id,
-          status: ProgramStatus.Finished,
+          status: ProgramStatus.Active,
         },
       },
     });
-    if (!response.errors && response.data.updateProgram) {
-      history.replace({
-        pathname: `/${businessArea}/programs/${response.data.updateProgram.program.id}`,
-        state: { showSnackbar: true, message: 'Programme finished.' },
-      });
-      setOpen(false);
-    } else {
-      history.replace({
-        pathname: history.location.pathname,
-        state: {showSnackbar: true, message: 'Programme finish action failed.'}
-      })
-    }
+    setOpen(false);
   };
   return (
     <span>
-      <Button color='primary' onClick={() => setOpen(true)}>
-        FINISH PROGRAM
+      <Button variant='outlined' color='primary' onClick={() => setOpen(true)}>
+        Reactivate
       </Button>
       <Dialog
         open={open}
@@ -107,40 +90,28 @@ export function FinishProgram({
       >
         <DialogTitleWrapper>
           <DialogTitle id='scroll-dialog-title'>
-            <Typography variant='h6'>Finish Programme</Typography>
+            <Typography variant='h6'>Reactivate Programme</Typography>
           </DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogDescription>
-            Are you sure you want to finish this Programme and push data to
-            CashAssist?
+            Are you sure you want to reactivate this Programme?
           </DialogDescription>
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button onClick={() => setOpen(false)}>
-              CANCEL
-            </Button>
+            <Button onClick={() => setOpen(false)}>CANCEL</Button>
             <Button
               type='submit'
               color='primary'
               variant='contained'
-              onClick={finishProgram}
+              onClick={reactivateProgram}
             >
-              FINISH
+              REACTIVATE
             </Button>
           </DialogActions>
         </DialogFooter>
       </Dialog>
-      {snackBar.show && (
-        <Snackbar
-          open={snackBar.show}
-          autoHideDuration={5000}
-          onClose={() => snackBar.setShow(false)}
-        >
-          <SnackbarContent message={snackBar.message} />
-        </Snackbar>
-      )}
     </span>
   );
 }
