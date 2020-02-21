@@ -51,6 +51,10 @@ This user has the ability to create / edit / remove and finalize Programmes.
 
 
 
+## Notifications
+
+See [**Programme Notications**](../../snackbar-notifications.md#programme-management)\*\*\*\*
+
 ## Technical Notes
 
 * Make sure some tabs are hidden based on permissions

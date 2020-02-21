@@ -18,6 +18,10 @@ class ProgramFilter(FilterSet):
 
 
 class ProgramNode(DjangoObjectType):
+    budget = graphene.Decimal()
+    total_entitled_quantity = graphene.Decimal()
+    total_delivered_quantity = graphene.Decimal()
+    total_undelivered_quantity = graphene.Decimal()
     total_number_of_households = graphene.Int()
     history = ConnectionField(LogEntryObjectConnection)
 
