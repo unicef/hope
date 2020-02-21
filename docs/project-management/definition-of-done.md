@@ -5,7 +5,7 @@ Here is our definition of done for features / stories:
 * Acceptance criteria is met
 * Documentation does exist
 * Tests do exist
-  * \*\*\*\*[**Unit Tests**](../technical-specification/development-setup/testing-strategy.md#unit-testing) for backend
+  * unit tests for backend
   * functional / e2e tests where appropriate
   * any other
 * All tests must pass
