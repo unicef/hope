@@ -10,13 +10,13 @@ Consolidation layer and reporting platform with non-personally identifiable info
 
 Must display current global coverage of HCT in all countries using HCT-MIS
 
-## Requirements:
+#### Notes: 
 
-### **HQ Dashboard Indicators and Feedback**
+* BR-1A
+  * To include reporting on total Households.
+* BR-2
 
-{% embed url="https://docs.google.com/document/d/12ET4\_gQZmh1QAMz5HnOayW9MjG6g6asdVFuH4rI2A2g/edit?usp=sharing" %}
-
-
+To have dashboard views: ie: Grievances, Payments, etc.
 
 
 
