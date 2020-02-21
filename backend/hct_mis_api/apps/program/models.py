@@ -9,6 +9,7 @@ from django.core.validators import (
 )
 from django.db import models
 from django.db.models import Sum
+from django.db.models.functions import Coalesce
 from django.utils.translation import ugettext_lazy as _
 
 from utils.models import TimeStampedUUIDModel
@@ -103,7 +104,7 @@ class Program(TimeStampedUUIDModel):
     @property
     def total_number_of_households(self):
         return self.cash_plans.aggregate(
-            households=Sum("number_of_households"),
+            households=Coalesce(Sum("number_of_households"), 0),
         )["households"]
 
 
