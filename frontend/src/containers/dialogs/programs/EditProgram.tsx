@@ -2,7 +2,12 @@ import React, { useState } from 'react';
 import moment from 'moment';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import { Button, DialogActions } from '@material-ui/core';
+import {
+  Button,
+  DialogActions,
+  Snackbar,
+  SnackbarContent,
+} from '@material-ui/core';
 import EditIcon from '@material-ui/icons/EditRounded';
 import {
   ProgramNode,
@@ -11,6 +16,8 @@ import {
 import { ProgramForm } from '../../forms/ProgramForm';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { PROGRAM_QUERY } from '../../../apollo/queries/Program';
+import { useSnackbarHelper } from '../../../hooks/useBreadcrumbHelper';
+import { ALL_LOG_ENTRIES_QUERY } from '../../../apollo/queries/AllLogEntries';
 
 const DialogFooter = styled.div`
   padding: 12px 16px;
@@ -26,7 +33,17 @@ interface EditProgramProps {
 export function EditProgram({ program }: EditProgramProps): React.ReactElement {
   const history = useHistory();
   const [open, setOpen] = useState(false);
+  const snackBar = useSnackbarHelper();
   const [mutate] = useUpdateProgramMutation({
+    refetchQueries: [
+      {
+        query: ALL_LOG_ENTRIES_QUERY,
+        variables: {
+          objectId: program.id,
+          count: 5,
+        },
+      },
+    ],
     update(cache, { data: { updateProgram } }) {
       cache.writeQuery({
         query: PROGRAM_QUERY,
@@ -45,26 +62,31 @@ export function EditProgram({ program }: EditProgramProps): React.ReactElement {
         programData: {
           id: program.id,
           ...values,
-          startDate: moment(values.startDate).toISOString(),
-          endDate: moment(values.endDate).toISOString(),
+          startDate: moment(values.startDate).format('YYYY-MM-DD'),
+          endDate: moment(values.endDate).format('YYYY-MM-DD'),
+          budget: parseFloat(values.budget).toFixed(2),
         },
       },
     });
     if (!response.errors && response.data.updateProgram) {
-      history.push(
-        `/${businessArea}/programs/${response.data.updateProgram.program.id}`,
-      );
+      history.replace({
+        pathname: `/${businessArea}/programs/${response.data.updateProgram.program.id}`,
+        state: { showSnackbar: true, message: 'Programme edited.' },
+      });
+      setOpen(false);
+    } else {
+      history.replace({
+        pathname: history.location.pathname,
+        state: {showSnackbar: true, message: 'Programme edit action failed.'}
+      })
     }
-    setOpen(false);
   };
 
   const renderSubmit = (submit): React.ReactElement => {
     return (
       <DialogFooter>
         <DialogActions>
-          <Button onClick={() => setOpen(false)} color='primary'>
-            Cancel
-          </Button>
+          <Button onClick={() => setOpen(false)}>Cancel</Button>
           <Button
             onClick={submit}
             type='submit'
@@ -96,6 +118,15 @@ export function EditProgram({ program }: EditProgramProps): React.ReactElement {
         onClose={() => setOpen(false)}
         title='Edit Programme Details'
       />
+      {snackBar.show && (
+        <Snackbar
+          open={snackBar.show}
+          autoHideDuration={5000}
+          onClose={() => snackBar.setShow(false)}
+        >
+          <SnackbarContent message={snackBar.message} />
+        </Snackbar>
+      )}
     </span>
   );
 }

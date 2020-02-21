@@ -2,9 +2,14 @@ from decimal import Decimal
 
 from auditlog.models import AuditlogHistoryField
 from django.conf import settings
-from django.core.validators import MinValueValidator
+from django.core.validators import (
+    MinValueValidator,
+    MinLengthValidator,
+    MaxLengthValidator,
+)
 from django.db import models
 from django.db.models import Sum
+from django.db.models.functions import Coalesce
 from django.utils.translation import ugettext_lazy as _
 
 from utils.models import TimeStampedUUIDModel
@@ -60,11 +65,17 @@ class Program(TimeStampedUUIDModel):
         (NO_INTEGRATION, _("No Integration")),
     )
 
-    name = models.CharField(max_length=255)
-    status = models.CharField(max_length=255, choices=STATUS_CHOICE,)
-    start_date = models.DateTimeField()
-    end_date = models.DateTimeField()
-    description = models.CharField(max_length=255)
+    name = models.CharField(
+        max_length=255,
+        validators=[MinLengthValidator(3), MaxLengthValidator(255)],
+    )
+    status = models.CharField(max_length=10, choices=STATUS_CHOICE,)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    description = models.CharField(
+        max_length=255,
+        validators=[MinLengthValidator(3), MaxLengthValidator(255)],
+    )
     program_ca_id = models.CharField(max_length=255)
     locations = models.ManyToManyField(
         "core.Location", related_name="programs", blank=True,
@@ -74,8 +85,8 @@ class Program(TimeStampedUUIDModel):
     )
     budget = models.DecimalField(
         decimal_places=2,
-        max_digits=12,
-        validators=[MinValueValidator(Decimal("0.01"))],
+        max_digits=11,
+        validators=[MinValueValidator(Decimal("0.00"))],
     )
     frequency_of_payments = models.CharField(
         max_length=50, choices=FREQUENCY_OF_PAYMENTS_CHOICE,
@@ -84,13 +95,16 @@ class Program(TimeStampedUUIDModel):
     scope = models.CharField(max_length=50, choices=SCOPE_CHOICE,)
     cash_plus = models.BooleanField()
     population_goal = models.PositiveIntegerField()
-    administrative_areas_of_implementation = models.CharField(max_length=255)
+    administrative_areas_of_implementation = models.CharField(
+        max_length=255,
+        validators=[MinLengthValidator(3), MaxLengthValidator(255)],
+    )
     history = AuditlogHistoryField(pk_indexable=False)
 
     @property
     def total_number_of_households(self):
         return self.cash_plans.aggregate(
-            households=Sum("number_of_households"),
+            households=Coalesce(Sum("number_of_households"), 0),
         )["households"]
 
 
@@ -108,7 +122,10 @@ class CashPlan(TimeStampedUUIDModel):
     program = models.ForeignKey(
         "Program", on_delete=models.CASCADE, related_name="cash_plans",
     )
-    name = models.CharField(max_length=255)
+    name = models.CharField(
+        max_length=255,
+        validators=[MinLengthValidator(3), MaxLengthValidator(255)],
+    )
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
     disbursement_date = models.DateTimeField()
@@ -152,5 +169,6 @@ class CashPlan(TimeStampedUUIDModel):
     assistance_through = models.CharField(max_length=255)
     fc_id = models.CharField(max_length=255)
     dp_id = models.CharField(max_length=255)
+
 
 auditlog.register(Program)

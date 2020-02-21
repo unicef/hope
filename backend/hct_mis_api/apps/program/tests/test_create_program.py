@@ -35,8 +35,8 @@ class TestCreateProgram(APITestCase):
         self.program_data = {
             "programData": {
                 "name": "Test",
-                "startDate": "2019-12-20T15:00:00",
-                "endDate": "2021-12-20T15:00:00",
+                "startDate": "2019-12-20",
+                "endDate": "2021-12-20",
                 "programCaId": "5e0a38c6-7bcb-4b4a-b8e0-311e8c694ae3",
                 "budget": 20000000,
                 "description": "my description of program",
