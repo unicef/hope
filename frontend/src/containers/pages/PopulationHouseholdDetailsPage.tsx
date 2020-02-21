@@ -82,22 +82,22 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
           <Grid container spacing={6}>
             <Grid item xs={4}>
               <LabelizedField label='Source'>
-                <div> </div>
+                <div>-</div>
               </LabelizedField>
             </Grid>
             <Grid item xs={4}>
               <LabelizedField label='Intake group name'>
-                <div> </div>
+                <div>-</div>
               </LabelizedField>
             </Grid>
             <Grid item xs={4}>
               <LabelizedField label='Registered Date'>
-                <div> </div>
+                <div>-</div>
               </LabelizedField>
             </Grid>
             <Grid item xs={4}>
               <LabelizedField label='Number of Rooms'>
-                <div> </div>
+                <div>-</div>
               </LabelizedField>
             </Grid>
           </Grid>
@@ -106,22 +106,22 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
           <Grid container spacing={6}>
             <Grid item xs={4}>
               <LabelizedField label='Start time'>
-                <div> </div>
+                <div>-</div>
               </LabelizedField>
             </Grid>
             <Grid item xs={4}>
               <LabelizedField label='End time'>
-                <div> </div>
+                <div>-</div>
               </LabelizedField>
             </Grid>
             <Grid item xs={4}>
               <LabelizedField label='Device ID'>
-                <div> </div>
+                <div>-</div>
               </LabelizedField>
             </Grid>
             <Grid item xs={4}>
               <LabelizedField label='User name'>
-                <div> </div>
+                <div>-</div>
               </LabelizedField>
             </Grid>
           </Grid>
