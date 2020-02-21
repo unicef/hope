@@ -40,8 +40,8 @@ export const menuItems = [
       },
       {
         name: 'Individuals',
-        href: '/#',
-        selectedRegexp: /^\/test.*$/,
+        href: '/population/individuals',
+        selectedRegexp: /^\/population\/individuals.*$/,
         icon: <FaceIcon />,
       },
     ],
