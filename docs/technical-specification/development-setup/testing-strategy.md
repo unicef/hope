@@ -4,7 +4,7 @@
 
 Tivix insures quality assurance throughout the SDLC by maintaining clear documentation through the project requirements, down to the code level.
 
-## Quality Assurance
+### Quality Assurance
 
 Tivix proposes an approach to QA & Unit Testing similar to what has been done in the PRP & UNPP projects. _**See diagram below:**_
 
