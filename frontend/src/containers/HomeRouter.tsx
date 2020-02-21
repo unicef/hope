@@ -13,6 +13,7 @@ import { ProgramDetailsPage } from './pages/ProgramDetailsPage';
 import { CashPlanDetailsPage } from './pages/CashPlanDetailsPage';
 import { PaymentRecordDetailsPage } from './pages/PaymentRecordDetailsPage';
 import { PopulationHouseholdPage } from './pages/PopulationHouseholdPage';
+import { PopulationHouseholdDetailsPage } from './pages/PopulationHouseholdDetailsPage';
 import { PopulationIndividualsPage } from './pages/PopulationIndividualsPage';
 
 const Root = styled.div`
@@ -54,6 +55,9 @@ export function HomeRouter(): React.ReactElement {
       <MainContent>
         <div className={classes.appBarSpacer} />
         <Switch>
+          <Route path='/:businessArea/population/household/:id'>
+            <PopulationHouseholdDetailsPage />
+          </Route>
           <Route path='/:businessArea/cashplans/:id'>
             <CashPlanDetailsPage />
           </Route>
