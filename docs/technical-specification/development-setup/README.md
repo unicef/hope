@@ -8,7 +8,9 @@
 
 ```bash
 docker-compose build
+docker-compose up
 docker-compose exec backend bash
+
 # in docker container
 ./manage.py reset_db
 ./manage.py migrate
@@ -17,7 +19,9 @@ docker-compose exec backend bash
 ./manage.py collectstatic 
 ```
 
-Access the frontend in your browser at `localhost:8082/login` . Backend can be accessed at `/api/` i.e. `localhost:8082/api/admin/` 
+Access the frontend in your browser at [`localhost:8082/login`](http://localhost:8082/login) . 
+
+Backend can be accessed at `/api/` i.e. [`localhost:8082/api/admin/`](http://localhost:8082/api/admin/) 
 
 
 

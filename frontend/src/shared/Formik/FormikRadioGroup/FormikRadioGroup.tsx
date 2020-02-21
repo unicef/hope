@@ -6,6 +6,25 @@ import {
   RadioGroup,
   Radio,
 } from '@material-ui/core';
+import styled from 'styled-components';
+
+const FormLabelContainer = styled.div`
+  margin-bottom: ${({ theme }) => theme.spacing(3)}px;
+
+  .MuiFormLabel-root {
+    color: ${({ theme }) => theme.palette.text.primary};
+  }
+  .MuiFormLabel-root.Mui-focused {
+    color: ${({ theme }) => theme.palette.text.primary};
+  }
+  .MuiFormLabel-root:focus {
+    color: ${({ theme }) => theme.palette.text.primary};
+  }
+`;
+const StyledFormControl = styled.div`
+  margin-top: ${({ theme }) => theme.spacing(4)}px;
+  margin-bottom: ${({ theme }) => theme.spacing(2)}px;
+`;
 
 export const FormikRadioGroup = ({
   field,
@@ -14,8 +33,10 @@ export const FormikRadioGroup = ({
 }): React.ReactElement => {
   return (
     <>
-      <FormControl {...otherProps} component='fieldset'>
-        <FormLabel component='legend'>{otherProps.label}</FormLabel>
+      <StyledFormControl {...otherProps} component='fieldset'>
+        <FormLabelContainer>
+          <FormLabel component='legend'>{otherProps.label}</FormLabel>
+        </FormLabelContainer>
         <RadioGroup
           {...field}
           {...otherProps}
@@ -32,7 +53,7 @@ export const FormikRadioGroup = ({
             />
           ))}
         </RadioGroup>
-      </FormControl>
+      </StyledFormControl>
     </>
   );
 };

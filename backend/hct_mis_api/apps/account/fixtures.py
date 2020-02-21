@@ -18,5 +18,5 @@ class UserFactory(factory.DjangoModelFactory):
     )
 
     username = factory.LazyAttribute(
-        lambda o: f"{o.first_name}{o.last_name}{time.time()}"
+        lambda o: f"{o.first_name}{o.last_name}"
     )
