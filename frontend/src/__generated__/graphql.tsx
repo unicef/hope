@@ -1677,6 +1677,40 @@ export type AllHouseholdsQuery = (
   )> }
 );
 
+export type AllIndividualsQueryVariables = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type AllIndividualsQuery = (
+  { __typename?: 'Query' }
+  & { allIndividuals: Maybe<(
+    { __typename?: 'IndividualNodeConnection' }
+    & Pick<IndividualNodeConnection, 'totalCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'startCursor' | 'endCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'IndividualNodeEdge' }
+      & { node: Maybe<(
+        { __typename?: 'IndividualNode' }
+        & Pick<IndividualNode, 'id' | 'createdAt' | 'updatedAt' | 'individualCaId' | 'fullName' | 'sex' | 'dob' | 'nationality' | 'martialStatus' | 'phoneNumber' | 'identificationType' | 'identificationNumber'>
+        & { household: (
+          { __typename?: 'HouseholdNode' }
+          & Pick<HouseholdNode, 'householdCaId'>
+          & { location: (
+            { __typename?: 'LocationNode' }
+            & Pick<LocationNode, 'id' | 'title'>
+          ) }
+        ) }
+      )> }
+    )>> }
+  )> }
+);
+
 export type AllLogEntriesQueryVariables = {
   objectId: Scalars['String'],
   after?: Maybe<Scalars['String']>,
@@ -2320,6 +2354,86 @@ export function useAllHouseholdsLazyQuery(baseOptions?: ApolloReactHooks.LazyQue
 export type AllHouseholdsQueryHookResult = ReturnType<typeof useAllHouseholdsQuery>;
 export type AllHouseholdsLazyQueryHookResult = ReturnType<typeof useAllHouseholdsLazyQuery>;
 export type AllHouseholdsQueryResult = ApolloReactCommon.QueryResult<AllHouseholdsQuery, AllHouseholdsQueryVariables>;
+export const AllIndividualsDocument = gql`
+    query AllIndividuals($before: String, $after: String, $first: Int, $last: Int) {
+  allIndividuals(before: $before, after: $after, first: $first, last: $last) {
+    totalCount
+    pageInfo {
+      startCursor
+      endCursor
+    }
+    edges {
+      node {
+        id
+        createdAt
+        updatedAt
+        individualCaId
+        fullName
+        sex
+        dob
+        nationality
+        martialStatus
+        phoneNumber
+        identificationType
+        identificationNumber
+        household {
+          householdCaId
+          location {
+            id
+            title
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export type AllIndividualsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllIndividualsQuery, AllIndividualsQueryVariables>, 'query'>;
+
+    export const AllIndividualsComponent = (props: AllIndividualsComponentProps) => (
+      <ApolloReactComponents.Query<AllIndividualsQuery, AllIndividualsQueryVariables> query={AllIndividualsDocument} {...props} />
+    );
+    
+export type AllIndividualsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllIndividualsQuery, AllIndividualsQueryVariables> & TChildProps;
+export function withAllIndividuals<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllIndividualsQuery,
+  AllIndividualsQueryVariables,
+  AllIndividualsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllIndividualsQuery, AllIndividualsQueryVariables, AllIndividualsProps<TChildProps>>(AllIndividualsDocument, {
+      alias: 'allIndividuals',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllIndividualsQuery__
+ *
+ * To run a query within a React component, call `useAllIndividualsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllIndividualsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllIndividualsQuery({
+ *   variables: {
+ *      before: // value for 'before'
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *   },
+ * });
+ */
+export function useAllIndividualsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllIndividualsQuery, AllIndividualsQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllIndividualsQuery, AllIndividualsQueryVariables>(AllIndividualsDocument, baseOptions);
+      }
+export function useAllIndividualsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllIndividualsQuery, AllIndividualsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllIndividualsQuery, AllIndividualsQueryVariables>(AllIndividualsDocument, baseOptions);
+        }
+export type AllIndividualsQueryHookResult = ReturnType<typeof useAllIndividualsQuery>;
+export type AllIndividualsLazyQueryHookResult = ReturnType<typeof useAllIndividualsLazyQuery>;
+export type AllIndividualsQueryResult = ApolloReactCommon.QueryResult<AllIndividualsQuery, AllIndividualsQueryVariables>;
 export const AllLogEntriesDocument = gql`
     query AllLogEntries($objectId: String!, $after: String, $before: String, $count: Int) {
   allLogEntries(after: $after, before: $before, first: $count, objectId: $objectId) {
