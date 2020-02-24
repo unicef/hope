@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@material-ui/core';
-import { _ } from 'lodash'
+import { debounce } from 'lodash';
 import { PageHeader } from '../../components/PageHeader';
 import { TargetPopulationFilters } from '../../components/TargetPopulation/TargetPopulationFilters';
 
 export function TargetPopulationPage() {
   const { t } = useTranslation();
   const [sizeFilter, setSizeFilter] = useState({
-    min: null,
-    max: null,
+    min: undefined,
+    max: undefined,
   });
   const [textFilter, setTextFilter] = useState('');
   const handleMinSizeFilter = (value: number): void => {
@@ -23,13 +23,10 @@ export function TargetPopulationPage() {
     }
   };
 
-  const handleTextFilter = (value: string): void => {
-    if (value.length > 3) {
-      setTextFilter(value);
-    } else {
-      setTextFilter('');
-    }
-  };
+  const handleTextFilter = useRef(
+    debounce((value) => setTextFilter(value), 300),
+  ).current;
+  
   return (
     <div>
       <PageHeader title={t('Target Population')}>
@@ -44,6 +41,7 @@ export function TargetPopulationPage() {
         householdMinSizeFilter={handleMinSizeFilter}
         householdTextFilter={handleTextFilter}
       />
+      <div>{textFilter}</div>
     </div>
   );
 }
