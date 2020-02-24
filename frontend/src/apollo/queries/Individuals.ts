@@ -19,6 +19,12 @@ export const INDIVIDUALS_QUERY = gql`
       identificationNumber
       household {
         id
+        address
+        location {
+          id
+          title
+          level
+        }
       }
       headingHousehold {
         id

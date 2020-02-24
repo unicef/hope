@@ -8,10 +8,6 @@ import moment from 'moment';
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px
     ${({ theme }) => theme.spacing(11)}px;
-  margin-top: 20px;
-  &:first-child {
-    margin-top: 0px;
-  }
 `;
 
 const Title = styled.div`

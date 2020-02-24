@@ -1877,7 +1877,11 @@ export type IndividualQuery = (
     & Pick<IndividualNode, 'id' | 'createdAt' | 'individualCaId' | 'fullName' | 'firstName' | 'lastName' | 'sex' | 'dob' | 'estimatedDob' | 'nationality' | 'martialStatus' | 'phoneNumber' | 'identificationType' | 'identificationNumber'>
     & { household: (
       { __typename?: 'HouseholdNode' }
-      & Pick<HouseholdNode, 'id'>
+      & Pick<HouseholdNode, 'id' | 'address'>
+      & { location: (
+        { __typename?: 'LocationNode' }
+        & Pick<LocationNode, 'id' | 'title' | 'level'>
+      ) }
     ), headingHousehold: Maybe<(
       { __typename?: 'HouseholdNode' }
       & Pick<HouseholdNode, 'id'>
@@ -2868,6 +2872,12 @@ export const IndividualDocument = gql`
     identificationNumber
     household {
       id
+      address
+      location {
+        id
+        title
+        level
+      }
     }
     headingHousehold {
       id
