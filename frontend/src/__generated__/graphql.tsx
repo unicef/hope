@@ -1865,6 +1865,34 @@ export type HouseholdQuery = (
   )> }
 );
 
+export type IndividualQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type IndividualQuery = (
+  { __typename?: 'Query' }
+  & { individual: Maybe<(
+    { __typename?: 'IndividualNode' }
+    & Pick<IndividualNode, 'id' | 'createdAt' | 'individualCaId' | 'fullName' | 'firstName' | 'lastName' | 'sex' | 'dob' | 'estimatedDob' | 'nationality' | 'martialStatus' | 'phoneNumber' | 'identificationType' | 'identificationNumber'>
+    & { household: (
+      { __typename?: 'HouseholdNode' }
+      & Pick<HouseholdNode, 'id' | 'address'>
+      & { location: (
+        { __typename?: 'LocationNode' }
+        & Pick<LocationNode, 'id' | 'title' | 'level'>
+      ) }
+    ), headingHousehold: Maybe<(
+      { __typename?: 'HouseholdNode' }
+      & Pick<HouseholdNode, 'id'>
+      & { headOfHousehold: Maybe<(
+        { __typename?: 'IndividualNode' }
+        & Pick<IndividualNode, 'id'>
+      )> }
+    )> }
+  )> }
+);
+
 export type MeQueryVariables = {};
 
 
@@ -2825,6 +2853,84 @@ export function useHouseholdLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHo
 export type HouseholdQueryHookResult = ReturnType<typeof useHouseholdQuery>;
 export type HouseholdLazyQueryHookResult = ReturnType<typeof useHouseholdLazyQuery>;
 export type HouseholdQueryResult = ApolloReactCommon.QueryResult<HouseholdQuery, HouseholdQueryVariables>;
+export const IndividualDocument = gql`
+    query Individual($id: ID!) {
+  individual(id: $id) {
+    id
+    createdAt
+    individualCaId
+    fullName
+    firstName
+    lastName
+    sex
+    dob
+    estimatedDob
+    nationality
+    martialStatus
+    phoneNumber
+    identificationType
+    identificationNumber
+    household {
+      id
+      address
+      location {
+        id
+        title
+        level
+      }
+    }
+    headingHousehold {
+      id
+      headOfHousehold {
+        id
+      }
+    }
+  }
+}
+    `;
+export type IndividualComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<IndividualQuery, IndividualQueryVariables>, 'query'> & ({ variables: IndividualQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const IndividualComponent = (props: IndividualComponentProps) => (
+      <ApolloReactComponents.Query<IndividualQuery, IndividualQueryVariables> query={IndividualDocument} {...props} />
+    );
+    
+export type IndividualProps<TChildProps = {}> = ApolloReactHoc.DataProps<IndividualQuery, IndividualQueryVariables> & TChildProps;
+export function withIndividual<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  IndividualQuery,
+  IndividualQueryVariables,
+  IndividualProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, IndividualQuery, IndividualQueryVariables, IndividualProps<TChildProps>>(IndividualDocument, {
+      alias: 'individual',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useIndividualQuery__
+ *
+ * To run a query within a React component, call `useIndividualQuery` and pass it any options that fit your needs.
+ * When your component renders, `useIndividualQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useIndividualQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useIndividualQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<IndividualQuery, IndividualQueryVariables>) {
+        return ApolloReactHooks.useQuery<IndividualQuery, IndividualQueryVariables>(IndividualDocument, baseOptions);
+      }
+export function useIndividualLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<IndividualQuery, IndividualQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<IndividualQuery, IndividualQueryVariables>(IndividualDocument, baseOptions);
+        }
+export type IndividualQueryHookResult = ReturnType<typeof useIndividualQuery>;
+export type IndividualLazyQueryHookResult = ReturnType<typeof useIndividualLazyQuery>;
+export type IndividualQueryResult = ApolloReactCommon.QueryResult<IndividualQuery, IndividualQueryVariables>;
 export const MeDocument = gql`
     query Me {
   me {
