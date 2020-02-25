@@ -4,6 +4,7 @@ import { Paper, Typography, Grid } from '@material-ui/core';
 import { LabelizedField } from '../LabelizedField';
 import { IndividualNode } from '../../__generated__/graphql';
 import moment from 'moment';
+import { getAgeFromDob } from '../../utils/utils';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px
@@ -24,7 +25,7 @@ export function IndividualsBioData({
   let age: number | null;
   const { dob } = individual;
   if (dob) {
-    age = moment().diff(moment(dob), 'years');
+    age = getAgeFromDob(dob);
   }
   return (
     <Overview>
