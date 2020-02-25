@@ -29,42 +29,42 @@ export function HouseholdVulnerabilities(): React.ReactElement {
         <Grid container spacing={6}>
           <Grid item xs={4}>
             <LabelizedField label='Living Situation'>
-              <div> </div>
+              <div>-</div>
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>
             <LabelizedField label='Construction Material'>
-              <div> </div>
+              <div>-</div>
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>
             <LabelizedField label='Shelter Quality'>
-              <div> </div>
+              <div>-</div>
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>
             <LabelizedField label='Number of Rooms'>
-              <div> </div>
+              <div>-</div>
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>
             <LabelizedField label='Total Dweller'>
-              <div> </div>
+              <div>-</div>
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>
             <LabelizedField label='Dwellers in one room'>
-              <div> </div>
+              <div>-</div>
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>
             <LabelizedField label='Total Households'>
-              <div> </div>
+              <div>-</div>
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>
             <LabelizedField label='Source of water'>
-              <div> </div>
+              <div>-</div>
             </LabelizedField>
           </Grid>
         </Grid>
