@@ -148,7 +148,8 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
                         and not object_type_to_add == "group"
                     ):
                         raise ValidationError(
-                            f"Row {row_number}: Label for {row[1].value} cannot be empty"
+                            f"Row {row_number + 1}: "
+                            f"English label cannot be empty"
                         )
 
                 self.json_fields_to_create[field_name].update(
@@ -166,7 +167,9 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
         if header_name in model_fields:
             if header_name == "type":
                 if not value:
-                    raise ValidationError(f"Row {row_number}: Type is required")
+                    raise ValidationError(
+                        f"Row {row_number + 1}: Type is required"
+                    )
                 choice_key = value.split(" ")[0]
 
                 if choice_key in self.TYPE_CHOICE_MAP.keys():
@@ -174,49 +177,59 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
                         "type"
                     ] = self.TYPE_CHOICE_MAP.get(choice_key)
             else:
-                if header_name == "name" and not value:
-                    raise ValidationError(f"Row {row_number}: Name is required")
+                is_attribute_name_empty = header_name == "name" and not value
+                is_choice_list_name_empty = (
+                    header_name == "list_name"
+                    and object_type_to_add == "choice"
+                ) and not value
+
+                if is_attribute_name_empty:
+                    raise ValidationError(
+                        f"Row {row_number + 1}: Name is required"
+                    )
+                if is_choice_list_name_empty:
+                    raise ValidationError(
+                        f"Row {row_number + 1}: List Name is required"
+                    )
                 self.object_fields_to_create[header_name] = (
                     value if value else ""
                 )
         elif header_name.startswith("admin"):
             self.object_fields_to_create["admin"] = value if value else ""
 
-    def _set_can_add_flag(self, value, row):
-        is_core_field = (
-            isinstance(value, str)
-            and any(value.endswith(i) for i in self.CORE_FIELD_SUFFIXES)
-            and not row[0].value.endswith("_group")
-        )
+    def _can_add_row(self, row):
+        is_core_field = any(
+            row[1].value.endswith(i) for i in self.CORE_FIELD_SUFFIXES
+        ) and not row[0].value.endswith("_group")
 
         is_in_excluded = row[0].value in self.EXCLUDED_MODEL_FIELDS
 
         is_version_field = row[1].value == "__version__"
 
-        is_end_info = any(value == i for i in ("end_repeat", "end_group"))
+        is_end_info = any(
+            row[0].value == i for i in ("end_repeat", "end_group")
+        )
 
         if is_end_info:
             self.current_group_tree.pop()
-            self.can_add_flag = False
-            return
+            return False
 
         if is_core_field or is_in_excluded or is_version_field:
-            self.can_add_flag = False
-            return
+            return False
 
-        self.can_add_flag = True
+        return True
 
     def _get_list_of_field_choices(self, sheet):
         fields_with_choices = []
         for row_number in range(1, sheet.nrows):
             row = sheet.row(row_number)
-            if row[0].value.startswith("select"):
+            if row[0].value.startswith("select_"):
                 fields_with_choices.append(row)
 
-        return [row[0].value.split(" ")[1] for row in fields_with_choices]
+        return set(row[0].value.split(" ")[1] for row in fields_with_choices)
 
     def _get_field_choice_name(self, row):
-        has_choice = row[0].value.startswith("select")
+        has_choice = row[0].value.startswith("select_")
         if has_choice:
             return row[0].value.split(" ")[1]
         return
@@ -224,22 +237,24 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
     def _reset_model_fields_variables(self):
         self.json_fields_to_create = defaultdict(dict)
         self.object_fields_to_create = {}
-        self.can_add_flag = True
 
-    def _handle_choices(self, sheet):
-        choices_assigned_to_fields = self._get_list_of_field_choices(sheet)
+    def _handle_choices(self, sheets):
+        choices_assigned_to_fields = self._get_list_of_field_choices(
+            sheets["survey"]
+        )
         choices_from_db = FlexibleAttributeChoice.objects.all()
-        choices_first_row = sheet.row(0)
+        choices_first_row = sheets["choices"].row(0)
         choices_headers_map = [col.value for col in choices_first_row]
         to_create_choices = []
         updated_choices = []
-        for row_number in range(1, sheet.nrows):
-            row = sheet.row(row_number)
+        for row_number in range(1, sheets["choices"].nrows):
+            row = sheets["choices"].row(row_number)
             self._reset_model_fields_variables()
 
-            if row[0].value in choices_assigned_to_fields:
+            if row[0].value not in choices_assigned_to_fields:
                 raise ValidationError(
-                    f"Row {row_number}: Choice is not assigned to any field!"
+                    f"Row {row_number + 1}: "
+                    f"Choice is not assigned to any field"
                 )
 
             for cell, header_name in zip(row, choices_headers_map):
@@ -298,78 +313,77 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
             repeatable = True if row[0].value == "begin_repeat" else False
             self._reset_model_fields_variables()
 
+            if not self._can_add_row(row):
+                continue
+
             for cell, header_name in zip(row, headers_map):
                 value = cell.value
-
-                self._set_can_add_flag(value, row)
-                if not self.can_add_flag:
-                    break
 
                 self._assign_field_values(
                     value, header_name, object_type_to_add, row, row_number,
                 )
 
-            if self.can_add_flag:
-                if object_type_to_add == "group":
-                    obj = FlexibleAttributeGroup.all_objects.filter(
-                        name=self.object_fields_to_create["name"],
-                    ).first()
+            if object_type_to_add == "group":
+                obj = FlexibleAttributeGroup.all_objects.filter(
+                    name=self.object_fields_to_create["name"],
+                ).first()
 
-                    if obj:
-                        parent = self.current_group_tree[-1]
-                        obj.label = self.json_fields_to_create["label"]
-                        obj.hint = self.json_fields_to_create["hint"]
-                        obj.repeatable = repeatable
-                        obj.parent = parent
-                        obj.is_removed = False
-                        obj.save()
-                        group = obj
-                        self.current_group_tree.append(group)
-                    else:
-                        group = FlexibleAttributeGroup.objects.create(
-                            **self.object_fields_to_create,
-                            **self.json_fields_to_create,
-                            repeatable=repeatable,
-                            parent=self.current_group_tree[-1],
+                if obj:
+                    parent = self.current_group_tree[-1]
+                    obj.label = self.json_fields_to_create["label"]
+                    obj.hint = self.json_fields_to_create["hint"]
+                    obj.repeatable = repeatable
+                    obj.parent = parent
+                    obj.is_removed = False
+                    obj.save()
+                    group = obj
+                    self.current_group_tree.append(group)
+                else:
+                    group = FlexibleAttributeGroup.objects.create(
+                        **self.object_fields_to_create,
+                        **self.json_fields_to_create,
+                        repeatable=repeatable,
+                        parent=self.current_group_tree[-1],
+                    )
+                    self.current_group_tree.append(group)
+
+                FlexibleAttributeGroup.objects.rebuild()
+
+                all_groups.append(group)
+            elif object_type_to_add == "attribute":
+                choice_name = self._get_field_choice_name(row)
+                obj = FlexibleAttribute.all_objects.filter(
+                    name=self.object_fields_to_create["name"],
+                ).first()
+
+                if obj:
+                    if obj.type != self.object_fields_to_create["type"]:
+                        raise ValidationError(
+                            f"Row {row_number + 1}: Type of the "
+                            f"attribute cannot be changed!"
                         )
-                        self.current_group_tree.append(group)
+                    obj.type = self.object_fields_to_create["type"]
+                    obj.name = self.object_fields_to_create["name"]
+                    obj.required = self.object_fields_to_create["required"]
+                    obj.label = self.json_fields_to_create["label"]
+                    obj.hint = self.json_fields_to_create["hint"]
+                    obj.is_removed = False
+                    obj.save()
+                    field = obj
 
-                    FlexibleAttributeGroup.objects.rebuild()
+                else:
+                    field = FlexibleAttribute.objects.create(
+                        group=self.current_group_tree[-1],
+                        **self.object_fields_to_create,
+                        **self.json_fields_to_create,
+                    )
+                if choice_name:
+                    choices = FlexibleAttributeChoice.objects.filter(
+                        list_name=choice_name,
+                    )
+                    field.flexibleattributechoice_set.set(choices)
 
-                    all_groups.append(group)
-                elif object_type_to_add == "attribute":
-                    choice_name = self._get_field_choice_name(row)
-                    obj = FlexibleAttribute.all_objects.filter(
-                        name=self.object_fields_to_create["name"],
-                    ).first()
-                    if obj:
-                        if obj.type != self.object_fields_to_create["type"]:
-                            raise ValidationError(
-                                f"Row {row_number}: Type of the "
-                                f"attribute cannot be changed!"
-                            )
-                        obj.type = self.object_fields_to_create["type"]
-                        obj.name = self.object_fields_to_create["name"]
-                        obj.required = self.object_fields_to_create["required"]
-                        obj.label = self.json_fields_to_create["label"]
-                        obj.hint = self.json_fields_to_create["hint"]
-                        obj.is_removed = False
-                        obj.save()
-                        field = obj
-
-                    else:
-                        field = FlexibleAttribute.objects.create(
-                            group=self.current_group_tree[-1],
-                            **self.object_fields_to_create,
-                            **self.json_fields_to_create,
-                        )
-                    if choice_name:
-                        choices = FlexibleAttributeChoice.objects.filter(
-                            list_name=choice_name,
-                        )
-                        field.flexibleattributechoice_set.set(choices)
-
-                    all_attrs.append(field)
+                all_attrs.append(field)
 
         groups_to_delete = set(groups_from_db).difference(set(all_groups))
 
@@ -404,7 +418,7 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
                     "survey": wb.sheet_by_name("survey"),
                     "choices": wb.sheet_by_name("choices"),
                 }
-                self._handle_choices(sheets["choices"])
+                self._handle_choices(sheets)
                 self._handle_groups_and_fields(sheets["survey"])
             except ValidationError as validation_error:
                 form.add_error("xls_file", validation_error)

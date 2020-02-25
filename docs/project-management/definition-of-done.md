@@ -1,0 +1,18 @@
+# Definition of Done
+
+Here is our definition of done for features / stories:
+
+* Acceptance criteria is met
+* Documentation does exist
+* Tests do exist
+  * unit tests for backend
+  * functional / e2e tests where appropriate
+  * any other
+* All tests must pass
+* Code has been demoed on local or live\(dev/staging\) instance
+* Code has been reviewed by one peer, for features / critical bug fixes
+* Code meets coding guidelines
+* Code is checked in
+
+
+

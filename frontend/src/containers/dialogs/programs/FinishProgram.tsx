@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { useHistory } from 'react-router-dom';
 import {
   Button,
   Dialog,
@@ -7,6 +8,8 @@ import {
   DialogContent,
   DialogTitle,
   Typography,
+  Snackbar,
+  SnackbarContent,
 } from '@material-ui/core';
 import {
   AllProgramsQuery,
@@ -18,6 +21,7 @@ import { PROGRAM_QUERY } from '../../../apollo/queries/Program';
 import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/AllPrograms';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { programCompare } from '../../../utils/utils';
+import { useSnackbarHelper } from '../../../hooks/useBreadcrumbHelper';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -43,7 +47,9 @@ interface FinishProgramProps {
 export function FinishProgram({
   program,
 }: FinishProgramProps): React.ReactElement {
+  const history = useHistory();
   const [open, setOpen] = useState(false);
+  const snackBar = useSnackbarHelper();
   const businessArea = useBusinessArea();
   const [mutate] = useUpdateProgramMutation({
     update(cache, { data: { updateProgram } }) {
@@ -67,7 +73,7 @@ export function FinishProgram({
     },
   });
   const finishProgram = async (): Promise<void> => {
-    await mutate({
+    const response = await mutate({
       variables: {
         programData: {
           id: program.id,
@@ -75,7 +81,18 @@ export function FinishProgram({
         },
       },
     });
-    setOpen(false);
+    if (!response.errors && response.data.updateProgram) {
+      history.replace({
+        pathname: `/${businessArea}/programs/${response.data.updateProgram.program.id}`,
+        state: { showSnackbar: true, message: 'Programme finished.' },
+      });
+      setOpen(false);
+    } else {
+      history.replace({
+        pathname: history.location.pathname,
+        state: {showSnackbar: true, message: 'Programme finish action failed.'}
+      })
+    }
   };
   return (
     <span>
@@ -115,6 +132,15 @@ export function FinishProgram({
           </DialogActions>
         </DialogFooter>
       </Dialog>
+      {snackBar.show && (
+        <Snackbar
+          open={snackBar.show}
+          autoHideDuration={5000}
+          onClose={() => snackBar.setShow(false)}
+        >
+          <SnackbarContent message={snackBar.message} />
+        </Snackbar>
+      )}
     </span>
   );
 }
