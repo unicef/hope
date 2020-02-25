@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@material-ui/core';
@@ -6,6 +7,7 @@ import { debounce } from 'lodash';
 import { PageHeader } from '../../components/PageHeader';
 import { TargetPopulationFilters } from '../../components/TargetPopulation/TargetPopulationFilters';
 import { TargetPopulationTable } from '../TargetPopulationTable';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
 
 const Container = styled.div`
   && {
@@ -25,6 +27,8 @@ const TableWrapper = styled.div`
 
 export function TargetPopulationPage() {
   const { t } = useTranslation();
+  const history = useHistory();
+  const businessArea = useBusinessArea();
   const [sizeFilter, setSizeFilter] = useState({
     min: undefined,
     max: undefined,
@@ -46,10 +50,15 @@ export function TargetPopulationPage() {
     debounce((value) => setTextFilter(value), 300),
   ).current;
 
+  const redirectToCreate = () => {
+    const path = `/${businessArea}/target-population/create`;
+    return history.push(path)
+  }
+
   return (
     <div>
       <PageHeader title={t('Target Population')}>
-        <Button variant='contained' color='primary'>
+        <Button variant='contained' color='primary' onClick={() => redirectToCreate()}>
           Create new
         </Button>
       </PageHeader>
