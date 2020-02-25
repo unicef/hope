@@ -9,7 +9,6 @@
   * [Technical glossary](introduction/glossary-terminology/technical.md)
   * [CashAssist glossary](introduction/glossary-terminology/cashassist.md)
   * [Kobo glossary](introduction/glossary-terminology/kobo-glossary.md)
-* [FAQ](introduction/faq.md)
 * [Team](introduction/team/README.md)
   * [Project Team RACI](introduction/team/project-team-raci.md)
 * [Events](introduction/events.md)
@@ -19,13 +18,18 @@
 * [Country Office](product-specification/country-office/README.md)
   * [Login](product-specification/country-office/login.md)
   * [Registration Data Import](product-specification/country-office/registration-data-import/README.md)
-    * [Detail screen / approval process](product-specification/country-office/registration-data-import/detail-screen-approval-process.md)
-    * [Via Excel import](product-specification/country-office/registration-data-import/via-excel-import.md)
-    * [Via Kobo API](product-specification/country-office/registration-data-import/via-kobo-api.md)
-    * [De-duplicating data](product-specification/country-office/registration-data-import/de-duplicating-data.md)
-  * [Population](product-specification/country-office/population-management.md)
-  * [Target Population \(Targeting\)](product-specification/country-office/targeting/README.md)
-    * [Targeting Criteria](product-specification/country-office/targeting/targeting-criteria.md)
+    * [Import Management](product-specification/country-office/registration-data-import/detail-screen-approval-process.md)
+    * [Excel Import](product-specification/country-office/registration-data-import/via-excel-import.md)
+    * [Kobo Import API](product-specification/country-office/registration-data-import/via-kobo-api.md)
+    * [Import Data Details](product-specification/country-office/registration-data-import/import-file-details.md)
+    * [De-duplicating Data](product-specification/country-office/registration-data-import/de-duplicating-data.md)
+    * [Approval Process](product-specification/country-office/registration-data-import/approval-process.md)
+  * [Population](product-specification/country-office/population-management/README.md)
+    * [Core fields on households & individuals](product-specification/country-office/population-management/core-fields-on-households-and-individuals.md)
+  * [Target Population\(s\)](product-specification/country-office/targeting/README.md)
+    * [Targeting Criteria \[Create\]](product-specification/country-office/targeting/targeting-criteria.md)
+    * [Target Population Details](product-specification/country-office/targeting/view-copy-delete.md)
+    * [Manage Target Populations \[Edit / Copy / Delete\]](product-specification/country-office/targeting/manage-target-populations-edit-copy-delete.md)
   * [Programme Management](product-specification/country-office/program-management/README.md)
     * [Programme: Overview Page](product-specification/country-office/program-management/programme-overview-page.md)
     * [Programme: Detail Page](product-specification/country-office/program-management/programme-detail-page.md)
@@ -44,6 +48,8 @@
 * [External Integrations](product-specification/external-integrations/README.md)
   * [CashAssist](product-specification/external-integrations/cashassist.md)
   * [Kobo](product-specification/external-integrations/kobo.md)
+* [Input Validation Rules](product-specification/input-validation-rules.md)
+* [Snackbar Notifications](product-specification/snackbar-notifications.md)
 
 ## Design Specification
 
@@ -66,6 +72,7 @@
 * [Development Setup / Process](technical-specification/development-setup/README.md)
   * [HCT-MIS: Testing Strategy](technical-specification/development-setup/testing-strategy.md)
   * [UNHCR QA/Testing](technical-specification/development-setup/unhcr-qa-testing.md)
+  * [Coding Guidelines](technical-specification/development-setup/coding-guidelines.md)
 * [Data Model](technical-specification/data-model.md)
 * [CashAssist Integration](technical-specification/cashassist-integration/README.md)
   * [Cash Assist](technical-specification/cashassist-integration/cash-assist.md)
@@ -75,9 +82,6 @@
 * [Kobo Integration](technical-specification/kobo-integration/README.md)
   * [Kobo hosting](technical-specification/kobo-integration/kobo-hosting.md)
   * [Open issues](technical-specification/kobo-integration/open-issues.md)
-* [Coding Guidelines](technical-specification/coding-guidelines.md)
-* [Input Validation Rules](technical-specification/input-validation-rules.md)
-* [Snackbar Notifications](technical-specification/snackbar-notifications.md)
 
 ## Project Management
 
@@ -87,4 +91,5 @@
   * [Iteration 3](project-management/iterations-deliverables/iteration-3.md)
   * [Iteration 4](project-management/iterations-deliverables/iteration-4.md)
 * [CO / User testing](project-management/co-user-testing.md)
+* [Definition of Done](project-management/definition-of-done.md)
 
