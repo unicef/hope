@@ -39,6 +39,9 @@
             "name": "HouseholdNode"
           },
           {
+            "name": "IndividualNode"
+          },
+          {
             "name": "TargetPopulationNode"
           }
         ]
