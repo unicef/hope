@@ -13,6 +13,7 @@ import { ProgramDetailsPage } from './pages/ProgramDetailsPage';
 import { CashPlanDetailsPage } from './pages/CashPlanDetailsPage';
 import { PaymentRecordDetailsPage } from './pages/PaymentRecordDetailsPage';
 import { PopulationHouseholdPage } from "./pages/PopulationHouseholdPage";
+import { RegistrationDataImportPage } from './pages/RegistrationDataImportPage';
 
 const Root = styled.div`
   display: flex;
@@ -71,6 +72,10 @@ export function HomeRouter(): React.ReactElement {
           <Route path='/:businessArea/programs'>
             <ProgramsPage />
           </Route>
+          <Route path='/:businessArea/registration-data-import'>
+            <RegistrationDataImportPage />
+          </Route>
+
           <Route path='/'>
             <DashboardPage />
           </Route>

@@ -139,11 +139,11 @@ type CreateProgram {
 
 input CreateProgramInput {
   name: String
-  startDate: DateTime
-  endDate: DateTime
+  startDate: Date
+  endDate: Date
   description: String
   programCaId: String
-  budget: Float
+  budget: Decimal
   frequencyOfPayments: String
   sector: String
   scope: String
@@ -396,7 +396,10 @@ type HouseholdNode implements Node {
   familySize: Int
   address: String
   location: LocationNode!
+  representative: IndividualNode
   registrationDataImportId: RegistrationDataImportNode!
+  headOfHousehold: IndividualNode
+  individuals(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
   targetPopulations(before: String, after: String, first: Int, last: Int): TargetPopulationNodeConnection!
 }
@@ -419,6 +422,233 @@ enum HouseholdResidenceStatus {
   CITIZEN
   IDP
   OTHER
+}
+
+enum IndividualIdentificationType {
+  NA
+  BIRTH_CERTIFICATE
+  DRIVING_LICENSE
+  UNHCR_ID_CARD
+  NATIONAL_ID
+  NATIONAL_PASSPORT
+}
+
+enum IndividualMartialStatus {
+  SINGLE
+  MARRIED
+  WIDOW
+  DIVORCED
+  SEPARATED
+}
+
+enum IndividualNationality {
+  AF
+  AL
+  DZ
+  AD
+  AO
+  AR
+  AM
+  A
+  AT
+  AZ
+  BS
+  BH
+  BD
+  BB
+  BY
+  BE
+  BZ
+  BJ
+  BT
+  BO
+  BA
+  BW
+  BR
+  GB
+  BN
+  BG
+  BF
+  MM
+  BF_28
+  BI
+  CM
+  CA
+  CV
+  TD
+  CL
+  CN
+  CO
+  CG
+  CR
+  HR
+  C
+  CY
+  CZ
+  DK
+  DJ
+  DM
+  DO
+  EC
+  EG
+  SV
+  GB_50
+  ER
+  EE
+  ET
+  FJ
+  FI
+  FR
+  GA
+  GM
+  GE
+  DE
+  GH
+  GR
+  GD
+  GT
+  GQ
+  GY
+  HT
+  NL
+  HN
+  H
+  IS
+  IO
+  ID
+  IR
+  IQ
+  IE
+  IL
+  IT
+  JM
+  JP
+  JO
+  KZ
+  KE
+  KW
+  LA
+  LV
+  LB
+  LR
+  LY
+  LT
+  MK
+  MG
+  MW
+  MY
+  MV
+  ML
+  MT
+  MR
+  M
+  MX
+  MD
+  MC
+  MN
+  ME
+  MA
+  MZ
+  NA
+  NP
+  NI
+  NE
+  NG
+  KP
+  NO
+  OM
+  PK
+  PA
+  PG
+  PY
+  PE
+  PH
+  PL
+  PT
+  QA
+  RO
+  R
+  RW
+  SA
+  AE
+  SN
+  RS
+  SC
+  SL
+  SG
+  SK
+  SI
+  SO
+  ZA
+  KR
+  ES
+  LK
+  SD
+  SR
+  SZ
+  SE
+  CH
+  SY
+  TW
+  TJ
+  TZ
+  TH
+  TG
+  TT
+  TN
+  TR
+  TM
+  TV
+  UG
+  UA
+  UY
+  UZ
+  V
+  VE
+  VN
+  GB_164
+  YE
+  ZM
+  ZW
+}
+
+type IndividualNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  individualCaId: String!
+  fullName: String!
+  firstName: String!
+  lastName: String!
+  sex: IndividualSex!
+  dob: Date
+  estimatedDob: Date
+  nationality: IndividualNationality!
+  martialStatus: IndividualMartialStatus!
+  phoneNumber: String!
+  identificationType: IndividualIdentificationType!
+  identificationNumber: String!
+  household: HouseholdNode!
+  registrationDataImportId: RegistrationDataImportNode!
+  representedHouseholds(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
+  headingHousehold: HouseholdNode
+}
+
+type IndividualNodeConnection {
+  pageInfo: PageInfo!
+  edges: [IndividualNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type IndividualNodeEdge {
+  node: IndividualNode
+  cursor: String!
+}
+
+enum IndividualSex {
+  MALE
+  FEMALE
 }
 
 scalar JSONLazyString
@@ -524,8 +754,8 @@ type PaymentEntitlementNode {
   createdAt: DateTime!
   updatedAt: DateTime!
   deliveryType: PaymentEntitlementDeliveryType!
-  entitlementQuantity: Float!
-  deliveredQuantity: Float
+  entitlementQuantity: Decimal
+  deliveredQuantity: Decimal
   entitlementCardIssueDate: Date
   entitlementCardNumber: String!
   currency: String!
@@ -581,13 +811,13 @@ type ProgramNode implements Node {
   updatedAt: DateTime!
   name: String!
   status: ProgramStatus!
-  startDate: DateTime!
-  endDate: DateTime!
+  startDate: Date!
+  endDate: Date!
   description: String!
   programCaId: String!
   locations(before: String, after: String, first: Int, last: Int, title: String): LocationNodeConnection!
   businessArea: BusinessAreaNode!
-  budget: Float!
+  budget: Decimal
   frequencyOfPayments: ProgramFrequencyOfPayments!
   sector: ProgramSector!
   scope: ProgramScope!
@@ -595,6 +825,9 @@ type ProgramNode implements Node {
   populationGoal: Int!
   administrativeAreasOfImplementation: String!
   cashPlans(before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
+  totalEntitledQuantity: Decimal
+  totalDeliveredQuantity: Decimal
+  totalUndeliveredQuantity: Decimal
   totalNumberOfHouseholds: Int
   history(before: String, after: String, first: Int, last: Int): LogEntryObjectConnection
 }
@@ -645,7 +878,7 @@ type Query {
   allBusinessAreas(before: String, after: String, first: Int, last: Int, id: UUID): BusinessAreaNodeConnection
   allLogEntries(objectId: String!, before: String, after: String, first: Int, last: Int): LogEntryObjectConnection
   program(id: ID!): ProgramNode
-  allPrograms(before: String, after: String, first: Int, last: Int, id: UUID, businessArea: String): ProgramNodeConnection
+  allPrograms(before: String, after: String, first: Int, last: Int, id: UUID, status: String, businessArea: String): ProgramNodeConnection
   cashPlan(id: ID!): CashPlanNode
   allCashPlans(before: String, after: String, first: Int, last: Int, program: ID, orderBy: String): CashPlanNodeConnection
   programStatusChoices: [ChoiceObject]
@@ -659,6 +892,8 @@ type Query {
   allHouseholds(before: String, after: String, first: Int, last: Int, businessArea: String, familySizeGreater: Float, familySizeLower: Float, orderBy: String): HouseholdNodeConnection
   registrationDataImport(id: ID!): RegistrationDataImportNode
   allRegistrationDataImports(before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection
+  individual(id: ID!): IndividualNode
+  allIndividuals(before: String, after: String, first: Int, last: Int): IndividualNodeConnection
   me: UserObjectType
   _debug: DjangoDebug
 }
@@ -682,6 +917,7 @@ type RegistrationDataImportNode implements Node {
   numberOfIndividuals: Int!
   numberOfHouseholds: Int!
   households(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
+  individuals(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
 }
 
 type RegistrationDataImportNodeConnection {
@@ -786,11 +1022,11 @@ input UpdateProgramInput {
   id: String!
   name: String
   status: String
-  startDate: DateTime
-  endDate: DateTime
+  startDate: Date
+  endDate: Date
   description: String
   programCaId: String
-  budget: Float
+  budget: Decimal
   frequencyOfPayments: String
   sector: String
   scope: String
