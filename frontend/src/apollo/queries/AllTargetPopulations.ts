@@ -6,6 +6,11 @@ export const AllTargetPopulations = gql`
       edges {
         node {
           name
+          createdAt
+          createdBy {
+            firstName
+            lastName
+          }
         }
         cursor
       }
