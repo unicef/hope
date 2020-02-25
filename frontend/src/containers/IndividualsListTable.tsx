@@ -127,11 +127,9 @@ export const IndividualsListTable = ({
               <TableCell align='left'>{row.individualCaId}</TableCell>
               <TableCell align='left'>{row.fullName}</TableCell>
               <TableCell align='left'>{row.household.householdCaId}</TableCell>
-              <TableCell align='left'>{row.dob}</TableCell>
-              <TableCell align='right'>{row.sex}</TableCell>
-              <TableCell align='right'>
-                {row.household.location.title}
-              </TableCell>
+              <TableCell align='right'>{row.dob}</TableCell>
+              <TableCell align='left'>{row.sex}</TableCell>
+              <TableCell align='left'>{row.household.location.title}</TableCell>
             </TableRow>
           );
         }}
