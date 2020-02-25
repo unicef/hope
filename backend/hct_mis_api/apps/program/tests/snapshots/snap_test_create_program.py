@@ -12,17 +12,17 @@ snapshots['TestCreateProgram::test_create_program_authenticated 1'] = {
         'createProgram': {
             'program': {
                 'administrativeAreasOfImplementation': 'Lorem Ipsum',
-                'budget': 20000000.0,
+                'budget': '20000000',
                 'cashPlus': True,
                 'description': 'my description of program',
-                'endDate': '2021-12-20T15:00:00',
+                'endDate': '2021-12-20',
                 'frequencyOfPayments': 'REGULAR',
                 'name': 'Test',
                 'populationGoal': 150000,
                 'programCaId': '5e0a38c6-7bcb-4b4a-b8e0-311e8c694ae3',
                 'scope': 'FULL',
                 'sector': 'EDUCATION',
-                'startDate': '2019-12-20T15:00:00',
+                'startDate': '2019-12-20',
                 'status': 'DRAFT'
             }
         }
@@ -54,17 +54,17 @@ snapshots['TestCreateProgram::test_create_program_invalid_dates 1'] = {
         'createProgram': {
             'program': {
                 'administrativeAreasOfImplementation': 'Lorem Ipsum',
-                'budget': 20000000.0,
+                'budget': '20000000',
                 'cashPlus': True,
                 'description': 'my description of program',
-                'endDate': '2021-12-20T15:00:00',
+                'endDate': '2021-12-20',
                 'frequencyOfPayments': 'REGULAR',
                 'name': 'Test',
                 'populationGoal': 150000,
                 'programCaId': '5e0a38c6-7bcb-4b4a-b8e0-311e8c694ae3',
                 'scope': 'FULL',
                 'sector': 'EDUCATION',
-                'startDate': '2019-12-20T15:00:00',
+                'startDate': '2019-12-20',
                 'status': 'DRAFT'
             }
         }
