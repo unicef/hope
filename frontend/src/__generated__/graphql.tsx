@@ -1780,7 +1780,11 @@ export type AllTargetPopulationsQuery = (
       & Pick<TargetPopulationNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'TargetPopulationNode' }
-        & Pick<TargetPopulationNode, 'name'>
+        & Pick<TargetPopulationNode, 'name' | 'createdAt'>
+        & { createdBy: Maybe<(
+          { __typename?: 'UserObjectType' }
+          & Pick<UserObjectType, 'firstName' | 'lastName'>
+        )> }
       )> }
     )>> }
   )> }
@@ -2534,6 +2538,11 @@ export const AllTargetPopulationsDocument = gql`
     edges {
       node {
         name
+        createdAt
+        createdBy {
+          firstName
+          lastName
+        }
       }
       cursor
     }
