@@ -15,6 +15,7 @@ import { PaymentRecordDetailsPage } from './pages/PaymentRecordDetailsPage';
 import { PopulationHouseholdPage } from './pages/PopulationHouseholdPage';
 import { PopulationHouseholdDetailsPage } from './pages/PopulationHouseholdDetailsPage';
 import { PopulationIndividualsPage } from './pages/PopulationIndividualsPage';
+import { PopulationIndividualsDetailsPage } from './pages/PopulationIndividualsDetailsPage';
 
 const Root = styled.div`
   display: flex;
@@ -57,6 +58,9 @@ export function HomeRouter(): React.ReactElement {
         <Switch>
           <Route path='/:businessArea/population/household/:id'>
             <PopulationHouseholdDetailsPage />
+          </Route>
+          <Route path='/:businessArea/population/individuals/:id'>
+            <PopulationIndividualsDetailsPage />
           </Route>
           <Route path='/:businessArea/cashplans/:id'>
             <CashPlanDetailsPage />
