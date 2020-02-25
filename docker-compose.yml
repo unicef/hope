@@ -42,7 +42,7 @@ services:
     volumes:
       - ./backend:/code/
       - backend-data:/data
-    command: bash -c "python manage.py runserver 0.0.0.0:8000"
+    command: "dev"
     depends_on:
       - db
       - redis
