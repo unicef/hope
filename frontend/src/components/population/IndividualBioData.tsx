@@ -91,7 +91,7 @@ export function IndividualsBioData({
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='Special Privileges'>
-            <div> </div>
+            <div>-</div>
           </LabelizedField>
         </Grid>
       </Grid>
