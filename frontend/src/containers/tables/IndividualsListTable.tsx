@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { IndividualNode, useAllIndividualsQuery, } from '../../__generated__/graphql';
-import { columnToOrderBy } from '../../utils/utils';
+import { columnToOrderBy, getAgeFromDob } from '../../utils/utils';
 import { Order, TableComponent } from '../../components/table/TableComponent';
 import { HeadCell } from '../../components/table/EnhancedTableHead';
 import { ClickableTableRow } from '../../components/table/ClickableTableRow';
