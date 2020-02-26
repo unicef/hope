@@ -7,8 +7,7 @@ export const AllHouseholds = gql`
     $first: Int
     $last: Int
     $businessArea: String
-    $familySizeGreater: Float
-    $familySizeLower: Float
+    $familySize: String
     $orderBy: String
   ) {
     allHouseholds(
@@ -17,8 +16,7 @@ export const AllHouseholds = gql`
       first: $first
       last: $last
       businessArea: $businessArea
-      familySizeGreater: $familySizeGreater
-      familySizeLower: $familySizeLower
+      familySize: $familySize
       orderBy: $orderBy
     ) {
       pageInfo {
@@ -39,6 +37,9 @@ export const AllHouseholds = gql`
           location {
             id
             title
+          }
+          individuals {
+            totalCount
           }
           paymentRecords {
             edges {

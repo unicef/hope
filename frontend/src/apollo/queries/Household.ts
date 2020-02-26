@@ -24,6 +24,9 @@ export const HOUSEHOLD_QUERY = gql`
         id
         title
       }
+      individuals {
+        totalCount
+      }
       residenceStatus
       paymentRecords {
         edges {
