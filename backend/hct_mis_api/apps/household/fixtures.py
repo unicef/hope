@@ -2,36 +2,14 @@ import factory
 from factory import fuzzy
 from pytz import utc
 
-from account.fixtures import UserFactory
 from core.fixtures import LocationFactory
 from household.const import NATIONALITIES
 from household.models import (
     Household,
-    RegistrationDataImport,
     EntitlementCard,
     Individual,
 )
-
-
-class RegistrationDataImportFactory(factory.DjangoModelFactory):
-    class Meta:
-        model = RegistrationDataImport
-
-    name = factory.Faker(
-        "sentence", nb_words=6, variable_nb_words=True, ext_word_list=None,
-    )
-    status = factory.fuzzy.FuzzyChoice(
-        RegistrationDataImport.STATUS_CHOICE, getter=lambda c: c[0],
-    )
-    import_date = factory.Faker(
-        "date_time_this_decade", before_now=True, tzinfo=utc,
-    )
-    imported_by = factory.SubFactory(UserFactory)
-    data_source = factory.fuzzy.FuzzyChoice(
-        RegistrationDataImport.DATA_SOURCE_CHOICE, getter=lambda c: c[0],
-    )
-    number_of_individuals = factory.fuzzy.FuzzyInteger(100, 10000)
-    number_of_households = factory.fuzzy.FuzzyInteger(3, 50)
+from registration_data.fixtures import RegistrationDataImportFactory
 
 
 class HouseholdFactory(factory.DjangoModelFactory):
@@ -61,8 +39,11 @@ class IndividualFactory(factory.DjangoModelFactory):
         model = Individual
 
     individual_ca_id = factory.Faker("uuid4")
-    full_name = factory.LazyAttribute(lambda o: f"{o.first_name} {o.last_name}")
+    full_name = factory.LazyAttribute(
+        lambda o: f"{o.first_name} {o.middle_name} {o.last_name}"
+    )
     first_name = factory.Faker("first_name")
+    middle_name = factory.Faker("first_name")
     last_name = factory.Faker("last_name")
     sex = factory.fuzzy.FuzzyChoice(
         Individual.SEX_CHOICE, getter=lambda c: c[0],
@@ -78,6 +59,7 @@ class IndividualFactory(factory.DjangoModelFactory):
         Individual.MARTIAL_STATUS_CHOICE, getter=lambda c: c[0],
     )
     phone_number = factory.Faker("phone_number")
+    phone_number_alternative = ""
     identification_type = factory.fuzzy.FuzzyChoice(
         Individual.IDENTIFICATION_TYPE_CHOICE, getter=lambda c: c[0],
     )
@@ -85,6 +67,12 @@ class IndividualFactory(factory.DjangoModelFactory):
     household = factory.SubFactory(HouseholdFactory)
     registration_data_import_id = factory.SubFactory(
         RegistrationDataImportFactory
+    )
+    work_status = factory.fuzzy.FuzzyChoice(
+        Individual.YES_NO_CHOICE, getter=lambda c: c[0],
+    )
+    disability = factory.fuzzy.FuzzyChoice(
+        Individual.DISABILITY_CHOICE, getter=lambda c: c[0],
     )
 
 
