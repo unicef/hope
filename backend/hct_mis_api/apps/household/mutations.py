@@ -6,9 +6,10 @@ from account.models import User
 from core.models import Location
 from core.permissions import is_authenticated
 from core.utils import decode_id_string
-from household.models import Household, RegistrationDataImport
+from household.models import Household
 from household.schema import HouseholdNode, RegistrationDataImportNode
 from household.validators import HouseholdValidator
+from registration_data.models import RegistrationDataImport
 
 
 class CreateHouseholdInput(graphene.InputObjectType):
