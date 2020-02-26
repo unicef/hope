@@ -54,6 +54,9 @@ class Household(TimeStampedUUIDModel):
         null=True,
     )
 
+    def __str__(self):
+        return f"Household CashAssist ID: {self.household_ca_id}"
+
 
 class Individual(TimeStampedUUIDModel):
     SEX_CHOICE = (
