@@ -93,8 +93,7 @@ export const HouseholdTable = ({
       after,
       before,
       businessArea,
-      familySizeGreater: Number(sizeFilter.min),
-      familySizeLower: Number(sizeFilter.max),
+      familySize: '',
       orderBy,
     },
   });
