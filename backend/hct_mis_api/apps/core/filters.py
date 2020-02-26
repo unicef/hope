@@ -23,15 +23,17 @@ class IntegerRangeFilter(Filter):
 
     def filter(self, qs, values):
         if values:
-            if values.get("min") is not None and values.get("max") is not None:
+            min_value = values.get("min")
+            max_value = values.get("max")
+            if min_value is not None and max_value is not None:
                 self.lookup_expr = "range"
-                values = (values.get("min"), values.get("max"))
-            elif values.get("min") is not None and values.get("max") is None:
+                values = (min_value, max_value)
+            elif min_value is not None and max_value is None:
                 self.lookup_expr = "gte"
-                values = values.get("min")
-            elif values.get("min") is None and values.get("max") is not None:
+                values = min_value
+            elif min_value is None and max_value is not None:
                 self.lookup_expr = "lte"
-                values = values.get("max")
+                values = max_value
 
         return super().filter(qs, values)
 
@@ -41,32 +43,34 @@ class AgeRangeFilter(Filter):
 
     def filter(self, qs, values):
         if values:
+            min_value = values.get("min")
+            max_value = values.get("max")
             current = datetime.now().date()
-            if values.get("min") is not None and values.get("max") is not None:
+            if min_value is not None and max_value is not None:
                 self.lookup_expr = "range"
                 min_date = date(
-                    current.year - values.get("min"),
+                    current.year - min_value,
                     current.month,
                     current.day,
                 )
                 max_date = date(
-                    current.year - values.get("max"),
+                    current.year - max_value,
                     current.month,
                     current.day,
                 )
                 values = (max_date, min_date)
-            elif values.get("min") is not None and values.get("max") is None:
+            elif min_value is not None and max_value is None:
                 self.lookup_expr = "lte"
                 min_date = date(
-                    current.year - values.get("min"),
+                    current.year - min_value,
                     current.month,
                     current.day,
                 )
                 values = min_date
-            elif values.get("min") is None and values.get("max") is not None:
+            elif min_value is None and max_value is not None:
                 self.lookup_expr = "gte"
                 max_date = date(
-                    current.year - values.get("max"),
+                    current.year - max_value,
                     current.month,
                     current.day,
                 )
