@@ -1,12 +1,14 @@
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
-from household.fixtures import HouseholdFactory
+from registration_datahub.fixtures import ImportedHouseholdFactory
 
 
-class TestHouseholdQuery(APITestCase):
-    ALL_HOUSEHOLD_QUERY = """
-    query AllHouseholds{
-      allHouseholds {
+class TestImportedHouseholdQuery(APITestCase):
+    multi_db = True
+
+    ALL_IMPORTED_HOUSEHOLD_QUERY = """
+    query AllImportedHouseholds{
+      allImportedHouseholds {
         edges {
           node {
             familySize
@@ -18,9 +20,9 @@ class TestHouseholdQuery(APITestCase):
       }
     }
     """
-    ALL_HOUSEHOLD_QUERY_RANGE = """
-    query AllHouseholds{
-      allHouseholds(familySize: "{\\"min\\": 3, \\"max\\": 9}") {
+    ALL_IMPORTED_HOUSEHOLD_QUERY_RANGE = """
+    query AllImportedHouseholds{
+      allImportedHouseholds(familySize: "{\\"min\\": 3, \\"max\\": 9}") {
         edges {
           node {
             familySize
@@ -32,9 +34,9 @@ class TestHouseholdQuery(APITestCase):
       }
     }
     """
-    ALL_HOUSEHOLD_QUERY_MIN = """
-    query AllHouseholds{
-      allHouseholds(familySize: "{\\"min\\": 3}") {
+    ALL_IMPORTED_HOUSEHOLD_QUERY_MIN = """
+    query AllImportedHouseholds{
+      allImportedHouseholds(familySize: "{\\"min\\": 3}") {
         edges {
           node {
             familySize
@@ -46,9 +48,9 @@ class TestHouseholdQuery(APITestCase):
       }
     }
     """
-    ALL_HOUSEHOLD_QUERY_MAX = """
-    query AllHouseholds{
-      allHouseholds(familySize: "{\\"max\\": 9}") {
+    ALL_IMPORTED_HOUSEHOLD_QUERY_MAX = """
+    query AllImportedHouseholds{
+      allImportedHouseholds(familySize: "{\\"max\\": 9}") {
         edges {
           node {
             familySize
@@ -60,9 +62,9 @@ class TestHouseholdQuery(APITestCase):
       }
     }
     """
-    HOUSEHOLD_QUERY = """
-    query Household($id: ID!) {
-      household(id: $id) {
+    IMPORTED_HOUSEHOLD_QUERY = """
+    query ImportedHousehold($id: ID!) {
+      importedHousehold(id: $id) {
         familySize
         nationality
         householdCaId
@@ -76,7 +78,7 @@ class TestHouseholdQuery(APITestCase):
         self.user = UserFactory.create()
         family_sizes_list = (2, 4, 5, 1, 3, 11, 14)
         self.households = [
-            HouseholdFactory(
+            ImportedHouseholdFactory(
                 family_size=family_size,
                 address="Lorem Ipsum",
                 nationality="PL",
@@ -85,37 +87,37 @@ class TestHouseholdQuery(APITestCase):
             for family_size in family_sizes_list
         ]
 
-    def test_household_query_all(self):
+    def test_imported_household_query_all(self):
         self.snapshot_graphql_request(
-            request_string=self.ALL_HOUSEHOLD_QUERY,
+            request_string=self.ALL_IMPORTED_HOUSEHOLD_QUERY,
             context={"user": self.user},
         )
 
-    def test_household_query_all_range(self):
+    def test_imported_household_query_all_range(self):
         self.snapshot_graphql_request(
-            request_string=self.ALL_HOUSEHOLD_QUERY_RANGE,
+            request_string=self.ALL_IMPORTED_HOUSEHOLD_QUERY_RANGE,
             context={"user": self.user},
         )
 
-    def test_household_query_all_min(self):
+    def test_imported_household_query_all_min(self):
         self.snapshot_graphql_request(
-            request_string=self.ALL_HOUSEHOLD_QUERY_MIN,
+            request_string=self.ALL_IMPORTED_HOUSEHOLD_QUERY_MIN,
             context={"user": self.user},
         )
 
-    def test_household_query_all_max(self):
+    def test_imported_household_query_all_max(self):
         self.snapshot_graphql_request(
-            request_string=self.ALL_HOUSEHOLD_QUERY_MAX,
+            request_string=self.ALL_IMPORTED_HOUSEHOLD_QUERY_MAX,
             context={"user": self.user},
         )
 
-    def test_household_query_single(self):
+    def test_imported_household_query_single(self):
         self.snapshot_graphql_request(
-            request_string=self.HOUSEHOLD_QUERY,
+            request_string=self.IMPORTED_HOUSEHOLD_QUERY,
             context={"user": self.user},
             variables={
                 "id": self.id_to_base64(
-                    self.households[0].id, "Household"
+                    self.households[0].id, "ImportedHousehold"
                 )
             },
         )
