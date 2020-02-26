@@ -1,13 +1,13 @@
-import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import Moment from 'react-moment';
 import { HouseholdNode, useAllHouseholdsQuery } from '../__generated__/graphql';
-import { columnToOrderBy } from '../utils/utils';
+import { columnToOrderBy, formatCurrency } from '../utils/utils';
 import { Order, TableComponent } from '../components/table/TableComponent';
 import { HeadCell } from '../components/table/EnhancedTableHead';
+import { ClickableTableRow } from '../components/table/ClickableTableRow';
 
 const headCells: HeadCell<HouseholdNode>[] = [
   {
@@ -58,14 +58,6 @@ const TableWrapper = styled.div`
   padding: 20px;
 `;
 
-const formatCurrency = (amount: number): string =>
-  amount.toLocaleString('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-
 interface HouseholdTableProps {
   sizeFilter: { min: number | undefined; max: number | undefined };
   textFilter: string;
@@ -93,8 +85,6 @@ export const HouseholdTable = ({
       after,
       before,
       businessArea,
-      familySizeGreater: Number(sizeFilter.min),
-      familySizeLower: Number(sizeFilter.max),
       orderBy,
     },
   });
@@ -131,7 +121,7 @@ export const HouseholdTable = ({
         }}
         renderRow={(row) => {
           return (
-            <TableRow
+            <ClickableTableRow
               hover
               onClick={() => handleClick(row)}
               role='checkbox'
@@ -153,7 +143,7 @@ export const HouseholdTable = ({
               <TableCell align='right'>
                 <Moment format='MM/DD/YYYY'>{row.createdAt}</Moment>
               </TableCell>
-            </TableRow>
+            </ClickableTableRow>
           );
         }}
         handleChangeRowsPerPage={(e) => {
