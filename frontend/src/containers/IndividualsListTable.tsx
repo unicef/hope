@@ -116,7 +116,7 @@ export const IndividualsListTable = ({
           setOrderDirection(direction);
         }}
         renderRow={(row) => {
-          let age;
+          let age: number | string = 'N/A';
           if (row.dob) {
             age = getAgeFromDob(row.dob);
           }
