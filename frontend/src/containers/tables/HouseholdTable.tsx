@@ -4,27 +4,12 @@ import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import Moment from 'react-moment';
-import {
-  useAllIndividualsQuery,
-  IndividualNode,
-} from '../__generated__/graphql';
-import { columnToOrderBy } from '../utils/utils';
-import { Order, TableComponent } from '../components/table/TableComponent';
-import { HeadCell } from '../components/table/EnhancedTableHead';
+import { HouseholdNode, useAllHouseholdsQuery } from '../../__generated__/graphql';
+import { columnToOrderBy } from '../../utils/utils';
+import { Order, TableComponent } from '../../components/table/TableComponent';
+import { HeadCell } from '../../components/table/EnhancedTableHead';
 
-const headCells: HeadCell<IndividualNode>[] = [
-  {
-    disablePadding: false,
-    label: 'Individual ID',
-    id: 'individualCaId',
-    numeric: false,
-  },
-  {
-    disablePadding: false,
-    label: 'Individual',
-    id: 'fullName',
-    numeric: false,
-  },
+const headCells: HeadCell<HouseholdNode>[] = [
   {
     disablePadding: false,
     label: 'Household ID',
@@ -33,15 +18,15 @@ const headCells: HeadCell<IndividualNode>[] = [
   },
   {
     disablePadding: false,
-    label: 'Age',
-    id: 'age',
-    numeric: true,
+    label: 'Head of Household',
+    id: 'paymentRecords',
+    numeric: false,
   },
   {
     disablePadding: false,
-    label: 'Sex',
-    id: 'sex',
-    numeric: false,
+    label: 'Household Size',
+    id: 'familySize',
+    numeric: true,
   },
   {
     disablePadding: false,
@@ -49,22 +34,48 @@ const headCells: HeadCell<IndividualNode>[] = [
     id: 'location',
     numeric: false,
   },
+  {
+    disablePadding: false,
+    label: 'Residence Status',
+    id: 'residenceStatus',
+    numeric: true,
+  },
+  {
+    disablePadding: false,
+    label: 'Total Cash Received',
+    id: 'paymentRecords',
+    numeric: true,
+  },
+  {
+    disablePadding: false,
+    label: 'Registration Date',
+    id: 'createdAt',
+    numeric: true,
+  },
 ];
 
 const TableWrapper = styled.div`
   padding: 20px;
 `;
 
-interface IndividualsListTableProps {
-  ageFilter: { min: number | undefined; max: number | undefined };
-  textFilter?: string;
-  businessArea?: string;
+const formatCurrency = (amount: number): string =>
+  amount.toLocaleString('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
+interface HouseholdTableProps {
+  sizeFilter: { min: number | undefined; max: number | undefined };
+  textFilter: string;
+  businessArea: string;
 }
 
-export const IndividualsListTable = ({
-  ageFilter,
+export const HouseholdTable = ({
+  sizeFilter,
   businessArea,
-}: IndividualsListTableProps): React.ReactElement => {
+}: HouseholdTableProps): React.ReactElement => {
   const history = useHistory();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -75,19 +86,21 @@ export const IndividualsListTable = ({
   const [first, setFirst] = useState(rowsPerPage);
   const [last, setLast] = useState(rowsPerPage);
 
-  const { loading, data, refetch } = useAllIndividualsQuery({
+  const { loading, data, refetch } = useAllHouseholdsQuery({
     variables: {
       first,
       last,
       after,
       before,
-      //   ageGreater: ageFilter.min,
-      //   ageLower: ageFilter.max
+      businessArea,
+      familySizeGreater: Number(sizeFilter.min),
+      familySizeLower: Number(sizeFilter.max),
+      orderBy,
     },
   });
 
-  const handleClick = (row: IndividualNode): void => {
-    const path = `/${businessArea}/population/individuals/${row.id}`;
+  const handleClick = (row: HouseholdNode): void => {
+    const path = `/${businessArea}/population/household/${row.id}`;
     history.push(path);
   };
 
@@ -97,17 +110,17 @@ export const IndividualsListTable = ({
 
   if (loading) return null;
 
-  const { edges, pageInfo } = data.allIndividuals;
-  const individuals = edges.map((edge) => edge.node as IndividualNode);
+  const { edges, pageInfo } = data.allHouseholds;
+  const houseHolds = edges.map((edge) => edge.node as HouseholdNode);
 
   return (
     <TableWrapper>
-      <TableComponent<IndividualNode>
+      <TableComponent<HouseholdNode>
         loading={loading}
         title='Households'
         page={page}
-        data={individuals}
-        itemsCount={data.allIndividuals.totalCount}
+        data={houseHolds}
+        itemsCount={data.allHouseholds.totalCount}
         handleRequestSort={(e, property) => {
           let direction = 'asc';
           if (property === orderBy) {
@@ -124,13 +137,21 @@ export const IndividualsListTable = ({
               role='checkbox'
               key={row.id}
             >
-              <TableCell align='left'>{row.individualCaId}</TableCell>
-              <TableCell align='left'>{row.fullName}</TableCell>
-              <TableCell align='left'>{row.household.householdCaId}</TableCell>
-              <TableCell align='left'>{row.dob}</TableCell>
-              <TableCell align='right'>{row.sex}</TableCell>
+              <TableCell align='left'>{row.householdCaId}</TableCell>
+              <TableCell align='left'>
+                {row.paymentRecords.edges[0].node.headOfHousehold}
+              </TableCell>
+              <TableCell align='right'>{row.familySize}</TableCell>
+              <TableCell align='left'>{row.location.title}</TableCell>
+              <TableCell align='right'>{row.residenceStatus}</TableCell>
               <TableCell align='right'>
-                {row.household.location.title}
+                {formatCurrency(
+                  row.paymentRecords.edges[0].node.cashPlan
+                    .totalDeliveredQuantity,
+                )}
+              </TableCell>
+              <TableCell align='right'>
+                <Moment format='MM/DD/YYYY'>{row.createdAt}</Moment>
               </TableCell>
             </TableRow>
           );
@@ -149,7 +170,7 @@ export const IndividualsListTable = ({
             setLast(null);
             setAfter(null);
             setBefore(null);
-          } else if (newPage === data.allIndividuals.totalCount / rowsPerPage) {
+          } else if (newPage === data.allHouseholds.totalCount / rowsPerPage) {
             setLast(rowsPerPage);
             setFirst(null);
             setAfter(null);

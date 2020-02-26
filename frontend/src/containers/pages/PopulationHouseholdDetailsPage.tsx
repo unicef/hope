@@ -13,10 +13,10 @@ import {
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { HouseholdVulnerabilities } from '../../components/population/HouseholdVulnerabilities';
-import { HouseholdActivityTable } from '../HouseholdActivityTable';
+import { HouseholdActivityTable } from '../tables/HouseholdActivityTable';
 import { LabelizedField } from '../../components/LabelizedField';
-import { PaymentRecordTable } from '../PaymentRecordTable';
-import { HouseholdIndividualsTable } from '../HouseholdIndividualsTable';
+import { PaymentRecordTable } from '../tables/PaymentRecordTable';
+import { HouseholdIndividualsTable } from '../tables/HouseholdIndividualsTable';
 
 const Container = styled.div`
 padding 20px;

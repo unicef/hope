@@ -8,13 +8,13 @@ import {
   CashPlanNode,
   PaymentRecordNode,
   useAllPaymentRecordsQuery,
-} from '../__generated__/graphql';
-import { Order, TableComponent } from '../components/table/TableComponent';
-import { HeadCell } from '../components/table/EnhancedTableHead';
-import { StatusBox } from '../components/StatusBox';
-import { columnToOrderBy, paymentRecordStatusToColor } from '../utils/utils';
-import { useBusinessArea } from '../hooks/useBusinessArea';
-import { ClickableTableRow } from '../components/table/ClickableTableRow';
+} from '../../__generated__/graphql';
+import { Order, TableComponent } from '../../components/table/TableComponent';
+import { HeadCell } from '../../components/table/EnhancedTableHead';
+import { StatusBox } from '../../components/StatusBox';
+import { columnToOrderBy, paymentRecordStatusToColor } from '../../utils/utils';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { ClickableTableRow } from '../../components/table/ClickableTableRow';
 
 const headCells: HeadCell<PaymentRecordNode>[] = [
   {

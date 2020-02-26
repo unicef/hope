@@ -1601,7 +1601,8 @@ export type AllCashPlansQueryVariables = {
   program: Scalars['ID'],
   after?: Maybe<Scalars['String']>,
   before?: Maybe<Scalars['String']>,
-  count?: Maybe<Scalars['Int']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -2217,8 +2218,8 @@ export type AllBusinessAreasQueryHookResult = ReturnType<typeof useAllBusinessAr
 export type AllBusinessAreasLazyQueryHookResult = ReturnType<typeof useAllBusinessAreasLazyQuery>;
 export type AllBusinessAreasQueryResult = ApolloReactCommon.QueryResult<AllBusinessAreasQuery, AllBusinessAreasQueryVariables>;
 export const AllCashPlansDocument = gql`
-    query AllCashPlans($program: ID!, $after: String, $before: String, $count: Int, $orderBy: String) {
-  allCashPlans(program: $program, after: $after, before: $before, first: $count, orderBy: $orderBy) {
+    query AllCashPlans($program: ID!, $after: String, $before: String, $first: Int, $last: Int, $orderBy: String) {
+  allCashPlans(program: $program, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -2276,7 +2277,8 @@ export function withAllCashPlans<TProps, TChildProps = {}>(operationOptions?: Ap
  *      program: // value for 'program'
  *      after: // value for 'after'
  *      before: // value for 'before'
- *      count: // value for 'count'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
  *      orderBy: // value for 'orderBy'
  *   },
  * });

@@ -4,8 +4,8 @@ import {
   LogEntryObject,
   useAllLogEntriesQuery,
   IndividualNode,
-} from '../__generated__/graphql';
-import { ActivityLogTable } from '../components/ActivityLogTable/ActivityLogTable';
+} from '../../__generated__/graphql';
+import { ActivityLogTable } from '../../components/ActivityLogTable/ActivityLogTable';
 
 interface IndividualsActivityTableProps {
   individual: IndividualNode;

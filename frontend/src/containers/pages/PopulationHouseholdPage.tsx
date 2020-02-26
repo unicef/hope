@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { PageHeader } from '../../components/PageHeader';
-import { HouseholdTable } from '../HouseholdTable';
+import { HouseholdTable } from '../tables/HouseholdTable';
 import { HouseholdFilters } from '../../components/population/HouseholdFilter';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 

@@ -11,7 +11,7 @@ import {
 } from '../../__generated__/graphql';
 import { IndividualContactDetails } from '../../components/population/IndividualContactDetails';
 import { IndividualVulnerabilities } from '../../components/population/IndividualVunerabilities';
-import { IndividualActivityTable } from '../IndividualActivityTable';
+import { IndividualActivityTable } from '../tables/IndividualActivityTable';
 
 const Container = styled.div`
 padding 20px;
