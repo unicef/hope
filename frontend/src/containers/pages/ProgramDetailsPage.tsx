@@ -10,10 +10,10 @@ import {
   useProgrammeChoiceDataQuery,
   useProgramQuery,
 } from '../../__generated__/graphql';
-import { ProgramActivityLogTable } from '../tables/ProgramActivityLogTable';
 import { LoadingComponent } from '../../components/LoadingComponent';
 import { ProgramDetailsPageHeader } from './headers/ProgramDetailsPageHeader';
 import { useSnackbarHelper } from '../../hooks/useBreadcrumbHelper';
+import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
 
 const Container = styled.div`
   && {
@@ -85,7 +85,7 @@ export function ProgramDetailsPage(): React.ReactElement {
           </TableWrapper>
         )}
         <TableWrapper>
-          <ProgramActivityLogTable program={program} />
+          <UniversalActivityLogTable objectId={program.id} />
         </TableWrapper>
       </Container>
       {snackBar.show && (

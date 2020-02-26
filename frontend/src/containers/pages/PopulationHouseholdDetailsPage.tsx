@@ -1,22 +1,22 @@
 import React from 'react';
 import styled from 'styled-components';
 import Paper from '@material-ui/core/Paper';
-import { Typography, Grid } from '@material-ui/core';
+import { Grid, Typography } from '@material-ui/core';
 import { useParams } from 'react-router-dom';
 import { HouseholdDetails } from '../../components/population/HouseholdDetails';
 import { PageHeader } from '../../components/PageHeader';
 import {
-  useHouseholdQuery,
-  HouseholdNode,
   CashPlanNode,
+  HouseholdNode,
+  useHouseholdQuery,
 } from '../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { HouseholdVulnerabilities } from '../../components/population/HouseholdVulnerabilities';
-import { HouseholdActivityTable } from '../tables/HouseholdActivityTable';
 import { LabelizedField } from '../../components/LabelizedField';
 import { PaymentRecordTable } from '../tables/PaymentRecordTable';
 import { HouseholdIndividualsTable } from '../tables/HouseholdIndividualsTable';
+import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
 
 const Container = styled.div`
   padding: 20px;
@@ -127,7 +127,7 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
           </Grid>
         </Overview>
         <Content>
-          <HouseholdActivityTable household={data.household as HouseholdNode} />
+          <UniversalActivityLogTable objectId={data.household.id} />
         </Content>
       </Container>
     </div>
