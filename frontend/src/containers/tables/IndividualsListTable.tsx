@@ -1,16 +1,12 @@
-import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import Moment from 'react-moment';
-import {
-  useAllIndividualsQuery,
-  IndividualNode,
-} from '../../__generated__/graphql';
+import { IndividualNode, useAllIndividualsQuery, } from '../../__generated__/graphql';
 import { columnToOrderBy } from '../../utils/utils';
 import { Order, TableComponent } from '../../components/table/TableComponent';
 import { HeadCell } from '../../components/table/EnhancedTableHead';
+import { ClickableTableRow } from '../../components/table/ClickableTableRow';
 
 const headCells: HeadCell<IndividualNode>[] = [
   {
@@ -62,9 +58,9 @@ interface IndividualsListTableProps {
 }
 
 export const IndividualsListTable = ({
-  ageFilter,
-  businessArea,
-}: IndividualsListTableProps): React.ReactElement => {
+                                       ageFilter,
+                                       businessArea,
+                                     }: IndividualsListTableProps): React.ReactElement => {
   const history = useHistory();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -117,8 +113,12 @@ export const IndividualsListTable = ({
           setOrderDirection(direction);
         }}
         renderRow={(row) => {
+          let age: number | string = 'N/A';
+          if (row.dob) {
+            age = getAgeFromDob(row.dob);
+          }
           return (
-            <TableRow
+            <ClickableTableRow
               hover
               onClick={() => handleClick(row)}
               role='checkbox'
@@ -127,12 +127,10 @@ export const IndividualsListTable = ({
               <TableCell align='left'>{row.individualCaId}</TableCell>
               <TableCell align='left'>{row.fullName}</TableCell>
               <TableCell align='left'>{row.household.householdCaId}</TableCell>
-              <TableCell align='left'>{row.dob}</TableCell>
-              <TableCell align='right'>{row.sex}</TableCell>
-              <TableCell align='right'>
-                {row.household.location.title}
-              </TableCell>
-            </TableRow>
+              <TableCell align='right'>{age}</TableCell>
+              <TableCell align='left'>{row.sex}</TableCell>
+              <TableCell align='left'>{row.household.location.title}</TableCell>
+            </ClickableTableRow>
           );
         }}
         handleChangeRowsPerPage={(e) => {

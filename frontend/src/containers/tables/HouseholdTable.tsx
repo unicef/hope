@@ -1,13 +1,16 @@
-import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import Moment from 'react-moment';
-import { HouseholdNode, useAllHouseholdsQuery } from '../../__generated__/graphql';
+import {
+  HouseholdNode,
+  useAllHouseholdsQuery,
+} from '../../__generated__/graphql';
 import { columnToOrderBy } from '../../utils/utils';
 import { Order, TableComponent } from '../../components/table/TableComponent';
 import { HeadCell } from '../../components/table/EnhancedTableHead';
+import { ClickableTableRow } from '../../components/table/ClickableTableRow';
 
 const headCells: HeadCell<HouseholdNode>[] = [
   {
@@ -131,7 +134,7 @@ export const HouseholdTable = ({
         }}
         renderRow={(row) => {
           return (
-            <TableRow
+            <ClickableTableRow
               hover
               onClick={() => handleClick(row)}
               role='checkbox'
@@ -153,7 +156,7 @@ export const HouseholdTable = ({
               <TableCell align='right'>
                 <Moment format='MM/DD/YYYY'>{row.createdAt}</Moment>
               </TableCell>
-            </TableRow>
+            </ClickableTableRow>
           );
         }}
         handleChangeRowsPerPage={(e) => {

@@ -62,8 +62,8 @@ interface HouseholdIndividualsTableProps {
   household: HouseholdNode;
 }
 export function HouseholdIndividualsTable({
-  household,
-}: HouseholdIndividualsTableProps): ReactElement {
+                                            household,
+                                          }: HouseholdIndividualsTableProps): ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
   const [page, setPage] = useState(0);
