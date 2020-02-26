@@ -141,7 +141,7 @@ export const HouseholdTable = ({
               <TableCell align='left'>
                 {row.paymentRecords.edges[0].node.headOfHousehold}
               </TableCell>
-              <TableCell align='right'>{row.familySize}</TableCell>
+              <TableCell align='right'>{row.individuals.totalCount}</TableCell>
               <TableCell align='left'>{row.location.title}</TableCell>
               <TableCell align='right'>{row.residenceStatus}</TableCell>
               <TableCell align='right'>

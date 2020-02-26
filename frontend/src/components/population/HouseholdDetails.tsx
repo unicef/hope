@@ -49,7 +49,11 @@ export function HouseholdDetails({
         <Grid container spacing={6}>
           <Grid item xs={4}>
             <LabelizedField label='Household Size'>
-              <div>{houseHold.familySize ? houseHold.familySize : 0}</div>
+              <div>
+                {houseHold.individuals && houseHold.individuals.totalCount
+                  ? houseHold.individuals.totalCount
+                  : 0}
+              </div>
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>
