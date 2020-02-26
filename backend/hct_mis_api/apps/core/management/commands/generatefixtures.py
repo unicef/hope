@@ -13,11 +13,16 @@ from household.fixtures import (
     EntitlementCardFactory,
     HouseholdFactory,
     IndividualFactory,
-    RegistrationDataImportFactory,
 )
 from household.models import Household
 from payment.fixtures import PaymentRecordFactory
 from program.fixtures import CashPlanFactory, ProgramFactory
+from registration_data.fixtures import RegistrationDataImportFactory
+from registration_datahub.fixtures import (
+    RegistrationDataImportDatahubFactory,
+    ImportedIndividualFactory,
+    ImportedHouseholdFactory,
+)
 from targeting.fixtures import TargetPopulationFactory
 
 
@@ -85,7 +90,9 @@ class Command(BaseCommand):
                     registration_data_import_id=registration_data_import,
                 )
                 individuals = IndividualFactory.create_batch(
-                    4, household=household
+                    4,
+                    household=household,
+                    registration_data_import_id=registration_data_import,
                 )
                 household.head_of_household = individuals[0]
                 household.representative = individuals[0]
@@ -119,6 +126,22 @@ class Command(BaseCommand):
         )
         pool.close()
         pool.join()
+
+        registration_data_import_dth = RegistrationDataImportDatahubFactory(
+            imported_by="Test User",
+        )
+        for _ in range(50):
+            imported_household = ImportedHouseholdFactory(
+                registration_data_import_id=registration_data_import_dth,
+            )
+            imported_individuals = ImportedIndividualFactory.create_batch(
+                4,
+                household=imported_household,
+                registration_data_import_id=registration_data_import_dth,
+            )
+            imported_household.head_of_household = imported_individuals[0]
+            imported_household.representative = imported_individuals[0]
+            imported_household.save()
 
         # quick fix for households without payment_records
         Household.objects.filter(payment_records=None).delete()
