@@ -1,4 +1,3 @@
-import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -11,6 +10,7 @@ import {
 import { columnToOrderBy } from '../utils/utils';
 import { Order, TableComponent } from '../components/table/TableComponent';
 import { HeadCell } from '../components/table/EnhancedTableHead';
+import { ClickableTableRow } from '../components/table/ClickableTableRow';
 
 const headCells: HeadCell<IndividualNode>[] = [
   {
@@ -118,7 +118,7 @@ export const IndividualsListTable = ({
         }}
         renderRow={(row) => {
           return (
-            <TableRow
+            <ClickableTableRow
               hover
               onClick={() => handleClick(row)}
               role='checkbox'
@@ -132,7 +132,7 @@ export const IndividualsListTable = ({
               <TableCell align='right'>
                 {row.household.location.title}
               </TableCell>
-            </TableRow>
+            </ClickableTableRow>
           );
         }}
         handleChangeRowsPerPage={(e) => {
