@@ -28,6 +28,7 @@ export const AllIndividuals = gql`
           identificationType
           identificationNumber
           household {
+            id
             householdCaId
             location {
               id

@@ -102,7 +102,7 @@ DATABASES = {
         "NAME": os.getenv("POSTGRES_DB"),
         "USER": os.getenv("POSTGRES_USER"),
         "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
-        "HOST": os.getenv("POSTGRES_HOST"),
+        "HOST": os.getenv("POSTGRES_HOST_CA"),
         "PORT": 5432,
     },
     "registration_datahub": {
@@ -110,7 +110,7 @@ DATABASES = {
         "NAME": os.getenv("POSTGRES_DB"),
         "USER": os.getenv("POSTGRES_USER"),
         "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
-        "HOST": os.getenv("POSTGRES_HOST"),
+        "HOST": os.getenv("POSTGRES_HOST_REG"),
         "PORT": 5432,
     },
 }
@@ -174,6 +174,7 @@ PROJECT_APPS = [
     "mptt",
     "django_extensions",
     "auditlog",
+    "registration_data",
 ]
 
 DJANGO_APPS = [
