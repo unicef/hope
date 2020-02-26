@@ -1,5 +1,4 @@
 import React, { ReactElement, useState } from 'react';
-import { AllCashPlansQueryVariables } from '../../__generated__/graphql';
 import { Order, TableComponent } from '../../components/table/TableComponent';
 import { HeadCell } from '../../components/table/EnhancedTableHead';
 import { columnToOrderBy } from '../../utils/utils';
@@ -44,7 +43,7 @@ export function UniversalTable<T, K>({
       rowsPerPageOptions={[2, 10, 15]}
       rowsPerPage={rowsPerPage}
       page={page}
-      itemsCount={data.allCashPlans.totalCount}
+      itemsCount={data[queriedObjectName].totalCount}
       handleChangePage={(event, newPage) => {
         const variables = {
           first: undefined,

@@ -38,13 +38,17 @@ export function ProgramActivityLogTable({
           const before = edges[0].cursor;
           variables = {
             before,
-            count: rowsPerPage,
+            last: rowsPerPage,
+            first: undefined,
+            after: undefined,
           };
         } else {
           const after = edges[logEntries.length - 1].cursor;
           variables = {
             after,
-            count: rowsPerPage,
+            first: rowsPerPage,
+            last: undefined,
+            before: undefined,
           };
         }
         setPage(newPage);
@@ -60,7 +64,10 @@ export function ProgramActivityLogTable({
         setRowsPerPage(value);
         setPage(0);
         const variables = {
-          count: rowsPerPage,
+          first: rowsPerPage,
+          after: undefined,
+          last: undefined,
+          before: undefined,
         };
         fetchMore({
           variables,

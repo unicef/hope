@@ -1716,7 +1716,8 @@ export type AllLogEntriesQueryVariables = {
   objectId: Scalars['String'],
   after?: Maybe<Scalars['String']>,
   before?: Maybe<Scalars['String']>,
-  count?: Maybe<Scalars['Int']>
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -1748,7 +1749,8 @@ export type AllPaymentRecordsQueryVariables = {
   after?: Maybe<Scalars['String']>,
   before?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>,
-  count?: Maybe<Scalars['Int']>
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -2465,8 +2467,8 @@ export type AllIndividualsQueryHookResult = ReturnType<typeof useAllIndividualsQ
 export type AllIndividualsLazyQueryHookResult = ReturnType<typeof useAllIndividualsLazyQuery>;
 export type AllIndividualsQueryResult = ApolloReactCommon.QueryResult<AllIndividualsQuery, AllIndividualsQueryVariables>;
 export const AllLogEntriesDocument = gql`
-    query AllLogEntries($objectId: String!, $after: String, $before: String, $count: Int) {
-  allLogEntries(after: $after, before: $before, first: $count, objectId: $objectId) {
+    query AllLogEntries($objectId: String!, $after: String, $before: String, $first: Int, $last: Int) {
+  allLogEntries(after: $after, before: $before, first: $first, last: $last, objectId: $objectId) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -2524,7 +2526,8 @@ export function withAllLogEntries<TProps, TChildProps = {}>(operationOptions?: A
  *      objectId: // value for 'objectId'
  *      after: // value for 'after'
  *      before: // value for 'before'
- *      count: // value for 'count'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
  *   },
  * });
  */
@@ -2538,8 +2541,8 @@ export type AllLogEntriesQueryHookResult = ReturnType<typeof useAllLogEntriesQue
 export type AllLogEntriesLazyQueryHookResult = ReturnType<typeof useAllLogEntriesLazyQuery>;
 export type AllLogEntriesQueryResult = ApolloReactCommon.QueryResult<AllLogEntriesQuery, AllLogEntriesQueryVariables>;
 export const AllPaymentRecordsDocument = gql`
-    query AllPaymentRecords($cashPlan: ID!, $after: String, $before: String, $orderBy: String, $count: Int) {
-  allPaymentRecords(cashPlan: $cashPlan, after: $after, before: $before, first: $count, orderBy: $orderBy) {
+    query AllPaymentRecords($cashPlan: ID!, $after: String, $before: String, $orderBy: String, $first: Int, $last: Int) {
+  allPaymentRecords(cashPlan: $cashPlan, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -2610,7 +2613,8 @@ export function withAllPaymentRecords<TProps, TChildProps = {}>(operationOptions
  *      after: // value for 'after'
  *      before: // value for 'before'
  *      orderBy: // value for 'orderBy'
- *      count: // value for 'count'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
  *   },
  * });
  */
