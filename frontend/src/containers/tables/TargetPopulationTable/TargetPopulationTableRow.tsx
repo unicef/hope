@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import Moment from 'react-moment';
 import TableCell from '@material-ui/core/TableCell';
 import { useHistory } from 'react-router-dom';
 import { TargetPopulationNode } from '../../../__generated__/graphql';
@@ -32,6 +33,16 @@ export function TargetPopulationTableRow({
       key={targetPopulation.id}
     >
       <TableCell align='left'>{targetPopulation.name}</TableCell>
+      <TableCell align='left'>-</TableCell>
+      <TableCell align='left'>-</TableCell>
+      <TableCell align='left'>-</TableCell>
+      <TableCell align='left'>
+        <Moment format='MM/DD/YYYY'>
+          {targetPopulation.createdAt}
+        </Moment>
+      </TableCell>
+      <TableCell align='left'>-</TableCell>
+      <TableCell align='left'>-</TableCell>
     </ClickableTableRow>
   );
 }
