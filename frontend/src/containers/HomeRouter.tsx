@@ -15,7 +15,6 @@ import { PaymentRecordDetailsPage } from './pages/PaymentRecordDetailsPage';
 import { PopulationHouseholdPage } from "./pages/PopulationHouseholdPage";
 import { TargetPopulationPage } from './pages/TargetPopulationPage';
 import { TargetPopulationDetailsPage } from './pages/TargetPopulationDetailsPage';
-import { CreateTargetPopulation } from './pages/CreateTargetPopulation';
 
 const Root = styled.div`
   display: flex;
@@ -62,9 +61,6 @@ export function HomeRouter(): React.ReactElement {
           <Route exact path='/:businessArea/target-population'>
             <TargetPopulationPage />
           </Route>
-          <Route path='/:businessArea/target-population/create'>
-            <CreateTargetPopulation />
-          </Route>
           <Route path='/:businessArea/target-population/:id'>
             <TargetPopulationDetailsPage />
           </Route>
@@ -73,9 +69,6 @@ export function HomeRouter(): React.ReactElement {
           </Route>
           <Route path='/:businessArea/programs/:id'>
             <ProgramDetailsPage />
-          </Route>
-          <Route path='/:businessArea/payment_records/:id'>
-            <PaymentRecordDetailsPage />
           </Route>
           <Route path='/:businessArea/payment_records/:id'>
             <PaymentRecordDetailsPage />
