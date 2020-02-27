@@ -3,17 +3,17 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { Snackbar, SnackbarContent } from '@material-ui/core';
 import { ProgramDetails } from '../../components/programs/ProgramDetails';
-import { CashPlanTable } from '../CashPlanTable';
+import { CashPlanTable } from '../tables/CashPlanTable/CashPlanTable';
 import {
   ProgramNode,
   ProgramStatus,
   useProgrammeChoiceDataQuery,
   useProgramQuery,
 } from '../../__generated__/graphql';
-import { ProgramActivityLogTable } from '../ProgramActivityLogTable';
 import { LoadingComponent } from '../../components/LoadingComponent';
 import { ProgramDetailsPageHeader } from './headers/ProgramDetailsPageHeader';
 import { useSnackbarHelper } from '../../hooks/useBreadcrumbHelper';
+import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
 
 const Container = styled.div`
   && {
@@ -85,7 +85,7 @@ export function ProgramDetailsPage(): React.ReactElement {
           </TableWrapper>
         )}
         <TableWrapper>
-          <ProgramActivityLogTable program={program} />
+          <UniversalActivityLogTable objectId={program.id} />
         </TableWrapper>
       </Container>
       {snackBar.show && (
