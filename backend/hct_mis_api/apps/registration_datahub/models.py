@@ -1,3 +1,10 @@
+from datetime import date
+
+from django.core.validators import (
+    validate_image_file_extension,
+    MinLengthValidator,
+    MaxLengthValidator,
+)
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from phonenumber_field.modelfields import PhoneNumberField
@@ -7,7 +14,7 @@ from hct_mis_api.apps.household.const import NATIONALITIES
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 
 
-class Household(TimeStampedUUIDModel):
+class ImportedHousehold(TimeStampedUUIDModel):
     RESIDENCE_STATUS_CHOICE = (
         ("REFUGEE", _("Refugee")),
         ("MIGRANT", _("Migrant")),
@@ -17,24 +24,37 @@ class Household(TimeStampedUUIDModel):
     )
 
     household_ca_id = models.CharField(max_length=255)
-    consent = ImageField()
+    consent = ImageField(validators=[validate_image_file_extension])
     residence_status = models.CharField(
         max_length=255, choices=RESIDENCE_STATUS_CHOICE,
     )
     nationality = models.CharField(max_length=255, choices=NATIONALITIES,)
-    family_size = models.PositiveIntegerField(blank=True, null=True)
-    address = models.CharField(max_length=255, blank=True, null=True)
-    # TODO where to point datahub foreign key
-    # location = models.ForeignKey('core.Location', related_name='households', on_delete=models.CASCADE)
+    family_size = models.PositiveIntegerField()
+    address = models.CharField(max_length=255, blank=True)
+    location = models.CharField(max_length=255)
+    representative = models.ForeignKey(
+        "ImportedIndividual",
+        on_delete=models.SET_NULL,
+        related_name="represented_households",
+        null=True,
+    )
     registration_data_import_id = models.ForeignKey(
-        "RegistrationDataImport",
+        "RegistrationDataImportDatahub",
         related_name="households",
         on_delete=models.CASCADE,
     )
-    is_active = models.BooleanField()
+    head_of_household = models.OneToOneField(
+        "ImportedIndividual",
+        on_delete=models.CASCADE,
+        related_name="heading_household",
+        null=True,
+    )
+
+    def __str__(self):
+        return f"Household CashAssist ID: {self.household_ca_id}"
 
 
-class Individual(TimeStampedUUIDModel):
+class ImportedIndividual(TimeStampedUUIDModel):
     SEX_CHOICE = (
         ("MALE", _("Male")),
         ("FEMALE", _("Female")),
@@ -54,32 +74,90 @@ class Individual(TimeStampedUUIDModel):
         ("NATIONAL_ID", _("National ID")),
         ("NATIONAL_PASSPORT", _("National Passport")),
     )
+    YES_NO_CHOICE = (
+        ("YES", _("Yes")),
+        ("NO", _("No")),
+    )
+    DISABILITY_CHOICE = (
+        ("NO", _("No")),
+        ("SEEING", _("Difficulty seeing (even if wearing glasses)")),
+        ("HEARING", _("Difficulty hearing (even if using a hearing aid)")),
+        ("WALKING", _("Difficulty walking or climbing steps")),
+        ("MEMORY", _("Difficulty remembering or concentrating")),
+        ("SELF_CARE", _("Difficulty with self care (washing, dressing)")),
+        (
+            "COMMUNICATING",
+            _(
+                "Difficulty communicating "
+                "(e.g understanding or being understood)"
+            ),
+        ),
+    )
+
     individual_ca_id = models.CharField(max_length=255)
-    full_name = models.CharField(max_length=255)
-    first_name = models.CharField(max_length=255)
-    last_name = models.CharField(max_length=255)
-    middle_name = models.CharField(max_length=255)
+    full_name = models.CharField(
+        max_length=255,
+        validators=[MinLengthValidator(3), MaxLengthValidator(255)],
+    )
+    first_name = models.CharField(
+        max_length=85,
+        validators=[MinLengthValidator(3), MaxLengthValidator(85)],
+    )
+    middle_name = models.CharField(
+        max_length=85,
+        validators=[MinLengthValidator(3), MaxLengthValidator(85)],
+        blank=True,
+    )
+    last_name = models.CharField(
+        max_length=85,
+        validators=[MinLengthValidator(3), MaxLengthValidator(85)],
+    )
     sex = models.CharField(max_length=255, choices=SEX_CHOICE,)
-    dob = models.DateField(blank=True, null=True)
-    estimated_dob = models.DateField(blank=True, null=True)
+    dob = models.DateField()
+    estimated_dob = models.CharField(
+        max_length=3, default="NO", choices=YES_NO_CHOICE,
+    )
     nationality = models.CharField(max_length=255, choices=NATIONALITIES,)
     martial_status = models.CharField(
         max_length=255, choices=MARTIAL_STATUS_CHOICE,
     )
     phone_number = PhoneNumberField(blank=True)
+    phone_number_alternative = PhoneNumberField(blank=True)
     identification_type = models.CharField(
         max_length=255, choices=IDENTIFICATION_TYPE_CHOICE,
     )
     identification_number = models.CharField(max_length=255)
     household = models.ForeignKey(
-        "Household", related_name="individuals", on_delete=models.CASCADE
+        "ImportedHousehold",
+        related_name="individuals",
+        on_delete=models.CASCADE,
     )
+    registration_data_import_id = models.ForeignKey(
+        "RegistrationDataImportDatahub",
+        related_name="individuals",
+        on_delete=models.CASCADE,
+    )
+    work_status = models.CharField(
+        max_length=3, default="NO", choices=YES_NO_CHOICE,
+    )
+    disability = models.CharField(
+        max_length=30, default="NO", choices=DISABILITY_CHOICE,
+    )
+
+    @property
+    def age(self):
+        today = date.today()
+        return (
+            today.year
+            - self.dob.year
+            - ((today.month, today.day) < (self.dob.month, self.dob.day))
+        )
 
     def __str__(self):
         return self.full_name
 
 
-class RegistrationDataImport(TimeStampedUUIDModel):
+class RegistrationDataImportDatahub(TimeStampedUUIDModel):
     IN_PROGRESS = "IN_PROGRESS"
     DONE = "DONE"
     STATUS_CHOICE = (
@@ -94,12 +172,9 @@ class RegistrationDataImport(TimeStampedUUIDModel):
     )
     name = models.CharField(max_length=255)
     status = models.CharField(max_length=255, choices=STATUS_CHOICE,)
-    import_date = models.DateTimeField()
-    # TODO  what type
-    imported_by = models.CharField(max_length=255)
+    import_date = models.DateTimeField(auto_now_add=True)
+    imported_by = models.CharField(max_length=255, blank=True)
     data_source = models.CharField(max_length=255, choices=DATA_SOURCE_CHOICE,)
-    number_of_individuals = models.PositiveIntegerField()
-    number_of_households = models.PositiveIntegerField()
 
     def __str__(self):
         return self.name

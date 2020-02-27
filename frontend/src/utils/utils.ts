@@ -4,6 +4,7 @@ import {
   ChoiceObject,
   ProgramStatus,
 } from '../__generated__/graphql';
+import moment from 'moment';
 
 export function opacityToHex(opacity: number): string {
   return Math.floor(opacity * 0xff).toString(16);
@@ -117,4 +118,17 @@ export function programCompare(
   const statusA = programStatusToPriority(a.node.status);
   const statusB = programStatusToPriority(b.node.status);
   return statusA > statusB ? 1 : -1;
+}
+
+export function formatCurrency(amount: number): string {
+  return amount.toLocaleString('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+export function getAgeFromDob(date: string): number {
+  return moment().diff(moment(date), 'years');
 }

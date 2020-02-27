@@ -6,7 +6,49 @@ from household.fixtures import HouseholdFactory
 class TestHouseholdQuery(APITestCase):
     ALL_HOUSEHOLD_QUERY = """
     query AllHouseholds{
-      allHouseholds(familySizeGreater: 4, familySizeLower: 10) {
+      allHouseholds {
+        edges {
+          node {
+            familySize
+            nationality
+            householdCaId
+            address
+          }
+        }
+      }
+    }
+    """
+    ALL_HOUSEHOLD_QUERY_RANGE = """
+    query AllHouseholds{
+      allHouseholds(familySize: "{\\"min\\": 3, \\"max\\": 9}") {
+        edges {
+          node {
+            familySize
+            nationality
+            householdCaId
+            address
+          }
+        }
+      }
+    }
+    """
+    ALL_HOUSEHOLD_QUERY_MIN = """
+    query AllHouseholds{
+      allHouseholds(familySize: "{\\"min\\": 3}") {
+        edges {
+          node {
+            familySize
+            nationality
+            householdCaId
+            address
+          }
+        }
+      }
+    }
+    """
+    ALL_HOUSEHOLD_QUERY_MAX = """
+    query AllHouseholds{
+      allHouseholds(familySize: "{\\"max\\": 9}") {
         edges {
           node {
             familySize
@@ -49,11 +91,31 @@ class TestHouseholdQuery(APITestCase):
             context={"user": self.user},
         )
 
+    def test_household_query_all_range(self):
+        self.snapshot_graphql_request(
+            request_string=self.ALL_HOUSEHOLD_QUERY_RANGE,
+            context={"user": self.user},
+        )
+
+    def test_household_query_all_min(self):
+        self.snapshot_graphql_request(
+            request_string=self.ALL_HOUSEHOLD_QUERY_MIN,
+            context={"user": self.user},
+        )
+
+    def test_household_query_all_max(self):
+        self.snapshot_graphql_request(
+            request_string=self.ALL_HOUSEHOLD_QUERY_MAX,
+            context={"user": self.user},
+        )
+
     def test_household_query_single(self):
         self.snapshot_graphql_request(
             request_string=self.HOUSEHOLD_QUERY,
             context={"user": self.user},
             variables={
-                "id": self.id_to_base64(self.households[0].id, "Household")
+                "id": self.id_to_base64(
+                    self.households[0].id, "Household"
+                )
             },
         )
