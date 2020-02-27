@@ -4,7 +4,7 @@ import { Button } from '@material-ui/core';
 import { useParams } from 'react-router-dom';
 import { PageHeader } from '../../components/PageHeader';
 import { CashPlanDetails } from '../../components/CashPlanDetails';
-import { PaymentRecordTable } from '../PaymentRecordTable';
+import { PaymentRecordTable } from '../tables/PaymentRecordTable';
 import { useCashPlanQuery, CashPlanNode } from '../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
 import { useBusinessArea } from '../../hooks/useBusinessArea';

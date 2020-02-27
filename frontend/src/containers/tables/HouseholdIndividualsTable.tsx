@@ -2,13 +2,13 @@ import React, { ReactElement, useState } from 'react';
 import TableCell from '@material-ui/core/TableCell';
 import styled from 'styled-components';
 import { useHistory } from 'react-router-dom';
-import { HouseholdNode, IndividualNode } from '../__generated__/graphql';
-import { Order, TableComponent } from '../components/table/TableComponent';
-import { HeadCell } from '../components/table/EnhancedTableHead';
-import { ClickableTableRow } from '../components/table/ClickableTableRow';
-import { useBusinessArea } from '../hooks/useBusinessArea';
-import { StatusBox } from '../components/StatusBox';
-import { paymentRecordStatusToColor } from '../utils/utils';
+import { HouseholdNode, IndividualNode } from '../../__generated__/graphql';
+import { Order, TableComponent } from '../../components/table/TableComponent';
+import { HeadCell } from '../../components/table/EnhancedTableHead';
+import { ClickableTableRow } from '../../components/table/ClickableTableRow';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { StatusBox } from '../../components/StatusBox';
+import { paymentRecordStatusToColor } from '../../utils/utils';
 
 const headCells: HeadCell<IndividualNode>[] = [
   {
@@ -62,8 +62,8 @@ interface HouseholdIndividualsTableProps {
   household: HouseholdNode;
 }
 export function HouseholdIndividualsTable({
-  household,
-}: HouseholdIndividualsTableProps): ReactElement {
+                                            household,
+                                          }: HouseholdIndividualsTableProps): ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
   const [page, setPage] = useState(0);
