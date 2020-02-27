@@ -4,6 +4,7 @@ import { PageHeader } from '../../components/PageHeader';
 import { HouseholdFilters } from '../../components/population/HouseholdFilter';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { HouseholdTable } from '../tables/HouseholdTable';
+import { useAllProgramsQuery, ProgramNode } from '../../__generated__/graphql';
 
 const Container = styled.div`
   display: flex;
@@ -17,7 +18,13 @@ export function PopulationHouseholdPage(): React.ReactElement {
     max: undefined,
   });
   const [textFilter, setTextFilter] = useState('');
+  const [programFilter, setProgramFilter] = useState();
   const businessArea = useBusinessArea();
+  const { data, loading } = useAllProgramsQuery({
+    variables: { businessArea },
+  });
+
+  if (loading) return null;
 
   const handleMinSizeFilter = (value: number): void => {
     setSizeFilter({ ...sizeFilter, min: value });
@@ -30,6 +37,10 @@ export function PopulationHouseholdPage(): React.ReactElement {
     }
   };
 
+  const householdProgramFilter = (value: string): void => {
+    setProgramFilter(value);
+  };
+
   const handleTextFilter = (value: string): void => {
     if (value.length > 3) {
       setTextFilter(value);
@@ -38,18 +49,24 @@ export function PopulationHouseholdPage(): React.ReactElement {
     }
   };
 
+  const { allPrograms } = data;
+  const programs = allPrograms.edges.map((edge) => edge.node);
+
   return (
     <div>
       <PageHeader title='Households' />
       <HouseholdFilters
+        programs={programs as ProgramNode[]}
         minValue={sizeFilter.min}
         maxValue={sizeFilter.max}
+        householdProgramFilter={householdProgramFilter}
         householdMaxSizeFilter={handleMaxSizeFilter}
         householdMinSizeFilter={handleMinSizeFilter}
         householdTextFilter={handleTextFilter}
       />
       <Container>
         <HouseholdTable
+          programFilter={programFilter}
           sizeFilter={sizeFilter}
           textFilter={textFilter}
           businessArea={businessArea}

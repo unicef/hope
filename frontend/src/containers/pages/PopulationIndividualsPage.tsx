@@ -15,6 +15,8 @@ const Container = styled.div`
 export function PopulationIndividualsPage(): React.ReactElement {
   const businessArea = useBusinessArea();
   const [ageFilter, setAgeFilter] = useState({ min: null, max: null });
+  const [sexFilter, setSexFilter] = useState('none');
+  const [textFilter, setTextFilter] = useState();
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -29,16 +31,17 @@ export function PopulationIndividualsPage(): React.ReactElement {
   const handleMaxAgeFilter = (value: number): void => {
     setAgeFilter({ ...ageFilter, max: value });
   };
-  const handleTextFilter = (value: string): string => {
-    return value;
+  const handleTextFilter = (value: string): void => {
+    setTextFilter(value);
   };
-  const handleSexFilter = (value: string): string => {
-    return value;
+  const handleSexFilter = (value: string): void => {
+    setSexFilter(value);
   };
   return (
     <>
       <PageHeader title='Individuals' breadCrumbs={breadCrumbsItems} />
       <IndividualsFilter
+        sexFilter={sexFilter}
         individualSexFilter={handleSexFilter}
         individualMaxAgeFilter={handleMaxAgeFilter}
         individualMinAgeFilter={handleMinAgeFilter}
@@ -46,6 +49,8 @@ export function PopulationIndividualsPage(): React.ReactElement {
       />
       <Container>
         <IndividualsListTable
+          textFilter={textFilter}
+          sexFilter={sexFilter}
           ageFilter={ageFilter}
           businessArea={businessArea}
         />
