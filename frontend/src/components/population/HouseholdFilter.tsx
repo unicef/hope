@@ -93,6 +93,7 @@ export function HouseholdFilters({
         }}
       />
       <TextContainer
+        id='minFilter'
         value={minValue}
         variant='filled'
         placeholder='Household size'
@@ -108,6 +109,7 @@ export function HouseholdFilters({
       />
       to
       <TextContainer
+        id='maxFilter'
         value={maxValue}
         variant='filled'
         placeholder='Household size'

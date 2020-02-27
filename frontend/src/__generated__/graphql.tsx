@@ -2289,6 +2289,9 @@ export type AllHouseholdsQuery = (
         & { location: (
           { __typename?: 'LocationNode' }
           & Pick<LocationNode, 'id' | 'title'>
+        ), individuals: (
+          { __typename?: 'IndividualNodeConnection' }
+          & Pick<IndividualNodeConnection, 'totalCount'>
         ), paymentRecords: (
           { __typename?: 'PaymentRecordNodeConnection' }
           & { edges: Array<Maybe<(
@@ -2471,6 +2474,7 @@ export type HouseholdQuery = (
     & Pick<HouseholdNode, 'id' | 'createdAt' | 'familySize' | 'nationality' | 'residenceStatus'>
     & { individuals: (
       { __typename?: 'IndividualNodeConnection' }
+      & Pick<IndividualNodeConnection, 'totalCount'>
       & { edges: Array<Maybe<(
         { __typename?: 'IndividualNodeEdge' }
         & { node: Maybe<(
@@ -2950,6 +2954,9 @@ export const AllHouseholdsDocument = gql`
           id
           title
         }
+        individuals {
+          totalCount
+        }
         paymentRecords {
           edges {
             node {
@@ -3423,10 +3430,14 @@ export const HouseholdDocument = gql`
           identificationType
         }
       }
+      totalCount
     }
     location {
       id
       title
+    }
+    individuals {
+      totalCount
     }
     residenceStatus
     paymentRecords {
