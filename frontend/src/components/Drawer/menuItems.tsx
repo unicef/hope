@@ -27,7 +27,7 @@ export const menuItems = [
   },
   {
     name: 'Population',
-    href: '/#',
+    href: '/population/household',
     selectedRegexp: /^\/population.*$/,
     icon: <PeopleIcon />,
     collapsable: true,

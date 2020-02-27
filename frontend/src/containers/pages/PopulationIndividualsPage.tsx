@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { PageHeader } from '../../components/PageHeader';
-import { IndividualsListTable } from '../IndividualsListTable';
+import { IndividualsListTable } from '../tables/IndividualsListTable';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { IndividualsFilter } from '../../components/population/IndividualsFilter';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';

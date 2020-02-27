@@ -5,14 +5,16 @@ export const AllCashPlans = gql`
     $program: ID!
     $after: String
     $before: String
-    $count: Int
+    $first: Int
+    $last: Int
     $orderBy: String
   ) {
     allCashPlans(
       program: $program
       after: $after
       before: $before
-      first: $count
+      first: $first
+      last: $last
       orderBy: $orderBy
     ) {
       pageInfo {
