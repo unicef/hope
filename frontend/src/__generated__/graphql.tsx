@@ -2237,7 +2237,8 @@ export type AllCashPlansQueryVariables = {
   program: Scalars['ID'],
   after?: Maybe<Scalars['String']>,
   before?: Maybe<Scalars['String']>,
-  count?: Maybe<Scalars['Int']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -2267,7 +2268,10 @@ export type AllHouseholdsQueryVariables = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
+<<<<<<< HEAD
   familySize?: Maybe<Scalars['String']>,
+=======
+>>>>>>> develop
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -2301,7 +2305,7 @@ export type AllHouseholdsQuery = (
               & Pick<PaymentRecordNode, 'id' | 'headOfHousehold'>
               & { cashPlan: (
                 { __typename?: 'CashPlanNode' }
-                & Pick<CashPlanNode, 'totalDeliveredQuantity'>
+                & Pick<CashPlanNode, 'id' | 'totalDeliveredQuantity'>
                 & { program: (
                   { __typename?: 'ProgramNode' }
                   & Pick<ProgramNode, 'id' | 'name'>
@@ -2338,7 +2342,7 @@ export type AllIndividualsQuery = (
         & Pick<IndividualNode, 'id' | 'createdAt' | 'updatedAt' | 'individualCaId' | 'fullName' | 'sex' | 'dob' | 'nationality' | 'martialStatus' | 'phoneNumber' | 'identificationType' | 'identificationNumber'>
         & { household: (
           { __typename?: 'HouseholdNode' }
-          & Pick<HouseholdNode, 'householdCaId'>
+          & Pick<HouseholdNode, 'id' | 'householdCaId'>
           & { location: (
             { __typename?: 'LocationNode' }
             & Pick<LocationNode, 'id' | 'title'>
@@ -2353,7 +2357,8 @@ export type AllLogEntriesQueryVariables = {
   objectId: Scalars['String'],
   after?: Maybe<Scalars['String']>,
   before?: Maybe<Scalars['String']>,
-  count?: Maybe<Scalars['Int']>
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -2385,7 +2390,8 @@ export type AllPaymentRecordsQueryVariables = {
   after?: Maybe<Scalars['String']>,
   before?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>,
-  count?: Maybe<Scalars['Int']>
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -2856,8 +2862,8 @@ export type AllBusinessAreasQueryHookResult = ReturnType<typeof useAllBusinessAr
 export type AllBusinessAreasLazyQueryHookResult = ReturnType<typeof useAllBusinessAreasLazyQuery>;
 export type AllBusinessAreasQueryResult = ApolloReactCommon.QueryResult<AllBusinessAreasQuery, AllBusinessAreasQueryVariables>;
 export const AllCashPlansDocument = gql`
-    query AllCashPlans($program: ID!, $after: String, $before: String, $count: Int, $orderBy: String) {
-  allCashPlans(program: $program, after: $after, before: $before, first: $count, orderBy: $orderBy) {
+    query AllCashPlans($program: ID!, $after: String, $before: String, $first: Int, $last: Int, $orderBy: String) {
+  allCashPlans(program: $program, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -2915,7 +2921,8 @@ export function withAllCashPlans<TProps, TChildProps = {}>(operationOptions?: Ap
  *      program: // value for 'program'
  *      after: // value for 'after'
  *      before: // value for 'before'
- *      count: // value for 'count'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
  *      orderBy: // value for 'orderBy'
  *   },
  * });
@@ -2930,8 +2937,13 @@ export type AllCashPlansQueryHookResult = ReturnType<typeof useAllCashPlansQuery
 export type AllCashPlansLazyQueryHookResult = ReturnType<typeof useAllCashPlansLazyQuery>;
 export type AllCashPlansQueryResult = ApolloReactCommon.QueryResult<AllCashPlansQuery, AllCashPlansQueryVariables>;
 export const AllHouseholdsDocument = gql`
+<<<<<<< HEAD
     query AllHouseholds($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $familySize: String, $orderBy: String) {
   allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, familySize: $familySize, orderBy: $orderBy) {
+=======
+    query AllHouseholds($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String) {
+  allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, orderBy: $orderBy) {
+>>>>>>> develop
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -2960,6 +2972,7 @@ export const AllHouseholdsDocument = gql`
               id
               headOfHousehold
               cashPlan {
+                id
                 program {
                   id
                   name
@@ -3009,7 +3022,10 @@ export function withAllHouseholds<TProps, TChildProps = {}>(operationOptions?: A
  *      first: // value for 'first'
  *      last: // value for 'last'
  *      businessArea: // value for 'businessArea'
+<<<<<<< HEAD
  *      familySize: // value for 'familySize'
+=======
+>>>>>>> develop
  *      orderBy: // value for 'orderBy'
  *   },
  * });
@@ -3046,6 +3062,7 @@ export const AllIndividualsDocument = gql`
         identificationType
         identificationNumber
         household {
+          id
           householdCaId
           location {
             id
@@ -3104,8 +3121,8 @@ export type AllIndividualsQueryHookResult = ReturnType<typeof useAllIndividualsQ
 export type AllIndividualsLazyQueryHookResult = ReturnType<typeof useAllIndividualsLazyQuery>;
 export type AllIndividualsQueryResult = ApolloReactCommon.QueryResult<AllIndividualsQuery, AllIndividualsQueryVariables>;
 export const AllLogEntriesDocument = gql`
-    query AllLogEntries($objectId: String!, $after: String, $before: String, $count: Int) {
-  allLogEntries(after: $after, before: $before, first: $count, objectId: $objectId) {
+    query AllLogEntries($objectId: String!, $after: String, $before: String, $first: Int, $last: Int) {
+  allLogEntries(after: $after, before: $before, first: $first, last: $last, objectId: $objectId) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -3163,7 +3180,8 @@ export function withAllLogEntries<TProps, TChildProps = {}>(operationOptions?: A
  *      objectId: // value for 'objectId'
  *      after: // value for 'after'
  *      before: // value for 'before'
- *      count: // value for 'count'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
  *   },
  * });
  */
@@ -3177,8 +3195,8 @@ export type AllLogEntriesQueryHookResult = ReturnType<typeof useAllLogEntriesQue
 export type AllLogEntriesLazyQueryHookResult = ReturnType<typeof useAllLogEntriesLazyQuery>;
 export type AllLogEntriesQueryResult = ApolloReactCommon.QueryResult<AllLogEntriesQuery, AllLogEntriesQueryVariables>;
 export const AllPaymentRecordsDocument = gql`
-    query AllPaymentRecords($cashPlan: ID!, $after: String, $before: String, $orderBy: String, $count: Int) {
-  allPaymentRecords(cashPlan: $cashPlan, after: $after, before: $before, first: $count, orderBy: $orderBy) {
+    query AllPaymentRecords($cashPlan: ID!, $after: String, $before: String, $orderBy: String, $first: Int, $last: Int) {
+  allPaymentRecords(cashPlan: $cashPlan, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -3249,7 +3267,8 @@ export function withAllPaymentRecords<TProps, TChildProps = {}>(operationOptions
  *      after: // value for 'after'
  *      before: // value for 'before'
  *      orderBy: // value for 'orderBy'
- *      count: // value for 'count'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
  *   },
  * });
  */
