@@ -50,6 +50,9 @@ class ImportedHousehold(TimeStampedUUIDModel):
         null=True,
     )
 
+    def __str__(self):
+        return f"Household CashAssist ID: {self.household_ca_id}"
+
 
 class ImportedIndividual(TimeStampedUUIDModel):
     SEX_CHOICE = (
