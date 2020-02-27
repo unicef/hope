@@ -35,9 +35,9 @@ export function HouseHoldTableRow({ household }: HouseHoldTableRowProps) {
       <TableCell align='left'>
         {household.paymentRecords.edges[0].node.headOfHousehold}
       </TableCell>
-      <TableCell align='right'>{household.familySize}</TableCell>
+      <TableCell align='left'>{household.individuals.totalCount}</TableCell>
       <TableCell align='left'>{household.location.title}</TableCell>
-      <TableCell align='right'>{household.residenceStatus}</TableCell>
+      <TableCell align='left'>{household.residenceStatus}</TableCell>
       <TableCell align='right'>
         {formatCurrency(
           household.paymentRecords.edges[0].node.cashPlan
