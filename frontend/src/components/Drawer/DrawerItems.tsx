@@ -27,7 +27,7 @@ const Icon = styled(ListItemIcon)`
 `;
 
 const SubList = styled(List)`
-  padding-left: ${({ theme }) => theme.spacing(10)};
+  padding-left: ${({ theme }) => theme.spacing(10)}px !important;
 `;
 
 interface Props {

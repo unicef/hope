@@ -43,6 +43,15 @@
           },
           {
             "name": "TargetPopulationNode"
+          },
+          {
+            "name": "ImportedHouseholdNode"
+          },
+          {
+            "name": "ImportedIndividualNode"
+          },
+          {
+            "name": "RegistrationDataImportDatahubNode"
           }
         ]
       }
