@@ -21,7 +21,7 @@ export function UniversalTable<T, K>({
   title,
 }: UniversalTableProps<T, K>): ReactElement {
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(2);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
   const [orderBy, setOrderBy] = useState(null);
   const [orderDirection, setOrderDirection] = useState('asc');
   const { data, refetch, loading } = query({
@@ -40,7 +40,7 @@ export function UniversalTable<T, K>({
       loading={loading}
       renderRow={renderRow}
       headCells={headCells}
-      rowsPerPageOptions={[2, 10, 15]}
+      rowsPerPageOptions={[5, 10, 15]}
       rowsPerPage={rowsPerPage}
       page={page}
       itemsCount={data[queriedObjectName].totalCount}
