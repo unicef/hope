@@ -27,7 +27,7 @@ export const HouseholdTable = ({
 }: HouseholdTableProps): React.ReactElement => {
   const initialVariables: AllHouseholdsQueryVariables = {
     businessArea,
-
+    familySize: JSON.stringify(sizeFilter),
     // familySizeGreater: Number(sizeFilter.min),
     // familySizeLower: Number(sizeFilter.max),
   };
