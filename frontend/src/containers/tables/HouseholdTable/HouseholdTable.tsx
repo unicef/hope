@@ -14,18 +14,22 @@ const TableWrapper = styled.div`
 `;
 
 interface HouseholdTableProps {
+  programFilter: string;
   sizeFilter: { min: number | undefined; max: number | undefined };
   textFilter: string;
   businessArea: string;
 }
 
 export const HouseholdTable = ({
+  programFilter,
   sizeFilter,
   businessArea,
 }: HouseholdTableProps): React.ReactElement => {
-  const initialVariables:AllHouseholdsQueryVariables = {
+  const initialVariables: AllHouseholdsQueryVariables = {
     businessArea,
-    familySize: JSON.stringify(sizeFilter)
+    familySize: JSON.stringify(sizeFilter),
+    // familySizeGreater: Number(sizeFilter.min),
+    // familySizeLower: Number(sizeFilter.max),
   };
 
   return (
@@ -33,6 +37,7 @@ export const HouseholdTable = ({
       <UniversalTable<HouseholdNode, AllHouseholdsQueryVariables>
         title='Households'
         headCells={headCells}
+        rowsPage={[10, 15, 20]}
         query={useAllHouseholdsQuery}
         queriedObjectName='allHouseholds'
         initialVariables={initialVariables}
