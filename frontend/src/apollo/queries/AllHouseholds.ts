@@ -15,7 +15,6 @@ export const AllHouseholds = gql`
       first: $first
       last: $last
       businessArea: $businessArea
-
       orderBy: $orderBy
     ) {
       pageInfo {
@@ -36,6 +35,9 @@ export const AllHouseholds = gql`
           location {
             id
             title
+          }
+          individuals {
+            totalCount
           }
           paymentRecords {
             edges {
