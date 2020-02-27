@@ -6,15 +6,15 @@ import { BreadCrumbsItem } from '../../components/BreadCrumbs';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { IndividualsBioData } from '../../components/population/IndividualBioData';
 import {
-  useIndividualQuery,
   IndividualNode,
+  useIndividualQuery,
 } from '../../__generated__/graphql';
 import { IndividualContactDetails } from '../../components/population/IndividualContactDetails';
 import { IndividualVulnerabilities } from '../../components/population/IndividualVunerabilities';
-import { IndividualActivityTable } from '../IndividualActivityTable';
+import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
 
 const Container = styled.div`
-padding 20px;
+padding: 20px;
   && {
     display: flex;
     flex-direction: column;
@@ -51,7 +51,7 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
         <IndividualsBioData individual={individual as IndividualNode} />
         <IndividualContactDetails individual={individual as IndividualNode} />
         <IndividualVulnerabilities individual={individual as IndividualNode} />
-        <IndividualActivityTable individual={individual as IndividualNode} />
+        <UniversalActivityLogTable objectId={individual.id} />
       </Container>
     </div>
   );
