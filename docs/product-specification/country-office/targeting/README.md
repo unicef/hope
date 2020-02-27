@@ -29,7 +29,7 @@ HCT user will be able to use the search field to quickly pull up previously targ
 Users will be able to filter their search query by using the following options:
 
 * **Created By**
-* Status
+* **Status**
 * **Number of Individuals \(Range\)**
 
 

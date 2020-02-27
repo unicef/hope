@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@material-ui/core';
 import { debounce } from 'lodash';
 import { PageHeader } from '../../components/PageHeader';
-import { TargetPopulationFilters } from '../../components/targetPopulation/TargetPopulationFilters';
+import { TargetPopulationFilters } from '../../components/TargetPopulation/TargetPopulationFilters';
 import { TargetPopulationTable } from '../TargetPopulationTable';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 

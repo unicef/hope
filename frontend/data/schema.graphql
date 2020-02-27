@@ -393,7 +393,7 @@ type HouseholdNode implements Node {
   consent: String!
   residenceStatus: HouseholdResidenceStatus!
   nationality: HouseholdNationality!
-  familySize: Int
+  familySize: Int!
   address: String
   location: LocationNode!
   representative: IndividualNode
@@ -422,6 +422,475 @@ enum HouseholdResidenceStatus {
   CITIZEN
   IDP
   OTHER
+}
+
+enum ImportedHouseholdNationality {
+  AF
+  AL
+  DZ
+  AD
+  AO
+  AR
+  AM
+  A
+  AT
+  AZ
+  BS
+  BH
+  BD
+  BB
+  BY
+  BE
+  BZ
+  BJ
+  BT
+  BO
+  BA
+  BW
+  BR
+  GB
+  BN
+  BG
+  BF
+  MM
+  BF_28
+  BI
+  CM
+  CA
+  CV
+  TD
+  CL
+  CN
+  CO
+  CG
+  CR
+  HR
+  C
+  CY
+  CZ
+  DK
+  DJ
+  DM
+  DO
+  EC
+  EG
+  SV
+  GB_50
+  ER
+  EE
+  ET
+  FJ
+  FI
+  FR
+  GA
+  GM
+  GE
+  DE
+  GH
+  GR
+  GD
+  GT
+  GQ
+  GY
+  HT
+  NL
+  HN
+  H
+  IS
+  IO
+  ID
+  IR
+  IQ
+  IE
+  IL
+  IT
+  JM
+  JP
+  JO
+  KZ
+  KE
+  KW
+  LA
+  LV
+  LB
+  LR
+  LY
+  LT
+  MK
+  MG
+  MW
+  MY
+  MV
+  ML
+  MT
+  MR
+  M
+  MX
+  MD
+  MC
+  MN
+  ME
+  MA
+  MZ
+  NA
+  NP
+  NI
+  NE
+  NG
+  KP
+  NO
+  OM
+  PK
+  PA
+  PG
+  PY
+  PE
+  PH
+  PL
+  PT
+  QA
+  RO
+  R
+  RW
+  SA
+  AE
+  SN
+  RS
+  SC
+  SL
+  SG
+  SK
+  SI
+  SO
+  ZA
+  KR
+  ES
+  LK
+  SD
+  SR
+  SZ
+  SE
+  CH
+  SY
+  TW
+  TJ
+  TZ
+  TH
+  TG
+  TT
+  TN
+  TR
+  TM
+  TV
+  UG
+  UA
+  UY
+  UZ
+  V
+  VE
+  VN
+  GB_164
+  YE
+  ZM
+  ZW
+}
+
+type ImportedHouseholdNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  householdCaId: String!
+  consent: String!
+  residenceStatus: ImportedHouseholdResidenceStatus!
+  nationality: ImportedHouseholdNationality!
+  familySize: Int!
+  address: String!
+  location: String!
+  representative: ImportedIndividualNode
+  registrationDataImportId: RegistrationDataImportDatahubNode!
+  headOfHousehold: ImportedIndividualNode
+  individuals(before: String, after: String, first: Int, last: Int): ImportedIndividualNodeConnection!
+}
+
+type ImportedHouseholdNodeConnection {
+  pageInfo: PageInfo!
+  edges: [ImportedHouseholdNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type ImportedHouseholdNodeEdge {
+  node: ImportedHouseholdNode
+  cursor: String!
+}
+
+enum ImportedHouseholdResidenceStatus {
+  REFUGEE
+  MIGRANT
+  CITIZEN
+  IDP
+  OTHER
+}
+
+enum ImportedIndividualDisability {
+  NO
+  SEEING
+  HEARING
+  WALKING
+  MEMORY
+  SELF_CARE
+  COMMUNICATING
+}
+
+enum ImportedIndividualEstimatedDob {
+  YES
+  NO
+}
+
+enum ImportedIndividualIdentificationType {
+  NA
+  BIRTH_CERTIFICATE
+  DRIVING_LICENSE
+  UNHCR_ID_CARD
+  NATIONAL_ID
+  NATIONAL_PASSPORT
+}
+
+enum ImportedIndividualMartialStatus {
+  SINGLE
+  MARRIED
+  WIDOW
+  DIVORCED
+  SEPARATED
+}
+
+enum ImportedIndividualNationality {
+  AF
+  AL
+  DZ
+  AD
+  AO
+  AR
+  AM
+  A
+  AT
+  AZ
+  BS
+  BH
+  BD
+  BB
+  BY
+  BE
+  BZ
+  BJ
+  BT
+  BO
+  BA
+  BW
+  BR
+  GB
+  BN
+  BG
+  BF
+  MM
+  BF_28
+  BI
+  CM
+  CA
+  CV
+  TD
+  CL
+  CN
+  CO
+  CG
+  CR
+  HR
+  C
+  CY
+  CZ
+  DK
+  DJ
+  DM
+  DO
+  EC
+  EG
+  SV
+  GB_50
+  ER
+  EE
+  ET
+  FJ
+  FI
+  FR
+  GA
+  GM
+  GE
+  DE
+  GH
+  GR
+  GD
+  GT
+  GQ
+  GY
+  HT
+  NL
+  HN
+  H
+  IS
+  IO
+  ID
+  IR
+  IQ
+  IE
+  IL
+  IT
+  JM
+  JP
+  JO
+  KZ
+  KE
+  KW
+  LA
+  LV
+  LB
+  LR
+  LY
+  LT
+  MK
+  MG
+  MW
+  MY
+  MV
+  ML
+  MT
+  MR
+  M
+  MX
+  MD
+  MC
+  MN
+  ME
+  MA
+  MZ
+  NA
+  NP
+  NI
+  NE
+  NG
+  KP
+  NO
+  OM
+  PK
+  PA
+  PG
+  PY
+  PE
+  PH
+  PL
+  PT
+  QA
+  RO
+  R
+  RW
+  SA
+  AE
+  SN
+  RS
+  SC
+  SL
+  SG
+  SK
+  SI
+  SO
+  ZA
+  KR
+  ES
+  LK
+  SD
+  SR
+  SZ
+  SE
+  CH
+  SY
+  TW
+  TJ
+  TZ
+  TH
+  TG
+  TT
+  TN
+  TR
+  TM
+  TV
+  UG
+  UA
+  UY
+  UZ
+  V
+  VE
+  VN
+  GB_164
+  YE
+  ZM
+  ZW
+}
+
+type ImportedIndividualNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  individualCaId: String!
+  fullName: String!
+  firstName: String!
+  middleName: String!
+  lastName: String!
+  sex: ImportedIndividualSex!
+  dob: Date!
+  estimatedDob: ImportedIndividualEstimatedDob!
+  nationality: ImportedIndividualNationality!
+  martialStatus: ImportedIndividualMartialStatus!
+  phoneNumber: String!
+  phoneNumberAlternative: String!
+  identificationType: ImportedIndividualIdentificationType!
+  identificationNumber: String!
+  household: ImportedHouseholdNode!
+  registrationDataImportId: RegistrationDataImportDatahubNode!
+  workStatus: ImportedIndividualWorkStatus!
+  disability: ImportedIndividualDisability!
+  representedHouseholds(before: String, after: String, first: Int, last: Int): ImportedHouseholdNodeConnection!
+  headingHousehold: ImportedHouseholdNode
+}
+
+type ImportedIndividualNodeConnection {
+  pageInfo: PageInfo!
+  edges: [ImportedIndividualNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type ImportedIndividualNodeEdge {
+  node: ImportedIndividualNode
+  cursor: String!
+}
+
+enum ImportedIndividualSex {
+  MALE
+  FEMALE
+}
+
+enum ImportedIndividualWorkStatus {
+  YES
+  NO
+}
+
+enum IndividualDisability {
+  NO
+  SEEING
+  HEARING
+  WALKING
+  MEMORY
+  SELF_CARE
+  COMMUNICATING
 }
 
 enum IndividualIdentificationType {
@@ -619,6 +1088,7 @@ type IndividualNode implements Node {
   individualCaId: String!
   fullName: String!
   firstName: String!
+  middleName: String!
   lastName: String!
   sex: IndividualSex!
   dob: Date
@@ -626,10 +1096,13 @@ type IndividualNode implements Node {
   nationality: IndividualNationality!
   martialStatus: IndividualMartialStatus!
   phoneNumber: String!
+  phoneNumberAlternative: String!
   identificationType: IndividualIdentificationType!
   identificationNumber: String!
   household: HouseholdNode!
   registrationDataImportId: RegistrationDataImportNode!
+  workStatus: IndividualWorkStatus!
+  disability: IndividualDisability!
   representedHouseholds(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   headingHousehold: HouseholdNode
 }
@@ -649,6 +1122,11 @@ type IndividualNodeEdge {
 enum IndividualSex {
   MALE
   FEMALE
+}
+
+enum IndividualWorkStatus {
+  YES
+  NO
 }
 
 scalar JSONLazyString
@@ -889,12 +1367,18 @@ type Query {
   targetPopulation(id: ID!): TargetPopulationNode
   allTargetPopulation(before: String, after: String, first: Int, last: Int): TargetPopulationNodeConnection
   household(id: ID!): HouseholdNode
-  allHouseholds(before: String, after: String, first: Int, last: Int, businessArea: String, familySizeGreater: Float, familySizeLower: Float, orderBy: String): HouseholdNodeConnection
+  allHouseholds(before: String, after: String, first: Int, last: Int, businessArea: String, nationality: String, nationality_Icontains: String, address: String, address_Icontains: String, representative_FullName: String, representative_FullName_Icontains: String, headOfHousehold_FullName: String, headOfHousehold_FullName_Icontains: String, householdCaId: String, familySize_Range: Int, familySize_Lte: Int, familySize_Gte: Int, familySize: String, orderBy: String): HouseholdNodeConnection
   registrationDataImport(id: ID!): RegistrationDataImportNode
   allRegistrationDataImports(before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection
   individual(id: ID!): IndividualNode
-  allIndividuals(before: String, after: String, first: Int, last: Int): IndividualNodeConnection
+  allIndividuals(before: String, after: String, first: Int, last: Int, fullName: String, fullName_Icontains: String, sex: [ID], age: String, orderBy: String): IndividualNodeConnection
   me: UserObjectType
+  importedHousehold(id: ID!): ImportedHouseholdNode
+  allImportedHouseholds(before: String, after: String, first: Int, last: Int, nationality: String, nationality_Icontains: String, address: String, address_Icontains: String, representative_FullName: String, representative_FullName_Icontains: String, headOfHousehold_FullName: String, headOfHousehold_FullName_Icontains: String, householdCaId: String, familySize_Range: Int, familySize_Lte: Int, familySize_Gte: Int, familySize: String, orderBy: String): ImportedHouseholdNodeConnection
+  registrationDataImportDatahub(id: ID!): RegistrationDataImportDatahubNode
+  allRegistrationDataImportsDatahub(before: String, after: String, first: Int, last: Int): RegistrationDataImportDatahubNodeConnection
+  importedIndividual(id: ID!): ImportedIndividualNode
+  allImportedIndividuals(before: String, after: String, first: Int, last: Int, fullName: String, fullName_Icontains: String, sex: [ID], age: String, orderBy: String): ImportedIndividualNodeConnection
   _debug: DjangoDebug
 }
 
@@ -903,6 +1387,43 @@ enum RegistrationDataImportDataSource {
   A_3RD_PARTY
   XML
   OTHER
+}
+
+enum RegistrationDataImportDatahubDataSource {
+  XLS
+  A_3RD_PARTY
+  XML
+  OTHER
+}
+
+type RegistrationDataImportDatahubNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+  status: RegistrationDataImportDatahubStatus!
+  importDate: DateTime!
+  importedBy: String!
+  dataSource: RegistrationDataImportDatahubDataSource!
+  households(before: String, after: String, first: Int, last: Int): ImportedHouseholdNodeConnection!
+  individuals(before: String, after: String, first: Int, last: Int): ImportedIndividualNodeConnection!
+}
+
+type RegistrationDataImportDatahubNodeConnection {
+  pageInfo: PageInfo!
+  edges: [RegistrationDataImportDatahubNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type RegistrationDataImportDatahubNodeEdge {
+  node: RegistrationDataImportDatahubNode
+  cursor: String!
+}
+
+enum RegistrationDataImportDatahubStatus {
+  IN_PROGRESS
+  DONE
 }
 
 type RegistrationDataImportNode implements Node {

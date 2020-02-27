@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { Button, Typography, Paper } from '@material-ui/core';
 import { PageHeader } from '../../components/PageHeader';
-import { TargetingCriteria } from '../../components/targetPopulation/TargetingCriteria';
+import { TargetingCriteria } from '../../components/TargetPopulation/TargetingCriteria';
 
 const PaperContainer = styled(Paper)`
   display: flex;
