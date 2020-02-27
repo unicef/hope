@@ -4,7 +4,12 @@ from graphene import relay, ConnectionField, Connection
 from graphene_django import DjangoObjectType, DjangoConnectionField
 from graphene_django.filter import DjangoFilterConnectionField
 
-from core.schema import ExtendedConnection, ChoiceObject, LogEntryObject, LogEntryObjectConnection
+from core.schema import (
+    ExtendedConnection,
+    ChoiceObject,
+    LogEntryObject,
+    LogEntryObjectConnection,
+)
 from program.models import Program, CashPlan
 from django_filters import FilterSet, OrderingFilter, CharFilter
 
@@ -13,7 +18,7 @@ class ProgramFilter(FilterSet):
     business_area = CharFilter(field_name="business_area__slug")
 
     class Meta:
-        fields = ("id",)
+        fields = ("id", "status")
         model = Program
 
 
