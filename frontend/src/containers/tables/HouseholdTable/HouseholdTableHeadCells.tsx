@@ -18,7 +18,7 @@ export const headCells: HeadCell<HouseholdNode>[] = [
     disablePadding: false,
     label: 'Household Size',
     id: 'familySize',
-    numeric: true,
+    numeric: false,
   },
   {
     disablePadding: false,
@@ -30,7 +30,7 @@ export const headCells: HeadCell<HouseholdNode>[] = [
     disablePadding: false,
     label: 'Residence Status',
     id: 'residenceStatus',
-    numeric: true,
+    numeric: false,
   },
   {
     disablePadding: false,
