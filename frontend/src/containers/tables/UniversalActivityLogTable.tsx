@@ -1,23 +1,22 @@
 import React, { ReactElement, useState } from 'react';
 import {
   LogEntryObject,
-  ProgramNode,
   useAllLogEntriesQuery,
-} from '../__generated__/graphql';
-import { ActivityLogTable } from '../components/ActivityLogTable/ActivityLogTable';
+} from '../../__generated__/graphql';
+import { ActivityLogTable } from '../../components/ActivityLogTable/ActivityLogTable';
 
 interface ProgramActivityLogTableProps {
-  program: ProgramNode;
+  objectId: string;
 }
-export function ProgramActivityLogTable({
-  program,
+export function UniversalActivityLogTable({
+  objectId,
 }: ProgramActivityLogTableProps): ReactElement {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const { data, fetchMore } = useAllLogEntriesQuery({
+  const { data, refetch } = useAllLogEntriesQuery({
     variables: {
-      objectId: program.id,
-      count: rowsPerPage,
+      objectId,
+      first: rowsPerPage,
     },
     fetchPolicy: 'network-only',
   });
@@ -33,41 +32,35 @@ export function ProgramActivityLogTable({
       logEntries={logEntries}
       page={page}
       onChangePage={(event, newPage) => {
-        let variables;
+        const variables = {
+          objectId,
+          first: undefined,
+          last: undefined,
+          after: undefined,
+          before: undefined,
+        };
         if (newPage < page) {
-          const before = edges[0].cursor;
-          variables = {
-            before,
-            count: rowsPerPage,
-          };
+          variables.last = rowsPerPage;
+          variables.before = edges[0].cursor;
         } else {
-          const after = edges[logEntries.length - 1].cursor;
-          variables = {
-            after,
-            count: rowsPerPage,
-          };
+          variables.after = edges[edges.length - 1].cursor;
+          variables.first = rowsPerPage;
         }
         setPage(newPage);
-        fetchMore({
-          variables,
-          updateQuery: (prev, { fetchMoreResult }) => {
-            return fetchMoreResult;
-          },
-        });
+        refetch(variables);
       }}
       onChangeRowsPerPage={(event) => {
         const value = parseInt(event.target.value, 10);
         setRowsPerPage(value);
         setPage(0);
         const variables = {
-          count: rowsPerPage,
+          objectId,
+          first: rowsPerPage,
+          after: undefined,
+          last: undefined,
+          before: undefined,
         };
-        fetchMore({
-          variables,
-          updateQuery: (prev, { fetchMoreResult }) => {
-            return fetchMoreResult;
-          },
-        });
+        refetch(variables);
       }}
     />
   );
