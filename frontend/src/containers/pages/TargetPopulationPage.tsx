@@ -6,7 +6,7 @@ import { Button } from '@material-ui/core';
 import { debounce } from 'lodash';
 import { PageHeader } from '../../components/PageHeader';
 import { TargetPopulationFilters } from '../../components/TargetPopulation/TargetPopulationFilters';
-import { TargetPopulationTable } from '../TargetPopulationTable';
+import { TargetPopulationTable } from '../tables/TargetPopulationTable';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 
 const Container = styled.div`

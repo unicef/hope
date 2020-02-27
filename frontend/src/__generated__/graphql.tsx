@@ -2441,7 +2441,10 @@ export type AllProgramsQuery = (
 );
 
 export type AllTargetPopulationsQueryVariables = {
-  count?: Maybe<Scalars['Int']>
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -2455,7 +2458,7 @@ export type AllTargetPopulationsQuery = (
       & Pick<TargetPopulationNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'TargetPopulationNode' }
-        & Pick<TargetPopulationNode, 'name' | 'createdAt'>
+        & Pick<TargetPopulationNode, 'id' | 'name' | 'createdAt'>
         & { createdBy: Maybe<(
           { __typename?: 'UserObjectType' }
           & Pick<UserObjectType, 'firstName' | 'lastName'>
@@ -3367,10 +3370,11 @@ export type AllProgramsQueryHookResult = ReturnType<typeof useAllProgramsQuery>;
 export type AllProgramsLazyQueryHookResult = ReturnType<typeof useAllProgramsLazyQuery>;
 export type AllProgramsQueryResult = ApolloReactCommon.QueryResult<AllProgramsQuery, AllProgramsQueryVariables>;
 export const AllTargetPopulationsDocument = gql`
-    query AllTargetPopulations($count: Int) {
-  allTargetPopulation(first: $count) {
+    query AllTargetPopulations($after: String, $before: String, $first: Int, $last: Int) {
+  allTargetPopulation(after: $after, before: $before, first: $first, last: $last) {
     edges {
       node {
+        id
         name
         createdAt
         createdBy {
@@ -3415,7 +3419,10 @@ export function withAllTargetPopulations<TProps, TChildProps = {}>(operationOpti
  * @example
  * const { data, loading, error } = useAllTargetPopulationsQuery({
  *   variables: {
- *      count: // value for 'count'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
  *   },
  * });
  */
