@@ -8,7 +8,7 @@ import { HeadCell } from '../../components/table/EnhancedTableHead';
 import { ClickableTableRow } from '../../components/table/ClickableTableRow';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { StatusBox } from '../../components/StatusBox';
-import { paymentRecordStatusToColor } from '../../utils/utils';
+import { paymentRecordStatusToColor, sexToCapitalize } from '../../utils/utils';
 
 const headCells: HeadCell<IndividualNode>[] = [
   {
@@ -37,7 +37,7 @@ const headCells: HeadCell<IndividualNode>[] = [
   },
   {
     disablePadding: false,
-    label: 'Sex',
+    label: 'Employment / Education',
     id: 'sex',
     numeric: false,
   },
@@ -49,9 +49,9 @@ const headCells: HeadCell<IndividualNode>[] = [
   },
   {
     disablePadding: false,
-    label: 'Employment / Education',
+    label: 'Sex',
     id: 'employment',
-    numeric: true,
+    numeric: false,
   },
 ];
 const StatusContainer = styled.div`
@@ -62,8 +62,8 @@ interface HouseholdIndividualsTableProps {
   household: HouseholdNode;
 }
 export function HouseholdIndividualsTable({
-                                            household,
-                                          }: HouseholdIndividualsTableProps): ReactElement {
+  household,
+}: HouseholdIndividualsTableProps): ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
   const [page, setPage] = useState(0);
@@ -71,7 +71,7 @@ export function HouseholdIndividualsTable({
   const [orderBy, setOrderBy] = useState(null);
   const [orderDirection, setOrderDirection] = useState('asc');
   const handleClick = (row): void => {
-    history.push(`/${businessArea}/population/household/individual/${row.id}`);
+    history.push(`/${businessArea}/population/individuals/${row.id}`);
   };
 
   const allIndividuals = household.individuals.edges.map((edge) => edge.node);
@@ -101,12 +101,20 @@ export function HouseholdIndividualsTable({
                 />
               </StatusContainer>
             </TableCell>
-            <TableCell align='left'>empty</TableCell>
-            <TableCell align='left'>{row.sex}</TableCell>
             <TableCell align='left'>
-              {row.dob ? row.estimatedDob : row.dob}
+              {row.representedHouseholds &&
+                row.representedHouseholds.edges.map(
+                  (edge) =>
+                    edge.node.representative &&
+                    edge.node.representative.fullName === row.fullName &&
+                    'Head of Household',
+                )}
             </TableCell>
-            <TableCell align='left'>empty</TableCell>
+            <TableCell align='left'>
+              {row.workStatus === 'YES' ? 'Yes' : 'No'}
+            </TableCell>
+            <TableCell align='right'>{row.dob ? 'N/A' : row.dob}</TableCell>
+            <TableCell align='left'>{sexToCapitalize(row.sex)}</TableCell>
           </ClickableTableRow>
         );
       }}

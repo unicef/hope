@@ -2320,7 +2320,8 @@ export type AllIndividualsQueryVariables = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
+  last?: Maybe<Scalars['Int']>,
+  fullName_Icontains?: Maybe<Scalars['String']>
 };
 
 
@@ -2480,7 +2481,21 @@ export type HouseholdQuery = (
         { __typename?: 'IndividualNodeEdge' }
         & { node: Maybe<(
           { __typename?: 'IndividualNode' }
-          & Pick<IndividualNode, 'id' | 'individualCaId' | 'fullName' | 'sex' | 'dob' | 'nationality' | 'identificationType'>
+          & Pick<IndividualNode, 'id' | 'individualCaId' | 'fullName' | 'sex' | 'dob' | 'nationality' | 'identificationType' | 'workStatus'>
+          & { representedHouseholds: (
+            { __typename?: 'HouseholdNodeConnection' }
+            & { edges: Array<Maybe<(
+              { __typename?: 'HouseholdNodeEdge' }
+              & { node: Maybe<(
+                { __typename?: 'HouseholdNode' }
+                & Pick<HouseholdNode, 'id'>
+                & { representative: Maybe<(
+                  { __typename?: 'IndividualNode' }
+                  & Pick<IndividualNode, 'fullName'>
+                )> }
+              )> }
+            )>> }
+          ) }
         )> }
       )>> }
     ), location: (
@@ -3029,8 +3044,8 @@ export type AllHouseholdsQueryHookResult = ReturnType<typeof useAllHouseholdsQue
 export type AllHouseholdsLazyQueryHookResult = ReturnType<typeof useAllHouseholdsLazyQuery>;
 export type AllHouseholdsQueryResult = ApolloReactCommon.QueryResult<AllHouseholdsQuery, AllHouseholdsQueryVariables>;
 export const AllIndividualsDocument = gql`
-    query AllIndividuals($before: String, $after: String, $first: Int, $last: Int) {
-  allIndividuals(before: $before, after: $after, first: $first, last: $last) {
+    query AllIndividuals($before: String, $after: String, $first: Int, $last: Int, $fullName_Icontains: String) {
+  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Icontains: $fullName_Icontains) {
     totalCount
     pageInfo {
       startCursor
@@ -3097,6 +3112,7 @@ export function withAllIndividuals<TProps, TChildProps = {}>(operationOptions?: 
  *      after: // value for 'after'
  *      first: // value for 'first'
  *      last: // value for 'last'
+ *      fullName_Icontains: // value for 'fullName_Icontains'
  *   },
  * });
  */
@@ -3421,6 +3437,7 @@ export const HouseholdDocument = gql`
     familySize
     nationality
     individuals {
+      totalCount
       edges {
         node {
           id
@@ -3430,16 +3447,23 @@ export const HouseholdDocument = gql`
           dob
           nationality
           identificationType
+          workStatus
+          representedHouseholds {
+            edges {
+              node {
+                id
+                representative {
+                  fullName
+                }
+              }
+            }
+          }
         }
       }
-      totalCount
     }
     location {
       id
       title
-    }
-    individuals {
-      totalCount
     }
     residenceStatus
     paymentRecords {
