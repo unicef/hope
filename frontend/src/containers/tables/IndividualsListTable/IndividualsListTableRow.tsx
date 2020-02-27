@@ -3,11 +3,20 @@ import TableCell from '@material-ui/core/TableCell';
 import Moment from 'react-moment';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { CashPlanNode, HouseholdNode, IndividualNode } from '../../../__generated__/graphql';
+import {
+  CashPlanNode,
+  HouseholdNode,
+  IndividualNode,
+} from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
 import { StatusBox } from '../../../components/StatusBox';
-import { cashPlanStatusToColor, formatCurrency, getAgeFromDob } from '../../../utils/utils';
+import {
+  cashPlanStatusToColor,
+  formatCurrency,
+  getAgeFromDob,
+  sexToCapitalize,
+} from '../../../utils/utils';
 
 const StatusContainer = styled.div`
   width: 120px;
@@ -17,7 +26,9 @@ interface IndividualsListTableRowProps {
   individual: IndividualNode;
 }
 
-export function IndividualsListTableRow({ individual }: IndividualsListTableRowProps) {
+export function IndividualsListTableRow({
+  individual,
+}: IndividualsListTableRowProps) {
   const history = useHistory();
   const businessArea = useBusinessArea();
   let age: number | string = 'N/A';
@@ -29,7 +40,6 @@ export function IndividualsListTableRow({ individual }: IndividualsListTableRowP
     history.push(path);
   };
   return (
-
     <ClickableTableRow
       hover
       onClick={handleClick}
@@ -40,7 +50,7 @@ export function IndividualsListTableRow({ individual }: IndividualsListTableRowP
       <TableCell align='left'>{individual.fullName}</TableCell>
       <TableCell align='left'>{individual.household.householdCaId}</TableCell>
       <TableCell align='right'>{age}</TableCell>
-      <TableCell align='left'>{individual.sex}</TableCell>
+      <TableCell align='left'>{sexToCapitalize(individual.sex)}</TableCell>
       <TableCell align='left'>{individual.household.location.title}</TableCell>
     </ClickableTableRow>
   );
