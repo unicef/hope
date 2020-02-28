@@ -12,6 +12,7 @@ class TargetPopulationFilter(django_filters.FilterSet):
                                      lookup_expr="icontains")
     created_by_name = django_filters.CharFilter(
         field_name="created_by", method='filter_created_by_name')
+    last_edited = django_filters.DateTimeFilter(field_name="last_edited_at")
     min_num_individuals = django_filters.NumericRangeFilter(
         field_name="num_individuals_household", lookup_expr="gte")
     max_num_individuals = django_filters.NumericRangeFilter(
@@ -34,9 +35,10 @@ class TargetPopulationFilter(django_filters.FilterSet):
             "created_by_name",
             "created_at",
             "last_edited_at",
-            "num_individuals_household",
             "households",
+            "target_filters",
         )
+
         filter_overrides = {
             target_models.IntegerRangeField: {
                 'filter_class': django_filters.NumericRangeFilter,
@@ -46,7 +48,8 @@ class TargetPopulationFilter(django_filters.FilterSet):
             },
         }
 
-    order_by = django_filters.OrderingFilter(fields=("created_by",))
+    # TODO(codecakes): how to order?
+    order_by = django_filters.OrderingFilter(fields=("created_at",))
 
 
 class TargetPopulationNode(DjangoObjectType):
