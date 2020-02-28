@@ -1,12 +1,17 @@
-import account.schema
-import core.schema
 import graphene
+from graphene_django.debug import DjangoDebug
+
+import account.schema
+import core.mutations
+import core.schema
+import household.mutations
 import household.schema
 import payment.schema
+import program.mutations
 import program.schema
 import registration_datahub.schema
+import targeting.schema
 import targeting.mutations
-from graphene_django.debug import DjangoDebug
 
 
 class Query(
