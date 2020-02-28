@@ -24,10 +24,12 @@ export const HouseholdTable = ({
   programFilter,
   sizeFilter,
   businessArea,
+  textFilter,
 }: HouseholdTableProps): React.ReactElement => {
   const initialVariables: AllHouseholdsQueryVariables = {
     businessArea,
     familySize: JSON.stringify(sizeFilter),
+    headOfHouseholdFullNameIcontains: textFilter,
     // familySizeGreater: Number(sizeFilter.min),
     // familySizeLower: Number(sizeFilter.max),
   };

@@ -72,7 +72,7 @@ export function HouseholdDetails({
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>
-            <LabelizedField label='Household Size'>
+            <LabelizedField label='Head of Household'>
               <div>
                 {paymentRecords.edges.length
                   ? paymentRecords.edges[0].node.headOfHousehold
