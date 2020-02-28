@@ -110,9 +110,9 @@ export function IndividualsFilter({
         }}
       >
         <MenuItem value='none'>Sex</MenuItem>
-        <MenuItem value='Male'>Male</MenuItem>
-        <MenuItem value='Female'>Female</MenuItem>
-        <MenuItem value='Other'>Other</MenuItem>
+        <MenuItem value='MALE'>Male</MenuItem>
+        <MenuItem value='FEMALE'>Female</MenuItem>
+        <MenuItem value='OTHER'>Other</MenuItem>
       </TextContainer>
       <TextContainer
         variant='filled'
