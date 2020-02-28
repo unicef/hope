@@ -10,6 +10,7 @@ const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px
     ${({ theme }) => theme.spacing(11)}px;
   margin-top: ${({ theme }) => theme.spacing(6)}px;
+  margin-bottom: ${({ theme }) => theme.spacing(6)}px;
 `;
 
 const Title = styled.div`

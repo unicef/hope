@@ -4,6 +4,7 @@ import { HeadCell } from '../../components/table/EnhancedTableHead';
 import { columnToOrderBy } from '../../utils/utils';
 
 interface UniversalTableProps<T, K> {
+  rowsPage?: number[];
   initialVariables: K;
   query;
   queriedObjectName: string;
@@ -12,6 +13,7 @@ interface UniversalTableProps<T, K> {
   title: string;
 }
 export function UniversalTable<T, K>({
+  rowsPage = [5, 10, 15],
   initialVariables,
   query,
   queriedObjectName,
@@ -20,7 +22,7 @@ export function UniversalTable<T, K>({
   title,
 }: UniversalTableProps<T, K>): ReactElement {
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(rowsPage[0]);
   const [orderBy, setOrderBy] = useState(null);
   const [orderDirection, setOrderDirection] = useState('asc');
   const { data, refetch, loading } = query({
@@ -39,7 +41,7 @@ export function UniversalTable<T, K>({
       loading={loading}
       renderRow={renderRow}
       headCells={headCells}
-      rowsPerPageOptions={[5, 10, 15]}
+      rowsPerPageOptions={rowsPage}
       rowsPerPage={rowsPerPage}
       page={page}
       itemsCount={data[queriedObjectName].totalCount}

@@ -17,6 +17,7 @@ import { useSnackbarHelper } from '../../hooks/useBreadcrumbHelper';
 import { RegistrationDataImport } from '../dialogs/registration/RegistrationDataImport';
 import { RegistrationDataImportTable } from '../tables/RegistrationdDataImportTable';
 import { RegistrationFilters } from '../../components/registration/RegistrationFilter';
+import { useDebounce } from '../../hooks/useDebounce';
 
 const PageContainer = styled.div`
   display: flex;
@@ -29,9 +30,10 @@ export function RegistrationDataImportPage(): React.ReactElement {
   const businessArea = useBusinessArea();
   const { t } = useTranslation();
   const [filter, setFilter] = useState({});
-  const [queryString, setQueryString] = useState('');
+  const debounceFilter = useDebounce(filter,500);
   const location = useLocation();
   const history = useHistory();
+
   useEffect(() => {
     const query = new URLSearchParams(location.search);
     const filterQuery = {};
@@ -52,10 +54,9 @@ export function RegistrationDataImportPage(): React.ReactElement {
     );
     console.log('encoded', encoded);
     const query = encoded.join('&');
-    setQueryString(encoded.join('&'));
     history.push(`${location.pathname}?${query}`);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter]);
+  }, [debounceFilter]);
   const toolbar = (
     <PageHeader title={t('Registration Data Import')}>
       <RegistrationDataImport />

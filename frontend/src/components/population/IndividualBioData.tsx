@@ -3,8 +3,14 @@ import styled from 'styled-components';
 import { Paper, Typography, Grid } from '@material-ui/core';
 import { LabelizedField } from '../LabelizedField';
 import { IndividualNode } from '../../__generated__/graphql';
-import moment from 'moment';
-import { getAgeFromDob } from '../../utils/utils';
+import { useHistory } from 'react-router-dom';
+import {
+  getAgeFromDob,
+  sexToCapitalize,
+  getIdentificationType,
+} from '../../utils/utils';
+import Moment from 'react-moment';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px
@@ -16,17 +22,31 @@ const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
+const ContentLink = styled.div`
+  text-decoration: underline;
+  cursor: pointer;
+`;
+
 interface IndividualBioDataProps {
   individual: IndividualNode;
 }
 export function IndividualsBioData({
   individual,
 }: IndividualBioDataProps): React.ReactElement {
+  const history = useHistory();
+  const businessArea = useBusinessArea();
+
   let age: number | null;
   const { dob } = individual;
   if (dob) {
     age = getAgeFromDob(dob);
   }
+
+  const openHousehold = (): void => {
+    history.push(
+      `/${businessArea}/population/household/${individual.household.id}`,
+    );
+  };
   return (
     <Overview>
       <Title>
@@ -55,7 +75,7 @@ export function IndividualsBioData({
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='Sex'>
-            <div>{individual.sex}</div>
+            <div>{sexToCapitalize(individual.sex)}</div>
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
@@ -65,7 +85,7 @@ export function IndividualsBioData({
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='Date of Birth'>
-            <div>{dob}</div>
+            <Moment format='DD/MM/YYYY'>{dob}</Moment>
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
@@ -77,7 +97,7 @@ export function IndividualsBioData({
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='ID Type'>
-            <div>{individual.identificationType}</div>
+            <div>{getIdentificationType(individual.identificationType)}</div>
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
@@ -87,7 +107,9 @@ export function IndividualsBioData({
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='Household ID'>
-            <div>{individual.household.id}</div>
+            <ContentLink onClick={() => openHousehold()}>
+              {individual.household.id}
+            </ContentLink>
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>

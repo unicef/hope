@@ -16,18 +16,23 @@ const TableWrapper = styled.div`
 interface IndividualsListTableProps {
   ageFilter: { min: number | undefined; max: number | undefined };
   textFilter?: string;
+  sexFilter?: string;
   businessArea?: string;
 }
 
 export const IndividualsListTable = ({
   ageFilter,
   businessArea,
+  sexFilter,
+  textFilter,
 }: IndividualsListTableProps): React.ReactElement => {
   const initialVariables = {
-    // todo missing filters !important
+    // TODO
     // businessArea,
-    //   ageGreater: ageFilter.min,
-    //   ageLower: ageFilter.max
+    // sexFilter,
+    // fullName_Icontains: textFilter,
+    // ageGreater: ageFilter.min,
+    // ageLower: ageFilter.max
   };
 
   return (
@@ -35,6 +40,7 @@ export const IndividualsListTable = ({
       <UniversalTable<IndividualNode, AllIndividualsQueryVariables>
         title='Individuals'
         headCells={headCells}
+        rowsPage={[10, 15, 20]}
         query={useAllIndividualsQuery}
         queriedObjectName='allIndividuals'
         initialVariables={initialVariables}

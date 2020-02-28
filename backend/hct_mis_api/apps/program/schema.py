@@ -1,15 +1,13 @@
 import graphene
 from django.db.models import Case, When, Value, IntegerField
-from graphene import relay, ConnectionField, Connection
-from graphene_django import DjangoObjectType, DjangoConnectionField
+from graphene import relay, ConnectionField
+from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
 from core.schema import (
-    ExtendedConnection,
     ChoiceObject,
-    LogEntryObject,
-    LogEntryObjectConnection,
-)
+    LogEntryObjectConnection)
+from core.extended_connection import ExtendedConnection
 from program.models import Program, CashPlan
 from django_filters import FilterSet, OrderingFilter, CharFilter
 
@@ -18,7 +16,7 @@ class ProgramFilter(FilterSet):
     business_area = CharFilter(field_name="business_area__slug")
 
     class Meta:
-        fields = ("id", "status")
+        fields = ("id",)
         model = Program
 
 
