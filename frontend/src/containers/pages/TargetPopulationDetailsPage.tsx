@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Button, Typography, Paper } from '@material-ui/core';
 import { EditRounded } from '@material-ui/icons';
 import { PageHeader } from '../../components/PageHeader';
+import { Results } from '../../components/TargetPopulation/Results';
 import { TargetingCriteria } from '../../components/TargetPopulation/TargetingCriteria';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
@@ -51,11 +52,7 @@ export function TargetPopulationDetailsPage() {
         </>
       </PageHeader>
       <TargetingCriteria />
-      <PaperContainer>
-        <Title>
-          <Typography variant='h6'>Results</Typography>
-        </Title>
-      </PaperContainer>
+      <Results />
       <PaperContainer>
         <Title>
           <Typography variant='h6'>
