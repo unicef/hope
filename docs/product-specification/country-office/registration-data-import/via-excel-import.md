@@ -14,7 +14,10 @@ To ease the import process, we need to provide a template to users of how they s
 
 Primarily this template will consist of two tabs: one called "**households**" and one called "**individuals**".
 
-Within each tab there will be set of columns, one set for core fields and one for the active flex fields that HCT recognizes.
+Within each tab there will be set of columns, one set for core fields and one for the active flex fields that HCT recognizes. 
+
+* The first row should not be modified by the user since this helps us programmatically identify what data is being uploaded.
+* The second row has human readable version of it, along with the "data type" and any other helpful hints of what data is permissible to upload.
 
 Additionally household tab will have a "**unique\_id**" as its first column. This will then be referenced in the individuals tab as a "household\_unique\_id" reference since individuals being imported have to belong to a \(valid\) household always.
 
@@ -50,5 +53,14 @@ Furthermore, for the user's convenience, and to ensure consistency in data is be
 ### Edge Cases / Validation Steps
 
 * [ ] File import data must match the format of the approved Import Template.
-* [ ] The system must allow file types to include XLSx
+* [ ] The system should only support XLSx file type
+* [ ] If an import template is used, user removes multiple not required columns, has data in the rest and imports, the import should be successful.
+* [ ] The user gets an import template, but modifies row 1 for any of the columns to something invalid, the import should fail.
+* [ ] If any required fields are missing in the excel file being imported, the import should error out.
+
+### Open issues
+
+* It may be beneficial in the import template that is given to user, to have some sample data in it? Especially helpful where there are "select one" type fields, where choices could be not easy to guess/figure out?
+
+
 
