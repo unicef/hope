@@ -4,7 +4,9 @@
 
 ## Motivation
 
-Many times data for households and individuals is obtained via flat or CSV or excel files.
+Many times data for households and individuals is obtained via flat or CSV or excel files. These files may have been obtained by their own independent registration efforts using some other systems. These files could also have been shared by other agencies with UNICEF as a way of sharing data.
+
+The goal is to leverage this data to seed the golden record / population data within HCT MIS, so that programmes can be run for the households by targeting the population based on certain criteria.
 
 ## **Functional Specifications**
 
