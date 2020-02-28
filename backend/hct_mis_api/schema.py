@@ -1,16 +1,12 @@
-import graphene
-from graphene_django.debug import DjangoDebug
-
 import account.schema
-import core.mutations
 import core.schema
-import household.mutations
+import graphene
 import household.schema
 import payment.schema
-import program.mutations
 import program.schema
 import registration_datahub.schema
-import targeting.schema
+import targeting.mutations
+from graphene_django.debug import DjangoDebug
 
 
 class Query(
@@ -29,6 +25,7 @@ class Query(
 class Mutations(
     core.mutations.Mutations,
     household.mutations.Mutations,
+    targeting.mutations.Mutations,
     program.mutations.Mutations,
     graphene.ObjectType,
 ):
