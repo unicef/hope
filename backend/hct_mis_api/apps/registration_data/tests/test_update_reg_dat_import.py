@@ -2,7 +2,7 @@ import unittest
 
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
-from household.fixtures import RegistrationDataImportFactory
+from registration_data.fixtures import RegistrationDataImportFactory
 
 
 @unittest.skip("Not supporting updating Registration Data Import")
@@ -36,7 +36,7 @@ class TestUpdateRegistrationDataImport(APITestCase):
                     self.registration_data_import.id, "RegistrationDataImport",
                 ),
                 "name": "Test name",
-                "status": "DONE",
+                "status": "APPROVED",
                 "importDate": "2019-12-20T15:00:00",
                 "importedById": self.id_to_base64(self.user.id, "User"),
                 "dataSource": "XLS",

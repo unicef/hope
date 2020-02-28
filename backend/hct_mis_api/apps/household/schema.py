@@ -10,9 +10,8 @@ from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
 from core.filters import AgeRangeFilter, IntegerRangeFilter
-from core.schema import ExtendedConnection
+from core.extended_connection import ExtendedConnection
 from household.models import Household, Individual
-from registration_data.models import RegistrationDataImport
 
 
 class HouseholdFilter(FilterSet):
@@ -35,6 +34,9 @@ class HouseholdFilter(FilterSet):
 
 
 class IndividualFilter(FilterSet):
+    business_area = CharFilter(
+        field_name="household__location__business_area__slug",
+    )
     age = AgeRangeFilter(field_name="dob")
     sex = ModelMultipleChoiceFilter(
         to_field_name="sex", queryset=Individual.objects.all(),
@@ -43,6 +45,7 @@ class IndividualFilter(FilterSet):
     class Meta:
         model = Individual
         fields = {
+            "business_area": ["exact"],
             "full_name": ["exact", "icontains"],
             "age": ["range", "lte", "gte"],
             "sex": ["exact"],
@@ -76,22 +79,10 @@ class IndividualNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
-class RegistrationDataImportNode(DjangoObjectType):
-    class Meta:
-        model = RegistrationDataImport
-        filter_fields = []
-        interfaces = (relay.Node,)
-        connection_class = ExtendedConnection
-
-
 class Query(graphene.ObjectType):
     household = relay.Node.Field(HouseholdNode)
     all_households = DjangoFilterConnectionField(
         HouseholdNode, filterset_class=HouseholdFilter,
-    )
-    registration_data_import = relay.Node.Field(RegistrationDataImportNode)
-    all_registration_data_imports = DjangoFilterConnectionField(
-        RegistrationDataImportNode
     )
     individual = relay.Node.Field(IndividualNode)
     all_individuals = DjangoFilterConnectionField(
