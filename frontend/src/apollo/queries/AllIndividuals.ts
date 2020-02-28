@@ -6,14 +6,18 @@ export const AllIndividuals = gql`
     $after: String
     $first: Int
     $last: Int
-    $fullName_Icontains: String
+    $fullNameContains: String
+    $sex: [ID]
+    $age: String
   ) {
     allIndividuals(
       before: $before
       after: $after
       first: $first
       last: $last
-      fullName_Icontains: $fullName_Icontains
+      fullName_Icontains: $fullNameContains
+      sex: $sex
+      age: $age
     ) {
       totalCount
       pageInfo {

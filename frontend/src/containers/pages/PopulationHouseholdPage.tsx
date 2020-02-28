@@ -42,11 +42,7 @@ export function PopulationHouseholdPage(): React.ReactElement {
   };
 
   const handleTextFilter = (value: string): void => {
-    if (value.length > 3) {
-      setTextFilter(value);
-    } else {
-      setTextFilter('');
-    }
+    setTextFilter(value);
   };
 
   const { allPrograms } = data;
