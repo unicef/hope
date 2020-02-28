@@ -9,6 +9,7 @@ from registration_data.models import RegistrationDataImport
 class RegistrationDataImportFactory(factory.DjangoModelFactory):
     class Meta:
         model = RegistrationDataImport
+        django_get_or_create = ("name",)
 
     name = factory.Faker(
         "sentence", nb_words=6, variable_nb_words=True, ext_word_list=None,
@@ -25,3 +26,4 @@ class RegistrationDataImportFactory(factory.DjangoModelFactory):
     )
     number_of_individuals = factory.fuzzy.FuzzyInteger(100, 10000)
     number_of_households = factory.fuzzy.FuzzyInteger(3, 50)
+    datahub_id = factory.Faker("uuid4")

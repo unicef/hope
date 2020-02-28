@@ -6,11 +6,11 @@ from utils.models import TimeStampedUUIDModel
 
 
 class RegistrationDataImport(TimeStampedUUIDModel):
-    IN_PROGRESS = "IN_PROGRESS"
-    DONE = "DONE"
     STATUS_CHOICE = (
-        (IN_PROGRESS, _("In progress")),
-        (DONE, _("Done")),
+        ("IN_REVIEW", _("In Review")),
+        ("APPROVED", _("Approved")),
+        ("MERGED", _("Merged")),
+        ("MERGING", _("Merging")),
     )
     DATA_SOURCE_CHOICE = (
         ("XLS", "Excel"),
@@ -18,7 +18,7 @@ class RegistrationDataImport(TimeStampedUUIDModel):
         ("XML", "XML"),
         ("OTHER", "Other"),
     )
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
     status = models.CharField(max_length=255, choices=STATUS_CHOICE,)
     import_date = models.DateTimeField(auto_now_add=True)
     imported_by = models.ForeignKey(
@@ -29,6 +29,7 @@ class RegistrationDataImport(TimeStampedUUIDModel):
     data_source = models.CharField(max_length=255, choices=DATA_SOURCE_CHOICE,)
     number_of_individuals = models.PositiveIntegerField()
     number_of_households = models.PositiveIntegerField()
+    datahub_id = models.UUIDField(null=True, default=None)
 
     def __str__(self):
         return self.name

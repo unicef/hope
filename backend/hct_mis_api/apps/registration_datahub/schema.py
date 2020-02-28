@@ -9,7 +9,7 @@ from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
 from core.filters import AgeRangeFilter, IntegerRangeFilter
-from core.schema import ExtendedConnection
+from core.extended_connection import ExtendedConnection
 from registration_datahub.models import (
     ImportedHousehold,
     ImportedIndividual,

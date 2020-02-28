@@ -1,6 +1,6 @@
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
-from household.fixtures import RegistrationDataImportFactory
+from registration_data.fixtures import RegistrationDataImportFactory
 
 
 class TestRegistrationDataImportQuery(APITestCase):
