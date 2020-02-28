@@ -1,28 +1,30 @@
 import styled from 'styled-components';
 import TableCell from '@material-ui/core/TableCell';
-import Moment from 'react-moment';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { CashPlanNode, PaymentRecordNode } from '../../../__generated__/graphql';
+import { RegistrationDataImportNode } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
 import { StatusBox } from '../../../components/StatusBox';
-import { cashPlanStatusToColor, paymentRecordStatusToColor } from '../../../utils/utils';
+import { registrationDataImportStatusToColor } from '../../../utils/utils';
+import moment from 'moment';
 
 const StatusContainer = styled.div`
   width: 120px;
 `;
 
 interface PaymentRecordTableRowProps {
-  paymentRecord: PaymentRecordNode;
+  registrationDataImport: RegistrationDataImportNode;
 }
 
-export function RegistrationDataImportTableRow({ paymentRecord }: PaymentRecordTableRowProps) {
+export function RegistrationDataImportTableRow({
+  registrationDataImport,
+}: PaymentRecordTableRowProps) {
   const history = useHistory();
   const businessArea = useBusinessArea();
 
   const handleClick = (): void => {
-    const path = `/${businessArea}/payment_records/${paymentRecord.id}`;
+    const path = `/${businessArea}/registration-dataI=-import/${registrationDataImport.id}`;
     history.push(path);
   };
   return (
@@ -30,37 +32,27 @@ export function RegistrationDataImportTableRow({ paymentRecord }: PaymentRecordT
       hover
       onClick={handleClick}
       role='checkbox'
-      key={paymentRecord.id}
+      key={registrationDataImport.id}
     >
-      <TableCell align='left'>{paymentRecord.cashAssistId}</TableCell>
+      <TableCell align='left'>{registrationDataImport.name}</TableCell>
       <TableCell align='left'>
         <StatusContainer>
           <StatusBox
-            status={paymentRecord.status}
-            statusToColor={paymentRecordStatusToColor}
+            status={registrationDataImport.status}
+            statusToColor={registrationDataImportStatusToColor}
           />
         </StatusContainer>
       </TableCell>
-      <TableCell align='left'>{paymentRecord.headOfHousehold}</TableCell>
-      <TableCell align='left'>{paymentRecord.household.householdCaId}</TableCell>
-      <TableCell align='left'>{paymentRecord.totalPersonCovered}</TableCell>
-      <TableCell align='right'>
-        {paymentRecord.entitlement.entitlementQuantity.toLocaleString('en-US', {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        })}
+      <TableCell align='left'>
+        {moment(registrationDataImport.importDate).format('DD MMM YYYY')}
       </TableCell>
       <TableCell align='right'>
-        {paymentRecord.entitlement.deliveredQuantity.toLocaleString('en-US', {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        })}
+        {registrationDataImport.numberOfHouseholds}
       </TableCell>
-      <TableCell align='right'>
-        <Moment format='MM/DD/YYYY'>
-          {paymentRecord.entitlement.deliveryDate}
-        </Moment>
+      <TableCell align='left'>
+        {`${registrationDataImport.importedBy.firstName} ${registrationDataImport.importedBy.lastName}`}
       </TableCell>
+      <TableCell align='left'>{registrationDataImport.dataSource}</TableCell>
     </ClickableTableRow>
   );
 }

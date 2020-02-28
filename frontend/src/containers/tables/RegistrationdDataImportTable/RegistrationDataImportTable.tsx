@@ -1,31 +1,35 @@
 import React, { ReactElement } from 'react';
+import styled from 'styled-components';
 import {
-  AllPaymentRecordsQueryVariables,
-  CashPlanNode,
-  PaymentRecordNode,
-  useAllPaymentRecordsQuery,
+  AllRegistrationDataImportsQueryVariables,
+  RegistrationDataImportNode,
+  useAllRegistrationDataImportsQuery,
 } from '../../../__generated__/graphql';
 import { UniversalTable } from '../UniversalTable';
 import { headCells } from './RegistrationDataImportTableHeadCells';
 import { RegistrationDataImportTableRow } from './RegistrationDataImportTableRow';
 
-interface PaymentRecordTableProps {
-  cashPlan: CashPlanNode;
-}
-export function RegistrationDataImportTable({
-  cashPlan,
-}: PaymentRecordTableProps): ReactElement {
-  const initialVariables = {
-    cashPlan: cashPlan.id,
-  };
+const TableWrapper = styled.div`
+  padding: 20px;
+`;
+
+export function RegistrationDataImportTable(): ReactElement {
+  const initialVariables = {};
   return (
-    <UniversalTable<PaymentRecordNode, AllPaymentRecordsQueryVariables>
-      title='Payment Records'
-      headCells={headCells}
-      query={useAllPaymentRecordsQuery}
-      queriedObjectName='allPaymentRecords'
-      initialVariables={initialVariables}
-      renderRow={(row) => <RegistrationDataImportTableRow paymentRecord={row} />}
-    />
+    <TableWrapper>
+      <UniversalTable<
+        RegistrationDataImportNode,
+        AllRegistrationDataImportsQueryVariables
+      >
+        title='List of Imports'
+        headCells={headCells}
+        query={useAllRegistrationDataImportsQuery}
+        queriedObjectName='allRegistrationDataImports'
+        initialVariables={initialVariables}
+        renderRow={(row) => (
+          <RegistrationDataImportTableRow registrationDataImport={row} />
+        )}
+      />
+    </TableWrapper>
   );
 }

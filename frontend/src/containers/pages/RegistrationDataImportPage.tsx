@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
+import { useHistory, useLocation } from 'react-router-dom';
 import { Snackbar, SnackbarContent } from '@material-ui/core';
 import { ProgramCard } from '../../components/programs/ProgramCard';
 import { PageHeader } from '../../components/PageHeader';
@@ -12,8 +13,10 @@ import {
 import { CreateProgram } from '../dialogs/programs/CreateProgram';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { LoadingComponent } from '../../components/LoadingComponent';
-import { useSnackbarHelper } from '../../hooks/useBreadcrumbHelper'
+import { useSnackbarHelper } from '../../hooks/useBreadcrumbHelper';
 import { RegistrationDataImport } from '../dialogs/registration/RegistrationDataImport';
+import { RegistrationDataImportTable } from '../tables/RegistrationdDataImportTable';
+import { RegistrationFilters } from '../../components/registration/RegistrationFilter';
 
 const PageContainer = styled.div`
   display: flex;
@@ -25,7 +28,34 @@ const PageContainer = styled.div`
 export function RegistrationDataImportPage(): React.ReactElement {
   const businessArea = useBusinessArea();
   const { t } = useTranslation();
+  const [filter, setFilter] = useState({});
+  const [queryString, setQueryString] = useState('');
+  const location = useLocation();
+  const history = useHistory();
+  useEffect(() => {
+    const query = new URLSearchParams(location.search);
+    const filterQuery = {};
+    query.forEach((value, name) => {
+      filterQuery[name] = value;
+    });
+    setFilter(filterQuery);
 
+    console.log({ filterQuery });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
+    if (Object.keys(filter).length === 0) {
+      return;
+    }
+    const encoded = Object.keys(filter).map(
+      (key) => `${encodeURIComponent(key)}=${encodeURIComponent(filter[key])}`,
+    );
+    console.log('encoded', encoded);
+    const query = encoded.join('&');
+    setQueryString(encoded.join('&'));
+    history.push(`${location.pathname}?${query}`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter]);
   const toolbar = (
     <PageHeader title={t('Registration Data Import')}>
       <RegistrationDataImport />
@@ -40,6 +70,8 @@ export function RegistrationDataImportPage(): React.ReactElement {
   return (
     <div>
       {toolbar}
+      <RegistrationFilters onFilterChange={setFilter} filter={filter} />
+      <RegistrationDataImportTable />
     </div>
   );
 }

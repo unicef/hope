@@ -5,8 +5,7 @@ import { columnToOrderBy } from '../../utils/utils';
 
 interface UniversalTableProps<T, K> {
   initialVariables: K;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  query: any;
+  query;
   queriedObjectName: string;
   renderRow: (row: T) => ReactElement;
   headCells: HeadCell<T>[];

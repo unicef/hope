@@ -1,11 +1,11 @@
 import { HeadCell } from '../../../components/table/EnhancedTableHead';
-import { PaymentRecordNode } from '../../../__generated__/graphql';
+import { RegistrationDataImportNode, } from '../../../__generated__/graphql';
 
-export const headCells: HeadCell<PaymentRecordNode>[] = [
+export const headCells: HeadCell<RegistrationDataImportNode>[] = [
   {
     disablePadding: false,
-    label: 'Payment ID',
-    id: 'cashAssistId',
+    label: 'Title',
+    id: 'name',
     numeric: false,
   },
   {
@@ -16,38 +16,26 @@ export const headCells: HeadCell<PaymentRecordNode>[] = [
   },
   {
     disablePadding: false,
-    label: 'Head of Household',
-    id: 'headOfHousehold',
+    label: 'Import Date',
+    id: 'importDate',
     numeric: false,
   },
   {
-    disablePadding: false,
-    label: 'Household ID',
-    id: 'household__household_ca_id',
-    numeric: false,
-  },
-  {
-    disablePadding: false,
-    label: 'Household Size',
-    id: 'totalPersonCovered',
-    numeric: false,
-  },
-  {
-    disablePadding: false,
-    label: 'Entitlement',
-    id: 'entitlement__entitlement_quantity',
+    disablePadding: true,
+    label: 'Num. of Households',
+    id: 'numberOfHouseholds',
     numeric: true,
   },
   {
     disablePadding: false,
-    label: 'Delivered Amount',
-    id: 'entitlement__delivered_quantity',
+    label: 'Imported by',
+    id: 'importedBy__first_name',
     numeric: true,
   },
   {
     disablePadding: false,
-    label: 'Delivery Date',
-    id: 'entitlement__delivery_date',
+    label: 'Data Source',
+    id: 'dataSource',
     numeric: true,
   },
 ];

@@ -50,6 +50,21 @@ export function paymentRecordStatusToColor(
       return theme.palette.error.main;
   }
 }
+
+export function registrationDataImportStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  switch (status) {
+    case 'DONE':
+      return theme.hctPalette.green;
+    case 'IN_PROGRESS':
+      return theme.hctPalette.oragne;
+    default:
+      return theme.hctPalette.oragne;
+  }
+}
+
 export function getCookie(name): string | null {
   const value = `; ${document.cookie}`;
   const parts = value.split(`; ${name}=`);

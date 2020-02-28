@@ -1,9 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import {
-  AllHouseholdsQueryVariables,
   AllIndividualsQueryVariables,
-  HouseholdNode,
   IndividualNode,
   useAllIndividualsQuery,
 } from '../../../__generated__/graphql';
@@ -26,7 +24,7 @@ export const IndividualsListTable = ({
   businessArea,
 }: IndividualsListTableProps): React.ReactElement => {
   const initialVariables = {
-   // todo missing filters !important
+    // todo missing filters !important
     // businessArea,
     //   ageGreater: ageFilter.min,
     //   ageLower: ageFilter.max
