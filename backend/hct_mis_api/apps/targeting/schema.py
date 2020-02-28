@@ -3,7 +3,7 @@ from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
-from core.schema import ExtendedConnection
+from core.extended_connection import ExtendedConnection
 from targeting.models import TargetPopulation
 
 
