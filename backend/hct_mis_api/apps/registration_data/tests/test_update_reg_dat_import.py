@@ -36,7 +36,7 @@ class TestUpdateRegistrationDataImport(APITestCase):
                     self.registration_data_import.id, "RegistrationDataImport",
                 ),
                 "name": "Test name",
-                "status": "DONE",
+                "status": "APPROVED",
                 "importDate": "2019-12-20T15:00:00",
                 "importedById": self.id_to_base64(self.user.id, "User"),
                 "dataSource": "XLS",

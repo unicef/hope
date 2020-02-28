@@ -19,7 +19,9 @@ class RegistrationDataImport(TimeStampedUUIDModel):
         ("OTHER", "Other"),
     )
     name = models.CharField(max_length=255, unique=True)
-    status = models.CharField(max_length=255, choices=STATUS_CHOICE,)
+    status = models.CharField(
+        max_length=255, choices=STATUS_CHOICE, default="IN_REVIEW",
+    )
     import_date = models.DateTimeField(auto_now_add=True)
     imported_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,

@@ -17,7 +17,7 @@ snapshots['TestRegistrationDataImportQuery::test_registration_data_import_datahu
                         'name': 'Lorem Ipsum',
                         'numberOfHouseholds': 54,
                         'numberOfIndividuals': 123,
-                        'status': 'IN_PROGRESS'
+                        'status': 'IN_REVIEW'
                     }
                 },
                 {
@@ -26,7 +26,7 @@ snapshots['TestRegistrationDataImportQuery::test_registration_data_import_datahu
                         'name': 'Lorem Ipsum 2',
                         'numberOfHouseholds': 154,
                         'numberOfIndividuals': 323,
-                        'status': 'DONE'
+                        'status': 'IN_REVIEW'
                     }
                 },
                 {
@@ -35,7 +35,7 @@ snapshots['TestRegistrationDataImportQuery::test_registration_data_import_datahu
                         'name': 'Lorem Ipsum 3',
                         'numberOfHouseholds': 184,
                         'numberOfIndividuals': 423,
-                        'status': 'IN_PROGRESS'
+                        'status': 'IN_REVIEW'
                     }
                 }
             ]
@@ -50,7 +50,7 @@ snapshots['TestRegistrationDataImportQuery::test_registration_data_import_datahu
             'name': 'Lorem Ipsum',
             'numberOfHouseholds': 54,
             'numberOfIndividuals': 123,
-            'status': 'IN_PROGRESS'
+            'status': 'IN_REVIEW'
         }
     }
 }

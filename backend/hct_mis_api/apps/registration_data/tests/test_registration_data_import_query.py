@@ -39,7 +39,7 @@ class TestRegistrationDataImportQuery(APITestCase):
         self.to_create = [
             {
                 "name": "Lorem Ipsum",
-                "status": "IN_PROGRESS",
+                "status": "IN_REVIEW",
                 "imported_by": self.user,
                 "data_source": "XLS",
                 "number_of_individuals": 123,
@@ -47,7 +47,7 @@ class TestRegistrationDataImportQuery(APITestCase):
             },
             {
                 "name": "Lorem Ipsum 2",
-                "status": "DONE",
+                "status": "IN_REVIEW",
                 "imported_by": self.user,
                 "data_source": "XLS",
                 "number_of_individuals": 323,
@@ -55,7 +55,7 @@ class TestRegistrationDataImportQuery(APITestCase):
             },
             {
                 "name": "Lorem Ipsum 3",
-                "status": "IN_PROGRESS",
+                "status": "IN_REVIEW",
                 "imported_by": self.user,
                 "data_source": "XLS",
                 "number_of_individuals": 423,
