@@ -17,14 +17,6 @@ const Container = styled.div`
   }
 `;
 
-const TableWrapper = styled.div`
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  padding: 20px;
-  padding-bottom: 0;
-`;
-
 export function TargetPopulationPage() {
   const { t } = useTranslation();
   const history = useHistory();
@@ -52,13 +44,17 @@ export function TargetPopulationPage() {
 
   const redirectToCreate = () => {
     const path = `/${businessArea}/target-population/create`;
-    return history.push(path)
-  }
+    return history.push(path);
+  };
 
   return (
     <div>
       <PageHeader title={t('Target Population')}>
-        <Button variant='contained' color='primary' onClick={() => redirectToCreate()}>
+        <Button
+          variant='contained'
+          color='primary'
+          onClick={() => redirectToCreate()}
+        >
           Create new
         </Button>
       </PageHeader>
@@ -70,9 +66,11 @@ export function TargetPopulationPage() {
         householdTextFilter={handleTextFilter}
       />
       <Container>
-        <TableWrapper>
-          <TargetPopulationTable />
-        </TableWrapper>
+        <TargetPopulationTable
+          sizeFilter={sizeFilter}
+          textFilter={textFilter}
+          businessArea={businessArea}
+        />
       </Container>
     </div>
   );
