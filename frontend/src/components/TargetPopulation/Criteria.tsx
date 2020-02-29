@@ -8,7 +8,8 @@ const CriteriaElement = styled.div`
   border-radius: 3px;
   font-size: 16px;
   background-color: #f7faff;
-  padding: ${({ theme }) => theme.spacing(3)}px;
+  padding: ${({ theme }) => theme.spacing(1)}px
+    ${({ theme }) => theme.spacing(3)}px;
   p {
     margin: ${({ theme }) => theme.spacing(2)}px 0;
     span {
