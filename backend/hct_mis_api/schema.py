@@ -9,12 +9,14 @@ import household.schema
 import payment.schema
 import program.mutations
 import program.schema
+import registration_data.schema
 import registration_datahub.schema
 import targeting.schema
 import targeting.mutations
 
 
 class Query(
+    registration_data.schema.Query,
     registration_datahub.schema.Query,
     account.schema.Query,
     household.schema.Query,

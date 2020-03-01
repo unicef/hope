@@ -1,8 +1,10 @@
 import React from 'react';
 import styled from 'styled-components';
-import { TextField, InputAdornment } from '@material-ui/core';
+import { TextField, InputAdornment, MenuItem } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
 import GroupIcon from '@material-ui/icons/Group';
+import { ProgramNode } from '../../__generated__/graphql';
+import FlashOnIcon from '@material-ui/icons/FlashOn';
 
 const Container = styled.div`
   display: flex;
@@ -65,15 +67,19 @@ const TextContainer = styled(TextField)`
 `;
 
 interface HouseholdFiltersProps {
+  programs: ProgramNode[];
   minValue: number;
   maxValue: number;
+  householdProgramFilter: (value: string) => void;
   householdMinSizeFilter: (value: number) => void;
   householdMaxSizeFilter: (value: number) => void;
   householdTextFilter: (value: string) => void;
 }
 export function HouseholdFilters({
+  programs,
   minValue,
   maxValue,
+  householdProgramFilter,
   householdMinSizeFilter,
   householdMaxSizeFilter,
   householdTextFilter,
@@ -93,6 +99,24 @@ export function HouseholdFilters({
         }}
       />
       <TextContainer
+        select
+        placeholder='Programme'
+        variant='filled'
+        onChange={(e) => householdProgramFilter(e.target.value)}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position='start'>
+              <FlashOnIcon />
+            </InputAdornment>
+          ),
+        }}
+      >
+        {programs.map((program) => (
+          <MenuItem value={program.id}>{program.name}</MenuItem>
+        ))}
+      </TextContainer>
+      <TextContainer
+        id='minFilter'
         value={minValue}
         variant='filled'
         placeholder='Household size'
@@ -108,6 +132,7 @@ export function HouseholdFilters({
       />
       to
       <TextContainer
+        id='maxFilter'
         value={maxValue}
         variant='filled'
         placeholder='Household size'

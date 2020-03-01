@@ -27,6 +27,12 @@ The **domain name** part of an email address has to conform to strict guidelines
   * Digit
   * Special character
 
+## Currency
+
+* \[symbol\] \#\#.\#\# \[Currency Type\]
+  * **example:** $100.00 USD
+* A currency amount should not exceed two decimal place.
+
 ## Dates
 
 * DD/MM/YYYY format

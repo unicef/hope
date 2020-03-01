@@ -74,6 +74,9 @@ class IndividualFactory(factory.DjangoModelFactory):
     disability = factory.fuzzy.FuzzyChoice(
         Individual.DISABILITY_CHOICE, getter=lambda c: c[0],
     )
+    serious_illness = factory.fuzzy.FuzzyChoice(
+        Individual.YES_NO_CHOICE, getter=lambda c: c[0],
+    )
 
 
 class EntitlementCardFactory(factory.DjangoModelFactory):
