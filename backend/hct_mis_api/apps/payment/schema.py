@@ -4,7 +4,8 @@ from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
-from core.schema import ExtendedConnection, ChoiceObject
+from core.schema import ChoiceObject
+from core.extended_connection import ExtendedConnection
 from payment.models import PaymentRecord, PaymentEntitlement
 
 

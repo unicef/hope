@@ -5,12 +5,14 @@ export const ALL_LOG_ENTRIES_QUERY = gql`
     $objectId: String!
     $after: String
     $before: String
-    $count: Int
+    $first: Int
+    $last: Int
   ) {
     allLogEntries(
       after: $after
       before: $before
-      first: $count
+      first: $first
+      last: $last
       objectId: $objectId
     ) {
       pageInfo {
@@ -27,7 +29,7 @@ export const ALL_LOG_ENTRIES_QUERY = gql`
           action
           changesDisplayDict
           timestamp
-          actor{
+          actor {
             id
             firstName
             lastName

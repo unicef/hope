@@ -1,3 +1,8 @@
 from django.contrib import admin
 
-# Register your models here.
+from registration_data.models import RegistrationDataImport
+
+
+@admin.register(RegistrationDataImport)
+class RegistrationDataImportAdmin(admin.ModelAdmin):
+    pass
