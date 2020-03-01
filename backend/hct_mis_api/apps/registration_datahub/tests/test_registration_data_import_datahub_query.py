@@ -12,9 +12,7 @@ class TestRegistrationDataImportDatahubQuery(APITestCase):
         edges {
           node {
             name
-            status
-            dataSource
-            importedBy
+            hctId
           }
         }
       }
@@ -24,9 +22,7 @@ class TestRegistrationDataImportDatahubQuery(APITestCase):
     query RegistrationDataImportDatahub($id: ID!) {
       registrationDataImportDatahub(id: $id) {
         name
-        status
-        dataSource
-        importedBy
+        hctId
       }
     }
     """
@@ -37,21 +33,15 @@ class TestRegistrationDataImportDatahubQuery(APITestCase):
         self.to_create = [
             {
                 "name": "Lorem Ipsum",
-                "status": "IN_PROGRESS",
-                "imported_by": "Super User",
-                "data_source": "XLS",
+                "hct_id": "42191234-5a31-11ea-82b4-0242ac130003",
             },
             {
                 "name": "Lorem Ipsum 2",
-                "status": "DONE",
-                "imported_by": "Super User",
-                "data_source": "XLS",
+                "hct_id": "c2abeded-4aa0-422a-bfa2-b18dec20071f",
             },
             {
                 "name": "Lorem Ipsum 3",
-                "status": "IN_PROGRESS",
-                "imported_by": "Super User",
-                "data_source": "XLS",
+                "hct_id": "df7e419f-26bd-4a52-8698-0a201447a5f1",
             },
         ]
 
