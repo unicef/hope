@@ -50,6 +50,9 @@ class ImportedHousehold(TimeStampedUUIDModel):
         null=True,
     )
 
+    def __str__(self):
+        return f"Household CashAssist ID: {self.household_ca_id}"
+
 
 class ImportedIndividual(TimeStampedUUIDModel):
     SEX_CHOICE = (
@@ -155,23 +158,9 @@ class ImportedIndividual(TimeStampedUUIDModel):
 
 
 class RegistrationDataImportDatahub(TimeStampedUUIDModel):
-    IN_PROGRESS = "IN_PROGRESS"
-    DONE = "DONE"
-    STATUS_CHOICE = (
-        (IN_PROGRESS, _("In progress")),
-        (DONE, _("Done")),
-    )
-    DATA_SOURCE_CHOICE = (
-        ("XLS", "Excel"),
-        ("3RD_PARTY", "3rd party"),
-        ("XML", "XML"),
-        ("OTHER", "Other"),
-    )
     name = models.CharField(max_length=255)
-    status = models.CharField(max_length=255, choices=STATUS_CHOICE,)
     import_date = models.DateTimeField(auto_now_add=True)
-    imported_by = models.CharField(max_length=255, blank=True)
-    data_source = models.CharField(max_length=255, choices=DATA_SOURCE_CHOICE,)
+    hct_id = models.UUIDField(null=True, default=None)
 
     def __str__(self):
         return self.name

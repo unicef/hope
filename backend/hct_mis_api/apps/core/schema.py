@@ -12,6 +12,7 @@ from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
 from account.schema import UserObjectType
+from core.extended_connection import ExtendedConnection
 from core.models import Location, BusinessArea
 from core.utils import decode_id_string
 
@@ -68,20 +69,6 @@ class LogEntryObjectConnection(Connection):
 
     class Meta:
         node = LogEntryObject
-
-
-class ExtendedConnection(graphene.Connection):
-    class Meta:
-        abstract = True
-
-    total_count = graphene.Int()
-    edge_count = graphene.Int()
-
-    def resolve_total_count(root, info, **kwargs):
-        return root.length
-
-    def resolve_edge_count(root, info, **kwargs):
-        return len(root.edges)
 
 
 class LocationNode(DjangoObjectType):
