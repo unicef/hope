@@ -1,9 +1,11 @@
 import React, {useState} from 'react';
+import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { Typography, Paper } from '@material-ui/core';
 import { TargetPopulationPageHeader } from './headers/TargetPopulationPageHeader';
 import { Results } from '../../components/TargetPopulation/Results';
 import { TargetingCriteria } from '../../components/TargetPopulation/TargetingCriteria';
+import { useTargetPopulationQuery } from '../../__generated__/graphql';
 
 const PaperContainer = styled(Paper)`
   display: flex;
@@ -19,7 +21,15 @@ const Title = styled.div`
 `;
 
 export function TargetPopulationDetailsPage() {
+  const { id } = useParams();
+  const { data, loading } = useTargetPopulationQuery({
+    variables: {id}
+  });
   const [isEdit, setEditState] = useState(false);
+
+  if(!data) {
+    return null;
+  }
   return (
     <div>
       <TargetPopulationPageHeader isEditMode={isEdit} setEditState={setEditState}/>
