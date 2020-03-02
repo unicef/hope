@@ -27,7 +27,7 @@ Backend can be accessed at `/api/` i.e. [`localhost:8082/api/admin/`](http://loc
 
 ## Development / Build / Deployment Process
 
-![Engineering Process](../../.gitbook/assets/unicef_hct-mis__online_whiteboard_for_visual_collaboration%20%281%29.jpg)
+![](../../.gitbook/assets/unicef-hct-mis-1.jpg)
 
 ## Git Branching
 

@@ -52,7 +52,7 @@ During this time, the selected file will be analyzed for any potential issues an
 
 Furthermore, for the user's convenience, and to ensure consistency in data is being met, the users will have the ability to download the approved data [import template](via-excel-import.md#import-template) by clicking a button on the bottom right of the modal.
 
-### Edge Cases / Validation Steps
+## Edge Cases / Validation Steps
 
 * [ ] File import data must match the format of the approved Import Template.
 * [ ] The system should only support XLSx file type
@@ -60,9 +60,14 @@ Furthermore, for the user's convenience, and to ensure consistency in data is be
 * [ ] The user gets an import template, but modifies row 1 for any of the columns to something invalid, the import should fail.
 * [ ] If any required fields are missing in the excel file being imported, the import should error out.
 
-### Open issues
+## Open issues
 
 * It may be beneficial in the import template that is given to user, to have some sample data in it? Especially helpful where there are "select one" type fields, where choices could be not easy to guess/figure out?
+
+## Future Enhancements / Out of scope
+
+* Implementation of a wizard that read the excel column first and ask the user to map the columns in the next step.
+* Further improvements can store common mapping for reuse, this will allow to not "freeze" the mapping today and grant the ability to be "open for changes" in case external systems change or new ones come.
 
 
 
