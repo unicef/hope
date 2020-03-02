@@ -5,6 +5,7 @@ import { HouseholdFilters } from '../../components/population/HouseholdFilter';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { HouseholdTable } from '../tables/HouseholdTable';
 import { useAllProgramsQuery, ProgramNode } from '../../__generated__/graphql';
+import { BreadCrumbsItem } from '../../components/BreadCrumbs';
 
 const Container = styled.div`
   display: flex;
@@ -25,6 +26,13 @@ export function PopulationHouseholdPage(): React.ReactElement {
   });
 
   if (loading) return null;
+
+  const breadCrumbsItems: BreadCrumbsItem[] = [
+    {
+      title: 'Population',
+      to: `/${businessArea}/population/household`,
+    },
+  ];
 
   const handleMinSizeFilter = (value: number): void => {
     setSizeFilter({ ...sizeFilter, min: value });
@@ -50,7 +58,7 @@ export function PopulationHouseholdPage(): React.ReactElement {
 
   return (
     <div>
-      <PageHeader title='Households' />
+      <PageHeader title='Households' breadCrumbs={breadCrumbsItems} />
       <HouseholdFilters
         programs={programs as ProgramNode[]}
         minValue={sizeFilter.min}
