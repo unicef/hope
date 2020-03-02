@@ -6,6 +6,9 @@ import { useHistory } from 'react-router-dom';
 import { TargetPopulationNode } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
+import { StatusBox } from '../../../components/StatusBox';
+import { targetPopulationStatusToColor } from '../../../utils/utils';
+
 
 const StatusContainer = styled.div`
   width: 120px;
@@ -33,13 +36,18 @@ export function TargetPopulationTableRow({
       key={targetPopulation.id}
     >
       <TableCell align='left'>{targetPopulation.name}</TableCell>
-      <TableCell align='left'>-</TableCell>
+      <TableCell align='left'>
+        <StatusContainer>
+          <StatusBox
+            status={targetPopulation.status}
+            statusToColor={targetPopulationStatusToColor}
+          />
+        </StatusContainer>
+      </TableCell>
       <TableCell align='left'>-</TableCell>
       <TableCell align='left'>-</TableCell>
       <TableCell align='left'>
-        <Moment format='MM/DD/YYYY'>
-          {targetPopulation.createdAt}
-        </Moment>
+        <Moment format='MM/DD/YYYY'>{targetPopulation.createdAt}</Moment>
       </TableCell>
       <TableCell align='left'>-</TableCell>
       <TableCell align='left'>-</TableCell>
