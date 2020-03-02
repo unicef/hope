@@ -1,6 +1,7 @@
 import json
 
 import factory
+from factory import fuzzy
 
 from account.fixtures import UserFactory
 from household.fixtures import HouseholdFactory
@@ -17,3 +18,7 @@ class TargetPopulationFactory(factory.DjangoModelFactory):
     created_by = factory.SubFactory(UserFactory)
     rules = json.loads('{"example": 123}')
     households = factory.RelatedFactory(HouseholdFactory)
+    status = factory.fuzzy.FuzzyChoice(
+        TargetPopulation.STATUS_CHOICE, getter=lambda c: c[0],
+    )
+
