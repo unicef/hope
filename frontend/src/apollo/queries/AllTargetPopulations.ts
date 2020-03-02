@@ -17,6 +17,7 @@ export const AllTargetPopulations = gql`
         node {
           id
           name
+          status
           createdAt
           createdBy {
             firstName
