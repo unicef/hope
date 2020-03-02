@@ -1,12 +1,12 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
-import { Button } from '@material-ui/core';
-import { EditRounded } from '@material-ui/icons';
 import { TargetPopulationNode } from '../../../__generated__/graphql';
 import { PageHeader } from '../../../components/PageHeader';
 import { BreadCrumbsItem } from '../../../components/BreadCrumbs';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { InProgressTargetPopulationHeaderButtons } from './InProgressTargetPopulationHeaderButtons';
+import { FinalizedTargetPopulationHeaderButtons } from './FinalizedTargetPopulationHeaderButtons';
 
 const ButtonContainer = styled.span`
   margin: 0 ${({ theme }) => theme.spacing(2)}px;
@@ -16,40 +16,63 @@ export interface ProgramDetailsPageHeaderPropTypes {
   // targetPopulation: TargetPopulationNode;
   isEditMode: boolean;
   setEditState: Function;
+  targetPopulation: TargetPopulationNode;
 }
 
 export function TargetPopulationPageHeader({
-  // targetPopulation,
+  targetPopulation,
   isEditMode,
-  setEditState
+  setEditState,
 }: ProgramDetailsPageHeaderPropTypes): React.ReactElement {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
-      title: 'Programme Managment',
+      title: 'Target Population',
       to: `/${businessArea}/target-population/`,
     },
   ];
+  //TODO: Use statuses from node - not in backend yet
+  let buttons;
+  switch (targetPopulation.status) {
+    case 'IN_PROGRESS':
+      buttons = (
+        <InProgressTargetPopulationHeaderButtons
+          targetPopulation={targetPopulation}
+          setEditState={setEditState}
+        />
+      );
+      break;
+    case 'FINALIZED':
+      buttons = (
+        <FinalizedTargetPopulationHeaderButtons
+          targetPopulation={targetPopulation}
+        />
+      );
+      break;
+    default:
+      //TODO: this could be edit case, in such scenario 
+      //wrap other components in page header
+      buttons = (
+        <InProgressTargetPopulationHeaderButtons
+          targetPopulation={targetPopulation}
+          setEditState={setEditState}
+        />
+      );
+      break;
+  }
   return (
-    <PageHeader title={t('sample name')} breadCrumbs={breadCrumbsItems}>
-      <>
-        <ButtonContainer>
-          <Button
-            variant='outlined'
-            color='primary'
-            startIcon={<EditRounded />}
-            onClick={() => setEditState(!isEditMode)}
-          >
-            Edit
-          </Button>
-        </ButtonContainer>
-        <ButtonContainer>
-          <Button variant='contained' color='primary'>
-            Finalize
-          </Button>
-        </ButtonContainer>
-      </>
-    </PageHeader>
+    <>
+      {isEditMode ? (
+        <div>Edit mode header</div>
+      ) : (
+        <PageHeader
+          title={t(`${targetPopulation.name}`)}
+          breadCrumbs={breadCrumbsItems}
+        >
+          {buttons}
+        </PageHeader>
+      )}
+    </>
   );
 }
