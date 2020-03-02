@@ -5,7 +5,7 @@ import { Typography, Paper } from '@material-ui/core';
 import { TargetPopulationPageHeader } from './headers/TargetPopulationPageHeader';
 import { Results } from '../../components/TargetPopulation/Results';
 import { TargetingCriteria } from '../../components/TargetPopulation/TargetingCriteria';
-import { useTargetPopulationQuery } from '../../__generated__/graphql';
+import { useTargetPopulationQuery, TargetPopulationNode } from '../../__generated__/graphql';
 
 const PaperContainer = styled(Paper)`
   display: flex;
@@ -30,9 +30,10 @@ export function TargetPopulationDetailsPage() {
   if(!data) {
     return null;
   }
+  const targetPopulation = data.targetPopulation as TargetPopulationNode
   return (
     <div>
-      <TargetPopulationPageHeader isEditMode={isEdit} setEditState={setEditState}/>
+      <TargetPopulationPageHeader targetPopulation={targetPopulation} isEditMode={isEdit} setEditState={setEditState}/>
       <TargetingCriteria />
       <Results />
       <PaperContainer>
