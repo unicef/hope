@@ -3,7 +3,7 @@ import unittest
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
 from household.fixtures import RegistrationDataImportFactory
-from household.models import RegistrationDataImport
+from registration_data.models import RegistrationDataImport
 
 
 @unittest.skip("Not supporting deleting Registration Data Import")

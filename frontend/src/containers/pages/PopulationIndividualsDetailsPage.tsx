@@ -14,7 +14,7 @@ import { IndividualVulnerabilities } from '../../components/population/Individua
 import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
 
 const Container = styled.div`
-padding: 20px;
+  padding: 20px;
   && {
     display: flex;
     flex-direction: column;

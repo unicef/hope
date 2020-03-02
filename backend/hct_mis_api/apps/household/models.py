@@ -12,7 +12,6 @@ from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
 
 from household.const import NATIONALITIES
-from registration_data.models import RegistrationDataImport
 from utils.models import TimeStampedUUIDModel
 
 
@@ -43,7 +42,7 @@ class Household(TimeStampedUUIDModel):
         null=True,
     )
     registration_data_import_id = models.ForeignKey(
-        RegistrationDataImport,
+        "registration_data.RegistrationDataImport",
         related_name="households",
         on_delete=models.CASCADE,
     )
@@ -133,7 +132,7 @@ class Individual(TimeStampedUUIDModel):
         "Household", related_name="individuals", on_delete=models.CASCADE,
     )
     registration_data_import_id = models.ForeignKey(
-        RegistrationDataImport,
+        "registration_data.RegistrationDataImport",
         related_name="individuals",
         on_delete=models.CASCADE,
     )
@@ -142,6 +141,23 @@ class Individual(TimeStampedUUIDModel):
     )
     disability = models.CharField(
         max_length=30, default="NO", choices=DISABILITY_CHOICE,
+    )
+    serious_illness = models.CharField(
+        max_length=3, default="NO", choices=YES_NO_CHOICE,
+    )
+    age_first_married = models.PositiveIntegerField(null=True, default=None)
+    enrolled_in_school = models.CharField(
+        max_length=3, default="NO", choices=YES_NO_CHOICE,
+    )
+    school_attendance = models.CharField(max_length=100, blank=True, default="")
+    school_type = models.CharField(max_length=100, blank=True, default="")
+    years_in_school = models.PositiveIntegerField(null=True, default=None)
+    minutes_to_school = models.PositiveIntegerField(null=True, default=None)
+    enrolled_in_nutrition_programme = models.CharField(
+        max_length=3, default="", choices=YES_NO_CHOICE, blank=True,
+    )
+    administration_of_rutf = models.CharField(
+        max_length=3, default="", choices=YES_NO_CHOICE, blank=True,
     )
 
     @property
