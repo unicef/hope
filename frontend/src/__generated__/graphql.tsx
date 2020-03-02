@@ -2647,6 +2647,19 @@ export type ProgrammeChoiceDataQuery = (
   )>>> }
 );
 
+export type TargetPopulationQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type TargetPopulationQuery = (
+  { __typename?: 'Query' }
+  & { targetPopulation: Maybe<(
+    { __typename?: 'TargetPopulationNode' }
+    & Pick<TargetPopulationNode, 'name'>
+  )> }
+);
+
 
 export const CreateProgramDocument = gql`
     mutation CreateProgram($programData: CreateProgramInput!) {
@@ -3951,6 +3964,56 @@ export function useProgrammeChoiceDataLazyQuery(baseOptions?: ApolloReactHooks.L
 export type ProgrammeChoiceDataQueryHookResult = ReturnType<typeof useProgrammeChoiceDataQuery>;
 export type ProgrammeChoiceDataLazyQueryHookResult = ReturnType<typeof useProgrammeChoiceDataLazyQuery>;
 export type ProgrammeChoiceDataQueryResult = ApolloReactCommon.QueryResult<ProgrammeChoiceDataQuery, ProgrammeChoiceDataQueryVariables>;
+export const TargetPopulationDocument = gql`
+    query targetPopulation($id: ID!) {
+  targetPopulation(id: $id) {
+    name
+  }
+}
+    `;
+export type TargetPopulationComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<TargetPopulationQuery, TargetPopulationQueryVariables>, 'query'> & ({ variables: TargetPopulationQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const TargetPopulationComponent = (props: TargetPopulationComponentProps) => (
+      <ApolloReactComponents.Query<TargetPopulationQuery, TargetPopulationQueryVariables> query={TargetPopulationDocument} {...props} />
+    );
+    
+export type TargetPopulationProps<TChildProps = {}> = ApolloReactHoc.DataProps<TargetPopulationQuery, TargetPopulationQueryVariables> & TChildProps;
+export function withTargetPopulation<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  TargetPopulationQuery,
+  TargetPopulationQueryVariables,
+  TargetPopulationProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, TargetPopulationQuery, TargetPopulationQueryVariables, TargetPopulationProps<TChildProps>>(TargetPopulationDocument, {
+      alias: 'targetPopulation',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useTargetPopulationQuery__
+ *
+ * To run a query within a React component, call `useTargetPopulationQuery` and pass it any options that fit your needs.
+ * When your component renders, `useTargetPopulationQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useTargetPopulationQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useTargetPopulationQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<TargetPopulationQuery, TargetPopulationQueryVariables>) {
+        return ApolloReactHooks.useQuery<TargetPopulationQuery, TargetPopulationQueryVariables>(TargetPopulationDocument, baseOptions);
+      }
+export function useTargetPopulationLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<TargetPopulationQuery, TargetPopulationQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<TargetPopulationQuery, TargetPopulationQueryVariables>(TargetPopulationDocument, baseOptions);
+        }
+export type TargetPopulationQueryHookResult = ReturnType<typeof useTargetPopulationQuery>;
+export type TargetPopulationLazyQueryHookResult = ReturnType<typeof useTargetPopulationLazyQuery>;
+export type TargetPopulationQueryResult = ApolloReactCommon.QueryResult<TargetPopulationQuery, TargetPopulationQueryVariables>;
 
 
 export type ResolverTypeWrapper<T> = Promise<T> | T;
