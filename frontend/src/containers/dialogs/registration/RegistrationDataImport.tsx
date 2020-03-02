@@ -82,7 +82,6 @@ function DropzoneField({
   ...otherProps
 }) {
   const onDrop = useCallback((acceptedFiles) => {
-    console.log('test');
     field.onChange({
       target: { value: acceptedFiles[0], name: field.name },
     });

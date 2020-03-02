@@ -152,6 +152,13 @@ export function programStatusToPriority(status: ProgramStatus): number {
       return 3;
   }
 }
+export function decodeIdString(idString) {
+  if (!idString) {
+    return null;
+  }
+  const decoded = atob(idString);
+  return decoded.split(':')[1];
+}
 
 export function programCompare(
   a: AllProgramsQuery['allPrograms']['edges'][number],

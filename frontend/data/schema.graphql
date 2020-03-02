@@ -1387,7 +1387,7 @@ type Query {
   importedIndividual(id: ID!): ImportedIndividualNode
   allImportedIndividuals(before: String, after: String, first: Int, last: Int, fullName: String, fullName_Icontains: String, sex: [ID], age: String, orderBy: String): ImportedIndividualNodeConnection
   registrationDataImport(id: ID!): RegistrationDataImportNode
-  allRegistrationDataImports(before: String, after: String, first: Int, last: Int, importedBy_Id: UUID, status: String, name: String, name_Icontains: String, orderBy: String): RegistrationDataImportNodeConnection
+  allRegistrationDataImports(before: String, after: String, first: Int, last: Int, importedBy_Id: UUID, importDate: Date, status: String, name: String, name_Icontains: String, orderBy: String): RegistrationDataImportNodeConnection
   registrationDataStatusChoices: [ChoiceObject]
   _debug: DjangoDebug
 }

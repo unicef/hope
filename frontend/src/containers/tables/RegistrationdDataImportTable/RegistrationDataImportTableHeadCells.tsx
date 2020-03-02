@@ -30,12 +30,12 @@ export const headCells: HeadCell<RegistrationDataImportNode>[] = [
     disablePadding: false,
     label: 'Imported by',
     id: 'importedBy__first_name',
-    numeric: true,
+    numeric: false,
   },
   {
     disablePadding: false,
     label: 'Data Source',
     id: 'dataSource',
-    numeric: true,
+    numeric: false,
   },
 ];

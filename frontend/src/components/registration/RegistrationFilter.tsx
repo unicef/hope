@@ -17,6 +17,11 @@ import PersonRoundedIcon from '@material-ui/icons/PersonRounded';
 import { DatePicker } from '@material-ui/pickers';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
 import WcIcon from '@material-ui/icons/Wc';
+import {
+  useAllUsersQuery,
+  useRegistrationChoicesQuery,
+} from '../../__generated__/graphql';
+import { decodeIdString } from '../../utils/utils';
 
 const Container = styled.div`
   display: flex;
@@ -207,11 +212,18 @@ export function RegistrationFilters({
   const [importedByLabelWidth, setImportedByLabelWidth] = React.useState(0);
   const statusLabel = React.useRef<HTMLLabelElement>(null);
   const [statusLabelWidth, setStatusLabelWidth] = React.useState(0);
-  console.log(filter.importedBy, typeof filter.importedBy);
+  const { data: allUsersData } = useAllUsersQuery();
+  const { data: registrationChoicesData } = useRegistrationChoicesQuery();
   React.useEffect(() => {
+    if (!importedByLabel.current) {
+      return;
+    }
     setImportedByLabelWidth(importedByLabel.current.offsetWidth);
     setStatusLabelWidth(statusLabel.current.offsetWidth);
-  }, []);
+  }, [importedByLabel, statusLabel, allUsersData]);
+  if (!allUsersData || !registrationChoicesData) {
+    return null;
+  }
   return (
     <Container>
       <TextContainer
@@ -219,7 +231,6 @@ export function RegistrationFilters({
         margin='dense'
         onChange={(e) => handleFilterChange(e, 'search')}
         value={filter.search}
-        label='test'
         InputProps={{
           startAdornment: (
             <InputAdornment position='start'>
@@ -255,9 +266,13 @@ export function RegistrationFilters({
           <MenuItem value=''>
             <em>None</em>
           </MenuItem>
-          <MenuItem value='10'>Ten</MenuItem>
-          <MenuItem value='20'>Twenty</MenuItem>
-          <MenuItem value='30'>Thirty</MenuItem>
+          {allUsersData.allUsers.edges.map((edge) => {
+            return (
+              <MenuItem key={edge.node.id} value={decodeIdString(edge.node.id)}>
+                {edge.node.firstName} {edge.node.lastName}
+              </MenuItem>
+            );
+          })}
         </Select>
       </StyledFormControl>
       <StyledFormControl variant='outlined' margin='dense'>
@@ -270,9 +285,13 @@ export function RegistrationFilters({
           <MenuItem value=''>
             <em>None</em>
           </MenuItem>
-          <MenuItem value='10'>Ten</MenuItem>
-          <MenuItem value='20'>Twenty</MenuItem>
-          <MenuItem value='30'>Thirty</MenuItem>
+          {registrationChoicesData.registrationDataStatusChoices.map((item) => {
+            return (
+              <MenuItem key={item.value} value={item.value}>
+                {item.name}
+              </MenuItem>
+            );
+          })}
         </Select>
       </StyledFormControl>
     </Container>

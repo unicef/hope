@@ -41,8 +41,6 @@ export function RegistrationDataImportPage(): React.ReactElement {
       filterQuery[name] = value;
     });
     setFilter(filterQuery);
-
-    console.log({ filterQuery });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
@@ -52,7 +50,6 @@ export function RegistrationDataImportPage(): React.ReactElement {
     const encoded = Object.keys(filter).map(
       (key) => `${encodeURIComponent(key)}=${encodeURIComponent(filter[key])}`,
     );
-    console.log('encoded', encoded);
     const query = encoded.join('&');
     history.push(`${location.pathname}?${query}`);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -72,7 +69,7 @@ export function RegistrationDataImportPage(): React.ReactElement {
     <div>
       {toolbar}
       <RegistrationFilters onFilterChange={setFilter} filter={filter} />
-      <RegistrationDataImportTable />
+      <RegistrationDataImportTable filter={debounceFilter} />
     </div>
   );
 }

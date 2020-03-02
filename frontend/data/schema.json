@@ -1720,6 +1720,16 @@
                 "defaultValue": null
               },
               {
+                "name": "importDate",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Date",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "status",
                 "description": null,
                 "type": {

@@ -1868,6 +1868,7 @@ export type QueryAllRegistrationDataImportsArgs = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   importedBy_Id?: Maybe<Scalars['UUID']>,
+  importDate?: Maybe<Scalars['Date']>,
   status?: Maybe<Scalars['String']>,
   name?: Maybe<Scalars['String']>,
   name_Icontains?: Maybe<Scalars['String']>,
@@ -2502,7 +2503,12 @@ export type AllRegistrationDataImportsQueryVariables = {
   after?: Maybe<Scalars['String']>,
   before?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
+  last?: Maybe<Scalars['Int']>,
+  orderBy?: Maybe<Scalars['String']>,
+  name_Icontains?: Maybe<Scalars['String']>,
+  importedBy_Id?: Maybe<Scalars['UUID']>,
+  status?: Maybe<Scalars['String']>,
+  importDate?: Maybe<Scalars['Date']>
 };
 
 
@@ -2524,6 +2530,26 @@ export type AllRegistrationDataImportsQuery = (
           { __typename?: 'UserNode' }
           & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
         ) }
+      )> }
+    )>> }
+  )> }
+);
+
+export type AllUsersQueryVariables = {};
+
+
+export type AllUsersQuery = (
+  { __typename?: 'Query' }
+  & { allUsers: Maybe<(
+    { __typename?: 'UserNodeConnection' }
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'endCursor' | 'startCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'UserNodeEdge' }
+      & { node: Maybe<(
+        { __typename?: 'UserNode' }
+        & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
       )> }
     )>> }
   )> }
@@ -2717,6 +2743,17 @@ export type ProgrammeChoiceDataQuery = (
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
   )>>>, programStatusChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>> }
+);
+
+export type RegistrationChoicesQueryVariables = {};
+
+
+export type RegistrationChoicesQuery = (
+  { __typename?: 'Query' }
+  & { registrationDataStatusChoices: Maybe<Array<Maybe<(
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
   )>>> }
@@ -3447,8 +3484,8 @@ export type AllProgramsQueryHookResult = ReturnType<typeof useAllProgramsQuery>;
 export type AllProgramsLazyQueryHookResult = ReturnType<typeof useAllProgramsLazyQuery>;
 export type AllProgramsQueryResult = ApolloReactCommon.QueryResult<AllProgramsQuery, AllProgramsQueryVariables>;
 export const AllRegistrationDataImportsDocument = gql`
-    query AllRegistrationDataImports($after: String, $before: String, $first: Int, $last: Int) {
-  allRegistrationDataImports(after: $after, before: $before, first: $first, last: $last) {
+    query AllRegistrationDataImports($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name_Icontains: String, $importedBy_Id: UUID, $status: String, $importDate: Date) {
+  allRegistrationDataImports(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name_Icontains: $name_Icontains, importedBy_Id: $importedBy_Id, status: $status, importDate: $importDate) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -3511,6 +3548,11 @@ export function withAllRegistrationDataImports<TProps, TChildProps = {}>(operati
  *      before: // value for 'before'
  *      first: // value for 'first'
  *      last: // value for 'last'
+ *      orderBy: // value for 'orderBy'
+ *      name_Icontains: // value for 'name_Icontains'
+ *      importedBy_Id: // value for 'importedBy_Id'
+ *      status: // value for 'status'
+ *      importDate: // value for 'importDate'
  *   },
  * });
  */
@@ -3523,6 +3565,67 @@ export function useAllRegistrationDataImportsLazyQuery(baseOptions?: ApolloReact
 export type AllRegistrationDataImportsQueryHookResult = ReturnType<typeof useAllRegistrationDataImportsQuery>;
 export type AllRegistrationDataImportsLazyQueryHookResult = ReturnType<typeof useAllRegistrationDataImportsLazyQuery>;
 export type AllRegistrationDataImportsQueryResult = ApolloReactCommon.QueryResult<AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables>;
+export const AllUsersDocument = gql`
+    query AllUsers {
+  allUsers {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      endCursor
+      startCursor
+    }
+    edges {
+      node {
+        id
+        firstName
+        lastName
+      }
+    }
+  }
+}
+    `;
+export type AllUsersComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllUsersQuery, AllUsersQueryVariables>, 'query'>;
+
+    export const AllUsersComponent = (props: AllUsersComponentProps) => (
+      <ApolloReactComponents.Query<AllUsersQuery, AllUsersQueryVariables> query={AllUsersDocument} {...props} />
+    );
+    
+export type AllUsersProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllUsersQuery, AllUsersQueryVariables> & TChildProps;
+export function withAllUsers<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllUsersQuery,
+  AllUsersQueryVariables,
+  AllUsersProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllUsersQuery, AllUsersQueryVariables, AllUsersProps<TChildProps>>(AllUsersDocument, {
+      alias: 'allUsers',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllUsersQuery__
+ *
+ * To run a query within a React component, call `useAllUsersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllUsersQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllUsersQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useAllUsersQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllUsersQuery, AllUsersQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllUsersQuery, AllUsersQueryVariables>(AllUsersDocument, baseOptions);
+      }
+export function useAllUsersLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllUsersQuery, AllUsersQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllUsersQuery, AllUsersQueryVariables>(AllUsersDocument, baseOptions);
+        }
+export type AllUsersQueryHookResult = ReturnType<typeof useAllUsersQuery>;
+export type AllUsersLazyQueryHookResult = ReturnType<typeof useAllUsersLazyQuery>;
+export type AllUsersQueryResult = ApolloReactCommon.QueryResult<AllUsersQuery, AllUsersQueryVariables>;
 export const CashPlanDocument = gql`
     query CashPlan($id: ID!) {
   cashPlan(id: $id) {
@@ -4047,6 +4150,56 @@ export function useProgrammeChoiceDataLazyQuery(baseOptions?: ApolloReactHooks.L
 export type ProgrammeChoiceDataQueryHookResult = ReturnType<typeof useProgrammeChoiceDataQuery>;
 export type ProgrammeChoiceDataLazyQueryHookResult = ReturnType<typeof useProgrammeChoiceDataLazyQuery>;
 export type ProgrammeChoiceDataQueryResult = ApolloReactCommon.QueryResult<ProgrammeChoiceDataQuery, ProgrammeChoiceDataQueryVariables>;
+export const RegistrationChoicesDocument = gql`
+    query registrationChoices {
+  registrationDataStatusChoices {
+    name
+    value
+  }
+}
+    `;
+export type RegistrationChoicesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<RegistrationChoicesQuery, RegistrationChoicesQueryVariables>, 'query'>;
+
+    export const RegistrationChoicesComponent = (props: RegistrationChoicesComponentProps) => (
+      <ApolloReactComponents.Query<RegistrationChoicesQuery, RegistrationChoicesQueryVariables> query={RegistrationChoicesDocument} {...props} />
+    );
+    
+export type RegistrationChoicesProps<TChildProps = {}> = ApolloReactHoc.DataProps<RegistrationChoicesQuery, RegistrationChoicesQueryVariables> & TChildProps;
+export function withRegistrationChoices<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  RegistrationChoicesQuery,
+  RegistrationChoicesQueryVariables,
+  RegistrationChoicesProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, RegistrationChoicesQuery, RegistrationChoicesQueryVariables, RegistrationChoicesProps<TChildProps>>(RegistrationChoicesDocument, {
+      alias: 'registrationChoices',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useRegistrationChoicesQuery__
+ *
+ * To run a query within a React component, call `useRegistrationChoicesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useRegistrationChoicesQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useRegistrationChoicesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useRegistrationChoicesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<RegistrationChoicesQuery, RegistrationChoicesQueryVariables>) {
+        return ApolloReactHooks.useQuery<RegistrationChoicesQuery, RegistrationChoicesQueryVariables>(RegistrationChoicesDocument, baseOptions);
+      }
+export function useRegistrationChoicesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<RegistrationChoicesQuery, RegistrationChoicesQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<RegistrationChoicesQuery, RegistrationChoicesQueryVariables>(RegistrationChoicesDocument, baseOptions);
+        }
+export type RegistrationChoicesQueryHookResult = ReturnType<typeof useRegistrationChoicesQuery>;
+export type RegistrationChoicesLazyQueryHookResult = ReturnType<typeof useRegistrationChoicesLazyQuery>;
+export type RegistrationChoicesQueryResult = ApolloReactCommon.QueryResult<RegistrationChoicesQuery, RegistrationChoicesQueryVariables>;
 
 
 export type ResolverTypeWrapper<T> = Promise<T> | T;
