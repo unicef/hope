@@ -2732,7 +2732,7 @@ export type TargetPopulationQuery = (
   { __typename?: 'Query' }
   & { targetPopulation: Maybe<(
     { __typename?: 'TargetPopulationNode' }
-    & Pick<TargetPopulationNode, 'name'>
+    & Pick<TargetPopulationNode, 'id' | 'name' | 'status'>
   )> }
 );
 
@@ -4053,7 +4053,9 @@ export type ProgrammeChoiceDataQueryResult = ApolloReactCommon.QueryResult<Progr
 export const TargetPopulationDocument = gql`
     query targetPopulation($id: ID!) {
   targetPopulation(id: $id) {
+    id
     name
+    status
   }
 }
     `;
