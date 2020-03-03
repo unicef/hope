@@ -1,6 +1,7 @@
 revision: 1
 namespace: staging
 env:
+domain: 
 
 backend:
   image:
