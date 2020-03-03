@@ -1,5 +1,5 @@
 import graphene
-from django_filters import FilterSet, OrderingFilter
+from django_filters import FilterSet, OrderingFilter, DateFilter
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
@@ -9,10 +9,13 @@ from registration_data.models import RegistrationDataImport
 
 
 class RegistrationDataImportFilter(FilterSet):
+    import_date = DateFilter(field_name='import_date__date')
+
     class Meta:
         model = RegistrationDataImport
         fields = {
             "imported_by__id": ["exact"],
+            "import_date": ["exact"],
             "status": ["exact"],
             "name": ["exact", "icontains"],
         }

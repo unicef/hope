@@ -127,9 +127,7 @@ class Command(BaseCommand):
         pool.close()
         pool.join()
 
-        registration_data_import_dth = RegistrationDataImportDatahubFactory(
-            imported_by="Test User",
-        )
+        registration_data_import_dth = RegistrationDataImportDatahubFactory()
         for _ in range(50):
             imported_household = ImportedHouseholdFactory(
                 registration_data_import_id=registration_data_import_dth,
