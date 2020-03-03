@@ -5,6 +5,7 @@ import { HouseholdFilters } from '../../components/population/HouseholdFilter';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { HouseholdTable } from '../tables/HouseholdTable';
 import { useAllProgramsQuery, ProgramNode } from '../../__generated__/graphql';
+import { BreadCrumbsItem } from '../../components/BreadCrumbs';
 
 const Container = styled.div`
   display: flex;
@@ -42,11 +43,7 @@ export function PopulationHouseholdPage(): React.ReactElement {
   };
 
   const handleTextFilter = (value: string): void => {
-    if (value.length > 3) {
-      setTextFilter(value);
-    } else {
-      setTextFilter('');
-    }
+    setTextFilter(value);
   };
 
   const { allPrograms } = data;
@@ -54,7 +51,7 @@ export function PopulationHouseholdPage(): React.ReactElement {
 
   return (
     <div>
-      <PageHeader title='Households' />
+      <PageHeader title='Households'/>
       <HouseholdFilters
         programs={programs as ProgramNode[]}
         minValue={sizeFilter.min}

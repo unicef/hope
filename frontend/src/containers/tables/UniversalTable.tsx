@@ -6,15 +6,14 @@ import { columnToOrderBy } from '../../utils/utils';
 interface UniversalTableProps<T, K> {
   rowsPage?: number[];
   initialVariables: K;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  query: any;
+  query;
   queriedObjectName: string;
   renderRow: (row: T) => ReactElement;
   headCells: HeadCell<T>[];
   title: string;
 }
 export function UniversalTable<T, K>({
-  rowsPage,
+  rowsPage = [5, 10, 15],
   initialVariables,
   query,
   queriedObjectName,
@@ -23,7 +22,7 @@ export function UniversalTable<T, K>({
   title,
 }: UniversalTableProps<T, K>): ReactElement {
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(rowsPage ? rowsPage[0] : 5);
+  const [rowsPerPage, setRowsPerPage] = useState(rowsPage[0]);
   const [orderBy, setOrderBy] = useState(null);
   const [orderDirection, setOrderDirection] = useState('asc');
   const { data, refetch, loading } = query({
@@ -35,6 +34,7 @@ export function UniversalTable<T, K>({
   }
   const { edges } = data[queriedObjectName];
   const typedEdges = edges.map((edge) => edge.node as T);
+  console.log('query1', typedEdges, initialVariables);
   return (
     <TableComponent<T>
       title={title}
@@ -42,7 +42,7 @@ export function UniversalTable<T, K>({
       loading={loading}
       renderRow={renderRow}
       headCells={headCells}
-      rowsPerPageOptions={rowsPage && rowsPage.length ? rowsPage : [5, 10, 15]}
+      rowsPerPageOptions={rowsPage}
       rowsPerPage={rowsPerPage}
       page={page}
       itemsCount={data[queriedObjectName].totalCount}
