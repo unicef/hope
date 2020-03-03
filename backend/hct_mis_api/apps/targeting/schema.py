@@ -1,10 +1,10 @@
+import datetime as dt
 import functools
 import json
 
 import django_filters
 import graphene
 import targeting.models as target_models
-from core.permissions import is_authenticated
 from core.schema import ExtendedConnection
 from graphene import relay
 from graphene_django import DjangoObjectType
@@ -80,7 +80,6 @@ class TargetPopulationFilter(django_filters.FilterSet):
 
 
 class TargetPopulationNode(DjangoObjectType):
-
     class Meta:
         model = target_models.TargetPopulation
         interfaces = (relay.Node, )
@@ -96,46 +95,41 @@ class Query(graphene.ObjectType):
         serialized_list=graphene.String(),
         description="json dump of filters containing key value pairs.")
 
-    @classmethod
-    @is_authenticated
-    def resolve_target_filters(cls, info, serialized_list):
+    def resolve_target_filters(self, info, serialized_list):
         """Resolver for target_filters.
         args:
             info: object, HTTPRequestObject.
             serialized_list: list, check below.
 
-        Arguments in serialized_list are of type:
-        intake_group = graphene.Field(IntakeGroupType)
-        sex = graphene.String()
-        age_min = graphene.Int()
-        age_max = graphene.Int()
-        # school_distance_min = graphene.Int()
-        # school_distance_max = graphene.Int()
-        num_individuals_household_min = graphene.Int()
-        num_individuals_household_max = graphene.Int()
+        Arguments in serialized_list are of type.
         """
         filter_lists = json.loads(serialized_list)
         queryset = functools.reduce(
             lambda f_1, f_2: f_1 | f_2,
-            cls.get_households_from_filter(filter_lists))
+            Query.get_households_from_filter(filter_lists))
         return queryset.all()
 
     @staticmethod
     def get_households_from_filter(filter_lists):
         for filter_list in filter_lists:
             # TODO(codecakes): Add dist to school field once mapping known.
+            today = dt.date.today()
+            year_min = today.year - filter_list["age_min"]
+            year_max = today.year - filter_list["age_max"]
+            dob_min = dt.date(year_min, 1, 1)
+            dob_max = dt.date(year_max, 1, 1)
             yield Household.objects.filter(
                 **{
                     "head_of_household__sex":
-                    filter_list["sex"],
+                        filter_list["sex"],
                     "family_size__gte":
-                    filter_list["num_individuals_household_min"],
+                        filter_list["num_individuals_min"],
                     "family_size__lte":
-                    filter_list["num_individuals_household_max"],
-                    "head_of_household__age__gte":
-                    filter_list["age_min"],
-                    "head_of_household__age_lte":
-                    filter_list["age_max"],
+                        filter_list["num_individuals_max"],
+                    "head_of_household__dob__gte":
+                        dob_min,
                     "registration_data_import_id__name":
-                    filter_list["intake_group"],
-                })
+                        filter_list["intake_group"],
+                }).filter(**{
+                "head_of_household__dob__lte": dob_max,
+            })
