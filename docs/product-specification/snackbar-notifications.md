@@ -16,7 +16,7 @@
 | Activate | Programme activated. | Programme activate action failed. |
 | Reactivate | Programme reactivated. | Programme reactivate action failed. |
 
-## Target Population \(Details\)
+## Target Population
 
 | Action | Success message | Fail message |
 | :--- | :--- | :--- |
