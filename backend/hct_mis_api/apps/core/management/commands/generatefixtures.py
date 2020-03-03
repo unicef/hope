@@ -98,6 +98,8 @@ class Command(BaseCommand):
                 household.representative = individuals[0]
                 household.save()
 
+                household.programs.add(program)
+
                 target_population = TargetPopulationFactory(
                     households=household, created_by=user
                 )
