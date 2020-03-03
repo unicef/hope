@@ -6,7 +6,7 @@ import { Button } from '@material-ui/core';
 import { debounce } from 'lodash';
 import { PageHeader } from '../../components/PageHeader';
 import { TargetPopulationFilters } from '../../components/TargetPopulation/TargetPopulationFilters';
-import { TargetPopulationTable } from '../TargetPopulationTable';
+import { TargetPopulationTable } from '../tables/TargetPopulationTable';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 
 const Container = styled.div`
@@ -15,14 +15,6 @@ const Container = styled.div`
     flex-direction: column;
     min-width: 100%;
   }
-`;
-
-const TableWrapper = styled.div`
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  padding: 20px;
-  padding-bottom: 0;
 `;
 
 export function TargetPopulationPage() {
@@ -52,13 +44,17 @@ export function TargetPopulationPage() {
 
   const redirectToCreate = () => {
     const path = `/${businessArea}/target-population/create`;
-    return history.push(path)
-  }
+    return history.push(path);
+  };
 
   return (
     <div>
       <PageHeader title={t('Target Population')}>
-        <Button variant='contained' color='primary' onClick={() => redirectToCreate()}>
+        <Button
+          variant='contained'
+          color='primary'
+          onClick={() => redirectToCreate()}
+        >
           Create new
         </Button>
       </PageHeader>
@@ -70,9 +66,11 @@ export function TargetPopulationPage() {
         householdTextFilter={handleTextFilter}
       />
       <Container>
-        <TableWrapper>
-          <TargetPopulationTable />
-        </TableWrapper>
+        <TargetPopulationTable
+          sizeFilter={sizeFilter}
+          textFilter={textFilter}
+          businessArea={businessArea}
+        />
       </Container>
     </div>
   );

@@ -16,16 +16,10 @@ class RegistrationDataImportDatahubFactory(factory.DjangoModelFactory):
     name = factory.Faker(
         "sentence", nb_words=6, variable_nb_words=True, ext_word_list=None,
     )
-    status = factory.fuzzy.FuzzyChoice(
-        RegistrationDataImportDatahub.STATUS_CHOICE, getter=lambda c: c[0],
-    )
     import_date = factory.Faker(
         "date_time_this_decade", before_now=True, tzinfo=utc,
     )
-    imported_by = factory.Faker("name")
-    data_source = factory.fuzzy.FuzzyChoice(
-        RegistrationDataImportDatahub.DATA_SOURCE_CHOICE, getter=lambda c: c[0],
-    )
+    hct_id = factory.Faker("uuid4")
 
 
 class ImportedHouseholdFactory(factory.DjangoModelFactory):

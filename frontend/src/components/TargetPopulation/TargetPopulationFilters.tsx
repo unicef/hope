@@ -1,8 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { TextField, InputAdornment } from '@material-ui/core';
-import SearchIcon from '@material-ui/icons/Search';
-import GroupIcon from '@material-ui/icons/Group';
+import { Person, Search, Group } from '@material-ui/icons';
 
 const Container = styled.div`
   display: flex;
@@ -87,11 +86,26 @@ export function TargetPopulationFilters({
         InputProps={{
           startAdornment: (
             <InputAdornment position='start'>
-              <SearchIcon />
+              <Search />
             </InputAdornment>
           ),
         }}
       />
+      <TextContainer
+        select
+        placeholder='Created by'
+        variant='filled'
+        onChange={(e) => console.log(e.target.value)}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position='start'>
+              <Person />
+            </InputAdornment>
+          ),
+        }}
+      >
+        <option>test</option>
+      </TextContainer>
       <TextContainer
         value={minValue}
         variant='filled'
@@ -101,7 +115,7 @@ export function TargetPopulationFilters({
         InputProps={{
           startAdornment: (
             <InputAdornment position='start'>
-              <GroupIcon />
+              <Group />
             </InputAdornment>
           ),
         }}
@@ -116,7 +130,7 @@ export function TargetPopulationFilters({
         InputProps={{
           startAdornment: (
             <InputAdornment position='start'>
-              <GroupIcon />
+              <Group />
             </InputAdornment>
           ),
         }}

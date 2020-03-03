@@ -1,11 +1,23 @@
 import { gql } from 'apollo-boost';
 
 export const AllTargetPopulations = gql`
-  query AllTargetPopulations($count: Int) {
-    allTargetPopulation(first: $count) {
+  query AllTargetPopulations(
+    $after: String
+    $before: String
+    $first: Int
+    $last: Int
+  ) {
+    allTargetPopulation(
+      after: $after
+      before: $before
+      first: $first
+      last: $last
+    ) {
       edges {
         node {
+          id
           name
+          status
           createdAt
           createdBy {
             firstName

@@ -6,6 +6,33 @@ import {
 } from '../__generated__/graphql';
 import moment from 'moment';
 
+const Gender = new Map([
+  ['MALE', 'Male'],
+  ['FEMALE', 'Female'],
+]);
+
+const IdentificationType = new Map([
+  ['NA', 'N/A'],
+  ['BIRTH_CERTIFICATE', 'Birth Certificate'],
+  ['DRIVING_LICENSE', 'Driving License'],
+  ['UNHCR_ID_CARD', 'UNHCR ID Card'],
+  ['NATIONAL_ID', 'National ID'],
+  ['NATIONAL_PASSPORT', 'National Passport'],
+]);
+
+export const getIdentificationType = (idType: string): string => {
+  if (IdentificationType.has(idType)) {
+    return IdentificationType.get(idType);
+  }
+  return idType;
+};
+export const sexToCapitalize = (sex: string): string => {
+  if (Gender.has(sex)) {
+    return Gender.get(sex);
+  }
+  return sex;
+};
+
 export function opacityToHex(opacity: number): string {
   return Math.floor(opacity * 0xff).toString(16);
 }
@@ -46,6 +73,19 @@ export function paymentRecordStatusToColor(
       return theme.hctPalette.green;
     case 'PENDING':
       return theme.hctPalette.oragne;
+    default:
+      return theme.palette.error.main;
+  }
+}
+export function targetPopulationStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  switch (status) {
+    case 'IN_PROGRESS':
+      return theme.hctPalette.oragne;
+    case 'FINALIZED':
+      return theme.hctPalette.green;
     default:
       return theme.palette.error.main;
   }
@@ -121,12 +161,11 @@ export function programCompare(
 }
 
 export function formatCurrency(amount: number): string {
-  return amount.toLocaleString('en-US', {
-    style: 'currency',
+  return `${amount.toLocaleString('en-US', {
     currency: 'USD',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  });
+  })} USD`;
 }
 
 export function getAgeFromDob(date: string): number {
