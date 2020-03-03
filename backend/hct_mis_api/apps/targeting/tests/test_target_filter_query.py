@@ -12,6 +12,28 @@ from registration_data.fixtures import RegistrationDataImportFactory
 class TestTargetFilterQuery(APITestCase):
     @classmethod
     def setUpTestData(cls):
+        # graph query to be called.
+        cls.FILTER_QUERY = """
+        query TargetFilters($serializedList: String!) {
+            targetFilters(serializedList: $serializedList) {
+                householdCaId
+                headOfHousehold {
+                    fullName
+                    firstName
+                    lastName
+                    dob
+                }
+                familySize
+                address
+                location {
+                    title
+                }
+                registrationDataImportId {
+                    name
+                }
+            }
+        }
+        """
         cls.user = UserFactory.create()
         intake_group = "some group name"
         argument_payload = [
@@ -20,6 +42,7 @@ class TestTargetFilterQuery(APITestCase):
                 "sex": "M",
                 "age_min": 1,
                 "age_max": 39,
+                # TODO(codecakes): enable when we can map school distance to right model.
                 # "school_distance_min": 1,
                 # "school_distance_min": 10,
                 "num_individuals_min": 2,
@@ -36,7 +59,9 @@ class TestTargetFilterQuery(APITestCase):
                 "num_individuals_max": 6,
             },
         ]
+        # serialized argument
         cls.serialized_payload = json.dumps(argument_payload)
+        # factory models for association.
         cls.location = LocationFactory.create(title="some town")
         cls.registration_import_data = RegistrationDataImportFactory.create(
             name=intake_group)
@@ -74,28 +99,6 @@ class TestTargetFilterQuery(APITestCase):
             # This is mocked HouseHold Model.
             HouseholdFactory(**data) for data in filters_to_create
         ]
-        # graph query to be called.
-        cls.FILTER_QUERY = """
-                query targetFilters($serializedList: String!) {
-                    targetFilters(serializedList: $serializedList) {
-                        householdCaId
-                        headOfHousehold {
-                            fullName
-                            firstName
-                            lastName
-                            dob
-                        }
-                        familySize
-                        address
-                        location {
-                            title
-                        }
-                        registrationDataImportId {
-                            name
-                        }
-                    }
-                }
-                """
 
     def test_filter_query(self):
         self.snapshot_graphql_request(
@@ -103,7 +106,5 @@ class TestTargetFilterQuery(APITestCase):
             context={"user": self.user},
             variables={
                 "serializedList": self.serialized_payload,
-                # base64.b64encode(
-                #     f"{self.serialized_payload}".encode("utf-8")).decode()
             },
         )
