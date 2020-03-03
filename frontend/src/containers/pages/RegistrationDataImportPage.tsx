@@ -59,12 +59,6 @@ export function RegistrationDataImportPage(): React.ReactElement {
       <RegistrationDataImport />
     </PageHeader>
   );
-  // if (loading || choicesLoading) {
-  //   return <LoadingComponent />;
-  // }
-  // if (!data || !data.allPrograms || !choices) {
-  //   return <div>{toolbar}</div>;
-  // }
   return (
     <div>
       {toolbar}

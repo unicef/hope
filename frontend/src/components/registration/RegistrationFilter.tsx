@@ -149,56 +149,9 @@ const StyledFormControl = styled(FormControl)`
   border-bottom: 0;
 `;
 
-const TextContainer = styled(TextField)`
-  //.MuiFilledInput-root {
-  //  border-radius: 4px;
-  //}
-  //&& {
-  //  width: 232px;
-  //  color: #5f6368;
-  //  border-bottom: 0;
-  //}
-  //.MuiFilledInput-underline:before {
-  //  border-bottom: 0;
-  //}
-  //.MuiFilledInput-underline:before {
-  //  border-bottom: 0;
-  //}
-  //.MuiFilledInput-underline:hover {
-  //  border-bottom: 0;
-  //  border-radius: 4px;
-  //}
-  //.MuiFilledInput-underline:hover::before {
-  //  border-bottom: 0;
-  //}
-  //.MuiFilledInput-underline::before {
-  //  border-bottom: 0;
-  //}
-  //.MuiFilledInput-underline::after {
-  //  border-bottom: 0;
-  //}
-  //.MuiFilledInput-underline::after:hover {
-  //  border-bottom: 0;
-  //}
-  //.MuiSvgIcon-root {
-  //  color: #5f6368;
-  //}
-  //.MuiFilledInput-input {
-  //  padding: 10px 15px 10px;
-  //}
-  //.MuiInputAdornment-filled.MuiInputAdornment-positionStart:not(.MuiInputAdornment-hiddenLabel) {
-  //  margin: 0px;
-  //}
-`;
+
 
 interface RegistrationFiltersProps {
-  // onSearchChange;
-  // onImportDateChange;
-  // onImportedByChange;
-  // onStatusChange;
-  // search
-  // importDate
-  // importedBy
   onFilterChange;
   filter;
 }
@@ -226,7 +179,7 @@ export function RegistrationFilters({
   }
   return (
     <Container>
-      <TextContainer
+      <TextField
         variant='outlined'
         margin='dense'
         onChange={(e) => handleFilterChange(e, 'search')}
