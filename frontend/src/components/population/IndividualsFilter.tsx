@@ -4,6 +4,7 @@ import SearchIcon from '@material-ui/icons/Search';
 import CakeIcon from '@material-ui/icons/Cake';
 import WcIcon from '@material-ui/icons/Wc';
 import { TextField, InputAdornment, Select, MenuItem } from '@material-ui/core';
+import { clearValue } from '../../utils/utils';
 
 const Container = styled.div`
   display: flex;
@@ -117,7 +118,7 @@ export function IndividualsFilter({
       <TextContainer
         variant='filled'
         placeholder='Age'
-        onChange={(e) => individualMinAgeFilter(e.target.value)}
+        onChange={(e) => individualMinAgeFilter(clearValue(e.target.value))}
         type='number'
         InputProps={{
           startAdornment: (
@@ -131,7 +132,7 @@ export function IndividualsFilter({
       <TextContainer
         variant='filled'
         placeholder='Age'
-        onChange={(e) => individualMaxAgeFilter(e.target.value)}
+        onChange={(e) => individualMaxAgeFilter(clearValue(e.target.value))}
         type='number'
         InputProps={{
           startAdornment: (

@@ -177,6 +177,14 @@ export function formatCurrency(amount: number): string {
   })} USD`;
 }
 
+export function clearValue(value) {
+  if (!value) {
+    return undefined;
+  }
+
+  return parseInt(value, 10);
+}
+
 export function getAgeFromDob(date: string): number {
   return moment().diff(moment(date), 'years');
 }
