@@ -33,6 +33,10 @@ class HouseHoldType(DjangoObjectType):
 
 
 class TargetPopulationFilter(django_filters.FilterSet):
+    """Query target population records.
+
+    Loads associated entries for Households and TargetFilters.
+    """
     name = django_filters.CharFilter(field_name="name",
                                      lookup_expr="icontains")
     created_by_name = django_filters.CharFilter(
@@ -41,6 +45,7 @@ class TargetPopulationFilter(django_filters.FilterSet):
         field_name="target_filters__num_individuals_min", lookup_expr="gte")
     num_individuals_max = django_filters.NumberFilter(
         field_name="target_filters__num_individuals_max", lookup_expr="lte")
+
     # TODO(codecakes): waiting on dist to school and adminlevel clarification.
 
     @staticmethod
@@ -80,6 +85,7 @@ class TargetPopulationFilter(django_filters.FilterSet):
 
 
 class TargetPopulationNode(DjangoObjectType):
+    """Defines an individual target population record."""
     class Meta:
         model = target_models.TargetPopulation
         interfaces = (relay.Node, )
@@ -90,6 +96,7 @@ class TargetPopulationNode(DjangoObjectType):
 class Query(graphene.ObjectType):
     target_population = relay.Node.Field(TargetPopulationNode)
     all_target_population = DjangoFilterConnectionField(TargetPopulationNode)
+    # Queries household and associated registration and individuals records.
     target_filters = graphene.List(
         HouseHoldType,
         serialized_list=graphene.String(),

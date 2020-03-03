@@ -19,7 +19,15 @@ class TargetPopulationFactory(factory.DjangoModelFactory):
         TargetPopulation.STATE_CHOICES,
         getter=lambda x: x[0],
     )
-    households = factory.RelatedFactory(HouseholdFactory)
+
+    @factory.post_generation
+    def households(self, create, extracted, **kwargs):
+        if not create:
+            self.households.add(HouseholdFactory())
+
+        if extracted:
+            for household in extracted:
+                self.households.add(household)
 
 
 class TargetFilterFactory(factory.DjangoModelFactory):
