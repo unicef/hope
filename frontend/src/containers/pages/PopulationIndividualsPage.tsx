@@ -21,7 +21,7 @@ export function PopulationIndividualsPage(): React.ReactElement {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: 'Population',
-      to: `/${businessArea}/`,
+      to: `/${businessArea}/population/household`,
     },
   ];
 
