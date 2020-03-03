@@ -14,7 +14,7 @@ The frontend will be a React based application leveraging UNICEF design philosop
 
 The backend will be a Django and Python application, exposing a [GraphQL](https://graphql.org/) API that leverages [Graphene](https://graphene-python.org).
 
-![](../../.gitbook/assets/unicef_hct-mis__online_whiteboard_for_visual_collaboration%20%283%29.jpg)
+![](../../.gitbook/assets/unicef-hct-mis.jpg)
 
 ### Application components / sub-components
 

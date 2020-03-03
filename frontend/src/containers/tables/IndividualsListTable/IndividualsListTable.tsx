@@ -27,10 +27,10 @@ export const IndividualsListTable = ({
   textFilter,
 }: IndividualsListTableProps): React.ReactElement => {
   const initialVariables = {
-    // TODO
-    // businessArea,
-    // sexFilter,
-    // fullName_Icontains: textFilter,
+    age: JSON.stringify(ageFilter),
+    businessArea,
+    sex: [sexFilter],
+    fullNameContains: textFilter,
     // ageGreater: ageFilter.min,
     // ageLower: ageFilter.max
   };

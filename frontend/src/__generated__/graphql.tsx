@@ -2326,7 +2326,8 @@ export type AllHouseholdsQueryVariables = {
   last?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>,
-  familySize?: Maybe<Scalars['String']>
+  familySize?: Maybe<Scalars['String']>,
+  headOfHouseholdFullNameIcontains?: Maybe<Scalars['String']>
 };
 
 
@@ -2378,7 +2379,9 @@ export type AllIndividualsQueryVariables = {
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  fullName_Icontains?: Maybe<Scalars['String']>
+  fullNameContains?: Maybe<Scalars['String']>,
+  sex?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  age?: Maybe<Scalars['String']>
 };
 
 
@@ -3074,8 +3077,8 @@ export type AllCashPlansQueryHookResult = ReturnType<typeof useAllCashPlansQuery
 export type AllCashPlansLazyQueryHookResult = ReturnType<typeof useAllCashPlansLazyQuery>;
 export type AllCashPlansQueryResult = ApolloReactCommon.QueryResult<AllCashPlansQuery, AllCashPlansQueryVariables>;
 export const AllHouseholdsDocument = gql`
-    query AllHouseholds($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String) {
-  allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, familySize: $familySize, orderBy: $orderBy) {
+    query AllHouseholds($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $headOfHouseholdFullNameIcontains: String) {
+  allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, familySize: $familySize, orderBy: $orderBy, headOfHousehold_FullName_Icontains: $headOfHouseholdFullNameIcontains) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -3156,6 +3159,7 @@ export function withAllHouseholds<TProps, TChildProps = {}>(operationOptions?: A
  *      businessArea: // value for 'businessArea'
  *      orderBy: // value for 'orderBy'
  *      familySize: // value for 'familySize'
+ *      headOfHouseholdFullNameIcontains: // value for 'headOfHouseholdFullNameIcontains'
  *   },
  * });
  */
@@ -3169,8 +3173,8 @@ export type AllHouseholdsQueryHookResult = ReturnType<typeof useAllHouseholdsQue
 export type AllHouseholdsLazyQueryHookResult = ReturnType<typeof useAllHouseholdsLazyQuery>;
 export type AllHouseholdsQueryResult = ApolloReactCommon.QueryResult<AllHouseholdsQuery, AllHouseholdsQueryVariables>;
 export const AllIndividualsDocument = gql`
-    query AllIndividuals($before: String, $after: String, $first: Int, $last: Int, $fullName_Icontains: String) {
-  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Icontains: $fullName_Icontains) {
+    query AllIndividuals($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [ID], $age: String) {
+  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Icontains: $fullNameContains, sex: $sex, age: $age) {
     totalCount
     pageInfo {
       startCursor
@@ -3237,7 +3241,9 @@ export function withAllIndividuals<TProps, TChildProps = {}>(operationOptions?: 
  *      after: // value for 'after'
  *      first: // value for 'first'
  *      last: // value for 'last'
- *      fullName_Icontains: // value for 'fullName_Icontains'
+ *      fullNameContains: // value for 'fullNameContains'
+ *      sex: // value for 'sex'
+ *      age: // value for 'age'
  *   },
  * });
  */
