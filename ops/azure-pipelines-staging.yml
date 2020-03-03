@@ -59,11 +59,11 @@ stages:
             inputs:
               connectionType: 'Kubernetes Service Connection'
               kubernetesServiceConnection: 'ICTD-HCT-MIS-Demo-uni-apps-K8s-dev-hct-ims-dev-1574767480012'
-              namespace: 'hct-ims-dev'
+              namespace: 'hct-ims-staging'
               command: 'upgrade'
               chartType: 'FilePath'
               chartPath: '**/ops/helm'
-              releaseName: 'hct-mis'
+              releaseName: 'hct-mis-staging'
               install: true
               force: true
               overrideValues: "
@@ -72,6 +72,7 @@ stages:
                 frontend.image=uniappsk8sdevacr.azurecr.io/$(frontendImageRepository):$(Build.BuildId),\
                 namespace=hct-ims-dev,\
                 env=DEV,\
+                domain=$(DOMAIN),\
                 backend.secret.env=DEV,\
                 revision=\"$(Build.BuildId)\",\
                 backend.image=uniappsk8sdevacr.azurecr.io/$(backendImageRepository):$(Build.BuildId),\

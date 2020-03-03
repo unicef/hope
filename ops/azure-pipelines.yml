@@ -2,7 +2,6 @@ trigger:
   batch: true
   branches:
     include:
-    - master
     - develop
   paths:
     exclude:
@@ -72,6 +71,7 @@ stages:
                 frontend.image=uniappsk8sdevacr.azurecr.io/$(frontendImageRepository):$(Build.BuildId),\
                 namespace=hct-ims-dev,\
                 env=DEV,\
+                domain=$(DOMAIN),\
                 backend.secret.env=DEV,\
                 revision=\"$(Build.BuildId)\",\
                 backend.image=uniappsk8sdevacr.azurecr.io/$(backendImageRepository):$(Build.BuildId),\
