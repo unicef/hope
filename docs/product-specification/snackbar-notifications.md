@@ -16,5 +16,14 @@
 | Activate | Programme activated. | Programme activate action failed. |
 | Reactivate | Programme reactivated. | Programme reactivate action failed. |
 
+## Target Population \(Details\)
 
+| Action | Success message | Fail message |
+| :--- | :--- | :--- |
+| Create | Target population created. | Target population create action failed. |
+| Edit | Target population edited. | Target population edit action failed. |
+| Finalize | Target population finalized. | Target population finalize action failed. |
+| Delete | Target population deleted. | Target population delete action failed. |
+| Duplicate | Target population duplicated. | Target population duplicate action failed. |
+| New results | Added new results. | Add new results action failed. |
 
