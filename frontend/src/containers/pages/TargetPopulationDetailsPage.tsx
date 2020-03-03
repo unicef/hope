@@ -1,9 +1,11 @@
-import React from 'react';
+import React, {useState} from 'react';
+import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
-import { useTranslation } from 'react-i18next';
-import { Button, Typography, Paper } from '@material-ui/core';
-import { PageHeader } from '../../components/PageHeader';
+import { Typography, Paper } from '@material-ui/core';
+import { TargetPopulationPageHeader } from './headers/TargetPopulationPageHeader';
+import { Results } from '../../components/TargetPopulation/Results';
 import { TargetingCriteria } from '../../components/TargetPopulation/TargetingCriteria';
+import { useTargetPopulationQuery, TargetPopulationNode } from '../../__generated__/graphql';
 
 const PaperContainer = styled(Paper)`
   display: flex;
@@ -18,26 +20,27 @@ const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
-
 export function TargetPopulationDetailsPage() {
-  const { t } = useTranslation();
+  const { id } = useParams();
+  const { data, loading } = useTargetPopulationQuery({
+    variables: {id}
+  });
+  const [isEdit, setEditState] = useState(false);
 
+  if(!data) {
+    return null;
+  }
+  const targetPopulation = data.targetPopulation as TargetPopulationNode
   return (
     <div>
-      <PageHeader title={t('Population')}>
-        <Button variant='contained' color='primary' disabled>
-          Save
-        </Button>
-      </PageHeader>
+      <TargetPopulationPageHeader targetPopulation={targetPopulation} isEditMode={isEdit} setEditState={setEditState}/>
       <TargetingCriteria />
+      <Results />
       <PaperContainer>
         <Title>
-          <Typography variant='h6'>Results</Typography>
-        </Title>
-      </PaperContainer>
-      <PaperContainer>
-        <Title>
-          <Typography variant='h6'>Target Population Entries (Households)</Typography>
+          <Typography variant='h6'>
+            Target Population Entries (Households)
+          </Typography>
         </Title>
       </PaperContainer>
     </div>
