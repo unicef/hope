@@ -14,16 +14,10 @@ const Container = styled.div`
 
 export function PopulationIndividualsPage(): React.ReactElement {
   const businessArea = useBusinessArea();
-  const [ageFilter, setAgeFilter] = useState({ min: null, max: null });
+  const [ageFilter, setAgeFilter] = useState({ min: undefined, max: undefined });
   const [sexFilter, setSexFilter] = useState('none');
   const [textFilter, setTextFilter] = useState();
 
-  const breadCrumbsItems: BreadCrumbsItem[] = [
-    {
-      title: 'Population',
-      to: `/${businessArea}/population/household`,
-    },
-  ];
 
   const handleMinAgeFilter = (value: number): void => {
     setAgeFilter({ ...ageFilter, min: value });
@@ -39,7 +33,7 @@ export function PopulationIndividualsPage(): React.ReactElement {
   };
   return (
     <>
-      <PageHeader title='Individuals' breadCrumbs={breadCrumbsItems} />
+      <PageHeader title='Individuals'/>
       <IndividualsFilter
         sexFilter={sexFilter}
         individualSexFilter={handleSexFilter}

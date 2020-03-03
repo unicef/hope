@@ -1,9 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import {
-  AllHouseholdsQueryVariables,
   AllIndividualsQueryVariables,
-  HouseholdNode,
   IndividualNode,
   useAllIndividualsQuery,
 } from '../../../__generated__/graphql';

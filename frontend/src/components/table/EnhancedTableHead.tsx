@@ -8,73 +8,60 @@ import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 
 type Order = 'asc' | 'desc';
 
-
-
-
 export interface HeadCell<T> {
   disablePadding: boolean;
-  id: string;
+  id: keyof T | string;
   label: string;
   numeric: boolean;
   weight?: number;
 }
 
 const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
-      root: {
-        width: '100%',
-      },
-      paper: {
-        width: '100%',
-        marginBottom: theme.spacing(2),
-      },
-      table: {
-        minWidth: 750,
-      },
-      visuallyHidden: {
-        border: 0,
-        clip: 'rect(0 0 0 0)',
-        height: 1,
-        margin: -1,
-        overflow: 'hidden',
-        padding: 0,
-        position: 'absolute',
-        top: 20,
-        width: 1,
-      },
-    }),
+  createStyles({
+    root: {
+      width: '100%',
+    },
+    paper: {
+      width: '100%',
+      marginBottom: theme.spacing(2),
+    },
+    table: {
+      minWidth: 750,
+    },
+    visuallyHidden: {
+      border: 0,
+      clip: 'rect(0 0 0 0)',
+      height: 1,
+      margin: -1,
+      overflow: 'hidden',
+      padding: 0,
+      position: 'absolute',
+      top: 20,
+      width: 1,
+    },
+  }),
 );
 
 const TableSortLabelStyled = styled(TableSortLabel)`
-  &{
-  font-size: 12px;
+  & {
+    font-size: 12px;
   }
 `;
 
 interface EnhancedTableProps<T> {
   classes: ReturnType<typeof useStyles>;
-  onRequestSort:  (
-      event: React.MouseEvent<unknown>,
-      property: string,
-  ) => void;
+  onRequestSort: (event: React.MouseEvent<unknown>, property: keyof T | string) => void;
   order: Order;
   orderBy: keyof T;
   rowCount: number;
-  headCells: HeadCell<T>[]
+  headCells: HeadCell<T>[];
 }
 
-
-
-
-export function EnhancedTableHead<T>(props: EnhancedTableProps<T>) : React.ReactElement {
-  const {
-    classes,
-    order,
-    orderBy,
-    headCells,
-    onRequestSort,
-  } = props;
-  const createSortHandler = (property: string) => (
+export function EnhancedTableHead<T>(
+  props: EnhancedTableProps<T>,
+): React.ReactElement {
+  const { classes, order, orderBy, headCells, onRequestSort } = props;
+  const createSortHandler = (property: keyof T | string) => (
     event: React.MouseEvent<unknown>,
   ) => {
     onRequestSort(event, property);
