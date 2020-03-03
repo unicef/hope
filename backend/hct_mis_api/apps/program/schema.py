@@ -16,7 +16,7 @@ class ProgramFilter(FilterSet):
     business_area = CharFilter(field_name="business_area__slug")
 
     class Meta:
-        fields = ("id",)
+        fields = ("id", "status")
         model = Program
 
 

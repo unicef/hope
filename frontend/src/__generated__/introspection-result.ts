@@ -33,7 +33,10 @@
             "name": "BusinessAreaNode"
           },
           {
-            "name": "RegistrationDataImportNode"
+            "name": "UserNode"
+          },
+          {
+            "name": "TargetPopulationNode"
           },
           {
             "name": "HouseholdNode"
@@ -42,7 +45,7 @@
             "name": "IndividualNode"
           },
           {
-            "name": "TargetPopulationNode"
+            "name": "RegistrationDataImportNode"
           },
           {
             "name": "ImportedHouseholdNode"
