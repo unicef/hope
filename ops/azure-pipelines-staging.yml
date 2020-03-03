@@ -1,8 +1,9 @@
+name: HCT-MIS Staging
 trigger:
   batch: true
   branches:
     include:
-    - develop
+    - staging
   paths:
     exclude:
     -  docs/*
@@ -58,11 +59,11 @@ stages:
             inputs:
               connectionType: 'Kubernetes Service Connection'
               kubernetesServiceConnection: 'ICTD-HCT-MIS-Demo-uni-apps-K8s-dev-hct-ims-dev-1574767480012'
-              namespace: 'hct-ims-dev'
+              namespace: 'hct-ims-staging'
               command: 'upgrade'
               chartType: 'FilePath'
               chartPath: '**/ops/helm'
-              releaseName: 'hct-mis'
+              releaseName: 'hct-mis-staging'
               install: true
               force: true
               overrideValues: "
