@@ -36,6 +36,10 @@ export const AllHouseholds = gql`
           householdCaId
           residenceStatus
           familySize
+          headOfHousehold {
+            id
+            fullName
+          }
           location {
             id
             title
