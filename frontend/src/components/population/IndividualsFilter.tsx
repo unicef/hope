@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import SearchIcon from '@material-ui/icons/Search';
 import CakeIcon from '@material-ui/icons/Cake';
 import WcIcon from '@material-ui/icons/Wc';
-import { TextField, InputAdornment, Select } from '@material-ui/core';
+import { TextField, InputAdornment, Select, MenuItem } from '@material-ui/core';
 
 const Container = styled.div`
   display: flex;
@@ -60,18 +60,23 @@ const TextContainer = styled(TextField)`
   .MuiFilledInput-input {
     padding: 10px 15px 10px;
   }
+  .MuiFilledInput-input[value='none'] {
+    color: red;
+  }
   .MuiInputAdornment-filled.MuiInputAdornment-positionStart:not(.MuiInputAdornment-hiddenLabel) {
     margin: 0px;
   }
 `;
 
 interface IndividualsFilterProps {
+  sexFilter: string;
   individualSexFilter: (value: string) => void;
   individualMinAgeFilter: (value: number) => void;
   individualMaxAgeFilter: (value: number) => void;
   individualTextFilter: (value: string) => void;
 }
 export function IndividualsFilter({
+  sexFilter,
   individualSexFilter,
   individualMinAgeFilter,
   individualMaxAgeFilter,
@@ -93,7 +98,7 @@ export function IndividualsFilter({
       />
       <TextContainer
         select
-        placeholder='Search'
+        defaultValue={sexFilter}
         variant='filled'
         onChange={(e) => individualSexFilter(e.target.value)}
         InputProps={{
@@ -104,7 +109,10 @@ export function IndividualsFilter({
           ),
         }}
       >
-        <option>Hey ya</option>
+        <MenuItem value='none'>Sex</MenuItem>
+        <MenuItem value='Male'>Male</MenuItem>
+        <MenuItem value='Female'>Female</MenuItem>
+        <MenuItem value='Other'>Other</MenuItem>
       </TextContainer>
       <TextContainer
         variant='filled'

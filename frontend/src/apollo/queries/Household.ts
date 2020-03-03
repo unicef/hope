@@ -8,6 +8,7 @@ export const HOUSEHOLD_QUERY = gql`
       familySize
       nationality
       individuals {
+        totalCount
         edges {
           node {
             id
@@ -17,15 +18,23 @@ export const HOUSEHOLD_QUERY = gql`
             dob
             nationality
             identificationType
+            workStatus
+            representedHouseholds {
+              edges {
+                node {
+                  id
+                  representative {
+                    fullName
+                  }
+                }
+              }
+            }
           }
         }
       }
       location {
         id
         title
-      }
-      individuals {
-        totalCount
       }
       residenceStatus
       paymentRecords {

@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { Typography, Paper } from '@material-ui/core';
+import { Criteria } from './Criteria';
 
 const data = [
   {
@@ -35,21 +36,27 @@ const ContentWrapper = styled.div`
   display: flex;
 `;
 
-const Criteria = styled.div`
-  width: 380px;
-  border: 2px solid #033f91;
-  border-radius: 3px;
-  font-size: 16px;
-  background-color: #f7faff;
-  padding: ${({ theme }) => theme.spacing(3)}px;
-  p {
-    margin: ${({ theme }) => theme.spacing(2)}px 0;
-    span {
-      color: #003c8f;
-    }
-  }
+const Divider = styled.div`
+  border-left: 1px solid #b1b1b5;
+  margin: 0 ${({ theme }) => theme.spacing(10)}px;
+  position: relative;
 `;
-//eslint-disable-next-line
+
+const DividerLabel = styled.div`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 14px;
+  font-weight: 500;
+  color: #253b46;
+  text-transform: uppercase;
+  padding: 5px;
+  border: 1px solid #b1b1b5;
+  border-radius: 50%;
+  background-color: #fff;
+`;
+
 export function TargetingCriteria() {
   const { t } = useTranslation();
 
@@ -60,40 +67,19 @@ export function TargetingCriteria() {
           <Typography variant='h6'>{t('Targeting Criteria')}</Typography>
         </Title>
         <ContentWrapper>
-          {data.map((criteria) => {
+          {data.map((criteria, index) => {
             return (
-              <Criteria>
-                {criteria.intakeGroup && (
-                  <p>
-                    Intake group: <span>{criteria.intakeGroup}</span>
-                  </p>
+              <>
+                <Criteria criteria={criteria} />{' '}
+                {index % 2 ? null : (
+                  <Divider>
+                    <DividerLabel>Or</DividerLabel>
+                  </Divider>
                 )}
-                {criteria.sex && (
-                  <p>
-                    Sex: <span>{criteria.sex}</span>
-                  </p>
-                )}
-                {criteria.age && (
-                  <p>
-                    Age: <span>{criteria.age}</span>
-                  </p>
-                )}
-                {criteria.distanceToSchool && (
-                  <p>
-                    Distance to school: <span>{criteria.distanceToSchool}</span>
-                  </p>
-                )}
-                {criteria.household && (
-                  <p>
-                    Hoousehold size: <span>{criteria.household}</span>
-                  </p>
-                )}
-              </Criteria>
+              </>
             );
           })}
-          
         </ContentWrapper>
-        {/* <Criteria>Add Criteria</Criteria> */}
       </PaperContainer>
     </div>
   );
