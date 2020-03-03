@@ -31,7 +31,7 @@ class TestCreateRegistrationDataImport(APITestCase):
         self.registration_data_import = {
             "registrationDataImportData": {
                 "name": "Test name",
-                "status": "DONE",
+                "status": "IN_REVIEW",
                 "importDate": "2019-12-20T15:00:00",
                 "importedById": self.id_to_base64(self.user.id, "User"),
                 "dataSource": "XLS",

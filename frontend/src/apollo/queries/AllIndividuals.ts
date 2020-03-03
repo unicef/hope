@@ -6,8 +6,15 @@ export const AllIndividuals = gql`
     $after: String
     $first: Int
     $last: Int
+    $fullName_Icontains: String
   ) {
-    allIndividuals(before: $before, after: $after, first: $first, last: $last) {
+    allIndividuals(
+      before: $before
+      after: $after
+      first: $first
+      last: $last
+      fullName_Icontains: $fullName_Icontains
+    ) {
       totalCount
       pageInfo {
         startCursor
