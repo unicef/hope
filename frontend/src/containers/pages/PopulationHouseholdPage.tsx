@@ -27,13 +27,6 @@ export function PopulationHouseholdPage(): React.ReactElement {
 
   if (loading) return null;
 
-  const breadCrumbsItems: BreadCrumbsItem[] = [
-    {
-      title: 'Population',
-      to: `/${businessArea}/population/household`,
-    },
-  ];
-
   const handleMinSizeFilter = (value: number): void => {
     setSizeFilter({ ...sizeFilter, min: value });
   };
@@ -58,7 +51,7 @@ export function PopulationHouseholdPage(): React.ReactElement {
 
   return (
     <div>
-      <PageHeader title='Households' breadCrumbs={breadCrumbsItems} />
+      <PageHeader title='Households'/>
       <HouseholdFilters
         programs={programs as ProgramNode[]}
         minValue={sizeFilter.min}

@@ -21,8 +21,8 @@ export const menuItems = [
   },
   {
     name: 'Registration Data Import',
-    href: '/#',
-    selectedRegexp: /^\/test.*$/,
+    href: '/registration-data-import',
+    selectedRegexp: /^\/registration-data-import.*$/,
     icon: <AutorenewIcon />,
   },
   {

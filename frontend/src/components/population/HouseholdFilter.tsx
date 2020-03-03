@@ -5,6 +5,7 @@ import SearchIcon from '@material-ui/icons/Search';
 import GroupIcon from '@material-ui/icons/Group';
 import { ProgramNode } from '../../__generated__/graphql';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
+import { clearValue } from '../../utils/utils';
 
 const Container = styled.div`
   display: flex;
@@ -120,7 +121,7 @@ export function HouseholdFilters({
         value={minValue}
         variant='filled'
         placeholder='Household size'
-        onChange={(e) => householdMinSizeFilter(e.target.value)}
+        onChange={(e) => householdMinSizeFilter(clearValue(e.target.value))}
         type='number'
         InputProps={{
           startAdornment: (
@@ -136,7 +137,7 @@ export function HouseholdFilters({
         value={maxValue}
         variant='filled'
         placeholder='Household size'
-        onChange={(e) => householdMaxSizeFilter(e.target.value)}
+        onChange={(e) => householdMaxSizeFilter(clearValue(e.target.value))}
         type='number'
         InputProps={{
           startAdornment: (
