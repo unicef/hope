@@ -6,7 +6,7 @@ from django.contrib.postgres.fields import IntegerRangeField
 from django.contrib.postgres.validators import RangeMinValueValidator, RangeMaxValueValidator
 from django.db import models
 from django.db.models import Q
-from household.models import Household
+from household.models import Household, Individual
 from model_utils.models import UUIDModel
 from psycopg2.extras import NumericRange
 
@@ -44,13 +44,8 @@ class TargetStatus(EnumGetChoices):
     FINALIZED = 'Finalized'
 
 
-class Gender(EnumGetChoices):
-    M = 'M'
-    F = 'F'
-
-
 class TargetPopulation(UUIDModel):
-    _STATE_CHOICES = TargetStatus.get_choices()
+    STATE_CHOICES = TargetStatus.get_choices()
     # fields
     name = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -63,7 +58,7 @@ class TargetPopulation(UUIDModel):
     )
     status = models.CharField(max_length=_MAX_LEN,
                               blank=False,
-                              choices=_STATE_CHOICES,
+                              choices=STATE_CHOICES,
                               null=False,
                               default=TargetStatus.IN_PROGRESS)
     households = models.ManyToManyField("household.Household",
@@ -80,17 +75,16 @@ class TargetPopulation(UUIDModel):
 
 
 class TargetFilter(models.Model):
-    _GENDER_CHOICES = Gender.get_choices()
+    GENDER_CHOICES = Individual.SEX_CHOICE
 
     intake_group = models.CharField(max_length=_MAX_LEN, null=False)
-    sex = models.CharField(max_length=2, choices=_GENDER_CHOICES)
+    sex = models.CharField(max_length=2, choices=GENDER_CHOICES)
     age_min = models.IntegerField(max_length=_MAX_LEN, null=True)
     age_max = models.IntegerField(max_length=_MAX_LEN, null=True)
     school_distance_min = models.IntegerField(max_length=_MAX_LEN, null=True)
     school_distance_max = models.IntegerField(max_length=_MAX_LEN, null=True)
     num_individuals_min = models.IntegerField(max_length=_MAX_LEN, null=True)
     num_individuals_max = models.IntegerField(max_length=_MAX_LEN, null=True)
-    school_distance_range = get_integer_range()
     target_population = models.ForeignKey("TargetPopulation",
                                           related_name="target_filters",
                                           on_delete=models.PROTECT,
