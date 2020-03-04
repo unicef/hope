@@ -8,8 +8,8 @@ description: These mutations and queries support the core functionality within H
 
 ### Registration Data Import
 
-* Validate import XLS file \(is this a query?!\)
-* Create import \(via XLS or Kobo project\)
+* Validate import XLSX file \(is this a query?!\)
+* Create import \(via XLSX or Kobo project\)
   * Will have to trigger, probably via REST an async job.
 * Change Import State \(pending -&gt; approved\)
   * importing -&gt; pending and merging -&gt; merged are async backend import state transitions. approved -&gt; merging is done in a separate mutation \(below\)?
