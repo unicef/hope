@@ -6,6 +6,20 @@ export const TargetPopulation = gql`
       id
       name
       status
+      households {
+        edges {
+          node {
+            id
+            headOfHousehold {
+              fullName
+            }
+            householdCaId
+            location {
+              title
+            }
+          }
+        }
+      }
     }
   }
 `;

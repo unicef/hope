@@ -2733,6 +2733,23 @@ export type TargetPopulationQuery = (
   & { targetPopulation: Maybe<(
     { __typename?: 'TargetPopulationNode' }
     & Pick<TargetPopulationNode, 'id' | 'name' | 'status'>
+    & { households: (
+      { __typename?: 'HouseholdNodeConnection' }
+      & { edges: Array<Maybe<(
+        { __typename?: 'HouseholdNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'HouseholdNode' }
+          & Pick<HouseholdNode, 'id' | 'householdCaId'>
+          & { headOfHousehold: Maybe<(
+            { __typename?: 'IndividualNode' }
+            & Pick<IndividualNode, 'fullName'>
+          )>, location: (
+            { __typename?: 'LocationNode' }
+            & Pick<LocationNode, 'title'>
+          ) }
+        )> }
+      )>> }
+    ) }
   )> }
 );
 
@@ -4056,6 +4073,20 @@ export const TargetPopulationDocument = gql`
     id
     name
     status
+    households {
+      edges {
+        node {
+          id
+          headOfHousehold {
+            fullName
+          }
+          householdCaId
+          location {
+            title
+          }
+        }
+      }
+    }
   }
 }
     `;
