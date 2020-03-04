@@ -70,7 +70,39 @@ Once criteria is added and saved to the Target Population, the system will retur
 
 ### Core Fields
 
-_\[Add document\]_
+| **Group** | Field Type |
+| :--- | :--- |
+| Sex | Select Many |
+| Location | Select Many |
+| Age | Range |
+|  |  |
+|  |  |
+|  |  |
+|  |  |
+
+### **Flex Fields**
+
+| **Group** | Field Type |
+| :--- | :--- |
+| ID Type | Select One |
+|  |  |
+|  |  |
+|  |  |
+|  |  |
+|  |  |
+|  |  |
+
+### \*\*\*\*
+
+### **Individual Fields**
+
+| **Group** | Field Type |
+| :--- | :--- |
+| Intake Group | Select Many |
+| Tags | Select Many |
+| Programmes | Select Many |
+
+### \*\*\*\*
 
 ## Acceptance Criteria
 
