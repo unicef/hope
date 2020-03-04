@@ -43,7 +43,7 @@ description: These mutations and queries support the core functionality within H
 ### Registration Data Import
 
 * List of Imports \(paginated, filtered, sortable\)
-* Validate import XLS file
+* Validate import XLSX file
   * is this a mutation? Its just a validation check as part of import creation process.
 * Import details \(nested households, individuals\)
 
