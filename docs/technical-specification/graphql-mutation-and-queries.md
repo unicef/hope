@@ -59,7 +59,7 @@ description: These mutations and queries support the core functionality within H
 * List of target populations \(paginated, filtered, sortable\)
 * Targeting filters supported
   * This will return a list of possible filters that can be applied while creating a new targeting population. This will basically be a combination of some of the core fields and all the flex fields in the db that are active.
-  * Each should have a key, readable name, type \(int, string etc.\), operations supported \(between, equals etc.\)
+  * Each should have a key, readable name, type \(int, string etc.\), choices, operations supported \(between, equals etc.\)
   * This will enable the frontend to build the ui with appropriate functionality and also appropriately build a filter payload to send in below queries but also in the save/edit mutations.
 * Target population details \(by ID\)
   * send back any metadata like name, who created, when it was created, its current state
