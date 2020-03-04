@@ -2345,7 +2345,10 @@ export type AllHouseholdsQuery = (
       & { node: Maybe<(
         { __typename?: 'HouseholdNode' }
         & Pick<HouseholdNode, 'id' | 'createdAt' | 'householdCaId' | 'residenceStatus' | 'familySize'>
-        & { location: (
+        & { headOfHousehold: Maybe<(
+          { __typename?: 'IndividualNode' }
+          & Pick<IndividualNode, 'id' | 'fullName'>
+        )>, location: (
           { __typename?: 'LocationNode' }
           & Pick<LocationNode, 'id' | 'title'>
         ), individuals: (
@@ -2381,7 +2384,8 @@ export type AllIndividualsQueryVariables = {
   last?: Maybe<Scalars['Int']>,
   fullNameContains?: Maybe<Scalars['String']>,
   sex?: Maybe<Array<Maybe<Scalars['ID']>>>,
-  age?: Maybe<Scalars['String']>
+  age?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
 };
 
 
@@ -3094,6 +3098,10 @@ export const AllHouseholdsDocument = gql`
         householdCaId
         residenceStatus
         familySize
+        headOfHousehold {
+          id
+          fullName
+        }
         location {
           id
           title
@@ -3173,8 +3181,8 @@ export type AllHouseholdsQueryHookResult = ReturnType<typeof useAllHouseholdsQue
 export type AllHouseholdsLazyQueryHookResult = ReturnType<typeof useAllHouseholdsLazyQuery>;
 export type AllHouseholdsQueryResult = ApolloReactCommon.QueryResult<AllHouseholdsQuery, AllHouseholdsQueryVariables>;
 export const AllIndividualsDocument = gql`
-    query AllIndividuals($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [ID], $age: String) {
-  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Icontains: $fullNameContains, sex: $sex, age: $age) {
+    query AllIndividuals($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [ID], $age: String, $orderBy: String) {
+  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Icontains: $fullNameContains, sex: $sex, age: $age, orderBy: $orderBy) {
     totalCount
     pageInfo {
       startCursor
@@ -3244,6 +3252,7 @@ export function withAllIndividuals<TProps, TChildProps = {}>(operationOptions?: 
  *      fullNameContains: // value for 'fullNameContains'
  *      sex: // value for 'sex'
  *      age: // value for 'age'
+ *      orderBy: // value for 'orderBy'
  *   },
  * });
  */
