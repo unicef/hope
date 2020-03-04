@@ -32,7 +32,6 @@ class Query(
 class Mutations(
     core.mutations.Mutations,
     household.mutations.Mutations,
-    targeting.mutations.Mutations,
     program.mutations.Mutations,
     graphene.ObjectType,
 ):

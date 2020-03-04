@@ -16,8 +16,7 @@ class TargetPopulationFactory(factory.DjangoModelFactory):
     created_by = factory.SubFactory(UserFactory)
     last_edited_at = fuzzy.FuzzyDateTime(dt.datetime.utcnow().astimezone())
     status = factory.fuzzy.FuzzyChoice(
-        TargetPopulation.STATE_CHOICES,
-        getter=lambda x: x[0],
+        TargetPopulation.STATE_CHOICES, getter=lambda x: x[0],
     )
 
     @factory.post_generation
@@ -36,8 +35,7 @@ class TargetFilterFactory(factory.DjangoModelFactory):
 
     intake_group = factory.LazyAttribute(lambda: "sentence")
     sex = factory.fuzzy.FuzzyChoice(
-        TargetFilter.GENDER_CHOICES,
-        getter=lambda x: x[0],
+        TargetFilter.GENDER_CHOICES, getter=lambda x: x[0],
     )
     age_min = factory.LazyAttribute(lambda: 1)
     age_max = factory.LazyAttribute(lambda: 200)
