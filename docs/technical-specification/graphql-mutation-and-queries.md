@@ -23,6 +23,8 @@ description: These mutations and queries support the core functionality within H
 ### Target Population
 
 * Create
+  * Requires a name and a valid set of filters payload to be sent
+  * Will then freeze results and the households associated with this newly created target population.
 * Change Target population state \(in progress -&gt; finalized\)
 * Edit
   * Very similar to create, all the same validations, save actions etc.
