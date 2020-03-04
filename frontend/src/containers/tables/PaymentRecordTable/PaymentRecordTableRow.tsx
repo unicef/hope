@@ -22,16 +22,22 @@ const StatusContainer = styled.div`
 
 interface PaymentRecordTableRowProps {
   paymentRecord: PaymentRecordNode;
+  openInNewTab: boolean;
 }
 
 export function PaymentRecordTableRow({
   paymentRecord,
+  openInNewTab,
 }: PaymentRecordTableRowProps) {
   const businessArea = useBusinessArea();
-
+  const history = useHistory();
   const handleClick = (): void => {
     const path = `/${businessArea}/payment_records/${paymentRecord.id}`;
-    window.open(path);
+    if (openInNewTab) {
+      window.open(path);
+    } else {
+      history.push(path);
+    }
   };
   return (
     <ClickableTableRow
