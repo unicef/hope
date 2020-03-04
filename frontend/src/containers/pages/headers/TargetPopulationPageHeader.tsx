@@ -7,6 +7,7 @@ import { BreadCrumbsItem } from '../../../components/BreadCrumbs';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { InProgressTargetPopulationHeaderButtons } from './InProgressTargetPopulationHeaderButtons';
 import { FinalizedTargetPopulationHeaderButtons } from './FinalizedTargetPopulationHeaderButtons';
+import { EditTargetPopulationHeader } from './EditTargetPopulationHeader';
 
 const ButtonContainer = styled.span`
   margin: 0 ${({ theme }) => theme.spacing(2)}px;
@@ -54,17 +55,16 @@ export function TargetPopulationPageHeader({
       //TODO: this could be edit case, in such scenario 
       //wrap other components in page header
       buttons = (
-        <InProgressTargetPopulationHeaderButtons
-          targetPopulation={targetPopulation}
-          setEditState={setEditState}
-        />
+        <EditTargetPopulationHeader />
       );
       break;
   }
   return (
     <>
       {isEditMode ? (
-        <div>Edit mode header</div>
+        <PageHeader title={<div>Edit input</div>}>
+          <EditTargetPopulationHeader />
+        </PageHeader>
       ) : (
         <PageHeader
           title={t(`${targetPopulation.name}`)}
