@@ -43,7 +43,8 @@ DEFAULT_FILE_STORAGE = "core.storage.AzureMediaStorage"
 STATICFILES_STORAGE = "core.storage.AzureStaticStorage"
 SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
 
-DATABASES["default"]["OPTIONS"] = {
-    "sslmode": "verify-full",
-    "sslrootcert": "/code/psql-cert.crt"
-}
+if os.getenv("POSTGRES_SSL", False):
+    DATABASES["default"]["OPTIONS"] = {
+        "sslmode": "verify-full",
+        "sslrootcert": "/code/psql-cert.crt"
+    }
