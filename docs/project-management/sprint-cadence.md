@@ -2,6 +2,12 @@
 
 ## Sprint Cadence
 
+**Frequency:** Every 2 weeks.
+
+**Start:** Monday
+
+**End:** Friday
+
 ## Daily Standup <a id="daily-standup"></a>
 
 **Who:** Tivix Team
