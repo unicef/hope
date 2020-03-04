@@ -49,21 +49,21 @@ redis:
 
 databases:
   postgres-cash-assist-datahub-db:
-    image: postgres:10.10-alpine
+    image: mdillon/postgis:10-alpine
     port: 5432
     secret:
       POSTGRES_DB: ""
       POSTGRES_USER: ""
       POSTGRES_PASSWORD: ""
   backend-db:
-    image: postgres:10.10-alpine
+    image: mdillon/postgis:10-alpine
     port: 5432
     secret:
       POSTGRES_DB: ""
       POSTGRES_USER: ""
       POSTGRES_PASSWORD: ""
   registration-datahub-db:
-    image: postgres:10.10-alpine
+    image: mdillon/postgis:10-alpine
     port: 5432
     secret:
       POSTGRES_DB: ""
