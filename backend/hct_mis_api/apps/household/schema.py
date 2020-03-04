@@ -28,9 +28,23 @@ class HouseholdFilter(FilterSet):
             "head_of_household__full_name": ["exact", "icontains"],
             "household_ca_id": ["exact"],
             "family_size": ["range", "lte", "gte"],
+            "target_populations": ["exact"],
         }
 
-    order_by = OrderingFilter(fields=("age", "sex", "household__id", "id",))
+    order_by = OrderingFilter(
+        fields=(
+            "age",
+            "sex",
+            "household__id",
+            "id",
+            "household_ca_id",
+            "family_size",
+            "head_of_household__full_name",
+            "location__title",
+            "residence_status",
+            "registration_data_import_id__",
+        )
+    )
 
 
 class IndividualFilter(FilterSet):
@@ -53,10 +67,10 @@ class IndividualFilter(FilterSet):
 
     order_by = OrderingFilter(
         fields=(
-            "individual__id",
+            "id",
             "full_name",
             "household__id",
-            "age",
+            "dob",
             "sex",
             "household__location__title",
         )
