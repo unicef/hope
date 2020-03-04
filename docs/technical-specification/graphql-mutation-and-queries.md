@@ -55,6 +55,10 @@ description: These mutations and queries support the core functionality within H
 ### Target Population
 
 * List of target populations \(paginated, filtered, sortable\)
+* Targeting filters supported
+  * This will return a list of possible filters that can be applied while creating a new targeting population
+  * Each should have a key, readable name, type \(int, string etc.\), operations supported \(between, equals etc.\)
+  * This will enable the frontend to build the ui with appropriate functionality and also appropriately build a filter payload to send in below queries but also in the save/edit mutations.
 * Target population targeting criterias \(filters\)
 * Target population results \(by target population ID \(for saved ones\) or by filter payload \(for new/editing purposes\)\)
 * Target population households \(by target population ID \(for saved ones\) or by filter payload \(for new/editing purposes\)\)
