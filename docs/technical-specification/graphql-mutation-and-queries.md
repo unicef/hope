@@ -60,7 +60,7 @@ description: These mutations and queries support the core functionality within H
 * Target population households \(by target population ID \(for saved ones\) or by filter payload \(for new/editing purposes\)\)
 
 {% hint style="info" %}
-Proposing to do as separate queries rather than one query called "target population details" since in edit mode the frontend will send to backend a payload of filters and expect fresh \(not from db or stored in db\) results / households sent back. So this would be better design.
+Proposing to do filters/results/households as separate queries above, rather than one query called "target population details", since in edit mode the frontend will send to backend a payload of filters and expect fresh \(not from db or stored in db\) results / households sent back. So this would be better design.
 
 The code for determining the households to associate with a target population and these queries ideally is shared code since this is how we "target the households / filter them".
 {% endhint %}
