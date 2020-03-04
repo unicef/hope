@@ -6,6 +6,7 @@ import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { HouseholdTable } from '../tables/HouseholdTable';
 import { useAllProgramsQuery, ProgramNode } from '../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
+import { useDebounce } from '../../hooks/useDebounce';
 
 const Container = styled.div`
   display: flex;
@@ -14,12 +15,10 @@ const Container = styled.div`
 `;
 
 export function PopulationHouseholdPage(): React.ReactElement {
-  const [sizeFilter, setSizeFilter] = useState({
-    min: undefined,
-    max: undefined,
+  const [filter, setFilter] = useState({
+    householdSize: { min: undefined, max: undefined },
   });
-  const [textFilter, setTextFilter] = useState('');
-  const [programFilter, setProgramFilter] = useState();
+  const debouncedFilter = useDebounce(filter, 500);
   const businessArea = useBusinessArea();
   const { data, loading } = useAllProgramsQuery({
     variables: { businessArea },
@@ -27,24 +26,6 @@ export function PopulationHouseholdPage(): React.ReactElement {
 
   if (loading) return null;
 
-  const handleMinSizeFilter = (value: number): void => {
-    setSizeFilter({ ...sizeFilter, min: value });
-  };
-  const handleMaxSizeFilter = (value: number): void => {
-    if (value < sizeFilter.min) {
-      setSizeFilter({ ...sizeFilter, max: Number(sizeFilter.min) });
-    } else {
-      setSizeFilter({ ...sizeFilter, max: value });
-    }
-  };
-
-  const householdProgramFilter = (value: string): void => {
-    setProgramFilter(value);
-  };
-
-  const handleTextFilter = (value: string): void => {
-    setTextFilter(value);
-  };
 
   const { allPrograms } = data;
   const programs = allPrograms.edges.map((edge) => edge.node);
@@ -54,18 +35,12 @@ export function PopulationHouseholdPage(): React.ReactElement {
       <PageHeader title='Households'/>
       <HouseholdFilters
         programs={programs as ProgramNode[]}
-        minValue={sizeFilter.min}
-        maxValue={sizeFilter.max}
-        householdProgramFilter={householdProgramFilter}
-        householdMaxSizeFilter={handleMaxSizeFilter}
-        householdMinSizeFilter={handleMinSizeFilter}
-        householdTextFilter={handleTextFilter}
+        filter={filter}
+        onFilterChange={setFilter}
       />
       <Container>
         <HouseholdTable
-          programFilter={programFilter}
-          sizeFilter={sizeFilter}
-          textFilter={textFilter}
+          filter={debouncedFilter}
           businessArea={businessArea}
         />
       </Container>
