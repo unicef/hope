@@ -7,7 +7,7 @@ import { CashPlanNode, HouseholdNode } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
 import { StatusBox } from '../../../components/StatusBox';
-import { cashPlanStatusToColor, formatCurrency } from '../../../utils/utils';
+import { cashPlanStatusToColor, decodeIdString, formatCurrency } from '../../../utils/utils';
 
 const StatusContainer = styled.div`
   width: 120px;
@@ -31,9 +31,9 @@ export function HouseHoldTableRow({ household }: HouseHoldTableRowProps) {
       role='checkbox'
       key={household.id}
     >
-      <TableCell align='left'>{household.householdCaId}</TableCell>
+      <TableCell align='left'>{decodeIdString(household.id)}</TableCell>
       <TableCell align='left'>
-        {household.paymentRecords.edges[0].node.headOfHousehold}
+        {household.headOfHousehold.fullName}
       </TableCell>
       <TableCell align='left'>{household.familySize}</TableCell>
       <TableCell align='left'>{household.location.title}</TableCell>

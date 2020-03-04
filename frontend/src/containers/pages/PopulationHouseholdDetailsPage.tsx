@@ -74,7 +74,7 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
       <HouseholdDetails houseHold={household as HouseholdNode} />
       <Container>
         <HouseholdIndividualsTable household={household as HouseholdNode} />
-        <PaymentRecordTable cashPlan={cashPlan} />
+        <PaymentRecordTable openInNewTab cashPlan={cashPlan} />
         <HouseholdVulnerabilities />
         <Overview>
           <Title>
