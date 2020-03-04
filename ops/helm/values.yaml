@@ -30,6 +30,7 @@ backend:
     AZURE_CLIENT_ID: ""
     AZURE_CLIENT_SECRET: ""
     AZURE_TENANT_KEY: ""
+    NEW_ENV: ""
   staticStorage:
     secretName: ""
     accountName: ""
@@ -46,25 +47,25 @@ redis:
   port: 6379
 
 
-# databases:
-#   postgres-cash-assist-datahub-db:
-#     image: postgres:9.5.15-alpine
-#     port: 5432
-#     secret:
-#       POSTGRES_DB: ""
-#       POSTGRES_USER: ""
-#       POSTGRES_PASSWORD: ""
-#   backend-db:
-#     image: postgres:9.5.15-alpine
-#     port: 5432
-#     secret:
-#       POSTGRES_DB: ""
-#       POSTGRES_USER: ""
-#       POSTGRES_PASSWORD: ""
-#   registration-datahub-db:
-#     image: postgres:9.5.15-alpine
-#     port: 5432
-#     secret:
-#       POSTGRES_DB: ""
-#       POSTGRES_USER: ""
-#       POSTGRES_PASSWORD: ""
+databases:
+  postgres-cash-assist-datahub-db:
+    image: postgres:10.10-alpine
+    port: 5432
+    secret:
+      POSTGRES_DB: ""
+      POSTGRES_USER: ""
+      POSTGRES_PASSWORD: ""
+  backend-db:
+    image: postgres:10.10-alpine
+    port: 5432
+    secret:
+      POSTGRES_DB: ""
+      POSTGRES_USER: ""
+      POSTGRES_PASSWORD: ""
+  registration-datahub-db:
+    image: postgres:10.10-alpine
+    port: 5432
+    secret:
+      POSTGRES_DB: ""
+      POSTGRES_USER: ""
+      POSTGRES_PASSWORD: ""
