@@ -31,7 +31,7 @@ const BackButton = styled.div`
 `;
 
 interface Props {
-  title: string;
+  title: string | React.ReactElement;
   children?: React.ReactElement;
   breadCrumbs?: BreadCrumbsItem[];
 }
