@@ -48,3 +48,21 @@ if os.getenv("POSTGRES_SSL", False):
         "sslmode": "verify-full",
         "sslrootcert": "/code/psql-cert.crt"
     }
+
+DATABASES["cash_assist_datahub"] = {
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": os.getenv("POSTGRES_CASHASSIST_DATAHUB_DB"),
+        "USER": os.getenv("POSTGRES_CASHASSIST_DATAHUB_USER"),
+        "PASSWORD": os.getenv("POSTGRES_CASHASSIST_DATAHUB_PASSWORD"),
+        "HOST": os.getenv("POSTGRES_CASHASSIST_DATAHUB_HOST"),
+        "PORT": 5432,
+}
+
+DATABASES["registration_datahub"] = {
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": os.getenv("POSTGRES_REGISTRATION_DATAHUB_DB"),
+        "USER": os.getenv("POSTGRES_REGISTRATION_DATAHUB_USER"),
+        "PASSWORD": os.getenv("POSTGRES_REGISTRATION_DATAHUB_PASSWORD"),
+        "HOST": os.getenv("POSTGRES_REGISTRATION_DATAHUB_HOST"),
+        "PORT": 5432,
+}
