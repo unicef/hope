@@ -68,29 +68,23 @@ const TextContainer = styled(TextField)`
 `;
 
 interface HouseholdFiltersProps {
+  onFilterChange;
+  filter;
   programs: ProgramNode[];
-  minValue: number;
-  maxValue: number;
-  householdProgramFilter: (value: string) => void;
-  householdMinSizeFilter: (value: number) => void;
-  householdMaxSizeFilter: (value: number) => void;
-  householdTextFilter: (value: string) => void;
 }
 export function HouseholdFilters({
+  onFilterChange,
+  filter,
   programs,
-  minValue,
-  maxValue,
-  householdProgramFilter,
-  householdMinSizeFilter,
-  householdMaxSizeFilter,
-  householdTextFilter,
 }: HouseholdFiltersProps): React.ReactElement {
+  const handleFilterChange = (e, name) =>
+    onFilterChange({ ...filter, [name]: e.target.value });
   return (
     <Container>
       <TextContainer
         placeholder='Search'
         variant='filled'
-        onChange={(e) => householdTextFilter(e.target.value)}
+        onChange={(e) => handleFilterChange(e, 'text')}
         InputProps={{
           startAdornment: (
             <InputAdornment position='start'>
@@ -103,7 +97,7 @@ export function HouseholdFilters({
         select
         placeholder='Programme'
         variant='filled'
-        onChange={(e) => householdProgramFilter(e.target.value)}
+        onChange={(e) => handleFilterChange(e, 'program')}
         InputProps={{
           startAdornment: (
             <InputAdornment position='start'>
@@ -118,10 +112,18 @@ export function HouseholdFilters({
       </TextContainer>
       <TextContainer
         id='minFilter'
-        value={minValue}
+        value={filter.householdSize.min}
         variant='filled'
         placeholder='Household size'
-        onChange={(e) => householdMinSizeFilter(clearValue(e.target.value))}
+        onChange={(e) =>
+          onFilterChange({
+            ...filter,
+            householdSize: {
+              ...filter.householdSize,
+              min: e.target.value || undefined,
+            },
+          })
+        }
         type='number'
         InputProps={{
           startAdornment: (
@@ -134,10 +136,18 @@ export function HouseholdFilters({
       to
       <TextContainer
         id='maxFilter'
-        value={maxValue}
+        value={filter.householdSize.max}
         variant='filled'
         placeholder='Household size'
-        onChange={(e) => householdMaxSizeFilter(clearValue(e.target.value))}
+        onChange={(e) =>
+          onFilterChange({
+            ...filter,
+            householdSize: {
+              ...filter.householdSize,
+              max: e.target.value || undefined,
+            },
+          })
+        }
         type='number'
         InputProps={{
           startAdornment: (

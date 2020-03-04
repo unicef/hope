@@ -70,25 +70,22 @@ const TextContainer = styled(TextField)`
 `;
 
 interface IndividualsFilterProps {
-  sexFilter: string;
-  individualSexFilter: (value: string) => void;
-  individualMinAgeFilter: (value: number) => void;
-  individualMaxAgeFilter: (value: number) => void;
-  individualTextFilter: (value: string) => void;
+  onFilterChange;
+  filter;
 }
 export function IndividualsFilter({
-  sexFilter,
-  individualSexFilter,
-  individualMinAgeFilter,
-  individualMaxAgeFilter,
-  individualTextFilter,
+  onFilterChange,
+  filter,
 }: IndividualsFilterProps): React.ReactElement {
+  const handleFilterChange = (e, name) =>
+    onFilterChange({ ...filter, [name]: e.target.value });
   return (
     <Container>
       <TextContainer
         placeholder='Search'
         variant='filled'
-        onChange={(e) => individualTextFilter(e.target.value)}
+        value={filter.text}
+        onChange={(e) => handleFilterChange(e, 'text')}
         InputProps={{
           startAdornment: (
             <InputAdornment position='start'>
@@ -99,9 +96,9 @@ export function IndividualsFilter({
       />
       <TextContainer
         select
-        defaultValue={sexFilter}
+        defaultValue={filter.sex}
         variant='filled'
-        onChange={(e) => individualSexFilter(e.target.value)}
+        onChange={(e) => handleFilterChange(e, 'sex')}
         InputProps={{
           startAdornment: (
             <InputAdornment position='start'>
@@ -117,7 +114,13 @@ export function IndividualsFilter({
       <TextContainer
         variant='filled'
         placeholder='Age'
-        onChange={(e) => individualMinAgeFilter(clearValue(e.target.value))}
+        value={filter.age.min}
+        onChange={(e) =>
+          onFilterChange({
+            ...filter,
+            age: { ...filter.age, min: e.target.value || undefined },
+          })
+        }
         type='number'
         InputProps={{
           startAdornment: (
@@ -131,7 +134,13 @@ export function IndividualsFilter({
       <TextContainer
         variant='filled'
         placeholder='Age'
-        onChange={(e) => individualMaxAgeFilter(clearValue(e.target.value))}
+        value={filter.age.max}
+        onChange={(e) =>
+          onFilterChange({
+            ...filter,
+            age: { ...filter.age, max: e.target.value || undefined },
+          })
+        }
         type='number'
         InputProps={{
           startAdornment: (

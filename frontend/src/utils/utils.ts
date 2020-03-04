@@ -83,8 +83,10 @@ export function registrationDataImportStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case 'DONE':
+    case 'APPROVED':
       return theme.hctPalette.green;
+    case 'MERGED':
+      return theme.hctPalette.gray;
     case 'IN_PROGRESS':
       return theme.hctPalette.oragne;
     default:
@@ -129,6 +131,10 @@ export function columnToOrderBy(
   column: string,
   orderDirection: string,
 ): string {
+  if (column.startsWith('-')) {
+    const clearColumn = column.replace('-', '');
+    return camelToUnderscore(`${orderDirection === 'asc' ? '-' : ''}${clearColumn}`);
+  }
   return camelToUnderscore(`${orderDirection === 'desc' ? '-' : ''}${column}`);
 }
 
