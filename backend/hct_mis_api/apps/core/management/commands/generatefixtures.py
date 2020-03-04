@@ -78,6 +78,12 @@ class Command(BaseCommand):
 
         for _ in range(cash_plans_amount):
             cash_plan = CashPlanFactory(program=program, created_by=user)
+
+            target_population = TargetPopulationFactory(
+                created_by=user, households=None,
+            )
+            households = []
+
             for _ in range(payment_record_amount):
                 location = LocationFactory(business_area=business_area)
 
@@ -98,15 +104,16 @@ class Command(BaseCommand):
                 household.representative = individuals[0]
                 household.save()
 
-                target_population = TargetPopulationFactory(
-                    households=household, created_by=user
-                )
+                households.append(household)
+
                 PaymentRecordFactory(
                     cash_plan=cash_plan,
                     household=household,
                     target_population=target_population,
                 )
                 EntitlementCardFactory(household=household)
+
+            target_population.households.add(*households)
 
     def handle(self, *args, **options):
         start_time = time.time()
