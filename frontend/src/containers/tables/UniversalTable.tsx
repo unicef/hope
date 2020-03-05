@@ -1,4 +1,4 @@
-import React, { ReactElement, useState } from 'react';
+import React, { ReactElement, useState, useEffect } from 'react';
 import { Order, TableComponent } from '../../components/table/TableComponent';
 import { HeadCell } from '../../components/table/EnhancedTableHead';
 import { columnToOrderBy } from '../../utils/utils';
@@ -29,9 +29,17 @@ export function UniversalTable<T, K>({
     variables: { ...initialVariables, first: rowsPerPage },
     fetchPolicy: 'network-only',
   });
+
+  useEffect(() => {
+    if (initialVariables) {
+      setPage(0);
+    }
+  }, [initialVariables]);
+
   if (!data) {
     return null;
   }
+
   const { edges } = data[queriedObjectName];
   const typedEdges = edges.map((edge) => edge.node as T);
   console.log('query1', typedEdges, initialVariables);
