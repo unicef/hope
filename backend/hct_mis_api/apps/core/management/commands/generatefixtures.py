@@ -20,7 +20,7 @@ from registration_datahub.fixtures import (
     ImportedIndividualFactory,
     ImportedHouseholdFactory,
 )
-from targeting.fixtures import TargetPopulationFactory
+from targeting.fixtures import TargetPopulationFactory, TargetRuleFactory
 
 
 class Command(BaseCommand):
@@ -107,9 +107,12 @@ class Command(BaseCommand):
 
                 household.programs.add(program)
 
+                target_rules = TargetRuleFactory.create_batch(5)
+
                 target_population = TargetPopulationFactory(
-                    households=household, created_by=user
+                    households=[household], created_by=user,
                 )
+                target_population.target_rules.add(*target_rules)
 
                 cash_plan.target_population = target_population
                 cash_plan.save()

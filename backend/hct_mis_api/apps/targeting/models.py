@@ -63,6 +63,7 @@ class TargetPopulation(UUIDModel):
     # fields
     name = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+    # TODO(codecakes): check and use auditlog instead.
     last_edited_at = models.DateTimeField(auto_now=True, null=True)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -148,15 +149,13 @@ class FilterAttrType(models.Model):
                 "head_of_household__dob__gte": dob_min,
                 "head_of_household__dob__lte": dob_max,
             }
-        else:
-            return {}
+        return {}
 
     @classmethod
     def get_gender(cls, rule_obj: dict) -> dict:
         if "sex" in rule_obj:
             return {"head_of_household__sex": rule_obj["sex"]}
-        else:
-            return {}
+        return {}
 
     @classmethod
     def get_family_size(cls, rule_obj: dict) -> dict:
@@ -168,8 +167,7 @@ class FilterAttrType(models.Model):
                 "family_size__gte": rule_obj["num_individuals_min"],
                 "family_size__lte": rule_obj["num_individuals_max"],
             }
-        else:
-            return {}
+        return {}
 
     @classmethod
     def get_intake_group(cls, rule_obj: dict) -> dict:
@@ -177,5 +175,4 @@ class FilterAttrType(models.Model):
             return {
                 "registration_data_import_id__name": rule_obj["intake_group"],
             }
-        else:
-            return {}
+        return {}
