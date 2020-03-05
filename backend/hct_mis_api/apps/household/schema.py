@@ -1,4 +1,5 @@
 import graphene
+from django.db.models import Sum
 from django_filters import (
     FilterSet,
     OrderingFilter,
@@ -17,12 +18,10 @@ from household.models import Household, Individual
 class HouseholdFilter(FilterSet):
     business_area = CharFilter(field_name="location__business_area__slug")
     family_size = IntegerRangeFilter(field_name="family_size")
-    programme = CharFilter(field_name="programs__name")
 
     class Meta:
         model = Household
         fields = {
-            "programme": ["exact", "icontains"],
             "business_area": ["exact", "icontains"],
             "nationality": ["exact", "icontains"],
             "address": ["exact", "icontains"],
@@ -31,6 +30,7 @@ class HouseholdFilter(FilterSet):
             "household_ca_id": ["exact"],
             "family_size": ["range", "lte", "gte"],
             "target_populations": ["exact"],
+            "programs": ["exact"],
         }
 
     order_by = OrderingFilter(
@@ -45,6 +45,8 @@ class HouseholdFilter(FilterSet):
             "location__title",
             "residence_status",
             "registration_data_import_id__",
+            "total_cash",
+            "registration_date",
         )
     )
 
@@ -82,6 +84,8 @@ class IndividualFilter(FilterSet):
 
 
 class HouseholdNode(DjangoObjectType):
+    total_cash_received = graphene.Decimal()
+
     class Meta:
         model = Household
         filter_fields = []
@@ -106,3 +110,8 @@ class Query(graphene.ObjectType):
     all_individuals = DjangoFilterConnectionField(
         IndividualNode, filterset_class=IndividualFilter,
     )
+
+    def resolve_all_households(self, info, **kwargs):
+        return Household.objects.annotate(
+            total_cash=Sum("payment_records__entitlement__delivered_quantity")
+        )

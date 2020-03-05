@@ -25,6 +25,13 @@ const Container = styled.div`
 `;
 
 const TextContainer = styled(TextField)`
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number']::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+  }
+  input[type='number'] {
+    -moz-appearance: textfield;
+  }
   .MuiFilledInput-root {
     border-radius: 4px;
   }

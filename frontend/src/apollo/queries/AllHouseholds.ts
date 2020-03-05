@@ -9,6 +9,7 @@ export const AllHouseholds = gql`
     $businessArea: String
     $orderBy: String
     $familySize: String
+    $programs: [ID]
     $headOfHouseholdFullNameIcontains: String
   ) {
     allHouseholds(
@@ -19,6 +20,7 @@ export const AllHouseholds = gql`
       businessArea: $businessArea
       familySize: $familySize
       orderBy: $orderBy
+      programs: $programs
       headOfHousehold_FullName_Icontains: $headOfHouseholdFullNameIcontains
     ) {
       pageInfo {
@@ -36,6 +38,8 @@ export const AllHouseholds = gql`
           householdCaId
           residenceStatus
           familySize
+          totalCashReceived
+          registrationDate
           headOfHousehold {
             id
             fullName
@@ -46,22 +50,6 @@ export const AllHouseholds = gql`
           }
           individuals {
             totalCount
-          }
-          paymentRecords {
-            edges {
-              node {
-                id
-                headOfHousehold
-                cashPlan {
-                  id
-                  program {
-                    id
-                    name
-                  }
-                  totalDeliveredQuantity
-                }
-              }
-            }
           }
         }
       }
