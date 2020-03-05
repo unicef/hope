@@ -11,9 +11,11 @@ import { PaymentRecordTableRow } from './PaymentRecordTableRow';
 
 interface PaymentRecordTableProps {
   cashPlan: CashPlanNode;
+  openInNewTab?: boolean;
 }
 export function PaymentRecordTable({
   cashPlan,
+  openInNewTab = false,
 }: PaymentRecordTableProps): ReactElement {
   const initialVariables = {
     cashPlan: cashPlan.id,
@@ -25,7 +27,12 @@ export function PaymentRecordTable({
       query={useAllPaymentRecordsQuery}
       queriedObjectName='allPaymentRecords'
       initialVariables={initialVariables}
-      renderRow={(row) => <PaymentRecordTableRow paymentRecord={row} />}
+      renderRow={(row) => (
+        <PaymentRecordTableRow
+          paymentRecord={row}
+          openInNewTab={openInNewTab}
+        />
+      )}
     />
   );
 }
