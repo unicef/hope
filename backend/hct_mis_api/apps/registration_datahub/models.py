@@ -58,6 +58,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
     SEX_CHOICE = (
         ("MALE", _("Male")),
         ("FEMALE", _("Female")),
+        ("OTHER", _("Other")),
     )
     MARTIAL_STATUS_CHOICE = (
         ("SINGLE", _("SINGLE")),
