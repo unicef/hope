@@ -37,6 +37,7 @@ spec:
   selector:
     app: redis
 --- 
+{{ if .Values.podDB }}
 {{- range $key, $value :=  .Values.databases }}
 kind: Service
 apiVersion: v1
@@ -51,3 +52,4 @@ spec:
     app: {{ $key }}
 ---
 {{- end }}
+{{ end }}
