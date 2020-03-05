@@ -12,6 +12,7 @@ backend:
   port: 8000
   healthCheckPath: "/api/_health"
   secret:
+    POSTGRES_SSL: 
     SECRET_KEY: ""
     POSTGRES_DB: ""
     POSTGRES_USER: ""
@@ -31,7 +32,6 @@ backend:
     AZURE_CLIENT_ID: ""
     AZURE_CLIENT_SECRET: ""
     AZURE_TENANT_KEY: ""
-    NEW_ENV: ""
   staticStorage:
     secretName: ""
     accountName: ""
