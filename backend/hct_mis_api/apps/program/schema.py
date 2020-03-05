@@ -4,9 +4,7 @@ from graphene import relay, ConnectionField
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
-from core.schema import (
-    ChoiceObject,
-    LogEntryObjectConnection)
+from core.schema import ChoiceObject, LogEntryObjectConnection
 from core.extended_connection import ExtendedConnection
 from program.models import Program, CashPlan
 from django_filters import FilterSet, OrderingFilter, CharFilter
@@ -84,7 +82,7 @@ class Query(graphene.ObjectType):
     program_scope_choices = graphene.List(ChoiceObject)
     cash_plan_status_choices = graphene.List(ChoiceObject)
 
-    def resolve_all_programs(self, info, **kwardgs):
+    def resolve_all_programs(self, info, **kwargs):
         return Program.objects.annotate(
             custom_order=Case(
                 When(status=Program.DRAFT, then=Value(1)),
