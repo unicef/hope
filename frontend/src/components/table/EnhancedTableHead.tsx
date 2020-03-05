@@ -101,13 +101,13 @@ export function EnhancedTableHead<T>(
                 onClick={createSortHandler(headCell.id)}
               >
                 {headCell.label}
-                {orderBy === headCell.id ? (
+                {orderBy === headCell.id && (
                   <span className={classes.visuallyHidden}>
                     {order === 'desc'
                       ? 'sorted descending'
                       : 'sorted ascending'}
                   </span>
-                ) : null}
+                )}
               </TableSortLabelStyled>
             ) : (
               <TableRowStyled>{headCell.label}</TableRowStyled>
