@@ -72,3 +72,72 @@ snapshots['TestIndividualQuery::test_individual_query_single 1'] = {
         }
     }
 }
+
+snapshots['TestIndividualQuery::test_individual_programme_filter 1'] = {
+    'data': {
+        'allIndividuals': {
+            'edges': [
+                {
+                    'node': {
+                        'dob': '1969-11-29',
+                        'firstName': 'Jenna',
+                        'fullName': 'Jenna Franklin',
+                        'household': {
+                            'programs': {
+                                'edges': [
+                                    {
+                                        'node': {
+                                            'name': 'Test program TWO'
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        'lastName': 'Franklin',
+                        'phoneNumber': '001-296-358-5428-607'
+                    }
+                },
+                {
+                    'node': {
+                        'dob': '1983-12-21',
+                        'firstName': 'Timothy',
+                        'fullName': 'Timothy Perry',
+                        'household': {
+                            'programs': {
+                                'edges': [
+                                    {
+                                        'node': {
+                                            'name': 'Test program TWO'
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        'lastName': 'Perry',
+                        'phoneNumber': '(548)313-1700-902'
+                    }
+                },
+                {
+                    'node': {
+                        'dob': '1943-07-30',
+                        'firstName': 'Benjamin',
+                        'fullName': 'Benjamin Butler',
+                        'household': {
+                            'programs': {
+                                'edges': [
+                                    {
+                                        'node': {
+                                            'name': 'Test program TWO'
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        'lastName': 'Butler',
+                        'phoneNumber': '(953)682-4596'
+                    }
+                }
+            ]
+        }
+    }
+}
