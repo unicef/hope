@@ -7,7 +7,7 @@ import { useHistory } from 'react-router-dom';
 import {
   getAgeFromDob,
   sexToCapitalize,
-  getIdentificationType,
+  getIdentificationType, decodeIdString,
 } from '../../utils/utils';
 import Moment from 'react-moment';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
@@ -108,7 +108,7 @@ export function IndividualsBioData({
         <Grid item xs={4}>
           <LabelizedField label='Household ID'>
             <ContentLink onClick={() => openHousehold()}>
-              {individual.household.id}
+              {decodeIdString(individual.household.id)}
             </ContentLink>
           </LabelizedField>
         </Grid>

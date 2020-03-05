@@ -30,6 +30,9 @@ class HouseholdFactory(factory.DjangoModelFactory):
     registration_data_import_id = factory.SubFactory(
         RegistrationDataImportFactory,
     )
+    registration_date = factory.Faker(
+        "date_this_year", before_today=True, after_today=False
+    )
     # set it manually
     head_of_household = None
 
