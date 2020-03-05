@@ -1,4 +1,3 @@
-import datetime as dt
 import functools
 import json
 import operator
@@ -12,13 +11,6 @@ from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from household.models import Household
-from registration_data.models import RegistrationDataImport
-
-
-class IntakeGroupType(DjangoObjectType):
-    class Meta:
-        model = RegistrationDataImport
-        fields = ("name",)
 
 
 class HouseHoldType(DjangoObjectType):
@@ -37,18 +29,18 @@ class HouseHoldType(DjangoObjectType):
 class TargetPopulationFilter(django_filters.FilterSet):
     """Query target population records.
 
-    Loads associated entries for Households and TargetFilters.
+    Loads associated entries for Households and TargetRules.
     """
 
     name = django_filters.CharFilter(field_name="name", lookup_expr="icontains")
     created_by_name = django_filters.CharFilter(
-        field_name="created_by", method="filter_created_by_name"
+        field_name="created_by__full_name", method="filter_created_by_name"
     )
     num_individuals_min = django_filters.NumberFilter(
-        field_name="target_filters__num_individuals_min", lookup_expr="gte"
+        field_name="target_rules__num_individuals_min", lookup_expr="gte"
     )
     num_individuals_max = django_filters.NumberFilter(
-        field_name="target_filters__num_individuals_max", lookup_expr="lte"
+        field_name="target_rules__num_individuals_max", lookup_expr="lte"
     )
 
     # TODO(codecakes): waiting on dist to school and adminlevel clarification.
@@ -73,12 +65,14 @@ class TargetPopulationFilter(django_filters.FilterSet):
         model = target_models.TargetPopulation
         fields = (
             "name",
-            "status",
             "created_by_name",
             "created_at",
             "last_edited_at",
+            "status",
+            "total_households",
+            "total_family_size",
             "households",
-            "target_filters",
+            "target_rules",
         )
 
         filter_overrides = {
@@ -91,7 +85,17 @@ class TargetPopulationFilter(django_filters.FilterSet):
         }
 
     # TODO(codecakes): how to order?
-    order_by = django_filters.OrderingFilter(fields=("created_at",))
+    order_by = django_filters.OrderingFilter(
+        fields=(
+            "name",
+            "created_at",
+            "created_by",
+            "last_edited_at",
+            "status",
+            "total_households",
+            "total_family_size",
+        )
+    )
 
 
 class TargetPopulationNode(DjangoObjectType):
@@ -104,46 +108,74 @@ class TargetPopulationNode(DjangoObjectType):
         filterset_class = TargetPopulationFilter
 
 
+class SavedTargetRuleFilter(django_filters.FilterSet):
+    """Filters for saved TargetRules."""
+
+    class Meta:
+        model = target_models.TargetRule
+        fields = (
+            "flex_rules",
+            "core_rules",
+            "target_population",
+        )
+
+        filter_overrides = {
+            target_models.JSONField: {
+                'filter_class': django_filters.LookupChoiceFilter,
+                # 'extra': lambda f: {'lookup_expr': ['icontains']},
+            },
+        }
+
+
+class SavedTargetRuleNode(DjangoObjectType):
+    """Fetches the saved filters."""
+
+    class Meta:
+        model = target_models.TargetRule
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+        filterset_class = SavedTargetRuleFilter
+
+
 class Query(graphene.ObjectType):
     target_population = relay.Node.Field(TargetPopulationNode)
     all_target_population = DjangoFilterConnectionField(TargetPopulationNode)
-    # Queries household and associated registration and individuals records.
-    target_filters = graphene.List(
+    # Saved snapshots of target rules from a target population.
+    saved_target_rule = relay.Node.Field(SavedTargetRuleNode)
+    all_saved_target_rule = DjangoFilterConnectionField(SavedTargetRuleNode)
+    # Realtime Queries from golden reocrds.
+    # household and associated registration and individuals records.
+    target_rules = graphene.List(
         HouseHoldType,
         serialized_list=graphene.String(),
         description="json dump of filters containing key value pairs.",
     )
 
-    def resolve_target_filters(self, info, serialized_list):
-        """Resolver for target_filters.
+    def resolve_target_rules(self, info, serialized_list):
+        """Resolver for target_rules. Queries from golden records.
+
         args:
             info: object, HTTPRequestObject.
             serialized_list: list, check below.
 
         Arguments in serialized_list are of type.
         """
-        filter_lists = json.loads(serialized_list)
+        rule_lists = json.loads(serialized_list)
         return functools.reduce(
-            operator.or_, Query.get_households_from_filter(filter_lists),
+            operator.or_, Query.get_households_from_rule(rule_lists),
         )
 
     @staticmethod
-    def get_households_from_filter(filter_lists):
-        for filter_list in filter_lists:
-            # TODO(codecakes): Add dist to school field once mapping known.
-            today = dt.date.today()
-            year_min = today.year - filter_list["age_min"]
-            year_max = today.year - filter_list["age_max"]
-            dob_min = dt.date(year_min, 1, 1)
-            dob_max = dt.date(year_max, 1, 1)
-            search_filters = {
-                "head_of_household__sex": filter_list["sex"],
-                "family_size__gte": filter_list["num_individuals_min"],
-                "family_size__lte": filter_list["num_individuals_max"],
-                "head_of_household__dob__gte": dob_min,
-                "head_of_household__dob__lte": dob_max,
-                "registration_data_import_id__name": filter_list[
-                    "intake_group"
-                ],
-            }
-            yield Household.objects.filter(**search_filters)
+    def get_households_from_rule(rule_lists: list):
+        """Fetches live results from Household golden db."""
+        for rule_obj in rule_lists:
+            search_rules = {}
+            rules = {}
+            rules.update(rule_obj["core_rules"])
+            rules.update(rule_obj["flex_rules"])
+            # TODO(codecakes): decouple to core and flex functions.
+            # many dynamic fields here will depend on the info
+            #  from FilterAttrType class falls back on that method.
+            for functor in target_models.FilterAttrType.apply_filters(rules):
+                search_rules.update(functor())
+            yield Household.objects.filter(**search_rules)
