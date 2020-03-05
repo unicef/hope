@@ -1,6 +1,10 @@
+from django.core.management import call_command
+
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
-from household.fixtures import IndividualFactory
+from core.models import BusinessArea
+from household.fixtures import IndividualFactory, HouseholdFactory
+from program.fixtures import ProgramFactory
 
 
 class TestIndividualQuery(APITestCase):
@@ -14,6 +18,30 @@ class TestIndividualQuery(APITestCase):
             lastName
             phoneNumber
             dob
+          }
+        }
+      }
+    }
+    """
+    ALL_INDIVIDUALS_BY_PROGRAMME_QUERY = """
+    query AllIndividuals {
+      allIndividuals(programme: "Test program TWO") {
+        edges {
+          node {
+            fullName
+            firstName
+            lastName
+            phoneNumber
+            dob
+            household {
+              programs { 
+                edges {
+                  node {
+                    name
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -33,7 +61,19 @@ class TestIndividualQuery(APITestCase):
 
     def setUp(self):
         super().setUp()
-        self.user = UserFactory.create()
+        call_command("loadbusinessareas")
+        self.user = UserFactory()
+        program_one = ProgramFactory(
+            name="Test program ONE", business_area=BusinessArea.objects.first(),
+        )
+        program_two = ProgramFactory(
+            name="Test program TWO", business_area=BusinessArea.objects.first(),
+        )
+        household_one = HouseholdFactory()
+        household_two = HouseholdFactory()
+        household_one.programs.add(program_one)
+        household_two.programs.add(program_two)
+
         self.individuals_to_create = [
             {
                 "full_name": "Benjamin Butler",
@@ -74,9 +114,10 @@ class TestIndividualQuery(APITestCase):
 
         self.individuals = [
             IndividualFactory(
+                household=household_one if index % 2 else household_two,
                 **individual
             )
-            for individual in self.individuals_to_create
+            for index, individual in enumerate(self.individuals_to_create)
         ]
 
     def test_individual_query_all(self):
@@ -92,4 +133,10 @@ class TestIndividualQuery(APITestCase):
             variables={
                 "id": self.id_to_base64(self.individuals[0].id, "Individual")
             },
+        )
+
+    def test_individual_programme_filter(self):
+        self.snapshot_graphql_request(
+            request_string=self.ALL_INDIVIDUALS_BY_PROGRAMME_QUERY,
+            context={"user": self.user},
         )
