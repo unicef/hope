@@ -10,7 +10,7 @@ from program.fixtures import ProgramFactory
 class TestHouseholdQuery(APITestCase):
     ALL_HOUSEHOLD_QUERY = """
     query AllHouseholds{
-      allHouseholds {
+      allHouseholds(orderBy: "family_size") {
         edges {
           node {
             familySize
@@ -24,7 +24,10 @@ class TestHouseholdQuery(APITestCase):
     """
     ALL_HOUSEHOLD_QUERY_RANGE = """
     query AllHouseholds{
-      allHouseholds(familySize: "{\\"min\\": 3, \\"max\\": 9}") {
+      allHouseholds(
+        orderBy: "family_size", 
+        familySize: "{\\"min\\": 3, \\"max\\": 9}"
+      ) {
         edges {
           node {
             familySize
@@ -38,7 +41,7 @@ class TestHouseholdQuery(APITestCase):
     """
     ALL_HOUSEHOLD_QUERY_MIN = """
     query AllHouseholds{
-      allHouseholds(familySize: "{\\"min\\": 3}") {
+      allHouseholds(orderBy: "family_size", familySize: "{\\"min\\": 3}") {
         edges {
           node {
             familySize
@@ -52,7 +55,7 @@ class TestHouseholdQuery(APITestCase):
     """
     ALL_HOUSEHOLD_QUERY_MAX = """
     query AllHouseholds{
-      allHouseholds(familySize: "{\\"max\\": 9}") {
+      allHouseholds(orderBy: "family_size", familySize: "{\\"max\\": 9}") {
         edges {
           node {
             familySize
@@ -101,10 +104,10 @@ class TestHouseholdQuery(APITestCase):
         call_command("loadbusinessareas")
         self.user = UserFactory.create()
         family_sizes_list = (2, 4, 5, 1, 3, 11, 14)
-        program_one = ProgramFactory(
+        self.program_one = ProgramFactory(
             name="Test program ONE", business_area=BusinessArea.objects.first(),
         )
-        program_two = ProgramFactory(
+        self.program_two = ProgramFactory(
             name="Test program TWO", business_area=BusinessArea.objects.first(),
         )
 
@@ -117,9 +120,9 @@ class TestHouseholdQuery(APITestCase):
                 household_ca_id="123-123-123",
             )
             if index % 2:
-                household.programs.add(program_one)
+                household.programs.add(self.program_one)
             else:
-                household.programs.add(program_two)
+                household.programs.add(self.program_two)
 
             self.households.append(household)
 
@@ -152,7 +155,7 @@ class TestHouseholdQuery(APITestCase):
             request_string=self.ALL_HOUSEHOLD_FILTER_PROGRAMS_QUERY,
             variables={
                 "programs": [
-                    self.id_to_base64(self.households[0].id, "Program")
+                    self.id_to_base64(self.program_one.id, "Program")
                 ]
             },
             context={"user": self.user},
