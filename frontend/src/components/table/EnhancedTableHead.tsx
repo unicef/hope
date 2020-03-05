@@ -48,19 +48,36 @@ const TableSortLabelStyled = styled(TableSortLabel)`
   }
 `;
 
+const TableRowStyled = styled(TableRow)`
+  & {
+    font-size: 12px;
+  }
+`;
+
 interface EnhancedTableProps<T> {
   classes: ReturnType<typeof useStyles>;
-  onRequestSort: (event: React.MouseEvent<unknown>, property: keyof T | string) => void;
+  onRequestSort: (
+    event: React.MouseEvent<unknown>,
+    property: keyof T | string,
+  ) => void;
   order: Order;
   orderBy: keyof T;
   rowCount: number;
   headCells: HeadCell<T>[];
+  allowSort?: boolean;
 }
 
 export function EnhancedTableHead<T>(
   props: EnhancedTableProps<T>,
 ): React.ReactElement {
-  const { classes, order, orderBy, headCells, onRequestSort } = props;
+  const {
+    classes,
+    order,
+    orderBy,
+    headCells,
+    onRequestSort,
+    allowSort = true,
+  } = props;
   const createSortHandler = (property: keyof T | string) => (
     event: React.MouseEvent<unknown>,
   ) => {
@@ -77,18 +94,24 @@ export function EnhancedTableHead<T>(
             padding={headCell.disablePadding ? 'none' : 'default'}
             sortDirection={orderBy === headCell.id ? order : false}
           >
-            <TableSortLabelStyled
-              active={orderBy === headCell.id}
-              direction={orderBy === headCell.id ? order : 'asc'}
-              onClick={createSortHandler(headCell.id)}
-            >
-              {headCell.label}
-              {orderBy === headCell.id ? (
-                <span className={classes.visuallyHidden}>
-                  {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
-                </span>
-              ) : null}
-            </TableSortLabelStyled>
+            {allowSort ? (
+              <TableSortLabelStyled
+                active={orderBy === headCell.id}
+                direction={orderBy === headCell.id ? order : 'asc'}
+                onClick={createSortHandler(headCell.id)}
+              >
+                {headCell.label}
+                {orderBy === headCell.id ? (
+                  <span className={classes.visuallyHidden}>
+                    {order === 'desc'
+                      ? 'sorted descending'
+                      : 'sorted ascending'}
+                  </span>
+                ) : null}
+              </TableSortLabelStyled>
+            ) : (
+              <TableRowStyled>{headCell.label}</TableRowStyled>
+            )}
           </TableCell>
         ))}
       </TableRow>
