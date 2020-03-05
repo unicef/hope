@@ -152,7 +152,7 @@ class Command(BaseCommand):
                     registration_data_import_id=data_import,
                 )
                 imported_individuals = ImportedIndividualFactory.create_batch(
-                    4,
+                    imported_household.family_size,
                     household=imported_household,
                     registration_data_import_id=data_import,
                 )
