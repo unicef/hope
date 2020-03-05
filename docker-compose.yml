@@ -44,7 +44,7 @@ services:
     volumes:
       - ./backend:/code/
       - backend-data:/data
-    command: bash -c "python manage.py runserver 0.0.0.0:8000"
+    command: "dev"
     depends_on:
       - db
       - redis
@@ -72,9 +72,11 @@ services:
   db:
     image: mdillon/postgis:9.5-alpine
     volumes:
-       - db:/data/postgres
+      - db:/data/postgres
     env_file:
       - .env
+    ports:
+      - "5433:5432"
 
   cash_assist_datahub_db:
     image: postgres:9.5.15-alpine
