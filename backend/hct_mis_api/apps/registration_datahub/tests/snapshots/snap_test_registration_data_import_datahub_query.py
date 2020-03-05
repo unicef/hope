@@ -13,26 +13,20 @@ snapshots['TestRegistrationDataImportDatahubQuery::test_registration_data_import
             'edges': [
                 {
                     'node': {
-                        'dataSource': 'XLS',
-                        'importedBy': 'Super User',
-                        'name': 'Lorem Ipsum',
-                        'status': 'IN_PROGRESS'
+                        'hctId': '42191234-5a31-11ea-82b4-0242ac130003',
+                        'name': 'Lorem Ipsum'
                     }
                 },
                 {
                     'node': {
-                        'dataSource': 'XLS',
-                        'importedBy': 'Super User',
-                        'name': 'Lorem Ipsum 2',
-                        'status': 'DONE'
+                        'hctId': 'c2abeded-4aa0-422a-bfa2-b18dec20071f',
+                        'name': 'Lorem Ipsum 2'
                     }
                 },
                 {
                     'node': {
-                        'dataSource': 'XLS',
-                        'importedBy': 'Super User',
-                        'name': 'Lorem Ipsum 3',
-                        'status': 'IN_PROGRESS'
+                        'hctId': 'df7e419f-26bd-4a52-8698-0a201447a5f1',
+                        'name': 'Lorem Ipsum 3'
                     }
                 }
             ]
@@ -43,10 +37,8 @@ snapshots['TestRegistrationDataImportDatahubQuery::test_registration_data_import
 snapshots['TestRegistrationDataImportDatahubQuery::test_registration_data_import_datahub_query_single 1'] = {
     'data': {
         'registrationDataImportDatahub': {
-            'dataSource': 'XLS',
-            'importedBy': 'Super User',
-            'name': 'Lorem Ipsum',
-            'status': 'IN_PROGRESS'
+            'hctId': '42191234-5a31-11ea-82b4-0242ac130003',
+            'name': 'Lorem Ipsum'
         }
     }
 }

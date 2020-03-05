@@ -37,17 +37,19 @@ spec:
   selector:
     app: redis
 --- 
-# {{- range $key, $value :=  .Values.databases }}
-# kind: Service
-# apiVersion: v1
-# metadata:
-#   name: {{ $key }}
-#   namespace: {{ $.Values.namespace }}
-# spec:
-#   ports:
-#     - protocol: TCP
-#       port: {{ $value.port }}
-#   selector:
-#     app: {{ $key }}
-# ---
-# {{- end }}
+{{ if .Values.podDB }}
+{{- range $key, $value :=  .Values.databases }}
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ $key }}
+  namespace: {{ $.Values.namespace }}
+spec:
+  ports:
+    - protocol: TCP
+      port: {{ $value.port }}
+  selector:
+    app: {{ $key }}
+---
+{{- end }}
+{{ end }}

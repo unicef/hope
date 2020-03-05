@@ -14,25 +14,19 @@ const TableWrapper = styled.div`
 `;
 
 interface IndividualsListTableProps {
-  ageFilter: { min: number | undefined; max: number | undefined };
-  textFilter?: string;
-  sexFilter?: string;
+  filter
   businessArea?: string;
 }
 
 export const IndividualsListTable = ({
-  ageFilter,
   businessArea,
-  sexFilter,
-  textFilter,
+  filter,
 }: IndividualsListTableProps): React.ReactElement => {
   const initialVariables = {
-    age: JSON.stringify(ageFilter),
+    age: JSON.stringify(filter.age),
     businessArea,
-    sex: [sexFilter],
-    fullNameContains: textFilter,
-    // ageGreater: ageFilter.min,
-    // ageLower: ageFilter.max
+    sex: [filter.sex],
+    fullNameContains: filter.text,
   };
 
   return (
