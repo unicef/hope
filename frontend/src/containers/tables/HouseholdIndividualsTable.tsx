@@ -38,7 +38,7 @@ const headCells: HeadCell<IndividualNode>[] = [
   {
     disablePadding: false,
     label: 'Employment / Education',
-    id: 'sex',
+    id: 'workStatus',
     numeric: false,
   },
   {
@@ -50,7 +50,7 @@ const headCells: HeadCell<IndividualNode>[] = [
   {
     disablePadding: false,
     label: 'Sex',
-    id: 'employment',
+    id: 'sex',
     numeric: false,
   },
 ];
@@ -75,6 +75,19 @@ export function HouseholdIndividualsTable({
   };
 
   const allIndividuals = household.individuals.edges.map((edge) => edge.node);
+
+  if (orderBy) {
+    if (orderDirection === 'asc') {
+      allIndividuals.sort((a, b) => {
+        return a[orderBy] < b[orderBy] ? 1 : -1;
+      });
+    } else {
+      allIndividuals.sort((a, b) => {
+        return a[orderBy] > b[orderBy] ? 1 : -1;
+      });
+    }
+  }
+
   const totalCount = allIndividuals.length;
   return (
     <TableComponent<IndividualNode>
@@ -83,6 +96,7 @@ export function HouseholdIndividualsTable({
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage,
       )}
+      allowSort={false}
       renderRow={(row) => {
         return (
           <ClickableTableRow
