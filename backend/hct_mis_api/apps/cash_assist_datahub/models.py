@@ -35,6 +35,7 @@ class Individual(TimeStampedUUIDModel):
     SEX_CHOICE = (
         ("MALE", _("Male")),
         ("FEMALE", _("Female")),
+        ("OTHER", _("Other")),
     )
 
     household = models.ForeignKey(
