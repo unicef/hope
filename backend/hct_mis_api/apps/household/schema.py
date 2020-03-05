@@ -1,4 +1,5 @@
 import graphene
+from django.db.models import Sum
 from django_filters import (
     FilterSet,
     OrderingFilter,
@@ -43,6 +44,8 @@ class HouseholdFilter(FilterSet):
             "location__title",
             "residence_status",
             "registration_data_import_id__",
+            "total_cash",
+            "registration_date",
         )
     )
 
@@ -78,6 +81,8 @@ class IndividualFilter(FilterSet):
 
 
 class HouseholdNode(DjangoObjectType):
+    total_cash_received = graphene.Decimal()
+
     class Meta:
         model = Household
         filter_fields = []
@@ -102,3 +107,8 @@ class Query(graphene.ObjectType):
     all_individuals = DjangoFilterConnectionField(
         IndividualNode, filterset_class=IndividualFilter,
     )
+
+    def resolve_all_households(self, info, **kwardgs):
+        return Household.objects.annotate(
+            total_cash=Sum("payment_records__entitlement__delivered_quantity")
+        )
