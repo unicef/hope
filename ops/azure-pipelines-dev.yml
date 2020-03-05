@@ -66,6 +66,7 @@ stages:
               install: true
               force: true
               overrideValues: "
+                podDB=true,\
                 backend.staticStorage.secretName=$(staticStorageSecretName),\
                 backend.staticStorage.accountName=$(staticStorageAccountName),\
                 frontend.image=uniappsk8sdevacr.azurecr.io/$(frontendImageRepository):$(Build.BuildId),\
