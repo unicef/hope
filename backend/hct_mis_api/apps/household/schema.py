@@ -18,10 +18,12 @@ from household.models import Household, Individual
 class HouseholdFilter(FilterSet):
     business_area = CharFilter(field_name="location__business_area__slug")
     family_size = IntegerRangeFilter(field_name="family_size")
+    programme = CharFilter(field_name="programs__name")
 
     class Meta:
         model = Household
         fields = {
+            "programme": ["exact", "icontains"],
             "business_area": ["exact", "icontains"],
             "nationality": ["exact", "icontains"],
             "address": ["exact", "icontains"],
@@ -58,10 +60,12 @@ class IndividualFilter(FilterSet):
     sex = ModelMultipleChoiceFilter(
         to_field_name="sex", queryset=Individual.objects.all(),
     )
+    programme = CharFilter(field_name="household__programs__name")
 
     class Meta:
         model = Individual
         fields = {
+            "programme": ["exact", "icontains"],
             "business_area": ["exact"],
             "full_name": ["exact", "icontains"],
             "age": ["range", "lte", "gte"],

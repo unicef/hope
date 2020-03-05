@@ -90,6 +90,7 @@
   * [Iteration 2](project-management/iterations-deliverables/iteration-2.md)
   * [Iteration 3](project-management/iterations-deliverables/iteration-3.md)
   * [Iteration 4](project-management/iterations-deliverables/iteration-4.md)
+* [Sprint Cadence](project-management/sprint-cadence.md)
 * [CO / User testing](project-management/co-user-testing.md)
 * [Definition of Ready/Done](project-management/definition-of-ready-and-done.md)
 
