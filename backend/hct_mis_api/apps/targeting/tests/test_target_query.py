@@ -77,21 +77,21 @@ class TestTargetPopulationQuery(APITestCase):
         cls.user = UserFactory.create()
         cls.last_edited = dt.datetime.utcnow().astimezone()
         cls.households = HouseholdFactory.create_batch(5)
-        # cls.target_filters = TargetFilterFactory.create_batch(3)
+        # cls.target_rules = TargetRuleFactory.create_batch(3)
         targets_to_create = [
             {
                 "name": "target_1",
                 "created_by": cls.user,
                 "last_edited_at": cls.last_edited,
                 "households": cls.households,
-                # "target_filters": cls.target_filters,
+                # "target_rules": cls.target_rules,
             },
             {
                 "name": "target_2",
                 "created_by": cls.user,
                 "last_edited_at": cls.last_edited,
                 "households": cls.households,
-                # "target_filters": cls.target_filters,
+                # "target_rules": cls.target_rules,
             },
         ]
         # populate mock factory model
