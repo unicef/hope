@@ -53,6 +53,9 @@ class Household(TimeStampedUUIDModel):
         related_name="heading_household",
         null=True,
     )
+    programs = models.ManyToManyField(
+        "program.Program", related_name="households", blank=True,
+    )
     registration_date = models.DateField(null=True)
 
     @property

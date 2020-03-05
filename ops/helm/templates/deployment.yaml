@@ -100,7 +100,7 @@ spec:
           image: {{ .Values.redis.image }}
           ports:
             - containerPort: {{ .Values.redis.port }}
-
+{{ if .Values.podDB }}
 {{- range $key, $value :=  .Values.databases }}
 ---
 apiVersion: apps/v1
@@ -126,6 +126,10 @@ spec:
       labels:
         app: {{ $key }}
     spec:
+      volumes:
+      - name: {{ $key }}-data
+        persistentVolumeClaim:
+          claimName: {{ $value.claimName }}
       containers:
         - name: {{ $key }}
           image: {{ $value.image }}
@@ -134,5 +138,10 @@ spec:
           envFrom:
             - secretRef:
                 name: {{ $key }}-secret
+          volumeMounts:
+            - mountPath: "/var/lib/postgresql/data"
+              name: {{ $key }}-data
+              subPath: pgdata
 ---
 {{- end }}
+{{ end }}

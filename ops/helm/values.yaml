@@ -2,6 +2,7 @@ revision: 1
 namespace: staging
 env:
 domain: 
+podDB: false
 
 backend:
   image:
@@ -11,6 +12,7 @@ backend:
   port: 8000
   healthCheckPath: "/api/_health"
   secret:
+    POSTGRES_SSL: 
     SECRET_KEY: ""
     POSTGRES_DB: ""
     POSTGRES_USER: ""
@@ -30,7 +32,6 @@ backend:
     AZURE_CLIENT_ID: ""
     AZURE_CLIENT_SECRET: ""
     AZURE_TENANT_KEY: ""
-    NEW_ENV: ""
   staticStorage:
     secretName: ""
     accountName: ""
@@ -51,6 +52,7 @@ databases:
   postgres-cash-assist-datahub-db:
     image: mdillon/postgis:10-alpine
     port: 5432
+    claimName: pvc-cahubdev-pgdata
     secret:
       POSTGRES_DB: ""
       POSTGRES_USER: ""
@@ -58,6 +60,7 @@ databases:
   backend-db:
     image: mdillon/postgis:10-alpine
     port: 5432
+    claimName: pvc-hctmisdev-pgdata
     secret:
       POSTGRES_DB: ""
       POSTGRES_USER: ""
@@ -65,6 +68,7 @@ databases:
   registration-datahub-db:
     image: mdillon/postgis:10-alpine
     port: 5432
+    claimName: pvc-reghubdev-pgdata
     secret:
       POSTGRES_DB: ""
       POSTGRES_USER: ""
