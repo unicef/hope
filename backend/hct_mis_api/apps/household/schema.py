@@ -112,7 +112,7 @@ class Query(graphene.ObjectType):
         IndividualNode, filterset_class=IndividualFilter,
     )
 
-    def resolve_all_households(self, info, **kwardgs):
+    def resolve_all_households(self, info, **kwargs):
         return Household.objects.annotate(
             total_cash=Sum("payment_records__entitlement__delivered_quantity")
         )
