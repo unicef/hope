@@ -12,7 +12,7 @@ The purpose of this section is to allow HCT users to draw up potential scenarios
 
 In this section we will review the many features of the **Target Population** Tab in detail.
 
-When a user access the Target Population Tab they will be taken to a screen that features three main components:
+When a user accesses the Target Population Tab they will be taken to a screen that features three main components:
 
 * Create New Target Population
 * Search & Filter
