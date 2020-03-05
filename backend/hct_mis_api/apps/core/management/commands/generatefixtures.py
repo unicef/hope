@@ -1,10 +1,8 @@
-import multiprocessing
-import string
+import random
 import time
-from random import choice
 
-import factory.random
-from django.core.management import BaseCommand
+from django.core.management import BaseCommand, call_command
+from django.db import transaction
 
 from account.fixtures import UserFactory
 from core.fixtures import LocationFactory
@@ -14,7 +12,6 @@ from household.fixtures import (
     HouseholdFactory,
     IndividualFactory,
 )
-from household.models import Household
 from payment.fixtures import PaymentRecordFactory
 from program.fixtures import CashPlanFactory, ProgramFactory
 from registration_data.fixtures import RegistrationDataImportFactory
@@ -64,33 +61,43 @@ class Command(BaseCommand):
             "household and cash plan.",
         )
 
+        parser.add_argument(
+            "--noinput",
+            action="store_true",
+            help="Suppresses all user prompts.",
+        )
+
     @staticmethod
-    def _generate_program_with_dependencies(args_tuple):
-        options, seed = args_tuple
-        factory.random.reseed_random(seed)
+    def _generate_program_with_dependencies(options):
         cash_plans_amount = options["cash_plans_amount"]
         payment_record_amount = options["payment_record_amount"]
         business_area = BusinessArea.objects.first()
 
         user = UserFactory()
 
-        program = ProgramFactory(business_area=business_area)
+        locations = LocationFactory.create_batch(
+            3, business_area=business_area,
+        )
+        program = ProgramFactory(
+            business_area=business_area, locations=locations,
+        )
 
         for _ in range(cash_plans_amount):
-            cash_plan = CashPlanFactory(program=program, created_by=user)
-            for _ in range(payment_record_amount):
-                location = LocationFactory(business_area=business_area)
+            cash_plan = CashPlanFactory.build(
+                program=program, created_by=user, target_population=None,
+            )
 
+            for _ in range(payment_record_amount):
                 registration_data_import = RegistrationDataImportFactory(
                     imported_by=user,
                 )
 
                 household = HouseholdFactory(
-                    location=location,
+                    location=random.choice(locations),
                     registration_data_import_id=registration_data_import,
                 )
                 individuals = IndividualFactory.create_batch(
-                    4,
+                    household.family_size,
                     household=household,
                     registration_data_import_id=registration_data_import,
                 )
@@ -103,6 +110,10 @@ class Command(BaseCommand):
                 target_population = TargetPopulationFactory(
                     households=household, created_by=user
                 )
+
+                cash_plan.target_population = target_population
+                cash_plan.save()
+
                 PaymentRecordFactory(
                     cash_plan=cash_plan,
                     household=household,
@@ -110,41 +121,46 @@ class Command(BaseCommand):
                 )
                 EntitlementCardFactory(household=household)
 
+    @transaction.atomic
     def handle(self, *args, **options):
         start_time = time.time()
         programs_amount = options["programs_amount"]
 
-        map_args = [
-            (
-                options,
-                "".join(choice(string.ascii_lowercase) for _ in range(20)),
-            )
-            for _ in range(programs_amount)
-        ]
+        business_areas = BusinessArea.objects.all().count()
+        if not business_areas:
+            if options["noinput"]:
+                call_command("loadbusinessareas")
+            else:
+                self.stdout.write(
+                    self.style.WARNING("BusinessAreas does not exist, ")
+                )
 
-        pool = multiprocessing.Pool(processes=7)
-        pool.map(
-            self._generate_program_with_dependencies, map_args,
-        )
-        pool.close()
-        pool.join()
+                user_input = input("Type 'y' to generate, or 'n' to cancel: ")
 
-        registration_data_import_dth = RegistrationDataImportDatahubFactory()
-        for _ in range(50):
-            imported_household = ImportedHouseholdFactory(
-                registration_data_import_id=registration_data_import_dth,
-            )
-            imported_individuals = ImportedIndividualFactory.create_batch(
-                4,
-                household=imported_household,
-                registration_data_import_id=registration_data_import_dth,
-            )
-            imported_household.head_of_household = imported_individuals[0]
-            imported_household.representative = imported_individuals[0]
-            imported_household.save()
+                if user_input.upper() == "Y" or options["noinput"]:
+                    call_command("loadbusinessareas")
+                else:
+                    self.stdout.write("Generation canceled")
+                    return
 
-        # quick fix for households without payment_records
-        Household.objects.filter(payment_records=None).delete()
+        for _ in range(programs_amount):
+            self._generate_program_with_dependencies(options)
+
+        # Data imports generation
+        data_imports_dth = RegistrationDataImportDatahubFactory.create_batch(5)
+        for data_import in data_imports_dth:
+            for _ in range(50):
+                imported_household = ImportedHouseholdFactory(
+                    registration_data_import_id=data_import,
+                )
+                imported_individuals = ImportedIndividualFactory.create_batch(
+                    imported_household.family_size,
+                    household=imported_household,
+                    registration_data_import_id=data_import,
+                )
+                imported_household.head_of_household = imported_individuals[0]
+                imported_household.representative = imported_individuals[0]
+                imported_household.save()
 
         self.stdout.write(
             f"Generated fixtures in {(time.time() - start_time)} seconds"
