@@ -116,12 +116,12 @@ DATABASES = {
 }
 
 # If app is not specified here it will use default db
-# DATABASE_APPS_MAPPING = {
-#     "cash_assist_datahub": "cash_assist_datahub",
-#     "registration_datahub": "registration_datahub",
-# }
-#
-# DATABASE_ROUTERS = ("core.dbrouters.DbRouter",)
+DATABASE_APPS_MAPPING = {
+    "cash_assist_datahub": "cash_assist_datahub",
+    "registration_datahub": "registration_datahub",
+}
+
+DATABASE_ROUTERS = ("core.dbrouters.DbRouter",)
 
 POSTGRES_SSL_MODE = os.getenv("POSTGRES_SSL_MODE", "off")
 if POSTGRES_SSL_MODE == "on":
