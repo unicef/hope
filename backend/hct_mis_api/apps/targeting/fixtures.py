@@ -1,11 +1,21 @@
 import datetime as dt
+import json
 
 import factory
 from account.fixtures import UserFactory
 from factory import fuzzy
 from household.fixtures import HouseholdFactory
-from targeting.models import TargetFilter
 from targeting.models import TargetPopulation
+from targeting.models import TargetRule
+
+
+class JSONFactory(factory.DictFactory):
+    """A Json factory class to get JSON strings."""
+
+    @classmethod
+    def _generate(cls, create, attrs):
+        obj_dict = super()._generate(create, attrs)
+        return json.dumps(obj_dict)
 
 
 class TargetPopulationFactory(factory.DjangoModelFactory):
@@ -18,6 +28,8 @@ class TargetPopulationFactory(factory.DjangoModelFactory):
     status = factory.fuzzy.FuzzyChoice(
         TargetPopulation.STATE_CHOICES, getter=lambda x: x[0],
     )
+    total_households = factory.LazyAttribute(lambda: 10)
+    total_family_size = factory.LazyAttribute(lambda: 20)
 
     @factory.post_generation
     def households(self, create, extracted, **kwargs):
@@ -29,18 +41,20 @@ class TargetPopulationFactory(factory.DjangoModelFactory):
                 self.households.add(household)
 
 
-class TargetFilterFactory(factory.DjangoModelFactory):
+class TargetRuleFactory(factory.DjangoModelFactory):
     class Meta:
-        model = TargetFilter
+        model = TargetRule
 
-    intake_group = factory.LazyAttribute(lambda: "sentence")
-    sex = factory.fuzzy.FuzzyChoice(
-        TargetFilter.GENDER_CHOICES, getter=lambda x: x[0],
+    flex_rules = factory.Dict(
+        {"age_min": 1, "age_max": 25,}, dict_factory=JSONFactory
     )
-    age_min = factory.LazyAttribute(lambda: 1)
-    age_max = factory.LazyAttribute(lambda: 200)
-    school_distance_min = factory.LazyAttribute(lambda: 1)
-    school_distance_max = factory.LazyAttribute(lambda: 20)
-    num_individuals_min = factory.LazyAttribute(lambda: 1)
-    num_individuals_max = factory.LazyAttribute(lambda: 50)
+    core_rules = factory.Dict(
+        {
+            "intake_group": "registration import name",
+            "sex": "Male",
+            "num_individuals_min": 1,
+            "num_individuals_max": 5,
+        },
+        dict_factory=JSONFactory,
+    )
     target_population = factory.SubFactory(TargetPopulationFactory)
