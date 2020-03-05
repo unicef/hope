@@ -40,12 +40,11 @@ export function HouseHoldTableRow({ household }: HouseHoldTableRowProps) {
       <TableCell align='left'>{household.residenceStatus}</TableCell>
       <TableCell align='right'>
         {formatCurrency(
-          household.paymentRecords.edges[0].node.cashPlan
-            .totalDeliveredQuantity,
+          household.totalCashReceived
         )}
       </TableCell>
       <TableCell align='right'>
-        <Moment format='MM/DD/YYYY'>{household.createdAt}</Moment>
+        <Moment format='MM/DD/YYYY'>{household.registrationDate}</Moment>
       </TableCell>
     </ClickableTableRow>
   );

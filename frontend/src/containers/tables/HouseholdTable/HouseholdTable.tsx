@@ -15,7 +15,7 @@ const TableWrapper = styled.div`
 
 interface HouseholdTableProps {
   businessArea: string;
-  filter
+  filter;
 }
 
 export const HouseholdTable = ({
@@ -27,6 +27,9 @@ export const HouseholdTable = ({
     familySize: JSON.stringify(filter.householdSize),
     headOfHouseholdFullNameIcontains: filter.text,
   };
+  if (filter.program) {
+    initialVariables.programs = [filter.program];
+  }
 
   return (
     <TableWrapper>

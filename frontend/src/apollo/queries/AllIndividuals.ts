@@ -27,6 +27,7 @@ export const AllIndividuals = gql`
         endCursor
       }
       edges {
+        cursor
         node {
           id
           createdAt

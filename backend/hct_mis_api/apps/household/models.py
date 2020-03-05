@@ -6,6 +6,7 @@ from django.core.validators import (
     MaxLengthValidator,
 )
 from django.db import models
+from django.db.models import Sum
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 from phonenumber_field.modelfields import PhoneNumberField
@@ -55,6 +56,15 @@ class Household(TimeStampedUUIDModel):
     programs = models.ManyToManyField(
         "program.Program", related_name="households", blank=True,
     )
+    registration_date = models.DateField(null=True)
+
+    @property
+    def total_cash_received(self):
+        return (
+            self.payment_records.filter()
+            .aggregate(Sum("entitlement__delivered_quantity"))
+            .get("entitlement__delivered_quantity__sum")
+        )
 
     def __str__(self):
         return f"Household CashAssist ID: {self.household_ca_id}"
