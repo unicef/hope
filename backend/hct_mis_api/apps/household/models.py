@@ -52,6 +52,9 @@ class Household(TimeStampedUUIDModel):
         related_name="heading_household",
         null=True,
     )
+    programs = models.ManyToManyField(
+        "program.Program", related_name="households", blank=True,
+    )
 
     def __str__(self):
         return f"Household CashAssist ID: {self.household_ca_id}"
