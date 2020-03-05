@@ -141,6 +141,7 @@ spec:
           volumeMounts:
             - mountPath: "/var/lib/postgresql/data"
               name: {{ $key }}-data
+              subPath: pgdata
 ---
 {{- end }}
 {{ end }}
