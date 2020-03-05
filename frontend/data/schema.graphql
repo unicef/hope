@@ -381,6 +381,7 @@ type HouseholdNode implements Node {
   representative: IndividualNode
   registrationDataImportId: RegistrationDataImportNode!
   headOfHousehold: IndividualNode
+  programs(before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
   registrationDate: Date
   individuals(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
@@ -1312,6 +1313,7 @@ type ProgramNode implements Node {
   cashPlus: Boolean!
   populationGoal: Int!
   administrativeAreasOfImplementation: String!
+  households(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   cashPlans(before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
   totalEntitledQuantity: Decimal
   totalDeliveredQuantity: Decimal
@@ -1377,9 +1379,9 @@ type Query {
   targetPopulation(id: ID!): TargetPopulationNode
   allTargetPopulation(before: String, after: String, first: Int, last: Int): TargetPopulationNodeConnection
   household(id: ID!): HouseholdNode
-  allHouseholds(before: String, after: String, first: Int, last: Int, businessArea: String, nationality: String, nationality_Icontains: String, address: String, address_Icontains: String, representative_FullName: String, representative_FullName_Icontains: String, headOfHousehold_FullName: String, headOfHousehold_FullName_Icontains: String, householdCaId: String, familySize_Range: Int, familySize_Lte: Int, familySize_Gte: Int, targetPopulations: [ID], registrationDate: Date, familySize: String, orderBy: String): HouseholdNodeConnection
+  allHouseholds(before: String, after: String, first: Int, last: Int, programme: String, businessArea: String, nationality: String, nationality_Icontains: String, address: String, address_Icontains: String, representative_FullName: String, representative_FullName_Icontains: String, headOfHousehold_FullName: String, headOfHousehold_FullName_Icontains: String, householdCaId: String, familySize_Range: Int, familySize_Lte: Int, familySize_Gte: Int, targetPopulations: [ID], familySize: String, orderBy: String): HouseholdNodeConnection
   individual(id: ID!): IndividualNode
-  allIndividuals(before: String, after: String, first: Int, last: Int, businessArea: String, fullName: String, fullName_Icontains: String, sex: [ID], age: String, orderBy: String): IndividualNodeConnection
+  allIndividuals(before: String, after: String, first: Int, last: Int, programme: String, businessArea: String, fullName: String, fullName_Icontains: String, sex: [ID], age: String, orderBy: String): IndividualNodeConnection
   me: UserObjectType
   allUsers(before: String, after: String, first: Int, last: Int, fullName: String, orderBy: String): UserNodeConnection
   importedHousehold(id: ID!): ImportedHouseholdNode

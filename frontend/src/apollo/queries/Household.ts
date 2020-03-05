@@ -7,6 +7,10 @@ export const HOUSEHOLD_QUERY = gql`
       createdAt
       familySize
       nationality
+      headOfHousehold {
+        id
+        fullName
+      }
       individuals {
         totalCount
         edges {
