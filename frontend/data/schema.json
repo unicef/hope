@@ -817,16 +817,6 @@
                 "defaultValue": null
               },
               {
-                "name": "programme",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
                 "name": "businessArea",
                 "description": null,
                 "type": {
@@ -958,6 +948,20 @@
               },
               {
                 "name": "targetPopulations",
+                "description": null,
+                "type": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "ID",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "programs",
                 "description": null,
                 "type": {
                   "kind": "LIST",
