@@ -73,31 +73,20 @@ export function HouseholdDetails({
           </Grid>
           <Grid item xs={4}>
             <LabelizedField label='Head of Household'>
-              <div>
-                {paymentRecords.edges.length
-                  ? paymentRecords.edges[0].node.headOfHousehold
-                  : ''}
-              </div>
+              <div>{houseHold.headOfHousehold.fullName}</div>
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>
             <LabelizedField label='Total Cash Received'>
-              <div>
-                {paymentRecords.edges.length
-                  ? formatCurrency(
-                      paymentRecords.edges[0].node.cashPlan
-                        .totalDeliveredQuantity,
-                    )
-                  : ''}
-              </div>
+              <div>{formatCurrency(houseHold.totalCashReceived)}</div>
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>
             <LabelizedField label='Programme(s)'>
               <div>
-                {paymentRecords.edges.length
-                  ? paymentRecords.edges[0].node.cashPlan.program.name
-                  : ''}
+                {houseHold.programs.edges.map((item) => (
+                  <div>{item.node.name}</div>
+                ))}
               </div>
             </LabelizedField>
           </Grid>

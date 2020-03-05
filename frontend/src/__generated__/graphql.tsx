@@ -452,9 +452,21 @@ export type HouseholdNode = Node & {
   representative?: Maybe<IndividualNode>,
   registrationDataImportId: RegistrationDataImportNode,
   headOfHousehold?: Maybe<IndividualNode>,
+  programs: ProgramNodeConnection,
+  registrationDate?: Maybe<Scalars['Date']>,
   individuals: IndividualNodeConnection,
   paymentRecords: PaymentRecordNodeConnection,
   targetPopulations: TargetPopulationNodeConnection,
+  totalCashReceived?: Maybe<Scalars['Decimal']>,
+};
+
+
+export type HouseholdNodeProgramsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>
 };
 
 
@@ -1539,6 +1551,7 @@ export type ProgramNode = Node & {
   cashPlus: Scalars['Boolean'],
   populationGoal: Scalars['Int'],
   administrativeAreasOfImplementation: Scalars['String'],
+  households: HouseholdNodeConnection,
   cashPlans: CashPlanNodeConnection,
   totalEntitledQuantity?: Maybe<Scalars['Decimal']>,
   totalDeliveredQuantity?: Maybe<Scalars['Decimal']>,
@@ -1554,6 +1567,14 @@ export type ProgramNodeLocationsArgs = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   title?: Maybe<Scalars['String']>
+};
+
+
+export type ProgramNodeHouseholdsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -1765,6 +1786,8 @@ export type QueryAllHouseholdsArgs = {
   familySize_Range?: Maybe<Scalars['Int']>,
   familySize_Lte?: Maybe<Scalars['Int']>,
   familySize_Gte?: Maybe<Scalars['Int']>,
+  targetPopulations?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  programs?: Maybe<Array<Maybe<Scalars['ID']>>>,
   familySize?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
@@ -1780,6 +1803,7 @@ export type QueryAllIndividualsArgs = {
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
+  programme?: Maybe<Scalars['String']>,
   businessArea?: Maybe<Scalars['String']>,
   fullName?: Maybe<Scalars['String']>,
   fullName_Icontains?: Maybe<Scalars['String']>,
@@ -2327,6 +2351,7 @@ export type AllHouseholdsQueryVariables = {
   businessArea?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>,
   familySize?: Maybe<Scalars['String']>,
+  programs?: Maybe<Array<Maybe<Scalars['ID']>>>,
   headOfHouseholdFullNameIcontains?: Maybe<Scalars['String']>
 };
 
@@ -2344,7 +2369,7 @@ export type AllHouseholdsQuery = (
       & Pick<HouseholdNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'HouseholdNode' }
-        & Pick<HouseholdNode, 'id' | 'createdAt' | 'householdCaId' | 'residenceStatus' | 'familySize'>
+        & Pick<HouseholdNode, 'id' | 'createdAt' | 'householdCaId' | 'residenceStatus' | 'familySize' | 'totalCashReceived' | 'registrationDate'>
         & { headOfHousehold: Maybe<(
           { __typename?: 'IndividualNode' }
           & Pick<IndividualNode, 'id' | 'fullName'>
@@ -2354,23 +2379,6 @@ export type AllHouseholdsQuery = (
         ), individuals: (
           { __typename?: 'IndividualNodeConnection' }
           & Pick<IndividualNodeConnection, 'totalCount'>
-        ), paymentRecords: (
-          { __typename?: 'PaymentRecordNodeConnection' }
-          & { edges: Array<Maybe<(
-            { __typename?: 'PaymentRecordNodeEdge' }
-            & { node: Maybe<(
-              { __typename?: 'PaymentRecordNode' }
-              & Pick<PaymentRecordNode, 'id' | 'headOfHousehold'>
-              & { cashPlan: (
-                { __typename?: 'CashPlanNode' }
-                & Pick<CashPlanNode, 'id' | 'totalDeliveredQuantity'>
-                & { program: (
-                  { __typename?: 'ProgramNode' }
-                  & Pick<ProgramNode, 'id' | 'name'>
-                ) }
-              ) }
-            )> }
-          )>> }
         ) }
       )> }
     )>> }
@@ -2399,6 +2407,7 @@ export type AllIndividualsQuery = (
       & Pick<PageInfo, 'startCursor' | 'endCursor'>
     ), edges: Array<Maybe<(
       { __typename?: 'IndividualNodeEdge' }
+      & Pick<IndividualNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'IndividualNode' }
         & Pick<IndividualNode, 'id' | 'createdAt' | 'updatedAt' | 'individualCaId' | 'fullName' | 'sex' | 'dob' | 'nationality' | 'martialStatus' | 'phoneNumber' | 'identificationType' | 'identificationNumber'>
@@ -2594,8 +2603,11 @@ export type HouseholdQuery = (
   { __typename?: 'Query' }
   & { household: Maybe<(
     { __typename?: 'HouseholdNode' }
-    & Pick<HouseholdNode, 'id' | 'createdAt' | 'familySize' | 'nationality' | 'residenceStatus'>
-    & { individuals: (
+    & Pick<HouseholdNode, 'id' | 'createdAt' | 'familySize' | 'nationality' | 'totalCashReceived' | 'residenceStatus'>
+    & { headOfHousehold: Maybe<(
+      { __typename?: 'IndividualNode' }
+      & Pick<IndividualNode, 'id' | 'fullName'>
+    )>, individuals: (
       { __typename?: 'IndividualNodeConnection' }
       & Pick<IndividualNodeConnection, 'totalCount'>
       & { edges: Array<Maybe<(
@@ -2622,6 +2634,15 @@ export type HouseholdQuery = (
     ), location: (
       { __typename?: 'LocationNode' }
       & Pick<LocationNode, 'id' | 'title'>
+    ), programs: (
+      { __typename?: 'ProgramNodeConnection' }
+      & { edges: Array<Maybe<(
+        { __typename?: 'ProgramNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'ProgramNode' }
+          & Pick<ProgramNode, 'name'>
+        )> }
+      )>> }
     ), paymentRecords: (
       { __typename?: 'PaymentRecordNodeConnection' }
       & { edges: Array<Maybe<(
@@ -3081,8 +3102,8 @@ export type AllCashPlansQueryHookResult = ReturnType<typeof useAllCashPlansQuery
 export type AllCashPlansLazyQueryHookResult = ReturnType<typeof useAllCashPlansLazyQuery>;
 export type AllCashPlansQueryResult = ApolloReactCommon.QueryResult<AllCashPlansQuery, AllCashPlansQueryVariables>;
 export const AllHouseholdsDocument = gql`
-    query AllHouseholds($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $headOfHouseholdFullNameIcontains: String) {
-  allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, familySize: $familySize, orderBy: $orderBy, headOfHousehold_FullName_Icontains: $headOfHouseholdFullNameIcontains) {
+    query AllHouseholds($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $programs: [ID], $headOfHouseholdFullNameIcontains: String) {
+  allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, familySize: $familySize, orderBy: $orderBy, programs: $programs, headOfHousehold_FullName_Icontains: $headOfHouseholdFullNameIcontains) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -3098,6 +3119,8 @@ export const AllHouseholdsDocument = gql`
         householdCaId
         residenceStatus
         familySize
+        totalCashReceived
+        registrationDate
         headOfHousehold {
           id
           fullName
@@ -3108,22 +3131,6 @@ export const AllHouseholdsDocument = gql`
         }
         individuals {
           totalCount
-        }
-        paymentRecords {
-          edges {
-            node {
-              id
-              headOfHousehold
-              cashPlan {
-                id
-                program {
-                  id
-                  name
-                }
-                totalDeliveredQuantity
-              }
-            }
-          }
         }
       }
     }
@@ -3167,6 +3174,7 @@ export function withAllHouseholds<TProps, TChildProps = {}>(operationOptions?: A
  *      businessArea: // value for 'businessArea'
  *      orderBy: // value for 'orderBy'
  *      familySize: // value for 'familySize'
+ *      programs: // value for 'programs'
  *      headOfHouseholdFullNameIcontains: // value for 'headOfHouseholdFullNameIcontains'
  *   },
  * });
@@ -3189,6 +3197,7 @@ export const AllIndividualsDocument = gql`
       endCursor
     }
     edges {
+      cursor
       node {
         id
         createdAt
@@ -3720,6 +3729,11 @@ export const HouseholdDocument = gql`
     createdAt
     familySize
     nationality
+    totalCashReceived
+    headOfHousehold {
+      id
+      fullName
+    }
     individuals {
       totalCount
       edges {
@@ -3750,6 +3764,13 @@ export const HouseholdDocument = gql`
       title
     }
     residenceStatus
+    programs {
+      edges {
+        node {
+          name
+        }
+      }
+    }
     paymentRecords {
       edges {
         node {
@@ -4337,14 +4358,14 @@ export type ResolversTypes = {
   IndividualEnrolledInSchool: IndividualEnrolledInSchool,
   IndividualEnrolledInNutritionProgramme: IndividualEnrolledInNutritionProgramme,
   IndividualAdministrationOfRutf: IndividualAdministrationOfRutf,
-  PaymentRecordNodeConnection: ResolverTypeWrapper<PaymentRecordNodeConnection>,
-  PaymentRecordNodeEdge: ResolverTypeWrapper<PaymentRecordNodeEdge>,
-  RegistrationDataImportNodeConnection: ResolverTypeWrapper<RegistrationDataImportNodeConnection>,
-  RegistrationDataImportNodeEdge: ResolverTypeWrapper<RegistrationDataImportNodeEdge>,
   ProgramNodeConnection: ResolverTypeWrapper<ProgramNodeConnection>,
   ProgramNodeEdge: ResolverTypeWrapper<ProgramNodeEdge>,
-  Float: ResolverTypeWrapper<Scalars['Float']>,
+  PaymentRecordNodeConnection: ResolverTypeWrapper<PaymentRecordNodeConnection>,
+  PaymentRecordNodeEdge: ResolverTypeWrapper<PaymentRecordNodeEdge>,
   Decimal: ResolverTypeWrapper<Scalars['Decimal']>,
+  RegistrationDataImportNodeConnection: ResolverTypeWrapper<RegistrationDataImportNodeConnection>,
+  RegistrationDataImportNodeEdge: ResolverTypeWrapper<RegistrationDataImportNodeEdge>,
+  Float: ResolverTypeWrapper<Scalars['Float']>,
   ProgramFrequencyOfPayments: ProgramFrequencyOfPayments,
   ProgramSector: ProgramSector,
   ProgramScope: ProgramScope,
@@ -4454,14 +4475,14 @@ export type ResolversParentTypes = {
   IndividualEnrolledInSchool: IndividualEnrolledInSchool,
   IndividualEnrolledInNutritionProgramme: IndividualEnrolledInNutritionProgramme,
   IndividualAdministrationOfRutf: IndividualAdministrationOfRutf,
-  PaymentRecordNodeConnection: PaymentRecordNodeConnection,
-  PaymentRecordNodeEdge: PaymentRecordNodeEdge,
-  RegistrationDataImportNodeConnection: RegistrationDataImportNodeConnection,
-  RegistrationDataImportNodeEdge: RegistrationDataImportNodeEdge,
   ProgramNodeConnection: ProgramNodeConnection,
   ProgramNodeEdge: ProgramNodeEdge,
-  Float: Scalars['Float'],
+  PaymentRecordNodeConnection: PaymentRecordNodeConnection,
+  PaymentRecordNodeEdge: PaymentRecordNodeEdge,
   Decimal: Scalars['Decimal'],
+  RegistrationDataImportNodeConnection: RegistrationDataImportNodeConnection,
+  RegistrationDataImportNodeEdge: RegistrationDataImportNodeEdge,
+  Float: Scalars['Float'],
   ProgramFrequencyOfPayments: ProgramFrequencyOfPayments,
   ProgramSector: ProgramSector,
   ProgramScope: ProgramScope,
@@ -4673,9 +4694,12 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   representative?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
   registrationDataImportId?: Resolver<ResolversTypes['RegistrationDataImportNode'], ParentType, ContextType>,
   headOfHousehold?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
+  programs?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, HouseholdNodeProgramsArgs>,
+  registrationDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, HouseholdNodeIndividualsArgs>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, HouseholdNodePaymentRecordsArgs>,
   targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, HouseholdNodeTargetPopulationsArgs>,
+  totalCashReceived?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
 };
 
 export type HouseholdNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['HouseholdNodeConnection'] = ResolversParentTypes['HouseholdNodeConnection']> = {
@@ -4956,6 +4980,7 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   cashPlus?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   populationGoal?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   administrativeAreasOfImplementation?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, ProgramNodeHouseholdsArgs>,
   cashPlans?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, ProgramNodeCashPlansArgs>,
   totalEntitledQuantity?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
   totalDeliveredQuantity?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
