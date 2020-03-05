@@ -8,7 +8,7 @@ description: These mutations and queries support the core functionality within H
 
 ### Registration Data Import
 
-* Validate import XLSX file \(is this a query?!\)
+* Validate and Create only with XLS file attached
 * Create import \(via XLSX or Kobo project\)
   * Will have to trigger, probably via REST an async job.
 * Approve Registration Import \(pending -&gt; approved\)
@@ -43,8 +43,6 @@ description: These mutations and queries support the core functionality within H
 ### Registration Data Import
 
 * List of Imports \(paginated, filtered, sortable\)
-* Validate import XLSX file
-  * is this a mutation? Its just a validation check as part of import creation process.
 * Import details \(nested households, individuals\)
 
 ### Population
