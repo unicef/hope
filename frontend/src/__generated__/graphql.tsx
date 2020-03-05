@@ -1773,7 +1773,6 @@ export type QueryAllHouseholdsArgs = {
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  programme?: Maybe<Scalars['String']>,
   businessArea?: Maybe<Scalars['String']>,
   nationality?: Maybe<Scalars['String']>,
   nationality_Icontains?: Maybe<Scalars['String']>,
@@ -1788,6 +1787,7 @@ export type QueryAllHouseholdsArgs = {
   familySize_Lte?: Maybe<Scalars['Int']>,
   familySize_Gte?: Maybe<Scalars['Int']>,
   targetPopulations?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  programs?: Maybe<Array<Maybe<Scalars['ID']>>>,
   familySize?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
@@ -2351,6 +2351,7 @@ export type AllHouseholdsQueryVariables = {
   businessArea?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>,
   familySize?: Maybe<Scalars['String']>,
+  programs?: Maybe<Array<Maybe<Scalars['ID']>>>,
   headOfHouseholdFullNameIcontains?: Maybe<Scalars['String']>
 };
 
@@ -2602,7 +2603,7 @@ export type HouseholdQuery = (
   { __typename?: 'Query' }
   & { household: Maybe<(
     { __typename?: 'HouseholdNode' }
-    & Pick<HouseholdNode, 'id' | 'createdAt' | 'familySize' | 'nationality' | 'residenceStatus'>
+    & Pick<HouseholdNode, 'id' | 'createdAt' | 'familySize' | 'nationality' | 'totalCashReceived' | 'residenceStatus'>
     & { headOfHousehold: Maybe<(
       { __typename?: 'IndividualNode' }
       & Pick<IndividualNode, 'id' | 'fullName'>
@@ -2633,6 +2634,15 @@ export type HouseholdQuery = (
     ), location: (
       { __typename?: 'LocationNode' }
       & Pick<LocationNode, 'id' | 'title'>
+    ), programs: (
+      { __typename?: 'ProgramNodeConnection' }
+      & { edges: Array<Maybe<(
+        { __typename?: 'ProgramNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'ProgramNode' }
+          & Pick<ProgramNode, 'name'>
+        )> }
+      )>> }
     ), paymentRecords: (
       { __typename?: 'PaymentRecordNodeConnection' }
       & { edges: Array<Maybe<(
@@ -3092,8 +3102,8 @@ export type AllCashPlansQueryHookResult = ReturnType<typeof useAllCashPlansQuery
 export type AllCashPlansLazyQueryHookResult = ReturnType<typeof useAllCashPlansLazyQuery>;
 export type AllCashPlansQueryResult = ApolloReactCommon.QueryResult<AllCashPlansQuery, AllCashPlansQueryVariables>;
 export const AllHouseholdsDocument = gql`
-    query AllHouseholds($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $headOfHouseholdFullNameIcontains: String) {
-  allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, familySize: $familySize, orderBy: $orderBy, headOfHousehold_FullName_Icontains: $headOfHouseholdFullNameIcontains) {
+    query AllHouseholds($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $programs: [ID], $headOfHouseholdFullNameIcontains: String) {
+  allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, familySize: $familySize, orderBy: $orderBy, programs: $programs, headOfHousehold_FullName_Icontains: $headOfHouseholdFullNameIcontains) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -3164,6 +3174,7 @@ export function withAllHouseholds<TProps, TChildProps = {}>(operationOptions?: A
  *      businessArea: // value for 'businessArea'
  *      orderBy: // value for 'orderBy'
  *      familySize: // value for 'familySize'
+ *      programs: // value for 'programs'
  *      headOfHouseholdFullNameIcontains: // value for 'headOfHouseholdFullNameIcontains'
  *   },
  * });
@@ -3718,6 +3729,7 @@ export const HouseholdDocument = gql`
     createdAt
     familySize
     nationality
+    totalCashReceived
     headOfHousehold {
       id
       fullName
@@ -3752,6 +3764,13 @@ export const HouseholdDocument = gql`
       title
     }
     residenceStatus
+    programs {
+      edges {
+        node {
+          name
+        }
+      }
+    }
     paymentRecords {
       edges {
         node {

@@ -9,6 +9,7 @@ export const AllHouseholds = gql`
     $businessArea: String
     $orderBy: String
     $familySize: String
+    $programs: [ID]
     $headOfHouseholdFullNameIcontains: String
   ) {
     allHouseholds(
@@ -19,6 +20,7 @@ export const AllHouseholds = gql`
       businessArea: $businessArea
       familySize: $familySize
       orderBy: $orderBy
+      programs: $programs
       headOfHousehold_FullName_Icontains: $headOfHouseholdFullNameIcontains
     ) {
       pageInfo {
