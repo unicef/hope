@@ -35,13 +35,13 @@ export const headCells: HeadCell<HouseholdNode>[] = [
   {
     disablePadding: false,
     label: 'Total Cash Received',
-    id: 'paymentRecords',
+    id: 'totalCash',
     numeric: true,
   },
   {
     disablePadding: false,
     label: 'Registration Date',
-    id: 'createdAt',
+    id: 'registrationDate',
     numeric: true,
   },
 ];

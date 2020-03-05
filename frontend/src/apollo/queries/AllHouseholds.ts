@@ -36,6 +36,8 @@ export const AllHouseholds = gql`
           householdCaId
           residenceStatus
           familySize
+          totalCashReceived
+          registrationDate
           headOfHousehold {
             id
             fullName
@@ -46,22 +48,6 @@ export const AllHouseholds = gql`
           }
           individuals {
             totalCount
-          }
-          paymentRecords {
-            edges {
-              node {
-                id
-                headOfHousehold
-                cashPlan {
-                  id
-                  program {
-                    id
-                    name
-                  }
-                  totalDeliveredQuantity
-                }
-              }
-            }
           }
         }
       }
