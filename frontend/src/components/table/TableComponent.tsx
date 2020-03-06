@@ -57,6 +57,7 @@ interface TableComponentProps<T> {
   order: Order;
   title: string;
   loading?: boolean;
+  allowSort?: boolean;
 }
 
 export function TableComponent<T>({
@@ -74,6 +75,7 @@ export function TableComponent<T>({
   order,
   orderBy,
   loading,
+  allowSort,
 }: TableComponentProps<T>): React.ReactElement {
   const classes = useStyles({});
 
@@ -122,6 +124,7 @@ export function TableComponent<T>({
               orderBy={orderBy}
               onRequestSort={handleRequestSort}
               rowCount={itemsCount}
+              allowSort={allowSort}
             />
             <TableBody>{body}</TableBody>
           </Table>
