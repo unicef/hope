@@ -1,0 +1,107 @@
+name: HCT-MIS Staging
+trigger:
+  batch: true
+  branches:
+    include:
+    - staging
+  paths:
+    exclude:
+    -  docs/*
+
+resources:
+  - repo: self
+
+variables:
+  frontendDockerFilePath: "**/frontend/Dockerfile"
+  backendDockerFilePath: "**/backend/Dockerfile"
+  kubernetesServiceConnection: 'ICTD-HCT-MIS-Demo-uni-apps-K8s-dev-hct-ims-dev-1574767480012'
+  backendImageRepository: "hct-mis-backend"
+  frontendImageRepository: "hct-mis-frontend"
+  containerRegistry: "uniappsk8sdevacr"
+
+stages:
+  - stage: Build
+    displayName: Build and push images
+    jobs:
+      - job: Build
+        displayName: Build
+        steps:
+          - task: Docker@2
+            displayName: Build and push backend image
+            inputs:
+              command: buildAndPush
+              dockerfile: $(backendDockerFilePath)
+              repository: $(backendImageRepository)
+              containerRegistry: $(containerRegistry)
+              tags: |
+                $(Build.BuildId)
+
+          - task: Docker@2
+            displayName: Build and push frontend image
+            inputs:
+              command: buildAndPush
+              dockerfile: $(frontendDockerFilePath)
+              imageName: frontend
+              repository: $(frontendImageRepository)
+              containerRegistry: $(containerRegistry)
+              tags: |
+                $(Build.BuildId)
+
+  - stage: Deploy
+    displayName: Deploy app to K8S cluster.
+    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+    jobs:
+      - job: Deploy
+        displayName: Deploy helm chart
+        steps:
+          - task: HelmDeploy@0
+            displayName: Deploy Helm chart
+            inputs:
+              connectionType: 'Kubernetes Service Connection'
+              kubernetesServiceConnection: 'ICTD-HCT-MIS-Demo-uni-apps-K8s-dev-hct-ims-dev-1574767480012'
+              namespace: 'hct-ims-staging'
+              command: 'upgrade'
+              chartType: 'FilePath'
+              chartPath: '**/ops/helm'
+              releaseName: 'hct-mis-staging'
+              install: true
+              force: true
+              overrideValues: "
+                backend.staticStorage.secretName=$(staticStorageSecretName),\
+                backend.staticStorage.accountName=$(staticStorageAccountName),\
+                frontend.image=uniappsk8sdevacr.azurecr.io/$(frontendImageRepository):$(Build.BuildId),\
+                namespace=hct-ims-staging,\
+                env=STAGING,\
+                domain=$(DOMAIN),\
+                backend.secret.env=STAGING,\
+                revision=\"$(Build.BuildId)\",\
+                backend.image=uniappsk8sdevacr.azurecr.io/$(backendImageRepository):$(Build.BuildId),\
+                backend.secret.SECRET_KEY=$(SECRET_KEY),\
+                backend.secret.POSTGRES_SSL=true,\
+                backend.secret.ENV=$(ENV),\
+                backend.secret.POSTGRES_DB=$(POSTGRES_DB),\
+                backend.secret.POSTGRES_USER=$(POSTGRES_USER),\
+                backend.secret.POSTGRES_PASSWORD=$(POSTGRES_PASSWORD),\
+                backend.secret.POSTGRES_HOST=$(POSTGRES_HOST),\
+                backend.secret.DJANGO_ALLOWED_HOST=$(DJANGO_ALLOWED_HOST),\
+                backend.secret.DOMAIN=$(DOMAIN),\
+                backend.secret.AZURE_CLIENT_ID=$(AZURE_CLIENT_ID),\
+                backend.secret.AZURE_CLIENT_SECRET=$(AZURE_CLIENT_SECRET),\
+                backend.secret.AZURE_TENANT_KEY=$(AZURE_TENANT_KEY),\
+                backend.secret.POSTGRES_REGISTRATION_DATAHUB_DB=$(REGISTRATION_DATAHUB_POSTGRES_DB),\
+                backend.secret.POSTGRES_REGISTRATION_DATAHUB_USER=$(REGISTRATION_DATAHUB_POSTGRES_USER),\
+                backend.secret.POSTGRES_REGISTRATION_DATAHUB_PASSWORD=$(REGISTRATION_DATAHUB_POSTGRES_PASSWORD),\
+                backend.secret.POSTGRES_REGISTRATION_DATAHUB_HOST=$(REGISTRATION_DATAHUB_POSTGRES_HOST),\
+                backend.secret.POSTGRES_CASHASSIST_DATAHUB_DB=$(CASH_ASSIST_DATAHUB_POSTGRES_DB),\
+                backend.secret.POSTGRES_CASHASSIST_DATAHUB_USER=$(CASH_ASSIST_REGISTRATION_DATAHUB_POSTGRES_USER),\
+                backend.secret.POSTGRES_CASHASSIST_DATAHUB_PASSWORD=$(CASH_ASSIST_REGISTRATION_DATAHUB_POSTGRES_PASSWORD),\
+                backend.secret.POSTGRES_CASHASSIST_DATAHUB_HOST=$(CASH_ASSIST_REGISTRATION_DATAHUB_POSTGRES_HOST),\
+                databases.backend-db.secret.POSTGRES_DB=$(POSTGRES_DB),\
+                databases.backend-db.secret.POSTGRES_USER=$(POSTGRES_USER),\
+                databases.backend-db.secret.POSTGRES_PASSWORD=$(POSTGRES_PASSWORD),\
+                databases.registration-datahub-db.secret.POSTGRES_DB=$(REGISTRATION_DATAHUB_POSTGRES_DB),\
+                databases.registration-datahub-db.secret.POSTGRES_USER=$(REGISTRATION_DATAHUB_POSTGRES_USER),\
+                databases.registration-datahub-db.secret.POSTGRES_PASSWORD=$(REGISTRATION_DATAHUB_POSTGRES_PASSWORD),\
+                databases.postgres-cash-assist-datahub-db.secret.POSTGRES_DB=$(CASH_ASSIST_DATAHUB_POSTGRES_DB),\
+                databases.postgres-cash-assist-datahub-db.secret.POSTGRES_USER=$(CASH_ASSIST_REGISTRATION_DATAHUB_POSTGRES_USER),\
+                databases.postgres-cash-assist-datahub-db.secret.POSTGRES_PASSWORD=$(CASH_ASSIST_REGISTRATION_DATAHUB_POSTGRES_PASSWORD),"

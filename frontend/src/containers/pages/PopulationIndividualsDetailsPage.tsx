@@ -12,6 +12,7 @@ import {
 import { IndividualContactDetails } from '../../components/population/IndividualContactDetails';
 import { IndividualVulnerabilities } from '../../components/population/IndividualVunerabilities';
 import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
+import { decodeIdString } from '../../utils/utils';
 
 const Container = styled.div`
   padding: 20px;
@@ -44,7 +45,7 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
   return (
     <div>
       <PageHeader
-        title={`Individual ID: ${id}`}
+        title={`Individual ID: ${decodeIdString(id)}`}
         breadCrumbs={breadCrumbsItems}
       />
       <Container>
