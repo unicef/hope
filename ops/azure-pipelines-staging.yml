@@ -66,6 +66,7 @@ stages:
               releaseName: 'hct-mis-staging'
               install: true
               force: true
+              debug: true
               overrideValues: "
                 backend.staticStorage.secretName=$(staticStorageSecretName),\
                 backend.staticStorage.accountName=$(staticStorageAccountName),\
