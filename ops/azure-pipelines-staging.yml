@@ -77,7 +77,7 @@ stages:
                 revision=\"$(Build.BuildId)\",\
                 backend.image=uniappsk8sdevacr.azurecr.io/$(backendImageRepository):$(Build.BuildId),\
                 backend.secret.SECRET_KEY=$(SECRET_KEY),\
-                backend.secret.POSTGRES_SSL="True",\
+                backend.secret.POSTGRES_SSL=\"True\",\
                 backend.secret.ENV=$(ENV),\
                 backend.secret.POSTGRES_DB=$(POSTGRES_DB),\
                 backend.secret.POSTGRES_USER=$(POSTGRES_USER),\
