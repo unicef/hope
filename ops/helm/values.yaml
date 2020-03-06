@@ -12,7 +12,7 @@ backend:
   port: 8000
   healthCheckPath: "/api/_health"
   secret:
-    POSTGRES_SSL: 
+    POSTGRES_SSL: ""
     SECRET_KEY: ""
     POSTGRES_DB: ""
     POSTGRES_USER: ""
