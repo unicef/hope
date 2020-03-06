@@ -990,7 +990,8 @@ export type ImportedIndividualNodeEdge = {
 
 export enum ImportedIndividualSex {
   Male = 'MALE',
-  Female = 'FEMALE'
+  Female = 'FEMALE',
+  Other = 'OTHER'
 }
 
 export enum ImportedIndividualWorkStatus {
@@ -1276,7 +1277,8 @@ export enum IndividualSeriousIllness {
 
 export enum IndividualSex {
   Male = 'MALE',
-  Female = 'FEMALE'
+  Female = 'FEMALE',
+  Other = 'OTHER'
 }
 
 export enum IndividualWorkStatus {

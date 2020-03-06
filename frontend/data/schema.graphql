@@ -861,6 +861,7 @@ type ImportedIndividualNodeEdge {
 enum ImportedIndividualSex {
   MALE
   FEMALE
+  OTHER
 }
 
 enum ImportedIndividualWorkStatus {
@@ -1136,6 +1137,7 @@ enum IndividualSeriousIllness {
 enum IndividualSex {
   MALE
   FEMALE
+  OTHER
 }
 
 enum IndividualWorkStatus {
