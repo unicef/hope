@@ -55,7 +55,7 @@ description: These mutations and queries support the core functionality within H
 ### Target Population
 
 * List of target populations \(paginated, filtered, sortable\)
-* Targeting filters supported
+* [Targeting filters supported](https://unicef.visualstudio.com/ICTD-HCT-MIS/_boards/board/t/Software%20Engineering/Stories/?workitem=52076)
   * This will return a list of possible filters that can be applied while creating a new targeting population. This will basically be a combination of some of the core fields and all the flex fields in the db that are active.
   * Each should have a key, readable name, type \(int, string etc.\), choices, operations supported \(between, equals etc.\)
   * This will enable the frontend to build the ui with appropriate functionality and also appropriately build a filter payload to send in below queries but also in the save/edit mutations.
