@@ -20,7 +20,7 @@ spec:
       - name: job-migrations-container
         image: {{ .Values.backend.image }}
         command: ["/bin/sh"]
-        args: ["-c", "python3 /code/manage.py migrate --noinput"]
+        args: ["-c", "python3 /code/manage.py migrate --noinput && python3 manage.py migrate --noinput --database registration_datahub && python3 manage.py migrate --noinput --database cash_assist_datahub"]
         envFrom:
           - secretRef:
               name: backend-secret

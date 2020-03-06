@@ -7,6 +7,11 @@ export const HOUSEHOLD_QUERY = gql`
       createdAt
       familySize
       nationality
+      totalCashReceived
+      headOfHousehold {
+        id
+        fullName
+      }
       individuals {
         totalCount
         edges {
@@ -37,6 +42,13 @@ export const HOUSEHOLD_QUERY = gql`
         title
       }
       residenceStatus
+      programs {
+        edges {
+          node {
+            name
+          }
+        }
+      }
       paymentRecords {
         edges {
           node {

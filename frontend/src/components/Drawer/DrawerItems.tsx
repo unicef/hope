@@ -4,9 +4,9 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import ExpandLess from '@material-ui/icons/ExpandLess';
+import { useHistory, useLocation, Link } from 'react-router-dom';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import styled from 'styled-components';
-import { Link } from 'react-router-dom';
 import React from 'react';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { menuItems } from './menuItems';
@@ -36,6 +36,7 @@ interface Props {
 export function DrawerItems({ currentLocation }: Props): React.ReactElement {
   const businessArea = useBusinessArea();
   const clearLocation = currentLocation.replace(`/${businessArea}`, '');
+  const history = useHistory();
   const initialIndex = menuItems.findIndex((item) => {
     if (!item.secondaryActions) {
       return false;
@@ -58,11 +59,16 @@ export function DrawerItems({ currentLocation }: Props): React.ReactElement {
             <>
               <ListItem
                 button
-                onClick={() =>
-                  index === expandedItem
-                    ? setExpandedItem(null)
-                    : setExpandedItem(index)
-                }
+                onClick={() => {
+                  if (index === expandedItem) {
+                    setExpandedItem(null);
+                  } else {
+                    setExpandedItem(index);
+                  }
+                  if (item.href) {
+                    history.push(`/${businessArea}${item.href}`);
+                  }
+                }}
                 key={item.name}
               >
                 <Icon>{item.icon}</Icon>

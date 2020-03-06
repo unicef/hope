@@ -12,6 +12,7 @@ import program.schema
 import registration_data.schema
 import registration_datahub.schema
 import targeting.schema
+import targeting.mutations
 
 
 class Query(

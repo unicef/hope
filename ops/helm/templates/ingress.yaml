@@ -9,11 +9,11 @@ metadata:
 spec:
   tls:
     - hosts:
-      - dev-hct.unitst.org
+      - {{ .Values.domain }}
       secretName: aks-unitst-tls
 
   rules:
-    - host: dev-hct.unitst.org
+    - host: {{ .Values.domain }}
       http:
         paths:
         - path: /api/*
@@ -31,10 +31,10 @@ metadata:
 spec:
   tls:
     - hosts:
-      - dev-hct.unitst.org
+      - {{ .Values.domain }}
       secretName: aks-unitst-tls
   rules:
-    - host: dev-hct.unitst.org
+    - host: {{ .Values.domain }}
       http:
         paths:
         - path: /

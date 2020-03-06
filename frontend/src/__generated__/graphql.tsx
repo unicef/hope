@@ -452,9 +452,21 @@ export type HouseholdNode = Node & {
   representative?: Maybe<IndividualNode>,
   registrationDataImportId: RegistrationDataImportNode,
   headOfHousehold?: Maybe<IndividualNode>,
+  programs: ProgramNodeConnection,
+  registrationDate?: Maybe<Scalars['Date']>,
   individuals: IndividualNodeConnection,
   paymentRecords: PaymentRecordNodeConnection,
   targetPopulations: TargetPopulationNodeConnection,
+  totalCashReceived?: Maybe<Scalars['Decimal']>,
+};
+
+
+export type HouseholdNodeProgramsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>
 };
 
 
@@ -1539,6 +1551,7 @@ export type ProgramNode = Node & {
   cashPlus: Scalars['Boolean'],
   populationGoal: Scalars['Int'],
   administrativeAreasOfImplementation: Scalars['String'],
+  households: HouseholdNodeConnection,
   cashPlans: CashPlanNodeConnection,
   totalEntitledQuantity?: Maybe<Scalars['Decimal']>,
   totalDeliveredQuantity?: Maybe<Scalars['Decimal']>,
@@ -1554,6 +1567,14 @@ export type ProgramNodeLocationsArgs = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   title?: Maybe<Scalars['String']>
+};
+
+
+export type ProgramNodeHouseholdsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -1709,6 +1730,7 @@ export type QueryAllProgramsArgs = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   id?: Maybe<Scalars['UUID']>,
+  status?: Maybe<Scalars['String']>,
   businessArea?: Maybe<Scalars['String']>
 };
 
@@ -1764,6 +1786,8 @@ export type QueryAllHouseholdsArgs = {
   familySize_Range?: Maybe<Scalars['Int']>,
   familySize_Lte?: Maybe<Scalars['Int']>,
   familySize_Gte?: Maybe<Scalars['Int']>,
+  targetPopulations?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  programs?: Maybe<Array<Maybe<Scalars['ID']>>>,
   familySize?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
@@ -1779,11 +1803,22 @@ export type QueryAllIndividualsArgs = {
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
+  programme?: Maybe<Scalars['String']>,
   businessArea?: Maybe<Scalars['String']>,
   fullName?: Maybe<Scalars['String']>,
   fullName_Icontains?: Maybe<Scalars['String']>,
   sex?: Maybe<Array<Maybe<Scalars['ID']>>>,
   age?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type QueryAllUsersArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  fullName?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -1867,6 +1902,7 @@ export type QueryAllRegistrationDataImportsArgs = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   importedBy_Id?: Maybe<Scalars['UUID']>,
+  importDate?: Maybe<Scalars['Date']>,
   status?: Maybe<Scalars['String']>,
   name?: Maybe<Scalars['String']>,
   name_Icontains?: Maybe<Scalars['String']>,
@@ -2330,7 +2366,9 @@ export type AllHouseholdsQueryVariables = {
   last?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>,
-  familySize?: Maybe<Scalars['String']>
+  familySize?: Maybe<Scalars['String']>,
+  programs?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  headOfHouseholdFullNameIcontains?: Maybe<Scalars['String']>
 };
 
 
@@ -2347,30 +2385,16 @@ export type AllHouseholdsQuery = (
       & Pick<HouseholdNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'HouseholdNode' }
-        & Pick<HouseholdNode, 'id' | 'createdAt' | 'householdCaId' | 'residenceStatus' | 'familySize'>
-        & { location: (
+        & Pick<HouseholdNode, 'id' | 'createdAt' | 'householdCaId' | 'residenceStatus' | 'familySize' | 'totalCashReceived' | 'registrationDate'>
+        & { headOfHousehold: Maybe<(
+          { __typename?: 'IndividualNode' }
+          & Pick<IndividualNode, 'id' | 'fullName'>
+        )>, location: (
           { __typename?: 'LocationNode' }
           & Pick<LocationNode, 'id' | 'title'>
         ), individuals: (
           { __typename?: 'IndividualNodeConnection' }
           & Pick<IndividualNodeConnection, 'totalCount'>
-        ), paymentRecords: (
-          { __typename?: 'PaymentRecordNodeConnection' }
-          & { edges: Array<Maybe<(
-            { __typename?: 'PaymentRecordNodeEdge' }
-            & { node: Maybe<(
-              { __typename?: 'PaymentRecordNode' }
-              & Pick<PaymentRecordNode, 'id' | 'headOfHousehold'>
-              & { cashPlan: (
-                { __typename?: 'CashPlanNode' }
-                & Pick<CashPlanNode, 'id' | 'totalDeliveredQuantity'>
-                & { program: (
-                  { __typename?: 'ProgramNode' }
-                  & Pick<ProgramNode, 'id' | 'name'>
-                ) }
-              ) }
-            )> }
-          )>> }
         ) }
       )> }
     )>> }
@@ -2382,7 +2406,10 @@ export type AllIndividualsQueryVariables = {
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  fullName_Icontains?: Maybe<Scalars['String']>
+  fullNameContains?: Maybe<Scalars['String']>,
+  sex?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  age?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
 };
 
 
@@ -2396,6 +2423,7 @@ export type AllIndividualsQuery = (
       & Pick<PageInfo, 'startCursor' | 'endCursor'>
     ), edges: Array<Maybe<(
       { __typename?: 'IndividualNodeEdge' }
+      & Pick<IndividualNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'IndividualNode' }
         & Pick<IndividualNode, 'id' | 'createdAt' | 'updatedAt' | 'individualCaId' | 'fullName' | 'sex' | 'dob' | 'nationality' | 'martialStatus' | 'phoneNumber' | 'identificationType' | 'identificationNumber'>
@@ -2481,7 +2509,8 @@ export type AllPaymentRecordsQuery = (
 );
 
 export type AllProgramsQueryVariables = {
-  businessArea?: Maybe<Scalars['String']>
+  businessArea?: Maybe<Scalars['String']>,
+  status?: Maybe<Scalars['String']>
 };
 
 
@@ -2502,29 +2531,57 @@ export type AllProgramsQuery = (
   )> }
 );
 
-export type AllTargetPopulationsQueryVariables = {
+export type AllRegistrationDataImportsQueryVariables = {
   after?: Maybe<Scalars['String']>,
   before?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
+  last?: Maybe<Scalars['Int']>,
+  orderBy?: Maybe<Scalars['String']>,
+  name_Icontains?: Maybe<Scalars['String']>,
+  importedBy_Id?: Maybe<Scalars['UUID']>,
+  status?: Maybe<Scalars['String']>,
+  importDate?: Maybe<Scalars['Date']>
 };
 
 
-export type AllTargetPopulationsQuery = (
+export type AllRegistrationDataImportsQuery = (
   { __typename?: 'Query' }
-  & { allTargetPopulation: Maybe<(
-    { __typename?: 'TargetPopulationNodeConnection' }
-    & Pick<TargetPopulationNodeConnection, 'totalCount' | 'edgeCount'>
-    & { edges: Array<Maybe<(
-      { __typename?: 'TargetPopulationNodeEdge' }
-      & Pick<TargetPopulationNodeEdge, 'cursor'>
+  & { allRegistrationDataImports: Maybe<(
+    { __typename?: 'RegistrationDataImportNodeConnection' }
+    & Pick<RegistrationDataImportNodeConnection, 'totalCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'startCursor' | 'endCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'RegistrationDataImportNodeEdge' }
+      & Pick<RegistrationDataImportNodeEdge, 'cursor'>
       & { node: Maybe<(
-        { __typename?: 'TargetPopulationNode' }
-        & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'createdAt'>
-        & { createdBy: Maybe<(
+        { __typename?: 'RegistrationDataImportNode' }
+        & Pick<RegistrationDataImportNode, 'id' | 'createdAt' | 'name' | 'status' | 'importDate' | 'dataSource' | 'numberOfHouseholds'>
+        & { importedBy: (
           { __typename?: 'UserNode' }
-          & Pick<UserNode, 'firstName' | 'lastName'>
-        )> }
+          & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
+        ) }
+      )> }
+    )>> }
+  )> }
+);
+
+export type AllUsersQueryVariables = {};
+
+
+export type AllUsersQuery = (
+  { __typename?: 'Query' }
+  & { allUsers: Maybe<(
+    { __typename?: 'UserNodeConnection' }
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'endCursor' | 'startCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'UserNodeEdge' }
+      & { node: Maybe<(
+        { __typename?: 'UserNode' }
+        & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
       )> }
     )>> }
   )> }
@@ -2562,8 +2619,11 @@ export type HouseholdQuery = (
   { __typename?: 'Query' }
   & { household: Maybe<(
     { __typename?: 'HouseholdNode' }
-    & Pick<HouseholdNode, 'id' | 'createdAt' | 'familySize' | 'nationality' | 'residenceStatus'>
-    & { individuals: (
+    & Pick<HouseholdNode, 'id' | 'createdAt' | 'familySize' | 'nationality' | 'totalCashReceived' | 'residenceStatus'>
+    & { headOfHousehold: Maybe<(
+      { __typename?: 'IndividualNode' }
+      & Pick<IndividualNode, 'id' | 'fullName'>
+    )>, individuals: (
       { __typename?: 'IndividualNodeConnection' }
       & Pick<IndividualNodeConnection, 'totalCount'>
       & { edges: Array<Maybe<(
@@ -2590,6 +2650,15 @@ export type HouseholdQuery = (
     ), location: (
       { __typename?: 'LocationNode' }
       & Pick<LocationNode, 'id' | 'title'>
+    ), programs: (
+      { __typename?: 'ProgramNodeConnection' }
+      & { edges: Array<Maybe<(
+        { __typename?: 'ProgramNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'ProgramNode' }
+          & Pick<ProgramNode, 'name'>
+        )> }
+      )>> }
     ), paymentRecords: (
       { __typename?: 'PaymentRecordNodeConnection' }
       & { edges: Array<Maybe<(
@@ -2723,34 +2792,15 @@ export type ProgrammeChoiceDataQuery = (
   )>>> }
 );
 
-export type TargetPopulationQueryVariables = {
-  id: Scalars['ID']
-};
+export type RegistrationChoicesQueryVariables = {};
 
 
-export type TargetPopulationQuery = (
+export type RegistrationChoicesQuery = (
   { __typename?: 'Query' }
-  & { targetPopulation: Maybe<(
-    { __typename?: 'TargetPopulationNode' }
-    & Pick<TargetPopulationNode, 'id' | 'name' | 'status'>
-    & { households: (
-      { __typename?: 'HouseholdNodeConnection' }
-      & { edges: Array<Maybe<(
-        { __typename?: 'HouseholdNodeEdge' }
-        & { node: Maybe<(
-          { __typename?: 'HouseholdNode' }
-          & Pick<HouseholdNode, 'id' | 'householdCaId'>
-          & { headOfHousehold: Maybe<(
-            { __typename?: 'IndividualNode' }
-            & Pick<IndividualNode, 'fullName'>
-          )>, location: (
-            { __typename?: 'LocationNode' }
-            & Pick<LocationNode, 'title'>
-          ) }
-        )> }
-      )>> }
-    ) }
-  )> }
+  & { registrationDataStatusChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>> }
 );
 
 
@@ -3068,8 +3118,8 @@ export type AllCashPlansQueryHookResult = ReturnType<typeof useAllCashPlansQuery
 export type AllCashPlansLazyQueryHookResult = ReturnType<typeof useAllCashPlansLazyQuery>;
 export type AllCashPlansQueryResult = ApolloReactCommon.QueryResult<AllCashPlansQuery, AllCashPlansQueryVariables>;
 export const AllHouseholdsDocument = gql`
-    query AllHouseholds($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String) {
-  allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, familySize: $familySize, orderBy: $orderBy) {
+    query AllHouseholds($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $programs: [ID], $headOfHouseholdFullNameIcontains: String) {
+  allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, familySize: $familySize, orderBy: $orderBy, programs: $programs, headOfHousehold_FullName_Icontains: $headOfHouseholdFullNameIcontains) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -3085,28 +3135,18 @@ export const AllHouseholdsDocument = gql`
         householdCaId
         residenceStatus
         familySize
+        totalCashReceived
+        registrationDate
+        headOfHousehold {
+          id
+          fullName
+        }
         location {
           id
           title
         }
         individuals {
           totalCount
-        }
-        paymentRecords {
-          edges {
-            node {
-              id
-              headOfHousehold
-              cashPlan {
-                id
-                program {
-                  id
-                  name
-                }
-                totalDeliveredQuantity
-              }
-            }
-          }
         }
       }
     }
@@ -3150,6 +3190,8 @@ export function withAllHouseholds<TProps, TChildProps = {}>(operationOptions?: A
  *      businessArea: // value for 'businessArea'
  *      orderBy: // value for 'orderBy'
  *      familySize: // value for 'familySize'
+ *      programs: // value for 'programs'
+ *      headOfHouseholdFullNameIcontains: // value for 'headOfHouseholdFullNameIcontains'
  *   },
  * });
  */
@@ -3163,14 +3205,15 @@ export type AllHouseholdsQueryHookResult = ReturnType<typeof useAllHouseholdsQue
 export type AllHouseholdsLazyQueryHookResult = ReturnType<typeof useAllHouseholdsLazyQuery>;
 export type AllHouseholdsQueryResult = ApolloReactCommon.QueryResult<AllHouseholdsQuery, AllHouseholdsQueryVariables>;
 export const AllIndividualsDocument = gql`
-    query AllIndividuals($before: String, $after: String, $first: Int, $last: Int, $fullName_Icontains: String) {
-  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Icontains: $fullName_Icontains) {
+    query AllIndividuals($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [ID], $age: String, $orderBy: String) {
+  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Icontains: $fullNameContains, sex: $sex, age: $age, orderBy: $orderBy) {
     totalCount
     pageInfo {
       startCursor
       endCursor
     }
     edges {
+      cursor
       node {
         id
         createdAt
@@ -3231,7 +3274,10 @@ export function withAllIndividuals<TProps, TChildProps = {}>(operationOptions?: 
  *      after: // value for 'after'
  *      first: // value for 'first'
  *      last: // value for 'last'
- *      fullName_Icontains: // value for 'fullName_Icontains'
+ *      fullNameContains: // value for 'fullNameContains'
+ *      sex: // value for 'sex'
+ *      age: // value for 'age'
+ *      orderBy: // value for 'orderBy'
  *   },
  * });
  */
@@ -3406,8 +3452,8 @@ export type AllPaymentRecordsQueryHookResult = ReturnType<typeof useAllPaymentRe
 export type AllPaymentRecordsLazyQueryHookResult = ReturnType<typeof useAllPaymentRecordsLazyQuery>;
 export type AllPaymentRecordsQueryResult = ApolloReactCommon.QueryResult<AllPaymentRecordsQuery, AllPaymentRecordsQueryVariables>;
 export const AllProgramsDocument = gql`
-    query AllPrograms($businessArea: String) {
-  allPrograms(businessArea: $businessArea) {
+    query AllPrograms($businessArea: String, $status: String) {
+  allPrograms(businessArea: $businessArea, status: $status) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -3464,6 +3510,7 @@ export function withAllPrograms<TProps, TChildProps = {}>(operationOptions?: Apo
  * const { data, loading, error } = useAllProgramsQuery({
  *   variables: {
  *      businessArea: // value for 'businessArea'
+ *      status: // value for 'status'
  *   },
  * });
  */
@@ -3476,73 +3523,149 @@ export function useAllProgramsLazyQuery(baseOptions?: ApolloReactHooks.LazyQuery
 export type AllProgramsQueryHookResult = ReturnType<typeof useAllProgramsQuery>;
 export type AllProgramsLazyQueryHookResult = ReturnType<typeof useAllProgramsLazyQuery>;
 export type AllProgramsQueryResult = ApolloReactCommon.QueryResult<AllProgramsQuery, AllProgramsQueryVariables>;
-export const AllTargetPopulationsDocument = gql`
-    query AllTargetPopulations($after: String, $before: String, $first: Int, $last: Int) {
-  allTargetPopulation(after: $after, before: $before, first: $first, last: $last) {
+export const AllRegistrationDataImportsDocument = gql`
+    query AllRegistrationDataImports($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name_Icontains: String, $importedBy_Id: UUID, $status: String, $importDate: Date) {
+  allRegistrationDataImports(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name_Icontains: $name_Icontains, importedBy_Id: $importedBy_Id, status: $status, importDate: $importDate) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+    totalCount
     edges {
+      cursor
       node {
         id
+        createdAt
         name
         status
-        createdAt
-        createdBy {
+        importDate
+        importedBy {
+          id
           firstName
           lastName
         }
+        dataSource
+        numberOfHouseholds
+        numberOfHouseholds
       }
-      cursor
     }
-    totalCount
-    edgeCount
   }
 }
     `;
-export type AllTargetPopulationsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>, 'query'>;
+export type AllRegistrationDataImportsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables>, 'query'>;
 
-    export const AllTargetPopulationsComponent = (props: AllTargetPopulationsComponentProps) => (
-      <ApolloReactComponents.Query<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables> query={AllTargetPopulationsDocument} {...props} />
+    export const AllRegistrationDataImportsComponent = (props: AllRegistrationDataImportsComponentProps) => (
+      <ApolloReactComponents.Query<AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables> query={AllRegistrationDataImportsDocument} {...props} />
     );
-    
-export type AllTargetPopulationsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables> & TChildProps;
-export function withAllTargetPopulations<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+
+export type AllRegistrationDataImportsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables> & TChildProps;
+export function withAllRegistrationDataImports<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
   TProps,
-  AllTargetPopulationsQuery,
-  AllTargetPopulationsQueryVariables,
-  AllTargetPopulationsProps<TChildProps>>) {
-    return ApolloReactHoc.withQuery<TProps, AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables, AllTargetPopulationsProps<TChildProps>>(AllTargetPopulationsDocument, {
-      alias: 'allTargetPopulations',
+  AllRegistrationDataImportsQuery,
+  AllRegistrationDataImportsQueryVariables,
+  AllRegistrationDataImportsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables, AllRegistrationDataImportsProps<TChildProps>>(AllRegistrationDataImportsDocument, {
+      alias: 'allRegistrationDataImports',
       ...operationOptions
     });
 };
 
 /**
- * __useAllTargetPopulationsQuery__
+ * __useAllRegistrationDataImportsQuery__
  *
- * To run a query within a React component, call `useAllTargetPopulationsQuery` and pass it any options that fit your needs.
- * When your component renders, `useAllTargetPopulationsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * To run a query within a React component, call `useAllRegistrationDataImportsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllRegistrationDataImportsQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useAllTargetPopulationsQuery({
+ * const { data, loading, error } = useAllRegistrationDataImportsQuery({
  *   variables: {
  *      after: // value for 'after'
  *      before: // value for 'before'
  *      first: // value for 'first'
  *      last: // value for 'last'
+ *      orderBy: // value for 'orderBy'
+ *      name_Icontains: // value for 'name_Icontains'
+ *      importedBy_Id: // value for 'importedBy_Id'
+ *      status: // value for 'status'
+ *      importDate: // value for 'importDate'
  *   },
  * });
  */
-export function useAllTargetPopulationsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>) {
-        return ApolloReactHooks.useQuery<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>(AllTargetPopulationsDocument, baseOptions);
+export function useAllRegistrationDataImportsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables>(AllRegistrationDataImportsDocument, baseOptions);
       }
-export function useAllTargetPopulationsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>) {
-          return ApolloReactHooks.useLazyQuery<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>(AllTargetPopulationsDocument, baseOptions);
+export function useAllRegistrationDataImportsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables>(AllRegistrationDataImportsDocument, baseOptions);
         }
-export type AllTargetPopulationsQueryHookResult = ReturnType<typeof useAllTargetPopulationsQuery>;
-export type AllTargetPopulationsLazyQueryHookResult = ReturnType<typeof useAllTargetPopulationsLazyQuery>;
-export type AllTargetPopulationsQueryResult = ApolloReactCommon.QueryResult<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>;
+export type AllRegistrationDataImportsQueryHookResult = ReturnType<typeof useAllRegistrationDataImportsQuery>;
+export type AllRegistrationDataImportsLazyQueryHookResult = ReturnType<typeof useAllRegistrationDataImportsLazyQuery>;
+export type AllRegistrationDataImportsQueryResult = ApolloReactCommon.QueryResult<AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables>;
+export const AllUsersDocument = gql`
+    query AllUsers {
+  allUsers {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      endCursor
+      startCursor
+    }
+    edges {
+      node {
+        id
+        firstName
+        lastName
+      }
+    }
+  }
+}
+    `;
+export type AllUsersComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllUsersQuery, AllUsersQueryVariables>, 'query'>;
+
+    export const AllUsersComponent = (props: AllUsersComponentProps) => (
+      <ApolloReactComponents.Query<AllUsersQuery, AllUsersQueryVariables> query={AllUsersDocument} {...props} />
+    );
+
+export type AllUsersProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllUsersQuery, AllUsersQueryVariables> & TChildProps;
+export function withAllUsers<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllUsersQuery,
+  AllUsersQueryVariables,
+  AllUsersProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllUsersQuery, AllUsersQueryVariables, AllUsersProps<TChildProps>>(AllUsersDocument, {
+      alias: 'allUsers',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllUsersQuery__
+ *
+ * To run a query within a React component, call `useAllUsersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllUsersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllUsersQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useAllUsersQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllUsersQuery, AllUsersQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllUsersQuery, AllUsersQueryVariables>(AllUsersDocument, baseOptions);
+      }
+export function useAllUsersLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllUsersQuery, AllUsersQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllUsersQuery, AllUsersQueryVariables>(AllUsersDocument, baseOptions);
+        }
+export type AllUsersQueryHookResult = ReturnType<typeof useAllUsersQuery>;
+export type AllUsersLazyQueryHookResult = ReturnType<typeof useAllUsersLazyQuery>;
+export type AllUsersQueryResult = ApolloReactCommon.QueryResult<AllUsersQuery, AllUsersQueryVariables>;
 export const CashPlanDocument = gql`
     query CashPlan($id: ID!) {
   cashPlan(id: $id) {
@@ -3622,6 +3745,11 @@ export const HouseholdDocument = gql`
     createdAt
     familySize
     nationality
+    totalCashReceived
+    headOfHousehold {
+      id
+      fullName
+    }
     individuals {
       totalCount
       edges {
@@ -3652,6 +3780,13 @@ export const HouseholdDocument = gql`
       title
     }
     residenceStatus
+    programs {
+      edges {
+        node {
+          name
+        }
+      }
+    }
     paymentRecords {
       edges {
         node {
@@ -4067,72 +4202,56 @@ export function useProgrammeChoiceDataLazyQuery(baseOptions?: ApolloReactHooks.L
 export type ProgrammeChoiceDataQueryHookResult = ReturnType<typeof useProgrammeChoiceDataQuery>;
 export type ProgrammeChoiceDataLazyQueryHookResult = ReturnType<typeof useProgrammeChoiceDataLazyQuery>;
 export type ProgrammeChoiceDataQueryResult = ApolloReactCommon.QueryResult<ProgrammeChoiceDataQuery, ProgrammeChoiceDataQueryVariables>;
-export const TargetPopulationDocument = gql`
-    query targetPopulation($id: ID!) {
-  targetPopulation(id: $id) {
-    id
+export const RegistrationChoicesDocument = gql`
+    query registrationChoices {
+  registrationDataStatusChoices {
     name
-    status
-    households {
-      edges {
-        node {
-          id
-          headOfHousehold {
-            fullName
-          }
-          householdCaId
-          location {
-            title
-          }
-        }
-      }
-    }
+    value
   }
 }
     `;
-export type TargetPopulationComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<TargetPopulationQuery, TargetPopulationQueryVariables>, 'query'> & ({ variables: TargetPopulationQueryVariables; skip?: boolean; } | { skip: boolean; });
+export type RegistrationChoicesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<RegistrationChoicesQuery, RegistrationChoicesQueryVariables>, 'query'>;
 
-    export const TargetPopulationComponent = (props: TargetPopulationComponentProps) => (
-      <ApolloReactComponents.Query<TargetPopulationQuery, TargetPopulationQueryVariables> query={TargetPopulationDocument} {...props} />
+    export const RegistrationChoicesComponent = (props: RegistrationChoicesComponentProps) => (
+      <ApolloReactComponents.Query<RegistrationChoicesQuery, RegistrationChoicesQueryVariables> query={RegistrationChoicesDocument} {...props} />
     );
-    
-export type TargetPopulationProps<TChildProps = {}> = ApolloReactHoc.DataProps<TargetPopulationQuery, TargetPopulationQueryVariables> & TChildProps;
-export function withTargetPopulation<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+
+export type RegistrationChoicesProps<TChildProps = {}> = ApolloReactHoc.DataProps<RegistrationChoicesQuery, RegistrationChoicesQueryVariables> & TChildProps;
+export function withRegistrationChoices<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
   TProps,
-  TargetPopulationQuery,
-  TargetPopulationQueryVariables,
-  TargetPopulationProps<TChildProps>>) {
-    return ApolloReactHoc.withQuery<TProps, TargetPopulationQuery, TargetPopulationQueryVariables, TargetPopulationProps<TChildProps>>(TargetPopulationDocument, {
-      alias: 'targetPopulation',
+  RegistrationChoicesQuery,
+  RegistrationChoicesQueryVariables,
+  RegistrationChoicesProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, RegistrationChoicesQuery, RegistrationChoicesQueryVariables, RegistrationChoicesProps<TChildProps>>(RegistrationChoicesDocument, {
+      alias: 'registrationChoices',
       ...operationOptions
     });
 };
 
 /**
- * __useTargetPopulationQuery__
+ * __useRegistrationChoicesQuery__
  *
- * To run a query within a React component, call `useTargetPopulationQuery` and pass it any options that fit your needs.
- * When your component renders, `useTargetPopulationQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * To run a query within a React component, call `useRegistrationChoicesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useRegistrationChoicesQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useTargetPopulationQuery({
+ * const { data, loading, error } = useRegistrationChoicesQuery({
  *   variables: {
- *      id: // value for 'id'
  *   },
  * });
  */
-export function useTargetPopulationQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<TargetPopulationQuery, TargetPopulationQueryVariables>) {
-        return ApolloReactHooks.useQuery<TargetPopulationQuery, TargetPopulationQueryVariables>(TargetPopulationDocument, baseOptions);
+export function useRegistrationChoicesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<RegistrationChoicesQuery, RegistrationChoicesQueryVariables>) {
+        return ApolloReactHooks.useQuery<RegistrationChoicesQuery, RegistrationChoicesQueryVariables>(RegistrationChoicesDocument, baseOptions);
       }
-export function useTargetPopulationLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<TargetPopulationQuery, TargetPopulationQueryVariables>) {
-          return ApolloReactHooks.useLazyQuery<TargetPopulationQuery, TargetPopulationQueryVariables>(TargetPopulationDocument, baseOptions);
+export function useRegistrationChoicesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<RegistrationChoicesQuery, RegistrationChoicesQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<RegistrationChoicesQuery, RegistrationChoicesQueryVariables>(RegistrationChoicesDocument, baseOptions);
         }
-export type TargetPopulationQueryHookResult = ReturnType<typeof useTargetPopulationQuery>;
-export type TargetPopulationLazyQueryHookResult = ReturnType<typeof useTargetPopulationLazyQuery>;
-export type TargetPopulationQueryResult = ApolloReactCommon.QueryResult<TargetPopulationQuery, TargetPopulationQueryVariables>;
+export type RegistrationChoicesQueryHookResult = ReturnType<typeof useRegistrationChoicesQuery>;
+export type RegistrationChoicesLazyQueryHookResult = ReturnType<typeof useRegistrationChoicesLazyQuery>;
+export type RegistrationChoicesQueryResult = ApolloReactCommon.QueryResult<RegistrationChoicesQuery, RegistrationChoicesQueryVariables>;
 
 
 export type ResolverTypeWrapper<T> = Promise<T> | T;
@@ -4255,15 +4374,14 @@ export type ResolversTypes = {
   IndividualEnrolledInSchool: IndividualEnrolledInSchool,
   IndividualEnrolledInNutritionProgramme: IndividualEnrolledInNutritionProgramme,
   IndividualAdministrationOfRutf: IndividualAdministrationOfRutf,
-  PaymentRecordNodeConnection: ResolverTypeWrapper<PaymentRecordNodeConnection>,
-  PaymentRecordNodeEdge: ResolverTypeWrapper<PaymentRecordNodeEdge>,
-  TargetPopulationStatus: TargetPopulationStatus,
-  RegistrationDataImportNodeConnection: ResolverTypeWrapper<RegistrationDataImportNodeConnection>,
-  RegistrationDataImportNodeEdge: ResolverTypeWrapper<RegistrationDataImportNodeEdge>,
   ProgramNodeConnection: ResolverTypeWrapper<ProgramNodeConnection>,
   ProgramNodeEdge: ResolverTypeWrapper<ProgramNodeEdge>,
-  Float: ResolverTypeWrapper<Scalars['Float']>,
+  PaymentRecordNodeConnection: ResolverTypeWrapper<PaymentRecordNodeConnection>,
+  PaymentRecordNodeEdge: ResolverTypeWrapper<PaymentRecordNodeEdge>,
   Decimal: ResolverTypeWrapper<Scalars['Decimal']>,
+  RegistrationDataImportNodeConnection: ResolverTypeWrapper<RegistrationDataImportNodeConnection>,
+  RegistrationDataImportNodeEdge: ResolverTypeWrapper<RegistrationDataImportNodeEdge>,
+  Float: ResolverTypeWrapper<Scalars['Float']>,
   ProgramFrequencyOfPayments: ProgramFrequencyOfPayments,
   ProgramSector: ProgramSector,
   ProgramScope: ProgramScope,
@@ -4373,15 +4491,14 @@ export type ResolversParentTypes = {
   IndividualEnrolledInSchool: IndividualEnrolledInSchool,
   IndividualEnrolledInNutritionProgramme: IndividualEnrolledInNutritionProgramme,
   IndividualAdministrationOfRutf: IndividualAdministrationOfRutf,
-  PaymentRecordNodeConnection: PaymentRecordNodeConnection,
-  PaymentRecordNodeEdge: PaymentRecordNodeEdge,
-  TargetPopulationStatus: TargetPopulationStatus,
-  RegistrationDataImportNodeConnection: RegistrationDataImportNodeConnection,
-  RegistrationDataImportNodeEdge: RegistrationDataImportNodeEdge,
   ProgramNodeConnection: ProgramNodeConnection,
   ProgramNodeEdge: ProgramNodeEdge,
-  Float: Scalars['Float'],
+  PaymentRecordNodeConnection: PaymentRecordNodeConnection,
+  PaymentRecordNodeEdge: PaymentRecordNodeEdge,
   Decimal: Scalars['Decimal'],
+  RegistrationDataImportNodeConnection: RegistrationDataImportNodeConnection,
+  RegistrationDataImportNodeEdge: RegistrationDataImportNodeEdge,
+  Float: Scalars['Float'],
   ProgramFrequencyOfPayments: ProgramFrequencyOfPayments,
   ProgramSector: ProgramSector,
   ProgramScope: ProgramScope,
@@ -4593,9 +4710,12 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   representative?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
   registrationDataImportId?: Resolver<ResolversTypes['RegistrationDataImportNode'], ParentType, ContextType>,
   headOfHousehold?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
+  programs?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, HouseholdNodeProgramsArgs>,
+  registrationDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, HouseholdNodeIndividualsArgs>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, HouseholdNodePaymentRecordsArgs>,
   targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, HouseholdNodeTargetPopulationsArgs>,
+  totalCashReceived?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
 };
 
 export type HouseholdNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['HouseholdNodeConnection'] = ResolversParentTypes['HouseholdNodeConnection']> = {
@@ -4876,6 +4996,7 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   cashPlus?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   populationGoal?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   administrativeAreasOfImplementation?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, ProgramNodeHouseholdsArgs>,
   cashPlans?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, ProgramNodeCashPlansArgs>,
   totalEntitledQuantity?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
   totalDeliveredQuantity?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
