@@ -77,6 +77,23 @@ export function paymentRecordStatusToColor(
       return theme.palette.error.main;
   }
 }
+
+export function registrationDataImportStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  switch (status) {
+    case 'APPROVED':
+      return theme.hctPalette.green;
+    case 'MERGED':
+      return theme.hctPalette.gray;
+    case 'IN_PROGRESS':
+      return theme.hctPalette.oragne;
+    default:
+      return theme.hctPalette.oragne;
+  }
+}
+
 export function targetPopulationStatusToColor(
   theme: typeof themeObj,
   status: string,
@@ -127,6 +144,10 @@ export function columnToOrderBy(
   column: string,
   orderDirection: string,
 ): string {
+  if (column.startsWith('-')) {
+    const clearColumn = column.replace('-', '');
+    return camelToUnderscore(`${orderDirection === 'asc' ? '-' : ''}${clearColumn}`);
+  }
   return camelToUnderscore(`${orderDirection === 'desc' ? '-' : ''}${column}`);
 }
 
@@ -150,6 +171,13 @@ export function programStatusToPriority(status: ProgramStatus): number {
       return 3;
   }
 }
+export function decodeIdString(idString) {
+  if (!idString) {
+    return null;
+  }
+  const decoded = atob(idString);
+  return decoded.split(':')[1];
+}
 
 export function programCompare(
   a: AllProgramsQuery['allPrograms']['edges'][number],
@@ -166,6 +194,14 @@ export function formatCurrency(amount: number): string {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })} USD`;
+}
+
+export function clearValue(value) {
+  if (!value) {
+    return undefined;
+  }
+
+  return parseInt(value, 10);
 }
 
 export function getAgeFromDob(date: string): number {

@@ -381,9 +381,12 @@ type HouseholdNode implements Node {
   representative: IndividualNode
   registrationDataImportId: RegistrationDataImportNode!
   headOfHousehold: IndividualNode
+  programs(before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
+  registrationDate: Date
   individuals(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
   targetPopulations(before: String, after: String, first: Int, last: Int): TargetPopulationNodeConnection!
+  totalCashReceived: Decimal
 }
 
 type HouseholdNodeConnection {
@@ -1310,6 +1313,7 @@ type ProgramNode implements Node {
   cashPlus: Boolean!
   populationGoal: Int!
   administrativeAreasOfImplementation: String!
+  households(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   cashPlans(before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
   totalEntitledQuantity: Decimal
   totalDeliveredQuantity: Decimal
@@ -1364,7 +1368,7 @@ type Query {
   allBusinessAreas(before: String, after: String, first: Int, last: Int, id: UUID): BusinessAreaNodeConnection
   allLogEntries(objectId: String!, before: String, after: String, first: Int, last: Int): LogEntryObjectConnection
   program(id: ID!): ProgramNode
-  allPrograms(before: String, after: String, first: Int, last: Int, id: UUID, businessArea: String): ProgramNodeConnection
+  allPrograms(before: String, after: String, first: Int, last: Int, id: UUID, status: String, businessArea: String): ProgramNodeConnection
   cashPlan(id: ID!): CashPlanNode
   allCashPlans(before: String, after: String, first: Int, last: Int, program: ID, orderBy: String): CashPlanNodeConnection
   programStatusChoices: [ChoiceObject]

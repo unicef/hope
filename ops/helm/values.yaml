@@ -1,6 +1,8 @@
 revision: 1
 namespace: staging
 env:
+domain: 
+podDB: false
 
 backend:
   image:
@@ -10,6 +12,7 @@ backend:
   port: 8000
   healthCheckPath: "/api/_health"
   secret:
+    POSTGRES_SSL: 
     SECRET_KEY: ""
     POSTGRES_DB: ""
     POSTGRES_USER: ""
@@ -45,25 +48,28 @@ redis:
   port: 6379
 
 
-# databases:
-#   postgres-cash-assist-datahub-db:
-#     image: postgres:9.5.15-alpine
-#     port: 5432
-#     secret:
-#       POSTGRES_DB: ""
-#       POSTGRES_USER: ""
-#       POSTGRES_PASSWORD: ""
-#   backend-db:
-#     image: postgres:9.5.15-alpine
-#     port: 5432
-#     secret:
-#       POSTGRES_DB: ""
-#       POSTGRES_USER: ""
-#       POSTGRES_PASSWORD: ""
-#   registration-datahub-db:
-#     image: postgres:9.5.15-alpine
-#     port: 5432
-#     secret:
-#       POSTGRES_DB: ""
-#       POSTGRES_USER: ""
-#       POSTGRES_PASSWORD: ""
+databases:
+  postgres-cash-assist-datahub-db:
+    image: mdillon/postgis:10-alpine
+    port: 5432
+    claimName: pvc-cahubdev-pgdata
+    secret:
+      POSTGRES_DB: ""
+      POSTGRES_USER: ""
+      POSTGRES_PASSWORD: ""
+  backend-db:
+    image: mdillon/postgis:10-alpine
+    port: 5432
+    claimName: pvc-hctmisdev-pgdata
+    secret:
+      POSTGRES_DB: ""
+      POSTGRES_USER: ""
+      POSTGRES_PASSWORD: ""
+  registration-datahub-db:
+    image: mdillon/postgis:10-alpine
+    port: 5432
+    claimName: pvc-reghubdev-pgdata
+    secret:
+      POSTGRES_DB: ""
+      POSTGRES_USER: ""
+      POSTGRES_PASSWORD: ""

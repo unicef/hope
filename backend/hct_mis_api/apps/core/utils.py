@@ -1,5 +1,7 @@
+import json
 import re
 
+import factory
 from django.template.defaultfilters import slugify
 
 
@@ -81,3 +83,12 @@ def _slug_strip(value, separator="-"):
             re_sep = re.escape(separator)
         value = re.sub(r"^%s+|%s+$" % (re_sep, re_sep), "", value)
     return value
+
+
+class JSONFactory(factory.DictFactory):
+    """A Json factory class to get JSON strings."""
+
+    @classmethod
+    def _generate(cls, create, attrs):
+        obj_dict = super()._generate(create, attrs)
+        return json.dumps(obj_dict)
