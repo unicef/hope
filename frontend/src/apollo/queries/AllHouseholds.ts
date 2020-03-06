@@ -9,6 +9,8 @@ export const AllHouseholds = gql`
     $businessArea: String
     $orderBy: String
     $familySize: String
+    $programs: [ID]
+    $headOfHouseholdFullNameIcontains: String
   ) {
     allHouseholds(
       after: $after
@@ -18,6 +20,8 @@ export const AllHouseholds = gql`
       businessArea: $businessArea
       familySize: $familySize
       orderBy: $orderBy
+      programs: $programs
+      headOfHousehold_FullName_Icontains: $headOfHouseholdFullNameIcontains
     ) {
       pageInfo {
         hasNextPage
@@ -34,28 +38,18 @@ export const AllHouseholds = gql`
           householdCaId
           residenceStatus
           familySize
+          totalCashReceived
+          registrationDate
+          headOfHousehold {
+            id
+            fullName
+          }
           location {
             id
             title
           }
           individuals {
             totalCount
-          }
-          paymentRecords {
-            edges {
-              node {
-                id
-                headOfHousehold
-                cashPlan {
-                  id
-                  program {
-                    id
-                    name
-                  }
-                  totalDeliveredQuantity
-                }
-              }
-            }
           }
         }
       }
