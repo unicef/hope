@@ -17,6 +17,7 @@ import { LabelizedField } from '../../components/LabelizedField';
 import { PaymentRecordTable } from '../tables/PaymentRecordTable';
 import { HouseholdIndividualsTable } from '../tables/HouseholdIndividualsTable';
 import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
+import { decodeIdString } from '../../utils/utils';
 
 const Container = styled.div`
   padding: 20px;
@@ -55,7 +56,7 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
-      title: 'Household Details',
+      title: 'Households',
       to: `/${businessArea}/population/household`,
     },
   ];
@@ -67,13 +68,13 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
   return (
     <div>
       <PageHeader
-        title={`Household ID: ${id}`}
+        title={`Household ID: ${decodeIdString(id)}`}
         breadCrumbs={breadCrumbsItems}
       />
       <HouseholdDetails houseHold={household as HouseholdNode} />
       <Container>
         <HouseholdIndividualsTable household={household as HouseholdNode} />
-        <PaymentRecordTable cashPlan={cashPlan} />
+        <PaymentRecordTable openInNewTab cashPlan={cashPlan} />
         <HouseholdVulnerabilities />
         <Overview>
           <Title>

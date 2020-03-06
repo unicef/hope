@@ -14,23 +14,22 @@ const TableWrapper = styled.div`
 `;
 
 interface HouseholdTableProps {
-  programFilter: string;
-  sizeFilter: { min: number | undefined; max: number | undefined };
-  textFilter: string;
   businessArea: string;
+  filter;
 }
 
 export const HouseholdTable = ({
-  programFilter,
-  sizeFilter,
   businessArea,
+  filter,
 }: HouseholdTableProps): React.ReactElement => {
   const initialVariables: AllHouseholdsQueryVariables = {
     businessArea,
-    familySize: JSON.stringify(sizeFilter),
-    // familySizeGreater: Number(sizeFilter.min),
-    // familySizeLower: Number(sizeFilter.max),
+    familySize: JSON.stringify(filter.householdSize),
+    headOfHouseholdFullNameIcontains: filter.text,
   };
+  if (filter.program) {
+    initialVariables.programs = [filter.program];
+  }
 
   return (
     <TableWrapper>

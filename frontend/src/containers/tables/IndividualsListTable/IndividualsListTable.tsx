@@ -1,9 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import {
-  AllHouseholdsQueryVariables,
   AllIndividualsQueryVariables,
-  HouseholdNode,
   IndividualNode,
   useAllIndividualsQuery,
 } from '../../../__generated__/graphql';
@@ -16,25 +14,19 @@ const TableWrapper = styled.div`
 `;
 
 interface IndividualsListTableProps {
-  ageFilter: { min: number | undefined; max: number | undefined };
-  textFilter?: string;
-  sexFilter?: string;
+  filter
   businessArea?: string;
 }
 
 export const IndividualsListTable = ({
-  ageFilter,
   businessArea,
-  sexFilter,
-  textFilter,
+  filter,
 }: IndividualsListTableProps): React.ReactElement => {
   const initialVariables = {
-    // TODO
-    // businessArea,
-    // sexFilter,
-    // fullName_Icontains: textFilter,
-    // ageGreater: ageFilter.min,
-    // ageLower: ageFilter.max
+    age: JSON.stringify(filter.age),
+    businessArea,
+    sex: [filter.sex],
+    fullNameContains: filter.text,
   };
 
   return (
