@@ -6,14 +6,20 @@ export const AllIndividuals = gql`
     $after: String
     $first: Int
     $last: Int
-    $fullName_Icontains: String
+    $fullNameContains: String
+    $sex: [ID]
+    $age: String
+    $orderBy: String
   ) {
     allIndividuals(
       before: $before
       after: $after
       first: $first
       last: $last
-      fullName_Icontains: $fullName_Icontains
+      fullName_Icontains: $fullNameContains
+      sex: $sex
+      age: $age
+      orderBy: $orderBy
     ) {
       totalCount
       pageInfo {
@@ -21,6 +27,7 @@ export const AllIndividuals = gql`
         endCursor
       }
       edges {
+        cursor
         node {
           id
           createdAt

@@ -5,6 +5,7 @@ import { IndividualsListTable } from '../tables/IndividualsListTable';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { IndividualsFilter } from '../../components/population/IndividualsFilter';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
+import { useDebounce } from '../../hooks/useDebounce';
 
 const Container = styled.div`
   display: flex;
@@ -14,44 +15,19 @@ const Container = styled.div`
 
 export function PopulationIndividualsPage(): React.ReactElement {
   const businessArea = useBusinessArea();
-  const [ageFilter, setAgeFilter] = useState({ min: null, max: null });
-  const [sexFilter, setSexFilter] = useState('none');
-  const [textFilter, setTextFilter] = useState();
+  const [filter, setFilter] = useState({
+    sex: 'none',
+    age: { min: undefined, max: undefined },
+  });
+  const debouncedFilter = useDebounce(filter, 500);
 
-  const breadCrumbsItems: BreadCrumbsItem[] = [
-    {
-      title: 'Population',
-      to: `/${businessArea}/`,
-    },
-  ];
-
-  const handleMinAgeFilter = (value: number): void => {
-    setAgeFilter({ ...ageFilter, min: value });
-  };
-  const handleMaxAgeFilter = (value: number): void => {
-    setAgeFilter({ ...ageFilter, max: value });
-  };
-  const handleTextFilter = (value: string): void => {
-    setTextFilter(value);
-  };
-  const handleSexFilter = (value: string): void => {
-    setSexFilter(value);
-  };
   return (
     <>
-      <PageHeader title='Individuals' breadCrumbs={breadCrumbsItems} />
-      <IndividualsFilter
-        sexFilter={sexFilter}
-        individualSexFilter={handleSexFilter}
-        individualMaxAgeFilter={handleMaxAgeFilter}
-        individualMinAgeFilter={handleMinAgeFilter}
-        individualTextFilter={handleTextFilter}
-      />
+      <PageHeader title='Individuals' />
+      <IndividualsFilter filter={filter} onFilterChange={setFilter} />
       <Container>
         <IndividualsListTable
-          textFilter={textFilter}
-          sexFilter={sexFilter}
-          ageFilter={ageFilter}
+          filter={debouncedFilter}
           businessArea={businessArea}
         />
       </Container>
