@@ -13,6 +13,7 @@ import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
 import { StatusBox } from '../../../components/StatusBox';
 import {
   cashPlanStatusToColor,
+  decodeIdString,
   formatCurrency,
   getAgeFromDob,
   sexToCapitalize,
@@ -46,9 +47,11 @@ export function IndividualsListTableRow({
       role='checkbox'
       key={individual.id}
     >
-      <TableCell align='left'>{individual.individualCaId}</TableCell>
+      <TableCell align='left'>{decodeIdString(individual.id)}</TableCell>
       <TableCell align='left'>{individual.fullName}</TableCell>
-      <TableCell align='left'>{individual.household.householdCaId}</TableCell>
+      <TableCell align='left'>
+        {decodeIdString(individual.household.id)}
+      </TableCell>
       <TableCell align='right'>{age}</TableCell>
       <TableCell align='left'>{sexToCapitalize(individual.sex)}</TableCell>
       <TableCell align='left'>{individual.household.location.title}</TableCell>

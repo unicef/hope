@@ -35,9 +35,17 @@ export type BusinessAreaNode = Node & {
   regionName: Scalars['String'],
   koboToken?: Maybe<Scalars['String']>,
   slug: Scalars['String'],
-  userSet: Array<UserObjectType>,
+  userSet: UserNodeConnection,
   locations: LocationNodeConnection,
   programSet: ProgramNodeConnection,
+};
+
+
+export type BusinessAreaNodeUserSetArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -84,7 +92,7 @@ export type CashPlanNode = Node & {
   disbursementDate: Scalars['DateTime'],
   numberOfHouseholds: Scalars['Int'],
   createdDate: Scalars['DateTime'],
-  createdBy?: Maybe<UserObjectType>,
+  createdBy?: Maybe<UserNode>,
   coverageDuration: Scalars['Int'],
   coverageUnits: Scalars['String'],
   targetPopulation: TargetPopulationNode,
@@ -212,21 +220,6 @@ export type CreateProgramInput = {
   businessAreaSlug?: Maybe<Scalars['String']>,
 };
 
-export type CreateRegistrationDataImport = {
-   __typename?: 'CreateRegistrationDataImport',
-  registrationDataImport?: Maybe<RegistrationDataImportNode>,
-};
-
-export type CreateRegistrationDataImportInput = {
-  name?: Maybe<Scalars['String']>,
-  status?: Maybe<Scalars['String']>,
-  importDate?: Maybe<Scalars['DateTime']>,
-  importedById?: Maybe<Scalars['String']>,
-  dataSource?: Maybe<Scalars['String']>,
-  numberOfIndividuals?: Maybe<Scalars['Int']>,
-  numberOfHouseholds?: Maybe<Scalars['Int']>,
-};
-
 
 
 
@@ -247,11 +240,6 @@ export type DeleteLocation = {
 
 export type DeleteProgram = {
    __typename?: 'DeleteProgram',
-  ok?: Maybe<Scalars['Boolean']>,
-};
-
-export type DeleteRegistrationDataImport = {
-   __typename?: 'DeleteRegistrationDataImport',
   ok?: Maybe<Scalars['Boolean']>,
 };
 
@@ -464,9 +452,21 @@ export type HouseholdNode = Node & {
   representative?: Maybe<IndividualNode>,
   registrationDataImportId: RegistrationDataImportNode,
   headOfHousehold?: Maybe<IndividualNode>,
+  programs: ProgramNodeConnection,
+  registrationDate?: Maybe<Scalars['Date']>,
   individuals: IndividualNodeConnection,
   paymentRecords: PaymentRecordNodeConnection,
   targetPopulations: TargetPopulationNodeConnection,
+  totalCashReceived?: Maybe<Scalars['Decimal']>,
+};
+
+
+export type HouseholdNodeProgramsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>
 };
 
 
@@ -998,6 +998,11 @@ export enum ImportedIndividualWorkStatus {
   No = 'NO'
 }
 
+export enum IndividualAdministrationOfRutf {
+  Yes = 'YES',
+  No = 'NO'
+}
+
 export enum IndividualDisability {
   No = 'NO',
   Seeing = 'SEEING',
@@ -1006,6 +1011,16 @@ export enum IndividualDisability {
   Memory = 'MEMORY',
   SelfCare = 'SELF_CARE',
   Communicating = 'COMMUNICATING'
+}
+
+export enum IndividualEnrolledInNutritionProgramme {
+  Yes = 'YES',
+  No = 'NO'
+}
+
+export enum IndividualEnrolledInSchool {
+  Yes = 'YES',
+  No = 'NO'
 }
 
 export enum IndividualIdentificationType {
@@ -1219,6 +1234,15 @@ export type IndividualNode = Node & {
   registrationDataImportId: RegistrationDataImportNode,
   workStatus: IndividualWorkStatus,
   disability: IndividualDisability,
+  seriousIllness: IndividualSeriousIllness,
+  ageFirstMarried?: Maybe<Scalars['Int']>,
+  enrolledInSchool: IndividualEnrolledInSchool,
+  schoolAttendance: Scalars['String'],
+  schoolType: Scalars['String'],
+  yearsInSchool?: Maybe<Scalars['Int']>,
+  minutesToSchool?: Maybe<Scalars['Int']>,
+  enrolledInNutritionProgramme?: Maybe<IndividualEnrolledInNutritionProgramme>,
+  administrationOfRutf?: Maybe<IndividualAdministrationOfRutf>,
   representedHouseholds: HouseholdNodeConnection,
   headingHousehold?: Maybe<HouseholdNode>,
 };
@@ -1244,6 +1268,11 @@ export type IndividualNodeEdge = {
   node?: Maybe<IndividualNode>,
   cursor: Scalars['String'],
 };
+
+export enum IndividualSeriousIllness {
+  Yes = 'YES',
+  No = 'NO'
+}
 
 export enum IndividualSex {
   Male = 'MALE',
@@ -1329,7 +1358,7 @@ export type LogEntryObject = {
   objectRepr: Scalars['String'],
   action: LogEntryAction,
   changes: Scalars['String'],
-  actor?: Maybe<UserObjectType>,
+  actor?: Maybe<UserNode>,
   remoteAddr?: Maybe<Scalars['String']>,
   timestamp?: Maybe<Scalars['DateTime']>,
   changesDisplayDict?: Maybe<Scalars['JSONLazyString']>,
@@ -1359,9 +1388,6 @@ export type Mutations = {
   createHousehold?: Maybe<CreateHousehold>,
   updateHousehold?: Maybe<UpdateHousehold>,
   deleteHousehold?: Maybe<DeleteHousehold>,
-  createRegistrationDataImport?: Maybe<CreateRegistrationDataImport>,
-  updateRegistrationDataImport?: Maybe<UpdateRegistrationDataImport>,
-  deleteRegistrationDataImport?: Maybe<DeleteRegistrationDataImport>,
   createLocation?: Maybe<CreateLocation>,
   updateLocation?: Maybe<UpdateLocation>,
   deleteLocation?: Maybe<DeleteLocation>,
@@ -1410,21 +1436,6 @@ export type MutationsUpdateHouseholdArgs = {
 
 export type MutationsDeleteHouseholdArgs = {
   householdId: Scalars['String']
-};
-
-
-export type MutationsCreateRegistrationDataImportArgs = {
-  registrationDataImportData: CreateRegistrationDataImportInput
-};
-
-
-export type MutationsUpdateRegistrationDataImportArgs = {
-  registrationDataImportData?: Maybe<UpdateRegistrationDataImportInput>
-};
-
-
-export type MutationsDeleteRegistrationDataImportArgs = {
-  registrationDataImportId: Scalars['String']
 };
 
 
@@ -1540,6 +1551,7 @@ export type ProgramNode = Node & {
   cashPlus: Scalars['Boolean'],
   populationGoal: Scalars['Int'],
   administrativeAreasOfImplementation: Scalars['String'],
+  households: HouseholdNodeConnection,
   cashPlans: CashPlanNodeConnection,
   totalEntitledQuantity?: Maybe<Scalars['Decimal']>,
   totalDeliveredQuantity?: Maybe<Scalars['Decimal']>,
@@ -1555,6 +1567,14 @@ export type ProgramNodeLocationsArgs = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   title?: Maybe<Scalars['String']>
+};
+
+
+export type ProgramNodeHouseholdsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -1634,17 +1654,19 @@ export type Query = {
   allTargetPopulation?: Maybe<TargetPopulationNodeConnection>,
   household?: Maybe<HouseholdNode>,
   allHouseholds?: Maybe<HouseholdNodeConnection>,
-  registrationDataImport?: Maybe<RegistrationDataImportNode>,
-  allRegistrationDataImports?: Maybe<RegistrationDataImportNodeConnection>,
   individual?: Maybe<IndividualNode>,
   allIndividuals?: Maybe<IndividualNodeConnection>,
   me?: Maybe<UserObjectType>,
+  allUsers?: Maybe<UserNodeConnection>,
   importedHousehold?: Maybe<ImportedHouseholdNode>,
   allImportedHouseholds?: Maybe<ImportedHouseholdNodeConnection>,
   registrationDataImportDatahub?: Maybe<RegistrationDataImportDatahubNode>,
   allRegistrationDataImportsDatahub?: Maybe<RegistrationDataImportDatahubNodeConnection>,
   importedIndividual?: Maybe<ImportedIndividualNode>,
   allImportedIndividuals?: Maybe<ImportedIndividualNodeConnection>,
+  registrationDataImport?: Maybe<RegistrationDataImportNode>,
+  allRegistrationDataImports?: Maybe<RegistrationDataImportNodeConnection>,
+  registrationDataStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   _debug?: Maybe<DjangoDebug>,
 };
 
@@ -1708,6 +1730,7 @@ export type QueryAllProgramsArgs = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   id?: Maybe<Scalars['UUID']>,
+  status?: Maybe<Scalars['String']>,
   businessArea?: Maybe<Scalars['String']>
 };
 
@@ -1763,21 +1786,10 @@ export type QueryAllHouseholdsArgs = {
   familySize_Range?: Maybe<Scalars['Int']>,
   familySize_Lte?: Maybe<Scalars['Int']>,
   familySize_Gte?: Maybe<Scalars['Int']>,
+  targetPopulations?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  programs?: Maybe<Array<Maybe<Scalars['ID']>>>,
   familySize?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
-};
-
-
-export type QueryRegistrationDataImportArgs = {
-  id: Scalars['ID']
-};
-
-
-export type QueryAllRegistrationDataImportsArgs = {
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -1791,10 +1803,22 @@ export type QueryAllIndividualsArgs = {
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
+  programme?: Maybe<Scalars['String']>,
+  businessArea?: Maybe<Scalars['String']>,
   fullName?: Maybe<Scalars['String']>,
   fullName_Icontains?: Maybe<Scalars['String']>,
   sex?: Maybe<Array<Maybe<Scalars['ID']>>>,
   age?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type QueryAllUsersArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  fullName?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -1856,12 +1880,24 @@ export type QueryAllImportedIndividualsArgs = {
   orderBy?: Maybe<Scalars['String']>
 };
 
-export enum RegistrationDataImportDatahubDataSource {
-  Xls = 'XLS',
-  A_3RdParty = 'A_3RD_PARTY',
-  Xml = 'XML',
-  Other = 'OTHER'
-}
+
+export type QueryRegistrationDataImportArgs = {
+  id: Scalars['ID']
+};
+
+
+export type QueryAllRegistrationDataImportsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  importedBy_Id?: Maybe<Scalars['UUID']>,
+  importDate?: Maybe<Scalars['Date']>,
+  status?: Maybe<Scalars['String']>,
+  name?: Maybe<Scalars['String']>,
+  name_Icontains?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
+};
 
 export type RegistrationDataImportDatahubNode = Node & {
    __typename?: 'RegistrationDataImportDatahubNode',
@@ -1869,10 +1905,8 @@ export type RegistrationDataImportDatahubNode = Node & {
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
   name: Scalars['String'],
-  status: RegistrationDataImportDatahubStatus,
   importDate: Scalars['DateTime'],
-  importedBy: Scalars['String'],
-  dataSource: RegistrationDataImportDatahubDataSource,
+  hctId?: Maybe<Scalars['UUID']>,
   households: ImportedHouseholdNodeConnection,
   individuals: ImportedIndividualNodeConnection,
 };
@@ -1907,11 +1941,6 @@ export type RegistrationDataImportDatahubNodeEdge = {
   cursor: Scalars['String'],
 };
 
-export enum RegistrationDataImportDatahubStatus {
-  InProgress = 'IN_PROGRESS',
-  Done = 'DONE'
-}
-
 export enum RegistrationDataImportDataSource {
   Xls = 'XLS',
   A_3RdParty = 'A_3RD_PARTY',
@@ -1927,10 +1956,11 @@ export type RegistrationDataImportNode = Node & {
   name: Scalars['String'],
   status: RegistrationDataImportStatus,
   importDate: Scalars['DateTime'],
-  importedBy: UserObjectType,
+  importedBy: UserNode,
   dataSource: RegistrationDataImportDataSource,
   numberOfIndividuals: Scalars['Int'],
   numberOfHouseholds: Scalars['Int'],
+  datahubId?: Maybe<Scalars['UUID']>,
   households: HouseholdNodeConnection,
   individuals: IndividualNodeConnection,
 };
@@ -1966,8 +1996,10 @@ export type RegistrationDataImportNodeEdge = {
 };
 
 export enum RegistrationDataImportStatus {
-  InProgress = 'IN_PROGRESS',
-  Done = 'DONE'
+  InReview = 'IN_REVIEW',
+  Approved = 'APPROVED',
+  Merged = 'MERGED',
+  Merging = 'MERGING'
 }
 
 export type TargetPopulationNode = Node & {
@@ -1975,7 +2007,7 @@ export type TargetPopulationNode = Node & {
   id: Scalars['ID'],
   name: Scalars['String'],
   createdAt: Scalars['DateTime'],
-  createdBy?: Maybe<UserObjectType>,
+  createdBy?: Maybe<UserNode>,
   rules: Scalars['JSONString'],
   households: HouseholdNodeConnection,
   paymentRecords: PaymentRecordNodeConnection,
@@ -2100,20 +2132,69 @@ export type UpdateProgramInput = {
   businessAreaSlug?: Maybe<Scalars['String']>,
 };
 
-export type UpdateRegistrationDataImport = {
-   __typename?: 'UpdateRegistrationDataImport',
-  registrationDataImport?: Maybe<RegistrationDataImportNode>,
+export type UserNode = Node & {
+   __typename?: 'UserNode',
+  lastLogin?: Maybe<Scalars['DateTime']>,
+  isSuperuser: Scalars['Boolean'],
+  username: Scalars['String'],
+  firstName: Scalars['String'],
+  lastName: Scalars['String'],
+  email: Scalars['String'],
+  isStaff: Scalars['Boolean'],
+  isActive: Scalars['Boolean'],
+  dateJoined: Scalars['DateTime'],
+  id: Scalars['ID'],
+  businessAreas: BusinessAreaNodeConnection,
+  cashPlans: CashPlanNodeConnection,
+  targetPopulations: TargetPopulationNodeConnection,
+  registrationDataImports: RegistrationDataImportNodeConnection,
 };
 
-export type UpdateRegistrationDataImportInput = {
-  id: Scalars['String'],
-  name?: Maybe<Scalars['String']>,
-  status?: Maybe<Scalars['String']>,
-  importDate?: Maybe<Scalars['DateTime']>,
-  importedById?: Maybe<Scalars['String']>,
-  dataSource?: Maybe<Scalars['String']>,
-  numberOfIndividuals?: Maybe<Scalars['Int']>,
-  numberOfHouseholds?: Maybe<Scalars['Int']>,
+
+export type UserNodeBusinessAreasArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  id?: Maybe<Scalars['UUID']>
+};
+
+
+export type UserNodeCashPlansArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type UserNodeTargetPopulationsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type UserNodeRegistrationDataImportsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+export type UserNodeConnection = {
+   __typename?: 'UserNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<UserNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type UserNodeEdge = {
+   __typename?: 'UserNodeEdge',
+  node?: Maybe<UserNode>,
+  cursor: Scalars['String'],
 };
 
 export type UserObjectType = {
@@ -2129,9 +2210,9 @@ export type UserObjectType = {
   dateJoined: Scalars['DateTime'],
   id: Scalars['UUID'],
   businessAreas: BusinessAreaNodeConnection,
-  registrationDataImports: RegistrationDataImportNodeConnection,
   cashPlans: CashPlanNodeConnection,
   targetPopulations: TargetPopulationNodeConnection,
+  registrationDataImports: RegistrationDataImportNodeConnection,
 };
 
 
@@ -2144,14 +2225,6 @@ export type UserObjectTypeBusinessAreasArgs = {
 };
 
 
-export type UserObjectTypeRegistrationDataImportsArgs = {
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
-};
-
-
 export type UserObjectTypeCashPlansArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -2161,6 +2234,14 @@ export type UserObjectTypeCashPlansArgs = {
 
 
 export type UserObjectTypeTargetPopulationsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type UserObjectTypeRegistrationDataImportsArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -2269,7 +2350,9 @@ export type AllHouseholdsQueryVariables = {
   last?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>,
-  familySize?: Maybe<Scalars['String']>
+  familySize?: Maybe<Scalars['String']>,
+  programs?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  headOfHouseholdFullNameIcontains?: Maybe<Scalars['String']>
 };
 
 
@@ -2286,30 +2369,16 @@ export type AllHouseholdsQuery = (
       & Pick<HouseholdNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'HouseholdNode' }
-        & Pick<HouseholdNode, 'id' | 'createdAt' | 'householdCaId' | 'residenceStatus' | 'familySize'>
-        & { location: (
+        & Pick<HouseholdNode, 'id' | 'createdAt' | 'householdCaId' | 'residenceStatus' | 'familySize' | 'totalCashReceived' | 'registrationDate'>
+        & { headOfHousehold: Maybe<(
+          { __typename?: 'IndividualNode' }
+          & Pick<IndividualNode, 'id' | 'fullName'>
+        )>, location: (
           { __typename?: 'LocationNode' }
           & Pick<LocationNode, 'id' | 'title'>
         ), individuals: (
           { __typename?: 'IndividualNodeConnection' }
           & Pick<IndividualNodeConnection, 'totalCount'>
-        ), paymentRecords: (
-          { __typename?: 'PaymentRecordNodeConnection' }
-          & { edges: Array<Maybe<(
-            { __typename?: 'PaymentRecordNodeEdge' }
-            & { node: Maybe<(
-              { __typename?: 'PaymentRecordNode' }
-              & Pick<PaymentRecordNode, 'id' | 'headOfHousehold'>
-              & { cashPlan: (
-                { __typename?: 'CashPlanNode' }
-                & Pick<CashPlanNode, 'id' | 'totalDeliveredQuantity'>
-                & { program: (
-                  { __typename?: 'ProgramNode' }
-                  & Pick<ProgramNode, 'id' | 'name'>
-                ) }
-              ) }
-            )> }
-          )>> }
         ) }
       )> }
     )>> }
@@ -2321,7 +2390,10 @@ export type AllIndividualsQueryVariables = {
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  fullName_Icontains?: Maybe<Scalars['String']>
+  fullNameContains?: Maybe<Scalars['String']>,
+  sex?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  age?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
 };
 
 
@@ -2335,6 +2407,7 @@ export type AllIndividualsQuery = (
       & Pick<PageInfo, 'startCursor' | 'endCursor'>
     ), edges: Array<Maybe<(
       { __typename?: 'IndividualNodeEdge' }
+      & Pick<IndividualNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'IndividualNode' }
         & Pick<IndividualNode, 'id' | 'createdAt' | 'updatedAt' | 'individualCaId' | 'fullName' | 'sex' | 'dob' | 'nationality' | 'martialStatus' | 'phoneNumber' | 'identificationType' | 'identificationNumber'>
@@ -2375,8 +2448,8 @@ export type AllLogEntriesQuery = (
         { __typename?: 'LogEntryObject' }
         & Pick<LogEntryObject, 'id' | 'action' | 'changesDisplayDict' | 'timestamp'>
         & { actor: Maybe<(
-          { __typename?: 'UserObjectType' }
-          & Pick<UserObjectType, 'id' | 'firstName' | 'lastName'>
+          { __typename?: 'UserNode' }
+          & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
         )> }
       )> }
     )>> }
@@ -2420,7 +2493,8 @@ export type AllPaymentRecordsQuery = (
 );
 
 export type AllProgramsQueryVariables = {
-  businessArea?: Maybe<Scalars['String']>
+  businessArea?: Maybe<Scalars['String']>,
+  status?: Maybe<Scalars['String']>
 };
 
 
@@ -2436,6 +2510,62 @@ export type AllProgramsQuery = (
       & { node: Maybe<(
         { __typename?: 'ProgramNode' }
         & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'programCaId' | 'description' | 'budget' | 'frequencyOfPayments' | 'populationGoal' | 'sector' | 'totalNumberOfHouseholds'>
+      )> }
+    )>> }
+  )> }
+);
+
+export type AllRegistrationDataImportsQueryVariables = {
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  orderBy?: Maybe<Scalars['String']>,
+  name_Icontains?: Maybe<Scalars['String']>,
+  importedBy_Id?: Maybe<Scalars['UUID']>,
+  status?: Maybe<Scalars['String']>,
+  importDate?: Maybe<Scalars['Date']>
+};
+
+
+export type AllRegistrationDataImportsQuery = (
+  { __typename?: 'Query' }
+  & { allRegistrationDataImports: Maybe<(
+    { __typename?: 'RegistrationDataImportNodeConnection' }
+    & Pick<RegistrationDataImportNodeConnection, 'totalCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'startCursor' | 'endCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'RegistrationDataImportNodeEdge' }
+      & Pick<RegistrationDataImportNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'RegistrationDataImportNode' }
+        & Pick<RegistrationDataImportNode, 'id' | 'createdAt' | 'name' | 'status' | 'importDate' | 'dataSource' | 'numberOfHouseholds'>
+        & { importedBy: (
+          { __typename?: 'UserNode' }
+          & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
+        ) }
+      )> }
+    )>> }
+  )> }
+);
+
+export type AllUsersQueryVariables = {};
+
+
+export type AllUsersQuery = (
+  { __typename?: 'Query' }
+  & { allUsers: Maybe<(
+    { __typename?: 'UserNodeConnection' }
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'endCursor' | 'startCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'UserNodeEdge' }
+      & { node: Maybe<(
+        { __typename?: 'UserNode' }
+        & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
       )> }
     )>> }
   )> }
@@ -2473,8 +2603,11 @@ export type HouseholdQuery = (
   { __typename?: 'Query' }
   & { household: Maybe<(
     { __typename?: 'HouseholdNode' }
-    & Pick<HouseholdNode, 'id' | 'createdAt' | 'familySize' | 'nationality' | 'residenceStatus'>
-    & { individuals: (
+    & Pick<HouseholdNode, 'id' | 'createdAt' | 'familySize' | 'nationality' | 'totalCashReceived' | 'residenceStatus'>
+    & { headOfHousehold: Maybe<(
+      { __typename?: 'IndividualNode' }
+      & Pick<IndividualNode, 'id' | 'fullName'>
+    )>, individuals: (
       { __typename?: 'IndividualNodeConnection' }
       & Pick<IndividualNodeConnection, 'totalCount'>
       & { edges: Array<Maybe<(
@@ -2501,6 +2634,15 @@ export type HouseholdQuery = (
     ), location: (
       { __typename?: 'LocationNode' }
       & Pick<LocationNode, 'id' | 'title'>
+    ), programs: (
+      { __typename?: 'ProgramNodeConnection' }
+      & { edges: Array<Maybe<(
+        { __typename?: 'ProgramNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'ProgramNode' }
+          & Pick<ProgramNode, 'name'>
+        )> }
+      )>> }
     ), paymentRecords: (
       { __typename?: 'PaymentRecordNodeConnection' }
       & { edges: Array<Maybe<(
@@ -2629,6 +2771,17 @@ export type ProgrammeChoiceDataQuery = (
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
   )>>>, programStatusChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>> }
+);
+
+export type RegistrationChoicesQueryVariables = {};
+
+
+export type RegistrationChoicesQuery = (
+  { __typename?: 'Query' }
+  & { registrationDataStatusChoices: Maybe<Array<Maybe<(
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
   )>>> }
@@ -2949,8 +3102,8 @@ export type AllCashPlansQueryHookResult = ReturnType<typeof useAllCashPlansQuery
 export type AllCashPlansLazyQueryHookResult = ReturnType<typeof useAllCashPlansLazyQuery>;
 export type AllCashPlansQueryResult = ApolloReactCommon.QueryResult<AllCashPlansQuery, AllCashPlansQueryVariables>;
 export const AllHouseholdsDocument = gql`
-    query AllHouseholds($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String) {
-  allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, familySize: $familySize, orderBy: $orderBy) {
+    query AllHouseholds($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $programs: [ID], $headOfHouseholdFullNameIcontains: String) {
+  allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, familySize: $familySize, orderBy: $orderBy, programs: $programs, headOfHousehold_FullName_Icontains: $headOfHouseholdFullNameIcontains) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -2966,28 +3119,18 @@ export const AllHouseholdsDocument = gql`
         householdCaId
         residenceStatus
         familySize
+        totalCashReceived
+        registrationDate
+        headOfHousehold {
+          id
+          fullName
+        }
         location {
           id
           title
         }
         individuals {
           totalCount
-        }
-        paymentRecords {
-          edges {
-            node {
-              id
-              headOfHousehold
-              cashPlan {
-                id
-                program {
-                  id
-                  name
-                }
-                totalDeliveredQuantity
-              }
-            }
-          }
         }
       }
     }
@@ -3031,6 +3174,8 @@ export function withAllHouseholds<TProps, TChildProps = {}>(operationOptions?: A
  *      businessArea: // value for 'businessArea'
  *      orderBy: // value for 'orderBy'
  *      familySize: // value for 'familySize'
+ *      programs: // value for 'programs'
+ *      headOfHouseholdFullNameIcontains: // value for 'headOfHouseholdFullNameIcontains'
  *   },
  * });
  */
@@ -3044,14 +3189,15 @@ export type AllHouseholdsQueryHookResult = ReturnType<typeof useAllHouseholdsQue
 export type AllHouseholdsLazyQueryHookResult = ReturnType<typeof useAllHouseholdsLazyQuery>;
 export type AllHouseholdsQueryResult = ApolloReactCommon.QueryResult<AllHouseholdsQuery, AllHouseholdsQueryVariables>;
 export const AllIndividualsDocument = gql`
-    query AllIndividuals($before: String, $after: String, $first: Int, $last: Int, $fullName_Icontains: String) {
-  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Icontains: $fullName_Icontains) {
+    query AllIndividuals($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [ID], $age: String, $orderBy: String) {
+  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Icontains: $fullNameContains, sex: $sex, age: $age, orderBy: $orderBy) {
     totalCount
     pageInfo {
       startCursor
       endCursor
     }
     edges {
+      cursor
       node {
         id
         createdAt
@@ -3112,7 +3258,10 @@ export function withAllIndividuals<TProps, TChildProps = {}>(operationOptions?: 
  *      after: // value for 'after'
  *      first: // value for 'first'
  *      last: // value for 'last'
- *      fullName_Icontains: // value for 'fullName_Icontains'
+ *      fullNameContains: // value for 'fullNameContains'
+ *      sex: // value for 'sex'
+ *      age: // value for 'age'
+ *      orderBy: // value for 'orderBy'
  *   },
  * });
  */
@@ -3287,8 +3436,8 @@ export type AllPaymentRecordsQueryHookResult = ReturnType<typeof useAllPaymentRe
 export type AllPaymentRecordsLazyQueryHookResult = ReturnType<typeof useAllPaymentRecordsLazyQuery>;
 export type AllPaymentRecordsQueryResult = ApolloReactCommon.QueryResult<AllPaymentRecordsQuery, AllPaymentRecordsQueryVariables>;
 export const AllProgramsDocument = gql`
-    query AllPrograms($businessArea: String) {
-  allPrograms(businessArea: $businessArea) {
+    query AllPrograms($businessArea: String, $status: String) {
+  allPrograms(businessArea: $businessArea, status: $status) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -3345,6 +3494,7 @@ export function withAllPrograms<TProps, TChildProps = {}>(operationOptions?: Apo
  * const { data, loading, error } = useAllProgramsQuery({
  *   variables: {
  *      businessArea: // value for 'businessArea'
+ *      status: // value for 'status'
  *   },
  * });
  */
@@ -3357,6 +3507,149 @@ export function useAllProgramsLazyQuery(baseOptions?: ApolloReactHooks.LazyQuery
 export type AllProgramsQueryHookResult = ReturnType<typeof useAllProgramsQuery>;
 export type AllProgramsLazyQueryHookResult = ReturnType<typeof useAllProgramsLazyQuery>;
 export type AllProgramsQueryResult = ApolloReactCommon.QueryResult<AllProgramsQuery, AllProgramsQueryVariables>;
+export const AllRegistrationDataImportsDocument = gql`
+    query AllRegistrationDataImports($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name_Icontains: String, $importedBy_Id: UUID, $status: String, $importDate: Date) {
+  allRegistrationDataImports(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name_Icontains: $name_Icontains, importedBy_Id: $importedBy_Id, status: $status, importDate: $importDate) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+    totalCount
+    edges {
+      cursor
+      node {
+        id
+        createdAt
+        name
+        status
+        importDate
+        importedBy {
+          id
+          firstName
+          lastName
+        }
+        dataSource
+        numberOfHouseholds
+        numberOfHouseholds
+      }
+    }
+  }
+}
+    `;
+export type AllRegistrationDataImportsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables>, 'query'>;
+
+    export const AllRegistrationDataImportsComponent = (props: AllRegistrationDataImportsComponentProps) => (
+      <ApolloReactComponents.Query<AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables> query={AllRegistrationDataImportsDocument} {...props} />
+    );
+    
+export type AllRegistrationDataImportsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables> & TChildProps;
+export function withAllRegistrationDataImports<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllRegistrationDataImportsQuery,
+  AllRegistrationDataImportsQueryVariables,
+  AllRegistrationDataImportsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables, AllRegistrationDataImportsProps<TChildProps>>(AllRegistrationDataImportsDocument, {
+      alias: 'allRegistrationDataImports',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllRegistrationDataImportsQuery__
+ *
+ * To run a query within a React component, call `useAllRegistrationDataImportsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllRegistrationDataImportsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllRegistrationDataImportsQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      orderBy: // value for 'orderBy'
+ *      name_Icontains: // value for 'name_Icontains'
+ *      importedBy_Id: // value for 'importedBy_Id'
+ *      status: // value for 'status'
+ *      importDate: // value for 'importDate'
+ *   },
+ * });
+ */
+export function useAllRegistrationDataImportsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables>(AllRegistrationDataImportsDocument, baseOptions);
+      }
+export function useAllRegistrationDataImportsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables>(AllRegistrationDataImportsDocument, baseOptions);
+        }
+export type AllRegistrationDataImportsQueryHookResult = ReturnType<typeof useAllRegistrationDataImportsQuery>;
+export type AllRegistrationDataImportsLazyQueryHookResult = ReturnType<typeof useAllRegistrationDataImportsLazyQuery>;
+export type AllRegistrationDataImportsQueryResult = ApolloReactCommon.QueryResult<AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables>;
+export const AllUsersDocument = gql`
+    query AllUsers {
+  allUsers {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      endCursor
+      startCursor
+    }
+    edges {
+      node {
+        id
+        firstName
+        lastName
+      }
+    }
+  }
+}
+    `;
+export type AllUsersComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllUsersQuery, AllUsersQueryVariables>, 'query'>;
+
+    export const AllUsersComponent = (props: AllUsersComponentProps) => (
+      <ApolloReactComponents.Query<AllUsersQuery, AllUsersQueryVariables> query={AllUsersDocument} {...props} />
+    );
+    
+export type AllUsersProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllUsersQuery, AllUsersQueryVariables> & TChildProps;
+export function withAllUsers<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllUsersQuery,
+  AllUsersQueryVariables,
+  AllUsersProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllUsersQuery, AllUsersQueryVariables, AllUsersProps<TChildProps>>(AllUsersDocument, {
+      alias: 'allUsers',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllUsersQuery__
+ *
+ * To run a query within a React component, call `useAllUsersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllUsersQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllUsersQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useAllUsersQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllUsersQuery, AllUsersQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllUsersQuery, AllUsersQueryVariables>(AllUsersDocument, baseOptions);
+      }
+export function useAllUsersLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllUsersQuery, AllUsersQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllUsersQuery, AllUsersQueryVariables>(AllUsersDocument, baseOptions);
+        }
+export type AllUsersQueryHookResult = ReturnType<typeof useAllUsersQuery>;
+export type AllUsersLazyQueryHookResult = ReturnType<typeof useAllUsersLazyQuery>;
+export type AllUsersQueryResult = ApolloReactCommon.QueryResult<AllUsersQuery, AllUsersQueryVariables>;
 export const CashPlanDocument = gql`
     query CashPlan($id: ID!) {
   cashPlan(id: $id) {
@@ -3436,6 +3729,11 @@ export const HouseholdDocument = gql`
     createdAt
     familySize
     nationality
+    totalCashReceived
+    headOfHousehold {
+      id
+      fullName
+    }
     individuals {
       totalCount
       edges {
@@ -3466,6 +3764,13 @@ export const HouseholdDocument = gql`
       title
     }
     residenceStatus
+    programs {
+      edges {
+        node {
+          name
+        }
+      }
+    }
     paymentRecords {
       edges {
         node {
@@ -3881,6 +4186,56 @@ export function useProgrammeChoiceDataLazyQuery(baseOptions?: ApolloReactHooks.L
 export type ProgrammeChoiceDataQueryHookResult = ReturnType<typeof useProgrammeChoiceDataQuery>;
 export type ProgrammeChoiceDataLazyQueryHookResult = ReturnType<typeof useProgrammeChoiceDataLazyQuery>;
 export type ProgrammeChoiceDataQueryResult = ApolloReactCommon.QueryResult<ProgrammeChoiceDataQuery, ProgrammeChoiceDataQueryVariables>;
+export const RegistrationChoicesDocument = gql`
+    query registrationChoices {
+  registrationDataStatusChoices {
+    name
+    value
+  }
+}
+    `;
+export type RegistrationChoicesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<RegistrationChoicesQuery, RegistrationChoicesQueryVariables>, 'query'>;
+
+    export const RegistrationChoicesComponent = (props: RegistrationChoicesComponentProps) => (
+      <ApolloReactComponents.Query<RegistrationChoicesQuery, RegistrationChoicesQueryVariables> query={RegistrationChoicesDocument} {...props} />
+    );
+    
+export type RegistrationChoicesProps<TChildProps = {}> = ApolloReactHoc.DataProps<RegistrationChoicesQuery, RegistrationChoicesQueryVariables> & TChildProps;
+export function withRegistrationChoices<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  RegistrationChoicesQuery,
+  RegistrationChoicesQueryVariables,
+  RegistrationChoicesProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, RegistrationChoicesQuery, RegistrationChoicesQueryVariables, RegistrationChoicesProps<TChildProps>>(RegistrationChoicesDocument, {
+      alias: 'registrationChoices',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useRegistrationChoicesQuery__
+ *
+ * To run a query within a React component, call `useRegistrationChoicesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useRegistrationChoicesQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useRegistrationChoicesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useRegistrationChoicesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<RegistrationChoicesQuery, RegistrationChoicesQueryVariables>) {
+        return ApolloReactHooks.useQuery<RegistrationChoicesQuery, RegistrationChoicesQueryVariables>(RegistrationChoicesDocument, baseOptions);
+      }
+export function useRegistrationChoicesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<RegistrationChoicesQuery, RegistrationChoicesQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<RegistrationChoicesQuery, RegistrationChoicesQueryVariables>(RegistrationChoicesDocument, baseOptions);
+        }
+export type RegistrationChoicesQueryHookResult = ReturnType<typeof useRegistrationChoicesQuery>;
+export type RegistrationChoicesLazyQueryHookResult = ReturnType<typeof useRegistrationChoicesLazyQuery>;
+export type RegistrationChoicesQueryResult = ApolloReactCommon.QueryResult<RegistrationChoicesQuery, RegistrationChoicesQueryVariables>;
 
 
 export type ResolverTypeWrapper<T> = Promise<T> | T;
@@ -3970,15 +4325,18 @@ export type ResolversTypes = {
   LocationNodeEdge: ResolverTypeWrapper<LocationNodeEdge>,
   LocationNode: ResolverTypeWrapper<LocationNode>,
   BusinessAreaNode: ResolverTypeWrapper<BusinessAreaNode>,
-  UserObjectType: ResolverTypeWrapper<UserObjectType>,
+  UserNodeConnection: ResolverTypeWrapper<UserNodeConnection>,
+  UserNodeEdge: ResolverTypeWrapper<UserNodeEdge>,
+  UserNode: ResolverTypeWrapper<UserNode>,
   UUID: ResolverTypeWrapper<Scalars['UUID']>,
   BusinessAreaNodeConnection: ResolverTypeWrapper<BusinessAreaNodeConnection>,
   BusinessAreaNodeEdge: ResolverTypeWrapper<BusinessAreaNodeEdge>,
-  RegistrationDataImportNodeConnection: ResolverTypeWrapper<RegistrationDataImportNodeConnection>,
-  RegistrationDataImportNodeEdge: ResolverTypeWrapper<RegistrationDataImportNodeEdge>,
-  RegistrationDataImportNode: ResolverTypeWrapper<RegistrationDataImportNode>,
-  RegistrationDataImportStatus: RegistrationDataImportStatus,
-  RegistrationDataImportDataSource: RegistrationDataImportDataSource,
+  CashPlanNodeConnection: ResolverTypeWrapper<CashPlanNodeConnection>,
+  CashPlanNodeEdge: ResolverTypeWrapper<CashPlanNodeEdge>,
+  TargetPopulationNodeConnection: ResolverTypeWrapper<TargetPopulationNodeConnection>,
+  TargetPopulationNodeEdge: ResolverTypeWrapper<TargetPopulationNodeEdge>,
+  TargetPopulationNode: ResolverTypeWrapper<TargetPopulationNode>,
+  JSONString: ResolverTypeWrapper<Scalars['JSONString']>,
   HouseholdNodeConnection: ResolverTypeWrapper<HouseholdNodeConnection>,
   HouseholdNodeEdge: ResolverTypeWrapper<HouseholdNodeEdge>,
   HouseholdNode: ResolverTypeWrapper<HouseholdNode>,
@@ -3989,22 +4347,25 @@ export type ResolversTypes = {
   IndividualNationality: IndividualNationality,
   IndividualMartialStatus: IndividualMartialStatus,
   IndividualIdentificationType: IndividualIdentificationType,
-  IndividualWorkStatus: IndividualWorkStatus,
-  IndividualDisability: IndividualDisability,
+  RegistrationDataImportNode: ResolverTypeWrapper<RegistrationDataImportNode>,
+  RegistrationDataImportStatus: RegistrationDataImportStatus,
+  RegistrationDataImportDataSource: RegistrationDataImportDataSource,
   IndividualNodeConnection: ResolverTypeWrapper<IndividualNodeConnection>,
   IndividualNodeEdge: ResolverTypeWrapper<IndividualNodeEdge>,
-  PaymentRecordNodeConnection: ResolverTypeWrapper<PaymentRecordNodeConnection>,
-  PaymentRecordNodeEdge: ResolverTypeWrapper<PaymentRecordNodeEdge>,
-  TargetPopulationNodeConnection: ResolverTypeWrapper<TargetPopulationNodeConnection>,
-  TargetPopulationNodeEdge: ResolverTypeWrapper<TargetPopulationNodeEdge>,
-  TargetPopulationNode: ResolverTypeWrapper<TargetPopulationNode>,
-  JSONString: ResolverTypeWrapper<Scalars['JSONString']>,
-  CashPlanNodeConnection: ResolverTypeWrapper<CashPlanNodeConnection>,
-  CashPlanNodeEdge: ResolverTypeWrapper<CashPlanNodeEdge>,
+  IndividualWorkStatus: IndividualWorkStatus,
+  IndividualDisability: IndividualDisability,
+  IndividualSeriousIllness: IndividualSeriousIllness,
+  IndividualEnrolledInSchool: IndividualEnrolledInSchool,
+  IndividualEnrolledInNutritionProgramme: IndividualEnrolledInNutritionProgramme,
+  IndividualAdministrationOfRutf: IndividualAdministrationOfRutf,
   ProgramNodeConnection: ResolverTypeWrapper<ProgramNodeConnection>,
   ProgramNodeEdge: ResolverTypeWrapper<ProgramNodeEdge>,
-  Float: ResolverTypeWrapper<Scalars['Float']>,
+  PaymentRecordNodeConnection: ResolverTypeWrapper<PaymentRecordNodeConnection>,
+  PaymentRecordNodeEdge: ResolverTypeWrapper<PaymentRecordNodeEdge>,
   Decimal: ResolverTypeWrapper<Scalars['Decimal']>,
+  RegistrationDataImportNodeConnection: ResolverTypeWrapper<RegistrationDataImportNodeConnection>,
+  RegistrationDataImportNodeEdge: ResolverTypeWrapper<RegistrationDataImportNodeEdge>,
+  Float: ResolverTypeWrapper<Scalars['Float']>,
   ProgramFrequencyOfPayments: ProgramFrequencyOfPayments,
   ProgramSector: ProgramSector,
   ProgramScope: ProgramScope,
@@ -4017,6 +4378,7 @@ export type ResolversTypes = {
   PaymentEntitlementNode: ResolverTypeWrapper<PaymentEntitlementNode>,
   PaymentEntitlementDeliveryType: PaymentEntitlementDeliveryType,
   ChoiceObject: ResolverTypeWrapper<ChoiceObject>,
+  UserObjectType: ResolverTypeWrapper<UserObjectType>,
   ImportedHouseholdNode: ResolverTypeWrapper<ImportedHouseholdNode>,
   ImportedHouseholdResidenceStatus: ImportedHouseholdResidenceStatus,
   ImportedHouseholdNationality: ImportedHouseholdNationality,
@@ -4027,8 +4389,6 @@ export type ResolversTypes = {
   ImportedIndividualMartialStatus: ImportedIndividualMartialStatus,
   ImportedIndividualIdentificationType: ImportedIndividualIdentificationType,
   RegistrationDataImportDatahubNode: ResolverTypeWrapper<RegistrationDataImportDatahubNode>,
-  RegistrationDataImportDatahubStatus: RegistrationDataImportDatahubStatus,
-  RegistrationDataImportDatahubDataSource: RegistrationDataImportDatahubDataSource,
   ImportedHouseholdNodeConnection: ResolverTypeWrapper<ImportedHouseholdNodeConnection>,
   ImportedHouseholdNodeEdge: ResolverTypeWrapper<ImportedHouseholdNodeEdge>,
   ImportedIndividualNodeConnection: ResolverTypeWrapper<ImportedIndividualNodeConnection>,
@@ -4055,11 +4415,6 @@ export type ResolversTypes = {
   UpdateHouseholdInput: UpdateHouseholdInput,
   UpdateHousehold: ResolverTypeWrapper<UpdateHousehold>,
   DeleteHousehold: ResolverTypeWrapper<DeleteHousehold>,
-  CreateRegistrationDataImportInput: CreateRegistrationDataImportInput,
-  CreateRegistrationDataImport: ResolverTypeWrapper<CreateRegistrationDataImport>,
-  UpdateRegistrationDataImportInput: UpdateRegistrationDataImportInput,
-  UpdateRegistrationDataImport: ResolverTypeWrapper<UpdateRegistrationDataImport>,
-  DeleteRegistrationDataImport: ResolverTypeWrapper<DeleteRegistrationDataImport>,
   CreateLocationInput: CreateLocationInput,
   CreateLocation: ResolverTypeWrapper<CreateLocation>,
   UpdateLocationInput: UpdateLocationInput,
@@ -4087,15 +4442,18 @@ export type ResolversParentTypes = {
   LocationNodeEdge: LocationNodeEdge,
   LocationNode: LocationNode,
   BusinessAreaNode: BusinessAreaNode,
-  UserObjectType: UserObjectType,
+  UserNodeConnection: UserNodeConnection,
+  UserNodeEdge: UserNodeEdge,
+  UserNode: UserNode,
   UUID: Scalars['UUID'],
   BusinessAreaNodeConnection: BusinessAreaNodeConnection,
   BusinessAreaNodeEdge: BusinessAreaNodeEdge,
-  RegistrationDataImportNodeConnection: RegistrationDataImportNodeConnection,
-  RegistrationDataImportNodeEdge: RegistrationDataImportNodeEdge,
-  RegistrationDataImportNode: RegistrationDataImportNode,
-  RegistrationDataImportStatus: RegistrationDataImportStatus,
-  RegistrationDataImportDataSource: RegistrationDataImportDataSource,
+  CashPlanNodeConnection: CashPlanNodeConnection,
+  CashPlanNodeEdge: CashPlanNodeEdge,
+  TargetPopulationNodeConnection: TargetPopulationNodeConnection,
+  TargetPopulationNodeEdge: TargetPopulationNodeEdge,
+  TargetPopulationNode: TargetPopulationNode,
+  JSONString: Scalars['JSONString'],
   HouseholdNodeConnection: HouseholdNodeConnection,
   HouseholdNodeEdge: HouseholdNodeEdge,
   HouseholdNode: HouseholdNode,
@@ -4106,22 +4464,25 @@ export type ResolversParentTypes = {
   IndividualNationality: IndividualNationality,
   IndividualMartialStatus: IndividualMartialStatus,
   IndividualIdentificationType: IndividualIdentificationType,
-  IndividualWorkStatus: IndividualWorkStatus,
-  IndividualDisability: IndividualDisability,
+  RegistrationDataImportNode: RegistrationDataImportNode,
+  RegistrationDataImportStatus: RegistrationDataImportStatus,
+  RegistrationDataImportDataSource: RegistrationDataImportDataSource,
   IndividualNodeConnection: IndividualNodeConnection,
   IndividualNodeEdge: IndividualNodeEdge,
-  PaymentRecordNodeConnection: PaymentRecordNodeConnection,
-  PaymentRecordNodeEdge: PaymentRecordNodeEdge,
-  TargetPopulationNodeConnection: TargetPopulationNodeConnection,
-  TargetPopulationNodeEdge: TargetPopulationNodeEdge,
-  TargetPopulationNode: TargetPopulationNode,
-  JSONString: Scalars['JSONString'],
-  CashPlanNodeConnection: CashPlanNodeConnection,
-  CashPlanNodeEdge: CashPlanNodeEdge,
+  IndividualWorkStatus: IndividualWorkStatus,
+  IndividualDisability: IndividualDisability,
+  IndividualSeriousIllness: IndividualSeriousIllness,
+  IndividualEnrolledInSchool: IndividualEnrolledInSchool,
+  IndividualEnrolledInNutritionProgramme: IndividualEnrolledInNutritionProgramme,
+  IndividualAdministrationOfRutf: IndividualAdministrationOfRutf,
   ProgramNodeConnection: ProgramNodeConnection,
   ProgramNodeEdge: ProgramNodeEdge,
-  Float: Scalars['Float'],
+  PaymentRecordNodeConnection: PaymentRecordNodeConnection,
+  PaymentRecordNodeEdge: PaymentRecordNodeEdge,
   Decimal: Scalars['Decimal'],
+  RegistrationDataImportNodeConnection: RegistrationDataImportNodeConnection,
+  RegistrationDataImportNodeEdge: RegistrationDataImportNodeEdge,
+  Float: Scalars['Float'],
   ProgramFrequencyOfPayments: ProgramFrequencyOfPayments,
   ProgramSector: ProgramSector,
   ProgramScope: ProgramScope,
@@ -4134,6 +4495,7 @@ export type ResolversParentTypes = {
   PaymentEntitlementNode: PaymentEntitlementNode,
   PaymentEntitlementDeliveryType: PaymentEntitlementDeliveryType,
   ChoiceObject: ChoiceObject,
+  UserObjectType: UserObjectType,
   ImportedHouseholdNode: ImportedHouseholdNode,
   ImportedHouseholdResidenceStatus: ImportedHouseholdResidenceStatus,
   ImportedHouseholdNationality: ImportedHouseholdNationality,
@@ -4144,8 +4506,6 @@ export type ResolversParentTypes = {
   ImportedIndividualMartialStatus: ImportedIndividualMartialStatus,
   ImportedIndividualIdentificationType: ImportedIndividualIdentificationType,
   RegistrationDataImportDatahubNode: RegistrationDataImportDatahubNode,
-  RegistrationDataImportDatahubStatus: RegistrationDataImportDatahubStatus,
-  RegistrationDataImportDatahubDataSource: RegistrationDataImportDatahubDataSource,
   ImportedHouseholdNodeConnection: ImportedHouseholdNodeConnection,
   ImportedHouseholdNodeEdge: ImportedHouseholdNodeEdge,
   ImportedIndividualNodeConnection: ImportedIndividualNodeConnection,
@@ -4172,11 +4532,6 @@ export type ResolversParentTypes = {
   UpdateHouseholdInput: UpdateHouseholdInput,
   UpdateHousehold: UpdateHousehold,
   DeleteHousehold: DeleteHousehold,
-  CreateRegistrationDataImportInput: CreateRegistrationDataImportInput,
-  CreateRegistrationDataImport: CreateRegistrationDataImport,
-  UpdateRegistrationDataImportInput: UpdateRegistrationDataImportInput,
-  UpdateRegistrationDataImport: UpdateRegistrationDataImport,
-  DeleteRegistrationDataImport: DeleteRegistrationDataImport,
   CreateLocationInput: CreateLocationInput,
   CreateLocation: CreateLocation,
   UpdateLocationInput: UpdateLocationInput,
@@ -4195,7 +4550,7 @@ export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends Reso
   regionName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   koboToken?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   slug?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  userSet?: Resolver<Array<ResolversTypes['UserObjectType']>, ParentType, ContextType>,
+  userSet?: Resolver<ResolversTypes['UserNodeConnection'], ParentType, ContextType, BusinessAreaNodeUserSetArgs>,
   locations?: Resolver<ResolversTypes['LocationNodeConnection'], ParentType, ContextType, BusinessAreaNodeLocationsArgs>,
   programSet?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, BusinessAreaNodeProgramSetArgs>,
 };
@@ -4223,7 +4578,7 @@ export type CashPlanNodeResolvers<ContextType = any, ParentType extends Resolver
   disbursementDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   numberOfHouseholds?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   createdDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  createdBy?: Resolver<Maybe<ResolversTypes['UserObjectType']>, ParentType, ContextType>,
+  createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   coverageDuration?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   coverageUnits?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   targetPopulation?: Resolver<ResolversTypes['TargetPopulationNode'], ParentType, ContextType>,
@@ -4276,10 +4631,6 @@ export type CreateProgramResolvers<ContextType = any, ParentType extends Resolve
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
 };
 
-export type CreateRegistrationDataImportResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateRegistrationDataImport'] = ResolversParentTypes['CreateRegistrationDataImport']> = {
-  registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
-};
-
 export interface DateScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Date'], any> {
   name: 'Date'
 }
@@ -4305,10 +4656,6 @@ export type DeleteLocationResolvers<ContextType = any, ParentType extends Resolv
 };
 
 export type DeleteProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteProgram'] = ResolversParentTypes['DeleteProgram']> = {
-  ok?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-};
-
-export type DeleteRegistrationDataImportResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteRegistrationDataImport'] = ResolversParentTypes['DeleteRegistrationDataImport']> = {
   ok?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
@@ -4347,9 +4694,12 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   representative?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
   registrationDataImportId?: Resolver<ResolversTypes['RegistrationDataImportNode'], ParentType, ContextType>,
   headOfHousehold?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
+  programs?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, HouseholdNodeProgramsArgs>,
+  registrationDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, HouseholdNodeIndividualsArgs>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, HouseholdNodePaymentRecordsArgs>,
   targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, HouseholdNodeTargetPopulationsArgs>,
+  totalCashReceived?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
 };
 
 export type HouseholdNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['HouseholdNodeConnection'] = ResolversParentTypes['HouseholdNodeConnection']> = {
@@ -4453,6 +4803,15 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   registrationDataImportId?: Resolver<ResolversTypes['RegistrationDataImportNode'], ParentType, ContextType>,
   workStatus?: Resolver<ResolversTypes['IndividualWorkStatus'], ParentType, ContextType>,
   disability?: Resolver<ResolversTypes['IndividualDisability'], ParentType, ContextType>,
+  seriousIllness?: Resolver<ResolversTypes['IndividualSeriousIllness'], ParentType, ContextType>,
+  ageFirstMarried?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  enrolledInSchool?: Resolver<ResolversTypes['IndividualEnrolledInSchool'], ParentType, ContextType>,
+  schoolAttendance?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  schoolType?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  yearsInSchool?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  minutesToSchool?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  enrolledInNutritionProgramme?: Resolver<Maybe<ResolversTypes['IndividualEnrolledInNutritionProgramme']>, ParentType, ContextType>,
+  administrationOfRutf?: Resolver<Maybe<ResolversTypes['IndividualAdministrationOfRutf']>, ParentType, ContextType>,
   representedHouseholds?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, IndividualNodeRepresentedHouseholdsArgs>,
   headingHousehold?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
 };
@@ -4513,7 +4872,7 @@ export type LogEntryObjectResolvers<ContextType = any, ParentType extends Resolv
   objectRepr?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   action?: Resolver<ResolversTypes['LogEntryAction'], ParentType, ContextType>,
   changes?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  actor?: Resolver<Maybe<ResolversTypes['UserObjectType']>, ParentType, ContextType>,
+  actor?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   remoteAddr?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   timestamp?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   changesDisplayDict?: Resolver<Maybe<ResolversTypes['JSONLazyString']>, ParentType, ContextType>,
@@ -4540,16 +4899,13 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   createHousehold?: Resolver<Maybe<ResolversTypes['CreateHousehold']>, ParentType, ContextType, MutationsCreateHouseholdArgs>,
   updateHousehold?: Resolver<Maybe<ResolversTypes['UpdateHousehold']>, ParentType, ContextType, MutationsUpdateHouseholdArgs>,
   deleteHousehold?: Resolver<Maybe<ResolversTypes['DeleteHousehold']>, ParentType, ContextType, RequireFields<MutationsDeleteHouseholdArgs, 'householdId'>>,
-  createRegistrationDataImport?: Resolver<Maybe<ResolversTypes['CreateRegistrationDataImport']>, ParentType, ContextType, RequireFields<MutationsCreateRegistrationDataImportArgs, 'registrationDataImportData'>>,
-  updateRegistrationDataImport?: Resolver<Maybe<ResolversTypes['UpdateRegistrationDataImport']>, ParentType, ContextType, MutationsUpdateRegistrationDataImportArgs>,
-  deleteRegistrationDataImport?: Resolver<Maybe<ResolversTypes['DeleteRegistrationDataImport']>, ParentType, ContextType, RequireFields<MutationsDeleteRegistrationDataImportArgs, 'registrationDataImportId'>>,
   createLocation?: Resolver<Maybe<ResolversTypes['CreateLocation']>, ParentType, ContextType, RequireFields<MutationsCreateLocationArgs, 'locationData'>>,
   updateLocation?: Resolver<Maybe<ResolversTypes['UpdateLocation']>, ParentType, ContextType, MutationsUpdateLocationArgs>,
   deleteLocation?: Resolver<Maybe<ResolversTypes['DeleteLocation']>, ParentType, ContextType, RequireFields<MutationsDeleteLocationArgs, 'locationId'>>,
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'LocationNode' | 'BusinessAreaNode' | 'RegistrationDataImportNode' | 'HouseholdNode' | 'IndividualNode' | 'TargetPopulationNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode', ParentType, ContextType>,
+  __resolveType: TypeResolveFn<'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'LocationNode' | 'BusinessAreaNode' | 'UserNode' | 'TargetPopulationNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode', ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
 };
 
@@ -4624,6 +4980,7 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   cashPlus?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   populationGoal?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   administrativeAreasOfImplementation?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, ProgramNodeHouseholdsArgs>,
   cashPlans?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, ProgramNodeCashPlansArgs>,
   totalEntitledQuantity?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
   totalDeliveredQuantity?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
@@ -4666,17 +5023,19 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allTargetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNodeConnection']>, ParentType, ContextType, QueryAllTargetPopulationArgs>,
   household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType, RequireFields<QueryHouseholdArgs, 'id'>>,
   allHouseholds?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, QueryAllHouseholdsArgs>,
-  registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType, RequireFields<QueryRegistrationDataImportArgs, 'id'>>,
-  allRegistrationDataImports?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNodeConnection']>, ParentType, ContextType, QueryAllRegistrationDataImportsArgs>,
   individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType, RequireFields<QueryIndividualArgs, 'id'>>,
   allIndividuals?: Resolver<Maybe<ResolversTypes['IndividualNodeConnection']>, ParentType, ContextType, QueryAllIndividualsArgs>,
   me?: Resolver<Maybe<ResolversTypes['UserObjectType']>, ParentType, ContextType>,
+  allUsers?: Resolver<Maybe<ResolversTypes['UserNodeConnection']>, ParentType, ContextType, QueryAllUsersArgs>,
   importedHousehold?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType, RequireFields<QueryImportedHouseholdArgs, 'id'>>,
   allImportedHouseholds?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNodeConnection']>, ParentType, ContextType, QueryAllImportedHouseholdsArgs>,
   registrationDataImportDatahub?: Resolver<Maybe<ResolversTypes['RegistrationDataImportDatahubNode']>, ParentType, ContextType, RequireFields<QueryRegistrationDataImportDatahubArgs, 'id'>>,
   allRegistrationDataImportsDatahub?: Resolver<Maybe<ResolversTypes['RegistrationDataImportDatahubNodeConnection']>, ParentType, ContextType, QueryAllRegistrationDataImportsDatahubArgs>,
   importedIndividual?: Resolver<Maybe<ResolversTypes['ImportedIndividualNode']>, ParentType, ContextType, RequireFields<QueryImportedIndividualArgs, 'id'>>,
   allImportedIndividuals?: Resolver<Maybe<ResolversTypes['ImportedIndividualNodeConnection']>, ParentType, ContextType, QueryAllImportedIndividualsArgs>,
+  registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType, RequireFields<QueryRegistrationDataImportArgs, 'id'>>,
+  allRegistrationDataImports?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNodeConnection']>, ParentType, ContextType, QueryAllRegistrationDataImportsArgs>,
+  registrationDataStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   _debug?: Resolver<Maybe<ResolversTypes['DjangoDebug']>, ParentType, ContextType>,
 };
 
@@ -4685,10 +5044,8 @@ export type RegistrationDataImportDatahubNodeResolvers<ContextType = any, Parent
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  status?: Resolver<ResolversTypes['RegistrationDataImportDatahubStatus'], ParentType, ContextType>,
   importDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  importedBy?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  dataSource?: Resolver<ResolversTypes['RegistrationDataImportDatahubDataSource'], ParentType, ContextType>,
+  hctId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
   households?: Resolver<ResolversTypes['ImportedHouseholdNodeConnection'], ParentType, ContextType, RegistrationDataImportDatahubNodeHouseholdsArgs>,
   individuals?: Resolver<ResolversTypes['ImportedIndividualNodeConnection'], ParentType, ContextType, RegistrationDataImportDatahubNodeIndividualsArgs>,
 };
@@ -4712,10 +5069,11 @@ export type RegistrationDataImportNodeResolvers<ContextType = any, ParentType ex
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['RegistrationDataImportStatus'], ParentType, ContextType>,
   importDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  importedBy?: Resolver<ResolversTypes['UserObjectType'], ParentType, ContextType>,
+  importedBy?: Resolver<ResolversTypes['UserNode'], ParentType, ContextType>,
   dataSource?: Resolver<ResolversTypes['RegistrationDataImportDataSource'], ParentType, ContextType>,
   numberOfIndividuals?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   numberOfHouseholds?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  datahubId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
   households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeHouseholdsArgs>,
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeIndividualsArgs>,
 };
@@ -4736,7 +5094,7 @@ export type TargetPopulationNodeResolvers<ContextType = any, ParentType extends 
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  createdBy?: Resolver<Maybe<ResolversTypes['UserObjectType']>, ParentType, ContextType>,
+  createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   rules?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, TargetPopulationNodeHouseholdsArgs>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, TargetPopulationNodePaymentRecordsArgs>,
@@ -4771,8 +5129,33 @@ export type UpdateProgramResolvers<ContextType = any, ParentType extends Resolve
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
 };
 
-export type UpdateRegistrationDataImportResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdateRegistrationDataImport'] = ResolversParentTypes['UpdateRegistrationDataImport']> = {
-  registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
+export type UserNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['UserNode'] = ResolversParentTypes['UserNode']> = {
+  lastLogin?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  isSuperuser?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  username?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  firstName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  lastName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  email?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  isStaff?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  isActive?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  dateJoined?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  businessAreas?: Resolver<ResolversTypes['BusinessAreaNodeConnection'], ParentType, ContextType, UserNodeBusinessAreasArgs>,
+  cashPlans?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, UserNodeCashPlansArgs>,
+  targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserNodeTargetPopulationsArgs>,
+  registrationDataImports?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, UserNodeRegistrationDataImportsArgs>,
+};
+
+export type UserNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['UserNodeConnection'] = ResolversParentTypes['UserNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['UserNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type UserNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['UserNodeEdge'] = ResolversParentTypes['UserNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
 };
 
 export type UserObjectTypeResolvers<ContextType = any, ParentType extends ResolversParentTypes['UserObjectType'] = ResolversParentTypes['UserObjectType']> = {
@@ -4787,9 +5170,9 @@ export type UserObjectTypeResolvers<ContextType = any, ParentType extends Resolv
   dateJoined?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
   businessAreas?: Resolver<ResolversTypes['BusinessAreaNodeConnection'], ParentType, ContextType, UserObjectTypeBusinessAreasArgs>,
-  registrationDataImports?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, UserObjectTypeRegistrationDataImportsArgs>,
   cashPlans?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, UserObjectTypeCashPlansArgs>,
   targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserObjectTypeTargetPopulationsArgs>,
+  registrationDataImports?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, UserObjectTypeRegistrationDataImportsArgs>,
 };
 
 export interface UuidScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['UUID'], any> {
@@ -4808,7 +5191,6 @@ export type Resolvers<ContextType = any> = {
   CreateHousehold?: CreateHouseholdResolvers<ContextType>,
   CreateLocation?: CreateLocationResolvers<ContextType>,
   CreateProgram?: CreateProgramResolvers<ContextType>,
-  CreateRegistrationDataImport?: CreateRegistrationDataImportResolvers<ContextType>,
   Date?: GraphQLScalarType,
   DateTime?: GraphQLScalarType,
   Decimal?: GraphQLScalarType,
@@ -4816,7 +5198,6 @@ export type Resolvers<ContextType = any> = {
   DeleteHousehold?: DeleteHouseholdResolvers<ContextType>,
   DeleteLocation?: DeleteLocationResolvers<ContextType>,
   DeleteProgram?: DeleteProgramResolvers<ContextType>,
-  DeleteRegistrationDataImport?: DeleteRegistrationDataImportResolvers<ContextType>,
   DjangoDebug?: DjangoDebugResolvers<ContextType>,
   DjangoDebugSQL?: DjangoDebugSqlResolvers<ContextType>,
   HouseholdNode?: HouseholdNodeResolvers<ContextType>,
@@ -4863,7 +5244,9 @@ export type Resolvers<ContextType = any> = {
   UpdateHousehold?: UpdateHouseholdResolvers<ContextType>,
   UpdateLocation?: UpdateLocationResolvers<ContextType>,
   UpdateProgram?: UpdateProgramResolvers<ContextType>,
-  UpdateRegistrationDataImport?: UpdateRegistrationDataImportResolvers<ContextType>,
+  UserNode?: UserNodeResolvers<ContextType>,
+  UserNodeConnection?: UserNodeConnectionResolvers<ContextType>,
+  UserNodeEdge?: UserNodeEdgeResolvers<ContextType>,
   UserObjectType?: UserObjectTypeResolvers<ContextType>,
   UUID?: GraphQLScalarType,
 };

@@ -5,13 +5,13 @@ export const headCells: HeadCell<HouseholdNode>[] = [
   {
     disablePadding: false,
     label: 'Household ID',
-    id: 'householdCaId',
+    id: 'id',
     numeric: false,
   },
   {
     disablePadding: false,
     label: 'Head of Household',
-    id: 'paymentRecords',
+    id: 'head_of_household__full_name',
     numeric: false,
   },
   {
@@ -23,7 +23,7 @@ export const headCells: HeadCell<HouseholdNode>[] = [
   {
     disablePadding: false,
     label: 'Location',
-    id: 'location',
+    id: 'location__title',
     numeric: false,
   },
   {
@@ -35,13 +35,13 @@ export const headCells: HeadCell<HouseholdNode>[] = [
   {
     disablePadding: false,
     label: 'Total Cash Received',
-    id: 'paymentRecords',
+    id: 'totalCash',
     numeric: true,
   },
   {
     disablePadding: false,
     label: 'Registration Date',
-    id: 'createdAt',
+    id: 'registrationDate',
     numeric: true,
   },
 ];
