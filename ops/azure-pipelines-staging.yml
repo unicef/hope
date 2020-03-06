@@ -67,6 +67,7 @@ stages:
               install: true
               force: true
               debug: true
+              wait: false
               overrideValues: "
                 backend.staticStorage.secretName=$(staticStorageSecretName),\
                 backend.staticStorage.accountName=$(staticStorageAccountName),\
