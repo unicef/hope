@@ -2671,7 +2671,8 @@ export type AllTargetPopulationsQueryVariables = {
   after?: Maybe<Scalars['String']>,
   before?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
+  last?: Maybe<Scalars['Int']>,
+  orderBy?: Maybe<Scalars['String']>
 };
 
 
@@ -2685,7 +2686,7 @@ export type AllTargetPopulationsQuery = (
       & Pick<TargetPopulationNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'TargetPopulationNode' }
-        & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'createdAt'>
+        & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'createdAt' | 'lastEditedAt' | 'totalHouseholds' | 'totalFamilySize'>
         & { createdBy: Maybe<(
           { __typename?: 'UserNode' }
           & Pick<UserNode, 'firstName' | 'lastName'>
@@ -3764,14 +3765,17 @@ export type AllRegistrationDataImportsQueryHookResult = ReturnType<typeof useAll
 export type AllRegistrationDataImportsLazyQueryHookResult = ReturnType<typeof useAllRegistrationDataImportsLazyQuery>;
 export type AllRegistrationDataImportsQueryResult = ApolloReactCommon.QueryResult<AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables>;
 export const AllTargetPopulationsDocument = gql`
-    query AllTargetPopulations($after: String, $before: String, $first: Int, $last: Int) {
-  allTargetPopulation(after: $after, before: $before, first: $first, last: $last) {
+    query AllTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String) {
+  allTargetPopulation(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy) {
     edges {
       node {
         id
         name
         status
         createdAt
+        lastEditedAt
+        totalHouseholds
+        totalFamilySize
         createdBy {
           firstName
           lastName
@@ -3818,6 +3822,7 @@ export function withAllTargetPopulations<TProps, TChildProps = {}>(operationOpti
  *      before: // value for 'before'
  *      first: // value for 'first'
  *      last: // value for 'last'
+ *      orderBy: // value for 'orderBy'
  *   },
  * });
  */
