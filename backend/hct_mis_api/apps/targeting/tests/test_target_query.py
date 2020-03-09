@@ -23,19 +23,23 @@ class TestTargetPopulationQuery(APITestCase):
                          createdAt
                          lastEditedAt
                          households {
-                            householdCaId
-                            familySize
-                            address
-                            location {
-                                title
-                            }
-                            registrationDataImportId {
-                                name
-                            }
-                            headOfHousehold {
-                                fullName
-                                firstName
-                                lastName
+                            edges {
+                                node {
+                                    householdCaId
+                                    familySize
+                                    address
+                                    location {
+                                        title
+                                    }
+                                    registrationDataImportId {
+                                        name
+                                    }
+                                    headOfHousehold {
+                                        fullName
+                                        firstName
+                                        lastName
+                                    }
+                                }
                             }
                          }
                     }
@@ -56,21 +60,25 @@ class TestTargetPopulationQuery(APITestCase):
                 createdAt
                 lastEditedAt
                 households {
-                    householdCaId
-                    familySize
-                    address
-                    location {
-                        title
+                    edges {
+                        node {
+                            householdCaId
+                            familySize
+                            address
+                            location {
+                                title
+                            }
+                            registrationDataImportId {
+                                name
+                            }
+                            headOfHousehold {
+                                fullName
+                                firstName
+                                lastName
+                            }
+                        }
                     }
-                    registrationDataImportId {
-                        name
-                    }
-                    headOfHousehold {
-                        fullName
-                        firstName
-                        lastName
-                    }
-                 }
+                }
             }
         }
         """
