@@ -12,158 +12,182 @@ snapshots['TestTargetPopulationQuery::test_all_target_population_query 1'] = {
             'edges': [
                 {
                     'node': {
-                        'createdAt': '2020-03-06T12:59:43.310488',
+                        'createdAt': '2020-03-09T21:16:38.286418',
                         'createdBy': {
-                            'firstName': 'Karen',
-                            'lastName': 'Callahan'
+                            'firstName': 'Amanda',
+                            'lastName': 'Campbell'
                         },
-                        'households': [
-                            {
-                                'address': '''Unit 6543 Box 7148
-DPO AE 13366''',
-                                'familySize': 7,
-                                'headOfHousehold': None,
-                                'householdCaId': '379b9f87-847c-4de5-ac26-e6736eb35fd0',
-                                'location': {
-                                    'title': 'East Allenmouth'
+                        'households': {
+                            'edges': [
+                                {
+                                    'node': {
+                                        'address': '''099 Richardson Ramp
+North Sarah, ND 69005''',
+                                        'familySize': 4,
+                                        'headOfHousehold': None,
+                                        'householdCaId': '541f4f21-a736-4d4c-9649-365c2bc7cee8',
+                                        'location': {
+                                            'title': 'New Kevinland'
+                                        },
+                                        'registrationDataImportId': {
+                                            'name': 'Play natural left perform record.'
+                                        }
+                                    }
                                 },
-                                'registrationDataImportId': {
-                                    'name': 'Thank compare others light.'
-                                }
-                            },
-                            {
-                                'address': '''16962 Mccarty Grove
-Whitneymouth, ID 31460''',
-                                'familySize': 6,
-                                'headOfHousehold': None,
-                                'householdCaId': 'ca45e35b-eb96-4161-a2ea-25cf4876aaee',
-                                'location': {
-                                    'title': 'Vargasville'
+                                {
+                                    'node': {
+                                        'address': '''27082 Julie Courts Apt. 387
+Amyshire, ME 28865''',
+                                        'familySize': 6,
+                                        'headOfHousehold': None,
+                                        'householdCaId': '6284ed31-2839-4c74-aa2e-ac1662987a55',
+                                        'location': {
+                                            'title': 'West Michelleberg'
+                                        },
+                                        'registrationDataImportId': {
+                                            'name': 'Past exactly state best government clearly stop herself.'
+                                        }
+                                    }
                                 },
-                                'registrationDataImportId': {
-                                    'name': 'Market begin us.'
-                                }
-                            },
-                            {
-                                'address': '''667 Erin Plains
-Rebeccaborough, IN 64747''',
-                                'familySize': 4,
-                                'headOfHousehold': None,
-                                'householdCaId': '02f6be12-e4f1-46f0-9636-c553d2274464',
-                                'location': {
-                                    'title': 'North Scott'
+                                {
+                                    'node': {
+                                        'address': '''2779 Sara Parks
+Lake Carol, IA 69498''',
+                                        'familySize': 5,
+                                        'headOfHousehold': None,
+                                        'householdCaId': '38ed58b0-84d1-4d63-93f0-4298e6fa5718',
+                                        'location': {
+                                            'title': 'Henryburgh'
+                                        },
+                                        'registrationDataImportId': {
+                                            'name': 'Whatever culture according resource three relate police.'
+                                        }
+                                    }
                                 },
-                                'registrationDataImportId': {
-                                    'name': 'Choose if actually subject store visit under capital.'
-                                }
-                            },
-                            {
-                                'address': '''PSC 7831, Box 5100
-APO AA 58378''',
-                                'familySize': 5,
-                                'headOfHousehold': None,
-                                'householdCaId': 'c5b1a2b1-4c6e-4f49-92e8-4fe59ed9fa99',
-                                'location': {
-                                    'title': 'New Joshuatown'
+                                {
+                                    'node': {
+                                        'address': '''USNS Smith
+FPO AE 44907''',
+                                        'familySize': 7,
+                                        'headOfHousehold': None,
+                                        'householdCaId': '2c909160-8d8f-42a3-b7a2-ec83216aad64',
+                                        'location': {
+                                            'title': 'Velezfurt'
+                                        },
+                                        'registrationDataImportId': {
+                                            'name': 'Interest idea hospital career.'
+                                        }
+                                    }
                                 },
-                                'registrationDataImportId': {
-                                    'name': 'How speak have east brother window.'
+                                {
+                                    'node': {
+                                        'address': '''PSC 0401, Box 0957
+APO AP 19689''',
+                                        'familySize': 3,
+                                        'headOfHousehold': None,
+                                        'householdCaId': 'fe539143-670b-4da9-a77e-a4a12005797b',
+                                        'location': {
+                                            'title': 'Port Eric'
+                                        },
+                                        'registrationDataImportId': {
+                                            'name': 'Brother quite along kind fill strong.'
+                                        }
+                                    }
                                 }
-                            },
-                            {
-                                'address': '''6868 Jeremiah Hill Suite 979
-South Ryan, VT 80457''',
-                                'familySize': 6,
-                                'headOfHousehold': None,
-                                'householdCaId': '9e67b8cc-4a53-4019-804b-48699362d422',
-                                'location': {
-                                    'title': 'New Donna'
-                                },
-                                'registrationDataImportId': {
-                                    'name': 'State doctor fire.'
-                                }
-                            }
-                        ],
-                        'lastEditedAt': '2020-03-06T12:59:43.321203',
+                            ]
+                        },
+                        'lastEditedAt': '2020-03-09T21:16:38.294981',
                         'name': 'target_1',
-                        'status': 'IN_PROGRESS'
+                        'status': 'FINALIZED'
                     }
                 },
                 {
                     'node': {
-                        'createdAt': '2020-03-06T12:59:43.322440',
+                        'createdAt': '2020-03-09T21:16:38.296042',
                         'createdBy': {
-                            'firstName': 'Karen',
-                            'lastName': 'Callahan'
+                            'firstName': 'Amanda',
+                            'lastName': 'Campbell'
                         },
-                        'households': [
-                            {
-                                'address': '''Unit 6543 Box 7148
-DPO AE 13366''',
-                                'familySize': 7,
-                                'headOfHousehold': None,
-                                'householdCaId': '379b9f87-847c-4de5-ac26-e6736eb35fd0',
-                                'location': {
-                                    'title': 'East Allenmouth'
+                        'households': {
+                            'edges': [
+                                {
+                                    'node': {
+                                        'address': '''099 Richardson Ramp
+North Sarah, ND 69005''',
+                                        'familySize': 4,
+                                        'headOfHousehold': None,
+                                        'householdCaId': '541f4f21-a736-4d4c-9649-365c2bc7cee8',
+                                        'location': {
+                                            'title': 'New Kevinland'
+                                        },
+                                        'registrationDataImportId': {
+                                            'name': 'Play natural left perform record.'
+                                        }
+                                    }
                                 },
-                                'registrationDataImportId': {
-                                    'name': 'Thank compare others light.'
-                                }
-                            },
-                            {
-                                'address': '''16962 Mccarty Grove
-Whitneymouth, ID 31460''',
-                                'familySize': 6,
-                                'headOfHousehold': None,
-                                'householdCaId': 'ca45e35b-eb96-4161-a2ea-25cf4876aaee',
-                                'location': {
-                                    'title': 'Vargasville'
+                                {
+                                    'node': {
+                                        'address': '''27082 Julie Courts Apt. 387
+Amyshire, ME 28865''',
+                                        'familySize': 6,
+                                        'headOfHousehold': None,
+                                        'householdCaId': '6284ed31-2839-4c74-aa2e-ac1662987a55',
+                                        'location': {
+                                            'title': 'West Michelleberg'
+                                        },
+                                        'registrationDataImportId': {
+                                            'name': 'Past exactly state best government clearly stop herself.'
+                                        }
+                                    }
                                 },
-                                'registrationDataImportId': {
-                                    'name': 'Market begin us.'
-                                }
-                            },
-                            {
-                                'address': '''667 Erin Plains
-Rebeccaborough, IN 64747''',
-                                'familySize': 4,
-                                'headOfHousehold': None,
-                                'householdCaId': '02f6be12-e4f1-46f0-9636-c553d2274464',
-                                'location': {
-                                    'title': 'North Scott'
+                                {
+                                    'node': {
+                                        'address': '''2779 Sara Parks
+Lake Carol, IA 69498''',
+                                        'familySize': 5,
+                                        'headOfHousehold': None,
+                                        'householdCaId': '38ed58b0-84d1-4d63-93f0-4298e6fa5718',
+                                        'location': {
+                                            'title': 'Henryburgh'
+                                        },
+                                        'registrationDataImportId': {
+                                            'name': 'Whatever culture according resource three relate police.'
+                                        }
+                                    }
                                 },
-                                'registrationDataImportId': {
-                                    'name': 'Choose if actually subject store visit under capital.'
-                                }
-                            },
-                            {
-                                'address': '''PSC 7831, Box 5100
-APO AA 58378''',
-                                'familySize': 5,
-                                'headOfHousehold': None,
-                                'householdCaId': 'c5b1a2b1-4c6e-4f49-92e8-4fe59ed9fa99',
-                                'location': {
-                                    'title': 'New Joshuatown'
+                                {
+                                    'node': {
+                                        'address': '''USNS Smith
+FPO AE 44907''',
+                                        'familySize': 7,
+                                        'headOfHousehold': None,
+                                        'householdCaId': '2c909160-8d8f-42a3-b7a2-ec83216aad64',
+                                        'location': {
+                                            'title': 'Velezfurt'
+                                        },
+                                        'registrationDataImportId': {
+                                            'name': 'Interest idea hospital career.'
+                                        }
+                                    }
                                 },
-                                'registrationDataImportId': {
-                                    'name': 'How speak have east brother window.'
+                                {
+                                    'node': {
+                                        'address': '''PSC 0401, Box 0957
+APO AP 19689''',
+                                        'familySize': 3,
+                                        'headOfHousehold': None,
+                                        'householdCaId': 'fe539143-670b-4da9-a77e-a4a12005797b',
+                                        'location': {
+                                            'title': 'Port Eric'
+                                        },
+                                        'registrationDataImportId': {
+                                            'name': 'Brother quite along kind fill strong.'
+                                        }
+                                    }
                                 }
-                            },
-                            {
-                                'address': '''6868 Jeremiah Hill Suite 979
-South Ryan, VT 80457''',
-                                'familySize': 6,
-                                'headOfHousehold': None,
-                                'householdCaId': '9e67b8cc-4a53-4019-804b-48699362d422',
-                                'location': {
-                                    'title': 'New Donna'
-                                },
-                                'registrationDataImportId': {
-                                    'name': 'State doctor fire.'
-                                }
-                            }
-                        ],
-                        'lastEditedAt': '2020-03-06T12:59:43.331441',
+                            ]
+                        },
+                        'lastEditedAt': '2020-03-09T21:16:38.303335',
                         'name': 'target_2',
                         'status': 'IN_PROGRESS'
                     }
@@ -176,81 +200,93 @@ South Ryan, VT 80457''',
 snapshots['TestTargetPopulationQuery::test_target_population_query 1'] = {
     'data': {
         'targetPopulation': {
-            'createdAt': '2020-03-06T12:59:43.310488',
+            'createdAt': '2020-03-09T21:16:38.286418',
             'createdBy': {
-                'firstName': 'Karen',
-                'lastName': 'Callahan'
+                'firstName': 'Amanda',
+                'lastName': 'Campbell'
             },
-            'households': [
-                {
-                    'address': '''Unit 6543 Box 7148
-DPO AE 13366''',
-                    'familySize': 7,
-                    'headOfHousehold': None,
-                    'householdCaId': '379b9f87-847c-4de5-ac26-e6736eb35fd0',
-                    'location': {
-                        'title': 'East Allenmouth'
+            'households': {
+                'edges': [
+                    {
+                        'node': {
+                            'address': '''099 Richardson Ramp
+North Sarah, ND 69005''',
+                            'familySize': 4,
+                            'headOfHousehold': None,
+                            'householdCaId': '541f4f21-a736-4d4c-9649-365c2bc7cee8',
+                            'location': {
+                                'title': 'New Kevinland'
+                            },
+                            'registrationDataImportId': {
+                                'name': 'Play natural left perform record.'
+                            }
+                        }
                     },
-                    'registrationDataImportId': {
-                        'name': 'Thank compare others light.'
-                    }
-                },
-                {
-                    'address': '''16962 Mccarty Grove
-Whitneymouth, ID 31460''',
-                    'familySize': 6,
-                    'headOfHousehold': None,
-                    'householdCaId': 'ca45e35b-eb96-4161-a2ea-25cf4876aaee',
-                    'location': {
-                        'title': 'Vargasville'
+                    {
+                        'node': {
+                            'address': '''27082 Julie Courts Apt. 387
+Amyshire, ME 28865''',
+                            'familySize': 6,
+                            'headOfHousehold': None,
+                            'householdCaId': '6284ed31-2839-4c74-aa2e-ac1662987a55',
+                            'location': {
+                                'title': 'West Michelleberg'
+                            },
+                            'registrationDataImportId': {
+                                'name': 'Past exactly state best government clearly stop herself.'
+                            }
+                        }
                     },
-                    'registrationDataImportId': {
-                        'name': 'Market begin us.'
-                    }
-                },
-                {
-                    'address': '''667 Erin Plains
-Rebeccaborough, IN 64747''',
-                    'familySize': 4,
-                    'headOfHousehold': None,
-                    'householdCaId': '02f6be12-e4f1-46f0-9636-c553d2274464',
-                    'location': {
-                        'title': 'North Scott'
+                    {
+                        'node': {
+                            'address': '''2779 Sara Parks
+Lake Carol, IA 69498''',
+                            'familySize': 5,
+                            'headOfHousehold': None,
+                            'householdCaId': '38ed58b0-84d1-4d63-93f0-4298e6fa5718',
+                            'location': {
+                                'title': 'Henryburgh'
+                            },
+                            'registrationDataImportId': {
+                                'name': 'Whatever culture according resource three relate police.'
+                            }
+                        }
                     },
-                    'registrationDataImportId': {
-                        'name': 'Choose if actually subject store visit under capital.'
-                    }
-                },
-                {
-                    'address': '''PSC 7831, Box 5100
-APO AA 58378''',
-                    'familySize': 5,
-                    'headOfHousehold': None,
-                    'householdCaId': 'c5b1a2b1-4c6e-4f49-92e8-4fe59ed9fa99',
-                    'location': {
-                        'title': 'New Joshuatown'
+                    {
+                        'node': {
+                            'address': '''USNS Smith
+FPO AE 44907''',
+                            'familySize': 7,
+                            'headOfHousehold': None,
+                            'householdCaId': '2c909160-8d8f-42a3-b7a2-ec83216aad64',
+                            'location': {
+                                'title': 'Velezfurt'
+                            },
+                            'registrationDataImportId': {
+                                'name': 'Interest idea hospital career.'
+                            }
+                        }
                     },
-                    'registrationDataImportId': {
-                        'name': 'How speak have east brother window.'
+                    {
+                        'node': {
+                            'address': '''PSC 0401, Box 0957
+APO AP 19689''',
+                            'familySize': 3,
+                            'headOfHousehold': None,
+                            'householdCaId': 'fe539143-670b-4da9-a77e-a4a12005797b',
+                            'location': {
+                                'title': 'Port Eric'
+                            },
+                            'registrationDataImportId': {
+                                'name': 'Brother quite along kind fill strong.'
+                            }
+                        }
                     }
-                },
-                {
-                    'address': '''6868 Jeremiah Hill Suite 979
-South Ryan, VT 80457''',
-                    'familySize': 6,
-                    'headOfHousehold': None,
-                    'householdCaId': '9e67b8cc-4a53-4019-804b-48699362d422',
-                    'location': {
-                        'title': 'New Donna'
-                    },
-                    'registrationDataImportId': {
-                        'name': 'State doctor fire.'
-                    }
-                }
-            ],
-            'lastEditedAt': '2020-03-06T12:59:43.321203',
+                ]
+            },
+            'lastEditedAt': '2020-03-09T21:16:38.294981',
             'name': 'target_1',
-            'status': 'IN_PROGRESS'
+            'status': 'FINALIZED'
         }
     }
 }
