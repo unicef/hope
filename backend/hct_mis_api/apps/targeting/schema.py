@@ -11,19 +11,7 @@ from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from household.models import Household
-
-
-class HouseHoldType(DjangoObjectType):
-    class Meta:
-        model = Household
-        fields = (
-            "household_ca_id",
-            "head_of_household",
-            "family_size",
-            "address",
-            "location",
-            "registration_data_import_id",
-        )
+from household.schema import HouseholdNode
 
 
 class TargetPopulationFilter(django_filters.FilterSet):
@@ -146,7 +134,7 @@ class Query(graphene.ObjectType):
     # Realtime Queries from golden reocrds.
     # household and associated registration and individuals records.
     target_rules = graphene.List(
-        HouseHoldType,
+        HouseholdNode,
         serialized_list=graphene.String(),
         description="json dump of filters containing key value pairs.",
     )
