@@ -25,13 +25,13 @@ export const TargetPopulationTable = ({
 }: TargetPopulationProps): ReactElement => {
   const initialVariables = {
     businessArea,
-    familySize: JSON.stringify(sizeFilter),
   };
   return (
     <TableWrapper>
       <UniversalTable<TargetPopulationNode, AllTargetPopulationsQuery>
-        title='Payment Records'
+        title='Target Population'
         headCells={headCells}
+        rowsPage={[10, 15, 20]}
         query={useAllTargetPopulationsQuery}
         queriedObjectName='allTargetPopulation'
         initialVariables={null}
