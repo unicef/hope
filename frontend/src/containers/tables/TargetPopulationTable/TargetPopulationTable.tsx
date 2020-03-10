@@ -22,9 +22,10 @@ interface TargetPopulationProps {
 export const TargetPopulationTable = ({
   businessArea,
   sizeFilter,
+  textFilter
 }: TargetPopulationProps): ReactElement => {
   const initialVariables = {
-    businessArea,
+    name: textFilter
   };
   return (
     <TableWrapper>
