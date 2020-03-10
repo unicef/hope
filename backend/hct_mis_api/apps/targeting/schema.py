@@ -1,6 +1,7 @@
 import functools
 import json
 import operator
+from decimal import Decimal
 
 import django_filters
 import graphene
@@ -25,14 +26,13 @@ class TargetPopulationFilter(django_filters.FilterSet):
         field_name="created_by", method="filter_created_by_name"
     )
     num_individuals_min = django_filters.NumberFilter(
-        field_name="target_rules__num_individuals_min", lookup_expr="gte"
+        field_name="target_rules", method="filter_num_individuals_min"
     )
     num_individuals_max = django_filters.NumberFilter(
-        field_name="target_rules__num_individuals_max", lookup_expr="lte"
+        field_name="target_rules", method="filter_num_individuals_max"
     )
 
     # TODO(codecakes): waiting on dist to school and adminlevel clarification.
-
     @staticmethod
     def filter_created_by_name(queryset, model_field, value):
         """Gets full name of the associated user from query."""
@@ -43,6 +43,20 @@ class TargetPopulationFilter(django_filters.FilterSet):
             f"{model_field}__last_name__icontains": value,
         }
         return queryset.filter(Q(**first_name_query) | Q(**last_name_query))
+
+    @staticmethod
+    def filter_num_individuals_min(queryset, model_field, value):
+        field_name = f"{model_field}__core_rules__num_individuals_min__gte"
+        if isinstance(value, Decimal):
+            value = int(value)
+        return queryset.filter(**{field_name: value})
+
+    @staticmethod
+    def filter_num_individuals_max(queryset, model_field, value):
+        field_name = f"{model_field}__core_rules__num_individuals_max__lte"
+        if isinstance(value, Decimal):
+            value = int(value)
+        return queryset.filter(**{field_name: value})
 
     class Meta:
         model = target_models.TargetPopulation
@@ -126,7 +140,7 @@ class Query(graphene.ObjectType):
     # Saved snapshots of target rules from a target population.
     saved_target_rule = relay.Node.Field(SavedTargetRuleNode)
     all_saved_target_rule = DjangoFilterConnectionField(SavedTargetRuleNode)
-    # Realtime Queries from golden reocrds.
+    # Realtime Queries from golden records.
     # household and associated registration and individuals records.
     target_rules = graphene.List(
         HouseholdNode,
@@ -154,8 +168,8 @@ class Query(graphene.ObjectType):
         for rule_obj in rule_lists:
             search_rules = {}
             rules = {}
-            rules.update(rule_obj["core_rules"])
-            rules.update(rule_obj["flex_rules"])
+            rules.update(rule_obj.get("core_rules", {}))
+            rules.update(rule_obj.get("flex_rules", {}))
             # TODO(codecakes): decouple to core and flex functions.
             # many dynamic fields here will depend on the info
             #  from FilterAttrType class falls back on that method.
