@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import {
   TargetPopulationNode,
   useAllTargetPopulationsQuery,
-  AllTargetPopulationsQuery,
+  AllTargetPopulationsQueryVariables,
 } from '../../../__generated__/graphql';
 import { UniversalTable } from '../UniversalTable';
 import { headCells } from './TargetPopulationTableHeadCells';
@@ -29,13 +29,13 @@ export const TargetPopulationTable = ({
   };
   return (
     <TableWrapper>
-      <UniversalTable<TargetPopulationNode, AllTargetPopulationsQuery>
+      <UniversalTable<TargetPopulationNode, AllTargetPopulationsQueryVariables>
         title='Target Population'
         headCells={headCells}
         rowsPage={[10, 15, 20]}
         query={useAllTargetPopulationsQuery}
         queriedObjectName='allTargetPopulation'
-        initialVariables={null}
+        initialVariables={initialVariables}
         renderRow={(row) => <TargetPopulationTableRow targetPopulation={row} />}
       />
     </TableWrapper>
