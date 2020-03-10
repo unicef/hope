@@ -24,7 +24,8 @@ export const TargetPopulationTable = ({
 }: TargetPopulationProps): ReactElement => {
   const initialVariables = {
     name: filter.name,
-    
+    numIndividualsMin: filter.numIndividuals.min,
+    numIndividualsMax: filter.numIndividuals.max,
   };
   return (
     <TableWrapper>
