@@ -1,3 +1,5 @@
+import datetime as dt
+
 import factory
 from account.fixtures import UserFactory
 from core.utils import JSONFactory
@@ -9,6 +11,10 @@ from targeting.models import TargetRule
 
 
 class TargetPopulationFactory(factory.DjangoModelFactory):
+    _NOW_TIME = (dt.datetime(2020, 1, 1)).astimezone()
+    _EDIT_TIME = _NOW_TIME + dt.timedelta(days=1)
+    _END_TIME = (dt.datetime(2022, 1, 1)).astimezone()
+
     class Meta:
         model = TargetPopulation
 
@@ -17,10 +23,10 @@ class TargetPopulationFactory(factory.DjangoModelFactory):
     )
     created_by = factory.SubFactory(UserFactory)
     created_at = factory.Faker(
-        "date_time_this_year", before_now=True, after_now=False
+        "date_between_dates", date_start=_NOW_TIME, date_end=_END_TIME
     )
     last_edited_at = factory.Faker(
-        "date_time_this_year", before_now=False, after_now=True
+        "date_between_dates", date_start=_EDIT_TIME, date_end=_END_TIME
     )
     status = factory.fuzzy.FuzzyChoice(
         TargetPopulation.STATE_CHOICES, getter=lambda x: x[0],
@@ -66,3 +72,4 @@ class TargetRuleFactory(factory.DjangoModelFactory):
         dict_factory=JSONFactory,
     )
     target_population = factory.SubFactory(TargetPopulationFactory)
+
