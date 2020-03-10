@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
@@ -22,7 +22,7 @@ export function TargetPopulationPage() {
   const history = useHistory();
   const businessArea = useBusinessArea();
   const [filter, setFilter] = useState({
-    noOfIndividuals: {
+    numIndividuals: {
       min: undefined,
       max: undefined,
     },
@@ -47,6 +47,7 @@ export function TargetPopulationPage() {
         </Button>
       </PageHeader>
       <TargetPopulationFilters
+        //targetPopulations={targetPopulations as TargetPopulationNode[]}
         filter={filter}
         onFilterChange={setFilter}
       />
