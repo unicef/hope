@@ -22,7 +22,7 @@ class TargetPopulationFilter(django_filters.FilterSet):
 
     name = django_filters.CharFilter(field_name="name", lookup_expr="icontains")
     created_by_name = django_filters.CharFilter(
-        field_name="created_by__full_name", method="filter_created_by_name"
+        field_name="created_by", method="filter_created_by_name"
     )
     num_individuals_min = django_filters.NumberFilter(
         field_name="target_rules__num_individuals_min", lookup_expr="gte"
@@ -42,12 +42,7 @@ class TargetPopulationFilter(django_filters.FilterSet):
         last_name_query = {
             f"{model_field}__last_name__icontains": value,
         }
-        full_name_query = {
-            f"{model_field}__full_name__icontains": value,
-        }
-        return queryset.filter(
-            Q(**first_name_query) | Q(**last_name_query) | Q(full_name_query)
-        )
+        return queryset.filter(Q(**first_name_query) | Q(**last_name_query))
 
     class Meta:
         model = target_models.TargetPopulation
@@ -109,7 +104,7 @@ class SavedTargetRuleFilter(django_filters.FilterSet):
 
         filter_overrides = {
             target_models.JSONField: {
-                'filter_class': django_filters.LookupChoiceFilter,
+                "filter_class": django_filters.LookupChoiceFilter,
                 # 'extra': lambda f: {'lookup_expr': ['icontains']},
             },
         }
