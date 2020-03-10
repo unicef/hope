@@ -15,17 +15,16 @@ const TableWrapper = styled.div`
 
 interface TargetPopulationProps {
   businessArea: string;
-  sizeFilter: { min: number | undefined; max: number | undefined };
-  textFilter: string;
+  filter;
 }
 
 export const TargetPopulationTable = ({
   businessArea,
-  sizeFilter,
-  textFilter
+  filter
 }: TargetPopulationProps): ReactElement => {
   const initialVariables = {
-    name: textFilter
+    name: filter.name,
+    
   };
   return (
     <TableWrapper>
