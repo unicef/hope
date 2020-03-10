@@ -64,10 +64,12 @@ const TextContainer = styled(TextField)`
 `;
 
 interface HouseholdFiltersProps {
+  //targetPopulations: TargetPopulationNode[],
   onFilterChange;
   filter;
 }
 export function TargetPopulationFilters({
+  // targetPopulations,
   onFilterChange,
   filter,
 }: HouseholdFiltersProps): React.ReactElement {
@@ -104,14 +106,14 @@ export function TargetPopulationFilters({
       </TextContainer>
       <TextContainer
         id='minFilter'
-        value={filter.noOfIndividuals.min}
+        value={filter.numIndividuals.min}
         variant='filled'
         placeholder='No. of Individuals'
         onChange={(e) =>
           onFilterChange({
             ...filter,
-            noOfIndividuals: {
-              ...filter.noOfIndividuals,
+            numIndividuals: {
+              ...filter.numIndividuals,
               min: e.target.value || undefined,
             },
           })
@@ -128,14 +130,14 @@ export function TargetPopulationFilters({
       to
       <TextContainer
         id='maxFilter'
-        value={filter.noOfIndividuals.max}
+        value={filter.numIndividuals.max}
         variant='filled'
         placeholder='No. of Individuals'
         onChange={(e) =>
           onFilterChange({
             ...filter,
-            noOfIndividuals: {
-              ...filter.noOfIndividuals,
+            numIndividuals: {
+              ...filter.numIndividuals,
               max: e.target.value || undefined,
             },
           })
