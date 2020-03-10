@@ -64,25 +64,21 @@ const TextContainer = styled(TextField)`
 `;
 
 interface HouseholdFiltersProps {
-  minValue: number;
-  maxValue: number;
-  householdMinSizeFilter: (value: number) => void;
-  householdMaxSizeFilter: (value: number) => void;
-  householdTextFilter: (value: string) => void;
+  onFilterChange;
+  filter;
 }
 export function TargetPopulationFilters({
-  minValue,
-  maxValue,
-  householdMinSizeFilter,
-  householdMaxSizeFilter,
-  householdTextFilter,
+  onFilterChange,
+  filter,
 }: HouseholdFiltersProps): React.ReactElement {
+  const handleFilterChange = (e, name) =>
+    onFilterChange({ ...filter, [name]: e.target.value });
   return (
     <Container>
       <TextContainer
         placeholder='Search'
         variant='filled'
-        onChange={(e) => householdTextFilter(e.target.value)}
+        onChange={(e) => handleFilterChange(e, 'name')}
         InputProps={{
           startAdornment: (
             <InputAdornment position='start'>
@@ -107,10 +103,19 @@ export function TargetPopulationFilters({
         <option>test</option>
       </TextContainer>
       <TextContainer
-        value={minValue}
+        id='minFilter'
+        value={filter.noOfIndividuals.min}
         variant='filled'
         placeholder='No. of Individuals'
-        onChange={(e) => householdMinSizeFilter(e.target.value)}
+        onChange={(e) =>
+          onFilterChange({
+            ...filter,
+            noOfIndividuals: {
+              ...filter.noOfIndividuals,
+              min: e.target.value || undefined,
+            },
+          })
+        }
         type='number'
         InputProps={{
           startAdornment: (
@@ -122,10 +127,19 @@ export function TargetPopulationFilters({
       />
       to
       <TextContainer
-        value={maxValue}
+        id='maxFilter'
+        value={filter.noOfIndividuals.max}
         variant='filled'
         placeholder='No. of Individuals'
-        onChange={(e) => householdMaxSizeFilter(e.target.value)}
+        onChange={(e) =>
+          onFilterChange({
+            ...filter,
+            noOfIndividuals: {
+              ...filter.noOfIndividuals,
+              max: e.target.value || undefined,
+            },
+          })
+        }
         type='number'
         InputProps={{
           startAdornment: (

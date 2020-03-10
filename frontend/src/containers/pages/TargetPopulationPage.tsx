@@ -3,7 +3,7 @@ import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@material-ui/core';
-import { debounce } from 'lodash';
+import { useDebounce } from '../../hooks/useDebounce';
 import { PageHeader } from '../../components/PageHeader';
 import { TargetPopulationFilters } from '../../components/TargetPopulation/TargetPopulationFilters';
 import { TargetPopulationTable } from '../tables/TargetPopulationTable';
@@ -21,26 +21,14 @@ export function TargetPopulationPage() {
   const { t } = useTranslation();
   const history = useHistory();
   const businessArea = useBusinessArea();
-  const [sizeFilter, setSizeFilter] = useState({
-    min: undefined,
-    max: undefined,
-  });
-  //TODO: create a hook to handle those
-  const [textFilter, setTextFilter] = useState('');
-  const handleMinSizeFilter = (value: number): void => {
-    setSizeFilter({ ...sizeFilter, min: value });
-  };
-  const handleMaxSizeFilter = (value: number): void => {
-    if (value < sizeFilter.min) {
-      setSizeFilter({ ...sizeFilter, min: sizeFilter.min + 1 });
-    } else {
-      setSizeFilter({ ...sizeFilter, max: value });
-    }
-  };
-
-  const handleTextFilter = useRef(
-    debounce((value) => setTextFilter(value), 300),
-  ).current;
+  const [filter, setFilter] = useState({
+    noOfIndividuals: {
+      min: undefined,
+      max: undefined,
+    },
+    name: '',
+  })
+  const debouncedFilter = useDebounce(filter, 500);
 
   const redirectToCreate = () => {
     const path = `/${businessArea}/target-population/create`;
@@ -59,16 +47,12 @@ export function TargetPopulationPage() {
         </Button>
       </PageHeader>
       <TargetPopulationFilters
-        minValue={sizeFilter.min}
-        maxValue={sizeFilter.max}
-        householdMaxSizeFilter={handleMaxSizeFilter}
-        householdMinSizeFilter={handleMinSizeFilter}
-        householdTextFilter={handleTextFilter}
+        filter={filter}
+        onFilterChange={setFilter}
       />
       <Container>
         <TargetPopulationTable
-          sizeFilter={sizeFilter}
-          textFilter={textFilter}
+          filter={debouncedFilter}
           businessArea={businessArea}
         />
       </Container>
