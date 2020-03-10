@@ -7,6 +7,7 @@ export const AllTargetPopulations = gql`
     $first: Int
     $last: Int
     $orderBy: String
+    $name: String
   ) {
     allTargetPopulation(
       after: $after
@@ -14,6 +15,7 @@ export const AllTargetPopulations = gql`
       first: $first
       last: $last
       orderBy: $orderBy
+      name: $name
     ) {
       edges {
         node {

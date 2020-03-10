@@ -2672,7 +2672,8 @@ export type AllTargetPopulationsQueryVariables = {
   before?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  orderBy?: Maybe<Scalars['String']>
+  orderBy?: Maybe<Scalars['String']>,
+  name?: Maybe<Scalars['String']>
 };
 
 
@@ -3765,8 +3766,8 @@ export type AllRegistrationDataImportsQueryHookResult = ReturnType<typeof useAll
 export type AllRegistrationDataImportsLazyQueryHookResult = ReturnType<typeof useAllRegistrationDataImportsLazyQuery>;
 export type AllRegistrationDataImportsQueryResult = ApolloReactCommon.QueryResult<AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables>;
 export const AllTargetPopulationsDocument = gql`
-    query AllTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String) {
-  allTargetPopulation(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy) {
+    query AllTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String) {
+  allTargetPopulation(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name: $name) {
     edges {
       node {
         id
@@ -3823,6 +3824,7 @@ export function withAllTargetPopulations<TProps, TChildProps = {}>(operationOpti
  *      first: // value for 'first'
  *      last: // value for 'last'
  *      orderBy: // value for 'orderBy'
+ *      name: // value for 'name'
  *   },
  * });
  */
