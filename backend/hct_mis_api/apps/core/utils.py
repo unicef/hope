@@ -1,6 +1,7 @@
 import json
 import re
 
+from django.core.files.uploadedfile import UploadedFile
 import factory
 from django.template.defaultfilters import slugify
 
