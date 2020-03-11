@@ -49,6 +49,7 @@ class ImportedHousehold(TimeStampedUUIDModel):
         related_name="heading_household",
         null=True,
     )
+    registration_date = models.DateField(null=True)
 
     def __str__(self):
         return f"Household CashAssist ID: {self.household_ca_id}"
