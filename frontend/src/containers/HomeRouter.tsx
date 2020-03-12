@@ -19,6 +19,7 @@ import { PopulationIndividualsPage } from './pages/PopulationIndividualsPage';
 import { PopulationIndividualsDetailsPage } from './pages/PopulationIndividualsDetailsPage';
 import { RegistrationDataImport } from './dialogs/registration/RegistrationDataImport';
 import { RegistrationDataImportDetailsPage } from './registration/details/RegistrationDataImportDetailsPage';
+import {RegistrationHouseholdDetailsPage} from "./registration/details/households/RegistrationHouseholdDetailsPage";
 
 const Root = styled.div`
   display: flex;
@@ -85,6 +86,9 @@ export function HomeRouter(): React.ReactElement {
           </Route>
           <Route path='/:businessArea/programs'>
             <ProgramsPage />
+          </Route>
+          <Route path='/:businessArea/registration-data-import/household/:id'>
+            <RegistrationHouseholdDetailsPage />
           </Route>
           <Route path='/:businessArea/registration-data-import/:id'>
             <RegistrationDataImportDetailsPage />

@@ -1,3 +1,4 @@
+import django_filters
 import graphene
 from django_filters import (
     FilterSet,
@@ -60,6 +61,9 @@ class ImportedIndividualFilter(FilterSet):
     rdi_id = CharFilter(
         field_name="household__programs__name", method="filter_rdi_id"
     )
+    household = django_filters.CharFilter(
+        field_name="household__id", method="filter_household"
+    )
 
     class Meta:
         model = ImportedIndividual
@@ -67,6 +71,7 @@ class ImportedIndividualFilter(FilterSet):
             "full_name": ["exact", "icontains"],
             "age": ["range", "lte", "gte"],
             "sex": ["exact"],
+            "household": ["exact"],
         }
 
     order_by = OrderingFilter(
@@ -77,6 +82,9 @@ class ImportedIndividualFilter(FilterSet):
         return queryset.filter(
             registration_data_import_id__hct_id=decode_id_string(value)
         )
+
+    def filter_household(self, queryset, model_field, value):
+        return queryset.filter(household__id=decode_id_string(value))
 
 
 class ImportedHouseholdNode(DjangoObjectType):

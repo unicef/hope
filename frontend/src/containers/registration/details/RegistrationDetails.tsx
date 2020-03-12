@@ -13,7 +13,7 @@ import {
   ProgrammeChoiceDataQuery,
   ProgramNode,
   RegistrationDataImportNode,
-  RegistrationFragmentDetailedFragment,
+  RegistrationDetailedFragment,
 } from '../../../__generated__/graphql';
 import { MiśTheme } from '../../../theme';
 import { Doughnut } from 'react-chartjs-2';
@@ -67,7 +67,7 @@ const Title = styled.div`
 `;
 
 interface RegistrationDetailsProps {
-  registration: RegistrationFragmentDetailedFragment;
+  registration: RegistrationDetailedFragment;
 }
 
 export function RegistrationDetails({

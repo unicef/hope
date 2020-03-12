@@ -33,7 +33,7 @@ export const ALL_REGISTRATION_DATA_IMPORT_QUERY = gql`
       edges {
         cursor
         node {
-            ...registrationFragmentMinimal
+            ...registrationMinimal
         }
       }
     }

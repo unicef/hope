@@ -1,11 +1,11 @@
 import React from 'react';
-import { RegistrationFragmentDetailedFragment, } from '../../../__generated__/graphql';
+import { RegistrationDetailedFragment, } from '../../../__generated__/graphql';
 import { PageHeader } from '../../../components/PageHeader';
 import { BreadCrumbsItem } from '../../../components/BreadCrumbs';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 
 export interface RegistrationDataImportDetailsPageHeaderPropTypes {
-  registration: RegistrationFragmentDetailedFragment;
+  registration: RegistrationDetailedFragment;
 }
 
 export function RegistrationDataImportDetailsPageHeader({
