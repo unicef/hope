@@ -44,7 +44,7 @@ export function ImportedIndividualsTableRow({
       <TableCell align='left'>
         {individual.fullName}
       </TableCell>
-      <TableCell align='right'>{individual.workStatus}</TableCell>
+      <TableCell align='left'>{individual.workStatus}</TableCell>
       <TableCell align='left'>
         {moment(individual.dob).format('DD MMM YYYY')}
       </TableCell>

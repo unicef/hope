@@ -21,7 +21,7 @@ export const headCells: HeadCell<ImportedIndividualMinimalFragment>[] = [
     disablePadding: false,
     label: 'Employment/Education',
     id: 'workStatus',
-    numeric: true,
+    numeric: false,
   },
   {
     disablePadding: false,
