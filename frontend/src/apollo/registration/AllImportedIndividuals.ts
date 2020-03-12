@@ -7,6 +7,7 @@ export const ALL_IMPORTED_INDIVIDUALS_QUERY = gql`
     $first: Int
     $last: Int
     $rdiId: String
+    $household: String
   ) {
     allImportedIndividuals(
       after: $after
@@ -14,6 +15,7 @@ export const ALL_IMPORTED_INDIVIDUALS_QUERY = gql`
       first: $first
       last: $last
       rdiId: $rdiId
+      household: $household
     ) {
       pageInfo {
         hasNextPage
