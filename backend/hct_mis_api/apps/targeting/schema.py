@@ -36,13 +36,18 @@ class TargetPopulationFilter(django_filters.FilterSet):
     @staticmethod
     def filter_created_by_name(queryset, model_field, value):
         """Gets full name of the associated user from query."""
-        first_name_query = {
-            f"{model_field}__first_name__icontains": value,
-        }
-        last_name_query = {
-            f"{model_field}__last_name__icontains": value,
-        }
-        return queryset.filter(Q(**first_name_query) | Q(**last_name_query))
+        qs = []
+        for name in value.strip().split():
+            first_name_query = {
+                f"{model_field}__first_name__icontains": name,
+            }
+            last_name_query = {
+                f"{model_field}__last_name__icontains": name,
+            }
+            qs.append(
+                queryset.filter(Q(**first_name_query) | Q(**last_name_query))
+            )
+        return functools.reduce(lambda x, y: x.union(y), qs)
 
     @staticmethod
     def filter_num_individuals_min(queryset, model_field, value):
@@ -66,8 +71,6 @@ class TargetPopulationFilter(django_filters.FilterSet):
             "created_at",
             "last_edited_at",
             "status",
-            "total_households",
-            "total_family_size",
             "households",
             "target_rules",
         )
@@ -97,6 +100,9 @@ class TargetPopulationFilter(django_filters.FilterSet):
 
 class TargetPopulationNode(DjangoObjectType):
     """Defines an individual target population record."""
+
+    total_households = graphene.Int(source="total_households")
+    total_family_size = graphene.Int(source="total_family_size")
 
     class Meta:
         model = target_models.TargetPopulation

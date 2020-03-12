@@ -1,4 +1,5 @@
 import datetime as dt
+import random
 
 import factory
 from account.fixtures import UserFactory
@@ -25,19 +26,18 @@ class TargetPopulationFactory(factory.DjangoModelFactory):
     created_at = factory.Faker(
         "date_between_dates", date_start=_NOW_TIME, date_end=_END_TIME
     )
-    last_edited_at = factory.Faker(
-        "date_between_dates", date_start=_EDIT_TIME, date_end=_END_TIME
+    last_edited_at = factory.LazyAttribute(
+        lambda t: t.created_at + dt.timedelta(days=random.randint(60, 1000))
     )
     status = factory.fuzzy.FuzzyChoice(
         TargetPopulation.STATE_CHOICES, getter=lambda x: x[0],
     )
-    total_households = factory.fuzzy.FuzzyInteger(5, 500)
-    total_family_size = factory.fuzzy.FuzzyInteger(2, 20)
 
     @factory.post_generation
     def households(self, create, extracted, **kwargs):
         if not create:
-            self.households.add(HouseholdFactory())
+            households = HouseholdFactory.create_batch(5)
+            self.households.add(*households)
 
         if extracted:
             for household in extracted:
@@ -72,4 +72,3 @@ class TargetRuleFactory(factory.DjangoModelFactory):
         dict_factory=JSONFactory,
     )
     target_population = factory.SubFactory(TargetPopulationFactory)
-
