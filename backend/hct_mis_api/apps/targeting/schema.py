@@ -11,8 +11,26 @@ from django.db.models import Q
 from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
+from household import schema as household_schema
 from household.models import Household
 from household.schema import HouseholdNode
+
+
+# TODO(codecakes): see if later the format can be kept consistent with FilterAttrType model.
+class FilterAttrTypeNode(graphene.ObjectType):
+    """Defines all filter types for core and flex fields."""
+
+    core_field_types = graphene.List(description="core field datatype meta.")
+    flex_field_types = graphene.List(description="flex field datatype meta.")
+
+    def resolve_core_field_types(self, info, **kwargs):
+        return household_schema._CORE_FIELDS
+
+    def resolve_flex_field_types(self, info, **kwargs):
+        return household_schema.get_flex_fields()
+
+    class Meta:
+        filterset_class = FilterAttrTypeFilter
 
 
 class TargetPopulationFilter(django_filters.FilterSet):
@@ -153,6 +171,7 @@ class Query(graphene.ObjectType):
         serialized_list=graphene.String(),
         description="json dump of filters containing key value pairs.",
     )
+    meta_data_filter_type = relay.Node.Field(FilterAttrTypeNode)
 
     def resolve_target_rules(self, info, serialized_list):
         """Resolver for target_rules. Queries from golden records.
