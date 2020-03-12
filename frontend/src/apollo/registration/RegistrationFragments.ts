@@ -1,7 +1,7 @@
 import { gql } from 'apollo-boost';
 
-export const registrationFragmentMinimal = gql`
-  fragment registrationFragmentMinimal on RegistrationDataImportNode {
+export const registrationMinimal = gql`
+  fragment registrationMinimal on RegistrationDataImportNode {
     id
     createdAt
     name
@@ -17,9 +17,9 @@ export const registrationFragmentMinimal = gql`
   }
 `;
 
-export const registrationFragmentDetailed = gql`
-  fragment registrationFragmentDetailed on RegistrationDataImportNode {
-    ...registrationFragmentMinimal
+export const registrationDetailed = gql`
+  fragment registrationDetailed on RegistrationDataImportNode {
+    ...registrationMinimal
     numberOfIndividuals
   }
 `;
@@ -37,26 +37,27 @@ export const importedHouseholdMinimal = gql`
   }
 `;
 export const importedHouseholdDetailed = gql`
-    fragment importedHouseholdDetailed on ImportedHouseholdNode {
-        id
-        headOfHousehold {
-            id
-            fullName
-        }
-        familySize
-        location
-        registrationDate
-        
-        residenceStatus
-        nationality
-        representative{
-            id
-            fullName
-        }
-        registrationDataImportId{
-            hctId
-        }
+  fragment importedHouseholdDetailed on ImportedHouseholdNode {
+    id
+    headOfHousehold {
+      id
+      fullName
     }
+    familySize
+    location
+    registrationDate
+
+    residenceStatus
+    nationality
+    representative {
+      id
+      fullName
+    }
+    registrationDataImportId {
+      hctId
+      name
+    }
+  }
 `;
 
 export const importedIndividualMinimal = gql`

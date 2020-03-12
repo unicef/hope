@@ -1927,6 +1927,7 @@ export type QueryAllImportedIndividualsArgs = {
   fullName?: Maybe<Scalars['String']>,
   fullName_Icontains?: Maybe<Scalars['String']>,
   sex?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  household?: Maybe<Scalars['String']>,
   age?: Maybe<Scalars['String']>,
   rdiId?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
@@ -2891,7 +2892,8 @@ export type AllImportedIndividualsQueryVariables = {
   before?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  rdiId?: Maybe<Scalars['String']>
+  rdiId?: Maybe<Scalars['String']>,
+  household?: Maybe<Scalars['String']>
 };
 
 
@@ -2940,9 +2942,22 @@ export type AllRegistrationDataImportsQuery = (
       & Pick<RegistrationDataImportNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'RegistrationDataImportNode' }
-        & RegistrationFragmentMinimalFragment
+        & RegistrationMinimalFragment
       )> }
     )>> }
+  )> }
+);
+
+export type ImportedHouseholdQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type ImportedHouseholdQuery = (
+  { __typename?: 'Query' }
+  & { importedHousehold: Maybe<(
+    { __typename?: 'ImportedHouseholdNode' }
+    & ImportedHouseholdDetailedFragment
   )> }
 );
 
@@ -2966,11 +2981,11 @@ export type RegistrationDataImportQuery = (
   { __typename?: 'Query' }
   & { registrationDataImport: Maybe<(
     { __typename?: 'RegistrationDataImportNode' }
-    & RegistrationFragmentDetailedFragment
+    & RegistrationDetailedFragment
   )> }
 );
 
-export type RegistrationFragmentMinimalFragment = (
+export type RegistrationMinimalFragment = (
   { __typename?: 'RegistrationDataImportNode' }
   & Pick<RegistrationDataImportNode, 'id' | 'createdAt' | 'name' | 'status' | 'importDate' | 'dataSource' | 'numberOfHouseholds'>
   & { importedBy: (
@@ -2979,10 +2994,10 @@ export type RegistrationFragmentMinimalFragment = (
   ) }
 );
 
-export type RegistrationFragmentDetailedFragment = (
+export type RegistrationDetailedFragment = (
   { __typename?: 'RegistrationDataImportNode' }
   & Pick<RegistrationDataImportNode, 'numberOfIndividuals'>
-  & RegistrationFragmentMinimalFragment
+  & RegistrationMinimalFragment
 );
 
 export type ImportedHouseholdMinimalFragment = (
@@ -2994,13 +3009,28 @@ export type ImportedHouseholdMinimalFragment = (
   )> }
 );
 
+export type ImportedHouseholdDetailedFragment = (
+  { __typename?: 'ImportedHouseholdNode' }
+  & Pick<ImportedHouseholdNode, 'id' | 'familySize' | 'location' | 'registrationDate' | 'residenceStatus' | 'nationality'>
+  & { headOfHousehold: Maybe<(
+    { __typename?: 'ImportedIndividualNode' }
+    & Pick<ImportedIndividualNode, 'id' | 'fullName'>
+  )>, representative: Maybe<(
+    { __typename?: 'ImportedIndividualNode' }
+    & Pick<ImportedIndividualNode, 'id' | 'fullName'>
+  )>, registrationDataImportId: (
+    { __typename?: 'RegistrationDataImportDatahubNode' }
+    & Pick<RegistrationDataImportDatahubNode, 'hctId' | 'name'>
+  ) }
+);
+
 export type ImportedIndividualMinimalFragment = (
   { __typename?: 'ImportedIndividualNode' }
   & Pick<ImportedIndividualNode, 'id' | 'fullName' | 'workStatus' | 'dob' | 'sex'>
 );
 
-export const RegistrationFragmentMinimalFragmentDoc = gql`
-    fragment registrationFragmentMinimal on RegistrationDataImportNode {
+export const RegistrationMinimalFragmentDoc = gql`
+    fragment registrationMinimal on RegistrationDataImportNode {
   id
   createdAt
   name
@@ -3015,12 +3045,12 @@ export const RegistrationFragmentMinimalFragmentDoc = gql`
   numberOfHouseholds
 }
     `;
-export const RegistrationFragmentDetailedFragmentDoc = gql`
-    fragment registrationFragmentDetailed on RegistrationDataImportNode {
-  ...registrationFragmentMinimal
+export const RegistrationDetailedFragmentDoc = gql`
+    fragment registrationDetailed on RegistrationDataImportNode {
+  ...registrationMinimal
   numberOfIndividuals
 }
-    ${RegistrationFragmentMinimalFragmentDoc}`;
+    ${RegistrationMinimalFragmentDoc}`;
 export const ImportedHouseholdMinimalFragmentDoc = gql`
     fragment importedHouseholdMinimal on ImportedHouseholdNode {
   id
@@ -3031,6 +3061,28 @@ export const ImportedHouseholdMinimalFragmentDoc = gql`
   familySize
   location
   registrationDate
+}
+    `;
+export const ImportedHouseholdDetailedFragmentDoc = gql`
+    fragment importedHouseholdDetailed on ImportedHouseholdNode {
+  id
+  headOfHousehold {
+    id
+    fullName
+  }
+  familySize
+  location
+  registrationDate
+  residenceStatus
+  nationality
+  representative {
+    id
+    fullName
+  }
+  registrationDataImportId {
+    hctId
+    name
+  }
 }
     `;
 export const ImportedIndividualMinimalFragmentDoc = gql`
@@ -4425,8 +4477,8 @@ export type AllImportedHouseholdsQueryHookResult = ReturnType<typeof useAllImpor
 export type AllImportedHouseholdsLazyQueryHookResult = ReturnType<typeof useAllImportedHouseholdsLazyQuery>;
 export type AllImportedHouseholdsQueryResult = ApolloReactCommon.QueryResult<AllImportedHouseholdsQuery, AllImportedHouseholdsQueryVariables>;
 export const AllImportedIndividualsDocument = gql`
-    query AllImportedIndividuals($after: String, $before: String, $first: Int, $last: Int, $rdiId: String) {
-  allImportedIndividuals(after: $after, before: $before, first: $first, last: $last, rdiId: $rdiId) {
+    query AllImportedIndividuals($after: String, $before: String, $first: Int, $last: Int, $rdiId: String, $household: String) {
+  allImportedIndividuals(after: $after, before: $before, first: $first, last: $last, rdiId: $rdiId, household: $household) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -4478,6 +4530,7 @@ export function withAllImportedIndividuals<TProps, TChildProps = {}>(operationOp
  *      first: // value for 'first'
  *      last: // value for 'last'
  *      rdiId: // value for 'rdiId'
+ *      household: // value for 'household'
  *   },
  * });
  */
@@ -4503,12 +4556,12 @@ export const AllRegistrationDataImportsDocument = gql`
     edges {
       cursor
       node {
-        ...registrationFragmentMinimal
+        ...registrationMinimal
       }
     }
   }
 }
-    ${RegistrationFragmentMinimalFragmentDoc}`;
+    ${RegistrationMinimalFragmentDoc}`;
 export type AllRegistrationDataImportsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables>, 'query'>;
 
     export const AllRegistrationDataImportsComponent = (props: AllRegistrationDataImportsComponentProps) => (
@@ -4560,6 +4613,56 @@ export function useAllRegistrationDataImportsLazyQuery(baseOptions?: ApolloReact
 export type AllRegistrationDataImportsQueryHookResult = ReturnType<typeof useAllRegistrationDataImportsQuery>;
 export type AllRegistrationDataImportsLazyQueryHookResult = ReturnType<typeof useAllRegistrationDataImportsLazyQuery>;
 export type AllRegistrationDataImportsQueryResult = ApolloReactCommon.QueryResult<AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables>;
+export const ImportedHouseholdDocument = gql`
+    query ImportedHousehold($id: ID!) {
+  importedHousehold(id: $id) {
+    ...importedHouseholdDetailed
+  }
+}
+    ${ImportedHouseholdDetailedFragmentDoc}`;
+export type ImportedHouseholdComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<ImportedHouseholdQuery, ImportedHouseholdQueryVariables>, 'query'> & ({ variables: ImportedHouseholdQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const ImportedHouseholdComponent = (props: ImportedHouseholdComponentProps) => (
+      <ApolloReactComponents.Query<ImportedHouseholdQuery, ImportedHouseholdQueryVariables> query={ImportedHouseholdDocument} {...props} />
+    );
+    
+export type ImportedHouseholdProps<TChildProps = {}> = ApolloReactHoc.DataProps<ImportedHouseholdQuery, ImportedHouseholdQueryVariables> & TChildProps;
+export function withImportedHousehold<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ImportedHouseholdQuery,
+  ImportedHouseholdQueryVariables,
+  ImportedHouseholdProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, ImportedHouseholdQuery, ImportedHouseholdQueryVariables, ImportedHouseholdProps<TChildProps>>(ImportedHouseholdDocument, {
+      alias: 'importedHousehold',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useImportedHouseholdQuery__
+ *
+ * To run a query within a React component, call `useImportedHouseholdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useImportedHouseholdQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useImportedHouseholdQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useImportedHouseholdQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<ImportedHouseholdQuery, ImportedHouseholdQueryVariables>) {
+        return ApolloReactHooks.useQuery<ImportedHouseholdQuery, ImportedHouseholdQueryVariables>(ImportedHouseholdDocument, baseOptions);
+      }
+export function useImportedHouseholdLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<ImportedHouseholdQuery, ImportedHouseholdQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<ImportedHouseholdQuery, ImportedHouseholdQueryVariables>(ImportedHouseholdDocument, baseOptions);
+        }
+export type ImportedHouseholdQueryHookResult = ReturnType<typeof useImportedHouseholdQuery>;
+export type ImportedHouseholdLazyQueryHookResult = ReturnType<typeof useImportedHouseholdLazyQuery>;
+export type ImportedHouseholdQueryResult = ApolloReactCommon.QueryResult<ImportedHouseholdQuery, ImportedHouseholdQueryVariables>;
 export const RegistrationChoicesDocument = gql`
     query registrationChoices {
   registrationDataStatusChoices {
@@ -4613,10 +4716,10 @@ export type RegistrationChoicesQueryResult = ApolloReactCommon.QueryResult<Regis
 export const RegistrationDataImportDocument = gql`
     query RegistrationDataImport($id: ID!) {
   registrationDataImport(id: $id) {
-    ...registrationFragmentDetailed
+    ...registrationDetailed
   }
 }
-    ${RegistrationFragmentDetailedFragmentDoc}`;
+    ${RegistrationDetailedFragmentDoc}`;
 export type RegistrationDataImportComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<RegistrationDataImportQuery, RegistrationDataImportQueryVariables>, 'query'> & ({ variables: RegistrationDataImportQueryVariables; skip?: boolean; } | { skip: boolean; });
 
     export const RegistrationDataImportComponent = (props: RegistrationDataImportComponentProps) => (

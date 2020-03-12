@@ -1,32 +1,44 @@
 import React, { ReactElement } from 'react';
-import styled from 'styled-components';
 import {
-  AllImportedHouseholdsQueryVariables,
   AllImportedIndividualsQueryVariables,
-  ImportedHouseholdMinimalFragment,
   ImportedIndividualMinimalFragment,
-  useAllImportedHouseholdsQuery,
   useAllImportedIndividualsQuery,
 } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../../tables/UniversalTable';
 import { ImportedIndividualsTableRow } from './ImportedIndividualsTableRow';
 import { headCells } from './ImportedIndividualsTableHeadCells';
 
-export function ImportedIndividualsTable({ rdiId }): ReactElement {
+interface ImportedIndividualsTableProps {
+  rdiId?: string;
+  household?: string;
+  title?: string;
+  isOnPaper?: boolean;
+  rowsPerPageOptions?: number[];
+}
+
+export function ImportedIndividualsTable({
+  rdiId,
+  isOnPaper = false,
+  title,
+  household,
+  rowsPerPageOptions = [10, 15, 20],
+}: ImportedIndividualsTableProps): ReactElement {
   const initialVariables = {
     rdiId,
+    household,
   };
   return (
     <UniversalTable<
       ImportedIndividualMinimalFragment,
       AllImportedIndividualsQueryVariables
     >
+      title={title}
       headCells={headCells}
       query={useAllImportedIndividualsQuery}
       queriedObjectName='allImportedIndividuals'
-      rowsPerPageOptions={[10,15,20]}
+      rowsPerPageOptions={rowsPerPageOptions}
       initialVariables={initialVariables}
-      isOnPaper={false}
+      isOnPaper={isOnPaper}
       renderRow={(row) => <ImportedIndividualsTableRow individual={row} />}
     />
   );
