@@ -78,7 +78,6 @@ class ImportedIndividualFactory(factory.DjangoModelFactory):
         ImportedIndividual.IDENTIFICATION_TYPE_CHOICE, getter=lambda c: c[0],
     )
     identification_number = factory.Faker("uuid4")
-    household = factory.SubFactory(ImportedHouseholdFactory)
     registration_data_import_id = factory.SubFactory(
         RegistrationDataImportDatahubFactory
     )
