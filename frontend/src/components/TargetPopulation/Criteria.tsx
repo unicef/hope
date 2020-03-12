@@ -1,9 +1,12 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
+import { IconButton } from '@material-ui/core';
+import { Delete, Edit } from '@material-ui/icons';
 
 const CriteriaElement = styled.div`
   width: 380px;
+  position: relative;
   border: 2px solid #033f91;
   border-radius: 3px;
   font-size: 16px;
@@ -19,7 +22,21 @@ const CriteriaElement = styled.div`
   }
 `;
 
-export function Criteria({ criteria }) {
+const ButtonsContainer = styled.div`
+  position: absolute;
+  right: 0;
+  top: 0;
+  button {
+    color: #949494;
+    padding: 12px 8px;
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+`;
+
+export function Criteria({ criteria, removeFunction, editFunction, isEdit }) {
   const { t } = useTranslation();
 
   return (
@@ -48,6 +65,16 @@ export function Criteria({ criteria }) {
         <p>
           Hoousehold size: <span>{criteria.household}</span>
         </p>
+      )}
+      {isEdit && (
+        <ButtonsContainer>
+          <IconButton>
+            <Edit onClick={editFunction} />
+          </IconButton>
+          <IconButton onClick={removeFunction}>
+            <Delete />
+          </IconButton>
+        </ButtonsContainer>
       )}
     </CriteriaElement>
   );
