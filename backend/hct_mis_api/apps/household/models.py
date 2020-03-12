@@ -18,9 +18,12 @@ from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
 from utils.models import TimeStampedUUIDModel
 
+_INTEGER = "INTEGER"
+_SELECT_ONE = "SELECT_ONE"
+
 _CORE_FIELDS = [
     {
-        "type": "Integer",
+        "type": _INTEGER,
         "name": "years_in_school",
         "label": "years in school",
         "hint": "number of years spent in school",
@@ -29,7 +32,7 @@ _CORE_FIELDS = [
         "associated_with": "individual_fields",
     },
     {
-        "type": "Integer",
+        "type": _INTEGER,
         "name": "age",
         "label": "age",
         "hint": "age in years",
@@ -38,7 +41,7 @@ _CORE_FIELDS = [
         "associated_with": "individual_fields",
     },
     {
-        "type": "Integer",
+        "type": _INTEGER,
         "name": "family_size",
         "label": "Family Size",
         "hint": "how many persons in the household",
@@ -47,7 +50,7 @@ _CORE_FIELDS = [
         "associated_with": "household_fields",
     },
     {
-        "type": "SELECT_ONE",
+        "type": _SELECT_ONE,
         "name": "residence_status",
         "required": True,
         "label": "Residence Status",
@@ -71,11 +74,11 @@ def json_field_generator(
     """
     for each_type_obj in field_type_list:
         yield {
-            "name": each_type_obj["name"],
-            "type": each_type_obj["type"],
-            "required": each_type_obj["required"],
-            "label": each_type_obj["label"],
-            "hint": each_type_obj["hint"],
+            "name": each_type_obj.name,
+            "type": each_type_obj.type,
+            "required": each_type_obj.required,
+            "label": each_type_obj.label,
+            "hint": each_type_obj.hint,
             "choices": [
                 {
                     "name": flex_choice.name,
