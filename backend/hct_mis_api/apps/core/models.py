@@ -299,6 +299,10 @@ class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
         ("DATETIME", _("Datetime")),
         ("GEOPOINT", _("Geopoint")),
     )
+    ASSOCIATED_WITH_CHOICES = (
+        (0, _("Household")),
+        (1, _("Individual")),
+    )
 
     type = models.CharField(max_length=16, choices=TYPE_CHOICE)
     name = models.CharField(max_length=255, unique=True)
@@ -311,6 +315,7 @@ class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
         related_name="flex_attributes",
         null=True,
     )
+    associated_with = models.SmallIntegerField(choices=ASSOCIATED_WITH_CHOICES)
     history = AuditlogHistoryField(pk_indexable=False)
 
     def __str__(self):
@@ -354,7 +359,7 @@ class FlexibleAttributeChoice(SoftDeletableModel, TimeStampedUUIDModel):
 
 mptt.register(Location, order_insertion_by=["title"])
 mptt.register(CartoDBTable, order_insertion_by=["table_name"])
-mptt.register(FlexibleAttributeGroup)
+mptt.register(FlexibleAttributeGroup, order_insertion_by=["name"])
 
 auditlog.register(FlexibleAttributeChoice)
 auditlog.register(FlexibleAttributeGroup)
