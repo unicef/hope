@@ -18,6 +18,45 @@ from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
 from utils.models import TimeStampedUUIDModel
 
+_CORE_FIELDS = [
+    {
+        "type": "Integer",
+        "name": "years_in_school",
+        "label": "years in school",
+        "hint": "number of years spent in school",
+        "required": True,
+        "choices": [],
+        "associated_with": "individual_fields",
+    },
+    {
+        "type": "Integer",
+        "name": "age",
+        "label": "age",
+        "hint": "age in years",
+        "required": True,
+        "choices": [],
+        "associated_with": "individual_fields",
+    },
+    {
+        "type": "Integer",
+        "name": "family_size",
+        "label": "Family Size",
+        "hint": "how many persons in the household",
+        "required": True,
+        "choices": [],
+        "associated_with": "household_fields",
+    },
+    {
+        "type": "SELECT_ONE",
+        "name": "residence_status",
+        "required": True,
+        "label": "Residence Status",
+        "hint": "residential status of household",
+        "choices": [],
+        "associated_with": "household_fields",
+    },
+]
+
 
 def json_field_generator(
     field_type_list: object,
@@ -50,58 +89,11 @@ def json_field_generator(
 
 
 def get_flex_fields() -> List:
+    """Gets list of flex metadatatype objects. """
     return [
         flex_obj
         for flex_obj in json_field_generator(FlexibleAttribute.objects.all())
     ]
-
-
-_CORE_FIELDS = {
-    "individual_fields": [
-        {
-            "type": "Integer",
-            "name": "years_in_school",
-            "label": "years in school",
-            "hint": "number of years spent in school",
-            "required": True,
-            "choices": [],
-        },
-        {
-            "type": "Integer",
-            "name": "age",
-            "label": "age",
-            "hint": "age in years",
-            "required": True,
-            "choices": [],
-        },
-    ],
-    "household_fields": [
-        {
-            "type": "Integer",
-            "name": "family_size",
-            "label": "Family Size",
-            "hint": "how many persons in the household",
-            "required": True,
-            "choices": [],
-        },
-        {
-            "type": "SELECT_ONE",
-            "name": "residence_status",
-            "required": True,
-            "label": "Residence Status",
-            "hint": "residential status of household",
-            "choices": [],
-        },
-    ],
-}
-
-
-def get_filter_data_types():
-    """Returns core and flex fields."""
-    return {
-        "core_fields": _CORE_FIELDS,
-        "flex_fields": get_flex_fields(),
-    }
 
 
 class Household(TimeStampedUUIDModel):
