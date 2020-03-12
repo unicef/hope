@@ -9,7 +9,11 @@ else
         until pg_isready -h db -p 5432;
           do echo "waiting for database"; sleep 2; done;
         python manage.py collectstatic --no-input
+        python manage.py makemigrations
         python manage.py migrate
+        python manage.py loadbusinessareas
+        python manage.py migratealldb
+        python manage.py generatefixtures
         python manage.py runserver 0.0.0.0:8000
 
         ;;
@@ -18,3 +22,5 @@ else
     ;;
     esac
 fi
+
+
