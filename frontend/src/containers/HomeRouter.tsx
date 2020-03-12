@@ -19,6 +19,7 @@ import { PopulationIndividualsPage } from './pages/PopulationIndividualsPage';
 import { PopulationIndividualsDetailsPage } from './pages/PopulationIndividualsDetailsPage';
 import { TargetPopulationPage } from './pages/TargetPopulationPage';
 import { TargetPopulationDetailsPage } from './pages/TargetPopulationDetailsPage';
+import { CreateTargetPopulation } from './pages/CreateTargetPopulation';
 
 const Root = styled.div`
   display: flex;
@@ -70,6 +71,9 @@ export function HomeRouter(): React.ReactElement {
           </Route>
           <Route exact path='/:businessArea/target-population'>
             <TargetPopulationPage />
+          </Route>
+          <Route path='/:businessArea/target-population/create'>
+            <CreateTargetPopulation />
           </Route>
           <Route path='/:businessArea/target-population/:id'>
             <TargetPopulationDetailsPage />

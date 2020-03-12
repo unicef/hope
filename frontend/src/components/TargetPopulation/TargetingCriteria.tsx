@@ -1,25 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
-import { Typography, Paper } from '@material-ui/core';
+import { Typography, Paper, Button } from '@material-ui/core';
 import { Criteria } from './Criteria';
-
-const data = [
-  {
-    intakeGroup: 'Children 9/10/2019',
-    sex: 'Female',
-    age: '7 - 15 years old',
-    distanceToSchool: 'over 3km',
-    household: 'over 5 individuals',
-  },
-  {
-    intakeGroup: 'Children 9/10/2019',
-    sex: 'Male',
-    age: null,
-    distanceToSchool: 'over 3km',
-    household: null,
-  },
-];
+import { TargetCriteriaForm } from '../../containers/forms/TargetCriteriaForm';
 
 const PaperContainer = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(3)}px
@@ -29,7 +13,10 @@ const PaperContainer = styled(Paper)`
 `;
 
 const Title = styled.div`
-  padding-bottom: ${({ theme }) => theme.spacing(2)}px;
+  padding-bottom: ${({ theme }) => theme.spacing(4)}px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 `;
 
 const ContentWrapper = styled.div`
@@ -57,20 +44,63 @@ const DividerLabel = styled.div`
   background-color: #fff;
 `;
 
-export function TargetingCriteria() {
+interface TargetingCriteriaProps {
+  criterias: object[];
+  isEdit: boolean;
+  helpers?;
+}
+
+export function TargetingCriteria({
+  criterias,
+  isEdit,
+  helpers,
+}: TargetingCriteriaProps) {
   const { t } = useTranslation();
+  const [isOpen, setOpen] = useState(false);
+  const [criteriaObject, setCriteria] = useState({});
+  const openModal = (criteria) => {
+    setCriteria(criteria);
+    setOpen(true);
+  };
+  const closeModal = () => {
+    setCriteria({});
+    setOpen(false);
+  };
 
   return (
     <div>
       <PaperContainer>
         <Title>
           <Typography variant='h6'>{t('Targeting Criteria')}</Typography>
+          {isEdit && (
+            <>
+              <Button
+                variant='contained'
+                color='primary'
+                onClick={() => setOpen(true)}
+              >
+                Add Criteria
+              </Button>
+              <TargetCriteriaForm
+                criteria={criteriaObject}
+                title='Add targeting criteria'
+                open={isOpen}
+                onClose={() => closeModal()}
+              />
+            </>
+          )}
         </Title>
         <ContentWrapper>
-          {data.map((criteria, index) => {
+          {criterias.map((criteria, index) => {
             return (
               <>
-                <Criteria criteria={criteria} />{' '}
+                <Criteria
+                  isEdit={isEdit}
+                  criteria={criteria}
+                  editFunction={() => openModal(criteria)}
+                  removeFunction={() => helpers.remove(index)}
+                />
+
                 {index % 2 ? null : (
                   <Divider>
                     <DividerLabel>Or</DividerLabel>

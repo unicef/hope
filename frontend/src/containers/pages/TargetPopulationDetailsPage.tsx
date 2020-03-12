@@ -20,6 +20,32 @@ const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
+const criterias = [
+  {
+    intakeGroup: 'Children 9/10/2019',
+    sex: 'Female',
+    age: '7 - 15 years old',
+    distanceToSchool: 'over 3km',
+    household: 'over 5 individuals',
+  },
+  {
+    intakeGroup: 'Children 9/10/2019',
+    sex: 'Male',
+    age: null,
+    distanceToSchool: 'over 3km',
+    household: null,
+  },
+]
+
+const resultsData = {
+  totalNumberOfHouseholds: 125,
+  targetedIndividuals: 254,
+  femaleChildren: 43,
+  maleChildren: 50,
+  femaleAdults: 35,
+  maleAdults: 12,
+};
+
 export function TargetPopulationDetailsPage() {
   const { id } = useParams();
   const { data, loading } = useTargetPopulationQuery({
@@ -34,8 +60,8 @@ export function TargetPopulationDetailsPage() {
   return (
     <div>
       <TargetPopulationPageHeader targetPopulation={targetPopulation} isEditMode={isEdit} setEditState={setEditState}/>
-      <TargetingCriteria />
-      <Results />
+      <TargetingCriteria criterias={criterias} isEdit={isEdit}/>
+      <Results resultsData={resultsData}/>
       <PaperContainer>
         <Title>
           <Typography variant='h6'>

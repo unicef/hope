@@ -5,21 +5,12 @@ import { Typography, Paper, Grid } from '@material-ui/core';
 import { MiśTheme } from '../../theme';
 import { LabelizedField } from '../LabelizedField';
 
-const data = {
-  totalNumberOfHouseholds: 125,
-  targetedIndividuals: 254,
-  femaleChildren: 43,
-  maleChildren: 50,
-  femaleAdults: 35,
-  maleAdults: 12,
-};
-
 const colors = {
-    femaleChildren: '#023E90',
-    maleChildren: '#029BFE',
-    femaleAdult: '#73C302',
-    maleAdult: '#F2E82C'
-}
+  femaleChildren: '#023E90',
+  maleChildren: '#029BFE',
+  femaleAdult: '#73C302',
+  maleAdult: '#F2E82C',
+};
 
 const PaperContainer = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(3)}px
@@ -38,7 +29,7 @@ const ContentWrapper = styled.div`
 
 const FieldBorder = styled.div`
   padding: 0 ${({ theme }) => theme.spacing(2)}px;
-  border-color: ${props => props.color};
+  border-color: ${(props) => props.color};
   border-left-width: 2px;
   border-left-style: solid;
 `;
@@ -59,7 +50,15 @@ const SummaryValue = styled.div`
   margin-top: ${({ theme }) => theme.spacing(2)}px;
 `;
 
-export function Results() {
+const Label = styled.p`
+  color: #b1b1b5;
+`
+
+interface ResultsProps {
+  resultsData?;
+}
+
+export function Results({ resultsData }: ResultsProps) {
   const { t } = useTranslation();
 
   return (
@@ -69,38 +68,58 @@ export function Results() {
           <Typography variant='h6'>{t('Results')}</Typography>
         </Title>
         <ContentWrapper>
-          <Grid container spacing={0} justify='flex-start'>
-            <Grid item xs={6}>
-              <FieldBorder color={colors.femaleChildren}>
-                <LabelizedField label='Female Children' value={data.femaleChildren} />
-              </FieldBorder>
-            </Grid>
-            <Grid item xs={6}>
-              <FieldBorder color={colors.femaleAdult}>
-                <LabelizedField label='Female Adults' value={data.femaleAdults} />
-              </FieldBorder>
-            </Grid>
-            <Grid item xs={6}>
-              <FieldBorder color={colors.maleChildren}>
-                <LabelizedField label='Male Children' value={data.maleChildren} />
-              </FieldBorder>
-            </Grid>
-            <Grid item xs={6}>
-              <FieldBorder color={colors.maleAdult}>
-                <LabelizedField label='Male Adults' value={data.maleAdults} />
-              </FieldBorder>
-            </Grid>
-          </Grid>
-          <SummaryBorder>
-            <LabelizedField label='Total Number of Households'>
-              <SummaryValue>{data.totalNumberOfHouseholds}</SummaryValue>
-            </LabelizedField>
-          </SummaryBorder>
-          <SummaryBorder>
-            <LabelizedField label='Targeted Individuals'>
-              <SummaryValue>{data.targetedIndividuals}</SummaryValue>
-            </LabelizedField>
-          </SummaryBorder>
+          {resultsData ? (
+            <>
+              <Grid container spacing={0} justify='flex-start'>
+                <Grid item xs={6}>
+                  <FieldBorder color={colors.femaleChildren}>
+                    <LabelizedField
+                      label='Female Children'
+                      value={resultsData.femaleChildren}
+                    />
+                  </FieldBorder>
+                </Grid>
+                <Grid item xs={6}>
+                  <FieldBorder color={colors.femaleAdult}>
+                    <LabelizedField
+                      label='Female Adults'
+                      value={resultsData.femaleAdults}
+                    />
+                  </FieldBorder>
+                </Grid>
+                <Grid item xs={6}>
+                  <FieldBorder color={colors.maleChildren}>
+                    <LabelizedField
+                      label='Male Children'
+                      value={resultsData.maleChildren}
+                    />
+                  </FieldBorder>
+                </Grid>
+                <Grid item xs={6}>
+                  <FieldBorder color={colors.maleAdult}>
+                    <LabelizedField
+                      label='Male Adults'
+                      value={resultsData.maleAdults}
+                    />
+                  </FieldBorder>
+                </Grid>
+              </Grid>
+              <SummaryBorder>
+                <LabelizedField label='Total Number of Households'>
+                  <SummaryValue>
+                    {resultsData.totalNumberOfHouseholds}
+                  </SummaryValue>
+                </LabelizedField>
+              </SummaryBorder>
+              <SummaryBorder>
+                <LabelizedField label='Targeted Individuals'>
+                  <SummaryValue>{resultsData.targetedIndividuals}</SummaryValue>
+                </LabelizedField>
+              </SummaryBorder>
+            </>
+          ) : (
+            <Label>Add targeting criteria to see results.</Label>
+          )}
         </ContentWrapper>
       </PaperContainer>
     </div>
