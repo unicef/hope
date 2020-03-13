@@ -2,20 +2,18 @@ import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { Paper, Snackbar, SnackbarContent, Tab } from '@material-ui/core';
+import Tabs from '@material-ui/core/Tabs';
+import Typography from '@material-ui/core/Typography';
 import {
   useProgrammeChoiceDataQuery,
   useRegistrationDataImportQuery,
 } from '../../../__generated__/graphql';
-import AppBar from '@material-ui/core/AppBar';
-import Tabs from '@material-ui/core/Tabs';
 import { LoadingComponent } from '../../../components/LoadingComponent';
 import { useSnackbarHelper } from '../../../hooks/useBreadcrumbHelper';
 import { ImportedHouseholdTable } from '../tables/ImportedHouseholdsTable';
+import { ImportedIndividualsTable } from '../tables/ImportedIndividualsTable';
 import { RegistrationDetails } from './RegistrationDetails';
 import { RegistrationDataImportDetailsPageHeader } from './RegistrationDataImportDetailsPageHeader';
-import Typography from '@material-ui/core/Typography';
-import Toolbar from '@material-ui/core/Toolbar';
-import { ImportedIndividualsTable } from '../tables/ImportedIndividualsTable';
 
 const Container = styled.div`
   && {
@@ -84,9 +82,7 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
         <RegistrationDetails registration={data.registrationDataImport} />
         <TableWrapper>
           <Paper>
-            <Title variant='h6'>
-              Import Preview
-            </Title>
+            <Title variant='h6'>Import Preview</Title>
             <TabsContainer>
               <StyledTabs
                 value={selectedTab}

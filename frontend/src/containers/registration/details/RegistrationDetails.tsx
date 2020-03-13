@@ -1,22 +1,12 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Grid, Typography } from '@material-ui/core';
-import moment from 'moment';
-import { StatusBox } from '../../../components/StatusBox';
-import {
-  choicesToDict,
-  programStatusToColor,
-  registrationDataImportStatusToColor,
-} from '../../../utils/utils';
-import { LabelizedField } from '../../../components/LabelizedField';
-import {
-  ProgrammeChoiceDataQuery,
-  ProgramNode,
-  RegistrationDataImportNode,
-  RegistrationDetailedFragment,
-} from '../../../__generated__/graphql';
-import { MiśTheme } from '../../../theme';
 import { Doughnut } from 'react-chartjs-2';
+import { StatusBox } from '../../../components/StatusBox';
+import { registrationDataImportStatusToColor } from '../../../utils/utils';
+import { LabelizedField } from '../../../components/LabelizedField';
+import { RegistrationDetailedFragment } from '../../../__generated__/graphql';
+import { MiśTheme } from '../../../theme';
 
 const Container = styled.div`
   display: flex;
