@@ -2961,6 +2961,19 @@ export type ImportedHouseholdQuery = (
   )> }
 );
 
+export type ImportedIndividualQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type ImportedIndividualQuery = (
+  { __typename?: 'Query' }
+  & { importedIndividual: Maybe<(
+    { __typename?: 'ImportedIndividualNode' }
+    & ImportedIndividualDetailedFragment
+  )> }
+);
+
 export type RegistrationChoicesQueryVariables = {};
 
 
@@ -3020,13 +3033,25 @@ export type ImportedHouseholdDetailedFragment = (
     & Pick<ImportedIndividualNode, 'id' | 'fullName'>
   )>, registrationDataImportId: (
     { __typename?: 'RegistrationDataImportDatahubNode' }
-    & Pick<RegistrationDataImportDatahubNode, 'hctId' | 'name'>
+    & Pick<RegistrationDataImportDatahubNode, 'id' | 'hctId' | 'name'>
   ) }
 );
 
 export type ImportedIndividualMinimalFragment = (
   { __typename?: 'ImportedIndividualNode' }
   & Pick<ImportedIndividualNode, 'id' | 'fullName' | 'workStatus' | 'dob' | 'sex'>
+);
+
+export type ImportedIndividualDetailedFragment = (
+  { __typename?: 'ImportedIndividualNode' }
+  & Pick<ImportedIndividualNode, 'id' | 'fullName' | 'workStatus' | 'dob' | 'sex' | 'firstName' | 'lastName' | 'middleName' | 'estimatedDob' | 'identificationType' | 'identificationNumber' | 'phoneNumber' | 'phoneNumberAlternative'>
+  & { household: (
+    { __typename?: 'ImportedHouseholdNode' }
+    & Pick<ImportedHouseholdNode, 'id' | 'location' | 'address'>
+  ), registrationDataImportId: (
+    { __typename?: 'RegistrationDataImportDatahubNode' }
+    & Pick<RegistrationDataImportDatahubNode, 'id' | 'hctId' | 'name'>
+  ) }
 );
 
 export const RegistrationMinimalFragmentDoc = gql`
@@ -3080,6 +3105,7 @@ export const ImportedHouseholdDetailedFragmentDoc = gql`
     fullName
   }
   registrationDataImportId {
+    id
     hctId
     name
   }
@@ -3092,6 +3118,33 @@ export const ImportedIndividualMinimalFragmentDoc = gql`
   workStatus
   dob
   sex
+}
+    `;
+export const ImportedIndividualDetailedFragmentDoc = gql`
+    fragment importedIndividualDetailed on ImportedIndividualNode {
+  id
+  fullName
+  workStatus
+  dob
+  sex
+  firstName
+  lastName
+  middleName
+  estimatedDob
+  identificationType
+  identificationNumber
+  household {
+    id
+    location
+    address
+  }
+  registrationDataImportId {
+    id
+    hctId
+    name
+  }
+  phoneNumber
+  phoneNumberAlternative
 }
     `;
 export const CreateProgramDocument = gql`
@@ -4663,6 +4716,56 @@ export function useImportedHouseholdLazyQuery(baseOptions?: ApolloReactHooks.Laz
 export type ImportedHouseholdQueryHookResult = ReturnType<typeof useImportedHouseholdQuery>;
 export type ImportedHouseholdLazyQueryHookResult = ReturnType<typeof useImportedHouseholdLazyQuery>;
 export type ImportedHouseholdQueryResult = ApolloReactCommon.QueryResult<ImportedHouseholdQuery, ImportedHouseholdQueryVariables>;
+export const ImportedIndividualDocument = gql`
+    query ImportedIndividual($id: ID!) {
+  importedIndividual(id: $id) {
+    ...importedIndividualDetailed
+  }
+}
+    ${ImportedIndividualDetailedFragmentDoc}`;
+export type ImportedIndividualComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<ImportedIndividualQuery, ImportedIndividualQueryVariables>, 'query'> & ({ variables: ImportedIndividualQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const ImportedIndividualComponent = (props: ImportedIndividualComponentProps) => (
+      <ApolloReactComponents.Query<ImportedIndividualQuery, ImportedIndividualQueryVariables> query={ImportedIndividualDocument} {...props} />
+    );
+    
+export type ImportedIndividualProps<TChildProps = {}> = ApolloReactHoc.DataProps<ImportedIndividualQuery, ImportedIndividualQueryVariables> & TChildProps;
+export function withImportedIndividual<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ImportedIndividualQuery,
+  ImportedIndividualQueryVariables,
+  ImportedIndividualProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, ImportedIndividualQuery, ImportedIndividualQueryVariables, ImportedIndividualProps<TChildProps>>(ImportedIndividualDocument, {
+      alias: 'importedIndividual',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useImportedIndividualQuery__
+ *
+ * To run a query within a React component, call `useImportedIndividualQuery` and pass it any options that fit your needs.
+ * When your component renders, `useImportedIndividualQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useImportedIndividualQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useImportedIndividualQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<ImportedIndividualQuery, ImportedIndividualQueryVariables>) {
+        return ApolloReactHooks.useQuery<ImportedIndividualQuery, ImportedIndividualQueryVariables>(ImportedIndividualDocument, baseOptions);
+      }
+export function useImportedIndividualLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<ImportedIndividualQuery, ImportedIndividualQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<ImportedIndividualQuery, ImportedIndividualQueryVariables>(ImportedIndividualDocument, baseOptions);
+        }
+export type ImportedIndividualQueryHookResult = ReturnType<typeof useImportedIndividualQuery>;
+export type ImportedIndividualLazyQueryHookResult = ReturnType<typeof useImportedIndividualLazyQuery>;
+export type ImportedIndividualQueryResult = ApolloReactCommon.QueryResult<ImportedIndividualQuery, ImportedIndividualQueryVariables>;
 export const RegistrationChoicesDocument = gql`
     query registrationChoices {
   registrationDataStatusChoices {
