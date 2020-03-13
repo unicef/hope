@@ -1,5 +1,7 @@
+import enum
 import json
 import re
+from typing import List
 
 import factory
 from django.template.defaultfilters import slugify
@@ -83,6 +85,17 @@ def _slug_strip(value, separator="-"):
             re_sep = re.escape(separator)
         value = re.sub(r"^%s+|%s+$" % (re_sep, re_sep), "", value)
     return value
+
+
+class EnumGetChoices(enum.Enum):
+    """Subclasses Enum class for additional methods."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+
+    @classmethod
+    def get_choices(cls) -> List[tuple]:
+        return [(field.name, field.value) for field in cls]
 
 
 class JSONFactory(factory.DictFactory):
