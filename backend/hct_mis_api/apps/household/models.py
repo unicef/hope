@@ -1,7 +1,5 @@
 from datetime import date
-from typing import Dict
-from typing import List
-from typing import Union
+from typing import Dict, List, Union, Iterable
 
 from core.models import FlexibleAttribute
 from django.core.validators import (
@@ -62,7 +60,7 @@ _CORE_FIELDS = [
 
 
 def json_field_generator(
-    field_type_list: object,
+    field_type_list: Iterable[FlexibleAttribute],
 ) -> Dict[str, Union[str, List[dict]]]:
     """Generator that yields json mappings from field data types.
 
