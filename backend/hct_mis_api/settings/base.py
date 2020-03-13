@@ -134,7 +134,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
-    'auditlog.middleware.AuditlogMiddleware',
+    "auditlog.middleware.AuditlogMiddleware",
 ]
 
 TEMPLATES = [
@@ -362,6 +362,6 @@ LOGIN_URL = "/api/login/azuread-tenant-oauth2"
 TEST_RUNNER = "snapshottest.django.TestRunner"
 
 GRAPH_MODELS = {
-  'all_applications': True,
-  'group_models': True,
+    "all_applications": True,
+    "group_models": True,
 }
