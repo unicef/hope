@@ -1,11 +1,16 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
-import { Typography, Paper } from '@material-ui/core';
+import { Typography, Paper, Button } from '@material-ui/core';
 import { TargetPopulationPageHeader } from './headers/TargetPopulationPageHeader';
 import { Results } from '../../components/TargetPopulation/Results';
 import { TargetingCriteria } from '../../components/TargetPopulation/TargetingCriteria';
-import { useTargetPopulationQuery, TargetPopulationNode } from '../../__generated__/graphql';
+import {
+  useTargetPopulationQuery,
+  TargetPopulationNode,
+} from '../../__generated__/graphql';
+import { EditTargetPopulation } from '../../components/TargetPopulation/EditTargetPopulation';
+import { TargetPopulationDetails } from '../../components/TargetPopulation/TargetPopulationDetails';
 
 const PaperContainer = styled(Paper)`
   display: flex;
@@ -35,7 +40,7 @@ const criterias = [
     distanceToSchool: 'over 3km',
     household: null,
   },
-]
+];
 
 const resultsData = {
   totalNumberOfHouseholds: 125,
@@ -49,26 +54,44 @@ const resultsData = {
 export function TargetPopulationDetailsPage() {
   const { id } = useParams();
   const { data, loading } = useTargetPopulationQuery({
-    variables: {id}
+    variables: { id },
   });
   const [isEdit, setEditState] = useState(false);
 
-  if(!data) {
+  if (!data) {
     return null;
   }
-  const targetPopulation = data.targetPopulation as TargetPopulationNode
+  const targetPopulation = data.targetPopulation as TargetPopulationNode;
+
   return (
     <div>
-      <TargetPopulationPageHeader targetPopulation={targetPopulation} isEditMode={isEdit} setEditState={setEditState}/>
-      <TargetingCriteria criterias={criterias} isEdit={isEdit}/>
-      <Results resultsData={resultsData}/>
-      <PaperContainer>
-        <Title>
-          <Typography variant='h6'>
-            Target Population Entries (Households)
-          </Typography>
-        </Title>
-      </PaperContainer>
+      {isEdit ? (
+        <EditTargetPopulation
+          criterias={criterias}
+          targetPopulation={targetPopulation}
+          cancelEdit={() => setEditState(false)}
+        />
+      ) : (
+        <>
+          <TargetPopulationPageHeader
+            targetPopulation={targetPopulation}
+            isEditMode={isEdit}
+            setEditState={setEditState}
+          />
+          {targetPopulation.status === 'FINALIZED' && (
+            <TargetPopulationDetails targetPopulation={targetPopulation} />
+          )}
+          <TargetingCriteria criterias={criterias} isEdit={isEdit} />
+          <Results resultsData={resultsData} />
+          <PaperContainer>
+            <Title>
+              <Typography variant='h6'>
+                Target Population Entries (Households)
+              </Typography>
+            </Title>
+          </PaperContainer>
+        </>
+      )}
     </div>
   );
 }
