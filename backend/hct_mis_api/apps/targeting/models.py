@@ -182,15 +182,12 @@ class FilterAttrType(models.Model):
             today = dt.date.today()
             this_year = today.year
             year_min = age_max and (this_year - age_max)
-            year_max = age_min and (this_year - age_min)
+            year_max = (age_min and (this_year - age_min)) or year_min
             year_min = year_min or year_max
-            if year_min and year_max and year_min <= year_max:
-                dob_min = dt.date(year_min, 1, 1)
-                dob_max = dt.date(year_max, 12, 31)
-                return {
-                    "head_of_household__dob__gte": dob_min,
-                    "head_of_household__dob__lte": dob_max,
-                }
+            return {
+                "head_of_household_dob__year__lte": year_max,
+                "head_of_household_dob__year__gte": year_min,
+            }
         return {}
 
     @classmethod
