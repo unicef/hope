@@ -33,10 +33,10 @@ const TabsContainer = styled.div`
 `;
 
 const TableWrapper = styled.div`
-  padding: 20px;
+  padding: ${({ theme }) => theme.spacing(4)}px;
 `;
 const Title = styled(Typography)`
-  padding: 24px;
+  padding: ${({ theme }) => theme.spacing(6)}px;
 `;
 interface TabPanelProps {
   children: React.ReactNode;
