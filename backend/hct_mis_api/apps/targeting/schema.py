@@ -170,7 +170,7 @@ class Query(graphene.ObjectType):
 
     def resolve_meta_data_filter_type(self, info):
         return {
-            "core_field_types": household_models._CORE_FIELDS,
+            "core_field_types": household_models.get_core_fields(Household),
             "flex_field_types": household_models.get_flex_fields(),
         }
 
