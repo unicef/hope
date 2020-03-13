@@ -2,11 +2,11 @@ import styled from 'styled-components';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { RegistrationDataImportNode } from '../../../__generated__/graphql';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
-import { StatusBox } from '../../../components/StatusBox';
-import { registrationDataImportStatusToColor } from '../../../utils/utils';
+import { RegistrationDataImportNode } from '../../../../__generated__/graphql';
+import { useBusinessArea } from '../../../../hooks/useBusinessArea';
+import { ClickableTableRow } from '../../../../components/table/ClickableTableRow';
+import { StatusBox } from '../../../../components/StatusBox';
+import { registrationDataImportStatusToColor } from '../../../../utils/utils';
 import moment from 'moment';
 
 const StatusContainer = styled.div`
@@ -24,7 +24,7 @@ export function RegistrationDataImportTableRow({
   const businessArea = useBusinessArea();
 
   const handleClick = (): void => {
-    const path = `/${businessArea}/registration-dataI=-import/${registrationDataImport.id}`;
+    const path = `/${businessArea}/registration-data-import/${registrationDataImport.id}`;
     history.push(path);
   };
   return (
