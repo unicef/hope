@@ -4,25 +4,27 @@ import { HeadCell } from '../../components/table/EnhancedTableHead';
 import { columnToOrderBy } from '../../utils/utils';
 
 interface UniversalTableProps<T, K> {
-  rowsPage?: number[];
+  rowsPerPageOptions?: number[];
   initialVariables: K;
   query;
   queriedObjectName: string;
   renderRow: (row: T) => ReactElement;
   headCells: HeadCell<T>[];
-  title: string;
+  title?: string;
+  isOnPaper?: boolean;
 }
 export function UniversalTable<T, K>({
-  rowsPage = [5, 10, 15],
+  rowsPerPageOptions = [5, 10, 15],
   initialVariables,
   query,
   queriedObjectName,
   renderRow,
   headCells,
   title,
+  isOnPaper,
 }: UniversalTableProps<T, K>): ReactElement {
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(rowsPage[0]);
+  const [rowsPerPage, setRowsPerPage] = useState(rowsPerPageOptions[0]);
   const [orderBy, setOrderBy] = useState(null);
   const [orderDirection, setOrderDirection] = useState('asc');
   const { data, refetch, loading } = query({
@@ -42,15 +44,15 @@ export function UniversalTable<T, K>({
 
   const { edges } = data[queriedObjectName];
   const typedEdges = edges.map((edge) => edge.node as T);
-  console.log('query1', typedEdges, initialVariables);
   return (
     <TableComponent<T>
       title={title}
       data={typedEdges}
       loading={loading}
       renderRow={renderRow}
+      isOnPaper={isOnPaper}
       headCells={headCells}
-      rowsPerPageOptions={rowsPage}
+      rowsPerPageOptions={rowsPerPageOptions}
       rowsPerPage={rowsPerPage}
       page={page}
       itemsCount={data[queriedObjectName].totalCount}
