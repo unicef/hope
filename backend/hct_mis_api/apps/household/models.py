@@ -1,7 +1,6 @@
+import operator
 from datetime import date
-from typing import Dict
-from typing import List
-from typing import Union
+from typing import Dict, List, Union, Iterable
 
 from core.models import FlexibleAttribute
 from django.core.validators import (
@@ -21,48 +20,9 @@ from utils.models import TimeStampedUUIDModel
 _INTEGER = "INTEGER"
 _SELECT_ONE = "SELECT_ONE"
 
-_CORE_FIELDS = [
-    {
-        "type": _INTEGER,
-        "name": "years_in_school",
-        "label": "years in school",
-        "hint": "number of years spent in school",
-        "required": True,
-        "choices": [],
-        "associated_with": "individual_fields",
-    },
-    {
-        "type": _INTEGER,
-        "name": "age",
-        "label": "age",
-        "hint": "age in years",
-        "required": True,
-        "choices": [],
-        "associated_with": "individual_fields",
-    },
-    {
-        "type": _INTEGER,
-        "name": "family_size",
-        "label": "Family Size",
-        "hint": "how many persons in the household",
-        "required": True,
-        "choices": [],
-        "associated_with": "household_fields",
-    },
-    {
-        "type": _SELECT_ONE,
-        "name": "residence_status",
-        "required": True,
-        "label": "Residence Status",
-        "hint": "residential status of household",
-        "choices": [],
-        "associated_with": "household_fields",
-    },
-]
-
 
 def json_field_generator(
-    field_type_list: object,
+    field_type_list: Iterable[FlexibleAttribute],
 ) -> Dict[str, Union[str, List[dict]]]:
     """Generator that yields json mappings from field data types.
 
@@ -96,6 +56,52 @@ def get_flex_fields() -> List:
     return [
         flex_obj
         for flex_obj in json_field_generator(FlexibleAttribute.objects.all())
+    ]
+
+
+# TODO(codecakes): make it dynamic when possible.
+def get_core_fields(model: models.Model) -> List:
+    """Gets list of flex metadatatype objects. """
+    get_item_fn = operator.itemgetter(1)
+    return [
+        {
+            "type": _INTEGER,
+            "name": "years_in_school",
+            "label": "years in school",
+            "hint": "number of years spent in school",
+            "required": True,
+            "choices": [],
+            "associated_with": "individual_fields",
+        },
+        {
+            "type": _INTEGER,
+            "name": "age",
+            "label": "age",
+            "hint": "age in years",
+            "required": True,
+            "choices": [],
+            "associated_with": "individual_fields",
+        },
+        {
+            "type": _INTEGER,
+            "name": "family_size",
+            "label": "Family Size",
+            "hint": "how many persons in the household",
+            "required": True,
+            "choices": [],
+            "associated_with": "household_fields",
+        },
+        {
+            "type": _SELECT_ONE,
+            "name": "residence_status",
+            "required": True,
+            "label": "Residence Status",
+            "hint": "residential status of household",
+            "choices": [
+                str(get_item_fn(item)) for item in model.RESIDENCE_STATUS_CHOICE
+            ],
+            "associated_with": "household_fields",
+        },
     ]
 
 
