@@ -1,14 +1,10 @@
 import React from 'react';
-import { ImportedIndividualsTable } from '../../tables/ImportedIndividualsTable';
 import { Grid, Typography } from '@material-ui/core';
-import { LabelizedField } from '../../../../components/LabelizedField';
 import styled from 'styled-components';
-import {
-  RegistrationDetailedFragment,
-  useRegistrationDataImportQuery,
-} from '../../../../__generated__/graphql';
-import Paper from "@material-ui/core/Paper";
-
+import Paper from '@material-ui/core/Paper';
+import { LabelizedField } from '../../../../components/LabelizedField';
+import { useRegistrationDataImportQuery } from '../../../../__generated__/graphql';
+import { Missing } from '../../../../components/Missing';
 
 const Title = styled.div`
   width: 100%;
@@ -25,12 +21,12 @@ const Overview = styled(Paper)`
 `;
 interface RegistrationDetailsProps {
   hctId: string;
-  registrationDate: string
+  registrationDate: string;
 }
 
 export function RegistrationDetails({
   hctId,
-                                        registrationDate
+  registrationDate,
 }: RegistrationDetailsProps): React.ReactElement {
   const { data } = useRegistrationDataImportQuery({
     variables: {
@@ -40,7 +36,7 @@ export function RegistrationDetails({
   if (!data) {
     return null;
   }
-  const  {registrationDataImport} = data;
+  const { registrationDataImport } = data;
   return (
     <Overview>
       <Title>
@@ -64,7 +60,9 @@ export function RegistrationDetails({
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='Number of Rooms'>
-            <div>-</div>
+            <div>
+              <Missing />
+            </div>
           </LabelizedField>
         </Grid>
       </Grid>
@@ -73,22 +71,30 @@ export function RegistrationDetails({
       <Grid container spacing={6}>
         <Grid item xs={4}>
           <LabelizedField label='Start time'>
-            <div>-</div>
+            <div>
+              <Missing />
+            </div>
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='End time'>
-            <div>-</div>
+            <div>
+              <Missing />
+            </div>
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='Device ID'>
-            <div>-</div>
+            <div>
+              <Missing />
+            </div>
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='User name'>
-            <div>-</div>
+            <div>
+              <Missing />
+            </div>
           </LabelizedField>
         </Grid>
       </Grid>

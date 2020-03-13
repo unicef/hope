@@ -54,6 +54,7 @@ export const importedHouseholdDetailed = gql`
       fullName
     }
     registrationDataImportId {
+      id
       hctId
       name
     }
@@ -67,5 +68,34 @@ export const importedIndividualMinimal = gql`
     workStatus
     dob
     sex
+  }
+`;
+
+export const importedIndividualDetailed = gql`
+  fragment importedIndividualDetailed on ImportedIndividualNode {
+    id
+    fullName
+    workStatus
+    dob
+    sex
+    firstName
+    lastName
+    middleName
+    estimatedDob
+    identificationType
+    identificationNumber
+    household {
+      id
+      location
+      address
+    }
+    registrationDataImportId{
+      id
+      hctId
+      name
+    }
+    phoneNumber
+    phoneNumberAlternative
+    
   }
 `;
