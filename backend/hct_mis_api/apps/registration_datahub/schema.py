@@ -10,13 +10,14 @@ from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
-from core.filters import AgeRangeFilter, IntegerRangeFilter
 from core.extended_connection import ExtendedConnection
 from core.utils import decode_id_string
+from core.filters import AgeRangeFilter, IntegerRangeFilter
 from registration_datahub.models import (
     ImportedHousehold,
     ImportedIndividual,
     RegistrationDataImportDatahub,
+    ImportData,
 )
 
 
@@ -111,6 +112,13 @@ class RegistrationDataImportDatahubNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
+class ImportDataNode(DjangoObjectType):
+    class Meta:
+        model = ImportData
+        filter_fields = []
+        interfaces = (relay.Node,)
+
+
 class Query(graphene.ObjectType):
     imported_household = relay.Node.Field(ImportedHouseholdNode)
     all_imported_households = DjangoFilterConnectionField(
@@ -126,3 +134,4 @@ class Query(graphene.ObjectType):
     all_imported_individuals = DjangoFilterConnectionField(
         ImportedIndividualNode, filterset_class=ImportedIndividualFilter,
     )
+    import_data = relay.Node.Field(ImportDataNode)
