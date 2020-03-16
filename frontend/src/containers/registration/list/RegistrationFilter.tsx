@@ -1,27 +1,12 @@
 import React from 'react';
 import styled from 'styled-components';
-import {
-  TextField,
-  InputAdornment,
-  Select,
-  Menu,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  createStyles,
-  makeStyles,
-} from '@material-ui/core';
+import {FormControl, InputAdornment, InputLabel, MenuItem, Select, TextField,} from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
-import GroupIcon from '@material-ui/icons/Group';
-import PersonRoundedIcon from '@material-ui/icons/PersonRounded';
-import { DatePicker } from '@material-ui/pickers';
+import Autocomplete from '@material-ui/lab/Autocomplete';
+import {DatePicker} from '@material-ui/pickers';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
-import WcIcon from '@material-ui/icons/Wc';
-import {
-  useAllUsersQuery,
-  useRegistrationChoicesQuery,
-} from '../../__generated__/graphql';
-import { decodeIdString } from '../../utils/utils';
+import {useRegistrationChoicesQuery,} from '../../../__generated__/graphql';
+import {UsersAutocomplete} from "./UsersAutocomplete";
 
 const Container = styled.div`
   display: flex;
@@ -149,8 +134,6 @@ const StyledFormControl = styled(FormControl)`
   border-bottom: 0;
 `;
 
-
-
 interface RegistrationFiltersProps {
   onFilterChange;
   filter;
@@ -162,19 +145,16 @@ export function RegistrationFilters({
   const handleFilterChange = (e, name) =>
     onFilterChange({ ...filter, [name]: e.target.value });
   const importedByLabel = React.useRef<HTMLLabelElement>(null);
-  const [importedByLabelWidth, setImportedByLabelWidth] = React.useState(0);
   const statusLabel = React.useRef<HTMLLabelElement>(null);
   const [statusLabelWidth, setStatusLabelWidth] = React.useState(0);
-  const { data: allUsersData } = useAllUsersQuery();
   const { data: registrationChoicesData } = useRegistrationChoicesQuery();
   React.useEffect(() => {
-    if (!importedByLabel.current) {
+    if (!statusLabel.current) {
       return;
     }
-    setImportedByLabelWidth(importedByLabel.current.offsetWidth);
     setStatusLabelWidth(statusLabel.current.offsetWidth);
-  }, [importedByLabel, statusLabel, allUsersData]);
-  if (!allUsersData || !registrationChoicesData) {
+  }, [importedByLabel, statusLabel]);
+  if (!registrationChoicesData) {
     return null;
   }
   return (
@@ -209,25 +189,20 @@ export function RegistrationFilters({
           ),
         }}
       />
-      <StyledFormControl variant='outlined' margin='dense'>
-        <InputLabel ref={importedByLabel}>Imported By</InputLabel>
-        <Select
-          value={filter.importedBy || ''}
-          labelWidth={importedByLabelWidth}
-          onChange={(e) => handleFilterChange(e, 'importedBy')}
-        >
-          <MenuItem value=''>
-            <em>None</em>
-          </MenuItem>
-          {allUsersData.allUsers.edges.map((edge) => {
-            return (
-              <MenuItem key={edge.node.id} value={decodeIdString(edge.node.id)}>
-                {edge.node.firstName} {edge.node.lastName}
-              </MenuItem>
-            );
-          })}
-        </Select>
-      </StyledFormControl>
+      <UsersAutocomplete
+        onInputTextChange={(value) =>
+          onFilterChange({ ...filter, userInputValue: value })
+        }
+        inputValue={filter.userInputValue}
+        onChange={(e, option) => {
+          if (!option ) {
+            onFilterChange({ ...filter, importedBy: undefined });
+            return;
+          }
+          onFilterChange({ ...filter, importedBy: option.node.id });
+        }}
+        value={filter.importedBy}
+      />
       <StyledFormControl variant='outlined' margin='dense'>
         <InputLabel ref={statusLabel}>Status</InputLabel>
         <Select
