@@ -1,8 +1,7 @@
 import operator
 from datetime import date
-from typing import Dict, List, Union, Iterable
+from typing import List
 
-from core.models import FlexibleAttribute
 from django.core.validators import (
     validate_image_file_extension,
     MinLengthValidator,
@@ -19,44 +18,6 @@ from utils.models import TimeStampedUUIDModel
 
 _INTEGER = "INTEGER"
 _SELECT_ONE = "SELECT_ONE"
-
-
-def json_field_generator(
-    field_type_list: Iterable[FlexibleAttribute],
-) -> Dict[str, Union[str, List[dict]]]:
-    """Generator that yields json mappings from field data types.
-
-    Args:
-        field_type_list: List, a list of query objects.
-
-    Returns:
-        A dictionary of type mappings with relevant attributes.
-    """
-    for each_type_obj in field_type_list:
-        yield {
-            "name": each_type_obj.name,
-            "type": each_type_obj.type,
-            "required": each_type_obj.required,
-            "label": each_type_obj.label,
-            "hint": each_type_obj.hint,
-            "choices": [
-                {
-                    "name": flex_choice.name,
-                    "list_name": flex_choice.list_name,
-                    "label": flex_choice.label,
-                    "admin": flex_choice.admin,
-                }
-                for flex_choice in each_type_obj.flexibleattributechoice_set.all()
-            ],
-        }
-
-
-def get_flex_fields() -> List:
-    """Gets list of flex metadatatype objects. """
-    return [
-        flex_obj
-        for flex_obj in json_field_generator(FlexibleAttribute.objects.all())
-    ]
 
 
 # TODO(codecakes): make it dynamic when possible.

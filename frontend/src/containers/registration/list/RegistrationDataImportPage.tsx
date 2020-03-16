@@ -3,21 +3,21 @@ import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Snackbar, SnackbarContent } from '@material-ui/core';
-import { ProgramCard } from '../../components/programs/ProgramCard';
-import { PageHeader } from '../../components/PageHeader';
+import { ProgramCard } from '../../../components/programs/ProgramCard';
+import { PageHeader } from '../../../components/PageHeader';
 import {
   ProgramNode,
   useAllProgramsQuery,
   useProgrammeChoiceDataQuery,
-} from '../../__generated__/graphql';
-import { CreateProgram } from '../dialogs/programs/CreateProgram';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { LoadingComponent } from '../../components/LoadingComponent';
-import { useSnackbarHelper } from '../../hooks/useBreadcrumbHelper';
-import { RegistrationDataImport } from '../dialogs/registration/RegistrationDataImport';
+} from '../../../__generated__/graphql';
+import { CreateProgram } from '../../dialogs/programs/CreateProgram';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { LoadingComponent } from '../../../components/LoadingComponent';
+import { useSnackbarHelper } from '../../../hooks/useBreadcrumbHelper';
+import { RegistrationDataImport } from '../../dialogs/registration/RegistrationDataImport';
 import { RegistrationDataImportTable } from '../tables/RegistrationdDataImportTable';
-import { RegistrationFilters } from '../../components/registration/RegistrationFilter';
-import { useDebounce } from '../../hooks/useDebounce';
+import { RegistrationFilters } from './RegistrationFilter';
+import { useDebounce } from '../../../hooks/useDebounce';
 
 const PageContainer = styled.div`
   display: flex;
@@ -51,7 +51,7 @@ export function RegistrationDataImportPage(): React.ReactElement {
       (key) => `${encodeURIComponent(key)}=${encodeURIComponent(filter[key])}`,
     );
     const query = encoded.join('&');
-    history.push(`${location.pathname}?${query}`);
+   // history.push(`${location.pathname}?${query}`);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debounceFilter]);
   const toolbar = (

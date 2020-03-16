@@ -19,7 +19,6 @@ class RegistrationDataImportDatahubFactory(factory.DjangoModelFactory):
     import_date = factory.Faker(
         "date_time_this_decade", before_now=True, tzinfo=utc,
     )
-    hct_id = factory.Faker("uuid4")
 
 
 class ImportedHouseholdFactory(factory.DjangoModelFactory):
@@ -42,6 +41,9 @@ class ImportedHouseholdFactory(factory.DjangoModelFactory):
     )
     # set it manually
     head_of_household = None
+    registration_date = factory.Faker(
+        "date_this_year", before_today=True, after_today=False
+    )
 
 
 class ImportedIndividualFactory(factory.DjangoModelFactory):
@@ -76,7 +78,6 @@ class ImportedIndividualFactory(factory.DjangoModelFactory):
         ImportedIndividual.IDENTIFICATION_TYPE_CHOICE, getter=lambda c: c[0],
     )
     identification_number = factory.Faker("uuid4")
-    household = factory.SubFactory(ImportedHouseholdFactory)
     registration_data_import_id = factory.SubFactory(
         RegistrationDataImportDatahubFactory
     )
