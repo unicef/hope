@@ -1,10 +1,10 @@
 """Models for target population and target rules."""
 
 import datetime as dt
-import enum
 import functools
 from typing import List
 
+from core.utils import EnumGetChoices
 from django.conf import settings
 from django.contrib.postgres.fields import IntegerRangeField
 from django.contrib.postgres.fields import JSONField
@@ -39,15 +39,6 @@ def get_integer_range(min_range=None, max_range=None):
     )
 
 
-class EnumGetChoices(enum.Enum):
-    def __init__(self, *args, **kwargs):
-        super().__init__()
-
-    @classmethod
-    def get_choices(cls) -> List[tuple]:
-        return [(field.name, field.value) for field in cls]
-
-
 class TargetStatus(EnumGetChoices):
     IN_PROGRESS = "In Progress"
     FINALIZED = "Finalized"
@@ -79,8 +70,8 @@ class TargetPopulation(UUIDModel):
     households = models.ManyToManyField(
         "household.Household", related_name="target_populations"
     )
-    _total_households = models.IntegerField(default=0)
-    _total_family_size = models.IntegerField(default=0)
+    _total_households = models.PositiveIntegerField(default=0)
+    _total_family_size = models.PositiveIntegerField(default=0)
 
     @property
     def total_households(self):
@@ -105,9 +96,9 @@ class TargetPopulation(UUIDModel):
         """Gets sum of all family sizes from all the households."""
         return (
             (
-                self.households.filter()
-                .aggregate(models.Sum("family_size"))
-                .get("family_size__sum")
+                self.households.aggregate(models.Sum("family_size")).get(
+                    "family_size__sum"
+                )
             )
             if not self._total_family_size
             else self._total_family_size
