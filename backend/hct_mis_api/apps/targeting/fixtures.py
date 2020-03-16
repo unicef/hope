@@ -12,9 +12,6 @@ from targeting.models import TargetRule
 
 
 class TargetPopulationFactory(factory.DjangoModelFactory):
-    _NOW_TIME = (dt.datetime(2020, 1, 1)).astimezone()
-    _EDIT_TIME = _NOW_TIME + dt.timedelta(days=1)
-    _END_TIME = (dt.datetime(2022, 1, 1)).astimezone()
 
     class Meta:
         model = TargetPopulation
@@ -24,7 +21,7 @@ class TargetPopulationFactory(factory.DjangoModelFactory):
     )
     created_by = factory.SubFactory(UserFactory)
     created_at = factory.Faker(
-        "date_between_dates", date_start=_NOW_TIME, date_end=_END_TIME
+        "date_time_this_decade", before_now=False, after_now=True
     )
     last_edited_at = factory.LazyAttribute(
         lambda t: t.created_at + dt.timedelta(days=random.randint(60, 1000))
