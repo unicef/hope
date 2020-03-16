@@ -4,8 +4,8 @@ import {
   AllRegistrationDataImportsQueryVariables,
   RegistrationDataImportNode,
   useAllRegistrationDataImportsQuery,
-} from '../../../__generated__/graphql';
-import { UniversalTable } from '../UniversalTable';
+} from '../../../../__generated__/graphql';
+import { UniversalTable } from '../../../tables/UniversalTable';
 import { headCells } from './RegistrationDataImportTableHeadCells';
 import { RegistrationDataImportTableRow } from './RegistrationDataImportTableRow';
 import moment from 'moment';

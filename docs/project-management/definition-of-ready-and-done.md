@@ -2,8 +2,6 @@
 
 ## Definition of Ready
 
-## Definition of Ready
-
 To align the team on expectations for building new features, it is important to be consistent with the definition of ready. 
 
 To align the team on expectations for building new features, it is important to be consistent with the definition of ready. 
@@ -30,8 +28,6 @@ Establish team understanding that as each person accepts a ticket to work on, th
 
 ## Definition of Done
 
-## Definition of Done
-
 To align the team on expectations of the feature lifecycle, it is important to understand the definition of done. This supports the step to "Set Expectations" both within the team and for Clients. 
 
 Here is our definition of done for features / stories:
@@ -51,22 +47,7 @@ Tickets are created as pieces of functionality to support a larger goal. These t
 
 Team members have all agreed to verify the work they have delivered is working as expected both locally and in the staging environment. This will be done as soon as the team is notified that staging has been deployed. 
 
-
-
 Failure to complete the steps as described here will lead to low quality of work and potentially numerous bugs. This will cause the QA engineer and all stakeholders more work so it is best that the team member responsible for the work complies. 
 
 
-
-## **Put Simply**
-
-### Definition of "Done"
-
-* Acceptance Criteria is met
-* Documentation does exist \(user-story related\)
-* Tests do exist
-* All tests must pass
-* Code has been demoed \(live instance\)
-* Code reviewed by a peer
-* Code meets coding guidelines
-* Code checked in
 

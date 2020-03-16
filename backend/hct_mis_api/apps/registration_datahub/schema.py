@@ -1,24 +1,31 @@
+import django_filters
 import graphene
 from django_filters import (
     FilterSet,
     OrderingFilter,
     ModelMultipleChoiceFilter,
+    CharFilter,
 )
 from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
-from core.filters import AgeRangeFilter, IntegerRangeFilter
 from core.extended_connection import ExtendedConnection
+from core.utils import decode_id_string
+from core.filters import AgeRangeFilter, IntegerRangeFilter
 from registration_datahub.models import (
     ImportedHousehold,
     ImportedIndividual,
     RegistrationDataImportDatahub,
+    ImportData,
 )
 
 
 class ImportedHouseholdFilter(FilterSet):
     family_size = IntegerRangeFilter(field_name="family_size")
+    rdi_id = CharFilter(
+        field_name="household__programs__name", method="filter_rdi_id"
+    )
 
     class Meta:
         model = ImportedHousehold
@@ -30,23 +37,33 @@ class ImportedHouseholdFilter(FilterSet):
             "household_ca_id": ["exact"],
             "family_size": ["range", "lte", "gte"],
         }
-
-    order_by = OrderingFilter(
-        fields=(
-            "household_ca_id",
-            "residence_status",
-            "nationality",
-            "family_size",
-            "representative__full_name",
-            "registration_data_import_id__name",
+        order_by = OrderingFilter(
+            fields=(
+                "household_ca_id",
+                "residence_status",
+                "nationality",
+                "family_size",
+                "representative__full_name",
+                "registration_data_import_id__name",
+            )
         )
-    )
+
+    def filter_rdi_id(self, queryset, model_field, value):
+        return queryset.filter(
+            registration_data_import_id__hct_id=decode_id_string(value)
+        )
 
 
 class ImportedIndividualFilter(FilterSet):
     age = AgeRangeFilter(field_name="dob")
     sex = ModelMultipleChoiceFilter(
         to_field_name="sex", queryset=ImportedIndividual.objects.all(),
+    )
+    rdi_id = CharFilter(
+        field_name="household__programs__name", method="filter_rdi_id"
+    )
+    household = django_filters.CharFilter(
+        field_name="household__id", method="filter_household"
     )
 
     class Meta:
@@ -55,11 +72,20 @@ class ImportedIndividualFilter(FilterSet):
             "full_name": ["exact", "icontains"],
             "age": ["range", "lte", "gte"],
             "sex": ["exact"],
+            "household": ["exact"],
         }
 
     order_by = OrderingFilter(
         fields=("individual__id", "full_name", "household__id", "age", "sex",)
     )
+
+    def filter_rdi_id(self, queryset, model_field, value):
+        return queryset.filter(
+            registration_data_import_id__hct_id=decode_id_string(value)
+        )
+
+    def filter_household(self, queryset, model_field, value):
+        return queryset.filter(household__id=decode_id_string(value))
 
 
 class ImportedHouseholdNode(DjangoObjectType):
@@ -86,6 +112,13 @@ class RegistrationDataImportDatahubNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
+class ImportDataNode(DjangoObjectType):
+    class Meta:
+        model = ImportData
+        filter_fields = []
+        interfaces = (relay.Node,)
+
+
 class Query(graphene.ObjectType):
     imported_household = relay.Node.Field(ImportedHouseholdNode)
     all_imported_households = DjangoFilterConnectionField(
@@ -101,3 +134,4 @@ class Query(graphene.ObjectType):
     all_imported_individuals = DjangoFilterConnectionField(
         ImportedIndividualNode, filterset_class=ImportedIndividualFilter,
     )
+    import_data = relay.Node.Field(ImportDataNode)
