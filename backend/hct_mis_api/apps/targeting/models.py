@@ -1,10 +1,10 @@
 """Models for target population and target rules."""
 
 import datetime as dt
-import enum
 import functools
 from typing import List
 
+from core.utils import EnumGetChoices
 from django.conf import settings
 from django.contrib.postgres.fields import IntegerRangeField
 from django.contrib.postgres.fields import JSONField
@@ -39,15 +39,6 @@ def get_integer_range(min_range=None, max_range=None):
     )
 
 
-class EnumGetChoices(enum.Enum):
-    def __init__(self, *args, **kwargs):
-        super().__init__()
-
-    @classmethod
-    def get_choices(cls) -> List[tuple]:
-        return [(field.name, field.value) for field in cls]
-
-
 class TargetStatus(EnumGetChoices):
     IN_PROGRESS = "In Progress"
     FINALIZED = "Finalized"
@@ -76,11 +67,51 @@ class TargetPopulation(UUIDModel):
         choices=STATE_CHOICES,
         default=TargetStatus.IN_PROGRESS,
     )
-    total_households = models.IntegerField(default=0)
-    total_family_size = models.IntegerField(default=0)
     households = models.ManyToManyField(
         "household.Household", related_name="target_populations"
     )
+    _total_households = models.PositiveIntegerField(default=0)
+    _total_family_size = models.PositiveIntegerField(default=0)
+
+    @property
+    def total_households(self):
+        """Gets sum of all household numbers from association."""
+        return (
+            self.households.count()
+            if not self._total_households
+            else self._total_households
+        )
+
+    @total_households.setter
+    def total_households(self, value: int):
+        """
+
+        Args:
+            value (int): the aggregated value of total households
+        """
+        self._total_households = value
+
+    @property
+    def total_family_size(self):
+        """Gets sum of all family sizes from all the households."""
+        return (
+            (
+                self.households.aggregate(models.Sum("family_size")).get(
+                    "family_size__sum"
+                )
+            )
+            if not self._total_family_size
+            else self._total_family_size
+        )
+
+    @total_family_size.setter
+    def total_family_size(self, value: int):
+        """
+
+        Args:
+            value (int): the aggregated value of the total family sizes.
+        """
+        self._total_family_size = value
 
 
 class TargetRule(models.Model):
@@ -136,19 +167,21 @@ class FilterAttrType(models.Model):
 
     @classmethod
     def get_age(cls, rule_obj: dict) -> dict:
-        age_min = 0
-        age_max = 0
-        today = dt.date.today()
-        this_year = today.year
-        year_min = this_year - rule_obj.get("age_min", age_min)
-        year_max = this_year - rule_obj.get("age_max", age_max)
-        if year_min <= year_max < this_year:
-            dob_min = dt.date(year_min, 1, 1)
-            dob_max = dt.date(year_max, 12, 31)
-            return {
-                "head_of_household__dob__gte": dob_min,
-                "head_of_household__dob__lte": dob_max,
-            }
+        if "age_min" in rule_obj or "age_max" in rule_obj:
+            age_min = rule_obj.get("age_min", None)
+            age_max = rule_obj.get("age_max", None)
+            today = dt.date.today()
+            this_year = today.year
+            year_min = age_max and (this_year - age_max)
+            year_max = age_min and (this_year - age_min)
+            year_min = year_min or year_max
+            if year_min and year_max and year_min <= year_max:
+                dob_min = dt.date(year_min, 1, 1)
+                dob_max = dt.date(year_max, 12, 31)
+                return {
+                    "head_of_household__dob__gte": dob_min,
+                    "head_of_household__dob__lte": dob_max,
+                }
         return {}
 
     @classmethod

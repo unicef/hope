@@ -125,11 +125,13 @@ class TestSavedTargetRuleQuery(APITestCase):
     def setUpTestData(cls):
         # graph query to be called.
         cls.SAVED_TARGET_RULE_QUERY = """
-        query SavedTargetRule($target_id: ID!) {
-            savedTargetRule(target_id: $target_id) {
+        query SavedTargetRule($id: ID!) {
+            savedTargetRule(id: $id) {
                 flexRules
                 coreRules
-                targetPopulation
+                targetPopulation {
+                    name
+                }
             }
         }
         """
@@ -140,39 +142,32 @@ class TestSavedTargetRuleQuery(APITestCase):
                     node {
                         flexRules
                         coreRules
-                        targetPopulation
+                        targetPopulation {
+                            name
+                        }
                     }
                 }
             }
         }
         """
         cls.user = UserFactory.create()
-        cls.target_population = TargetPopulationFactory.create()
-        rules_to_create = [
-            {
-                "flex_rules": {"age_min": 1, "age_max": 25,},
-                "core_rules": {
-                    "intake_group": "registration import name A",
-                    "sex": "Male",
-                    "num_individuals_min": 1,
-                    "num_individuals_max": 5,
-                },
-                "target_population": cls.target_population,
-            },
-            {
-                "flex_rules": {"age_min": 10, "age_max": 30,},
-                "core_rules": {
-                    "intake_group": "registration import name B",
-                    "sex": "Female",
-                    "num_individuals_min": 1,
-                    "num_individuals_max": 5,
-                },
-                "target_population": cls.target_population,
-            },
-        ]
-        cls.target_rules = [
-            TargetRuleFactory(**data) for data in rules_to_create
-        ]
+        location = LocationFactory.create()
+        registration_import_data = RegistrationDataImportFactory.create_batch(5)
+        individuals = IndividualFactory.create_batch(5)
+        households = HouseholdFactory.create_batch(5)
+        for (household, individual, reg) in zip(
+            households, individuals, registration_import_data
+        ):
+            household.head_of_household = individual
+            household.registration_data_import_id = reg
+            household.location = location
+            household.save()
+
+        cls.target_rules = TargetRuleFactory.create_batch(5)
+        target_population = TargetPopulationFactory(
+            households=households, created_by=cls.user
+        )
+        target_population.target_rules.add(*cls.target_rules)
 
     def test_all_saved_target_rule_query(self):
         self.snapshot_graphql_request(
@@ -185,6 +180,6 @@ class TestSavedTargetRuleQuery(APITestCase):
             request_string=self.SAVED_TARGET_RULE_QUERY,
             context={"user": self.user},
             variables={
-                "id": self.id_to_base64(self.targets[0].id, "SavedTargetRule")
+                "id": self.id_to_base64(self.target_rules[0].id, "SavedTargetRule")
             },
         )
