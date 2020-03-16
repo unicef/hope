@@ -2,7 +2,6 @@ import operator
 from datetime import date
 from typing import List
 
-from core.models import FlexibleAttribute
 from django.core.validators import (
     validate_image_file_extension,
     MinLengthValidator,
@@ -19,22 +18,6 @@ from utils.models import TimeStampedUUIDModel
 
 _INTEGER = "INTEGER"
 _SELECT_ONE = "SELECT_ONE"
-_FLEX_FIELDS = (
-    "name",
-    "type",
-    "required",
-    "label",
-    "hint",
-    "flexibleattributechoice__name",
-    "flexibleattributechoice__list_name",
-    "flexibleattributechoice__label",
-    "flexibleattributechoice__admin",
-)
-
-
-def get_flex_fields() -> List:
-    """Gets list of flex metadatatype objects."""
-    return FlexibleAttribute.objects.all().values(*_FLEX_FIELDS)
 
 
 # TODO(codecakes): make it dynamic when possible.
