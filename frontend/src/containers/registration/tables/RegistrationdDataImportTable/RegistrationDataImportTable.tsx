@@ -9,6 +9,7 @@ import { UniversalTable } from '../../../tables/UniversalTable';
 import { headCells } from './RegistrationDataImportTableHeadCells';
 import { RegistrationDataImportTableRow } from './RegistrationDataImportTableRow';
 import moment from 'moment';
+import { decodeIdString } from '../../../../utils/utils';
 
 const TableWrapper = styled.div`
   padding: 20px;
@@ -21,7 +22,9 @@ export function RegistrationDataImportTable({ filter }): ReactElement {
     importDate:
       filter.importDate && moment(filter.importDate).format('YYYY-MM-DD'),
     // eslint-disable-next-line @typescript-eslint/camelcase
-    importedBy_Id: filter.importedBy !== '' ? filter.importedBy : undefined,
+    importedBy_Id: filter.importedBy
+      ? decodeIdString(filter.importedBy)
+      : undefined,
     status: filter.status !== '' ? filter.status : undefined,
   };
   return (
