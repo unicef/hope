@@ -7,16 +7,56 @@ from core.permissions import is_authenticated
 from core.utils import decode_id_string
 from core.validators import CommonValidator
 from registration_data.models import RegistrationDataImport
-from registration_datahub.models import ImportData
+from registration_data.schema import RegistrationDataImportNode
+from registration_datahub.models import (
+    ImportData,
+    RegistrationDataImportDatahub,
+)
 from registration_datahub.schema import ImportDataNode
 
 
-class ValidateAndCreateRegistrationDataImportInput(graphene.InputObjectType):
+class CreateRegistrationDataImportExcelInput(graphene.InputObjectType):
+    import_data_id = graphene.ID()
     name = graphene.String()
-    status = graphene.String()
-    data_source = graphene.String()
-    number_of_individuals = graphene.Int()
-    number_of_households = graphene.Int()
+
+
+class CreateRegistrationDataImport(CommonValidator, graphene.Mutation):
+    registration_data_import = graphene.Field(RegistrationDataImportNode)
+
+    class Arguments:
+        registration_data_import_data = CreateRegistrationDataImportExcelInput(
+            required=True
+        )
+
+    @classmethod
+    @is_authenticated
+    def mutate(cls, root, info, registration_data_import_data):
+        import_data_id = decode_id_string(
+            registration_data_import_data.pop("import_data_id")
+        )
+        import_data_obj = ImportData.objects.get(id=import_data_id)
+
+        created_obj_datahub = RegistrationDataImportDatahub.objects.create(
+            import_data=import_data_obj, **registration_data_import_data,
+        )
+        created_obj_hct = RegistrationDataImport.objects.create(
+            status="IN_REVIEW",
+            imported_by=info.context.user,
+            data_source="XLS",
+            number_of_individuals=import_data_obj.number_of_individuals,
+            number_of_households=import_data_obj.number_of_households,
+            **registration_data_import_data,
+        )
+
+        created_obj_datahub.hct_id = created_obj_hct.id
+        created_obj_datahub.save()
+
+        created_obj_hct.datahub_id = created_obj_datahub.id
+        created_obj_hct.save()
+
+        # take file and run AirFlow job to add Households and Individuals
+
+        return CreateRegistrationDataImport(created_obj_hct)
 
 
 class UploadImportDataXLSXFile(
@@ -74,3 +114,4 @@ class DeleteRegistrationDataImport(graphene.Mutation):
 class Mutations(graphene.ObjectType):
     upload_import_data_xlsx_file = UploadImportDataXLSXFile.Field()
     delete_registration_data_import = DeleteRegistrationDataImport.Field()
+    create_registration_data_import = CreateRegistrationDataImport.Field()
