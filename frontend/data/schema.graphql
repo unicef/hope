@@ -594,6 +594,7 @@ type ImportedHouseholdNode implements Node {
   representative: ImportedIndividualNode
   registrationDataImportId: RegistrationDataImportDatahubNode!
   headOfHousehold: ImportedIndividualNode
+  registrationDate: Date
   individuals(before: String, after: String, first: Int, last: Int): ImportedIndividualNodeConnection!
 }
 
@@ -1390,11 +1391,11 @@ type Query {
   me: UserObjectType
   allUsers(before: String, after: String, first: Int, last: Int, fullName: String, orderBy: String): UserNodeConnection
   importedHousehold(id: ID!): ImportedHouseholdNode
-  allImportedHouseholds(before: String, after: String, first: Int, last: Int, nationality: String, nationality_Icontains: String, address: String, address_Icontains: String, representative_FullName: String, representative_FullName_Icontains: String, headOfHousehold_FullName: String, headOfHousehold_FullName_Icontains: String, householdCaId: String, familySize_Range: Int, familySize_Lte: Int, familySize_Gte: Int, familySize: String, orderBy: String): ImportedHouseholdNodeConnection
+  allImportedHouseholds(before: String, after: String, first: Int, last: Int, nationality: String, nationality_Icontains: String, address: String, address_Icontains: String, representative_FullName: String, representative_FullName_Icontains: String, headOfHousehold_FullName: String, headOfHousehold_FullName_Icontains: String, householdCaId: String, familySize_Range: Int, familySize_Lte: Int, familySize_Gte: Int, familySize: String, rdiId: String): ImportedHouseholdNodeConnection
   registrationDataImportDatahub(id: ID!): RegistrationDataImportDatahubNode
   allRegistrationDataImportsDatahub(before: String, after: String, first: Int, last: Int): RegistrationDataImportDatahubNodeConnection
   importedIndividual(id: ID!): ImportedIndividualNode
-  allImportedIndividuals(before: String, after: String, first: Int, last: Int, fullName: String, fullName_Icontains: String, sex: [ID], age: String, orderBy: String): ImportedIndividualNodeConnection
+  allImportedIndividuals(before: String, after: String, first: Int, last: Int, fullName: String, fullName_Icontains: String, sex: [ID], household: String, age: String, rdiId: String, orderBy: String): ImportedIndividualNodeConnection
   registrationDataImport(id: ID!): RegistrationDataImportNode
   allRegistrationDataImports(before: String, after: String, first: Int, last: Int, importedBy_Id: UUID, importDate: Date, status: String, name: String, name_Icontains: String, orderBy: String): RegistrationDataImportNodeConnection
   registrationDataStatusChoices: [ChoiceObject]

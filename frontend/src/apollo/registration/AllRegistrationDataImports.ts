@@ -33,19 +33,7 @@ export const ALL_REGISTRATION_DATA_IMPORT_QUERY = gql`
       edges {
         cursor
         node {
-          id
-          createdAt
-          name
-          status
-          importDate
-          importedBy {
-            id
-            firstName
-            lastName
-          }
-          dataSource
-          numberOfHouseholds
-          numberOfHouseholds
+            ...registrationMinimal
         }
       }
     }
