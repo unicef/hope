@@ -1,27 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
-import {
-  FormControl,
-  InputAdornment,
-  InputLabel,
-  MenuItem,
-  Select,
-  TextField,
-} from '@material-ui/core';
-
-import get from 'lodash/get';
+import {FormControl, InputAdornment, InputLabel, MenuItem, Select, TextField,} from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
-import PersonIcon from '@material-ui/icons/Person';
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import { DatePicker } from '@material-ui/pickers';
+import {DatePicker} from '@material-ui/pickers';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
-import {
-  AllUsersQuery,
-  useAllUsersQuery,
-  useRegistrationChoicesQuery,
-} from '../../../__generated__/graphql';
-import { useDebounce } from '../../../hooks/useDebounce';
+import {useRegistrationChoicesQuery,} from '../../../__generated__/graphql';
+import {UsersAutocomplete} from "./UsersAutocomplete";
 
 const Container = styled.div`
   display: flex;
@@ -149,77 +134,6 @@ const StyledFormControl = styled(FormControl)`
   border-bottom: 0;
 `;
 
-const StyledAutocomplete = styled(Autocomplete)`
-  width: 232px;
-  .MuiFormControl-marginDense {
-    margin-top: 4px;
-  }
-`;
-
-function AutoComplete({ value, onChange, onInputTextChange, inputValue }) {
-  const [open, setOpen] = React.useState(false);
-  const debouncedInputText = useDebounce(inputValue, 500);
-  const [newValue, setNewValue] = useState();
-  const { data, loading } = useAllUsersQuery({
-    variables: {
-      first: 100,
-      fullName: debouncedInputText,
-    },
-  });
-  useEffect(() => setNewValue(value), [data, value]);
-  return (
-    <StyledAutocomplete<AllUsersQuery['allUsers']['edges'][number]>
-      open={open}
-      filterOptions={(options1) => options1}
-      onChange={onChange}
-      value={newValue}
-      onOpen={() => {
-        setOpen(true);
-      }}
-      onClose={() => {
-        setOpen(false);
-      }}
-      getOptionSelected={(option, value1) => {
-        return value1 === option.node.id;
-      }}
-      getOptionLabel={(option) => {
-        if (!option.node) {
-          return '';
-        }
-        return `${option.node.firstName} ${option.node.lastName}`;
-      }}
-      options={get(data, 'allUsers.edges', [])}
-      loading={loading}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          label='Imported By'
-          variant='outlined'
-          margin='dense'
-          value={inputValue}
-          onChange={(e) => onInputTextChange(e.target.value)}
-          InputProps={{
-            ...params.InputProps,
-            startAdornment: (
-              <InputAdornment position='start'>
-                <PersonIcon style={{ color: '#5f6368' }} />
-              </InputAdornment>
-            ),
-            endAdornment: (
-              <>
-                {loading ? (
-                  <CircularProgress color='inherit' size={20} />
-                ) : null}
-                {params.InputProps.endAdornment}
-              </>
-            ),
-          }}
-        />
-      )}
-    />
-  );
-}
-
 interface RegistrationFiltersProps {
   onFilterChange;
   filter;
@@ -275,7 +189,7 @@ export function RegistrationFilters({
           ),
         }}
       />
-      <AutoComplete
+      <UsersAutocomplete
         onInputTextChange={(value) =>
           onFilterChange({ ...filter, userInputValue: value })
         }
@@ -289,25 +203,6 @@ export function RegistrationFilters({
         }}
         value={filter.importedBy}
       />
-      {/*<StyledFormControl variant='outlined' margin='dense'>*/}
-      {/*  <InputLabel ref={importedByLabel}>Imported By</InputLabel>*/}
-      {/*  <Select*/}
-      {/*    value={filter.importedBy || ''}*/}
-      {/*    labelWidth={importedByLabelWidth}*/}
-      {/*    onChange={(e) => handleFilterChange(e, 'importedBy')}*/}
-      {/*  >*/}
-      {/*    <MenuItem value=''>*/}
-      {/*      <em>None</em>*/}
-      {/*    </MenuItem>*/}
-      {/*    {allUsersData.allUsers.edges.map((edge) => {*/}
-      {/*      return (*/}
-      {/*        <MenuItem key={edge.node.id} value={decodeIdString(edge.node.id)}>*/}
-      {/*          {edge.node.firstName} {edge.node.lastName}*/}
-      {/*        </MenuItem>*/}
-      {/*      );*/}
-      {/*    })}*/}
-      {/*  </Select>*/}
-      {/*</StyledFormControl>*/}
       <StyledFormControl variant='outlined' margin='dense'>
         <InputLabel ref={statusLabel}>Status</InputLabel>
         <Select
