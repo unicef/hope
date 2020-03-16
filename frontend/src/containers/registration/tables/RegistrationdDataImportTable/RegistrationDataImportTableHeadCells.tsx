@@ -1,5 +1,5 @@
-import { HeadCell } from '../../../components/table/EnhancedTableHead';
-import { RegistrationDataImportNode, } from '../../../__generated__/graphql';
+import { HeadCell } from '../../../../components/table/EnhancedTableHead';
+import { RegistrationDataImportNode, } from '../../../../__generated__/graphql';
 
 export const headCells: HeadCell<RegistrationDataImportNode>[] = [
   {
