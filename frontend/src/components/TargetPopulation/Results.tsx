@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { Typography, Paper, Grid } from '@material-ui/core';
+import { Pie } from 'react-chartjs-2';
 import { MiśTheme } from '../../theme';
 import { LabelizedField } from '../LabelizedField';
 
@@ -50,9 +51,15 @@ const SummaryValue = styled.div`
   margin-top: ${({ theme }) => theme.spacing(2)}px;
 `;
 
+const ChartContainer = styled.div`
+  width: 100px;
+  height: 100px;
+  margin: 0 auto;
+`;
+
 const Label = styled.p`
   color: #b1b1b5;
-`
+`;
 
 interface ResultsProps {
   resultsData?;
@@ -104,18 +111,66 @@ export function Results({ resultsData }: ResultsProps) {
                   </FieldBorder>
                 </Grid>
               </Grid>
-              <SummaryBorder>
-                <LabelizedField label='Total Number of Households'>
-                  <SummaryValue>
-                    {resultsData.totalNumberOfHouseholds}
-                  </SummaryValue>
-                </LabelizedField>
-              </SummaryBorder>
-              <SummaryBorder>
-                <LabelizedField label='Targeted Individuals'>
-                  <SummaryValue>{resultsData.targetedIndividuals}</SummaryValue>
-                </LabelizedField>
-              </SummaryBorder>
+              <Grid
+                container
+                spacing={0}
+                justify='flex-start'
+                alignItems='center'
+              >
+                <Grid item xs={4}>
+                  <ChartContainer>
+                    <Pie
+                      width={100}
+                      height={100}
+                      options={{
+                        legend: {
+                          display: false,
+                        }
+                      }}
+                      data={{
+                        labels: [
+                          'Female Children',
+                          'Female Adults',
+                          'Male Children',
+                          'Male Adults',
+                        ],
+                        datasets: [
+                          {
+                            data: [
+                              resultsData.femaleChildren,
+                              resultsData.femaleAdults,
+                              resultsData.maleChildren,
+                              resultsData.maleAdults,
+                            ],
+                            backgroundColor: [
+                              colors.femaleChildren,
+                              colors.femaleAdult,
+                              colors.maleChildren,
+                              colors.maleAdult,
+                            ],
+                          },
+                        ],
+                      }}
+                    />
+                  </ChartContainer>
+                </Grid>
+              </Grid>
+              <Grid container spacing={0} justify='flex-end'>
+                <SummaryBorder>
+                  <LabelizedField label='Total Number of Households'>
+                    <SummaryValue>
+                      {resultsData.totalNumberOfHouseholds}
+                    </SummaryValue>
+                  </LabelizedField>
+                </SummaryBorder>
+                <SummaryBorder>
+                  <LabelizedField label='Targeted Individuals'>
+                    <SummaryValue>
+                      {resultsData.targetedIndividuals}
+                    </SummaryValue>
+                  </LabelizedField>
+                </SummaryBorder>
+              </Grid>
             </>
           ) : (
             <Label>Add targeting criteria to see results.</Label>
