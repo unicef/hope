@@ -4,13 +4,13 @@ from graphene_django.debug import DjangoDebug
 import account.schema
 import core.mutations
 import core.schema
-import household.mutations
 import household.schema
 import payment.schema
 import program.mutations
 import program.schema
 import registration_data.schema
 import registration_datahub.schema
+import registration_datahub.mutations
 import targeting.schema
 import targeting.mutations
 
@@ -30,8 +30,8 @@ class Query(
 
 
 class Mutations(
+    registration_datahub.mutations.Mutations,
     core.mutations.Mutations,
-    household.mutations.Mutations,
     program.mutations.Mutations,
     graphene.ObjectType,
 ):

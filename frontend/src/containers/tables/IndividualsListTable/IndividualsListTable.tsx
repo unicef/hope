@@ -34,7 +34,7 @@ export const IndividualsListTable = ({
       <UniversalTable<IndividualNode, AllIndividualsQueryVariables>
         title='Individuals'
         headCells={headCells}
-        rowsPage={[10, 15, 20]}
+        rowsPerPageOptions={[10, 15, 20]}
         query={useAllIndividualsQuery}
         queriedObjectName='allIndividuals'
         initialVariables={initialVariables}
