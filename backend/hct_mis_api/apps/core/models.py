@@ -7,9 +7,11 @@ from auditlog.registry import auditlog
 from core.coutries import COUNTRY_NAME_TO_ALPHA2_CODE
 from core.utils import unique_slugify
 from django.contrib.gis.db.models import MultiPolygonField, PointField
+from django.contrib.postgres.aggregates import ArrayAgg
 from django.contrib.postgres.fields import JSONField
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
+from django.db.models.expressions import F
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
@@ -24,11 +26,8 @@ _FLEX_FIELDS = (
     "required",
     "label",
     "hint",
-    "flexibleattributechoice__name",
-    "flexibleattributechoice__list_name",
-    "flexibleattributechoice__label",
-    "flexibleattributechoice__admin",
 )
+_FLEX_ATTR_CHOICE_NAME = "flexibleattributechoice__name"
 
 
 class Country(TimeStampedUUIDModel):
@@ -328,8 +327,12 @@ class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
     @classmethod
     def flex_fields(cls):
         """Gets list of flex metadatatype objects."""
-        cls.__flex_fields = (
-            cls.__flex_fields or FlexibleAttribute.objects.values(*_FLEX_FIELDS)
+        cls.__flex_fields = cls.__flex_fields or FlexibleAttribute.objects.values(
+            *_FLEX_FIELDS
+        ).annotate(
+            choices=ArrayAgg(
+                F(_FLEX_ATTR_CHOICE_NAME), default=[], distinct=True
+            )
         )
         return cls.__flex_fields
 
