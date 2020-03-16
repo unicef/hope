@@ -2,7 +2,7 @@ FROM node:13-alpine as dev
 
 WORKDIR /code/
 ADD package*.json /code/
-RUN npm install
+RUN yarn install
 ADD . /code/
 
 EXPOSE 3000
