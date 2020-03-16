@@ -12,14 +12,18 @@ import { ProgramsPage } from './pages/ProgramsPage';
 import { ProgramDetailsPage } from './pages/ProgramDetailsPage';
 import { CashPlanDetailsPage } from './pages/CashPlanDetailsPage';
 import { PaymentRecordDetailsPage } from './pages/PaymentRecordDetailsPage';
-import { PopulationHouseholdPage } from "./pages/PopulationHouseholdPage";
-import { RegistrationDataImportPage } from './pages/RegistrationDataImportPage';
+import { PopulationHouseholdPage } from './pages/PopulationHouseholdPage';
+import { RegistrationDataImportPage } from './registration/list/RegistrationDataImportPage';
 import { PopulationHouseholdDetailsPage } from './pages/PopulationHouseholdDetailsPage';
 import { PopulationIndividualsPage } from './pages/PopulationIndividualsPage';
 import { PopulationIndividualsDetailsPage } from './pages/PopulationIndividualsDetailsPage';
 import { TargetPopulationPage } from './pages/TargetPopulationPage';
 import { TargetPopulationDetailsPage } from './pages/TargetPopulationDetailsPage';
 import { CreateTargetPopulation } from './pages/CreateTargetPopulation';
+import { RegistrationDataImport } from './dialogs/registration/RegistrationDataImport';
+import { RegistrationDataImportDetailsPage } from './registration/details/RegistrationDataImportDetailsPage';
+import {RegistrationHouseholdDetailsPage} from "./registration/details/households/RegistrationHouseholdDetailsPage";
+import {RegistrationIndividualDetailsPage} from "./registration/details/individual/RegistrationIndividualDetailsPage";
 
 const Root = styled.div`
   display: flex;
@@ -92,6 +96,15 @@ export function HomeRouter(): React.ReactElement {
           </Route>
           <Route path='/:businessArea/programs'>
             <ProgramsPage />
+          </Route>
+          <Route path='/:businessArea/registration-data-import/household/:id'>
+            <RegistrationHouseholdDetailsPage />
+          </Route>
+          <Route path='/:businessArea/registration-data-import/individual/:id'>
+            <RegistrationIndividualDetailsPage />
+          </Route>
+          <Route path='/:businessArea/registration-data-import/:id'>
+            <RegistrationDataImportDetailsPage />
           </Route>
           <Route path='/:businessArea/registration-data-import'>
             <RegistrationDataImportPage />

@@ -20,8 +20,8 @@ import WcIcon from '@material-ui/icons/Wc';
 import {
   useAllUsersQuery,
   useRegistrationChoicesQuery,
-} from '../../__generated__/graphql';
-import { decodeIdString } from '../../utils/utils';
+} from '../../../__generated__/graphql';
+import { decodeIdString } from '../../../utils/utils';
 
 const Container = styled.div`
   display: flex;
