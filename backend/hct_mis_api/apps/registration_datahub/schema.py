@@ -37,16 +37,21 @@ class ImportedHouseholdFilter(FilterSet):
             "household_ca_id": ["exact"],
             "family_size": ["range", "lte", "gte"],
         }
-        order_by = OrderingFilter(
-            fields=(
-                "household_ca_id",
-                "residence_status",
-                "nationality",
-                "family_size",
-                "representative__full_name",
-                "registration_data_import_id__name",
-            )
+
+    order_by = OrderingFilter(
+        fields=(
+            "id",
+            "household_ca_id",
+            "head_of_household__full_name",
+            "residence_status",
+            "nationality",
+            "family_size",
+            "location",
+            "registration_date",
+            "representative__full_name",
+            "registration_data_import_id__name",
         )
+    )
 
     def filter_rdi_id(self, queryset, model_field, value):
         return queryset.filter(
@@ -76,7 +81,15 @@ class ImportedIndividualFilter(FilterSet):
         }
 
     order_by = OrderingFilter(
-        fields=("individual__id", "full_name", "household__id", "age", "sex",)
+        fields=(
+            "id",
+            "full_name",
+            "household__id",
+            "age",
+            "sex",
+            "work_status",
+            "dob",
+        )
     )
 
     def filter_rdi_id(self, queryset, model_field, value):

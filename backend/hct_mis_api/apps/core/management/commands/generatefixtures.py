@@ -152,7 +152,7 @@ class Command(BaseCommand):
 
         # Data imports generation
         data_imports_dth = RegistrationDataImportDatahubFactory.create_batch(
-            5, hct_id=RegistrationDataImport.objects.first().id
+            5, hct_id=RegistrationDataImport.objects.all()[0].id
         )
         for data_import in data_imports_dth:
             for _ in range(50):

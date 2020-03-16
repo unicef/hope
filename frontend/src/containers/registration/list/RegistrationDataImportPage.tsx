@@ -51,7 +51,7 @@ export function RegistrationDataImportPage(): React.ReactElement {
       (key) => `${encodeURIComponent(key)}=${encodeURIComponent(filter[key])}`,
     );
     const query = encoded.join('&');
-    history.push(`${location.pathname}?${query}`);
+   // history.push(`${location.pathname}?${query}`);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debounceFilter]);
   const toolbar = (
