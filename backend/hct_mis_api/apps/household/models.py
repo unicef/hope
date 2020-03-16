@@ -1,5 +1,8 @@
+import operator
 from datetime import date
+from typing import Dict, List, Union, Iterable
 
+from core.models import FlexibleAttribute
 from django.core.validators import (
     validate_image_file_extension,
     MinLengthValidator,
@@ -8,12 +11,98 @@ from django.core.validators import (
 from django.db import models
 from django.db.models import Sum
 from django.utils.translation import ugettext_lazy as _
+from household.const import NATIONALITIES
 from model_utils import Choices
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
-
-from household.const import NATIONALITIES
 from utils.models import TimeStampedUUIDModel
+
+_INTEGER = "INTEGER"
+_SELECT_ONE = "SELECT_ONE"
+
+
+def json_field_generator(
+    field_type_list: Iterable[FlexibleAttribute],
+) -> Dict[str, Union[str, List[dict]]]:
+    """Generator that yields json mappings from field data types.
+
+    Args:
+        field_type_list: List, a list of query objects.
+
+    Returns:
+        A dictionary of type mappings with relevant attributes.
+    """
+    for each_type_obj in field_type_list:
+        yield {
+            "name": each_type_obj.name,
+            "type": each_type_obj.type,
+            "required": each_type_obj.required,
+            "label": each_type_obj.label,
+            "hint": each_type_obj.hint,
+            "choices": [
+                {
+                    "name": flex_choice.name,
+                    "list_name": flex_choice.list_name,
+                    "label": flex_choice.label,
+                    "admin": flex_choice.admin,
+                }
+                for flex_choice in each_type_obj.flexibleattributechoice_set.all()
+            ],
+        }
+
+
+def get_flex_fields() -> List:
+    """Gets list of flex metadatatype objects. """
+    return [
+        flex_obj
+        for flex_obj in json_field_generator(FlexibleAttribute.objects.all())
+    ]
+
+
+# TODO(codecakes): make it dynamic when possible.
+def get_core_fields(model: models.Model) -> List:
+    """Gets list of flex metadatatype objects. """
+    get_item_fn = operator.itemgetter(1)
+    return [
+        {
+            "type": _INTEGER,
+            "name": "years_in_school",
+            "label": "years in school",
+            "hint": "number of years spent in school",
+            "required": True,
+            "choices": [],
+            "associated_with": "individual_fields",
+        },
+        {
+            "type": _INTEGER,
+            "name": "age",
+            "label": "age",
+            "hint": "age in years",
+            "required": True,
+            "choices": [],
+            "associated_with": "individual_fields",
+        },
+        {
+            "type": _INTEGER,
+            "name": "family_size",
+            "label": "Family Size",
+            "hint": "how many persons in the household",
+            "required": True,
+            "choices": [],
+            "associated_with": "household_fields",
+        },
+        {
+            "type": _SELECT_ONE,
+            "name": "residence_status",
+            "required": True,
+            "label": "Residence Status",
+            "hint": "residential status of household",
+            "choices": [
+                str(get_item_fn(item)) for item in model.RESIDENCE_STATUS_CHOICE
+            ],
+            "associated_with": "household_fields",
+        },
+    ]
 
 
 class Household(TimeStampedUUIDModel):
