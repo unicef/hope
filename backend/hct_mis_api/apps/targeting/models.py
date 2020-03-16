@@ -52,7 +52,7 @@ class TargetPopulation(UUIDModel):
 
     STATE_CHOICES = TargetStatus.get_choices()
     # fields
-    name = models.TextField()
+    name = models.TextField(unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     # TODO(codecakes): check and use auditlog instead.
     last_edited_at = models.DateTimeField(auto_now=True, null=True)
