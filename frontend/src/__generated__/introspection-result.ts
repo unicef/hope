@@ -48,6 +48,9 @@
             "name": "RegistrationDataImportNode"
           },
           {
+            "name": "SavedTargetRuleNode"
+          },
+          {
             "name": "ImportedHouseholdNode"
           },
           {
@@ -55,6 +58,9 @@
           },
           {
             "name": "RegistrationDataImportDatahubNode"
+          },
+          {
+            "name": "ImportDataNode"
           }
         ]
       }

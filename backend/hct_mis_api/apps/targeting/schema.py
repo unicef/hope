@@ -6,6 +6,7 @@ from decimal import Decimal
 import django_filters
 import graphene
 import targeting.models as target_models
+from core.models import FlexibleAttribute
 from core.schema import ExtendedConnection
 from django.db.models import Q
 from graphene import relay
@@ -171,7 +172,7 @@ class Query(graphene.ObjectType):
     def resolve_meta_data_filter_type(self, info):
         return {
             "core_field_types": household_models.get_core_fields(Household),
-            "flex_field_types": household_models.get_flex_fields(),
+            "flex_field_types": FlexibleAttribute.flex_fields(),
         }
 
     def resolve_target_rules(self, info, serialized_list):
