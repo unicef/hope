@@ -85,45 +85,6 @@ type ChoiceObject {
   value: String
 }
 
-type CreateCashPlan {
-  cashPlan: CashPlanNode
-}
-
-input CreateCashPlanInput {
-  programId: String
-  name: String
-  startDate: DateTime
-  endDate: DateTime
-  disbursementDate: DateTime
-  numberOfHouseholds: Int
-  coverageDuration: Int
-  coverageUnits: String
-  targetPopulationId: String
-  cashAssistId: String
-  distributionModality: String
-  fsp: String
-  status: String
-  currency: String
-  totalEntitledQuantity: Decimal
-  totalDeliveredQuantity: Decimal
-  totalUndeliveredQuantity: Decimal
-  dispersionDate: Date
-}
-
-type CreateHousehold {
-  household: HouseholdNode
-}
-
-input CreateHouseholdInput {
-  householdCaId: String!
-  residenceStatus: String!
-  nationality: String!
-  familySize: Int
-  address: String
-  locationId: String!
-  registrationDataImportId: String!
-}
-
 type CreateLocation {
   location: LocationNode
 }
@@ -153,25 +114,30 @@ input CreateProgramInput {
   businessAreaSlug: String
 }
 
+type CreateRegistrationDataImport {
+  registrationDataImport: RegistrationDataImportNode
+}
+
+input CreateRegistrationDataImportExcelInput {
+  importDataId: ID
+  name: String
+}
+
 scalar Date
 
 scalar DateTime
 
 scalar Decimal
 
-type DeleteCashPlan {
-  ok: Boolean
-}
-
-type DeleteHousehold {
-  ok: Boolean
-}
-
 type DeleteLocation {
   ok: Boolean
 }
 
 type DeleteProgram {
+  ok: Boolean
+}
+
+type DeleteRegistrationDataImport {
   ok: Boolean
 }
 
@@ -407,6 +373,16 @@ enum HouseholdResidenceStatus {
   CITIZEN
   IDP
   OTHER
+}
+
+type ImportDataNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  xlsxFile: String!
+  numberOfHouseholds: Int!
+  numberOfIndividuals: Int!
+  registrationDataImport(before: String, after: String, first: Int, last: Int): RegistrationDataImportDatahubNodeConnection!
 }
 
 enum ImportedHouseholdNationality {
@@ -1213,15 +1189,12 @@ type Mutations {
   createProgram(programData: CreateProgramInput!): CreateProgram
   updateProgram(programData: UpdateProgramInput): UpdateProgram
   deleteProgram(programId: String!): DeleteProgram
-  createCashPlan(cashPlanData: CreateCashPlanInput!): CreateCashPlan
-  updateCashPlan(cashPlanData: UpdateCashPlanInput): UpdateCashPlan
-  deleteCashPlan(cashPlanId: String!): DeleteCashPlan
-  createHousehold(householdData: CreateHouseholdInput): CreateHousehold
-  updateHousehold(householdData: UpdateHouseholdInput): UpdateHousehold
-  deleteHousehold(householdId: String!): DeleteHousehold
   createLocation(locationData: CreateLocationInput!): CreateLocation
   updateLocation(locationData: UpdateLocationInput): UpdateLocation
   deleteLocation(locationId: String!): DeleteLocation
+  uploadImportDataXlsxFile(file: Upload!): UploadImportDataXLSXFile
+  deleteRegistrationDataImport(registrationDataImportId: String!): DeleteRegistrationDataImport
+  createRegistrationDataImport(registrationDataImportData: CreateRegistrationDataImportExcelInput!): CreateRegistrationDataImport
 }
 
 interface Node {
@@ -1391,11 +1364,12 @@ type Query {
   me: UserObjectType
   allUsers(before: String, after: String, first: Int, last: Int, fullName: String, orderBy: String): UserNodeConnection
   importedHousehold(id: ID!): ImportedHouseholdNode
-  allImportedHouseholds(before: String, after: String, first: Int, last: Int, nationality: String, nationality_Icontains: String, address: String, address_Icontains: String, representative_FullName: String, representative_FullName_Icontains: String, headOfHousehold_FullName: String, headOfHousehold_FullName_Icontains: String, householdCaId: String, familySize_Range: Int, familySize_Lte: Int, familySize_Gte: Int, familySize: String, rdiId: String): ImportedHouseholdNodeConnection
+  allImportedHouseholds(before: String, after: String, first: Int, last: Int, nationality: String, nationality_Icontains: String, address: String, address_Icontains: String, representative_FullName: String, representative_FullName_Icontains: String, headOfHousehold_FullName: String, headOfHousehold_FullName_Icontains: String, householdCaId: String, familySize_Range: Int, familySize_Lte: Int, familySize_Gte: Int, familySize: String, rdiId: String, orderBy: String): ImportedHouseholdNodeConnection
   registrationDataImportDatahub(id: ID!): RegistrationDataImportDatahubNode
   allRegistrationDataImportsDatahub(before: String, after: String, first: Int, last: Int): RegistrationDataImportDatahubNodeConnection
   importedIndividual(id: ID!): ImportedIndividualNode
   allImportedIndividuals(before: String, after: String, first: Int, last: Int, fullName: String, fullName_Icontains: String, sex: [ID], household: String, age: String, rdiId: String, orderBy: String): ImportedIndividualNodeConnection
+  importData(id: ID!): ImportDataNode
   registrationDataImport(id: ID!): RegistrationDataImportNode
   allRegistrationDataImports(before: String, after: String, first: Int, last: Int, importedBy_Id: UUID, importDate: Date, status: String, name: String, name_Icontains: String, orderBy: String): RegistrationDataImportNodeConnection
   registrationDataStatusChoices: [ChoiceObject]
@@ -1416,6 +1390,7 @@ type RegistrationDataImportDatahubNode implements Node {
   name: String!
   importDate: DateTime!
   hctId: UUID
+  importData: ImportDataNode
   households(before: String, after: String, first: Int, last: Int): ImportedHouseholdNodeConnection!
   individuals(before: String, after: String, first: Int, last: Int): ImportedIndividualNodeConnection!
 }
@@ -1520,48 +1495,6 @@ enum TargetPopulationStatus {
 
 scalar UUID
 
-type UpdateCashPlan {
-  cashPlan: CashPlanNode
-}
-
-input UpdateCashPlanInput {
-  id: String!
-  programId: String
-  name: String
-  startDate: DateTime
-  endDate: DateTime
-  disbursementDate: DateTime
-  numberOfHouseholds: Int
-  coverageDuration: Int
-  coverageUnits: String
-  targetPopulationId: String
-  cashAssistId: String
-  distributionModality: String
-  fsp: String
-  status: String
-  currency: String
-  totalEntitledQuantity: Decimal
-  totalDeliveredQuantity: Decimal
-  totalUndeliveredQuantity: Decimal
-  dispersionDate: Date
-}
-
-type UpdateHousehold {
-  household: HouseholdNode
-}
-
-input UpdateHouseholdInput {
-  id: String!
-  householdCaId: String
-  consent: String
-  residenceStatus: String
-  nationality: String
-  familySize: Int
-  address: String
-  locationId: String
-  registrationDataImportId: String
-}
-
 type UpdateLocation {
   location: LocationNode
 }
@@ -1592,6 +1525,12 @@ input UpdateProgramInput {
   populationGoal: Int
   administrativeAreasOfImplementation: String
   businessAreaSlug: String
+}
+
+scalar Upload
+
+type UploadImportDataXLSXFile {
+  importData: ImportDataNode
 }
 
 type UserNode implements Node {
