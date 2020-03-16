@@ -32,7 +32,7 @@ export const TargetPopulationTable = ({
       <UniversalTable<TargetPopulationNode, AllTargetPopulationsQueryVariables>
         title='Target Population'
         headCells={headCells}
-        rowsPage={[10, 15, 20]}
+        rowsPerPageOptions={[10, 15, 20]}
         query={useAllTargetPopulationsQuery}
         queriedObjectName='allTargetPopulation'
         initialVariables={initialVariables}
