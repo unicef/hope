@@ -1,17 +1,32 @@
 import functools
 import json
 import operator
+from decimal import Decimal
 
 import django_filters
 import graphene
 import targeting.models as target_models
+from core.models import FlexibleAttribute
 from core.schema import ExtendedConnection
 from django.db.models import Q
 from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
+from household import models as household_models
 from household.models import Household
 from household.schema import HouseholdNode
+
+
+# TODO(codecakes): see if later the format can be kept consistent with FilterAttrType model.
+class FilterAttrTypeNode(graphene.ObjectType):
+    """Defines all filter types for core and flex fields."""
+
+    core_field_types = graphene.List(
+        graphene.JSONString, description="core field datatype meta.",
+    )
+    flex_field_types = graphene.List(
+        graphene.JSONString, description="flex field datatype meta."
+    )
 
 
 class TargetPopulationFilter(django_filters.FilterSet):
@@ -22,32 +37,45 @@ class TargetPopulationFilter(django_filters.FilterSet):
 
     name = django_filters.CharFilter(field_name="name", lookup_expr="icontains")
     created_by_name = django_filters.CharFilter(
-        field_name="created_by__full_name", method="filter_created_by_name"
+        field_name="created_by", method="filter_created_by_name"
     )
     num_individuals_min = django_filters.NumberFilter(
-        field_name="target_rules__num_individuals_min", lookup_expr="gte"
+        field_name="target_rules", method="filter_num_individuals_min"
     )
     num_individuals_max = django_filters.NumberFilter(
-        field_name="target_rules__num_individuals_max", lookup_expr="lte"
+        field_name="target_rules", method="filter_num_individuals_max"
     )
 
     # TODO(codecakes): waiting on dist to school and adminlevel clarification.
-
     @staticmethod
     def filter_created_by_name(queryset, model_field, value):
         """Gets full name of the associated user from query."""
-        first_name_query = {
-            f"{model_field}__first_name__icontains": value,
-        }
-        last_name_query = {
-            f"{model_field}__last_name__icontains": value,
-        }
-        full_name_query = {
-            f"{model_field}__full_name__icontains": value,
-        }
-        return queryset.filter(
-            Q(**first_name_query) | Q(**last_name_query) | Q(full_name_query)
-        )
+        qs = []
+        for name in value.strip().split():
+            first_name_query = {
+                f"{model_field}__first_name__icontains": name,
+            }
+            last_name_query = {
+                f"{model_field}__last_name__icontains": name,
+            }
+            qs.append(
+                queryset.filter(Q(**first_name_query) | Q(**last_name_query))
+            )
+        return functools.reduce(lambda x, y: x.union(y), qs)
+
+    @staticmethod
+    def filter_num_individuals_min(queryset, model_field, value):
+        field_name = f"{model_field}__core_rules__num_individuals_min__gte"
+        if isinstance(value, Decimal):
+            value = int(value)
+        return queryset.filter(**{field_name: value})
+
+    @staticmethod
+    def filter_num_individuals_max(queryset, model_field, value):
+        field_name = f"{model_field}__core_rules__num_individuals_max__lte"
+        if isinstance(value, Decimal):
+            value = int(value)
+        return queryset.filter(**{field_name: value})
 
     class Meta:
         model = target_models.TargetPopulation
@@ -57,8 +85,6 @@ class TargetPopulationFilter(django_filters.FilterSet):
             "created_at",
             "last_edited_at",
             "status",
-            "total_households",
-            "total_family_size",
             "households",
             "target_rules",
         )
@@ -89,6 +115,9 @@ class TargetPopulationFilter(django_filters.FilterSet):
 class TargetPopulationNode(DjangoObjectType):
     """Defines an individual target population record."""
 
+    total_households = graphene.Int(source="total_households")
+    total_family_size = graphene.Int(source="total_family_size")
+
     class Meta:
         model = target_models.TargetPopulation
         interfaces = (relay.Node,)
@@ -109,7 +138,7 @@ class SavedTargetRuleFilter(django_filters.FilterSet):
 
         filter_overrides = {
             target_models.JSONField: {
-                'filter_class': django_filters.LookupChoiceFilter,
+                "filter_class": django_filters.LookupChoiceFilter,
                 # 'extra': lambda f: {'lookup_expr': ['icontains']},
             },
         }
@@ -131,13 +160,20 @@ class Query(graphene.ObjectType):
     # Saved snapshots of target rules from a target population.
     saved_target_rule = relay.Node.Field(SavedTargetRuleNode)
     all_saved_target_rule = DjangoFilterConnectionField(SavedTargetRuleNode)
-    # Realtime Queries from golden reocrds.
+    # Realtime Queries from golden records.
     # household and associated registration and individuals records.
     target_rules = graphene.List(
         HouseholdNode,
         serialized_list=graphene.String(),
         description="json dump of filters containing key value pairs.",
     )
+    meta_data_filter_type = graphene.Field(FilterAttrTypeNode)
+
+    def resolve_meta_data_filter_type(self, info):
+        return {
+            "core_field_types": household_models.get_core_fields(Household),
+            "flex_field_types": FlexibleAttribute.flex_fields(),
+        }
 
     def resolve_target_rules(self, info, serialized_list):
         """Resolver for target_rules. Queries from golden records.
@@ -159,8 +195,8 @@ class Query(graphene.ObjectType):
         for rule_obj in rule_lists:
             search_rules = {}
             rules = {}
-            rules.update(rule_obj["core_rules"])
-            rules.update(rule_obj["flex_rules"])
+            rules.update(rule_obj.get("core_rules", {}))
+            rules.update(rule_obj.get("flex_rules", {}))
             # TODO(codecakes): decouple to core and flex functions.
             # many dynamic fields here will depend on the info
             #  from FilterAttrType class falls back on that method.
