@@ -1,11 +1,11 @@
 import functools
 import json
 import operator
-from decimal import Decimal
 
 import django_filters
 import graphene
 import targeting.models as target_models
+from core.filters import IntegerFilter
 from core.models import FlexibleAttribute
 from core.schema import ExtendedConnection
 from django.db.models import Q
@@ -39,43 +39,26 @@ class TargetPopulationFilter(django_filters.FilterSet):
     created_by_name = django_filters.CharFilter(
         field_name="created_by", method="filter_created_by_name"
     )
-    num_individuals_min = django_filters.NumberFilter(
-        field_name="target_rules", method="filter_num_individuals_min"
+    num_individuals_min = IntegerFilter(
+        field_name="target_rules__core_rules__num_individuals_min",
+        lookup_expr="gte"
     )
-    num_individuals_max = django_filters.NumberFilter(
-        field_name="target_rules", method="filter_num_individuals_max"
+    num_individuals_max = IntegerFilter(
+        field_name="target_rules__core_rules__num_individuals_max",
+        lookup_expr="lte"
     )
 
     # TODO(codecakes): waiting on dist to school and adminlevel clarification.
     @staticmethod
     def filter_created_by_name(queryset, model_field, value):
         """Gets full name of the associated user from query."""
-        qs = []
+        fname_query_key = f"{model_field}__first_name__icontains"
+        lname_query_key = f"{model_field}__last_name__icontains"
         for name in value.strip().split():
-            first_name_query = {
-                f"{model_field}__first_name__icontains": name,
-            }
-            last_name_query = {
-                f"{model_field}__last_name__icontains": name,
-            }
-            qs.append(
-                queryset.filter(Q(**first_name_query) | Q(**last_name_query))
+            queryset = queryset.filter(
+                Q(**{fname_query_key: name,}) | Q(**{lname_query_key: name,})
             )
-        return functools.reduce(lambda x, y: x.union(y), qs)
-
-    @staticmethod
-    def filter_num_individuals_min(queryset, model_field, value):
-        field_name = f"{model_field}__core_rules__num_individuals_min__gte"
-        if isinstance(value, Decimal):
-            value = int(value)
-        return queryset.filter(**{field_name: value})
-
-    @staticmethod
-    def filter_num_individuals_max(queryset, model_field, value):
-        field_name = f"{model_field}__core_rules__num_individuals_max__lte"
-        if isinstance(value, Decimal):
-            value = int(value)
-        return queryset.filter(**{field_name: value})
+        return queryset
 
     class Meta:
         model = target_models.TargetPopulation
@@ -167,6 +150,7 @@ class Query(graphene.ObjectType):
         serialized_list=graphene.String(),
         description="json dump of filters containing key value pairs.",
     )
+    # Fetch available filters types metadata.
     meta_data_filter_type = graphene.Field(FilterAttrTypeNode)
 
     def resolve_meta_data_filter_type(self, info):
