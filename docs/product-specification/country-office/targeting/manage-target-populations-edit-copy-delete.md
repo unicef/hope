@@ -33,7 +33,7 @@ The user may also add more **OR** criteria if desired.
 
 In order to **Copy** a Target Population and it's criteria, a user must first visit the **Target Population Details** page of their selected Target Population and click the **`Copy`** button \(icon\) located on the top-right of the screen, next to a `delete` / `edit` / `finalize` buttons respectively. 
 
-This will generate a new Target Population with the same criteria selected, however the user will need to provide a new **Name** of the Target Population.
+A modal screen will prompt the user to fill in a new name of the duplicate Target Population before moving forward. Once a user has added a new title they can proceed with the duplicate by selecting `Save`. This will generate a new Target Population with the same criteria selected as well as a snapshot of the data preserved in the duplicated Target Population. Once the criteria is changed, or any other manipulations to the data occur, the Target Population will begin to take in new results from the most recent data in the Population database. 
 
 From here, all the steps are the same as seen in the [**Create New Target Population**](targeting-criteria.md#create-new-target-population) section.
 
