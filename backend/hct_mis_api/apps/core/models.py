@@ -4,20 +4,30 @@ import mptt
 import pycountry
 from auditlog.models import AuditlogHistoryField
 from auditlog.registry import auditlog
+from core.coutries import COUNTRY_NAME_TO_ALPHA2_CODE
+from core.utils import unique_slugify
 from django.contrib.gis.db.models import MultiPolygonField, PointField
+from django.contrib.postgres.aggregates import ArrayAgg
 from django.contrib.postgres.fields import JSONField
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
+from django.db.models.expressions import F
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
-from model_utils.models import UUIDModel, SoftDeletableModel
+from model_utils.models import SoftDeletableModel
 from mptt.fields import TreeForeignKey
 from mptt.managers import TreeManager
 from mptt.models import MPTTModel
-
-from core.coutries import COUNTRY_NAME_TO_ALPHA2_CODE
-from core.utils import unique_slugify
 from utils.models import TimeStampedUUIDModel, SoftDeletionTreeModel
+
+_FLEX_FIELDS = (
+    "name",
+    "type",
+    "required",
+    "label",
+    "hint",
+)
+_FLEX_ATTR_CHOICE_NAME = "flexibleattributechoice__name"
 
 
 class Country(TimeStampedUUIDModel):
@@ -317,6 +327,19 @@ class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
     )
     associated_with = models.SmallIntegerField(choices=ASSOCIATED_WITH_CHOICES)
     history = AuditlogHistoryField(pk_indexable=False)
+    __flex_fields = None
+
+    @classmethod
+    def flex_fields(cls):
+        """Gets list of flex metadatatype objects."""
+        cls.__flex_fields = cls.__flex_fields or FlexibleAttribute.objects.values(
+            *_FLEX_FIELDS
+        ).annotate(
+            choices=ArrayAgg(
+                F(_FLEX_ATTR_CHOICE_NAME), default=[], distinct=True
+            )
+        )
+        return cls.__flex_fields
 
     def __str__(self):
         return f"type: {self.type}, name: {self.name}"
