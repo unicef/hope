@@ -1,10 +1,10 @@
 """Models for target population and target rules."""
 
 import datetime as dt
-import enum
 import functools
 from typing import List
 
+from core.utils import EnumGetChoices
 from django.conf import settings
 from django.contrib.postgres.fields import IntegerRangeField
 from django.contrib.postgres.fields import JSONField
@@ -39,15 +39,6 @@ def get_integer_range(min_range=None, max_range=None):
     )
 
 
-class EnumGetChoices(enum.Enum):
-    def __init__(self, *args, **kwargs):
-        super().__init__()
-
-    @classmethod
-    def get_choices(cls) -> List[tuple]:
-        return [(field.name, field.value) for field in cls]
-
-
 class TargetStatus(EnumGetChoices):
     IN_PROGRESS = "In Progress"
     FINALIZED = "Finalized"
@@ -76,11 +67,51 @@ class TargetPopulation(UUIDModel):
         choices=STATE_CHOICES,
         default=TargetStatus.IN_PROGRESS,
     )
-    total_households = models.IntegerField(default=0)
-    total_family_size = models.IntegerField(default=0)
     households = models.ManyToManyField(
         "household.Household", related_name="target_populations"
     )
+    _total_households = models.PositiveIntegerField(default=0)
+    _total_family_size = models.PositiveIntegerField(default=0)
+
+    @property
+    def total_households(self):
+        """Gets sum of all household numbers from association."""
+        return (
+            self.households.count()
+            if not self._total_households
+            else self._total_households
+        )
+
+    @total_households.setter
+    def total_households(self, value: int):
+        """
+
+        Args:
+            value (int): the aggregated value of total households
+        """
+        self._total_households = value
+
+    @property
+    def total_family_size(self):
+        """Gets sum of all family sizes from all the households."""
+        return (
+            (
+                self.households.aggregate(models.Sum("family_size")).get(
+                    "family_size__sum"
+                )
+            )
+            if not self._total_family_size
+            else self._total_family_size
+        )
+
+    @total_family_size.setter
+    def total_family_size(self, value: int):
+        """
+
+        Args:
+            value (int): the aggregated value of the total family sizes.
+        """
+        self._total_family_size = value
 
 
 class TargetRule(models.Model):

@@ -149,16 +149,6 @@ export type ChoiceObject = {
   value?: Maybe<Scalars['String']>,
 };
 
-export type CreateLocation = {
-   __typename?: 'CreateLocation',
-  location?: Maybe<LocationNode>,
-};
-
-export type CreateLocationInput = {
-  name?: Maybe<Scalars['String']>,
-  country?: Maybe<Scalars['String']>,
-};
-
 export type CreateProgram = {
    __typename?: 'CreateProgram',
   program?: Maybe<ProgramNode>,
@@ -193,11 +183,6 @@ export type CreateRegistrationDataImportExcelInput = {
 
 
 
-export type DeleteLocation = {
-   __typename?: 'DeleteLocation',
-  ok?: Maybe<Scalars['Boolean']>,
-};
-
 export type DeleteProgram = {
    __typename?: 'DeleteProgram',
   ok?: Maybe<Scalars['Boolean']>,
@@ -229,6 +214,12 @@ export type DjangoDebugSql = {
   transStatus?: Maybe<Scalars['String']>,
   isoLevel?: Maybe<Scalars['String']>,
   encoding?: Maybe<Scalars['String']>,
+};
+
+export type FilterAttrTypeNode = {
+   __typename?: 'FilterAttrTypeNode',
+  coreFieldTypes?: Maybe<Array<Maybe<Scalars['JSONString']>>>,
+  flexFieldTypes?: Maybe<Array<Maybe<Scalars['JSONString']>>>,
 };
 
 export enum HouseholdNationality {
@@ -463,8 +454,6 @@ export type HouseholdNodeTargetPopulationsArgs = {
   createdAt?: Maybe<Scalars['DateTime']>,
   lastEditedAt?: Maybe<Scalars['DateTime']>,
   status?: Maybe<Scalars['String']>,
-  totalHouseholds?: Maybe<Scalars['Int']>,
-  totalFamilySize?: Maybe<Scalars['Int']>,
   households?: Maybe<Array<Maybe<Scalars['ID']>>>,
   targetRules?: Maybe<Array<Maybe<Scalars['ID']>>>,
   numIndividualsMin?: Maybe<Scalars['Float']>,
@@ -1381,9 +1370,6 @@ export type Mutations = {
   createProgram?: Maybe<CreateProgram>,
   updateProgram?: Maybe<UpdateProgram>,
   deleteProgram?: Maybe<DeleteProgram>,
-  createLocation?: Maybe<CreateLocation>,
-  updateLocation?: Maybe<UpdateLocation>,
-  deleteLocation?: Maybe<DeleteLocation>,
   uploadImportDataXlsxFile?: Maybe<UploadImportDataXlsxFile>,
   deleteRegistrationDataImport?: Maybe<DeleteRegistrationDataImport>,
   createRegistrationDataImport?: Maybe<CreateRegistrationDataImport>,
@@ -1402,21 +1388,6 @@ export type MutationsUpdateProgramArgs = {
 
 export type MutationsDeleteProgramArgs = {
   programId: Scalars['String']
-};
-
-
-export type MutationsCreateLocationArgs = {
-  locationData: CreateLocationInput
-};
-
-
-export type MutationsUpdateLocationArgs = {
-  locationData?: Maybe<UpdateLocationInput>
-};
-
-
-export type MutationsDeleteLocationArgs = {
-  locationId: Scalars['String']
 };
 
 
@@ -1636,6 +1607,7 @@ export type Query = {
   savedTargetRule?: Maybe<SavedTargetRuleNode>,
   allSavedTargetRule?: Maybe<SavedTargetRuleNodeConnection>,
   targetRules?: Maybe<Array<Maybe<HouseholdNode>>>,
+  metaDataFilterType?: Maybe<FilterAttrTypeNode>,
   household?: Maybe<HouseholdNode>,
   allHouseholds?: Maybe<HouseholdNodeConnection>,
   individual?: Maybe<IndividualNode>,
@@ -1750,8 +1722,6 @@ export type QueryAllTargetPopulationArgs = {
   createdAt?: Maybe<Scalars['DateTime']>,
   lastEditedAt?: Maybe<Scalars['DateTime']>,
   status?: Maybe<Scalars['String']>,
-  totalHouseholds?: Maybe<Scalars['Int']>,
-  totalFamilySize?: Maybe<Scalars['Int']>,
   households?: Maybe<Array<Maybe<Scalars['ID']>>>,
   targetRules?: Maybe<Array<Maybe<Scalars['ID']>>>,
   numIndividualsMin?: Maybe<Scalars['Float']>,
@@ -1864,7 +1834,8 @@ export type QueryAllImportedHouseholdsArgs = {
   familySize_Lte?: Maybe<Scalars['Int']>,
   familySize_Gte?: Maybe<Scalars['Int']>,
   familySize?: Maybe<Scalars['String']>,
-  rdiId?: Maybe<Scalars['String']>
+  rdiId?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
 };
 
 
@@ -2058,12 +2029,14 @@ export type TargetPopulationNode = Node & {
   lastEditedAt?: Maybe<Scalars['DateTime']>,
   createdBy?: Maybe<UserNode>,
   status: TargetPopulationStatus,
-  totalHouseholds: Scalars['Int'],
-  totalFamilySize: Scalars['Int'],
   households: HouseholdNodeConnection,
+  TotalHouseholds: Scalars['Int'],
+  TotalFamilySize: Scalars['Int'],
   paymentRecords: PaymentRecordNodeConnection,
   cashPlans: CashPlanNodeConnection,
   targetRules: SavedTargetRuleNodeConnection,
+  totalHouseholds?: Maybe<Scalars['Int']>,
+  totalFamilySize?: Maybe<Scalars['Int']>,
 };
 
 
@@ -2121,17 +2094,6 @@ export enum TargetPopulationStatus {
   InProgress = 'IN_PROGRESS',
   Finalized = 'FINALIZED'
 }
-
-export type UpdateLocation = {
-   __typename?: 'UpdateLocation',
-  location?: Maybe<LocationNode>,
-};
-
-export type UpdateLocationInput = {
-  id: Scalars['String'],
-  name?: Maybe<Scalars['String']>,
-  country?: Maybe<Scalars['String']>,
-};
 
 export type UpdateProgram = {
    __typename?: 'UpdateProgram',
@@ -2208,8 +2170,6 @@ export type UserNodeTargetPopulationsArgs = {
   createdAt?: Maybe<Scalars['DateTime']>,
   lastEditedAt?: Maybe<Scalars['DateTime']>,
   status?: Maybe<Scalars['String']>,
-  totalHouseholds?: Maybe<Scalars['Int']>,
-  totalFamilySize?: Maybe<Scalars['Int']>,
   households?: Maybe<Array<Maybe<Scalars['ID']>>>,
   targetRules?: Maybe<Array<Maybe<Scalars['ID']>>>,
   numIndividualsMin?: Maybe<Scalars['Float']>,
@@ -2285,8 +2245,6 @@ export type UserObjectTypeTargetPopulationsArgs = {
   createdAt?: Maybe<Scalars['DateTime']>,
   lastEditedAt?: Maybe<Scalars['DateTime']>,
   status?: Maybe<Scalars['String']>,
-  totalHouseholds?: Maybe<Scalars['Int']>,
-  totalFamilySize?: Maybe<Scalars['Int']>,
   households?: Maybe<Array<Maybe<Scalars['ID']>>>,
   targetRules?: Maybe<Array<Maybe<Scalars['ID']>>>,
   numIndividualsMin?: Maybe<Scalars['Float']>,
@@ -2599,7 +2557,10 @@ export type AllTargetPopulationsQuery = (
   )> }
 );
 
-export type AllUsersQueryVariables = {};
+export type AllUsersQueryVariables = {
+  fullName?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>
+};
 
 
 export type AllUsersQuery = (
@@ -2859,7 +2820,8 @@ export type AllImportedHouseholdsQueryVariables = {
   before?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  rdiId?: Maybe<Scalars['String']>
+  rdiId?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
 };
 
 
@@ -2888,7 +2850,8 @@ export type AllImportedIndividualsQueryVariables = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   rdiId?: Maybe<Scalars['String']>,
-  household?: Maybe<Scalars['String']>
+  household?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
 };
 
 
@@ -3934,8 +3897,8 @@ export type AllTargetPopulationsQueryHookResult = ReturnType<typeof useAllTarget
 export type AllTargetPopulationsLazyQueryHookResult = ReturnType<typeof useAllTargetPopulationsLazyQuery>;
 export type AllTargetPopulationsQueryResult = ApolloReactCommon.QueryResult<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>;
 export const AllUsersDocument = gql`
-    query AllUsers {
-  allUsers {
+    query AllUsers($fullName: String, $first: Int) {
+  allUsers(fullName: $fullName, first: $first) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -3982,6 +3945,8 @@ export function withAllUsers<TProps, TChildProps = {}>(operationOptions?: Apollo
  * @example
  * const { data, loading, error } = useAllUsersQuery({
  *   variables: {
+ *      fullName: // value for 'fullName'
+ *      first: // value for 'first'
  *   },
  * });
  */
@@ -4597,8 +4562,8 @@ export type TargetPopulationQueryHookResult = ReturnType<typeof useTargetPopulat
 export type TargetPopulationLazyQueryHookResult = ReturnType<typeof useTargetPopulationLazyQuery>;
 export type TargetPopulationQueryResult = ApolloReactCommon.QueryResult<TargetPopulationQuery, TargetPopulationQueryVariables>;
 export const AllImportedHouseholdsDocument = gql`
-    query AllImportedHouseholds($after: String, $before: String, $first: Int, $last: Int, $rdiId: String) {
-  allImportedHouseholds(after: $after, before: $before, first: $first, last: $last, rdiId: $rdiId) {
+    query AllImportedHouseholds($after: String, $before: String, $first: Int, $last: Int, $rdiId: String, $orderBy: String) {
+  allImportedHouseholds(after: $after, before: $before, first: $first, last: $last, rdiId: $rdiId, orderBy: $orderBy) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -4650,6 +4615,7 @@ export function withAllImportedHouseholds<TProps, TChildProps = {}>(operationOpt
  *      first: // value for 'first'
  *      last: // value for 'last'
  *      rdiId: // value for 'rdiId'
+ *      orderBy: // value for 'orderBy'
  *   },
  * });
  */
@@ -4663,8 +4629,8 @@ export type AllImportedHouseholdsQueryHookResult = ReturnType<typeof useAllImpor
 export type AllImportedHouseholdsLazyQueryHookResult = ReturnType<typeof useAllImportedHouseholdsLazyQuery>;
 export type AllImportedHouseholdsQueryResult = ApolloReactCommon.QueryResult<AllImportedHouseholdsQuery, AllImportedHouseholdsQueryVariables>;
 export const AllImportedIndividualsDocument = gql`
-    query AllImportedIndividuals($after: String, $before: String, $first: Int, $last: Int, $rdiId: String, $household: String) {
-  allImportedIndividuals(after: $after, before: $before, first: $first, last: $last, rdiId: $rdiId, household: $household) {
+    query AllImportedIndividuals($after: String, $before: String, $first: Int, $last: Int, $rdiId: String, $household: String, $orderBy: String) {
+  allImportedIndividuals(after: $after, before: $before, first: $first, last: $last, rdiId: $rdiId, household: $household, orderBy: $orderBy) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -4717,6 +4683,7 @@ export function withAllImportedIndividuals<TProps, TChildProps = {}>(operationOp
  *      last: // value for 'last'
  *      rdiId: // value for 'rdiId'
  *      household: // value for 'household'
+ *      orderBy: // value for 'orderBy'
  *   },
  * });
  */
@@ -5145,6 +5112,7 @@ export type ResolversTypes = {
   PaymentEntitlementNode: ResolverTypeWrapper<PaymentEntitlementNode>,
   PaymentEntitlementDeliveryType: PaymentEntitlementDeliveryType,
   ChoiceObject: ResolverTypeWrapper<ChoiceObject>,
+  FilterAttrTypeNode: ResolverTypeWrapper<FilterAttrTypeNode>,
   UserObjectType: ResolverTypeWrapper<UserObjectType>,
   ImportedHouseholdNode: ResolverTypeWrapper<ImportedHouseholdNode>,
   ImportedHouseholdResidenceStatus: ImportedHouseholdResidenceStatus,
@@ -5173,11 +5141,6 @@ export type ResolversTypes = {
   UpdateProgramInput: UpdateProgramInput,
   UpdateProgram: ResolverTypeWrapper<UpdateProgram>,
   DeleteProgram: ResolverTypeWrapper<DeleteProgram>,
-  CreateLocationInput: CreateLocationInput,
-  CreateLocation: ResolverTypeWrapper<CreateLocation>,
-  UpdateLocationInput: UpdateLocationInput,
-  UpdateLocation: ResolverTypeWrapper<UpdateLocation>,
-  DeleteLocation: ResolverTypeWrapper<DeleteLocation>,
   Upload: ResolverTypeWrapper<Scalars['Upload']>,
   UploadImportDataXLSXFile: ResolverTypeWrapper<UploadImportDataXlsxFile>,
   DeleteRegistrationDataImport: ResolverTypeWrapper<DeleteRegistrationDataImport>,
@@ -5262,6 +5225,7 @@ export type ResolversParentTypes = {
   PaymentEntitlementNode: PaymentEntitlementNode,
   PaymentEntitlementDeliveryType: PaymentEntitlementDeliveryType,
   ChoiceObject: ChoiceObject,
+  FilterAttrTypeNode: FilterAttrTypeNode,
   UserObjectType: UserObjectType,
   ImportedHouseholdNode: ImportedHouseholdNode,
   ImportedHouseholdResidenceStatus: ImportedHouseholdResidenceStatus,
@@ -5290,11 +5254,6 @@ export type ResolversParentTypes = {
   UpdateProgramInput: UpdateProgramInput,
   UpdateProgram: UpdateProgram,
   DeleteProgram: DeleteProgram,
-  CreateLocationInput: CreateLocationInput,
-  CreateLocation: CreateLocation,
-  UpdateLocationInput: UpdateLocationInput,
-  UpdateLocation: UpdateLocation,
-  DeleteLocation: DeleteLocation,
   Upload: Scalars['Upload'],
   UploadImportDataXLSXFile: UploadImportDataXlsxFile,
   DeleteRegistrationDataImport: DeleteRegistrationDataImport,
@@ -5378,10 +5337,6 @@ export type ChoiceObjectResolvers<ContextType = any, ParentType extends Resolver
   value?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
-export type CreateLocationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateLocation'] = ResolversParentTypes['CreateLocation']> = {
-  location?: Resolver<Maybe<ResolversTypes['LocationNode']>, ParentType, ContextType>,
-};
-
 export type CreateProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateProgram'] = ResolversParentTypes['CreateProgram']> = {
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
 };
@@ -5401,10 +5356,6 @@ export interface DateTimeScalarConfig extends GraphQLScalarTypeConfig<ResolversT
 export interface DecimalScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Decimal'], any> {
   name: 'Decimal'
 }
-
-export type DeleteLocationResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteLocation'] = ResolversParentTypes['DeleteLocation']> = {
-  ok?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-};
 
 export type DeleteProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteProgram'] = ResolversParentTypes['DeleteProgram']> = {
   ok?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
@@ -5433,6 +5384,11 @@ export type DjangoDebugSqlResolvers<ContextType = any, ParentType extends Resolv
   transStatus?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   isoLevel?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   encoding?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
+export type FilterAttrTypeNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['FilterAttrTypeNode'] = ResolversParentTypes['FilterAttrTypeNode']> = {
+  coreFieldTypes?: Resolver<Maybe<Array<Maybe<ResolversTypes['JSONString']>>>, ParentType, ContextType>,
+  flexFieldTypes?: Resolver<Maybe<Array<Maybe<ResolversTypes['JSONString']>>>, ParentType, ContextType>,
 };
 
 export type HouseholdNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['HouseholdNode'] = ResolversParentTypes['HouseholdNode']> = {
@@ -5659,9 +5615,6 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   createProgram?: Resolver<Maybe<ResolversTypes['CreateProgram']>, ParentType, ContextType, RequireFields<MutationsCreateProgramArgs, 'programData'>>,
   updateProgram?: Resolver<Maybe<ResolversTypes['UpdateProgram']>, ParentType, ContextType, MutationsUpdateProgramArgs>,
   deleteProgram?: Resolver<Maybe<ResolversTypes['DeleteProgram']>, ParentType, ContextType, RequireFields<MutationsDeleteProgramArgs, 'programId'>>,
-  createLocation?: Resolver<Maybe<ResolversTypes['CreateLocation']>, ParentType, ContextType, RequireFields<MutationsCreateLocationArgs, 'locationData'>>,
-  updateLocation?: Resolver<Maybe<ResolversTypes['UpdateLocation']>, ParentType, ContextType, MutationsUpdateLocationArgs>,
-  deleteLocation?: Resolver<Maybe<ResolversTypes['DeleteLocation']>, ParentType, ContextType, RequireFields<MutationsDeleteLocationArgs, 'locationId'>>,
   uploadImportDataXlsxFile?: Resolver<Maybe<ResolversTypes['UploadImportDataXLSXFile']>, ParentType, ContextType, RequireFields<MutationsUploadImportDataXlsxFileArgs, 'file'>>,
   deleteRegistrationDataImport?: Resolver<Maybe<ResolversTypes['DeleteRegistrationDataImport']>, ParentType, ContextType, RequireFields<MutationsDeleteRegistrationDataImportArgs, 'registrationDataImportId'>>,
   createRegistrationDataImport?: Resolver<Maybe<ResolversTypes['CreateRegistrationDataImport']>, ParentType, ContextType, RequireFields<MutationsCreateRegistrationDataImportArgs, 'registrationDataImportData'>>,
@@ -5787,6 +5740,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   savedTargetRule?: Resolver<Maybe<ResolversTypes['SavedTargetRuleNode']>, ParentType, ContextType, RequireFields<QuerySavedTargetRuleArgs, 'id'>>,
   allSavedTargetRule?: Resolver<Maybe<ResolversTypes['SavedTargetRuleNodeConnection']>, ParentType, ContextType, QueryAllSavedTargetRuleArgs>,
   targetRules?: Resolver<Maybe<Array<Maybe<ResolversTypes['HouseholdNode']>>>, ParentType, ContextType, QueryTargetRulesArgs>,
+  metaDataFilterType?: Resolver<Maybe<ResolversTypes['FilterAttrTypeNode']>, ParentType, ContextType>,
   household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType, RequireFields<QueryHouseholdArgs, 'id'>>,
   allHouseholds?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, QueryAllHouseholdsArgs>,
   individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType, RequireFields<QueryIndividualArgs, 'id'>>,
@@ -5884,12 +5838,14 @@ export type TargetPopulationNodeResolvers<ContextType = any, ParentType extends 
   lastEditedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   status?: Resolver<ResolversTypes['TargetPopulationStatus'], ParentType, ContextType>,
-  totalHouseholds?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  totalFamilySize?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, TargetPopulationNodeHouseholdsArgs>,
+  TotalHouseholds?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  TotalFamilySize?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, TargetPopulationNodePaymentRecordsArgs>,
   cashPlans?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, TargetPopulationNodeCashPlansArgs>,
   targetRules?: Resolver<ResolversTypes['SavedTargetRuleNodeConnection'], ParentType, ContextType, TargetPopulationNodeTargetRulesArgs>,
+  totalHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  totalFamilySize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 
 export type TargetPopulationNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetPopulationNodeConnection'] = ResolversParentTypes['TargetPopulationNodeConnection']> = {
@@ -5902,10 +5858,6 @@ export type TargetPopulationNodeConnectionResolvers<ContextType = any, ParentTyp
 export type TargetPopulationNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetPopulationNodeEdge'] = ResolversParentTypes['TargetPopulationNodeEdge']> = {
   node?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
-export type UpdateLocationResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdateLocation'] = ResolversParentTypes['UpdateLocation']> = {
-  location?: Resolver<Maybe<ResolversTypes['LocationNode']>, ParentType, ContextType>,
 };
 
 export type UpdateProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdateProgram'] = ResolversParentTypes['UpdateProgram']> = {
@@ -5978,17 +5930,16 @@ export type Resolvers<ContextType = any> = {
   CashPlanNodeConnection?: CashPlanNodeConnectionResolvers<ContextType>,
   CashPlanNodeEdge?: CashPlanNodeEdgeResolvers<ContextType>,
   ChoiceObject?: ChoiceObjectResolvers<ContextType>,
-  CreateLocation?: CreateLocationResolvers<ContextType>,
   CreateProgram?: CreateProgramResolvers<ContextType>,
   CreateRegistrationDataImport?: CreateRegistrationDataImportResolvers<ContextType>,
   Date?: GraphQLScalarType,
   DateTime?: GraphQLScalarType,
   Decimal?: GraphQLScalarType,
-  DeleteLocation?: DeleteLocationResolvers<ContextType>,
   DeleteProgram?: DeleteProgramResolvers<ContextType>,
   DeleteRegistrationDataImport?: DeleteRegistrationDataImportResolvers<ContextType>,
   DjangoDebug?: DjangoDebugResolvers<ContextType>,
   DjangoDebugSQL?: DjangoDebugSqlResolvers<ContextType>,
+  FilterAttrTypeNode?: FilterAttrTypeNodeResolvers<ContextType>,
   HouseholdNode?: HouseholdNodeResolvers<ContextType>,
   HouseholdNodeConnection?: HouseholdNodeConnectionResolvers<ContextType>,
   HouseholdNodeEdge?: HouseholdNodeEdgeResolvers<ContextType>,
@@ -6033,7 +5984,6 @@ export type Resolvers<ContextType = any> = {
   TargetPopulationNode?: TargetPopulationNodeResolvers<ContextType>,
   TargetPopulationNodeConnection?: TargetPopulationNodeConnectionResolvers<ContextType>,
   TargetPopulationNodeEdge?: TargetPopulationNodeEdgeResolvers<ContextType>,
-  UpdateLocation?: UpdateLocationResolvers<ContextType>,
   UpdateProgram?: UpdateProgramResolvers<ContextType>,
   Upload?: GraphQLScalarType,
   UploadImportDataXLSXFile?: UploadImportDataXlsxFileResolvers<ContextType>,
