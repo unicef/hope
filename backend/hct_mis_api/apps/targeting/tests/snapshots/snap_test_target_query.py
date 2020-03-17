@@ -12,182 +12,182 @@ snapshots['TestTargetPopulationQuery::test_all_target_population_query 1'] = {
             'edges': [
                 {
                     'node': {
-                        'createdAt': '2020-03-09T21:16:38.286418',
+                        'createdAt': '2020-03-17T16:18:17.910356',
                         'createdBy': {
-                            'firstName': 'Amanda',
-                            'lastName': 'Campbell'
+                            'firstName': 'Jacob',
+                            'lastName': 'Williams'
                         },
                         'households': {
                             'edges': [
                                 {
                                     'node': {
-                                        'address': '''099 Richardson Ramp
-North Sarah, ND 69005''',
-                                        'familySize': 4,
-                                        'headOfHousehold': None,
-                                        'householdCaId': '541f4f21-a736-4d4c-9649-365c2bc7cee8',
-                                        'location': {
-                                            'title': 'New Kevinland'
-                                        },
-                                        'registrationDataImportId': {
-                                            'name': 'Play natural left perform record.'
-                                        }
-                                    }
-                                },
-                                {
-                                    'node': {
-                                        'address': '''27082 Julie Courts Apt. 387
-Amyshire, ME 28865''',
-                                        'familySize': 6,
-                                        'headOfHousehold': None,
-                                        'householdCaId': '6284ed31-2839-4c74-aa2e-ac1662987a55',
-                                        'location': {
-                                            'title': 'West Michelleberg'
-                                        },
-                                        'registrationDataImportId': {
-                                            'name': 'Past exactly state best government clearly stop herself.'
-                                        }
-                                    }
-                                },
-                                {
-                                    'node': {
-                                        'address': '''2779 Sara Parks
-Lake Carol, IA 69498''',
-                                        'familySize': 5,
-                                        'headOfHousehold': None,
-                                        'householdCaId': '38ed58b0-84d1-4d63-93f0-4298e6fa5718',
-                                        'location': {
-                                            'title': 'Henryburgh'
-                                        },
-                                        'registrationDataImportId': {
-                                            'name': 'Whatever culture according resource three relate police.'
-                                        }
-                                    }
-                                },
-                                {
-                                    'node': {
-                                        'address': '''USNS Smith
-FPO AE 44907''',
-                                        'familySize': 7,
-                                        'headOfHousehold': None,
-                                        'householdCaId': '2c909160-8d8f-42a3-b7a2-ec83216aad64',
-                                        'location': {
-                                            'title': 'Velezfurt'
-                                        },
-                                        'registrationDataImportId': {
-                                            'name': 'Interest idea hospital career.'
-                                        }
-                                    }
-                                },
-                                {
-                                    'node': {
-                                        'address': '''PSC 0401, Box 0957
-APO AP 19689''',
+                                        'address': '''42203 Kenneth Island Apt. 597
+Vargasville, OK 23525''',
                                         'familySize': 3,
                                         'headOfHousehold': None,
-                                        'householdCaId': 'fe539143-670b-4da9-a77e-a4a12005797b',
+                                        'householdCaId': '54fe5053-b729-4028-8804-94b887f1f143',
                                         'location': {
-                                            'title': 'Port Eric'
+                                            'title': 'Stephanieland'
                                         },
                                         'registrationDataImportId': {
-                                            'name': 'Brother quite along kind fill strong.'
+                                            'name': 'Worry most senior political total big.'
+                                        }
+                                    }
+                                },
+                                {
+                                    'node': {
+                                        'address': '''934 Henderson Isle Apt. 844
+North Nathanhaven, MO 65710''',
+                                        'familySize': 7,
+                                        'headOfHousehold': None,
+                                        'householdCaId': 'e94506f7-30dd-4086-b25e-012e9829817b',
+                                        'location': {
+                                            'title': 'East Tonyahaven'
+                                        },
+                                        'registrationDataImportId': {
+                                            'name': 'Character Mrs season trial.'
+                                        }
+                                    }
+                                },
+                                {
+                                    'node': {
+                                        'address': '''PSC 2015, Box 0361
+APO AA 83969''',
+                                        'familySize': 8,
+                                        'headOfHousehold': None,
+                                        'householdCaId': '92a66199-4625-467e-8630-ce0b640a5348',
+                                        'location': {
+                                            'title': 'North Jonathanborough'
+                                        },
+                                        'registrationDataImportId': {
+                                            'name': 'Consider seem if.'
+                                        }
+                                    }
+                                },
+                                {
+                                    'node': {
+                                        'address': '''00979 Christina Square
+Lake Ashleyville, LA 05463''',
+                                        'familySize': 8,
+                                        'headOfHousehold': None,
+                                        'householdCaId': '50a35e3d-ad22-49bb-aa16-ab29835a3880',
+                                        'location': {
+                                            'title': 'New Dawnport'
+                                        },
+                                        'registrationDataImportId': {
+                                            'name': 'Contain manage science support lawyer herself floor.'
+                                        }
+                                    }
+                                },
+                                {
+                                    'node': {
+                                        'address': '''4289 William Gateway
+Woodsside, FL 71884''',
+                                        'familySize': 5,
+                                        'headOfHousehold': None,
+                                        'householdCaId': '99cf4429-7be0-430e-829f-6a3d7f3832ab',
+                                        'location': {
+                                            'title': 'West Amandaborough'
+                                        },
+                                        'registrationDataImportId': {
+                                            'name': 'Single away center fish course either.'
                                         }
                                     }
                                 }
                             ]
                         },
-                        'lastEditedAt': '2020-03-09T21:16:38.294981',
+                        'lastEditedAt': '2020-03-17T16:18:17.918828',
                         'name': 'target_1',
                         'status': 'FINALIZED'
                     }
                 },
                 {
                     'node': {
-                        'createdAt': '2020-03-09T21:16:38.296042',
+                        'createdAt': '2020-03-17T16:18:17.919925',
                         'createdBy': {
-                            'firstName': 'Amanda',
-                            'lastName': 'Campbell'
+                            'firstName': 'Jacob',
+                            'lastName': 'Williams'
                         },
                         'households': {
                             'edges': [
                                 {
                                     'node': {
-                                        'address': '''099 Richardson Ramp
-North Sarah, ND 69005''',
-                                        'familySize': 4,
-                                        'headOfHousehold': None,
-                                        'householdCaId': '541f4f21-a736-4d4c-9649-365c2bc7cee8',
-                                        'location': {
-                                            'title': 'New Kevinland'
-                                        },
-                                        'registrationDataImportId': {
-                                            'name': 'Play natural left perform record.'
-                                        }
-                                    }
-                                },
-                                {
-                                    'node': {
-                                        'address': '''27082 Julie Courts Apt. 387
-Amyshire, ME 28865''',
-                                        'familySize': 6,
-                                        'headOfHousehold': None,
-                                        'householdCaId': '6284ed31-2839-4c74-aa2e-ac1662987a55',
-                                        'location': {
-                                            'title': 'West Michelleberg'
-                                        },
-                                        'registrationDataImportId': {
-                                            'name': 'Past exactly state best government clearly stop herself.'
-                                        }
-                                    }
-                                },
-                                {
-                                    'node': {
-                                        'address': '''2779 Sara Parks
-Lake Carol, IA 69498''',
-                                        'familySize': 5,
-                                        'headOfHousehold': None,
-                                        'householdCaId': '38ed58b0-84d1-4d63-93f0-4298e6fa5718',
-                                        'location': {
-                                            'title': 'Henryburgh'
-                                        },
-                                        'registrationDataImportId': {
-                                            'name': 'Whatever culture according resource three relate police.'
-                                        }
-                                    }
-                                },
-                                {
-                                    'node': {
-                                        'address': '''USNS Smith
-FPO AE 44907''',
-                                        'familySize': 7,
-                                        'headOfHousehold': None,
-                                        'householdCaId': '2c909160-8d8f-42a3-b7a2-ec83216aad64',
-                                        'location': {
-                                            'title': 'Velezfurt'
-                                        },
-                                        'registrationDataImportId': {
-                                            'name': 'Interest idea hospital career.'
-                                        }
-                                    }
-                                },
-                                {
-                                    'node': {
-                                        'address': '''PSC 0401, Box 0957
-APO AP 19689''',
+                                        'address': '''42203 Kenneth Island Apt. 597
+Vargasville, OK 23525''',
                                         'familySize': 3,
                                         'headOfHousehold': None,
-                                        'householdCaId': 'fe539143-670b-4da9-a77e-a4a12005797b',
+                                        'householdCaId': '54fe5053-b729-4028-8804-94b887f1f143',
                                         'location': {
-                                            'title': 'Port Eric'
+                                            'title': 'Stephanieland'
                                         },
                                         'registrationDataImportId': {
-                                            'name': 'Brother quite along kind fill strong.'
+                                            'name': 'Worry most senior political total big.'
+                                        }
+                                    }
+                                },
+                                {
+                                    'node': {
+                                        'address': '''934 Henderson Isle Apt. 844
+North Nathanhaven, MO 65710''',
+                                        'familySize': 7,
+                                        'headOfHousehold': None,
+                                        'householdCaId': 'e94506f7-30dd-4086-b25e-012e9829817b',
+                                        'location': {
+                                            'title': 'East Tonyahaven'
+                                        },
+                                        'registrationDataImportId': {
+                                            'name': 'Character Mrs season trial.'
+                                        }
+                                    }
+                                },
+                                {
+                                    'node': {
+                                        'address': '''PSC 2015, Box 0361
+APO AA 83969''',
+                                        'familySize': 8,
+                                        'headOfHousehold': None,
+                                        'householdCaId': '92a66199-4625-467e-8630-ce0b640a5348',
+                                        'location': {
+                                            'title': 'North Jonathanborough'
+                                        },
+                                        'registrationDataImportId': {
+                                            'name': 'Consider seem if.'
+                                        }
+                                    }
+                                },
+                                {
+                                    'node': {
+                                        'address': '''00979 Christina Square
+Lake Ashleyville, LA 05463''',
+                                        'familySize': 8,
+                                        'headOfHousehold': None,
+                                        'householdCaId': '50a35e3d-ad22-49bb-aa16-ab29835a3880',
+                                        'location': {
+                                            'title': 'New Dawnport'
+                                        },
+                                        'registrationDataImportId': {
+                                            'name': 'Contain manage science support lawyer herself floor.'
+                                        }
+                                    }
+                                },
+                                {
+                                    'node': {
+                                        'address': '''4289 William Gateway
+Woodsside, FL 71884''',
+                                        'familySize': 5,
+                                        'headOfHousehold': None,
+                                        'householdCaId': '99cf4429-7be0-430e-829f-6a3d7f3832ab',
+                                        'location': {
+                                            'title': 'West Amandaborough'
+                                        },
+                                        'registrationDataImportId': {
+                                            'name': 'Single away center fish course either.'
                                         }
                                     }
                                 }
                             ]
                         },
-                        'lastEditedAt': '2020-03-09T21:16:38.303335',
+                        'lastEditedAt': '2020-03-17T16:18:17.927451',
                         'name': 'target_2',
                         'status': 'IN_PROGRESS'
                     }
@@ -200,93 +200,102 @@ APO AP 19689''',
 snapshots['TestTargetPopulationQuery::test_target_population_query 1'] = {
     'data': {
         'targetPopulation': {
-            'createdAt': '2020-03-09T21:16:38.286418',
+            'createdAt': '2020-03-17T16:18:17.910356',
             'createdBy': {
-                'firstName': 'Amanda',
-                'lastName': 'Campbell'
+                'firstName': 'Jacob',
+                'lastName': 'Williams'
             },
             'households': {
                 'edges': [
                     {
                         'node': {
-                            'address': '''099 Richardson Ramp
-North Sarah, ND 69005''',
-                            'familySize': 4,
-                            'headOfHousehold': None,
-                            'householdCaId': '541f4f21-a736-4d4c-9649-365c2bc7cee8',
-                            'location': {
-                                'title': 'New Kevinland'
-                            },
-                            'registrationDataImportId': {
-                                'name': 'Play natural left perform record.'
-                            }
-                        }
-                    },
-                    {
-                        'node': {
-                            'address': '''27082 Julie Courts Apt. 387
-Amyshire, ME 28865''',
-                            'familySize': 6,
-                            'headOfHousehold': None,
-                            'householdCaId': '6284ed31-2839-4c74-aa2e-ac1662987a55',
-                            'location': {
-                                'title': 'West Michelleberg'
-                            },
-                            'registrationDataImportId': {
-                                'name': 'Past exactly state best government clearly stop herself.'
-                            }
-                        }
-                    },
-                    {
-                        'node': {
-                            'address': '''2779 Sara Parks
-Lake Carol, IA 69498''',
-                            'familySize': 5,
-                            'headOfHousehold': None,
-                            'householdCaId': '38ed58b0-84d1-4d63-93f0-4298e6fa5718',
-                            'location': {
-                                'title': 'Henryburgh'
-                            },
-                            'registrationDataImportId': {
-                                'name': 'Whatever culture according resource three relate police.'
-                            }
-                        }
-                    },
-                    {
-                        'node': {
-                            'address': '''USNS Smith
-FPO AE 44907''',
-                            'familySize': 7,
-                            'headOfHousehold': None,
-                            'householdCaId': '2c909160-8d8f-42a3-b7a2-ec83216aad64',
-                            'location': {
-                                'title': 'Velezfurt'
-                            },
-                            'registrationDataImportId': {
-                                'name': 'Interest idea hospital career.'
-                            }
-                        }
-                    },
-                    {
-                        'node': {
-                            'address': '''PSC 0401, Box 0957
-APO AP 19689''',
+                            'address': '''42203 Kenneth Island Apt. 597
+Vargasville, OK 23525''',
                             'familySize': 3,
                             'headOfHousehold': None,
-                            'householdCaId': 'fe539143-670b-4da9-a77e-a4a12005797b',
+                            'householdCaId': '54fe5053-b729-4028-8804-94b887f1f143',
                             'location': {
-                                'title': 'Port Eric'
+                                'title': 'Stephanieland'
                             },
                             'registrationDataImportId': {
-                                'name': 'Brother quite along kind fill strong.'
+                                'name': 'Worry most senior political total big.'
+                            }
+                        }
+                    },
+                    {
+                        'node': {
+                            'address': '''934 Henderson Isle Apt. 844
+North Nathanhaven, MO 65710''',
+                            'familySize': 7,
+                            'headOfHousehold': None,
+                            'householdCaId': 'e94506f7-30dd-4086-b25e-012e9829817b',
+                            'location': {
+                                'title': 'East Tonyahaven'
+                            },
+                            'registrationDataImportId': {
+                                'name': 'Character Mrs season trial.'
+                            }
+                        }
+                    },
+                    {
+                        'node': {
+                            'address': '''PSC 2015, Box 0361
+APO AA 83969''',
+                            'familySize': 8,
+                            'headOfHousehold': None,
+                            'householdCaId': '92a66199-4625-467e-8630-ce0b640a5348',
+                            'location': {
+                                'title': 'North Jonathanborough'
+                            },
+                            'registrationDataImportId': {
+                                'name': 'Consider seem if.'
+                            }
+                        }
+                    },
+                    {
+                        'node': {
+                            'address': '''00979 Christina Square
+Lake Ashleyville, LA 05463''',
+                            'familySize': 8,
+                            'headOfHousehold': None,
+                            'householdCaId': '50a35e3d-ad22-49bb-aa16-ab29835a3880',
+                            'location': {
+                                'title': 'New Dawnport'
+                            },
+                            'registrationDataImportId': {
+                                'name': 'Contain manage science support lawyer herself floor.'
+                            }
+                        }
+                    },
+                    {
+                        'node': {
+                            'address': '''4289 William Gateway
+Woodsside, FL 71884''',
+                            'familySize': 5,
+                            'headOfHousehold': None,
+                            'householdCaId': '99cf4429-7be0-430e-829f-6a3d7f3832ab',
+                            'location': {
+                                'title': 'West Amandaborough'
+                            },
+                            'registrationDataImportId': {
+                                'name': 'Single away center fish course either.'
                             }
                         }
                     }
                 ]
             },
-            'lastEditedAt': '2020-03-09T21:16:38.294981',
+            'lastEditedAt': '2020-03-17T16:18:17.918828',
             'name': 'target_1',
             'status': 'FINALIZED'
+        }
+    }
+}
+
+snapshots['TestTargetPopulationQuery::test_all_target_population_num_individuals_query 1'] = {
+    'data': {
+        'allTargetPopulation': {
+            'edges': [
+            ]
         }
     }
 }
