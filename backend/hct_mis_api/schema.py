@@ -2,7 +2,6 @@ import graphene
 from graphene_django.debug import DjangoDebug
 
 import account.schema
-import core.mutations
 import core.schema
 import household.schema
 import payment.schema
@@ -31,7 +30,6 @@ class Query(
 
 class Mutations(
     registration_datahub.mutations.Mutations,
-    core.mutations.Mutations,
     program.mutations.Mutations,
     graphene.ObjectType,
 ):
