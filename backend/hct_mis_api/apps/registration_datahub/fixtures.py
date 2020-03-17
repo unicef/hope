@@ -41,6 +41,7 @@ class ImportedHouseholdFactory(factory.DjangoModelFactory):
     )
     # set it manually
     head_of_household = None
+    representative = None
     registration_date = factory.Faker(
         "date_this_year", before_today=True, after_today=False
     )
@@ -87,3 +88,4 @@ class ImportedIndividualFactory(factory.DjangoModelFactory):
     disability = factory.fuzzy.FuzzyChoice(
         ImportedIndividual.DISABILITY_CHOICE, getter=lambda c: c[0],
     )
+    household = factory.SubFactory(ImportedHouseholdFactory)
