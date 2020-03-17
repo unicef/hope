@@ -50,6 +50,7 @@ class EnumGetChoices(enum.Enum):
 
 class TargetStatus(EnumGetChoices):
     IN_PROGRESS = "In Progress"
+    CANDIDATE_LIST = "Candidate List"
     FINALIZED = "Finalized"
 
 
@@ -77,8 +78,21 @@ class TargetPopulation(UUIDModel):
         default=TargetStatus.IN_PROGRESS,
     )
     households = models.ManyToManyField(
-        "household.Household", related_name="target_populations"
+        "household.Household", 
+        related_name="target_populations",
+        through="HouseholdSelection"
     )
+    candidate_list_number_households = models.IntegerField(blank=True, null=True)
+    candidate_list_number_individuals = models.IntegerField(blank=True, null=True)
+    final_list_number_households = models.IntegerField(blank=True, null=True)
+    final_list_number_individuals = models.IntegerField(blank=True, null=True)
+    selection_computation_metadata = models.TextField(blank=True, null=True, 
+        help_text="""This would be the metadata written to by say Corticon on how
+        it arrived at the selection it made.""")
+    program = models.ForeignKey("program.Program", blank=True, null=True,
+        help_text="""Set only when the target population moves from draft to
+            candidate list (frozen) state""")
+
     _total_households = models.IntegerField(default=0)
     _total_family_size = models.IntegerField(default=0)
 
@@ -86,10 +100,16 @@ class TargetPopulation(UUIDModel):
     def total_households(self):
         """Gets sum of all household numbers from association."""
         return (
-            self.households.count()
+            self.qset.count()
             if not self._total_households
             else self._total_households
         )
+
+    @property
+    def final_list(self):
+        if self.status != STATE_CHOICES.FINALIZED:
+            return []
+        return self.households.filter(selected=True)
 
     @total_households.setter
     def total_households(self, value: int):
@@ -121,6 +141,28 @@ class TargetPopulation(UUIDModel):
             value (int): the aggregated value of the total family sizes.
         """
         self._total_family_size = value
+
+
+
+class HouseholdSelection(TimeStampedUUIDModel):
+    """
+    This model contains metadata associated with the relation between a target 
+    population and a household. Its understood that once the candidate list of
+    households has been frozen, some external system (eg. Corticon) will run
+    to calculate vulnerability score and mark the households as having been
+    'selected'. By default a draft list or frozen candidate list will have
+    selected set to False.
+    """
+    household = models.ForeignKey("Household")
+    target_population = models.ForeignKey("TargetPopulation")
+    vulnerability_score = models.DecimalField(blank=True, null=True)
+    selection_calculation_metadata = JSONField(default=dict)
+    selected = models.BooleanField(default=False,
+        help_text="""
+            When set to True, this means the household has been selected from 
+            the candidate list. Only these households will be sent to
+            CashAssist when a sync is run for the associated target population.
+            """)
 
 
 class TargetRule(models.Model):
