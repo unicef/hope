@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { Typography, Paper, Button } from '@material-ui/core';
+import { AddCircleOutline } from '@material-ui/icons';
 import { Criteria } from './Criteria';
 import { TargetCriteriaForm } from '../../containers/forms/TargetCriteriaForm';
 
@@ -44,6 +45,23 @@ const DividerLabel = styled.div`
   background-color: #fff;
 `;
 
+const AddCriteria = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #003c8f;
+  border: 2px solid #033f91;
+  border-radius: 3px;
+  font-size: 16px;
+  padding: ${({ theme }) => theme.spacing(6)}px
+    ${({ theme }) => theme.spacing(28)}px;
+  cursor: pointer;
+  p {
+    font-weight: 500;
+    margin: 0 0 0 ${({ theme }) => theme.spacing(2)}px;
+  }
+`;
+
 interface TargetingCriteriaProps {
   criterias: object[];
   isEdit: boolean;
@@ -74,13 +92,15 @@ export function TargetingCriteria({
           <Typography variant='h6'>{t('Targeting Criteria')}</Typography>
           {isEdit && (
             <>
-              <Button
-                variant='contained'
-                color='primary'
-                onClick={() => setOpen(true)}
-              >
-                Add Criteria
-              </Button>
+              {!!criterias.length && (
+                <Button
+                  variant='contained'
+                  color='primary'
+                  onClick={() => setOpen(true)}
+                >
+                  Add Criteria
+                </Button>
+              )}
               <TargetCriteriaForm
                 criteria={criteriaObject}
                 title='Add targeting criteria'
@@ -91,24 +111,31 @@ export function TargetingCriteria({
           )}
         </Title>
         <ContentWrapper>
-          {criterias.map((criteria, index) => {
-            return (
-              <>
-                <Criteria
-                  isEdit={isEdit}
-                  criteria={criteria}
-                  editFunction={() => openModal(criteria)}
-                  removeFunction={() => helpers.remove(index)}
-                />
+          {criterias.length ? (
+            criterias.map((criteria, index) => {
+              return (
+                <>
+                  <Criteria
+                    isEdit={isEdit}
+                    criteria={criteria}
+                    editFunction={() => openModal(criteria)}
+                    removeFunction={() => helpers.remove(index)}
+                  />
 
-                {index % 2 ? null : (
-                  <Divider>
-                    <DividerLabel>Or</DividerLabel>
-                  </Divider>
-                )}
-              </>
-            );
-          })}
+                  {index % 2 ? null : (
+                    <Divider>
+                      <DividerLabel>Or</DividerLabel>
+                    </Divider>
+                  )}
+                </>
+              );
+            })
+          ) : (
+            <AddCriteria onClick={() => setOpen(true)}>
+              <AddCircleOutline />
+              <p>Add Criteria</p>
+            </AddCriteria>
+          )}
         </ContentWrapper>
       </PaperContainer>
     </div>
