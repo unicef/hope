@@ -25,7 +25,7 @@ class SoftDeletionTreeManager(TreeManager):
         )
 
 
-class SoftDeletionTreeModel(MPTTModel, TimeStampedUUIDModel):
+class SoftDeletionTreeModel(TimeStampedUUIDModel, MPTTModel):
     is_removed = models.BooleanField(default=False)
 
     class Meta:
