@@ -48,6 +48,35 @@ class TestTargetPopulationQuery(APITestCase):
         }
         """
 
+        cls.ALL_TARGET_POPULATION_NUM_INDIVIDUALS_QUERY = """
+        query AllTargetPopulation($numIndividualsMin: Int, $numIndividualsMax: Int) {
+            allTargetPopulation(numIndividualsMin: $numIndividualsMin, numIndividualsMax: $numIndividualsMax) {
+                edges {
+                    cursor
+                    node {
+                         name
+                         status
+                         createdBy {
+                            firstName
+                            lastName
+                         }
+                         createdAt
+                         lastEditedAt
+                         targetRules {
+                            edges {
+                                node {
+                                  id
+                                  flexRules
+                                  coreRules
+                                }
+                            }
+                         }
+                    }
+                }
+            }
+        }
+        """
+
         cls.TARGET_POPULATION_QUERY = """
         query TargetPopulation($id: ID!) {
             targetPopulation(id: $id) {
@@ -111,6 +140,13 @@ class TestTargetPopulationQuery(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.ALL_TARGET_POPULATION_QUERY,
             context={"user": self.user},
+        )
+
+    def test_all_target_population_num_individuals_query(self):
+        self.snapshot_graphql_request(
+            request_string=self.ALL_TARGET_POPULATION_NUM_INDIVIDUALS_QUERY,
+            context={"user": self.user},
+            variables={"numIndividualsMin": 1, "numIndividualsMax": 100},
         )
 
     def test_target_population_query(self):
