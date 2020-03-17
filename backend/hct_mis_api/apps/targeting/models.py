@@ -100,7 +100,7 @@ class TargetPopulation(UUIDModel):
     def total_households(self):
         """Gets sum of all household numbers from association."""
         return (
-            self.qset.count()
+            self.households.count()
             if not self._total_households
             else self._total_households
         )
