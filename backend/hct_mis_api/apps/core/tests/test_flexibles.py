@@ -23,9 +23,7 @@ class TestFlexibles(TestCase):
         self.admin = FlexibleAttributeAdmin(FlexibleAttribute, site)
 
     def load_xls(self, name):
-        with open(
-            f"hct_mis_api/apps/core/tests/test_files/{name}", "rb",
-        ) as f:
+        with open(f"hct_mis_api/apps/core/tests/test_files/{name}", "rb",) as f:
             file_upload = SimpleUploadedFile(
                 "xls_file", f.read(), content_type="text/html"
             )
@@ -41,7 +39,7 @@ class TestFlexibles(TestCase):
     def test_flexible_init_update_delete(self):
         self.load_xls("flex_init.xls")
         # Check if created correct amount of objects
-        expected_attributes_count = 65
+        expected_attributes_count = 45
         expected_groups_count = 10
         expected_repeated_groups = 2
         expected_choices_count = 441
@@ -127,7 +125,9 @@ class TestFlexibles(TestCase):
 
         for name, label in zip(selected_attribs, attrib_english_labels):
             attrib = FlexibleAttribute.objects.get(name=name)
+            expected_associated_with = 0 if attrib.name[-4:] == "_h_f" else 1
             self.assertEqual(attrib.label["English(EN)"], label)
+            self.assertEqual(attrib.associated_with, expected_associated_with)
             self.assertTrue(
                 yes_choice.flex_attributes.filter(id=attrib.id).exists()
             )
@@ -162,7 +162,7 @@ class TestFlexibles(TestCase):
         self.assertEqual(consent_group.label["English(EN)"], "Consent Edited")
 
         introduction = FlexibleAttribute.objects.filter(
-            type="note", name="introduction"
+            type="note", name="introduction_h_f"
         ).exists()
         self.assertFalse(introduction)
 
@@ -178,7 +178,7 @@ class TestFlexibles(TestCase):
 
         assert flex_attrs_from_db.filter(
             type="STRING",
-            name="introduction",
+            name="introduction_h_f",
             label={
                 "French(FR)": "",
                 "English(EN)": "1) Greeting    "
@@ -230,8 +230,7 @@ class TestFlexibles(TestCase):
 
     def test_reimport_soft_deleted_objects(self):
         self.load_xls("flex_init_valid_types.xls")
-
-        field = FlexibleAttribute.objects.get(name="introduction")
+        field = FlexibleAttribute.objects.get(name="introduction_h_f")
         group = FlexibleAttributeGroup.objects.get(name="consent")
 
         self.assertTrue(field)
