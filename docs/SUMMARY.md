@@ -79,6 +79,7 @@
   * [Access Management Portal](technical-specification/cashassist-integration/access-management-portal.md)
   * [CashAssist - Training Site](technical-specification/cashassist-integration/cashassist-training-site.md)
   * [Open Issues](technical-specification/cashassist-integration/open-issues.md)
+* [Airflow Operators](technical-specification/airflow-operators.md)
 * [Kobo Integration](technical-specification/kobo-integration/README.md)
   * [Kobo hosting](technical-specification/kobo-integration/kobo-hosting.md)
   * [Open issues](technical-specification/kobo-integration/open-issues.md)
