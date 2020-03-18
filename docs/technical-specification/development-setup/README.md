@@ -56,6 +56,42 @@ here is instruction how to integrate **Black** with your editor [https://github.
 
 for frontend we are using **Prettier**
 
+### Writing and running tests:
+
+#### **Backend:**
+
+for backend we are using _Django's TestCase_ and snapshottest.
+
+For snapshottest we are using our custom class **APITestCase**, use it if your test should use snapshots. Check existing tests to see how we are using it.
+
+We are keeping tests in &lt;app\_name&gt;/tests/ and creating separate files for each test case.
+
+to run all tests use:
+
+```bash
+./manage.py test
+```
+
+to overwrite existing snapshots:
+
+```bash
+./manage.py test --snapshot-update
+```
+
+You can run single test in TestCase or overwrite snapshot for only one TestCase by providing a path.
+
+Example for running single test method in TestCase.
+
+```bash
+./manage.py test core.tests.test_flexibles.TestFlexibles.test_load_invalid_file
+```
+
+More information can be found here:
+
+{% embed url="https://docs.djangoproject.com/en/3.0/topics/testing/overview/" %}
+
+[https://github.com/syrusakbary/snapshottest](https://github.com/syrusakbary/snapshottest)
+
 ## Development / Build / Deployment Process
 
 ![](../../.gitbook/assets/unicef-hct-mis-1.jpg)
