@@ -329,18 +329,6 @@ class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
     history = AuditlogHistoryField(pk_indexable=False)
     __flex_fields = None
 
-    @classmethod
-    def flex_fields(cls):
-        """Gets list of flex metadatatype objects."""
-        cls.__flex_fields = cls.__flex_fields or FlexibleAttribute.objects.values(
-            *_FLEX_FIELDS
-        ).annotate(
-            choices=ArrayAgg(
-                F(_FLEX_ATTR_CHOICE_NAME), default=[], distinct=True
-            )
-        )
-        return cls.__flex_fields
-
     def __str__(self):
         return f"type: {self.type}, name: {self.name}"
 
@@ -373,7 +361,9 @@ class FlexibleAttributeChoice(SoftDeletableModel, TimeStampedUUIDModel):
     name = models.CharField(max_length=255)
     label = JSONField(default=dict)
     admin = models.CharField(max_length=255)
-    flex_attributes = models.ManyToManyField("core.FlexibleAttribute",)
+    flex_attributes = models.ManyToManyField(
+        "core.FlexibleAttribute", related_name="choices"
+    )
     history = AuditlogHistoryField(pk_indexable=False)
 
     def __str__(self):
