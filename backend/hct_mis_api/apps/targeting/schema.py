@@ -5,9 +5,9 @@ import operator
 import django_filters
 import graphene
 import targeting.models as target_models
-from core.filters import IntegerFilter
 from core.models import FlexibleAttribute
 from core.schema import ExtendedConnection
+from core.filters import IntegerFilter
 from django.db.models import Q
 from graphene import relay
 from graphene_django import DjangoObjectType
@@ -15,18 +15,10 @@ from graphene_django.filter import DjangoFilterConnectionField
 from household import models as household_models
 from household.models import Household
 from household.schema import HouseholdNode
+from core import utils
 
-
-# TODO(codecakes): see if later the format can be kept consistent with FilterAttrType model.
-class FilterAttrTypeNode(graphene.ObjectType):
-    """Defines all filter types for core and flex fields."""
-
-    core_field_types = graphene.List(
-        graphene.JSONString, description="core field datatype meta.",
-    )
-    flex_field_types = graphene.List(
-        graphene.JSONString, description="flex field datatype meta."
-    )
+# TODO(codecakes): see if later the format can be kept consistent in FilterAttrType model.
+# by using FlexFieldNode and CoreFieldNode to return target filter rules.
 
 
 class TargetPopulationFilter(django_filters.FilterSet):
@@ -150,14 +142,7 @@ class Query(graphene.ObjectType):
         serialized_list=graphene.String(),
         description="json dump of filters containing key value pairs.",
     )
-    # Fetch available filters types metadata.
-    meta_data_filter_type = graphene.Field(FilterAttrTypeNode)
 
-    def resolve_meta_data_filter_type(self, info):
-        return {
-            "core_field_types": household_models.get_core_fields(Household),
-            "flex_field_types": FlexibleAttribute.flex_fields(),
-        }
 
     def resolve_target_rules(self, info, serialized_list):
         """Resolver for target_rules. Queries from golden records.
