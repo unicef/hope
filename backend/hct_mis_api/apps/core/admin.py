@@ -5,7 +5,7 @@ from django.contrib import admin
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.forms import forms
-from django.shortcuts import redirect, render, render_to_response
+from django.shortcuts import redirect, render
 from django.urls import path
 from django.utils.html import strip_tags
 from xlrd import XLRDError
@@ -58,6 +58,11 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
     CORE_FIELD_SUFFIXES = (
         "_h_c",
         "_i_c",
+    )
+
+    FLEX_FIELD_SUFFIXES = (
+        "_h_f",
+        "_i_f",
     )
 
     JSON_MODEL_FIELDS = (
@@ -323,6 +328,11 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
                     value, header_name, object_type_to_add, row, row_number,
                 )
 
+            is_flex_field = any(
+                self.object_fields_to_create["name"].endswith(i)
+                for i in self.FLEX_FIELD_SUFFIXES
+            )
+
             if object_type_to_add == "group":
                 obj = FlexibleAttributeGroup.all_objects.filter(
                     name=self.object_fields_to_create["name"],
@@ -350,7 +360,8 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
                 FlexibleAttributeGroup.objects.rebuild()
 
                 all_groups.append(group)
-            elif object_type_to_add == "attribute":
+
+            elif object_type_to_add == "attribute" and is_flex_field:
                 choice_name = self._get_field_choice_name(row)
                 obj = FlexibleAttribute.all_objects.filter(
                     name=self.object_fields_to_create["name"],
@@ -374,9 +385,16 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
                 else:
                     field = FlexibleAttribute.objects.create(
                         group=self.current_group_tree[-1],
+                        associated_with=(
+                            0
+                            if self.object_fields_to_create["name"][-4:]
+                            == "_h_f"
+                            else 1
+                        ),
                         **self.object_fields_to_create,
                         **self.json_fields_to_create,
                     )
+
                 if choice_name:
                     choices = FlexibleAttributeChoice.objects.filter(
                         list_name=choice_name,

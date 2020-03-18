@@ -13,8 +13,13 @@ from graphene_django.filter import DjangoFilterConnectionField
 
 from account.schema import UserObjectType
 from core.extended_connection import ExtendedConnection
-from core.models import Location, BusinessArea
-from core.utils import decode_id_string
+from core.models import (
+    Location,
+    BusinessArea,
+    FlexibleAttribute,
+    FlexibleAttributeChoice,
+)
+from core.utils import decode_id_string, get_core_fields
 
 
 class ChoiceObject(graphene.ObjectType):
@@ -88,6 +93,35 @@ class BusinessAreaNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
+class FlexibleAttributeChoice(DjangoObjectType):
+    class Meta:
+        model = FlexibleAttributeChoice
+        filter_fields = ["id"]
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
+class FlexFieldNode(DjangoObjectType):
+    choices = graphene.List(FlexibleAttributeChoice)
+
+    def resolve_choices(self, info):
+        return self.choices.all()
+
+    class Meta:
+        model = FlexibleAttribute
+
+
+class CoreFieldNode(graphene.ObjectType):
+    id = graphene.String()
+    type = graphene.String()
+    name = graphene.String()
+    label = graphene.JSONString()
+    hint = graphene.String()
+    required = graphene.Boolean()
+    choices = graphene.List(ChoiceObject)
+    associated_with = graphene.String()
+
+
 class Query(graphene.ObjectType):
     location = relay.Node.Field(LocationNode)
     all_locations = DjangoFilterConnectionField(LocationNode)
@@ -95,7 +129,19 @@ class Query(graphene.ObjectType):
     all_log_entries = ConnectionField(
         LogEntryObjectConnection, object_id=graphene.String(required=True),
     )
+    all_core_field_attributes = graphene.List(
+        CoreFieldNode, description="core field datatype meta.",
+    )
+    all_flex_field_attributes = graphene.List(
+        FlexFieldNode, description="flex field datatype meta."
+    )
 
     def resolve_all_log_entries(self, info, object_id, **kwargs):
         id = decode_id_string(object_id)
         return LogEntry.objects.filter(~Q(action=0), object_pk=id).all()
+
+    def resolve_all_core_field_attributes(self, info):
+        return get_core_fields()
+
+    def resolve_all_flex_field_attributes(self, info):
+        return FlexibleAttribute.objects.all()
