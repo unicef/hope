@@ -1,7 +1,16 @@
 import json
 
 import graphene
+from account.schema import UserObjectType
 from auditlog.models import LogEntry
+from core.extended_connection import ExtendedConnection
+from core.models import (
+    Location,
+    BusinessArea,
+    FlexibleAttribute,
+    FlexibleAttributeChoice,
+)
+from core.utils import decode_id_string, get_core_fields
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Q
 from django.utils.encoding import force_text
@@ -11,20 +20,10 @@ from graphene import relay, ConnectionField, Connection
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
-from account.schema import UserObjectType
-from core.extended_connection import ExtendedConnection
-from core.models import (
-    Location,
-    BusinessArea,
-    FlexibleAttribute,
-    FlexibleAttributeChoice,
-)
-from core.utils import decode_id_string, get_core_fields
-
 
 class ChoiceObject(graphene.ObjectType):
     name = String()
-    value = String()
+    label = String()
 
 
 class LazyEncoder(DjangoJSONEncoder):
@@ -93,22 +92,38 @@ class BusinessAreaNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
-class FlexibleAttributeChoice(DjangoObjectType):
+class FlexibleAttributeChoiceNode(DjangoObjectType):
+    name = graphene.String()
+
     class Meta:
         model = FlexibleAttributeChoice
-        filter_fields = ["id"]
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
+        fields = ["name", "label"]
 
 
 class FlexFieldNode(DjangoObjectType):
-    choices = graphene.List(FlexibleAttributeChoice)
+    choices = graphene.List(FlexibleAttributeChoiceNode)
+    associated_with = graphene.String()
 
     def resolve_choices(self, info):
         return self.choices.all()
 
+    def resolve_associated_with(self, info):
+        return str(
+            FlexibleAttribute.ASSOCIATED_WITH_CHOICES[self.associated_with][1]
+        )
+
     class Meta:
         model = FlexibleAttribute
+        fields = [
+            "id",
+            "type",
+            "name",
+            "label",
+            "hint",
+            "required",
+        ]
 
 
 class CoreFieldNode(graphene.ObjectType):
