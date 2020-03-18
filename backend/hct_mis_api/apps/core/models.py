@@ -7,11 +7,9 @@ from auditlog.registry import auditlog
 from core.coutries import COUNTRY_NAME_TO_ALPHA2_CODE
 from core.utils import unique_slugify
 from django.contrib.gis.db.models import MultiPolygonField, PointField
-from django.contrib.postgres.aggregates import ArrayAgg
 from django.contrib.postgres.fields import JSONField
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
-from django.db.models.expressions import F
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
@@ -327,7 +325,6 @@ class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
     )
     associated_with = models.SmallIntegerField(choices=ASSOCIATED_WITH_CHOICES)
     history = AuditlogHistoryField(pk_indexable=False)
-    __flex_fields = None
 
     def __str__(self):
         return f"type: {self.type}, name: {self.name}"
