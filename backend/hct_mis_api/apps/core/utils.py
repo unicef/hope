@@ -4,6 +4,7 @@ import operator
 import re
 from typing import List
 
+import django
 import factory
 from django.template.defaultfilters import slugify
 from household.models import Household
@@ -166,3 +167,8 @@ def get_core_fields() -> List:
             "associated_with": get_item_fn(associated_with[0]),
         },
     ]
+
+def update_model(model: django.db.models.Model, changeset: dict):
+    for attrib, value in changeset.items():
+        if hasattr(model, attrib):
+            setattr(model, attrib, value)
