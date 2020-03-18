@@ -1,11 +1,17 @@
 import enum
 import json
+import operator
 import re
 from typing import List
 
-from django.core.files.uploadedfile import UploadedFile
 import factory
 from django.template.defaultfilters import slugify
+from household.models import Household
+
+from . import models
+
+_INTEGER = "INTEGER"
+_SELECT_ONE = "SELECT_ONE"
 
 
 def decode_id_string(id_string):
@@ -108,17 +114,13 @@ class JSONFactory(factory.DictFactory):
         return json.dumps(obj_dict)
 
 
-_INTEGER = "INTEGER"
-_SELECT_ONE = "SELECT_ONE"
-
-
 # TODO(codecakes): make it dynamic when possible.
 def get_core_fields() -> List:
     """Gets list of flex metadatatype objects. """
-    import operator
-    from household.models import Household
 
     get_item_fn = operator.itemgetter(1)
+    associated_with = models.FlexibleAttribute.ASSOCIATED_WITH_CHOICES
+
     return [
         {
             "id": "05c6be72-22ac-401b-9d3f-0a7e7352aa87",
@@ -128,7 +130,7 @@ def get_core_fields() -> List:
             "hint": "number of years spent in school",
             "required": True,
             "choices": [],
-            "associated_with": "individual_fields",
+            "associated_with": get_item_fn(associated_with[1]),
         },
         {
             "id": "a1741e3c-0e24-4a60-8d2f-463943abaebb",
@@ -138,7 +140,7 @@ def get_core_fields() -> List:
             "hint": "age in years",
             "required": True,
             "choices": [],
-            "associated_with": "individual_fields",
+            "associated_with": get_item_fn(associated_with[1]),
         },
         {
             "id": "d6aa9669-ae82-4e3c-adfe-79b5d95d0754",
@@ -148,7 +150,7 @@ def get_core_fields() -> List:
             "hint": "how many persons in the household",
             "required": True,
             "choices": [],
-            "associated_with": "household_fields",
+            "associated_with": get_item_fn(associated_with[0]),
         },
         {
             "id": "3c2473d6-1e81-4025-86c7-e8036dd92f4b",
@@ -158,9 +160,9 @@ def get_core_fields() -> List:
             "label": {"English(EN)": "Residence Status"},
             "hint": "residential status of household",
             "choices": [
-                {"name": name, "value": value}
-                for value, name in Household.RESIDENCE_STATUS_CHOICE
+                {"name": name, "label": str(value)}
+                for name, value in Household.RESIDENCE_STATUS_CHOICE
             ],
-            "associated_with": "household_fields",
+            "associated_with": get_item_fn(associated_with[0]),
         },
     ]
