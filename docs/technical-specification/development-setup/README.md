@@ -12,18 +12,49 @@ docker-compose up
 docker-compose exec backend bash
 
 # in docker container
-./manage.py reset_db
-./manage.py migrate
-./manage.py loadbusinessareas
-./manage.py generatefixtures 
-./manage.py collectstatic 
+./manage.py init
 ```
+
+4. Go to [`localhost:8082/api/admin/`](http://localhost:8082/api/admin/) Flexible Attributes, click **Import XLS** choose file: backend/data/FlexibleAttributesInit.xls then load.
 
 Access the frontend in your browser at [`localhost:8082/login`](http://localhost:8082/login) . 
 
 Backend can be accessed at `/api/` i.e. [`localhost:8082/api/admin/`](http://localhost:8082/api/admin/) 
 
+### **Commands**
 
+**generatefixtures** - command for generating project fake data, requires business areas, which can be loaded before by using:
+
+```bash
+./manage.py loadbusinessareas
+```
+
+ or **generatefixtures** will ask if you want to load business areas.
+
+accepts the arguments:
+
+* **--program** - Create provided amount of programs, default is 10
+* **--cash-plan** - Create provided amount of cash plans for one program, default is 10
+* **--payment-record** - Create provided amount of payment records assigned to household and cash plan, default is 10
+* **--noinput** - Suppresses all user prompts
+
+**loadbusinessareas** - load businessareas defined in XML file backend/data/GetBusinessAreaList\_XML.xml
+
+**migratealldb** - our custom command to migrate all databases specified in settings
+
+**init** - resets all databases, run migrations on all databases, load business areas and fake data with default values
+
+### Code formatting
+
+#### Backend
+
+for backend we are using **Black** - [https://github.com/psf/black](https://github.com/psf/black) \(don't install it in project, but globally\)
+
+here is instruction how to integrate **Black** with your editor [https://github.com/psf/black\#editor-integration](https://github.com/psf/black#editor-integration)
+
+#### Frontend
+
+for frontend we are using **Prettier**
 
 ## Development / Build / Deployment Process
 
