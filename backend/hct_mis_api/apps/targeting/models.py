@@ -167,21 +167,24 @@ class FilterAttrType(models.Model):
 
     @classmethod
     def get_age(cls, rule_obj: dict) -> dict:
-        if "age_min" in rule_obj or "age_max" in rule_obj:
-            age_min = rule_obj.get("age_min", None)
-            age_max = rule_obj.get("age_max", None)
-            today = dt.date.today()
-            this_year = today.year
-            year_min = age_max and (this_year - age_max)
-            year_max = (age_min and (this_year - age_min)) or year_min
-            year_min = year_min or year_max
-            return {
+        age_min = rule_obj.get("age_min", None)
+        age_max = rule_obj.get("age_max", None)
+        if not age_min and age_max:
+            return {}
+        today = dt.date.today()
+        this_year = today.year
+        year_min = age_max and (this_year - age_max)
+        year_max = age_min and (this_year - age_min)
+        return (
+            {
                 "head_of_household_dob__year__lte": year_max,
                 "head_of_household_dob__year__gte": year_min,
-            } if year_max > year_min else {
-                "head_of_household_dob__year": year_min
             }
-        return {}
+            if (year_max and year_min) and year_max > year_min
+            else {"head_of_household_dob__year__gte": year_min}
+            if not year_max
+            else {"head_of_household_dob__year__lte": year_max}
+        )
 
     @classmethod
     def get_gender(cls, rule_obj: dict) -> dict:

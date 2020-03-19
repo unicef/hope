@@ -33,14 +33,23 @@ class TargetPopulationFilter(django_filters.FilterSet):
     )
     num_individuals_min = IntegerFilter(
         field_name="target_rules__core_rules__num_individuals_min",
-        lookup_expr="gte"
+        lookup_expr="gte",
+        method="filter_num_individuals_min"
     )
     num_individuals_max = IntegerFilter(
         field_name="target_rules__core_rules__num_individuals_max",
-        lookup_expr="lte"
+        lookup_expr="lte",
+        method="filter_num_individuals_max"
     )
 
-    # TODO(codecakes): waiting on dist to school and adminlevel clarification.
+    @staticmethod
+    def filter_num_individuals_min(queryset, _model, _value):
+        return queryset.distinct("id")
+
+    @staticmethod
+    def filter_num_individuals_max(queryset, _model, _value):
+        return queryset.distinct("id")
+
     @staticmethod
     def filter_created_by_name(queryset, model_field, value):
         """Gets full name of the associated user from query."""
@@ -143,7 +152,6 @@ class Query(graphene.ObjectType):
         description="json dump of filters containing key value pairs.",
     )
 
-
     def resolve_target_rules(self, info, serialized_list):
         """Resolver for target_rules. Queries from golden records.
 
@@ -166,9 +174,7 @@ class Query(graphene.ObjectType):
             rules = {}
             rules.update(rule_obj.get("core_rules", {}))
             rules.update(rule_obj.get("flex_rules", {}))
-            # TODO(codecakes): decouple to core and flex functions.
-            # many dynamic fields here will depend on the info
-            #  from FilterAttrType class falls back on that method.
+            # TODO(codecakes): make it more dynamic/generic later by just using query filters.
             for functor in target_models.FilterAttrType.apply_filters(rules):
                 search_rules.update(functor())
             yield Household.objects.filter(**search_rules)
