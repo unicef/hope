@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { makeStyles } from '@material-ui/core';
+import { makeStyles, Snackbar, SnackbarContent } from '@material-ui/core';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import { Redirect, Route, Switch, useLocation } from 'react-router-dom';
 import { MiśTheme } from '../theme';
@@ -17,10 +17,11 @@ import { RegistrationDataImportPage } from './registration/list/RegistrationData
 import { PopulationHouseholdDetailsPage } from './pages/PopulationHouseholdDetailsPage';
 import { PopulationIndividualsPage } from './pages/PopulationIndividualsPage';
 import { PopulationIndividualsDetailsPage } from './pages/PopulationIndividualsDetailsPage';
-import { RegistrationDataImport } from './dialogs/registration/RegistrationDataImport';
+import { RegistrationDataImport } from './registration/import/RegistrationDataImport';
 import { RegistrationDataImportDetailsPage } from './registration/details/RegistrationDataImportDetailsPage';
-import {RegistrationHouseholdDetailsPage} from "./registration/details/households/RegistrationHouseholdDetailsPage";
-import {RegistrationIndividualDetailsPage} from "./registration/details/individual/RegistrationIndividualDetailsPage";
+import { RegistrationHouseholdDetailsPage } from './registration/details/households/RegistrationHouseholdDetailsPage';
+import { RegistrationIndividualDetailsPage } from './registration/details/individual/RegistrationIndividualDetailsPage';
+import { useSnackbar } from '../hooks/useSnackBar';
 
 const Root = styled.div`
   display: flex;
@@ -39,6 +40,8 @@ export function HomeRouter(): React.ReactElement {
   const [open, setOpen] = React.useState(true);
   const classes = useStyles({});
   const location = useLocation();
+  const snackBar = useSnackbar();
+  console.log('snackBar.message', snackBar.message);
   const handleDrawerOpen = (): void => {
     setOpen(true);
   };
@@ -106,6 +109,15 @@ export function HomeRouter(): React.ReactElement {
           </Route>
         </Switch>
       </MainContent>
+      {snackBar.show && (
+        <Snackbar
+          open={snackBar.show}
+          autoHideDuration={5000}
+          onClose={() => snackBar.setShow(false)}
+        >
+          <SnackbarContent message={snackBar.message} />
+        </Snackbar>
+      )}
     </Root>
   );
 }

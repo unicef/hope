@@ -85,13 +85,15 @@ type ChoiceObject {
   value: String
 }
 
-type CreateLocation {
-  location: LocationNode
-}
-
-input CreateLocationInput {
+type CoreFieldNode {
+  id: String
+  type: String
   name: String
-  country: String
+  label: JSONString
+  hint: String
+  required: Boolean
+  choices: [ChoiceObject]
+  associatedWith: String
 }
 
 type CreateProgram {
@@ -129,10 +131,6 @@ scalar DateTime
 
 scalar Decimal
 
-type DeleteLocation {
-  ok: Boolean
-}
-
 type DeleteProgram {
   ok: Boolean
 }
@@ -160,6 +158,48 @@ type DjangoDebugSQL {
   transStatus: String
   isoLevel: String
   encoding: String
+}
+
+type FlexFieldNode {
+  id: UUID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  isRemoved: Boolean!
+  type: FlexibleAttributeType!
+  name: String!
+  required: Boolean!
+  label: JSONString!
+  hint: JSONString!
+  associatedWith: FlexibleAttributeAssociatedWith!
+  choices: [FlexibleAttributeChoice]
+}
+
+enum FlexibleAttributeAssociatedWith {
+  A_0
+  A_1
+}
+
+type FlexibleAttributeChoice implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  isRemoved: Boolean!
+  listName: String!
+  name: String!
+  label: JSONString!
+  admin: String!
+  flexAttributes: [FlexFieldNode!]!
+}
+
+enum FlexibleAttributeType {
+  STRING
+  IMAGE
+  INTEGER
+  DECIMAL
+  SELECT_ONE
+  SELECT_MANY
+  DATETIME
+  GEOPOINT
 }
 
 enum HouseholdNationality {
@@ -351,7 +391,7 @@ type HouseholdNode implements Node {
   registrationDate: Date
   individuals(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
-  targetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, lastEditedAt: DateTime, status: String, totalHouseholds: Int, totalFamilySize: Int, households: [ID], targetRules: [ID], numIndividualsMin: Float, numIndividualsMax: Float, orderBy: String): TargetPopulationNodeConnection!
+  targetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, lastEditedAt: DateTime, status: String, households: [ID], targetRules: [ID], numIndividualsMin: Float, numIndividualsMax: Float, orderBy: String): TargetPopulationNodeConnection!
   totalCashReceived: Decimal
 }
 
@@ -1189,9 +1229,6 @@ type Mutations {
   createProgram(programData: CreateProgramInput!): CreateProgram
   updateProgram(programData: UpdateProgramInput): UpdateProgram
   deleteProgram(programId: String!): DeleteProgram
-  createLocation(locationData: CreateLocationInput!): CreateLocation
-  updateLocation(locationData: UpdateLocationInput): UpdateLocation
-  deleteLocation(locationId: String!): DeleteLocation
   uploadImportDataXlsxFile(file: Upload!): UploadImportDataXLSXFile
   deleteRegistrationDataImport(registrationDataImportId: String!): DeleteRegistrationDataImport
   createRegistrationDataImport(registrationDataImportData: CreateRegistrationDataImportExcelInput!): CreateRegistrationDataImport
@@ -1343,6 +1380,8 @@ type Query {
   allLocations(before: String, after: String, first: Int, last: Int, title: String): LocationNodeConnection
   allBusinessAreas(before: String, after: String, first: Int, last: Int, id: UUID): BusinessAreaNodeConnection
   allLogEntries(objectId: String!, before: String, after: String, first: Int, last: Int): LogEntryObjectConnection
+  allCoreFieldAttributes: [CoreFieldNode]
+  allFlexFieldAttributes: [FlexFieldNode]
   program(id: ID!): ProgramNode
   allPrograms(before: String, after: String, first: Int, last: Int, id: UUID, status: String, businessArea: String): ProgramNodeConnection
   cashPlan(id: ID!): CashPlanNode
@@ -1353,7 +1392,7 @@ type Query {
   programScopeChoices: [ChoiceObject]
   cashPlanStatusChoices: [ChoiceObject]
   targetPopulation(id: ID!): TargetPopulationNode
-  allTargetPopulation(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, lastEditedAt: DateTime, status: String, totalHouseholds: Int, totalFamilySize: Int, households: [ID], targetRules: [ID], numIndividualsMin: Float, numIndividualsMax: Float, orderBy: String): TargetPopulationNodeConnection
+  allTargetPopulation(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, lastEditedAt: DateTime, status: String, households: [ID], targetRules: [ID], numIndividualsMin: Float, numIndividualsMax: Float, orderBy: String): TargetPopulationNodeConnection
   savedTargetRule(id: ID!): SavedTargetRuleNode
   allSavedTargetRule(before: String, after: String, first: Int, last: Int, flexRules: String, coreRules: String, targetPopulation: ID): SavedTargetRuleNodeConnection
   targetRules(serializedList: String): [HouseholdNode]
@@ -1468,12 +1507,14 @@ type TargetPopulationNode implements Node {
   lastEditedAt: DateTime
   createdBy: UserNode
   status: TargetPopulationStatus!
-  totalHouseholds: Int!
-  totalFamilySize: Int!
   households(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
+  TotalHouseholds: Int!
+  TotalFamilySize: Int!
   paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
   cashPlans(before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
   targetRules(before: String, after: String, first: Int, last: Int, flexRules: String, coreRules: String, targetPopulation: ID): SavedTargetRuleNodeConnection!
+  totalHouseholds: Int
+  totalFamilySize: Int
 }
 
 type TargetPopulationNodeConnection {
@@ -1494,16 +1535,6 @@ enum TargetPopulationStatus {
 }
 
 scalar UUID
-
-type UpdateLocation {
-  location: LocationNode
-}
-
-input UpdateLocationInput {
-  id: String!
-  name: String
-  country: String
-}
 
 type UpdateProgram {
   program: ProgramNode
@@ -1546,7 +1577,7 @@ type UserNode implements Node {
   id: ID!
   businessAreas(before: String, after: String, first: Int, last: Int, id: UUID): BusinessAreaNodeConnection!
   cashPlans(before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
-  targetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, lastEditedAt: DateTime, status: String, totalHouseholds: Int, totalFamilySize: Int, households: [ID], targetRules: [ID], numIndividualsMin: Float, numIndividualsMax: Float, orderBy: String): TargetPopulationNodeConnection!
+  targetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, lastEditedAt: DateTime, status: String, households: [ID], targetRules: [ID], numIndividualsMin: Float, numIndividualsMax: Float, orderBy: String): TargetPopulationNodeConnection!
   registrationDataImports(before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
 }
 
@@ -1575,6 +1606,6 @@ type UserObjectType {
   id: UUID!
   businessAreas(before: String, after: String, first: Int, last: Int, id: UUID): BusinessAreaNodeConnection!
   cashPlans(before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
-  targetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, lastEditedAt: DateTime, status: String, totalHouseholds: Int, totalFamilySize: Int, households: [ID], targetRules: [ID], numIndividualsMin: Float, numIndividualsMax: Float, orderBy: String): TargetPopulationNodeConnection!
+  targetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, lastEditedAt: DateTime, status: String, households: [ID], targetRules: [ID], numIndividualsMin: Float, numIndividualsMax: Float, orderBy: String): TargetPopulationNodeConnection!
   registrationDataImports(before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
 }

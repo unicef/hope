@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
-import { useHistory } from 'react-router-dom';
+import * as Yup from 'yup';
 import { useTranslation } from 'react-i18next';
 import {
   Button,
@@ -9,32 +9,24 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Typography,
-  Snackbar,
-  SnackbarContent,
-  MenuItem,
-  Select,
   FormControl,
   InputLabel,
+  MenuItem,
+  Select,
+  Typography,
 } from '@material-ui/core';
 import ExitToAppRoundedIcon from '@material-ui/icons/ExitToAppRounded';
-import {
-  AllProgramsQuery,
-  ProgramNode,
-  ProgramStatus,
-  useAllProgramsQuery,
-  useUpdateProgramMutation,
-} from '../../../__generated__/graphql';
-import { PROGRAM_QUERY } from '../../../apollo/queries/Program';
-import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/AllPrograms';
-import { programCompare } from '../../../utils/utils';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { useSnackbarHelper } from '../../../hooks/useBreadcrumbHelper';
 import { useDropzone } from 'react-dropzone';
 import { Field, Form, Formik } from 'formik';
-import { FormikSwitchField } from '../../../shared/Formik/FormikSwitchField';
+import get from 'lodash/get';
+import {
+  useCreateRegistrationDataImportMutation,
+  useUploadImportDataXlsxFileMutation,
+} from '../../../__generated__/graphql';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useSnackbar } from '../../../hooks/useSnackBar';
 import { FormikTextField } from '../../../shared/Formik/FormikTextField';
-import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
+import { LoadingComponent } from '../../../components/LoadingComponent';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -70,30 +62,26 @@ const DropzoneContainer = styled.div`
   justify-content: center;
   align-items: center;
   margin-top: ${({ theme }) => theme.spacing(5)}px;
+  cursor: pointer;
+
+  ${({ disabled }) => (disabled ? 'filter: grayscale(100%);' : '')}
 `;
 
-function DropzoneField({
-  field,
-  form,
-  decoratorStart,
-  decoratorEnd,
-  type,
-  precision,
-  ...otherProps
-}) {
+function DropzoneField({ onChange, loading }) {
   const onDrop = useCallback((acceptedFiles) => {
-    field.onChange({
-      target: { value: acceptedFiles[0], name: field.name },
-    });
+    onChange(acceptedFiles);
   }, []);
   const { getRootProps, getInputProps, acceptedFiles, rootRef } = useDropzone({
+    disabled: loading,
+    accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     onDrop,
   });
   const acceptedFilename =
     acceptedFiles.length > 0 ? acceptedFiles[0].name : null;
   return (
     <div>
-      <DropzoneContainer {...getRootProps()}>
+      <DropzoneContainer {...getRootProps()} disabled={loading}>
+        <LoadingComponent isLoading={loading} absolute />
         <input {...getInputProps()} />
         {acceptedFilename || 'UPLOAD FILE'}
       </DropzoneContainer>
@@ -101,24 +89,23 @@ function DropzoneField({
   );
 }
 
+const validationSchema = Yup.object().shape({
+  name: Yup.string().required('Name Upload is required'),
+});
+
 export function RegistrationDataImport(): React.ReactElement {
-  const history = useHistory();
   const [open, setOpen] = useState(false);
-  const snackBar = useSnackbarHelper();
+
+  const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
-  const { data } = useAllProgramsQuery({
-    variables: { status: ProgramStatus.Draft },
-  });
+  const [
+    uploadMutate,
+    { data: uploadData, loading: fileLoading },
+  ] = useUploadImportDataXlsxFileMutation();
+  const [createRegistrationMutate] = useCreateRegistrationDataImportMutation();
   const [importType, setImportType] = useState();
   const { t } = useTranslation();
 
-  if (!data || !data.allPrograms) {
-    return null;
-  }
-  const programChoices = data.allPrograms.edges.map((item) => ({
-    name: item.node.name,
-    value: item.node.id,
-  }));
   return (
     <span>
       <Button
@@ -136,10 +123,24 @@ export function RegistrationDataImport(): React.ReactElement {
         aria-labelledby='form-dialog-title'
       >
         <Formik
-          onSubmit={(values) => {
+          validationSchema={validationSchema}
+          onSubmit={async (values) => {
             console.log({ values });
+            const { data } = await createRegistrationMutate({
+              variables: {
+                registrationDataImportData: {
+                  importDataId:
+                    uploadData.uploadImportDataXlsxFile.importData.id,
+                  name: values.name,
+                },
+              },
+            });
+            showMessage('Registration', {
+              pathname: `/${businessArea}/registration-data-import/${data.createRegistrationDataImport.registrationDataImport.id}`,
+              historyMethod: 'push',
+            });
           }}
-          initialValues={{}}
+          initialValues={{ name: '' }}
         >
           {({ submitForm, values }) => (
             <Form>
@@ -156,10 +157,7 @@ export function RegistrationDataImport(): React.ReactElement {
                   to CashAssist?
                 </DialogDescription>
 
-                <FormControl
-                  variant='filled'
-                  margin='dense'
-                >
+                <FormControl variant='filled' margin='dense'>
                   <InputLabel>Import from</InputLabel>
                   <ComboBox
                     value={importType}
@@ -177,21 +175,54 @@ export function RegistrationDataImport(): React.ReactElement {
                   </ComboBox>
                 </FormControl>
                 {importType === 'excel' ? (
-                  <Field name='file' component={DropzoneField} />
+                  <>
+                    <DropzoneField
+                      loading={fileLoading}
+                      onChange={(files) => {
+                        if (files.length === 0) {
+                          return;
+                        }
+                        const file = files[0];
+                        const fileSizeMB = file.size / (1024 * 1024);
+                        if (fileSizeMB > 200) {
+                          alert(
+                            `File size is to big. It should be under 200MB, File size is ${fileSizeMB}MB`,
+                          );
+                          return;
+                        }
+                        uploadMutate({
+                          variables: {
+                            file,
+                          },
+                        });
+                      }}
+                    />
+                    {get(uploadData, 'uploadImportDataXlsxFile.importData') ? (
+                      <>
+                        <div>
+                          {
+                            uploadData.uploadImportDataXlsxFile.importData
+                              .numberOfHouseholds
+                          }{' '}
+                          Households available to Import
+                        </div>
+                        <div>
+                          {
+                            uploadData.uploadImportDataXlsxFile.importData
+                              .numberOfIndividuals
+                          }{' '}
+                          Individuals available to Import
+                        </div>
+                      </>
+                    ) : null}
+                  </>
                 ) : null}
                 <Field
                   name='name'
                   fullWidth
                   label='Name Upload'
+                  required
                   component={FormikTextField}
-                />
-
-                <Field
-                  name='program'
-                  fullWidth
-                  label='Program'
-                  choices={programChoices}
-                  component={FormikSelectField}
                 />
               </DialogContent>
               <DialogFooter>
@@ -201,6 +232,7 @@ export function RegistrationDataImport(): React.ReactElement {
                     type='submit'
                     color='primary'
                     variant='contained'
+                    disabled={!uploadData}
                     onClick={() => {
                       submitForm();
                     }}

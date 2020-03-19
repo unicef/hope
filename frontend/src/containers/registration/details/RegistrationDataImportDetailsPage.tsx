@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
-import { Paper, Snackbar, SnackbarContent, Tab } from '@material-ui/core';
+import { Paper, Tab } from '@material-ui/core';
 import Tabs from '@material-ui/core/Tabs';
 import Typography from '@material-ui/core/Typography';
 import {
@@ -9,7 +9,6 @@ import {
   useRegistrationDataImportQuery,
 } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../../components/LoadingComponent';
-import { useSnackbarHelper } from '../../../hooks/useBreadcrumbHelper';
 import { ImportedHouseholdTable } from '../tables/ImportedHouseholdsTable';
 import { ImportedIndividualsTable } from '../tables/ImportedIndividualsTable';
 import { RegistrationDetails } from './RegistrationDetails';
@@ -65,7 +64,6 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
     data: choices,
     loading: choicesLoading,
   } = useProgrammeChoiceDataQuery();
-  const snackBar = useSnackbarHelper();
   if (loading || choicesLoading) {
     return <LoadingComponent />;
   }
@@ -107,15 +105,6 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
           </Paper>
         </TableWrapper>
       </Container>
-      {snackBar.show && (
-        <Snackbar
-          open={snackBar.show}
-          autoHideDuration={5000}
-          onClose={() => snackBar.setShow(false)}
-        >
-          <SnackbarContent message={snackBar.message} />
-        </Snackbar>
-      )}
     </div>
   );
 }
