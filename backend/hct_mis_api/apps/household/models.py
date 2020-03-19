@@ -18,7 +18,6 @@ from sorl.thumbnail import ImageField
 from utils.models import TimeStampedUUIDModel
 
 
-
 class Household(TimeStampedUUIDModel):
     RESIDENCE_STATUS_CHOICE = (
         ("REFUGEE", _("Refugee")),
