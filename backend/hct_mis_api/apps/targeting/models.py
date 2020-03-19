@@ -13,8 +13,8 @@ from django.contrib.postgres.validators import (
     RangeMaxValueValidator,
 )
 from django.db import models
-from model_utils.models import UUIDModel
 from psycopg2.extras import NumericRange
+from utils.models import TimeStampedUUIDModel
 
 _MAX_LEN = 256
 _MIN_RANGE = 1
@@ -44,7 +44,7 @@ class TargetStatus(EnumGetChoices):
     FINALIZED = "Finalized"
 
 
-class TargetPopulation(UUIDModel):
+class TargetPopulation(TimeStampedUUIDModel):
     """Model for target populations.
 
     Has N:N association with households.
@@ -52,9 +52,9 @@ class TargetPopulation(UUIDModel):
 
     STATE_CHOICES = TargetStatus.get_choices()
     # fields
-    name = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
+    name = models.TextField(unique=True)
     # TODO(codecakes): check and use auditlog instead.
+    # Dependent field. Change to auditlog or change depending modules in future CL.
     last_edited_at = models.DateTimeField(auto_now=True, null=True)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -167,22 +167,15 @@ class FilterAttrType(models.Model):
 
     @classmethod
     def get_age(cls, rule_obj: dict) -> dict:
-        if "age_min" in rule_obj or "age_max" in rule_obj:
-            age_min = rule_obj.get("age_min", None)
-            age_max = rule_obj.get("age_max", None)
-            today = dt.date.today()
-            this_year = today.year
-            year_min = age_max and (this_year - age_max)
-            year_max = age_min and (this_year - age_min)
-            year_min = year_min or year_max
-            if year_min and year_max and year_min <= year_max:
-                dob_min = dt.date(year_min, 1, 1)
-                dob_max = dt.date(year_max, 12, 31)
-                return {
-                    "head_of_household__dob__gte": dob_min,
-                    "head_of_household__dob__lte": dob_max,
-                }
-        return {}
+        age_min = rule_obj.get("age_min")
+        age_max = rule_obj.get("age_max")
+        result = {}
+        this_year = dt.date.today().year
+        if age_min:
+            result["head_of_household_dob__year__lte"] = this_year - age_min
+        if age_max:
+            result["head_of_household_dob__year__gte"] = this_year - age_max
+        return result
 
     @classmethod
     def get_gender(cls, rule_obj: dict) -> dict:
