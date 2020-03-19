@@ -1,7 +1,17 @@
 import json
 
 import graphene
+from account.schema import UserObjectType
 from auditlog.models import LogEntry
+from core.extended_connection import ExtendedConnection
+from core.models import (
+    Location,
+    BusinessArea,
+    CoreAttribute,
+    FlexibleAttribute,
+    FlexibleAttributeChoice,
+)
+from core.utils import decode_id_string
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Q
 from django.utils.encoding import force_text
@@ -10,16 +20,7 @@ from graphene import String, DateTime, Scalar
 from graphene import relay, ConnectionField, Connection
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
-
-from account.schema import UserObjectType
-from core.extended_connection import ExtendedConnection
-from core.models import (
-    Location,
-    BusinessArea,
-    FlexibleAttribute,
-    FlexibleAttributeChoice,
-)
-from core.utils import decode_id_string, get_core_fields
+from household.models import Household
 
 
 class ChoiceObject(graphene.ObjectType):
@@ -93,22 +94,47 @@ class BusinessAreaNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
-class FlexibleAttributeChoice(DjangoObjectType):
+class FlexibleAttributeChoiceNode(DjangoObjectType):
+    name = graphene.String()
+    value = graphene.String(source="label")
+
     class Meta:
         model = FlexibleAttributeChoice
-        filter_fields = ["id"]
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
+        exclude_fields = [
+            "history",
+        ]
 
 
 class FlexFieldNode(DjangoObjectType):
-    choices = graphene.List(FlexibleAttributeChoice)
+    choices = graphene.List(FlexibleAttributeChoiceNode)
+    associated_with = graphene.String()
 
     def resolve_choices(self, info):
         return self.choices.all()
 
+    def resolve_associated_with(self, info):
+        return str(
+            FlexibleAttribute.ASSOCIATED_WITH_CHOICES[self.associated_with][1]
+        )
+
     class Meta:
         model = FlexibleAttribute
+        fields = [
+            "id",
+            "type",
+            "name",
+            "label",
+            "hint",
+            "required",
+        ]
+
+class CoreFieldChoiceObject(graphene.ObjectType):
+    name = String()
+    value = String()
+    admin = String()
+    list_name = String()
 
 
 class CoreFieldNode(graphene.ObjectType):
@@ -118,7 +144,7 @@ class CoreFieldNode(graphene.ObjectType):
     label = graphene.JSONString()
     hint = graphene.String()
     required = graphene.Boolean()
-    choices = graphene.List(ChoiceObject)
+    choices = graphene.List(CoreFieldChoiceObject)
     associated_with = graphene.String()
 
 
@@ -141,7 +167,7 @@ class Query(graphene.ObjectType):
         return LogEntry.objects.filter(~Q(action=0), object_pk=id).all()
 
     def resolve_all_core_field_attributes(self, info):
-        return get_core_fields()
+        return CoreAttribute.get_core_fields(Household)
 
     def resolve_all_flex_field_attributes(self, info):
         return FlexibleAttribute.objects.all()

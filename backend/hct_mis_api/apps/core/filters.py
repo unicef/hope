@@ -69,3 +69,9 @@ class AgeRangeFilter(Filter):
                 values = max_date
 
         return super().filter(qs, values)
+
+
+class IntegerFilter(Filter):
+    """Custom Integer filter to parse Decimal values."""
+
+    field_class = IntegerField

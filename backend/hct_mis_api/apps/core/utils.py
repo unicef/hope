@@ -3,7 +3,7 @@ import json
 import re
 from typing import List
 
-from django.core.files.uploadedfile import UploadedFile
+import django
 import factory
 from django.template.defaultfilters import slugify
 
@@ -108,59 +108,31 @@ class JSONFactory(factory.DictFactory):
         return json.dumps(obj_dict)
 
 
-_INTEGER = "INTEGER"
-_SELECT_ONE = "SELECT_ONE"
+def update_model(model: django.db.models.Model, changeset: dict):
+    for attrib, value in changeset.items():
+        if hasattr(model, attrib):
+            setattr(model, attrib, value)
+    model.save()
 
 
-# TODO(codecakes): make it dynamic when possible.
-def get_core_fields() -> List:
-    """Gets list of flex metadatatype objects. """
-    import operator
-    from household.models import Household
+def filter_relational_fields(model: django.db.models.Model) -> list:
+    """Get Only Relational Fields."""
+    return list(
+        filter(
+            lambda field: field not in model._meta.fields,
+            model._meta.get_fields(),
+        )
+    )
 
-    get_item_fn = operator.itemgetter(1)
-    return [
-        {
-            "id": "05c6be72-22ac-401b-9d3f-0a7e7352aa87",
-            "type": _INTEGER,
-            "name": "years_in_school",
-            "label": {"English(EN)": "years in school"},
-            "hint": "number of years spent in school",
-            "required": True,
-            "choices": [],
-            "associated_with": "individual_fields",
-        },
-        {
-            "id": "a1741e3c-0e24-4a60-8d2f-463943abaebb",
-            "type": _INTEGER,
-            "name": "age",
-            "label": {"English(EN)": "age"},
-            "hint": "age in years",
-            "required": True,
-            "choices": [],
-            "associated_with": "individual_fields",
-        },
-        {
-            "id": "d6aa9669-ae82-4e3c-adfe-79b5d95d0754",
-            "type": _INTEGER,
-            "name": "family_size",
-            "label": {"English(EN)": "Family Size"},
-            "hint": "how many persons in the household",
-            "required": True,
-            "choices": [],
-            "associated_with": "household_fields",
-        },
-        {
-            "id": "3c2473d6-1e81-4025-86c7-e8036dd92f4b",
-            "type": _SELECT_ONE,
-            "name": "residence_status",
-            "required": True,
-            "label": {"English(EN)": "Residence Status"},
-            "hint": "residential status of household",
-            "choices": [
-                {"name": name, "value": value}
-                for value, name in Household.RESIDENCE_STATUS_CHOICE
-            ],
-            "associated_with": "household_fields",
-        },
-    ]
+
+def copy_associations(
+    from_model: django.db.models.Model,
+    to_model: django.db.models.Model,
+    exclude_foreign_fields: list,
+) -> django.db.models.Model:
+    """Copy reverse and M2M associations."""
+    for field in exclude_foreign_fields:
+        from_model_foreign_relation_set = getattr(from_model, field.name)
+        to_model_foreign_relation_set = getattr(to_model, field.name)
+        to_model_foreign_relation_set.set(from_model_foreign_relation_set.all())
+    return to_model
