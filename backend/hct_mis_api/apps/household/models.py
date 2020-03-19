@@ -1,5 +1,8 @@
+import operator
 from datetime import date
+from typing import List
 
+from core import models as core_models
 from django.core.validators import (
     validate_image_file_extension,
     MinLengthValidator,
@@ -8,12 +11,14 @@ from django.core.validators import (
 from django.db import models
 from django.db.models import Sum
 from django.utils.translation import ugettext_lazy as _
+from household.const import NATIONALITIES
 from model_utils import Choices
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
-
-from household.const import NATIONALITIES
 from utils.models import TimeStampedUUIDModel
+
+_INTEGER = "INTEGER"
+_SELECT_ONE = "SELECT_ONE"
 
 
 class Household(TimeStampedUUIDModel):
@@ -207,3 +212,57 @@ class EntitlementCard(TimeStampedUUIDModel):
         on_delete=models.SET_NULL,
         null=True,
     )
+
+
+# TODO(codecakes): make it dynamic when possible.
+def get_core_fields() -> List:
+    """Gets list of flex metadatatype objects. """
+
+    get_item_fn = operator.itemgetter(1)
+    associated_with = core_models.FlexibleAttribute.ASSOCIATED_WITH_CHOICES
+
+    return [
+        {
+            "id": "05c6be72-22ac-401b-9d3f-0a7e7352aa87",
+            "type": _INTEGER,
+            "name": "years_in_school",
+            "label": {"English(EN)": "years in school"},
+            "hint": "number of years spent in school",
+            "required": True,
+            "choices": [],
+            "associated_with": get_item_fn(associated_with[1]),
+        },
+        {
+            "id": "a1741e3c-0e24-4a60-8d2f-463943abaebb",
+            "type": _INTEGER,
+            "name": "age",
+            "label": {"English(EN)": "age"},
+            "hint": "age in years",
+            "required": True,
+            "choices": [],
+            "associated_with": get_item_fn(associated_with[1]),
+        },
+        {
+            "id": "d6aa9669-ae82-4e3c-adfe-79b5d95d0754",
+            "type": _INTEGER,
+            "name": "family_size",
+            "label": {"English(EN)": "Family Size"},
+            "hint": "how many persons in the household",
+            "required": True,
+            "choices": [],
+            "associated_with": get_item_fn(associated_with[0]),
+        },
+        {
+            "id": "3c2473d6-1e81-4025-86c7-e8036dd92f4b",
+            "type": _SELECT_ONE,
+            "name": "residence_status",
+            "required": True,
+            "label": {"English(EN)": "Residence Status"},
+            "hint": "residential status of household",
+            "choices": [
+                {"name": name, "value": str(value)}
+                for name, value in Household.RESIDENCE_STATUS_CHOICE
+            ],
+            "associated_with": get_item_fn(associated_with[0]),
+        },
+    ]
