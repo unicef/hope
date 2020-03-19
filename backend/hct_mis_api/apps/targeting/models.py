@@ -178,6 +178,8 @@ class FilterAttrType(models.Model):
             return {
                 "head_of_household_dob__year__lte": year_max,
                 "head_of_household_dob__year__gte": year_min,
+            } if year_max != year_min else {
+                "head_of_household_dob__year": year_min
             }
         return {}
 
