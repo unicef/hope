@@ -105,6 +105,51 @@ export function RegistrationDataImport(): React.ReactElement {
   const [createRegistrationMutate] = useCreateRegistrationDataImportMutation();
   const [importType, setImportType] = useState();
   const { t } = useTranslation();
+  let counters = null;
+  if(get(uploadData, 'uploadImportDataXlsxFile.importData')){
+    counters = <>
+      <div>
+        {
+          uploadData.uploadImportDataXlsxFile.importData
+              .numberOfHouseholds
+        }{' '}
+        Households available to Import
+      </div>
+      <div>
+        {
+          uploadData.uploadImportDataXlsxFile.importData
+              .numberOfIndividuals
+        }{' '}
+        Individuals available to Import
+      </div>
+    </>;
+  }
+  let importTypeSpecificContent = null;
+  if(importType==='excel'){
+    importTypeSpecificContent=<>
+      <DropzoneField
+          loading={fileLoading}
+          onChange={(files) => {
+            if (files.length === 0) {
+              return;
+            }
+            const file = files[0];
+            const fileSizeMB = file.size / (1024 * 1024);
+            if (fileSizeMB > 200) {
+              showMessage(
+                  `File size is to big. It should be under 200MB, File size is ${fileSizeMB}MB`,
+              );
+              return;
+            }
+            uploadMutate({
+              variables: {
+                file,
+              },
+            });
+          }}
+      />
+    </>
+  }
 
   return (
     <span>
@@ -125,7 +170,6 @@ export function RegistrationDataImport(): React.ReactElement {
         <Formik
           validationSchema={validationSchema}
           onSubmit={async (values) => {
-            console.log({ values });
             const { data } = await createRegistrationMutate({
               variables: {
                 registrationDataImportData: {
@@ -174,49 +218,8 @@ export function RegistrationDataImport(): React.ReactElement {
                     </MenuItem>
                   </ComboBox>
                 </FormControl>
-                {importType === 'excel' ? (
-                  <>
-                    <DropzoneField
-                      loading={fileLoading}
-                      onChange={(files) => {
-                        if (files.length === 0) {
-                          return;
-                        }
-                        const file = files[0];
-                        const fileSizeMB = file.size / (1024 * 1024);
-                        if (fileSizeMB > 200) {
-                          alert(
-                            `File size is to big. It should be under 200MB, File size is ${fileSizeMB}MB`,
-                          );
-                          return;
-                        }
-                        uploadMutate({
-                          variables: {
-                            file,
-                          },
-                        });
-                      }}
-                    />
-                    {get(uploadData, 'uploadImportDataXlsxFile.importData') ? (
-                      <>
-                        <div>
-                          {
-                            uploadData.uploadImportDataXlsxFile.importData
-                              .numberOfHouseholds
-                          }{' '}
-                          Households available to Import
-                        </div>
-                        <div>
-                          {
-                            uploadData.uploadImportDataXlsxFile.importData
-                              .numberOfIndividuals
-                          }{' '}
-                          Individuals available to Import
-                        </div>
-                      </>
-                    ) : null}
-                  </>
-                ) : null}
+                {importTypeSpecificContent}
+                {counters}
                 <Field
                   name='name'
                   fullWidth
