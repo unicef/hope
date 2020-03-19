@@ -41,7 +41,6 @@ export function HomeRouter(): React.ReactElement {
   const classes = useStyles({});
   const location = useLocation();
   const snackBar = useSnackbar();
-  console.log('snackBar.message', snackBar.message);
   const handleDrawerOpen = (): void => {
     setOpen(true);
   };
