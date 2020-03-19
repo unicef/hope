@@ -7,10 +7,11 @@ from core.extended_connection import ExtendedConnection
 from core.models import (
     Location,
     BusinessArea,
+    CoreAttribute,
     FlexibleAttribute,
     FlexibleAttributeChoice,
 )
-from core.utils import decode_id_string, get_core_fields
+from core.utils import decode_id_string
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Q
 from django.utils.encoding import force_text
@@ -19,11 +20,12 @@ from graphene import String, DateTime, Scalar
 from graphene import relay, ConnectionField, Connection
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
+from household.models import Household
 
 
 class ChoiceObject(graphene.ObjectType):
     name = String()
-    label = String()
+    value = String()
 
 
 class LazyEncoder(DjangoJSONEncoder):
@@ -94,6 +96,7 @@ class BusinessAreaNode(DjangoObjectType):
 
 class FlexibleAttributeChoiceNode(DjangoObjectType):
     name = graphene.String()
+    value = graphene.String(source="label")
 
     class Meta:
         model = FlexibleAttributeChoice
@@ -156,7 +159,7 @@ class Query(graphene.ObjectType):
         return LogEntry.objects.filter(~Q(action=0), object_pk=id).all()
 
     def resolve_all_core_field_attributes(self, info):
-        return get_core_fields()
+        return CoreAttribute.get_core_fields(Household)
 
     def resolve_all_flex_field_attributes(self, info):
         return FlexibleAttribute.objects.all()
