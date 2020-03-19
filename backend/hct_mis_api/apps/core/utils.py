@@ -1,18 +1,11 @@
 import enum
 import json
-import operator
 import re
 from typing import List
 
 import django
 import factory
 from django.template.defaultfilters import slugify
-from household.models import Household
-
-from . import models
-
-_INTEGER = "INTEGER"
-_SELECT_ONE = "SELECT_ONE"
 
 
 def decode_id_string(id_string):
@@ -114,59 +107,6 @@ class JSONFactory(factory.DictFactory):
         obj_dict = super()._generate(create, attrs)
         return json.dumps(obj_dict)
 
-
-# TODO(codecakes): make it dynamic when possible.
-def get_core_fields() -> List:
-    """Gets list of flex metadatatype objects. """
-
-    get_item_fn = operator.itemgetter(1)
-    associated_with = models.FlexibleAttribute.ASSOCIATED_WITH_CHOICES
-
-    return [
-        {
-            "id": "05c6be72-22ac-401b-9d3f-0a7e7352aa87",
-            "type": _INTEGER,
-            "name": "years_in_school",
-            "label": {"English(EN)": "years in school"},
-            "hint": "number of years spent in school",
-            "required": True,
-            "choices": [],
-            "associated_with": get_item_fn(associated_with[1]),
-        },
-        {
-            "id": "a1741e3c-0e24-4a60-8d2f-463943abaebb",
-            "type": _INTEGER,
-            "name": "age",
-            "label": {"English(EN)": "age"},
-            "hint": "age in years",
-            "required": True,
-            "choices": [],
-            "associated_with": get_item_fn(associated_with[1]),
-        },
-        {
-            "id": "d6aa9669-ae82-4e3c-adfe-79b5d95d0754",
-            "type": _INTEGER,
-            "name": "family_size",
-            "label": {"English(EN)": "Family Size"},
-            "hint": "how many persons in the household",
-            "required": True,
-            "choices": [],
-            "associated_with": get_item_fn(associated_with[0]),
-        },
-        {
-            "id": "3c2473d6-1e81-4025-86c7-e8036dd92f4b",
-            "type": _SELECT_ONE,
-            "name": "residence_status",
-            "required": True,
-            "label": {"English(EN)": "Residence Status"},
-            "hint": "residential status of household",
-            "choices": [
-                {"name": name, "label": str(value)}
-                for name, value in Household.RESIDENCE_STATUS_CHOICE
-            ],
-            "associated_with": get_item_fn(associated_with[0]),
-        },
-    ]
 
 def update_model(model: django.db.models.Model, changeset: dict):
     for attrib, value in changeset.items():
