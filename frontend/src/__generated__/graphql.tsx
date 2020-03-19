@@ -149,14 +149,16 @@ export type ChoiceObject = {
   value?: Maybe<Scalars['String']>,
 };
 
-export type CreateLocation = {
-   __typename?: 'CreateLocation',
-  location?: Maybe<LocationNode>,
-};
-
-export type CreateLocationInput = {
+export type CoreFieldNode = {
+   __typename?: 'CoreFieldNode',
+  id?: Maybe<Scalars['String']>,
+  type?: Maybe<Scalars['String']>,
   name?: Maybe<Scalars['String']>,
-  country?: Maybe<Scalars['String']>,
+  label?: Maybe<Scalars['JSONString']>,
+  hint?: Maybe<Scalars['String']>,
+  required?: Maybe<Scalars['Boolean']>,
+  choices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  associatedWith?: Maybe<Scalars['String']>,
 };
 
 export type CreateProgram = {
@@ -193,11 +195,6 @@ export type CreateRegistrationDataImportExcelInput = {
 
 
 
-export type DeleteLocation = {
-   __typename?: 'DeleteLocation',
-  ok?: Maybe<Scalars['Boolean']>,
-};
-
 export type DeleteProgram = {
    __typename?: 'DeleteProgram',
   ok?: Maybe<Scalars['Boolean']>,
@@ -230,6 +227,50 @@ export type DjangoDebugSql = {
   isoLevel?: Maybe<Scalars['String']>,
   encoding?: Maybe<Scalars['String']>,
 };
+
+export type FlexFieldNode = {
+   __typename?: 'FlexFieldNode',
+  id: Scalars['UUID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  isRemoved: Scalars['Boolean'],
+  type: FlexibleAttributeType,
+  name: Scalars['String'],
+  required: Scalars['Boolean'],
+  label: Scalars['JSONString'],
+  hint: Scalars['JSONString'],
+  associatedWith: FlexibleAttributeAssociatedWith,
+  choices?: Maybe<Array<Maybe<FlexibleAttributeChoice>>>,
+};
+
+export enum FlexibleAttributeAssociatedWith {
+  A_0 = 'A_0',
+  A_1 = 'A_1'
+}
+
+export type FlexibleAttributeChoice = Node & {
+   __typename?: 'FlexibleAttributeChoice',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  isRemoved: Scalars['Boolean'],
+  listName: Scalars['String'],
+  name: Scalars['String'],
+  label: Scalars['JSONString'],
+  admin: Scalars['String'],
+  flexAttributes: Array<FlexFieldNode>,
+};
+
+export enum FlexibleAttributeType {
+  String = 'STRING',
+  Image = 'IMAGE',
+  Integer = 'INTEGER',
+  Decimal = 'DECIMAL',
+  SelectOne = 'SELECT_ONE',
+  SelectMany = 'SELECT_MANY',
+  Datetime = 'DATETIME',
+  Geopoint = 'GEOPOINT'
+}
 
 export enum HouseholdNationality {
   Af = 'AF',
@@ -463,8 +504,6 @@ export type HouseholdNodeTargetPopulationsArgs = {
   createdAt?: Maybe<Scalars['DateTime']>,
   lastEditedAt?: Maybe<Scalars['DateTime']>,
   status?: Maybe<Scalars['String']>,
-  totalHouseholds?: Maybe<Scalars['Int']>,
-  totalFamilySize?: Maybe<Scalars['Int']>,
   households?: Maybe<Array<Maybe<Scalars['ID']>>>,
   targetRules?: Maybe<Array<Maybe<Scalars['ID']>>>,
   numIndividualsMin?: Maybe<Scalars['Float']>,
@@ -1381,9 +1420,6 @@ export type Mutations = {
   createProgram?: Maybe<CreateProgram>,
   updateProgram?: Maybe<UpdateProgram>,
   deleteProgram?: Maybe<DeleteProgram>,
-  createLocation?: Maybe<CreateLocation>,
-  updateLocation?: Maybe<UpdateLocation>,
-  deleteLocation?: Maybe<DeleteLocation>,
   uploadImportDataXlsxFile?: Maybe<UploadImportDataXlsxFile>,
   deleteRegistrationDataImport?: Maybe<DeleteRegistrationDataImport>,
   createRegistrationDataImport?: Maybe<CreateRegistrationDataImport>,
@@ -1402,21 +1438,6 @@ export type MutationsUpdateProgramArgs = {
 
 export type MutationsDeleteProgramArgs = {
   programId: Scalars['String']
-};
-
-
-export type MutationsCreateLocationArgs = {
-  locationData: CreateLocationInput
-};
-
-
-export type MutationsUpdateLocationArgs = {
-  locationData?: Maybe<UpdateLocationInput>
-};
-
-
-export type MutationsDeleteLocationArgs = {
-  locationId: Scalars['String']
 };
 
 
@@ -1622,6 +1643,8 @@ export type Query = {
   allLocations?: Maybe<LocationNodeConnection>,
   allBusinessAreas?: Maybe<BusinessAreaNodeConnection>,
   allLogEntries?: Maybe<LogEntryObjectConnection>,
+  allCoreFieldAttributes?: Maybe<Array<Maybe<CoreFieldNode>>>,
+  allFlexFieldAttributes?: Maybe<Array<Maybe<FlexFieldNode>>>,
   program?: Maybe<ProgramNode>,
   allPrograms?: Maybe<ProgramNodeConnection>,
   cashPlan?: Maybe<CashPlanNode>,
@@ -1750,8 +1773,6 @@ export type QueryAllTargetPopulationArgs = {
   createdAt?: Maybe<Scalars['DateTime']>,
   lastEditedAt?: Maybe<Scalars['DateTime']>,
   status?: Maybe<Scalars['String']>,
-  totalHouseholds?: Maybe<Scalars['Int']>,
-  totalFamilySize?: Maybe<Scalars['Int']>,
   households?: Maybe<Array<Maybe<Scalars['ID']>>>,
   targetRules?: Maybe<Array<Maybe<Scalars['ID']>>>,
   numIndividualsMin?: Maybe<Scalars['Float']>,
@@ -2059,12 +2080,14 @@ export type TargetPopulationNode = Node & {
   lastEditedAt?: Maybe<Scalars['DateTime']>,
   createdBy?: Maybe<UserNode>,
   status: TargetPopulationStatus,
-  totalHouseholds: Scalars['Int'],
-  totalFamilySize: Scalars['Int'],
   households: HouseholdNodeConnection,
+  TotalHouseholds: Scalars['Int'],
+  TotalFamilySize: Scalars['Int'],
   paymentRecords: PaymentRecordNodeConnection,
   cashPlans: CashPlanNodeConnection,
   targetRules: SavedTargetRuleNodeConnection,
+  totalHouseholds?: Maybe<Scalars['Int']>,
+  totalFamilySize?: Maybe<Scalars['Int']>,
 };
 
 
@@ -2122,17 +2145,6 @@ export enum TargetPopulationStatus {
   InProgress = 'IN_PROGRESS',
   Finalized = 'FINALIZED'
 }
-
-export type UpdateLocation = {
-   __typename?: 'UpdateLocation',
-  location?: Maybe<LocationNode>,
-};
-
-export type UpdateLocationInput = {
-  id: Scalars['String'],
-  name?: Maybe<Scalars['String']>,
-  country?: Maybe<Scalars['String']>,
-};
 
 export type UpdateProgram = {
    __typename?: 'UpdateProgram',
@@ -2209,8 +2221,6 @@ export type UserNodeTargetPopulationsArgs = {
   createdAt?: Maybe<Scalars['DateTime']>,
   lastEditedAt?: Maybe<Scalars['DateTime']>,
   status?: Maybe<Scalars['String']>,
-  totalHouseholds?: Maybe<Scalars['Int']>,
-  totalFamilySize?: Maybe<Scalars['Int']>,
   households?: Maybe<Array<Maybe<Scalars['ID']>>>,
   targetRules?: Maybe<Array<Maybe<Scalars['ID']>>>,
   numIndividualsMin?: Maybe<Scalars['Float']>,
@@ -2286,8 +2296,6 @@ export type UserObjectTypeTargetPopulationsArgs = {
   createdAt?: Maybe<Scalars['DateTime']>,
   lastEditedAt?: Maybe<Scalars['DateTime']>,
   status?: Maybe<Scalars['String']>,
-  totalHouseholds?: Maybe<Scalars['Int']>,
-  totalFamilySize?: Maybe<Scalars['Int']>,
   households?: Maybe<Array<Maybe<Scalars['ID']>>>,
   targetRules?: Maybe<Array<Maybe<Scalars['ID']>>>,
   numIndividualsMin?: Maybe<Scalars['Float']>,
@@ -2993,6 +3001,48 @@ export type ImportedIndividualDetailedFragment = (
     { __typename?: 'RegistrationDataImportDatahubNode' }
     & Pick<RegistrationDataImportDatahubNode, 'id' | 'hctId' | 'name'>
   ) }
+);
+
+export type UploadImportDataXlsxFileMutationVariables = {
+  file: Scalars['Upload']
+};
+
+
+export type UploadImportDataXlsxFileMutation = (
+  { __typename?: 'Mutations' }
+  & { uploadImportDataXlsxFile: Maybe<(
+    { __typename?: 'UploadImportDataXLSXFile' }
+    & { importData: Maybe<(
+      { __typename?: 'ImportDataNode' }
+      & Pick<ImportDataNode, 'id' | 'numberOfIndividuals' | 'numberOfHouseholds'>
+      & { registrationDataImport: (
+        { __typename?: 'RegistrationDataImportDatahubNodeConnection' }
+        & { edges: Array<Maybe<(
+          { __typename?: 'RegistrationDataImportDatahubNodeEdge' }
+          & { node: Maybe<(
+            { __typename?: 'RegistrationDataImportDatahubNode' }
+            & Pick<RegistrationDataImportDatahubNode, 'id'>
+          )> }
+        )>> }
+      ) }
+    )> }
+  )> }
+);
+
+export type CreateRegistrationDataImportMutationVariables = {
+  registrationDataImportData: CreateRegistrationDataImportExcelInput
+};
+
+
+export type CreateRegistrationDataImportMutation = (
+  { __typename?: 'Mutations' }
+  & { createRegistrationDataImport: Maybe<(
+    { __typename?: 'CreateRegistrationDataImport' }
+    & { registrationDataImport: Maybe<(
+      { __typename?: 'RegistrationDataImportNode' }
+      & Pick<RegistrationDataImportNode, 'id' | 'name'>
+    )> }
+  )> }
 );
 
 export const RegistrationMinimalFragmentDoc = gql`
@@ -4811,6 +4861,118 @@ export function useRegistrationDataImportLazyQuery(baseOptions?: ApolloReactHook
 export type RegistrationDataImportQueryHookResult = ReturnType<typeof useRegistrationDataImportQuery>;
 export type RegistrationDataImportLazyQueryHookResult = ReturnType<typeof useRegistrationDataImportLazyQuery>;
 export type RegistrationDataImportQueryResult = ApolloReactCommon.QueryResult<RegistrationDataImportQuery, RegistrationDataImportQueryVariables>;
+export const UploadImportDataXlsxFileDocument = gql`
+    mutation UploadImportDataXlsxFile($file: Upload!) {
+  uploadImportDataXlsxFile(file: $file) {
+    importData {
+      id
+      numberOfIndividuals
+      numberOfHouseholds
+      registrationDataImport {
+        edges {
+          node {
+            id
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export type UploadImportDataXlsxFileMutationFn = ApolloReactCommon.MutationFunction<UploadImportDataXlsxFileMutation, UploadImportDataXlsxFileMutationVariables>;
+export type UploadImportDataXlsxFileComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<UploadImportDataXlsxFileMutation, UploadImportDataXlsxFileMutationVariables>, 'mutation'>;
+
+    export const UploadImportDataXlsxFileComponent = (props: UploadImportDataXlsxFileComponentProps) => (
+      <ApolloReactComponents.Mutation<UploadImportDataXlsxFileMutation, UploadImportDataXlsxFileMutationVariables> mutation={UploadImportDataXlsxFileDocument} {...props} />
+    );
+    
+export type UploadImportDataXlsxFileProps<TChildProps = {}> = ApolloReactHoc.MutateProps<UploadImportDataXlsxFileMutation, UploadImportDataXlsxFileMutationVariables> & TChildProps;
+export function withUploadImportDataXlsxFile<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  UploadImportDataXlsxFileMutation,
+  UploadImportDataXlsxFileMutationVariables,
+  UploadImportDataXlsxFileProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, UploadImportDataXlsxFileMutation, UploadImportDataXlsxFileMutationVariables, UploadImportDataXlsxFileProps<TChildProps>>(UploadImportDataXlsxFileDocument, {
+      alias: 'uploadImportDataXlsxFile',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useUploadImportDataXlsxFileMutation__
+ *
+ * To run a mutation, you first call `useUploadImportDataXlsxFileMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUploadImportDataXlsxFileMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [uploadImportDataXlsxFileMutation, { data, loading, error }] = useUploadImportDataXlsxFileMutation({
+ *   variables: {
+ *      file: // value for 'file'
+ *   },
+ * });
+ */
+export function useUploadImportDataXlsxFileMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UploadImportDataXlsxFileMutation, UploadImportDataXlsxFileMutationVariables>) {
+        return ApolloReactHooks.useMutation<UploadImportDataXlsxFileMutation, UploadImportDataXlsxFileMutationVariables>(UploadImportDataXlsxFileDocument, baseOptions);
+      }
+export type UploadImportDataXlsxFileMutationHookResult = ReturnType<typeof useUploadImportDataXlsxFileMutation>;
+export type UploadImportDataXlsxFileMutationResult = ApolloReactCommon.MutationResult<UploadImportDataXlsxFileMutation>;
+export type UploadImportDataXlsxFileMutationOptions = ApolloReactCommon.BaseMutationOptions<UploadImportDataXlsxFileMutation, UploadImportDataXlsxFileMutationVariables>;
+export const CreateRegistrationDataImportDocument = gql`
+    mutation CreateRegistrationDataImport($registrationDataImportData: CreateRegistrationDataImportExcelInput!) {
+  createRegistrationDataImport(registrationDataImportData: $registrationDataImportData) {
+    registrationDataImport {
+      id
+      name
+    }
+  }
+}
+    `;
+export type CreateRegistrationDataImportMutationFn = ApolloReactCommon.MutationFunction<CreateRegistrationDataImportMutation, CreateRegistrationDataImportMutationVariables>;
+export type CreateRegistrationDataImportComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<CreateRegistrationDataImportMutation, CreateRegistrationDataImportMutationVariables>, 'mutation'>;
+
+    export const CreateRegistrationDataImportComponent = (props: CreateRegistrationDataImportComponentProps) => (
+      <ApolloReactComponents.Mutation<CreateRegistrationDataImportMutation, CreateRegistrationDataImportMutationVariables> mutation={CreateRegistrationDataImportDocument} {...props} />
+    );
+    
+export type CreateRegistrationDataImportProps<TChildProps = {}> = ApolloReactHoc.MutateProps<CreateRegistrationDataImportMutation, CreateRegistrationDataImportMutationVariables> & TChildProps;
+export function withCreateRegistrationDataImport<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CreateRegistrationDataImportMutation,
+  CreateRegistrationDataImportMutationVariables,
+  CreateRegistrationDataImportProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, CreateRegistrationDataImportMutation, CreateRegistrationDataImportMutationVariables, CreateRegistrationDataImportProps<TChildProps>>(CreateRegistrationDataImportDocument, {
+      alias: 'createRegistrationDataImport',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCreateRegistrationDataImportMutation__
+ *
+ * To run a mutation, you first call `useCreateRegistrationDataImportMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateRegistrationDataImportMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createRegistrationDataImportMutation, { data, loading, error }] = useCreateRegistrationDataImportMutation({
+ *   variables: {
+ *      registrationDataImportData: // value for 'registrationDataImportData'
+ *   },
+ * });
+ */
+export function useCreateRegistrationDataImportMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateRegistrationDataImportMutation, CreateRegistrationDataImportMutationVariables>) {
+        return ApolloReactHooks.useMutation<CreateRegistrationDataImportMutation, CreateRegistrationDataImportMutationVariables>(CreateRegistrationDataImportDocument, baseOptions);
+      }
+export type CreateRegistrationDataImportMutationHookResult = ReturnType<typeof useCreateRegistrationDataImportMutation>;
+export type CreateRegistrationDataImportMutationResult = ApolloReactCommon.MutationResult<CreateRegistrationDataImportMutation>;
+export type CreateRegistrationDataImportMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateRegistrationDataImportMutation, CreateRegistrationDataImportMutationVariables>;
 
 
 export type ResolverTypeWrapper<T> = Promise<T> | T;
@@ -4957,6 +5119,11 @@ export type ResolversTypes = {
   PaymentEntitlementNode: ResolverTypeWrapper<PaymentEntitlementNode>,
   PaymentEntitlementDeliveryType: PaymentEntitlementDeliveryType,
   ChoiceObject: ResolverTypeWrapper<ChoiceObject>,
+  CoreFieldNode: ResolverTypeWrapper<CoreFieldNode>,
+  FlexFieldNode: ResolverTypeWrapper<FlexFieldNode>,
+  FlexibleAttributeType: FlexibleAttributeType,
+  FlexibleAttributeAssociatedWith: FlexibleAttributeAssociatedWith,
+  FlexibleAttributeChoice: ResolverTypeWrapper<FlexibleAttributeChoice>,
   UserObjectType: ResolverTypeWrapper<UserObjectType>,
   ImportedHouseholdNode: ResolverTypeWrapper<ImportedHouseholdNode>,
   ImportedHouseholdResidenceStatus: ImportedHouseholdResidenceStatus,
@@ -4985,11 +5152,6 @@ export type ResolversTypes = {
   UpdateProgramInput: UpdateProgramInput,
   UpdateProgram: ResolverTypeWrapper<UpdateProgram>,
   DeleteProgram: ResolverTypeWrapper<DeleteProgram>,
-  CreateLocationInput: CreateLocationInput,
-  CreateLocation: ResolverTypeWrapper<CreateLocation>,
-  UpdateLocationInput: UpdateLocationInput,
-  UpdateLocation: ResolverTypeWrapper<UpdateLocation>,
-  DeleteLocation: ResolverTypeWrapper<DeleteLocation>,
   Upload: ResolverTypeWrapper<Scalars['Upload']>,
   UploadImportDataXLSXFile: ResolverTypeWrapper<UploadImportDataXlsxFile>,
   DeleteRegistrationDataImport: ResolverTypeWrapper<DeleteRegistrationDataImport>,
@@ -5074,6 +5236,11 @@ export type ResolversParentTypes = {
   PaymentEntitlementNode: PaymentEntitlementNode,
   PaymentEntitlementDeliveryType: PaymentEntitlementDeliveryType,
   ChoiceObject: ChoiceObject,
+  CoreFieldNode: CoreFieldNode,
+  FlexFieldNode: FlexFieldNode,
+  FlexibleAttributeType: FlexibleAttributeType,
+  FlexibleAttributeAssociatedWith: FlexibleAttributeAssociatedWith,
+  FlexibleAttributeChoice: FlexibleAttributeChoice,
   UserObjectType: UserObjectType,
   ImportedHouseholdNode: ImportedHouseholdNode,
   ImportedHouseholdResidenceStatus: ImportedHouseholdResidenceStatus,
@@ -5102,11 +5269,6 @@ export type ResolversParentTypes = {
   UpdateProgramInput: UpdateProgramInput,
   UpdateProgram: UpdateProgram,
   DeleteProgram: DeleteProgram,
-  CreateLocationInput: CreateLocationInput,
-  CreateLocation: CreateLocation,
-  UpdateLocationInput: UpdateLocationInput,
-  UpdateLocation: UpdateLocation,
-  DeleteLocation: DeleteLocation,
   Upload: Scalars['Upload'],
   UploadImportDataXLSXFile: UploadImportDataXlsxFile,
   DeleteRegistrationDataImport: DeleteRegistrationDataImport,
@@ -5190,8 +5352,15 @@ export type ChoiceObjectResolvers<ContextType = any, ParentType extends Resolver
   value?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
-export type CreateLocationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateLocation'] = ResolversParentTypes['CreateLocation']> = {
-  location?: Resolver<Maybe<ResolversTypes['LocationNode']>, ParentType, ContextType>,
+export type CoreFieldNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['CoreFieldNode'] = ResolversParentTypes['CoreFieldNode']> = {
+  id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  label?: Resolver<Maybe<ResolversTypes['JSONString']>, ParentType, ContextType>,
+  hint?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  required?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  choices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  associatedWith?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type CreateProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateProgram'] = ResolversParentTypes['CreateProgram']> = {
@@ -5213,10 +5382,6 @@ export interface DateTimeScalarConfig extends GraphQLScalarTypeConfig<ResolversT
 export interface DecimalScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Decimal'], any> {
   name: 'Decimal'
 }
-
-export type DeleteLocationResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteLocation'] = ResolversParentTypes['DeleteLocation']> = {
-  ok?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-};
 
 export type DeleteProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteProgram'] = ResolversParentTypes['DeleteProgram']> = {
   ok?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
@@ -5245,6 +5410,32 @@ export type DjangoDebugSqlResolvers<ContextType = any, ParentType extends Resolv
   transStatus?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   isoLevel?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   encoding?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
+export type FlexFieldNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['FlexFieldNode'] = ResolversParentTypes['FlexFieldNode']> = {
+  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  type?: Resolver<ResolversTypes['FlexibleAttributeType'], ParentType, ContextType>,
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  required?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  label?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
+  hint?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
+  associatedWith?: Resolver<ResolversTypes['FlexibleAttributeAssociatedWith'], ParentType, ContextType>,
+  choices?: Resolver<Maybe<Array<Maybe<ResolversTypes['FlexibleAttributeChoice']>>>, ParentType, ContextType>,
+};
+
+export type FlexibleAttributeChoiceResolvers<ContextType = any, ParentType extends ResolversParentTypes['FlexibleAttributeChoice'] = ResolversParentTypes['FlexibleAttributeChoice']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  listName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  label?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
+  admin?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  flexAttributes?: Resolver<Array<ResolversTypes['FlexFieldNode']>, ParentType, ContextType>,
 };
 
 export type HouseholdNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['HouseholdNode'] = ResolversParentTypes['HouseholdNode']> = {
@@ -5471,16 +5662,13 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   createProgram?: Resolver<Maybe<ResolversTypes['CreateProgram']>, ParentType, ContextType, RequireFields<MutationsCreateProgramArgs, 'programData'>>,
   updateProgram?: Resolver<Maybe<ResolversTypes['UpdateProgram']>, ParentType, ContextType, MutationsUpdateProgramArgs>,
   deleteProgram?: Resolver<Maybe<ResolversTypes['DeleteProgram']>, ParentType, ContextType, RequireFields<MutationsDeleteProgramArgs, 'programId'>>,
-  createLocation?: Resolver<Maybe<ResolversTypes['CreateLocation']>, ParentType, ContextType, RequireFields<MutationsCreateLocationArgs, 'locationData'>>,
-  updateLocation?: Resolver<Maybe<ResolversTypes['UpdateLocation']>, ParentType, ContextType, MutationsUpdateLocationArgs>,
-  deleteLocation?: Resolver<Maybe<ResolversTypes['DeleteLocation']>, ParentType, ContextType, RequireFields<MutationsDeleteLocationArgs, 'locationId'>>,
   uploadImportDataXlsxFile?: Resolver<Maybe<ResolversTypes['UploadImportDataXLSXFile']>, ParentType, ContextType, RequireFields<MutationsUploadImportDataXlsxFileArgs, 'file'>>,
   deleteRegistrationDataImport?: Resolver<Maybe<ResolversTypes['DeleteRegistrationDataImport']>, ParentType, ContextType, RequireFields<MutationsDeleteRegistrationDataImportArgs, 'registrationDataImportId'>>,
   createRegistrationDataImport?: Resolver<Maybe<ResolversTypes['CreateRegistrationDataImport']>, ParentType, ContextType, RequireFields<MutationsCreateRegistrationDataImportArgs, 'registrationDataImportData'>>,
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'LocationNode' | 'BusinessAreaNode' | 'UserNode' | 'TargetPopulationNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'SavedTargetRuleNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode', ParentType, ContextType>,
+  __resolveType: TypeResolveFn<'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'LocationNode' | 'BusinessAreaNode' | 'UserNode' | 'TargetPopulationNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'SavedTargetRuleNode' | 'FlexibleAttributeChoice' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode', ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
 };
 
@@ -5585,6 +5773,8 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allLocations?: Resolver<Maybe<ResolversTypes['LocationNodeConnection']>, ParentType, ContextType, QueryAllLocationsArgs>,
   allBusinessAreas?: Resolver<Maybe<ResolversTypes['BusinessAreaNodeConnection']>, ParentType, ContextType, QueryAllBusinessAreasArgs>,
   allLogEntries?: Resolver<Maybe<ResolversTypes['LogEntryObjectConnection']>, ParentType, ContextType, RequireFields<QueryAllLogEntriesArgs, 'objectId'>>,
+  allCoreFieldAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['CoreFieldNode']>>>, ParentType, ContextType>,
+  allFlexFieldAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FlexFieldNode']>>>, ParentType, ContextType>,
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType, RequireFields<QueryProgramArgs, 'id'>>,
   allPrograms?: Resolver<Maybe<ResolversTypes['ProgramNodeConnection']>, ParentType, ContextType, QueryAllProgramsArgs>,
   cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType, RequireFields<QueryCashPlanArgs, 'id'>>,
@@ -5696,12 +5886,14 @@ export type TargetPopulationNodeResolvers<ContextType = any, ParentType extends 
   lastEditedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   status?: Resolver<ResolversTypes['TargetPopulationStatus'], ParentType, ContextType>,
-  totalHouseholds?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  totalFamilySize?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, TargetPopulationNodeHouseholdsArgs>,
+  TotalHouseholds?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  TotalFamilySize?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, TargetPopulationNodePaymentRecordsArgs>,
   cashPlans?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, TargetPopulationNodeCashPlansArgs>,
   targetRules?: Resolver<ResolversTypes['SavedTargetRuleNodeConnection'], ParentType, ContextType, TargetPopulationNodeTargetRulesArgs>,
+  totalHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  totalFamilySize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 
 export type TargetPopulationNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetPopulationNodeConnection'] = ResolversParentTypes['TargetPopulationNodeConnection']> = {
@@ -5714,10 +5906,6 @@ export type TargetPopulationNodeConnectionResolvers<ContextType = any, ParentTyp
 export type TargetPopulationNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetPopulationNodeEdge'] = ResolversParentTypes['TargetPopulationNodeEdge']> = {
   node?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
-export type UpdateLocationResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdateLocation'] = ResolversParentTypes['UpdateLocation']> = {
-  location?: Resolver<Maybe<ResolversTypes['LocationNode']>, ParentType, ContextType>,
 };
 
 export type UpdateProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdateProgram'] = ResolversParentTypes['UpdateProgram']> = {
@@ -5790,17 +5978,18 @@ export type Resolvers<ContextType = any> = {
   CashPlanNodeConnection?: CashPlanNodeConnectionResolvers<ContextType>,
   CashPlanNodeEdge?: CashPlanNodeEdgeResolvers<ContextType>,
   ChoiceObject?: ChoiceObjectResolvers<ContextType>,
-  CreateLocation?: CreateLocationResolvers<ContextType>,
+  CoreFieldNode?: CoreFieldNodeResolvers<ContextType>,
   CreateProgram?: CreateProgramResolvers<ContextType>,
   CreateRegistrationDataImport?: CreateRegistrationDataImportResolvers<ContextType>,
   Date?: GraphQLScalarType,
   DateTime?: GraphQLScalarType,
   Decimal?: GraphQLScalarType,
-  DeleteLocation?: DeleteLocationResolvers<ContextType>,
   DeleteProgram?: DeleteProgramResolvers<ContextType>,
   DeleteRegistrationDataImport?: DeleteRegistrationDataImportResolvers<ContextType>,
   DjangoDebug?: DjangoDebugResolvers<ContextType>,
   DjangoDebugSQL?: DjangoDebugSqlResolvers<ContextType>,
+  FlexFieldNode?: FlexFieldNodeResolvers<ContextType>,
+  FlexibleAttributeChoice?: FlexibleAttributeChoiceResolvers<ContextType>,
   HouseholdNode?: HouseholdNodeResolvers<ContextType>,
   HouseholdNodeConnection?: HouseholdNodeConnectionResolvers<ContextType>,
   HouseholdNodeEdge?: HouseholdNodeEdgeResolvers<ContextType>,
@@ -5845,7 +6034,6 @@ export type Resolvers<ContextType = any> = {
   TargetPopulationNode?: TargetPopulationNodeResolvers<ContextType>,
   TargetPopulationNodeConnection?: TargetPopulationNodeConnectionResolvers<ContextType>,
   TargetPopulationNodeEdge?: TargetPopulationNodeEdgeResolvers<ContextType>,
-  UpdateLocation?: UpdateLocationResolvers<ContextType>,
   UpdateProgram?: UpdateProgramResolvers<ContextType>,
   Upload?: GraphQLScalarType,
   UploadImportDataXLSXFile?: UploadImportDataXlsxFileResolvers<ContextType>,

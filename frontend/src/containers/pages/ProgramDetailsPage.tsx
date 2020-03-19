@@ -12,7 +12,7 @@ import {
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../../components/LoadingComponent';
 import { ProgramDetailsPageHeader } from './headers/ProgramDetailsPageHeader';
-import { useSnackbarHelper } from '../../hooks/useBreadcrumbHelper';
+import { useSnackbar } from '../../hooks/useSnackBar';
 import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
 
 const Container = styled.div`
@@ -56,7 +56,6 @@ export function ProgramDetailsPage(): React.ReactElement {
     data: choices,
     loading: choicesLoading,
   } = useProgrammeChoiceDataQuery();
-  const snackBar = useSnackbarHelper();
   if (loading || choicesLoading) {
     return <LoadingComponent />;
   }
@@ -88,15 +87,6 @@ export function ProgramDetailsPage(): React.ReactElement {
           <UniversalActivityLogTable objectId={program.id} />
         </TableWrapper>
       </Container>
-      {snackBar.show && (
-        <Snackbar
-          open={snackBar.show}
-          autoHideDuration={5000}
-          onClose={() => snackBar.setShow(false)}
-        >
-          <SnackbarContent message={snackBar.message} />
-        </Snackbar>
-      )}
     </div>
   );
 }

@@ -12,7 +12,7 @@ import {
 import { CreateProgram } from '../dialogs/programs/CreateProgram';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { LoadingComponent } from '../../components/LoadingComponent';
-import { useSnackbarHelper } from '../../hooks/useBreadcrumbHelper'
+import { useSnackbar } from '../../hooks/useSnackBar'
 
 const PageContainer = styled.div`
   display: flex;
@@ -22,7 +22,6 @@ const PageContainer = styled.div`
   justify-content: center;
 `;
 export function ProgramsPage(): React.ReactElement {
-  const snackBar = useSnackbarHelper()
   const businessArea = useBusinessArea();
   const { data, loading } = useAllProgramsQuery({
     variables: {
@@ -56,15 +55,6 @@ export function ProgramsPage(): React.ReactElement {
     <div>
       {toolbar}
       <PageContainer>{programsList}</PageContainer>
-      {snackBar.show && (
-        <Snackbar
-          open={snackBar.show}
-          autoHideDuration={5000}
-          onClose={() => snackBar.setShow(false)}
-        >
-          <SnackbarContent message={snackBar.message} />
-        </Snackbar>
-      )}
     </div>
   );
 }
