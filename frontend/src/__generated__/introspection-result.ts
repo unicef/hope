@@ -51,6 +51,9 @@
             "name": "SavedTargetRuleNode"
           },
           {
+            "name": "FlexibleAttributeChoice"
+          },
+          {
             "name": "ImportedHouseholdNode"
           },
           {
