@@ -13,8 +13,8 @@ from django.contrib.postgres.validators import (
     RangeMaxValueValidator,
 )
 from django.db import models
-from model_utils.models import UUIDModel
 from psycopg2.extras import NumericRange
+from utils.models import TimeStampedUUIDModel
 
 _MAX_LEN = 256
 _MIN_RANGE = 1
@@ -44,7 +44,7 @@ class TargetStatus(EnumGetChoices):
     FINALIZED = "Finalized"
 
 
-class TargetPopulation(UUIDModel):
+class TargetPopulation(TimeStampedUUIDModel):
     """Model for target populations.
 
     Has N:N association with households.
@@ -53,8 +53,8 @@ class TargetPopulation(UUIDModel):
     STATE_CHOICES = TargetStatus.get_choices()
     # fields
     name = models.TextField(unique=True)
-    created_at = models.DateTimeField(auto_now_add=True)
     # TODO(codecakes): check and use auditlog instead.
+    # Dependent field. Change to auditlog or change depending modules in future CL.
     last_edited_at = models.DateTimeField(auto_now=True, null=True)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
