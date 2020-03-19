@@ -40,6 +40,16 @@ class TargetPopulationFactory(factory.DjangoModelFactory):
             for household in extracted:
                 self.households.add(household)
 
+    @factory.post_generation
+    def target_rules(self, create, extracted, **kwargs):
+        if not create:
+            target_rules = TargetRuleFactory.create_batch(5)
+            self.target_rules.add(*target_rules)
+
+        if extracted:
+            for target_rule in extracted:
+                self.target_rules.add(target_rule)
+
 
 class TargetRuleFactory(factory.DjangoModelFactory):
     class Meta:
