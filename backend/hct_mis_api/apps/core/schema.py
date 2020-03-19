@@ -102,7 +102,9 @@ class FlexibleAttributeChoiceNode(DjangoObjectType):
         model = FlexibleAttributeChoice
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
-        fields = ["name", "label"]
+        exclude_fields = [
+            "history",
+        ]
 
 
 class FlexFieldNode(DjangoObjectType):
@@ -128,6 +130,12 @@ class FlexFieldNode(DjangoObjectType):
             "required",
         ]
 
+class CoreFieldChoiceObject(graphene.ObjectType):
+    name = String()
+    value = String()
+    admin = String()
+    list_name = String()
+
 
 class CoreFieldNode(graphene.ObjectType):
     id = graphene.String()
@@ -136,7 +144,7 @@ class CoreFieldNode(graphene.ObjectType):
     label = graphene.JSONString()
     hint = graphene.String()
     required = graphene.Boolean()
-    choices = graphene.List(ChoiceObject)
+    choices = graphene.List(CoreFieldChoiceObject)
     associated_with = graphene.String()
 
 
