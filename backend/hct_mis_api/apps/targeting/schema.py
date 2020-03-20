@@ -31,6 +31,7 @@ class TargetPopulationFilter(django_filters.FilterSet):
     created_by_name = django_filters.CharFilter(
         field_name="created_by", method="filter_created_by_name"
     )
+    # TODO(codecakes): fix allTargetPopulationFilters query response by fixing the below two.
     num_individuals_min = IntegerFilter(
         field_name="target_rules__core_rules__num_individuals_min",
         lookup_expr="gte",
