@@ -99,6 +99,7 @@ class TargetPopulation(TimeStampedUUIDModel):
                 self.households.aggregate(models.Sum("family_size")).get(
                     "family_size__sum"
                 )
+                or 0
             )
             if not self._total_family_size
             else self._total_family_size

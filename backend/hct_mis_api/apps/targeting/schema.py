@@ -27,29 +27,19 @@ class TargetPopulationFilter(django_filters.FilterSet):
     Loads associated entries for Households and TargetRules.
     """
 
-    name = django_filters.CharFilter(field_name="name", lookup_expr="icontains")
-    created_by_name = django_filters.CharFilter(
-        field_name="created_by", method="filter_created_by_name"
-    )
-    # TODO(codecakes): fix allTargetPopulationFilters query response by fixing the below two.
+    name = django_filters.CharFilter(field_name="name", lookup_expr="icontains", distinct=True)
+    created_by_name = django_filters.CharFilter(field_name="created_by", method="filter_created_by_name")
+    # TODO(codecakes): Fix allTargetPopulationFilters query response by fixing the below two.
     num_individuals_min = IntegerFilter(
         field_name="target_rules__core_rules__num_individuals_min",
         lookup_expr="gte",
-        method="filter_num_individuals_min"
+        distinct=True
     )
     num_individuals_max = IntegerFilter(
         field_name="target_rules__core_rules__num_individuals_max",
         lookup_expr="lte",
-        method="filter_num_individuals_max"
+        distinct=True
     )
-
-    @staticmethod
-    def filter_num_individuals_min(queryset, _model, _value):
-        return queryset.distinct("id")
-
-    @staticmethod
-    def filter_num_individuals_max(queryset, _model, _value):
-        return queryset.distinct("id")
 
     @staticmethod
     def filter_created_by_name(queryset, model_field, value):
@@ -64,20 +54,9 @@ class TargetPopulationFilter(django_filters.FilterSet):
 
     class Meta:
         model = target_models.TargetPopulation
-        fields = (
-            "name",
-            "created_by_name",
-            "created_at",
-            "last_edited_at",
-            "status",
-            "households",
-            "target_rules",
-        )
+        fields = "__all__"
 
         filter_overrides = {
-            target_models.IntegerRangeField: {
-                "filter_class": django_filters.NumericRangeFilter,
-            },
             target_models.models.DateTimeField: {
                 "filter_class": django_filters.DateTimeFilter,
             },
@@ -124,7 +103,6 @@ class SavedTargetRuleFilter(django_filters.FilterSet):
         filter_overrides = {
             target_models.JSONField: {
                 "filter_class": django_filters.LookupChoiceFilter,
-                # 'extra': lambda f: {'lookup_expr': ['icontains']},
             },
         }
 
@@ -140,7 +118,7 @@ class SavedTargetRuleNode(DjangoObjectType):
 
 
 class Query(graphene.ObjectType):
-    target_population = relay.Node.Field(TargetPopulationNode)
+    target_population = relay.Node.Field(TargetPopulationNode, distinct=True)
     all_target_population = DjangoFilterConnectionField(TargetPopulationNode)
     # Saved snapshots of target rules from a target population.
     saved_target_rule = relay.Node.Field(SavedTargetRuleNode)
