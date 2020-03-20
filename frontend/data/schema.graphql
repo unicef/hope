@@ -3,6 +3,10 @@ schema {
   mutation: Mutations
 }
 
+type ApproveRegistrationDataImportMutation {
+  registrationDataImport: RegistrationDataImportNode
+}
+
 type BusinessAreaNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -1225,6 +1229,10 @@ type LogEntryObjectEdge {
   cursor: String!
 }
 
+type MergeRegistrationDataImportMutation {
+  registrationDataImport: RegistrationDataImportNode
+}
+
 type Mutations {
   createProgram(programData: CreateProgramInput!): CreateProgram
   updateProgram(programData: UpdateProgramInput): UpdateProgram
@@ -1232,6 +1240,9 @@ type Mutations {
   uploadImportDataXlsxFile(file: Upload!): UploadImportDataXLSXFile
   deleteRegistrationDataImport(registrationDataImportId: String!): DeleteRegistrationDataImport
   createRegistrationDataImport(registrationDataImportData: CreateRegistrationDataImportExcelInput!): CreateRegistrationDataImport
+  approveRegistrationDataImport(id: ID!): ApproveRegistrationDataImportMutation
+  unapproveRegistrationDataImport(id: ID!): UnapproveRegistrationDataImportMutation
+  mergeRegistrationDataImport(id: ID!): MergeRegistrationDataImportMutation
 }
 
 interface Node {
@@ -1535,6 +1546,10 @@ enum TargetPopulationStatus {
 }
 
 scalar UUID
+
+type UnapproveRegistrationDataImportMutation {
+  registrationDataImport: RegistrationDataImportNode
+}
 
 type UpdateProgram {
   program: ProgramNode
