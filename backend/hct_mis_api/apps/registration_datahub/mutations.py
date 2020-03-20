@@ -185,6 +185,7 @@ class ApproveRegistrationDataImportMutation(BaseValidator, graphene.Mutation):
 
     @classmethod
     @is_authenticated
+    @transaction.atomic
     def mutate(cls, root, info, id):
         decode_id = decode_id_string(id)
 
@@ -192,9 +193,8 @@ class ApproveRegistrationDataImportMutation(BaseValidator, graphene.Mutation):
             id=decode_id,
         )
         cls.validate(status=obj.status)
-
         obj.status = "APPROVED"
-
+        obj.save()
         return ApproveRegistrationDataImportMutation(obj)
 
 
@@ -214,6 +214,7 @@ class UnapproveRegistrationDataImportMutation(BaseValidator, graphene.Mutation):
 
     @classmethod
     @is_authenticated
+    @transaction.atomic
     def mutate(cls, root, info, id):
         decode_id = decode_id_string(id)
 
@@ -221,9 +222,8 @@ class UnapproveRegistrationDataImportMutation(BaseValidator, graphene.Mutation):
             id=decode_id,
         )
         cls.validate(status=obj.status)
-
         obj.status = "IN_REVIEW"
-
+        obj.save()
         return ApproveRegistrationDataImportMutation(obj)
 
 
