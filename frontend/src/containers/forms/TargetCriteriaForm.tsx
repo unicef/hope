@@ -6,9 +6,13 @@ import {
   DialogContent,
   DialogTitle,
   Typography,
+  Button,
+  DialogActions,
 } from '@material-ui/core';
-import { Field, Form, Formik } from 'formik';
+import { Field, Form, Formik, FieldArray } from 'formik';
+import { useImportedIndividualFieldsQuery } from '../../__generated__/graphql';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
+import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -39,12 +43,38 @@ const DialogContainer = styled.div`
   position: absolute;
 `;
 
+const DialogFooter = styled.div`
+  padding: 12px 16px;
+  margin: 0;
+  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
+  text-align: right;
+`;
+
 const validationSchema = Yup.object().shape({
-  name: Yup.string().required('Name is required'),
+  criterias: Yup.array().of(
+    Yup.object().shape({
+      name: Yup.string().required('Name is required'),
+    }),
+  ),
 });
 
+const SubField = ({ field, form, ...otherProps }) => {
+  //eslint-disable-next-line
+  // debugger
+  // const subSelection = choices.find((each) => each.name === name);
+  // switch (subSelection.type) {
+  //   case 'SELECT_ONE':
+  //     return <div>Select one</div>
+  //   case 'INTEGER':
+  //     return <div>integer</div>;
+  //   default:
+  //     return <div>default</div>;
+  // }
+  return <div>Select one</div>;
+};
+
 interface ProgramFormPropTypes {
-  criteria?
+  criteria?;
   onSubmit: (values) => Promise<void>;
   renderSubmit: (submit: () => Promise<void>) => void;
   open: boolean;
@@ -60,26 +90,36 @@ export function TargetCriteriaForm({
   onClose,
   title,
 }): React.ReactElement {
-  
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const initialValue: { [key: string]: any } = {
-    name: '',
-  
+  const { data, loading } = useImportedIndividualFieldsQuery();
+
+  let initialValue = {
+    criterias: [
+      {
+        label: '',
+        value: '',
+      },
+    ],
   };
 
+  if (loading) return null;
+
+  if (criteria.core && criteria.core.length > 0) {
+    initialValue = { criterias: criteria.core };
+  }
   return (
     <DialogContainer>
       <Formik
         initialValues={initialValue}
         onSubmit={(values) => {
-          const newValues = { ...values };
-          newValues.budget = Number(values.budget).toFixed(2);
+          //eslint-disable-next-line
+          debugger;
           return console.log(values);
         }}
         validationSchema={validationSchema}
+        enableReinitialize
       >
         {({ submitForm, values }) => (
-          <Form>
+          <>
             <Dialog
               open={open}
               onClose={onClose}
@@ -93,21 +133,67 @@ export function TargetCriteriaForm({
               </DialogTitleWrapper>
               <DialogContent>
                 <DialogDescription>
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit. Natus tempora iusto maxime? Odit expedita ipsam natus eos? Inventore illo officiis laborum, quidem reprehenderit distinctio architecto aliquid obcaecati eius placeat dolorem.
+                  Lorem ipsum dolor sit amet consectetur adipisicing elit. Natus
+                  tempora iusto maxime? Odit expedita ipsam natus eos?
                 </DialogDescription>
-
-                <Field
-                  name='name'
-                  label='Programme Name'
-                  type='text'
-                  fullWidth
-                  required
-                  component={FormikTextField}
+                <FieldArray
+                  name='criterias'
+                  render={(arrayHelpers) => (
+                    <>
+                      {values.criterias.map((each, index) => {
+                        return (
+                          <div key={each.label}>
+                            <Field
+                              name={each.label}
+                              label='Choose field type'
+                              fullWidth
+                              required
+                              choices={data.allCoreFieldAttributes}
+                              value={each.label}
+                              component={FormikSelectField}
+                            />
+                            {each.label && (
+                              <Field
+                                name={each.value}
+                                // choices={data.allCoreFieldAttributes.map(
+                                //   (option) =>{
+                                //     if(option.name === each.label) {
+                                //       option.choices
+                                //     }
+                                //   }
+                                // )}
+                                value={each.value}
+                                component={FormikSelectField}
+                              />
+                            )}
+                          </div>
+                        );
+                      })}
+                      <button
+                        type='button'
+                        onClick={() => arrayHelpers.push({ name: '' })}
+                      >
+                        Add
+                      </button>
+                    </>
+                  )}
                 />
               </DialogContent>
-              {/* {renderSubmit(submitForm)} */}
+              <DialogFooter>
+                <DialogActions>
+                  <Button onClick={onClose}>Cancel</Button>
+                  <Button
+                    onClick={submitForm}
+                    type='submit'
+                    color='primary'
+                    variant='contained'
+                  >
+                    Save
+                  </Button>
+                </DialogActions>
+              </DialogFooter>
             </Dialog>
-          </Form>
+          </>
         )}
       </Formik>
     </DialogContainer>
