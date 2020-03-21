@@ -112,3 +112,27 @@ def update_model(model: django.db.models.Model, changeset: dict):
     for attrib, value in changeset.items():
         if hasattr(model, attrib):
             setattr(model, attrib, value)
+    model.save()
+
+
+def filter_relational_fields(model: django.db.models.Model) -> list:
+    """Get Only Relational Fields."""
+    return list(
+        filter(
+            lambda field: field not in model._meta.fields,
+            model._meta.get_fields(),
+        )
+    )
+
+
+def copy_associations(
+    from_model: django.db.models.Model,
+    to_model: django.db.models.Model,
+    exclude_foreign_fields: list,
+) -> django.db.models.Model:
+    """Copy reverse and M2M associations."""
+    for field in exclude_foreign_fields:
+        from_model_foreign_relation_set = getattr(from_model, field.name)
+        to_model_foreign_relation_set = getattr(to_model, field.name)
+        to_model_foreign_relation_set.set(from_model_foreign_relation_set.all())
+    return to_model
