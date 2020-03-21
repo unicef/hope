@@ -149,6 +149,18 @@ export type ChoiceObject = {
   value?: Maybe<Scalars['String']>,
 };
 
+export type CoreFieldNode = {
+   __typename?: 'CoreFieldNode',
+  id?: Maybe<Scalars['String']>,
+  type?: Maybe<Scalars['String']>,
+  name?: Maybe<Scalars['String']>,
+  label?: Maybe<Scalars['JSONString']>,
+  hint?: Maybe<Scalars['String']>,
+  required?: Maybe<Scalars['Boolean']>,
+  choices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  associatedWith?: Maybe<Scalars['String']>,
+};
+
 export type CreateProgram = {
    __typename?: 'CreateProgram',
   program?: Maybe<ProgramNode>,
@@ -216,11 +228,49 @@ export type DjangoDebugSql = {
   encoding?: Maybe<Scalars['String']>,
 };
 
-export type FilterAttrTypeNode = {
-   __typename?: 'FilterAttrTypeNode',
-  coreFieldTypes?: Maybe<Array<Maybe<Scalars['JSONString']>>>,
-  flexFieldTypes?: Maybe<Array<Maybe<Scalars['JSONString']>>>,
+export type FlexFieldNode = {
+   __typename?: 'FlexFieldNode',
+  id: Scalars['UUID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  isRemoved: Scalars['Boolean'],
+  type: FlexibleAttributeType,
+  name: Scalars['String'],
+  required: Scalars['Boolean'],
+  label: Scalars['JSONString'],
+  hint: Scalars['JSONString'],
+  associatedWith: FlexibleAttributeAssociatedWith,
+  choices?: Maybe<Array<Maybe<FlexibleAttributeChoice>>>,
 };
+
+export enum FlexibleAttributeAssociatedWith {
+  A_0 = 'A_0',
+  A_1 = 'A_1'
+}
+
+export type FlexibleAttributeChoice = Node & {
+   __typename?: 'FlexibleAttributeChoice',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  isRemoved: Scalars['Boolean'],
+  listName: Scalars['String'],
+  name: Scalars['String'],
+  label: Scalars['JSONString'],
+  admin: Scalars['String'],
+  flexAttributes: Array<FlexFieldNode>,
+};
+
+export enum FlexibleAttributeType {
+  String = 'STRING',
+  Image = 'IMAGE',
+  Integer = 'INTEGER',
+  Decimal = 'DECIMAL',
+  SelectOne = 'SELECT_ONE',
+  SelectMany = 'SELECT_MANY',
+  Datetime = 'DATETIME',
+  Geopoint = 'GEOPOINT'
+}
 
 export enum HouseholdNationality {
   Af = 'AF',
@@ -1593,6 +1643,8 @@ export type Query = {
   allLocations?: Maybe<LocationNodeConnection>,
   allBusinessAreas?: Maybe<BusinessAreaNodeConnection>,
   allLogEntries?: Maybe<LogEntryObjectConnection>,
+  allCoreFieldAttributes?: Maybe<Array<Maybe<CoreFieldNode>>>,
+  allFlexFieldAttributes?: Maybe<Array<Maybe<FlexFieldNode>>>,
   program?: Maybe<ProgramNode>,
   allPrograms?: Maybe<ProgramNodeConnection>,
   cashPlan?: Maybe<CashPlanNode>,
@@ -1607,7 +1659,6 @@ export type Query = {
   savedTargetRule?: Maybe<SavedTargetRuleNode>,
   allSavedTargetRule?: Maybe<SavedTargetRuleNodeConnection>,
   targetRules?: Maybe<Array<Maybe<HouseholdNode>>>,
-  metaDataFilterType?: Maybe<FilterAttrTypeNode>,
   household?: Maybe<HouseholdNode>,
   allHouseholds?: Maybe<HouseholdNodeConnection>,
   individual?: Maybe<IndividualNode>,
@@ -3010,6 +3061,21 @@ export type ImportedIndividualDetailedFragment = (
     { __typename?: 'RegistrationDataImportDatahubNode' }
     & Pick<RegistrationDataImportDatahubNode, 'id' | 'hctId' | 'name'>
   ) }
+);
+
+export type ImportedIndividualFieldsQueryVariables = {};
+
+
+export type ImportedIndividualFieldsQuery = (
+  { __typename?: 'Query' }
+  & { allCoreFieldAttributes: Maybe<Array<Maybe<(
+    { __typename?: 'CoreFieldNode' }
+    & Pick<CoreFieldNode, 'id' | 'name' | 'label' | 'type' | 'associatedWith'>
+    & { choices: Maybe<Array<Maybe<(
+      { __typename?: 'ChoiceObject' }
+      & Pick<ChoiceObject, 'name' | 'value'>
+    )>>> }
+  )>>> }
 );
 
 export const RegistrationMinimalFragmentDoc = gql`
@@ -4966,6 +5032,63 @@ export function useRegistrationDataImportLazyQuery(baseOptions?: ApolloReactHook
 export type RegistrationDataImportQueryHookResult = ReturnType<typeof useRegistrationDataImportQuery>;
 export type RegistrationDataImportLazyQueryHookResult = ReturnType<typeof useRegistrationDataImportLazyQuery>;
 export type RegistrationDataImportQueryResult = ApolloReactCommon.QueryResult<RegistrationDataImportQuery, RegistrationDataImportQueryVariables>;
+export const ImportedIndividualFieldsDocument = gql`
+    query ImportedIndividualFields {
+  allCoreFieldAttributes {
+    id
+    name
+    label
+    type
+    associatedWith
+    choices {
+      name
+      value
+    }
+  }
+}
+    `;
+export type ImportedIndividualFieldsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>, 'query'>;
+
+    export const ImportedIndividualFieldsComponent = (props: ImportedIndividualFieldsComponentProps) => (
+      <ApolloReactComponents.Query<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables> query={ImportedIndividualFieldsDocument} {...props} />
+    );
+    
+export type ImportedIndividualFieldsProps<TChildProps = {}> = ApolloReactHoc.DataProps<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables> & TChildProps;
+export function withImportedIndividualFields<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ImportedIndividualFieldsQuery,
+  ImportedIndividualFieldsQueryVariables,
+  ImportedIndividualFieldsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables, ImportedIndividualFieldsProps<TChildProps>>(ImportedIndividualFieldsDocument, {
+      alias: 'importedIndividualFields',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useImportedIndividualFieldsQuery__
+ *
+ * To run a query within a React component, call `useImportedIndividualFieldsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useImportedIndividualFieldsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useImportedIndividualFieldsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useImportedIndividualFieldsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>) {
+        return ApolloReactHooks.useQuery<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>(ImportedIndividualFieldsDocument, baseOptions);
+      }
+export function useImportedIndividualFieldsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>(ImportedIndividualFieldsDocument, baseOptions);
+        }
+export type ImportedIndividualFieldsQueryHookResult = ReturnType<typeof useImportedIndividualFieldsQuery>;
+export type ImportedIndividualFieldsLazyQueryHookResult = ReturnType<typeof useImportedIndividualFieldsLazyQuery>;
+export type ImportedIndividualFieldsQueryResult = ApolloReactCommon.QueryResult<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>;
 
 
 export type ResolverTypeWrapper<T> = Promise<T> | T;
@@ -5112,7 +5235,11 @@ export type ResolversTypes = {
   PaymentEntitlementNode: ResolverTypeWrapper<PaymentEntitlementNode>,
   PaymentEntitlementDeliveryType: PaymentEntitlementDeliveryType,
   ChoiceObject: ResolverTypeWrapper<ChoiceObject>,
-  FilterAttrTypeNode: ResolverTypeWrapper<FilterAttrTypeNode>,
+  CoreFieldNode: ResolverTypeWrapper<CoreFieldNode>,
+  FlexFieldNode: ResolverTypeWrapper<FlexFieldNode>,
+  FlexibleAttributeType: FlexibleAttributeType,
+  FlexibleAttributeAssociatedWith: FlexibleAttributeAssociatedWith,
+  FlexibleAttributeChoice: ResolverTypeWrapper<FlexibleAttributeChoice>,
   UserObjectType: ResolverTypeWrapper<UserObjectType>,
   ImportedHouseholdNode: ResolverTypeWrapper<ImportedHouseholdNode>,
   ImportedHouseholdResidenceStatus: ImportedHouseholdResidenceStatus,
@@ -5225,7 +5352,11 @@ export type ResolversParentTypes = {
   PaymentEntitlementNode: PaymentEntitlementNode,
   PaymentEntitlementDeliveryType: PaymentEntitlementDeliveryType,
   ChoiceObject: ChoiceObject,
-  FilterAttrTypeNode: FilterAttrTypeNode,
+  CoreFieldNode: CoreFieldNode,
+  FlexFieldNode: FlexFieldNode,
+  FlexibleAttributeType: FlexibleAttributeType,
+  FlexibleAttributeAssociatedWith: FlexibleAttributeAssociatedWith,
+  FlexibleAttributeChoice: FlexibleAttributeChoice,
   UserObjectType: UserObjectType,
   ImportedHouseholdNode: ImportedHouseholdNode,
   ImportedHouseholdResidenceStatus: ImportedHouseholdResidenceStatus,
@@ -5337,6 +5468,17 @@ export type ChoiceObjectResolvers<ContextType = any, ParentType extends Resolver
   value?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
+export type CoreFieldNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['CoreFieldNode'] = ResolversParentTypes['CoreFieldNode']> = {
+  id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  label?: Resolver<Maybe<ResolversTypes['JSONString']>, ParentType, ContextType>,
+  hint?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  required?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  choices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  associatedWith?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
 export type CreateProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateProgram'] = ResolversParentTypes['CreateProgram']> = {
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
 };
@@ -5386,9 +5528,30 @@ export type DjangoDebugSqlResolvers<ContextType = any, ParentType extends Resolv
   encoding?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
-export type FilterAttrTypeNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['FilterAttrTypeNode'] = ResolversParentTypes['FilterAttrTypeNode']> = {
-  coreFieldTypes?: Resolver<Maybe<Array<Maybe<ResolversTypes['JSONString']>>>, ParentType, ContextType>,
-  flexFieldTypes?: Resolver<Maybe<Array<Maybe<ResolversTypes['JSONString']>>>, ParentType, ContextType>,
+export type FlexFieldNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['FlexFieldNode'] = ResolversParentTypes['FlexFieldNode']> = {
+  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  type?: Resolver<ResolversTypes['FlexibleAttributeType'], ParentType, ContextType>,
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  required?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  label?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
+  hint?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
+  associatedWith?: Resolver<ResolversTypes['FlexibleAttributeAssociatedWith'], ParentType, ContextType>,
+  choices?: Resolver<Maybe<Array<Maybe<ResolversTypes['FlexibleAttributeChoice']>>>, ParentType, ContextType>,
+};
+
+export type FlexibleAttributeChoiceResolvers<ContextType = any, ParentType extends ResolversParentTypes['FlexibleAttributeChoice'] = ResolversParentTypes['FlexibleAttributeChoice']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  listName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  label?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
+  admin?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  flexAttributes?: Resolver<Array<ResolversTypes['FlexFieldNode']>, ParentType, ContextType>,
 };
 
 export type HouseholdNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['HouseholdNode'] = ResolversParentTypes['HouseholdNode']> = {
@@ -5621,7 +5784,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'LocationNode' | 'BusinessAreaNode' | 'UserNode' | 'TargetPopulationNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'SavedTargetRuleNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode', ParentType, ContextType>,
+  __resolveType: TypeResolveFn<'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'LocationNode' | 'BusinessAreaNode' | 'UserNode' | 'TargetPopulationNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'SavedTargetRuleNode' | 'FlexibleAttributeChoice' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode', ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
 };
 
@@ -5726,6 +5889,8 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allLocations?: Resolver<Maybe<ResolversTypes['LocationNodeConnection']>, ParentType, ContextType, QueryAllLocationsArgs>,
   allBusinessAreas?: Resolver<Maybe<ResolversTypes['BusinessAreaNodeConnection']>, ParentType, ContextType, QueryAllBusinessAreasArgs>,
   allLogEntries?: Resolver<Maybe<ResolversTypes['LogEntryObjectConnection']>, ParentType, ContextType, RequireFields<QueryAllLogEntriesArgs, 'objectId'>>,
+  allCoreFieldAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['CoreFieldNode']>>>, ParentType, ContextType>,
+  allFlexFieldAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FlexFieldNode']>>>, ParentType, ContextType>,
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType, RequireFields<QueryProgramArgs, 'id'>>,
   allPrograms?: Resolver<Maybe<ResolversTypes['ProgramNodeConnection']>, ParentType, ContextType, QueryAllProgramsArgs>,
   cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType, RequireFields<QueryCashPlanArgs, 'id'>>,
@@ -5740,7 +5905,6 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   savedTargetRule?: Resolver<Maybe<ResolversTypes['SavedTargetRuleNode']>, ParentType, ContextType, RequireFields<QuerySavedTargetRuleArgs, 'id'>>,
   allSavedTargetRule?: Resolver<Maybe<ResolversTypes['SavedTargetRuleNodeConnection']>, ParentType, ContextType, QueryAllSavedTargetRuleArgs>,
   targetRules?: Resolver<Maybe<Array<Maybe<ResolversTypes['HouseholdNode']>>>, ParentType, ContextType, QueryTargetRulesArgs>,
-  metaDataFilterType?: Resolver<Maybe<ResolversTypes['FilterAttrTypeNode']>, ParentType, ContextType>,
   household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType, RequireFields<QueryHouseholdArgs, 'id'>>,
   allHouseholds?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, QueryAllHouseholdsArgs>,
   individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType, RequireFields<QueryIndividualArgs, 'id'>>,
@@ -5930,6 +6094,7 @@ export type Resolvers<ContextType = any> = {
   CashPlanNodeConnection?: CashPlanNodeConnectionResolvers<ContextType>,
   CashPlanNodeEdge?: CashPlanNodeEdgeResolvers<ContextType>,
   ChoiceObject?: ChoiceObjectResolvers<ContextType>,
+  CoreFieldNode?: CoreFieldNodeResolvers<ContextType>,
   CreateProgram?: CreateProgramResolvers<ContextType>,
   CreateRegistrationDataImport?: CreateRegistrationDataImportResolvers<ContextType>,
   Date?: GraphQLScalarType,
@@ -5939,7 +6104,8 @@ export type Resolvers<ContextType = any> = {
   DeleteRegistrationDataImport?: DeleteRegistrationDataImportResolvers<ContextType>,
   DjangoDebug?: DjangoDebugResolvers<ContextType>,
   DjangoDebugSQL?: DjangoDebugSqlResolvers<ContextType>,
-  FilterAttrTypeNode?: FilterAttrTypeNodeResolvers<ContextType>,
+  FlexFieldNode?: FlexFieldNodeResolvers<ContextType>,
+  FlexibleAttributeChoice?: FlexibleAttributeChoiceResolvers<ContextType>,
   HouseholdNode?: HouseholdNodeResolvers<ContextType>,
   HouseholdNodeConnection?: HouseholdNodeConnectionResolvers<ContextType>,
   HouseholdNodeEdge?: HouseholdNodeEdgeResolvers<ContextType>,
