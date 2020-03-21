@@ -32,6 +32,12 @@ const criterias = [
     age: '7 - 15 years old',
     distanceToSchool: 'over 3km',
     household: 'over 5 individuals',
+    core: [
+      {
+        label: 'residence_status',
+        value: 'MIGRANT'
+      }
+    ]
   },
   {
     intakeGroup: 'Children 9/10/2019',
@@ -39,6 +45,12 @@ const criterias = [
     age: null,
     distanceToSchool: 'over 3km',
     household: null,
+    core: [
+      {
+        label: 'residence_status',
+        value: 'CITIZEN'
+      }
+    ]
   },
 ];
 

@@ -21,13 +21,16 @@ export const FormikSelectField = ({
           {...field}
           {...otherProps}
           name={field.name}
-          value={field.value}
+          value={field.value || field.name}
           id={`textField-${field.name}`}
           error={isInvalid}
         >
           {otherProps.choices.map((each) => (
-            <MenuItem key={each.value} value={each.value}>
-              {each.name}
+            <MenuItem
+              key={each.value ? each.value : each.name}
+              value={each.value ? each.value : each.name}
+            >
+              {each.label ? each.label : each.name}
             </MenuItem>
           ))}
         </Select>
