@@ -2,7 +2,6 @@ import graphene
 from account.models import User
 from core import utils
 from core.permissions import is_authenticated
-from django.db import transaction
 from django.forms.models import model_to_dict
 from targeting.models import TargetPopulation
 from targeting.schema import TargetPopulationNode
@@ -44,7 +43,6 @@ class CopyTarget(graphene.relay.ClientIDMutation, TargetValidator):
         target_population_data = CopyTargetPopulationInput()
 
     @classmethod
-    @transaction.atomic
     @is_authenticated
     def mutate_and_get_payload(cls, _root, info, **kwargs):
         user = info.context.user
@@ -70,7 +68,7 @@ class CopyTarget(graphene.relay.ClientIDMutation, TargetValidator):
             **target_population_dict
         )
         # Copy associations.
-        new_target_population = utils.copy_associations(
+        new_target_population = utils.copy_associations_async(
             target_population, new_target_population, exclude_foreign_fields
         )
         return CopyTarget(new_target_population)
