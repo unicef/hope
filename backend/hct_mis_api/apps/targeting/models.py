@@ -4,6 +4,7 @@ import datetime as dt
 import functools
 from typing import List
 
+import mptt
 from core.utils import EnumGetChoices
 from django.conf import settings
 from django.contrib.postgres.fields import IntegerRangeField
@@ -13,8 +14,10 @@ from django.contrib.postgres.validators import (
     RangeMaxValueValidator,
 )
 from django.db import models
+from django.utils.translation import ugettext_lazy
+from mptt.models import TreeForeignKey
 from psycopg2.extras import NumericRange
-from utils.models import TimeStampedUUIDModel
+from utils.models import SoftDeletionTreeModel
 
 _MAX_LEN = 256
 _MIN_RANGE = 1
@@ -44,13 +47,26 @@ class TargetStatus(EnumGetChoices):
     FINALIZED = "Finalized"
 
 
-class TargetPopulation(TimeStampedUUIDModel):
+class TargetPopulation(SoftDeletionTreeModel):
     """Model for target populations.
 
     Has N:N association with households.
     """
 
     STATE_CHOICES = TargetStatus.get_choices()
+    parent = TreeForeignKey(
+        "self",
+        verbose_name=ugettext_lazy("Parent"),
+        null=True,
+        blank=True,
+        related_name="children",
+        db_index=True,
+        on_delete=models.CASCADE,
+    )
+    level = models.PositiveIntegerField(editable=False, default=0)
+    lft = models.PositiveIntegerField(editable=False, null=True)
+    rght = models.PositiveIntegerField(editable=False, null=True)
+    tree_id =  models.PositiveIntegerField(db_index=True, editable=False, null=True)
     # fields
     name = models.TextField(unique=True)
     # TODO(codecakes): check and use auditlog instead.
@@ -202,3 +218,5 @@ class FilterAttrType(models.Model):
                 "registration_data_import_id__name": rule_obj["intake_group"],
             }
         return {}
+
+mptt.register(TargetPopulation, order_insertion_by=["name"])
