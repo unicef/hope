@@ -2,7 +2,6 @@ import graphene
 from account.models import User
 from core import utils
 from core.permissions import is_authenticated
-from django.db import transaction
 from django.forms.models import model_to_dict
 from targeting.models import TargetPopulation
 from targeting.schema import TargetPopulationNode
@@ -44,7 +43,6 @@ class CopyTarget(graphene.relay.ClientIDMutation, TargetValidator):
         target_population_data = CopyTargetPopulationInput()
 
     @classmethod
-    @transaction.atomic
     @is_authenticated
     def mutate_and_get_payload(cls, _root, info, **kwargs):
         user = info.context.user
@@ -70,7 +68,7 @@ class CopyTarget(graphene.relay.ClientIDMutation, TargetValidator):
             **target_population_dict
         )
         # Copy associations.
-        new_target_population = utils.copy_associations(
+        new_target_population = utils.copy_associations_async(
             target_population, new_target_population, exclude_foreign_fields
         )
         return CopyTarget(new_target_population)
@@ -93,12 +91,24 @@ class UpdateTarget(graphene.relay.ClientIDMutation, TargetValidator):
         return UpdateTarget(target_population=target_population)
 
 
-class DeleteTarget:
-    # TODO(codecakes): implement
-    pass
+class DeleteTarget(graphene.relay.ClientIDMutation, TargetValidator):
+    ok = graphene.Boolean()
+
+    class Input:
+        target_id = graphene.ID(required=True)
+
+    @classmethod
+    @is_authenticated
+    def mutate_and_get_payload(cls, _root, _info, **kwargs):
+        target_id = utils.decode_id_string(kwargs["target_id"])
+        target_population = TargetPopulation.objects.get(id=target_id)
+        cls.validate_is_finalized(target_population.status)
+        target_population.delete()
+        return DeleteTarget(ok=True)
 
 
 class Mutations(graphene.ObjectType):
     update_target = UpdateTarget.Field()
     copy_target = CopyTarget.Field()
+    delete_target = DeleteTarget.Field()
     # TODO(codecakes): implement others
