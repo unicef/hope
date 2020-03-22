@@ -1,4 +1,6 @@
+import concurrent.futures as concurrent_futures
 import enum
+import functools
 import json
 import re
 from typing import List
@@ -125,14 +127,48 @@ def filter_relational_fields(model: django.db.models.Model) -> list:
     )
 
 
-def copy_associations(
+def set_field_object_association(
+    from_model: django.db.models.Model,
+    to_model: django.db.models.Model,
+    field: django.db.models.Field,
+):
+    """Adds an association field to a model from another model.
+
+    Args:
+        from_model (django.db.models.Model): The model to copy associated field from.
+        to_model (django.db.models.Model): The model to copy associated field to.
+        field (django.db.models.Field): The Field value(s) to copy.
+    """
+    from_model_foreign_relation_set = getattr(from_model, field.name)
+    to_model_foreign_relation_set = getattr(to_model, field.name)
+    to_model_foreign_relation_set.set(from_model_foreign_relation_set.all())
+
+
+def copy_associations_async(
     from_model: django.db.models.Model,
     to_model: django.db.models.Model,
     exclude_foreign_fields: list,
 ) -> django.db.models.Model:
-    """Copy reverse and M2M associations."""
-    for field in exclude_foreign_fields:
-        from_model_foreign_relation_set = getattr(from_model, field.name)
-        to_model_foreign_relation_set = getattr(to_model, field.name)
-        to_model_foreign_relation_set.set(from_model_foreign_relation_set.all())
+    """Copy reverse and M2M associations concurrently.
+
+    Args:
+        from_model (django.db.models.Model): The model to copy associated field from.
+        to_model (django.db.models.Model): The model to copy associated field to.
+        field (django.db.models.Field): The Field value(s) to copy.
+        exclude_foreign_fields (List[django.db.models.Field]): List of relatable field value(s) to copy.
+
+    Returns:
+        The updated model to copy associations to.
+    """
+    set_assocation_partial_fn = functools.partial(
+        set_field_object_association, from_model, to_model
+    )
+    # You can't use context manager. See Why: graphene/relay/mutation.py line 70
+    executor = concurrent_futures.ThreadPoolExecutor(
+        max_workers=len(exclude_foreign_fields)
+    )
+    _results = list(
+        executor.map(set_assocation_partial_fn, exclude_foreign_fields,)
+    )
+    executor.shutdown(wait=True)
     return to_model
