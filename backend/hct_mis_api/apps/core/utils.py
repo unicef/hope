@@ -112,3 +112,63 @@ def update_model(model: django.db.models.Model, changeset: dict):
     for attrib, value in changeset.items():
         if hasattr(model, attrib):
             setattr(model, attrib, value)
+
+
+def get_choices_values(choices):
+    return tuple(
+        choice[0] if isinstance(choice, tuple) else choice for choice in choices
+    )
+
+
+def serialize_flex_attributes():
+    """
+    Flexible Attributes objects to dict mapping:
+        "individuals": {
+            "id_type_i_f": {
+                "type": "SINGLE_CHOICE",
+                "choices": (
+                    ("BIRTH_CERTIFICATE", "Birth Certificate"),
+                    ("DRIVERS_LICENSE", "Driver's License"),
+                    ("UNHCR_ID", "UNHCR ID"),
+                    ("NATIONAL_ID", "National ID"),
+                    ("NATIONAL_PASSPORT", "National Passport"),
+                    ("OTHER", "Other"),
+                    ("NOT_AVAILABLE", "Not Available"),
+                ),
+            },
+        },
+        "households": {
+            "assistance_type_h_f": {
+                "type": "MULTIPLE_CHOICE",
+                "choices": (
+                    (1, "Option 1"),
+                    (2, "Option 2"),
+                    (3, "Option 3"),
+                    (4, "Option 4"),
+                    (5, "Option 5"),
+                    (6, "Option 6"),
+                    (7, "Option 7"),
+                ),
+            },
+        }
+    """
+    from core.models import FlexibleAttribute
+
+    flex_attributes = FlexibleAttribute.objects.all()
+
+    result_dict = {
+        "individuals": {},
+        "households": {},
+    }
+
+    for attr in flex_attributes:
+        associated_with = (
+            "households" if attr.associated_with == 0 else "individuals"
+        )
+
+        result_dict[associated_with][attr.name] = {
+            "type": attr.type,
+            "choices": list(attr.choices.values_list("name", flat=True)),
+        }
+
+    return result_dict

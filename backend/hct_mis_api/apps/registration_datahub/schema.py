@@ -11,8 +11,8 @@ from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
 from core.extended_connection import ExtendedConnection
-from core.utils import decode_id_string
 from core.filters import AgeRangeFilter, IntegerRangeFilter
+from core.utils import decode_id_string
 from registration_datahub.models import (
     ImportedHousehold,
     ImportedIndividual,
@@ -130,6 +130,12 @@ class ImportDataNode(DjangoObjectType):
         model = ImportData
         filter_fields = []
         interfaces = (relay.Node,)
+
+
+class XlsxRowErrorNode(graphene.ObjectType):
+    row_number = graphene.Int()
+    header = graphene.String()
+    message = graphene.String()
 
 
 class Query(graphene.ObjectType):
