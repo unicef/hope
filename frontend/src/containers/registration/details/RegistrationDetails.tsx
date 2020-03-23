@@ -89,12 +89,12 @@ export function RegistrationDetails({
         </Grid>
         <BigValueContainer>
           <LabelizedField label='Total Number of Households'>
-            <BigValue>10</BigValue>
+            <BigValue>{registration.numberOfHouseholds}</BigValue>
           </LabelizedField>
         </BigValueContainer>
         <BigValueContainer>
           <LabelizedField label='Total Number of Individuals'>
-            <BigValue>10</BigValue>
+            <BigValue>{registration.numberOfIndividuals}</BigValue>
           </LabelizedField>
         </BigValueContainer>
         <BigValueContainer>

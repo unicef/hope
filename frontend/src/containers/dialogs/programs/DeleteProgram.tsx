@@ -19,7 +19,7 @@ import {
 } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/AllPrograms';
-import { useSnackbarHelper } from '../../../hooks/useBreadcrumbHelper';
+import { useSnackbar } from '../../../hooks/useSnackBar';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -65,9 +65,8 @@ interface DeleteProgramProps {
 export function DeleteProgram({
   program,
 }: DeleteProgramProps): React.ReactElement {
-  const history = useHistory();
   const [open, setOpen] = useState(false);
-  const snackBar = useSnackbarHelper();
+  const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
   const [mutate] = useDeleteProgramMutation({
     variables: {
@@ -94,16 +93,13 @@ export function DeleteProgram({
       },
     });
     if (!response.errors && response.data.deleteProgram) {
-      history.push({
+      showMessage('Programme removed.', {
         pathname: `/${businessArea}/programs/`,
-        state: { showSnackbar: true, message: 'Programme removed.' },
+        historyMethod: 'push',
       });
       setOpen(false);
     } else {
-      history.replace({
-        pathname: history.location.pathname,
-        state: {showSnackbar: true, message: 'Programme remove action failed.'}
-      })
+      showMessage('Programme remove action failed.');
     }
   };
   return (
@@ -141,15 +137,6 @@ export function DeleteProgram({
           </DialogActions>
         </DialogFooter>
       </MidDialog>
-      {snackBar.show && (
-        <Snackbar
-          open={snackBar.show}
-          autoHideDuration={5000}
-          onClose={() => snackBar.setShow(false)}
-        >
-          <SnackbarContent message={snackBar.message} />
-        </Snackbar>
-      )}
     </span>
   );
 }
