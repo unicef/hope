@@ -36,7 +36,7 @@ export const HouseholdTable = ({
       <UniversalTable<HouseholdNode, AllHouseholdsQueryVariables>
         title='Households'
         headCells={headCells}
-        rowsPage={[10, 15, 20]}
+        rowsPerPageOptions={[10, 15, 20]}
         query={useAllHouseholdsQuery}
         queriedObjectName='allHouseholds'
         initialVariables={initialVariables}
