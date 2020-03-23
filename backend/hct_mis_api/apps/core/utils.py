@@ -1,4 +1,6 @@
+import concurrent.futures as concurrent_futures
 import enum
+import functools
 import json
 import re
 from typing import List
@@ -112,3 +114,121 @@ def update_model(model: django.db.models.Model, changeset: dict):
     for attrib, value in changeset.items():
         if hasattr(model, attrib):
             setattr(model, attrib, value)
+    model.save()
+
+
+def filter_relational_fields(model: django.db.models.Model) -> list:
+    """Get Only Relational Fields."""
+    return list(
+        filter(
+            lambda field: field not in model._meta.fields,
+            model._meta.get_fields(),
+        )
+    )
+
+
+def set_field_object_association(
+    from_model: django.db.models.Model,
+    to_model: django.db.models.Model,
+    field: django.db.models.Field,
+):
+    """Adds an association field to a model from another model.
+
+    Args:
+        from_model (django.db.models.Model): The model to copy associated field from.
+        to_model (django.db.models.Model): The model to copy associated field to.
+        field (django.db.models.Field): The Field value(s) to copy.
+    """
+    from_model_foreign_relation_set = getattr(from_model, field.name)
+    to_model_foreign_relation_set = getattr(to_model, field.name)
+    to_model_foreign_relation_set.set(from_model_foreign_relation_set.all())
+
+
+def copy_associations_async(
+    from_model: django.db.models.Model,
+    to_model: django.db.models.Model,
+    exclude_foreign_fields: list,
+) -> django.db.models.Model:
+    """Copy reverse and M2M associations concurrently.
+
+    Args:
+        from_model (django.db.models.Model): The model to copy associated field from.
+        to_model (django.db.models.Model): The model to copy associated field to.
+        field (django.db.models.Field): The Field value(s) to copy.
+        exclude_foreign_fields (List[django.db.models.Field]): List of relatable field value(s) to copy.
+
+    Returns:
+        The updated model to copy associations to.
+    """
+    set_assocation_partial_fn = functools.partial(
+        set_field_object_association, from_model, to_model
+    )
+    # You can't use context manager. See Why: graphene/relay/mutation.py line 70
+    executor = concurrent_futures.ThreadPoolExecutor(
+        max_workers=len(exclude_foreign_fields)
+    )
+    _results = list(
+        executor.map(set_assocation_partial_fn, exclude_foreign_fields,)
+    )
+    executor.shutdown(wait=True)
+    return to_model
+
+
+def get_choices_values(choices):
+    return tuple(
+        choice[0] if isinstance(choice, tuple) else choice for choice in choices
+    )
+
+
+def serialize_flex_attributes():
+    """
+    Flexible Attributes objects to dict mapping:
+        "individuals": {
+            "id_type_i_f": {
+                "type": "SINGLE_CHOICE",
+                "choices": (
+                    ("BIRTH_CERTIFICATE", "Birth Certificate"),
+                    ("DRIVERS_LICENSE", "Driver's License"),
+                    ("UNHCR_ID", "UNHCR ID"),
+                    ("NATIONAL_ID", "National ID"),
+                    ("NATIONAL_PASSPORT", "National Passport"),
+                    ("OTHER", "Other"),
+                    ("NOT_AVAILABLE", "Not Available"),
+                ),
+            },
+        },
+        "households": {
+            "assistance_type_h_f": {
+                "type": "MULTIPLE_CHOICE",
+                "choices": (
+                    (1, "Option 1"),
+                    (2, "Option 2"),
+                    (3, "Option 3"),
+                    (4, "Option 4"),
+                    (5, "Option 5"),
+                    (6, "Option 6"),
+                    (7, "Option 7"),
+                ),
+            },
+        }
+    """
+    from core.models import FlexibleAttribute
+
+    flex_attributes = FlexibleAttribute.objects.all()
+
+    result_dict = {
+        "individuals": {},
+        "households": {},
+    }
+
+    for attr in flex_attributes:
+        associated_with = (
+            "households" if attr.associated_with == 0 else "individuals"
+        )
+
+        result_dict[associated_with][attr.name] = {
+            "type": attr.type,
+            "choices": list(attr.choices.values_list("name", flat=True)),
+        }
+
+    return result_dict
