@@ -49,6 +49,7 @@ class ImportedHousehold(TimeStampedUUIDModel):
         related_name="heading_household",
         null=True,
     )
+    registration_date = models.DateField(null=True)
 
     def __str__(self):
         return f"Household CashAssist ID: {self.household_ca_id}"
@@ -159,9 +160,21 @@ class ImportedIndividual(TimeStampedUUIDModel):
 
 
 class RegistrationDataImportDatahub(TimeStampedUUIDModel):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, blank=True)
     import_date = models.DateTimeField(auto_now_add=True)
-    hct_id = models.UUIDField(null=True, default=None)
+    hct_id = models.UUIDField(null=True)
+    import_data = models.OneToOneField(
+        "ImportData",
+        related_name="registration_data_import",
+        on_delete=models.CASCADE,
+        null=True,
+    )
 
     def __str__(self):
         return self.name
+
+
+class ImportData(TimeStampedUUIDModel):
+    xlsx_file = models.FileField()
+    number_of_households = models.PositiveIntegerField()
+    number_of_individuals = models.PositiveIntegerField()

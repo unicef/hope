@@ -6,15 +6,28 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Q
 from django.utils.encoding import force_text
 from django.utils.functional import Promise
-from graphene import String, DateTime, Scalar
-from graphene import relay, ConnectionField, Connection
+from graphene import (
+    String,
+    DateTime,
+    Scalar,
+    relay,
+    ConnectionField,
+    Connection,
+)
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
 from account.schema import UserObjectType
 from core.extended_connection import ExtendedConnection
-from core.models import Location, BusinessArea
+from core.models import (
+    Location,
+    BusinessArea,
+    CoreAttribute,
+    FlexibleAttribute,
+    FlexibleAttributeChoice,
+)
 from core.utils import decode_id_string
+from household.models import Household
 
 
 class ChoiceObject(graphene.ObjectType):
@@ -88,6 +101,61 @@ class BusinessAreaNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
+class FlexibleAttributeChoiceNode(DjangoObjectType):
+    name = graphene.String()
+    value = graphene.String(source="label")
+
+    class Meta:
+        model = FlexibleAttributeChoice
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+        exclude_fields = [
+            "history",
+        ]
+
+
+class FlexibleAttributeNode(DjangoObjectType):
+    choices = graphene.List(FlexibleAttributeChoiceNode)
+    associated_with = graphene.String()
+
+    def resolve_choices(self, info):
+        return self.choices.all()
+
+    def resolve_associated_with(self, info):
+        return str(
+            FlexibleAttribute.ASSOCIATED_WITH_CHOICES[self.associated_with][1]
+        )
+
+    class Meta:
+        model = FlexibleAttribute
+        fields = [
+            "id",
+            "type",
+            "name",
+            "label",
+            "hint",
+            "required",
+        ]
+
+
+class CoreFieldChoiceObject(graphene.ObjectType):
+    name = String()
+    value = String()
+    admin = String()
+    list_name = String()
+
+
+class CoreFieldNode(graphene.ObjectType):
+    id = graphene.String()
+    type = graphene.String()
+    name = graphene.String()
+    label = graphene.JSONString()
+    hint = graphene.String()
+    required = graphene.Boolean()
+    choices = graphene.List(CoreFieldChoiceObject)
+    associated_with = graphene.String()
+
+
 class Query(graphene.ObjectType):
     location = relay.Node.Field(LocationNode)
     all_locations = DjangoFilterConnectionField(LocationNode)
@@ -95,7 +163,19 @@ class Query(graphene.ObjectType):
     all_log_entries = ConnectionField(
         LogEntryObjectConnection, object_id=graphene.String(required=True),
     )
+    all_core_field_attributes = graphene.List(
+        CoreFieldNode, description="core field datatype meta.",
+    )
+    all_flex_field_attributes = graphene.List(
+        FlexibleAttributeNode, description="flex field datatype meta."
+    )
 
     def resolve_all_log_entries(self, info, object_id, **kwargs):
         id = decode_id_string(object_id)
         return LogEntry.objects.filter(~Q(action=0), object_pk=id).all()
+
+    def resolve_all_core_field_attributes(self, info):
+        return CoreAttribute.get_core_fields(Household)
+
+    def resolve_all_flex_field_attributes(self, info):
+        return FlexibleAttribute.objects.all()

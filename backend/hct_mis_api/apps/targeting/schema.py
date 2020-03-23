@@ -1,18 +1,24 @@
 import functools
 import json
 import operator
-from decimal import Decimal
 
 import django_filters
 import graphene
 import targeting.models as target_models
+from core.models import FlexibleAttribute
 from core.schema import ExtendedConnection
+from core.filters import IntegerFilter
 from django.db.models import Q
 from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
+from household import models as household_models
 from household.models import Household
 from household.schema import HouseholdNode
+from core import utils
+
+# TODO(codecakes): see if later the format can be kept consistent in FilterAttrType model.
+# by using FlexFieldNode and CoreFieldNode to return target filter rules.
 
 
 class TargetPopulationFilter(django_filters.FilterSet):
@@ -25,43 +31,35 @@ class TargetPopulationFilter(django_filters.FilterSet):
     created_by_name = django_filters.CharFilter(
         field_name="created_by", method="filter_created_by_name"
     )
-    num_individuals_min = django_filters.NumberFilter(
-        field_name="target_rules", method="filter_num_individuals_min"
+    num_individuals_min = IntegerFilter(
+        field_name="target_rules__core_rules__num_individuals_min",
+        lookup_expr="gte",
+        method="filter_num_individuals_min"
     )
-    num_individuals_max = django_filters.NumberFilter(
-        field_name="target_rules", method="filter_num_individuals_max"
+    num_individuals_max = IntegerFilter(
+        field_name="target_rules__core_rules__num_individuals_max",
+        lookup_expr="lte",
+        method="filter_num_individuals_max"
     )
 
-    # TODO(codecakes): waiting on dist to school and adminlevel clarification.
+    @staticmethod
+    def filter_num_individuals_min(queryset, _model, _value):
+        return queryset.distinct("id")
+
+    @staticmethod
+    def filter_num_individuals_max(queryset, _model, _value):
+        return queryset.distinct("id")
+
     @staticmethod
     def filter_created_by_name(queryset, model_field, value):
         """Gets full name of the associated user from query."""
-        qs = []
+        fname_query_key = f"{model_field}__first_name__icontains"
+        lname_query_key = f"{model_field}__last_name__icontains"
         for name in value.strip().split():
-            first_name_query = {
-                f"{model_field}__first_name__icontains": name,
-            }
-            last_name_query = {
-                f"{model_field}__last_name__icontains": name,
-            }
-            qs.append(
-                queryset.filter(Q(**first_name_query) | Q(**last_name_query))
+            queryset = queryset.filter(
+                Q(**{fname_query_key: name,}) | Q(**{lname_query_key: name,})
             )
-        return functools.reduce(lambda x, y: x.union(y), qs)
-
-    @staticmethod
-    def filter_num_individuals_min(queryset, model_field, value):
-        field_name = f"{model_field}__core_rules__num_individuals_min__gte"
-        if isinstance(value, Decimal):
-            value = int(value)
-        return queryset.filter(**{field_name: value})
-
-    @staticmethod
-    def filter_num_individuals_max(queryset, model_field, value):
-        field_name = f"{model_field}__core_rules__num_individuals_max__lte"
-        if isinstance(value, Decimal):
-            value = int(value)
-        return queryset.filter(**{field_name: value})
+        return queryset
 
     class Meta:
         model = target_models.TargetPopulation
@@ -176,9 +174,7 @@ class Query(graphene.ObjectType):
             rules = {}
             rules.update(rule_obj.get("core_rules", {}))
             rules.update(rule_obj.get("flex_rules", {}))
-            # TODO(codecakes): decouple to core and flex functions.
-            # many dynamic fields here will depend on the info
-            #  from FilterAttrType class falls back on that method.
+            # TODO(codecakes): make it more dynamic/generic later by just using query filters.
             for functor in target_models.FilterAttrType.apply_filters(rules):
                 search_rules.update(functor())
             yield Household.objects.filter(**search_rules)
