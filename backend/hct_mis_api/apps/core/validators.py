@@ -38,7 +38,8 @@ class BaseValidator:
 
 
 class CommonValidator(BaseValidator):
-    def validate_start_end_date(self, start_date, end_date, *args, **kwargs):
+    @classmethod
+    def validate_start_end_date(cls, start_date, end_date, *args, **kwargs):
         if start_date and end_date:
             if start_date > end_date:
                 raise ValidationError(
