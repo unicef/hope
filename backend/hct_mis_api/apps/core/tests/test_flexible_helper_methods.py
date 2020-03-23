@@ -35,6 +35,7 @@ class TestFlexibleHelperMethods(TestCase):
                 "label",
                 "hint",
                 "group",
+                "associated_with",
                 "history",
             ],
             [
