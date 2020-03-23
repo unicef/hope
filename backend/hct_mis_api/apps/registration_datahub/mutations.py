@@ -4,7 +4,6 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from graphene_file_upload.scalars import Upload
 
-from core.models import FlexibleAttribute
 from core.permissions import is_authenticated
 from core.utils import decode_id_string
 from core.validators import BaseValidator
@@ -17,7 +16,8 @@ from registration_datahub.models import (
     ImportedHousehold,
     ImportedIndividual,
 )
-from registration_datahub.schema import ImportDataNode
+from registration_datahub.schema import ImportDataNode, XlsxRowErrorNode
+from registration_datahub.validators import UploadXLSXValidator
 
 
 class CreateRegistrationDataImportExcelInput(graphene.InputObjectType):
@@ -185,6 +185,7 @@ class ApproveRegistrationDataImportMutation(BaseValidator, graphene.Mutation):
 
     @classmethod
     @is_authenticated
+    @transaction.atomic
     def mutate(cls, root, info, id):
         decode_id = decode_id_string(id)
 
@@ -192,9 +193,8 @@ class ApproveRegistrationDataImportMutation(BaseValidator, graphene.Mutation):
             id=decode_id,
         )
         cls.validate(status=obj.status)
-
         obj.status = "APPROVED"
-
+        obj.save()
         return ApproveRegistrationDataImportMutation(obj)
 
 
@@ -214,6 +214,7 @@ class UnapproveRegistrationDataImportMutation(BaseValidator, graphene.Mutation):
 
     @classmethod
     @is_authenticated
+    @transaction.atomic
     def mutate(cls, root, info, id):
         decode_id = decode_id_string(id)
 
@@ -221,48 +222,57 @@ class UnapproveRegistrationDataImportMutation(BaseValidator, graphene.Mutation):
             id=decode_id,
         )
         cls.validate(status=obj.status)
-
         obj.status = "IN_REVIEW"
-
+        obj.save()
         return ApproveRegistrationDataImportMutation(obj)
 
 
 class UploadImportDataXLSXFile(
-    BaseValidator, graphene.Mutation,
+    UploadXLSXValidator, graphene.Mutation,
 ):
     import_data = graphene.Field(ImportDataNode)
+    errors = graphene.List(XlsxRowErrorNode)
 
     class Arguments:
         file = Upload(required=True)
 
-    def validate_file_with_template(self, *args, **kwargs):
-        xlsx_file = kwargs.get("file")
-        flex_attr_names = FlexibleAttribute.objects.values("name")
-        # still don't know which core fields we will have
-
-        core_fields = {
-            "individuals": (),
-            "households": (),
-        }
-
-        wb = openpyxl.load_workbook(xlsx_file)
-
-        for name, fields in core_fields.items():
-            sheet = wb[name.capitalize()]
-            first_row = sheet[1]
-
-            expected_column_names = core_fields[name] + flex_attr_names
-            column_names = [cell.value for cell in first_row]
-
     @classmethod
     @is_authenticated
     def mutate(cls, root, info, file):
-        # cls.validate(file=file)
+        # TODO: Is it good approach?
+        #  consult this with Janek
+        errors = cls.validate(file=file)
+
+        if errors:
+            return UploadImportDataXLSXFile(None, errors)
+
+        wb = openpyxl.load_workbook(file)
+
+        hh_sheet = wb["Households"]
+        ind_sheet = wb["Individuals"]
+
+        number_of_households = 0
+        number_of_individuals = 0
+
+        # Could just return max_row if openpyxl won't count empty rows too
+        for row in hh_sheet.iter_rows(min_row=3):
+            if not any([cell.value for cell in row]):
+                continue
+            number_of_households += 1
+
+        for row in ind_sheet.iter_rows(min_row=3):
+
+            if not any([cell.value for cell in row]):
+                continue
+            number_of_individuals += 1
+
         created = ImportData.objects.create(
-            xlsx_file=file, number_of_households=0, number_of_individuals=0,
+            xlsx_file=file,
+            number_of_households=number_of_households,
+            number_of_individuals=number_of_individuals,
         )
 
-        return UploadImportDataXLSXFile(created)
+        return UploadImportDataXLSXFile(created, [])
 
 
 class DeleteRegistrationDataImport(graphene.Mutation):
