@@ -28,6 +28,11 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
           numberOfHouseholds
           numberOfIndividuals
         }
+        errors {
+          rowNumber
+          header
+          message
+        }
       }
     }
     """
