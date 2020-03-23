@@ -1,17 +1,11 @@
 import React, { useState } from 'react';
 import moment from 'moment';
-import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import {
-  Button,
-  DialogActions,
-  Snackbar,
-  SnackbarContent,
-} from '@material-ui/core';
+import { Button, DialogActions } from '@material-ui/core';
 import { useCreateProgramMutation } from '../../../__generated__/graphql';
 import { ProgramForm } from '../../forms/ProgramForm';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { useSnackbarHelper } from '../../../hooks/useBreadcrumbHelper';
+import { useSnackbar } from '../../../hooks/useSnackBar';
 
 const DialogFooter = styled.div`
   padding: 12px 16px;
@@ -21,9 +15,8 @@ const DialogFooter = styled.div`
 `;
 
 export function CreateProgram(): React.ReactElement {
-  const history = useHistory();
   const [open, setOpen] = useState(false);
-  const snackBar = useSnackbarHelper();
+  const { showMessage } = useSnackbar();
   const [mutate] = useCreateProgramMutation();
   const businessArea = useBusinessArea();
 
@@ -39,15 +32,12 @@ export function CreateProgram(): React.ReactElement {
       },
     });
     if (!response.errors && response.data.createProgram) {
-      history.push({
+      showMessage('Programme created.', {
         pathname: `/${businessArea}/programs/${response.data.createProgram.program.id}`,
-        state: { showSnackbar: true, message: 'Programme created.' },
+        historyMethod: 'push',
       });
     } else {
-      history.replace({
-        pathname: history.location.pathname,
-        state: {showSnackbar: true, message: 'Programme create action failed.'}
-      })
+      showMessage('Programme create action failed.');
     }
   };
 
@@ -82,15 +72,6 @@ export function CreateProgram(): React.ReactElement {
         onClose={() => setOpen(false)}
         title='Set-up a new Programme'
       />
-      {snackBar.show && (
-        <Snackbar
-          open={snackBar.show}
-          autoHideDuration={5000}
-          onClose={() => snackBar.setShow(false)}
-        >
-          <SnackbarContent message={snackBar.message} />
-        </Snackbar>
-      )}
     </div>
   );
 }
