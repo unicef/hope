@@ -8,20 +8,23 @@ const Container = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  ${({ absolute }) => (absolute ? 'position: absolute;' : '')}
 `;
 
 interface LoadingComponentProps {
   isLoading?: boolean;
+  absolute?: boolean;
 }
 
 export function LoadingComponent({
   isLoading = true,
+  absolute,
 }: LoadingComponentProps): React.ReactElement {
   if (!isLoading) {
     return null;
   }
   return (
-    <Container>
+    <Container absolute={absolute}>
       <CircularProgress />
     </Container>
   );

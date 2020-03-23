@@ -15,6 +15,7 @@ from household.fixtures import (
 from payment.fixtures import PaymentRecordFactory
 from program.fixtures import CashPlanFactory, ProgramFactory
 from registration_data.fixtures import RegistrationDataImportFactory
+from registration_data.models import RegistrationDataImport
 from registration_datahub.fixtures import (
     RegistrationDataImportDatahubFactory,
     ImportedIndividualFactory,
@@ -150,7 +151,9 @@ class Command(BaseCommand):
             self._generate_program_with_dependencies(options)
 
         # Data imports generation
-        data_imports_dth = RegistrationDataImportDatahubFactory.create_batch(5)
+        data_imports_dth = RegistrationDataImportDatahubFactory.create_batch(
+            5, hct_id=RegistrationDataImport.objects.all()[0].id
+        )
         for data_import in data_imports_dth:
             for _ in range(50):
                 imported_household = ImportedHouseholdFactory(

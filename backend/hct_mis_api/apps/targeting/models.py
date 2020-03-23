@@ -1,10 +1,10 @@
 """Models for target population and target rules."""
 
 import datetime as dt
-import enum
 import functools
 from typing import List
 
+from core.utils import EnumGetChoices
 from django.conf import settings
 from django.contrib.postgres.fields import IntegerRangeField
 from django.contrib.postgres.fields import JSONField
@@ -13,8 +13,8 @@ from django.contrib.postgres.validators import (
     RangeMaxValueValidator,
 )
 from django.db import models
-from model_utils.models import UUIDModel
 from psycopg2.extras import NumericRange
+from utils.models import TimeStampedUUIDModel
 
 _MAX_LEN = 256
 _MIN_RANGE = 1
@@ -39,22 +39,13 @@ def get_integer_range(min_range=None, max_range=None):
     )
 
 
-class EnumGetChoices(enum.Enum):
-    def __init__(self, *args, **kwargs):
-        super().__init__()
-
-    @classmethod
-    def get_choices(cls) -> List[tuple]:
-        return [(field.name, field.value) for field in cls]
-
-
 class TargetStatus(EnumGetChoices):
-    IN_PROGRESS = "In Progress"
-    CANDIDATE_LIST = "Candidate List"
+    DRAFT = "Draft"
+    APPROVED = "Approved"
     FINALIZED = "Finalized"
 
 
-class TargetPopulation(UUIDModel):
+class TargetPopulation(TimeStampedUUIDModel):
     """Model for target populations.
 
     Has N:N association with households.
@@ -62,9 +53,9 @@ class TargetPopulation(UUIDModel):
 
     STATE_CHOICES = TargetStatus.get_choices()
     # fields
-    name = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
+    name = models.TextField(unique=True)
     # TODO(codecakes): check and use auditlog instead.
+    # Dependent field. Change to auditlog or change depending modules in future CL.
     last_edited_at = models.DateTimeField(auto_now=True, null=True)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -93,8 +84,8 @@ class TargetPopulation(UUIDModel):
         help_text="""Set only when the target population moves from draft to
             candidate list (frozen) state""")
 
-    _total_households = models.IntegerField(default=0)
-    _total_family_size = models.IntegerField(default=0)
+    _total_households = models.PositiveIntegerField(default=0)
+    _total_family_size = models.PositiveIntegerField(default=0)
 
     @property
     def total_households(self):
@@ -125,9 +116,9 @@ class TargetPopulation(UUIDModel):
         """Gets sum of all family sizes from all the households."""
         return (
             (
-                self.households.filter()
-                .aggregate(models.Sum("family_size"))
-                .get("family_size__sum")
+                self.households.aggregate(models.Sum("family_size")).get(
+                    "family_size__sum"
+                )
             )
             if not self._total_family_size
             else self._total_family_size
@@ -218,19 +209,15 @@ class FilterAttrType(models.Model):
 
     @classmethod
     def get_age(cls, rule_obj: dict) -> dict:
-        if "age_min" in rule_obj or "age_max" in rule_obj:
-            age_min = rule_obj.get("age_min", None)
-            age_max = rule_obj.get("age_max", None)
-            today = dt.date.today()
-            this_year = today.year
-            year_min = age_max and (this_year - age_max)
-            year_max = (age_min and (this_year - age_min)) or year_min
-            year_min = year_min or year_max
-            return {
-                "head_of_household_dob__year__lte": year_max,
-                "head_of_household_dob__year__gte": year_min,
-            }
-        return {}
+        age_min = rule_obj.get("age_min")
+        age_max = rule_obj.get("age_max")
+        result = {}
+        this_year = dt.date.today().year
+        if age_min:
+            result["head_of_household_dob__year__lte"] = this_year - age_min
+        if age_max:
+            result["head_of_household_dob__year__gte"] = this_year - age_max
+        return result
 
     @classmethod
     def get_gender(cls, rule_obj: dict) -> dict:
