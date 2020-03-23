@@ -1,8 +1,23 @@
 import json
 
 import graphene
-from account.schema import UserObjectType
 from auditlog.models import LogEntry
+from django.core.serializers.json import DjangoJSONEncoder
+from django.db.models import Q
+from django.utils.encoding import force_text
+from django.utils.functional import Promise
+from graphene import (
+    String,
+    DateTime,
+    Scalar,
+    relay,
+    ConnectionField,
+    Connection,
+)
+from graphene_django import DjangoObjectType
+from graphene_django.filter import DjangoFilterConnectionField
+
+from account.schema import UserObjectType
 from core.extended_connection import ExtendedConnection
 from core.models import (
     Location,
@@ -12,14 +27,6 @@ from core.models import (
     FlexibleAttributeChoice,
 )
 from core.utils import decode_id_string
-from django.core.serializers.json import DjangoJSONEncoder
-from django.db.models import Q
-from django.utils.encoding import force_text
-from django.utils.functional import Promise
-from graphene import String, DateTime, Scalar
-from graphene import relay, ConnectionField, Connection
-from graphene_django import DjangoObjectType
-from graphene_django.filter import DjangoFilterConnectionField
 from household.models import Household
 
 
@@ -107,7 +114,7 @@ class FlexibleAttributeChoiceNode(DjangoObjectType):
         ]
 
 
-class FlexFieldNode(DjangoObjectType):
+class FlexibleAttributeNode(DjangoObjectType):
     choices = graphene.List(FlexibleAttributeChoiceNode)
     associated_with = graphene.String()
 
@@ -129,6 +136,7 @@ class FlexFieldNode(DjangoObjectType):
             "hint",
             "required",
         ]
+
 
 class CoreFieldChoiceObject(graphene.ObjectType):
     name = String()
@@ -159,7 +167,7 @@ class Query(graphene.ObjectType):
         CoreFieldNode, description="core field datatype meta.",
     )
     all_flex_field_attributes = graphene.List(
-        FlexFieldNode, description="flex field datatype meta."
+        FlexibleAttributeNode, description="flex field datatype meta."
     )
 
     def resolve_all_log_entries(self, info, object_id, **kwargs):
