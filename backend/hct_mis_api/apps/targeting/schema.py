@@ -5,17 +5,15 @@ import operator
 import django_filters
 import graphene
 import targeting.models as target_models
-from core.models import FlexibleAttribute
-from core.schema import ExtendedConnection
 from core.filters import IntegerFilter
+from core.schema import ExtendedConnection
 from django.db.models import Q
 from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
-from household import models as household_models
 from household.models import Household
 from household.schema import HouseholdNode
-from core import utils
+
 
 # TODO(codecakes): see if later the format can be kept consistent in FilterAttrType model.
 # by using FlexFieldNode and CoreFieldNode to return target filter rules.
@@ -27,18 +25,22 @@ class TargetPopulationFilter(django_filters.FilterSet):
     Loads associated entries for Households and TargetRules.
     """
 
-    name = django_filters.CharFilter(field_name="name", lookup_expr="icontains", distinct=True)
-    created_by_name = django_filters.CharFilter(field_name="created_by", method="filter_created_by_name")
+    name = django_filters.CharFilter(
+        field_name="name", lookup_expr="icontains", distinct=True
+    )
+    created_by_name = django_filters.CharFilter(
+        field_name="created_by", method="filter_created_by_name"
+    )
     # TODO(codecakes): Fix allTargetPopulationFilters query response by fixing the below two.
     num_individuals_min = IntegerFilter(
         field_name="target_rules__core_rules__num_individuals_min",
         lookup_expr="gte",
-        distinct=True
+        distinct=True,
     )
     num_individuals_max = IntegerFilter(
         field_name="target_rules__core_rules__num_individuals_max",
         lookup_expr="lte",
-        distinct=True
+        distinct=True,
     )
 
     @staticmethod
@@ -117,6 +119,12 @@ class SavedTargetRuleNode(DjangoObjectType):
         filterset_class = SavedTargetRuleFilter
 
 
+class StatusNode(graphene.ObjectType):
+    # show list of status available
+    key = graphene.String()
+    value = graphene.String()
+
+
 class Query(graphene.ObjectType):
     target_population = relay.Node.Field(TargetPopulationNode, distinct=True)
     all_target_population = DjangoFilterConnectionField(TargetPopulationNode)
@@ -130,6 +138,13 @@ class Query(graphene.ObjectType):
         serialized_list=graphene.String(),
         description="json dump of filters containing key value pairs.",
     )
+    target_status_types = graphene.List(StatusNode)
+
+    def resolve_target_status_types(self, info):
+        return [
+            StatusNode(key, value)
+            for (key, value) in target_models.TargetPopulation.STATE_CHOICES
+        ]
 
     def resolve_target_rules(self, info, serialized_list):
         """Resolver for target_rules. Queries from golden records.
