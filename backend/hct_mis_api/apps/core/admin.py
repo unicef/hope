@@ -1,6 +1,12 @@
 from collections import defaultdict
 
 import xlrd
+from core.models import (
+    BusinessArea,
+    FlexibleAttribute,
+    FlexibleAttributeGroup,
+    FlexibleAttributeChoice,
+)
 from django.contrib import admin
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -9,13 +15,6 @@ from django.shortcuts import redirect, render
 from django.urls import path
 from django.utils.html import strip_tags
 from xlrd import XLRDError
-
-from core.models import (
-    BusinessArea,
-    FlexibleAttribute,
-    FlexibleAttributeGroup,
-    FlexibleAttributeChoice,
-)
 
 
 class XLSImportForm(forms.Form):
@@ -399,7 +398,8 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
                     choices = FlexibleAttributeChoice.objects.filter(
                         list_name=choice_name,
                     )
-                    field.flexibleattributechoice_set.set(choices)
+                    # See core.models.FlexibleAttributeChoice.flex_attributes for why.
+                    field.choices.set(choices)
 
                 all_attrs.append(field)
 

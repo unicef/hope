@@ -12,18 +12,85 @@ docker-compose up
 docker-compose exec backend bash
 
 # in docker container
-./manage.py reset_db
-./manage.py migrate
-./manage.py loadbusinessareas
-./manage.py generatefixtures 
-./manage.py collectstatic 
+./manage.py init
 ```
+
+4. Go to [`localhost:8082/api/admin/`](http://localhost:8082/api/admin/) Flexible Attributes, click **Import XLS** choose file: backend/data/FlexibleAttributesInit.xls then load.
 
 Access the frontend in your browser at [`localhost:8082/login`](http://localhost:8082/login) . 
 
 Backend can be accessed at `/api/` i.e. [`localhost:8082/api/admin/`](http://localhost:8082/api/admin/) 
 
+### **Commands**
 
+**generatefixtures** - command for generating project fake data, requires business areas, which can be loaded before by using:
+
+```bash
+./manage.py loadbusinessareas
+```
+
+ or **generatefixtures** will ask if you want to load business areas.
+
+accepts the arguments:
+
+* **--program** - Create provided amount of programs, default is 10
+* **--cash-plan** - Create provided amount of cash plans for one program, default is 10
+* **--payment-record** - Create provided amount of payment records assigned to household and cash plan, default is 10
+* **--noinput** - Suppresses all user prompts
+
+**loadbusinessareas** - load businessareas defined in XML file backend/data/GetBusinessAreaList\_XML.xml
+
+**migratealldb** - our custom command to migrate all databases specified in settings
+
+**init** - resets all databases, run migrations on all databases, load business areas and fake data with default values
+
+### Code formatting
+
+#### Backend
+
+for backend we are using **Black** - [https://github.com/psf/black](https://github.com/psf/black) \(don't install it in project, but globally\)
+
+here is instruction how to integrate **Black** with your editor [https://github.com/psf/black\#editor-integration](https://github.com/psf/black#editor-integration)
+
+#### Frontend
+
+for frontend we are using **Prettier**
+
+### Writing and running tests:
+
+#### **Backend:**
+
+for backend we are using _Django's TestCase_ and snapshottest.
+
+For snapshottest we are using our custom class **APITestCase**, use it if your test should use snapshots. Check existing tests to see how we are using it.
+
+We are keeping tests in &lt;app\_name&gt;/tests/ and creating separate files for each test case.
+
+to run all tests use:
+
+```bash
+./manage.py test
+```
+
+to overwrite existing snapshots:
+
+```bash
+./manage.py test --snapshot-update
+```
+
+You can run single test in TestCase or overwrite snapshot for only one TestCase by providing a path.
+
+Example for running single test method in TestCase.
+
+```bash
+./manage.py test core.tests.test_flexibles.TestFlexibles.test_load_invalid_file
+```
+
+More information can be found here:
+
+{% embed url="https://docs.djangoproject.com/en/3.0/topics/testing/overview/" %}
+
+[https://github.com/syrusakbary/snapshottest](https://github.com/syrusakbary/snapshottest)
 
 ## Development / Build / Deployment Process
 
