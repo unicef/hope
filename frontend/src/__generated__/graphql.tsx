@@ -154,6 +154,14 @@ export type ChoiceObject = {
   value?: Maybe<Scalars['String']>,
 };
 
+export type CoreFieldChoiceObject = {
+   __typename?: 'CoreFieldChoiceObject',
+  name?: Maybe<Scalars['String']>,
+  value?: Maybe<Scalars['String']>,
+  admin?: Maybe<Scalars['String']>,
+  listName?: Maybe<Scalars['String']>,
+};
+
 export type CoreFieldNode = {
    __typename?: 'CoreFieldNode',
   id?: Maybe<Scalars['String']>,
@@ -162,7 +170,7 @@ export type CoreFieldNode = {
   label?: Maybe<Scalars['JSONString']>,
   hint?: Maybe<Scalars['String']>,
   required?: Maybe<Scalars['Boolean']>,
-  choices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  choices?: Maybe<Array<Maybe<CoreFieldChoiceObject>>>,
   associatedWith?: Maybe<Scalars['String']>,
 };
 
@@ -236,34 +244,27 @@ export type DjangoDebugSql = {
 export type FlexFieldNode = {
    __typename?: 'FlexFieldNode',
   id: Scalars['UUID'],
-  createdAt: Scalars['DateTime'],
-  updatedAt: Scalars['DateTime'],
-  isRemoved: Scalars['Boolean'],
   type: FlexibleAttributeType,
   name: Scalars['String'],
   required: Scalars['Boolean'],
   label: Scalars['JSONString'],
   hint: Scalars['JSONString'],
-  associatedWith: FlexibleAttributeAssociatedWith,
-  choices?: Maybe<Array<Maybe<FlexibleAttributeChoice>>>,
+  choices?: Maybe<Array<Maybe<FlexibleAttributeChoiceNode>>>,
+  associatedWith?: Maybe<Scalars['String']>,
 };
 
-export enum FlexibleAttributeAssociatedWith {
-  A_0 = 'A_0',
-  A_1 = 'A_1'
-}
-
-export type FlexibleAttributeChoice = Node & {
-   __typename?: 'FlexibleAttributeChoice',
+export type FlexibleAttributeChoiceNode = Node & {
+   __typename?: 'FlexibleAttributeChoiceNode',
   id: Scalars['ID'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
   isRemoved: Scalars['Boolean'],
   listName: Scalars['String'],
-  name: Scalars['String'],
+  name?: Maybe<Scalars['String']>,
   label: Scalars['JSONString'],
   admin: Scalars['String'],
   flexAttributes: Array<FlexFieldNode>,
+  value?: Maybe<Scalars['String']>,
 };
 
 export enum FlexibleAttributeType {
@@ -511,8 +512,8 @@ export type HouseholdNodeTargetPopulationsArgs = {
   status?: Maybe<Scalars['String']>,
   households?: Maybe<Array<Maybe<Scalars['ID']>>>,
   targetRules?: Maybe<Array<Maybe<Scalars['ID']>>>,
-  numIndividualsMin?: Maybe<Scalars['Float']>,
-  numIndividualsMax?: Maybe<Scalars['Float']>,
+  numIndividualsMin?: Maybe<Scalars['Int']>,
+  numIndividualsMax?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -1427,6 +1428,7 @@ export type MergeRegistrationDataImportMutation = {
 
 export type Mutations = {
    __typename?: 'Mutations',
+  updateTarget?: Maybe<UpdateTargetPayload>,
   createProgram?: Maybe<CreateProgram>,
   updateProgram?: Maybe<UpdateProgram>,
   deleteProgram?: Maybe<DeleteProgram>,
@@ -1436,6 +1438,11 @@ export type Mutations = {
   approveRegistrationDataImport?: Maybe<ApproveRegistrationDataImportMutation>,
   unapproveRegistrationDataImport?: Maybe<UnapproveRegistrationDataImportMutation>,
   mergeRegistrationDataImport?: Maybe<MergeRegistrationDataImportMutation>,
+};
+
+
+export type MutationsUpdateTargetArgs = {
+  input: UpdateTargetInput
 };
 
 
@@ -1803,8 +1810,8 @@ export type QueryAllTargetPopulationArgs = {
   status?: Maybe<Scalars['String']>,
   households?: Maybe<Array<Maybe<Scalars['ID']>>>,
   targetRules?: Maybe<Array<Maybe<Scalars['ID']>>>,
-  numIndividualsMin?: Maybe<Scalars['Float']>,
-  numIndividualsMax?: Maybe<Scalars['Float']>,
+  numIndividualsMin?: Maybe<Scalars['Int']>,
+  numIndividualsMax?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -2103,8 +2110,9 @@ export type SavedTargetRuleNodeEdge = {
 export type TargetPopulationNode = Node & {
    __typename?: 'TargetPopulationNode',
   id: Scalars['ID'],
-  name: Scalars['String'],
   createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  name: Scalars['String'],
   lastEditedAt?: Maybe<Scalars['DateTime']>,
   createdBy?: Maybe<UserNode>,
   status: TargetPopulationStatus,
@@ -2202,6 +2210,24 @@ export type UpdateProgramInput = {
   businessAreaSlug?: Maybe<Scalars['String']>,
 };
 
+export type UpdateTargetInput = {
+  targetPopulationData?: Maybe<UpdateTargetPopulationInput>,
+  clientMutationId?: Maybe<Scalars['String']>,
+};
+
+export type UpdateTargetPayload = {
+   __typename?: 'UpdateTargetPayload',
+  targetPopulation?: Maybe<TargetPopulationNode>,
+  clientMutationId?: Maybe<Scalars['String']>,
+};
+
+export type UpdateTargetPopulationInput = {
+  id?: Maybe<Scalars['ID']>,
+  name?: Maybe<Scalars['String']>,
+  lastEditedAt?: Maybe<Scalars['DateTime']>,
+  status?: Maybe<Scalars['String']>,
+};
+
 
 export type UploadImportDataXlsxFile = {
    __typename?: 'UploadImportDataXLSXFile',
@@ -2256,8 +2282,8 @@ export type UserNodeTargetPopulationsArgs = {
   status?: Maybe<Scalars['String']>,
   households?: Maybe<Array<Maybe<Scalars['ID']>>>,
   targetRules?: Maybe<Array<Maybe<Scalars['ID']>>>,
-  numIndividualsMin?: Maybe<Scalars['Float']>,
-  numIndividualsMax?: Maybe<Scalars['Float']>,
+  numIndividualsMin?: Maybe<Scalars['Int']>,
+  numIndividualsMax?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -2331,8 +2357,8 @@ export type UserObjectTypeTargetPopulationsArgs = {
   status?: Maybe<Scalars['String']>,
   households?: Maybe<Array<Maybe<Scalars['ID']>>>,
   targetRules?: Maybe<Array<Maybe<Scalars['ID']>>>,
-  numIndividualsMin?: Maybe<Scalars['Float']>,
-  numIndividualsMax?: Maybe<Scalars['Float']>,
+  numIndividualsMin?: Maybe<Scalars['Int']>,
+  numIndividualsMax?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -2611,6 +2637,36 @@ export type AllProgramsQuery = (
   )> }
 );
 
+export type AllTargetPopulationsQueryVariables = {
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  orderBy?: Maybe<Scalars['String']>,
+  name?: Maybe<Scalars['String']>
+};
+
+
+export type AllTargetPopulationsQuery = (
+  { __typename?: 'Query' }
+  & { allTargetPopulation: Maybe<(
+    { __typename?: 'TargetPopulationNodeConnection' }
+    & Pick<TargetPopulationNodeConnection, 'totalCount' | 'edgeCount'>
+    & { edges: Array<Maybe<(
+      { __typename?: 'TargetPopulationNodeEdge' }
+      & Pick<TargetPopulationNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'TargetPopulationNode' }
+        & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'createdAt' | 'lastEditedAt' | 'totalHouseholds' | 'totalFamilySize'>
+        & { createdBy: Maybe<(
+          { __typename?: 'UserNode' }
+          & Pick<UserNode, 'firstName' | 'lastName'>
+        )> }
+      )> }
+    )>> }
+  )> }
+);
+
 export type AllUsersQueryVariables = {
   fullName?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>
@@ -2837,6 +2893,36 @@ export type ProgrammeChoiceDataQuery = (
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
   )>>> }
+);
+
+export type TargetPopulationQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type TargetPopulationQuery = (
+  { __typename?: 'Query' }
+  & { targetPopulation: Maybe<(
+    { __typename?: 'TargetPopulationNode' }
+    & Pick<TargetPopulationNode, 'id' | 'name' | 'status'>
+    & { households: (
+      { __typename?: 'HouseholdNodeConnection' }
+      & { edges: Array<Maybe<(
+        { __typename?: 'HouseholdNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'HouseholdNode' }
+          & Pick<HouseholdNode, 'id' | 'householdCaId'>
+          & { headOfHousehold: Maybe<(
+            { __typename?: 'IndividualNode' }
+            & Pick<IndividualNode, 'fullName'>
+          )>, location: (
+            { __typename?: 'LocationNode' }
+            & Pick<LocationNode, 'title'>
+          ) }
+        )> }
+      )>> }
+    ) }
+  )> }
 );
 
 export type AllImportedHouseholdsQueryVariables = {
@@ -3108,6 +3194,21 @@ export type UploadImportDataXlsxFileMutation = (
       ) }
     )> }
   )> }
+);
+
+export type ImportedIndividualFieldsQueryVariables = {};
+
+
+export type ImportedIndividualFieldsQuery = (
+  { __typename?: 'Query' }
+  & { allCoreFieldAttributes: Maybe<Array<Maybe<(
+    { __typename?: 'CoreFieldNode' }
+    & Pick<CoreFieldNode, 'id' | 'name' | 'label' | 'type' | 'associatedWith'>
+    & { choices: Maybe<Array<Maybe<(
+      { __typename?: 'CoreFieldChoiceObject' }
+      & Pick<CoreFieldChoiceObject, 'name' | 'value'>
+    )>>> }
+  )>>> }
 );
 
 export const RegistrationMinimalFragmentDoc = gql`
@@ -3922,6 +4023,78 @@ export function useAllProgramsLazyQuery(baseOptions?: ApolloReactHooks.LazyQuery
 export type AllProgramsQueryHookResult = ReturnType<typeof useAllProgramsQuery>;
 export type AllProgramsLazyQueryHookResult = ReturnType<typeof useAllProgramsLazyQuery>;
 export type AllProgramsQueryResult = ApolloReactCommon.QueryResult<AllProgramsQuery, AllProgramsQueryVariables>;
+export const AllTargetPopulationsDocument = gql`
+    query AllTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String) {
+  allTargetPopulation(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name: $name) {
+    edges {
+      node {
+        id
+        name
+        status
+        createdAt
+        lastEditedAt
+        totalHouseholds
+        totalFamilySize
+        createdBy {
+          firstName
+          lastName
+        }
+      }
+      cursor
+    }
+    totalCount
+    edgeCount
+  }
+}
+    `;
+export type AllTargetPopulationsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>, 'query'>;
+
+    export const AllTargetPopulationsComponent = (props: AllTargetPopulationsComponentProps) => (
+      <ApolloReactComponents.Query<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables> query={AllTargetPopulationsDocument} {...props} />
+    );
+    
+export type AllTargetPopulationsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables> & TChildProps;
+export function withAllTargetPopulations<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllTargetPopulationsQuery,
+  AllTargetPopulationsQueryVariables,
+  AllTargetPopulationsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables, AllTargetPopulationsProps<TChildProps>>(AllTargetPopulationsDocument, {
+      alias: 'allTargetPopulations',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllTargetPopulationsQuery__
+ *
+ * To run a query within a React component, call `useAllTargetPopulationsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllTargetPopulationsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllTargetPopulationsQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      orderBy: // value for 'orderBy'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useAllTargetPopulationsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>(AllTargetPopulationsDocument, baseOptions);
+      }
+export function useAllTargetPopulationsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>(AllTargetPopulationsDocument, baseOptions);
+        }
+export type AllTargetPopulationsQueryHookResult = ReturnType<typeof useAllTargetPopulationsQuery>;
+export type AllTargetPopulationsLazyQueryHookResult = ReturnType<typeof useAllTargetPopulationsLazyQuery>;
+export type AllTargetPopulationsQueryResult = ApolloReactCommon.QueryResult<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>;
 export const AllUsersDocument = gql`
     query AllUsers($fullName: String, $first: Int) {
   allUsers(fullName: $fullName, first: $first) {
@@ -4521,6 +4694,72 @@ export function useProgrammeChoiceDataLazyQuery(baseOptions?: ApolloReactHooks.L
 export type ProgrammeChoiceDataQueryHookResult = ReturnType<typeof useProgrammeChoiceDataQuery>;
 export type ProgrammeChoiceDataLazyQueryHookResult = ReturnType<typeof useProgrammeChoiceDataLazyQuery>;
 export type ProgrammeChoiceDataQueryResult = ApolloReactCommon.QueryResult<ProgrammeChoiceDataQuery, ProgrammeChoiceDataQueryVariables>;
+export const TargetPopulationDocument = gql`
+    query targetPopulation($id: ID!) {
+  targetPopulation(id: $id) {
+    id
+    name
+    status
+    households {
+      edges {
+        node {
+          id
+          headOfHousehold {
+            fullName
+          }
+          householdCaId
+          location {
+            title
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export type TargetPopulationComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<TargetPopulationQuery, TargetPopulationQueryVariables>, 'query'> & ({ variables: TargetPopulationQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const TargetPopulationComponent = (props: TargetPopulationComponentProps) => (
+      <ApolloReactComponents.Query<TargetPopulationQuery, TargetPopulationQueryVariables> query={TargetPopulationDocument} {...props} />
+    );
+    
+export type TargetPopulationProps<TChildProps = {}> = ApolloReactHoc.DataProps<TargetPopulationQuery, TargetPopulationQueryVariables> & TChildProps;
+export function withTargetPopulation<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  TargetPopulationQuery,
+  TargetPopulationQueryVariables,
+  TargetPopulationProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, TargetPopulationQuery, TargetPopulationQueryVariables, TargetPopulationProps<TChildProps>>(TargetPopulationDocument, {
+      alias: 'targetPopulation',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useTargetPopulationQuery__
+ *
+ * To run a query within a React component, call `useTargetPopulationQuery` and pass it any options that fit your needs.
+ * When your component renders, `useTargetPopulationQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useTargetPopulationQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useTargetPopulationQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<TargetPopulationQuery, TargetPopulationQueryVariables>) {
+        return ApolloReactHooks.useQuery<TargetPopulationQuery, TargetPopulationQueryVariables>(TargetPopulationDocument, baseOptions);
+      }
+export function useTargetPopulationLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<TargetPopulationQuery, TargetPopulationQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<TargetPopulationQuery, TargetPopulationQueryVariables>(TargetPopulationDocument, baseOptions);
+        }
+export type TargetPopulationQueryHookResult = ReturnType<typeof useTargetPopulationQuery>;
+export type TargetPopulationLazyQueryHookResult = ReturnType<typeof useTargetPopulationLazyQuery>;
+export type TargetPopulationQueryResult = ApolloReactCommon.QueryResult<TargetPopulationQuery, TargetPopulationQueryVariables>;
 export const AllImportedHouseholdsDocument = gql`
     query AllImportedHouseholds($after: String, $before: String, $first: Int, $last: Int, $rdiId: String, $orderBy: String) {
   allImportedHouseholds(after: $after, before: $before, first: $first, last: $last, rdiId: $rdiId, orderBy: $orderBy) {
@@ -5142,6 +5381,63 @@ export function useUploadImportDataXlsxFileMutation(baseOptions?: ApolloReactHoo
 export type UploadImportDataXlsxFileMutationHookResult = ReturnType<typeof useUploadImportDataXlsxFileMutation>;
 export type UploadImportDataXlsxFileMutationResult = ApolloReactCommon.MutationResult<UploadImportDataXlsxFileMutation>;
 export type UploadImportDataXlsxFileMutationOptions = ApolloReactCommon.BaseMutationOptions<UploadImportDataXlsxFileMutation, UploadImportDataXlsxFileMutationVariables>;
+export const ImportedIndividualFieldsDocument = gql`
+    query ImportedIndividualFields {
+  allCoreFieldAttributes {
+    id
+    name
+    label
+    type
+    associatedWith
+    choices {
+      name
+      value
+    }
+  }
+}
+    `;
+export type ImportedIndividualFieldsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>, 'query'>;
+
+    export const ImportedIndividualFieldsComponent = (props: ImportedIndividualFieldsComponentProps) => (
+      <ApolloReactComponents.Query<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables> query={ImportedIndividualFieldsDocument} {...props} />
+    );
+    
+export type ImportedIndividualFieldsProps<TChildProps = {}> = ApolloReactHoc.DataProps<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables> & TChildProps;
+export function withImportedIndividualFields<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ImportedIndividualFieldsQuery,
+  ImportedIndividualFieldsQueryVariables,
+  ImportedIndividualFieldsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables, ImportedIndividualFieldsProps<TChildProps>>(ImportedIndividualFieldsDocument, {
+      alias: 'importedIndividualFields',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useImportedIndividualFieldsQuery__
+ *
+ * To run a query within a React component, call `useImportedIndividualFieldsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useImportedIndividualFieldsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useImportedIndividualFieldsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useImportedIndividualFieldsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>) {
+        return ApolloReactHooks.useQuery<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>(ImportedIndividualFieldsDocument, baseOptions);
+      }
+export function useImportedIndividualFieldsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>(ImportedIndividualFieldsDocument, baseOptions);
+        }
+export type ImportedIndividualFieldsQueryHookResult = ReturnType<typeof useImportedIndividualFieldsQuery>;
+export type ImportedIndividualFieldsLazyQueryHookResult = ReturnType<typeof useImportedIndividualFieldsLazyQuery>;
+export type ImportedIndividualFieldsQueryResult = ApolloReactCommon.QueryResult<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>;
 
 
 export type ResolverTypeWrapper<T> = Promise<T> | T;
@@ -5239,7 +5535,6 @@ export type ResolversTypes = {
   BusinessAreaNodeEdge: ResolverTypeWrapper<BusinessAreaNodeEdge>,
   CashPlanNodeConnection: ResolverTypeWrapper<CashPlanNodeConnection>,
   CashPlanNodeEdge: ResolverTypeWrapper<CashPlanNodeEdge>,
-  Float: ResolverTypeWrapper<Scalars['Float']>,
   TargetPopulationNodeConnection: ResolverTypeWrapper<TargetPopulationNodeConnection>,
   TargetPopulationNodeEdge: ResolverTypeWrapper<TargetPopulationNodeEdge>,
   TargetPopulationNode: ResolverTypeWrapper<TargetPopulationNode>,
@@ -5276,6 +5571,7 @@ export type ResolversTypes = {
   JSONString: ResolverTypeWrapper<Scalars['JSONString']>,
   RegistrationDataImportNodeConnection: ResolverTypeWrapper<RegistrationDataImportNodeConnection>,
   RegistrationDataImportNodeEdge: ResolverTypeWrapper<RegistrationDataImportNodeEdge>,
+  Float: ResolverTypeWrapper<Scalars['Float']>,
   ProgramFrequencyOfPayments: ProgramFrequencyOfPayments,
   ProgramSector: ProgramSector,
   ProgramScope: ProgramScope,
@@ -5289,10 +5585,10 @@ export type ResolversTypes = {
   PaymentEntitlementDeliveryType: PaymentEntitlementDeliveryType,
   ChoiceObject: ResolverTypeWrapper<ChoiceObject>,
   CoreFieldNode: ResolverTypeWrapper<CoreFieldNode>,
+  CoreFieldChoiceObject: ResolverTypeWrapper<CoreFieldChoiceObject>,
   FlexFieldNode: ResolverTypeWrapper<FlexFieldNode>,
   FlexibleAttributeType: FlexibleAttributeType,
-  FlexibleAttributeAssociatedWith: FlexibleAttributeAssociatedWith,
-  FlexibleAttributeChoice: ResolverTypeWrapper<FlexibleAttributeChoice>,
+  FlexibleAttributeChoiceNode: ResolverTypeWrapper<FlexibleAttributeChoiceNode>,
   UserObjectType: ResolverTypeWrapper<UserObjectType>,
   ImportedHouseholdNode: ResolverTypeWrapper<ImportedHouseholdNode>,
   ImportedHouseholdResidenceStatus: ImportedHouseholdResidenceStatus,
@@ -5316,6 +5612,9 @@ export type ResolversTypes = {
   DjangoDebug: ResolverTypeWrapper<DjangoDebug>,
   DjangoDebugSQL: ResolverTypeWrapper<DjangoDebugSql>,
   Mutations: ResolverTypeWrapper<{}>,
+  UpdateTargetInput: UpdateTargetInput,
+  UpdateTargetPopulationInput: UpdateTargetPopulationInput,
+  UpdateTargetPayload: ResolverTypeWrapper<UpdateTargetPayload>,
   CreateProgramInput: CreateProgramInput,
   CreateProgram: ResolverTypeWrapper<CreateProgram>,
   UpdateProgramInput: UpdateProgramInput,
@@ -5359,7 +5658,6 @@ export type ResolversParentTypes = {
   BusinessAreaNodeEdge: BusinessAreaNodeEdge,
   CashPlanNodeConnection: CashPlanNodeConnection,
   CashPlanNodeEdge: CashPlanNodeEdge,
-  Float: Scalars['Float'],
   TargetPopulationNodeConnection: TargetPopulationNodeConnection,
   TargetPopulationNodeEdge: TargetPopulationNodeEdge,
   TargetPopulationNode: TargetPopulationNode,
@@ -5396,6 +5694,7 @@ export type ResolversParentTypes = {
   JSONString: Scalars['JSONString'],
   RegistrationDataImportNodeConnection: RegistrationDataImportNodeConnection,
   RegistrationDataImportNodeEdge: RegistrationDataImportNodeEdge,
+  Float: Scalars['Float'],
   ProgramFrequencyOfPayments: ProgramFrequencyOfPayments,
   ProgramSector: ProgramSector,
   ProgramScope: ProgramScope,
@@ -5409,10 +5708,10 @@ export type ResolversParentTypes = {
   PaymentEntitlementDeliveryType: PaymentEntitlementDeliveryType,
   ChoiceObject: ChoiceObject,
   CoreFieldNode: CoreFieldNode,
+  CoreFieldChoiceObject: CoreFieldChoiceObject,
   FlexFieldNode: FlexFieldNode,
   FlexibleAttributeType: FlexibleAttributeType,
-  FlexibleAttributeAssociatedWith: FlexibleAttributeAssociatedWith,
-  FlexibleAttributeChoice: FlexibleAttributeChoice,
+  FlexibleAttributeChoiceNode: FlexibleAttributeChoiceNode,
   UserObjectType: UserObjectType,
   ImportedHouseholdNode: ImportedHouseholdNode,
   ImportedHouseholdResidenceStatus: ImportedHouseholdResidenceStatus,
@@ -5436,6 +5735,9 @@ export type ResolversParentTypes = {
   DjangoDebug: DjangoDebug,
   DjangoDebugSQL: DjangoDebugSql,
   Mutations: {},
+  UpdateTargetInput: UpdateTargetInput,
+  UpdateTargetPopulationInput: UpdateTargetPopulationInput,
+  UpdateTargetPayload: UpdateTargetPayload,
   CreateProgramInput: CreateProgramInput,
   CreateProgram: CreateProgram,
   UpdateProgramInput: UpdateProgramInput,
@@ -5531,6 +5833,13 @@ export type ChoiceObjectResolvers<ContextType = any, ParentType extends Resolver
   value?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
+export type CoreFieldChoiceObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['CoreFieldChoiceObject'] = ResolversParentTypes['CoreFieldChoiceObject']> = {
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  value?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  admin?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  listName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
 export type CoreFieldNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['CoreFieldNode'] = ResolversParentTypes['CoreFieldNode']> = {
   id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
@@ -5538,7 +5847,7 @@ export type CoreFieldNodeResolvers<ContextType = any, ParentType extends Resolve
   label?: Resolver<Maybe<ResolversTypes['JSONString']>, ParentType, ContextType>,
   hint?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   required?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-  choices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  choices?: Resolver<Maybe<Array<Maybe<ResolversTypes['CoreFieldChoiceObject']>>>, ParentType, ContextType>,
   associatedWith?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
@@ -5593,28 +5902,26 @@ export type DjangoDebugSqlResolvers<ContextType = any, ParentType extends Resolv
 
 export type FlexFieldNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['FlexFieldNode'] = ResolversParentTypes['FlexFieldNode']> = {
   id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   type?: Resolver<ResolversTypes['FlexibleAttributeType'], ParentType, ContextType>,
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   required?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   label?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   hint?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
-  associatedWith?: Resolver<ResolversTypes['FlexibleAttributeAssociatedWith'], ParentType, ContextType>,
-  choices?: Resolver<Maybe<Array<Maybe<ResolversTypes['FlexibleAttributeChoice']>>>, ParentType, ContextType>,
+  choices?: Resolver<Maybe<Array<Maybe<ResolversTypes['FlexibleAttributeChoiceNode']>>>, ParentType, ContextType>,
+  associatedWith?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
-export type FlexibleAttributeChoiceResolvers<ContextType = any, ParentType extends ResolversParentTypes['FlexibleAttributeChoice'] = ResolversParentTypes['FlexibleAttributeChoice']> = {
+export type FlexibleAttributeChoiceNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['FlexibleAttributeChoiceNode'] = ResolversParentTypes['FlexibleAttributeChoiceNode']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   listName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   label?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   admin?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   flexAttributes?: Resolver<Array<ResolversTypes['FlexFieldNode']>, ParentType, ContextType>,
+  value?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type HouseholdNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['HouseholdNode'] = ResolversParentTypes['HouseholdNode']> = {
@@ -5842,6 +6149,7 @@ export type MergeRegistrationDataImportMutationResolvers<ContextType = any, Pare
 };
 
 export type MutationsResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutations'] = ResolversParentTypes['Mutations']> = {
+  updateTarget?: Resolver<Maybe<ResolversTypes['UpdateTargetPayload']>, ParentType, ContextType, RequireFields<MutationsUpdateTargetArgs, 'input'>>,
   createProgram?: Resolver<Maybe<ResolversTypes['CreateProgram']>, ParentType, ContextType, RequireFields<MutationsCreateProgramArgs, 'programData'>>,
   updateProgram?: Resolver<Maybe<ResolversTypes['UpdateProgram']>, ParentType, ContextType, MutationsUpdateProgramArgs>,
   deleteProgram?: Resolver<Maybe<ResolversTypes['DeleteProgram']>, ParentType, ContextType, RequireFields<MutationsDeleteProgramArgs, 'programId'>>,
@@ -5854,7 +6162,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'LocationNode' | 'BusinessAreaNode' | 'UserNode' | 'TargetPopulationNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'SavedTargetRuleNode' | 'FlexibleAttributeChoice' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode', ParentType, ContextType>,
+  __resolveType: TypeResolveFn<'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'LocationNode' | 'BusinessAreaNode' | 'UserNode' | 'TargetPopulationNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'SavedTargetRuleNode' | 'FlexibleAttributeChoiceNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode', ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
 };
 
@@ -6067,8 +6375,9 @@ export type SavedTargetRuleNodeEdgeResolvers<ContextType = any, ParentType exten
 
 export type TargetPopulationNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetPopulationNode'] = ResolversParentTypes['TargetPopulationNode']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   lastEditedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   status?: Resolver<ResolversTypes['TargetPopulationStatus'], ParentType, ContextType>,
@@ -6100,6 +6409,11 @@ export type UnapproveRegistrationDataImportMutationResolvers<ContextType = any, 
 
 export type UpdateProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdateProgram'] = ResolversParentTypes['UpdateProgram']> = {
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
+};
+
+export type UpdateTargetPayloadResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdateTargetPayload'] = ResolversParentTypes['UpdateTargetPayload']> = {
+  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
+  clientMutationId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export interface UploadScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Upload'], any> {
@@ -6169,6 +6483,7 @@ export type Resolvers<ContextType = any> = {
   CashPlanNodeConnection?: CashPlanNodeConnectionResolvers<ContextType>,
   CashPlanNodeEdge?: CashPlanNodeEdgeResolvers<ContextType>,
   ChoiceObject?: ChoiceObjectResolvers<ContextType>,
+  CoreFieldChoiceObject?: CoreFieldChoiceObjectResolvers<ContextType>,
   CoreFieldNode?: CoreFieldNodeResolvers<ContextType>,
   CreateProgram?: CreateProgramResolvers<ContextType>,
   CreateRegistrationDataImport?: CreateRegistrationDataImportResolvers<ContextType>,
@@ -6180,7 +6495,7 @@ export type Resolvers<ContextType = any> = {
   DjangoDebug?: DjangoDebugResolvers<ContextType>,
   DjangoDebugSQL?: DjangoDebugSqlResolvers<ContextType>,
   FlexFieldNode?: FlexFieldNodeResolvers<ContextType>,
-  FlexibleAttributeChoice?: FlexibleAttributeChoiceResolvers<ContextType>,
+  FlexibleAttributeChoiceNode?: FlexibleAttributeChoiceNodeResolvers<ContextType>,
   HouseholdNode?: HouseholdNodeResolvers<ContextType>,
   HouseholdNodeConnection?: HouseholdNodeConnectionResolvers<ContextType>,
   HouseholdNodeEdge?: HouseholdNodeEdgeResolvers<ContextType>,
@@ -6228,6 +6543,7 @@ export type Resolvers<ContextType = any> = {
   TargetPopulationNodeEdge?: TargetPopulationNodeEdgeResolvers<ContextType>,
   UnapproveRegistrationDataImportMutation?: UnapproveRegistrationDataImportMutationResolvers<ContextType>,
   UpdateProgram?: UpdateProgramResolvers<ContextType>,
+  UpdateTargetPayload?: UpdateTargetPayloadResolvers<ContextType>,
   Upload?: GraphQLScalarType,
   UploadImportDataXLSXFile?: UploadImportDataXlsxFileResolvers<ContextType>,
   UserNode?: UserNodeResolvers<ContextType>,
