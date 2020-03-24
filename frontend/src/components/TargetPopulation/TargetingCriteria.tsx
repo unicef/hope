@@ -85,6 +85,13 @@ export function TargetingCriteria({
     setOpen(false);
   };
 
+  const addCriteria = (values) => {
+    //eslint-disable-next-line
+    console.log('render', values);
+    helpers.push(values.criterias);
+    closeModal();
+  };
+
   return (
     <div>
       <PaperContainer>
@@ -106,6 +113,7 @@ export function TargetingCriteria({
                 title='Add targeting criteria'
                 open={isOpen}
                 onClose={() => closeModal()}
+                addCriteria={addCriteria}
               />
             </>
           )}
@@ -122,7 +130,8 @@ export function TargetingCriteria({
                     removeFunction={() => helpers.remove(index)}
                   />
 
-                  {index % 2 || (criterias.length === 1 && index === 0) ? null : (
+                  {index % 2 ||
+                  (criterias.length === 1 && index === 0) ? null : (
                     <Divider>
                       <DividerLabel>Or</DividerLabel>
                     </Divider>

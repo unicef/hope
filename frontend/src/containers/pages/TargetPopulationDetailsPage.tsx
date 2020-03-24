@@ -50,7 +50,7 @@ const criterias = [
         label: 'residence_status',
         value: 'CITIZEN'
       }
-    ]
+    ],
   },
 ];
 

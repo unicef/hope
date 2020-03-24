@@ -53,24 +53,18 @@ const DialogFooter = styled.div`
 const validationSchema = Yup.object().shape({
   criterias: Yup.array().of(
     Yup.object().shape({
-      name: Yup.string().required('Name is required'),
+      label: Yup.string().required('Label is required'),
     }),
   ),
 });
 
 const SubField = ({ field, form, ...otherProps }) => {
-  //eslint-disable-next-line
-  // debugger
-  // const subSelection = choices.find((each) => each.name === name);
-  // switch (subSelection.type) {
-  //   case 'SELECT_ONE':
-  //     return <div>Select one</div>
-  //   case 'INTEGER':
-  //     return <div>integer</div>;
-  //   default:
-  //     return <div>default</div>;
-  // }
-  return <div>Select one</div>;
+  switch (otherProps.type) {
+    case 'SELECT_ONE':
+      return <FormikSelectField field={field} form={form} {...otherProps} />;
+    default:
+      return <div>Dupa</div>;
+  }
 };
 
 interface ProgramFormPropTypes {
@@ -85,14 +79,14 @@ interface ProgramFormPropTypes {
 export function TargetCriteriaForm({
   criteria,
   //onSubmit,
-  //renderSubmit,
+  addCriteria,
   open,
   onClose,
   title,
 }): React.ReactElement {
   const { data, loading } = useImportedIndividualFieldsQuery();
 
-  let initialValue = {
+  const initialValue = {
     criterias: [
       {
         label: '',
@@ -103,17 +97,16 @@ export function TargetCriteriaForm({
 
   if (loading) return null;
 
-  if (criteria.core && criteria.core.length > 0) {
-    initialValue = { criterias: criteria.core };
-  }
+  // if (criteria.core && criteria.core.length > 0) {
+  //   initialValue = { criterias: criteria.core };
+  // }
   return (
     <DialogContainer>
       <Formik
         initialValues={initialValue}
-        onSubmit={(values) => {
-          //eslint-disable-next-line
-          debugger;
-          return console.log(values);
+        onSubmit={(values, bag) => {
+          bag.resetForm()
+          return addCriteria(values)
         }}
         validationSchema={validationSchema}
         enableReinitialize
@@ -142,28 +135,33 @@ export function TargetCriteriaForm({
                     <>
                       {values.criterias.map((each, index) => {
                         return (
-                          <div key={each.label}>
+                          //eslint-disable-next-line
+                          <div key={index}>
                             <Field
-                              name={each.label}
+                              name={`criterias[${index}].label`}
                               label='Choose field type'
                               fullWidth
                               required
                               choices={data.allCoreFieldAttributes}
-                              value={each.label}
+                              index={index}
                               component={FormikSelectField}
                             />
                             {each.label && (
                               <Field
-                                name={each.value}
-                                // choices={data.allCoreFieldAttributes.map(
-                                //   (option) =>{
-                                //     if(option.name === each.label) {
-                                //       option.choices
-                                //     }
-                                //   }
-                                // )}
-                                value={each.value}
-                                component={FormikSelectField}
+                                name={`criterias[${index}].value`}
+                                choices={
+                                  data.allCoreFieldAttributes.find(
+                                    (attributes) =>
+                                      attributes.name === each.label,
+                                  ).choices
+                                }
+                                type={
+                                  data.allCoreFieldAttributes.find(
+                                    (attributes) =>
+                                      attributes.name === each.label,
+                                  ).type
+                                }
+                                component={SubField}
                               />
                             )}
                           </div>
@@ -171,7 +169,7 @@ export function TargetCriteriaForm({
                       })}
                       <button
                         type='button'
-                        onClick={() => arrayHelpers.push({ name: '' })}
+                        onClick={() => arrayHelpers.push({ value: '', label: '' })}
                       >
                         Add
                       </button>
@@ -181,9 +179,9 @@ export function TargetCriteriaForm({
               </DialogContent>
               <DialogFooter>
                 <DialogActions>
-                  <Button onClick={onClose}>Cancel</Button>
+                  <Button onClick={() => onClose()}>Cancel</Button>
                   <Button
-                    onClick={submitForm}
+                    onClick={() => submitForm()}
                     type='submit'
                     color='primary'
                     variant='contained'

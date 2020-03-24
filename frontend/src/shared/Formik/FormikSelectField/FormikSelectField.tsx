@@ -21,7 +21,7 @@ export const FormikSelectField = ({
           {...field}
           {...otherProps}
           name={field.name}
-          value={field.value || field.name}
+          value={field.value}
           id={`textField-${field.name}`}
           error={isInvalid}
         >
