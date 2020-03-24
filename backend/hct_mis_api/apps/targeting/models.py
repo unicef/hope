@@ -73,16 +73,16 @@ class TargetPopulation(TimeStampedUUIDModel):
         related_name="target_populations",
         through="HouseholdSelection"
     )
-    candidate_list_number_households = models.IntegerField(blank=True, null=True)
-    candidate_list_number_individuals = models.IntegerField(blank=True, null=True)
-    final_list_number_households = models.IntegerField(blank=True, null=True)
-    final_list_number_individuals = models.IntegerField(blank=True, null=True)
+    candidate_list_total_households = models.PositiveIntegerField(blank=True, null=True)
+    candidate_list_total_individuals = models.PositiveIntegerField(blank=True, null=True)
+    final_list_total_households = models.PositiveIntegerField(blank=True, null=True)
+    final_list_total_individuals = models.PositiveIntegerField(blank=True, null=True)
     selection_computation_metadata = models.TextField(blank=True, null=True, 
         help_text="""This would be the metadata written to by say Corticon on how
         it arrived at the selection it made.""")
     program = models.ForeignKey("program.Program", blank=True, null=True,
         help_text="""Set only when the target population moves from draft to
-            candidate list (frozen) state""")
+            candidate list frozen state (approved)""")
 
     _total_households = models.PositiveIntegerField(default=0)
     _total_family_size = models.PositiveIntegerField(default=0)
@@ -100,7 +100,7 @@ class TargetPopulation(TimeStampedUUIDModel):
     def final_list(self):
         if self.status != STATE_CHOICES.FINALIZED:
             return []
-        return self.households.filter(selected=True)
+        return self.households.filter(final=True)
 
     @total_households.setter
     def total_households(self, value: int):
@@ -140,15 +140,16 @@ class HouseholdSelection(TimeStampedUUIDModel):
     This model contains metadata associated with the relation between a target 
     population and a household. Its understood that once the candidate list of
     households has been frozen, some external system (eg. Corticon) will run
-    to calculate vulnerability score and mark the households as having been
-    'selected'. By default a draft list or frozen candidate list will have
-    selected set to False.
+    to calculate vulnerability score. The user (may) filter again then against
+    the approved candidate list and mark the households as having been
+    'selected' or not (final=True/False). By default a draft list or frozen 
+    candidate list  will have final set to True.
     """
     household = models.ForeignKey("Household")
     target_population = models.ForeignKey("TargetPopulation")
-    vulnerability_score = models.DecimalField(blank=True, null=True)
-    selection_calculation_metadata = JSONField(default=dict)
-    selected = models.BooleanField(default=False,
+    vulnerability_score = models.DecimalField(blank=True, null=True,
+        help_text="Written by a tool such as Corticon.")
+    final = models.BooleanField(default=True,
         help_text="""
             When set to True, this means the household has been selected from 
             the candidate list. Only these households will be sent to
