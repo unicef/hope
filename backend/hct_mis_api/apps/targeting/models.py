@@ -13,6 +13,7 @@ from django.contrib.postgres.validators import (
     RangeMaxValueValidator,
 )
 from django.db import models
+from model_utils.models import SoftDeletableModel
 from psycopg2.extras import NumericRange
 from utils.models import TimeStampedUUIDModel
 
@@ -44,7 +45,7 @@ class TargetStatus(EnumGetChoices):
     FINALIZED = "Finalized"
 
 
-class TargetPopulation(TimeStampedUUIDModel):
+class TargetPopulation(TimeStampedUUIDModel, SoftDeletableModel):
     """Model for target populations.
 
     Has N:N association with households.
