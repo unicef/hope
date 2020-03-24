@@ -91,12 +91,24 @@ class UpdateTarget(graphene.relay.ClientIDMutation, TargetValidator):
         return UpdateTarget(target_population=target_population)
 
 
-class DeleteTarget:
-    # TODO(codecakes): implement
-    pass
+class DeleteTarget(graphene.relay.ClientIDMutation, TargetValidator):
+    ok = graphene.Boolean()
+
+    class Input:
+        target_id = graphene.ID(required=True)
+
+    @classmethod
+    @is_authenticated
+    def mutate_and_get_payload(cls, _root, _info, **kwargs):
+        target_id = utils.decode_id_string(kwargs["target_id"])
+        target_population = TargetPopulation.objects.get(id=target_id)
+        cls.validate_is_finalized(target_population.status)
+        target_population.delete()
+        return DeleteTarget(ok=True)
 
 
 class Mutations(graphene.ObjectType):
     update_target = UpdateTarget.Field()
     copy_target = CopyTarget.Field()
+    delete_target = DeleteTarget.Field()
     # TODO(codecakes): implement others
