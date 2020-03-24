@@ -35,6 +35,11 @@ const DividerLabel = styled.div`
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 14px;
   font-weight: 500;
   color: #253b46;

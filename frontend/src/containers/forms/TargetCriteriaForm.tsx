@@ -13,6 +13,7 @@ import { Field, Form, Formik, FieldArray } from 'formik';
 import { useImportedIndividualFieldsQuery } from '../../__generated__/graphql';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
+import { AddCircleOutline } from '@material-ui/icons';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -24,21 +25,6 @@ const DialogDescription = styled.div`
   color: rgba(0, 0, 0, 0.54);
 `;
 
-const MediumLabel = styled.div`
-  width: 60%;
-  margin: 12px 0;
-`;
-
-const DateFields = styled.div`
-  display: flex;
-  justify-content: space-between;
-  margin: 12px 0;
-`;
-
-const DateField = styled.div`
-  width: 48%;
-`;
-
 const DialogContainer = styled.div`
   position: absolute;
 `;
@@ -48,6 +34,51 @@ const DialogFooter = styled.div`
   margin: 0;
   border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
   text-align: right;
+`;
+
+const AddCriteriaWrapper = styled.div`
+  text-align: right;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: ${({ theme }) => theme.spacing(3)}px 0;
+`;
+
+const AddCriteria = styled.div`
+  display: flex;
+  align-items: center;
+  color: #003c8f;
+  text-transform: uppercase;
+  cursor: pointer;
+  svg {
+    margin-right: ${({ theme }) => theme.spacing(2)}px;
+  }
+`;
+
+const Divider = styled.div`
+  border-top: 1px solid #b1b1b5;
+  margin: ${({ theme }) => theme.spacing(10)}px 0;
+  position: relative;
+`;
+
+const DividerLabel = styled.div`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: #253b46;
+  text-transform: uppercase;
+  padding: 5px;
+  border: 1px solid #b1b1b5;
+  border-radius: 50%;
+  background-color: #fff;
 `;
 
 const validationSchema = Yup.object().shape({
@@ -63,7 +94,7 @@ const SubField = ({ field, form, ...otherProps }) => {
     case 'SELECT_ONE':
       return <FormikSelectField field={field} form={form} {...otherProps} />;
     default:
-      return <div>Dupa</div>;
+      return <div>Other fields</div>;
   }
 };
 
@@ -105,8 +136,8 @@ export function TargetCriteriaForm({
       <Formik
         initialValues={initialValue}
         onSubmit={(values, bag) => {
-          bag.resetForm()
-          return addCriteria(values)
+          bag.resetForm();
+          return addCriteria(values);
         }}
         validationSchema={validationSchema}
         enableReinitialize
@@ -164,15 +195,26 @@ export function TargetCriteriaForm({
                                 component={SubField}
                               />
                             )}
+                            {index % 2 ||
+                            (values.criterias.length === 1 &&
+                              index === 0) ? null : (
+                              <Divider>
+                                <DividerLabel>And</DividerLabel>
+                              </Divider>
+                            )}
                           </div>
                         );
                       })}
-                      <button
-                        type='button'
-                        onClick={() => arrayHelpers.push({ value: '', label: '' })}
-                      >
-                        Add
-                      </button>
+                      <AddCriteriaWrapper>
+                        <AddCriteria
+                          onClick={() =>
+                            arrayHelpers.push({ value: '', label: '' })
+                          }
+                        >
+                          <AddCircleOutline />
+                          <span>Add Criteria</span>
+                        </AddCriteria>
+                      </AddCriteriaWrapper>
                     </>
                   )}
                 />
