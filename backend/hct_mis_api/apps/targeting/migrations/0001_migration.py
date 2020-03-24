@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
                 ('name', models.CharField(max_length=255)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
+                ('created_at', models.DateTimeField(auto_now_add=True, blank=True)),
                 ('rules', django.contrib.postgres.fields.jsonb.JSONField()),
                 ('created_by', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='target_populations', to=settings.AUTH_USER_MODEL)),
                 ('households', models.ManyToManyField(related_name='target_populations', to='household.Household')),
