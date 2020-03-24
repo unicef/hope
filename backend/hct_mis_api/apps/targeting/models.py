@@ -13,6 +13,8 @@ from django.contrib.postgres.validators import (
     RangeMaxValueValidator,
 )
 from django.db import models
+from django.utils.translation import ugettext_lazy as _
+from model_utils import Choices
 from psycopg2.extras import NumericRange
 from utils.models import TimeStampedUUIDModel
 
@@ -83,6 +85,10 @@ class TargetPopulation(TimeStampedUUIDModel):
     program = models.ForeignKey("program.Program", blank=True, null=True,
         help_text="""Set only when the target population moves from draft to
             candidate list frozen state (approved)""")
+    candidate_list_targeting_criteria = models.OneToOneField(TargetingCriteria,
+        blank=True, null=True)
+    final_list_targeting_criteria = models.OneToOneField(TargetingCriteria,
+        blank=True, null=True)
 
     _total_households = models.PositiveIntegerField(default=0)
     _total_family_size = models.PositiveIntegerField(default=0)
@@ -98,7 +104,7 @@ class TargetPopulation(TimeStampedUUIDModel):
 
     @property
     def final_list(self):
-        if self.status != STATE_CHOICES.FINALIZED:
+        if self.status == STATE_CHOICES.DRAFT:
             return []
         return self.households.filter(final=True)
 
@@ -157,6 +163,37 @@ class HouseholdSelection(TimeStampedUUIDModel):
             """)
 
 
+class TargetingCriteria(TimeStampedUUIDModel):
+    """
+    This is a set of ORed Rules. These are either applied for a candidate list
+    (against Golden Record) or for a final list (against the approved candidate
+    list).
+    """
+    pass
+
+class TargetingCriteriaRule(TimeStampedUUIDModel):
+    """
+    This is a set of ANDed Filters.
+    """
+    targeting_criteria = models.ForeignKey("TargetingCriteria")
+
+class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
+    """
+    This is one explicit filter like: 
+        :Age <> 10-20
+        :Sex = Female
+        :Sex != Male
+    """
+    COMPARISON_CHOICES = Choices(
+        ("EQUALS", _("Equals")),
+        ("CONTAINS", _("Contains")),
+        ("NOT_CONTAINS", _("Does not contain")),
+        ("RANGE", _("In between <>")),
+        ("GREATER_THAN", _("Greater than")),
+        ("LESS_THAN", _("Less than")),
+    )
+    targeting_criteria_rule = models.ForeignKey("TargetingCriteriaRule")
+
 class TargetRule(models.Model):
     """Model for storing each rule as a seperate entry.
 
@@ -175,6 +212,8 @@ class TargetRule(models.Model):
         - school_distance_max
         - num_individuals_min
         - num_individuals_max
+    
+    TODO(Jan): Delete when the model approach above is done.
      """
 
     flex_rules = JSONField()
