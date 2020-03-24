@@ -7,7 +7,8 @@ import graphene
 import targeting.models as target_models
 from core.filters import IntegerFilter
 from core.schema import ExtendedConnection
-from django.db.models import Q
+from django.db.models import Value
+from django.db.models.functions import Concat
 from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
@@ -46,13 +47,11 @@ class TargetPopulationFilter(django_filters.FilterSet):
     @staticmethod
     def filter_created_by_name(queryset, model_field, value):
         """Gets full name of the associated user from query."""
-        fname_query_key = f"{model_field}__first_name__icontains"
-        lname_query_key = f"{model_field}__last_name__icontains"
-        for name in value.strip().split():
-            queryset = queryset.filter(
-                Q(**{fname_query_key: name,}) | Q(**{lname_query_key: name,})
-            )
-        return queryset
+        fname_query_key = f"{model_field}__first_name"
+        lname_query_key = f"{model_field}__last_name"
+        return queryset.annotate(
+            full_name=Concat(fname_query_key, Value(" "), lname_query_key)
+        ).filter(full_name__icontains=value)
 
     class Meta:
         model = target_models.TargetPopulation
@@ -69,7 +68,7 @@ class TargetPopulationFilter(django_filters.FilterSet):
         fields=(
             "name",
             "created_at",
-            "created_by",
+            "created_by_full_name",
             "last_edited_at",
             "status",
             "total_households",
@@ -83,6 +82,10 @@ class TargetPopulationNode(DjangoObjectType):
 
     total_households = graphene.Int(source="total_households")
     total_family_size = graphene.Int(source="total_family_size")
+    created_by_full_name = graphene.String(source="created_by")
+
+    def resolve_created_by_full_name(self, _info, model):
+        return f"{model.first_name} {model.last_name}"
 
     class Meta:
         model = target_models.TargetPopulation
@@ -120,7 +123,8 @@ class SavedTargetRuleNode(DjangoObjectType):
 
 
 class StatusNode(graphene.ObjectType):
-    # show list of status available
+    """Show list of status available."""
+
     key = graphene.String()
     value = graphene.String()
 
