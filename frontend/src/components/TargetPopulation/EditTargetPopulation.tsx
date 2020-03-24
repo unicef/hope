@@ -79,6 +79,7 @@ export function EditTargetPopulation({ targetPopulation, criterias, cancelEdit }
                   color='primary'
                   type='submit'
                   onClick={submitForm}
+                  disabled={!values.name}
                 >
                   Save
                 </Button>
