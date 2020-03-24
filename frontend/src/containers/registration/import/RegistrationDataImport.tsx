@@ -27,6 +27,7 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { FormikTextField } from '../../../shared/Formik/FormikTextField';
 import { LoadingComponent } from '../../../components/LoadingComponent';
+import { FormikTagsSelectField } from '../../../shared/Formik/FormikTagsSelectField';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -106,28 +107,25 @@ export function RegistrationDataImport(): React.ReactElement {
   const [importType, setImportType] = useState();
   const { t } = useTranslation();
   let counters = null;
-  if(get(uploadData, 'uploadImportDataXlsxFile.importData')){
-    counters = <>
-      <div>
-        {
-          uploadData.uploadImportDataXlsxFile.importData
-              .numberOfHouseholds
-        }{' '}
-        Households available to Import
-      </div>
-      <div>
-        {
-          uploadData.uploadImportDataXlsxFile.importData
-              .numberOfIndividuals
-        }{' '}
-        Individuals available to Import
-      </div>
-    </>;
+  if (get(uploadData, 'uploadImportDataXlsxFile.importData')) {
+    counters = (
+      <>
+        <div>
+          {uploadData.uploadImportDataXlsxFile.importData.numberOfHouseholds}{' '}
+          Households available to Import
+        </div>
+        <div>
+          {uploadData.uploadImportDataXlsxFile.importData.numberOfIndividuals}{' '}
+          Individuals available to Import
+        </div>
+      </>
+    );
   }
   let importTypeSpecificContent = null;
-  if(importType==='excel'){
-    importTypeSpecificContent=<>
-      <DropzoneField
+  if (importType === 'excel') {
+    importTypeSpecificContent = (
+      <>
+        <DropzoneField
           loading={fileLoading}
           onChange={(files) => {
             if (files.length === 0) {
@@ -137,7 +135,7 @@ export function RegistrationDataImport(): React.ReactElement {
             const fileSizeMB = file.size / (1024 * 1024);
             if (fileSizeMB > 200) {
               showMessage(
-                  `File size is to big. It should be under 200MB, File size is ${fileSizeMB}MB`,
+                `File size is to big. It should be under 200MB, File size is ${fileSizeMB}MB`,
               );
               return;
             }
@@ -147,8 +145,9 @@ export function RegistrationDataImport(): React.ReactElement {
               },
             });
           }}
-      />
-    </>
+        />
+      </>
+    );
   }
 
   return (
@@ -170,6 +169,7 @@ export function RegistrationDataImport(): React.ReactElement {
         <Formik
           validationSchema={validationSchema}
           onSubmit={async (values) => {
+            console.log('values', values);
             const { data } = await createRegistrationMutate({
               variables: {
                 registrationDataImportData: {
@@ -226,6 +226,13 @@ export function RegistrationDataImport(): React.ReactElement {
                   label='Name Upload'
                   required
                   component={FormikTextField}
+                />
+                <Field
+                  name='tags'
+                  fullWidth
+                  label='Tags'
+                  required
+                  component={FormikTagsSelectField}
                 />
               </DialogContent>
               <DialogFooter>
