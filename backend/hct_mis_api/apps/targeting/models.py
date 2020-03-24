@@ -4,6 +4,8 @@ import datetime as dt
 import functools
 from typing import List
 
+from django.db.models import Q
+
 from core.utils import EnumGetChoices
 from django.conf import settings
 from django.contrib.postgres.fields import IntegerRangeField
@@ -56,9 +58,6 @@ class TargetPopulation(TimeStampedUUIDModel):
     STATE_CHOICES = TargetStatus.get_choices()
     # fields
     name = models.TextField(unique=True)
-    # TODO(codecakes): check and use auditlog instead.
-    # Dependent field. Change to auditlog or change depending modules in future CL.
-    last_edited_at = models.DateTimeField(auto_now=True, null=True)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -66,29 +65,53 @@ class TargetPopulation(TimeStampedUUIDModel):
         null=True,
     )
     status = models.CharField(
-        max_length=_MAX_LEN,
-        choices=STATE_CHOICES,
-        default=TargetStatus.IN_PROGRESS,
+        max_length=_MAX_LEN, choices=STATE_CHOICES, default=TargetStatus.DRAFT,
     )
     households = models.ManyToManyField(
-        "household.Household", 
+        "household.Household",
         related_name="target_populations",
-        through="HouseholdSelection"
+        through="HouseholdSelection",
     )
-    candidate_list_total_households = models.PositiveIntegerField(blank=True, null=True)
-    candidate_list_total_individuals = models.PositiveIntegerField(blank=True, null=True)
-    final_list_total_households = models.PositiveIntegerField(blank=True, null=True)
-    final_list_total_individuals = models.PositiveIntegerField(blank=True, null=True)
-    selection_computation_metadata = models.TextField(blank=True, null=True, 
+    candidate_list_total_households = models.PositiveIntegerField(
+        blank=True, null=True
+    )
+    candidate_list_total_individuals = models.PositiveIntegerField(
+        blank=True, null=True
+    )
+    final_list_total_households = models.PositiveIntegerField(
+        blank=True, null=True
+    )
+    final_list_total_individuals = models.PositiveIntegerField(
+        blank=True, null=True
+    )
+    selection_computation_metadata = models.TextField(
+        blank=True,
+        null=True,
         help_text="""This would be the metadata written to by say Corticon on how
-        it arrived at the selection it made.""")
-    program = models.ForeignKey("program.Program", blank=True, null=True,
+        it arrived at the selection it made.""",
+    )
+    program = models.ForeignKey(
+        "program.Program",
+        blank=True,
+        null=True,
         help_text="""Set only when the target population moves from draft to
-            candidate list frozen state (approved)""")
-    candidate_list_targeting_criteria = models.OneToOneField(TargetingCriteria,
-        blank=True, null=True)
-    final_list_targeting_criteria = models.OneToOneField(TargetingCriteria,
-        blank=True, null=True)
+            candidate list frozen state (approved)""",
+        on_delete=models.SET_NULL,
+    )
+    candidate_list_targeting_criteria = models.OneToOneField(
+        "TargetingCriteria",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="target_population_candidate",
+    )
+    final_list_targeting_criteria = models.OneToOneField(
+        "TargetingCriteria",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="target_population_final",
+    )
 
     _total_households = models.PositiveIntegerField(default=0)
     _total_family_size = models.PositiveIntegerField(default=0)
@@ -104,41 +127,9 @@ class TargetPopulation(TimeStampedUUIDModel):
 
     @property
     def final_list(self):
-        if self.status == STATE_CHOICES.DRAFT:
+        if self.status == TargetStatus.DRAFT:
             return []
         return self.households.filter(final=True)
-
-    @total_households.setter
-    def total_households(self, value: int):
-        """
-
-        Args:
-            value (int): the aggregated value of total households
-        """
-        self._total_households = value
-
-    @property
-    def total_family_size(self):
-        """Gets sum of all family sizes from all the households."""
-        return (
-            (
-                self.households.aggregate(models.Sum("family_size")).get(
-                    "family_size__sum"
-                )
-            )
-            if not self._total_family_size
-            else self._total_family_size
-        )
-
-    @total_family_size.setter
-    def total_family_size(self, value: int):
-        """
-
-        Args:
-            value (int): the aggregated value of the total family sizes.
-        """
-        self._total_family_size = value
-
 
 
 class HouseholdSelection(TimeStampedUUIDModel):
@@ -151,16 +142,28 @@ class HouseholdSelection(TimeStampedUUIDModel):
     'selected' or not (final=True/False). By default a draft list or frozen 
     candidate list  will have final set to True.
     """
-    household = models.ForeignKey("Household")
-    target_population = models.ForeignKey("TargetPopulation")
-    vulnerability_score = models.DecimalField(blank=True, null=True,
-        help_text="Written by a tool such as Corticon.")
-    final = models.BooleanField(default=True,
+
+    household = models.ForeignKey(
+        "household.Household", on_delete=models.CASCADE
+    )
+    target_population = models.ForeignKey(
+        "TargetPopulation", on_delete=models.CASCADE
+    )
+    vulnerability_score = models.DecimalField(
+        blank=True,
+        null=True,
+        decimal_places=3,
+        max_digits=6,
+        help_text="Written by a tool such as Corticon.",
+    )
+    final = models.BooleanField(
+        default=True,
         help_text="""
             When set to True, this means the household has been selected from 
             the candidate list. Only these households will be sent to
             CashAssist when a sync is run for the associated target population.
-            """)
+            """,
+    )
 
 
 class TargetingCriteria(TimeStampedUUIDModel):
@@ -169,13 +172,30 @@ class TargetingCriteria(TimeStampedUUIDModel):
     (against Golden Record) or for a final list (against the approved candidate
     list).
     """
+
     pass
+
+    def to_query_dict(self):
+        if self.rules.count() == 0:
+            return None
+        query = None
+        for criteria in self.rules:
+            if query is None:
+                query = Q(criteria.get_query)
+
 
 class TargetingCriteriaRule(TimeStampedUUIDModel):
     """
     This is a set of ANDed Filters.
     """
-    targeting_criteria = models.ForeignKey("TargetingCriteria")
+
+    targeting_criteria = models.ForeignKey(
+        "TargetingCriteria", related_name="rules", on_delete=models.CASCADE,
+    )
+
+    def get_query(self):
+        pass
+
 
 class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
     """
@@ -184,6 +204,7 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
         :Sex = Female
         :Sex != Male
     """
+
     COMPARISON_CHOICES = Choices(
         ("EQUALS", _("Equals")),
         ("CONTAINS", _("Contains")),
@@ -192,7 +213,29 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
         ("GREATER_THAN", _("Greater than")),
         ("LESS_THAN", _("Less than")),
     )
-    targeting_criteria_rule = models.ForeignKey("TargetingCriteriaRule")
+    comparision_method = models.CharField(
+        max_length=20, choices=COMPARISON_CHOICES,
+    )
+    targeting_criteria_rule = models.ForeignKey(
+        "TargetingCriteriaRule",
+        related_name="filters",
+        on_delete=models.CASCADE,
+    )
+    is_flex_field = models.BooleanField(default=False)
+    field_name = models.CharField(max_length=20)
+    arguments = JSONField(
+        help_text="""
+            Array of arguments
+            """
+    )
+
+    def get_query_for_cor_field(self):
+        pass
+
+    def get_query(self):
+        if self.comparision_method == "Equals":
+            pass
+
 
 class TargetRule(models.Model):
     """Model for storing each rule as a seperate entry.
