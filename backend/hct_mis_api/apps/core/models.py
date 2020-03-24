@@ -398,6 +398,7 @@ class CoreAttribute(object):
                 "label": {"English(EN)": "years in school"},
                 "hint": "number of years spent in school",
                 "required": True,
+                "lookup": "individuals__years_in_school",
                 "choices": [],
                 "associated_with": get_item_fn(associated_with[1]),
             },
@@ -414,6 +415,7 @@ class CoreAttribute(object):
             {
                 "id": "d6aa9669-ae82-4e3c-adfe-79b5d95d0754",
                 "type": _INTEGER,
+                "lookup": "family_size",
                 "name": "family_size",
                 "label": {"English(EN)": "Family Size"},
                 "hint": "how many persons in the household",
@@ -425,6 +427,7 @@ class CoreAttribute(object):
                 "id": "3c2473d6-1e81-4025-86c7-e8036dd92f4b",
                 "type": _SELECT_ONE,
                 "name": "residence_status",
+                "lookup": "individual__residence_status",
                 "required": True,
                 "label": {"English(EN)": "Residence Status"},
                 "hint": "residential status of household",
