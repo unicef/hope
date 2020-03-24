@@ -195,9 +195,9 @@ export function TargetCriteriaForm({
                                 component={SubField}
                               />
                             )}
-                            {index % 2 ||
-                            (values.criterias.length === 1 &&
-                              index === 0) ? null : (
+                            {values.criterias.length === 1 &&
+                            index === 0 ||
+                            index === values.criterias.length - 1 ? null : (
                               <Divider>
                                 <DividerLabel>And</DividerLabel>
                               </Divider>
