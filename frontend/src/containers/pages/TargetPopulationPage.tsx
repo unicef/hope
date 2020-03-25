@@ -37,7 +37,7 @@ export function TargetPopulationPage() {
 
   return (
     <div>
-      <PageHeader title={t('Target Population')}>
+      <PageHeader title={t('Targeting')}>
         <Button
           variant='contained'
           color='primary'

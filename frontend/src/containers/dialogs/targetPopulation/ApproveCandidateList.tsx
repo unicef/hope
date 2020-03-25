@@ -9,7 +9,7 @@ import {
 } from '@material-ui/core';
 import styled from 'styled-components';
 
-export interface FinalizeTargetPopulationPropTypes {
+export interface ApproveCandidateListPropTypes {
   open: boolean;
   setOpen: Function;
 }
@@ -31,7 +31,7 @@ const DialogDescription = styled.div`
   color: rgba(0, 0, 0, 0.54);
 `;
 
-export function DuplicateTargetPopulation({ open, setOpen }) {
+export function ApproveCandidateList({ open, setOpen }) {
   return (
     <Dialog
       open={open}
@@ -41,22 +41,25 @@ export function DuplicateTargetPopulation({ open, setOpen }) {
     >
       <DialogTitleWrapper>
         <DialogTitle id='scroll-dialog-title'>
-          <Typography variant='h6'>Duplicate Target Population?</Typography>
+          <Typography variant='h6'>Approve Candidate List</Typography>
         </DialogTitle>
       </DialogTitleWrapper>
       <DialogContent>
         <DialogDescription>
-          Please use a unique name for the copy of this Target Population.
-          <br /> <strong>Note</strong>: This duplicate will result in a snapshot
-          of this Target Population List data, any changes will result in new
-          data for this copy.
+          Are you sure you want to approve the targeting criteria for this
+          Candidate List? Once a Candidate List is <strong>Approved</strong> the
+          targeting criteria will be permanently frozen.
+        </DialogDescription>
+        <DialogDescription>
+          Please select a Programme you would like to associate this candidate
+          list with:
         </DialogDescription>
       </DialogContent>
       <DialogFooter>
         <DialogActions>
           <Button onClick={() => setOpen(false)}>CANCEL</Button>
           <Button type='submit' color='primary' variant='contained'>
-            Save
+            Approve
           </Button>
         </DialogActions>
       </DialogFooter>
