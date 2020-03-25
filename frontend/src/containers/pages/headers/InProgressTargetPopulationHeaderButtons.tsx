@@ -6,6 +6,7 @@ import { TargetPopulationNode } from '../../../__generated__/graphql';
 import { FinalizeTargetPopulation } from '../../dialogs/targetPopulation/FinalizeTargetPopulation';
 import { DeleteTargetPopulation } from '../../dialogs/targetPopulation/DeleteTargetPopulation';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
+import { ApproveCandidateList } from '../../dialogs/targetPopulation/ApproveCandidateList';
 
 
 const IconContainer = styled.span`
@@ -32,7 +33,7 @@ export function InProgressTargetPopulationHeaderButtons({
   targetPopulation,
   setEditState,
 }: InProgressTargetPopulationHeaderButtonsPropTypes): React.ReactElement {
-  const [openFinalize, setOpenFinalize] = useState(false);
+  const [openApprove, setOpenApprove] = useState(false);
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   //TODO: Add finalize query and connect to dialog
@@ -62,14 +63,14 @@ export function InProgressTargetPopulationHeaderButtons({
         <Button
           variant='contained'
           color='primary'
-          onClick={() => setOpenFinalize(true)}
+          onClick={() => setOpenApprove(true)}
         >
-          Finalize
+          Approve
         </Button>
       </ButtonContainer>
       <DuplicateTargetPopulation open={openDuplicate} setOpen={setOpenDuplicate}/>
       <DeleteTargetPopulation open={openDelete} setOpen={setOpenDelete} />
-      <FinalizeTargetPopulation open={openFinalize} setOpen={setOpenFinalize} />
+      <ApproveCandidateList open={openApprove} setOpen={setOpenApprove} />
     </div>
   );
 }

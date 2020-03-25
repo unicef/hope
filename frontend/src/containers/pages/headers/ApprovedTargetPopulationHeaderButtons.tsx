@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Button } from '@material-ui/core';
-import { OpenInNewRounded, FileCopy } from '@material-ui/icons';
+import { FileCopy } from '@material-ui/icons';
 import { TargetPopulationNode } from '../../../__generated__/graphql';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 
@@ -20,13 +20,13 @@ const ButtonContainer = styled.span`
   margin: 0 ${({ theme }) => theme.spacing(2)}px;
 `;
 
-export interface FinalizedTargetPopulationHeaderButtonsPropTypes {
+export interface ApprovedTargetPopulationHeaderButtonsPropTypes {
   targetPopulation: TargetPopulationNode;
 }
 
-export function FinalizedTargetPopulationHeaderButtons({
+export function ApprovedTargetPopulationHeaderButtons({
   targetPopulation,
-}: FinalizedTargetPopulationHeaderButtonsPropTypes): React.ReactElement {
+}: ApprovedTargetPopulationHeaderButtonsPropTypes): React.ReactElement {
   const [openDuplicate, setOpenDuplicate] = useState(false);
   return (
     <div>
@@ -39,9 +39,8 @@ export function FinalizedTargetPopulationHeaderButtons({
         <Button
           variant='contained'
           color='primary'
-          startIcon={<OpenInNewRounded />}
         >
-          Open in cashassist
+          Finalize
         </Button>
       </ButtonContainer>
       <DuplicateTargetPopulation
