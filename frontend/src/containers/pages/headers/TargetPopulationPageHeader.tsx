@@ -47,21 +47,21 @@ export function TargetPopulationPageHeader({
   //TODO: Use statuses from node - not in backend yet
   let buttons;
   switch (targetPopulation.status) {
-    // case 'IN_PROGRESS':
-    //   buttons = (
-    //     <InProgressTargetPopulationHeaderButtons
-    //       targetPopulation={targetPopulation}
-    //       setEditState={setEditState}
-    //     />
-    //   );
-    //   break;
-    case 'IN_PROGRESS': //APPROVED
+    case 'IN_PROGRESS':
       buttons = (
-        <ApprovedTargetPopulationHeaderButtons
+        <InProgressTargetPopulationHeaderButtons
           targetPopulation={targetPopulation}
+          setEditState={setEditState}
         />
       );
       break;
+    // case 'IN_PROGRESS': //APPROVED
+    //   buttons = (
+    //     <ApprovedTargetPopulationHeaderButtons
+    //       targetPopulation={targetPopulation}
+    //     />
+    //   );
+    //   break;
     case 'FINALIZED':
       buttons = (
         <FinalizedTargetPopulationHeaderButtons
