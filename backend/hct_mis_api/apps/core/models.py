@@ -428,7 +428,7 @@ class CoreAttribute(object):
                 "id": "3c2473d6-1e81-4025-86c7-e8036dd92f4b",
                 "type": _SELECT_ONE,
                 "name": "residence_status",
-                "lookup": "individual__residence_status",
+                "lookup": "residence_status",
                 "required": True,
                 "label": {"English(EN)": "Residence Status"},
                 "hint": "residential status of household",

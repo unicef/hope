@@ -240,7 +240,7 @@ def age_to_dob_range_query(field_name, age_min, age_max):
     query_dict = {}
     this_year = dt.date.today().year
     if age_min == age_max and age_min is not None:
-        return Q(**{f"{field_name}__year": age_min})
+        return Q(**{f"{field_name}__year": this_year-age_min})
     if age_min:
         query_dict[f"{field_name}__year__lte"] = this_year - age_min
     if age_max:
@@ -248,37 +248,33 @@ def age_to_dob_range_query(field_name, age_min, age_max):
     return Q(**query_dict)
 
 
-def age_to_dob_query(comparision_method, *args):
+def age_to_dob_query(comparision_method, args):
     field_name = "individuals__dob"
+    comparision_method_args_count = {
+        "RANGE": 2,
+        "EQUALS": 1,
+        "NOT_EQUALS": 1,
+        "GREATER_THAN": 1,
+        "LESS_THAN": 1,
+    }
+    args_count = comparision_method_args_count.get(comparision_method)
+    if args_count is None:
+        raise ValidationError(
+            f"Age filter query don't supports {comparision_method} type"
+        )
+    if len(args) != args_count:
+        raise ValidationError(
+            f"Age {comparision_method} filter query expect {args_count} arguments"
+        )
     if comparision_method == "RANGE":
-        if len(args) != 2:
-            raise ValidationError(
-                f"Age {comparision_method} filter query expect 2 arguments"
-            )
-        return age_to_dob_range_query(field_name, args)
+        return age_to_dob_range_query(field_name, *args)
     if comparision_method == "EQUALS":
-        if len(args) != 1:
-            raise ValidationError(
-                f"Age {comparision_method} filter query expect 1 argument"
-            )
         return age_to_dob_range_query(field_name, args[0], args[0])
     if comparision_method == "NOT_EQUALS":
-        if len(args) != 1:
-            raise ValidationError(
-                f"Age {comparision_method} filter query expect 1 argument"
-            )
         return ~(age_to_dob_range_query(field_name, args[0], args[0]))
     if comparision_method == "GREATER_THAN":
-        if len(args) != 1:
-            raise ValidationError(
-                f"Age {comparision_method} filter query expect 1 argument"
-            )
         return age_to_dob_range_query(field_name, args[0], None)
     if comparision_method == "LESS_THAN":
-        if len(args) != 1:
-            raise ValidationError(
-                f"Age {comparision_method} filter query expect 1 argument"
-            )
         return age_to_dob_range_query(field_name, None, args[0])
     raise ValidationError(
         f"Age filter query don't supports {comparision_method} type"
