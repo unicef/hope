@@ -4,8 +4,10 @@ import datetime as dt
 import functools
 from typing import List
 
+from django.core.exceptions import ValidationError
 from django.db.models import Q
 
+from core.models import CoreAttribute
 from core.utils import EnumGetChoices
 from django.conf import settings
 from django.contrib.postgres.fields import IntegerRangeField
@@ -207,9 +209,11 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
 
     COMPARISON_CHOICES = Choices(
         ("EQUALS", _("Equals")),
+        ("NOT_EQUALS", _("Not Equals")),
         ("CONTAINS", _("Contains")),
         ("NOT_CONTAINS", _("Does not contain")),
         ("RANGE", _("In between <>")),
+        ("NOT_IN_RANGE", _("Not in between <>")),
         ("GREATER_THAN", _("Greater than")),
         ("LESS_THAN", _("Less than")),
     )
@@ -229,12 +233,63 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
             """
     )
 
+   
+
     def get_query_for_cor_field(self):
-        pass
+        core_fields = CoreAttribute.get_core_fields()
+        core_field_attrs = [
+            attr for attr in core_fields if attr.name == self.field_name
+        ]
+        if len(core_field_attrs) != 1:
+            raise ValidationError(
+                f"There are no Core Field Attributes associated with this fieldName {self.field_name}"
+            )
+        core_field_attr = core_field_attrs[0]
+        get_query = core_field_attr.get("get_query")
+        if get_query:
+            return get_query(self.comparision_method, self.arguments)
+        lookup = core_field_attr.get("lookup")
+        if not lookup:
+            raise ValidationError(
+                f"Core Field Attributes associated with this fieldName {self.field_name} doesn't have get_query method or lookup field"
+            )
+
+        if self.comparision_method == "RANGE":
+            if len(self.arguments) != 2:
+                raise ValidationError(
+                    f"{self.field_name} {self.comparision_method} filter query expect 2 arguments"
+                )
+            return Q(**{f"{lookup}__range": self.arguments})
+        if self.comparision_method == "EQUALS":
+            if len(self.arguments) != 1:
+                raise ValidationError(
+                    f"{self.field_name} {self.comparision_method} filter query expect 1 arguments"
+                )
+            return Q(**{f"{lookup}": self.arguments[0]})
+
+        if self.comparision_method == "NOT_EQUALS":
+            if len(self.arguments) != 1:
+                raise ValidationError(
+                    f"{self.field_name} {self.comparision_method} filter query expect 1 arguments"
+                )
+            return ~Q(**{f"{lookup}": self.arguments[0]})
+
+        if self.comparision_method == "CONTAINS":
+            if len(self.arguments) != 1:
+                raise ValidationError(
+                    f"{self.field_name} {self.comparision_method} filter query expect 1 arguments"
+                )
+            return ~Q(**{f"{lookup}__contains": self.arguments[0]})
+        if self.comparision_method == "CONTAINS":
+            if len(self.arguments) != 1:
+                raise ValidationError(
+                    f"{self.field_name} {self.comparision_method} filter query expect 1 arguments"
+                )
+            return ~Q(**{f"{lookup}__contains": self.arguments[0]})
 
     def get_query(self):
-        if self.comparision_method == "Equals":
-            pass
+        if not self.is_flex_field:
+            return self.get_query_for_cor_field()
 
 
 class TargetRule(models.Model):

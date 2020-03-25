@@ -43,7 +43,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='targetpopulation',
             name='status',
-            field=models.CharField(choices=[('IN_PROGRESS', 'In Progress'), ('FINALIZED', 'Finalized')], default=targeting.models.TargetStatus('In Progress'), max_length=256),
+            field=models.CharField(choices=[('IN_PROGRESS', 'In Progress'), ('FINALIZED', 'Finalized')], default='IN_PROGRESS', max_length=256),
         ),
         migrations.CreateModel(
             name='TargetRule',

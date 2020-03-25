@@ -7,7 +7,7 @@ import pycountry
 from auditlog.models import AuditlogHistoryField
 from auditlog.registry import auditlog
 from core.coutries import COUNTRY_NAME_TO_ALPHA2_CODE
-from core.utils import unique_slugify
+from core.utils import unique_slugify, age_to_dob_query
 from django.contrib.gis.db.models import MultiPolygonField, PointField
 from django.contrib.postgres.fields import JSONField
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -409,6 +409,7 @@ class CoreAttribute(object):
                 "label": {"English(EN)": "age"},
                 "hint": "age in years",
                 "required": True,
+                "get_query": age_to_dob_query,
                 "choices": [],
                 "associated_with": get_item_fn(associated_with[1]),
             },
