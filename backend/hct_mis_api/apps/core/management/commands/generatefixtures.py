@@ -1,12 +1,11 @@
 import random
 import time
 
-from django.core.management import BaseCommand, call_command
-from django.db import transaction
-
 from account.fixtures import UserFactory
 from core.fixtures import LocationFactory
 from core.models import BusinessArea
+from django.core.management import BaseCommand, call_command
+from django.db import transaction
 from household.fixtures import (
     EntitlementCardFactory,
     HouseholdFactory,
@@ -108,7 +107,9 @@ class Command(BaseCommand):
 
                 household.programs.add(program)
 
-                target_rules = TargetRuleFactory.create_batch(5)
+                # Coz Generate Target Rules based off the Household criteria.
+                target_rules_dict = TargetRuleFactory.generate_target_rules_dict(households=[household])
+                target_rules = [TargetRuleFactory.create(**rule_dict) for rule_dict in target_rules_dict]
 
                 target_population = TargetPopulationFactory(
                     households=[household], created_by=user,
