@@ -5,17 +5,16 @@ import operator
 import django_filters
 import graphene
 import targeting.models as target_models
-from core.models import FlexibleAttribute
-from core.schema import ExtendedConnection
 from core.filters import IntegerFilter
-from django.db.models import Q
+from core.schema import ExtendedConnection
+from django.db.models import Value
+from django.db.models.functions import Concat
 from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
-from household import models as household_models
 from household.models import Household
 from household.schema import HouseholdNode
-from core import utils
+
 
 # TODO(codecakes): see if later the format can be kept consistent in FilterAttrType model.
 # by using FlexFieldNode and CoreFieldNode to return target filter rules.
@@ -27,56 +26,38 @@ class TargetPopulationFilter(django_filters.FilterSet):
     Loads associated entries for Households and TargetRules.
     """
 
-    name = django_filters.CharFilter(field_name="name", lookup_expr="icontains")
+    name = django_filters.CharFilter(
+        field_name="name", lookup_expr="icontains", distinct=True
+    )
     created_by_name = django_filters.CharFilter(
         field_name="created_by", method="filter_created_by_name"
     )
+    # TODO(codecakes): Fix allTargetPopulationFilters query response by fixing the below two.
     num_individuals_min = IntegerFilter(
         field_name="target_rules__core_rules__num_individuals_min",
         lookup_expr="gte",
-        method="filter_num_individuals_min"
+        distinct=True,
     )
     num_individuals_max = IntegerFilter(
         field_name="target_rules__core_rules__num_individuals_max",
         lookup_expr="lte",
-        method="filter_num_individuals_max"
+        distinct=True,
     )
-
-    @staticmethod
-    def filter_num_individuals_min(queryset, _model, _value):
-        return queryset.distinct("id")
-
-    @staticmethod
-    def filter_num_individuals_max(queryset, _model, _value):
-        return queryset.distinct("id")
 
     @staticmethod
     def filter_created_by_name(queryset, model_field, value):
         """Gets full name of the associated user from query."""
-        fname_query_key = f"{model_field}__first_name__icontains"
-        lname_query_key = f"{model_field}__last_name__icontains"
-        for name in value.strip().split():
-            queryset = queryset.filter(
-                Q(**{fname_query_key: name,}) | Q(**{lname_query_key: name,})
-            )
-        return queryset
+        fname_query_key = f"{model_field}__first_name"
+        lname_query_key = f"{model_field}__last_name"
+        return queryset.annotate(
+            full_name=Concat(fname_query_key, Value(" "), lname_query_key)
+        ).filter(full_name__icontains=value)
 
     class Meta:
         model = target_models.TargetPopulation
-        fields = (
-            "name",
-            "created_by_name",
-            "created_at",
-            "last_edited_at",
-            "status",
-            "households",
-            "target_rules",
-        )
+        fields = "__all__"
 
         filter_overrides = {
-            target_models.IntegerRangeField: {
-                "filter_class": django_filters.NumericRangeFilter,
-            },
             target_models.models.DateTimeField: {
                 "filter_class": django_filters.DateTimeFilter,
             },
@@ -87,7 +68,7 @@ class TargetPopulationFilter(django_filters.FilterSet):
         fields=(
             "name",
             "created_at",
-            "created_by",
+            "created_by_full_name",
             "last_edited_at",
             "status",
             "total_households",
@@ -101,6 +82,10 @@ class TargetPopulationNode(DjangoObjectType):
 
     total_households = graphene.Int(source="total_households")
     total_family_size = graphene.Int(source="total_family_size")
+    created_by_full_name = graphene.String(source="created_by")
+
+    def resolve_created_by_full_name(self, _info, model):
+        return f"{model.first_name} {model.last_name}"
 
     class Meta:
         model = target_models.TargetPopulation
@@ -123,7 +108,6 @@ class SavedTargetRuleFilter(django_filters.FilterSet):
         filter_overrides = {
             target_models.JSONField: {
                 "filter_class": django_filters.LookupChoiceFilter,
-                # 'extra': lambda f: {'lookup_expr': ['icontains']},
             },
         }
 
@@ -138,8 +122,15 @@ class SavedTargetRuleNode(DjangoObjectType):
         filterset_class = SavedTargetRuleFilter
 
 
+class StatusNode(graphene.ObjectType):
+    """Show list of status available."""
+
+    key = graphene.String()
+    value = graphene.String()
+
+
 class Query(graphene.ObjectType):
-    target_population = relay.Node.Field(TargetPopulationNode)
+    target_population = relay.Node.Field(TargetPopulationNode, distinct=True)
     all_target_population = DjangoFilterConnectionField(TargetPopulationNode)
     # Saved snapshots of target rules from a target population.
     saved_target_rule = relay.Node.Field(SavedTargetRuleNode)
@@ -151,6 +142,13 @@ class Query(graphene.ObjectType):
         serialized_list=graphene.String(),
         description="json dump of filters containing key value pairs.",
     )
+    target_status_types = graphene.List(StatusNode)
+
+    def resolve_target_status_types(self, info):
+        return [
+            StatusNode(key, value)
+            for (key, value) in target_models.TargetPopulation.STATE_CHOICES
+        ]
 
     def resolve_target_rules(self, info, serialized_list):
         """Resolver for target_rules. Queries from golden records.

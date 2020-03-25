@@ -157,3 +157,22 @@ class TestTargetPopulationQuery(APITestCase):
                 "id": self.id_to_base64(self.targets[0].id, "TargetPopulation")
             },
         )
+
+class TestTargetStatusTypesQuery(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.TARGET_STATUS_TYPES_QUERY = """
+        query TargetStatusTypes {
+          targetStatusTypes {
+            key
+            value
+          }
+        }
+        """
+        cls.user = UserFactory.create()
+
+    def test_target_status_types_query(self):
+        self.snapshot_graphql_request(
+            request_string=self.TARGET_STATUS_TYPES_QUERY,
+            context={"user": self.user},
+        )
