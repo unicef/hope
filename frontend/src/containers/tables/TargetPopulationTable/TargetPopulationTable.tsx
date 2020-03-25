@@ -30,7 +30,7 @@ export const TargetPopulationTable = ({
   return (
     <TableWrapper>
       <UniversalTable<TargetPopulationNode, AllTargetPopulationsQueryVariables>
-        title='Target Population'
+        title='Target Populations'
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}
         query={useAllTargetPopulationsQuery}
