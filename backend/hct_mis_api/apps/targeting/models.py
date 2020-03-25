@@ -170,21 +170,41 @@ class HouseholdSelection(TimeStampedUUIDModel):
     )
 
 
-class TargetingCriteria(TimeStampedUUIDModel):
+class TargetingCriteriaQueryingMixin:
+    def __init__(self, rules=[]):
+        self.rules = rules
+
+    def get_query(self):
+        query = Q()
+        for rule in self.rules:
+            query |= rule.get_query()
+        return query
+
+
+class TargetingCriteria(TargetingCriteriaQueryingMixin, TimeStampedUUIDModel):
     """
     This is a set of ORed Rules. These are either applied for a candidate list
     (against Golden Record) or for a final list (against the approved candidate
     list).
     """
 
+    pass
+
+
+class TargetingCriteriaRuleQueryingMixin:
+    def __init__(self, filters=[]):
+        self.filters = filters
+
     def get_query(self):
         query = Q()
-        for rule in self.rules:
-            query |= rule.getQuery()
+        for ruleFilter in self.filters:
+            query &= ruleFilter.get_query()
         return query
 
 
-class TargetingCriteriaRule(TimeStampedUUIDModel):
+class TargetingCriteriaRule(
+    TargetingCriteriaRuleQueryingMixin, TimeStampedUUIDModel
+):
     """
     This is a set of ANDed Filters.
     """
@@ -193,19 +213,13 @@ class TargetingCriteriaRule(TimeStampedUUIDModel):
         "TargetingCriteria", related_name="rules", on_delete=models.CASCADE,
     )
 
-    def get_query(self):
-        query = Q()
-        for ruleFilter in self.filters:
-            query &= ruleFilter.getQuery()
-        return query
-
 
 class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
     """
     This is one explicit filter like: 
         :Age <> 10-20
-        :Sex = Female
-        :Sex != Male
+        :Residential Status = Refugee
+        :Residential Status != Refugee
     """
 
     COMPARISION_ATTRIBUTES = {
