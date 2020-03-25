@@ -27,7 +27,6 @@ class UpdateTargetPopulationInput(graphene.InputObjectType):
 
     id = graphene.ID()
     name = graphene.String()
-    last_edited_at = graphene.DateTime()
     status = graphene.String()
 
 
