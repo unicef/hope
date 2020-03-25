@@ -20,6 +20,8 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 from psycopg2.extras import NumericRange
+
+from household.models import Household
 from utils.models import TimeStampedUUIDModel
 
 _MAX_LEN = 256
@@ -175,15 +177,11 @@ class TargetingCriteria(TimeStampedUUIDModel):
     list).
     """
 
-    pass
-
-    def to_query_dict(self):
-        if self.rules.count() == 0:
-            return None
-        query = None
-        for criteria in self.rules:
-            if query is None:
-                query = Q(criteria.get_query)
+    def get_query(self):
+        query = Q()
+        for rule in self.rules:
+            query |= rule.getQuery()
+        return query
 
 
 class TargetingCriteriaRule(TimeStampedUUIDModel):
@@ -196,7 +194,10 @@ class TargetingCriteriaRule(TimeStampedUUIDModel):
     )
 
     def get_query(self):
-        pass
+        query = Q()
+        for ruleFilter in self.filters:
+            query &= ruleFilter.getQuery()
+        return query
 
 
 class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
@@ -206,6 +207,25 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
         :Sex = Female
         :Sex != Male
     """
+
+    COMPARISION_ATTRIBUTES = {
+        "EQUALS": {"arguments": 1, "lookup": "", "negative": False,},
+        "NOT_EQUALS": {"arguments": 1, "lookup": "", "negative": True,},
+        "CONTAINS": {"arguments": 1, "lookup": "__contains", "negative": True,},
+        "NOT_CONTAINS": {
+            "arguments": 1,
+            "lookup": "__contains",
+            "negative": True,
+        },
+        "RANGE": {"arguments": 2, "lookup": "__range", "negative": False,},
+        "NOT_IN_RANGE": {
+            "arguments": 2,
+            "lookup": "__range",
+            "negative": True,
+        },
+        "GREATER_THAN": {"arguments": 1, "lookup": "__gt", "negative": False,},
+        "LESS_THAN": {"arguments": 1, "lookup": "__lt", "negative": False,},
+    }
 
     COMPARISON_CHOICES = Choices(
         ("EQUALS", _("Equals")),
@@ -233,12 +253,10 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
             """
     )
 
-   
-
     def get_query_for_cor_field(self):
-        core_fields = CoreAttribute.get_core_fields()
+        core_fields = CoreAttribute.get_core_fields(Household)
         core_field_attrs = [
-            attr for attr in core_fields if attr.name == self.field_name
+            attr for attr in core_fields if attr.get("name") == self.field_name
         ]
         if len(core_field_attrs) != 1:
             raise ValidationError(
@@ -251,134 +269,31 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
         lookup = core_field_attr.get("lookup")
         if not lookup:
             raise ValidationError(
-                f"Core Field Attributes associated with this fieldName {self.field_name} doesn't have get_query method or lookup field"
+                f"Core Field Attributes associated with this fieldName {self.field_name}"
+                f" doesn't have get_query method or lookup field"
             )
-
-        if self.comparision_method == "RANGE":
-            if len(self.arguments) != 2:
-                raise ValidationError(
-                    f"{self.field_name} {self.comparision_method} filter query expect 2 arguments"
-                )
-            return Q(**{f"{lookup}__range": self.arguments})
-        if self.comparision_method == "EQUALS":
-            if len(self.arguments) != 1:
-                raise ValidationError(
-                    f"{self.field_name} {self.comparision_method} filter query expect 1 arguments"
-                )
-            return Q(**{f"{lookup}": self.arguments[0]})
-
-        if self.comparision_method == "NOT_EQUALS":
-            if len(self.arguments) != 1:
-                raise ValidationError(
-                    f"{self.field_name} {self.comparision_method} filter query expect 1 arguments"
-                )
-            return ~Q(**{f"{lookup}": self.arguments[0]})
-
-        if self.comparision_method == "CONTAINS":
-            if len(self.arguments) != 1:
-                raise ValidationError(
-                    f"{self.field_name} {self.comparision_method} filter query expect 1 arguments"
-                )
-            return ~Q(**{f"{lookup}__contains": self.arguments[0]})
-        if self.comparision_method == "CONTAINS":
-            if len(self.arguments) != 1:
-                raise ValidationError(
-                    f"{self.field_name} {self.comparision_method} filter query expect 1 arguments"
-                )
-            return ~Q(**{f"{lookup}__contains": self.arguments[0]})
+        comparision_attribute = TargetingCriteriaRuleFilter.COMPARISION_ATTRIBUTES.get(
+            self.comparision_method
+        )
+        args_count = comparision_attribute.get("arguments")
+        if self.arguments is None:
+            raise ValidationError(
+                f"{self.field_name} {self.comparision_method} filter query expect {args_count} "
+                f"arguments"
+            )
+        if args_count != len(self.arguments):
+            raise ValidationError(
+                f"{self.field_name} {self.comparision_method} filter query expect {args_count} "
+                f"arguments gets {len(self.arguments)}"
+            )
+        argument = self.arguments if args_count > 1 else self.arguments[0]
+        query = Q(
+            **{f"{lookup}{comparision_attribute.get('lookup')}": argument}
+        )
+        if comparision_attribute.get("negative"):
+            return ~query
+        return query
 
     def get_query(self):
         if not self.is_flex_field:
             return self.get_query_for_cor_field()
-
-
-class TargetRule(models.Model):
-    """Model for storing each rule as a seperate entry.
-
-     Decoupled and belongs to a target population entry.
-
-     There are two attributes to look out for.
-     core_fields will have fixed set of key attributes.
-     flex-fields may vary in terms of keys per entry.
-
-     Key attributes are like:
-        - intake_group
-        - sex
-        - age_min
-        - age_max
-        - school_distance_min
-        - school_distance_max
-        - num_individuals_min
-        - num_individuals_max
-    
-    TODO(Jan): Delete when the model approach above is done.
-     """
-
-    flex_rules = JSONField()
-    core_rules = JSONField()
-    target_population = models.ForeignKey(
-        "TargetPopulation",
-        related_name="target_rules",
-        on_delete=models.PROTECT,
-    )
-
-
-class FilterAttrType(models.Model):
-    """Mapping of field:field_type.
-
-    Gets core and flex field meta info per field.
-    """
-
-    flex_field_types = JSONField()
-    core_field_types = JSONField()
-
-    # TODO(codecakes): add during search filter task.
-    @classmethod
-    def apply_filters(cls, rule_obj: dict) -> List:
-        return [
-            functools.partial(functor, rule_obj)
-            for functor in (
-                cls.get_age,
-                cls.get_gender,
-                cls.get_family_size,
-                cls.get_intake_group,
-            )
-        ]
-
-    @classmethod
-    def get_age(cls, rule_obj: dict) -> dict:
-        age_min = rule_obj.get("age_min")
-        age_max = rule_obj.get("age_max")
-        result = {}
-        this_year = dt.date.today().year
-        if age_min:
-            result["head_of_household_dob__year__lte"] = this_year - age_min
-        if age_max:
-            result["head_of_household_dob__year__gte"] = this_year - age_max
-        return result
-
-    @classmethod
-    def get_gender(cls, rule_obj: dict) -> dict:
-        if "sex" in rule_obj:
-            return {"head_of_household__sex": rule_obj["sex"]}
-        return {}
-
-    @classmethod
-    def get_family_size(cls, rule_obj: dict) -> dict:
-        if (
-            "num_individuals_min" in rule_obj
-            and "num_individuals_max" in rule_obj
-        ):
-            return {
-                "family_size__gte": rule_obj["num_individuals_min"],
-                "family_size__lte": rule_obj["num_individuals_max"],
-            }
-        return {}
-
-    @classmethod
-    def get_intake_group(cls, rule_obj: dict) -> dict:
-        if "intake_group" in rule_obj:
-            return {
-                "registration_data_import_id__name": rule_obj["intake_group"],
-            }
-        return {}
