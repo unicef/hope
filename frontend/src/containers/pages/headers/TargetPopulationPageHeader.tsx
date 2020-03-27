@@ -29,12 +29,14 @@ export interface ProgramDetailsPageHeaderPropTypes {
   isEditMode: boolean;
   setEditState: Function;
   targetPopulation: TargetPopulationNode;
+  tabs: React.ReactElement;
 }
 
 export function TargetPopulationPageHeader({
   targetPopulation,
   isEditMode,
   setEditState,
+  tabs,
 }: ProgramDetailsPageHeaderPropTypes): React.ReactElement {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
@@ -90,6 +92,7 @@ export function TargetPopulationPageHeader({
           </HeaderWrapper>
         }
         breadCrumbs={breadCrumbsItems}
+        tabs={tabs}
       >
         {buttons}
       </PageHeader>

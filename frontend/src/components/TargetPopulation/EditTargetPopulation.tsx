@@ -35,11 +35,39 @@ const resultsData = {
 
 interface EditTargetPopulationProps {
     targetPopulation?
-    criterias?
     cancelEdit?
 }
 
-export function EditTargetPopulation({ targetPopulation, criterias, cancelEdit }: EditTargetPopulationProps) {
+const criterias = [
+  {
+    intakeGroup: 'Children 9/10/2019',
+    sex: 'Female',
+    age: '7 - 15 years old',
+    distanceToSchool: 'over 3km',
+    household: 'over 5 individuals',
+    core: [
+      {
+        label: 'residence_status',
+        value: 'MIGRANT',
+      },
+    ],
+  },
+  {
+    intakeGroup: 'Children 9/10/2019',
+    sex: 'Male',
+    age: null,
+    distanceToSchool: 'over 3km',
+    household: null,
+    core: [
+      {
+        label: 'residence_status',
+        value: 'CITIZEN',
+      },
+    ],
+  },
+];
+
+export function EditTargetPopulation({ targetPopulation, cancelEdit }: EditTargetPopulationProps) {
   const initialValues = {
     name: targetPopulation?.name || '',
     criterias: criterias || [],

@@ -69,13 +69,13 @@ const AddCriteria = styled.div`
 
 interface TargetingCriteriaProps {
   criterias: object[];
-  isEdit: boolean;
+  isEdit?: boolean;
   helpers?;
 }
 
 export function TargetingCriteria({
   criterias,
-  isEdit,
+  isEdit = false,
   helpers,
 }: TargetingCriteriaProps) {
   const { t } = useTranslation();
