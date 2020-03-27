@@ -48,6 +48,7 @@ class IndividualFactory(factory.DjangoModelFactory):
     first_name = factory.Faker("first_name")
     middle_name = factory.Faker("first_name")
     last_name = factory.Faker("last_name")
+    years_in_school = factory.fuzzy.FuzzyInteger(1, 8)
     sex = factory.fuzzy.FuzzyChoice(
         Individual.SEX_CHOICE, getter=lambda c: c[0],
     )
