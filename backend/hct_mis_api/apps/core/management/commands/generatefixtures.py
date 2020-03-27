@@ -21,7 +21,12 @@ from registration_datahub.fixtures import (
     ImportedIndividualFactory,
     ImportedHouseholdFactory,
 )
-from targeting.fixtures import TargetPopulationFactory, TargetRuleFactory
+from targeting.fixtures import (
+    TargetPopulationFactory,
+    TargetingCriteriaRuleFactory,
+    TargetingCriteriaRuleFilterFactory,
+    TargetingCriteriaFactory,
+)
 
 
 class Command(BaseCommand):
@@ -82,10 +87,22 @@ class Command(BaseCommand):
         program = ProgramFactory(
             business_area=business_area, locations=locations,
         )
+        targeting_criteria = TargetingCriteriaFactory()
+        rules = TargetingCriteriaRuleFactory.create_batch(
+            random.randint(1, 3), targeting_criteria=targeting_criteria
+        )
 
+        for rule in rules:
+            TargetingCriteriaRuleFilterFactory.create_batch(
+                random.randint(1, 5), targeting_criteria_rule=rule
+            )
+
+        target_population = TargetPopulationFactory(
+            created_by=user, candidate_list_targeting_criteria=targeting_criteria
+        )
         for _ in range(cash_plans_amount):
             cash_plan = CashPlanFactory.build(
-                program=program, created_by=user, target_population=None,
+                program=program, created_by=user, target_population=target_population,
             )
 
             for _ in range(payment_record_amount):
@@ -108,25 +125,20 @@ class Command(BaseCommand):
 
                 household.programs.add(program)
 
-                target_rules = TargetRuleFactory.create_batch(5)
-
-                target_population = TargetPopulationFactory(
-                    households=[household], created_by=user,
-                )
-                target_population.target_rules.add(*target_rules)
-
-                cash_plan.target_population = target_population
-                cash_plan.save()
-
-                PaymentRecordFactory(
-                    cash_plan=cash_plan,
-                    household=household,
-                    target_population=target_population,
-                )
-                EntitlementCardFactory(household=household)
+                # cash_plan.target_population = target_population
+                # cash_plan.save()
+                #
+                # PaymentRecordFactory(
+                #     cash_plan=cash_plan,
+                #     household=household,
+                #     target_population=target_population,
+                # )
+                # EntitlementCardFactory(household=household)
 
     @transaction.atomic
     def handle(self, *args, **options):
+
+
         start_time = time.time()
         programs_amount = options["programs_amount"]
 
