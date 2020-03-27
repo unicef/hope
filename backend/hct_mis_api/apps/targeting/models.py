@@ -171,17 +171,20 @@ class HouseholdSelection(TimeStampedUUIDModel):
 
 
 class TargetingCriteriaQueryingMixin:
-    def __init__(self, rules=[]):
+    def __init__(self, rules=None):
+        if rules is None:
+            return
         self.rules = rules
 
     def get_query(self):
         query = Q()
-        for rule in self.rules:
+        rules = self.rules if isinstance(self.rules,list) else self.rules.all()
+        for rule in rules:
             query |= rule.get_query()
         return query
 
 
-class TargetingCriteria(TargetingCriteriaQueryingMixin, TimeStampedUUIDModel):
+class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingMixin):
     """
     This is a set of ORed Rules. These are either applied for a candidate list
     (against Golden Record) or for a final list (against the approved candidate
@@ -192,18 +195,21 @@ class TargetingCriteria(TargetingCriteriaQueryingMixin, TimeStampedUUIDModel):
 
 
 class TargetingCriteriaRuleQueryingMixin:
-    def __init__(self, filters=[]):
+    def __init__(self, filters=None):
+        if filters is None:
+            return
         self.filters = filters
 
     def get_query(self):
         query = Q()
-        for ruleFilter in self.filters:
+        filters = self.filters if isinstance(self.filters,list) else self.filters.all()
+        for ruleFilter in filters:
             query &= ruleFilter.get_query()
         return query
 
 
 class TargetingCriteriaRule(
-    TargetingCriteriaRuleQueryingMixin, TimeStampedUUIDModel
+    TimeStampedUUIDModel, TargetingCriteriaRuleQueryingMixin
 ):
     """
     This is a set of ANDed Filters.
