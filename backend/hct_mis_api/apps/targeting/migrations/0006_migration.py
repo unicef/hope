@@ -100,7 +100,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='targetpopulation',
             name='status',
-            field=models.CharField(choices=[('DRAFT', 'Draft'), ('APPROVED', 'Approved'), ('FINALIZED', 'Finalized')], default=targeting.models.TargetStatus('Draft'), max_length=256),
+            field=models.CharField(choices=[('DRAFT', 'Draft'), ('APPROVED', 'Approved'), ('FINALIZED', 'Finalized')], default="DRAFT", max_length=256),
         ),
         migrations.CreateModel(
             name='TargetingCriteriaRuleFilter',

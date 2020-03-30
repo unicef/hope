@@ -8,9 +8,9 @@ from account.fixtures import UserFactory
 from core.fixtures import LocationFactory
 from core.models import BusinessArea
 from household.fixtures import (
-    EntitlementCardFactory,
     HouseholdFactory,
     IndividualFactory,
+    EntitlementCardFactory,
 )
 from payment.fixtures import PaymentRecordFactory
 from program.fixtures import CashPlanFactory, ProgramFactory
@@ -98,11 +98,14 @@ class Command(BaseCommand):
             )
 
         target_population = TargetPopulationFactory(
-            created_by=user, candidate_list_targeting_criteria=targeting_criteria
+            created_by=user,
+            candidate_list_targeting_criteria=targeting_criteria,
         )
         for _ in range(cash_plans_amount):
             cash_plan = CashPlanFactory.build(
-                program=program, created_by=user, target_population=target_population,
+                program=program,
+                created_by=user,
+                target_population=target_population,
             )
 
             for _ in range(payment_record_amount):
@@ -125,19 +128,18 @@ class Command(BaseCommand):
 
                 household.programs.add(program)
 
-                # cash_plan.target_population = target_population
-                # cash_plan.save()
-                #
-                # PaymentRecordFactory(
-                #     cash_plan=cash_plan,
-                #     household=household,
-                #     target_population=target_population,
-                # )
-                # EntitlementCardFactory(household=household)
+                cash_plan.target_population = target_population
+                cash_plan.save()
+
+                PaymentRecordFactory(
+                    cash_plan=cash_plan,
+                    household=household,
+                    target_population=target_population,
+                )
+                EntitlementCardFactory(household=household)
 
     @transaction.atomic
     def handle(self, *args, **options):
-
 
         start_time = time.time()
         programs_amount = options["programs_amount"]
