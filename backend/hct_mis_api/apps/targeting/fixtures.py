@@ -46,12 +46,14 @@ def arguments_resolver(obj):
         max = random.randint(min, min + 5)
     if obj.field_name == "age":
         min = random.randint(1, 100)
-        max = random.randint(min, random.randint(min+1,116))
+        max = random.randint(min, random.randint(min + 1, 116))
     if obj.field_name == "family_size":
         min = random.randint(1, 5)
-        max = random.randint(min, random.randint(min+1,10))
+        max = random.randint(min, random.randint(min + 1, 10))
     if obj.field_name == "residence_status":
-        return [random.choice([x[0] for x in Household.RESIDENCE_STATUS_CHOICE])]
+        return [
+            random.choice([x[0] for x in Household.RESIDENCE_STATUS_CHOICE])
+        ]
     if (
         obj.comparision_method == "RANGE"
         or obj.comparision_method == "NOT_IN_RANGE"
@@ -67,12 +69,12 @@ class TargetingCriteriaRuleFilterFactory(factory.DjangoModelFactory):
     )
     comparision_method = factory.LazyAttribute(comparision_method_resolver)
     arguments = factory.LazyAttribute(arguments_resolver)
+
     class Meta:
         model = TargetingCriteriaRuleFilter
 
 
 class TargetingCriteriaRuleFactory(factory.DjangoModelFactory):
-
     class Meta:
         model = TargetingCriteriaRule
 
@@ -96,9 +98,7 @@ class TargetPopulationFactory(factory.DjangoModelFactory):
     updated_at = factory.LazyAttribute(
         lambda t: t.created_at + dt.timedelta(days=random.randint(60, 1000))
     )
-    status = factory.fuzzy.FuzzyChoice(
-        TargetPopulation.STATE_CHOICES, getter=lambda x: x[0],
-    )
+    status = factory.fuzzy.FuzzyChoice(["DRAFT", "APPROVED", "FINALIZED"])
 
     @factory.post_generation
     def households(self, create, extracted, **kwargs):

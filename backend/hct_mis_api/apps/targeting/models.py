@@ -1,14 +1,5 @@
 """Models for target population and target rules."""
 
-import datetime as dt
-import functools
-from typing import List
-
-from django.core.exceptions import ValidationError
-from django.db.models import Q
-
-from core.models import CoreAttribute
-from core.utils import EnumGetChoices
 from django.conf import settings
 from django.contrib.postgres.fields import IntegerRangeField
 from django.contrib.postgres.fields import JSONField
@@ -16,11 +7,14 @@ from django.contrib.postgres.validators import (
     RangeMinValueValidator,
     RangeMaxValueValidator,
 )
+from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 from psycopg2.extras import NumericRange
 
+from core.models import CoreAttribute
 from household.models import Household
 from utils.models import TimeStampedUUIDModel
 
@@ -47,20 +41,12 @@ def get_integer_range(min_range=None, max_range=None):
     )
 
 
-class TargetStatus(EnumGetChoices):
-    DRAFT = "Draft"
-    APPROVED = "Approved"
-    FINALIZED = "Finalized"
-
-
 class TargetPopulation(TimeStampedUUIDModel):
     """Model for target populations.
 
     Has N:N association with households.
     """
 
-    STATE_CHOICES = TargetStatus.get_choices()
-    # fields
     name = models.TextField(unique=True)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -69,7 +55,13 @@ class TargetPopulation(TimeStampedUUIDModel):
         null=True,
     )
     status = models.CharField(
-        max_length=_MAX_LEN, choices=STATE_CHOICES, default=TargetStatus.DRAFT,
+        max_length=_MAX_LEN,
+        choices=(
+            ("DRAFT", _("Draft")),
+            ("APPROVED", _("Approved")),
+            ("FINALIZED", _("Finalized")),
+        ),
+        default="DRAFT",
     )
     households = models.ManyToManyField(
         "household.Household",
@@ -131,7 +123,7 @@ class TargetPopulation(TimeStampedUUIDModel):
 
     @property
     def final_list(self):
-        if self.status == TargetStatus.DRAFT:
+        if self.status == "DRAFT":
             return []
         return self.households.filter(final=True)
 
@@ -178,7 +170,7 @@ class TargetingCriteriaQueryingMixin:
 
     def get_query(self):
         query = Q()
-        rules = self.rules if isinstance(self.rules,list) else self.rules.all()
+        rules = self.rules if isinstance(self.rules, list) else self.rules.all()
         for rule in rules:
             query |= rule.get_query()
         return query
@@ -202,7 +194,11 @@ class TargetingCriteriaRuleQueryingMixin:
 
     def get_query(self):
         query = Q()
-        filters = self.filters if isinstance(self.filters,list) else self.filters.all()
+        filters = (
+            self.filters
+            if isinstance(self.filters, list)
+            else self.filters.all()
+        )
         for ruleFilter in filters:
             query &= ruleFilter.get_query()
         return query
