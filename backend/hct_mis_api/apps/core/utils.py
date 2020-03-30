@@ -93,17 +93,6 @@ def _slug_strip(value, separator="-"):
     return value
 
 
-class EnumGetChoices(enum.Enum):
-    """Subclasses Enum class for additional methods."""
-
-    def __init__(self, *args, **kwargs):
-        super().__init__()
-
-    @classmethod
-    def get_choices(cls) -> List[tuple]:
-        return [(field.name, field.value) for field in cls]
-
-
 class JSONFactory(factory.DictFactory):
     """A Json factory class to get JSON strings."""
 
