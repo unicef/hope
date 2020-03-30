@@ -227,7 +227,7 @@ class Query(graphene.ObjectType):
             )
         return target_population_model.households.all()
 
-    def resolve_final_list_by_targeting_criteria(
+    def resolve_final_households_list_by_targeting_criteria(
         parent, info, target_population, targeting_criteria=None
     ):
         target_population_id = decode_id_string(target_population)
@@ -242,12 +242,13 @@ class Query(graphene.ObjectType):
         ):
             if targeting_criteria is None:
                 return target_population_model.households.filter(
-                    target_population_model.candidate_list_targeting_criteria.get_query()
+                    target_population_model.final_list_targeting_criteria.get_query()
                 )
             return target_population_model.households.filter(
                 targeting_criteria_object_type_to_query(targeting_criteria)
             ).all()
-        return target_population_model.households.filter(final=True).all()
+
+        return target_population_model.final_list.all()
 
     def resolve_golden_record_by_targeting_criteria(
         parent, info, targeting_criteria
