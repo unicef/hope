@@ -180,10 +180,12 @@ class TargetingCriteriaObjectType(graphene.InputObjectType):
 
 
 def targeting_criteria_object_type_to_query(targeting_criteria_object_type):
-    targeting_criteria_querying = target_models.TargetingCriteriaQueryingMixin([])
+    targeting_criteria_querying = target_models.TargetingCriteriaQueryingMixin(
+        []
+    )
     for rule in targeting_criteria_object_type.get("rules", []):
-        targeting_criteria_rule_querying = (
-            target_models.TargetingCriteriaRuleQueryingMixin([])
+        targeting_criteria_rule_querying = target_models.TargetingCriteriaRuleQueryingMixin(
+            []
         )
         for filter_dict in rule.get("filters", []):
             targeting_criteria_rule_querying.filters.append(
@@ -199,14 +201,16 @@ class Query(graphene.ObjectType):
     target_population = relay.Node.Field(TargetPopulationNode)
     all_target_population = DjangoFilterConnectionField(TargetPopulationNode)
     golden_record_by_targeting_criteria = DjangoConnectionField(
-        HouseholdNode, targeting_criteria=TargetingCriteriaObjectType()
+        HouseholdNode,
+        targeting_criteria=TargetingCriteriaObjectType(required=True),
     )
     candidate_households_list_by_targeting_criteria = DjangoFilterConnectionField(
-        HouseholdNode, target_population=graphene.Argument(graphene.ID)
+        HouseholdNode,
+        target_population=graphene.Argument(graphene.ID, required=True),
     )
     final_households_list_by_targeting_criteria = DjangoFilterConnectionField(
         HouseholdNode,
-        target_population=graphene.Argument(graphene.ID),
+        target_population=graphene.Argument(graphene.ID, required=True),
         targeting_criteria=TargetingCriteriaObjectType(),
     )
 
@@ -232,7 +236,10 @@ class Query(graphene.ObjectType):
         )
         if target_population_model.status == "DRAFT":
             return []
-        if target_population_model.status == "APPROVED":
+        if (
+            target_population_model.status
+            == "APPROVED"
+        ):
             if targeting_criteria is None:
                 return target_population_model.households.filter(
                     target_population_model.candidate_list_targeting_criteria.get_query()
