@@ -125,25 +125,27 @@ class TargetPopulation(TimeStampedUUIDModel):
     def final_list(self):
         if self.status == "DRAFT":
             return []
-        return self.households.filter(final=True)
+        return self.households.filter(selections__final=True).distinct()
 
 
 class HouseholdSelection(TimeStampedUUIDModel):
     """
-    This model contains metadata associated with the relation between a target 
+    This model contains metadata associated with the relation between a target
     population and a household. Its understood that once the candidate list of
     households has been frozen, some external system (eg. Corticon) will run
     to calculate vulnerability score. The user (may) filter again then against
     the approved candidate list and mark the households as having been
-    'selected' or not (final=True/False). By default a draft list or frozen 
+    'selected' or not (final=True/False). By default a draft list or frozen
     candidate list  will have final set to True.
     """
 
     household = models.ForeignKey(
-        "household.Household", on_delete=models.CASCADE
+        "household.Household",
+        on_delete=models.CASCADE,
+        related_name="selections",
     )
     target_population = models.ForeignKey(
-        "TargetPopulation", on_delete=models.CASCADE
+        "TargetPopulation", on_delete=models.CASCADE, related_name="selections"
     )
     vulnerability_score = models.DecimalField(
         blank=True,
