@@ -22,26 +22,18 @@ class TestTargetPopulationQuery(APITestCase):
                          }
                          createdAt
                          lastEditedAt
-                         households {
-                            edges {
-                                node {
-                                    householdCaId
-                                    familySize
-                                    address
-                                    location {
-                                        title
-                                    }
-                                    registrationDataImportId {
-                                        name
-                                    }
-                                    headOfHousehold {
-                                        fullName
-                                        firstName
-                                        lastName
-                                    }
-                                }
+                         candidateListTargetingCriteria{
+                          rules{
+                            id
+                            filters{
+                              id
+                                            comparisionMethod
+                              isFlexField
+                              fieldName
+                              arguments
                             }
-                         }
+                          }
+                        }
                     }
                 }
             }
@@ -62,15 +54,7 @@ class TestTargetPopulationQuery(APITestCase):
                          }
                          createdAt
                          lastEditedAt
-                         targetRules {
-                            edges {
-                                node {
-                                  id
-                                  flexRules
-                                  coreRules
-                                }
-                            }
-                         }
+                         
                     }
                 }
             }
