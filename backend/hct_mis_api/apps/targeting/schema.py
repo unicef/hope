@@ -168,7 +168,7 @@ class TargetingCriteriaRuleFilterObjectType(graphene.InputObjectType):
     comparision_method = graphene.String()
     is_flex_field = graphene.Boolean()
     field_name = graphene.String()
-    arguments = graphene.JSONString()
+    arguments = graphene.List(Arg)
 
 
 class TargetingCriteriaRuleObjectType(graphene.InputObjectType):
@@ -180,10 +180,10 @@ class TargetingCriteriaObjectType(graphene.InputObjectType):
 
 
 def targeting_criteria_object_type_to_query(targeting_criteria_object_type):
-    targeting_criteria_querying = target_models.TargetingCriteriaQueryingMixin()
+    targeting_criteria_querying = target_models.TargetingCriteriaQueryingMixin([])
     for rule in targeting_criteria_object_type.get("rules", []):
         targeting_criteria_rule_querying = (
-            target_models.TargetingCriteriaRuleQueryingMixin()
+            target_models.TargetingCriteriaRuleQueryingMixin([])
         )
         for filter_dict in rule.get("filters", []):
             targeting_criteria_rule_querying.filters.append(
