@@ -433,12 +433,7 @@ class CoreAttribute(object):
                 "label": {"English(EN)": "Residence Status"},
                 "hint": "residential status of household",
                 "choices": [
-                    {
-                        "name": name,
-                        "value": str(value),
-                        "admin": "",
-                        "list_name": "",
-                    }
+                    {"label": {"English(EN)": name}, "value": str(value),}
                     for name, value in household_model.RESIDENCE_STATUS_CHOICE
                 ],
                 "associated_with": get_item_fn(associated_with[0]),
