@@ -179,6 +179,22 @@ class TargetingCriteriaObjectType(graphene.InputObjectType):
     rules = graphene.List(TargetingCriteriaRuleObjectType)
 
 
+def targeting_criteria_object_type_to_query(targeting_criteria_object_type):
+    targeting_criteria_querying = target_models.TargetingCriteriaQueryingMixin()
+    for rule in targeting_criteria_object_type.get("rules", []):
+        targeting_criteria_rule_querying = (
+            target_models.TargetingCriteriaRuleQueryingMixin()
+        )
+        for filter_dict in rule.get("filters", []):
+            targeting_criteria_rule_querying.filters.append(
+                target_models.TargetingCriteriaRuleFilter(**filter_dict)
+            )
+        targeting_criteria_querying.rules.append(
+            targeting_criteria_rule_querying
+        )
+    return targeting_criteria_querying.get_query()
+
+
 class Query(graphene.ObjectType):
     target_population = relay.Node.Field(TargetPopulationNode)
     all_target_population = DjangoFilterConnectionField(TargetPopulationNode)
@@ -189,7 +205,9 @@ class Query(graphene.ObjectType):
         HouseholdNode, target_population=graphene.Argument(graphene.ID)
     )
     final_households_list_by_targeting_criteria = DjangoFilterConnectionField(
-        HouseholdNode, target_population=graphene.Argument(graphene.ID)
+        HouseholdNode,
+        target_population=graphene.Argument(graphene.ID),
+        targeting_criteria=TargetingCriteriaObjectType(),
     )
 
     def resolve_candidate_households_list_by_targeting_criteria(
@@ -200,16 +218,13 @@ class Query(graphene.ObjectType):
             pk=target_population_id
         )
         if target_population_model.status == "DRAFT":
-            pprint(type(Household.objects.filter(
-                target_population_model.candidate_list_targeting_criteria.get_query()
-            )))
             return Household.objects.filter(
                 target_population_model.candidate_list_targeting_criteria.get_query()
             )
         return target_population_model.households.all()
 
     def resolve_final_list_by_targeting_criteria(
-        parent, info, target_population
+        parent, info, target_population, targeting_criteria=None
     ):
         target_population_id = decode_id_string(target_population)
         target_population_model = target_models.TargetPopulation.objects.get(
@@ -218,26 +233,18 @@ class Query(graphene.ObjectType):
         if target_population_model.status == "DRAFT":
             return []
         if target_population_model.status == "APPROVED":
+            if targeting_criteria is None:
+                return target_population_model.households.filter(
+                    target_population_model.candidate_list_targeting_criteria.get_query()
+                )
             return target_population_model.households.filter(
-                target_population_model.candidate_list_targeting_criteria.get_query()
-            )
-        return target_population_model.households.filter(final=True)
+                targeting_criteria_object_type_to_query(targeting_criteria)
+            ).all()
+        return target_population_model.households.filter(final=True).all()
 
     def resolve_golden_record_by_targeting_criteria(
         parent, info, targeting_criteria
     ):
-        targeting_criteria_querying = (
-            target_models.TargetingCriteriaQueryingMixin()
+        return Household.objects.filter(
+            targeting_criteria_object_type_to_query(targeting_criteria)
         )
-        for rule in targeting_criteria.get("rules", []):
-            targeting_criteria_rule_querying = (
-                target_models.TargetingCriteriaRuleQueryingMixin()
-            )
-            for filter_dict in rule.get("filters", []):
-                targeting_criteria_rule_querying.filters.append(
-                    target_models.TargetingCriteriaRuleFilter(**filter_dict)
-                )
-            targeting_criteria_querying.rules.append(
-                targeting_criteria_rule_querying
-            )
-        return Household.objects.filter(targeting_criteria_querying.get_query())
