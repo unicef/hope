@@ -27,39 +27,6 @@ class CandidateListTargetingCriteriaQueryTestCase(APITestCase):
       }
     }
     """
-    FAMILY_SIZE_2_VARIABLES = {
-        "targetingCriteria": {
-            "rules": [
-                {
-                    "filters": [
-                        {
-                            "comparisionMethod": "EQUALS",
-                            "arguments": [2],
-                            "fieldName": "family_size",
-                            "isFlexField": False,
-                        }
-                    ]
-                }
-            ]
-        }
-    }
-
-    RESIDENCE_STATUS_REFUGEE_VARIABLES = {
-        "targetingCriteria": {
-            "rules": [
-                {
-                    "filters": [
-                        {
-                            "comparisionMethod": "EQUALS",
-                            "arguments": ["REFUGEE"],
-                            "fieldName": "residence_status",
-                            "isFlexField": False,
-                        }
-                    ]
-                }
-            ]
-        }
-    }
 
     @classmethod
     def setUpTestData(cls):
