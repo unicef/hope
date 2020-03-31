@@ -67,6 +67,37 @@ const criterias = [
   },
 ];
 
+const rules = [
+  {
+    id: '1',
+    comparisionMethod: 'NOT_EQUALS',
+    isFlexField: false,
+    fieldName: 'years_in_school',
+    arguments: [5]
+  },
+  {
+    id: '1',
+    comparisionMethod: 'RANGE',
+    isFlexField: false,
+    fieldName: 'family_size',
+    arguments: [5, 7]
+  },
+  {
+    id: '1',
+    comparisionMethod: 'EQUALS',
+    isFlexField: false,
+    fieldName: 'residence_status',
+    arguments: ["CITIZEN"]
+  },
+  {
+    id: '1',
+    comparisionMethod: 'NOT_EQUALS',
+    isFlexField: false,
+    fieldName: 'years_in_school',
+    arguments: [5, 7]
+  }
+]
+
 export function EditTargetPopulation({ targetPopulation, cancelEdit }: EditTargetPopulationProps) {
   const initialValues = {
     name: targetPopulation?.name || '',
