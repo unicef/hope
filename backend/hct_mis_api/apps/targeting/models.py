@@ -69,16 +69,16 @@ class TargetPopulation(TimeStampedUUIDModel):
         through="HouseholdSelection",
     )
     candidate_list_total_households = models.PositiveIntegerField(
-        blank=True, null=True
+        blank=True, null=True, default=0,
     )
     candidate_list_total_individuals = models.PositiveIntegerField(
-        blank=True, null=True
+        blank=True, null=True, default=0,
     )
     final_list_total_households = models.PositiveIntegerField(
-        blank=True, null=True
+        blank=True, null=True, default=0,
     )
     final_list_total_individuals = models.PositiveIntegerField(
-        blank=True, null=True
+        blank=True, null=True, default=0,
     )
     selection_computation_metadata = models.TextField(
         blank=True,
