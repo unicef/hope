@@ -229,7 +229,7 @@ def age_to_dob_range_query(field_name, age_min, age_max):
     query_dict = {}
     this_year = dt.date.today().year
     if age_min == age_max and age_min is not None:
-        return Q(**{f"{field_name}__year": this_year-age_min})
+        return Q(**{f"{field_name}__year": this_year - age_min})
     if age_min:
         query_dict[f"{field_name}__year__lte"] = this_year - age_min
     if age_max:
@@ -241,6 +241,7 @@ def age_to_dob_query(comparision_method, args):
     field_name = "individuals__dob"
     comparision_method_args_count = {
         "RANGE": 2,
+        "NOT_IN_RANGE": 2,
         "EQUALS": 1,
         "NOT_EQUALS": 1,
         "GREATER_THAN": 1,
@@ -257,6 +258,8 @@ def age_to_dob_query(comparision_method, args):
         )
     if comparision_method == "RANGE":
         return age_to_dob_range_query(field_name, *args)
+    if comparision_method == "NOT_IN_RANGE":
+        return ~(age_to_dob_range_query(field_name, *args))
     if comparision_method == "EQUALS":
         return age_to_dob_range_query(field_name, args[0], args[0])
     if comparision_method == "NOT_EQUALS":

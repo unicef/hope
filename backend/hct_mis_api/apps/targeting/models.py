@@ -109,23 +109,15 @@ class TargetPopulation(TimeStampedUUIDModel):
         related_name="target_population_final",
     )
 
-    _total_households = models.PositiveIntegerField(default=0)
-    _total_family_size = models.PositiveIntegerField(default=0)
 
-    @property
-    def total_households(self):
-        """Gets sum of all household numbers from association."""
-        return (
-            self.households.count()
-            if not self._total_households
-            else self._total_households
-        )
 
     @property
     def final_list(self):
         if self.status == "DRAFT":
             return []
         return self.households.filter(selections__final=True).distinct()
+
+
 
 
 class HouseholdSelection(TimeStampedUUIDModel):
@@ -315,3 +307,4 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
     def get_query(self):
         if not self.is_flex_field:
             return self.get_query_for_cor_field()
+
