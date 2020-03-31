@@ -164,6 +164,11 @@ class CoreFieldChoiceObject(graphene.ObjectType):
             "English(EN)"
         ]
 
+    def resolve_value(parrent,info):
+        if isinstance(parrent, FlexibleAttributeChoice):
+            return parrent.name
+        return dict_or_attr_resolver("value", None, parrent, info)
+
     def resolve_labels(parrent, info):
         return resolve_label(
             dict_or_attr_resolver("label", None, parrent, info)
@@ -205,11 +210,13 @@ class FieldAttributeNode(graphene.ObjectType):
         ]
 
 
-def get_fields_attr_generators():
-    for attr in FlexibleAttribute.objects.all():
-        yield attr
-    for attr in CoreAttribute.get_core_fields(Household):
-        yield attr
+def get_fields_attr_generators(flex_field):
+    if flex_field!=False:
+        for attr in FlexibleAttribute.objects.all():
+            yield attr
+    if flex_field!=True:
+        for attr in CoreAttribute.get_core_fields(Household):
+            yield attr
 
 
 class Query(graphene.ObjectType):
@@ -220,12 +227,14 @@ class Query(graphene.ObjectType):
         LogEntryObjectConnection, object_id=graphene.String(required=True),
     )
     all_fields_attributes = graphene.List(
-        FieldAttributeNode, description="All field datatype meta.",
+        FieldAttributeNode,
+        flex_field=graphene.Boolean(),
+        description="All field datatype meta.",
     )
 
     def resolve_all_log_entries(self, info, object_id, **kwargs):
         id = decode_id_string(object_id)
         return LogEntry.objects.filter(~Q(action=0), object_pk=id).all()
 
-    def resolve_all_fields_attributes(self, info):
-        return get_fields_attr_generators()
+    def resolve_all_fields_attributes(parrent, info, flex_field=None):
+        return get_fields_attr_generators(flex_field)
