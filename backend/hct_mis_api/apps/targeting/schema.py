@@ -34,24 +34,39 @@ class TargetPopulationFilter(django_filters.FilterSet):
     created_by_name = django_filters.CharFilter(
         field_name="created_by", method="filter_created_by_name"
     )
-    num_individuals_min = IntegerFilter(
-        field_name="target_rules__core_rules__num_individuals_min",
+    candidate_list_total_households_min = IntegerFilter(
+        field_name="candidate_list_total_households",
         lookup_expr="gte",
-        method="filter_num_individuals_min",
     )
-    num_individuals_max = IntegerFilter(
-        field_name="target_rules__core_rules__num_individuals_max",
+    candidate_list_total_households_max = IntegerFilter(
+        field_name="candidate_list_total_households",
         lookup_expr="lte",
-        method="filter_num_individuals_max",
+    )
+    candidate_list_total_individuals_min = IntegerFilter(
+        field_name="candidate_list_total_individuals",
+        lookup_expr="gte",
+    )
+    candidate_list_total_individuals_max = IntegerFilter(
+        field_name="candidate_list_total_individuals",
+        lookup_expr="lte",
     )
 
-    @staticmethod
-    def filter_num_individuals_min(queryset, _model, _value):
-        return queryset.distinct("id")
-
-    @staticmethod
-    def filter_num_individuals_max(queryset, _model, _value):
-        return queryset.distinct("id")
+    final_list_total_households_min = IntegerFilter(
+        field_name="final_list_total_households",
+        lookup_expr="gte",
+    )
+    final_list_total_households_max = IntegerFilter(
+        field_name="final_list_total_households",
+        lookup_expr="lte",
+    )
+    final_list_total_individuals_min = IntegerFilter(
+        field_name="final_list_total_individuals",
+        lookup_expr="gte",
+    )
+    final_list_total_individuals_max = IntegerFilter(
+        field_name="final_list_total_individuals",
+        lookup_expr="lte",
+    )
 
     @staticmethod
     def filter_created_by_name(queryset, model_field, value):
