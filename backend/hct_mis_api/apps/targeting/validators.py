@@ -1,6 +1,5 @@
 from core.validators import BaseValidator
 from graphql import GraphQLError
-from targeting.models import TargetStatus
 
 
 class TargetValidator(BaseValidator):
@@ -8,7 +7,7 @@ class TargetValidator(BaseValidator):
 
     @staticmethod
     def validate_is_finalized(target_status):
-        if target_status == TargetStatus.FINALIZED.name:
+        if target_status == 'FINALIZED':
             raise GraphQLError(
                 "Target Population has been finalized. Cannot change."
             )

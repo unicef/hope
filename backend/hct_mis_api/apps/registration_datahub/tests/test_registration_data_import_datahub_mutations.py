@@ -6,6 +6,7 @@ from django.core.files.uploadedfile import (
     InMemoryUploadedFile,
     SimpleUploadedFile,
 )
+from django.core.management import call_command
 
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
@@ -87,6 +88,7 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
     def setUp(self):
         super().setUp()
         self.user = UserFactory()
+        call_command("loadbusinessareas")
 
         img = io.BytesIO(Image.new("RGB", (60, 30), color="red").tobytes())
 

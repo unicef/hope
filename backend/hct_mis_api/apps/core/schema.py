@@ -1,4 +1,5 @@
 import json
+from collections import Iterable
 
 import graphene
 from auditlog.models import LogEntry
@@ -14,6 +15,7 @@ from graphene import (
     ConnectionField,
     Connection,
 )
+from graphene.types.resolver import dict_resolver, dict_or_attr_resolver
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
@@ -138,22 +140,83 @@ class FlexibleAttributeNode(DjangoObjectType):
         ]
 
 
+class LabelNode(graphene.ObjectType):
+    language = graphene.String()
+    label = graphene.String()
+
+
+def resolve_label(parrent):
+    labels = []
+    for k, v in parrent.items():
+        labels.append({"language": k, "label": v})
+    return labels
+
+
 class CoreFieldChoiceObject(graphene.ObjectType):
-    name = String()
+    labels = graphene.List(LabelNode)
+    label_en = String()
     value = String()
     admin = String()
     list_name = String()
 
+    def resolve_label_en(parrent, info):
+        return dict_or_attr_resolver("label", None, parrent, info)[
+            "English(EN)"
+        ]
 
-class CoreFieldNode(graphene.ObjectType):
+    def resolve_value(parrent,info):
+        if isinstance(parrent, FlexibleAttributeChoice):
+            return parrent.name
+        return dict_or_attr_resolver("value", None, parrent, info)
+
+    def resolve_labels(parrent, info):
+        return resolve_label(
+            dict_or_attr_resolver("label", None, parrent, info)
+        )
+
+
+class FieldAttributeNode(graphene.ObjectType):
     id = graphene.String()
     type = graphene.String()
     name = graphene.String()
-    label = graphene.JSONString()
+    labels = graphene.List(LabelNode)
+    label_en = String()
     hint = graphene.String()
     required = graphene.Boolean()
     choices = graphene.List(CoreFieldChoiceObject)
     associated_with = graphene.String()
+    is_flex_field = graphene.Boolean()
+
+    def resolve_choices(parrent, info):
+        if isinstance(
+            dict_or_attr_resolver("choices", None, parrent, info), Iterable
+        ):
+            return parrent["choices"]
+        return parrent.choices.all()
+
+    def resolve_is_flex_field(self, info):
+        if isinstance(self, FlexibleAttribute):
+            return True
+        return False
+
+    def resolve_labels(parrent, info):
+        return resolve_label(
+            dict_or_attr_resolver("label", None, parrent, info)
+        )
+
+    def resolve_label_en(parrent, info):
+        return dict_or_attr_resolver("label", None, parrent, info)[
+            "English(EN)"
+        ]
+
+
+def get_fields_attr_generators(flex_field):
+    if flex_field!=False:
+        for attr in FlexibleAttribute.objects.all():
+            yield attr
+    if flex_field!=True:
+        for attr in CoreAttribute.get_core_fields(Household):
+            yield attr
 
 
 class Query(graphene.ObjectType):
@@ -163,19 +226,15 @@ class Query(graphene.ObjectType):
     all_log_entries = ConnectionField(
         LogEntryObjectConnection, object_id=graphene.String(required=True),
     )
-    all_core_field_attributes = graphene.List(
-        CoreFieldNode, description="core field datatype meta.",
-    )
-    all_flex_field_attributes = graphene.List(
-        FlexibleAttributeNode, description="flex field datatype meta."
+    all_fields_attributes = graphene.List(
+        FieldAttributeNode,
+        flex_field=graphene.Boolean(),
+        description="All field datatype meta.",
     )
 
     def resolve_all_log_entries(self, info, object_id, **kwargs):
         id = decode_id_string(object_id)
         return LogEntry.objects.filter(~Q(action=0), object_pk=id).all()
 
-    def resolve_all_core_field_attributes(self, info):
-        return CoreAttribute.get_core_fields(Household)
-
-    def resolve_all_flex_field_attributes(self, info):
-        return FlexibleAttribute.objects.all()
+    def resolve_all_fields_attributes(parrent, info, flex_field=None):
+        return get_fields_attr_generators(flex_field)
