@@ -94,6 +94,19 @@ export function registrationDataImportStatusToColor(
   }
 }
 
+export function targetPopulationStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  switch (status) {
+    case 'IN_PROGRESS':
+      return theme.hctPalette.oragne;
+    case 'FINALIZED':
+      return theme.hctPalette.green;
+    default:
+      return theme.palette.error.main;
+  }
+}
 export function getCookie(name): string | null {
   const value = `; ${document.cookie}`;
   const parts = value.split(`; ${name}=`);

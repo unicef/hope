@@ -7,6 +7,22 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
+snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_by_targeting_criteria_finalized 1'] = {
+    'data': {
+        'finalHouseholdsListByTargetingCriteria': {
+            'edges': [
+                {
+                    'node': {
+                        'familySize': 1,
+                        'residenceStatus': 'IDP'
+                    }
+                }
+            ],
+            'totalCount': 1
+        }
+    }
+}
+
 snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_by_targeting_criteria_family_size 1'] = {
     'data': {
         'finalHouseholdsListByTargetingCriteria': {
@@ -57,34 +73,6 @@ snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_b
                 }
             ],
             'totalCount': 1
-        }
-    }
-}
-
-snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_by_targeting_criteria_finalized 1'] = {
-    'data': {
-        'finalHouseholdsListByTargetingCriteria': {
-            'edges': [
-                {
-                    'node': {
-                        'familySize': 1,
-                        'residenceStatus': 'IDP'
-                    }
-                },
-                {
-                    'node': {
-                        'familySize': 1,
-                        'residenceStatus': 'CITIZEN'
-                    }
-                },
-                {
-                    'node': {
-                        'familySize': 2,
-                        'residenceStatus': 'REFUGEE'
-                    }
-                }
-            ],
-            'totalCount': 3
         }
     }
 }
