@@ -8,6 +8,8 @@ from django.contrib.postgres.validators import (
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 from psycopg2.extras import NumericRange
@@ -67,16 +69,16 @@ class TargetPopulation(TimeStampedUUIDModel):
         through="HouseholdSelection",
     )
     candidate_list_total_households = models.PositiveIntegerField(
-        blank=True, null=True, default=0,
+        blank=True, null=True,
     )
     candidate_list_total_individuals = models.PositiveIntegerField(
-        blank=True, null=True, default=0,
+        blank=True, null=True,
     )
     final_list_total_households = models.PositiveIntegerField(
-        blank=True, null=True, default=0,
+        blank=True, null=True,
     )
     final_list_total_individuals = models.PositiveIntegerField(
-        blank=True, null=True, default=0,
+        blank=True, null=True,
     )
     selection_computation_metadata = models.TextField(
         blank=True,
