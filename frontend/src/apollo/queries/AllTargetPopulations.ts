@@ -23,7 +23,7 @@ export const AllTargetPopulations = gql`
           name
           status
           createdAt
-          lastEditedAt
+          updatedAt
           totalHouseholds
           totalFamilySize
           createdBy {

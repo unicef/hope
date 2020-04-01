@@ -173,7 +173,7 @@ export function TargetCriteriaForm({
                               label='Choose field type'
                               fullWidth
                               required
-                              choices={data.allCoreFieldAttributes}
+                              choices={data.allFieldsAttributes}
                               index={index}
                               component={FormikSelectField}
                             />
@@ -181,13 +181,13 @@ export function TargetCriteriaForm({
                               <Field
                                 name={`criterias[${index}].value`}
                                 choices={
-                                  data.allCoreFieldAttributes.find(
+                                  data.allFieldsAttributes.find(
                                     (attributes) =>
                                       attributes.name === each.label,
                                   ).choices
                                 }
                                 type={
-                                  data.allCoreFieldAttributes.find(
+                                  data.allFieldsAttributes.find(
                                     (attributes) =>
                                       attributes.name === each.label,
                                   ).type
