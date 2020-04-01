@@ -68,7 +68,7 @@ const AddCriteria = styled.div`
 `;
 
 interface TargetingCriteriaProps {
-  criterias: object[];
+  criterias?;
   isEdit?: boolean;
   helpers?;
 }
@@ -96,7 +96,6 @@ export function TargetingCriteria({
     helpers.push(values.criterias);
     closeModal();
   };
-
   return (
     <div>
       <PaperContainer>
@@ -129,8 +128,9 @@ export function TargetingCriteria({
               return (
                 <>
                   <Criteria
+                    key={criteria.id}
                     isEdit={isEdit}
-                    criteria={criteria}
+                    criteria={criteria.filters}
                     editFunction={() => openModal(criteria)}
                     removeFunction={() => helpers.remove(index)}
                   />
