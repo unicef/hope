@@ -8,11 +8,7 @@ export const UPLOAD_IMPORT_XSLSX_MUTATION = gql`
         numberOfIndividuals
         numberOfHouseholds
         registrationDataImport {
-          edges {
-            node {
-              id
-            }
-          }
+          id
         }
       }
     }
