@@ -36,12 +36,50 @@ const ButtonsContainer = styled.div`
   }
 `;
 
+const CriteriaField = ({field}) => {
+  let fieldElement;
+  switch (field.comparisionMethod) {
+    case 'NOT_EQUALS':
+      fieldElement = (
+        <p>
+          {field.fieldName}: <span>{field.arguments[0]}</span>
+        </p>
+      )
+      break;
+    case 'RANGE':
+      fieldElement = (
+        <p>
+          {field.fieldName}:{' '}
+          <span>
+            {field.arguments[0]} - {field.arguments[1]}
+          </span>
+        </p>
+      )
+      break;
+    case 'EQUALS':
+      fieldElement = (
+        <p>
+          {field.fieldName}: <span>{field.arguments[0]}</span>
+        </p>
+      )
+      break;
+    default:
+      fieldElement = (
+        <p>
+          {field.fieldName}: <span>{field.arguments[0]}</span>
+        </p>
+      )
+      break;
+  }
+  return fieldElement;
+};
+
 export function Criteria({ criteria, removeFunction, editFunction, isEdit }) {
   const { t } = useTranslation();
-
+  console.log(criteria);
   return (
     <CriteriaElement>
-      {criteria.intakeGroup && (
+      {/* {criteria.intakeGroup && (
         <p>
           Intake group: <span>{criteria.intakeGroup}</span>
         </p>
@@ -65,7 +103,10 @@ export function Criteria({ criteria, removeFunction, editFunction, isEdit }) {
         <p>
           Hoousehold size: <span>{criteria.household}</span>
         </p>
-      )}
+      )} */}
+      {criteria.map((each) => (
+        <CriteriaField key={each.id} field={each} />
+      ))}
       {isEdit && (
         <ButtonsContainer>
           <IconButton>

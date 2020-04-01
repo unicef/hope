@@ -98,10 +98,65 @@ const rules = [
   }
 ]
 
+const candidateLiistTargetingCriteria = {
+  rules: [
+    {
+      filters: [
+        {
+          id: '1',
+          comparisionMethod: 'NOT_EQUALS',
+          isFlexField: false,
+          fieldName: 'years_in_school',
+          arguments: [5],
+        },
+        {
+          id: '2',
+          comparisionMethod: 'RANGE',
+          isFlexField: false,
+          fieldName: 'family_size',
+          arguments: [5, 7],
+        },
+        {
+          id: '3',
+          comparisionMethod: 'EQUALS',
+          isFlexField: false,
+          fieldName: 'residence_status',
+          arguments: ['CITIZEN'],
+        },
+      ],
+    },
+    {
+      filters: [
+        {
+          id: '4',
+          comparisionMethod: 'NOT_EQUALS',
+          isFlexField: false,
+          fieldName: 'years_in_school',
+          arguments: [5],
+        },
+        {
+          id: '5',
+          comparisionMethod: 'RANGE',
+          isFlexField: false,
+          fieldName: 'family_size',
+          arguments: [5, 7],
+        },
+        {
+          id: '6',
+          comparisionMethod: 'EQUALS',
+          isFlexField: false,
+          fieldName: 'residence_status',
+          arguments: ['CITIZEN'],
+        },
+      ],
+    },
+  ],
+};
+
 export function EditTargetPopulation({ targetPopulation, cancelEdit }: EditTargetPopulationProps) {
   const initialValues = {
     name: targetPopulation?.name || '',
-    criterias: criterias || [],
+    criterias: candidateLiistTargetingCriteria.rules || [],
   };
   return (
     <Formik
@@ -145,7 +200,7 @@ export function EditTargetPopulation({ targetPopulation, cancelEdit }: EditTarge
               </ButtonContainer>
             </>
           </PageHeader>
-          <FieldArray
+          {/* <FieldArray
             name='criterias'
             render={(arrayHelpers) => (
               <TargetingCriteria
@@ -154,7 +209,7 @@ export function EditTargetPopulation({ targetPopulation, cancelEdit }: EditTarge
                 isEdit
               />
             )}
-          />
+          /> */}
           <Results />
           <PaperContainer>
             <Title>
