@@ -1,17 +1,28 @@
 import { gql } from 'apollo-boost';
 
 export const ImportedIndividualFields = gql`
-    query ImportedIndividualFields {
-        allCoreFieldAttributes {
-            id
-            name
-            label
-            type
-            associatedWith
-            choices {
-                name
-                value
-            }
+  query ImportedIndividualFields {
+    allFieldsAttributes {
+      isFlexField
+      id
+      type
+      name
+      labels {
+        language
+        label
+      }
+      labelEn
+      hint
+      choices {
+        labels {
+          label
+          language
         }
+        labelEn
+        value
+        admin
+        listName
+      }
     }
-`
+  }
+`;
