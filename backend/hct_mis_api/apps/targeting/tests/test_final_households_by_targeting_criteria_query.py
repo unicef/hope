@@ -122,9 +122,6 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
             final_list_targeting_criteria=targeting_criteria,
             status="FINALIZED",
         )
-        cls.target_population_family_size_1_finalized.households.set(
-            cls.households
-        )
         cls.target_population_family_size_1_finalized.save()
         HouseholdSelection.objects.create(
             household=cls.household_family_size_1,

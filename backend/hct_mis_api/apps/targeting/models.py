@@ -1,5 +1,3 @@
-"""Models for target population and target rules."""
-
 from django.conf import settings
 from django.contrib.postgres.fields import IntegerRangeField
 from django.contrib.postgres.fields import JSONField
@@ -109,15 +107,11 @@ class TargetPopulation(TimeStampedUUIDModel):
         related_name="target_population_final",
     )
 
-
-
     @property
     def final_list(self):
         if self.status == "DRAFT":
             return []
         return self.households.filter(selections__final=True).distinct()
-
-
 
 
 class HouseholdSelection(TimeStampedUUIDModel):
@@ -212,7 +206,7 @@ class TargetingCriteriaRule(
 
 class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
     """
-    This is one explicit filter like: 
+    This is one explicit filter like:
         :Age <> 10-20
         :Residential Status = Refugee
         :Residential Status != Refugee
@@ -307,4 +301,3 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
     def get_query(self):
         if not self.is_flex_field:
             return self.get_query_for_cor_field()
-

@@ -140,7 +140,6 @@ class Command(BaseCommand):
 
     @transaction.atomic
     def handle(self, *args, **options):
-
         start_time = time.time()
         programs_amount = options["programs_amount"]
 
