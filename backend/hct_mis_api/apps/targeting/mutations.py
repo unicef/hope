@@ -1,9 +1,16 @@
 import graphene
+from django.db import transaction
+
 from account.models import User
 from core import utils
 from core.permissions import is_authenticated
 from django.forms.models import model_to_dict
-from targeting.models import TargetPopulation
+from targeting.models import (
+    TargetPopulation,
+    HouseholdSelection,
+    TargetingCriteria,
+    TargetingCriteriaRule,
+)
 from targeting.schema import TargetPopulationNode
 from targeting.validators import TargetValidator
 
@@ -43,34 +50,62 @@ class CopyTarget(graphene.relay.ClientIDMutation, TargetValidator):
 
     @classmethod
     @is_authenticated
+    @transaction.atomic
     def mutate_and_get_payload(cls, _root, info, **kwargs):
         user = info.context.user
         target_population_data = kwargs["target_population_data"]
+        name = target_population_data.pop("name")
         target_id = utils.decode_id_string(target_population_data.pop("id"))
         target_population = TargetPopulation.objects.get(id=target_id)
-        # Get relational fields
-        exclude_foreign_fields = utils.filter_relational_fields(
-            target_population
+        target_population_copy = TargetPopulation(
+            name=name,
+            created_by=user,
+            status=target_population.status,
+            candidate_list_total_households=target_population.candidate_list_total_households,
+            candidate_list_total_individuals=target_population.candidate_list_total_individuals,
+            final_list_total_households=target_population.final_list_total_households,
+            final_list_total_individuals=target_population.final_list_total_individuals,
+            selection_computation_metadata=target_population.selection_computation_metadata,
+            program=target_population.program,
         )
-        target_population_dict = model_to_dict(
-            target_population,
-            exclude=["id", "pk", "name"]
-            + [field.name for field in exclude_foreign_fields],
+        target_population_copy.save()
+        selections = HouseholdSelection.objects.filter(
+            target_population=target_population
         )
-        # Update relevant details.
-        target_population_dict["name"] = target_population_data["name"]
-        target_population_dict["created_by"] = (
-            user if isinstance(user, User) else target_population.created_by
+        selections_copy = []
+        for selection in selections:
+            selections_copy.append(
+                HouseholdSelection(
+                    target_population=target_population_copy,
+                    household=selection.household,
+                    final=selection.final,
+                )
+            )
+        HouseholdSelection.objects.bulk_create(selections_copy)
+        target_population_copy.candidate_list_targeting_criteria = cls.copy_target_criteria(
+            target_population.candidate_list_targeting_criteria
         )
-        # Create new record.
-        new_target_population = TargetPopulation.objects.create(
-            **target_population_dict
+        target_population_copy.final_list_targeting_criteria = cls.copy_target_criteria(
+            target_population.final_list_targeting_criteria
         )
-        # Copy associations.
-        new_target_population = utils.copy_associations_async(
-            target_population, new_target_population, exclude_foreign_fields
-        )
-        return CopyTarget(new_target_population)
+        target_population_copy.save()
+        target_population_copy.refresh_from_db()
+        return CopyTarget(target_population_copy)
+
+    @classmethod
+    def copy_target_criteria(cls, targeting_criteria):
+        targeting_criteria_copy = TargetingCriteria()
+        targeting_criteria_copy.save()
+        for rule in targeting_criteria.rules.all():
+            rule_copy = TargetingCriteriaRule(
+                targeting_criteria=targeting_criteria_copy
+            )
+            rule_copy.save()
+            for filter in rule.filters.all():
+                filter.pk = None
+                filter.targeting_criteria_rule = rule_copy
+                filter.save()
+        return targeting_criteria_copy
 
 
 class UpdateTarget(graphene.relay.ClientIDMutation, TargetValidator):
@@ -107,7 +142,7 @@ class DeleteTarget(graphene.relay.ClientIDMutation, TargetValidator):
 
 
 class Mutations(graphene.ObjectType):
-    update_target = UpdateTarget.Field()
-    copy_target = CopyTarget.Field()
-    delete_target = DeleteTarget.Field()
+    update_target_population = UpdateTarget.Field()
+    copy_target_population = CopyTarget.Field()
+    delete_target_population = DeleteTarget.Field()
     # TODO(codecakes): implement others
