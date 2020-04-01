@@ -124,6 +124,6 @@ def households_changed(sender, instance, **kwargs):
 
 @receiver(post_save, sender=HouseholdSelection)
 def post_save_households_selection(sender, instance, *args, **kwargs):
-    calculate_candidate_counts(instance)
-    calculate_final_counts(instance)
-    instance.save()
+    calculate_candidate_counts(instance.target_population)
+    calculate_final_counts(instance.target_population)
+    instance.target_population.save()
