@@ -85,6 +85,7 @@ class TargetingCriteriaFactory(factory.DjangoModelFactory):
 
 
 class TargetPopulationFactory(factory.DjangoModelFactory):
+
     class Meta:
         model = TargetPopulation
 

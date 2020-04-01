@@ -1,7 +1,6 @@
 import functools
 import json
 import operator
-from pprint import pprint
 
 import django_filters
 import graphene
