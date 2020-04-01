@@ -21,4 +21,5 @@ class Command(makemigrations.Command):
         )
         call_command("migratealldb")
         call_command("loadbusinessareas")
+        call_command("loadflexfieldsattributes")
         call_command("generatefixtures")
