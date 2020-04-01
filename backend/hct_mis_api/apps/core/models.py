@@ -7,7 +7,7 @@ import pycountry
 from auditlog.models import AuditlogHistoryField
 from auditlog.registry import auditlog
 from core.coutries import COUNTRY_NAME_TO_ALPHA2_CODE
-from core.utils import unique_slugify
+from core.utils import unique_slugify, age_to_dob_query
 from django.contrib.gis.db.models import MultiPolygonField, PointField
 from django.contrib.postgres.fields import JSONField
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -398,6 +398,7 @@ class CoreAttribute(object):
                 "label": {"English(EN)": "years in school"},
                 "hint": "number of years spent in school",
                 "required": True,
+                "lookup": "individuals__years_in_school",
                 "choices": [],
                 "associated_with": get_item_fn(associated_with[1]),
             },
@@ -408,12 +409,14 @@ class CoreAttribute(object):
                 "label": {"English(EN)": "age"},
                 "hint": "age in years",
                 "required": True,
+                "get_query": age_to_dob_query,
                 "choices": [],
                 "associated_with": get_item_fn(associated_with[1]),
             },
             {
                 "id": "d6aa9669-ae82-4e3c-adfe-79b5d95d0754",
                 "type": _INTEGER,
+                "lookup": "family_size",
                 "name": "family_size",
                 "label": {"English(EN)": "Family Size"},
                 "hint": "how many persons in the household",
@@ -425,16 +428,12 @@ class CoreAttribute(object):
                 "id": "3c2473d6-1e81-4025-86c7-e8036dd92f4b",
                 "type": _SELECT_ONE,
                 "name": "residence_status",
+                "lookup": "residence_status",
                 "required": True,
                 "label": {"English(EN)": "Residence Status"},
                 "hint": "residential status of household",
                 "choices": [
-                    {
-                        "name": name,
-                        "value": str(value),
-                        "admin": "",
-                        "list_name": "",
-                    }
+                    {"label": {"English(EN)": name}, "value": str(value),}
                     for name, value in household_model.RESIDENCE_STATUS_CHOICE
                 ],
                 "associated_with": get_item_fn(associated_with[0]),

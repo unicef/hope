@@ -42,7 +42,8 @@ ALLOWED_EXTENSIONS = (
     "doc",
     "docx",
     "xls",
-    "xlsx" "img",
+    "xlsx",
+    "img",
     "png",
     "jpg",
     "jpeg",
@@ -365,3 +366,5 @@ GRAPH_MODELS = {
     "all_applications": True,
     "group_models": True,
 }
+
+PHONENUMBER_DEFAULT_REGION = "US"
