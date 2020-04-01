@@ -99,7 +99,9 @@ export function targetPopulationStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case 'IN_PROGRESS':
+    case 'DRAFT':
+      return theme.hctPalette.gray;
+    case 'APPROVED':
       return theme.hctPalette.oragne;
     case 'FINALIZED':
       return theme.hctPalette.green;

@@ -49,7 +49,7 @@ export function TargetPopulationPageHeader({
   //TODO: Use statuses from node - not in backend yet
   let buttons;
   switch (targetPopulation.status) {
-    case 'IN_PROGRESS':
+    case 'DRAFT':
       buttons = (
         <InProgressTargetPopulationHeaderButtons
           targetPopulation={targetPopulation}
@@ -57,13 +57,13 @@ export function TargetPopulationPageHeader({
         />
       );
       break;
-    // case 'IN_PROGRESS': //APPROVED
-    //   buttons = (
-    //     <ApprovedTargetPopulationHeaderButtons
-    //       targetPopulation={targetPopulation}
-    //     />
-    //   );
-    //   break;
+    case 'APPROVED':
+      buttons = (
+        <ApprovedTargetPopulationHeaderButtons
+          targetPopulation={targetPopulation}
+        />
+      );
+      break;
     case 'FINALIZED':
       buttons = (
         <FinalizedTargetPopulationHeaderButtons
