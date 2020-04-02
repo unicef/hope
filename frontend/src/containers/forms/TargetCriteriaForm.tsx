@@ -108,7 +108,7 @@ export function TargetCriteriaForm({
 }): React.ReactElement {
   const { data, loading } = useImportedIndividualFieldsQuery();
   const initialValue = {
-    filters: criteria.filters || [],
+    filters: criteria.filters || [{fieldName: ''}],
   };
 
   if (loading) return null;
