@@ -13,6 +13,7 @@ import { Field, Formik, FieldArray } from 'formik';
 import { useImportedIndividualFieldsQuery } from '../../__generated__/graphql';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { AddCircleOutline } from '@material-ui/icons';
+import { SubField } from '../../components/TargetPopulation/SubField';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -81,21 +82,12 @@ const DividerLabel = styled.div`
 `;
 
 const validationSchema = Yup.object().shape({
-  criteria: Yup.array().of(
+  filters: Yup.array().of(
     Yup.object().shape({
-      label: Yup.string().required('Label is required'),
+      fieldName: Yup.string().required('Label is required'),
     }),
   ),
 });
-
-const SubField = ({ field, form, ...otherProps }) => {
-  switch (otherProps.type) {
-    case 'SELECT_ONE':
-      return <FormikSelectField field={field} form={form} {...otherProps} />;
-    default:
-      return <div>Other fields</div>;
-  }
-};
 
 interface ProgramFormPropTypes {
   criteria?;
@@ -116,7 +108,7 @@ export function TargetCriteriaForm({
 }): React.ReactElement {
   const { data, loading } = useImportedIndividualFieldsQuery();
   const initialValue = {
-    filters: criteria.filters || []
+    filters: criteria.filters || [],
   };
 
   if (loading) return null;
@@ -168,28 +160,18 @@ export function TargetCriteriaForm({
                               value={each.fieldName || null}
                               component={FormikSelectField}
                             />
-                            {/* {each.label && (
+                            {each.fieldName && (
                               <Field
-                                name={`filters[${index}].value`}
-                                choices={
-                                  data.allFieldsAttributes.find(
-                                    (attributes) =>
-                                      attributes.name === each.label,
-                                  ).choices
-                                }
-                                type={
-                                  data.allFieldsAttributes.find(
-                                    (attributes) =>
-                                      attributes.name === each.label,
-                                  ).type
-                                }
+                                name={`filters[${index}].arguments`}
+                                subField={data.allFieldsAttributes.find(
+                                  (attributes) =>
+                                    attributes.name === each.fieldName,
+                                )}
                                 component={SubField}
                               />
-                            )} */}
-                            {(values.filters.length === 1 &&
-                              index === 0) ||
-                            index ===
-                              values.filters.length - 1 ? null : (
+                            )}
+                            {(values.filters.length === 1 && index === 0) ||
+                            index === values.filters.length - 1 ? null : (
                               <Divider>
                                 <DividerLabel>And</DividerLabel>
                               </Divider>
@@ -199,9 +181,7 @@ export function TargetCriteriaForm({
                       })}
                       <AddCriteriaWrapper>
                         <AddCriteria
-                          onClick={() =>
-                            arrayHelpers.push({ fieldname: '' })
-                          }
+                          onClick={() => arrayHelpers.push({ fieldname: '' })}
                         >
                           <AddCircleOutline />
                           <span>Add Criteria</span>
