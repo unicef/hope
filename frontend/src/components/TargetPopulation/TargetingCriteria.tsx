@@ -22,6 +22,7 @@ const Title = styled.div`
 
 const ContentWrapper = styled.div`
   display: flex;
+  flex-wrap: wrap;
 `;
 
 const Divider = styled.div`

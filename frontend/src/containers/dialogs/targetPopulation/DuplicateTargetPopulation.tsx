@@ -49,6 +49,7 @@ export function DuplicateTargetPopulation({
     name: '',
     id: targetPopulationId,
   };
+
   return (
     <Dialog
       open={open}
@@ -60,16 +61,15 @@ export function DuplicateTargetPopulation({
         validationSchema={validationSchema}
         initialValues={initialValues}
         onSubmit={(values) => {
-          // mutate({
-          //   variables: { input: { targetPopulationData: { ...values } } },
-          // }).then(res => {
-          //   console.log(res)
-          // });
-          console.log(values)
+          return mutate({
+            variables: { input: { targetPopulationData: { ...values } } },
+          }).then((res) => {
+            setOpen(false)
+          });
         }}
       >
         {({ submitForm, values }) => (
-          <Form>
+          <>
             <DialogTitleWrapper>
               <DialogTitle id='scroll-dialog-title'>
                 <Typography variant='h6'>
@@ -99,13 +99,13 @@ export function DuplicateTargetPopulation({
                   type='submit'
                   color='primary'
                   variant='contained'
-                  onClick={() => submitForm()}
+                  onClick={submitForm}
                 >
                   Save
                 </Button>
               </DialogActions>
             </DialogFooter>
-          </Form>
+          </>
         )}
       </Formik>
     </Dialog>
