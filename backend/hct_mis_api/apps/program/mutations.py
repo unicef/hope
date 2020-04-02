@@ -1,4 +1,5 @@
 import graphene
+from django.core.exceptions import ValidationError
 from django.db import transaction
 
 from core.models import Location, BusinessArea
@@ -73,7 +74,7 @@ class CreateProgram(CommonValidator, graphene.Mutation):
         return CreateProgram(program)
 
 
-class UpdateProgram(CommonValidator, ProgramValidator, graphene.Mutation):
+class UpdateProgram( ProgramValidator, graphene.Mutation):
     program = graphene.Field(ProgramNode)
 
     class Arguments:
@@ -92,7 +93,6 @@ class UpdateProgram(CommonValidator, ProgramValidator, graphene.Mutation):
         if business_area_slug:
             business_area = BusinessArea.objects.get(slug=business_area_slug)
             program.business_area = business_area
-
         cls.validate(
             program_data=program_data,
             program=program,
