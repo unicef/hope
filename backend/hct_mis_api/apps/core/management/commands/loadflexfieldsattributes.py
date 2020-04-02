@@ -4,7 +4,10 @@ from django.core.management import BaseCommand
 
 from core.admin import FlexibleAttributeImporter
 from core.models import BusinessArea
+import logging
 
+
+logger = logging.getLogger(__name__)
 
 class Command(BaseCommand):
     help = "load flex fields attributes"
@@ -24,4 +27,4 @@ class Command(BaseCommand):
         file = options["file"]
         importer = FlexibleAttributeImporter()
         importer.import_xls(file)
-        self.stdout.write(f"Imported flex field attributes from {file}")
+        logger.debug(f"Imported flex field attributes from {file}")
