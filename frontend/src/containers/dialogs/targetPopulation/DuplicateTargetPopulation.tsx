@@ -9,7 +9,7 @@ import {
   Typography,
 } from '@material-ui/core';
 import styled from 'styled-components';
-import { Formik, Field, Form } from 'formik';
+import { Formik, Field } from 'formik';
 import { useCopyTargetPopulationMutation } from '../../../__generated__/graphql';
 import { FormikTextField } from '../../../shared/Formik/FormikTextField';
 import { useSnackbar } from '../../../hooks/useSnackBar';

@@ -2536,6 +2536,19 @@ export type DeleteProgramMutation = (
   )> }
 );
 
+export type DeleteTargetPopulationMutationVariables = {
+  input: DeleteTargetPopulationMutationInput
+};
+
+
+export type DeleteTargetPopulationMutation = (
+  { __typename?: 'Mutations' }
+  & { deleteTargetPopulation: Maybe<(
+    { __typename?: 'DeleteTargetPopulationMutationPayload' }
+    & Pick<DeleteTargetPopulationMutationPayload, 'clientMutationId'>
+  )> }
+);
+
 export type CopyTargetPopulationMutationVariables = {
   input: CopyTargetPopulationMutationInput
 };
@@ -3608,6 +3621,55 @@ export function useDeleteProgramMutation(baseOptions?: ApolloReactHooks.Mutation
 export type DeleteProgramMutationHookResult = ReturnType<typeof useDeleteProgramMutation>;
 export type DeleteProgramMutationResult = ApolloReactCommon.MutationResult<DeleteProgramMutation>;
 export type DeleteProgramMutationOptions = ApolloReactCommon.BaseMutationOptions<DeleteProgramMutation, DeleteProgramMutationVariables>;
+export const DeleteTargetPopulationDocument = gql`
+    mutation DeleteTargetPopulation($input: DeleteTargetPopulationMutationInput!) {
+  deleteTargetPopulation(input: $input) {
+    clientMutationId
+  }
+}
+    `;
+export type DeleteTargetPopulationMutationFn = ApolloReactCommon.MutationFunction<DeleteTargetPopulationMutation, DeleteTargetPopulationMutationVariables>;
+export type DeleteTargetPopulationComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<DeleteTargetPopulationMutation, DeleteTargetPopulationMutationVariables>, 'mutation'>;
+
+    export const DeleteTargetPopulationComponent = (props: DeleteTargetPopulationComponentProps) => (
+      <ApolloReactComponents.Mutation<DeleteTargetPopulationMutation, DeleteTargetPopulationMutationVariables> mutation={DeleteTargetPopulationDocument} {...props} />
+    );
+    
+export type DeleteTargetPopulationProps<TChildProps = {}> = ApolloReactHoc.MutateProps<DeleteTargetPopulationMutation, DeleteTargetPopulationMutationVariables> & TChildProps;
+export function withDeleteTargetPopulation<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  DeleteTargetPopulationMutation,
+  DeleteTargetPopulationMutationVariables,
+  DeleteTargetPopulationProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, DeleteTargetPopulationMutation, DeleteTargetPopulationMutationVariables, DeleteTargetPopulationProps<TChildProps>>(DeleteTargetPopulationDocument, {
+      alias: 'deleteTargetPopulation',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useDeleteTargetPopulationMutation__
+ *
+ * To run a mutation, you first call `useDeleteTargetPopulationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteTargetPopulationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteTargetPopulationMutation, { data, loading, error }] = useDeleteTargetPopulationMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useDeleteTargetPopulationMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<DeleteTargetPopulationMutation, DeleteTargetPopulationMutationVariables>) {
+        return ApolloReactHooks.useMutation<DeleteTargetPopulationMutation, DeleteTargetPopulationMutationVariables>(DeleteTargetPopulationDocument, baseOptions);
+      }
+export type DeleteTargetPopulationMutationHookResult = ReturnType<typeof useDeleteTargetPopulationMutation>;
+export type DeleteTargetPopulationMutationResult = ApolloReactCommon.MutationResult<DeleteTargetPopulationMutation>;
+export type DeleteTargetPopulationMutationOptions = ApolloReactCommon.BaseMutationOptions<DeleteTargetPopulationMutation, DeleteTargetPopulationMutationVariables>;
 export const CopyTargetPopulationDocument = gql`
     mutation CopyTargetPopulation($input: CopyTargetPopulationMutationInput!) {
   copyTargetPopulation(input: $input) {
