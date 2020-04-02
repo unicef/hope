@@ -12,6 +12,8 @@ import styled from 'styled-components';
 import { Formik, Field, Form } from 'formik';
 import { useCopyTargetPopulationMutation } from '../../../__generated__/graphql';
 import { FormikTextField } from '../../../shared/Formik/FormikTextField';
+import { useSnackbar } from '../../../hooks/useSnackBar';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
 
 export interface FinalizeTargetPopulationPropTypes {
   open: boolean;
@@ -45,6 +47,8 @@ export function DuplicateTargetPopulation({
   targetPopulationId,
 }) {
   const [mutate] = useCopyTargetPopulationMutation();
+  const { showMessage } = useSnackbar();
+  const businessArea = useBusinessArea();
   const initialValues = {
     name: '',
     id: targetPopulationId,
@@ -60,11 +64,14 @@ export function DuplicateTargetPopulation({
       <Formik
         validationSchema={validationSchema}
         initialValues={initialValues}
-        onSubmit={(values) => {
-          return mutate({
+        onSubmit={async (values) => {
+          const { data } = await mutate({
             variables: { input: { targetPopulationData: { ...values } } },
-          }).then((res) => {
-            setOpen(false)
+          });
+          setOpen(false);
+          showMessage('Target Population Duplicated', {
+            pathname: `/${businessArea}/target-population/${data.copyTargetPopulation.targetPopulation.id}`,
+            historyMethod: 'push',
           });
         }}
       >

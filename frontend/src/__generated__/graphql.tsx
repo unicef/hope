@@ -2546,6 +2546,10 @@ export type CopyTargetPopulationMutation = (
   & { copyTargetPopulation: Maybe<(
     { __typename?: 'CopyTargetPopulationMutationPayload' }
     & Pick<CopyTargetPopulationMutationPayload, 'clientMutationId'>
+    & { targetPopulation: Maybe<(
+      { __typename?: 'TargetPopulationNode' }
+      & Pick<TargetPopulationNode, 'id'>
+    )> }
   )> }
 );
 
@@ -3608,6 +3612,9 @@ export const CopyTargetPopulationDocument = gql`
     mutation CopyTargetPopulation($input: CopyTargetPopulationMutationInput!) {
   copyTargetPopulation(input: $input) {
     clientMutationId
+    targetPopulation {
+      id
+    }
   }
 }
     `;
