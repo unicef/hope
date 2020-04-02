@@ -8,14 +8,13 @@ import { DeleteTargetPopulation } from '../../dialogs/targetPopulation/DeleteTar
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 import { ApproveCandidateList } from '../../dialogs/targetPopulation/ApproveCandidateList';
 
-
 const IconContainer = styled.span`
   button {
     color: #949494;
     min-width: 40px;
     svg {
-        width: 20px;
-        height: 20px;
+      width: 20px;
+      height: 20px;
     }
   }
 `;
@@ -68,8 +67,16 @@ export function InProgressTargetPopulationHeaderButtons({
           Approve
         </Button>
       </ButtonContainer>
-      <DuplicateTargetPopulation open={openDuplicate} setOpen={setOpenDuplicate} targetPopulationId={targetPopulation.id}/>
-      <DeleteTargetPopulation open={openDelete} setOpen={setOpenDelete} />
+      <DuplicateTargetPopulation
+        open={openDuplicate}
+        setOpen={setOpenDuplicate}
+        targetPopulationId={targetPopulation.id}
+      />
+      <DeleteTargetPopulation
+        open={openDelete}
+        setOpen={setOpenDelete}
+        targetPopulationId={targetPopulation.id}
+      />
       <ApproveCandidateList open={openApprove} setOpen={setOpenApprove} />
     </div>
   );
