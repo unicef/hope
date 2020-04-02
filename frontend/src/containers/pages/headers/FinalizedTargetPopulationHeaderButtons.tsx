@@ -47,6 +47,7 @@ export function FinalizedTargetPopulationHeaderButtons({
       <DuplicateTargetPopulation
         open={openDuplicate}
         setOpen={setOpenDuplicate}
+        targetPopulationId={targetPopulation.id}
       />
     </div>
   );
