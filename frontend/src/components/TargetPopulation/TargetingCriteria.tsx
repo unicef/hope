@@ -130,7 +130,7 @@ export function TargetingCriteria({
                   <Criteria
                     key={criteria.id}
                     isEdit={isEdit}
-                    criteria={criteria.filters}
+                    rules={criteria.filters}
                     editFunction={() => openModal(criteria)}
                     removeFunction={() => helpers.remove(index)}
                   />

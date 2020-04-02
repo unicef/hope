@@ -3015,7 +3015,45 @@ export type TargetPopulationQuery = (
           ) }
         )> }
       )>> }
-    ) }
+    ), candidateListTargetingCriteria: Maybe<(
+      { __typename?: 'TargetingCriteriaNode' }
+      & { targetPopulationCandidate: Maybe<(
+        { __typename?: 'TargetPopulationNode' }
+        & { createdBy: Maybe<(
+          { __typename?: 'UserNode' }
+          & Pick<UserNode, 'firstName' | 'lastName'>
+        )>, program: Maybe<(
+          { __typename?: 'ProgramNode' }
+          & Pick<ProgramNode, 'id' | 'name'>
+        )> }
+      )>, rules: Maybe<Array<Maybe<(
+        { __typename?: 'TargetingCriteriaRuleNode' }
+        & Pick<TargetingCriteriaRuleNode, 'id'>
+        & { filters: Maybe<Array<Maybe<(
+          { __typename?: 'TargetingCriteriaRuleFilterNode' }
+          & Pick<TargetingCriteriaRuleFilterNode, 'id' | 'comparisionMethod' | 'isFlexField' | 'fieldName' | 'arguments'>
+        )>>> }
+      )>>> }
+    )>, finalListTargetingCriteria: Maybe<(
+      { __typename?: 'TargetingCriteriaNode' }
+      & { targetPopulationFinal: Maybe<(
+        { __typename?: 'TargetPopulationNode' }
+        & { createdBy: Maybe<(
+          { __typename?: 'UserNode' }
+          & Pick<UserNode, 'firstName' | 'lastName'>
+        )>, program: Maybe<(
+          { __typename?: 'ProgramNode' }
+          & Pick<ProgramNode, 'id' | 'name'>
+        )> }
+      )>, rules: Maybe<Array<Maybe<(
+        { __typename?: 'TargetingCriteriaRuleNode' }
+        & Pick<TargetingCriteriaRuleNode, 'id'>
+        & { filters: Maybe<Array<Maybe<(
+          { __typename?: 'TargetingCriteriaRuleFilterNode' }
+          & Pick<TargetingCriteriaRuleFilterNode, 'id' | 'comparisionMethod' | 'isFlexField' | 'fieldName' | 'arguments'>
+        )>>> }
+      )>>> }
+    )> }
   )> }
 );
 
@@ -4806,6 +4844,50 @@ export const TargetPopulationDocument = gql`
           location {
             title
           }
+        }
+      }
+    }
+    candidateListTargetingCriteria {
+      targetPopulationCandidate {
+        createdBy {
+          firstName
+          lastName
+        }
+        program {
+          id
+          name
+        }
+      }
+      rules {
+        id
+        filters {
+          id
+          comparisionMethod
+          isFlexField
+          fieldName
+          arguments
+        }
+      }
+    }
+    finalListTargetingCriteria {
+      targetPopulationFinal {
+        createdBy {
+          firstName
+          lastName
+        }
+        program {
+          id
+          name
+        }
+      }
+      rules {
+        id
+        filters {
+          id
+          comparisionMethod
+          isFlexField
+          fieldName
+          arguments
         }
       }
     }
