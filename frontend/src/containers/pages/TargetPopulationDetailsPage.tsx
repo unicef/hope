@@ -22,6 +22,11 @@ export function TargetPopulationDetailsPage() {
     setSelectedTab(newValue);
   };
 
+  if (!data) {
+    return null;
+  }
+  const targetPopulation = data.targetPopulation as TargetPopulationNode;
+
   const tabs = (
     <Tabs
       value={selectedTab}
@@ -31,14 +36,9 @@ export function TargetPopulationDetailsPage() {
       textColor='primary'
     >
       <Tab label='Candidate list' />
-      <Tab label='Target Population' />
+      <Tab label='Target Population' disabled={targetPopulation.status === "DRAFT"} />
     </Tabs>
   );
-
-  if (!data) {
-    return null;
-  }
-  const targetPopulation = data.targetPopulation as TargetPopulationNode;
 
   return (
     <div>
