@@ -38,125 +38,10 @@ interface EditTargetPopulationProps {
     cancelEdit?
 }
 
-const criterias = [
-  {
-    intakeGroup: 'Children 9/10/2019',
-    sex: 'Female',
-    age: '7 - 15 years old',
-    distanceToSchool: 'over 3km',
-    household: 'over 5 individuals',
-    core: [
-      {
-        label: 'residence_status',
-        value: 'MIGRANT',
-      },
-    ],
-  },
-  {
-    intakeGroup: 'Children 9/10/2019',
-    sex: 'Male',
-    age: null,
-    distanceToSchool: 'over 3km',
-    household: null,
-    core: [
-      {
-        label: 'residence_status',
-        value: 'CITIZEN',
-      },
-    ],
-  },
-];
-
-const rules = [
-  {
-    id: '1',
-    comparisionMethod: 'NOT_EQUALS',
-    isFlexField: false,
-    fieldName: 'years_in_school',
-    arguments: [5]
-  },
-  {
-    id: '1',
-    comparisionMethod: 'RANGE',
-    isFlexField: false,
-    fieldName: 'family_size',
-    arguments: [5, 7]
-  },
-  {
-    id: '1',
-    comparisionMethod: 'EQUALS',
-    isFlexField: false,
-    fieldName: 'residence_status',
-    arguments: ["CITIZEN"]
-  },
-  {
-    id: '1',
-    comparisionMethod: 'NOT_EQUALS',
-    isFlexField: false,
-    fieldName: 'years_in_school',
-    arguments: [5, 7]
-  }
-]
-
-const candidateLiistTargetingCriteria = {
-  rules: [
-    {
-      filters: [
-        {
-          id: '1',
-          comparisionMethod: 'NOT_EQUALS',
-          isFlexField: false,
-          fieldName: 'years_in_school',
-          arguments: [5],
-        },
-        {
-          id: '2',
-          comparisionMethod: 'RANGE',
-          isFlexField: false,
-          fieldName: 'family_size',
-          arguments: [5, 7],
-        },
-        {
-          id: '3',
-          comparisionMethod: 'EQUALS',
-          isFlexField: false,
-          fieldName: 'residence_status',
-          arguments: ['CITIZEN'],
-        },
-      ],
-    },
-    {
-      filters: [
-        {
-          id: '4',
-          comparisionMethod: 'NOT_EQUALS',
-          isFlexField: false,
-          fieldName: 'years_in_school',
-          arguments: [5],
-        },
-        {
-          id: '5',
-          comparisionMethod: 'RANGE',
-          isFlexField: false,
-          fieldName: 'family_size',
-          arguments: [5, 7],
-        },
-        {
-          id: '6',
-          comparisionMethod: 'EQUALS',
-          isFlexField: false,
-          fieldName: 'residence_status',
-          arguments: ['CITIZEN'],
-        },
-      ],
-    },
-  ],
-};
-
 export function EditTargetPopulation({ targetPopulation, cancelEdit }: EditTargetPopulationProps) {
   const initialValues = {
-    name: targetPopulation?.name || '',
-    criterias: candidateLiistTargetingCriteria.rules || [],
+    name: targetPopulation.name || '',
+    criterias: targetPopulation.rules || [],
   };
   return (
     <Formik
@@ -200,7 +85,7 @@ export function EditTargetPopulation({ targetPopulation, cancelEdit }: EditTarge
               </ButtonContainer>
             </>
           </PageHeader>
-          {/* <FieldArray
+          <FieldArray
             name='criterias'
             render={(arrayHelpers) => (
               <TargetingCriteria
@@ -209,7 +94,7 @@ export function EditTargetPopulation({ targetPopulation, cancelEdit }: EditTarge
                 isEdit
               />
             )}
-          /> */}
+          />
           <Results />
           <PaperContainer>
             <Title>

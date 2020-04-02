@@ -20,6 +20,50 @@ export const TargetPopulation = gql`
           }
         }
       }
+      candidateListTargetingCriteria {
+      targetPopulationCandidate {
+        createdBy {
+          firstName
+          lastName
+        }
+        program {
+          id
+          name
+        }
+      }
+      rules {
+        id
+        filters {
+          id
+          comparisionMethod
+          isFlexField
+          fieldName
+          arguments
+        }
+      }
+    }
+    finalListTargetingCriteria {
+      targetPopulationFinal {
+        createdBy {
+          firstName
+          lastName
+        }
+        program {
+          id
+          name
+        }
+      }
+      rules {
+        id
+        filters {
+          id
+          comparisionMethod
+          isFlexField
+          fieldName
+          arguments
+        }
+      }
+    }
     }
   }
 `;
