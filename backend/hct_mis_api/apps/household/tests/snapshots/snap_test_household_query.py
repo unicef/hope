@@ -7,6 +7,66 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
+snapshots['TestHouseholdQuery::test_household_filter_by_programme 1'] = {
+    'data': {
+        'allHouseholds': {
+            'edges': [
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum',
+                        'familySize': 4,
+                        'householdCaId': '123-123-123',
+                        'nationality': 'PL',
+                        'programs': {
+                            'edges': [
+                                {
+                                    'node': {
+                                        'name': 'Test program ONE'
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum',
+                        'familySize': 1,
+                        'householdCaId': '123-123-123',
+                        'nationality': 'PL',
+                        'programs': {
+                            'edges': [
+                                {
+                                    'node': {
+                                        'name': 'Test program ONE'
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum',
+                        'familySize': 11,
+                        'householdCaId': '123-123-123',
+                        'nationality': 'PL',
+                        'programs': {
+                            'edges': [
+                                {
+                                    'node': {
+                                        'name': 'Test program ONE'
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    }
+}
+
 snapshots['TestHouseholdQuery::test_household_query_all 1'] = {
     'data': {
         'allHouseholds': {
@@ -196,66 +256,6 @@ snapshots['TestHouseholdQuery::test_household_query_all_range 1'] = {
                         'familySize': 5,
                         'householdCaId': '123-123-123',
                         'nationality': 'PL'
-                    }
-                }
-            ]
-        }
-    }
-}
-
-snapshots['TestHouseholdQuery::test_household_filter_by_programme 1'] = {
-    'data': {
-        'allHouseholds': {
-            'edges': [
-                {
-                    'node': {
-                        'address': 'Lorem Ipsum',
-                        'familySize': 1,
-                        'householdCaId': '123-123-123',
-                        'nationality': 'PL',
-                        'programs': {
-                            'edges': [
-                                {
-                                    'node': {
-                                        'name': 'Test program ONE'
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                },
-                {
-                    'node': {
-                        'address': 'Lorem Ipsum',
-                        'familySize': 11,
-                        'householdCaId': '123-123-123',
-                        'nationality': 'PL',
-                        'programs': {
-                            'edges': [
-                                {
-                                    'node': {
-                                        'name': 'Test program ONE'
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                },
-                {
-                    'node': {
-                        'address': 'Lorem Ipsum',
-                        'familySize': 4,
-                        'householdCaId': '123-123-123',
-                        'nationality': 'PL',
-                        'programs': {
-                            'edges': [
-                                {
-                                    'node': {
-                                        'name': 'Test program ONE'
-                                    }
-                                }
-                            ]
-                        }
                     }
                 }
             ]
