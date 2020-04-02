@@ -3,16 +3,13 @@ from pathlib import Path
 from zipfile import BadZipfile
 
 import openpyxl
+import phonenumbers
 from dateutil import parser
-from django.core.exceptions import ValidationError
 from openpyxl import load_workbook
-from phonenumber_field.phonenumber import PhoneNumber
-from phonenumber_field.validators import validate_international_phonenumber
 
 from core.models import BusinessArea
 from core.utils import get_choices_values
 from core.validators import BaseValidator
-from household.const import NATIONALITIES
 from household.models import Individual, Household
 
 
@@ -21,7 +18,6 @@ class UploadXLSXValidator(BaseValidator):
     #  temporarily hardcoded
     #  FLEX_ATTRS = serialize_flex_attributes()
     WB = None
-    HOUSEHOLD_IDS = None
 
     FLEX_ATTRS = {
         "individuals": {
@@ -94,13 +90,8 @@ class UploadXLSXValidator(BaseValidator):
             "given_name": {"type": "STRING"},
             "last_name": {"type": "STRING"},
             "middle_name": {"type": "STRING"},
-            "full_name": {
-                "type": "CALCULATED",
-                "calculate_fields": ["first_name", "middle_name", "last_name",],
-            },
             "sex": {"type": "SELECT_ONE", "choices": Individual.SEX_CHOICE,},
             "birth_date": {"type": "DATE"},
-            "age": {"type": "CALCULATED", "calculate_fields": ["birth_date"],},
             "estimated_birth_date": {
                 "type": "SELECT_ONE",
                 "choices": Individual.YES_NO_CHOICE,
@@ -169,7 +160,13 @@ class UploadXLSXValidator(BaseValidator):
 
     @classmethod
     def integer_validator(cls, value, *args, **kwargs):
-        return isinstance(value, int)
+        if cls.float_validator(value) is True:
+            return False
+        try:
+            int(value)
+            return True
+        except ValueError:
+            return False
 
     @classmethod
     def float_validator(cls, value, *args, **kwargs):
@@ -192,12 +189,11 @@ class UploadXLSXValidator(BaseValidator):
 
     @classmethod
     def phone_validator(cls, value, *args, **kwargs):
-        phone_number_obj = PhoneNumber.from_string(value, region="US")
-        return phone_number_obj.is_valid()
-
-    @classmethod
-    def calculated_field_validator(cls, val, *args, **kwargs):
-        return bool(val)
+        try:
+            phonenumbers.parse(value)
+            return True
+        except (phonenumbers.NumberParseException, TypeError):
+            return False
 
     @classmethod
     def choice_validator(cls, value, header, *args, **kwargs):
@@ -239,7 +235,6 @@ class UploadXLSXValidator(BaseValidator):
             "SELECT_ONE": cls.choice_validator,
             "SELECT_MANY": cls.choice_validator,
             "PHONE_NUMBER": cls.phone_validator,
-            "CALCULATED": cls.not_empty_validator,
             "GEOLOCATION": cls.geolocation_validator,
             "GEOPOINT": cls.geolocation_validator,
             # TODO: add image validator, how image will be attached to file?
@@ -261,7 +256,9 @@ class UploadXLSXValidator(BaseValidator):
                 continue
 
             for cell, header in zip(row, first_row):
-                current_field = combined_fields[header.value]
+                current_field = combined_fields.get(header.value)
+                if not current_field:
+                    continue
                 field_type = current_field["type"]
                 fn = switch_dict.get(field_type)
 
@@ -317,7 +314,7 @@ class UploadXLSXValidator(BaseValidator):
             return [
                 {
                     "row_number": 1,
-                    "header": "xlsx_file.nam",
+                    "header": f"{xlsx_file.name}",
                     "message": "Invalid .xlsx file",
                 }
             ]
@@ -335,6 +332,7 @@ class UploadXLSXValidator(BaseValidator):
         else:
             wb = cls.WB
 
+        errors = []
         for name, fields in cls.CORE_FIELDS.items():
             sheet = wb[name.capitalize()]
             first_row = sheet[1]
@@ -347,15 +345,17 @@ class UploadXLSXValidator(BaseValidator):
 
             columns_difference = expected_column_names.difference(column_names)
             if columns_difference:
-                return [
-                    {
-                        "row_number": 1,
-                        "header": col,
-                        "message": "Invalid column name",
-                    }
-                    for col in columns_difference
-                ]
-            return []
+                errors.extend(
+                    [
+                        {
+                            "row_number": 1,
+                            "header": col,
+                            "message": f"Missing column name {col}",
+                        }
+                        for col in columns_difference
+                    ]
+                )
+        return errors
 
     @classmethod
     def validate_household_rows(cls, *args, **kwargs):

@@ -34,37 +34,29 @@ class TargetPopulationFilter(django_filters.FilterSet):
         field_name="created_by", method="filter_created_by_name"
     )
     candidate_list_total_households_min = IntegerFilter(
-        field_name="candidate_list_total_households",
-        lookup_expr="gte",
+        field_name="candidate_list_total_households", lookup_expr="gte",
     )
     candidate_list_total_households_max = IntegerFilter(
-        field_name="candidate_list_total_households",
-        lookup_expr="lte",
+        field_name="candidate_list_total_households", lookup_expr="lte",
     )
     candidate_list_total_individuals_min = IntegerFilter(
-        field_name="candidate_list_total_individuals",
-        lookup_expr="gte",
+        field_name="candidate_list_total_individuals", lookup_expr="gte",
     )
     candidate_list_total_individuals_max = IntegerFilter(
-        field_name="candidate_list_total_individuals",
-        lookup_expr="lte",
+        field_name="candidate_list_total_individuals", lookup_expr="lte",
     )
 
     final_list_total_households_min = IntegerFilter(
-        field_name="final_list_total_households",
-        lookup_expr="gte",
+        field_name="final_list_total_households", lookup_expr="gte",
     )
     final_list_total_households_max = IntegerFilter(
-        field_name="final_list_total_households",
-        lookup_expr="lte",
+        field_name="final_list_total_households", lookup_expr="lte",
     )
     final_list_total_individuals_min = IntegerFilter(
-        field_name="final_list_total_individuals",
-        lookup_expr="gte",
+        field_name="final_list_total_individuals", lookup_expr="gte",
     )
     final_list_total_individuals_max = IntegerFilter(
-        field_name="final_list_total_individuals",
-        lookup_expr="lte",
+        field_name="final_list_total_individuals", lookup_expr="lte",
     )
 
     @staticmethod
@@ -170,6 +162,7 @@ class TargetPopulationNode(DjangoObjectType):
     total_family_size = graphene.Int(source="total_family_size")
     candidate_list_targeting_criteria = TargetingCriteriaRuleFilterNode()
     final_list_targeting_criteria = TargetingCriteriaRuleFilterNode()
+    final_list = DjangoConnectionField(HouseholdNode)
 
     class Meta:
         model = target_models.TargetPopulation
@@ -250,10 +243,7 @@ class Query(graphene.ObjectType):
         )
         if target_population_model.status == "DRAFT":
             return []
-        if (
-            target_population_model.status
-            == "APPROVED"
-        ):
+        if target_population_model.status == "APPROVED":
             if targeting_criteria is None:
                 return target_population_model.households.filter(
                     target_population_model.final_list_targeting_criteria.get_query()

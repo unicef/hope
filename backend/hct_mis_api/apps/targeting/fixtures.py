@@ -99,7 +99,7 @@ class TargetPopulationFactory(factory.DjangoModelFactory):
     updated_at = factory.LazyAttribute(
         lambda t: t.created_at + dt.timedelta(days=random.randint(60, 1000))
     )
-    status = factory.fuzzy.FuzzyChoice(["DRAFT", "APPROVED", "FINALIZED"])
+    status = factory.fuzzy.FuzzyChoice(["DRAFT"])
 
     @factory.post_generation
     def households(self, create, extracted, **kwargs):

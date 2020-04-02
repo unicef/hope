@@ -8,7 +8,6 @@ class TestMetaDataFilterType(APITestCase):
     QUERY = """
            query AllFieldsAttributes {
              allFieldsAttributes{
-               id
                name
                type
                labels{
