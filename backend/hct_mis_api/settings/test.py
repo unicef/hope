@@ -29,20 +29,37 @@ CACHES = {
     }
 }
 
-# change logging level to debug
-LOGGING["loggers"]["django.request"]["level"] = "DEBUG"
-def graphql_error(record):
-    err_type, err_obj, traceback = record.exc_info
-    if err_type == GraphQLError or err_type == GraphQLLocatedError:
-        return False
-    return True
-
-
-logging.getLogger("graphql.execution.executor").addFilter(graphql_error)
-logging.getLogger("graphql.execution.utils").addFilter(graphql_error)
-logging.getLogger("graphql.execution").addFilter(graphql_error)
-logging.getLogger("graphql").addFilter(graphql_error)
-logging.getLogger("graphql.errors").addFilter(graphql_error)
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "standard": {
+            "format": "%(asctime)s [%(levelname)s] %(name)s line %(lineno)d: %(message)s"
+        },
+        "verbose": {
+            "format": "[%(asctime)s][%(levelname)s][%(name)s] %(filename)s.%(funcName)s:%(lineno)d %(message)s",
+        },
+    },
+    "filters": {
+        "require_debug_false": {"()": "django.utils.log.RequireDebugFalse"}
+    },
+    "handlers": {
+        "default": {
+            "level": LOG_LEVEL,
+            "class": "logging.StreamHandler",
+            "formatter": "standard",
+        },
+        "mail_admins": {
+            "level": "ERROR",
+            "class": "django.utils.log.AdminEmailHandler",
+            "include_html": True,
+        },
+    },
+    "loggers": {
+        "": {"handlers": ["default"], "level": "DEBUG", "propagate": True},
+        "graphql":{"handlers": ["default"], "level": "CRITICAL", "propagate": True},
+    },
+}
 
 
 try:

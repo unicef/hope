@@ -8,10 +8,21 @@ from snapshottest import Snapshot
 snapshots = Snapshot()
 
 snapshots['TestApproveTargetPopulationMutation::test_approve_fail_target_population 1'] = {
-    'data': None,
+    'data': {
+        'approveTargetPopulation': None
+    },
     'errors': [
         {
-            'message': 'cannot unpack non-iterable NoneType object'
+            'locations': [
+                {
+                    'column': 15,
+                    'line': 3
+                }
+            ],
+            'message': "['Only Target Population with status DRAFT can be approved']",
+            'path': [
+                'approveTargetPopulation'
+            ]
         }
     ]
 }
@@ -44,10 +55,21 @@ snapshots['TestApproveTargetPopulationMutation::test_approve_target_population 1
 }
 
 snapshots['TestFinalizeTargetPopulationMutation::test_finalize_fail_target_population 1'] = {
-    'data': None,
+    'data': {
+        'finalizeTargetPopulation': None
+    },
     'errors': [
         {
-            'message': 'cannot unpack non-iterable NoneType object'
+            'locations': [
+                {
+                    'column': 15,
+                    'line': 3
+                }
+            ],
+            'message': "['Only Target Population with status APPROVED can be finalized']",
+            'path': [
+                'finalizeTargetPopulation'
+            ]
         }
     ]
 }
@@ -133,10 +155,21 @@ snapshots['TestFinalizeTargetPopulationMutation::test_finalize_target_population
 }
 
 snapshots['TestUnapproveTargetPopulationMutation::test_unapprove_fail_target_population 1'] = {
-    'data': None,
+    'data': {
+        'unapproveTargetPopulation': None
+    },
     'errors': [
         {
-            'message': 'cannot unpack non-iterable NoneType object'
+            'locations': [
+                {
+                    'column': 15,
+                    'line': 3
+                }
+            ],
+            'message': "['Only Target Population with status APPROVED can be unapproved']",
+            'path': [
+                'unapproveTargetPopulation'
+            ]
         }
     ]
 }
