@@ -6379,6 +6379,59 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "finalList",
+            "description": null,
+            "args": [
+              {
+                "name": "before",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "after",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "first",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "last",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "HouseholdNodeConnection",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -16864,7 +16917,7 @@
         "description": null,
         "fields": [
           {
-            "name": "updateTarget",
+            "name": "updateTargetPopulation",
             "description": null,
             "args": [
               {
@@ -16875,7 +16928,7 @@
                   "name": null,
                   "ofType": {
                     "kind": "INPUT_OBJECT",
-                    "name": "UpdateTargetInput",
+                    "name": "UpdateTargetPopulationMutationInput",
                     "ofType": null
                   }
                 },
@@ -16884,14 +16937,14 @@
             ],
             "type": {
               "kind": "OBJECT",
-              "name": "UpdateTargetPayload",
+              "name": "UpdateTargetPopulationMutationPayload",
               "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
-            "name": "copyTarget",
+            "name": "copyTargetPopulation",
             "description": null,
             "args": [
               {
@@ -16902,7 +16955,7 @@
                   "name": null,
                   "ofType": {
                     "kind": "INPUT_OBJECT",
-                    "name": "CopyTargetInput",
+                    "name": "CopyTargetPopulationMutationInput",
                     "ofType": null
                   }
                 },
@@ -16911,14 +16964,14 @@
             ],
             "type": {
               "kind": "OBJECT",
-              "name": "CopyTargetPayload",
+              "name": "CopyTargetPopulationMutationPayload",
               "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
-            "name": "deleteTarget",
+            "name": "deleteTargetPopulation",
             "description": null,
             "args": [
               {
@@ -16929,7 +16982,7 @@
                   "name": null,
                   "ofType": {
                     "kind": "INPUT_OBJECT",
-                    "name": "DeleteTargetInput",
+                    "name": "DeleteTargetPopulationMutationInput",
                     "ofType": null
                   }
                 },
@@ -16938,7 +16991,88 @@
             ],
             "type": {
               "kind": "OBJECT",
-              "name": "DeleteTargetPayload",
+              "name": "DeleteTargetPopulationMutationPayload",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "approveTargetPopulation",
+            "description": null,
+            "args": [
+              {
+                "name": "id",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "ID",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "ApproveTargetPopulationMutation",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "unapproveTargetPopulation",
+            "description": null,
+            "args": [
+              {
+                "name": "id",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "ID",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "UnapproveTargetPopulationMutation",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "finalizeTargetPopulation",
+            "description": null,
+            "args": [
+              {
+                "name": "id",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "ID",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "FinalizeTargetPopulationMutation",
               "ofType": null
             },
             "isDeprecated": false,
@@ -17191,7 +17325,7 @@
       },
       {
         "kind": "INPUT_OBJECT",
-        "name": "UpdateTargetInput",
+        "name": "UpdateTargetPopulationMutationInput",
         "description": null,
         "fields": null,
         "inputFields": [
@@ -17263,7 +17397,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "UpdateTargetPayload",
+        "name": "UpdateTargetPopulationMutationPayload",
         "description": null,
         "fields": [
           {
@@ -17298,7 +17432,7 @@
       },
       {
         "kind": "INPUT_OBJECT",
-        "name": "CopyTargetInput",
+        "name": "CopyTargetPopulationMutationInput",
         "description": null,
         "fields": null,
         "inputFields": [
@@ -17360,7 +17494,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "CopyTargetPayload",
+        "name": "CopyTargetPopulationMutationPayload",
         "description": null,
         "fields": [
           {
@@ -17395,7 +17529,7 @@
       },
       {
         "kind": "INPUT_OBJECT",
-        "name": "DeleteTargetInput",
+        "name": "DeleteTargetPopulationMutationInput",
         "description": null,
         "fields": null,
         "inputFields": [
@@ -17430,7 +17564,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "DeleteTargetPayload",
+        "name": "DeleteTargetPopulationMutationPayload",
         "description": null,
         "fields": [
           {
@@ -17452,6 +17586,75 @@
             "type": {
               "kind": "SCALAR",
               "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "ApproveTargetPopulationMutation",
+        "description": null,
+        "fields": [
+          {
+            "name": "targetPopulation",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "TargetPopulationNode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "UnapproveTargetPopulationMutation",
+        "description": null,
+        "fields": [
+          {
+            "name": "targetPopulation",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "TargetPopulationNode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "FinalizeTargetPopulationMutation",
+        "description": null,
+        "fields": [
+          {
+            "name": "targetPopulation",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "TargetPopulationNode",
               "ofType": null
             },
             "isDeprecated": false,
