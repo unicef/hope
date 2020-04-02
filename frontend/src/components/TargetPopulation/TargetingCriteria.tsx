@@ -135,7 +135,7 @@ export function TargetingCriteria({
                     removeFunction={() => helpers.remove(index)}
                   />
 
-                  {index % 2 ||
+                  {index === (criterias.length - 1) ||
                   (criterias.length === 1 && index === 0) ? null : (
                     <Divider>
                       <DividerLabel>Or</DividerLabel>
