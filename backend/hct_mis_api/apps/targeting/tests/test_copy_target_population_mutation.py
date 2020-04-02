@@ -13,7 +13,7 @@ from targeting.models import (
 
 class TestCopyTargetPopulationMutation(APITestCase):
     COPY_TARGET_MUTATION = """
-            mutation CopyTargetPopulation($input: CopyTargetInput!) {
+            mutation CopyTargetPopulation($input: CopyTargetPopulationMutationInput!) {
               copyTargetPopulation(input: $input) {
                 targetPopulation {
                     name
@@ -47,7 +47,7 @@ class TestCopyTargetPopulationMutation(APITestCase):
             }
             """
     COPY_TARGET_MUTATION_WITH_ID = """
-                mutation CopyTargetPopulation($input: CopyTargetInput!) {
+                mutation CopyTargetPopulation($input: CopyTargetPopulationMutationInput!) {
                   copyTargetPopulation(input: $input) {
                     targetPopulation {
                         id
