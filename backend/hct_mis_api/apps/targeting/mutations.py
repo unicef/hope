@@ -185,12 +185,14 @@ class CopyTargetPopulationMutation(
                 )
             )
         HouseholdSelection.objects.bulk_create(selections_copy)
-        target_population_copy.candidate_list_targeting_criteria = cls.copy_target_criteria(
-            target_population.candidate_list_targeting_criteria
-        )
-        target_population_copy.final_list_targeting_criteria = cls.copy_target_criteria(
-            target_population.final_list_targeting_criteria
-        )
+        if target_population.candidate_list_targeting_criteria:
+            target_population_copy.candidate_list_targeting_criteria = cls.copy_target_criteria(
+                target_population.candidate_list_targeting_criteria
+            )
+        if target_population.final_list_targeting_criteria:
+            target_population_copy.final_list_targeting_criteria = cls.copy_target_criteria(
+                target_population.final_list_targeting_criteria
+            )
         target_population_copy.save()
         target_population_copy.refresh_from_db()
         return CopyTargetPopulationMutation(target_population_copy)
