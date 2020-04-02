@@ -6,6 +6,9 @@ export const DuplicateTargetPopulation = gql`
       input: $input
     ) {
       clientMutationId
+      targetPopulation {
+        id
+      }
     }
   }
 `;
