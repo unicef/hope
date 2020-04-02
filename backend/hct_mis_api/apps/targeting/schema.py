@@ -172,10 +172,10 @@ class TargetPopulationNode(DjangoObjectType):
 
 
 class TargetingCriteriaRuleFilterObjectType(graphene.InputObjectType):
-    comparision_method = graphene.String()
-    is_flex_field = graphene.Boolean()
-    field_name = graphene.String()
-    arguments = graphene.List(Arg)
+    comparision_method = graphene.String(required=True)
+    is_flex_field = graphene.Boolean(required=True)
+    field_name = graphene.String(required=True)
+    arguments = graphene.List(Arg, required=True)
 
 
 class TargetingCriteriaRuleObjectType(graphene.InputObjectType):

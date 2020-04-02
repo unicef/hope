@@ -16,8 +16,9 @@ from targeting.models import (
     HouseholdSelection,
     TargetingCriteria,
     TargetingCriteriaRule,
+    TargetingCriteriaRuleFilter,
 )
-from targeting.schema import TargetPopulationNode
+from targeting.schema import TargetPopulationNode, TargetingCriteriaObjectType
 from targeting.validators import (
     TargetValidator,
     ApproveTargetPopulationValidator,
@@ -26,26 +27,11 @@ from targeting.validators import (
 )
 
 
-class CreateTargetPopulationInput(graphene.InputObjectType):
-    """All attribute inputs to create a new entry."""
-
-    # TODO(codecakes): To Implement.
-    pass
-
-
 class CopyTargetPopulationInput(graphene.InputObjectType):
     """All attribute inputs to create a new entry."""
 
     id = graphene.ID()
     name = graphene.String()
-
-
-class UpdateTargetPopulationInput(graphene.InputObjectType):
-    """All attribute inputs to update an existing new entry."""
-
-    id = graphene.ID()
-    name = graphene.String()
-    status = graphene.String()
 
 
 class CreateTarget:
@@ -65,7 +51,9 @@ class ValidatedMutation(graphene.Mutation):
         for validator in cls.arguments_validators:
             validator.validate(kwargs)
         model_object = cls.get_object(root, info, **kwargs)
-        return cls.validated_mutate(root, info,model_object=model_object, **kwargs)
+        return cls.validated_mutate(
+            root, info, model_object=model_object, **kwargs
+        )
 
     @classmethod
     def get_object(cls, root, info, **kwargs):
@@ -78,6 +66,90 @@ class ValidatedMutation(graphene.Mutation):
         return object
 
 
+class UpdateTargetPopulationInput(graphene.InputObjectType):
+    """All attribute inputs to update an existing new entry."""
+
+    id = graphene.ID(required=True)
+    name = graphene.String()
+    targeting_criteria = TargetingCriteriaObjectType()
+
+
+class CreateTargetPopulationInput(graphene.InputObjectType):
+    name = graphene.String(required=True)
+    targeting_criteria = TargetingCriteriaObjectType(required=True)
+
+
+class CreateTargetPopulationMutation(graphene.Mutation):
+    target_population = graphene.Field(TargetPopulationNode)
+
+    class Arguments:
+        input = CreateTargetPopulationInput(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root, info, **kwargs):
+        user = info.context.user
+        input = kwargs.pop("input")
+
+        targeting_criteria_input = input.get("targeting_criteria")
+        targeting_criteria = TargetingCriteria()
+        targeting_criteria.save()
+        for rule_input in targeting_criteria_input.get("rules"):
+            rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)
+            rule.save()
+            for filter_input in rule_input.get("filters"):
+                rule_filter = TargetingCriteriaRuleFilter(
+                    targeting_criteria_rule=rule, **filter_input
+                )
+                rule_filter.save()
+        target_population = TargetPopulation(
+            name=input.get("name"), created_by=user,
+        )
+        target_population.candidate_list_targeting_criteria = targeting_criteria
+        target_population.save()
+        return cls(target_population=target_population)
+
+
+class UpdateTargetPopulationMutation(graphene.Mutation):
+    target_population = graphene.Field(TargetPopulationNode)
+
+    class Arguments:
+        input = UpdateTargetPopulationInput(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root, info, **kwargs):
+        input = kwargs.get("input")
+        id = kwargs.get("id")
+        target_population = cls.get_object(id)
+        target_population.name = input.get("name")
+        targeting_criteria_input = input.get("targeting_criteria")
+        if targeting_criteria_input:
+            targeting_criteria = TargetingCriteria()
+            targeting_criteria.save()
+            for rule_input in targeting_criteria_input.get("rules"):
+                rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)
+                rule.save()
+                for filter_input in rule_input.get("filters"):
+                    rule_filter = TargetingCriteriaRuleFilter(
+                        targeting_criteria_rule=rule, **filter_input
+                    )
+                    rule_filter.save()
+            target_population.candidate_list_targeting_criteria.delete()
+            target_population.candidate_list_targeting_criteria = targeting_criteria
+        target_population.save()
+        return cls(target_population=target_population)
+
+    @classmethod
+    def get_object(cls, id):
+        if id is None:
+            return None
+        object = TargetPopulation.objects.get(id=decode_id_string(id))
+        return object
+
+
 class ApproveTargetPopulationMutation(ValidatedMutation):
     target_population = graphene.Field(TargetPopulationNode)
     object_validators = [ApproveTargetPopulationValidator]
@@ -85,7 +157,6 @@ class ApproveTargetPopulationMutation(ValidatedMutation):
 
     class Arguments:
         id = graphene.ID(required=True)
-
 
     @classmethod
     @transaction.atomic
@@ -137,7 +208,8 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
                 ~Q(target_population.final_list_targeting_criteria.get_query())
             ).values_list("id")
             HouseholdSelection.objects.filter(
-                household__id__in=households_ids_queryset, target_population=target_population
+                household__id__in=households_ids_queryset,
+                target_population=target_population,
             ).update(final=False)
         target_population.save()
         return cls(target_population=target_population)
@@ -253,10 +325,10 @@ class DeleteTargetPopulationMutation(
 
 
 class Mutations(graphene.ObjectType):
-    update_target_population = UpdateTargetPopulationMutation.Field()
+    #  update_target_population = UpdateTargetPopulationMutation.Field()
+    create_target_population = CreateTargetPopulationMutation.Field()
     copy_target_population = CopyTargetPopulationMutation.Field()
     delete_target_population = DeleteTargetPopulationMutation.Field()
     approve_target_population = ApproveTargetPopulationMutation.Field()
     unapprove_target_population = UnapproveTargetPopulationMutation.Field()
     finalize_target_population = FinalizeTargetPopulationMutation.Field()
-    # TODO(codecakes): implement others
