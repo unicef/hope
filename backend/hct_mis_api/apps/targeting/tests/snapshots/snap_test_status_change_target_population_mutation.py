@@ -60,13 +60,13 @@ snapshots['TestFinalizeTargetPopulationMutation::test_finalize_target_population
                     'edges': [
                         {
                             'node': {
-                                'familySize': 1,
+                                'familySize': 2,
                                 'residenceStatus': 'CITIZEN'
                             }
                         },
                         {
                             'node': {
-                                'familySize': 2,
+                                'familySize': 1,
                                 'residenceStatus': 'CITIZEN'
                             }
                         }

@@ -113,7 +113,7 @@ class TargetPopulation(TimeStampedUUIDModel):
     def final_list(self):
         if self.status == "DRAFT":
             return []
-        return self.households.filter(selections__final=True).distinct()
+        return self.households.filter(selections__final=True).order_by('id').distinct()
 
 
 class HouseholdSelection(TimeStampedUUIDModel):
