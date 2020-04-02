@@ -74,37 +74,11 @@ const CriteriaField = ({field}) => {
   return fieldElement;
 };
 
-export function Criteria({ criteria, removeFunction, editFunction, isEdit }) {
+export function Criteria({ rules, removeFunction, editFunction, isEdit }) {
   const { t } = useTranslation();
-  console.log(criteria);
   return (
     <CriteriaElement>
-      {/* {criteria.intakeGroup && (
-        <p>
-          Intake group: <span>{criteria.intakeGroup}</span>
-        </p>
-      )}
-      {criteria.sex && (
-        <p>
-          Sex: <span>{criteria.sex}</span>
-        </p>
-      )}
-      {criteria.age && (
-        <p>
-          Age: <span>{criteria.age}</span>
-        </p>
-      )}
-      {criteria.distanceToSchool && (
-        <p>
-          Distance to school: <span>{criteria.distanceToSchool}</span>
-        </p>
-      )}
-      {criteria.household && (
-        <p>
-          Hoousehold size: <span>{criteria.household}</span>
-        </p>
-      )} */}
-      {criteria.map((each) => (
+      {rules.map((each) => (
         <CriteriaField key={each.id} field={each} />
       ))}
       {isEdit && (

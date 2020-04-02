@@ -44,7 +44,7 @@ export function TargetPopulationDetailsPage() {
     <div>
       {isEdit ? (
         <EditTargetPopulation
-          targetPopulation={targetPopulation}
+          targetPopulation={targetPopulation.candidateListTargetingCriteria}
           cancelEdit={() => setEditState(false)}
         />
       ) : (
@@ -56,10 +56,10 @@ export function TargetPopulationDetailsPage() {
             tabs={tabs}
           />
           <TabPanel value={selectedTab} index={0}>
-            <TargetPopulationCore targetPopulation={targetPopulation} />
+            <TargetPopulationCore targetPopulation={targetPopulation.candidateListTargetingCriteria} />
           </TabPanel>
           <TabPanel value={selectedTab} index={1}>
-            <TargetPopulationCore targetPopulation={targetPopulation} />
+            <TargetPopulationCore targetPopulation={targetPopulation.finalListTargetingCriteria} />
           </TabPanel>
         </>
       )}
