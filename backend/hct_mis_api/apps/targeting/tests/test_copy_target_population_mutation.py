@@ -83,6 +83,10 @@ class TestCopyTargetPopulationMutation(APITestCase):
         tp.save()
         tp.households.add(cls.household)
         cls.target_population = tp
+        cls.empty_target_population_1 = TargetPopulation(
+            name="emptyTargetPopulation1", status="APPROVED"
+        )
+        cls.empty_target_population_1.save()
 
     @staticmethod
     def get_targeting_criteria_for_rule(rule_filter):
@@ -167,4 +171,20 @@ class TestCopyTargetPopulationMutation(APITestCase):
         ).first()
         self.assertNotEqual(
             household_selection_copy.id, household_selection.id,
+        )
+
+    def test_copy_empty_target_1(self):
+        self.snapshot_graphql_request(
+            request_string=self.COPY_TARGET_MUTATION,
+            context={"user": self.user},
+            variables={
+                "input": {
+                    "targetPopulationData": {
+                        "id": self.id_to_base64(
+                            self.empty_target_population_1.id, "TargetPopulation"
+                        ),
+                        "name": "test_copy_empty_target_1",
+                    }
+                }
+            },
         )

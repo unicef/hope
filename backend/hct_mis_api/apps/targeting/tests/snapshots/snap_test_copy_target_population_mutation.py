@@ -53,3 +53,20 @@ snapshots['TestCopyTargetPopulationMutation::test_copy_target 1'] = {
         }
     }
 }
+
+snapshots['TestCopyTargetPopulationMutation::test_copy_empty_target_1 1'] = {
+    'data': {
+        'copyTargetPopulation': {
+            'targetPopulation': {
+                'candidateListTargetingCriteria': None,
+                'candidateListTotalHouseholds': 0,
+                'candidateListTotalIndividuals': None,
+                'finalListTargetingCriteria': None,
+                'finalListTotalHouseholds': 0,
+                'finalListTotalIndividuals': None,
+                'name': 'test_copy_empty_target_1',
+                'status': 'APPROVED'
+            }
+        }
+    }
+}
