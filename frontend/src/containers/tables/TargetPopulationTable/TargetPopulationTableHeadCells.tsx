@@ -41,7 +41,7 @@ export const headCells: HeadCell<TargetPopulationNode>[] = [
     {
       disablePadding: false,
       label: 'Created by',
-      id: 'else',
+      id: 'createdByName',
       numeric: false,
     },
   ];

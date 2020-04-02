@@ -49,7 +49,10 @@ export function TargetPopulationTableRow({ targetPopulation }) {
       <TableCell align='left'>
         <Moment format='MM/DD/YYYY'>{targetPopulation.lastEditedAt}</Moment>
       </TableCell>
-      <TableCell align='left'>-</TableCell>
+      <TableCell align='left'>
+        {targetPopulation.createdBy.firstName}{' '}
+        {targetPopulation.createdBy.lastName}
+      </TableCell>
     </ClickableTableRow>
   );
 }
