@@ -7,7 +7,7 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['TestStatusChangeTargetPopulationMutation::test_unapprove_fail_target_population 1'] = {
+snapshots['TestApproveTargetPopulationMutation::test_approve_fail_target_population 1'] = {
     'data': None,
     'errors': [
         {
@@ -16,16 +16,7 @@ snapshots['TestStatusChangeTargetPopulationMutation::test_unapprove_fail_target_
     ]
 }
 
-snapshots['TestStatusChangeTargetPopulationMutation::test_approve_fail_target_population 1'] = {
-    'data': None,
-    'errors': [
-        {
-            'message': 'cannot unpack non-iterable NoneType object'
-        }
-    ]
-}
-
-snapshots['TestStatusChangeTargetPopulationMutation::test_approve_target_population 1'] = {
+snapshots['TestApproveTargetPopulationMutation::test_approve_target_population 1'] = {
     'data': {
         'approveTargetPopulation': {
             'targetPopulation': {
@@ -52,7 +43,7 @@ snapshots['TestStatusChangeTargetPopulationMutation::test_approve_target_populat
     }
 }
 
-snapshots['TestStatusChangeTargetPopulationMutation::test_finalize_fail_target_population 1'] = {
+snapshots['TestFinalizeTargetPopulationMutation::test_finalize_fail_target_population 1'] = {
     'data': None,
     'errors': [
         {
@@ -61,7 +52,7 @@ snapshots['TestStatusChangeTargetPopulationMutation::test_finalize_fail_target_p
     ]
 }
 
-snapshots['TestStatusChangeTargetPopulationMutation::test_finalize_target_population 1'] = {
+snapshots['TestFinalizeTargetPopulationMutation::test_finalize_target_population 1'] = {
     'data': {
         'finalizeTargetPopulation': {
             'targetPopulation': {
@@ -104,7 +95,7 @@ snapshots['TestStatusChangeTargetPopulationMutation::test_finalize_target_popula
     }
 }
 
-snapshots['TestStatusChangeTargetPopulationMutation::test_finalize_target_population_with_final_criteria 1'] = {
+snapshots['TestFinalizeTargetPopulationMutation::test_finalize_target_population_with_final_criteria 1'] = {
     'data': {
         'finalizeTargetPopulation': {
             'targetPopulation': {
@@ -141,7 +132,16 @@ snapshots['TestStatusChangeTargetPopulationMutation::test_finalize_target_popula
     }
 }
 
-snapshots['TestStatusChangeTargetPopulationMutation::test_unapprove_target_population 1'] = {
+snapshots['TestUnapproveTargetPopulationMutation::test_unapprove_fail_target_population 1'] = {
+    'data': None,
+    'errors': [
+        {
+            'message': 'cannot unpack non-iterable NoneType object'
+        }
+    ]
+}
+
+snapshots['TestUnapproveTargetPopulationMutation::test_unapprove_target_population 1'] = {
     'data': {
         'unapproveTargetPopulation': {
             'targetPopulation': {
