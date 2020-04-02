@@ -28,7 +28,7 @@ export function SubField({ field, form, subField, ...otherProps }) {
             precision={0}
             label={subField.labelEn}
             type='number'
-            value={field.value[0]}
+            value={field.value}
             {...otherProps}
           />
           {/* <FormikTextField
