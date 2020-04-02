@@ -39,7 +39,7 @@ Before being able to complete the import process, the following criteria must be
 The following options are also available to the user during File Import:
 
 * \(Optional\) Tags may be applied to the file for future referencing.
-* \(Optional\) The ability to select an existing Programme within the HCT-MIS system for this this file should be associated with.
+* ~~\(Optional\) The ability to select an existing Programme within the HCT-MIS system for this this file should be associated with.~~
 
 Once a file is selected to be imported, a load screen will be presented where the `Upload File` message once was.
 
