@@ -29,6 +29,11 @@ export type ApproveRegistrationDataImportMutation = {
   registrationDataImport?: Maybe<RegistrationDataImportNode>,
 };
 
+export type ApproveTargetPopulationMutation = {
+   __typename?: 'ApproveTargetPopulationMutation',
+  targetPopulation?: Maybe<TargetPopulationNode>,
+};
+
 
 export type BusinessAreaNode = Node & {
    __typename?: 'BusinessAreaNode',
@@ -155,20 +160,20 @@ export type ChoiceObject = {
   value?: Maybe<Scalars['String']>,
 };
 
-export type CopyTargetInput = {
+export type CopyTargetPopulationInput = {
+  id?: Maybe<Scalars['ID']>,
+  name?: Maybe<Scalars['String']>,
+};
+
+export type CopyTargetPopulationMutationInput = {
   targetPopulationData?: Maybe<CopyTargetPopulationInput>,
   clientMutationId?: Maybe<Scalars['String']>,
 };
 
-export type CopyTargetPayload = {
-   __typename?: 'CopyTargetPayload',
+export type CopyTargetPopulationMutationPayload = {
+   __typename?: 'CopyTargetPopulationMutationPayload',
   targetPopulation?: Maybe<TargetPopulationNode>,
   clientMutationId?: Maybe<Scalars['String']>,
-};
-
-export type CopyTargetPopulationInput = {
-  id?: Maybe<Scalars['ID']>,
-  name?: Maybe<Scalars['String']>,
 };
 
 export type CoreFieldChoiceObject = {
@@ -224,13 +229,13 @@ export type DeleteRegistrationDataImport = {
   ok?: Maybe<Scalars['Boolean']>,
 };
 
-export type DeleteTargetInput = {
+export type DeleteTargetPopulationMutationInput = {
   targetId: Scalars['ID'],
   clientMutationId?: Maybe<Scalars['String']>,
 };
 
-export type DeleteTargetPayload = {
-   __typename?: 'DeleteTargetPayload',
+export type DeleteTargetPopulationMutationPayload = {
+   __typename?: 'DeleteTargetPopulationMutationPayload',
   ok?: Maybe<Scalars['Boolean']>,
   clientMutationId?: Maybe<Scalars['String']>,
 };
@@ -270,6 +275,11 @@ export type FieldAttributeNode = {
   choices?: Maybe<Array<Maybe<CoreFieldChoiceObject>>>,
   associatedWith?: Maybe<Scalars['String']>,
   isFlexField?: Maybe<Scalars['Boolean']>,
+};
+
+export type FinalizeTargetPopulationMutation = {
+   __typename?: 'FinalizeTargetPopulationMutation',
+  targetPopulation?: Maybe<TargetPopulationNode>,
 };
 
 export enum HouseholdNationality {
@@ -1424,9 +1434,12 @@ export type MergeRegistrationDataImportMutation = {
 
 export type Mutations = {
    __typename?: 'Mutations',
-  updateTarget?: Maybe<UpdateTargetPayload>,
-  copyTarget?: Maybe<CopyTargetPayload>,
-  deleteTarget?: Maybe<DeleteTargetPayload>,
+  updateTargetPopulation?: Maybe<UpdateTargetPopulationMutationPayload>,
+  copyTargetPopulation?: Maybe<CopyTargetPopulationMutationPayload>,
+  deleteTargetPopulation?: Maybe<DeleteTargetPopulationMutationPayload>,
+  approveTargetPopulation?: Maybe<ApproveTargetPopulationMutation>,
+  unapproveTargetPopulation?: Maybe<UnapproveTargetPopulationMutation>,
+  finalizeTargetPopulation?: Maybe<FinalizeTargetPopulationMutation>,
   createProgram?: Maybe<CreateProgram>,
   updateProgram?: Maybe<UpdateProgram>,
   deleteProgram?: Maybe<DeleteProgram>,
@@ -1439,18 +1452,33 @@ export type Mutations = {
 };
 
 
-export type MutationsUpdateTargetArgs = {
-  input: UpdateTargetInput
+export type MutationsUpdateTargetPopulationArgs = {
+  input: UpdateTargetPopulationMutationInput
 };
 
 
-export type MutationsCopyTargetArgs = {
-  input: CopyTargetInput
+export type MutationsCopyTargetPopulationArgs = {
+  input: CopyTargetPopulationMutationInput
 };
 
 
-export type MutationsDeleteTargetArgs = {
-  input: DeleteTargetInput
+export type MutationsDeleteTargetPopulationArgs = {
+  input: DeleteTargetPopulationMutationInput
+};
+
+
+export type MutationsApproveTargetPopulationArgs = {
+  id: Scalars['ID']
+};
+
+
+export type MutationsUnapproveTargetPopulationArgs = {
+  id: Scalars['ID']
+};
+
+
+export type MutationsFinalizeTargetPopulationArgs = {
+  id: Scalars['ID']
 };
 
 
@@ -2211,6 +2239,7 @@ export type TargetPopulationNode = Node & {
   cashPlans: CashPlanNodeConnection,
   totalHouseholds?: Maybe<Scalars['Int']>,
   totalFamilySize?: Maybe<Scalars['Int']>,
+  finalList?: Maybe<HouseholdNodeConnection>,
 };
 
 
@@ -2233,6 +2262,14 @@ export type TargetPopulationNodePaymentRecordsArgs = {
 
 
 export type TargetPopulationNodeCashPlansArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type TargetPopulationNodeFinalListArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -2264,6 +2301,11 @@ export type UnapproveRegistrationDataImportMutation = {
   registrationDataImport?: Maybe<RegistrationDataImportNode>,
 };
 
+export type UnapproveTargetPopulationMutation = {
+   __typename?: 'UnapproveTargetPopulationMutation',
+  targetPopulation?: Maybe<TargetPopulationNode>,
+};
+
 export type UpdateProgram = {
    __typename?: 'UpdateProgram',
   program?: Maybe<ProgramNode>,
@@ -2287,21 +2329,21 @@ export type UpdateProgramInput = {
   businessAreaSlug?: Maybe<Scalars['String']>,
 };
 
-export type UpdateTargetInput = {
-  targetPopulationData?: Maybe<UpdateTargetPopulationInput>,
-  clientMutationId?: Maybe<Scalars['String']>,
-};
-
-export type UpdateTargetPayload = {
-   __typename?: 'UpdateTargetPayload',
-  targetPopulation?: Maybe<TargetPopulationNode>,
-  clientMutationId?: Maybe<Scalars['String']>,
-};
-
 export type UpdateTargetPopulationInput = {
   id?: Maybe<Scalars['ID']>,
   name?: Maybe<Scalars['String']>,
   status?: Maybe<Scalars['String']>,
+};
+
+export type UpdateTargetPopulationMutationInput = {
+  targetPopulationData?: Maybe<UpdateTargetPopulationInput>,
+  clientMutationId?: Maybe<Scalars['String']>,
+};
+
+export type UpdateTargetPopulationMutationPayload = {
+   __typename?: 'UpdateTargetPopulationMutationPayload',
+  targetPopulation?: Maybe<TargetPopulationNode>,
+  clientMutationId?: Maybe<Scalars['String']>,
 };
 
 
@@ -2491,6 +2533,19 @@ export type DeleteProgramMutation = (
   & { deleteProgram: Maybe<(
     { __typename?: 'DeleteProgram' }
     & Pick<DeleteProgram, 'ok'>
+  )> }
+);
+
+export type CopyTargetPopulationMutationVariables = {
+  input: CopyTargetPopulationMutationInput
+};
+
+
+export type CopyTargetPopulationMutation = (
+  { __typename?: 'Mutations' }
+  & { copyTargetPopulation: Maybe<(
+    { __typename?: 'CopyTargetPopulationMutationPayload' }
+    & Pick<CopyTargetPopulationMutationPayload, 'clientMutationId'>
   )> }
 );
 
@@ -3549,6 +3604,55 @@ export function useDeleteProgramMutation(baseOptions?: ApolloReactHooks.Mutation
 export type DeleteProgramMutationHookResult = ReturnType<typeof useDeleteProgramMutation>;
 export type DeleteProgramMutationResult = ApolloReactCommon.MutationResult<DeleteProgramMutation>;
 export type DeleteProgramMutationOptions = ApolloReactCommon.BaseMutationOptions<DeleteProgramMutation, DeleteProgramMutationVariables>;
+export const CopyTargetPopulationDocument = gql`
+    mutation CopyTargetPopulation($input: CopyTargetPopulationMutationInput!) {
+  copyTargetPopulation(input: $input) {
+    clientMutationId
+  }
+}
+    `;
+export type CopyTargetPopulationMutationFn = ApolloReactCommon.MutationFunction<CopyTargetPopulationMutation, CopyTargetPopulationMutationVariables>;
+export type CopyTargetPopulationComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<CopyTargetPopulationMutation, CopyTargetPopulationMutationVariables>, 'mutation'>;
+
+    export const CopyTargetPopulationComponent = (props: CopyTargetPopulationComponentProps) => (
+      <ApolloReactComponents.Mutation<CopyTargetPopulationMutation, CopyTargetPopulationMutationVariables> mutation={CopyTargetPopulationDocument} {...props} />
+    );
+    
+export type CopyTargetPopulationProps<TChildProps = {}> = ApolloReactHoc.MutateProps<CopyTargetPopulationMutation, CopyTargetPopulationMutationVariables> & TChildProps;
+export function withCopyTargetPopulation<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CopyTargetPopulationMutation,
+  CopyTargetPopulationMutationVariables,
+  CopyTargetPopulationProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, CopyTargetPopulationMutation, CopyTargetPopulationMutationVariables, CopyTargetPopulationProps<TChildProps>>(CopyTargetPopulationDocument, {
+      alias: 'copyTargetPopulation',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCopyTargetPopulationMutation__
+ *
+ * To run a mutation, you first call `useCopyTargetPopulationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCopyTargetPopulationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [copyTargetPopulationMutation, { data, loading, error }] = useCopyTargetPopulationMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCopyTargetPopulationMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CopyTargetPopulationMutation, CopyTargetPopulationMutationVariables>) {
+        return ApolloReactHooks.useMutation<CopyTargetPopulationMutation, CopyTargetPopulationMutationVariables>(CopyTargetPopulationDocument, baseOptions);
+      }
+export type CopyTargetPopulationMutationHookResult = ReturnType<typeof useCopyTargetPopulationMutation>;
+export type CopyTargetPopulationMutationResult = ApolloReactCommon.MutationResult<CopyTargetPopulationMutation>;
+export type CopyTargetPopulationMutationOptions = ApolloReactCommon.BaseMutationOptions<CopyTargetPopulationMutation, CopyTargetPopulationMutationVariables>;
 export const UpdateProgramDocument = gql`
     mutation UpdateProgram($programData: UpdateProgramInput!) {
   updateProgram(programData: $programData) {
@@ -5798,14 +5902,17 @@ export type ResolversTypes = {
   DjangoDebug: ResolverTypeWrapper<DjangoDebug>,
   DjangoDebugSQL: ResolverTypeWrapper<DjangoDebugSql>,
   Mutations: ResolverTypeWrapper<{}>,
-  UpdateTargetInput: UpdateTargetInput,
+  UpdateTargetPopulationMutationInput: UpdateTargetPopulationMutationInput,
   UpdateTargetPopulationInput: UpdateTargetPopulationInput,
-  UpdateTargetPayload: ResolverTypeWrapper<UpdateTargetPayload>,
-  CopyTargetInput: CopyTargetInput,
+  UpdateTargetPopulationMutationPayload: ResolverTypeWrapper<UpdateTargetPopulationMutationPayload>,
+  CopyTargetPopulationMutationInput: CopyTargetPopulationMutationInput,
   CopyTargetPopulationInput: CopyTargetPopulationInput,
-  CopyTargetPayload: ResolverTypeWrapper<CopyTargetPayload>,
-  DeleteTargetInput: DeleteTargetInput,
-  DeleteTargetPayload: ResolverTypeWrapper<DeleteTargetPayload>,
+  CopyTargetPopulationMutationPayload: ResolverTypeWrapper<CopyTargetPopulationMutationPayload>,
+  DeleteTargetPopulationMutationInput: DeleteTargetPopulationMutationInput,
+  DeleteTargetPopulationMutationPayload: ResolverTypeWrapper<DeleteTargetPopulationMutationPayload>,
+  ApproveTargetPopulationMutation: ResolverTypeWrapper<ApproveTargetPopulationMutation>,
+  UnapproveTargetPopulationMutation: ResolverTypeWrapper<UnapproveTargetPopulationMutation>,
+  FinalizeTargetPopulationMutation: ResolverTypeWrapper<FinalizeTargetPopulationMutation>,
   CreateProgramInput: CreateProgramInput,
   CreateProgram: ResolverTypeWrapper<CreateProgram>,
   UpdateProgramInput: UpdateProgramInput,
@@ -5929,14 +6036,17 @@ export type ResolversParentTypes = {
   DjangoDebug: DjangoDebug,
   DjangoDebugSQL: DjangoDebugSql,
   Mutations: {},
-  UpdateTargetInput: UpdateTargetInput,
+  UpdateTargetPopulationMutationInput: UpdateTargetPopulationMutationInput,
   UpdateTargetPopulationInput: UpdateTargetPopulationInput,
-  UpdateTargetPayload: UpdateTargetPayload,
-  CopyTargetInput: CopyTargetInput,
+  UpdateTargetPopulationMutationPayload: UpdateTargetPopulationMutationPayload,
+  CopyTargetPopulationMutationInput: CopyTargetPopulationMutationInput,
   CopyTargetPopulationInput: CopyTargetPopulationInput,
-  CopyTargetPayload: CopyTargetPayload,
-  DeleteTargetInput: DeleteTargetInput,
-  DeleteTargetPayload: DeleteTargetPayload,
+  CopyTargetPopulationMutationPayload: CopyTargetPopulationMutationPayload,
+  DeleteTargetPopulationMutationInput: DeleteTargetPopulationMutationInput,
+  DeleteTargetPopulationMutationPayload: DeleteTargetPopulationMutationPayload,
+  ApproveTargetPopulationMutation: ApproveTargetPopulationMutation,
+  UnapproveTargetPopulationMutation: UnapproveTargetPopulationMutation,
+  FinalizeTargetPopulationMutation: FinalizeTargetPopulationMutation,
   CreateProgramInput: CreateProgramInput,
   CreateProgram: CreateProgram,
   UpdateProgramInput: UpdateProgramInput,
@@ -5955,6 +6065,10 @@ export type ResolversParentTypes = {
 
 export type ApproveRegistrationDataImportMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ApproveRegistrationDataImportMutation'] = ResolversParentTypes['ApproveRegistrationDataImportMutation']> = {
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
+};
+
+export type ApproveTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ApproveTargetPopulationMutation'] = ResolversParentTypes['ApproveTargetPopulationMutation']> = {
+  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
 };
 
 export interface ArgScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Arg'], any> {
@@ -6037,7 +6151,7 @@ export type ChoiceObjectResolvers<ContextType = any, ParentType extends Resolver
   value?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
-export type CopyTargetPayloadResolvers<ContextType = any, ParentType extends ResolversParentTypes['CopyTargetPayload'] = ResolversParentTypes['CopyTargetPayload']> = {
+export type CopyTargetPopulationMutationPayloadResolvers<ContextType = any, ParentType extends ResolversParentTypes['CopyTargetPopulationMutationPayload'] = ResolversParentTypes['CopyTargetPopulationMutationPayload']> = {
   targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
   clientMutationId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
@@ -6078,7 +6192,7 @@ export type DeleteRegistrationDataImportResolvers<ContextType = any, ParentType 
   ok?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
-export type DeleteTargetPayloadResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteTargetPayload'] = ResolversParentTypes['DeleteTargetPayload']> = {
+export type DeleteTargetPopulationMutationPayloadResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteTargetPopulationMutationPayload'] = ResolversParentTypes['DeleteTargetPopulationMutationPayload']> = {
   ok?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   clientMutationId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
@@ -6115,6 +6229,10 @@ export type FieldAttributeNodeResolvers<ContextType = any, ParentType extends Re
   choices?: Resolver<Maybe<Array<Maybe<ResolversTypes['CoreFieldChoiceObject']>>>, ParentType, ContextType>,
   associatedWith?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   isFlexField?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+};
+
+export type FinalizeTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinalizeTargetPopulationMutation'] = ResolversParentTypes['FinalizeTargetPopulationMutation']> = {
+  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
 };
 
 export type HouseholdNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['HouseholdNode'] = ResolversParentTypes['HouseholdNode']> = {
@@ -6343,9 +6461,12 @@ export type MergeRegistrationDataImportMutationResolvers<ContextType = any, Pare
 };
 
 export type MutationsResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutations'] = ResolversParentTypes['Mutations']> = {
-  updateTarget?: Resolver<Maybe<ResolversTypes['UpdateTargetPayload']>, ParentType, ContextType, RequireFields<MutationsUpdateTargetArgs, 'input'>>,
-  copyTarget?: Resolver<Maybe<ResolversTypes['CopyTargetPayload']>, ParentType, ContextType, RequireFields<MutationsCopyTargetArgs, 'input'>>,
-  deleteTarget?: Resolver<Maybe<ResolversTypes['DeleteTargetPayload']>, ParentType, ContextType, RequireFields<MutationsDeleteTargetArgs, 'input'>>,
+  updateTargetPopulation?: Resolver<Maybe<ResolversTypes['UpdateTargetPopulationMutationPayload']>, ParentType, ContextType, RequireFields<MutationsUpdateTargetPopulationArgs, 'input'>>,
+  copyTargetPopulation?: Resolver<Maybe<ResolversTypes['CopyTargetPopulationMutationPayload']>, ParentType, ContextType, RequireFields<MutationsCopyTargetPopulationArgs, 'input'>>,
+  deleteTargetPopulation?: Resolver<Maybe<ResolversTypes['DeleteTargetPopulationMutationPayload']>, ParentType, ContextType, RequireFields<MutationsDeleteTargetPopulationArgs, 'input'>>,
+  approveTargetPopulation?: Resolver<Maybe<ResolversTypes['ApproveTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsApproveTargetPopulationArgs, 'id'>>,
+  unapproveTargetPopulation?: Resolver<Maybe<ResolversTypes['UnapproveTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsUnapproveTargetPopulationArgs, 'id'>>,
+  finalizeTargetPopulation?: Resolver<Maybe<ResolversTypes['FinalizeTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsFinalizeTargetPopulationArgs, 'id'>>,
   createProgram?: Resolver<Maybe<ResolversTypes['CreateProgram']>, ParentType, ContextType, RequireFields<MutationsCreateProgramArgs, 'programData'>>,
   updateProgram?: Resolver<Maybe<ResolversTypes['UpdateProgram']>, ParentType, ContextType, MutationsUpdateProgramArgs>,
   deleteProgram?: Resolver<Maybe<ResolversTypes['DeleteProgram']>, ParentType, ContextType, RequireFields<MutationsDeleteProgramArgs, 'programId'>>,
@@ -6598,6 +6719,7 @@ export type TargetPopulationNodeResolvers<ContextType = any, ParentType extends 
   cashPlans?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, TargetPopulationNodeCashPlansArgs>,
   totalHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   totalFamilySize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  finalList?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, TargetPopulationNodeFinalListArgs>,
 };
 
 export type TargetPopulationNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetPopulationNodeConnection'] = ResolversParentTypes['TargetPopulationNodeConnection']> = {
@@ -6616,11 +6738,15 @@ export type UnapproveRegistrationDataImportMutationResolvers<ContextType = any, 
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
 };
 
+export type UnapproveTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['UnapproveTargetPopulationMutation'] = ResolversParentTypes['UnapproveTargetPopulationMutation']> = {
+  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
+};
+
 export type UpdateProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdateProgram'] = ResolversParentTypes['UpdateProgram']> = {
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
 };
 
-export type UpdateTargetPayloadResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdateTargetPayload'] = ResolversParentTypes['UpdateTargetPayload']> = {
+export type UpdateTargetPopulationMutationPayloadResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdateTargetPopulationMutationPayload'] = ResolversParentTypes['UpdateTargetPopulationMutationPayload']> = {
   targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
   clientMutationId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
@@ -6692,6 +6818,7 @@ export type XlsxRowErrorNodeResolvers<ContextType = any, ParentType extends Reso
 
 export type Resolvers<ContextType = any> = {
   ApproveRegistrationDataImportMutation?: ApproveRegistrationDataImportMutationResolvers<ContextType>,
+  ApproveTargetPopulationMutation?: ApproveTargetPopulationMutationResolvers<ContextType>,
   Arg?: GraphQLScalarType,
   BusinessAreaNode?: BusinessAreaNodeResolvers<ContextType>,
   BusinessAreaNodeConnection?: BusinessAreaNodeConnectionResolvers<ContextType>,
@@ -6700,7 +6827,7 @@ export type Resolvers<ContextType = any> = {
   CashPlanNodeConnection?: CashPlanNodeConnectionResolvers<ContextType>,
   CashPlanNodeEdge?: CashPlanNodeEdgeResolvers<ContextType>,
   ChoiceObject?: ChoiceObjectResolvers<ContextType>,
-  CopyTargetPayload?: CopyTargetPayloadResolvers<ContextType>,
+  CopyTargetPopulationMutationPayload?: CopyTargetPopulationMutationPayloadResolvers<ContextType>,
   CoreFieldChoiceObject?: CoreFieldChoiceObjectResolvers<ContextType>,
   CreateProgram?: CreateProgramResolvers<ContextType>,
   CreateRegistrationDataImport?: CreateRegistrationDataImportResolvers<ContextType>,
@@ -6709,10 +6836,11 @@ export type Resolvers<ContextType = any> = {
   Decimal?: GraphQLScalarType,
   DeleteProgram?: DeleteProgramResolvers<ContextType>,
   DeleteRegistrationDataImport?: DeleteRegistrationDataImportResolvers<ContextType>,
-  DeleteTargetPayload?: DeleteTargetPayloadResolvers<ContextType>,
+  DeleteTargetPopulationMutationPayload?: DeleteTargetPopulationMutationPayloadResolvers<ContextType>,
   DjangoDebug?: DjangoDebugResolvers<ContextType>,
   DjangoDebugSQL?: DjangoDebugSqlResolvers<ContextType>,
   FieldAttributeNode?: FieldAttributeNodeResolvers<ContextType>,
+  FinalizeTargetPopulationMutation?: FinalizeTargetPopulationMutationResolvers<ContextType>,
   HouseholdNode?: HouseholdNodeResolvers<ContextType>,
   HouseholdNodeConnection?: HouseholdNodeConnectionResolvers<ContextType>,
   HouseholdNodeEdge?: HouseholdNodeEdgeResolvers<ContextType>,
@@ -6759,8 +6887,9 @@ export type Resolvers<ContextType = any> = {
   TargetPopulationNodeConnection?: TargetPopulationNodeConnectionResolvers<ContextType>,
   TargetPopulationNodeEdge?: TargetPopulationNodeEdgeResolvers<ContextType>,
   UnapproveRegistrationDataImportMutation?: UnapproveRegistrationDataImportMutationResolvers<ContextType>,
+  UnapproveTargetPopulationMutation?: UnapproveTargetPopulationMutationResolvers<ContextType>,
   UpdateProgram?: UpdateProgramResolvers<ContextType>,
-  UpdateTargetPayload?: UpdateTargetPayloadResolvers<ContextType>,
+  UpdateTargetPopulationMutationPayload?: UpdateTargetPopulationMutationPayloadResolvers<ContextType>,
   Upload?: GraphQLScalarType,
   UploadImportDataXLSXFile?: UploadImportDataXlsxFileResolvers<ContextType>,
   UserNode?: UserNodeResolvers<ContextType>,

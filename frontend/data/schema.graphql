@@ -7,6 +7,10 @@ type ApproveRegistrationDataImportMutation {
   registrationDataImport: RegistrationDataImportNode
 }
 
+type ApproveTargetPopulationMutation {
+  targetPopulation: TargetPopulationNode
+}
+
 scalar Arg
 
 type BusinessAreaNode implements Node {
@@ -91,19 +95,19 @@ type ChoiceObject {
   value: String
 }
 
-input CopyTargetInput {
+input CopyTargetPopulationInput {
+  id: ID
+  name: String
+}
+
+input CopyTargetPopulationMutationInput {
   targetPopulationData: CopyTargetPopulationInput
   clientMutationId: String
 }
 
-type CopyTargetPayload {
+type CopyTargetPopulationMutationPayload {
   targetPopulation: TargetPopulationNode
   clientMutationId: String
-}
-
-input CopyTargetPopulationInput {
-  id: ID
-  name: String
 }
 
 type CoreFieldChoiceObject {
@@ -157,12 +161,12 @@ type DeleteRegistrationDataImport {
   ok: Boolean
 }
 
-input DeleteTargetInput {
+input DeleteTargetPopulationMutationInput {
   targetId: ID!
   clientMutationId: String
 }
 
-type DeleteTargetPayload {
+type DeleteTargetPopulationMutationPayload {
   ok: Boolean
   clientMutationId: String
 }
@@ -199,6 +203,10 @@ type FieldAttributeNode {
   choices: [CoreFieldChoiceObject]
   associatedWith: String
   isFlexField: Boolean
+}
+
+type FinalizeTargetPopulationMutation {
+  targetPopulation: TargetPopulationNode
 }
 
 enum HouseholdNationality {
@@ -1232,9 +1240,12 @@ type MergeRegistrationDataImportMutation {
 }
 
 type Mutations {
-  updateTarget(input: UpdateTargetInput!): UpdateTargetPayload
-  copyTarget(input: CopyTargetInput!): CopyTargetPayload
-  deleteTarget(input: DeleteTargetInput!): DeleteTargetPayload
+  updateTargetPopulation(input: UpdateTargetPopulationMutationInput!): UpdateTargetPopulationMutationPayload
+  copyTargetPopulation(input: CopyTargetPopulationMutationInput!): CopyTargetPopulationMutationPayload
+  deleteTargetPopulation(input: DeleteTargetPopulationMutationInput!): DeleteTargetPopulationMutationPayload
+  approveTargetPopulation(id: ID!): ApproveTargetPopulationMutation
+  unapproveTargetPopulation(id: ID!): UnapproveTargetPopulationMutation
+  finalizeTargetPopulation(id: ID!): FinalizeTargetPopulationMutation
   createProgram(programData: CreateProgramInput!): CreateProgram
   updateProgram(programData: UpdateProgramInput): UpdateProgram
   deleteProgram(programId: String!): DeleteProgram
@@ -1513,6 +1524,7 @@ type TargetPopulationNode implements Node {
   cashPlans(before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
   totalHouseholds: Int
   totalFamilySize: Int
+  finalList(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection
 }
 
 type TargetPopulationNodeConnection {
@@ -1593,6 +1605,10 @@ type UnapproveRegistrationDataImportMutation {
   registrationDataImport: RegistrationDataImportNode
 }
 
+type UnapproveTargetPopulationMutation {
+  targetPopulation: TargetPopulationNode
+}
+
 type UpdateProgram {
   program: ProgramNode
 }
@@ -1615,20 +1631,20 @@ input UpdateProgramInput {
   businessAreaSlug: String
 }
 
-input UpdateTargetInput {
-  targetPopulationData: UpdateTargetPopulationInput
-  clientMutationId: String
-}
-
-type UpdateTargetPayload {
-  targetPopulation: TargetPopulationNode
-  clientMutationId: String
-}
-
 input UpdateTargetPopulationInput {
   id: ID
   name: String
   status: String
+}
+
+input UpdateTargetPopulationMutationInput {
+  targetPopulationData: UpdateTargetPopulationInput
+  clientMutationId: String
+}
+
+type UpdateTargetPopulationMutationPayload {
+  targetPopulation: TargetPopulationNode
+  clientMutationId: String
 }
 
 scalar Upload
