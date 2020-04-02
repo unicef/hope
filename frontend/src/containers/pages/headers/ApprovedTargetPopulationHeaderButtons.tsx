@@ -4,6 +4,7 @@ import { Button } from '@material-ui/core';
 import { FileCopy } from '@material-ui/icons';
 import { TargetPopulationNode } from '../../../__generated__/graphql';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
+import { FinalizeTargetPopulation } from '../../dialogs/targetPopulation/FinalizeTargetPopulation';
 
 const IconContainer = styled.span`
   button {
@@ -28,6 +29,7 @@ export function ApprovedTargetPopulationHeaderButtons({
   targetPopulation,
 }: ApprovedTargetPopulationHeaderButtonsPropTypes): React.ReactElement {
   const [openDuplicate, setOpenDuplicate] = useState(false);
+  const [openFinalize, setOpenFinalize] = useState(false);
   return (
     <div>
       <IconContainer>
@@ -39,6 +41,7 @@ export function ApprovedTargetPopulationHeaderButtons({
         <Button
           variant='contained'
           color='primary'
+          onClick={() => setOpenDuplicate(true)}
         >
           Finalize
         </Button>
@@ -47,6 +50,7 @@ export function ApprovedTargetPopulationHeaderButtons({
         open={openDuplicate}
         setOpen={setOpenDuplicate}
       />
+      <FinalizeTargetPopulation open={openFinalize} setOpen={setOpenFinalize} />
     </div>
   );
 }

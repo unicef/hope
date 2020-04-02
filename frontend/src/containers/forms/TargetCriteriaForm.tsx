@@ -9,9 +9,8 @@ import {
   Button,
   DialogActions,
 } from '@material-ui/core';
-import { Field, Form, Formik, FieldArray } from 'formik';
+import { Field, Formik, FieldArray } from 'formik';
 import { useImportedIndividualFieldsQuery } from '../../__generated__/graphql';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { AddCircleOutline } from '@material-ui/icons';
 
@@ -82,7 +81,7 @@ const DividerLabel = styled.div`
 `;
 
 const validationSchema = Yup.object().shape({
-  criterias: Yup.array().of(
+  criteria: Yup.array().of(
     Yup.object().shape({
       label: Yup.string().required('Label is required'),
     }),
@@ -116,21 +115,12 @@ export function TargetCriteriaForm({
   title,
 }): React.ReactElement {
   const { data, loading } = useImportedIndividualFieldsQuery();
-
   const initialValue = {
-    criterias: [
-      {
-        label: '',
-        value: '',
-      },
-    ],
+    filters: criteria.filters || []
   };
 
   if (loading) return null;
 
-  // if (criteria.core && criteria.core.length > 0) {
-  //   initialValue = { criterias: criteria.core };
-  // }
   return (
     <DialogContainer>
       <Formik
@@ -161,25 +151,26 @@ export function TargetCriteriaForm({
                   tempora iusto maxime? Odit expedita ipsam natus eos?
                 </DialogDescription>
                 <FieldArray
-                  name='criterias'
+                  name='filters'
                   render={(arrayHelpers) => (
                     <>
-                      {values.criterias.map((each, index) => {
+                      {values.filters.map((each, index) => {
                         return (
                           //eslint-disable-next-line
                           <div key={index}>
                             <Field
-                              name={`criterias[${index}].label`}
+                              name={`filters[${index}].fieldName`}
                               label='Choose field type'
                               fullWidth
                               required
                               choices={data.allFieldsAttributes}
                               index={index}
+                              value={each.fieldName || null}
                               component={FormikSelectField}
                             />
-                            {each.label && (
+                            {/* {each.label && (
                               <Field
-                                name={`criterias[${index}].value`}
+                                name={`filters[${index}].value`}
                                 choices={
                                   data.allFieldsAttributes.find(
                                     (attributes) =>
@@ -194,10 +185,11 @@ export function TargetCriteriaForm({
                                 }
                                 component={SubField}
                               />
-                            )}
-                            {values.criterias.length === 1 &&
-                            index === 0 ||
-                            index === values.criterias.length - 1 ? null : (
+                            )} */}
+                            {(values.filters.length === 1 &&
+                              index === 0) ||
+                            index ===
+                              values.filters.length - 1 ? null : (
                               <Divider>
                                 <DividerLabel>And</DividerLabel>
                               </Divider>
@@ -208,7 +200,7 @@ export function TargetCriteriaForm({
                       <AddCriteriaWrapper>
                         <AddCriteria
                           onClick={() =>
-                            arrayHelpers.push({ value: '', label: '' })
+                            arrayHelpers.push({ fieldname: '' })
                           }
                         >
                           <AddCircleOutline />
