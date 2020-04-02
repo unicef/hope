@@ -26,7 +26,7 @@ snapshots['TestImportedIndividualQuery::test_imported_individual_query_age_max 1
                         'firstName': 'Eric',
                         'fullName': 'Eric Torres',
                         'lastName': 'Torres',
-                        'phoneNumber': '(228)231-5473'
+                        'phoneNumber': '+12282315473'
                     }
                 },
                 {
@@ -71,7 +71,7 @@ snapshots['TestImportedIndividualQuery::test_imported_individual_query_age_min 1
                         'firstName': 'Eric',
                         'fullName': 'Eric Torres',
                         'lastName': 'Torres',
-                        'phoneNumber': '(228)231-5473'
+                        'phoneNumber': '+12282315473'
                     }
                 },
                 {
@@ -98,7 +98,7 @@ snapshots['TestImportedIndividualQuery::test_imported_individual_query_age_range
                         'firstName': 'Eric',
                         'fullName': 'Eric Torres',
                         'lastName': 'Torres',
-                        'phoneNumber': '(228)231-5473'
+                        'phoneNumber': '+12282315473'
                     }
                 },
                 {
@@ -152,7 +152,7 @@ snapshots['TestImportedIndividualQuery::test_imported_individual_query_all 1'] =
                         'firstName': 'Eric',
                         'fullName': 'Eric Torres',
                         'lastName': 'Torres',
-                        'phoneNumber': '(228)231-5473'
+                        'phoneNumber': '+12282315473'
                     }
                 },
                 {
