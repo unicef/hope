@@ -68,7 +68,7 @@ export function InProgressTargetPopulationHeaderButtons({
           Approve
         </Button>
       </ButtonContainer>
-      <DuplicateTargetPopulation open={openDuplicate} setOpen={setOpenDuplicate}/>
+      <DuplicateTargetPopulation open={openDuplicate} setOpen={setOpenDuplicate} targetPopulationId={targetPopulation.id}/>
       <DeleteTargetPopulation open={openDelete} setOpen={setOpenDelete} />
       <ApproveCandidateList open={openApprove} setOpen={setOpenApprove} />
     </div>

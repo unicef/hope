@@ -49,6 +49,7 @@ export function ApprovedTargetPopulationHeaderButtons({
       <DuplicateTargetPopulation
         open={openDuplicate}
         setOpen={setOpenDuplicate}
+        targetPopulationId={targetPopulation.id}
       />
       <FinalizeTargetPopulation open={openFinalize} setOpen={setOpenFinalize} />
     </div>
