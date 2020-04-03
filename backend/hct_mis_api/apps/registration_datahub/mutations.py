@@ -1,9 +1,12 @@
 import graphene
 import openpyxl
+import requests
 from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import transaction
 from graphene_file_upload.scalars import Upload
 
+from core.airflow_api import AirflowApi
 from core.permissions import is_authenticated
 from core.utils import decode_id_string
 from core.validators import BaseValidator
@@ -60,6 +63,13 @@ class CreateRegistrationDataImport(BaseValidator, graphene.Mutation):
         created_obj_hct.save()
 
         # take file and run AirFlow job to add Households and Individuals
+        AirflowApi.start_dag(
+            dag_id="CreateRegistrationDataImportXLSX",
+            context={
+                "registration_data_import_id": created_obj_datahub.id,
+                "import_data_id": import_data_id,
+            },
+        )
 
         return CreateRegistrationDataImport(created_obj_hct)
 
@@ -239,40 +249,59 @@ class UploadImportDataXLSXFile(
     @classmethod
     @is_authenticated
     def mutate(cls, root, info, file):
-        # TODO: Is it good approach?
-        #  consult this with Janek
-        errors = cls.validate(file=file)
-
-        if errors:
-            return UploadImportDataXLSXFile(None, errors)
-
-        wb = openpyxl.load_workbook(file)
-
-        hh_sheet = wb["Households"]
-        ind_sheet = wb["Individuals"]
-
-        number_of_households = 0
-        number_of_individuals = 0
-
-        # Could just return max_row if openpyxl won't count empty rows too
-        for row in hh_sheet.iter_rows(min_row=3):
-            if not any([cell.value for cell in row]):
-                continue
-            number_of_households += 1
-
-        for row in ind_sheet.iter_rows(min_row=3):
-
-            if not any([cell.value for cell in row]):
-                continue
-            number_of_individuals += 1
-
-        created = ImportData.objects.create(
-            xlsx_file=file,
-            number_of_households=number_of_households,
-            number_of_individuals=number_of_individuals,
+        # TODO: FOR TESTING REMOVE IT LATER
+        xlsx_valid_file_path = (
+            "hct_mis_api/apps/registration_datahub/tests/test_file/"
+            "Registration Data Import XLS Template.xlsx"
         )
 
-        return UploadImportDataXLSXFile(created, [])
+        with open(xlsx_valid_file_path, "rb") as file:
+            valid_file = SimpleUploadedFile(file.name, file.read())
+            created = ImportData.objects.create(
+                xlsx_file=valid_file,
+                number_of_households=23,
+                number_of_individuals=47,
+            )
+            AirflowApi.start_dag(
+                dag_id="CreateRegistrationDataImportXLSX",
+                context={
+                    "registration_data_import_id": 12,
+                    "import_data_id": str(created.id),
+                },
+            )
+            return UploadImportDataXLSXFile(created, [])
+        # errors = cls.validate(file=file)
+        #
+        # if errors:
+        #     return UploadImportDataXLSXFile(None, errors)
+        #
+        # wb = openpyxl.load_workbook(file)
+        #
+        # hh_sheet = wb["Households"]
+        # ind_sheet = wb["Individuals"]
+        #
+        # number_of_households = 0
+        # number_of_individuals = 0
+        #
+        # # Could just return max_row if openpyxl won't count empty rows too
+        # for row in hh_sheet.iter_rows(min_row=3):
+        #     if not any([cell.value for cell in row]):
+        #         continue
+        #     number_of_households += 1
+        #
+        # for row in ind_sheet.iter_rows(min_row=3):
+        #
+        #     if not any([cell.value for cell in row]):
+        #         continue
+        #     number_of_individuals += 1
+        #
+        # created = ImportData.objects.create(
+        #     xlsx_file=file,
+        #     number_of_households=number_of_households,
+        #     number_of_individuals=number_of_individuals,
+        # )
+        #
+        # return UploadImportDataXLSXFile(created, [])
 
 
 class DeleteRegistrationDataImport(graphene.Mutation):
