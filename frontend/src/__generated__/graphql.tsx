@@ -2823,7 +2823,7 @@ export type AllTargetPopulationsQuery = (
       & Pick<TargetPopulationNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'TargetPopulationNode' }
-        & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'createdAt' | 'updatedAt' | 'totalHouseholds' | 'totalFamilySize'>
+        & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'createdAt' | 'updatedAt' | 'candidateListTotalHouseholds' | 'finalListTotalHouseholds'>
         & { createdBy: Maybe<(
           { __typename?: 'UserNode' }
           & Pick<UserNode, 'firstName' | 'lastName'>
@@ -4339,8 +4339,8 @@ export const AllTargetPopulationsDocument = gql`
         status
         createdAt
         updatedAt
-        totalHouseholds
-        totalFamilySize
+        candidateListTotalHouseholds
+        finalListTotalHouseholds
         createdBy {
           firstName
           lastName
