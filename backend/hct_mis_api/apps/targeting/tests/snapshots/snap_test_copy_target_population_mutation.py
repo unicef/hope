@@ -29,26 +29,11 @@ snapshots['TestCopyTargetPopulationMutation::test_copy_target 1'] = {
                 },
                 'candidateListTotalHouseholds': 1,
                 'candidateListTotalIndividuals': 1,
-                'finalListTargetingCriteria': {
-                    'rules': [
-                        {
-                            'filters': [
-                                {
-                                    'arguments': [
-                                        2
-                                    ],
-                                    'comparisionMethod': 'EQUALS',
-                                    'fieldName': 'family_size',
-                                    'isFlexField': False
-                                }
-                            ]
-                        }
-                    ]
-                },
-                'finalListTotalHouseholds': 0,
+                'finalListTargetingCriteria': None,
+                'finalListTotalHouseholds': None,
                 'finalListTotalIndividuals': None,
                 'name': 'Test New Copy Name',
-                'status': 'APPROVED'
+                'status': 'DRAFT'
             }
         }
     }
@@ -62,10 +47,10 @@ snapshots['TestCopyTargetPopulationMutation::test_copy_empty_target_1 1'] = {
                 'candidateListTotalHouseholds': 0,
                 'candidateListTotalIndividuals': None,
                 'finalListTargetingCriteria': None,
-                'finalListTotalHouseholds': 0,
+                'finalListTotalHouseholds': None,
                 'finalListTotalIndividuals': None,
                 'name': 'test_copy_empty_target_1',
-                'status': 'APPROVED'
+                'status': 'DRAFT'
             }
         }
     }
