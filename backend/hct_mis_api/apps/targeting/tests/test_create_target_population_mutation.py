@@ -1,14 +1,6 @@
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
-from core.utils import decode_id_string
 from household.fixtures import HouseholdFactory
-from targeting.models import (
-    TargetingCriteria,
-    TargetingCriteriaRule,
-    TargetingCriteriaRuleFilter,
-    TargetPopulation,
-    HouseholdSelection,
-)
 
 
 class TestCreateTargetPopulationMutation(APITestCase):
