@@ -2368,34 +2368,34 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': 'REFUGEE',
+                        'labelEn': 'Refugee',
                         'labels': [
                             {
-                                'label': 'REFUGEE',
+                                'label': 'Refugee',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'Refugee'
+                        'value': 'REFUGEE'
                     },
                     {
-                        'labelEn': 'MIGRANT',
+                        'labelEn': 'Migrant',
                         'labels': [
                             {
-                                'label': 'MIGRANT',
+                                'label': 'Migrant',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'Migrant'
+                        'value': 'MIGRANT'
                     },
                     {
-                        'labelEn': 'CITIZEN',
+                        'labelEn': 'Citizen',
                         'labels': [
                             {
-                                'label': 'CITIZEN',
+                                'label': 'Citizen',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'Citizen'
+                        'value': 'CITIZEN'
                     },
                     {
                         'labelEn': 'IDP',
@@ -2408,14 +2408,14 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'IDP'
                     },
                     {
-                        'labelEn': 'OTHER',
+                        'labelEn': 'Other',
                         'labels': [
                             {
-                                'label': 'OTHER',
+                                'label': 'Other',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'Other'
+                        'value': 'OTHER'
                     }
                 ],
                 'hint': 'residential status of household',
