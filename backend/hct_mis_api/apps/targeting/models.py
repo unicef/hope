@@ -14,7 +14,7 @@ from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 from psycopg2.extras import NumericRange
 
-from core.models import CoreAttribute
+from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES
 from household.models import Household
 from utils.models import TimeStampedUUIDModel
 
@@ -113,7 +113,11 @@ class TargetPopulation(TimeStampedUUIDModel):
     def final_list(self):
         if self.status == "DRAFT":
             return []
-        return self.households.filter(selections__final=True).order_by('id').distinct()
+        return (
+            self.households.filter(selections__final=True)
+            .order_by("created_at")
+            .distinct()
+        )
 
 
 class HouseholdSelection(TimeStampedUUIDModel):
@@ -215,22 +219,54 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
     """
 
     COMPARISION_ATTRIBUTES = {
-        "EQUALS": {"arguments": 1, "lookup": "", "negative": False,},
-        "NOT_EQUALS": {"arguments": 1, "lookup": "", "negative": True,},
-        "CONTAINS": {"arguments": 1, "lookup": "__contains", "negative": True,},
+        "EQUALS": {
+            "arguments": 1,
+            "lookup": "",
+            "negative": False,
+            "supported_types": ["INTEGER", "SELECT_ONE"],
+        },
+        "NOT_EQUALS": {
+            "arguments": 1,
+            "lookup": "",
+            "negative": True,
+            "supported_types": ["INTEGER", "SELECT_ONE"],
+        },
+        "CONTAINS": {
+            "arguments": 1,
+            "lookup": "__contains",
+            "negative": True,
+            "supported_types": [],
+        },
         "NOT_CONTAINS": {
             "arguments": 1,
             "lookup": "__contains",
             "negative": True,
+            "supported_types": [],
         },
-        "RANGE": {"arguments": 2, "lookup": "__range", "negative": False,},
+        "RANGE": {
+            "arguments": 2,
+            "lookup": "__range",
+            "negative": False,
+            "supported_types": ["INTEGER"],
+        },
         "NOT_IN_RANGE": {
             "arguments": 2,
             "lookup": "__range",
             "negative": True,
+            "supported_types": ["INTEGER"],
         },
-        "GREATER_THAN": {"arguments": 1, "lookup": "__gt", "negative": False,},
-        "LESS_THAN": {"arguments": 1, "lookup": "__lt", "negative": False,},
+        "GREATER_THAN": {
+            "arguments": 1,
+            "lookup": "__gt",
+            "negative": False,
+            "supported_types": ["INTEGER"],
+        },
+        "LESS_THAN": {
+            "arguments": 1,
+            "lookup": "__lt",
+            "negative": False,
+            "supported_types": ["INTEGER"],
+        },
     }
 
     COMPARISON_CHOICES = Choices(
@@ -260,7 +296,7 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
     )
 
     def get_query_for_cor_field(self):
-        core_fields = CoreAttribute.get_core_fields(Household)
+        core_fields = CORE_FIELDS_ATTRIBUTES
         core_field_attrs = [
             attr for attr in core_fields if attr.get("name") == self.field_name
         ]

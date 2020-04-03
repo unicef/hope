@@ -3,7 +3,7 @@ import random
 
 import factory
 from account.fixtures import UserFactory
-from core.models import CoreAttribute
+from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES
 from core.utils import JSONFactory
 from factory import fuzzy
 from household.fixtures import HouseholdFactory
@@ -17,7 +17,7 @@ from targeting.models import (
 
 
 def comparision_method_resolver(obj):
-    core_fields = CoreAttribute.get_core_fields(Household)
+    core_fields = CORE_FIELDS_ATTRIBUTES
     core_field_attrs = [
         attr for attr in core_fields if attr.get("name") == obj.field_name
     ]
@@ -64,7 +64,7 @@ def arguments_resolver(obj):
 
 class TargetingCriteriaRuleFilterFactory(factory.DjangoModelFactory):
     field_name = factory.fuzzy.FuzzyChoice(
-        CoreAttribute.get_core_fields(Household),
+        CORE_FIELDS_ATTRIBUTES,
         getter=lambda x: x.get("name"),
     )
     comparision_method = factory.LazyAttribute(comparision_method_resolver)
