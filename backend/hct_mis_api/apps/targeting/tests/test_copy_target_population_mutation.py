@@ -145,10 +145,6 @@ class TestCopyTargetPopulationMutation(APITestCase):
             target_population_copy.candidate_list_targeting_criteria.id,
             self.target_population.candidate_list_targeting_criteria.id,
         )
-        self.assertNotEqual(
-            target_population_copy.final_list_targeting_criteria.id,
-            self.target_population.final_list_targeting_criteria.id,
-        )
         rule_copy = (
             target_population_copy.candidate_list_targeting_criteria.rules.first()
         )
@@ -162,15 +158,6 @@ class TestCopyTargetPopulationMutation(APITestCase):
         filter = rule.filters.first()
         self.assertNotEqual(
             filter_copy.id, filter.id,
-        )
-        household_selection_copy = HouseholdSelection.objects.filter(
-            target_population=target_population_copy
-        ).first()
-        household_selection = HouseholdSelection.objects.filter(
-            target_population=self.target_population
-        ).first()
-        self.assertNotEqual(
-            household_selection_copy.id, household_selection.id,
         )
 
     def test_copy_empty_target_1(self):

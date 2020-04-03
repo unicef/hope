@@ -256,35 +256,14 @@ class CopyTargetPopulationMutation(
         target_population_copy = TargetPopulation(
             name=name,
             created_by=user,
-            status=target_population.status,
+            status="DRAFT",
             candidate_list_total_households=target_population.candidate_list_total_households,
             candidate_list_total_individuals=target_population.candidate_list_total_individuals,
-            final_list_total_households=target_population.final_list_total_households,
-            final_list_total_individuals=target_population.final_list_total_individuals,
-            selection_computation_metadata=target_population.selection_computation_metadata,
-            program=target_population.program,
         )
         target_population_copy.save()
-        selections = HouseholdSelection.objects.filter(
-            target_population=target_population
-        )
-        selections_copy = []
-        for selection in selections:
-            selections_copy.append(
-                HouseholdSelection(
-                    target_population=target_population_copy,
-                    household=selection.household,
-                    final=selection.final,
-                )
-            )
-        HouseholdSelection.objects.bulk_create(selections_copy)
         if target_population.candidate_list_targeting_criteria:
             target_population_copy.candidate_list_targeting_criteria = cls.copy_target_criteria(
                 target_population.candidate_list_targeting_criteria
-            )
-        if target_population.final_list_targeting_criteria:
-            target_population_copy.final_list_targeting_criteria = cls.copy_target_criteria(
-                target_population.final_list_targeting_criteria
             )
         target_population_copy.save()
         target_population_copy.refresh_from_db()
