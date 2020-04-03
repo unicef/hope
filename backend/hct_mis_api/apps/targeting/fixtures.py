@@ -2,12 +2,12 @@ import datetime as dt
 import random
 
 import factory
+from factory import fuzzy
+
 from account.fixtures import UserFactory
 from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES
-from core.utils import JSONFactory
-from factory import fuzzy
 from household.fixtures import HouseholdFactory
-from household.models import Individual, Household
+from household.models import Household
 from targeting.models import (
     TargetPopulation,
     TargetingCriteriaRuleFilter,

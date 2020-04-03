@@ -1,5 +1,4 @@
 from django.core.exceptions import ValidationError
-from graphene.types.resolver import dict_or_attr_resolver
 
 from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES_DICTIONARY
 from core.models import FlexibleAttribute
