@@ -2,7 +2,6 @@ import copy
 
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
-from core.utils import decode_id_string
 from household.fixtures import HouseholdFactory
 from household.models import Household
 from targeting.models import (
@@ -10,7 +9,6 @@ from targeting.models import (
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
     TargetPopulation,
-    HouseholdSelection,
 )
 
 
