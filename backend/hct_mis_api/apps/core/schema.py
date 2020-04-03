@@ -20,11 +20,11 @@ from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
 from account.schema import UserObjectType
+from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES
 from core.extended_connection import ExtendedConnection
 from core.models import (
     Location,
     BusinessArea,
-    CoreAttribute,
     FlexibleAttribute,
     FlexibleAttributeChoice,
 )
@@ -215,7 +215,7 @@ def get_fields_attr_generators(flex_field):
         for attr in FlexibleAttribute.objects.all():
             yield attr
     if flex_field!=True:
-        for attr in CoreAttribute.get_core_fields(Household):
+        for attr in CORE_FIELDS_ATTRIBUTES:
             yield attr
 
 
