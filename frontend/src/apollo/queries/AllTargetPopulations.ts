@@ -24,8 +24,8 @@ export const AllTargetPopulations = gql`
           status
           createdAt
           updatedAt
-          totalHouseholds
-          totalFamilySize
+          candidateListTotalHouseholds
+          finalListTotalHouseholds
           createdBy {
             firstName
             lastName
