@@ -1,8 +1,10 @@
 from pprint import pprint
 
 import graphene
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q
+from django.shortcuts import get_object_or_404
 
 from account.models import User
 from core import utils
@@ -24,6 +26,7 @@ from targeting.validators import (
     ApproveTargetPopulationValidator,
     FinalizeTargetPopulationValidator,
     UnapproveTargetPopulationValidator,
+    TargetingCriteriaInputValidator,
 )
 
 
@@ -67,7 +70,6 @@ class ValidatedMutation(graphene.Mutation):
 
 
 class UpdateTargetPopulationInput(graphene.InputObjectType):
-    """All attribute inputs to update an existing new entry."""
 
     id = graphene.ID(required=True)
     name = graphene.String()
@@ -93,6 +95,7 @@ class CreateTargetPopulationMutation(graphene.Mutation):
         input = kwargs.pop("input")
 
         targeting_criteria_input = input.get("targeting_criteria")
+        TargetingCriteriaInputValidator.validate(targeting_criteria_input)
         targeting_criteria = TargetingCriteria()
         targeting_criteria.save()
         for rule_input in targeting_criteria_input.get("rules"):
@@ -122,23 +125,41 @@ class UpdateTargetPopulationMutation(graphene.Mutation):
     @transaction.atomic
     def mutate(cls, root, info, **kwargs):
         input = kwargs.get("input")
-        id = kwargs.get("id")
+        id = input.get("id")
         target_population = cls.get_object(id)
+
+        if target_population.status == "FINALIZED":
+            raise ValidationError(
+                "Finalized Target Population can't be changed"
+            )
         target_population.name = input.get("name")
         targeting_criteria_input = input.get("targeting_criteria")
+        TargetingCriteriaInputValidator.validate(targeting_criteria_input)
         if targeting_criteria_input:
             targeting_criteria = TargetingCriteria()
             targeting_criteria.save()
             for rule_input in targeting_criteria_input.get("rules"):
-                rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)
+                rule = TargetingCriteriaRule(
+                    targeting_criteria=targeting_criteria
+                )
                 rule.save()
                 for filter_input in rule_input.get("filters"):
                     rule_filter = TargetingCriteriaRuleFilter(
                         targeting_criteria_rule=rule, **filter_input
                     )
                     rule_filter.save()
-            target_population.candidate_list_targeting_criteria.delete()
-            target_population.candidate_list_targeting_criteria = targeting_criteria
+            if target_population.status == "DRAFT":
+                if target_population.candidate_list_targeting_criteria:
+                    target_population.candidate_list_targeting_criteria.delete()
+                target_population.candidate_list_targeting_criteria = (
+                    targeting_criteria
+                )
+            elif target_population.status == "APPROVED":
+                if target_population.final_list_targeting_criteria:
+                    target_population.final_list_targeting_criteria.delete()
+                target_population.final_list_targeting_criteria = (
+                    targeting_criteria
+                )
         target_population.save()
         return cls(target_population=target_population)
 
@@ -146,7 +167,7 @@ class UpdateTargetPopulationMutation(graphene.Mutation):
     def get_object(cls, id):
         if id is None:
             return None
-        object = TargetPopulation.objects.get(id=decode_id_string(id))
+        object = get_object_or_404(TargetPopulation, id=decode_id_string(id))
         return object
 
 
@@ -285,27 +306,6 @@ class CopyTargetPopulationMutation(
         return targeting_criteria_copy
 
 
-class UpdateTargetPopulationMutation(
-    graphene.relay.ClientIDMutation, TargetValidator
-):
-    target_population = graphene.Field(TargetPopulationNode)
-
-    class Input:
-        target_population_data = UpdateTargetPopulationInput()
-
-    @classmethod
-    @is_authenticated
-    def mutate_and_get_payload(cls, _root, _info, **kwargs):
-        target_population_data = kwargs["target_population_data"]
-        target_id = utils.decode_id_string(target_population_data.pop("id"))
-        target_population = TargetPopulation.objects.get(id=target_id)
-        cls.validate_is_finalized(target_population.status)
-        utils.update_model(target_population, target_population_data)
-        return UpdateTargetPopulationMutation(
-            target_population=target_population
-        )
-
-
 class DeleteTargetPopulationMutation(
     graphene.relay.ClientIDMutation, TargetValidator
 ):
@@ -325,8 +325,8 @@ class DeleteTargetPopulationMutation(
 
 
 class Mutations(graphene.ObjectType):
-    #  update_target_population = UpdateTargetPopulationMutation.Field()
     create_target_population = CreateTargetPopulationMutation.Field()
+    update_target_population = UpdateTargetPopulationMutation.Field()
     copy_target_population = CopyTargetPopulationMutation.Field()
     delete_target_population = DeleteTargetPopulationMutation.Field()
     approve_target_population = ApproveTargetPopulationMutation.Field()

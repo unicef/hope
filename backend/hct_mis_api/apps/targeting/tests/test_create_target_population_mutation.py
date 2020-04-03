@@ -58,6 +58,9 @@ class TestCreateTargetPopulationMutation(APITestCase):
     def setUpTestData(cls):
         cls.user = UserFactory.create()
         HouseholdFactory(
+            family_size=2, residence_status="CITIZEN",
+        )
+        HouseholdFactory(
             family_size=3, residence_status="CITIZEN",
         )
         HouseholdFactory(
