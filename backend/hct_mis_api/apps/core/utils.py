@@ -271,3 +271,9 @@ def age_to_dob_query(comparision_method, args):
     raise ValidationError(
         f"Age filter query don't supports {comparision_method} type"
     )
+
+
+def get_attr_value(name, object, default=None):
+    if isinstance(object, dict):
+        return object.get(name, default)
+    return getattr(name, object, default)
