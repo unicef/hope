@@ -21,6 +21,7 @@ from core import utils
 
 # TODO(codecakes): see if later the format can be kept consistent in FilterAttrType model.
 # by using FlexFieldNode and CoreFieldNode to return target filter rules.
+from targeting.validators import TargetingCriteriaInputValidator
 
 
 class TargetPopulationFilter(django_filters.FilterSet):
@@ -187,6 +188,7 @@ class TargetingCriteriaObjectType(graphene.InputObjectType):
 
 
 def targeting_criteria_object_type_to_query(targeting_criteria_object_type):
+    TargetingCriteriaInputValidator.validate(targeting_criteria_object_type)
     targeting_criteria_querying = target_models.TargetingCriteriaQueryingMixin(
         []
     )
