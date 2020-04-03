@@ -1,13 +1,11 @@
-import xml.etree.ElementTree as ET
+import logging
 
 from django.core.management import BaseCommand
 
 from core.admin import FlexibleAttributeImporter
-from core.models import BusinessArea
-import logging
-
 
 logger = logging.getLogger(__name__)
+
 
 class Command(BaseCommand):
     help = "load flex fields attributes"
