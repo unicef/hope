@@ -21,6 +21,7 @@ pycountry==19.8.18
 openpyxl==3.0.3
 xlrd
 ipdb
+factory-boy==2.12.0
 
 # API
 graphene-django==2.7.1
