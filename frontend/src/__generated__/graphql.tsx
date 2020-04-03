@@ -2507,6 +2507,22 @@ export type XlsxRowErrorNode = {
   message?: Maybe<Scalars['String']>,
 };
 
+export type ApproveTpMutationVariables = {
+  id: Scalars['ID']
+};
+
+
+export type ApproveTpMutation = (
+  { __typename?: 'Mutations' }
+  & { approveTargetPopulation: Maybe<(
+    { __typename?: 'ApproveTargetPopulationMutation' }
+    & { targetPopulation: Maybe<(
+      { __typename?: 'TargetPopulationNode' }
+      & Pick<TargetPopulationNode, 'status'>
+    )> }
+  )> }
+);
+
 export type CreateProgramMutationVariables = {
   programData: CreateProgramInput
 };
@@ -3509,6 +3525,57 @@ export const ImportedIndividualDetailedFragmentDoc = gql`
   phoneNumberAlternative
 }
     `;
+export const ApproveTpDocument = gql`
+    mutation ApproveTP($id: ID!) {
+  approveTargetPopulation(id: $id) {
+    targetPopulation {
+      status
+    }
+  }
+}
+    `;
+export type ApproveTpMutationFn = ApolloReactCommon.MutationFunction<ApproveTpMutation, ApproveTpMutationVariables>;
+export type ApproveTpComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ApproveTpMutation, ApproveTpMutationVariables>, 'mutation'>;
+
+    export const ApproveTpComponent = (props: ApproveTpComponentProps) => (
+      <ApolloReactComponents.Mutation<ApproveTpMutation, ApproveTpMutationVariables> mutation={ApproveTpDocument} {...props} />
+    );
+    
+export type ApproveTpProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ApproveTpMutation, ApproveTpMutationVariables> & TChildProps;
+export function withApproveTp<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ApproveTpMutation,
+  ApproveTpMutationVariables,
+  ApproveTpProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, ApproveTpMutation, ApproveTpMutationVariables, ApproveTpProps<TChildProps>>(ApproveTpDocument, {
+      alias: 'approveTp',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useApproveTpMutation__
+ *
+ * To run a mutation, you first call `useApproveTpMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useApproveTpMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [approveTpMutation, { data, loading, error }] = useApproveTpMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useApproveTpMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ApproveTpMutation, ApproveTpMutationVariables>) {
+        return ApolloReactHooks.useMutation<ApproveTpMutation, ApproveTpMutationVariables>(ApproveTpDocument, baseOptions);
+      }
+export type ApproveTpMutationHookResult = ReturnType<typeof useApproveTpMutation>;
+export type ApproveTpMutationResult = ApolloReactCommon.MutationResult<ApproveTpMutation>;
+export type ApproveTpMutationOptions = ApolloReactCommon.BaseMutationOptions<ApproveTpMutation, ApproveTpMutationVariables>;
 export const CreateProgramDocument = gql`
     mutation CreateProgram($programData: CreateProgramInput!) {
   createProgram(programData: $programData) {
