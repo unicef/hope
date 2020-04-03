@@ -7,7 +7,6 @@ from targeting.models import (
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
     TargetPopulation,
-    HouseholdSelection,
 )
 
 
@@ -168,7 +167,8 @@ class TestCopyTargetPopulationMutation(APITestCase):
                 "input": {
                     "targetPopulationData": {
                         "id": self.id_to_base64(
-                            self.empty_target_population_1.id, "TargetPopulation"
+                            self.empty_target_population_1.id,
+                            "TargetPopulation",
                         ),
                         "name": "test_copy_empty_target_1",
                     }

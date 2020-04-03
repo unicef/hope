@@ -8,14 +8,11 @@ from django.contrib.postgres.validators import (
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
-from django.db.models.signals import pre_save
-from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 from psycopg2.extras import NumericRange
 
 from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES
-from household.models import Household
 from utils.models import TimeStampedUUIDModel
 
 _MAX_LEN = 256

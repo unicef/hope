@@ -1,5 +1,3 @@
-from pprint import pprint
-
 from django.db.models import Sum
 from django.db.models.signals import post_save, pre_save, m2m_changed
 from django.dispatch import receiver

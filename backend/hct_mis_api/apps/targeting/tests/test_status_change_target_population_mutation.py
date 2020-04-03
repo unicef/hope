@@ -1,13 +1,11 @@
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
-from core.utils import decode_id_string
 from household.fixtures import HouseholdFactory
 from targeting.models import (
     TargetingCriteria,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
     TargetPopulation,
-    HouseholdSelection,
 )
 
 
@@ -358,7 +356,8 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
             context={"user": self.user},
             variables={
                 "id": self.id_to_base64(
-                    self.target_population_approved_with_final_rule.id, "TargetPopulation"
+                    self.target_population_approved_with_final_rule.id,
+                    "TargetPopulation",
                 )
             },
         )
@@ -380,8 +379,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
             context={"user": self.user},
             variables={
                 "id": self.id_to_base64(
-                    self.target_population_draft.id,
-                    "TargetPopulation",
+                    self.target_population_draft.id, "TargetPopulation",
                 )
             },
         )
