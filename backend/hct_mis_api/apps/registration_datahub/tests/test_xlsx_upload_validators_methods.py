@@ -1,3 +1,4 @@
+import operator
 from unittest import TestCase
 
 import openpyxl
@@ -266,6 +267,7 @@ class TestXLSXValidatorsMethods(TestCase):
         invalid_cols_file_path = f"{self.FILES_DIR_PATH}/invalid_cols.xlsx"
         with open(invalid_cols_file_path, "rb") as file:
             errors = UploadXLSXValidator.validate_file_with_template(file=file)
+            errors.sort(key=operator.itemgetter('row_number', 'header'))
             expected = [
                 {
                     "row_number": 1,
