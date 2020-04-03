@@ -77,7 +77,11 @@ export function InProgressTargetPopulationHeaderButtons({
         setOpen={setOpenDelete}
         targetPopulationId={targetPopulation.id}
       />
-      <ApproveCandidateList open={openApprove} setOpen={setOpenApprove} />
+      <ApproveCandidateList
+        open={openApprove}
+        setOpen={setOpenApprove}
+        targetPopulationId={targetPopulation.id}
+      />
     </div>
   );
 }
