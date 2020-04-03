@@ -52,8 +52,8 @@ CORE_FIELDS_ATTRIBUTES = [
         "label": {"English(EN)": "Residence Status"},
         "hint": "residential status of household",
         "choices": [
-            {"label": {"English(EN)": name}, "value": str(value),}
-            for name, value in Household.RESIDENCE_STATUS_CHOICE
+            {"label": {"English(EN)": label}, "value": str(value),}
+            for value, label in Household.RESIDENCE_STATUS_CHOICE
         ],
         "associated_with": _HOUSEHOLD,
     },
