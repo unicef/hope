@@ -3410,6 +3410,32 @@ export type UploadImportDataXlsxFileMutation = (
   )> }
 );
 
+export type CandidateHouseholdsListByTargetingCriteriaQueryVariables = {
+  targetPopulation: Scalars['ID']
+};
+
+
+export type CandidateHouseholdsListByTargetingCriteriaQuery = (
+  { __typename?: 'Query' }
+  & { candidateHouseholdsListByTargetingCriteria: Maybe<(
+    { __typename?: 'HouseholdNodeConnection' }
+    & { edges: Array<Maybe<(
+      { __typename?: 'HouseholdNodeEdge' }
+      & { node: Maybe<(
+        { __typename?: 'HouseholdNode' }
+        & Pick<HouseholdNode, 'id' | 'familySize' | 'updatedAt'>
+        & { headOfHousehold: Maybe<(
+          { __typename?: 'IndividualNode' }
+          & Pick<IndividualNode, 'firstName' | 'lastName'>
+        )>, location: (
+          { __typename?: 'LocationNode' }
+          & Pick<LocationNode, 'title'>
+        ) }
+      )> }
+    )>> }
+  )> }
+);
+
 export type ImportedIndividualFieldsQueryVariables = {};
 
 
@@ -5794,6 +5820,69 @@ export function useUploadImportDataXlsxFileMutation(baseOptions?: ApolloReactHoo
 export type UploadImportDataXlsxFileMutationHookResult = ReturnType<typeof useUploadImportDataXlsxFileMutation>;
 export type UploadImportDataXlsxFileMutationResult = ApolloReactCommon.MutationResult<UploadImportDataXlsxFileMutation>;
 export type UploadImportDataXlsxFileMutationOptions = ApolloReactCommon.BaseMutationOptions<UploadImportDataXlsxFileMutation, UploadImportDataXlsxFileMutationVariables>;
+export const CandidateHouseholdsListByTargetingCriteriaDocument = gql`
+    query candidateHouseholdsListByTargetingCriteria($targetPopulation: ID!) {
+  candidateHouseholdsListByTargetingCriteria(targetPopulation: $targetPopulation) {
+    edges {
+      node {
+        id
+        headOfHousehold {
+          firstName
+          lastName
+        }
+        familySize
+        location {
+          title
+        }
+        updatedAt
+      }
+    }
+  }
+}
+    `;
+export type CandidateHouseholdsListByTargetingCriteriaComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<CandidateHouseholdsListByTargetingCriteriaQuery, CandidateHouseholdsListByTargetingCriteriaQueryVariables>, 'query'> & ({ variables: CandidateHouseholdsListByTargetingCriteriaQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const CandidateHouseholdsListByTargetingCriteriaComponent = (props: CandidateHouseholdsListByTargetingCriteriaComponentProps) => (
+      <ApolloReactComponents.Query<CandidateHouseholdsListByTargetingCriteriaQuery, CandidateHouseholdsListByTargetingCriteriaQueryVariables> query={CandidateHouseholdsListByTargetingCriteriaDocument} {...props} />
+    );
+    
+export type CandidateHouseholdsListByTargetingCriteriaProps<TChildProps = {}> = ApolloReactHoc.DataProps<CandidateHouseholdsListByTargetingCriteriaQuery, CandidateHouseholdsListByTargetingCriteriaQueryVariables> & TChildProps;
+export function withCandidateHouseholdsListByTargetingCriteria<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CandidateHouseholdsListByTargetingCriteriaQuery,
+  CandidateHouseholdsListByTargetingCriteriaQueryVariables,
+  CandidateHouseholdsListByTargetingCriteriaProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, CandidateHouseholdsListByTargetingCriteriaQuery, CandidateHouseholdsListByTargetingCriteriaQueryVariables, CandidateHouseholdsListByTargetingCriteriaProps<TChildProps>>(CandidateHouseholdsListByTargetingCriteriaDocument, {
+      alias: 'candidateHouseholdsListByTargetingCriteria',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCandidateHouseholdsListByTargetingCriteriaQuery__
+ *
+ * To run a query within a React component, call `useCandidateHouseholdsListByTargetingCriteriaQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCandidateHouseholdsListByTargetingCriteriaQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCandidateHouseholdsListByTargetingCriteriaQuery({
+ *   variables: {
+ *      targetPopulation: // value for 'targetPopulation'
+ *   },
+ * });
+ */
+export function useCandidateHouseholdsListByTargetingCriteriaQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<CandidateHouseholdsListByTargetingCriteriaQuery, CandidateHouseholdsListByTargetingCriteriaQueryVariables>) {
+        return ApolloReactHooks.useQuery<CandidateHouseholdsListByTargetingCriteriaQuery, CandidateHouseholdsListByTargetingCriteriaQueryVariables>(CandidateHouseholdsListByTargetingCriteriaDocument, baseOptions);
+      }
+export function useCandidateHouseholdsListByTargetingCriteriaLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<CandidateHouseholdsListByTargetingCriteriaQuery, CandidateHouseholdsListByTargetingCriteriaQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<CandidateHouseholdsListByTargetingCriteriaQuery, CandidateHouseholdsListByTargetingCriteriaQueryVariables>(CandidateHouseholdsListByTargetingCriteriaDocument, baseOptions);
+        }
+export type CandidateHouseholdsListByTargetingCriteriaQueryHookResult = ReturnType<typeof useCandidateHouseholdsListByTargetingCriteriaQuery>;
+export type CandidateHouseholdsListByTargetingCriteriaLazyQueryHookResult = ReturnType<typeof useCandidateHouseholdsListByTargetingCriteriaLazyQuery>;
+export type CandidateHouseholdsListByTargetingCriteriaQueryResult = ApolloReactCommon.QueryResult<CandidateHouseholdsListByTargetingCriteriaQuery, CandidateHouseholdsListByTargetingCriteriaQueryVariables>;
 export const ImportedIndividualFieldsDocument = gql`
     query ImportedIndividualFields {
   allFieldsAttributes {
