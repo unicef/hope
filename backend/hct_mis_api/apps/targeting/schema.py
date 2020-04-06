@@ -1,26 +1,19 @@
-import functools
-import json
-import operator
-
 import django_filters
 import graphene
-import targeting.models as target_models
-from core.models import FlexibleAttribute
-from core.schema import ExtendedConnection
-from core.filters import IntegerFilter
 from django.db.models import Q
-from graphene import relay, String, Scalar
+from graphene import relay, Scalar
 from graphene_django import DjangoObjectType, DjangoConnectionField
 from graphene_django.filter import DjangoFilterConnectionField
 
+import targeting.models as target_models
+from core.filters import IntegerFilter
+from core.schema import ExtendedConnection
 from core.utils import decode_id_string
-from household import models as household_models
 from household.models import Household
 from household.schema import HouseholdNode
-from core import utils
-
 # TODO(codecakes): see if later the format can be kept consistent in FilterAttrType model.
 # by using FlexFieldNode and CoreFieldNode to return target filter rules.
+from targeting.validators import TargetingCriteriaInputValidator
 
 
 class TargetPopulationFilter(django_filters.FilterSet):
@@ -172,10 +165,10 @@ class TargetPopulationNode(DjangoObjectType):
 
 
 class TargetingCriteriaRuleFilterObjectType(graphene.InputObjectType):
-    comparision_method = graphene.String()
-    is_flex_field = graphene.Boolean()
-    field_name = graphene.String()
-    arguments = graphene.List(Arg)
+    comparision_method = graphene.String(required=True)
+    is_flex_field = graphene.Boolean(required=True)
+    field_name = graphene.String(required=True)
+    arguments = graphene.List(Arg, required=True)
 
 
 class TargetingCriteriaRuleObjectType(graphene.InputObjectType):
@@ -187,6 +180,7 @@ class TargetingCriteriaObjectType(graphene.InputObjectType):
 
 
 def targeting_criteria_object_type_to_query(targeting_criteria_object_type):
+    TargetingCriteriaInputValidator.validate(targeting_criteria_object_type)
     targeting_criteria_querying = target_models.TargetingCriteriaQueryingMixin(
         []
     )

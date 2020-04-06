@@ -15,21 +15,20 @@ from graphene import (
     ConnectionField,
     Connection,
 )
-from graphene.types.resolver import dict_resolver, dict_or_attr_resolver
+from graphene.types.resolver import dict_or_attr_resolver
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
 from account.schema import UserObjectType
+from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES
 from core.extended_connection import ExtendedConnection
 from core.models import (
     Location,
     BusinessArea,
-    CoreAttribute,
     FlexibleAttribute,
     FlexibleAttributeChoice,
 )
 from core.utils import decode_id_string
-from household.models import Household
 
 
 class ChoiceObject(graphene.ObjectType):
@@ -164,7 +163,7 @@ class CoreFieldChoiceObject(graphene.ObjectType):
             "English(EN)"
         ]
 
-    def resolve_value(parrent,info):
+    def resolve_value(parrent, info):
         if isinstance(parrent, FlexibleAttributeChoice):
             return parrent.name
         return dict_or_attr_resolver("value", None, parrent, info)
@@ -211,11 +210,11 @@ class FieldAttributeNode(graphene.ObjectType):
 
 
 def get_fields_attr_generators(flex_field):
-    if flex_field!=False:
+    if flex_field != False:
         for attr in FlexibleAttribute.objects.all():
             yield attr
-    if flex_field!=True:
-        for attr in CoreAttribute.get_core_fields(Household):
+    if flex_field != True:
+        for attr in CORE_FIELDS_ATTRIBUTES:
             yield attr
 
 

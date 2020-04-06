@@ -1,9 +1,5 @@
-import datetime as dt
-
-from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
 from household.fixtures import HouseholdFactory, IndividualFactory
-from targeting.fixtures import TargetPopulationFactory
 
 
 class GoldenRecordTargetingCriteriaQueryTestCase(APITestCase):

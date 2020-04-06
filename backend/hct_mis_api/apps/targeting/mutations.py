@@ -1,14 +1,11 @@
-from pprint import pprint
-
 import graphene
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q
+from django.shortcuts import get_object_or_404
 
-from account.models import User
 from core import utils
 from core.permissions import is_authenticated
-from django.forms.models import model_to_dict
-
 from core.utils import decode_id_string
 from household.models import Household
 from targeting.models import (
@@ -16,21 +13,16 @@ from targeting.models import (
     HouseholdSelection,
     TargetingCriteria,
     TargetingCriteriaRule,
+    TargetingCriteriaRuleFilter,
 )
-from targeting.schema import TargetPopulationNode
+from targeting.schema import TargetPopulationNode, TargetingCriteriaObjectType
 from targeting.validators import (
     TargetValidator,
     ApproveTargetPopulationValidator,
     FinalizeTargetPopulationValidator,
     UnapproveTargetPopulationValidator,
+    TargetingCriteriaInputValidator,
 )
-
-
-class CreateTargetPopulationInput(graphene.InputObjectType):
-    """All attribute inputs to create a new entry."""
-
-    # TODO(codecakes): To Implement.
-    pass
 
 
 class CopyTargetPopulationInput(graphene.InputObjectType):
@@ -38,14 +30,6 @@ class CopyTargetPopulationInput(graphene.InputObjectType):
 
     id = graphene.ID()
     name = graphene.String()
-
-
-class UpdateTargetPopulationInput(graphene.InputObjectType):
-    """All attribute inputs to update an existing new entry."""
-
-    id = graphene.ID()
-    name = graphene.String()
-    status = graphene.String()
 
 
 class CreateTarget:
@@ -65,7 +49,9 @@ class ValidatedMutation(graphene.Mutation):
         for validator in cls.arguments_validators:
             validator.validate(kwargs)
         model_object = cls.get_object(root, info, **kwargs)
-        return cls.validated_mutate(root, info,model_object=model_object, **kwargs)
+        return cls.validated_mutate(
+            root, info, model_object=model_object, **kwargs
+        )
 
     @classmethod
     def get_object(cls, root, info, **kwargs):
@@ -78,6 +64,108 @@ class ValidatedMutation(graphene.Mutation):
         return object
 
 
+class UpdateTargetPopulationInput(graphene.InputObjectType):
+
+    id = graphene.ID(required=True)
+    name = graphene.String()
+    targeting_criteria = TargetingCriteriaObjectType()
+
+
+class CreateTargetPopulationInput(graphene.InputObjectType):
+    name = graphene.String(required=True)
+    targeting_criteria = TargetingCriteriaObjectType(required=True)
+
+
+class CreateTargetPopulationMutation(graphene.Mutation):
+    target_population = graphene.Field(TargetPopulationNode)
+
+    class Arguments:
+        input = CreateTargetPopulationInput(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root, info, **kwargs):
+        user = info.context.user
+        input = kwargs.pop("input")
+
+        targeting_criteria_input = input.get("targeting_criteria")
+        TargetingCriteriaInputValidator.validate(targeting_criteria_input)
+        targeting_criteria = TargetingCriteria()
+        targeting_criteria.save()
+        for rule_input in targeting_criteria_input.get("rules"):
+            rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)
+            rule.save()
+            for filter_input in rule_input.get("filters"):
+                rule_filter = TargetingCriteriaRuleFilter(
+                    targeting_criteria_rule=rule, **filter_input
+                )
+                rule_filter.save()
+        target_population = TargetPopulation(
+            name=input.get("name"), created_by=user,
+        )
+        target_population.candidate_list_targeting_criteria = targeting_criteria
+        target_population.save()
+        return cls(target_population=target_population)
+
+
+class UpdateTargetPopulationMutation(graphene.Mutation):
+    target_population = graphene.Field(TargetPopulationNode)
+
+    class Arguments:
+        input = UpdateTargetPopulationInput(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root, info, **kwargs):
+        input = kwargs.get("input")
+        id = input.get("id")
+        target_population = cls.get_object(id)
+
+        if target_population.status == "FINALIZED":
+            raise ValidationError(
+                "Finalized Target Population can't be changed"
+            )
+        target_population.name = input.get("name")
+        targeting_criteria_input = input.get("targeting_criteria")
+        TargetingCriteriaInputValidator.validate(targeting_criteria_input)
+        if targeting_criteria_input:
+            targeting_criteria = TargetingCriteria()
+            targeting_criteria.save()
+            for rule_input in targeting_criteria_input.get("rules"):
+                rule = TargetingCriteriaRule(
+                    targeting_criteria=targeting_criteria
+                )
+                rule.save()
+                for filter_input in rule_input.get("filters"):
+                    rule_filter = TargetingCriteriaRuleFilter(
+                        targeting_criteria_rule=rule, **filter_input
+                    )
+                    rule_filter.save()
+            if target_population.status == "DRAFT":
+                if target_population.candidate_list_targeting_criteria:
+                    target_population.candidate_list_targeting_criteria.delete()
+                target_population.candidate_list_targeting_criteria = (
+                    targeting_criteria
+                )
+            elif target_population.status == "APPROVED":
+                if target_population.final_list_targeting_criteria:
+                    target_population.final_list_targeting_criteria.delete()
+                target_population.final_list_targeting_criteria = (
+                    targeting_criteria
+                )
+        target_population.save()
+        return cls(target_population=target_population)
+
+    @classmethod
+    def get_object(cls, id):
+        if id is None:
+            return None
+        object = get_object_or_404(TargetPopulation, id=decode_id_string(id))
+        return object
+
+
 class ApproveTargetPopulationMutation(ValidatedMutation):
     target_population = graphene.Field(TargetPopulationNode)
     object_validators = [ApproveTargetPopulationValidator]
@@ -85,7 +173,6 @@ class ApproveTargetPopulationMutation(ValidatedMutation):
 
     class Arguments:
         id = graphene.ID(required=True)
-
 
     @classmethod
     @transaction.atomic
@@ -137,7 +224,8 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
                 ~Q(target_population.final_list_targeting_criteria.get_query())
             ).values_list("id")
             HouseholdSelection.objects.filter(
-                household__id__in=households_ids_queryset, target_population=target_population
+                household__id__in=households_ids_queryset,
+                target_population=target_population,
             ).update(final=False)
         target_population.save()
         return cls(target_population=target_population)
@@ -163,35 +251,14 @@ class CopyTargetPopulationMutation(
         target_population_copy = TargetPopulation(
             name=name,
             created_by=user,
-            status=target_population.status,
+            status="DRAFT",
             candidate_list_total_households=target_population.candidate_list_total_households,
             candidate_list_total_individuals=target_population.candidate_list_total_individuals,
-            final_list_total_households=target_population.final_list_total_households,
-            final_list_total_individuals=target_population.final_list_total_individuals,
-            selection_computation_metadata=target_population.selection_computation_metadata,
-            program=target_population.program,
         )
         target_population_copy.save()
-        selections = HouseholdSelection.objects.filter(
-            target_population=target_population
-        )
-        selections_copy = []
-        for selection in selections:
-            selections_copy.append(
-                HouseholdSelection(
-                    target_population=target_population_copy,
-                    household=selection.household,
-                    final=selection.final,
-                )
-            )
-        HouseholdSelection.objects.bulk_create(selections_copy)
         if target_population.candidate_list_targeting_criteria:
             target_population_copy.candidate_list_targeting_criteria = cls.copy_target_criteria(
                 target_population.candidate_list_targeting_criteria
-            )
-        if target_population.final_list_targeting_criteria:
-            target_population_copy.final_list_targeting_criteria = cls.copy_target_criteria(
-                target_population.final_list_targeting_criteria
             )
         target_population_copy.save()
         target_population_copy.refresh_from_db()
@@ -213,27 +280,6 @@ class CopyTargetPopulationMutation(
         return targeting_criteria_copy
 
 
-class UpdateTargetPopulationMutation(
-    graphene.relay.ClientIDMutation, TargetValidator
-):
-    target_population = graphene.Field(TargetPopulationNode)
-
-    class Input:
-        target_population_data = UpdateTargetPopulationInput()
-
-    @classmethod
-    @is_authenticated
-    def mutate_and_get_payload(cls, _root, _info, **kwargs):
-        target_population_data = kwargs["target_population_data"]
-        target_id = utils.decode_id_string(target_population_data.pop("id"))
-        target_population = TargetPopulation.objects.get(id=target_id)
-        cls.validate_is_finalized(target_population.status)
-        utils.update_model(target_population, target_population_data)
-        return UpdateTargetPopulationMutation(
-            target_population=target_population
-        )
-
-
 class DeleteTargetPopulationMutation(
     graphene.relay.ClientIDMutation, TargetValidator
 ):
@@ -253,10 +299,10 @@ class DeleteTargetPopulationMutation(
 
 
 class Mutations(graphene.ObjectType):
+    create_target_population = CreateTargetPopulationMutation.Field()
     update_target_population = UpdateTargetPopulationMutation.Field()
     copy_target_population = CopyTargetPopulationMutation.Field()
     delete_target_population = DeleteTargetPopulationMutation.Field()
     approve_target_population = ApproveTargetPopulationMutation.Field()
     unapprove_target_population = UnapproveTargetPopulationMutation.Field()
     finalize_target_population = FinalizeTargetPopulationMutation.Field()
-    # TODO(codecakes): implement others
