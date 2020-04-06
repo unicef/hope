@@ -94,7 +94,8 @@ export function TargetingCriteria({
   const addCriteria = (values) => {
     //eslint-disable-next-line
     console.log('render', values);
-    helpers.push(values.criterias);
+    //rework to use arguments
+    helpers.push({ filters: [...values.filters] });
     closeModal();
   };
   return (
@@ -129,14 +130,15 @@ export function TargetingCriteria({
               return (
                 <>
                   <Criteria
-                    key={criteria.id}
+                    //eslint-disable-next-line
+                    key={criteria.id || index}
                     isEdit={isEdit}
                     rules={criteria.filters}
                     editFunction={() => openModal(criteria)}
                     removeFunction={() => helpers.remove(index)}
                   />
 
-                  {index === (criterias.length - 1) ||
+                  {index === criterias.length - 1 ||
                   (criterias.length === 1 && index === 0) ? null : (
                     <Divider>
                       <DividerLabel>Or</DividerLabel>

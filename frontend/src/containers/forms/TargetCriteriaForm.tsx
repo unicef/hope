@@ -14,6 +14,7 @@ import { useImportedIndividualFieldsQuery } from '../../__generated__/graphql';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { AddCircleOutline } from '@material-ui/icons';
 import { SubField } from '../../components/TargetPopulation/SubField';
+import { FormikTextField } from '../../shared/Formik/FormikTextField';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -108,18 +109,79 @@ export function TargetCriteriaForm({
 }): React.ReactElement {
   const { data, loading } = useImportedIndividualFieldsQuery();
   const initialValue = {
-    filters: criteria.filters || [{fieldName: ''}],
+    filters: criteria.filters || [{ fieldName: '' }],
+  };
+
+  const chooseFieldType = (e, arrayHelpers, index) => {
+    const subField = data.allFieldsAttributes.find(
+      (attributes) => attributes.name === e.target.value,
+    );
+    const values = {
+      isFlexField: subField.isFlexField,
+      value: null,
+      choices: null,
+    };
+    switch (subField.type) {
+      case 'INTEGER':
+        values.value = { from: '', to: '' }
+        break;
+      case 'SELECT_ONE':
+        values.choices = subField.choices;
+        break;
+      default:
+        values.value = null;
+        break;
+    }
+    arrayHelpers.replace(index, {
+      ...values,
+      fieldName: e.target.value,
+      type: subField.type,
+    });
   };
 
   if (loading) return null;
 
+  const subField = (field, index) => {
+    switch (field.type) {
+      case 'INTEGER':
+        return (
+          <>
+            <Field
+              name={`filters[${index}].value.from`}
+              label={`${field.fieldName} from`}
+              type='number'
+              component={FormikTextField}
+            />
+            <Field
+              name={`filters[${index}].value.to`}
+              label={`${field.fieldName} to`}
+              type='number'
+              component={FormikTextField}
+            />
+          </>
+        );
+      case 'SELECT_ONE':
+        return (
+          <Field
+            name={`filters[${index}].value`}
+            label={`${field.fieldName}`}
+            choices={field.choices}
+            index={index}
+            component={FormikSelectField}
+          />
+        );
+      default:
+        return <p>Dupa</p>;
+    }
+  };
   return (
     <DialogContainer>
       <Formik
         initialValues={initialValue}
         onSubmit={(values, bag) => {
-          bag.resetForm();
-          return addCriteria(values);
+          const dataToSend = values.filters.map(each => ({...each, arguments: [each.value]}))
+          addCriteria({filters: dataToSend});
+          return bag.resetForm();
         }}
         validationSchema={validationSchema}
         enableReinitialize
@@ -158,18 +220,12 @@ export function TargetCriteriaForm({
                               choices={data.allFieldsAttributes}
                               index={index}
                               value={each.fieldName || null}
+                              onChange={(e) =>
+                                chooseFieldType(e, arrayHelpers, index)
+                              }
                               component={FormikSelectField}
                             />
-                            {each.fieldName && (
-                              <Field
-                                name={`filters[${index}].arguments`}
-                                subField={data.allFieldsAttributes.find(
-                                  (attributes) =>
-                                    attributes.name === each.fieldName,
-                                )}
-                                component={SubField}
-                              />
-                            )}
+                            {each.fieldName && subField(each, index)}
                             {(values.filters.length === 1 && index === 0) ||
                             index === values.filters.length - 1 ? null : (
                               <Divider>
