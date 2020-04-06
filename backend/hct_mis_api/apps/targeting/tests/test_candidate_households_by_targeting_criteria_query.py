@@ -2,63 +2,41 @@ from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
 from household.fixtures import HouseholdFactory, IndividualFactory
 from targeting.models import (
+    TargetPopulation,
     TargetingCriteria,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
-    TargetPopulation,
     HouseholdSelection,
 )
 
 
-class TestTargetPopulationQuery(APITestCase):
-    ALL_TARGET_POPULATION_QUERY = """
-            query AllTargetPopulation($finalListTotalHouseholdsMin: Int) {
-                allTargetPopulation(finalListTotalHouseholdsMin:$finalListTotalHouseholdsMin) {
-                    edges {
-                        node {
-                             name
-                             status
-                            candidateListTotalHouseholds
-                            candidateListTotalIndividuals
-                            finalListTotalHouseholds
-                            finalListTotalIndividuals
-                        }
-                    }
-                }
-            }
-            """
-    TARGET_POPULATION_QUERY = """
-       query TargetPopulation($id:ID!) {
-          targetPopulation(id:$id){
-            name
-            status
-            candidateListTotalHouseholds
-            candidateListTotalIndividuals
-            finalListTotalHouseholds
-            finalListTotalIndividuals
-            candidateListTargetingCriteria{
-              rules{
-                filters{
-                  comparisionMethod
-                  fieldName
-                  isFlexField
-                  arguments
-                }
-              }
-            }
-            finalListTargetingCriteria{
-              rules{
-                filters{
-                  comparisionMethod
-                  fieldName
-                  isFlexField
-                  arguments
-                }
+class CandidateListTargetingCriteriaQueryTestCase(APITestCase):
+    QUERY = """
+    query CandidateListByTargetingCriteria($targetPopulation: ID!) {
+      candidateHouseholdsListByTargetingCriteria (targetPopulation:$targetPopulation){
+        totalCount
+        edges {
+          node {
+            familySize
+            residenceStatus
+          }
+        }
+      }
+    }
+    """
+    QUERY_FIRST_10 = """
+        query CandidateListByTargetingCriteria($targetPopulation: ID!) {
+          candidateHouseholdsListByTargetingCriteria (targetPopulation:$targetPopulation, first: 10){
+            totalCount
+            edges {
+              node {
+                familySize
+                residenceStatus
               }
             }
           }
         }
-                """
+        """
 
     @classmethod
     def setUpTestData(cls):
@@ -135,37 +113,46 @@ class TestTargetPopulationQuery(APITestCase):
         rule_filter.save()
         return targeting_criteria
 
-    def test_simple_all_targets_query(self):
+    def test_candidate_households_list_by_targeting_criteria_family_size(self):
         self.snapshot_graphql_request(
-            request_string=TestTargetPopulationQuery.ALL_TARGET_POPULATION_QUERY,
-        )
-
-    def test_simple_all_targets_query_filter_finalListTotalHouseholdsMin(self):
-        self.snapshot_graphql_request(
-            request_string=TestTargetPopulationQuery.ALL_TARGET_POPULATION_QUERY,
-            variables={"finalListTotalHouseholdsMin": 1},
-        )
-
-    def test_simple_target_query(self):
-        self.snapshot_graphql_request(
-            request_string=TestTargetPopulationQuery.TARGET_POPULATION_QUERY,
+            request_string=CandidateListTargetingCriteriaQueryTestCase.QUERY,
             variables={
-                "id": self.id_to_base64(
-                    self.target_population_family_size_1_approved.id,
-                    "TargetPopulation",
+                "targetPopulation": self.id_to_base64(
+                    self.target_population_family_size_2.id, "TargetPopulation"
                 )
             },
         )
 
-    def test_simple_target_query_2(self):
+    def test_candidate_households_list_by_targeting_criteria_residence_status(
+        self,
+    ):
         self.snapshot_graphql_request(
-            request_string=TestTargetPopulationQuery.TARGET_POPULATION_QUERY,
+            request_string=CandidateListTargetingCriteriaQueryTestCase.QUERY,
             variables={
-                "id": self.id_to_base64(
+                "targetPopulation": self.id_to_base64(
                     self.target_population_residence_status.id,
                     "TargetPopulation",
                 )
             },
         )
 
+    def test_candidate_households_list_by_targeting_criteria_approved(self):
+        self.snapshot_graphql_request(
+            request_string=CandidateListTargetingCriteriaQueryTestCase.QUERY,
+            variables={
+                "targetPopulation": self.id_to_base64(
+                    self.target_population_family_size_1_approved.id,
+                    "TargetPopulation",
+                )
+            },
+        )
 
+    def test_candidate_households_list_by_targeting_criteria_first_10(self):
+        self.snapshot_graphql_request(
+            request_string=CandidateListTargetingCriteriaQueryTestCase.QUERY_FIRST_10,
+            variables={
+                "targetPopulation": self.id_to_base64(
+                    self.target_population_family_size_2.id, "TargetPopulation"
+                )
+            },
+        )
