@@ -1,3 +1,5 @@
+from pprint import pprint
+
 import xlrd
 from django.contrib.admin import AdminSite
 from django.core.exceptions import ValidationError
@@ -24,7 +26,7 @@ class TestFlexibleHelperMethods(TestCase):
         args = ("attribute", "group", "choice", "Not Correct Arg")
         expected_values = (
             [
-                "flexibleattributechoice",
+                "choices",
                 "is_removed",
                 "id",
                 "created_at",
@@ -70,7 +72,6 @@ class TestFlexibleHelperMethods(TestCase):
             ],
             None,
         )
-
         for arg, expected_value in zip(args, expected_values):
             returned_value = self.admin._get_model_fields(arg)
             self.assertEqual(returned_value, expected_value)
