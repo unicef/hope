@@ -1,7 +1,5 @@
-import operator
 from functools import reduce
 
-from core.models import FlexibleAttribute
 from core.utils import age_to_dob_query
 from household.models import Household
 
