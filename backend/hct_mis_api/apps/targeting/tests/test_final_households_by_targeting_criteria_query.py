@@ -1,9 +1,6 @@
-import datetime as dt
-
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
 from household.fixtures import HouseholdFactory, IndividualFactory
-from targeting.fixtures import TargetPopulationFactory
 from targeting.models import (
     TargetPopulation,
     TargetingCriteria,
@@ -151,7 +148,9 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
             },
         )
 
-    def test_final_households_list_by_targeting_criteria_residence_status(self,):
+    def test_final_households_list_by_targeting_criteria_residence_status(
+        self,
+    ):
         self.snapshot_graphql_request(
             request_string=FinalListTargetingCriteriaQueryTestCase.QUERY,
             variables={
