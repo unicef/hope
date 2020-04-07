@@ -8,6 +8,7 @@ from core import utils
 from core.permissions import is_authenticated
 from core.utils import decode_id_string
 from household.models import Household
+from program.models import Program
 from targeting.models import (
     TargetPopulation,
     HouseholdSelection,
@@ -58,7 +59,7 @@ class ValidatedMutation(graphene.Mutation):
         id = kwargs.get("id")
         if id is None:
             return None
-        object = cls.model_class.objects.get(id=decode_id_string(id))
+        object = get_object_or_404(cls.model_class, id=decode_id_string(id))
         for validator in cls.object_validators:
             validator.validate(object)
         return object
@@ -122,12 +123,17 @@ class UpdateTargetPopulationMutation(graphene.Mutation):
         input = kwargs.get("input")
         id = input.get("id")
         target_population = cls.get_object(id)
-
+        name = input.get("name")
+        if target_population.status == "APPROVED" and name:
+            raise ValidationError(
+                "Name can't be changed when Target Population is in APPROVED status"
+            )
         if target_population.status == "FINALIZED":
             raise ValidationError(
                 "Finalized Target Population can't be changed"
             )
-        target_population.name = input.get("name")
+        if name:
+            target_population.name = name
         targeting_criteria_input = input.get("targeting_criteria")
         TargetingCriteriaInputValidator.validate(targeting_criteria_input)
         if targeting_criteria_input:
@@ -173,16 +179,21 @@ class ApproveTargetPopulationMutation(ValidatedMutation):
 
     class Arguments:
         id = graphene.ID(required=True)
+        program_id = graphene.ID(required=True)
 
     @classmethod
     @transaction.atomic
     def validated_mutate(cls, root, info, **kwargs):
+        program = get_object_or_404(
+            Program, pk=decode_id_string(kwargs.get("program_id"))
+        )
         target_population = kwargs.get("model_object")
         target_population.status = "APPROVED"
         households = Household.objects.filter(
             target_population.candidate_list_targeting_criteria.get_query()
         )
         target_population.households.set(households)
+        target_population.program = program
         target_population.save()
         return cls(target_population=target_population)
 

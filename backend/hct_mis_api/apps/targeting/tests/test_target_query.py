@@ -43,6 +43,10 @@ class TestTargetPopulationQuery(APITestCase):
                   fieldName
                   isFlexField
                   arguments
+                  fieldAttribute{
+                    labelEn
+                    type
+                  }
                 }
               }
             }

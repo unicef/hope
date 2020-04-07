@@ -6,11 +6,14 @@ from graphene_django import DjangoObjectType, DjangoConnectionField
 from graphene_django.filter import DjangoFilterConnectionField
 
 import targeting.models as target_models
+from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES_DICTIONARY
 from core.filters import IntegerFilter
-from core.schema import ExtendedConnection
+from core.models import FlexibleAttribute
+from core.schema import ExtendedConnection, FieldAttributeNode
 from core.utils import decode_id_string
 from household.models import Household
 from household.schema import HouseholdNode
+
 # TODO(codecakes): see if later the format can be kept consistent in FilterAttrType model.
 # by using FlexFieldNode and CoreFieldNode to return target filter rules.
 from targeting.validators import TargetingCriteriaInputValidator
@@ -120,9 +123,16 @@ class Arg(Scalar):
 
 class TargetingCriteriaRuleFilterNode(DjangoObjectType):
     arguments = graphene.List(Arg)
+    field_attribute = graphene.Field(FieldAttributeNode)
 
     def resolve_arguments(self, info):
         return self.arguments
+
+    def resolve_field_attribute(parrent, info):
+        if parrent.is_flex_field:
+            return FlexibleAttribute.objects.get(name=parrent.field_name)
+        else:
+            return CORE_FIELDS_ATTRIBUTES_DICTIONARY.get(parrent.field_name)
 
     class Meta:
         model = target_models.TargetingCriteriaRuleFilter
