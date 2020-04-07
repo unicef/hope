@@ -34,11 +34,14 @@ const resultsData = {
 };
 
 interface EditTargetPopulationProps {
-    targetPopulation?
-    cancelEdit?
+  targetPopulation?;
+  cancelEdit?;
 }
 
-export function EditTargetPopulation({ targetPopulation, cancelEdit }: EditTargetPopulationProps) {
+export function EditTargetPopulation({
+  targetPopulation,
+  cancelEdit,
+}: EditTargetPopulationProps) {
   const initialValues = {
     name: targetPopulation.name || '',
     criterias: targetPopulation.rules || [],
@@ -67,7 +70,11 @@ export function EditTargetPopulation({ targetPopulation, cancelEdit }: EditTarge
             <>
               {values.name && (
                 <ButtonContainer>
-                  <Button variant='outlined' color='primary' onClick={cancelEdit}>
+                  <Button
+                    variant='outlined'
+                    color='primary'
+                    onClick={cancelEdit}
+                  >
                     Cancel
                   </Button>
                 </ButtonContainer>
