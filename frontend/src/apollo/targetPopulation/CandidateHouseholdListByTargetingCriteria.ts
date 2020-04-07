@@ -1,8 +1,8 @@
 import { gql } from 'apollo-boost';
 
 export const CandidateHouseholdsListByTargetingCriteria = gql`
-  query candidateHouseholdsListByTargetingCriteria($targetPopulation: ID!) {
-    candidateHouseholdsListByTargetingCriteria(targetPopulation: $targetPopulation) {
+  query candidateHouseholdsListByTargetingCriteria($targetPopulation: ID! $first: Int) {
+    candidateHouseholdsListByTargetingCriteria(targetPopulation: $targetPopulation first: $first) {
       edges {
         node {
           id
@@ -17,6 +17,8 @@ export const CandidateHouseholdsListByTargetingCriteria = gql`
           updatedAt
         }
       }
+      totalCount
+      edgeCount
     }
   }
 `;
