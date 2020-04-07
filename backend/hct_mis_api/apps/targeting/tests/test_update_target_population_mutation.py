@@ -225,9 +225,6 @@ class TestUpdateTargetPopulationMutation(APITestCase):
         variables["updateTargetPopulationInput"]["id"] = self.id_to_base64(
             self.approved_target_population.id, "TargetPopulation"
         )
-        variables["updateTargetPopulationInput"][
-            "name"
-        ] = "approved_target_population updated"
 
         self.snapshot_graphql_request(
             request_string=TestUpdateTargetPopulationMutation.MUTATION_QUERY,
