@@ -181,7 +181,7 @@ class ApproveTargetPopulationMutation(ValidatedMutation):
         target_population.status = "APPROVED"
         households = Household.objects.filter(
             target_population.candidate_list_targeting_criteria.get_query()
-        ).all()
+        )
         target_population.households.set(households)
         target_population.save()
         return cls(target_population=target_population)
