@@ -3137,6 +3137,10 @@ export type TargetPopulationQuery = (
           & { fieldAttribute: Maybe<(
             { __typename?: 'FieldAttributeNode' }
             & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
+            & { choices: Maybe<Array<Maybe<(
+              { __typename?: 'CoreFieldChoiceObject' }
+              & Pick<CoreFieldChoiceObject, 'value' | 'labelEn'>
+            )>>> }
           )> }
         )>>> }
       )>>> }
@@ -3160,6 +3164,10 @@ export type TargetPopulationQuery = (
           & { fieldAttribute: Maybe<(
             { __typename?: 'FieldAttributeNode' }
             & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
+            & { choices: Maybe<Array<Maybe<(
+              { __typename?: 'CoreFieldChoiceObject' }
+              & Pick<CoreFieldChoiceObject, 'value' | 'labelEn'>
+            )>>> }
           )> }
         )>>> }
       )>>> }
@@ -5189,6 +5197,10 @@ export const TargetPopulationDocument = gql`
             name
             labelEn
             type
+            choices {
+              value
+              labelEn
+            }
           }
         }
       }
@@ -5215,6 +5227,10 @@ export const TargetPopulationDocument = gql`
             name
             labelEn
             type
+            choices {
+              value
+              labelEn
+            }
           }
         }
       }

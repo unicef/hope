@@ -81,6 +81,14 @@ const DividerLabel = styled.div`
   background-color: #fff;
 `;
 
+const RangeWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
+`;
+const InlineField = styled.div`
+width: 48%;
+`;
+
 const validationSchema = Yup.object().shape({
   filters: Yup.array().of(
     Yup.object().shape({
@@ -115,17 +123,24 @@ export function TargetCriteriaForm({
     const subField = data.allFieldsAttributes.find(
       (attributes) => attributes.name === e.target.value,
     );
+    //eslint-disable-next-line
+    // debugger
     const values = {
       isFlexField: subField.isFlexField,
+      labelEn: subField.labelEn,
+      fieldAttribute: {
+        labelEn: subField.labelEn,
+        type: subField.type,
+        choices: null,
+      },
       value: null,
-      choices: null,
     };
     switch (subField.type) {
       case 'INTEGER':
         values.value = { from: '', to: '' };
         break;
       case 'SELECT_ONE':
-        values.choices = subField.choices;
+        values.fieldAttribute.choices = subField.choices;
         break;
       default:
         values.value = null;
@@ -141,32 +156,38 @@ export function TargetCriteriaForm({
   if (loading) return null;
 
   const subField = (field, index) => {
-    switch (field.type) {
+    switch (field.fieldAttribute.type) {
       case 'INTEGER':
         return (
-          <>
+          <RangeWrapper>
+            <InlineField>
             <Field
               name={`filters[${index}].value.from`}
-              label={`${field.fieldName} from`}
+              label={`${field.fieldAttribute.labelEn} from`}
               type='number'
               variant='filled'
+              fullWidth
               component={FormikTextField}
             />
+            </InlineField>
+            <InlineField>
             <Field
               name={`filters[${index}].value.to`}
-              label={`${field.fieldName} to`}
+              label={`${field.fieldAttribute.labelEn} to`}
               type='number'
               variant='filled'
+              fullWidth
               component={FormikTextField}
             />
-          </>
+            </InlineField>
+          </RangeWrapper>
         );
       case 'SELECT_ONE':
         return (
           <Field
             name={`filters[${index}].value`}
-            label={`${field.fieldName}`}
-            choices={field.choices}
+            label={`${field.fieldAttribute.labelEn}`}
+            choices={field.fieldAttribute.choices}
             index={index}
             component={FormikSelectField}
           />
