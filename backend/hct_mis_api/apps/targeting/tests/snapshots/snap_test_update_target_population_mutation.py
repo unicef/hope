@@ -147,7 +147,7 @@ snapshots['TestUpdateTargetPopulationMutation::test_update_approved_mutation 1']
                 },
                 'finalListTotalHouseholds': 2,
                 'finalListTotalIndividuals': 6,
-                'name': 'approved_target_population updated',
+                'name': 'approved_target_population',
                 'status': 'APPROVED'
             }
         }
