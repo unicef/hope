@@ -125,8 +125,6 @@ export function TargetCriteriaForm({
     const subField = data.allFieldsAttributes.find(
       (attributes) => attributes.name === e.target.value,
     );
-    //eslint-disable-next-line
-    // debugger
     const values = {
       isFlexField: subField.isFlexField,
       labelEn: subField.labelEn,
@@ -142,6 +140,10 @@ export function TargetCriteriaForm({
         values.value = { from: '', to: '' };
         break;
       case 'SELECT_ONE':
+        values.fieldAttribute.choices = subField.choices;
+        break;
+      case 'SELECT_MANY':
+        values.value = [];
         values.fieldAttribute.choices = subField.choices;
         break;
       default:
@@ -195,8 +197,29 @@ export function TargetCriteriaForm({
             component={FormikSelectField}
           />
         );
+      case 'SELECT_MANY':
+        return (
+          <Field
+            name={`filters[${index}].value`}
+            label={`${field.fieldAttribute.labelEn}`}
+            choices={field.fieldAttribute.choices}
+            index={index}
+            multiple
+            component={FormikSelectField}
+          />
+        );
+      case 'STRING':
+        return (
+          <Field
+            name={`filters[${index}].value`}
+            label={`${field.fieldAttribute.labelEn}`}
+            fullWidth
+            variant='filled'
+            component={FormikTextField}
+          />
+        );
       default:
-        return <p>Dupa</p>;
+        return <p>{field.fieldAttribute.type}</p>;
     }
   };
   return (
@@ -255,7 +278,9 @@ export function TargetCriteriaForm({
                                 component={FormikSelectField}
                               />
                               <IconButton>
-                                <Delete onClick={() => arrayHelpers.remove(index)}/>
+                                <Delete
+                                  onClick={() => arrayHelpers.remove(index)}
+                                />
                               </IconButton>
                             </FlexWrapper>
                             {each.fieldName && subField(each, index)}
