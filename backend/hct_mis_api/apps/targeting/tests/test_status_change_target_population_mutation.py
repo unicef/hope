@@ -1,6 +1,10 @@
+from django.core.management import call_command
+
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
+from core.models import BusinessArea
 from household.fixtures import HouseholdFactory
+from program.fixtures import ProgramFactory
 from targeting.models import (
     TargetingCriteria,
     TargetingCriteriaRule,
@@ -11,8 +15,8 @@ from targeting.models import (
 
 class TestApproveTargetPopulationMutation(APITestCase):
     APPROVE_TARGET_MUTATION = """
-            mutation ApproveTargetPopulation($id: ID!) {
-              approveTargetPopulation(id: $id) {
+            mutation ApproveTargetPopulation($id: ID!, $programId: ID!) {
+              approveTargetPopulation(id: $id, programId: $programId) {
                 targetPopulation {
                   status
                   households {
@@ -31,6 +35,11 @@ class TestApproveTargetPopulationMutation(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
+        call_command("loadbusinessareas")
+        cls.program = ProgramFactory.create(
+            status="ACTIVE",
+            business_area=BusinessArea.objects.order_by("?").first(),
+        )
         cls.user = UserFactory.create()
         cls.households = []
         cls.household_family_size_1 = HouseholdFactory(
@@ -111,7 +120,8 @@ class TestApproveTargetPopulationMutation(APITestCase):
             variables={
                 "id": self.id_to_base64(
                     self.target_population_draft.id, "TargetPopulation"
-                )
+                ),
+                "programId": self.id_to_base64(self.program.id, "Program"),
             },
         )
 
@@ -123,7 +133,8 @@ class TestApproveTargetPopulationMutation(APITestCase):
                 "id": self.id_to_base64(
                     self.target_population_approved_with_final_rule.id,
                     "TargetPopulation",
-                )
+                ),
+                "programId": self.id_to_base64(self.program.id, "Program"),
             },
         )
 
