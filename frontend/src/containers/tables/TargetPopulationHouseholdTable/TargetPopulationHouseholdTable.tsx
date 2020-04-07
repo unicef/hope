@@ -2,7 +2,6 @@ import React, { ReactElement } from 'react';
 import styled from 'styled-components';
 import {
   TargetPopulationNode,
-  useCandidateHouseholdsListByTargetingCriteriaQuery,
   HouseholdNode,
 } from '../../../__generated__/graphql';
 import { UniversalTable } from '../UniversalTable';
@@ -19,9 +18,13 @@ interface TargetPopulationHouseholdProps {
 
 export const TargetPopulationHouseholdTable = ({
   id,
-}: TargetPopulationHouseholdProps): ReactElement => {
+  query,
+  queryObjectName,
+  variables = {}
+}): ReactElement => {
   const initialVariables = {
     targetPopulation: id,
+    ...variables
   };
   return (
     <TableWrapper>
@@ -29,8 +32,8 @@ export const TargetPopulationHouseholdTable = ({
         title='Households'
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}
-        query={useCandidateHouseholdsListByTargetingCriteriaQuery}
-        queriedObjectName='candidateHouseholdsListByTargetingCriteria'
+        query={query}
+        queriedObjectName={queryObjectName}
         initialVariables={initialVariables}
         renderRow={(row) => (
           <TargetPopulationHouseholdTableRow household={row} />
