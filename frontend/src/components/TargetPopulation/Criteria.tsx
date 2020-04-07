@@ -42,14 +42,14 @@ const CriteriaField = ({field}) => {
     case 'NOT_EQUALS':
       fieldElement = (
         <p>
-          {field.fieldName}: <span>{field.arguments[0]}</span>
+          {field.fieldAttribute.labelEn || field.fieldName}: <span>{field.arguments[0]}</span>
         </p>
       )
       break;
     case 'RANGE':
       fieldElement = (
         <p>
-          {field.fieldName}:{' '}
+          {field.fieldAttribute.labelEn || field.fieldName}:{' '}
           <span>
             {field.arguments[0]} - {field.arguments[1]}
           </span>
@@ -59,14 +59,28 @@ const CriteriaField = ({field}) => {
     case 'EQUALS':
       fieldElement = (
         <p>
-          {field.fieldName}: <span>{field.arguments[0]}</span>
+          {field.fieldAttribute.labelEn || field.fieldName}: <span>{field.arguments[0]}</span>
+        </p>
+      )
+      break;
+    case 'LESS_THAN':
+      fieldElement = (
+        <p>
+          {field.fieldAttribute.labelEn || field.fieldName}: {'>'} <span>{field.arguments[0]}</span>
+        </p>
+      )
+      break;
+    case 'GREATER_THAN':
+      fieldElement = (
+        <p>
+          {field.fieldAttribute.labelEn || field.fieldName}: {'<'} <span>{field.arguments[0]}</span>
         </p>
       )
       break;
     default:
       fieldElement = (
         <p>
-          {field.fieldName}: <span>{field.arguments[0]}</span>
+          {field.fieldAttribute.labelEn}: <span>{field.arguments[0]}</span>
         </p>
       )
       break;
