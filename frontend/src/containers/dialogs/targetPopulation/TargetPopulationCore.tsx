@@ -5,6 +5,7 @@ import { TargetPopulationDetails } from '../../../components/TargetPopulation/Ta
 import { TargetingCriteria } from '../../../components/TargetPopulation/TargetingCriteria';
 import { Results } from '../../../components/TargetPopulation/Results';
 import { TargetPopulationHouseholdTable } from '../../tables/TargetPopulationHouseholdTable';
+import { useCandidateHouseholdsListByTargetingCriteriaQuery } from '../../../__generated__/graphql';
 
 const PaperContainer = styled(Paper)`
   display: flex;
@@ -13,10 +14,6 @@ const PaperContainer = styled(Paper)`
   margin: ${({ theme }) => theme.spacing(5)}px;
   flex-direction: column;
   border-bottom: 1px solid rgba(224, 224, 224, 1);
-`;
-
-const Title = styled.div`
-  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
 const Label = styled.p`
@@ -45,15 +42,17 @@ export function TargetPopulationCore({ targetPopulation, id }) {
       <Results resultsData={resultsData} />
 
       {rules.length ? (
-        <TargetPopulationHouseholdTable id={id} />
+        <TargetPopulationHouseholdTable
+          id={id}
+          query={useCandidateHouseholdsListByTargetingCriteriaQuery}
+          queryObjectName='candidateHouseholdsListByTargetingCriteria'
+        />
       ) : (
         <PaperContainer>
-          <Title>
-            <Typography variant='h6'>
-              Target Population Entries (Households)
-            </Typography>
-            <Label>Add targeting criteria to see results.</Label>
-          </Title>
+          <Typography variant='h6'>
+            Target Population Entries (Households)
+          </Typography>
+          <Label>Add targeting criteria to see results.</Label>
         </PaperContainer>
       )}
     </>
