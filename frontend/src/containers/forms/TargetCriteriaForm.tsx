@@ -13,7 +13,6 @@ import { Field, Formik, FieldArray } from 'formik';
 import { useImportedIndividualFieldsQuery } from '../../__generated__/graphql';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { AddCircleOutline } from '@material-ui/icons';
-import { SubField } from '../../components/TargetPopulation/SubField';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 
 const DialogTitleWrapper = styled.div`
