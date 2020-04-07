@@ -34,17 +34,19 @@ const resultsData = {
 };
 
 interface EditTargetPopulationProps {
-  targetPopulation?;
+  targetPopulationCriterias?;
+  targetPopulationName?;
   cancelEdit?;
 }
 
 export function EditTargetPopulation({
-  targetPopulation,
+  targetPopulationName,
+  targetPopulationCriterias,
   cancelEdit,
 }: EditTargetPopulationProps) {
   const initialValues = {
-    name: targetPopulation.name || '',
-    criterias: targetPopulation.rules || [],
+    name: targetPopulationName || '',
+    criterias: targetPopulationCriterias.rules || [],
   };
   return (
     <Formik
