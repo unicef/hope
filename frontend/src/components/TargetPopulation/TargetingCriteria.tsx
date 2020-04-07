@@ -81,6 +81,7 @@ export function TargetingCriteria({
 }: TargetingCriteriaProps) {
   const { t } = useTranslation();
   const [isOpen, setOpen] = useState(false);
+  const [criteriaIndex, setIndex] = useState(null);
   const [criteriaObject, setCriteria] = useState({});
   const openModal = (criteria) => {
     setCriteria(criteria);
@@ -88,15 +89,22 @@ export function TargetingCriteria({
   };
   const closeModal = () => {
     setCriteria({});
+    setIndex(null);
     setOpen(false);
+  };
+  const editCriteria = (criteria, index) => {
+    setIndex(index);
+    openModal(criteria);
   };
 
   const addCriteria = (values) => {
-    //eslint-disable-next-line
-    console.log('render', values);
-    //rework to use arguments
-    helpers.push({ filters: [...values.filters] });
-    closeModal();
+    //rework to use arguments and add index for update
+    if (criteriaIndex !== null) {
+      helpers.replace(criteriaIndex, { filters: [...values.filters] });
+    } else {
+      helpers.push({ filters: [...values.filters] });
+    }
+    return closeModal();
   };
   return (
     <div>
@@ -134,7 +142,7 @@ export function TargetingCriteria({
                     key={criteria.id || index}
                     isEdit={isEdit}
                     rules={criteria.filters}
-                    editFunction={() => openModal(criteria)}
+                    editFunction={() => editCriteria(criteria, index)}
                     removeFunction={() => helpers.remove(index)}
                   />
 
