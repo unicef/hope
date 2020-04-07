@@ -21,49 +21,57 @@ export const TargetPopulation = gql`
         }
       }
       candidateListTargetingCriteria {
-      targetPopulationCandidate {
-        createdBy {
-          firstName
-          lastName
+        targetPopulationCandidate {
+          createdBy {
+            firstName
+            lastName
+          }
+          program {
+            id
+            name
+          }
         }
-        program {
+        rules {
           id
-          name
+          filters {
+            fieldName
+            isFlexField
+            arguments
+            comparisionMethod
+            fieldAttribute {
+              name
+              labelEn
+              type
+            }
+          }
         }
       }
-      rules {
-        id
-        filters {
+      finalListTargetingCriteria {
+        targetPopulationFinal {
+          createdBy {
+            firstName
+            lastName
+          }
+          program {
+            id
+            name
+          }
+        }
+        rules {
           id
-          comparisionMethod
-          isFlexField
-          fieldName
-          arguments
+          filters {
+            fieldName
+            isFlexField
+            arguments
+            comparisionMethod
+            fieldAttribute {
+              name
+              labelEn
+              type
+            }
+          }
         }
       }
-    }
-    finalListTargetingCriteria {
-      targetPopulationFinal {
-        createdBy {
-          firstName
-          lastName
-        }
-        program {
-          id
-          name
-        }
-      }
-      rules {
-        id
-        filters {
-          id
-          comparisionMethod
-          isFlexField
-          fieldName
-          arguments
-        }
-      }
-    }
     }
   }
 `;

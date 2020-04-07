@@ -26,6 +26,7 @@ export const TargetPopulationTable = ({
     name: filter.name,
     numIndividualsMin: filter.numIndividuals.min,
     numIndividualsMax: filter.numIndividuals.max,
+    status: filter.status,
   };
   return (
     <TableWrapper>
