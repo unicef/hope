@@ -15,6 +15,8 @@ import { useImportedIndividualFieldsQuery } from '../../__generated__/graphql';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { AddCircleOutline, Delete } from '@material-ui/icons';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
+import { SubField } from '../../components/TargetPopulation/SubField';
+import { formatCriteriaFilters } from '../../utils/utils';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -86,9 +88,6 @@ const FlexWrapper = styled.div`
   display: flex;
   justify-content: space-between;
 `;
-const InlineField = styled.div`
-  width: 48%;
-`;
 
 const validationSchema = Yup.object().shape({
   filters: Yup.array().of(
@@ -122,29 +121,28 @@ export function TargetCriteriaForm({
 
   //create a hook?
   const chooseFieldType = (e, arrayHelpers, index) => {
-    const subField = data.allFieldsAttributes.find(
+    const subFieldData = data.allFieldsAttributes.find(
       (attributes) => attributes.name === e.target.value,
     );
     const values = {
-      isFlexField: subField.isFlexField,
-      labelEn: subField.labelEn,
+      isFlexField: subFieldData.isFlexField,
       fieldAttribute: {
-        labelEn: subField.labelEn,
-        type: subField.type,
+        labelEn: subFieldData.labelEn,
+        type: subFieldData.type,
         choices: null,
       },
       value: null,
     };
-    switch (subField.type) {
+    switch (subFieldData.type) {
       case 'INTEGER':
         values.value = { from: '', to: '' };
         break;
       case 'SELECT_ONE':
-        values.fieldAttribute.choices = subField.choices;
+        values.fieldAttribute.choices = subFieldData.choices;
         break;
       case 'SELECT_MANY':
         values.value = [];
-        values.fieldAttribute.choices = subField.choices;
+        values.fieldAttribute.choices = subFieldData.choices;
         break;
       default:
         values.value = null;
@@ -153,84 +151,19 @@ export function TargetCriteriaForm({
     arrayHelpers.replace(index, {
       ...values,
       fieldName: e.target.value,
-      type: subField.type,
+      type: subFieldData.type,
     });
   };
 
   if (loading) return null;
 
-  //move to another component
-  const subField = (field, index) => {
-    switch (field.fieldAttribute.type) {
-      case 'INTEGER':
-        return (
-          <FlexWrapper>
-            <InlineField>
-              <Field
-                name={`filters[${index}].value.from`}
-                label={`${field.fieldAttribute.labelEn} from`}
-                type='number'
-                variant='filled'
-                fullWidth
-                component={FormikTextField}
-              />
-            </InlineField>
-            <InlineField>
-              <Field
-                name={`filters[${index}].value.to`}
-                label={`${field.fieldAttribute.labelEn} to`}
-                type='number'
-                variant='filled'
-                fullWidth
-                component={FormikTextField}
-              />
-            </InlineField>
-          </FlexWrapper>
-        );
-      case 'SELECT_ONE':
-        return (
-          <Field
-            name={`filters[${index}].value`}
-            label={`${field.fieldAttribute.labelEn}`}
-            choices={field.fieldAttribute.choices}
-            index={index}
-            component={FormikSelectField}
-          />
-        );
-      case 'SELECT_MANY':
-        return (
-          <Field
-            name={`filters[${index}].value`}
-            label={`${field.fieldAttribute.labelEn}`}
-            choices={field.fieldAttribute.choices}
-            index={index}
-            multiple
-            component={FormikSelectField}
-          />
-        );
-      case 'STRING':
-        return (
-          <Field
-            name={`filters[${index}].value`}
-            label={`${field.fieldAttribute.labelEn}`}
-            fullWidth
-            variant='filled'
-            component={FormikTextField}
-          />
-        );
-      default:
-        return <p>{field.fieldAttribute.type}</p>;
-    }
-  };
+  
   return (
     <DialogContainer>
       <Formik
         initialValues={initialValue}
         onSubmit={(values, bag) => {
-          const dataToSend = values.filters.map((each) => ({
-            ...each,
-            arguments: [each.value],
-          }));
+          const dataToSend = formatCriteriaFilters(values);
           addCriteria({ filters: dataToSend });
           return bag.resetForm();
         }}
@@ -283,7 +216,7 @@ export function TargetCriteriaForm({
                                 />
                               </IconButton>
                             </FlexWrapper>
-                            {each.fieldName && subField(each, index)}
+                            {each.fieldName && SubField(each, index)}
                             {(values.filters.length === 1 && index === 0) ||
                             index === values.filters.length - 1 ? null : (
                               <Divider>

@@ -148,7 +148,9 @@ export function columnToOrderBy(
 ): string {
   if (column.startsWith('-')) {
     const clearColumn = column.replace('-', '');
-    return camelToUnderscore(`${orderDirection === 'asc' ? '-' : ''}${clearColumn}`);
+    return camelToUnderscore(
+      `${orderDirection === 'asc' ? '-' : ''}${clearColumn}`,
+    );
   }
   return camelToUnderscore(`${orderDirection === 'desc' ? '-' : ''}${column}`);
 }
@@ -208,4 +210,44 @@ export function clearValue(value) {
 
 export function getAgeFromDob(date: string): number {
   return moment().diff(moment(date), 'years');
+}
+
+export function formatCriteriaFilters({ filters }) {
+  return filters.map((each) => {
+    let comparisionMethod;
+    let values;
+    switch (each.type) {
+      case 'SELECT_ONE':
+        comparisionMethod = 'EQUALS';
+        values = [each.value];
+        break;
+      case 'STRING':
+        comparisionMethod = 'CONTAINS';
+        values = [each.value];
+        break;
+      case 'INTEGER':
+        if (each.value.from && each.value.to) {
+          comparisionMethod = 'RANGE';
+          values = [each.value.from, each.value.to];
+        } else if (each.value.from && !each.value.to) {
+          comparisionMethod = 'GREATER_THAN';
+          values = [each.value.from];
+        } else {
+          comparisionMethod = 'LESS_THAN';
+          values = [each.value.to];
+        }
+        break;
+      default:
+        comparisionMethod = 'CONTAINS';
+    }
+    return {
+      comparisionMethod,
+      arguments: values,
+      fieldName: each.fieldName,
+      isFlexField: each.isFlexField,
+      fieldAttribute: {
+        ...each.fieldAttribute
+      },
+    };
+  });
 }
