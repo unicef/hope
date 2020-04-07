@@ -9,6 +9,7 @@ import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { Results } from '../../components/TargetPopulation/Results';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
+import { TargetPopulationHouseholdTable } from '../tables/TargetPopulationHouseholdTable';
 
 const PaperContainer = styled(Paper)`
   display: flex;
@@ -82,7 +83,12 @@ export function CreateTargetPopulation() {
           />
           <Results />
           {values.criterias.length ? (
-            <p>test</p>
+            <p>Table</p>
+            // <TargetPopulationHouseholdTable
+            //   id={id}
+            //   query={useCandidateHouseholdsListByTargetingCriteriaQuery}
+            //   queryObjectName='candidateHouseholdsListByTargetingCriteria'
+            // />
           ) : (
             <PaperContainer>
               <Typography variant='h6'>
