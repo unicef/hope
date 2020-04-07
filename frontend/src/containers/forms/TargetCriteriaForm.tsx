@@ -8,11 +8,12 @@ import {
   Typography,
   Button,
   DialogActions,
+  IconButton,
 } from '@material-ui/core';
 import { Field, Formik, FieldArray } from 'formik';
 import { useImportedIndividualFieldsQuery } from '../../__generated__/graphql';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
-import { AddCircleOutline } from '@material-ui/icons';
+import { AddCircleOutline, Delete } from '@material-ui/icons';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 
 const DialogTitleWrapper = styled.div`
@@ -81,12 +82,12 @@ const DividerLabel = styled.div`
   background-color: #fff;
 `;
 
-const RangeWrapper = styled.div`
+const FlexWrapper = styled.div`
   display: flex;
   justify-content: space-between;
 `;
 const InlineField = styled.div`
-width: 48%;
+  width: 48%;
 `;
 
 const validationSchema = Yup.object().shape({
@@ -119,6 +120,7 @@ export function TargetCriteriaForm({
     filters: criteria.filters || [{ fieldName: '' }],
   };
 
+  //create a hook?
   const chooseFieldType = (e, arrayHelpers, index) => {
     const subField = data.allFieldsAttributes.find(
       (attributes) => attributes.name === e.target.value,
@@ -155,32 +157,33 @@ export function TargetCriteriaForm({
 
   if (loading) return null;
 
+  //move to another component
   const subField = (field, index) => {
     switch (field.fieldAttribute.type) {
       case 'INTEGER':
         return (
-          <RangeWrapper>
+          <FlexWrapper>
             <InlineField>
-            <Field
-              name={`filters[${index}].value.from`}
-              label={`${field.fieldAttribute.labelEn} from`}
-              type='number'
-              variant='filled'
-              fullWidth
-              component={FormikTextField}
-            />
+              <Field
+                name={`filters[${index}].value.from`}
+                label={`${field.fieldAttribute.labelEn} from`}
+                type='number'
+                variant='filled'
+                fullWidth
+                component={FormikTextField}
+              />
             </InlineField>
             <InlineField>
-            <Field
-              name={`filters[${index}].value.to`}
-              label={`${field.fieldAttribute.labelEn} to`}
-              type='number'
-              variant='filled'
-              fullWidth
-              component={FormikTextField}
-            />
+              <Field
+                name={`filters[${index}].value.to`}
+                label={`${field.fieldAttribute.labelEn} to`}
+                type='number'
+                variant='filled'
+                fullWidth
+                component={FormikTextField}
+              />
             </InlineField>
-          </RangeWrapper>
+          </FlexWrapper>
         );
       case 'SELECT_ONE':
         return (
@@ -237,19 +240,24 @@ export function TargetCriteriaForm({
                         return (
                           //eslint-disable-next-line
                           <div key={index}>
-                            <Field
-                              name={`filters[${index}].fieldName`}
-                              label='Choose field type'
-                              fullWidth
-                              required
-                              choices={data.allFieldsAttributes}
-                              index={index}
-                              value={each.fieldName || null}
-                              onChange={(e) =>
-                                chooseFieldType(e, arrayHelpers, index)
-                              }
-                              component={FormikSelectField}
-                            />
+                            <FlexWrapper>
+                              <Field
+                                name={`filters[${index}].fieldName`}
+                                label='Choose field type'
+                                fullWidth
+                                required
+                                choices={data.allFieldsAttributes}
+                                index={index}
+                                value={each.fieldName || null}
+                                onChange={(e) =>
+                                  chooseFieldType(e, arrayHelpers, index)
+                                }
+                                component={FormikSelectField}
+                              />
+                              <IconButton>
+                                <Delete onClick={() => arrayHelpers.remove(index)}/>
+                              </IconButton>
+                            </FlexWrapper>
                             {each.fieldName && subField(each, index)}
                             {(values.filters.length === 1 && index === 0) ||
                             index === values.filters.length - 1 ? null : (
