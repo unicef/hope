@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { TextField, InputAdornment } from '@material-ui/core';
+import { TextField, InputAdornment, Select, MenuItem } from '@material-ui/core';
 import { Person, Search, Group } from '@material-ui/icons';
 
 const Container = styled.div`
@@ -91,9 +91,9 @@ export function TargetPopulationFilters({
       />
       <TextContainer
         select
-        placeholder='Created by'
+        placeholder='Status'
         variant='filled'
-        onChange={(e) => console.log(e.target.value)}
+        onChange={(e) => handleFilterChange(e, 'status')}
         InputProps={{
           startAdornment: (
             <InputAdornment position='start'>
@@ -102,7 +102,9 @@ export function TargetPopulationFilters({
           ),
         }}
       >
-        <option>test</option>
+        <MenuItem value='DRAFT'>Draft</MenuItem>
+        <MenuItem value='APPROVED'>Approved</MenuItem>
+        <MenuItem value='FINALIZED'>Finalized</MenuItem>
       </TextContainer>
       <TextContainer
         id='minFilter'
