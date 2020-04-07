@@ -102,6 +102,7 @@ export function TargetPopulationFilters({
           ),
         }}
       >
+        <MenuItem value=''>None</MenuItem>
         <MenuItem value='DRAFT'>Draft</MenuItem>
         <MenuItem value='APPROVED'>Approved</MenuItem>
         <MenuItem value='FINALIZED'>Finalized</MenuItem>
