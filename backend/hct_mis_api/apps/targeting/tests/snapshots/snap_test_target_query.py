@@ -77,6 +77,10 @@ snapshots['TestTargetPopulationQuery::test_simple_target_query 1'] = {
                                     1
                                 ],
                                 'comparisionMethod': 'EQUALS',
+                                'fieldAttribute': {
+                                    'labelEn': 'Family Size',
+                                    'type': 'INTEGER'
+                                },
                                 'fieldName': 'family_size',
                                 'isFlexField': False
                             }
@@ -107,6 +111,10 @@ snapshots['TestTargetPopulationQuery::test_simple_target_query_2 1'] = {
                                     'REFUGEE'
                                 ],
                                 'comparisionMethod': 'EQUALS',
+                                'fieldAttribute': {
+                                    'labelEn': 'Residence Status',
+                                    'type': 'SELECT_ONE'
+                                },
                                 'fieldName': 'residence_status',
                                 'isFlexField': False
                             }
