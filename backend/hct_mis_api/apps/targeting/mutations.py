@@ -126,7 +126,7 @@ class UpdateTargetPopulationMutation(graphene.Mutation):
         name = input.get("name")
         if target_population.status == "APPROVED" and name:
             raise ValidationError(
-                "Name can't be changed when Target Population have APPROVED status"
+                "Name can't be changed when Target Population is in APPROVED status"
             )
         if target_population.status == "FINALIZED":
             raise ValidationError(
