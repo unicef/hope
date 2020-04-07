@@ -3448,6 +3448,34 @@ export type CandidateHouseholdsListByTargetingCriteriaQuery = (
   )> }
 );
 
+export type GoldenRecordByTargetingCriteriaQueryVariables = {
+  targetingCriteria: TargetingCriteriaObjectType,
+  first?: Maybe<Scalars['Int']>
+};
+
+
+export type GoldenRecordByTargetingCriteriaQuery = (
+  { __typename?: 'Query' }
+  & { goldenRecordByTargetingCriteria: Maybe<(
+    { __typename?: 'HouseholdNodeConnection' }
+    & Pick<HouseholdNodeConnection, 'totalCount' | 'edgeCount'>
+    & { edges: Array<Maybe<(
+      { __typename?: 'HouseholdNodeEdge' }
+      & { node: Maybe<(
+        { __typename?: 'HouseholdNode' }
+        & Pick<HouseholdNode, 'id' | 'familySize' | 'updatedAt'>
+        & { headOfHousehold: Maybe<(
+          { __typename?: 'IndividualNode' }
+          & Pick<IndividualNode, 'firstName' | 'lastName'>
+        )>, location: (
+          { __typename?: 'LocationNode' }
+          & Pick<LocationNode, 'title'>
+        ) }
+      )> }
+    )>> }
+  )> }
+);
+
 export type ImportedIndividualFieldsQueryVariables = {};
 
 
@@ -5898,6 +5926,72 @@ export function useCandidateHouseholdsListByTargetingCriteriaLazyQuery(baseOptio
 export type CandidateHouseholdsListByTargetingCriteriaQueryHookResult = ReturnType<typeof useCandidateHouseholdsListByTargetingCriteriaQuery>;
 export type CandidateHouseholdsListByTargetingCriteriaLazyQueryHookResult = ReturnType<typeof useCandidateHouseholdsListByTargetingCriteriaLazyQuery>;
 export type CandidateHouseholdsListByTargetingCriteriaQueryResult = ApolloReactCommon.QueryResult<CandidateHouseholdsListByTargetingCriteriaQuery, CandidateHouseholdsListByTargetingCriteriaQueryVariables>;
+export const GoldenRecordByTargetingCriteriaDocument = gql`
+    query GoldenRecordByTargetingCriteria($targetingCriteria: TargetingCriteriaObjectType!, $first: Int) {
+  goldenRecordByTargetingCriteria(targetingCriteria: $targetingCriteria, first: $first) {
+    edges {
+      node {
+        id
+        headOfHousehold {
+          firstName
+          lastName
+        }
+        familySize
+        location {
+          title
+        }
+        updatedAt
+      }
+    }
+    totalCount
+    edgeCount
+  }
+}
+    `;
+export type GoldenRecordByTargetingCriteriaComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<GoldenRecordByTargetingCriteriaQuery, GoldenRecordByTargetingCriteriaQueryVariables>, 'query'> & ({ variables: GoldenRecordByTargetingCriteriaQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const GoldenRecordByTargetingCriteriaComponent = (props: GoldenRecordByTargetingCriteriaComponentProps) => (
+      <ApolloReactComponents.Query<GoldenRecordByTargetingCriteriaQuery, GoldenRecordByTargetingCriteriaQueryVariables> query={GoldenRecordByTargetingCriteriaDocument} {...props} />
+    );
+    
+export type GoldenRecordByTargetingCriteriaProps<TChildProps = {}> = ApolloReactHoc.DataProps<GoldenRecordByTargetingCriteriaQuery, GoldenRecordByTargetingCriteriaQueryVariables> & TChildProps;
+export function withGoldenRecordByTargetingCriteria<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  GoldenRecordByTargetingCriteriaQuery,
+  GoldenRecordByTargetingCriteriaQueryVariables,
+  GoldenRecordByTargetingCriteriaProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, GoldenRecordByTargetingCriteriaQuery, GoldenRecordByTargetingCriteriaQueryVariables, GoldenRecordByTargetingCriteriaProps<TChildProps>>(GoldenRecordByTargetingCriteriaDocument, {
+      alias: 'goldenRecordByTargetingCriteria',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useGoldenRecordByTargetingCriteriaQuery__
+ *
+ * To run a query within a React component, call `useGoldenRecordByTargetingCriteriaQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGoldenRecordByTargetingCriteriaQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGoldenRecordByTargetingCriteriaQuery({
+ *   variables: {
+ *      targetingCriteria: // value for 'targetingCriteria'
+ *      first: // value for 'first'
+ *   },
+ * });
+ */
+export function useGoldenRecordByTargetingCriteriaQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GoldenRecordByTargetingCriteriaQuery, GoldenRecordByTargetingCriteriaQueryVariables>) {
+        return ApolloReactHooks.useQuery<GoldenRecordByTargetingCriteriaQuery, GoldenRecordByTargetingCriteriaQueryVariables>(GoldenRecordByTargetingCriteriaDocument, baseOptions);
+      }
+export function useGoldenRecordByTargetingCriteriaLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GoldenRecordByTargetingCriteriaQuery, GoldenRecordByTargetingCriteriaQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<GoldenRecordByTargetingCriteriaQuery, GoldenRecordByTargetingCriteriaQueryVariables>(GoldenRecordByTargetingCriteriaDocument, baseOptions);
+        }
+export type GoldenRecordByTargetingCriteriaQueryHookResult = ReturnType<typeof useGoldenRecordByTargetingCriteriaQuery>;
+export type GoldenRecordByTargetingCriteriaLazyQueryHookResult = ReturnType<typeof useGoldenRecordByTargetingCriteriaLazyQuery>;
+export type GoldenRecordByTargetingCriteriaQueryResult = ApolloReactCommon.QueryResult<GoldenRecordByTargetingCriteriaQuery, GoldenRecordByTargetingCriteriaQueryVariables>;
 export const ImportedIndividualFieldsDocument = gql`
     query ImportedIndividualFields {
   allFieldsAttributes {
