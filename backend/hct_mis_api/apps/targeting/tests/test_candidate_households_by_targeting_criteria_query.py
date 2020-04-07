@@ -24,6 +24,19 @@ class CandidateListTargetingCriteriaQueryTestCase(APITestCase):
       }
     }
     """
+    QUERY_FIRST_10 = """
+        query CandidateListByTargetingCriteria($targetPopulation: ID!) {
+          candidateHouseholdsListByTargetingCriteria (targetPopulation:$targetPopulation, first: 10){
+            totalCount
+            edges {
+              node {
+                familySize
+                residenceStatus
+              }
+            }
+          }
+        }
+        """
 
     @classmethod
     def setUpTestData(cls):
@@ -130,6 +143,16 @@ class CandidateListTargetingCriteriaQueryTestCase(APITestCase):
                 "targetPopulation": self.id_to_base64(
                     self.target_population_family_size_1_approved.id,
                     "TargetPopulation",
+                )
+            },
+        )
+
+    def test_candidate_households_list_by_targeting_criteria_first_10(self):
+        self.snapshot_graphql_request(
+            request_string=CandidateListTargetingCriteriaQueryTestCase.QUERY_FIRST_10,
+            variables={
+                "targetPopulation": self.id_to_base64(
+                    self.target_population_family_size_2.id, "TargetPopulation"
                 )
             },
         )
