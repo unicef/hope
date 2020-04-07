@@ -1253,7 +1253,7 @@ type Mutations {
   updateTargetPopulation(input: UpdateTargetPopulationInput!): UpdateTargetPopulationMutation
   copyTargetPopulation(input: CopyTargetPopulationMutationInput!): CopyTargetPopulationMutationPayload
   deleteTargetPopulation(input: DeleteTargetPopulationMutationInput!): DeleteTargetPopulationMutationPayload
-  approveTargetPopulation(id: ID!): ApproveTargetPopulationMutation
+  approveTargetPopulation(id: ID!, programId: ID!): ApproveTargetPopulationMutation
   unapproveTargetPopulation(id: ID!): UnapproveTargetPopulationMutation
   finalizeTargetPopulation(id: ID!): FinalizeTargetPopulationMutation
   createProgram(programData: CreateProgramInput!): CreateProgram
@@ -1588,6 +1588,7 @@ type TargetingCriteriaRuleFilterNode {
   isFlexField: Boolean!
   fieldName: String!
   arguments: [Arg]
+  fieldAttribute: FieldAttributeNode
 }
 
 input TargetingCriteriaRuleFilterObjectType {

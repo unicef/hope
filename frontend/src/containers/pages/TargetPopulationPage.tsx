@@ -27,6 +27,7 @@ export function TargetPopulationPage() {
       max: undefined,
     },
     name: '',
+    status: '',
   })
   const debouncedFilter = useDebounce(filter, 500);
 

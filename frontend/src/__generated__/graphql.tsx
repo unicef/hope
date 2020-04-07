@@ -1484,7 +1484,8 @@ export type MutationsDeleteTargetPopulationArgs = {
 
 
 export type MutationsApproveTargetPopulationArgs = {
-  id: Scalars['ID']
+  id: Scalars['ID'],
+  programId: Scalars['ID']
 };
 
 
@@ -2212,6 +2213,7 @@ export type TargetingCriteriaRuleFilterNode = {
   isFlexField: Scalars['Boolean'],
   fieldName: Scalars['String'],
   arguments?: Maybe<Array<Maybe<Scalars['Arg']>>>,
+  fieldAttribute?: Maybe<FieldAttributeNode>,
 };
 
 export type TargetingCriteriaRuleFilterObjectType = {
@@ -2518,7 +2520,8 @@ export type XlsxRowErrorNode = {
 };
 
 export type ApproveTpMutationVariables = {
-  id: Scalars['ID']
+  id: Scalars['ID'],
+  programId: Scalars['ID']
 };
 
 
@@ -2835,7 +2838,8 @@ export type AllTargetPopulationsQueryVariables = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>,
-  name?: Maybe<Scalars['String']>
+  name?: Maybe<Scalars['String']>,
+  status?: Maybe<Scalars['String']>
 };
 
 
@@ -3129,7 +3133,11 @@ export type TargetPopulationQuery = (
         & Pick<TargetingCriteriaRuleNode, 'id'>
         & { filters: Maybe<Array<Maybe<(
           { __typename?: 'TargetingCriteriaRuleFilterNode' }
-          & Pick<TargetingCriteriaRuleFilterNode, 'id' | 'comparisionMethod' | 'isFlexField' | 'fieldName' | 'arguments'>
+          & Pick<TargetingCriteriaRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod'>
+          & { fieldAttribute: Maybe<(
+            { __typename?: 'FieldAttributeNode' }
+            & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
+          )> }
         )>>> }
       )>>> }
     )>, finalListTargetingCriteria: Maybe<(
@@ -3148,7 +3156,11 @@ export type TargetPopulationQuery = (
         & Pick<TargetingCriteriaRuleNode, 'id'>
         & { filters: Maybe<Array<Maybe<(
           { __typename?: 'TargetingCriteriaRuleFilterNode' }
-          & Pick<TargetingCriteriaRuleFilterNode, 'id' | 'comparisionMethod' | 'isFlexField' | 'fieldName' | 'arguments'>
+          & Pick<TargetingCriteriaRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod'>
+          & { fieldAttribute: Maybe<(
+            { __typename?: 'FieldAttributeNode' }
+            & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
+          )> }
         )>>> }
       )>>> }
     )> }
@@ -3592,8 +3604,8 @@ export const ImportedIndividualDetailedFragmentDoc = gql`
 }
     `;
 export const ApproveTpDocument = gql`
-    mutation ApproveTP($id: ID!) {
-  approveTargetPopulation(id: $id) {
+    mutation ApproveTP($id: ID!, $programId: ID!) {
+  approveTargetPopulation(id: $id, programId: $programId) {
     targetPopulation {
       status
     }
@@ -3633,6 +3645,7 @@ export function withApproveTp<TProps, TChildProps = {}>(operationOptions?: Apoll
  * const [approveTpMutation, { data, loading, error }] = useApproveTpMutation({
  *   variables: {
  *      id: // value for 'id'
+ *      programId: // value for 'programId'
  *   },
  * });
  */
@@ -4463,8 +4476,8 @@ export type AllProgramsQueryHookResult = ReturnType<typeof useAllProgramsQuery>;
 export type AllProgramsLazyQueryHookResult = ReturnType<typeof useAllProgramsLazyQuery>;
 export type AllProgramsQueryResult = ApolloReactCommon.QueryResult<AllProgramsQuery, AllProgramsQueryVariables>;
 export const AllTargetPopulationsDocument = gql`
-    query AllTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String) {
-  allTargetPopulation(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name: $name) {
+    query AllTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String) {
+  allTargetPopulation(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name: $name, status: $status) {
     edges {
       node {
         id
@@ -4522,6 +4535,7 @@ export function withAllTargetPopulations<TProps, TChildProps = {}>(operationOpti
  *      last: // value for 'last'
  *      orderBy: // value for 'orderBy'
  *      name: // value for 'name'
+ *      status: // value for 'status'
  *   },
  * });
  */
@@ -5167,11 +5181,15 @@ export const TargetPopulationDocument = gql`
       rules {
         id
         filters {
-          id
-          comparisionMethod
-          isFlexField
           fieldName
+          isFlexField
           arguments
+          comparisionMethod
+          fieldAttribute {
+            name
+            labelEn
+            type
+          }
         }
       }
     }
@@ -5189,11 +5207,15 @@ export const TargetPopulationDocument = gql`
       rules {
         id
         filters {
-          id
-          comparisionMethod
-          isFlexField
           fieldName
+          isFlexField
           arguments
+          comparisionMethod
+          fieldAttribute {
+            name
+            labelEn
+            type
+          }
         }
       }
     }
@@ -6192,6 +6214,9 @@ export type ResolversTypes = {
   TargetingCriteriaRuleFilterNode: ResolverTypeWrapper<TargetingCriteriaRuleFilterNode>,
   TargetingCriteriaRuleFilterComparisionMethod: TargetingCriteriaRuleFilterComparisionMethod,
   Arg: ResolverTypeWrapper<Scalars['Arg']>,
+  FieldAttributeNode: ResolverTypeWrapper<FieldAttributeNode>,
+  LabelNode: ResolverTypeWrapper<LabelNode>,
+  CoreFieldChoiceObject: ResolverTypeWrapper<CoreFieldChoiceObject>,
   RegistrationDataImportNodeConnection: ResolverTypeWrapper<RegistrationDataImportNodeConnection>,
   RegistrationDataImportNodeEdge: ResolverTypeWrapper<RegistrationDataImportNodeEdge>,
   Float: ResolverTypeWrapper<Scalars['Float']>,
@@ -6207,9 +6232,6 @@ export type ResolversTypes = {
   PaymentEntitlementNode: ResolverTypeWrapper<PaymentEntitlementNode>,
   PaymentEntitlementDeliveryType: PaymentEntitlementDeliveryType,
   ChoiceObject: ResolverTypeWrapper<ChoiceObject>,
-  FieldAttributeNode: ResolverTypeWrapper<FieldAttributeNode>,
-  LabelNode: ResolverTypeWrapper<LabelNode>,
-  CoreFieldChoiceObject: ResolverTypeWrapper<CoreFieldChoiceObject>,
   TargetingCriteriaObjectType: TargetingCriteriaObjectType,
   TargetingCriteriaRuleObjectType: TargetingCriteriaRuleObjectType,
   TargetingCriteriaRuleFilterObjectType: TargetingCriteriaRuleFilterObjectType,
@@ -6327,6 +6349,9 @@ export type ResolversParentTypes = {
   TargetingCriteriaRuleFilterNode: TargetingCriteriaRuleFilterNode,
   TargetingCriteriaRuleFilterComparisionMethod: TargetingCriteriaRuleFilterComparisionMethod,
   Arg: Scalars['Arg'],
+  FieldAttributeNode: FieldAttributeNode,
+  LabelNode: LabelNode,
+  CoreFieldChoiceObject: CoreFieldChoiceObject,
   RegistrationDataImportNodeConnection: RegistrationDataImportNodeConnection,
   RegistrationDataImportNodeEdge: RegistrationDataImportNodeEdge,
   Float: Scalars['Float'],
@@ -6342,9 +6367,6 @@ export type ResolversParentTypes = {
   PaymentEntitlementNode: PaymentEntitlementNode,
   PaymentEntitlementDeliveryType: PaymentEntitlementDeliveryType,
   ChoiceObject: ChoiceObject,
-  FieldAttributeNode: FieldAttributeNode,
-  LabelNode: LabelNode,
-  CoreFieldChoiceObject: CoreFieldChoiceObject,
   TargetingCriteriaObjectType: TargetingCriteriaObjectType,
   TargetingCriteriaRuleObjectType: TargetingCriteriaRuleObjectType,
   TargetingCriteriaRuleFilterObjectType: TargetingCriteriaRuleFilterObjectType,
@@ -6805,7 +6827,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   updateTargetPopulation?: Resolver<Maybe<ResolversTypes['UpdateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateTargetPopulationArgs, 'input'>>,
   copyTargetPopulation?: Resolver<Maybe<ResolversTypes['CopyTargetPopulationMutationPayload']>, ParentType, ContextType, RequireFields<MutationsCopyTargetPopulationArgs, 'input'>>,
   deleteTargetPopulation?: Resolver<Maybe<ResolversTypes['DeleteTargetPopulationMutationPayload']>, ParentType, ContextType, RequireFields<MutationsDeleteTargetPopulationArgs, 'input'>>,
-  approveTargetPopulation?: Resolver<Maybe<ResolversTypes['ApproveTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsApproveTargetPopulationArgs, 'id'>>,
+  approveTargetPopulation?: Resolver<Maybe<ResolversTypes['ApproveTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsApproveTargetPopulationArgs, 'id' | 'programId'>>,
   unapproveTargetPopulation?: Resolver<Maybe<ResolversTypes['UnapproveTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsUnapproveTargetPopulationArgs, 'id'>>,
   finalizeTargetPopulation?: Resolver<Maybe<ResolversTypes['FinalizeTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsFinalizeTargetPopulationArgs, 'id'>>,
   createProgram?: Resolver<Maybe<ResolversTypes['CreateProgram']>, ParentType, ContextType, RequireFields<MutationsCreateProgramArgs, 'programData'>>,
@@ -7030,6 +7052,7 @@ export type TargetingCriteriaRuleFilterNodeResolvers<ContextType = any, ParentTy
   isFlexField?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   fieldName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   arguments?: Resolver<Maybe<Array<Maybe<ResolversTypes['Arg']>>>, ParentType, ContextType>,
+  fieldAttribute?: Resolver<Maybe<ResolversTypes['FieldAttributeNode']>, ParentType, ContextType>,
 };
 
 export type TargetingCriteriaRuleNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetingCriteriaRuleNode'] = ResolversParentTypes['TargetingCriteriaRuleNode']> = {
