@@ -216,7 +216,7 @@ class Query(graphene.ObjectType):
     )
 
     def resolve_candidate_households_list_by_targeting_criteria(
-        parent, info, target_population
+        parent, info, target_population, **kwargs
     ):
         target_population_id = decode_id_string(target_population)
         target_population_model = target_models.TargetPopulation.objects.get(
@@ -229,7 +229,7 @@ class Query(graphene.ObjectType):
         return target_population_model.households.all()
 
     def resolve_final_households_list_by_targeting_criteria(
-        parent, info, target_population, targeting_criteria=None
+        parent, info, target_population, targeting_criteria=None, **kwargs
     ):
         target_population_id = decode_id_string(target_population)
         target_population_model = target_models.TargetPopulation.objects.get(
@@ -249,7 +249,7 @@ class Query(graphene.ObjectType):
         return target_population_model.final_list.all()
 
     def resolve_golden_record_by_targeting_criteria(
-        parent, info, targeting_criteria
+        parent, info, targeting_criteria, **kwargs
     ):
         return Household.objects.filter(
             targeting_criteria_object_type_to_query(targeting_criteria)
