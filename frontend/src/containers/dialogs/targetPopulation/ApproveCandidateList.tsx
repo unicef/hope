@@ -65,7 +65,7 @@ export function ApproveCandidateList({ open, setOpen, targetPopulationId }) {
         initialValues={{ program: '' }}
         onSubmit={(values) => {
           mutate({
-            variables: { id: targetPopulationId },
+            variables: { id: targetPopulationId, programId: values.program },
           }).then((res) => {
             setOpen(false);
             showMessage('Candidate List Approved', {
