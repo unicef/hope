@@ -96,6 +96,7 @@ export function DuplicateTargetPopulation({
                 fullWidth
                 label='Name Copy of Target Population'
                 required
+                variant='filled'
                 component={FormikTextField}
               />
             </DialogContent>

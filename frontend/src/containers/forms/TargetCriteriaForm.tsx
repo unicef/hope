@@ -123,7 +123,7 @@ export function TargetCriteriaForm({
     };
     switch (subField.type) {
       case 'INTEGER':
-        values.value = { from: '', to: '' }
+        values.value = { from: '', to: '' };
         break;
       case 'SELECT_ONE':
         values.choices = subField.choices;
@@ -150,12 +150,14 @@ export function TargetCriteriaForm({
               name={`filters[${index}].value.from`}
               label={`${field.fieldName} from`}
               type='number'
+              variant='filled'
               component={FormikTextField}
             />
             <Field
               name={`filters[${index}].value.to`}
               label={`${field.fieldName} to`}
               type='number'
+              variant='filled'
               component={FormikTextField}
             />
           </>
@@ -179,8 +181,11 @@ export function TargetCriteriaForm({
       <Formik
         initialValues={initialValue}
         onSubmit={(values, bag) => {
-          const dataToSend = values.filters.map(each => ({...each, arguments: [each.value]}))
-          addCriteria({filters: dataToSend});
+          const dataToSend = values.filters.map((each) => ({
+            ...each,
+            arguments: [each.value],
+          }));
+          addCriteria({ filters: dataToSend });
           return bag.resetForm();
         }}
         validationSchema={validationSchema}
