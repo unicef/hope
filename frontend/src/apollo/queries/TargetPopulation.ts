@@ -42,6 +42,10 @@ export const TargetPopulation = gql`
               name
               labelEn
               type
+              choices {
+                value
+                labelEn
+              }
             }
           }
         }
@@ -68,6 +72,10 @@ export const TargetPopulation = gql`
               name
               labelEn
               type
+              choices {
+                value
+                labelEn
+              }
             }
           }
         }
