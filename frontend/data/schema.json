@@ -12372,9 +12372,13 @@
             "name": "comparisionMethod",
             "description": null,
             "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
             },
             "defaultValue": null
           },
@@ -12382,9 +12386,13 @@
             "name": "isFlexField",
             "description": null,
             "type": {
-              "kind": "SCALAR",
-              "name": "Boolean",
-              "ofType": null
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
             },
             "defaultValue": null
           },
@@ -12392,9 +12400,13 @@
             "name": "fieldName",
             "description": null,
             "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
             },
             "defaultValue": null
           },
@@ -12402,12 +12414,16 @@
             "name": "arguments",
             "description": null,
             "type": {
-              "kind": "LIST",
+              "kind": "NON_NULL",
               "name": null,
               "ofType": {
-                "kind": "SCALAR",
-                "name": "Arg",
-                "ofType": null
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Arg",
+                  "ofType": null
+                }
               }
             },
             "defaultValue": null
@@ -16917,6 +16933,33 @@
         "description": null,
         "fields": [
           {
+            "name": "createTargetPopulation",
+            "description": null,
+            "args": [
+              {
+                "name": "input",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "CreateTargetPopulationInput",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "CreateTargetPopulationMutation",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "updateTargetPopulation",
             "description": null,
             "args": [
@@ -16928,7 +16971,7 @@
                   "name": null,
                   "ofType": {
                     "kind": "INPUT_OBJECT",
-                    "name": "UpdateTargetPopulationMutationInput",
+                    "name": "UpdateTargetPopulationInput",
                     "ofType": null
                   }
                 },
@@ -16937,7 +16980,7 @@
             ],
             "type": {
               "kind": "OBJECT",
-              "name": "UpdateTargetPopulationMutationPayload",
+              "name": "UpdateTargetPopulationMutation",
               "ofType": null
             },
             "isDeprecated": false,
@@ -17325,32 +17368,63 @@
       },
       {
         "kind": "INPUT_OBJECT",
-        "name": "UpdateTargetPopulationMutationInput",
+        "name": "CreateTargetPopulationInput",
         "description": null,
         "fields": null,
         "inputFields": [
           {
-            "name": "targetPopulationData",
+            "name": "name",
             "description": null,
             "type": {
-              "kind": "INPUT_OBJECT",
-              "name": "UpdateTargetPopulationInput",
-              "ofType": null
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
             },
             "defaultValue": null
           },
           {
-            "name": "clientMutationId",
+            "name": "targetingCriteria",
             "description": null,
             "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "INPUT_OBJECT",
+                "name": "TargetingCriteriaObjectType",
+                "ofType": null
+              }
             },
             "defaultValue": null
           }
         ],
         "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "CreateTargetPopulationMutation",
+        "description": null,
+        "fields": [
+          {
+            "name": "targetPopulation",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "TargetPopulationNode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
         "enumValues": null,
         "possibleTypes": null
       },
@@ -17364,9 +17438,13 @@
             "name": "id",
             "description": null,
             "type": {
-              "kind": "SCALAR",
-              "name": "ID",
-              "ofType": null
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "ID",
+                "ofType": null
+              }
             },
             "defaultValue": null
           },
@@ -17381,11 +17459,11 @@
             "defaultValue": null
           },
           {
-            "name": "status",
+            "name": "targetingCriteria",
             "description": null,
             "type": {
-              "kind": "SCALAR",
-              "name": "String",
+              "kind": "INPUT_OBJECT",
+              "name": "TargetingCriteriaObjectType",
               "ofType": null
             },
             "defaultValue": null
@@ -17397,7 +17475,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "UpdateTargetPopulationMutationPayload",
+        "name": "UpdateTargetPopulationMutation",
         "description": null,
         "fields": [
           {
@@ -17407,18 +17485,6 @@
             "type": {
               "kind": "OBJECT",
               "name": "TargetPopulationNode",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "clientMutationId",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
               "ofType": null
             },
             "isDeprecated": false,

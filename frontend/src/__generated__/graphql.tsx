@@ -216,6 +216,16 @@ export type CreateRegistrationDataImportExcelInput = {
   name?: Maybe<Scalars['String']>,
 };
 
+export type CreateTargetPopulationInput = {
+  name: Scalars['String'],
+  targetingCriteria: TargetingCriteriaObjectType,
+};
+
+export type CreateTargetPopulationMutation = {
+   __typename?: 'CreateTargetPopulationMutation',
+  targetPopulation?: Maybe<TargetPopulationNode>,
+};
+
 
 
 
@@ -1434,7 +1444,8 @@ export type MergeRegistrationDataImportMutation = {
 
 export type Mutations = {
    __typename?: 'Mutations',
-  updateTargetPopulation?: Maybe<UpdateTargetPopulationMutationPayload>,
+  createTargetPopulation?: Maybe<CreateTargetPopulationMutation>,
+  updateTargetPopulation?: Maybe<UpdateTargetPopulationMutation>,
   copyTargetPopulation?: Maybe<CopyTargetPopulationMutationPayload>,
   deleteTargetPopulation?: Maybe<DeleteTargetPopulationMutationPayload>,
   approveTargetPopulation?: Maybe<ApproveTargetPopulationMutation>,
@@ -1452,8 +1463,13 @@ export type Mutations = {
 };
 
 
+export type MutationsCreateTargetPopulationArgs = {
+  input: CreateTargetPopulationInput
+};
+
+
 export type MutationsUpdateTargetPopulationArgs = {
-  input: UpdateTargetPopulationMutationInput
+  input: UpdateTargetPopulationInput
 };
 
 
@@ -2199,10 +2215,10 @@ export type TargetingCriteriaRuleFilterNode = {
 };
 
 export type TargetingCriteriaRuleFilterObjectType = {
-  comparisionMethod?: Maybe<Scalars['String']>,
-  isFlexField?: Maybe<Scalars['Boolean']>,
-  fieldName?: Maybe<Scalars['String']>,
-  arguments?: Maybe<Array<Maybe<Scalars['Arg']>>>,
+  comparisionMethod: Scalars['String'],
+  isFlexField: Scalars['Boolean'],
+  fieldName: Scalars['String'],
+  arguments: Array<Maybe<Scalars['Arg']>>,
 };
 
 export type TargetingCriteriaRuleNode = {
@@ -2330,20 +2346,14 @@ export type UpdateProgramInput = {
 };
 
 export type UpdateTargetPopulationInput = {
-  id?: Maybe<Scalars['ID']>,
+  id: Scalars['ID'],
   name?: Maybe<Scalars['String']>,
-  status?: Maybe<Scalars['String']>,
+  targetingCriteria?: Maybe<TargetingCriteriaObjectType>,
 };
 
-export type UpdateTargetPopulationMutationInput = {
-  targetPopulationData?: Maybe<UpdateTargetPopulationInput>,
-  clientMutationId?: Maybe<Scalars['String']>,
-};
-
-export type UpdateTargetPopulationMutationPayload = {
-   __typename?: 'UpdateTargetPopulationMutationPayload',
+export type UpdateTargetPopulationMutation = {
+   __typename?: 'UpdateTargetPopulationMutation',
   targetPopulation?: Maybe<TargetPopulationNode>,
-  clientMutationId?: Maybe<Scalars['String']>,
 };
 
 
@@ -3411,7 +3421,8 @@ export type UploadImportDataXlsxFileMutation = (
 );
 
 export type CandidateHouseholdsListByTargetingCriteriaQueryVariables = {
-  targetPopulation: Scalars['ID']
+  targetPopulation: Scalars['ID'],
+  first?: Maybe<Scalars['Int']>
 };
 
 
@@ -3419,6 +3430,7 @@ export type CandidateHouseholdsListByTargetingCriteriaQuery = (
   { __typename?: 'Query' }
   & { candidateHouseholdsListByTargetingCriteria: Maybe<(
     { __typename?: 'HouseholdNodeConnection' }
+    & Pick<HouseholdNodeConnection, 'totalCount' | 'edgeCount'>
     & { edges: Array<Maybe<(
       { __typename?: 'HouseholdNodeEdge' }
       & { node: Maybe<(
@@ -5821,8 +5833,8 @@ export type UploadImportDataXlsxFileMutationHookResult = ReturnType<typeof useUp
 export type UploadImportDataXlsxFileMutationResult = ApolloReactCommon.MutationResult<UploadImportDataXlsxFileMutation>;
 export type UploadImportDataXlsxFileMutationOptions = ApolloReactCommon.BaseMutationOptions<UploadImportDataXlsxFileMutation, UploadImportDataXlsxFileMutationVariables>;
 export const CandidateHouseholdsListByTargetingCriteriaDocument = gql`
-    query candidateHouseholdsListByTargetingCriteria($targetPopulation: ID!) {
-  candidateHouseholdsListByTargetingCriteria(targetPopulation: $targetPopulation) {
+    query candidateHouseholdsListByTargetingCriteria($targetPopulation: ID!, $first: Int) {
+  candidateHouseholdsListByTargetingCriteria(targetPopulation: $targetPopulation, first: $first) {
     edges {
       node {
         id
@@ -5837,6 +5849,8 @@ export const CandidateHouseholdsListByTargetingCriteriaDocument = gql`
         updatedAt
       }
     }
+    totalCount
+    edgeCount
   }
 }
     `;
@@ -5871,6 +5885,7 @@ export function withCandidateHouseholdsListByTargetingCriteria<TProps, TChildPro
  * const { data, loading, error } = useCandidateHouseholdsListByTargetingCriteriaQuery({
  *   variables: {
  *      targetPopulation: // value for 'targetPopulation'
+ *      first: // value for 'first'
  *   },
  * });
  */
@@ -6127,9 +6142,10 @@ export type ResolversTypes = {
   DjangoDebug: ResolverTypeWrapper<DjangoDebug>,
   DjangoDebugSQL: ResolverTypeWrapper<DjangoDebugSql>,
   Mutations: ResolverTypeWrapper<{}>,
-  UpdateTargetPopulationMutationInput: UpdateTargetPopulationMutationInput,
+  CreateTargetPopulationInput: CreateTargetPopulationInput,
+  CreateTargetPopulationMutation: ResolverTypeWrapper<CreateTargetPopulationMutation>,
   UpdateTargetPopulationInput: UpdateTargetPopulationInput,
-  UpdateTargetPopulationMutationPayload: ResolverTypeWrapper<UpdateTargetPopulationMutationPayload>,
+  UpdateTargetPopulationMutation: ResolverTypeWrapper<UpdateTargetPopulationMutation>,
   CopyTargetPopulationMutationInput: CopyTargetPopulationMutationInput,
   CopyTargetPopulationInput: CopyTargetPopulationInput,
   CopyTargetPopulationMutationPayload: ResolverTypeWrapper<CopyTargetPopulationMutationPayload>,
@@ -6261,9 +6277,10 @@ export type ResolversParentTypes = {
   DjangoDebug: DjangoDebug,
   DjangoDebugSQL: DjangoDebugSql,
   Mutations: {},
-  UpdateTargetPopulationMutationInput: UpdateTargetPopulationMutationInput,
+  CreateTargetPopulationInput: CreateTargetPopulationInput,
+  CreateTargetPopulationMutation: CreateTargetPopulationMutation,
   UpdateTargetPopulationInput: UpdateTargetPopulationInput,
-  UpdateTargetPopulationMutationPayload: UpdateTargetPopulationMutationPayload,
+  UpdateTargetPopulationMutation: UpdateTargetPopulationMutation,
   CopyTargetPopulationMutationInput: CopyTargetPopulationMutationInput,
   CopyTargetPopulationInput: CopyTargetPopulationInput,
   CopyTargetPopulationMutationPayload: CopyTargetPopulationMutationPayload,
@@ -6395,6 +6412,10 @@ export type CreateProgramResolvers<ContextType = any, ParentType extends Resolve
 
 export type CreateRegistrationDataImportResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateRegistrationDataImport'] = ResolversParentTypes['CreateRegistrationDataImport']> = {
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
+};
+
+export type CreateTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateTargetPopulationMutation'] = ResolversParentTypes['CreateTargetPopulationMutation']> = {
+  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
 };
 
 export interface DateScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Date'], any> {
@@ -6686,7 +6707,8 @@ export type MergeRegistrationDataImportMutationResolvers<ContextType = any, Pare
 };
 
 export type MutationsResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutations'] = ResolversParentTypes['Mutations']> = {
-  updateTargetPopulation?: Resolver<Maybe<ResolversTypes['UpdateTargetPopulationMutationPayload']>, ParentType, ContextType, RequireFields<MutationsUpdateTargetPopulationArgs, 'input'>>,
+  createTargetPopulation?: Resolver<Maybe<ResolversTypes['CreateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsCreateTargetPopulationArgs, 'input'>>,
+  updateTargetPopulation?: Resolver<Maybe<ResolversTypes['UpdateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateTargetPopulationArgs, 'input'>>,
   copyTargetPopulation?: Resolver<Maybe<ResolversTypes['CopyTargetPopulationMutationPayload']>, ParentType, ContextType, RequireFields<MutationsCopyTargetPopulationArgs, 'input'>>,
   deleteTargetPopulation?: Resolver<Maybe<ResolversTypes['DeleteTargetPopulationMutationPayload']>, ParentType, ContextType, RequireFields<MutationsDeleteTargetPopulationArgs, 'input'>>,
   approveTargetPopulation?: Resolver<Maybe<ResolversTypes['ApproveTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsApproveTargetPopulationArgs, 'id'>>,
@@ -6971,9 +6993,8 @@ export type UpdateProgramResolvers<ContextType = any, ParentType extends Resolve
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
 };
 
-export type UpdateTargetPopulationMutationPayloadResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdateTargetPopulationMutationPayload'] = ResolversParentTypes['UpdateTargetPopulationMutationPayload']> = {
+export type UpdateTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdateTargetPopulationMutation'] = ResolversParentTypes['UpdateTargetPopulationMutation']> = {
   targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
-  clientMutationId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export interface UploadScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Upload'], any> {
@@ -7056,6 +7077,7 @@ export type Resolvers<ContextType = any> = {
   CoreFieldChoiceObject?: CoreFieldChoiceObjectResolvers<ContextType>,
   CreateProgram?: CreateProgramResolvers<ContextType>,
   CreateRegistrationDataImport?: CreateRegistrationDataImportResolvers<ContextType>,
+  CreateTargetPopulationMutation?: CreateTargetPopulationMutationResolvers<ContextType>,
   Date?: GraphQLScalarType,
   DateTime?: GraphQLScalarType,
   Decimal?: GraphQLScalarType,
@@ -7114,7 +7136,7 @@ export type Resolvers<ContextType = any> = {
   UnapproveRegistrationDataImportMutation?: UnapproveRegistrationDataImportMutationResolvers<ContextType>,
   UnapproveTargetPopulationMutation?: UnapproveTargetPopulationMutationResolvers<ContextType>,
   UpdateProgram?: UpdateProgramResolvers<ContextType>,
-  UpdateTargetPopulationMutationPayload?: UpdateTargetPopulationMutationPayloadResolvers<ContextType>,
+  UpdateTargetPopulationMutation?: UpdateTargetPopulationMutationResolvers<ContextType>,
   Upload?: GraphQLScalarType,
   UploadImportDataXLSXFile?: UploadImportDataXlsxFileResolvers<ContextType>,
   UserNode?: UserNodeResolvers<ContextType>,

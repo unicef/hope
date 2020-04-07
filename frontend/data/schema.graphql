@@ -147,6 +147,15 @@ input CreateRegistrationDataImportExcelInput {
   name: String
 }
 
+input CreateTargetPopulationInput {
+  name: String!
+  targetingCriteria: TargetingCriteriaObjectType!
+}
+
+type CreateTargetPopulationMutation {
+  targetPopulation: TargetPopulationNode
+}
+
 scalar Date
 
 scalar DateTime
@@ -1240,7 +1249,8 @@ type MergeRegistrationDataImportMutation {
 }
 
 type Mutations {
-  updateTargetPopulation(input: UpdateTargetPopulationMutationInput!): UpdateTargetPopulationMutationPayload
+  createTargetPopulation(input: CreateTargetPopulationInput!): CreateTargetPopulationMutation
+  updateTargetPopulation(input: UpdateTargetPopulationInput!): UpdateTargetPopulationMutation
   copyTargetPopulation(input: CopyTargetPopulationMutationInput!): CopyTargetPopulationMutationPayload
   deleteTargetPopulation(input: DeleteTargetPopulationMutationInput!): DeleteTargetPopulationMutationPayload
   approveTargetPopulation(id: ID!): ApproveTargetPopulationMutation
@@ -1581,10 +1591,10 @@ type TargetingCriteriaRuleFilterNode {
 }
 
 input TargetingCriteriaRuleFilterObjectType {
-  comparisionMethod: String
-  isFlexField: Boolean
-  fieldName: String
-  arguments: [Arg]
+  comparisionMethod: String!
+  isFlexField: Boolean!
+  fieldName: String!
+  arguments: [Arg]!
 }
 
 type TargetingCriteriaRuleNode {
@@ -1632,19 +1642,13 @@ input UpdateProgramInput {
 }
 
 input UpdateTargetPopulationInput {
-  id: ID
+  id: ID!
   name: String
-  status: String
+  targetingCriteria: TargetingCriteriaObjectType
 }
 
-input UpdateTargetPopulationMutationInput {
-  targetPopulationData: UpdateTargetPopulationInput
-  clientMutationId: String
-}
-
-type UpdateTargetPopulationMutationPayload {
+type UpdateTargetPopulationMutation {
   targetPopulation: TargetPopulationNode
-  clientMutationId: String
 }
 
 scalar Upload
