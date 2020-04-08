@@ -8,7 +8,12 @@ import { TargetingCriteria } from '../../components/TargetPopulation/TargetingCr
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { Results } from '../../components/TargetPopulation/Results';
 import { TargetPopulationHouseholdTable } from '../tables/TargetPopulationHouseholdTable';
-import { useGoldenRecordByTargetingCriteriaQuery } from '../../__generated__/graphql';
+import {
+  useGoldenRecordByTargetingCriteriaQuery,
+  useCreateTargetPopulationMutation,
+} from '../../__generated__/graphql';
+import { useSnackbar } from '../../hooks/useSnackBar';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
 
 const PaperContainer = styled(Paper)`
   display: flex;
@@ -34,12 +39,40 @@ const initialValues = {
 
 export function CreateTargetPopulation() {
   const { t } = useTranslation();
-
+  const [mutate] = useCreateTargetPopulationMutation();
+  const { showMessage } = useSnackbar();
+  const businessArea = useBusinessArea();
   return (
     <Formik
       initialValues={initialValues}
-      onSubmit={(values) => {
-        console.log(values);
+      onSubmit={async (values) => {
+        const { data } = await mutate({
+          variables: {
+            input: {
+              name: values.name,
+              targetingCriteria: {
+                rules: values.criterias.map((rule) => {
+                  return {
+                    ...rule,
+                    filters: rule.filters.map((each) => {
+                      return {
+                        comparisionMethod: each.comparisionMethod,
+                        arguments: each.arguments,
+                        fieldName: each.fieldName,
+                        isFlexField: each.isFlexField,
+                      };
+                    }),
+                  };
+                }),
+              },
+            },
+          },
+        });
+        console.log(data)
+        showMessage('Target Population Created', {
+          pathname: `/${businessArea}/target-population/${data.createTargetPopulation.targetPopulation.id}`,
+          historyMethod: 'push',
+        });
       }}
     >
       {({ submitForm, values }) => (
@@ -61,7 +94,6 @@ export function CreateTargetPopulation() {
                 <Button
                   variant='contained'
                   color='primary'
-                  type='submit'
                   onClick={submitForm}
                   disabled={!values.name}
                 >
