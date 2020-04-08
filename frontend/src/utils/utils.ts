@@ -221,6 +221,10 @@ export function formatCriteriaFilters({ filters }) {
         comparisionMethod = 'EQUALS';
         values = [each.value];
         break;
+      case 'SELECT_MANY':
+        comparisionMethod = 'EQUALS';
+        values = [each.value];
+        break;
       case 'STRING':
         comparisionMethod = 'CONTAINS';
         values = [each.value];
@@ -245,10 +249,7 @@ export function formatCriteriaFilters({ filters }) {
       arguments: values,
       fieldName: each.fieldName,
       isFlexField: each.isFlexField,
-      fieldAttribute: {
-        labelEn: each.fieldAttribute.labelEn,
-        type: each.fieldAttribute.type,
-      },
+      fieldAttribute: each.fieldAttribute,
     };
   });
 }
