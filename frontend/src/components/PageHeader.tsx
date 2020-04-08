@@ -35,7 +35,22 @@ const BackButton = styled.div`
 
 const TabsWrapper = styled.div`
   margin: 0 0 0 ${({ theme }) => theme.spacing(5)}px;
-`
+`;
+
+const TitleWrapper = styled.div`
+  width: 60%;
+  min-width: 400px;
+  transform: translateY(-12px);
+  label:first-child {
+    font-size: ${({ theme }) => theme.spacing(6)}px;
+  }
+  input:first-child {
+    font-size: ${({ theme }) => theme.spacing(6)}px;
+  }
+  div:first-child {
+    margin: 0;
+  }
+`;
 
 interface Props {
   title: string | React.ReactElement;
@@ -62,11 +77,15 @@ export function PageHeader({
           </BackButton>
         ) : null}
         <HeaderContainer>
-          <div>
-            <div>
-              {breadCrumbs && <BreadCrumbs breadCrumbs={breadCrumbs} />}
-              <Typography variant='h5'>{title}</Typography>
-            </div>
+        <div>
+            {React.isValidElement(title) ? (
+              <TitleWrapper>{title}</TitleWrapper>
+            ) : (
+              <>
+                {breadCrumbs && <BreadCrumbs breadCrumbs={breadCrumbs} />}
+                <Typography variant='h5'>{title}</Typography>
+              </>
+            )}
           </div>
           <ActionsContainer>{children || null}</ActionsContainer>
         </HeaderContainer>
