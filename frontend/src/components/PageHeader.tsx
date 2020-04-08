@@ -57,6 +57,7 @@ interface Props {
   children?: React.ReactElement;
   breadCrumbs?: BreadCrumbsItem[];
   tabs?: React.ReactElement;
+  hasInputComponent?: boolean
 }
 
 export function PageHeader({
@@ -64,6 +65,7 @@ export function PageHeader({
   children,
   breadCrumbs = null,
   tabs = null,
+  hasInputComponent
 }: Props): React.ReactElement {
   const history = useHistory();
   return (
@@ -78,7 +80,7 @@ export function PageHeader({
         ) : null}
         <HeaderContainer>
         <div>
-            {React.isValidElement(title) ? (
+            {React.isValidElement(title) && hasInputComponent ? (
               <TitleWrapper>{title}</TitleWrapper>
             ) : (
               <>
