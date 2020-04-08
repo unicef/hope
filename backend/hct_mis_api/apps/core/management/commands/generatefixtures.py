@@ -140,6 +140,9 @@ class Command(BaseCommand):
 
     @transaction.atomic
     def handle(self, *args, **options):
+        self.stdout.write(
+            f"Generating fixtures..."
+        )
         start_time = time.time()
         programs_amount = options["programs_amount"]
 

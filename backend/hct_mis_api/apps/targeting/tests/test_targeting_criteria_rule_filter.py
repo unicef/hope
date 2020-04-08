@@ -1,4 +1,5 @@
 from django.core.exceptions import ValidationError
+from django.core.management import call_command
 from django.test import TestCase
 
 from household.fixtures import HouseholdFactory, IndividualFactory
@@ -247,3 +248,32 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         self.assertTrue(
             self.household_years_in_school_4.pk in [h.pk for h in queryset]
         )
+
+
+class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
+    def setUp(self):
+        call_command("loadflexfieldsattributes")
+        self.household_total_households_2=    HouseholdFactory(
+                family_size=1, flex_fields={"total_households_h_f": 2},
+            )
+        IndividualFactory(household=self.household_total_households_2,)
+        self.household_total_households_4 =HouseholdFactory(
+                family_size=1, flex_fields={"total_households_h_f": 4},
+            )
+        IndividualFactory(household=self.household_total_households_4,)
+        HouseholdFactory(
+            family_size=1, flex_fields={"ddd":3},
+        )
+
+
+    def test_rule_filter_age_equal(self):
+        rule_filter = TargetingCriteriaRuleFilter(
+            comparision_method="EQUALS",
+            field_name="total_households_h_f",
+            arguments=[4],
+            is_flex_field=True,
+        )
+        query = rule_filter.get_query()
+        queryset = Household.objects.filter(query)
+        self.assertEqual(queryset.count(), 1)
+        self.assertEqual(self.household_total_households_4.pk, queryset[0].pk)

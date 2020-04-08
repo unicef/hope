@@ -1,4 +1,4 @@
-from django.conf import settings
+  from django.conf import settings
 from django.contrib.postgres.fields import IntegerRangeField
 from django.contrib.postgres.fields import JSONField
 from django.contrib.postgres.validators import (
@@ -13,6 +13,7 @@ from model_utils import Choices
 from psycopg2.extras import NumericRange
 
 from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES
+from core.models import FlexibleAttribute
 from utils.models import TimeStampedUUIDModel
 
 _MAX_LEN = 256
@@ -229,6 +230,7 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
             "supported_types": ["INTEGER", "SELECT_ONE"],
         },
         "CONTAINS": {
+            "min_arguments": 1,
             "arguments": 1,
             "lookup": "__contains",
             "negative": True,
@@ -292,25 +294,7 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
             """
     )
 
-    def get_query_for_cor_field(self):
-        core_fields = CORE_FIELDS_ATTRIBUTES
-        core_field_attrs = [
-            attr for attr in core_fields if attr.get("name") == self.field_name
-        ]
-        if len(core_field_attrs) != 1:
-            raise ValidationError(
-                f"There are no Core Field Attributes associated with this fieldName {self.field_name}"
-            )
-        core_field_attr = core_field_attrs[0]
-        get_query = core_field_attr.get("get_query")
-        if get_query:
-            return get_query(self.comparision_method, self.arguments)
-        lookup = core_field_attr.get("lookup")
-        if not lookup:
-            raise ValidationError(
-                f"Core Field Attributes associated with this fieldName {self.field_name}"
-                f" doesn't have get_query method or lookup field"
-            )
+    def get_query_for_lookup(self, lookup):
         comparision_attribute = TargetingCriteriaRuleFilter.COMPARISION_ATTRIBUTES.get(
             self.comparision_method
         )
@@ -333,6 +317,37 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
             return ~query
         return query
 
+    def get_query_for_core_field(self):
+        core_fields = CORE_FIELDS_ATTRIBUTES
+        core_field_attrs = [
+            attr for attr in core_fields if attr.get("name") == self.field_name
+        ]
+        if len(core_field_attrs) != 1:
+            raise ValidationError(
+                f"There are no Core Field Attributes associated with this fieldName {self.field_name}"
+            )
+        core_field_attr = core_field_attrs[0]
+        get_query = core_field_attr.get("get_query")
+        if get_query:
+            return get_query(self.comparision_method, self.arguments)
+        lookup = core_field_attr.get("lookup")
+        if not lookup:
+            raise ValidationError(
+                f"Core Field Attributes associated with this fieldName {self.field_name}"
+                f" doesn't have get_query method or lookup field"
+            )
+        return self.get_query_for_lookup(lookup)
+
+    def get_query_for_flex_field(self):
+        flex_field_attr = FlexibleAttribute.objects.get(name=self.field_name)
+        if not flex_field_attr:
+            raise ValidationError(
+                f"There are no Core Field Attributes associated with this fieldName {self.field_name}"
+            )
+        lookup = f"{'individuals__' if flex_field_attr.associated_with else ''}flex_fields__{flex_field_attr.name}"
+        return self.get_query_for_lookup(lookup)
+
     def get_query(self):
         if not self.is_flex_field:
-            return self.get_query_for_cor_field()
+            return self.get_query_for_core_field()
+        return self.get_query_for_flex_field()
