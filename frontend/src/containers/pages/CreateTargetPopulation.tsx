@@ -10,7 +10,7 @@ import { Results } from '../../components/TargetPopulation/Results';
 import { TargetPopulationHouseholdTable } from '../tables/TargetPopulationHouseholdTable';
 import {
   useGoldenRecordByTargetingCriteriaQuery,
-  useCreateTargetPopulationMutation,
+  useCreateTpMutation,
 } from '../../__generated__/graphql';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
@@ -39,7 +39,7 @@ const initialValues = {
 
 export function CreateTargetPopulation() {
   const { t } = useTranslation();
-  const [mutate] = useCreateTargetPopulationMutation();
+  const [mutate] = useCreateTpMutation();
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
   return (
