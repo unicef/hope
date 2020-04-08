@@ -221,14 +221,6 @@ export type CreateTargetPopulationInput = {
   targetingCriteria: TargetingCriteriaObjectType,
 };
 
-export type CreateTargetPopulationMutation = {
-   __typename?: 'CreateTargetPopulationMutation',
-  targetPopulation?: Maybe<TargetPopulationNode>,
-};
-
-
-
-
 export type DeleteProgram = {
    __typename?: 'DeleteProgram',
   ok?: Maybe<Scalars['Boolean']>,
@@ -2552,6 +2544,22 @@ export type CreateProgramMutation = (
   )> }
 );
 
+export type CreateTargetPopulationMutationVariables = {
+  input: CreateTargetPopulationInput
+};
+
+
+export type CreateTargetPopulationMutation = (
+  { __typename?: 'Mutations' }
+  & { createTargetPopulation: Maybe<(
+    { __typename?: 'CreateTargetPopulationMutation' }
+    & { targetPopulation: Maybe<(
+      { __typename?: 'TargetPopulationNode' }
+      & Pick<TargetPopulationNode, 'id' | 'status'>
+    )> }
+  )> }
+);
+
 export type DeleteProgramMutationVariables = {
   programId: Scalars['String']
 };
@@ -3726,6 +3734,58 @@ export function useCreateProgramMutation(baseOptions?: ApolloReactHooks.Mutation
 export type CreateProgramMutationHookResult = ReturnType<typeof useCreateProgramMutation>;
 export type CreateProgramMutationResult = ApolloReactCommon.MutationResult<CreateProgramMutation>;
 export type CreateProgramMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateProgramMutation, CreateProgramMutationVariables>;
+export const CreateTargetPopulationDocument = gql`
+    mutation CreateTargetPopulation($input: CreateTargetPopulationInput!) {
+  createTargetPopulation(input: $input) {
+    targetPopulation {
+      id
+      status
+    }
+  }
+}
+    `;
+export type CreateTargetPopulationMutationFn = ApolloReactCommon.MutationFunction<CreateTargetPopulationMutation, CreateTargetPopulationMutationVariables>;
+export type CreateTargetPopulationComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<CreateTargetPopulationMutation, CreateTargetPopulationMutationVariables>, 'mutation'>;
+
+    export const CreateTargetPopulationComponent = (props: CreateTargetPopulationComponentProps) => (
+      <ApolloReactComponents.Mutation<CreateTargetPopulationMutation, CreateTargetPopulationMutationVariables> mutation={CreateTargetPopulationDocument} {...props} />
+    );
+    
+export type CreateTargetPopulationProps<TChildProps = {}> = ApolloReactHoc.MutateProps<CreateTargetPopulationMutation, CreateTargetPopulationMutationVariables> & TChildProps;
+export function withCreateTargetPopulation<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CreateTargetPopulationMutation,
+  CreateTargetPopulationMutationVariables,
+  CreateTargetPopulationProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, CreateTargetPopulationMutation, CreateTargetPopulationMutationVariables, CreateTargetPopulationProps<TChildProps>>(CreateTargetPopulationDocument, {
+      alias: 'createTargetPopulation',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCreateTargetPopulationMutation__
+ *
+ * To run a mutation, you first call `useCreateTargetPopulationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateTargetPopulationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createTargetPopulationMutation, { data, loading, error }] = useCreateTargetPopulationMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateTargetPopulationMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateTargetPopulationMutation, CreateTargetPopulationMutationVariables>) {
+        return ApolloReactHooks.useMutation<CreateTargetPopulationMutation, CreateTargetPopulationMutationVariables>(CreateTargetPopulationDocument, baseOptions);
+      }
+export type CreateTargetPopulationMutationHookResult = ReturnType<typeof useCreateTargetPopulationMutation>;
+export type CreateTargetPopulationMutationResult = ApolloReactCommon.MutationResult<CreateTargetPopulationMutation>;
+export type CreateTargetPopulationMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateTargetPopulationMutation, CreateTargetPopulationMutationVariables>;
 export const DeleteProgramDocument = gql`
     mutation DeleteProgram($programId: String!) {
   deleteProgram(programId: $programId) {
