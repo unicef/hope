@@ -41,7 +41,7 @@ export function ApprovedTargetPopulationHeaderButtons({
         <Button
           variant='contained'
           color='primary'
-          onClick={() => setOpenDuplicate(true)}
+          onClick={() => setOpenFinalize(true)}
         >
           Finalize
         </Button>
