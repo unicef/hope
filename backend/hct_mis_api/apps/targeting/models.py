@@ -1,4 +1,4 @@
-  from django.conf import settings
+from django.conf import settings
 from django.contrib.postgres.fields import IntegerRangeField
 from django.contrib.postgres.fields import JSONField
 from django.contrib.postgres.validators import (
