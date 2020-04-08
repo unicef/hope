@@ -2531,7 +2531,78 @@ export type ApproveTpMutation = (
     { __typename?: 'ApproveTargetPopulationMutation' }
     & { targetPopulation: Maybe<(
       { __typename?: 'TargetPopulationNode' }
-      & Pick<TargetPopulationNode, 'status'>
+      & Pick<TargetPopulationNode, 'id' | 'name' | 'status'>
+      & { households: (
+        { __typename?: 'HouseholdNodeConnection' }
+        & { edges: Array<Maybe<(
+          { __typename?: 'HouseholdNodeEdge' }
+          & { node: Maybe<(
+            { __typename?: 'HouseholdNode' }
+            & Pick<HouseholdNode, 'id' | 'householdCaId'>
+            & { headOfHousehold: Maybe<(
+              { __typename?: 'IndividualNode' }
+              & Pick<IndividualNode, 'fullName'>
+            )>, location: (
+              { __typename?: 'LocationNode' }
+              & Pick<LocationNode, 'title'>
+            ) }
+          )> }
+        )>> }
+      ), candidateListTargetingCriteria: Maybe<(
+        { __typename?: 'TargetingCriteriaNode' }
+        & { targetPopulationCandidate: Maybe<(
+          { __typename?: 'TargetPopulationNode' }
+          & { createdBy: Maybe<(
+            { __typename?: 'UserNode' }
+            & Pick<UserNode, 'firstName' | 'lastName'>
+          )>, program: Maybe<(
+            { __typename?: 'ProgramNode' }
+            & Pick<ProgramNode, 'id' | 'name'>
+          )> }
+        )>, rules: Maybe<Array<Maybe<(
+          { __typename?: 'TargetingCriteriaRuleNode' }
+          & Pick<TargetingCriteriaRuleNode, 'id'>
+          & { filters: Maybe<Array<Maybe<(
+            { __typename?: 'TargetingCriteriaRuleFilterNode' }
+            & Pick<TargetingCriteriaRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod'>
+            & { fieldAttribute: Maybe<(
+              { __typename?: 'FieldAttributeNode' }
+              & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
+              & { choices: Maybe<Array<Maybe<(
+                { __typename?: 'CoreFieldChoiceObject' }
+                & Pick<CoreFieldChoiceObject, 'value' | 'labelEn'>
+              )>>> }
+            )> }
+          )>>> }
+        )>>> }
+      )>, finalListTargetingCriteria: Maybe<(
+        { __typename?: 'TargetingCriteriaNode' }
+        & { targetPopulationFinal: Maybe<(
+          { __typename?: 'TargetPopulationNode' }
+          & { createdBy: Maybe<(
+            { __typename?: 'UserNode' }
+            & Pick<UserNode, 'firstName' | 'lastName'>
+          )>, program: Maybe<(
+            { __typename?: 'ProgramNode' }
+            & Pick<ProgramNode, 'id' | 'name'>
+          )> }
+        )>, rules: Maybe<Array<Maybe<(
+          { __typename?: 'TargetingCriteriaRuleNode' }
+          & Pick<TargetingCriteriaRuleNode, 'id'>
+          & { filters: Maybe<Array<Maybe<(
+            { __typename?: 'TargetingCriteriaRuleFilterNode' }
+            & Pick<TargetingCriteriaRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod'>
+            & { fieldAttribute: Maybe<(
+              { __typename?: 'FieldAttributeNode' }
+              & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
+              & { choices: Maybe<Array<Maybe<(
+                { __typename?: 'CoreFieldChoiceObject' }
+                & Pick<CoreFieldChoiceObject, 'value' | 'labelEn'>
+              )>>> }
+            )> }
+          )>>> }
+        )>>> }
+      )> }
     )> }
   )> }
 );
@@ -3458,7 +3529,10 @@ export type UploadImportDataXlsxFileMutation = (
 
 export type CandidateHouseholdsListByTargetingCriteriaQueryVariables = {
   targetPopulation: Scalars['ID'],
-  first?: Maybe<Scalars['Int']>
+  first?: Maybe<Scalars['Int']>,
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -3634,7 +3708,83 @@ export const ApproveTpDocument = gql`
     mutation ApproveTP($id: ID!, $programId: ID!) {
   approveTargetPopulation(id: $id, programId: $programId) {
     targetPopulation {
+      id
+      name
       status
+      households {
+        edges {
+          node {
+            id
+            headOfHousehold {
+              fullName
+            }
+            householdCaId
+            location {
+              title
+            }
+          }
+        }
+      }
+      candidateListTargetingCriteria {
+        targetPopulationCandidate {
+          createdBy {
+            firstName
+            lastName
+          }
+          program {
+            id
+            name
+          }
+        }
+        rules {
+          id
+          filters {
+            fieldName
+            isFlexField
+            arguments
+            comparisionMethod
+            fieldAttribute {
+              name
+              labelEn
+              type
+              choices {
+                value
+                labelEn
+              }
+            }
+          }
+        }
+      }
+      finalListTargetingCriteria {
+        targetPopulationFinal {
+          createdBy {
+            firstName
+            lastName
+          }
+          program {
+            id
+            name
+          }
+        }
+        rules {
+          id
+          filters {
+            fieldName
+            isFlexField
+            arguments
+            comparisionMethod
+            fieldAttribute {
+              name
+              labelEn
+              type
+              choices {
+                value
+                labelEn
+              }
+            }
+          }
+        }
+      }
     }
   }
 }
@@ -5970,8 +6120,8 @@ export type UploadImportDataXlsxFileMutationHookResult = ReturnType<typeof useUp
 export type UploadImportDataXlsxFileMutationResult = ApolloReactCommon.MutationResult<UploadImportDataXlsxFileMutation>;
 export type UploadImportDataXlsxFileMutationOptions = ApolloReactCommon.BaseMutationOptions<UploadImportDataXlsxFileMutation, UploadImportDataXlsxFileMutationVariables>;
 export const CandidateHouseholdsListByTargetingCriteriaDocument = gql`
-    query candidateHouseholdsListByTargetingCriteria($targetPopulation: ID!, $first: Int) {
-  candidateHouseholdsListByTargetingCriteria(targetPopulation: $targetPopulation, first: $first) {
+    query candidateHouseholdsListByTargetingCriteria($targetPopulation: ID!, $first: Int, $after: String, $before: String, $last: Int) {
+  candidateHouseholdsListByTargetingCriteria(targetPopulation: $targetPopulation, after: $after, before: $before, first: $first, last: $last) {
     edges {
       node {
         id
@@ -6023,6 +6173,9 @@ export function withCandidateHouseholdsListByTargetingCriteria<TProps, TChildPro
  *   variables: {
  *      targetPopulation: // value for 'targetPopulation'
  *      first: // value for 'first'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      last: // value for 'last'
  *   },
  * });
  */

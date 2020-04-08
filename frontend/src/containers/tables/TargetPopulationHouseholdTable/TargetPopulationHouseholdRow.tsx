@@ -15,7 +15,7 @@ export function TargetPopulationHouseholdTableRow({ household }) {
   const businessArea = useBusinessArea();
 
   const handleClick = (): void => {
-    const path = `/${businessArea}/target-population/${household.id}`;
+    const path = `/${businessArea}/population/household/${household.id}`;
     history.push(path);
   };
   return (
