@@ -82,12 +82,12 @@ export function CreateTargetPopulation() {
           />
           <Results />
           {values.criterias.length ? (
-            <p>Testing</p>
-            // <TargetPopulationHouseholdTable
-            //   variables={{targetingCriteria: {rules: values.criterias}}}
-            //   query={useGoldenRecordByTargetingCriteriaQuery}
-            //   queryObjectName='candidateHouseholdsListByTargetingCriteria'
-            // />
+            // <p>Testing</p>
+            <TargetPopulationHouseholdTable
+              variables={{targetingCriteria: {rules: values.criterias}}}
+              query={useGoldenRecordByTargetingCriteriaQuery}
+              queryObjectName='candidateHouseholdsListByTargetingCriteria'
+            />
           ) : (
             <PaperContainer>
               <Typography variant='h6'>
