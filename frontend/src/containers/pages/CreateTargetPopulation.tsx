@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { Button, Typography, Paper, Tabs, Tab } from '@material-ui/core';
 import { Field, Form, Formik, FieldArray } from 'formik';
 import { PageHeader } from '../../components/PageHeader';
-import { TargetPopulationFormikHeader } from '../../components/TargetPopulation/TargetPopulationFormikHeader'
 import { TargetingCriteria } from '../../components/TargetPopulation/TargetingCriteria';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { Results } from '../../components/TargetPopulation/Results';
@@ -108,6 +107,7 @@ export function CreateTargetPopulation() {
             }
             breadCrumbs={breadCrumbsItems}
             tabs={tabs}
+            hasInputComponent
           >
             <>
               <ButtonContainer>

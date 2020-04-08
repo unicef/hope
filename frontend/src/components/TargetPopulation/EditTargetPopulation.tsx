@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { Typography, Paper, Button } from '@material-ui/core';
+import { Typography, Paper, Button, Tabs, Tab } from '@material-ui/core';
 import { Formik, Form, Field, FieldArray } from 'formik';
 import { Results } from './Results';
 import { TargetingCriteria } from './TargetingCriteria';
 import { PageHeader } from '../PageHeader';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
+import { BreadCrumbsItem } from '../BreadCrumbs';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
 
 const PaperContainer = styled(Paper)`
   display: flex;
@@ -44,10 +46,28 @@ export function EditTargetPopulation({
   targetPopulationCriterias,
   cancelEdit,
 }: EditTargetPopulationProps) {
+  const businessArea = useBusinessArea();
   const initialValues = {
     name: targetPopulationName || '',
     criterias: targetPopulationCriterias.rules || [],
   };
+  const breadCrumbsItems: BreadCrumbsItem[] = [
+    {
+      title: 'Targeting',
+      to: `/${businessArea}/target-population/`,
+    },
+  ];
+  const tabs = (
+    <Tabs
+      value={0}
+      aria-label='tabs'
+      indicatorColor='primary'
+      textColor='primary'
+    >
+      <Tab label='Candidate list' />
+      <Tab label='Target Population' disabled />
+    </Tabs>
+  );
   return (
     <Formik
       initialValues={initialValues}
@@ -68,6 +88,9 @@ export function EditTargetPopulation({
                 component={FormikTextField}
               />
             }
+            tabs={tabs}
+            breadCrumbs={breadCrumbsItems}
+            hasInputComponent
           >
             <>
               {values.name && (
