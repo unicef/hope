@@ -14,19 +14,19 @@ const TableWrapper = styled.div`
 
 interface TargetPopulationHouseholdProps {
   id?: string;
-  query?
-  queryObjectName?
-  variables?
+  query?;
+  queryObjectName?;
+  variables?;
 }
 
 export const TargetPopulationHouseholdTable = ({
   id,
   query,
   queryObjectName,
-  variables
-}:TargetPopulationHouseholdProps): ReactElement => {
+  variables,
+}: TargetPopulationHouseholdProps): ReactElement => {
   const initialVariables = {
-    ...(id && {targetPopulation: id}),
+    ...(id && { targetPopulation: id }),
     ...variables
   };
   return (

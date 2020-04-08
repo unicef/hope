@@ -82,11 +82,26 @@ export function CreateTargetPopulation() {
           />
           <Results />
           {values.criterias.length ? (
-            // <p>Testing</p>
             <TargetPopulationHouseholdTable
-              variables={{targetingCriteria: {rules: values.criterias}}}
+              variables={{
+                targetingCriteria: {
+                  rules: values.criterias.map((rule) => {
+                    return {
+                      ...rule,
+                      filters: rule.filters.map((each) => {
+                        return {
+                          comparisionMethod: each.comparisionMethod,
+                          arguments: each.arguments,
+                          fieldName: each.fieldName,
+                          isFlexField: each.isFlexField,
+                        };
+                      }),
+                    };
+                  }),
+                },
+              }}
               query={useGoldenRecordByTargetingCriteriaQuery}
-              queryObjectName='candidateHouseholdsListByTargetingCriteria'
+              queryObjectName='goldenRecordByTargetingCriteria'
             />
           ) : (
             <PaperContainer>
