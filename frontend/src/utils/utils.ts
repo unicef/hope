@@ -246,7 +246,8 @@ export function formatCriteriaFilters({ filters }) {
       fieldName: each.fieldName,
       isFlexField: each.isFlexField,
       fieldAttribute: {
-        ...each.fieldAttribute
+        labelEn: each.fieldAttribute.labelEn,
+        type: each.fieldAttribute.type,
       },
     };
   });
