@@ -30,12 +30,12 @@ const resultsData = {
   maleAdults: 12,
 };
 
-export function TargetPopulationCore({ targetPopulation, id }) {
+export function TargetPopulationCore({ targetPopulation, id, status }) {
   if (!targetPopulation) return null;
   const { rules } = targetPopulation;
   return (
     <>
-      {targetPopulation.status === 'FINALIZED' && (
+      {(status === 'APPROVED' || status === 'FINALIZED') && (
         <TargetPopulationDetails targetPopulation={targetPopulation} />
       )}
       <TargetingCriteria criterias={rules} />
