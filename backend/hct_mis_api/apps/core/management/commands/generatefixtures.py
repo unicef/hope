@@ -1,15 +1,16 @@
 import random
 import time
 
+from django.core.management import BaseCommand, call_command
+from django.db import transaction
+
 from account.fixtures import UserFactory
 from core.fixtures import LocationFactory
 from core.models import BusinessArea
-from django.core.management import BaseCommand, call_command
-from django.db import transaction
 from household.fixtures import (
-    EntitlementCardFactory,
     HouseholdFactory,
     IndividualFactory,
+    EntitlementCardFactory,
 )
 from payment.fixtures import PaymentRecordFactory
 from program.fixtures import CashPlanFactory, ProgramFactory
@@ -20,7 +21,12 @@ from registration_datahub.fixtures import (
     ImportedIndividualFactory,
     ImportedHouseholdFactory,
 )
-from targeting.fixtures import TargetPopulationFactory, TargetRuleFactory
+from targeting.fixtures import (
+    TargetPopulationFactory,
+    TargetingCriteriaRuleFactory,
+    TargetingCriteriaRuleFilterFactory,
+    TargetingCriteriaFactory,
+)
 
 
 class Command(BaseCommand):
@@ -81,10 +87,25 @@ class Command(BaseCommand):
         program = ProgramFactory(
             business_area=business_area, locations=locations,
         )
+        targeting_criteria = TargetingCriteriaFactory()
+        rules = TargetingCriteriaRuleFactory.create_batch(
+            random.randint(1, 3), targeting_criteria=targeting_criteria
+        )
 
+        for rule in rules:
+            TargetingCriteriaRuleFilterFactory.create_batch(
+                random.randint(1, 5), targeting_criteria_rule=rule
+            )
+
+        target_population = TargetPopulationFactory(
+            created_by=user,
+            candidate_list_targeting_criteria=targeting_criteria,
+        )
         for _ in range(cash_plans_amount):
             cash_plan = CashPlanFactory.build(
-                program=program, created_by=user, target_population=None,
+                program=program,
+                created_by=user,
+                target_population=target_population,
             )
 
             for _ in range(payment_record_amount):
@@ -106,15 +127,6 @@ class Command(BaseCommand):
                 household.save()
 
                 household.programs.add(program)
-
-                # Coz Generate Target Rules based off the Household criteria.
-                target_rules_dict = TargetRuleFactory.generate_target_rules_dict(households=[household])
-                target_rules = [TargetRuleFactory.create(**rule_dict) for rule_dict in target_rules_dict]
-
-                target_population = TargetPopulationFactory(
-                    households=[household], created_by=user,
-                )
-                target_population.target_rules.add(*target_rules)
 
                 cash_plan.target_population = target_population
                 cash_plan.save()
