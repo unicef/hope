@@ -13,10 +13,13 @@ import {
 import { Field, Formik, FieldArray } from 'formik';
 import { useImportedIndividualFieldsQuery } from '../../__generated__/graphql';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
-import { AddCircleOutline, Delete } from '@material-ui/icons';
+import { AddCircleOutline, Delete, FilterSharp } from '@material-ui/icons';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { SubField } from '../../components/TargetPopulation/SubField';
-import { formatCriteriaFilters } from '../../utils/utils';
+import {
+  formatCriteriaFilters,
+  mapCriteriasToInitialValues,
+} from '../../utils/utils';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -115,8 +118,9 @@ export function TargetCriteriaForm({
   title,
 }): React.ReactElement {
   const { data, loading } = useImportedIndividualFieldsQuery();
+  const mappedFilters = mapCriteriasToInitialValues(criteria);
   const initialValue = {
-    filters: criteria.filters || [{ fieldName: '' }],
+    filters: mappedFilters,
   };
 
   //create a hook?
@@ -157,7 +161,6 @@ export function TargetCriteriaForm({
 
   if (loading) return null;
 
-  
   return (
     <DialogContainer>
       <Formik
