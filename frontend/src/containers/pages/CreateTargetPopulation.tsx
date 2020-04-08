@@ -1,9 +1,10 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
-import { Button, Typography, Paper } from '@material-ui/core';
+import { Button, Typography, Paper, Tabs, Tab } from '@material-ui/core';
 import { Field, Form, Formik, FieldArray } from 'formik';
 import { PageHeader } from '../../components/PageHeader';
+import { TargetPopulationFormikHeader } from '../../components/TargetPopulation/TargetPopulationFormikHeader'
 import { TargetingCriteria } from '../../components/TargetPopulation/TargetingCriteria';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { Results } from '../../components/TargetPopulation/Results';
@@ -14,6 +15,7 @@ import {
 } from '../../__generated__/graphql';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { BreadCrumbsItem } from '../../components/BreadCrumbs';
 
 const PaperContainer = styled(Paper)`
   display: flex;
@@ -42,6 +44,23 @@ export function CreateTargetPopulation() {
   const [mutate] = useCreateTpMutation();
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
+  const breadCrumbsItems: BreadCrumbsItem[] = [
+    {
+      title: 'Targeting',
+      to: `/${businessArea}/target-population/`,
+    },
+  ];
+  const tabs = (
+    <Tabs
+      value={0}
+      aria-label='tabs'
+      indicatorColor='primary'
+      textColor='primary'
+    >
+      <Tab label='Candidate list' />
+      <Tab label='Target Population' disabled />
+    </Tabs>
+  );
   return (
     <Formik
       initialValues={initialValues}
@@ -68,7 +87,6 @@ export function CreateTargetPopulation() {
             },
           },
         });
-        console.log(data)
         showMessage('Target Population Created', {
           pathname: `/${businessArea}/target-population/${data.createTargetPopulation.targetPopulation.id}`,
           historyMethod: 'push',
@@ -88,6 +106,8 @@ export function CreateTargetPopulation() {
                 component={FormikTextField}
               />
             }
+            breadCrumbs={breadCrumbsItems}
+            tabs={tabs}
           >
             <>
               <ButtonContainer>
@@ -95,7 +115,7 @@ export function CreateTargetPopulation() {
                   variant='contained'
                   color='primary'
                   onClick={submitForm}
-                  disabled={!values.name}
+                  disabled={!values.name || !values.criterias.length}
                 >
                   Save
                 </Button>
