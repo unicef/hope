@@ -12,8 +12,6 @@ metadata:
     redeploy: "true"
   namespace: {{ .Values.namespace }}
 spec:
-  successfulJobsHistoryLimit: 0
-  failedJobsHistoryLimit: 1
   template:
     spec:
       containers:
@@ -48,8 +46,6 @@ metadata:
     redeploy: "true"
   namespace: {{ .Values.namespace }}
 spec:
-  successfulJobsHistoryLimit: 0
-  failedJobsHistoryLimit: 1
   template:
     spec:
       containers:
