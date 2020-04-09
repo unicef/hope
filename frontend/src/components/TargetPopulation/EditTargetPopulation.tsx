@@ -90,7 +90,6 @@ export function EditTargetPopulation({
               targetingCriteria: {
                 rules: values.criterias.map((rule) => {
                   return {
-                    ...rule,
                     filters: rule.filters.map((each) => {
                       return {
                         comparisionMethod: each.comparisionMethod,

@@ -2709,7 +2709,62 @@ export type UpdateTpMutation = (
     { __typename?: 'UpdateTargetPopulationMutation' }
     & { targetPopulation: Maybe<(
       { __typename?: 'TargetPopulationNode' }
-      & Pick<TargetPopulationNode, 'id' | 'status'>
+      & Pick<TargetPopulationNode, 'id' | 'name' | 'status'>
+      & { candidateListTargetingCriteria: Maybe<(
+        { __typename?: 'TargetingCriteriaNode' }
+        & { targetPopulationCandidate: Maybe<(
+          { __typename?: 'TargetPopulationNode' }
+          & { createdBy: Maybe<(
+            { __typename?: 'UserNode' }
+            & Pick<UserNode, 'firstName' | 'lastName'>
+          )>, program: Maybe<(
+            { __typename?: 'ProgramNode' }
+            & Pick<ProgramNode, 'id' | 'name'>
+          )> }
+        )>, rules: Maybe<Array<Maybe<(
+          { __typename?: 'TargetingCriteriaRuleNode' }
+          & Pick<TargetingCriteriaRuleNode, 'id'>
+          & { filters: Maybe<Array<Maybe<(
+            { __typename?: 'TargetingCriteriaRuleFilterNode' }
+            & Pick<TargetingCriteriaRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod'>
+            & { fieldAttribute: Maybe<(
+              { __typename?: 'FieldAttributeNode' }
+              & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
+              & { choices: Maybe<Array<Maybe<(
+                { __typename?: 'CoreFieldChoiceObject' }
+                & Pick<CoreFieldChoiceObject, 'value' | 'labelEn'>
+              )>>> }
+            )> }
+          )>>> }
+        )>>> }
+      )>, finalListTargetingCriteria: Maybe<(
+        { __typename?: 'TargetingCriteriaNode' }
+        & { targetPopulationFinal: Maybe<(
+          { __typename?: 'TargetPopulationNode' }
+          & { createdBy: Maybe<(
+            { __typename?: 'UserNode' }
+            & Pick<UserNode, 'firstName' | 'lastName'>
+          )>, program: Maybe<(
+            { __typename?: 'ProgramNode' }
+            & Pick<ProgramNode, 'id' | 'name'>
+          )> }
+        )>, rules: Maybe<Array<Maybe<(
+          { __typename?: 'TargetingCriteriaRuleNode' }
+          & Pick<TargetingCriteriaRuleNode, 'id'>
+          & { filters: Maybe<Array<Maybe<(
+            { __typename?: 'TargetingCriteriaRuleFilterNode' }
+            & Pick<TargetingCriteriaRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod'>
+            & { fieldAttribute: Maybe<(
+              { __typename?: 'FieldAttributeNode' }
+              & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
+              & { choices: Maybe<Array<Maybe<(
+                { __typename?: 'CoreFieldChoiceObject' }
+                & Pick<CoreFieldChoiceObject, 'value' | 'labelEn'>
+              )>>> }
+            )> }
+          )>>> }
+        )>>> }
+      )> }
     )> }
   )> }
 );
@@ -4167,7 +4222,68 @@ export const UpdateTpDocument = gql`
   updateTargetPopulation(input: $input) {
     targetPopulation {
       id
+      name
       status
+      candidateListTargetingCriteria {
+        targetPopulationCandidate {
+          createdBy {
+            firstName
+            lastName
+          }
+          program {
+            id
+            name
+          }
+        }
+        rules {
+          id
+          filters {
+            fieldName
+            isFlexField
+            arguments
+            comparisionMethod
+            fieldAttribute {
+              name
+              labelEn
+              type
+              choices {
+                value
+                labelEn
+              }
+            }
+          }
+        }
+      }
+      finalListTargetingCriteria {
+        targetPopulationFinal {
+          createdBy {
+            firstName
+            lastName
+          }
+          program {
+            id
+            name
+          }
+        }
+        rules {
+          id
+          filters {
+            fieldName
+            isFlexField
+            arguments
+            comparisionMethod
+            fieldAttribute {
+              name
+              labelEn
+              type
+              choices {
+                value
+                labelEn
+              }
+            }
+          }
+        }
+      }
     }
   }
 }
