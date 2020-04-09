@@ -48,7 +48,7 @@ export function ApproveCandidateList({ open, setOpen, targetPopulationId }) {
   const { data: programs } = useAllProgramsQuery();
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
-  const [mutate] = useApproveTpMutation();
+  const [mutate, loading] = useApproveTpMutation();
   if (!programs) return null;
   const choices = programs.allPrograms.edges.map((program) => {
     return { ...program.node, value: program.node.id };
@@ -67,6 +67,8 @@ export function ApproveCandidateList({ open, setOpen, targetPopulationId }) {
           mutate({
             variables: { id: targetPopulationId, programId: values.program },
           }).then((res) => {
+            //eslint-disable-next-line
+            debugger
             setOpen(false);
             showMessage('Candidate List Approved', {
               pathname: `/${businessArea}/target-population/${targetPopulationId}`,
@@ -107,6 +109,7 @@ export function ApproveCandidateList({ open, setOpen, targetPopulationId }) {
                   color='primary'
                   variant='contained'
                   onClick={submitForm}
+                  disabled={!loading}
                 >
                   Approve
                 </Button>
