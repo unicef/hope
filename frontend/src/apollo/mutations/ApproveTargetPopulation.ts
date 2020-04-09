@@ -6,20 +6,6 @@ export const ApproveTargetPopulation = gql`
         id
         name
         status
-        households {
-          edges {
-            node {
-              id
-              headOfHousehold {
-                fullName
-              }
-              householdCaId
-              location {
-                title
-              }
-            }
-          }
-        }
         candidateListTargetingCriteria {
           targetPopulationCandidate {
             createdBy {
