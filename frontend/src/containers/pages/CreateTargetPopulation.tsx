@@ -33,13 +33,12 @@ const Label = styled.p`
   color: #b1b1b5;
 `;
 
-const initialValues = {
-  name: '',
-  criterias: [],
-};
-
 export function CreateTargetPopulation() {
   const { t } = useTranslation();
+  const initialValues = {
+    name: '',
+    criterias: [],
+  };
   const [mutate] = useCreateTpMutation();
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
@@ -139,7 +138,6 @@ export function CreateTargetPopulation() {
                 targetingCriteria: {
                   rules: values.criterias.map((rule) => {
                     return {
-                      ...rule,
                       filters: rule.filters.map((each) => {
                         return {
                           comparisionMethod: each.comparisionMethod,
