@@ -67,8 +67,6 @@ export function ApproveCandidateList({ open, setOpen, targetPopulationId }) {
           mutate({
             variables: { id: targetPopulationId, programId: values.program },
           }).then((res) => {
-            //eslint-disable-next-line
-            debugger
             setOpen(false);
             showMessage('Candidate List Approved', {
               pathname: `/${businessArea}/target-population/${targetPopulationId}`,
@@ -109,7 +107,7 @@ export function ApproveCandidateList({ open, setOpen, targetPopulationId }) {
                   color='primary'
                   variant='contained'
                   onClick={submitForm}
-                  disabled={!loading}
+                  disabled={!loading || !values.program}
                 >
                   Approve
                 </Button>
