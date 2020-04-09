@@ -4,44 +4,32 @@ import { TargetPopulationNode } from '../../../__generated__/graphql';
 export const headCells: HeadCell<TargetPopulationNode>[] = [
     {
       disablePadding: false,
-      label: 'Name',
-      id: 'name',
+      label: 'Id',
+      id: 'id',
       numeric: false,
     },
     {
       disablePadding: false,
-      label: 'Status',
-      id: 'status',
+      label: 'Head of Household',
+      id: 'headOfHousehold',
       numeric: false,
     },
     {
       disablePadding: false,
-      label: 'No. of Households Candidate List',
-      id: 'candidateListTotalHouseholds',
+      label: 'Household size',
+      id: 'householdSize',
       numeric: false,
     },
     {
       disablePadding: false,
-      label: 'No. of Households Final List',
-      id: 'finalListTotalHouseholds',
+      label: 'Location',
+      id: 'location',
       numeric: false,
     },
     {
       disablePadding: false,
-      label: 'Date Created',
-      id: 'createdAt',
-      numeric: false,
-    },
-    {
-      disablePadding: false,
-      label: 'Last edited',
+      label: 'Last Inspection',
       id: 'lastEditedAt',
-      numeric: false,
-    },
-    {
-      disablePadding: false,
-      label: 'Created by',
-      id: 'createdByName',
       numeric: false,
     },
   ];
