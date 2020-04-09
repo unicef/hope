@@ -8,9 +8,20 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { InProgressTargetPopulationHeaderButtons } from './InProgressTargetPopulationHeaderButtons';
 import { FinalizedTargetPopulationHeaderButtons } from './FinalizedTargetPopulationHeaderButtons';
 import { EditTargetPopulationHeader } from './EditTargetPopulationHeader';
+import { ApprovedTargetPopulationHeaderButtons } from './ApprovedTargetPopulationHeaderButtons';
+import { StatusBox } from '../../../components/StatusBox';
+import { targetPopulationStatusToColor } from '../../../utils/utils';
 
-const ButtonContainer = styled.span`
-  margin: 0 ${({ theme }) => theme.spacing(2)}px;
+const HeaderWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  div {
+    margin: 0 0 0 ${({ theme }) => theme.spacing(3)}px;
+  }
+`;
+const StatusWrapper = styled.div`
+  width: 140px;
 `;
 
 export interface ProgramDetailsPageHeaderPropTypes {
@@ -18,28 +29,41 @@ export interface ProgramDetailsPageHeaderPropTypes {
   isEditMode: boolean;
   setEditState: Function;
   targetPopulation: TargetPopulationNode;
+  tabs: React.ReactElement;
+  selectedTab: number;
 }
 
 export function TargetPopulationPageHeader({
   targetPopulation,
   isEditMode,
   setEditState,
+  tabs,
+  selectedTab,
 }: ProgramDetailsPageHeaderPropTypes): React.ReactElement {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
-      title: 'Target Population',
+      title: 'Targeting',
       to: `/${businessArea}/target-population/`,
     },
   ];
   //TODO: Use statuses from node - not in backend yet
   let buttons;
   switch (targetPopulation.status) {
-    case 'IN_PROGRESS':
+    case 'DRAFT':
       buttons = (
         <InProgressTargetPopulationHeaderButtons
           targetPopulation={targetPopulation}
+          setEditState={setEditState}
+        />
+      );
+      break;
+    case 'APPROVED':
+      buttons = (
+        <ApprovedTargetPopulationHeaderButtons
+          targetPopulation={targetPopulation}
+          selectedTab={selectedTab}
           setEditState={setEditState}
         />
       );
@@ -52,27 +76,30 @@ export function TargetPopulationPageHeader({
       );
       break;
     default:
-      //TODO: this could be edit case, in such scenario 
+      //TODO: this could be edit case, in such scenario
       //wrap other components in page header
-      buttons = (
-        <EditTargetPopulationHeader />
-      );
+      buttons = <EditTargetPopulationHeader />;
       break;
   }
   return (
     <>
-      {isEditMode ? (
-        <PageHeader title={<div>Edit input</div>}>
-          <EditTargetPopulationHeader />
-        </PageHeader>
-      ) : (
-        <PageHeader
-          title={t(`${targetPopulation.name}`)}
-          breadCrumbs={breadCrumbsItems}
-        >
-          {buttons}
-        </PageHeader>
-      )}
+      <PageHeader
+        title={
+          <HeaderWrapper>
+            {t(`${targetPopulation.name}`)}
+            <StatusWrapper>
+              <StatusBox
+                status={targetPopulation.status}
+                statusToColor={targetPopulationStatusToColor}
+              />
+            </StatusWrapper>
+          </HeaderWrapper>
+        }
+        breadCrumbs={breadCrumbsItems}
+        tabs={tabs}
+      >
+        {buttons}
+      </PageHeader>
     </>
   );
 }
