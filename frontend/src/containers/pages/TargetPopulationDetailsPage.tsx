@@ -44,6 +44,7 @@ export function TargetPopulationDetailsPage() {
     <div>
       {isEdit ? (
         <EditTargetPopulation
+          id={targetPopulation.id}
           targetPopulationName={targetPopulation.name}
           targetPopulationCriterias={targetPopulation.candidateListTargetingCriteria}
           cancelEdit={() => setEditState(false)}

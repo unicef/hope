@@ -2627,6 +2627,22 @@ export type UpdateProgramMutation = (
   )> }
 );
 
+export type UpdateTpMutationVariables = {
+  input: UpdateTargetPopulationInput
+};
+
+
+export type UpdateTpMutation = (
+  { __typename?: 'Mutations' }
+  & { updateTargetPopulation: Maybe<(
+    { __typename?: 'UpdateTargetPopulationMutation' }
+    & { targetPopulation: Maybe<(
+      { __typename?: 'TargetPopulationNode' }
+      & Pick<TargetPopulationNode, 'id' | 'status'>
+    )> }
+  )> }
+);
+
 export type AllBusinessAreasQueryVariables = {};
 
 
@@ -4015,6 +4031,58 @@ export function useUpdateProgramMutation(baseOptions?: ApolloReactHooks.Mutation
 export type UpdateProgramMutationHookResult = ReturnType<typeof useUpdateProgramMutation>;
 export type UpdateProgramMutationResult = ApolloReactCommon.MutationResult<UpdateProgramMutation>;
 export type UpdateProgramMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdateProgramMutation, UpdateProgramMutationVariables>;
+export const UpdateTpDocument = gql`
+    mutation UpdateTP($input: UpdateTargetPopulationInput!) {
+  updateTargetPopulation(input: $input) {
+    targetPopulation {
+      id
+      status
+    }
+  }
+}
+    `;
+export type UpdateTpMutationFn = ApolloReactCommon.MutationFunction<UpdateTpMutation, UpdateTpMutationVariables>;
+export type UpdateTpComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<UpdateTpMutation, UpdateTpMutationVariables>, 'mutation'>;
+
+    export const UpdateTpComponent = (props: UpdateTpComponentProps) => (
+      <ApolloReactComponents.Mutation<UpdateTpMutation, UpdateTpMutationVariables> mutation={UpdateTpDocument} {...props} />
+    );
+    
+export type UpdateTpProps<TChildProps = {}> = ApolloReactHoc.MutateProps<UpdateTpMutation, UpdateTpMutationVariables> & TChildProps;
+export function withUpdateTp<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  UpdateTpMutation,
+  UpdateTpMutationVariables,
+  UpdateTpProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, UpdateTpMutation, UpdateTpMutationVariables, UpdateTpProps<TChildProps>>(UpdateTpDocument, {
+      alias: 'updateTp',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useUpdateTpMutation__
+ *
+ * To run a mutation, you first call `useUpdateTpMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateTpMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateTpMutation, { data, loading, error }] = useUpdateTpMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateTpMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdateTpMutation, UpdateTpMutationVariables>) {
+        return ApolloReactHooks.useMutation<UpdateTpMutation, UpdateTpMutationVariables>(UpdateTpDocument, baseOptions);
+      }
+export type UpdateTpMutationHookResult = ReturnType<typeof useUpdateTpMutation>;
+export type UpdateTpMutationResult = ApolloReactCommon.MutationResult<UpdateTpMutation>;
+export type UpdateTpMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdateTpMutation, UpdateTpMutationVariables>;
 export const AllBusinessAreasDocument = gql`
     query AllBusinessAreas {
   allBusinessAreas {
