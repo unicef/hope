@@ -23,6 +23,7 @@ const Title = styled.div`
 const ContentWrapper = styled.div`
   display: flex;
   flex-wrap: wrap;
+  padding: ${({ theme }) => theme.spacing(4)}px 0;
 `;
 
 const Divider = styled.div`
@@ -66,6 +67,10 @@ const AddCriteria = styled.div`
     font-weight: 500;
     margin: 0 0 0 ${({ theme }) => theme.spacing(2)}px;
   }
+`;
+
+const Row = styled.div`
+  width: 100%;
 `;
 
 interface TargetingCriteriaProps {
@@ -135,10 +140,11 @@ export function TargetingCriteria({
             </>
           )}
         </Title>
-        <ContentWrapper>
-          {showAdditionalCriterias ? (
-            <>
-              {candidateListRules.length ? (
+
+        {showAdditionalCriterias ? (
+          <>
+            <ContentWrapper>
+              {candidateListRules.length &&
                 candidateListRules.map((criteria, index) => {
                   return (
                     <>
@@ -160,16 +166,9 @@ export function TargetingCriteria({
                       )}
                     </>
                   );
-                })
-              ) : (
-                <AddCriteria onClick={() => setOpen(true)}>
-                  <AddCircleOutline />
-                  <p>Add Criteria</p>
-                </AddCriteria>
-              )}
-            </>
-          ) : (
-            <>
+                })}
+            </ContentWrapper>
+            <ContentWrapper>
               {candidateListRules.length ? (
                 candidateListRules.map((criteria, index) => {
                   return (
@@ -200,9 +199,41 @@ export function TargetingCriteria({
                   <p>Add Criteria</p>
                 </AddCriteria>
               )}
-            </>
-          )}
-        </ContentWrapper>
+            </ContentWrapper>
+          </>
+        ) : (
+          <ContentWrapper>
+            {candidateListRules.length ? (
+              candidateListRules.map((criteria, index) => {
+                return (
+                  <>
+                    <Criteria
+                      //eslint-disable-next-line
+                      key={criteria.id || index}
+                      isEdit={isEdit}
+                      canRemove={candidateListRules.length > 1}
+                      rules={criteria.filters}
+                      editFunction={() => editCriteria(criteria, index)}
+                      removeFunction={() => helpers.remove(index)}
+                    />
+
+                    {index === candidateListRules.length - 1 ||
+                    (candidateListRules.length === 1 && index === 0) ? null : (
+                      <Divider>
+                        <DividerLabel>Or</DividerLabel>
+                      </Divider>
+                    )}
+                  </>
+                );
+              })
+            ) : (
+              <AddCriteria onClick={() => setOpen(true)}>
+                <AddCircleOutline />
+                <p>Add Criteria</p>
+              </AddCriteria>
+            )}
+          </ContentWrapper>
+        )}
       </PaperContainer>
     </div>
   );
