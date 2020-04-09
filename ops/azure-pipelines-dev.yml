@@ -66,6 +66,7 @@ stages:
               install: true
               force: true
               waitForExecution: false
+              timeout: 600s
               overrideValues: "
                 podDB=true,\
                 backend.staticStorage.secretName=$(staticStorageSecretName),\
