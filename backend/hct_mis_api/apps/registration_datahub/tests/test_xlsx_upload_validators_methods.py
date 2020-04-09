@@ -91,7 +91,6 @@ class TestXLSXValidatorsMethods(TestCase):
             "+48 69 563 7300",
         )
         for value in correct_values:
-            res = UploadXLSXValidator.phone_validator(value)
             self.assertTrue(UploadXLSXValidator.phone_validator(value))
 
         # test incorrect values:
