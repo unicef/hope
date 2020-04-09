@@ -9,7 +9,7 @@ import targeting.models as target_models
 from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES_DICTIONARY
 from core.filters import IntegerFilter
 from core.models import FlexibleAttribute
-from core.schema import ExtendedConnection, FieldAttributeNode
+from core.schema import ExtendedConnection, FieldAttributeNode, ChoiceObject
 from core.utils import decode_id_string
 from household.models import Household
 from household.schema import HouseholdNode
@@ -224,6 +224,13 @@ class Query(graphene.ObjectType):
         target_population=graphene.Argument(graphene.ID, required=True),
         targeting_criteria=TargetingCriteriaObjectType(),
     )
+    target_population_status_choices = graphene.List(ChoiceObject)
+
+    def resolve_target_population_status_choices(self, info, **kwargs):
+        return [
+            {"name": name, "value": value}
+            for value, name in target_models.TargetPopulation.STATUS_CHOICES
+        ]
 
     def resolve_candidate_households_list_by_targeting_criteria(
         parent, info, target_population, **kwargs
