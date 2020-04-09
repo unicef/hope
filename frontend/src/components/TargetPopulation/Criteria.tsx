@@ -36,36 +36,65 @@ const ButtonsContainer = styled.div`
   }
 `;
 
-export function Criteria({ criteria, removeFunction, editFunction, isEdit }) {
-  const { t } = useTranslation();
+const CriteriaField = ({field}) => {
+  let fieldElement;
+  switch (field.comparisionMethod) {
+    case 'NOT_EQUALS':
+      fieldElement = (
+        <p>
+          {field.fieldAttribute.labelEn || field.fieldName}: <span>{field.arguments[0]}</span>
+        </p>
+      )
+      break;
+    case 'RANGE':
+      fieldElement = (
+        <p>
+          {field.fieldAttribute.labelEn || field.fieldName}:{' '}
+          <span>
+            {field.arguments[0]} - {field.arguments[1]}
+          </span>
+        </p>
+      )
+      break;
+    case 'EQUALS':
+      fieldElement = (
+        <p>
+          {field.fieldAttribute.labelEn || field.fieldName}: <span>{field.arguments[0]}</span>
+        </p>
+      )
+      break;
+    case 'LESS_THAN':
+      fieldElement = (
+        <p>
+          {field.fieldAttribute.labelEn || field.fieldName}: {'>'} <span>{field.arguments[0]}</span>
+        </p>
+      )
+      break;
+    case 'GREATER_THAN':
+      fieldElement = (
+        <p>
+          {field.fieldAttribute.labelEn || field.fieldName}: {'<'} <span>{field.arguments[0]}</span>
+        </p>
+      )
+      break;
+    default:
+      fieldElement = (
+        <p>
+          {field.fieldAttribute.labelEn}: <span>{field.arguments[0]}</span>
+        </p>
+      )
+      break;
+  }
+  return fieldElement;
+};
 
+export function Criteria({ rules, removeFunction, editFunction, isEdit }) {
+  const { t } = useTranslation();
   return (
     <CriteriaElement>
-      {criteria.intakeGroup && (
-        <p>
-          Intake group: <span>{criteria.intakeGroup}</span>
-        </p>
-      )}
-      {criteria.sex && (
-        <p>
-          Sex: <span>{criteria.sex}</span>
-        </p>
-      )}
-      {criteria.age && (
-        <p>
-          Age: <span>{criteria.age}</span>
-        </p>
-      )}
-      {criteria.distanceToSchool && (
-        <p>
-          Distance to school: <span>{criteria.distanceToSchool}</span>
-        </p>
-      )}
-      {criteria.household && (
-        <p>
-          Hoousehold size: <span>{criteria.household}</span>
-        </p>
-      )}
+      {rules.map((each) => (
+        <CriteriaField key={each.id} field={each} />
+      ))}
       {isEdit && (
         <ButtonsContainer>
           <IconButton>
