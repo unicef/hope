@@ -22,6 +22,7 @@ const Title = styled.div`
 
 const ContentWrapper = styled.div`
   display: flex;
+  flex-wrap: wrap;
 `;
 
 const Divider = styled.div`
@@ -68,18 +69,19 @@ const AddCriteria = styled.div`
 `;
 
 interface TargetingCriteriaProps {
-  criterias: object[];
-  isEdit: boolean;
+  criterias?;
+  isEdit?: boolean;
   helpers?;
 }
 
 export function TargetingCriteria({
   criterias,
-  isEdit,
+  isEdit = false,
   helpers,
 }: TargetingCriteriaProps) {
   const { t } = useTranslation();
   const [isOpen, setOpen] = useState(false);
+  const [criteriaIndex, setIndex] = useState(null);
   const [criteriaObject, setCriteria] = useState({});
   const openModal = (criteria) => {
     setCriteria(criteria);
@@ -87,16 +89,23 @@ export function TargetingCriteria({
   };
   const closeModal = () => {
     setCriteria({});
+    setIndex(null);
     setOpen(false);
+  };
+  const editCriteria = (criteria, index) => {
+    setIndex(index);
+    openModal(criteria);
   };
 
   const addCriteria = (values) => {
-    //eslint-disable-next-line
-    console.log('render', values);
-    helpers.push(values.criterias);
-    closeModal();
+    //rework to use arguments and add index for update
+    if (criteriaIndex !== null) {
+      helpers.replace(criteriaIndex, { filters: [...values.filters] });
+    } else {
+      helpers.push({ filters: [...values.filters] });
+    }
+    return closeModal();
   };
-
   return (
     <div>
       <PaperContainer>
@@ -129,13 +138,15 @@ export function TargetingCriteria({
               return (
                 <>
                   <Criteria
+                    //eslint-disable-next-line
+                    key={criteria.id || index}
                     isEdit={isEdit}
-                    criteria={criteria}
-                    editFunction={() => openModal(criteria)}
+                    rules={criteria.filters}
+                    editFunction={() => editCriteria(criteria, index)}
                     removeFunction={() => helpers.remove(index)}
                   />
 
-                  {index % 2 ||
+                  {index === criterias.length - 1 ||
                   (criterias.length === 1 && index === 0) ? null : (
                     <Divider>
                       <DividerLabel>Or</DividerLabel>

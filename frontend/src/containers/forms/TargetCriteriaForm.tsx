@@ -8,12 +8,18 @@ import {
   Typography,
   Button,
   DialogActions,
+  IconButton,
 } from '@material-ui/core';
-import { Field, Form, Formik, FieldArray } from 'formik';
+import { Field, Formik, FieldArray } from 'formik';
 import { useImportedIndividualFieldsQuery } from '../../__generated__/graphql';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
-import { AddCircleOutline } from '@material-ui/icons';
+import { AddCircleOutline, Delete, FilterSharp } from '@material-ui/icons';
+import { FormikTextField } from '../../shared/Formik/FormikTextField';
+import { SubField } from '../../components/TargetPopulation/SubField';
+import {
+  formatCriteriaFilters,
+  mapCriteriasToInitialValues,
+} from '../../utils/utils';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -81,22 +87,18 @@ const DividerLabel = styled.div`
   background-color: #fff;
 `;
 
+const FlexWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
+`;
+
 const validationSchema = Yup.object().shape({
-  criterias: Yup.array().of(
+  filters: Yup.array().of(
     Yup.object().shape({
-      label: Yup.string().required('Label is required'),
+      fieldName: Yup.string().required('Label is required'),
     }),
   ),
 });
-
-const SubField = ({ field, form, ...otherProps }) => {
-  switch (otherProps.type) {
-    case 'SELECT_ONE':
-      return <FormikSelectField field={field} form={form} {...otherProps} />;
-    default:
-      return <div>Other fields</div>;
-  }
-};
 
 interface ProgramFormPropTypes {
   criteria?;
@@ -116,28 +118,57 @@ export function TargetCriteriaForm({
   title,
 }): React.ReactElement {
   const { data, loading } = useImportedIndividualFieldsQuery();
-
+  const mappedFilters = mapCriteriasToInitialValues(criteria);
   const initialValue = {
-    criterias: [
-      {
-        label: '',
-        value: '',
+    filters: mappedFilters,
+  };
+
+  //create a hook?
+  const chooseFieldType = (e, arrayHelpers, index) => {
+    const subFieldData = data.allFieldsAttributes.find(
+      (attributes) => attributes.name === e.target.value,
+    );
+    const values = {
+      isFlexField: subFieldData.isFlexField,
+      fieldAttribute: {
+        labelEn: subFieldData.labelEn,
+        type: subFieldData.type,
+        choices: null,
       },
-    ],
+      value: null,
+    };
+    switch (subFieldData.type) {
+      case 'INTEGER':
+        values.value = { from: '', to: '' };
+        break;
+      case 'SELECT_ONE':
+        values.fieldAttribute.choices = subFieldData.choices;
+        break;
+      case 'SELECT_MANY':
+        values.value = [];
+        values.fieldAttribute.choices = subFieldData.choices;
+        break;
+      default:
+        values.value = null;
+        break;
+    }
+    arrayHelpers.replace(index, {
+      ...values,
+      fieldName: e.target.value,
+      type: subFieldData.type,
+    });
   };
 
   if (loading) return null;
 
-  // if (criteria.core && criteria.core.length > 0) {
-  //   initialValue = { criterias: criteria.core };
-  // }
   return (
     <DialogContainer>
       <Formik
         initialValues={initialValue}
         onSubmit={(values, bag) => {
-          bag.resetForm();
-          return addCriteria(values);
+          const dataToSend = formatCriteriaFilters(values);
+          addCriteria({ filters: dataToSend });
+          return bag.resetForm();
         }}
         validationSchema={validationSchema}
         enableReinitialize
@@ -161,43 +192,36 @@ export function TargetCriteriaForm({
                   tempora iusto maxime? Odit expedita ipsam natus eos?
                 </DialogDescription>
                 <FieldArray
-                  name='criterias'
+                  name='filters'
                   render={(arrayHelpers) => (
                     <>
-                      {values.criterias.map((each, index) => {
+                      {values.filters.map((each, index) => {
                         return (
                           //eslint-disable-next-line
                           <div key={index}>
-                            <Field
-                              name={`criterias[${index}].label`}
-                              label='Choose field type'
-                              fullWidth
-                              required
-                              choices={data.allCoreFieldAttributes}
-                              index={index}
-                              component={FormikSelectField}
-                            />
-                            {each.label && (
+                            <FlexWrapper>
                               <Field
-                                name={`criterias[${index}].value`}
-                                choices={
-                                  data.allCoreFieldAttributes.find(
-                                    (attributes) =>
-                                      attributes.name === each.label,
-                                  ).choices
+                                name={`filters[${index}].fieldName`}
+                                label='Choose field type'
+                                fullWidth
+                                required
+                                choices={data.allFieldsAttributes}
+                                index={index}
+                                value={each.fieldName || null}
+                                onChange={(e) =>
+                                  chooseFieldType(e, arrayHelpers, index)
                                 }
-                                type={
-                                  data.allCoreFieldAttributes.find(
-                                    (attributes) =>
-                                      attributes.name === each.label,
-                                  ).type
-                                }
-                                component={SubField}
+                                component={FormikSelectField}
                               />
-                            )}
-                            {values.criterias.length === 1 &&
-                            index === 0 ||
-                            index === values.criterias.length - 1 ? null : (
+                              <IconButton>
+                                <Delete
+                                  onClick={() => arrayHelpers.remove(index)}
+                                />
+                              </IconButton>
+                            </FlexWrapper>
+                            {each.fieldName && SubField(each, index)}
+                            {(values.filters.length === 1 && index === 0) ||
+                            index === values.filters.length - 1 ? null : (
                               <Divider>
                                 <DividerLabel>And</DividerLabel>
                               </Divider>
@@ -207,9 +231,7 @@ export function TargetCriteriaForm({
                       })}
                       <AddCriteriaWrapper>
                         <AddCriteria
-                          onClick={() =>
-                            arrayHelpers.push({ value: '', label: '' })
-                          }
+                          onClick={() => arrayHelpers.push({ fieldname: '' })}
                         >
                           <AddCircleOutline />
                           <span>Add Criteria</span>
