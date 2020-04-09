@@ -1,8 +1,5 @@
-import operator
 from datetime import date
-from typing import List
 
-from core import models as core_models
 from django.core.validators import (
     validate_image_file_extension,
     MinLengthValidator,
@@ -11,10 +8,11 @@ from django.core.validators import (
 from django.db import models
 from django.db.models import Sum
 from django.utils.translation import ugettext_lazy as _
-from household.const import NATIONALITIES
 from model_utils import Choices
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
+
+from household.const import NATIONALITIES
 from utils.models import TimeStampedUUIDModel
 
 
@@ -167,7 +165,6 @@ class Individual(TimeStampedUUIDModel):
     )
     school_attendance = models.CharField(max_length=100, blank=True, default="")
     school_type = models.CharField(max_length=100, blank=True, default="")
-    years_in_school = models.PositiveIntegerField(null=True, default=None)
     minutes_to_school = models.PositiveIntegerField(null=True, default=None)
     enrolled_in_nutrition_programme = models.CharField(
         max_length=3, default="", choices=YES_NO_CHOICE, blank=True,

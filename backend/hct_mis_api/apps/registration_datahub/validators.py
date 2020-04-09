@@ -7,10 +7,13 @@ import phonenumbers
 from dateutil import parser
 from openpyxl import load_workbook
 
-from core.models import BusinessArea
-from core.utils import get_choices_values
+from core.core_fields_attributes import CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY
+from core.utils import (
+    serialize_flex_attributes,
+    get_combined_attributes,
+    get_choices_values,
+)
 from core.validators import BaseValidator
-from household.models import Individual, Household
 
 
 class UploadXLSXValidator(BaseValidator):
@@ -18,128 +21,9 @@ class UploadXLSXValidator(BaseValidator):
     #  temporarily hardcoded
     #  FLEX_ATTRS = serialize_flex_attributes()
     WB = None
-
-    FLEX_ATTRS = {
-        "individuals": {
-            "id_type_i_f": {
-                "type": "SELECT_ONE",
-                "choices": (
-                    "BIRTH_CERTIFICATE",
-                    "DRIVERS_LICENSE",
-                    "UNHCR_ID",
-                    "NATIONAL_ID",
-                    "NATIONAL_PASSPORT",
-                    "OTHER",
-                    "NOT_AVAILABLE",
-                ),
-            },
-        },
-        "households": {
-            "assistance_type_h_f": {
-                "type": "SELECT_MANY",
-                "choices": (
-                    "Option 1",
-                    "Option 2",
-                    "Option 3",
-                    "Option 4",
-                    "Option 5",
-                    "Option 6",
-                    "Option 7",
-                ),
-            },
-            "water_source_h_f": {
-                "type": "SELECT_ONE",
-                "choices": (
-                    "Buy bottled water",
-                    "From piped water",
-                    "From private vendor",
-                    "To buy water from water tank",
-                    "Collect water from rain water",
-                    "Collect water from a well/source directly",
-                ),
-            },
-        },
-    }
-    # TODO: Probably need to fetch fields directly from models
-    CORE_FIELDS = {
-        "individuals": {
-            "household_id": {"type": "INTEGER"},
-            "head_of_household": {
-                "type": "SELECT_ONE",
-                "choices": Individual.YES_NO_CHOICE,
-            },
-            "marital_status": {
-                "type": "SELECT_ONE",
-                "choices": Individual.MARTIAL_STATUS_CHOICE,
-            },
-            "status_as_head_of_household": {
-                "type": "SELECT_ONE",
-                "choices": ("ACTIVE", "N/A",),
-            },
-            "address": {"type": "STRING"},
-            # TODO: We need to query locations and check,
-            #  currently hardcoded
-            #  those two fields are also missing in model fields
-            "admin_level_1": {
-                "type": "SELECT_ONE",
-                "choices": ("Afghanistan",),
-            },
-            "admin_level_2": {"type": "SELECT_ONE", "choices": ("Kabul",),},
-            "phone_number_1": {"type": "PHONE_NUMBER"},
-            "phone_number_2": {"type": "PHONE_NUMBER"},
-            "given_name": {"type": "STRING"},
-            "last_name": {"type": "STRING"},
-            "middle_name": {"type": "STRING"},
-            "sex": {"type": "SELECT_ONE", "choices": Individual.SEX_CHOICE,},
-            "birth_date": {"type": "DATE"},
-            "estimated_birth_date": {
-                "type": "SELECT_ONE",
-                "choices": Individual.YES_NO_CHOICE,
-            },
-            "work_status": {
-                "type": "SELECT_ONE",
-                "choices": Individual.YES_NO_CHOICE,
-            },
-            "disability": {
-                "type": "SELECT_ONE",
-                "choices": Individual.DISABILITY_CHOICE,
-            },
-            # TODO: this field is missing, temp. get it from file
-            "severity_of_disability": {
-                "type": "SELECT_ONE",
-                "choices": ("A_LOT", "CANNOT_ALL", "SOME",),
-            },
-            "school_type": {
-                "type": "SELECT_ONE",
-                "choices": ("PUBLIC", "INFORMAL", "OTHER", "PRIVATE",),
-            },
-        },
-        "households": {
-            "household_id": {"type": "INTEGER"},
-            "household_location": {"type": "GEOLOCATION"},
-            "consent": {
-                "type": "SELECT_ONE",
-                "choices": Individual.YES_NO_CHOICE,
-            },
-            "residence_status": {
-                "type": "SELECT_ONE",
-                "choices": Household.RESIDENCE_STATUS_CHOICE,
-            },
-            "family_nationality": {
-                "type": "SELECT_ONE",
-                "choices": BusinessArea.objects.values_list("name", flat=True),
-            },
-            "household_size_h_c": {"type": "INTEGER"},
-            "distance_from_school": {"type": "DECIMAL"},
-        },
-    }
-
-    COMBINED_FIELDS_DICT = {
-        **CORE_FIELDS["individuals"],
-        **FLEX_ATTRS["individuals"],
-        **CORE_FIELDS["households"],
-        **FLEX_ATTRS["households"],
-    }
+    CORE_FIELDS = CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY
+    FLEX_FIELDS = serialize_flex_attributes()
+    ALL_FIELDS = get_combined_attributes()
 
     @classmethod
     def validate(cls, *args, **kwargs):
@@ -197,10 +81,8 @@ class UploadXLSXValidator(BaseValidator):
 
     @classmethod
     def choice_validator(cls, value, header, *args, **kwargs):
-        choices = get_choices_values(
-            cls.COMBINED_FIELDS_DICT[header]["choices"]
-        )
-        choice_type = cls.COMBINED_FIELDS_DICT[header]["type"]
+        choices = get_choices_values(cls.ALL_FIELDS[header]["choices"])
+        choice_type = cls.ALL_FIELDS[header]["type"]
 
         if choice_type == "SELECT_ONE":
             return value.strip() in choices
@@ -222,7 +104,7 @@ class UploadXLSXValidator(BaseValidator):
         first_row = sheet[1]
         combined_fields = {
             **cls.CORE_FIELDS[sheet.title.lower()],
-            **cls.FLEX_ATTRS[sheet.title.lower()],
+            **cls.FLEX_FIELDS[sheet.title.lower()],
         }
 
         switch_dict = {
@@ -339,7 +221,7 @@ class UploadXLSXValidator(BaseValidator):
 
             expected_column_names = {
                 *cls.CORE_FIELDS[name].keys(),
-                *cls.FLEX_ATTRS[name].keys(),
+                *cls.FLEX_FIELDS[name].keys(),
             }
             column_names = {cell.value for cell in first_row}
 
