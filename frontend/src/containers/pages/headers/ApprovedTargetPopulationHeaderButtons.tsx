@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Button } from '@material-ui/core';
-import { FileCopy } from '@material-ui/icons';
+import { FileCopy, EditRounded } from '@material-ui/icons';
 import { TargetPopulationNode } from '../../../__generated__/graphql';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 import { FinalizeTargetPopulation } from '../../dialogs/targetPopulation/FinalizeTargetPopulation';
@@ -23,10 +23,14 @@ const ButtonContainer = styled.span`
 
 export interface ApprovedTargetPopulationHeaderButtonsPropTypes {
   targetPopulation: TargetPopulationNode;
+  selectedTab: number;
+  setEditState: Function;
 }
 
 export function ApprovedTargetPopulationHeaderButtons({
   targetPopulation,
+  selectedTab,
+  setEditState,
 }: ApprovedTargetPopulationHeaderButtonsPropTypes): React.ReactElement {
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openFinalize, setOpenFinalize] = useState(false);
@@ -37,6 +41,18 @@ export function ApprovedTargetPopulationHeaderButtons({
           <FileCopy />
         </Button>
       </IconContainer>
+      {selectedTab !== 0 && (
+        <ButtonContainer>
+          <Button
+            variant='outlined'
+            color='primary'
+            startIcon={<EditRounded />}
+            onClick={() => setEditState(true)}
+          >
+            Edit
+          </Button>
+        </ButtonContainer>
+      )}
       <ButtonContainer>
         <Button
           variant='contained'
