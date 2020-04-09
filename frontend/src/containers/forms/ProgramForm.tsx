@@ -54,18 +54,20 @@ const validationSchema = Yup.object().shape({
   name: Yup.string().required('Programme name is required'),
   scope: Yup.string().required('CashAssist Scope is required'),
   startDate: Yup.date().required(),
-  endDate: Yup.date().when(
-    'startDate',
-    (startDate, schema) =>
-      startDate &&
-      schema.min(
-        startDate,
-        `End date have to be grater than ${moment(startDate).format(
-          'DD/MM/YYYY',
-        )}`,
-      ),
-    '',
-  ).required(),
+  endDate: Yup.date()
+    .when(
+      'startDate',
+      (startDate, schema) =>
+        startDate &&
+        schema.min(
+          startDate,
+          `End date have to be grater than ${moment(startDate).format(
+            'DD/MM/YYYY',
+          )}`,
+        ),
+      '',
+    )
+    .required(),
   sector: Yup.string().required('Sector is required'),
   budget: Yup.number().min(0),
 });
@@ -147,6 +149,7 @@ export function ProgramForm({
                   type='text'
                   fullWidth
                   required
+                  variant='filled'
                   component={FormikTextField}
                 />
 
@@ -195,6 +198,7 @@ export function ProgramForm({
                   type='text'
                   fullWidth
                   multiline
+                  variant='filled'
                   component={FormikTextField}
                 />
                 <MediumLabel>
@@ -204,6 +208,7 @@ export function ProgramForm({
                     type='number'
                     fullWidth
                     precision={2}
+                    variant='filled'
                     component={FormikTextField}
                   />
                 </MediumLabel>
@@ -218,6 +223,7 @@ export function ProgramForm({
                   label='Administrative Areas of Implementation'
                   type='text'
                   fullWidth
+                  variant='filled'
                   component={FormikTextField}
                 />
                 <MediumLabel>
@@ -226,6 +232,7 @@ export function ProgramForm({
                     label='Population goal'
                     type='number'
                     fullWidth
+                    variant='filled'
                     component={FormikTextField}
                   />
                 </MediumLabel>

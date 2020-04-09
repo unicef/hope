@@ -26,11 +26,12 @@ export const TargetPopulationTable = ({
     name: filter.name,
     numIndividualsMin: filter.numIndividuals.min,
     numIndividualsMax: filter.numIndividuals.max,
+    status: filter.status,
   };
   return (
     <TableWrapper>
       <UniversalTable<TargetPopulationNode, AllTargetPopulationsQueryVariables>
-        title='Target Population'
+        title='Target Populations'
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}
         query={useAllTargetPopulationsQuery}
