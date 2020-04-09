@@ -1,5 +1,4 @@
 import React from 'react';
-import * as Yup from 'yup';
 import {
   Button,
   Dialog,
@@ -9,13 +8,17 @@ import {
   Typography,
 } from '@material-ui/core';
 import styled from 'styled-components';
-import { Formik, Field } from 'formik';
-import { useCopyTargetPopulationMutation } from '../../../__generated__/graphql';
-import { FormikTextField } from '../../../shared/Formik/FormikTextField';
+import { Field, Formik, Form } from 'formik';
+import * as Yup from 'yup';
+import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
+import {
+  useAllProgramsQuery,
+  useApproveTpMutation,
+} from '../../../__generated__/graphql';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 
-export interface FinalizeTargetPopulationPropTypes {
+export interface ApproveCandidateListPropTypes {
   open: boolean;
   setOpen: Function;
 }
@@ -38,22 +41,18 @@ const DialogDescription = styled.div`
 `;
 
 const validationSchema = Yup.object().shape({
-  name: Yup.string().required('Name is required'),
+  program: Yup.string().required('Programme is required'),
 });
 
-export function DuplicateTargetPopulation({
-  open,
-  setOpen,
-  targetPopulationId,
-}) {
-  const [mutate] = useCopyTargetPopulationMutation();
+export function ApproveCandidateList({ open, setOpen, targetPopulationId }) {
+  const { data: programs } = useAllProgramsQuery();
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
-  const initialValues = {
-    name: '',
-    id: targetPopulationId,
-  };
-
+  const [mutate, loading] = useApproveTpMutation();
+  if (!programs) return null;
+  const choices = programs.allPrograms.edges.map((program) => {
+    return { ...program.node, value: program.node.id };
+  });
   return (
     <Dialog
       open={open}
@@ -63,15 +62,15 @@ export function DuplicateTargetPopulation({
     >
       <Formik
         validationSchema={validationSchema}
-        initialValues={initialValues}
-        onSubmit={async (values) => {
-          const { data } = await mutate({
-            variables: { input: { targetPopulationData: { ...values } } },
-          });
-          setOpen(false);
-          showMessage('Target Population Duplicated', {
-            pathname: `/${businessArea}/target-population/${data.copyTargetPopulation.targetPopulation.id}`,
-            historyMethod: 'push',
+        initialValues={{ program: '' }}
+        onSubmit={(values) => {
+          mutate({
+            variables: { id: targetPopulationId, programId: values.program },
+          }).then((res) => {
+            setOpen(false);
+            showMessage('Candidate List Approved', {
+              pathname: `/${businessArea}/target-population/${targetPopulationId}`,
+            });
           });
         }}
       >
@@ -79,37 +78,38 @@ export function DuplicateTargetPopulation({
           <>
             <DialogTitleWrapper>
               <DialogTitle id='scroll-dialog-title'>
-                <Typography variant='h6'>
-                  Duplicate Target Population?
-                </Typography>
+                <Typography variant='h6'>Approve Candidate List</Typography>
               </DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
               <DialogDescription>
-                Please use a unique name for the copy of this Target Population.
-                <br /> <strong>Note</strong>: This duplicate will result in a
-                snapshot of this Target Population List data, any changes will
-                result in new data for this copy.
+                Are you sure you want to approve the targeting criteria for this
+                Candidate List? Once a Candidate List is{' '}
+                <strong>Approved</strong> the targeting criteria will be
+                permanently frozen.
+              </DialogDescription>
+              <DialogDescription>
+                Please select a Programme you would like to associate this
+                candidate list with:
               </DialogDescription>
               <Field
-                name='name'
-                fullWidth
-                label='Name Copy of Target Population'
-                required
-                variant='filled'
-                component={FormikTextField}
+                name='program'
+                label='Programme'
+                choices={choices}
+                component={FormikSelectField}
               />
             </DialogContent>
             <DialogFooter>
               <DialogActions>
                 <Button onClick={() => setOpen(false)}>CANCEL</Button>
                 <Button
-                  type='submit'
+                  type="submit"
                   color='primary'
                   variant='contained'
                   onClick={submitForm}
+                  disabled={!loading || !values.program}
                 >
-                  Save
+                  Approve
                 </Button>
               </DialogActions>
             </DialogFooter>
