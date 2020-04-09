@@ -1,9 +1,6 @@
-import io
-from datetime import datetime
-
-from PIL import Image
 from django.db import transaction
 
+from registration_datahub.temporary_fields_map import CORE_FIELDS, FLEX_ATTRS
 from .base import DjangoOperator
 
 
@@ -14,96 +11,126 @@ class RegistrationXLSXImportOperator(DjangoOperator):
     that registration data import instance.
     """
 
+    households = None
+    individuals = None
+
+    def _handle_location(self, value):
+        from geopy.geocoders import ArcGIS
+
+        location = ArcGIS().reverse(value)
+
+    def _create_objects(self, sheet, registration_data_import):
+        from registration_datahub.models import (
+            ImportedHousehold,
+            ImportedIndividual,
+        )
+
+        complex_fields = {
+            "individuals": {"location": self.handle_location,},
+            "households": {},
+        }
+
+        sheet_title = sheet.title.lower()
+
+        combined_fields = {
+            **CORE_FIELDS[sheet_title],
+            **FLEX_ATTRS[sheet_title],
+        }
+
+        first_row = sheet[1]
+        households_to_update = []
+        for row in sheet.iter_rows(min_row=3):
+            if not any([cell.value for cell in row]):
+                continue
+
+            if sheet_title == "households":
+                obj_to_create = ImportedHousehold(
+                    household_ca_id="NOT PROVIDED",
+                    registration_data_import_id=registration_data_import,
+                )
+            else:
+                obj_to_create = ImportedIndividual(
+                    registration_data_import_id=registration_data_import,
+                )
+
+            household_id = None
+            for cell, header in zip(row, first_row):
+                current_field = combined_fields.get(header.value)
+                if not current_field:
+                    continue
+
+                if header == "household_id":
+                    household_id = cell.value
+                    if sheet_title == "individuals":
+                        obj_to_create.household = self.households.get(household_id)
+
+                if (
+                    hasattr(obj_to_create, header)
+                    and header not in complex_fields.keys()
+                ):
+                    if header == "representative":
+                        household = self.households.get(household_id)
+                        household.representative = obj_to_create
+                        households_to_update.append(household)
+                    elif header == "head_of_household":
+                        household = self.households.get(household_id)
+                        household.head_of_household = obj_to_create
+                        households_to_update.append(household)
+                    else:
+                        setattr(obj_to_create, header, cell.value)
+                elif header in complex_fields[sheet_title]:
+                    fn = complex_fields[sheet_title].get(header)
+                    value = fn(cell.value)
+                    setattr(obj_to_create, header, value)
+
+            if sheet_title == "households":
+                self.households[household_id] = obj_to_create
+            else:
+                # TODO: maybe make it as signal or override save() method
+                first_name = obj_to_create.first_name
+                middle_name = obj_to_create.middle_name
+                last_name = obj_to_create.last_name
+                obj_to_create.full_name = (
+                    first_name + f" {middle_name}"
+                    if middle_name
+                    else "" + f" {last_name}"
+                )
+                self.individuals.append(obj_to_create)
+
+        if sheet_title == "households":
+            ImportedHousehold.objects.bulk_create(self.households)
+        else:
+            ImportedIndividual.objects.bulk_create(self.individuals)
+            ImportedHousehold.objects.bulk_update(
+                households_to_update, ["representative", "head_of_household"], 1000,
+            )
+
+    @transaction.atomic()
     def execute(self, context, **kwargs):
         import openpyxl
 
         from registration_datahub.models import RegistrationDataImportDatahub
-        from registration_datahub.models import (
-            ImportData,
-            ImportedIndividual,
-            ImportedHousehold,
-        )
+        from registration_datahub.models import ImportData
+
+        # households have to be dict with id as key
+        # to match household to individuals
+        self.households = {}
+        self.individuals = []
 
         dag_run = context["dag_run"]
         config_vars = dag_run.conf
 
-        registration_data_import = RegistrationDataImportDatahub.objects.get(
+        registration_data_import = RegistrationDataImportDatahub.objects.select_for_update().get(
             id=config_vars.get("registration_data_import_id")
         )
-        import_data = ImportData.objects.get(
-            id=config_vars.get("import_data_id"),
-        )
+        import_data = ImportData.objects.get(id=config_vars.get("import_data_id"),)
 
         wb = openpyxl.load_workbook(import_data.xlsx_file, data_only=True)
 
-        # temporarily create consent img
-        img = io.BytesIO(Image.new("RGB", (60, 30), color="red").tobytes())
         # TODO: Currently adding only core fields for testing purposes,
         #  need to add flex fields
+        for sheet in wb.worksheets:
+            self._create_objects(sheet, registration_data_import)
 
-        households = []
-        ids_mapping = {}
-        with transaction.atomic():
-            for row in wb["Households"].iter_rows(min_row=3):
-                if not any([cell.value for cell in row]):
-                    continue
-
-                hh_obj = ImportedHousehold(
-                    household_ca_id="NOT PROVIDED",
-                    consent=img,
-                    residence_status=row[3].value,
-                    nationality=row[4].value,
-                    family_size=row[5].value,
-                    address="Add on Individuals creation",
-                    # What to do with location?
-                    location=None,
-                    representative=None,
-                    registration_data_import_id=registration_data_import,
-                    head_of_household=None,
-                    registration_date=datetime.now().date(),
-                )
-
-                households.append(hh_obj)
-                ids_mapping[row[0].value] = hh_obj
-
-            ImportedHousehold.objects.bulk_create(households)
-
-            individuals = []
-            hh_to_update = []
-            for row in wb["Individuals"].iter_rows(min_row=3):
-                if not any([cell.value for cell in row]):
-                    continue
-
-                household = ids_mapping[row[0].value]
-
-                individual_obj = ImportedIndividual(
-                    individual_ca_id="NOT PROVIDED",
-                    full_name=f"{row[9].value} {row[11].value} {row[10].value}",
-                    first_name=row[9].value,
-                    middle_name=row[11].value,
-                    last_name=row[10].value,
-                    sex=row[13].value,
-                    dob=row[14].value,
-                    estimated_dob=row[16].value,
-                    nationality=household.nationality,
-                    martial_status=row[2].value,
-                    phone_number=row[7].value,
-                    phone_number_alternative=row[8].value,
-                    # TODO: ASK ABOUT THOSE TWO FIELDS ???
-                    identification_type=row[20].value,
-                    identification_number=0,
-                    household=household,
-                    registration_data_import_id=registration_data_import,
-                    work_status=row[17].value,
-                    disability=row[18].value,
-                )
-                if row[1].value == "YES":
-                    household.representative = individual_obj
-                    household.head_of_household = individual_obj
-                    hh_to_update.append(household)
-
-            ImportedIndividual.objects.bulk_create(individuals)
-
-            ImportedHousehold.objects.bulk_update(
-                hh_to_update, ["representative", "head_of_household"], 1000,
-            )
+        registration_data_import.status = "DONE"
+        registration_data_import.save()
