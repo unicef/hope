@@ -56,6 +56,7 @@ export function TargetPopulationDetailsPage() {
             isEditMode={isEdit}
             setEditState={setEditState}
             tabs={tabs}
+            selectedTab={selectedTab}
           />
           <TabPanel value={selectedTab} index={0}>
             <TargetPopulationCore id={targetPopulation.id} status={targetPopulation.status} targetPopulation={targetPopulation.candidateListTargetingCriteria} />
