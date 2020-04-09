@@ -69,13 +69,15 @@ const AddCriteria = styled.div`
 `;
 
 interface TargetingCriteriaProps {
-  criterias?;
+  selectedTab?: number;
+  candidateListRules?;
   isEdit?: boolean;
   helpers?;
 }
 
 export function TargetingCriteria({
-  criterias,
+  selectedTab,
+  candidateListRules,
   isEdit = false,
   helpers,
 }: TargetingCriteriaProps) {
@@ -83,6 +85,7 @@ export function TargetingCriteria({
   const [isOpen, setOpen] = useState(false);
   const [criteriaIndex, setIndex] = useState(null);
   const [criteriaObject, setCriteria] = useState({});
+  const showAdditionalCriterias = selectedTab > 0;
   const openModal = (criteria) => {
     setCriteria(criteria);
     setOpen(true);
@@ -113,7 +116,7 @@ export function TargetingCriteria({
           <Typography variant='h6'>{t('Targeting Criteria')}</Typography>
           {isEdit && (
             <>
-              {!!criterias.length && (
+              {!!candidateListRules.length && (
                 <Button
                   variant='contained'
                   color='primary'
@@ -133,33 +136,71 @@ export function TargetingCriteria({
           )}
         </Title>
         <ContentWrapper>
-          {criterias.length ? (
-            criterias.map((criteria, index) => {
-              return (
-                <>
-                  <Criteria
-                    //eslint-disable-next-line
-                    key={criteria.id || index}
-                    isEdit={isEdit}
-                    rules={criteria.filters}
-                    editFunction={() => editCriteria(criteria, index)}
-                    removeFunction={() => helpers.remove(index)}
-                  />
+          {showAdditionalCriterias ? (
+            <>
+              {candidateListRules.length ? (
+                candidateListRules.map((criteria, index) => {
+                  return (
+                    <>
+                      <Criteria
+                        //eslint-disable-next-line
+                        key={criteria.id || index}
+                        isEdit={false}
+                        canRemove={candidateListRules.length > 1}
+                        rules={criteria.filters}
+                        alternative={showAdditionalCriterias}
+                      />
 
-                  {index === criterias.length - 1 ||
-                  (criterias.length === 1 && index === 0) ? null : (
-                    <Divider>
-                      <DividerLabel>Or</DividerLabel>
-                    </Divider>
-                  )}
-                </>
-              );
-            })
+                      {index === candidateListRules.length - 1 ||
+                      (candidateListRules.length === 1 &&
+                        index === 0) ? null : (
+                        <Divider>
+                          <DividerLabel>Or</DividerLabel>
+                        </Divider>
+                      )}
+                    </>
+                  );
+                })
+              ) : (
+                <AddCriteria onClick={() => setOpen(true)}>
+                  <AddCircleOutline />
+                  <p>Add Criteria</p>
+                </AddCriteria>
+              )}
+            </>
           ) : (
-            <AddCriteria onClick={() => setOpen(true)}>
-              <AddCircleOutline />
-              <p>Add Criteria</p>
-            </AddCriteria>
+            <>
+              {candidateListRules.length ? (
+                candidateListRules.map((criteria, index) => {
+                  return (
+                    <>
+                      <Criteria
+                        //eslint-disable-next-line
+                        key={criteria.id || index}
+                        isEdit={isEdit}
+                        canRemove={candidateListRules.length > 1}
+                        rules={criteria.filters}
+                        editFunction={() => editCriteria(criteria, index)}
+                        removeFunction={() => helpers.remove(index)}
+                      />
+
+                      {index === candidateListRules.length - 1 ||
+                      (candidateListRules.length === 1 &&
+                        index === 0) ? null : (
+                        <Divider>
+                          <DividerLabel>Or</DividerLabel>
+                        </Divider>
+                      )}
+                    </>
+                  );
+                })
+              ) : (
+                <AddCriteria onClick={() => setOpen(true)}>
+                  <AddCircleOutline />
+                  <p>Add Criteria</p>
+                </AddCriteria>
+              )}
+            </>
           )}
         </ContentWrapper>
       </PaperContainer>

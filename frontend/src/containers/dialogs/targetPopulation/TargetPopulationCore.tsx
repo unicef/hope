@@ -30,18 +30,25 @@ const resultsData = {
   maleAdults: 12,
 };
 
-export function TargetPopulationCore({ targetPopulation, id, status }) {
-  if (!targetPopulation) return null;
-  const { rules } = targetPopulation;
+export function TargetPopulationCore({
+  candidateList,
+  id,
+  status,
+  selectedTab = 0,
+}) {
+  if (!candidateList) return null;
+  const { rules: candidateListRules } = candidateList;
   return (
     <>
       {(status === 'APPROVED' || status === 'FINALIZED') && (
-        <TargetPopulationDetails targetPopulation={targetPopulation} />
+        <TargetPopulationDetails targetPopulation={candidateList} />
       )}
-      <TargetingCriteria criterias={rules} />
+      <TargetingCriteria
+        selectedTab={selectedTab}
+        candidateListRules={candidateListRules}
+      />
       <Results resultsData={resultsData} />
-
-      {rules.length ? (
+      {candidateListRules.length ? (
         <TargetPopulationHouseholdTable
           id={id}
           query={useCandidateHouseholdsListByTargetingCriteriaQuery}
