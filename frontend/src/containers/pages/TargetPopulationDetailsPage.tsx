@@ -36,7 +36,10 @@ export function TargetPopulationDetailsPage() {
       textColor='primary'
     >
       <Tab label='Candidate list' />
-      <Tab label='Target Population' disabled={targetPopulation.status === "DRAFT"} />
+      <Tab
+        label='Target Population'
+        disabled={targetPopulation.status === 'DRAFT'}
+      />
     </Tabs>
   );
 
@@ -46,7 +49,9 @@ export function TargetPopulationDetailsPage() {
         <EditTargetPopulation
           id={targetPopulation.id}
           targetPopulationName={targetPopulation.name}
-          targetPopulationCriterias={targetPopulation.candidateListTargetingCriteria}
+          targetPopulationCriterias={
+            targetPopulation.candidateListTargetingCriteria
+          }
           cancelEdit={() => setEditState(false)}
         />
       ) : (
@@ -59,10 +64,19 @@ export function TargetPopulationDetailsPage() {
             selectedTab={selectedTab}
           />
           <TabPanel value={selectedTab} index={0}>
-            <TargetPopulationCore id={targetPopulation.id} status={targetPopulation.status} targetPopulation={targetPopulation.candidateListTargetingCriteria} />
+            <TargetPopulationCore
+              id={targetPopulation.id}
+              status={targetPopulation.status}
+              candidateList={targetPopulation.candidateListTargetingCriteria}
+            />
           </TabPanel>
           <TabPanel value={selectedTab} index={1}>
-            <TargetPopulationCore id={targetPopulation.id} status={targetPopulation.status} targetPopulation={targetPopulation.candidateListTargetingCriteria} />
+            <TargetPopulationCore
+              id={targetPopulation.id}
+              status={targetPopulation.status}
+              candidateList={targetPopulation.candidateListTargetingCriteria}
+              selectedTab={selectedTab}
+            />
           </TabPanel>
         </>
       )}

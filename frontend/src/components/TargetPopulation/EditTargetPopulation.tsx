@@ -158,7 +158,7 @@ export function EditTargetPopulation({
             render={(arrayHelpers) => (
               <TargetingCriteria
                 helpers={arrayHelpers}
-                criterias={values.criterias}
+                candidateListRules={values.criterias}
                 isEdit
               />
             )}
