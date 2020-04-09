@@ -233,7 +233,7 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
             "min_arguments": 1,
             "arguments": 1,
             "lookup": "__contains",
-            "negative": True,
+            "negative": False,
             "supported_types": [],
         },
         "NOT_CONTAINS": {
@@ -294,7 +294,7 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
             """
     )
 
-    def get_query_for_lookup(self, lookup):
+    def get_query_for_lookup(self, lookup, select_many=False):
         comparision_attribute = TargetingCriteriaRuleFilter.COMPARISION_ATTRIBUTES.get(
             self.comparision_method
         )
@@ -304,12 +304,18 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
                 f"{self.field_name} {self.comparision_method} filter query expect {args_count} "
                 f"arguments"
             )
-        if args_count != len(self.arguments):
+        args_input_count =len(self.arguments)
+        if select_many:
+            if args_input_count < 1:
+                raise ValidationError(
+                    f"{self.field_name} SELECT MULTIPLE CONTAINS filter query expect at least 1 argument"
+                )
+        elif args_count != args_input_count:
             raise ValidationError(
                 f"{self.field_name} {self.comparision_method} filter query expect {args_count} "
-                f"arguments gets {len(self.arguments)}"
+                f"arguments gets {args_input_count}"
             )
-        argument = self.arguments if args_count > 1 else self.arguments[0]
+        argument = self.arguments if args_input_count > 1 else self.arguments[0]
         query = Q(
             **{f"{lookup}{comparision_attribute.get('lookup')}": argument}
         )
@@ -336,7 +342,9 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
                 f"Core Field Attributes associated with this fieldName {self.field_name}"
                 f" doesn't have get_query method or lookup field"
             )
-        return self.get_query_for_lookup(lookup)
+        return self.get_query_for_lookup(
+            lookup, select_many=core_field_attr.get("type") == "SELECT_MANY",
+        )
 
     def get_query_for_flex_field(self):
         flex_field_attr = FlexibleAttribute.objects.get(name=self.field_name)
@@ -345,7 +353,9 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
                 f"There are no Core Field Attributes associated with this fieldName {self.field_name}"
             )
         lookup = f"{'individuals__' if flex_field_attr.associated_with else ''}flex_fields__{flex_field_attr.name}"
-        return self.get_query_for_lookup(lookup)
+        return self.get_query_for_lookup(
+            lookup, select_many=flex_field_attr.type == "SELECT_MANY",
+        )
 
     def get_query(self):
         if not self.is_flex_field:

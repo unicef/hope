@@ -253,20 +253,34 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
 class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
     def setUp(self):
         call_command("loadflexfieldsattributes")
-        self.household_total_households_2=    HouseholdFactory(
-                family_size=1, flex_fields={"total_households_h_f": 2},
-            )
+        self.household_total_households_2 = HouseholdFactory(
+            family_size=1,
+            flex_fields={
+                "total_households_h_f": 2,
+                "treatment_facility_h_f": [
+                    "governent_health_center",
+                    "other_public",
+                    "private_doctor",
+                ],
+            },
+        )
         IndividualFactory(household=self.household_total_households_2,)
-        self.household_total_households_4 =HouseholdFactory(
-                family_size=1, flex_fields={"total_households_h_f": 4},
-            )
+        self.household_total_households_4 = HouseholdFactory(
+            family_size=1,
+            flex_fields={
+                "total_households_h_f": 4,
+                "treatment_facility_h_f": [
+                    "governent_health_center",
+                    "other_public",
+                ],
+            },
+        )
         IndividualFactory(household=self.household_total_households_4,)
         HouseholdFactory(
-            family_size=1, flex_fields={"ddd":3},
+            family_size=1, flex_fields={"ddd": 3, "treatment_facility_h_f": []},
         )
 
-
-    def test_rule_filter_age_equal(self):
+    def test_rule_filter_household_total_households_4(self):
         rule_filter = TargetingCriteriaRuleFilter(
             comparision_method="EQUALS",
             field_name="total_households_h_f",
@@ -277,3 +291,47 @@ class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
         queryset = Household.objects.filter(query)
         self.assertEqual(queryset.count(), 1)
         self.assertEqual(self.household_total_households_4.pk, queryset[0].pk)
+
+    def test_rule_filter_select_multiple_treatment_facility(self):
+        rule_filter = TargetingCriteriaRuleFilter(
+            comparision_method="CONTAINS",
+            field_name="treatment_facility_h_f",
+            arguments=["other_public", "private_doctor",],
+            is_flex_field=True,
+        )
+        query = rule_filter.get_query()
+        queryset = Household.objects.filter(query)
+        self.assertEqual(queryset.count(), 1)
+
+    def test_rule_filter_select_multiple_treatment_facility_2(self):
+        rule_filter = TargetingCriteriaRuleFilter(
+            comparision_method="CONTAINS",
+            field_name="treatment_facility_h_f",
+            arguments=["other_public", "governent_health_center",],
+            is_flex_field=True,
+        )
+        query = rule_filter.get_query()
+        queryset = Household.objects.filter(query)
+        self.assertEqual(queryset.count(), 2)
+
+    def test_rule_filter_select_multiple_treatment_facility_not_contains(self):
+        rule_filter = TargetingCriteriaRuleFilter(
+            comparision_method="NOT_CONTAINS",
+            field_name="treatment_facility_h_f",
+            arguments=["other_public", "governent_health_center",],
+            is_flex_field=True,
+        )
+        query = rule_filter.get_query()
+        queryset = Household.objects.filter(query)
+        self.assertEqual(queryset.count(), 1)
+
+    def test_rule_filter_select_multiple_treatment_facility_3(self):
+        rule_filter = TargetingCriteriaRuleFilter(
+            comparision_method="CONTAINS",
+            field_name="treatment_facility_h_f",
+            arguments=["governent_health_center"],
+            is_flex_field=True,
+        )
+        query = rule_filter.get_query()
+        queryset = Household.objects.filter(query)
+        self.assertEqual(queryset.count(), 1)
