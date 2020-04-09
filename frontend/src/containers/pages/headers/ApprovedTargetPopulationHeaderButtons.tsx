@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Button } from '@material-ui/core';
-import { OpenInNewRounded, FileCopy } from '@material-ui/icons';
+import { FileCopy, EditRounded } from '@material-ui/icons';
 import { TargetPopulationNode } from '../../../__generated__/graphql';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
+import { FinalizeTargetPopulation } from '../../dialogs/targetPopulation/FinalizeTargetPopulation';
 
 const IconContainer = styled.span`
   button {
@@ -20,14 +21,19 @@ const ButtonContainer = styled.span`
   margin: 0 ${({ theme }) => theme.spacing(2)}px;
 `;
 
-export interface FinalizedTargetPopulationHeaderButtonsPropTypes {
+export interface ApprovedTargetPopulationHeaderButtonsPropTypes {
   targetPopulation: TargetPopulationNode;
+  selectedTab: number;
+  setEditState: Function;
 }
 
-export function FinalizedTargetPopulationHeaderButtons({
+export function ApprovedTargetPopulationHeaderButtons({
   targetPopulation,
-}: FinalizedTargetPopulationHeaderButtonsPropTypes): React.ReactElement {
+  selectedTab,
+  setEditState,
+}: ApprovedTargetPopulationHeaderButtonsPropTypes): React.ReactElement {
   const [openDuplicate, setOpenDuplicate] = useState(false);
+  const [openFinalize, setOpenFinalize] = useState(false);
   return (
     <div>
       <IconContainer>
@@ -35,13 +41,25 @@ export function FinalizedTargetPopulationHeaderButtons({
           <FileCopy />
         </Button>
       </IconContainer>
+      {selectedTab !== 0 && (
+        <ButtonContainer>
+          <Button
+            variant='outlined'
+            color='primary'
+            startIcon={<EditRounded />}
+            onClick={() => setEditState(true)}
+          >
+            Edit
+          </Button>
+        </ButtonContainer>
+      )}
       <ButtonContainer>
         <Button
           variant='contained'
           color='primary'
-          startIcon={<OpenInNewRounded />}
+          onClick={() => setOpenFinalize(true)}
         >
-          Open in cashassist
+          Finalize
         </Button>
       </ButtonContainer>
       <DuplicateTargetPopulation
@@ -49,6 +67,7 @@ export function FinalizedTargetPopulationHeaderButtons({
         setOpen={setOpenDuplicate}
         targetPopulationId={targetPopulation.id}
       />
+      <FinalizeTargetPopulation open={openFinalize} setOpen={setOpenFinalize} />
     </div>
   );
 }

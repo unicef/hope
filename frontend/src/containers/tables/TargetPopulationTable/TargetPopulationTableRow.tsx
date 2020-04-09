@@ -41,15 +41,18 @@ export function TargetPopulationTableRow({ targetPopulation }) {
           />
         </StatusContainer>
       </TableCell>
-      <TableCell align='left'>{targetPopulation.totalHouseholds}</TableCell>
-      <TableCell align='left'>{targetPopulation.totalFamilySize}</TableCell>
+      <TableCell align='left'>{targetPopulation.candidateListTotalHouseholds}</TableCell>
+      <TableCell align='left'>{targetPopulation.finalListTotalHouseholds}</TableCell>
       <TableCell align='left'>
         <Moment format='MM/DD/YYYY'>{targetPopulation.createdAt}</Moment>
       </TableCell>
       <TableCell align='left'>
         <Moment format='MM/DD/YYYY'>{targetPopulation.lastEditedAt}</Moment>
       </TableCell>
-      <TableCell align='left'>-</TableCell>
+      <TableCell align='left'>
+        {targetPopulation.createdBy.firstName}{' '}
+        {targetPopulation.createdBy.lastName}
+      </TableCell>
     </ClickableTableRow>
   );
 }
