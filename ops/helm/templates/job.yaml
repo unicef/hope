@@ -31,7 +31,7 @@ spec:
           - name: STORAGE_AZURE_ACCOUNT_NAME
             value: {{ .Values.backend.staticStorage.accountName }}
       restartPolicy: Never
-  backoffLimit: 10
+  backoffLimit: 20
 ---
 apiVersion: batch/v1
 kind: Job
@@ -65,5 +65,5 @@ spec:
           - secretRef:
               name: backend-secret
       restartPolicy: Never
-  backoffLimit: 10
+  backoffLimit: 20
 ---
