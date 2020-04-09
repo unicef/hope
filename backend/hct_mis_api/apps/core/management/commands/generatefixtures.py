@@ -140,9 +140,11 @@ class Command(BaseCommand):
 
     @transaction.atomic
     def handle(self, *args, **options):
+        call_command('flush','--noinput')
+        call_command('flush','--noinput',database='cash_assist_datahub')
+        call_command('flush','--noinput',database='registration_datahub')
         start_time = time.time()
         programs_amount = options["programs_amount"]
-
         business_areas = BusinessArea.objects.all().count()
         if not business_areas:
             if options["noinput"]:
