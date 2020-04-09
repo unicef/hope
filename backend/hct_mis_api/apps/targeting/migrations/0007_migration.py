@@ -77,11 +77,11 @@ class Migration(migrations.Migration):
         ),
         migrations.RemoveField(
             model_name='targetpopulation',
-            name='_total_family_size',
+            name='total_family_size',
         ),
         migrations.RemoveField(
             model_name='targetpopulation',
-            name='_total_households',
+            name='total_households',
         ),
         migrations.RemoveField(
             model_name='targetpopulation',
