@@ -66,8 +66,8 @@ stages:
               releaseName: 'hct-mis-staging'
               install: true
               force: true
-              debug: true
-              wait: false
+              waitForExecution: false
+              arguments: "--timeout 600s"
               overrideValues: "
                 backend.staticStorage.secretName=$(staticStorageSecretName),\
                 backend.staticStorage.accountName=$(staticStorageAccountName),\
