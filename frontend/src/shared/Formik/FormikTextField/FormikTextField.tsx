@@ -47,7 +47,6 @@ export const FormikTextField = ({
         {...otherProps}
         name={field.name}
         id={`textField-${field.name}`}
-        variant='filled'
         margin='dense'
         value={field.value}
         onChange={form.handleChange}

@@ -55,6 +55,9 @@
           },
           {
             "name": "RegistrationDataImportDatahubNode"
+          },
+          {
+            "name": "ImportDataNode"
           }
         ]
       }

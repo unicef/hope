@@ -47,8 +47,8 @@ export const menuItems = [
     ],
   },
   {
-    name: 'Target Population',
-    href: '/#',
+    name: 'Targeting',
+    href: '/target-population',
     selectedRegexp: /^\/test.*$/,
     icon: <ListAltRounded />,
   },

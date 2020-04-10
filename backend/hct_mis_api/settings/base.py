@@ -42,7 +42,8 @@ ALLOWED_EXTENSIONS = (
     "doc",
     "docx",
     "xls",
-    "xlsx" "img",
+    "xlsx",
+    "img",
     "png",
     "jpg",
     "jpeg",
@@ -134,7 +135,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
-    'auditlog.middleware.AuditlogMiddleware',
+    "auditlog.middleware.AuditlogMiddleware",
 ]
 
 TEMPLATES = [
@@ -167,7 +168,7 @@ PROJECT_APPS = [
     "intervention",
     "payment",
     "program",
-    "targeting",
+    "targeting.apps.TargetingConfig",
     "utils",
     "cash_assist_datahub",
     "registration_datahub",
@@ -362,6 +363,8 @@ LOGIN_URL = "/api/login/azuread-tenant-oauth2"
 TEST_RUNNER = "snapshottest.django.TestRunner"
 
 GRAPH_MODELS = {
-  'all_applications': True,
-  'group_models': True,
+    "all_applications": True,
+    "group_models": True,
 }
+
+PHONENUMBER_DEFAULT_REGION = "US"

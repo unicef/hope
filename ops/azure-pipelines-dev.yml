@@ -65,6 +65,8 @@ stages:
               releaseName: 'hct-mis'
               install: true
               force: true
+              waitForExecution: false
+              arguments: "--timeout 600s"
               overrideValues: "
                 podDB=true,\
                 backend.staticStorage.secretName=$(staticStorageSecretName),\
