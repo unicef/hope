@@ -51,13 +51,14 @@ class TargetPopulation(TimeStampedUUIDModel):
         related_name="target_populations",
         null=True,
     )
+    STATUS_CHOICES = (
+            ("DRAFT", _("Open")),
+            ("APPROVED", _("Closed")),
+            ("FINALIZED", _("Sent")),
+        )
     status = models.CharField(
         max_length=_MAX_LEN,
-        choices=(
-            ("DRAFT", _("Draft")),
-            ("APPROVED", _("Approved")),
-            ("FINALIZED", _("Finalized")),
-        ),
+        choices=STATUS_CHOICES,
         default="DRAFT",
     )
     households = models.ManyToManyField(
