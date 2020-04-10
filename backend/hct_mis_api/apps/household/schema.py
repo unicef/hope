@@ -114,4 +114,4 @@ class Query(graphene.ObjectType):
     def resolve_all_households(self, info, **kwargs):
         return Household.objects.annotate(
             total_cash=Sum("payment_records__entitlement__delivered_quantity")
-        )
+        ).order_by("created_at")
