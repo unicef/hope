@@ -53,14 +53,12 @@ class TargetPopulation(TimeStampedUUIDModel):
         null=True,
     )
     STATUS_CHOICES = (
-            ("DRAFT", _("Open")),
-            ("APPROVED", _("Closed")),
-            ("FINALIZED", _("Sent")),
-        )
+        ("DRAFT", _("Open")),
+        ("APPROVED", _("Closed")),
+        ("FINALIZED", _("Sent")),
+    )
     status = models.CharField(
-        max_length=_MAX_LEN,
-        choices=STATUS_CHOICES,
-        default="DRAFT",
+        max_length=_MAX_LEN, choices=STATUS_CHOICES, default="DRAFT",
     )
     households = models.ManyToManyField(
         "household.Household",
@@ -305,7 +303,7 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
                 f"{self.field_name} {self.comparision_method} filter query expect {args_count} "
                 f"arguments"
             )
-        args_input_count =len(self.arguments)
+        args_input_count = len(self.arguments)
         if select_many:
             if args_input_count < 1:
                 raise ValidationError(
