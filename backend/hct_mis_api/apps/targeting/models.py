@@ -10,6 +10,7 @@ from django.db import models
 from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
+from model_utils.models import SoftDeletableModel
 from psycopg2.extras import NumericRange
 
 from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES
@@ -39,7 +40,7 @@ def get_integer_range(min_range=None, max_range=None):
     )
 
 
-class TargetPopulation(TimeStampedUUIDModel):
+class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
     """Model for target populations.
 
     Has N:N association with households.
