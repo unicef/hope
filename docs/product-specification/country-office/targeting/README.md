@@ -6,7 +6,9 @@
 
 ## Motivation:
 
-The purpose of this section is to allow HCT users to draw up potential scenarios with realistic data in order to prepare Cash Plans against a target population of households and individuals. 
+The purpose of this section is to allow HCT users to draw up potential scenarios with realistic data in order to prepare Cash Plans against a target population of households and individuals.
+
+It also allows HCT users to run targeted households against Corticon rule engine to generate Vulnerability scores and more. 
 
 ## Feature Specifications
 
@@ -28,7 +30,6 @@ HCT user will be able to use the search field to quickly pull up previously targ
 
 Users will be able to filter their search query by using the following options:
 
-* **Created By**
 * **Status**
 * **Number of Individuals \(Range\)**
 
@@ -54,7 +55,8 @@ This table will display up to 10 rows upon default.
 
 Target Populations go through the following states:
 
-* In Progress
+* Draft
+* Candidate List
 * Finalized
 
 ### 

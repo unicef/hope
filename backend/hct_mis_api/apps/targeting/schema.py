@@ -1,29 +1,22 @@
-import functools
-import json
-import operator
-
 import django_filters
 import graphene
-import targeting.models as target_models
-from core.schema import ExtendedConnection
 from django.db.models import Q
-from graphene import relay
-from graphene_django import DjangoObjectType
+from graphene import relay, Scalar
+from graphene_django import DjangoObjectType, DjangoConnectionField
 from graphene_django.filter import DjangoFilterConnectionField
+
+import targeting.models as target_models
+from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES_DICTIONARY
+from core.filters import IntegerFilter
+from core.models import FlexibleAttribute
+from core.schema import ExtendedConnection, FieldAttributeNode, ChoiceObject
+from core.utils import decode_id_string
 from household.models import Household
+from household.schema import HouseholdNode
 
-
-class HouseHoldType(DjangoObjectType):
-    class Meta:
-        model = Household
-        fields = (
-            "household_ca_id",
-            "head_of_household",
-            "family_size",
-            "address",
-            "location",
-            "registration_data_import_id",
-        )
+# TODO(codecakes): see if later the format can be kept consistent in FilterAttrType model.
+# by using FlexFieldNode and CoreFieldNode to return target filter rules.
+from targeting.validators import TargetingCriteriaInputValidator
 
 
 class TargetPopulationFilter(django_filters.FilterSet):
@@ -34,32 +27,44 @@ class TargetPopulationFilter(django_filters.FilterSet):
 
     name = django_filters.CharFilter(field_name="name", lookup_expr="icontains")
     created_by_name = django_filters.CharFilter(
-        field_name="created_by__full_name", method="filter_created_by_name"
+        field_name="created_by", method="filter_created_by_name"
     )
-    num_individuals_min = django_filters.NumberFilter(
-        field_name="target_rules__num_individuals_min", lookup_expr="gte"
+    candidate_list_total_households_min = IntegerFilter(
+        field_name="candidate_list_total_households", lookup_expr="gte",
     )
-    num_individuals_max = django_filters.NumberFilter(
-        field_name="target_rules__num_individuals_max", lookup_expr="lte"
+    candidate_list_total_households_max = IntegerFilter(
+        field_name="candidate_list_total_households", lookup_expr="lte",
+    )
+    candidate_list_total_individuals_min = IntegerFilter(
+        field_name="candidate_list_total_individuals", lookup_expr="gte",
+    )
+    candidate_list_total_individuals_max = IntegerFilter(
+        field_name="candidate_list_total_individuals", lookup_expr="lte",
     )
 
-    # TODO(codecakes): waiting on dist to school and adminlevel clarification.
+    final_list_total_households_min = IntegerFilter(
+        field_name="final_list_total_households", lookup_expr="gte",
+    )
+    final_list_total_households_max = IntegerFilter(
+        field_name="final_list_total_households", lookup_expr="lte",
+    )
+    final_list_total_individuals_min = IntegerFilter(
+        field_name="final_list_total_individuals", lookup_expr="gte",
+    )
+    final_list_total_individuals_max = IntegerFilter(
+        field_name="final_list_total_individuals", lookup_expr="lte",
+    )
 
     @staticmethod
     def filter_created_by_name(queryset, model_field, value):
         """Gets full name of the associated user from query."""
-        first_name_query = {
-            f"{model_field}__first_name__icontains": value,
-        }
-        last_name_query = {
-            f"{model_field}__last_name__icontains": value,
-        }
-        full_name_query = {
-            f"{model_field}__full_name__icontains": value,
-        }
-        return queryset.filter(
-            Q(**first_name_query) | Q(**last_name_query) | Q(full_name_query)
-        )
+        fname_query_key = f"{model_field}__first_name__icontains"
+        lname_query_key = f"{model_field}__last_name__icontains"
+        for name in value.strip().split():
+            queryset = queryset.filter(
+                Q(**{fname_query_key: name,}) | Q(**{lname_query_key: name,})
+            )
+        return queryset
 
     class Meta:
         model = target_models.TargetPopulation
@@ -67,12 +72,9 @@ class TargetPopulationFilter(django_filters.FilterSet):
             "name",
             "created_by_name",
             "created_at",
-            "last_edited_at",
+            "updated_at",
             "status",
-            "total_households",
-            "total_family_size",
             "households",
-            "target_rules",
         )
 
         filter_overrides = {
@@ -90,7 +92,7 @@ class TargetPopulationFilter(django_filters.FilterSet):
             "name",
             "created_at",
             "created_by",
-            "last_edited_at",
+            "updated_at",
             "status",
             "total_households",
             "total_family_size",
@@ -98,8 +100,72 @@ class TargetPopulationFilter(django_filters.FilterSet):
     )
 
 
+class Arg(Scalar):
+    """
+    Allows use of a JSON String for input / output from the GraphQL schema.
+
+    Use of this type is *not recommended* as you lose the benefits of having a defined, static
+    schema (one of the key benefits of GraphQL).
+    """
+
+    @staticmethod
+    def serialize(dt):
+        return dt
+
+    @staticmethod
+    def parse_literal(node):
+        return node
+
+    @staticmethod
+    def parse_value(value):
+        return value
+
+
+class TargetingCriteriaRuleFilterNode(DjangoObjectType):
+    arguments = graphene.List(Arg)
+    field_attribute = graphene.Field(FieldAttributeNode)
+
+    def resolve_arguments(self, info):
+        return self.arguments
+
+    def resolve_field_attribute(parrent, info):
+        if parrent.is_flex_field:
+            return FlexibleAttribute.objects.get(name=parrent.field_name)
+        else:
+            return CORE_FIELDS_ATTRIBUTES_DICTIONARY.get(parrent.field_name)
+
+    class Meta:
+        model = target_models.TargetingCriteriaRuleFilter
+
+
+class TargetingCriteriaRuleNode(DjangoObjectType):
+    filters = graphene.List(TargetingCriteriaRuleFilterNode)
+
+    def resolve_filters(self, info):
+        return self.filters.all()
+
+    class Meta:
+        model = target_models.TargetingCriteriaRule
+
+
+class TargetingCriteriaNode(DjangoObjectType):
+    rules = graphene.List(TargetingCriteriaRuleNode)
+
+    def resolve_rules(self, info):
+        return self.rules.all()
+
+    class Meta:
+        model = target_models.TargetingCriteria
+
+
 class TargetPopulationNode(DjangoObjectType):
     """Defines an individual target population record."""
+
+    total_households = graphene.Int(source="total_households")
+    total_family_size = graphene.Int(source="total_family_size")
+    candidate_list_targeting_criteria = TargetingCriteriaRuleFilterNode()
+    final_list_targeting_criteria = TargetingCriteriaRuleFilterNode()
+    final_list = DjangoConnectionField(HouseholdNode)
 
     class Meta:
         model = target_models.TargetPopulation
@@ -108,74 +174,100 @@ class TargetPopulationNode(DjangoObjectType):
         filterset_class = TargetPopulationFilter
 
 
-class SavedTargetRuleFilter(django_filters.FilterSet):
-    """Filters for saved TargetRules."""
+class TargetingCriteriaRuleFilterObjectType(graphene.InputObjectType):
+    comparision_method = graphene.String(required=True)
+    is_flex_field = graphene.Boolean(required=True)
+    field_name = graphene.String(required=True)
+    arguments = graphene.List(Arg, required=True)
 
-    class Meta:
-        model = target_models.TargetRule
-        fields = (
-            "flex_rules",
-            "core_rules",
-            "target_population",
+
+class TargetingCriteriaRuleObjectType(graphene.InputObjectType):
+    filters = graphene.List(TargetingCriteriaRuleFilterObjectType)
+
+
+class TargetingCriteriaObjectType(graphene.InputObjectType):
+    rules = graphene.List(TargetingCriteriaRuleObjectType)
+
+
+def targeting_criteria_object_type_to_query(targeting_criteria_object_type):
+    TargetingCriteriaInputValidator.validate(targeting_criteria_object_type)
+    targeting_criteria_querying = target_models.TargetingCriteriaQueryingMixin(
+        []
+    )
+    for rule in targeting_criteria_object_type.get("rules", []):
+        targeting_criteria_rule_querying = target_models.TargetingCriteriaRuleQueryingMixin(
+            []
         )
-
-        filter_overrides = {
-            target_models.JSONField: {
-                'filter_class': django_filters.LookupChoiceFilter,
-                # 'extra': lambda f: {'lookup_expr': ['icontains']},
-            },
-        }
-
-
-class SavedTargetRuleNode(DjangoObjectType):
-    """Fetches the saved filters."""
-
-    class Meta:
-        model = target_models.TargetRule
-        interfaces = (relay.Node,)
-        connection_class = ExtendedConnection
-        filterset_class = SavedTargetRuleFilter
+        for filter_dict in rule.get("filters", []):
+            targeting_criteria_rule_querying.filters.append(
+                target_models.TargetingCriteriaRuleFilter(**filter_dict)
+            )
+        targeting_criteria_querying.rules.append(
+            targeting_criteria_rule_querying
+        )
+    return targeting_criteria_querying.get_query()
 
 
 class Query(graphene.ObjectType):
     target_population = relay.Node.Field(TargetPopulationNode)
     all_target_population = DjangoFilterConnectionField(TargetPopulationNode)
-    # Saved snapshots of target rules from a target population.
-    saved_target_rule = relay.Node.Field(SavedTargetRuleNode)
-    all_saved_target_rule = DjangoFilterConnectionField(SavedTargetRuleNode)
-    # Realtime Queries from golden reocrds.
-    # household and associated registration and individuals records.
-    target_rules = graphene.List(
-        HouseHoldType,
-        serialized_list=graphene.String(),
-        description="json dump of filters containing key value pairs.",
+    golden_record_by_targeting_criteria = DjangoConnectionField(
+        HouseholdNode,
+        targeting_criteria=TargetingCriteriaObjectType(required=True),
     )
+    candidate_households_list_by_targeting_criteria = DjangoFilterConnectionField(
+        HouseholdNode,
+        target_population=graphene.Argument(graphene.ID, required=True),
+    )
+    final_households_list_by_targeting_criteria = DjangoFilterConnectionField(
+        HouseholdNode,
+        target_population=graphene.Argument(graphene.ID, required=True),
+        targeting_criteria=TargetingCriteriaObjectType(),
+    )
+    target_population_status_choices = graphene.List(ChoiceObject)
 
-    def resolve_target_rules(self, info, serialized_list):
-        """Resolver for target_rules. Queries from golden records.
+    def resolve_target_population_status_choices(self, info, **kwargs):
+        return [
+            {"name": name, "value": value}
+            for value, name in target_models.TargetPopulation.STATUS_CHOICES
+        ]
 
-        args:
-            info: object, HTTPRequestObject.
-            serialized_list: list, check below.
-
-        Arguments in serialized_list are of type.
-        """
-        rule_lists = json.loads(serialized_list)
-        return functools.reduce(
-            operator.or_, Query.get_households_from_rule(rule_lists),
+    def resolve_candidate_households_list_by_targeting_criteria(
+        parent, info, target_population, **kwargs
+    ):
+        target_population_id = decode_id_string(target_population)
+        target_population_model = target_models.TargetPopulation.objects.get(
+            pk=target_population_id
         )
+        if target_population_model.status == "DRAFT":
+            return Household.objects.filter(
+                target_population_model.candidate_list_targeting_criteria.get_query()
+            )
+        return target_population_model.households.all()
 
-    @staticmethod
-    def get_households_from_rule(rule_lists: list):
-        """Fetches live results from Household golden db."""
-        for rule_obj in rule_lists:
-            search_rules = {}
-            rules = {}
-            rules.update(rule_obj["core_rules"])
-            rules.update(rule_obj["flex_rules"])
-            # TODO(codecakes): decouple to core and flex functions.
-            # many dynamic fields here will depend on the info
-            #  from FilterAttrType class falls back on that method.
-            for functor in target_models.FilterAttrType.apply_filters(rules):
-                search_rules.update(functor())
-            yield Household.objects.filter(**search_rules)
+    def resolve_final_households_list_by_targeting_criteria(
+        parent, info, target_population, targeting_criteria=None, **kwargs
+    ):
+        target_population_id = decode_id_string(target_population)
+        target_population_model = target_models.TargetPopulation.objects.get(
+            pk=target_population_id
+        )
+        if target_population_model.status == "DRAFT":
+            return []
+        if target_population_model.status == "APPROVED":
+            if targeting_criteria is None:
+                return target_population_model.households.filter(
+                    target_population_model.final_list_targeting_criteria.get_query()
+                )
+            return target_population_model.households.filter(
+                targeting_criteria_object_type_to_query(targeting_criteria)
+            ).all()
+
+        return target_population_model.final_list.all()
+
+    def resolve_golden_record_by_targeting_criteria(
+        parent, info, targeting_criteria, **kwargs
+    ):
+        return Household.objects.filter(
+            targeting_criteria_object_type_to_query(targeting_criteria)
+        )

@@ -18,7 +18,7 @@ const StatusBoxContainer = styled.div`
   font-weight: 500;
   letter-spacing: 1.2px;
   line-height: 16px;
-  padding: 3px;
+  padding: ${({ theme }) => theme.spacing(1)}px;
   text-align: center;
 `;
 
