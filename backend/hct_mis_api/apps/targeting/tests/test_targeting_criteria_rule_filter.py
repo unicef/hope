@@ -325,13 +325,3 @@ class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
         queryset = Household.objects.filter(query)
         self.assertEqual(queryset.count(), 1)
 
-    def test_rule_filter_select_multiple_treatment_facility_3(self):
-        rule_filter = TargetingCriteriaRuleFilter(
-            comparision_method="CONTAINS",
-            field_name="treatment_facility_h_f",
-            arguments=["governent_health_center"],
-            is_flex_field=True,
-        )
-        query = rule_filter.get_query()
-        queryset = Household.objects.filter(query)
-        self.assertEqual(queryset.count(), 1)
