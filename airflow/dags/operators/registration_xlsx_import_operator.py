@@ -1,6 +1,6 @@
 from django.db import transaction
 
-from registration_datahub.temporary_fields_map import CORE_FIELDS, FLEX_ATTRS
+from backend.hct_mis_api.apps.core.utils import get_combined_attributes
 from .base import DjangoOperator
 
 
@@ -32,10 +32,7 @@ class RegistrationXLSXImportOperator(DjangoOperator):
 
         sheet_title = sheet.title.lower()
 
-        combined_fields = {
-            **CORE_FIELDS[sheet_title],
-            **FLEX_ATTRS[sheet_title],
-        }
+        combined_fields = get_combined_attributes()
 
         first_row = sheet[1]
         households_to_update = []

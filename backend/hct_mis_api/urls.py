@@ -8,6 +8,7 @@ from django.urls import path, include
 from django.views.decorators.csrf import csrf_exempt
 from graphene_file_upload.django import FileUploadGraphQLView
 
+import registration_datahub.views
 from core.views import homepage, schema
 
 
@@ -21,6 +22,7 @@ urlpatterns = [
         "api/graphql", csrf_exempt(FileUploadGraphQLView.as_view(graphiql=True))
     ),
     path("api/", include("social_django.urls", namespace="social")),
+    path("api/download_template", registration_datahub.views.download_template)
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 urlpatterns += staticfiles_urlpatterns()
