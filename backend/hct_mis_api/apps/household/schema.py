@@ -89,12 +89,14 @@ class HouseholdNode(DjangoObjectType):
     class Meta:
         model = Household
         filter_fields = []
+        exclude_fields = ("flex_fields",)
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
 
 class IndividualNode(DjangoObjectType):
     class Meta:
+        exclude_fields = ("flex_fields",)
         model = Individual
         filter_fields = []
         interfaces = (relay.Node,)
