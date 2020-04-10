@@ -9,12 +9,7 @@ class Migration(migrations.Migration):
         ("targeting", "0003_migration"),
     ]
 
-    def clear_target_populations(apps, schema):
-        TargetPopulation = apps.get_model("targeting", "TargetPopulation")
-        TargetPopulation.objects.all().delete()
-
     operations = [
-        migrations.RunPython(clear_target_populations),
         migrations.AlterField(
             model_name="targetpopulation",
             name="name",
