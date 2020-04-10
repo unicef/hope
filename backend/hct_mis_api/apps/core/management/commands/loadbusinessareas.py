@@ -1,9 +1,11 @@
+import logging
 import xml.etree.ElementTree as ET
 
 from django.core.management import BaseCommand
 
 from core.models import BusinessArea
 
+logger = logging.getLogger(__name__)
 
 class Command(BaseCommand):
     help = "load_business_areas"
@@ -49,4 +51,4 @@ class Command(BaseCommand):
                 region_name=business_area_tag.find("REGION_NAME").text,
             )
             business_area.save()
-        self.stdout.write(f"Imported business areas from {file}")
+        logger.debug(f"Imported business areas from {file}")

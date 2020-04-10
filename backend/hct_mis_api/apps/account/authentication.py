@@ -26,9 +26,8 @@ def social_details(backend, details, response, *args, **kwargs):
     return r
 
 
-def user_details(strategy, details, user=None, *args, **kwargs):
+def user_details(strategy, details, backend, user=None, *args, **kwargs):
     logger.debug(f"user_details for user {user} details:\n{details}")
-
     if user:
         fullname = details["fullname"].split(" ")
         user.first_name = fullname[0].capitalize()
@@ -37,7 +36,7 @@ def user_details(strategy, details, user=None, *args, **kwargs):
         user.save()
 
     return social_core_user.user_details(
-        strategy, details, user, *args, **kwargs
+        strategy, details, backend, user, *args, **kwargs
     )
 
 

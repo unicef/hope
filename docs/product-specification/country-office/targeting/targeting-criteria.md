@@ -24,7 +24,7 @@ Clicking the button will take you to a new screen, allowing HCT-MIS users to set
 In order to create a new Target, users will need to complete the following fields on the create screen.
 
 * Name Target Population
-* Adding Criteria
+* Adding at least one Criteria
 
 
 
@@ -56,7 +56,7 @@ When first clicking on the **Add Criteria** button, a user will start a new set 
 
 A modal will pop up on the UI and allow for the user to choose from a dropdown menu which field type they would like to select criteria from.
 
-To end their **AND** criteria, the user must click the **`Save`**.
+To end the **AND** criteria, the user must click the **`Save`**.
 
 Once clicking the **`Save`** button the modal will disappear, and the user will see a summary of their criteria within the blue box. 
 
@@ -102,7 +102,7 @@ Once criteria is added and saved to the Target Population, the system will retur
 | Treatment Facility | Select Many |
 | Number of Rooms | Integer |
 | Total Dwellers | Integer |
-| Water Source | Select Multiple |
+| Water Source | Select Many |
 | Sufficient Water | Select One |
 | Latrine | Select One |
 | Assistance Type | Select Many |

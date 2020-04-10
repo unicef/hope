@@ -55,9 +55,10 @@ interface TableComponentProps<T> {
   ) => void;
   orderBy: keyof T;
   order: Order;
-  title: string;
+  title?: string;
   loading?: boolean;
   allowSort?: boolean;
+  isOnPaper?: boolean;
 }
 
 export function TableComponent<T>({
@@ -76,6 +77,7 @@ export function TableComponent<T>({
   orderBy,
   loading,
   allowSort,
+  isOnPaper = true,
 }: TableComponentProps<T>): React.ReactElement {
   const classes = useStyles({});
 
@@ -105,40 +107,43 @@ export function TableComponent<T>({
       </>
     );
   }
+  const table = (
+    <>
+      <TableContainer>
+        {title ? <EnhancedTableToolbar title={title} /> : null}
+        <Table
+          className={classes.table}
+          aria-labelledby='tableTitle'
+          size='medium'
+          aria-label='enhanced table'
+        >
+          <EnhancedTableHead<T>
+            classes={classes}
+            order={order}
+            headCells={headCells}
+            orderBy={orderBy}
+            onRequestSort={handleRequestSort}
+            rowCount={itemsCount}
+            allowSort={allowSort}
+          />
+          <TableBody>{body}</TableBody>
+        </Table>
+      </TableContainer>
+      <TablePagination
+        rowsPerPageOptions={rowsPerPageOptions}
+        component='div'
+        count={itemsCount}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onChangePage={handleChangePage}
+        onChangeRowsPerPage={handleChangeRowsPerPage}
+      />
+    </>
+  );
 
   return (
     <div className={classes.root}>
-      <Paper className={classes.paper}>
-        <TableContainer>
-          <EnhancedTableToolbar title={title} />
-          <Table
-            className={classes.table}
-            aria-labelledby='tableTitle'
-            size='medium'
-            aria-label='enhanced table'
-          >
-            <EnhancedTableHead<T>
-              classes={classes}
-              order={order}
-              headCells={headCells}
-              orderBy={orderBy}
-              onRequestSort={handleRequestSort}
-              rowCount={itemsCount}
-              allowSort={allowSort}
-            />
-            <TableBody>{body}</TableBody>
-          </Table>
-        </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={rowsPerPageOptions}
-          component='div'
-          count={itemsCount}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onChangePage={handleChangePage}
-          onChangeRowsPerPage={handleChangeRowsPerPage}
-        />
-      </Paper>
+      {isOnPaper ? <Paper className={classes.paper}>{table}</Paper> : table}
     </div>
   );
 }

@@ -5,7 +5,7 @@ from django.contrib import admin
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.forms import forms
-from django.shortcuts import redirect, render, render_to_response
+from django.shortcuts import redirect, render
 from django.urls import path
 from django.utils.html import strip_tags
 from xlrd import XLRDError
@@ -27,9 +27,7 @@ class BusinessAreaAdmin(admin.ModelAdmin):
     list_display = ("name", "slug")
 
 
-@admin.register(FlexibleAttribute)
-class FlexibleAttributeAdmin(admin.ModelAdmin):
-    change_list_template = "core/flexible_fields_changelist.html"
+class FlexibleAttributeImporter:
 
     TYPE_CHOICE_MAP = {
         "note": "STRING",
@@ -60,6 +58,11 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
         "_i_c",
     )
 
+    FLEX_FIELD_SUFFIXES = (
+        "_h_f",
+        "_i_f",
+    )
+
     JSON_MODEL_FIELDS = (
         "label",
         "hint",
@@ -70,13 +73,6 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
         "end",
         "deviceid",
     )
-
-    def get_urls(self):
-        urls = super().get_urls()
-        my_urls = [
-            path("import-xls/", self.import_xls),
-        ]
-        return my_urls + urls
 
     def _validate_file_has_required_core_fields(self, sheet):
         required_fields = [
@@ -323,6 +319,11 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
                     value, header_name, object_type_to_add, row, row_number,
                 )
 
+            is_flex_field = any(
+                self.object_fields_to_create["name"].endswith(i)
+                for i in self.FLEX_FIELD_SUFFIXES
+            )
+
             if object_type_to_add == "group":
                 obj = FlexibleAttributeGroup.all_objects.filter(
                     name=self.object_fields_to_create["name"],
@@ -350,7 +351,8 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
                 FlexibleAttributeGroup.objects.rebuild()
 
                 all_groups.append(group)
-            elif object_type_to_add == "attribute":
+
+            elif object_type_to_add == "attribute" and is_flex_field:
                 choice_name = self._get_field_choice_name(row)
                 obj = FlexibleAttribute.all_objects.filter(
                     name=self.object_fields_to_create["name"],
@@ -374,14 +376,21 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
                 else:
                     field = FlexibleAttribute.objects.create(
                         group=self.current_group_tree[-1],
+                        associated_with=(
+                            0
+                            if self.object_fields_to_create["name"][-4:]
+                            == "_h_f"
+                            else 1
+                        ),
                         **self.object_fields_to_create,
                         **self.json_fields_to_create,
                     )
+
                 if choice_name:
                     choices = FlexibleAttributeChoice.objects.filter(
                         list_name=choice_name,
                     )
-                    field.flexibleattributechoice_set.set(choices)
+                    field.choices.set(choices)
 
                 all_attrs.append(field)
 
@@ -400,6 +409,31 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
     json_fields_to_create = defaultdict(dict)
     object_fields_to_create = {}
     can_add_flag = True
+
+    @transaction.atomic
+    def import_xls(self, xls_file):
+        # Disabled till we now what core fields we should have
+        # self._validate_file_has_required_core_fields(sheets["survey"])
+        self.current_group_tree = [None]
+        wb = xlrd.open_workbook(filename=xls_file)
+        sheets = {
+            "survey": wb.sheet_by_name("survey"),
+            "choices": wb.sheet_by_name("choices"),
+        }
+        self._handle_choices(sheets)
+        self._handle_groups_and_fields(sheets["survey"])
+
+
+@admin.register(FlexibleAttribute)
+class FlexibleAttributeAdmin(admin.ModelAdmin, FlexibleAttributeImporter):
+    change_list_template = "core/flexible_fields_changelist.html"
+
+    def get_urls(self):
+        urls = super().get_urls()
+        my_urls = [
+            path("import-xls/", self.import_xls),
+        ]
+        return my_urls + urls
 
     @transaction.atomic
     def import_xls(self, request):

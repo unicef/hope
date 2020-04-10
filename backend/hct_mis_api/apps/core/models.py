@@ -1,23 +1,26 @@
+import operator
 from decimal import Decimal
+from typing import List
 
 import mptt
 import pycountry
 from auditlog.models import AuditlogHistoryField
 from auditlog.registry import auditlog
+from core.coutries import COUNTRY_NAME_TO_ALPHA2_CODE
+from core.utils import unique_slugify, age_to_dob_query
 from django.contrib.gis.db.models import MultiPolygonField, PointField
 from django.contrib.postgres.fields import JSONField
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
-from model_utils.models import UUIDModel, SoftDeletableModel
+from model_utils.models import SoftDeletableModel
 from mptt.fields import TreeForeignKey
 from mptt.managers import TreeManager
 from mptt.models import MPTTModel
-
-from core.coutries import COUNTRY_NAME_TO_ALPHA2_CODE
-from core.utils import unique_slugify
 from utils.models import TimeStampedUUIDModel, SoftDeletionTreeModel
+
+
 
 
 class Country(TimeStampedUUIDModel):
@@ -299,6 +302,10 @@ class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
         ("DATETIME", _("Datetime")),
         ("GEOPOINT", _("Geopoint")),
     )
+    ASSOCIATED_WITH_CHOICES = (
+        (0, _("Household")),
+        (1, _("Individual")),
+    )
 
     type = models.CharField(max_length=16, choices=TYPE_CHOICE)
     name = models.CharField(max_length=255, unique=True)
@@ -311,6 +318,7 @@ class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
         related_name="flex_attributes",
         null=True,
     )
+    associated_with = models.SmallIntegerField(choices=ASSOCIATED_WITH_CHOICES)
     history = AuditlogHistoryField(pk_indexable=False)
 
     def __str__(self):
@@ -345,16 +353,19 @@ class FlexibleAttributeChoice(SoftDeletableModel, TimeStampedUUIDModel):
     name = models.CharField(max_length=255)
     label = JSONField(default=dict)
     admin = models.CharField(max_length=255)
-    flex_attributes = models.ManyToManyField("core.FlexibleAttribute",)
+    flex_attributes = models.ManyToManyField(
+        "core.FlexibleAttribute", related_name="choices"
+    )
     history = AuditlogHistoryField(pk_indexable=False)
 
     def __str__(self):
         return f"list name: {self.list_name}, name: {self.name}"
 
 
+
 mptt.register(Location, order_insertion_by=["title"])
 mptt.register(CartoDBTable, order_insertion_by=["table_name"])
-mptt.register(FlexibleAttributeGroup)
+mptt.register(FlexibleAttributeGroup, order_insertion_by=["name"])
 
 auditlog.register(FlexibleAttributeChoice)
 auditlog.register(FlexibleAttributeGroup)
