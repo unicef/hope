@@ -1,3 +1,5 @@
+import operator
+
 import graphene
 import openpyxl
 from django.core.exceptions import ValidationError
@@ -244,6 +246,7 @@ class UploadImportDataXLSXFile(
         errors = cls.validate(file=file)
 
         if errors:
+            errors.sort(key=operator.itemgetter('row_number', 'header'))
             return UploadImportDataXLSXFile(None, errors)
 
         wb = openpyxl.load_workbook(file)
