@@ -112,7 +112,7 @@ description: HCT MIS related glossary and terms
     <tr>
       <td style="text-align:left">Flexible Attributes</td>
       <td style="text-align:left">Non-Core attributes associated with a household / beneficiary. Also referred
-        to as &quot;Flex Fields&quot;.</td>
+        to as &quot;Flex Fields&quot;. Stored in the JSON blob.</td>
     </tr>
     <tr>
       <td style="text-align:left">FSP</td>
