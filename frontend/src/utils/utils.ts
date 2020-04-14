@@ -99,7 +99,9 @@ export function targetPopulationStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case 'IN_PROGRESS':
+    case 'DRAFT':
+      return theme.hctPalette.gray;
+    case 'APPROVED':
       return theme.hctPalette.oragne;
     case 'FINALIZED':
       return theme.hctPalette.green;
@@ -146,7 +148,9 @@ export function columnToOrderBy(
 ): string {
   if (column.startsWith('-')) {
     const clearColumn = column.replace('-', '');
-    return camelToUnderscore(`${orderDirection === 'asc' ? '-' : ''}${clearColumn}`);
+    return camelToUnderscore(
+      `${orderDirection === 'asc' ? '-' : ''}${clearColumn}`,
+    );
   }
   return camelToUnderscore(`${orderDirection === 'desc' ? '-' : ''}${column}`);
 }
@@ -189,7 +193,8 @@ export function programCompare(
 }
 
 export function formatCurrency(amount: number): string {
-  return `${amount.toLocaleString('en-US', {
+  const amountCleared = amount || 0;
+  return `${amountCleared.toLocaleString('en-US', {
     currency: 'USD',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
@@ -206,4 +211,87 @@ export function clearValue(value) {
 
 export function getAgeFromDob(date: string): number {
   return moment().diff(moment(date), 'years');
+}
+
+export function formatCriteriaFilters({ filters }) {
+  return filters.map((each) => {
+    let comparisionMethod;
+    let values;
+    switch (each.fieldAttribute.type) {
+      case 'SELECT_ONE':
+        comparisionMethod = 'EQUALS';
+        values = [each.value];
+        break;
+      case 'SELECT_MANY':
+        comparisionMethod = 'EQUALS';
+        values = [each.value];
+        break;
+      case 'STRING':
+        comparisionMethod = 'CONTAINS';
+        values = [each.value];
+        break;
+      case 'INTEGER':
+        if (each.value.from && each.value.to) {
+          comparisionMethod = 'RANGE';
+          values = [each.value.from, each.value.to];
+        } else if (each.value.from && !each.value.to) {
+          comparisionMethod = 'GREATER_THAN';
+          values = [each.value.from];
+        } else {
+          comparisionMethod = 'LESS_THAN';
+          values = [each.value.to];
+        }
+        break;
+      default:
+        comparisionMethod = 'CONTAINS';
+    }
+    return {
+      comparisionMethod,
+      arguments: values,
+      fieldName: each.fieldName,
+      isFlexField: each.isFlexField,
+      fieldAttribute: each.fieldAttribute,
+    };
+  });
+}
+
+export function mapCriteriasToInitialValues(criteria) {
+  const mappedFilters = [];
+  if (criteria.filters) {
+    criteria.filters.map((each) => {
+      switch (each.comparisionMethod) {
+        case 'RANGE':
+          return mappedFilters.push({
+            ...each,
+            value: {
+              from: each.arguments[0],
+              to: each.arguments[1],
+            },
+          });
+        case 'LESS_THAN':
+          return mappedFilters.push({
+            ...each,
+            value: {
+              from: '',
+              to: each.arguments[0],
+            },
+          });
+        case 'GREATER_THAN':
+          return mappedFilters.push({
+            ...each,
+            value: {
+              from: each.arguments[0],
+              to: '',
+            },
+          });
+        default:
+          return mappedFilters.push({
+            ...each,
+          });
+      }
+    });
+  } else {
+    mappedFilters.push({ fieldName: '' });
+  }
+  return mappedFilters;
 }
