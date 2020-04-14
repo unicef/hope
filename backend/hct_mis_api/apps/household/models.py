@@ -1,5 +1,6 @@
 from datetime import date
 
+from django.contrib.postgres.fields import JSONField
 from django.core.validators import (
     validate_image_file_extension,
     MinLengthValidator,
@@ -56,6 +57,7 @@ class Household(TimeStampedUUIDModel):
     programs = models.ManyToManyField(
         "program.Program", related_name="households", blank=True,
     )
+    flex_fields = JSONField(default=dict)
     registration_date = models.DateField(null=True)
 
     @property
@@ -165,6 +167,7 @@ class Individual(TimeStampedUUIDModel):
     )
     school_attendance = models.CharField(max_length=100, blank=True, default="")
     school_type = models.CharField(max_length=100, blank=True, default="")
+    years_in_school = models.PositiveIntegerField(null=True, default=None)
     minutes_to_school = models.PositiveIntegerField(null=True, default=None)
     enrolled_in_nutrition_programme = models.CharField(
         max_length=3, default="", choices=YES_NO_CHOICE, blank=True,
@@ -172,6 +175,7 @@ class Individual(TimeStampedUUIDModel):
     administration_of_rutf = models.CharField(
         max_length=3, default="", choices=YES_NO_CHOICE, blank=True,
     )
+    flex_fields = JSONField(default=dict)
 
     @property
     def age(self):
