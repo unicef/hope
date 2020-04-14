@@ -25,6 +25,7 @@ pycountry==19.8.18
 openpyxl==3.0.3
 xlrd
 ipdb
+sentry-sdk==0.14.3
 
 # API
 graphene-django==2.7.1
