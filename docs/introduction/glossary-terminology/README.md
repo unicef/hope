@@ -58,8 +58,8 @@ description: HCT MIS related glossary and terms
     </tr>
     <tr>
       <td style="text-align:left">Core Attribute</td>
-      <td style="text-align:left">Universally used attributes for Households / Individuals - stored within
-        the HCT System Database.</td>
+      <td style="text-align:left">Commonly used attributes for Households / Individuals that change with
+        the Country&apos;s needs - stored within the HCT System Database.</td>
     </tr>
     <tr>
       <td style="text-align:left">Country</td>
