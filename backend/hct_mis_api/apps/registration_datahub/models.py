@@ -1,5 +1,6 @@
 from datetime import date
 
+from django.contrib.postgres.fields import JSONField
 from django.core.validators import (
     validate_image_file_extension,
     MinLengthValidator,
@@ -10,8 +11,8 @@ from django.utils.translation import ugettext_lazy as _
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
 
-from hct_mis_api.apps.household.const import NATIONALITIES
-from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
+from household.const import NATIONALITIES
+from utils.models import TimeStampedUUIDModel
 
 
 class ImportedHousehold(TimeStampedUUIDModel):
@@ -50,6 +51,7 @@ class ImportedHousehold(TimeStampedUUIDModel):
         null=True,
     )
     registration_date = models.DateField(null=True)
+    flex_fields = JSONField(default=dict)
 
     def __str__(self):
         return f"Household CashAssist ID: {self.household_ca_id}"
@@ -145,6 +147,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
     disability = models.CharField(
         max_length=30, default="NO", choices=DISABILITY_CHOICE,
     )
+    flex_fields = JSONField(default=dict)
 
     @property
     def age(self):

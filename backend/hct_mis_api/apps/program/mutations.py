@@ -1,18 +1,17 @@
 import graphene
+from django.core.exceptions import ValidationError
 from django.db import transaction
 
-from core.models import Location, BusinessArea
+from core.models import BusinessArea
 from core.permissions import is_authenticated
 from core.utils import decode_id_string
 from core.validators import CommonValidator
-from program.models import Program, CashPlan
-from program.schema import ProgramNode, CashPlanNode
+from program.models import Program
+from program.schema import ProgramNode
 from program.validators import (
     ProgramValidator,
-    CashPlanValidator,
     ProgramDeletionValidator,
 )
-from targeting.models import TargetPopulation
 
 
 class CreateProgramInput(graphene.InputObjectType):
@@ -73,7 +72,7 @@ class CreateProgram(CommonValidator, graphene.Mutation):
         return CreateProgram(program)
 
 
-class UpdateProgram(CommonValidator, ProgramValidator, graphene.Mutation):
+class UpdateProgram( ProgramValidator, graphene.Mutation):
     program = graphene.Field(ProgramNode)
 
     class Arguments:
@@ -92,7 +91,6 @@ class UpdateProgram(CommonValidator, ProgramValidator, graphene.Mutation):
         if business_area_slug:
             business_area = BusinessArea.objects.get(slug=business_area_slug)
             program.business_area = business_area
-
         cls.validate(
             program_data=program_data,
             program=program,
