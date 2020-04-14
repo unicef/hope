@@ -42,7 +42,8 @@ ALLOWED_EXTENSIONS = (
     "doc",
     "docx",
     "xls",
-    "xlsx" "img",
+    "xlsx",
+    "img",
     "png",
     "jpg",
     "jpeg",
@@ -167,7 +168,7 @@ PROJECT_APPS = [
     "intervention",
     "payment",
     "program",
-    "targeting",
+    "targeting.apps.TargetingConfig",
     "utils",
     "cash_assist_datahub",
     "registration_datahub",
@@ -365,3 +366,5 @@ GRAPH_MODELS = {
     "all_applications": True,
     "group_models": True,
 }
+
+PHONENUMBER_DEFAULT_REGION = "US"

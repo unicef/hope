@@ -17,6 +17,9 @@ import { RegistrationDataImportPage } from './registration/list/RegistrationData
 import { PopulationHouseholdDetailsPage } from './pages/PopulationHouseholdDetailsPage';
 import { PopulationIndividualsPage } from './pages/PopulationIndividualsPage';
 import { PopulationIndividualsDetailsPage } from './pages/PopulationIndividualsDetailsPage';
+import { TargetPopulationPage } from './pages/TargetPopulationPage';
+import { TargetPopulationDetailsPage } from './pages/TargetPopulationDetailsPage';
+import { CreateTargetPopulation } from './pages/CreateTargetPopulation';
 import { RegistrationDataImport } from './registration/import/RegistrationDataImport';
 import { RegistrationDataImportDetailsPage } from './registration/details/RegistrationDataImportDetailsPage';
 import { RegistrationHouseholdDetailsPage } from './registration/details/households/RegistrationHouseholdDetailsPage';
@@ -72,6 +75,15 @@ export function HomeRouter(): React.ReactElement {
           <Route path='/:businessArea/cashplans/:id'>
             <CashPlanDetailsPage />
           </Route>
+          <Route exact path='/:businessArea/target-population'>
+            <TargetPopulationPage />
+          </Route>
+          <Route path='/:businessArea/target-population/create'>
+            <CreateTargetPopulation />
+          </Route>
+          <Route path='/:businessArea/target-population/:id'>
+            <TargetPopulationDetailsPage />
+          </Route>
           <Route path='/:businessArea/population/household'>
             <PopulationHouseholdPage />
           </Route>
@@ -80,9 +92,6 @@ export function HomeRouter(): React.ReactElement {
           </Route>
           <Route path='/:businessArea/programs/:id'>
             <ProgramDetailsPage />
-          </Route>
-          <Route path='/:businessArea/payment_records/:id'>
-            <PaymentRecordDetailsPage />
           </Route>
           <Route path='/:businessArea/payment_records/:id'>
             <PaymentRecordDetailsPage />

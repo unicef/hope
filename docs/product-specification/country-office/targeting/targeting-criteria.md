@@ -102,7 +102,7 @@ Once criteria is added and saved to the Target Population, the system will retur
 | Treatment Facility | Select Many |
 | Number of Rooms | Integer |
 | Total Dwellers | Integer |
-| Water Source | Select Multiple |
+| Water Source | Select Many |
 | Sufficient Water | Select One |
 | Latrine | Select One |
 | Assistance Type | Select Many |

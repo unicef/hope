@@ -3,14 +3,13 @@ from pathlib import Path
 from zipfile import BadZipfile
 
 import openpyxl
+import phonenumbers
 from dateutil import parser
-from django.core.exceptions import ValidationError
 from openpyxl import load_workbook
-from phonenumber_field.validators import validate_international_phonenumber
 
+from core.models import BusinessArea
 from core.utils import get_choices_values
 from core.validators import BaseValidator
-from household.const import NATIONALITIES
 from household.models import Individual, Household
 
 
@@ -56,7 +55,7 @@ class UploadXLSXValidator(BaseValidator):
                     "From private vendor",
                     "To buy water from water tank",
                     "Collect water from rain water",
-                    "Collect water from a well / source directly",
+                    "Collect water from a well/source directly",
                 ),
             },
         },
@@ -64,7 +63,7 @@ class UploadXLSXValidator(BaseValidator):
     # TODO: Probably need to fetch fields directly from models
     CORE_FIELDS = {
         "individuals": {
-            "household_id": {"type": "STRING"},
+            "household_id": {"type": "INTEGER"},
             "head_of_household": {
                 "type": "SELECT_ONE",
                 "choices": Individual.YES_NO_CHOICE,
@@ -83,21 +82,16 @@ class UploadXLSXValidator(BaseValidator):
             #  those two fields are also missing in model fields
             "admin_level_1": {
                 "type": "SELECT_ONE",
-                "choices": ("AFGHANISTAN",),
+                "choices": ("Afghanistan",),
             },
-            "admin_level_2": {"type": "SELECT_ONE", "choices": ("KABUL",),},
+            "admin_level_2": {"type": "SELECT_ONE", "choices": ("Kabul",),},
             "phone_number_1": {"type": "PHONE_NUMBER"},
             "phone_number_2": {"type": "PHONE_NUMBER"},
             "given_name": {"type": "STRING"},
             "last_name": {"type": "STRING"},
             "middle_name": {"type": "STRING"},
-            "full_name": {
-                "type": "CALCULATED",
-                "calculate_fields": ["first_name", "middle_name", "last_name",],
-            },
             "sex": {"type": "SELECT_ONE", "choices": Individual.SEX_CHOICE,},
             "birth_date": {"type": "DATE"},
-            "age": {"type": "CALCULATED", "calculate_fields": ["birth_date"],},
             "estimated_birth_date": {
                 "type": "SELECT_ONE",
                 "choices": Individual.YES_NO_CHOICE,
@@ -121,7 +115,7 @@ class UploadXLSXValidator(BaseValidator):
             },
         },
         "households": {
-            "household_id": {"type": "STRING"},
+            "household_id": {"type": "INTEGER"},
             "household_location": {"type": "GEOLOCATION"},
             "consent": {
                 "type": "SELECT_ONE",
@@ -133,7 +127,7 @@ class UploadXLSXValidator(BaseValidator):
             },
             "family_nationality": {
                 "type": "SELECT_ONE",
-                "choices": NATIONALITIES,
+                "choices": BusinessArea.objects.values_list("name", flat=True),
             },
             "household_size_h_c": {"type": "INTEGER"},
             "distance_from_school": {"type": "DECIMAL"},
@@ -166,7 +160,13 @@ class UploadXLSXValidator(BaseValidator):
 
     @classmethod
     def integer_validator(cls, value, *args, **kwargs):
-        return isinstance(value, int)
+        if cls.float_validator(value) is True:
+            return False
+        try:
+            int(value)
+            return True
+        except ValueError:
+            return False
 
     @classmethod
     def float_validator(cls, value, *args, **kwargs):
@@ -190,14 +190,10 @@ class UploadXLSXValidator(BaseValidator):
     @classmethod
     def phone_validator(cls, value, *args, **kwargs):
         try:
-            validate_international_phonenumber(value)
-        except ValidationError:
+            phonenumbers.parse(value)
+            return True
+        except (phonenumbers.NumberParseException, TypeError):
             return False
-        return True
-
-    @classmethod
-    def calculated_field_validator(cls, val, *args, **kwargs):
-        return bool(val)
 
     @classmethod
     def choice_validator(cls, value, header, *args, **kwargs):
@@ -207,7 +203,7 @@ class UploadXLSXValidator(BaseValidator):
         choice_type = cls.COMBINED_FIELDS_DICT[header]["type"]
 
         if choice_type == "SELECT_ONE":
-            return value in choices
+            return value.strip() in choices
         elif choice_type == "SELECT_MANY":
             selected_choices = value.split(",")
             for choice in selected_choices:
@@ -230,6 +226,7 @@ class UploadXLSXValidator(BaseValidator):
         }
 
         switch_dict = {
+            "ID": cls.string_validator,
             "STRING": cls.string_validator,
             "INTEGER": cls.integer_validator,
             "DECIMAL": cls.float_validator,
@@ -238,12 +235,19 @@ class UploadXLSXValidator(BaseValidator):
             "SELECT_ONE": cls.choice_validator,
             "SELECT_MANY": cls.choice_validator,
             "PHONE_NUMBER": cls.phone_validator,
-            "CALCULATED": cls.not_empty_validator,
             "GEOLOCATION": cls.geolocation_validator,
             "GEOPOINT": cls.geolocation_validator,
             # TODO: add image validator, how image will be attached to file?
             # "IMAGE": cls.geolocation_validator,
         }
+
+        # create set of household ids to validate
+        # individual is matched with any household
+        household_ids = (
+            {cell.value for cell in sheet["A"]}
+            if sheet.title == "Individuals"
+            else None
+        )
 
         invalid_rows = []
         for row in sheet.iter_rows(min_row=3):
@@ -252,15 +256,33 @@ class UploadXLSXValidator(BaseValidator):
                 continue
 
             for cell, header in zip(row, first_row):
-                current_field = combined_fields[header.value]
+                current_field = combined_fields.get(header.value)
+                if not current_field:
+                    continue
                 field_type = current_field["type"]
                 fn = switch_dict.get(field_type)
 
                 if fn(cell.value, header.value) is False:
                     message = (
-                        "Unexpected value for type "
-                        + f"{field_type.replace('_', ' ').lower()}"
+                        f"Sheet: {sheet.title}, Unexpected value: "
+                        f"{cell.value} for type "
+                        f"{field_type.replace('_', ' ').lower()} "
+                        f"of field {header.value}"
                     )
+                    invalid_rows.append(
+                        {
+                            "row_number": cell.row,
+                            "header": header.value,
+                            "message": message,
+                        }
+                    )
+
+                is_not_matched_with_household = (
+                    household_ids and header.value == "household_id"
+                ) and cell.value not in household_ids
+
+                if is_not_matched_with_household:
+                    message = "Individual is not matched with any household"
                     invalid_rows.append(
                         {
                             "row_number": cell.row,
@@ -287,12 +309,12 @@ class UploadXLSXValidator(BaseValidator):
         # Checking only extensions is not enough,
         # loading workbook to check if it is in fact true .xlsx file
         try:
-            load_workbook(xlsx_file)
+            load_workbook(xlsx_file, data_only=True)
         except BadZipfile:
             return [
                 {
                     "row_number": 1,
-                    "header": "xlsx_file.nam",
+                    "header": f"{xlsx_file.name}",
                     "message": "Invalid .xlsx file",
                 }
             ]
@@ -306,10 +328,11 @@ class UploadXLSXValidator(BaseValidator):
 
         if cls.WB is None:
             xlsx_file = kwargs.get("file")
-            wb = openpyxl.load_workbook(xlsx_file)
+            wb = openpyxl.load_workbook(xlsx_file, data_only=True)
         else:
             wb = cls.WB
 
+        errors = []
         for name, fields in cls.CORE_FIELDS.items():
             sheet = wb[name.capitalize()]
             first_row = sheet[1]
@@ -322,21 +345,23 @@ class UploadXLSXValidator(BaseValidator):
 
             columns_difference = expected_column_names.difference(column_names)
             if columns_difference:
-                return [
-                    {
-                        "row_number": 1,
-                        "header": col,
-                        "message": "Invalid column name",
-                    }
-                    for col in columns_difference
-                ]
-            return []
+                errors.extend(
+                    [
+                        {
+                            "row_number": 1,
+                            "header": col,
+                            "message": f"Missing column name {col}",
+                        }
+                        for col in columns_difference
+                    ]
+                )
+        return errors
 
     @classmethod
     def validate_household_rows(cls, *args, **kwargs):
         if cls.WB is None:
             xlsx_file = kwargs.get("file")
-            wb = openpyxl.load_workbook(xlsx_file)
+            wb = openpyxl.load_workbook(xlsx_file, data_only=True)
         else:
             wb = cls.WB
         household_sheet = wb["Households"]
@@ -346,7 +371,7 @@ class UploadXLSXValidator(BaseValidator):
     def validate_individuals_rows(cls, *args, **kwargs):
         if cls.WB is None:
             xlsx_file = kwargs.get("file")
-            wb = openpyxl.load_workbook(xlsx_file)
+            wb = openpyxl.load_workbook(xlsx_file, data_only=True)
         else:
             wb = cls.WB
         household_sheet = wb["Individuals"]
