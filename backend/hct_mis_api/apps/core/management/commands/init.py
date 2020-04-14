@@ -1,5 +1,5 @@
-from django.core.management.commands import makemigrations
 from django.core.management import call_command
+from django.core.management.commands import makemigrations
 
 
 class Command(makemigrations.Command):
@@ -21,4 +21,5 @@ class Command(makemigrations.Command):
         )
         call_command("migratealldb")
         call_command("loadbusinessareas")
+        call_command("loadflexfieldsattributes")
         call_command("generatefixtures")

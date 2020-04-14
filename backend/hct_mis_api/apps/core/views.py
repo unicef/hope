@@ -14,3 +14,7 @@ def schema(request):
     return HttpResponse(
         my_schema_str, content_type="application/graphlq", status=200
     )
+
+
+def trigger_error(request):
+    division_by_zero = 1 / 0

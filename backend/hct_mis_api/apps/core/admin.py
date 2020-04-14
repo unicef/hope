@@ -27,9 +27,7 @@ class BusinessAreaAdmin(admin.ModelAdmin):
     list_display = ("name", "slug")
 
 
-@admin.register(FlexibleAttribute)
-class FlexibleAttributeAdmin(admin.ModelAdmin):
-    change_list_template = "core/flexible_fields_changelist.html"
+class FlexibleAttributeImporter:
 
     TYPE_CHOICE_MAP = {
         "note": "STRING",
@@ -75,13 +73,6 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
         "end",
         "deviceid",
     )
-
-    def get_urls(self):
-        urls = super().get_urls()
-        my_urls = [
-            path("import-xls/", self.import_xls),
-        ]
-        return my_urls + urls
 
     def _validate_file_has_required_core_fields(self, sheet):
         required_fields = [
@@ -418,6 +409,31 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
     json_fields_to_create = defaultdict(dict)
     object_fields_to_create = {}
     can_add_flag = True
+
+    @transaction.atomic
+    def import_xls(self, xls_file):
+        # Disabled till we now what core fields we should have
+        # self._validate_file_has_required_core_fields(sheets["survey"])
+        self.current_group_tree = [None]
+        wb = xlrd.open_workbook(filename=xls_file)
+        sheets = {
+            "survey": wb.sheet_by_name("survey"),
+            "choices": wb.sheet_by_name("choices"),
+        }
+        self._handle_choices(sheets)
+        self._handle_groups_and_fields(sheets["survey"])
+
+
+@admin.register(FlexibleAttribute)
+class FlexibleAttributeAdmin(admin.ModelAdmin, FlexibleAttributeImporter):
+    change_list_template = "core/flexible_fields_changelist.html"
+
+    def get_urls(self):
+        urls = super().get_urls()
+        my_urls = [
+            path("import-xls/", self.import_xls),
+        ]
+        return my_urls + urls
 
     @transaction.atomic
     def import_xls(self, request):

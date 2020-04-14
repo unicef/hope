@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 from .base import *  # noqa: ignore=F403
-
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
 
 # dev overrides
 DEBUG = False
@@ -74,3 +75,8 @@ if os.getenv("POSTGRES_SSL", False):
         "sslmode": "verify-full",
         "sslrootcert": "/code/psql-cert.crt",
     }
+
+sentry_sdk.init(
+    dsn=os.getenv("SENTRY_DSN"),
+    integrations=[DjangoIntegration()],
+)
