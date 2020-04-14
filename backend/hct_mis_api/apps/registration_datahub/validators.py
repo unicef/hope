@@ -39,13 +39,17 @@ class UploadXLSXValidator(BaseValidator):
         return errors_list
 
     @classmethod
-    def string_validator(cls, value, *args, **kwargs):
+    def string_validator(cls, value, header, *args, **kwargs):
+        if not cls.required_validator(value, header):
+            return False
+
         return isinstance(value, str)
 
     @classmethod
-    def integer_validator(cls, value, *args, **kwargs):
-        if cls.float_validator(value) is True:
+    def integer_validator(cls, value, header, *args, **kwargs):
+        if not cls.required_validator(value, header):
             return False
+
         try:
             int(value)
             return True
@@ -53,17 +57,23 @@ class UploadXLSXValidator(BaseValidator):
             return False
 
     @classmethod
-    def float_validator(cls, value, *args, **kwargs):
+    def float_validator(cls, value, header, *args, **kwargs):
+        if not cls.required_validator(value, header):
+            return False
+
         return isinstance(value, float)
 
     @classmethod
-    def geolocation_validator(cls, value, *args, **kwargs):
+    def geolocation_validator(cls, value, header, *args, **kwargs):
+        if not cls.required_validator(value, header):
+            return False
+
         pattern = re.compile(r"^(\-?\d+\.\d+?,\s*\-?\d+\.\d+?)$")
         return bool(re.match(pattern, value))
 
     @classmethod
-    def date_validator(cls, value, *args, **kwargs):
-        if cls.integer_validator(value):
+    def date_validator(cls, value, header, *args, **kwargs):
+        if cls.integer_validator(value, header):
             return False
         try:
             parser.parse(value)
@@ -72,7 +82,10 @@ class UploadXLSXValidator(BaseValidator):
         return True
 
     @classmethod
-    def phone_validator(cls, value, *args, **kwargs):
+    def phone_validator(cls, value, header, *args, **kwargs):
+        if not cls.required_validator(value, header):
+            return False
+
         try:
             phonenumbers.parse(value)
             return True
@@ -84,8 +97,11 @@ class UploadXLSXValidator(BaseValidator):
         choices = get_choices_values(cls.ALL_FIELDS[header]["choices"])
         choice_type = cls.ALL_FIELDS[header]["type"]
 
+        if not cls.required_validator(value, header):
+            return False
+
         if choice_type == "SELECT_ONE":
-            return value.strip() in choices
+            return value.strip() not in choices
         elif choice_type == "SELECT_MANY":
             selected_choices = value.split(",")
             for choice in selected_choices:
@@ -98,6 +114,18 @@ class UploadXLSXValidator(BaseValidator):
     @classmethod
     def not_empty_validator(cls, value, *args, **kwargs):
         return bool(value)
+
+    @classmethod
+    def required_validator(cls, value, header, *args, **kwargs):
+        is_required = cls.ALL_FIELDS[header]["required"]
+        is_not_empty = cls.not_empty_validator(value)
+
+        if is_required and is_not_empty:
+            return True
+        if is_required and not is_not_empty:
+            return False
+        if not is_required:
+            return True
 
     @classmethod
     def rows_validator(cls, sheet):
