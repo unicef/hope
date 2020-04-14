@@ -10,9 +10,11 @@ from django.db import models
 from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
+from model_utils.models import SoftDeletableModel
 from psycopg2.extras import NumericRange
 
 from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES
+from core.models import FlexibleAttribute
 from utils.models import TimeStampedUUIDModel
 
 _MAX_LEN = 256
@@ -38,7 +40,7 @@ def get_integer_range(min_range=None, max_range=None):
     )
 
 
-class TargetPopulation(TimeStampedUUIDModel):
+class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
     """Model for target populations.
 
     Has N:N association with households.
@@ -51,14 +53,13 @@ class TargetPopulation(TimeStampedUUIDModel):
         related_name="target_populations",
         null=True,
     )
+    STATUS_CHOICES = (
+        ("DRAFT", _("Open")),
+        ("APPROVED", _("Closed")),
+        ("FINALIZED", _("Sent")),
+    )
     status = models.CharField(
-        max_length=_MAX_LEN,
-        choices=(
-            ("DRAFT", _("Draft")),
-            ("APPROVED", _("Approved")),
-            ("FINALIZED", _("Finalized")),
-        ),
-        default="DRAFT",
+        max_length=_MAX_LEN, choices=STATUS_CHOICES, default="DRAFT",
     )
     households = models.ManyToManyField(
         "household.Household",
@@ -229,9 +230,10 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
             "supported_types": ["INTEGER", "SELECT_ONE"],
         },
         "CONTAINS": {
+            "min_arguments": 1,
             "arguments": 1,
             "lookup": "__contains",
-            "negative": True,
+            "negative": False,
             "supported_types": [],
         },
         "NOT_CONTAINS": {
@@ -292,7 +294,36 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
             """
     )
 
-    def get_query_for_cor_field(self):
+    def get_query_for_lookup(self, lookup, select_many=False):
+        comparision_attribute = TargetingCriteriaRuleFilter.COMPARISION_ATTRIBUTES.get(
+            self.comparision_method
+        )
+        args_count = comparision_attribute.get("arguments")
+        if self.arguments is None:
+            raise ValidationError(
+                f"{self.field_name} {self.comparision_method} filter query expect {args_count} "
+                f"arguments"
+            )
+        args_input_count = len(self.arguments)
+        if select_many:
+            if args_input_count < 1:
+                raise ValidationError(
+                    f"{self.field_name} SELECT MULTIPLE CONTAINS filter query expect at least 1 argument"
+                )
+        elif args_count != args_input_count:
+            raise ValidationError(
+                f"{self.field_name} {self.comparision_method} filter query expect {args_count} "
+                f"arguments gets {args_input_count}"
+            )
+        argument = self.arguments if args_input_count > 1 else self.arguments[0]
+        query = Q(
+            **{f"{lookup}{comparision_attribute.get('lookup')}": argument}
+        )
+        if comparision_attribute.get("negative"):
+            return ~query
+        return query
+
+    def get_query_for_core_field(self):
         core_fields = CORE_FIELDS_ATTRIBUTES
         core_field_attrs = [
             attr for attr in core_fields if attr.get("name") == self.field_name
@@ -311,28 +342,22 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
                 f"Core Field Attributes associated with this fieldName {self.field_name}"
                 f" doesn't have get_query method or lookup field"
             )
-        comparision_attribute = TargetingCriteriaRuleFilter.COMPARISION_ATTRIBUTES.get(
-            self.comparision_method
+        return self.get_query_for_lookup(
+            lookup, select_many=core_field_attr.get("type") == "SELECT_MANY",
         )
-        args_count = comparision_attribute.get("arguments")
-        if self.arguments is None:
+
+    def get_query_for_flex_field(self):
+        flex_field_attr = FlexibleAttribute.objects.get(name=self.field_name)
+        if not flex_field_attr:
             raise ValidationError(
-                f"{self.field_name} {self.comparision_method} filter query expect {args_count} "
-                f"arguments"
+                f"There are no Core Field Attributes associated with this fieldName {self.field_name}"
             )
-        if args_count != len(self.arguments):
-            raise ValidationError(
-                f"{self.field_name} {self.comparision_method} filter query expect {args_count} "
-                f"arguments gets {len(self.arguments)}"
-            )
-        argument = self.arguments if args_count > 1 else self.arguments[0]
-        query = Q(
-            **{f"{lookup}{comparision_attribute.get('lookup')}": argument}
+        lookup = f"{'individuals__' if flex_field_attr.associated_with else ''}flex_fields__{flex_field_attr.name}"
+        return self.get_query_for_lookup(
+            lookup, select_many=flex_field_attr.type == "SELECT_MANY",
         )
-        if comparision_attribute.get("negative"):
-            return ~query
-        return query
 
     def get_query(self):
         if not self.is_flex_field:
-            return self.get_query_for_cor_field()
+            return self.get_query_for_core_field()
+        return self.get_query_for_flex_field()

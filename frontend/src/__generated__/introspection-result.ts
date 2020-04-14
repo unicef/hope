@@ -48,12 +48,6 @@
             "name": "RegistrationDataImportNode"
           },
           {
-            "name": "SavedTargetRuleNode"
-          },
-          {
-            "name": "FlexibleAttributeChoiceNode"
-          },
-          {
             "name": "ImportedHouseholdNode"
           },
           {

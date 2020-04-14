@@ -12,8 +12,6 @@ metadata:
     redeploy: "true"
   namespace: {{ .Values.namespace }}
 spec:
-  successfulJobsHistoryLimit: 0
-  failedJobsHistoryLimit: 1
   template:
     spec:
       containers:
@@ -33,7 +31,7 @@ spec:
           - name: STORAGE_AZURE_ACCOUNT_NAME
             value: {{ .Values.backend.staticStorage.accountName }}
       restartPolicy: Never
-  backoffLimit: 4
+  backoffLimit: 20
 ---
 apiVersion: batch/v1
 kind: Job
@@ -48,8 +46,6 @@ metadata:
     redeploy: "true"
   namespace: {{ .Values.namespace }}
 spec:
-  successfulJobsHistoryLimit: 0
-  failedJobsHistoryLimit: 1
   template:
     spec:
       containers:
@@ -69,5 +65,5 @@ spec:
           - secretRef:
               name: backend-secret
       restartPolicy: Never
-  backoffLimit: 4
+  backoffLimit: 20
 ---
