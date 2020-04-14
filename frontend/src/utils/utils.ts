@@ -193,7 +193,8 @@ export function programCompare(
 }
 
 export function formatCurrency(amount: number): string {
-  return `${amount.toLocaleString('en-US', {
+  const amountCleared = amount || 0;
+  return `${amountCleared.toLocaleString('en-US', {
     currency: 'USD',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
@@ -218,7 +219,6 @@ export function formatCriteriaFilters({ filters }) {
     let values;
     switch (each.fieldAttribute.type) {
       case 'SELECT_ONE':
-        console.log(each)
         comparisionMethod = 'EQUALS';
         values = [each.value];
         break;
@@ -256,42 +256,42 @@ export function formatCriteriaFilters({ filters }) {
 }
 
 export function mapCriteriasToInitialValues(criteria) {
-    const mappedFilters = [];
-    if(criteria.filters) {
-      criteria.filters.map(each => {
-        switch(each.comparisionMethod) {
-          case 'RANGE':
-            return mappedFilters.push({
-              ...each,
-              value: {
-                from: each.arguments[0],
-                to: each.arguments[1],
-              }
-            })
-          case 'LESS_THAN':
-            return mappedFilters.push({
-              ...each,
-              value: {
-                from: '',
-                to: each.arguments[0],
-              }
-            })
-          case 'GREATER_THAN':
-            return mappedFilters.push({
-              ...each,
-              value: {
-                from: each.arguments[0],
-                to: '',
-              }
-            })
-          default:
-            return mappedFilters.push({
-              ...each
-            })
-        }
-      })
-    } else {
-      mappedFilters.push({fieldName: ''})
-    }
-    return mappedFilters;
+  const mappedFilters = [];
+  if (criteria.filters) {
+    criteria.filters.map((each) => {
+      switch (each.comparisionMethod) {
+        case 'RANGE':
+          return mappedFilters.push({
+            ...each,
+            value: {
+              from: each.arguments[0],
+              to: each.arguments[1],
+            },
+          });
+        case 'LESS_THAN':
+          return mappedFilters.push({
+            ...each,
+            value: {
+              from: '',
+              to: each.arguments[0],
+            },
+          });
+        case 'GREATER_THAN':
+          return mappedFilters.push({
+            ...each,
+            value: {
+              from: each.arguments[0],
+              to: '',
+            },
+          });
+        default:
+          return mappedFilters.push({
+            ...each,
+          });
+      }
+    });
+  } else {
+    mappedFilters.push({ fieldName: '' });
+  }
+  return mappedFilters;
 }
