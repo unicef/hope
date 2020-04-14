@@ -24,7 +24,8 @@ If you lack access to any links below, please contact [**Brandin Lewis**](introd
 
 * **Github** repo: [https://github.com/unicef/hct-mis](https://github.com/unicef/hct-mis)
 * **Dev** env**:** [https://dev-hct.unitst.org/](https://dev-hct.unitst.org/)
-* **Staging** env: [https://staging-hct.unitst.org/](https://staging-hct.unitst.org/)
+* **Staging** env: [https://stg-hct.unitst.org/](https://stg-hct.unitst.org/)
+* **UAT** env: 
 * **Production** env:
 * **Azure DevOps:** [https://unicef.visualstudio.com/ICTD-HCT%20IMS](https://unicef.visualstudio.com/ICTD-HCT%20IMS)
   * **Clubhouse \(deprecated / do not use\):** [https://app.clubhouse.io/hct-mis/projects](https://app.clubhouse.io/hct-mis/projects)

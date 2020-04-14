@@ -225,6 +225,7 @@ export function RegistrationDataImport(): React.ReactElement {
                   fullWidth
                   label='Name Upload'
                   required
+                  variant='filled'
                   component={FormikTextField}
                 />
                 <Field

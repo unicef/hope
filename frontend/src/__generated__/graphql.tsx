@@ -19,7 +19,7 @@ export type Scalars = {
   Date: any,
   UUID: any,
   Decimal: any,
-  JSONString: any,
+  Arg: any,
   JSONLazyString: any,
   Upload: any,
 };
@@ -28,6 +28,12 @@ export type ApproveRegistrationDataImportMutation = {
    __typename?: 'ApproveRegistrationDataImportMutation',
   registrationDataImport?: Maybe<RegistrationDataImportNode>,
 };
+
+export type ApproveTargetPopulationMutation = {
+   __typename?: 'ApproveTargetPopulationMutation',
+  targetPopulation?: Maybe<TargetPopulationNode>,
+};
+
 
 export type BusinessAreaNode = Node & {
    __typename?: 'BusinessAreaNode',
@@ -154,24 +160,29 @@ export type ChoiceObject = {
   value?: Maybe<Scalars['String']>,
 };
 
+export type CopyTargetPopulationInput = {
+  id?: Maybe<Scalars['ID']>,
+  name?: Maybe<Scalars['String']>,
+};
+
+export type CopyTargetPopulationMutationInput = {
+  targetPopulationData?: Maybe<CopyTargetPopulationInput>,
+  clientMutationId?: Maybe<Scalars['String']>,
+};
+
+export type CopyTargetPopulationMutationPayload = {
+   __typename?: 'CopyTargetPopulationMutationPayload',
+  targetPopulation?: Maybe<TargetPopulationNode>,
+  clientMutationId?: Maybe<Scalars['String']>,
+};
+
 export type CoreFieldChoiceObject = {
    __typename?: 'CoreFieldChoiceObject',
-  name?: Maybe<Scalars['String']>,
+  labels?: Maybe<Array<Maybe<LabelNode>>>,
+  labelEn?: Maybe<Scalars['String']>,
   value?: Maybe<Scalars['String']>,
   admin?: Maybe<Scalars['String']>,
   listName?: Maybe<Scalars['String']>,
-};
-
-export type CoreFieldNode = {
-   __typename?: 'CoreFieldNode',
-  id?: Maybe<Scalars['String']>,
-  type?: Maybe<Scalars['String']>,
-  name?: Maybe<Scalars['String']>,
-  label?: Maybe<Scalars['JSONString']>,
-  hint?: Maybe<Scalars['String']>,
-  required?: Maybe<Scalars['Boolean']>,
-  choices?: Maybe<Array<Maybe<CoreFieldChoiceObject>>>,
-  associatedWith?: Maybe<Scalars['String']>,
 };
 
 export type CreateProgram = {
@@ -205,6 +216,16 @@ export type CreateRegistrationDataImportExcelInput = {
   name?: Maybe<Scalars['String']>,
 };
 
+export type CreateTargetPopulationInput = {
+  name: Scalars['String'],
+  targetingCriteria: TargetingCriteriaObjectType,
+};
+
+export type CreateTargetPopulationMutation = {
+   __typename?: 'CreateTargetPopulationMutation',
+  targetPopulation?: Maybe<TargetPopulationNode>,
+};
+
 
 
 
@@ -216,6 +237,17 @@ export type DeleteProgram = {
 export type DeleteRegistrationDataImport = {
    __typename?: 'DeleteRegistrationDataImport',
   ok?: Maybe<Scalars['Boolean']>,
+};
+
+export type DeleteTargetPopulationMutationInput = {
+  targetId: Scalars['ID'],
+  clientMutationId?: Maybe<Scalars['String']>,
+};
+
+export type DeleteTargetPopulationMutationPayload = {
+   __typename?: 'DeleteTargetPopulationMutationPayload',
+  ok?: Maybe<Scalars['Boolean']>,
+  clientMutationId?: Maybe<Scalars['String']>,
 };
 
 export type DjangoDebug = {
@@ -241,42 +273,24 @@ export type DjangoDebugSql = {
   encoding?: Maybe<Scalars['String']>,
 };
 
-export type FlexibleAttributeChoiceNode = Node & {
-   __typename?: 'FlexibleAttributeChoiceNode',
-  id: Scalars['ID'],
-  createdAt: Scalars['DateTime'],
-  updatedAt: Scalars['DateTime'],
-  isRemoved: Scalars['Boolean'],
-  listName: Scalars['String'],
+export type FieldAttributeNode = {
+   __typename?: 'FieldAttributeNode',
+  id?: Maybe<Scalars['String']>,
+  type?: Maybe<Scalars['String']>,
   name?: Maybe<Scalars['String']>,
-  label: Scalars['JSONString'],
-  admin: Scalars['String'],
-  flexAttributes: Array<FlexibleAttributeNode>,
-  value?: Maybe<Scalars['String']>,
-};
-
-export type FlexibleAttributeNode = {
-   __typename?: 'FlexibleAttributeNode',
-  id: Scalars['UUID'],
-  type: FlexibleAttributeType,
-  name: Scalars['String'],
-  required: Scalars['Boolean'],
-  label: Scalars['JSONString'],
-  hint: Scalars['JSONString'],
-  choices?: Maybe<Array<Maybe<FlexibleAttributeChoiceNode>>>,
+  labels?: Maybe<Array<Maybe<LabelNode>>>,
+  labelEn?: Maybe<Scalars['String']>,
+  hint?: Maybe<Scalars['String']>,
+  required?: Maybe<Scalars['Boolean']>,
+  choices?: Maybe<Array<Maybe<CoreFieldChoiceObject>>>,
   associatedWith?: Maybe<Scalars['String']>,
+  isFlexField?: Maybe<Scalars['Boolean']>,
 };
 
-export enum FlexibleAttributeType {
-  String = 'STRING',
-  Image = 'IMAGE',
-  Integer = 'INTEGER',
-  Decimal = 'DECIMAL',
-  SelectOne = 'SELECT_ONE',
-  SelectMany = 'SELECT_MANY',
-  Datetime = 'DATETIME',
-  Geopoint = 'GEOPOINT'
-}
+export type FinalizeTargetPopulationMutation = {
+   __typename?: 'FinalizeTargetPopulationMutation',
+  targetPopulation?: Maybe<TargetPopulationNode>,
+};
 
 export enum HouseholdNationality {
   Af = 'AF',
@@ -508,12 +522,17 @@ export type HouseholdNodeTargetPopulationsArgs = {
   name?: Maybe<Scalars['String']>,
   createdByName?: Maybe<Scalars['String']>,
   createdAt?: Maybe<Scalars['DateTime']>,
-  lastEditedAt?: Maybe<Scalars['DateTime']>,
+  updatedAt?: Maybe<Scalars['DateTime']>,
   status?: Maybe<Scalars['String']>,
   households?: Maybe<Array<Maybe<Scalars['ID']>>>,
-  targetRules?: Maybe<Array<Maybe<Scalars['ID']>>>,
-  numIndividualsMin?: Maybe<Scalars['Int']>,
-  numIndividualsMax?: Maybe<Scalars['Int']>,
+  candidateListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividualsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
+  finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -1321,6 +1340,11 @@ export enum IndividualWorkStatus {
 }
 
 
+export type LabelNode = {
+   __typename?: 'LabelNode',
+  language?: Maybe<Scalars['String']>,
+  label?: Maybe<Scalars['String']>,
+};
 
 export type LocationNode = Node & {
    __typename?: 'LocationNode',
@@ -1420,7 +1444,13 @@ export type MergeRegistrationDataImportMutation = {
 
 export type Mutations = {
    __typename?: 'Mutations',
-  updateTarget?: Maybe<UpdateTargetPayload>,
+  createTargetPopulation?: Maybe<CreateTargetPopulationMutation>,
+  updateTargetPopulation?: Maybe<UpdateTargetPopulationMutation>,
+  copyTargetPopulation?: Maybe<CopyTargetPopulationMutationPayload>,
+  deleteTargetPopulation?: Maybe<DeleteTargetPopulationMutationPayload>,
+  approveTargetPopulation?: Maybe<ApproveTargetPopulationMutation>,
+  unapproveTargetPopulation?: Maybe<UnapproveTargetPopulationMutation>,
+  finalizeTargetPopulation?: Maybe<FinalizeTargetPopulationMutation>,
   createProgram?: Maybe<CreateProgram>,
   updateProgram?: Maybe<UpdateProgram>,
   deleteProgram?: Maybe<DeleteProgram>,
@@ -1433,8 +1463,39 @@ export type Mutations = {
 };
 
 
-export type MutationsUpdateTargetArgs = {
-  input: UpdateTargetInput
+export type MutationsCreateTargetPopulationArgs = {
+  input: CreateTargetPopulationInput
+};
+
+
+export type MutationsUpdateTargetPopulationArgs = {
+  input: UpdateTargetPopulationInput
+};
+
+
+export type MutationsCopyTargetPopulationArgs = {
+  input: CopyTargetPopulationMutationInput
+};
+
+
+export type MutationsDeleteTargetPopulationArgs = {
+  input: DeleteTargetPopulationMutationInput
+};
+
+
+export type MutationsApproveTargetPopulationArgs = {
+  id: Scalars['ID'],
+  programId: Scalars['ID']
+};
+
+
+export type MutationsUnapproveTargetPopulationArgs = {
+  id: Scalars['ID']
+};
+
+
+export type MutationsFinalizeTargetPopulationArgs = {
+  id: Scalars['ID']
 };
 
 
@@ -1582,6 +1643,7 @@ export type ProgramNode = Node & {
   administrativeAreasOfImplementation: Scalars['String'],
   households: HouseholdNodeConnection,
   cashPlans: CashPlanNodeConnection,
+  targetpopulationSet: TargetPopulationNodeConnection,
   totalEntitledQuantity?: Maybe<Scalars['Decimal']>,
   totalDeliveredQuantity?: Maybe<Scalars['Decimal']>,
   totalUndeliveredQuantity?: Maybe<Scalars['Decimal']>,
@@ -1612,6 +1674,29 @@ export type ProgramNodeCashPlansArgs = {
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>
+};
+
+
+export type ProgramNodeTargetpopulationSetArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>,
+  createdByName?: Maybe<Scalars['String']>,
+  createdAt?: Maybe<Scalars['DateTime']>,
+  updatedAt?: Maybe<Scalars['DateTime']>,
+  status?: Maybe<Scalars['String']>,
+  households?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  candidateListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividualsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
+  finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  orderBy?: Maybe<Scalars['String']>
 };
 
 
@@ -1670,8 +1755,7 @@ export type Query = {
   allLocations?: Maybe<LocationNodeConnection>,
   allBusinessAreas?: Maybe<BusinessAreaNodeConnection>,
   allLogEntries?: Maybe<LogEntryObjectConnection>,
-  allCoreFieldAttributes?: Maybe<Array<Maybe<CoreFieldNode>>>,
-  allFlexFieldAttributes?: Maybe<Array<Maybe<FlexibleAttributeNode>>>,
+  allFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
   program?: Maybe<ProgramNode>,
   allPrograms?: Maybe<ProgramNodeConnection>,
   cashPlan?: Maybe<CashPlanNode>,
@@ -1683,9 +1767,9 @@ export type Query = {
   cashPlanStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   targetPopulation?: Maybe<TargetPopulationNode>,
   allTargetPopulation?: Maybe<TargetPopulationNodeConnection>,
-  savedTargetRule?: Maybe<SavedTargetRuleNode>,
-  allSavedTargetRule?: Maybe<SavedTargetRuleNodeConnection>,
-  targetRules?: Maybe<Array<Maybe<HouseholdNode>>>,
+  goldenRecordByTargetingCriteria?: Maybe<HouseholdNodeConnection>,
+  candidateHouseholdsListByTargetingCriteria?: Maybe<HouseholdNodeConnection>,
+  finalHouseholdsListByTargetingCriteria?: Maybe<HouseholdNodeConnection>,
   household?: Maybe<HouseholdNode>,
   allHouseholds?: Maybe<HouseholdNodeConnection>,
   individual?: Maybe<IndividualNode>,
@@ -1754,6 +1838,11 @@ export type QueryAllLogEntriesArgs = {
 };
 
 
+export type QueryAllFieldsAttributesArgs = {
+  flexField?: Maybe<Scalars['Boolean']>
+};
+
+
 export type QueryProgramArgs = {
   id: Scalars['ID']
 };
@@ -1798,34 +1887,46 @@ export type QueryAllTargetPopulationArgs = {
   name?: Maybe<Scalars['String']>,
   createdByName?: Maybe<Scalars['String']>,
   createdAt?: Maybe<Scalars['DateTime']>,
-  lastEditedAt?: Maybe<Scalars['DateTime']>,
+  updatedAt?: Maybe<Scalars['DateTime']>,
   status?: Maybe<Scalars['String']>,
   households?: Maybe<Array<Maybe<Scalars['ID']>>>,
-  targetRules?: Maybe<Array<Maybe<Scalars['ID']>>>,
-  numIndividualsMin?: Maybe<Scalars['Int']>,
-  numIndividualsMax?: Maybe<Scalars['Int']>,
+  candidateListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividualsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
+  finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
 
-export type QuerySavedTargetRuleArgs = {
-  id: Scalars['ID']
-};
-
-
-export type QueryAllSavedTargetRuleArgs = {
+export type QueryGoldenRecordByTargetingCriteriaArgs = {
+  targetingCriteria: TargetingCriteriaObjectType,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>,
-  flexRules?: Maybe<Scalars['String']>,
-  coreRules?: Maybe<Scalars['String']>,
-  targetPopulation?: Maybe<Scalars['ID']>
+  last?: Maybe<Scalars['Int']>
 };
 
 
-export type QueryTargetRulesArgs = {
-  serializedList?: Maybe<Scalars['String']>
+export type QueryCandidateHouseholdsListByTargetingCriteriaArgs = {
+  targetPopulation: Scalars['ID'],
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type QueryFinalHouseholdsListByTargetingCriteriaArgs = {
+  targetPopulation: Scalars['ID'],
+  targetingCriteria?: Maybe<TargetingCriteriaObjectType>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -2077,26 +2178,62 @@ export enum RegistrationDataImportStatus {
   Merging = 'MERGING'
 }
 
-export type SavedTargetRuleNode = Node & {
-   __typename?: 'SavedTargetRuleNode',
-  id: Scalars['ID'],
-  flexRules: Scalars['JSONString'],
-  coreRules: Scalars['JSONString'],
-  targetPopulation: TargetPopulationNode,
+export type TargetingCriteriaNode = {
+   __typename?: 'TargetingCriteriaNode',
+  id: Scalars['UUID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  targetPopulationCandidate?: Maybe<TargetPopulationNode>,
+  targetPopulationFinal?: Maybe<TargetPopulationNode>,
+  rules?: Maybe<Array<Maybe<TargetingCriteriaRuleNode>>>,
 };
 
-export type SavedTargetRuleNodeConnection = {
-   __typename?: 'SavedTargetRuleNodeConnection',
-  pageInfo: PageInfo,
-  edges: Array<Maybe<SavedTargetRuleNodeEdge>>,
-  totalCount?: Maybe<Scalars['Int']>,
-  edgeCount?: Maybe<Scalars['Int']>,
+export type TargetingCriteriaObjectType = {
+  rules?: Maybe<Array<Maybe<TargetingCriteriaRuleObjectType>>>,
 };
 
-export type SavedTargetRuleNodeEdge = {
-   __typename?: 'SavedTargetRuleNodeEdge',
-  node?: Maybe<SavedTargetRuleNode>,
-  cursor: Scalars['String'],
+export enum TargetingCriteriaRuleFilterComparisionMethod {
+  Equals = 'EQUALS',
+  NotEquals = 'NOT_EQUALS',
+  Contains = 'CONTAINS',
+  NotContains = 'NOT_CONTAINS',
+  Range = 'RANGE',
+  NotInRange = 'NOT_IN_RANGE',
+  GreaterThan = 'GREATER_THAN',
+  LessThan = 'LESS_THAN'
+}
+
+export type TargetingCriteriaRuleFilterNode = {
+   __typename?: 'TargetingCriteriaRuleFilterNode',
+  id: Scalars['UUID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  comparisionMethod: TargetingCriteriaRuleFilterComparisionMethod,
+  targetingCriteriaRule: TargetingCriteriaRuleNode,
+  isFlexField: Scalars['Boolean'],
+  fieldName: Scalars['String'],
+  arguments?: Maybe<Array<Maybe<Scalars['Arg']>>>,
+  fieldAttribute?: Maybe<FieldAttributeNode>,
+};
+
+export type TargetingCriteriaRuleFilterObjectType = {
+  comparisionMethod: Scalars['String'],
+  isFlexField: Scalars['Boolean'],
+  fieldName: Scalars['String'],
+  arguments: Array<Maybe<Scalars['Arg']>>,
+};
+
+export type TargetingCriteriaRuleNode = {
+   __typename?: 'TargetingCriteriaRuleNode',
+  id: Scalars['UUID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  targetingCriteria: TargetingCriteriaNode,
+  filters?: Maybe<Array<Maybe<TargetingCriteriaRuleFilterNode>>>,
+};
+
+export type TargetingCriteriaRuleObjectType = {
+  filters?: Maybe<Array<Maybe<TargetingCriteriaRuleFilterObjectType>>>,
 };
 
 export type TargetPopulationNode = Node & {
@@ -2105,17 +2242,22 @@ export type TargetPopulationNode = Node & {
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
   name: Scalars['String'],
-  lastEditedAt?: Maybe<Scalars['DateTime']>,
   createdBy?: Maybe<UserNode>,
   status: TargetPopulationStatus,
   households: HouseholdNodeConnection,
-  TotalHouseholds: Scalars['Int'],
-  TotalFamilySize: Scalars['Int'],
+  candidateListTotalHouseholds?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividuals?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholds?: Maybe<Scalars['Int']>,
+  finalListTotalIndividuals?: Maybe<Scalars['Int']>,
+  selectionComputationMetadata?: Maybe<Scalars['String']>,
+  program?: Maybe<ProgramNode>,
+  candidateListTargetingCriteria?: Maybe<TargetingCriteriaNode>,
+  finalListTargetingCriteria?: Maybe<TargetingCriteriaNode>,
   paymentRecords: PaymentRecordNodeConnection,
   cashPlans: CashPlanNodeConnection,
-  targetRules: SavedTargetRuleNodeConnection,
   totalHouseholds?: Maybe<Scalars['Int']>,
   totalFamilySize?: Maybe<Scalars['Int']>,
+  finalList?: Maybe<HouseholdNodeConnection>,
 };
 
 
@@ -2145,14 +2287,11 @@ export type TargetPopulationNodeCashPlansArgs = {
 };
 
 
-export type TargetPopulationNodeTargetRulesArgs = {
+export type TargetPopulationNodeFinalListArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>,
-  flexRules?: Maybe<Scalars['String']>,
-  coreRules?: Maybe<Scalars['String']>,
-  targetPopulation?: Maybe<Scalars['ID']>
+  last?: Maybe<Scalars['Int']>
 };
 
 export type TargetPopulationNodeConnection = {
@@ -2170,13 +2309,19 @@ export type TargetPopulationNodeEdge = {
 };
 
 export enum TargetPopulationStatus {
-  InProgress = 'IN_PROGRESS',
+  Draft = 'DRAFT',
+  Approved = 'APPROVED',
   Finalized = 'FINALIZED'
 }
 
 export type UnapproveRegistrationDataImportMutation = {
    __typename?: 'UnapproveRegistrationDataImportMutation',
   registrationDataImport?: Maybe<RegistrationDataImportNode>,
+};
+
+export type UnapproveTargetPopulationMutation = {
+   __typename?: 'UnapproveTargetPopulationMutation',
+  targetPopulation?: Maybe<TargetPopulationNode>,
 };
 
 export type UpdateProgram = {
@@ -2202,22 +2347,15 @@ export type UpdateProgramInput = {
   businessAreaSlug?: Maybe<Scalars['String']>,
 };
 
-export type UpdateTargetInput = {
-  targetPopulationData?: Maybe<UpdateTargetPopulationInput>,
-  clientMutationId?: Maybe<Scalars['String']>,
-};
-
-export type UpdateTargetPayload = {
-   __typename?: 'UpdateTargetPayload',
-  targetPopulation?: Maybe<TargetPopulationNode>,
-  clientMutationId?: Maybe<Scalars['String']>,
-};
-
 export type UpdateTargetPopulationInput = {
-  id?: Maybe<Scalars['ID']>,
+  id: Scalars['ID'],
   name?: Maybe<Scalars['String']>,
-  lastEditedAt?: Maybe<Scalars['DateTime']>,
-  status?: Maybe<Scalars['String']>,
+  targetingCriteria?: Maybe<TargetingCriteriaObjectType>,
+};
+
+export type UpdateTargetPopulationMutation = {
+   __typename?: 'UpdateTargetPopulationMutation',
+  targetPopulation?: Maybe<TargetPopulationNode>,
 };
 
 
@@ -2271,12 +2409,17 @@ export type UserNodeTargetPopulationsArgs = {
   name?: Maybe<Scalars['String']>,
   createdByName?: Maybe<Scalars['String']>,
   createdAt?: Maybe<Scalars['DateTime']>,
-  lastEditedAt?: Maybe<Scalars['DateTime']>,
+  updatedAt?: Maybe<Scalars['DateTime']>,
   status?: Maybe<Scalars['String']>,
   households?: Maybe<Array<Maybe<Scalars['ID']>>>,
-  targetRules?: Maybe<Array<Maybe<Scalars['ID']>>>,
-  numIndividualsMin?: Maybe<Scalars['Int']>,
-  numIndividualsMax?: Maybe<Scalars['Int']>,
+  candidateListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividualsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
+  finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -2346,12 +2489,17 @@ export type UserObjectTypeTargetPopulationsArgs = {
   name?: Maybe<Scalars['String']>,
   createdByName?: Maybe<Scalars['String']>,
   createdAt?: Maybe<Scalars['DateTime']>,
-  lastEditedAt?: Maybe<Scalars['DateTime']>,
+  updatedAt?: Maybe<Scalars['DateTime']>,
   status?: Maybe<Scalars['String']>,
   households?: Maybe<Array<Maybe<Scalars['ID']>>>,
-  targetRules?: Maybe<Array<Maybe<Scalars['ID']>>>,
-  numIndividualsMin?: Maybe<Scalars['Int']>,
-  numIndividualsMax?: Maybe<Scalars['Int']>,
+  candidateListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividualsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
+  finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -2371,6 +2519,78 @@ export type XlsxRowErrorNode = {
   message?: Maybe<Scalars['String']>,
 };
 
+export type ApproveTpMutationVariables = {
+  id: Scalars['ID'],
+  programId: Scalars['ID']
+};
+
+
+export type ApproveTpMutation = (
+  { __typename?: 'Mutations' }
+  & { approveTargetPopulation: Maybe<(
+    { __typename?: 'ApproveTargetPopulationMutation' }
+    & { targetPopulation: Maybe<(
+      { __typename?: 'TargetPopulationNode' }
+      & Pick<TargetPopulationNode, 'id' | 'name' | 'status'>
+      & { candidateListTargetingCriteria: Maybe<(
+        { __typename?: 'TargetingCriteriaNode' }
+        & { targetPopulationCandidate: Maybe<(
+          { __typename?: 'TargetPopulationNode' }
+          & { createdBy: Maybe<(
+            { __typename?: 'UserNode' }
+            & Pick<UserNode, 'firstName' | 'lastName'>
+          )>, program: Maybe<(
+            { __typename?: 'ProgramNode' }
+            & Pick<ProgramNode, 'id' | 'name'>
+          )> }
+        )>, rules: Maybe<Array<Maybe<(
+          { __typename?: 'TargetingCriteriaRuleNode' }
+          & Pick<TargetingCriteriaRuleNode, 'id'>
+          & { filters: Maybe<Array<Maybe<(
+            { __typename?: 'TargetingCriteriaRuleFilterNode' }
+            & Pick<TargetingCriteriaRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod'>
+            & { fieldAttribute: Maybe<(
+              { __typename?: 'FieldAttributeNode' }
+              & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
+              & { choices: Maybe<Array<Maybe<(
+                { __typename?: 'CoreFieldChoiceObject' }
+                & Pick<CoreFieldChoiceObject, 'value' | 'labelEn'>
+              )>>> }
+            )> }
+          )>>> }
+        )>>> }
+      )>, finalListTargetingCriteria: Maybe<(
+        { __typename?: 'TargetingCriteriaNode' }
+        & { targetPopulationFinal: Maybe<(
+          { __typename?: 'TargetPopulationNode' }
+          & { createdBy: Maybe<(
+            { __typename?: 'UserNode' }
+            & Pick<UserNode, 'firstName' | 'lastName'>
+          )>, program: Maybe<(
+            { __typename?: 'ProgramNode' }
+            & Pick<ProgramNode, 'id' | 'name'>
+          )> }
+        )>, rules: Maybe<Array<Maybe<(
+          { __typename?: 'TargetingCriteriaRuleNode' }
+          & Pick<TargetingCriteriaRuleNode, 'id'>
+          & { filters: Maybe<Array<Maybe<(
+            { __typename?: 'TargetingCriteriaRuleFilterNode' }
+            & Pick<TargetingCriteriaRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod'>
+            & { fieldAttribute: Maybe<(
+              { __typename?: 'FieldAttributeNode' }
+              & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
+              & { choices: Maybe<Array<Maybe<(
+                { __typename?: 'CoreFieldChoiceObject' }
+                & Pick<CoreFieldChoiceObject, 'value' | 'labelEn'>
+              )>>> }
+            )> }
+          )>>> }
+        )>>> }
+      )> }
+    )> }
+  )> }
+);
+
 export type CreateProgramMutationVariables = {
   programData: CreateProgramInput
 };
@@ -2383,6 +2603,22 @@ export type CreateProgramMutation = (
     & { program: Maybe<(
       { __typename?: 'ProgramNode' }
       & Pick<ProgramNode, 'id' | 'name' | 'status' | 'startDate' | 'endDate' | 'programCaId' | 'budget' | 'description' | 'frequencyOfPayments' | 'sector' | 'scope' | 'cashPlus' | 'populationGoal'>
+    )> }
+  )> }
+);
+
+export type CreateTpMutationVariables = {
+  input: CreateTargetPopulationInput
+};
+
+
+export type CreateTpMutation = (
+  { __typename?: 'Mutations' }
+  & { createTargetPopulation: Maybe<(
+    { __typename?: 'CreateTargetPopulationMutation' }
+    & { targetPopulation: Maybe<(
+      { __typename?: 'TargetPopulationNode' }
+      & Pick<TargetPopulationNode, 'id' | 'status'>
     )> }
   )> }
 );
@@ -2400,6 +2636,36 @@ export type DeleteProgramMutation = (
   )> }
 );
 
+export type DeleteTargetPopulationMutationVariables = {
+  input: DeleteTargetPopulationMutationInput
+};
+
+
+export type DeleteTargetPopulationMutation = (
+  { __typename?: 'Mutations' }
+  & { deleteTargetPopulation: Maybe<(
+    { __typename?: 'DeleteTargetPopulationMutationPayload' }
+    & Pick<DeleteTargetPopulationMutationPayload, 'clientMutationId'>
+  )> }
+);
+
+export type CopyTargetPopulationMutationVariables = {
+  input: CopyTargetPopulationMutationInput
+};
+
+
+export type CopyTargetPopulationMutation = (
+  { __typename?: 'Mutations' }
+  & { copyTargetPopulation: Maybe<(
+    { __typename?: 'CopyTargetPopulationMutationPayload' }
+    & Pick<CopyTargetPopulationMutationPayload, 'clientMutationId'>
+    & { targetPopulation: Maybe<(
+      { __typename?: 'TargetPopulationNode' }
+      & Pick<TargetPopulationNode, 'id'>
+    )> }
+  )> }
+);
+
 export type UpdateProgramMutationVariables = {
   programData: UpdateProgramInput
 };
@@ -2412,6 +2678,77 @@ export type UpdateProgramMutation = (
     & { program: Maybe<(
       { __typename?: 'ProgramNode' }
       & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'programCaId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'administrativeAreasOfImplementation'>
+    )> }
+  )> }
+);
+
+export type UpdateTpMutationVariables = {
+  input: UpdateTargetPopulationInput
+};
+
+
+export type UpdateTpMutation = (
+  { __typename?: 'Mutations' }
+  & { updateTargetPopulation: Maybe<(
+    { __typename?: 'UpdateTargetPopulationMutation' }
+    & { targetPopulation: Maybe<(
+      { __typename?: 'TargetPopulationNode' }
+      & Pick<TargetPopulationNode, 'id' | 'name' | 'status'>
+      & { candidateListTargetingCriteria: Maybe<(
+        { __typename?: 'TargetingCriteriaNode' }
+        & { targetPopulationCandidate: Maybe<(
+          { __typename?: 'TargetPopulationNode' }
+          & { createdBy: Maybe<(
+            { __typename?: 'UserNode' }
+            & Pick<UserNode, 'firstName' | 'lastName'>
+          )>, program: Maybe<(
+            { __typename?: 'ProgramNode' }
+            & Pick<ProgramNode, 'id' | 'name'>
+          )> }
+        )>, rules: Maybe<Array<Maybe<(
+          { __typename?: 'TargetingCriteriaRuleNode' }
+          & Pick<TargetingCriteriaRuleNode, 'id'>
+          & { filters: Maybe<Array<Maybe<(
+            { __typename?: 'TargetingCriteriaRuleFilterNode' }
+            & Pick<TargetingCriteriaRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod'>
+            & { fieldAttribute: Maybe<(
+              { __typename?: 'FieldAttributeNode' }
+              & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
+              & { choices: Maybe<Array<Maybe<(
+                { __typename?: 'CoreFieldChoiceObject' }
+                & Pick<CoreFieldChoiceObject, 'value' | 'labelEn'>
+              )>>> }
+            )> }
+          )>>> }
+        )>>> }
+      )>, finalListTargetingCriteria: Maybe<(
+        { __typename?: 'TargetingCriteriaNode' }
+        & { targetPopulationFinal: Maybe<(
+          { __typename?: 'TargetPopulationNode' }
+          & { createdBy: Maybe<(
+            { __typename?: 'UserNode' }
+            & Pick<UserNode, 'firstName' | 'lastName'>
+          )>, program: Maybe<(
+            { __typename?: 'ProgramNode' }
+            & Pick<ProgramNode, 'id' | 'name'>
+          )> }
+        )>, rules: Maybe<Array<Maybe<(
+          { __typename?: 'TargetingCriteriaRuleNode' }
+          & Pick<TargetingCriteriaRuleNode, 'id'>
+          & { filters: Maybe<Array<Maybe<(
+            { __typename?: 'TargetingCriteriaRuleFilterNode' }
+            & Pick<TargetingCriteriaRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod'>
+            & { fieldAttribute: Maybe<(
+              { __typename?: 'FieldAttributeNode' }
+              & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
+              & { choices: Maybe<Array<Maybe<(
+                { __typename?: 'CoreFieldChoiceObject' }
+                & Pick<CoreFieldChoiceObject, 'value' | 'labelEn'>
+              )>>> }
+            )> }
+          )>>> }
+        )>>> }
+      )> }
     )> }
   )> }
 );
@@ -2632,6 +2969,37 @@ export type AllProgramsQuery = (
       & { node: Maybe<(
         { __typename?: 'ProgramNode' }
         & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'programCaId' | 'description' | 'budget' | 'frequencyOfPayments' | 'populationGoal' | 'sector' | 'totalNumberOfHouseholds'>
+      )> }
+    )>> }
+  )> }
+);
+
+export type AllTargetPopulationsQueryVariables = {
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  orderBy?: Maybe<Scalars['String']>,
+  name?: Maybe<Scalars['String']>,
+  status?: Maybe<Scalars['String']>
+};
+
+
+export type AllTargetPopulationsQuery = (
+  { __typename?: 'Query' }
+  & { allTargetPopulation: Maybe<(
+    { __typename?: 'TargetPopulationNodeConnection' }
+    & Pick<TargetPopulationNodeConnection, 'totalCount' | 'edgeCount'>
+    & { edges: Array<Maybe<(
+      { __typename?: 'TargetPopulationNodeEdge' }
+      & Pick<TargetPopulationNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'TargetPopulationNode' }
+        & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'createdAt' | 'updatedAt' | 'candidateListTotalHouseholds' | 'finalListTotalHouseholds'>
+        & { createdBy: Maybe<(
+          { __typename?: 'UserNode' }
+          & Pick<UserNode, 'firstName' | 'lastName'>
+        )> }
       )> }
     )>> }
   )> }
@@ -2863,6 +3231,74 @@ export type ProgrammeChoiceDataQuery = (
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
   )>>> }
+);
+
+export type TargetPopulationQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type TargetPopulationQuery = (
+  { __typename?: 'Query' }
+  & { targetPopulation: Maybe<(
+    { __typename?: 'TargetPopulationNode' }
+    & Pick<TargetPopulationNode, 'id' | 'name' | 'status'>
+    & { candidateListTargetingCriteria: Maybe<(
+      { __typename?: 'TargetingCriteriaNode' }
+      & { targetPopulationCandidate: Maybe<(
+        { __typename?: 'TargetPopulationNode' }
+        & { createdBy: Maybe<(
+          { __typename?: 'UserNode' }
+          & Pick<UserNode, 'firstName' | 'lastName'>
+        )>, program: Maybe<(
+          { __typename?: 'ProgramNode' }
+          & Pick<ProgramNode, 'id' | 'name'>
+        )> }
+      )>, rules: Maybe<Array<Maybe<(
+        { __typename?: 'TargetingCriteriaRuleNode' }
+        & Pick<TargetingCriteriaRuleNode, 'id'>
+        & { filters: Maybe<Array<Maybe<(
+          { __typename?: 'TargetingCriteriaRuleFilterNode' }
+          & Pick<TargetingCriteriaRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod'>
+          & { fieldAttribute: Maybe<(
+            { __typename?: 'FieldAttributeNode' }
+            & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
+            & { choices: Maybe<Array<Maybe<(
+              { __typename?: 'CoreFieldChoiceObject' }
+              & Pick<CoreFieldChoiceObject, 'value' | 'labelEn'>
+            )>>> }
+          )> }
+        )>>> }
+      )>>> }
+    )>, finalListTargetingCriteria: Maybe<(
+      { __typename?: 'TargetingCriteriaNode' }
+      & { targetPopulationFinal: Maybe<(
+        { __typename?: 'TargetPopulationNode' }
+        & { createdBy: Maybe<(
+          { __typename?: 'UserNode' }
+          & Pick<UserNode, 'firstName' | 'lastName'>
+        )>, program: Maybe<(
+          { __typename?: 'ProgramNode' }
+          & Pick<ProgramNode, 'id' | 'name'>
+        )> }
+      )>, rules: Maybe<Array<Maybe<(
+        { __typename?: 'TargetingCriteriaRuleNode' }
+        & Pick<TargetingCriteriaRuleNode, 'id'>
+        & { filters: Maybe<Array<Maybe<(
+          { __typename?: 'TargetingCriteriaRuleFilterNode' }
+          & Pick<TargetingCriteriaRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod'>
+          & { fieldAttribute: Maybe<(
+            { __typename?: 'FieldAttributeNode' }
+            & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
+            & { choices: Maybe<Array<Maybe<(
+              { __typename?: 'CoreFieldChoiceObject' }
+              & Pick<CoreFieldChoiceObject, 'value' | 'labelEn'>
+            )>>> }
+          )> }
+        )>>> }
+      )>>> }
+    )> }
+  )> }
 );
 
 export type AllImportedHouseholdsQueryVariables = {
@@ -3119,10 +3555,7 @@ export type UploadImportDataXlsxFileMutation = (
   { __typename?: 'Mutations' }
   & { uploadImportDataXlsxFile: Maybe<(
     { __typename?: 'UploadImportDataXLSXFile' }
-    & { errors: Maybe<Array<Maybe<(
-      { __typename?: 'XlsxRowErrorNode' }
-      & Pick<XlsxRowErrorNode, 'header' | 'message' | 'rowNumber'>
-    )>>>, importData: Maybe<(
+    & { importData: Maybe<(
       { __typename?: 'ImportDataNode' }
       & Pick<ImportDataNode, 'id' | 'numberOfIndividuals' | 'numberOfHouseholds'>
       & { registrationDataImport: Maybe<(
@@ -3131,6 +3564,90 @@ export type UploadImportDataXlsxFileMutation = (
       )> }
     )> }
   )> }
+);
+
+export type CandidateHouseholdsListByTargetingCriteriaQueryVariables = {
+  targetPopulation: Scalars['ID'],
+  first?: Maybe<Scalars['Int']>,
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type CandidateHouseholdsListByTargetingCriteriaQuery = (
+  { __typename?: 'Query' }
+  & { candidateHouseholdsListByTargetingCriteria: Maybe<(
+    { __typename?: 'HouseholdNodeConnection' }
+    & Pick<HouseholdNodeConnection, 'totalCount' | 'edgeCount'>
+    & { edges: Array<Maybe<(
+      { __typename?: 'HouseholdNodeEdge' }
+      & { node: Maybe<(
+        { __typename?: 'HouseholdNode' }
+        & Pick<HouseholdNode, 'id' | 'familySize' | 'updatedAt'>
+        & { headOfHousehold: Maybe<(
+          { __typename?: 'IndividualNode' }
+          & Pick<IndividualNode, 'firstName' | 'lastName'>
+        )>, location: (
+          { __typename?: 'LocationNode' }
+          & Pick<LocationNode, 'title'>
+        ) }
+      )> }
+    )>> }
+  )> }
+);
+
+export type GoldenRecordByTargetingCriteriaQueryVariables = {
+  targetingCriteria: TargetingCriteriaObjectType,
+  first?: Maybe<Scalars['Int']>,
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type GoldenRecordByTargetingCriteriaQuery = (
+  { __typename?: 'Query' }
+  & { goldenRecordByTargetingCriteria: Maybe<(
+    { __typename?: 'HouseholdNodeConnection' }
+    & Pick<HouseholdNodeConnection, 'totalCount' | 'edgeCount'>
+    & { edges: Array<Maybe<(
+      { __typename?: 'HouseholdNodeEdge' }
+      & { node: Maybe<(
+        { __typename?: 'HouseholdNode' }
+        & Pick<HouseholdNode, 'id' | 'familySize' | 'updatedAt'>
+        & { headOfHousehold: Maybe<(
+          { __typename?: 'IndividualNode' }
+          & Pick<IndividualNode, 'firstName' | 'lastName'>
+        )>, location: (
+          { __typename?: 'LocationNode' }
+          & Pick<LocationNode, 'title'>
+        ) }
+      )> }
+    )>> }
+  )> }
+);
+
+export type ImportedIndividualFieldsQueryVariables = {};
+
+
+export type ImportedIndividualFieldsQuery = (
+  { __typename?: 'Query' }
+  & { allFieldsAttributes: Maybe<Array<Maybe<(
+    { __typename?: 'FieldAttributeNode' }
+    & Pick<FieldAttributeNode, 'isFlexField' | 'id' | 'type' | 'name' | 'labelEn' | 'hint'>
+    & { labels: Maybe<Array<Maybe<(
+      { __typename?: 'LabelNode' }
+      & Pick<LabelNode, 'language' | 'label'>
+    )>>>, choices: Maybe<Array<Maybe<(
+      { __typename?: 'CoreFieldChoiceObject' }
+      & Pick<CoreFieldChoiceObject, 'labelEn' | 'value' | 'admin' | 'listName'>
+      & { labels: Maybe<Array<Maybe<(
+        { __typename?: 'LabelNode' }
+        & Pick<LabelNode, 'label' | 'language'>
+      )>>> }
+    )>>> }
+  )>>> }
 );
 
 export const RegistrationMinimalFragmentDoc = gql`
@@ -3226,6 +3743,120 @@ export const ImportedIndividualDetailedFragmentDoc = gql`
   phoneNumberAlternative
 }
     `;
+export const ApproveTpDocument = gql`
+    mutation ApproveTP($id: ID!, $programId: ID!) {
+  approveTargetPopulation(id: $id, programId: $programId) {
+    targetPopulation {
+      id
+      name
+      status
+      candidateListTargetingCriteria {
+        targetPopulationCandidate {
+          createdBy {
+            firstName
+            lastName
+          }
+          program {
+            id
+            name
+          }
+        }
+        rules {
+          id
+          filters {
+            fieldName
+            isFlexField
+            arguments
+            comparisionMethod
+            fieldAttribute {
+              name
+              labelEn
+              type
+              choices {
+                value
+                labelEn
+              }
+            }
+          }
+        }
+      }
+      finalListTargetingCriteria {
+        targetPopulationFinal {
+          createdBy {
+            firstName
+            lastName
+          }
+          program {
+            id
+            name
+          }
+        }
+        rules {
+          id
+          filters {
+            fieldName
+            isFlexField
+            arguments
+            comparisionMethod
+            fieldAttribute {
+              name
+              labelEn
+              type
+              choices {
+                value
+                labelEn
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export type ApproveTpMutationFn = ApolloReactCommon.MutationFunction<ApproveTpMutation, ApproveTpMutationVariables>;
+export type ApproveTpComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ApproveTpMutation, ApproveTpMutationVariables>, 'mutation'>;
+
+    export const ApproveTpComponent = (props: ApproveTpComponentProps) => (
+      <ApolloReactComponents.Mutation<ApproveTpMutation, ApproveTpMutationVariables> mutation={ApproveTpDocument} {...props} />
+    );
+    
+export type ApproveTpProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ApproveTpMutation, ApproveTpMutationVariables> & TChildProps;
+export function withApproveTp<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ApproveTpMutation,
+  ApproveTpMutationVariables,
+  ApproveTpProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, ApproveTpMutation, ApproveTpMutationVariables, ApproveTpProps<TChildProps>>(ApproveTpDocument, {
+      alias: 'approveTp',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useApproveTpMutation__
+ *
+ * To run a mutation, you first call `useApproveTpMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useApproveTpMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [approveTpMutation, { data, loading, error }] = useApproveTpMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      programId: // value for 'programId'
+ *   },
+ * });
+ */
+export function useApproveTpMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ApproveTpMutation, ApproveTpMutationVariables>) {
+        return ApolloReactHooks.useMutation<ApproveTpMutation, ApproveTpMutationVariables>(ApproveTpDocument, baseOptions);
+      }
+export type ApproveTpMutationHookResult = ReturnType<typeof useApproveTpMutation>;
+export type ApproveTpMutationResult = ApolloReactCommon.MutationResult<ApproveTpMutation>;
+export type ApproveTpMutationOptions = ApolloReactCommon.BaseMutationOptions<ApproveTpMutation, ApproveTpMutationVariables>;
 export const CreateProgramDocument = gql`
     mutation CreateProgram($programData: CreateProgramInput!) {
   createProgram(programData: $programData) {
@@ -3289,6 +3920,58 @@ export function useCreateProgramMutation(baseOptions?: ApolloReactHooks.Mutation
 export type CreateProgramMutationHookResult = ReturnType<typeof useCreateProgramMutation>;
 export type CreateProgramMutationResult = ApolloReactCommon.MutationResult<CreateProgramMutation>;
 export type CreateProgramMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateProgramMutation, CreateProgramMutationVariables>;
+export const CreateTpDocument = gql`
+    mutation CreateTP($input: CreateTargetPopulationInput!) {
+  createTargetPopulation(input: $input) {
+    targetPopulation {
+      id
+      status
+    }
+  }
+}
+    `;
+export type CreateTpMutationFn = ApolloReactCommon.MutationFunction<CreateTpMutation, CreateTpMutationVariables>;
+export type CreateTpComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<CreateTpMutation, CreateTpMutationVariables>, 'mutation'>;
+
+    export const CreateTpComponent = (props: CreateTpComponentProps) => (
+      <ApolloReactComponents.Mutation<CreateTpMutation, CreateTpMutationVariables> mutation={CreateTpDocument} {...props} />
+    );
+    
+export type CreateTpProps<TChildProps = {}> = ApolloReactHoc.MutateProps<CreateTpMutation, CreateTpMutationVariables> & TChildProps;
+export function withCreateTp<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CreateTpMutation,
+  CreateTpMutationVariables,
+  CreateTpProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, CreateTpMutation, CreateTpMutationVariables, CreateTpProps<TChildProps>>(CreateTpDocument, {
+      alias: 'createTp',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCreateTpMutation__
+ *
+ * To run a mutation, you first call `useCreateTpMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateTpMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createTpMutation, { data, loading, error }] = useCreateTpMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateTpMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateTpMutation, CreateTpMutationVariables>) {
+        return ApolloReactHooks.useMutation<CreateTpMutation, CreateTpMutationVariables>(CreateTpDocument, baseOptions);
+      }
+export type CreateTpMutationHookResult = ReturnType<typeof useCreateTpMutation>;
+export type CreateTpMutationResult = ApolloReactCommon.MutationResult<CreateTpMutation>;
+export type CreateTpMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateTpMutation, CreateTpMutationVariables>;
 export const DeleteProgramDocument = gql`
     mutation DeleteProgram($programId: String!) {
   deleteProgram(programId: $programId) {
@@ -3338,6 +4021,107 @@ export function useDeleteProgramMutation(baseOptions?: ApolloReactHooks.Mutation
 export type DeleteProgramMutationHookResult = ReturnType<typeof useDeleteProgramMutation>;
 export type DeleteProgramMutationResult = ApolloReactCommon.MutationResult<DeleteProgramMutation>;
 export type DeleteProgramMutationOptions = ApolloReactCommon.BaseMutationOptions<DeleteProgramMutation, DeleteProgramMutationVariables>;
+export const DeleteTargetPopulationDocument = gql`
+    mutation DeleteTargetPopulation($input: DeleteTargetPopulationMutationInput!) {
+  deleteTargetPopulation(input: $input) {
+    clientMutationId
+  }
+}
+    `;
+export type DeleteTargetPopulationMutationFn = ApolloReactCommon.MutationFunction<DeleteTargetPopulationMutation, DeleteTargetPopulationMutationVariables>;
+export type DeleteTargetPopulationComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<DeleteTargetPopulationMutation, DeleteTargetPopulationMutationVariables>, 'mutation'>;
+
+    export const DeleteTargetPopulationComponent = (props: DeleteTargetPopulationComponentProps) => (
+      <ApolloReactComponents.Mutation<DeleteTargetPopulationMutation, DeleteTargetPopulationMutationVariables> mutation={DeleteTargetPopulationDocument} {...props} />
+    );
+    
+export type DeleteTargetPopulationProps<TChildProps = {}> = ApolloReactHoc.MutateProps<DeleteTargetPopulationMutation, DeleteTargetPopulationMutationVariables> & TChildProps;
+export function withDeleteTargetPopulation<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  DeleteTargetPopulationMutation,
+  DeleteTargetPopulationMutationVariables,
+  DeleteTargetPopulationProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, DeleteTargetPopulationMutation, DeleteTargetPopulationMutationVariables, DeleteTargetPopulationProps<TChildProps>>(DeleteTargetPopulationDocument, {
+      alias: 'deleteTargetPopulation',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useDeleteTargetPopulationMutation__
+ *
+ * To run a mutation, you first call `useDeleteTargetPopulationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteTargetPopulationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteTargetPopulationMutation, { data, loading, error }] = useDeleteTargetPopulationMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useDeleteTargetPopulationMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<DeleteTargetPopulationMutation, DeleteTargetPopulationMutationVariables>) {
+        return ApolloReactHooks.useMutation<DeleteTargetPopulationMutation, DeleteTargetPopulationMutationVariables>(DeleteTargetPopulationDocument, baseOptions);
+      }
+export type DeleteTargetPopulationMutationHookResult = ReturnType<typeof useDeleteTargetPopulationMutation>;
+export type DeleteTargetPopulationMutationResult = ApolloReactCommon.MutationResult<DeleteTargetPopulationMutation>;
+export type DeleteTargetPopulationMutationOptions = ApolloReactCommon.BaseMutationOptions<DeleteTargetPopulationMutation, DeleteTargetPopulationMutationVariables>;
+export const CopyTargetPopulationDocument = gql`
+    mutation CopyTargetPopulation($input: CopyTargetPopulationMutationInput!) {
+  copyTargetPopulation(input: $input) {
+    clientMutationId
+    targetPopulation {
+      id
+    }
+  }
+}
+    `;
+export type CopyTargetPopulationMutationFn = ApolloReactCommon.MutationFunction<CopyTargetPopulationMutation, CopyTargetPopulationMutationVariables>;
+export type CopyTargetPopulationComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<CopyTargetPopulationMutation, CopyTargetPopulationMutationVariables>, 'mutation'>;
+
+    export const CopyTargetPopulationComponent = (props: CopyTargetPopulationComponentProps) => (
+      <ApolloReactComponents.Mutation<CopyTargetPopulationMutation, CopyTargetPopulationMutationVariables> mutation={CopyTargetPopulationDocument} {...props} />
+    );
+    
+export type CopyTargetPopulationProps<TChildProps = {}> = ApolloReactHoc.MutateProps<CopyTargetPopulationMutation, CopyTargetPopulationMutationVariables> & TChildProps;
+export function withCopyTargetPopulation<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CopyTargetPopulationMutation,
+  CopyTargetPopulationMutationVariables,
+  CopyTargetPopulationProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, CopyTargetPopulationMutation, CopyTargetPopulationMutationVariables, CopyTargetPopulationProps<TChildProps>>(CopyTargetPopulationDocument, {
+      alias: 'copyTargetPopulation',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCopyTargetPopulationMutation__
+ *
+ * To run a mutation, you first call `useCopyTargetPopulationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCopyTargetPopulationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [copyTargetPopulationMutation, { data, loading, error }] = useCopyTargetPopulationMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCopyTargetPopulationMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CopyTargetPopulationMutation, CopyTargetPopulationMutationVariables>) {
+        return ApolloReactHooks.useMutation<CopyTargetPopulationMutation, CopyTargetPopulationMutationVariables>(CopyTargetPopulationDocument, baseOptions);
+      }
+export type CopyTargetPopulationMutationHookResult = ReturnType<typeof useCopyTargetPopulationMutation>;
+export type CopyTargetPopulationMutationResult = ApolloReactCommon.MutationResult<CopyTargetPopulationMutation>;
+export type CopyTargetPopulationMutationOptions = ApolloReactCommon.BaseMutationOptions<CopyTargetPopulationMutation, CopyTargetPopulationMutationVariables>;
 export const UpdateProgramDocument = gql`
     mutation UpdateProgram($programData: UpdateProgramInput!) {
   updateProgram(programData: $programData) {
@@ -3403,6 +4187,119 @@ export function useUpdateProgramMutation(baseOptions?: ApolloReactHooks.Mutation
 export type UpdateProgramMutationHookResult = ReturnType<typeof useUpdateProgramMutation>;
 export type UpdateProgramMutationResult = ApolloReactCommon.MutationResult<UpdateProgramMutation>;
 export type UpdateProgramMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdateProgramMutation, UpdateProgramMutationVariables>;
+export const UpdateTpDocument = gql`
+    mutation UpdateTP($input: UpdateTargetPopulationInput!) {
+  updateTargetPopulation(input: $input) {
+    targetPopulation {
+      id
+      name
+      status
+      candidateListTargetingCriteria {
+        targetPopulationCandidate {
+          createdBy {
+            firstName
+            lastName
+          }
+          program {
+            id
+            name
+          }
+        }
+        rules {
+          id
+          filters {
+            fieldName
+            isFlexField
+            arguments
+            comparisionMethod
+            fieldAttribute {
+              name
+              labelEn
+              type
+              choices {
+                value
+                labelEn
+              }
+            }
+          }
+        }
+      }
+      finalListTargetingCriteria {
+        targetPopulationFinal {
+          createdBy {
+            firstName
+            lastName
+          }
+          program {
+            id
+            name
+          }
+        }
+        rules {
+          id
+          filters {
+            fieldName
+            isFlexField
+            arguments
+            comparisionMethod
+            fieldAttribute {
+              name
+              labelEn
+              type
+              choices {
+                value
+                labelEn
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export type UpdateTpMutationFn = ApolloReactCommon.MutationFunction<UpdateTpMutation, UpdateTpMutationVariables>;
+export type UpdateTpComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<UpdateTpMutation, UpdateTpMutationVariables>, 'mutation'>;
+
+    export const UpdateTpComponent = (props: UpdateTpComponentProps) => (
+      <ApolloReactComponents.Mutation<UpdateTpMutation, UpdateTpMutationVariables> mutation={UpdateTpDocument} {...props} />
+    );
+    
+export type UpdateTpProps<TChildProps = {}> = ApolloReactHoc.MutateProps<UpdateTpMutation, UpdateTpMutationVariables> & TChildProps;
+export function withUpdateTp<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  UpdateTpMutation,
+  UpdateTpMutationVariables,
+  UpdateTpProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, UpdateTpMutation, UpdateTpMutationVariables, UpdateTpProps<TChildProps>>(UpdateTpDocument, {
+      alias: 'updateTp',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useUpdateTpMutation__
+ *
+ * To run a mutation, you first call `useUpdateTpMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateTpMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateTpMutation, { data, loading, error }] = useUpdateTpMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateTpMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdateTpMutation, UpdateTpMutationVariables>) {
+        return ApolloReactHooks.useMutation<UpdateTpMutation, UpdateTpMutationVariables>(UpdateTpDocument, baseOptions);
+      }
+export type UpdateTpMutationHookResult = ReturnType<typeof useUpdateTpMutation>;
+export type UpdateTpMutationResult = ApolloReactCommon.MutationResult<UpdateTpMutation>;
+export type UpdateTpMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdateTpMutation, UpdateTpMutationVariables>;
 export const AllBusinessAreasDocument = gql`
     query AllBusinessAreas {
   allBusinessAreas {
@@ -3945,6 +4842,79 @@ export function useAllProgramsLazyQuery(baseOptions?: ApolloReactHooks.LazyQuery
 export type AllProgramsQueryHookResult = ReturnType<typeof useAllProgramsQuery>;
 export type AllProgramsLazyQueryHookResult = ReturnType<typeof useAllProgramsLazyQuery>;
 export type AllProgramsQueryResult = ApolloReactCommon.QueryResult<AllProgramsQuery, AllProgramsQueryVariables>;
+export const AllTargetPopulationsDocument = gql`
+    query AllTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String) {
+  allTargetPopulation(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name: $name, status: $status) {
+    edges {
+      node {
+        id
+        name
+        status
+        createdAt
+        updatedAt
+        candidateListTotalHouseholds
+        finalListTotalHouseholds
+        createdBy {
+          firstName
+          lastName
+        }
+      }
+      cursor
+    }
+    totalCount
+    edgeCount
+  }
+}
+    `;
+export type AllTargetPopulationsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>, 'query'>;
+
+    export const AllTargetPopulationsComponent = (props: AllTargetPopulationsComponentProps) => (
+      <ApolloReactComponents.Query<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables> query={AllTargetPopulationsDocument} {...props} />
+    );
+    
+export type AllTargetPopulationsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables> & TChildProps;
+export function withAllTargetPopulations<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllTargetPopulationsQuery,
+  AllTargetPopulationsQueryVariables,
+  AllTargetPopulationsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables, AllTargetPopulationsProps<TChildProps>>(AllTargetPopulationsDocument, {
+      alias: 'allTargetPopulations',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllTargetPopulationsQuery__
+ *
+ * To run a query within a React component, call `useAllTargetPopulationsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllTargetPopulationsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllTargetPopulationsQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      orderBy: // value for 'orderBy'
+ *      name: // value for 'name'
+ *      status: // value for 'status'
+ *   },
+ * });
+ */
+export function useAllTargetPopulationsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>(AllTargetPopulationsDocument, baseOptions);
+      }
+export function useAllTargetPopulationsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>(AllTargetPopulationsDocument, baseOptions);
+        }
+export type AllTargetPopulationsQueryHookResult = ReturnType<typeof useAllTargetPopulationsQuery>;
+export type AllTargetPopulationsLazyQueryHookResult = ReturnType<typeof useAllTargetPopulationsLazyQuery>;
+export type AllTargetPopulationsQueryResult = ApolloReactCommon.QueryResult<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>;
 export const AllUsersDocument = gql`
     query AllUsers($fullName: String, $first: Int) {
   allUsers(fullName: $fullName, first: $first) {
@@ -4544,6 +5514,118 @@ export function useProgrammeChoiceDataLazyQuery(baseOptions?: ApolloReactHooks.L
 export type ProgrammeChoiceDataQueryHookResult = ReturnType<typeof useProgrammeChoiceDataQuery>;
 export type ProgrammeChoiceDataLazyQueryHookResult = ReturnType<typeof useProgrammeChoiceDataLazyQuery>;
 export type ProgrammeChoiceDataQueryResult = ApolloReactCommon.QueryResult<ProgrammeChoiceDataQuery, ProgrammeChoiceDataQueryVariables>;
+export const TargetPopulationDocument = gql`
+    query targetPopulation($id: ID!) {
+  targetPopulation(id: $id) {
+    id
+    name
+    status
+    candidateListTargetingCriteria {
+      targetPopulationCandidate {
+        createdBy {
+          firstName
+          lastName
+        }
+        program {
+          id
+          name
+        }
+      }
+      rules {
+        id
+        filters {
+          fieldName
+          isFlexField
+          arguments
+          comparisionMethod
+          fieldAttribute {
+            name
+            labelEn
+            type
+            choices {
+              value
+              labelEn
+            }
+          }
+        }
+      }
+    }
+    finalListTargetingCriteria {
+      targetPopulationFinal {
+        createdBy {
+          firstName
+          lastName
+        }
+        program {
+          id
+          name
+        }
+      }
+      rules {
+        id
+        filters {
+          fieldName
+          isFlexField
+          arguments
+          comparisionMethod
+          fieldAttribute {
+            name
+            labelEn
+            type
+            choices {
+              value
+              labelEn
+            }
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export type TargetPopulationComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<TargetPopulationQuery, TargetPopulationQueryVariables>, 'query'> & ({ variables: TargetPopulationQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const TargetPopulationComponent = (props: TargetPopulationComponentProps) => (
+      <ApolloReactComponents.Query<TargetPopulationQuery, TargetPopulationQueryVariables> query={TargetPopulationDocument} {...props} />
+    );
+    
+export type TargetPopulationProps<TChildProps = {}> = ApolloReactHoc.DataProps<TargetPopulationQuery, TargetPopulationQueryVariables> & TChildProps;
+export function withTargetPopulation<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  TargetPopulationQuery,
+  TargetPopulationQueryVariables,
+  TargetPopulationProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, TargetPopulationQuery, TargetPopulationQueryVariables, TargetPopulationProps<TChildProps>>(TargetPopulationDocument, {
+      alias: 'targetPopulation',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useTargetPopulationQuery__
+ *
+ * To run a query within a React component, call `useTargetPopulationQuery` and pass it any options that fit your needs.
+ * When your component renders, `useTargetPopulationQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useTargetPopulationQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useTargetPopulationQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<TargetPopulationQuery, TargetPopulationQueryVariables>) {
+        return ApolloReactHooks.useQuery<TargetPopulationQuery, TargetPopulationQueryVariables>(TargetPopulationDocument, baseOptions);
+      }
+export function useTargetPopulationLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<TargetPopulationQuery, TargetPopulationQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<TargetPopulationQuery, TargetPopulationQueryVariables>(TargetPopulationDocument, baseOptions);
+        }
+export type TargetPopulationQueryHookResult = ReturnType<typeof useTargetPopulationQuery>;
+export type TargetPopulationLazyQueryHookResult = ReturnType<typeof useTargetPopulationLazyQuery>;
+export type TargetPopulationQueryResult = ApolloReactCommon.QueryResult<TargetPopulationQuery, TargetPopulationQueryVariables>;
 export const AllImportedHouseholdsDocument = gql`
     query AllImportedHouseholds($after: String, $before: String, $first: Int, $last: Int, $rdiId: String, $orderBy: String) {
   allImportedHouseholds(after: $after, before: $before, first: $first, last: $last, rdiId: $rdiId, orderBy: $orderBy) {
@@ -5108,11 +6190,6 @@ export type UnapproveRdiMutationOptions = ApolloReactCommon.BaseMutationOptions<
 export const UploadImportDataXlsxFileDocument = gql`
     mutation UploadImportDataXlsxFile($file: Upload!) {
   uploadImportDataXlsxFile(file: $file) {
-    errors {
-      header
-      message
-      rowNumber
-    }
     importData {
       id
       numberOfIndividuals
@@ -5166,6 +6243,212 @@ export function useUploadImportDataXlsxFileMutation(baseOptions?: ApolloReactHoo
 export type UploadImportDataXlsxFileMutationHookResult = ReturnType<typeof useUploadImportDataXlsxFileMutation>;
 export type UploadImportDataXlsxFileMutationResult = ApolloReactCommon.MutationResult<UploadImportDataXlsxFileMutation>;
 export type UploadImportDataXlsxFileMutationOptions = ApolloReactCommon.BaseMutationOptions<UploadImportDataXlsxFileMutation, UploadImportDataXlsxFileMutationVariables>;
+export const CandidateHouseholdsListByTargetingCriteriaDocument = gql`
+    query candidateHouseholdsListByTargetingCriteria($targetPopulation: ID!, $first: Int, $after: String, $before: String, $last: Int) {
+  candidateHouseholdsListByTargetingCriteria(targetPopulation: $targetPopulation, after: $after, before: $before, first: $first, last: $last) {
+    edges {
+      node {
+        id
+        headOfHousehold {
+          firstName
+          lastName
+        }
+        familySize
+        location {
+          title
+        }
+        updatedAt
+      }
+    }
+    totalCount
+    edgeCount
+  }
+}
+    `;
+export type CandidateHouseholdsListByTargetingCriteriaComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<CandidateHouseholdsListByTargetingCriteriaQuery, CandidateHouseholdsListByTargetingCriteriaQueryVariables>, 'query'> & ({ variables: CandidateHouseholdsListByTargetingCriteriaQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const CandidateHouseholdsListByTargetingCriteriaComponent = (props: CandidateHouseholdsListByTargetingCriteriaComponentProps) => (
+      <ApolloReactComponents.Query<CandidateHouseholdsListByTargetingCriteriaQuery, CandidateHouseholdsListByTargetingCriteriaQueryVariables> query={CandidateHouseholdsListByTargetingCriteriaDocument} {...props} />
+    );
+    
+export type CandidateHouseholdsListByTargetingCriteriaProps<TChildProps = {}> = ApolloReactHoc.DataProps<CandidateHouseholdsListByTargetingCriteriaQuery, CandidateHouseholdsListByTargetingCriteriaQueryVariables> & TChildProps;
+export function withCandidateHouseholdsListByTargetingCriteria<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CandidateHouseholdsListByTargetingCriteriaQuery,
+  CandidateHouseholdsListByTargetingCriteriaQueryVariables,
+  CandidateHouseholdsListByTargetingCriteriaProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, CandidateHouseholdsListByTargetingCriteriaQuery, CandidateHouseholdsListByTargetingCriteriaQueryVariables, CandidateHouseholdsListByTargetingCriteriaProps<TChildProps>>(CandidateHouseholdsListByTargetingCriteriaDocument, {
+      alias: 'candidateHouseholdsListByTargetingCriteria',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCandidateHouseholdsListByTargetingCriteriaQuery__
+ *
+ * To run a query within a React component, call `useCandidateHouseholdsListByTargetingCriteriaQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCandidateHouseholdsListByTargetingCriteriaQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCandidateHouseholdsListByTargetingCriteriaQuery({
+ *   variables: {
+ *      targetPopulation: // value for 'targetPopulation'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      last: // value for 'last'
+ *   },
+ * });
+ */
+export function useCandidateHouseholdsListByTargetingCriteriaQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<CandidateHouseholdsListByTargetingCriteriaQuery, CandidateHouseholdsListByTargetingCriteriaQueryVariables>) {
+        return ApolloReactHooks.useQuery<CandidateHouseholdsListByTargetingCriteriaQuery, CandidateHouseholdsListByTargetingCriteriaQueryVariables>(CandidateHouseholdsListByTargetingCriteriaDocument, baseOptions);
+      }
+export function useCandidateHouseholdsListByTargetingCriteriaLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<CandidateHouseholdsListByTargetingCriteriaQuery, CandidateHouseholdsListByTargetingCriteriaQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<CandidateHouseholdsListByTargetingCriteriaQuery, CandidateHouseholdsListByTargetingCriteriaQueryVariables>(CandidateHouseholdsListByTargetingCriteriaDocument, baseOptions);
+        }
+export type CandidateHouseholdsListByTargetingCriteriaQueryHookResult = ReturnType<typeof useCandidateHouseholdsListByTargetingCriteriaQuery>;
+export type CandidateHouseholdsListByTargetingCriteriaLazyQueryHookResult = ReturnType<typeof useCandidateHouseholdsListByTargetingCriteriaLazyQuery>;
+export type CandidateHouseholdsListByTargetingCriteriaQueryResult = ApolloReactCommon.QueryResult<CandidateHouseholdsListByTargetingCriteriaQuery, CandidateHouseholdsListByTargetingCriteriaQueryVariables>;
+export const GoldenRecordByTargetingCriteriaDocument = gql`
+    query GoldenRecordByTargetingCriteria($targetingCriteria: TargetingCriteriaObjectType!, $first: Int, $after: String, $before: String, $last: Int) {
+  goldenRecordByTargetingCriteria(targetingCriteria: $targetingCriteria, after: $after, before: $before, first: $first, last: $last) {
+    edges {
+      node {
+        id
+        headOfHousehold {
+          firstName
+          lastName
+        }
+        familySize
+        location {
+          title
+        }
+        updatedAt
+      }
+    }
+    totalCount
+    edgeCount
+  }
+}
+    `;
+export type GoldenRecordByTargetingCriteriaComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<GoldenRecordByTargetingCriteriaQuery, GoldenRecordByTargetingCriteriaQueryVariables>, 'query'> & ({ variables: GoldenRecordByTargetingCriteriaQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const GoldenRecordByTargetingCriteriaComponent = (props: GoldenRecordByTargetingCriteriaComponentProps) => (
+      <ApolloReactComponents.Query<GoldenRecordByTargetingCriteriaQuery, GoldenRecordByTargetingCriteriaQueryVariables> query={GoldenRecordByTargetingCriteriaDocument} {...props} />
+    );
+    
+export type GoldenRecordByTargetingCriteriaProps<TChildProps = {}> = ApolloReactHoc.DataProps<GoldenRecordByTargetingCriteriaQuery, GoldenRecordByTargetingCriteriaQueryVariables> & TChildProps;
+export function withGoldenRecordByTargetingCriteria<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  GoldenRecordByTargetingCriteriaQuery,
+  GoldenRecordByTargetingCriteriaQueryVariables,
+  GoldenRecordByTargetingCriteriaProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, GoldenRecordByTargetingCriteriaQuery, GoldenRecordByTargetingCriteriaQueryVariables, GoldenRecordByTargetingCriteriaProps<TChildProps>>(GoldenRecordByTargetingCriteriaDocument, {
+      alias: 'goldenRecordByTargetingCriteria',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useGoldenRecordByTargetingCriteriaQuery__
+ *
+ * To run a query within a React component, call `useGoldenRecordByTargetingCriteriaQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGoldenRecordByTargetingCriteriaQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGoldenRecordByTargetingCriteriaQuery({
+ *   variables: {
+ *      targetingCriteria: // value for 'targetingCriteria'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      last: // value for 'last'
+ *   },
+ * });
+ */
+export function useGoldenRecordByTargetingCriteriaQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GoldenRecordByTargetingCriteriaQuery, GoldenRecordByTargetingCriteriaQueryVariables>) {
+        return ApolloReactHooks.useQuery<GoldenRecordByTargetingCriteriaQuery, GoldenRecordByTargetingCriteriaQueryVariables>(GoldenRecordByTargetingCriteriaDocument, baseOptions);
+      }
+export function useGoldenRecordByTargetingCriteriaLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GoldenRecordByTargetingCriteriaQuery, GoldenRecordByTargetingCriteriaQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<GoldenRecordByTargetingCriteriaQuery, GoldenRecordByTargetingCriteriaQueryVariables>(GoldenRecordByTargetingCriteriaDocument, baseOptions);
+        }
+export type GoldenRecordByTargetingCriteriaQueryHookResult = ReturnType<typeof useGoldenRecordByTargetingCriteriaQuery>;
+export type GoldenRecordByTargetingCriteriaLazyQueryHookResult = ReturnType<typeof useGoldenRecordByTargetingCriteriaLazyQuery>;
+export type GoldenRecordByTargetingCriteriaQueryResult = ApolloReactCommon.QueryResult<GoldenRecordByTargetingCriteriaQuery, GoldenRecordByTargetingCriteriaQueryVariables>;
+export const ImportedIndividualFieldsDocument = gql`
+    query ImportedIndividualFields {
+  allFieldsAttributes {
+    isFlexField
+    id
+    type
+    name
+    labels {
+      language
+      label
+    }
+    labelEn
+    hint
+    choices {
+      labels {
+        label
+        language
+      }
+      labelEn
+      value
+      admin
+      listName
+    }
+  }
+}
+    `;
+export type ImportedIndividualFieldsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>, 'query'>;
+
+    export const ImportedIndividualFieldsComponent = (props: ImportedIndividualFieldsComponentProps) => (
+      <ApolloReactComponents.Query<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables> query={ImportedIndividualFieldsDocument} {...props} />
+    );
+    
+export type ImportedIndividualFieldsProps<TChildProps = {}> = ApolloReactHoc.DataProps<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables> & TChildProps;
+export function withImportedIndividualFields<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ImportedIndividualFieldsQuery,
+  ImportedIndividualFieldsQueryVariables,
+  ImportedIndividualFieldsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables, ImportedIndividualFieldsProps<TChildProps>>(ImportedIndividualFieldsDocument, {
+      alias: 'importedIndividualFields',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useImportedIndividualFieldsQuery__
+ *
+ * To run a query within a React component, call `useImportedIndividualFieldsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useImportedIndividualFieldsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useImportedIndividualFieldsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useImportedIndividualFieldsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>) {
+        return ApolloReactHooks.useQuery<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>(ImportedIndividualFieldsDocument, baseOptions);
+      }
+export function useImportedIndividualFieldsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>(ImportedIndividualFieldsDocument, baseOptions);
+        }
+export type ImportedIndividualFieldsQueryHookResult = ReturnType<typeof useImportedIndividualFieldsQuery>;
+export type ImportedIndividualFieldsLazyQueryHookResult = ReturnType<typeof useImportedIndividualFieldsLazyQuery>;
+export type ImportedIndividualFieldsQueryResult = ApolloReactCommon.QueryResult<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>;
 
 
 export type ResolverTypeWrapper<T> = Promise<T> | T;
@@ -5293,10 +6576,14 @@ export type ResolversTypes = {
   PaymentRecordNodeConnection: ResolverTypeWrapper<PaymentRecordNodeConnection>,
   PaymentRecordNodeEdge: ResolverTypeWrapper<PaymentRecordNodeEdge>,
   Decimal: ResolverTypeWrapper<Scalars['Decimal']>,
-  SavedTargetRuleNodeConnection: ResolverTypeWrapper<SavedTargetRuleNodeConnection>,
-  SavedTargetRuleNodeEdge: ResolverTypeWrapper<SavedTargetRuleNodeEdge>,
-  SavedTargetRuleNode: ResolverTypeWrapper<SavedTargetRuleNode>,
-  JSONString: ResolverTypeWrapper<Scalars['JSONString']>,
+  TargetingCriteriaNode: ResolverTypeWrapper<TargetingCriteriaNode>,
+  TargetingCriteriaRuleNode: ResolverTypeWrapper<TargetingCriteriaRuleNode>,
+  TargetingCriteriaRuleFilterNode: ResolverTypeWrapper<TargetingCriteriaRuleFilterNode>,
+  TargetingCriteriaRuleFilterComparisionMethod: TargetingCriteriaRuleFilterComparisionMethod,
+  Arg: ResolverTypeWrapper<Scalars['Arg']>,
+  FieldAttributeNode: ResolverTypeWrapper<FieldAttributeNode>,
+  LabelNode: ResolverTypeWrapper<LabelNode>,
+  CoreFieldChoiceObject: ResolverTypeWrapper<CoreFieldChoiceObject>,
   RegistrationDataImportNodeConnection: ResolverTypeWrapper<RegistrationDataImportNodeConnection>,
   RegistrationDataImportNodeEdge: ResolverTypeWrapper<RegistrationDataImportNodeEdge>,
   Float: ResolverTypeWrapper<Scalars['Float']>,
@@ -5312,11 +6599,9 @@ export type ResolversTypes = {
   PaymentEntitlementNode: ResolverTypeWrapper<PaymentEntitlementNode>,
   PaymentEntitlementDeliveryType: PaymentEntitlementDeliveryType,
   ChoiceObject: ResolverTypeWrapper<ChoiceObject>,
-  CoreFieldNode: ResolverTypeWrapper<CoreFieldNode>,
-  CoreFieldChoiceObject: ResolverTypeWrapper<CoreFieldChoiceObject>,
-  FlexibleAttributeNode: ResolverTypeWrapper<FlexibleAttributeNode>,
-  FlexibleAttributeType: FlexibleAttributeType,
-  FlexibleAttributeChoiceNode: ResolverTypeWrapper<FlexibleAttributeChoiceNode>,
+  TargetingCriteriaObjectType: TargetingCriteriaObjectType,
+  TargetingCriteriaRuleObjectType: TargetingCriteriaRuleObjectType,
+  TargetingCriteriaRuleFilterObjectType: TargetingCriteriaRuleFilterObjectType,
   UserObjectType: ResolverTypeWrapper<UserObjectType>,
   ImportedHouseholdNode: ResolverTypeWrapper<ImportedHouseholdNode>,
   ImportedHouseholdResidenceStatus: ImportedHouseholdResidenceStatus,
@@ -5340,9 +6625,18 @@ export type ResolversTypes = {
   DjangoDebug: ResolverTypeWrapper<DjangoDebug>,
   DjangoDebugSQL: ResolverTypeWrapper<DjangoDebugSql>,
   Mutations: ResolverTypeWrapper<{}>,
-  UpdateTargetInput: UpdateTargetInput,
+  CreateTargetPopulationInput: CreateTargetPopulationInput,
+  CreateTargetPopulationMutation: ResolverTypeWrapper<CreateTargetPopulationMutation>,
   UpdateTargetPopulationInput: UpdateTargetPopulationInput,
-  UpdateTargetPayload: ResolverTypeWrapper<UpdateTargetPayload>,
+  UpdateTargetPopulationMutation: ResolverTypeWrapper<UpdateTargetPopulationMutation>,
+  CopyTargetPopulationMutationInput: CopyTargetPopulationMutationInput,
+  CopyTargetPopulationInput: CopyTargetPopulationInput,
+  CopyTargetPopulationMutationPayload: ResolverTypeWrapper<CopyTargetPopulationMutationPayload>,
+  DeleteTargetPopulationMutationInput: DeleteTargetPopulationMutationInput,
+  DeleteTargetPopulationMutationPayload: ResolverTypeWrapper<DeleteTargetPopulationMutationPayload>,
+  ApproveTargetPopulationMutation: ResolverTypeWrapper<ApproveTargetPopulationMutation>,
+  UnapproveTargetPopulationMutation: ResolverTypeWrapper<UnapproveTargetPopulationMutation>,
+  FinalizeTargetPopulationMutation: ResolverTypeWrapper<FinalizeTargetPopulationMutation>,
   CreateProgramInput: CreateProgramInput,
   CreateProgram: ResolverTypeWrapper<CreateProgram>,
   UpdateProgramInput: UpdateProgramInput,
@@ -5417,10 +6711,14 @@ export type ResolversParentTypes = {
   PaymentRecordNodeConnection: PaymentRecordNodeConnection,
   PaymentRecordNodeEdge: PaymentRecordNodeEdge,
   Decimal: Scalars['Decimal'],
-  SavedTargetRuleNodeConnection: SavedTargetRuleNodeConnection,
-  SavedTargetRuleNodeEdge: SavedTargetRuleNodeEdge,
-  SavedTargetRuleNode: SavedTargetRuleNode,
-  JSONString: Scalars['JSONString'],
+  TargetingCriteriaNode: TargetingCriteriaNode,
+  TargetingCriteriaRuleNode: TargetingCriteriaRuleNode,
+  TargetingCriteriaRuleFilterNode: TargetingCriteriaRuleFilterNode,
+  TargetingCriteriaRuleFilterComparisionMethod: TargetingCriteriaRuleFilterComparisionMethod,
+  Arg: Scalars['Arg'],
+  FieldAttributeNode: FieldAttributeNode,
+  LabelNode: LabelNode,
+  CoreFieldChoiceObject: CoreFieldChoiceObject,
   RegistrationDataImportNodeConnection: RegistrationDataImportNodeConnection,
   RegistrationDataImportNodeEdge: RegistrationDataImportNodeEdge,
   Float: Scalars['Float'],
@@ -5436,11 +6734,9 @@ export type ResolversParentTypes = {
   PaymentEntitlementNode: PaymentEntitlementNode,
   PaymentEntitlementDeliveryType: PaymentEntitlementDeliveryType,
   ChoiceObject: ChoiceObject,
-  CoreFieldNode: CoreFieldNode,
-  CoreFieldChoiceObject: CoreFieldChoiceObject,
-  FlexibleAttributeNode: FlexibleAttributeNode,
-  FlexibleAttributeType: FlexibleAttributeType,
-  FlexibleAttributeChoiceNode: FlexibleAttributeChoiceNode,
+  TargetingCriteriaObjectType: TargetingCriteriaObjectType,
+  TargetingCriteriaRuleObjectType: TargetingCriteriaRuleObjectType,
+  TargetingCriteriaRuleFilterObjectType: TargetingCriteriaRuleFilterObjectType,
   UserObjectType: UserObjectType,
   ImportedHouseholdNode: ImportedHouseholdNode,
   ImportedHouseholdResidenceStatus: ImportedHouseholdResidenceStatus,
@@ -5464,9 +6760,18 @@ export type ResolversParentTypes = {
   DjangoDebug: DjangoDebug,
   DjangoDebugSQL: DjangoDebugSql,
   Mutations: {},
-  UpdateTargetInput: UpdateTargetInput,
+  CreateTargetPopulationInput: CreateTargetPopulationInput,
+  CreateTargetPopulationMutation: CreateTargetPopulationMutation,
   UpdateTargetPopulationInput: UpdateTargetPopulationInput,
-  UpdateTargetPayload: UpdateTargetPayload,
+  UpdateTargetPopulationMutation: UpdateTargetPopulationMutation,
+  CopyTargetPopulationMutationInput: CopyTargetPopulationMutationInput,
+  CopyTargetPopulationInput: CopyTargetPopulationInput,
+  CopyTargetPopulationMutationPayload: CopyTargetPopulationMutationPayload,
+  DeleteTargetPopulationMutationInput: DeleteTargetPopulationMutationInput,
+  DeleteTargetPopulationMutationPayload: DeleteTargetPopulationMutationPayload,
+  ApproveTargetPopulationMutation: ApproveTargetPopulationMutation,
+  UnapproveTargetPopulationMutation: UnapproveTargetPopulationMutation,
+  FinalizeTargetPopulationMutation: FinalizeTargetPopulationMutation,
   CreateProgramInput: CreateProgramInput,
   CreateProgram: CreateProgram,
   UpdateProgramInput: UpdateProgramInput,
@@ -5486,6 +6791,14 @@ export type ResolversParentTypes = {
 export type ApproveRegistrationDataImportMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ApproveRegistrationDataImportMutation'] = ResolversParentTypes['ApproveRegistrationDataImportMutation']> = {
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
 };
+
+export type ApproveTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ApproveTargetPopulationMutation'] = ResolversParentTypes['ApproveTargetPopulationMutation']> = {
+  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
+};
+
+export interface ArgScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Arg'], any> {
+  name: 'Arg'
+}
 
 export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['BusinessAreaNode'] = ResolversParentTypes['BusinessAreaNode']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
@@ -5563,22 +6876,17 @@ export type ChoiceObjectResolvers<ContextType = any, ParentType extends Resolver
   value?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
+export type CopyTargetPopulationMutationPayloadResolvers<ContextType = any, ParentType extends ResolversParentTypes['CopyTargetPopulationMutationPayload'] = ResolversParentTypes['CopyTargetPopulationMutationPayload']> = {
+  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
+  clientMutationId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
 export type CoreFieldChoiceObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['CoreFieldChoiceObject'] = ResolversParentTypes['CoreFieldChoiceObject']> = {
-  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  labels?: Resolver<Maybe<Array<Maybe<ResolversTypes['LabelNode']>>>, ParentType, ContextType>,
+  labelEn?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   value?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   admin?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   listName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-};
-
-export type CoreFieldNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['CoreFieldNode'] = ResolversParentTypes['CoreFieldNode']> = {
-  id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  label?: Resolver<Maybe<ResolversTypes['JSONString']>, ParentType, ContextType>,
-  hint?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  required?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-  choices?: Resolver<Maybe<Array<Maybe<ResolversTypes['CoreFieldChoiceObject']>>>, ParentType, ContextType>,
-  associatedWith?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type CreateProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateProgram'] = ResolversParentTypes['CreateProgram']> = {
@@ -5587,6 +6895,10 @@ export type CreateProgramResolvers<ContextType = any, ParentType extends Resolve
 
 export type CreateRegistrationDataImportResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateRegistrationDataImport'] = ResolversParentTypes['CreateRegistrationDataImport']> = {
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
+};
+
+export type CreateTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateTargetPopulationMutation'] = ResolversParentTypes['CreateTargetPopulationMutation']> = {
+  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
 };
 
 export interface DateScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Date'], any> {
@@ -5607,6 +6919,11 @@ export type DeleteProgramResolvers<ContextType = any, ParentType extends Resolve
 
 export type DeleteRegistrationDataImportResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteRegistrationDataImport'] = ResolversParentTypes['DeleteRegistrationDataImport']> = {
   ok?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+};
+
+export type DeleteTargetPopulationMutationPayloadResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteTargetPopulationMutationPayload'] = ResolversParentTypes['DeleteTargetPopulationMutationPayload']> = {
+  ok?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  clientMutationId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type DjangoDebugResolvers<ContextType = any, ParentType extends ResolversParentTypes['DjangoDebug'] = ResolversParentTypes['DjangoDebug']> = {
@@ -5630,28 +6947,21 @@ export type DjangoDebugSqlResolvers<ContextType = any, ParentType extends Resolv
   encoding?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
-export type FlexibleAttributeChoiceNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['FlexibleAttributeChoiceNode'] = ResolversParentTypes['FlexibleAttributeChoiceNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  listName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+export type FieldAttributeNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['FieldAttributeNode'] = ResolversParentTypes['FieldAttributeNode']> = {
+  id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  label?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
-  admin?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  flexAttributes?: Resolver<Array<ResolversTypes['FlexibleAttributeNode']>, ParentType, ContextType>,
-  value?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  labels?: Resolver<Maybe<Array<Maybe<ResolversTypes['LabelNode']>>>, ParentType, ContextType>,
+  labelEn?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  hint?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  required?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  choices?: Resolver<Maybe<Array<Maybe<ResolversTypes['CoreFieldChoiceObject']>>>, ParentType, ContextType>,
+  associatedWith?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  isFlexField?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
-export type FlexibleAttributeNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['FlexibleAttributeNode'] = ResolversParentTypes['FlexibleAttributeNode']> = {
-  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
-  type?: Resolver<ResolversTypes['FlexibleAttributeType'], ParentType, ContextType>,
-  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  required?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  label?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
-  hint?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
-  choices?: Resolver<Maybe<Array<Maybe<ResolversTypes['FlexibleAttributeChoiceNode']>>>, ParentType, ContextType>,
-  associatedWith?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+export type FinalizeTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinalizeTargetPopulationMutation'] = ResolversParentTypes['FinalizeTargetPopulationMutation']> = {
+  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
 };
 
 export type HouseholdNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['HouseholdNode'] = ResolversParentTypes['HouseholdNode']> = {
@@ -5817,9 +7127,10 @@ export interface JsonLazyStringScalarConfig extends GraphQLScalarTypeConfig<Reso
   name: 'JSONLazyString'
 }
 
-export interface JsonStringScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['JSONString'], any> {
-  name: 'JSONString'
-}
+export type LabelNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['LabelNode'] = ResolversParentTypes['LabelNode']> = {
+  language?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  label?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
 
 export type LocationNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['LocationNode'] = ResolversParentTypes['LocationNode']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
@@ -5879,7 +7190,13 @@ export type MergeRegistrationDataImportMutationResolvers<ContextType = any, Pare
 };
 
 export type MutationsResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutations'] = ResolversParentTypes['Mutations']> = {
-  updateTarget?: Resolver<Maybe<ResolversTypes['UpdateTargetPayload']>, ParentType, ContextType, RequireFields<MutationsUpdateTargetArgs, 'input'>>,
+  createTargetPopulation?: Resolver<Maybe<ResolversTypes['CreateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsCreateTargetPopulationArgs, 'input'>>,
+  updateTargetPopulation?: Resolver<Maybe<ResolversTypes['UpdateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateTargetPopulationArgs, 'input'>>,
+  copyTargetPopulation?: Resolver<Maybe<ResolversTypes['CopyTargetPopulationMutationPayload']>, ParentType, ContextType, RequireFields<MutationsCopyTargetPopulationArgs, 'input'>>,
+  deleteTargetPopulation?: Resolver<Maybe<ResolversTypes['DeleteTargetPopulationMutationPayload']>, ParentType, ContextType, RequireFields<MutationsDeleteTargetPopulationArgs, 'input'>>,
+  approveTargetPopulation?: Resolver<Maybe<ResolversTypes['ApproveTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsApproveTargetPopulationArgs, 'id' | 'programId'>>,
+  unapproveTargetPopulation?: Resolver<Maybe<ResolversTypes['UnapproveTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsUnapproveTargetPopulationArgs, 'id'>>,
+  finalizeTargetPopulation?: Resolver<Maybe<ResolversTypes['FinalizeTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsFinalizeTargetPopulationArgs, 'id'>>,
   createProgram?: Resolver<Maybe<ResolversTypes['CreateProgram']>, ParentType, ContextType, RequireFields<MutationsCreateProgramArgs, 'programData'>>,
   updateProgram?: Resolver<Maybe<ResolversTypes['UpdateProgram']>, ParentType, ContextType, MutationsUpdateProgramArgs>,
   deleteProgram?: Resolver<Maybe<ResolversTypes['DeleteProgram']>, ParentType, ContextType, RequireFields<MutationsDeleteProgramArgs, 'programId'>>,
@@ -5892,7 +7209,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'LocationNode' | 'BusinessAreaNode' | 'UserNode' | 'TargetPopulationNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'SavedTargetRuleNode' | 'FlexibleAttributeChoiceNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode', ParentType, ContextType>,
+  __resolveType: TypeResolveFn<'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'LocationNode' | 'BusinessAreaNode' | 'UserNode' | 'TargetPopulationNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode', ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
 };
 
@@ -5969,6 +7286,7 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   administrativeAreasOfImplementation?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, ProgramNodeHouseholdsArgs>,
   cashPlans?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, ProgramNodeCashPlansArgs>,
+  targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, ProgramNodeTargetpopulationSetArgs>,
   totalEntitledQuantity?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
   totalDeliveredQuantity?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
   totalUndeliveredQuantity?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
@@ -5997,8 +7315,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allLocations?: Resolver<Maybe<ResolversTypes['LocationNodeConnection']>, ParentType, ContextType, QueryAllLocationsArgs>,
   allBusinessAreas?: Resolver<Maybe<ResolversTypes['BusinessAreaNodeConnection']>, ParentType, ContextType, QueryAllBusinessAreasArgs>,
   allLogEntries?: Resolver<Maybe<ResolversTypes['LogEntryObjectConnection']>, ParentType, ContextType, RequireFields<QueryAllLogEntriesArgs, 'objectId'>>,
-  allCoreFieldAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['CoreFieldNode']>>>, ParentType, ContextType>,
-  allFlexFieldAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FlexibleAttributeNode']>>>, ParentType, ContextType>,
+  allFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType, QueryAllFieldsAttributesArgs>,
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType, RequireFields<QueryProgramArgs, 'id'>>,
   allPrograms?: Resolver<Maybe<ResolversTypes['ProgramNodeConnection']>, ParentType, ContextType, QueryAllProgramsArgs>,
   cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType, RequireFields<QueryCashPlanArgs, 'id'>>,
@@ -6010,9 +7327,9 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   cashPlanStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType, RequireFields<QueryTargetPopulationArgs, 'id'>>,
   allTargetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNodeConnection']>, ParentType, ContextType, QueryAllTargetPopulationArgs>,
-  savedTargetRule?: Resolver<Maybe<ResolversTypes['SavedTargetRuleNode']>, ParentType, ContextType, RequireFields<QuerySavedTargetRuleArgs, 'id'>>,
-  allSavedTargetRule?: Resolver<Maybe<ResolversTypes['SavedTargetRuleNodeConnection']>, ParentType, ContextType, QueryAllSavedTargetRuleArgs>,
-  targetRules?: Resolver<Maybe<Array<Maybe<ResolversTypes['HouseholdNode']>>>, ParentType, ContextType, QueryTargetRulesArgs>,
+  goldenRecordByTargetingCriteria?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, RequireFields<QueryGoldenRecordByTargetingCriteriaArgs, 'targetingCriteria'>>,
+  candidateHouseholdsListByTargetingCriteria?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, RequireFields<QueryCandidateHouseholdsListByTargetingCriteriaArgs, 'targetPopulation'>>,
+  finalHouseholdsListByTargetingCriteria?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, RequireFields<QueryFinalHouseholdsListByTargetingCriteriaArgs, 'targetPopulation'>>,
   household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType, RequireFields<QueryHouseholdArgs, 'id'>>,
   allHouseholds?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, QueryAllHouseholdsArgs>,
   individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType, RequireFields<QueryIndividualArgs, 'id'>>,
@@ -6084,23 +7401,33 @@ export type RegistrationDataImportNodeEdgeResolvers<ContextType = any, ParentTyp
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
 };
 
-export type SavedTargetRuleNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SavedTargetRuleNode'] = ResolversParentTypes['SavedTargetRuleNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  flexRules?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
-  coreRules?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
-  targetPopulation?: Resolver<ResolversTypes['TargetPopulationNode'], ParentType, ContextType>,
+export type TargetingCriteriaNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetingCriteriaNode'] = ResolversParentTypes['TargetingCriteriaNode']> = {
+  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  targetPopulationCandidate?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
+  targetPopulationFinal?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
+  rules?: Resolver<Maybe<Array<Maybe<ResolversTypes['TargetingCriteriaRuleNode']>>>, ParentType, ContextType>,
 };
 
-export type SavedTargetRuleNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['SavedTargetRuleNodeConnection'] = ResolversParentTypes['SavedTargetRuleNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['SavedTargetRuleNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+export type TargetingCriteriaRuleFilterNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetingCriteriaRuleFilterNode'] = ResolversParentTypes['TargetingCriteriaRuleFilterNode']> = {
+  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  comparisionMethod?: Resolver<ResolversTypes['TargetingCriteriaRuleFilterComparisionMethod'], ParentType, ContextType>,
+  targetingCriteriaRule?: Resolver<ResolversTypes['TargetingCriteriaRuleNode'], ParentType, ContextType>,
+  isFlexField?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  fieldName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  arguments?: Resolver<Maybe<Array<Maybe<ResolversTypes['Arg']>>>, ParentType, ContextType>,
+  fieldAttribute?: Resolver<Maybe<ResolversTypes['FieldAttributeNode']>, ParentType, ContextType>,
 };
 
-export type SavedTargetRuleNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SavedTargetRuleNodeEdge'] = ResolversParentTypes['SavedTargetRuleNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['SavedTargetRuleNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+export type TargetingCriteriaRuleNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetingCriteriaRuleNode'] = ResolversParentTypes['TargetingCriteriaRuleNode']> = {
+  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  targetingCriteria?: Resolver<ResolversTypes['TargetingCriteriaNode'], ParentType, ContextType>,
+  filters?: Resolver<Maybe<Array<Maybe<ResolversTypes['TargetingCriteriaRuleFilterNode']>>>, ParentType, ContextType>,
 };
 
 export type TargetPopulationNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetPopulationNode'] = ResolversParentTypes['TargetPopulationNode']> = {
@@ -6108,17 +7435,22 @@ export type TargetPopulationNodeResolvers<ContextType = any, ParentType extends 
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  lastEditedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   status?: Resolver<ResolversTypes['TargetPopulationStatus'], ParentType, ContextType>,
   households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, TargetPopulationNodeHouseholdsArgs>,
-  TotalHouseholds?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  TotalFamilySize?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  candidateListTotalHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  candidateListTotalIndividuals?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  finalListTotalHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  finalListTotalIndividuals?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  selectionComputationMetadata?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
+  candidateListTargetingCriteria?: Resolver<Maybe<ResolversTypes['TargetingCriteriaNode']>, ParentType, ContextType>,
+  finalListTargetingCriteria?: Resolver<Maybe<ResolversTypes['TargetingCriteriaNode']>, ParentType, ContextType>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, TargetPopulationNodePaymentRecordsArgs>,
   cashPlans?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, TargetPopulationNodeCashPlansArgs>,
-  targetRules?: Resolver<ResolversTypes['SavedTargetRuleNodeConnection'], ParentType, ContextType, TargetPopulationNodeTargetRulesArgs>,
   totalHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   totalFamilySize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  finalList?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, TargetPopulationNodeFinalListArgs>,
 };
 
 export type TargetPopulationNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetPopulationNodeConnection'] = ResolversParentTypes['TargetPopulationNodeConnection']> = {
@@ -6137,13 +7469,16 @@ export type UnapproveRegistrationDataImportMutationResolvers<ContextType = any, 
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
 };
 
+export type UnapproveTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['UnapproveTargetPopulationMutation'] = ResolversParentTypes['UnapproveTargetPopulationMutation']> = {
+  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
+};
+
 export type UpdateProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdateProgram'] = ResolversParentTypes['UpdateProgram']> = {
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
 };
 
-export type UpdateTargetPayloadResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdateTargetPayload'] = ResolversParentTypes['UpdateTargetPayload']> = {
+export type UpdateTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdateTargetPopulationMutation'] = ResolversParentTypes['UpdateTargetPopulationMutation']> = {
   targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
-  clientMutationId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export interface UploadScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Upload'], any> {
@@ -6213,6 +7548,8 @@ export type XlsxRowErrorNodeResolvers<ContextType = any, ParentType extends Reso
 
 export type Resolvers<ContextType = any> = {
   ApproveRegistrationDataImportMutation?: ApproveRegistrationDataImportMutationResolvers<ContextType>,
+  ApproveTargetPopulationMutation?: ApproveTargetPopulationMutationResolvers<ContextType>,
+  Arg?: GraphQLScalarType,
   BusinessAreaNode?: BusinessAreaNodeResolvers<ContextType>,
   BusinessAreaNodeConnection?: BusinessAreaNodeConnectionResolvers<ContextType>,
   BusinessAreaNodeEdge?: BusinessAreaNodeEdgeResolvers<ContextType>,
@@ -6220,19 +7557,21 @@ export type Resolvers<ContextType = any> = {
   CashPlanNodeConnection?: CashPlanNodeConnectionResolvers<ContextType>,
   CashPlanNodeEdge?: CashPlanNodeEdgeResolvers<ContextType>,
   ChoiceObject?: ChoiceObjectResolvers<ContextType>,
+  CopyTargetPopulationMutationPayload?: CopyTargetPopulationMutationPayloadResolvers<ContextType>,
   CoreFieldChoiceObject?: CoreFieldChoiceObjectResolvers<ContextType>,
-  CoreFieldNode?: CoreFieldNodeResolvers<ContextType>,
   CreateProgram?: CreateProgramResolvers<ContextType>,
   CreateRegistrationDataImport?: CreateRegistrationDataImportResolvers<ContextType>,
+  CreateTargetPopulationMutation?: CreateTargetPopulationMutationResolvers<ContextType>,
   Date?: GraphQLScalarType,
   DateTime?: GraphQLScalarType,
   Decimal?: GraphQLScalarType,
   DeleteProgram?: DeleteProgramResolvers<ContextType>,
   DeleteRegistrationDataImport?: DeleteRegistrationDataImportResolvers<ContextType>,
+  DeleteTargetPopulationMutationPayload?: DeleteTargetPopulationMutationPayloadResolvers<ContextType>,
   DjangoDebug?: DjangoDebugResolvers<ContextType>,
   DjangoDebugSQL?: DjangoDebugSqlResolvers<ContextType>,
-  FlexibleAttributeChoiceNode?: FlexibleAttributeChoiceNodeResolvers<ContextType>,
-  FlexibleAttributeNode?: FlexibleAttributeNodeResolvers<ContextType>,
+  FieldAttributeNode?: FieldAttributeNodeResolvers<ContextType>,
+  FinalizeTargetPopulationMutation?: FinalizeTargetPopulationMutationResolvers<ContextType>,
   HouseholdNode?: HouseholdNodeResolvers<ContextType>,
   HouseholdNodeConnection?: HouseholdNodeConnectionResolvers<ContextType>,
   HouseholdNodeEdge?: HouseholdNodeEdgeResolvers<ContextType>,
@@ -6247,7 +7586,7 @@ export type Resolvers<ContextType = any> = {
   IndividualNodeConnection?: IndividualNodeConnectionResolvers<ContextType>,
   IndividualNodeEdge?: IndividualNodeEdgeResolvers<ContextType>,
   JSONLazyString?: GraphQLScalarType,
-  JSONString?: GraphQLScalarType,
+  LabelNode?: LabelNodeResolvers<ContextType>,
   LocationNode?: LocationNodeResolvers<ContextType>,
   LocationNodeConnection?: LocationNodeConnectionResolvers<ContextType>,
   LocationNodeEdge?: LocationNodeEdgeResolvers<ContextType>,
@@ -6272,15 +7611,16 @@ export type Resolvers<ContextType = any> = {
   RegistrationDataImportNode?: RegistrationDataImportNodeResolvers<ContextType>,
   RegistrationDataImportNodeConnection?: RegistrationDataImportNodeConnectionResolvers<ContextType>,
   RegistrationDataImportNodeEdge?: RegistrationDataImportNodeEdgeResolvers<ContextType>,
-  SavedTargetRuleNode?: SavedTargetRuleNodeResolvers<ContextType>,
-  SavedTargetRuleNodeConnection?: SavedTargetRuleNodeConnectionResolvers<ContextType>,
-  SavedTargetRuleNodeEdge?: SavedTargetRuleNodeEdgeResolvers<ContextType>,
+  TargetingCriteriaNode?: TargetingCriteriaNodeResolvers<ContextType>,
+  TargetingCriteriaRuleFilterNode?: TargetingCriteriaRuleFilterNodeResolvers<ContextType>,
+  TargetingCriteriaRuleNode?: TargetingCriteriaRuleNodeResolvers<ContextType>,
   TargetPopulationNode?: TargetPopulationNodeResolvers<ContextType>,
   TargetPopulationNodeConnection?: TargetPopulationNodeConnectionResolvers<ContextType>,
   TargetPopulationNodeEdge?: TargetPopulationNodeEdgeResolvers<ContextType>,
   UnapproveRegistrationDataImportMutation?: UnapproveRegistrationDataImportMutationResolvers<ContextType>,
+  UnapproveTargetPopulationMutation?: UnapproveTargetPopulationMutationResolvers<ContextType>,
   UpdateProgram?: UpdateProgramResolvers<ContextType>,
-  UpdateTargetPayload?: UpdateTargetPayloadResolvers<ContextType>,
+  UpdateTargetPopulationMutation?: UpdateTargetPopulationMutationResolvers<ContextType>,
   Upload?: GraphQLScalarType,
   UploadImportDataXLSXFile?: UploadImportDataXlsxFileResolvers<ContextType>,
   UserNode?: UserNodeResolvers<ContextType>,
