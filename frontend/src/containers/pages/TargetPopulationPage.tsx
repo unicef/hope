@@ -27,6 +27,7 @@ export function TargetPopulationPage() {
       max: undefined,
     },
     name: '',
+    status: '',
   })
   const debouncedFilter = useDebounce(filter, 500);
 
@@ -37,7 +38,7 @@ export function TargetPopulationPage() {
 
   return (
     <div>
-      <PageHeader title={t('Target Population')}>
+      <PageHeader title={t('Targeting')}>
         <Button
           variant='contained'
           color='primary'

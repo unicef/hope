@@ -21,7 +21,7 @@ export const FormikSelectField = ({
           {...field}
           {...otherProps}
           name={field.name}
-          value={field.value}
+          value={field.value || otherProps.value}
           id={`textField-${field.name}`}
           error={isInvalid}
         >
@@ -30,7 +30,7 @@ export const FormikSelectField = ({
               key={each.value ? each.value : each.name}
               value={each.value ? each.value : each.name}
             >
-              {each.label ? each.label : each.name}
+              {each.labelEn || each.name || each.label}
             </MenuItem>
           ))}
         </Select>

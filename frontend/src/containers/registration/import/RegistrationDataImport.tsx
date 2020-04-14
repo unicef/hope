@@ -106,28 +106,25 @@ export function RegistrationDataImport(): React.ReactElement {
   const [importType, setImportType] = useState();
   const { t } = useTranslation();
   let counters = null;
-  if(get(uploadData, 'uploadImportDataXlsxFile.importData')){
-    counters = <>
-      <div>
-        {
-          uploadData.uploadImportDataXlsxFile.importData
-              .numberOfHouseholds
-        }{' '}
-        Households available to Import
-      </div>
-      <div>
-        {
-          uploadData.uploadImportDataXlsxFile.importData
-              .numberOfIndividuals
-        }{' '}
-        Individuals available to Import
-      </div>
-    </>;
+  if (get(uploadData, 'uploadImportDataXlsxFile.importData')) {
+    counters = (
+      <>
+        <div>
+          {uploadData.uploadImportDataXlsxFile.importData.numberOfHouseholds}{' '}
+          Households available to Import
+        </div>
+        <div>
+          {uploadData.uploadImportDataXlsxFile.importData.numberOfIndividuals}{' '}
+          Individuals available to Import
+        </div>
+      </>
+    );
   }
   let importTypeSpecificContent = null;
-  if(importType==='excel'){
-    importTypeSpecificContent=<>
-      <DropzoneField
+  if (importType === 'excel') {
+    importTypeSpecificContent = (
+      <>
+        <DropzoneField
           loading={fileLoading}
           onChange={(files) => {
             if (files.length === 0) {
@@ -137,7 +134,7 @@ export function RegistrationDataImport(): React.ReactElement {
             const fileSizeMB = file.size / (1024 * 1024);
             if (fileSizeMB > 200) {
               showMessage(
-                  `File size is to big. It should be under 200MB, File size is ${fileSizeMB}MB`,
+                `File size is to big. It should be under 200MB, File size is ${fileSizeMB}MB`,
               );
               return;
             }
@@ -147,8 +144,9 @@ export function RegistrationDataImport(): React.ReactElement {
               },
             });
           }}
-      />
-    </>
+        />
+      </>
+    );
   }
 
   return (
@@ -225,6 +223,7 @@ export function RegistrationDataImport(): React.ReactElement {
                   fullWidth
                   label='Name Upload'
                   required
+                  variant='filled'
                   component={FormikTextField}
                 />
               </DialogContent>
