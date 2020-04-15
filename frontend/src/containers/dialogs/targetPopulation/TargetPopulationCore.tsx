@@ -33,16 +33,12 @@ const resultsData = {
 export function TargetPopulationCore({
   candidateList,
   id,
-  status,
   selectedTab = 0,
 }) {
   if (!candidateList) return null;
   const { rules: candidateListRules } = candidateList;
   return (
     <>
-      {(status === 'APPROVED' || status === 'FINALIZED') && (
-        <TargetPopulationDetails targetPopulation={candidateList} />
-      )}
       <TargetingCriteria
         selectedTab={selectedTab}
         candidateListRules={candidateListRules}
