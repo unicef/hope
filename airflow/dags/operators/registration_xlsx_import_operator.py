@@ -14,6 +14,7 @@ class RegistrationXLSXImportOperator(DjangoOperator):
     households = None
     individuals = None
 
+    # TODO: probably won't be needed
     def _handle_location(self, value):
         from geopy.geocoders import ArcGIS
 
@@ -59,22 +60,25 @@ class RegistrationXLSXImportOperator(DjangoOperator):
                 if header == "household_id":
                     household_id = cell.value
                     if sheet_title == "individuals":
-                        obj_to_create.household = self.households.get(household_id)
+                        obj_to_create.household = self.households.get(
+                            household_id
+                        )
 
                 if (
                     hasattr(obj_to_create, header)
                     and header not in complex_fields.keys()
                 ):
-                    if header == "representative":
-                        household = self.households.get(household_id)
-                        household.representative = obj_to_create
-                        households_to_update.append(household)
-                    elif header == "head_of_household":
-                        household = self.households.get(household_id)
-                        household.head_of_household = obj_to_create
-                        households_to_update.append(household)
-                    else:
-                        setattr(obj_to_create, header, cell.value)
+                    # TODO: probably won't be needed
+                    # if header == "representative":
+                    #     household = self.households.get(household_id)
+                    #     household.representative = obj_to_create
+                    #     households_to_update.append(household)
+                    # elif header == "head_of_household":
+                    #     household = self.households.get(household_id)
+                    #     household.head_of_household = obj_to_create
+                    #     households_to_update.append(household)
+                    # else:
+                    setattr(obj_to_create, header, cell.value)
                 elif header in complex_fields[sheet_title]:
                     fn = complex_fields[sheet_title].get(header)
                     value = fn(cell.value)
@@ -83,7 +87,6 @@ class RegistrationXLSXImportOperator(DjangoOperator):
             if sheet_title == "households":
                 self.households[household_id] = obj_to_create
             else:
-                # TODO: maybe make it as signal or override save() method
                 first_name = obj_to_create.first_name
                 middle_name = obj_to_create.middle_name
                 last_name = obj_to_create.last_name
@@ -99,7 +102,9 @@ class RegistrationXLSXImportOperator(DjangoOperator):
         else:
             ImportedIndividual.objects.bulk_create(self.individuals)
             ImportedHousehold.objects.bulk_update(
-                households_to_update, ["representative", "head_of_household"], 1000,
+                households_to_update,
+                ["representative", "head_of_household"],
+                1000,
             )
 
     @transaction.atomic()
@@ -117,15 +122,16 @@ class RegistrationXLSXImportOperator(DjangoOperator):
         dag_run = context["dag_run"]
         config_vars = dag_run.conf
 
-        registration_data_import = RegistrationDataImportDatahub.objects.select_for_update().get(
+        reg_data_qs = RegistrationDataImportDatahub.objects.select_for_update()
+        registration_data_import = reg_data_qs.get(
             id=config_vars.get("registration_data_import_id")
         )
-        import_data = ImportData.objects.get(id=config_vars.get("import_data_id"),)
+        import_data = ImportData.objects.get(
+            id=config_vars.get("import_data_id"),
+        )
 
         wb = openpyxl.load_workbook(import_data.xlsx_file, data_only=True)
 
-        # TODO: Currently adding only core fields for testing purposes,
-        #  need to add flex fields
         for sheet in wb.worksheets:
             self._create_objects(sheet, registration_data_import)
 
