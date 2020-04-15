@@ -9,6 +9,7 @@ import {
 } from '../../__generated__/graphql';
 import { EditTargetPopulation } from '../../components/TargetPopulation/EditTargetPopulation';
 import { TargetPopulationCore } from '../dialogs/targetPopulation/TargetPopulationCore';
+import { TargetPopulationDetails } from '../../components/TargetPopulation/TargetPopulationDetails';
 
 export function TargetPopulationDetailsPage() {
   const { id } = useParams();
@@ -26,7 +27,7 @@ export function TargetPopulationDetailsPage() {
     return null;
   }
   const targetPopulation = data.targetPopulation as TargetPopulationNode;
-
+  const { status } = targetPopulation;
   const tabs = (
     <Tabs
       value={selectedTab}
@@ -36,13 +37,9 @@ export function TargetPopulationDetailsPage() {
       textColor='primary'
     >
       <Tab label='Candidate list' />
-      <Tab
-        label='Target Population'
-        disabled={targetPopulation.status === 'DRAFT'}
-      />
+      <Tab label='Target Population' disabled={status === 'DRAFT'} />
     </Tabs>
   );
-
   return (
     <div>
       {isEdit ? (
@@ -63,17 +60,18 @@ export function TargetPopulationDetailsPage() {
             tabs={tabs}
             selectedTab={selectedTab}
           />
+          {(status === 'APPROVED' || status === 'FINALIZED') && (
+            <TargetPopulationDetails targetPopulation={targetPopulation} />
+          )}
           <TabPanel value={selectedTab} index={0}>
             <TargetPopulationCore
               id={targetPopulation.id}
-              status={targetPopulation.status}
               candidateList={targetPopulation.candidateListTargetingCriteria}
             />
           </TabPanel>
           <TabPanel value={selectedTab} index={1}>
             <TargetPopulationCore
               id={targetPopulation.id}
-              status={targetPopulation.status}
               candidateList={targetPopulation.candidateListTargetingCriteria}
               selectedTab={selectedTab}
             />

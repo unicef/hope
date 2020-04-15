@@ -284,6 +284,11 @@ export function mapCriteriasToInitialValues(criteria) {
                 to: '',
               }
             })
+          case 'EQUALS':
+            return mappedFilters.push({
+              ...each,
+              value: each.arguments[0]
+            })
           default:
             return mappedFilters.push({
               ...each
