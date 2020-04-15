@@ -45,9 +45,9 @@ The Programme Population will have two states:
 * Open
 * Closed
 
-A Programme Population will remain in the **Draft** State once the Target Population is first created until the user decides to **Approve** the list of results the chosen criteria has generated for the Target Population.
+A Programme Population will remain in the **Open** State once the Target Population is first created until the user decides to **Close** the list of results the chosen criteria has generated for the Target Population.
 
-Once the Target Population Programme Population is Approved, it will remain in the **`Approved`** state until **`Finalized`** . **More on this here.**
+Once the Target Population Programme Population is Closed, it will remain in the **`Closed`** state until **`Sent`** . **More on this here.**
 
 #### Target Population \(Final List\)
 
@@ -105,9 +105,9 @@ If the user decides to proceed, they will be able to select from a dropdown menu
 
 Selecting the **`Close`** option from the modal to continue will send the Target Population into the **`Programme Population`** \(state from the previous **`Open`** state\). This will lock in the criteria for this Programme population and prevent any further changes being made with the selection of beneficiaries \(households\) identified in this target population. 
 
-Furthermore, the "Programme Population" tab will change from the **`Open`** state to the **`Closed`** state, therefore the text "Draft" will be removed from the label on the UI \(_This is in regards to the label in the tab adjacent to the Final List Tab.\)_
+Furthermore, the "Programme Population" tab will change from the **`Open`** state to the **`Closed`** state.
 
-Once the Programme Population is in the **`Closed`** state, the user will now be able to run the target population in Corticon to generate additional details such as Vulnerability Scores, and more. 
+Once the Programme Population is in the **`Closed`** state, the user will now be able to run the Target Population in Corticon to generate additional details such as Vulnerability Scores, and more. 
 
 {% hint style="danger" %}
 **NOTE:** How Corticon will connect with HCT-MIS system and what details it will provide are still to be determined. 
@@ -121,7 +121,7 @@ When the user is ready to complete the Target Population and send the results to
 
 #### Send to CashAssist Modal
 
-The finalize Modal that pops up will list the total number of households being pushed to Cash Assist. The user will have the option to **`Send`** or `Cancel` . 
+The Send to CashAssist Modal that pops up will list the total number of households being pushed to Cash Assist. The user will have the option to **`Send`** or `Cancel` . 
 
 The **`Send`** button will lock in the criteria for this target population and push the resulting Households to CashAssist.
 
