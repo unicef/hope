@@ -7,7 +7,7 @@ import { TargetPopulationNode } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
 import { StatusBox } from '../../../components/StatusBox';
-import { targetPopulationStatusToColor } from '../../../utils/utils';
+import { targetPopulationStatusToColor, targetPopulationStatusMapping } from '../../../utils/utils';
 
 const StatusContainer = styled.div`
   width: 120px;
@@ -38,6 +38,7 @@ export function TargetPopulationTableRow({ targetPopulation }) {
           <StatusBox
             status={targetPopulation.status}
             statusToColor={targetPopulationStatusToColor}
+            statusNameMapping={targetPopulationStatusMapping}
           />
         </StatusContainer>
       </TableCell>
