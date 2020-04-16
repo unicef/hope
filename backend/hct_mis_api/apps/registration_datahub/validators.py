@@ -17,9 +17,6 @@ from core.validators import BaseValidator
 
 
 class UploadXLSXValidator(BaseValidator):
-    # TODO: Will be provided by utils.serialize_flex_attributes,
-    #  temporarily hardcoded
-    #  FLEX_ATTRS = serialize_flex_attributes()
     WB = None
     CORE_FIELDS = CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY
     FLEX_FIELDS = serialize_flex_attributes()
@@ -120,12 +117,10 @@ class UploadXLSXValidator(BaseValidator):
         is_required = cls.ALL_FIELDS[header]["required"]
         is_not_empty = cls.not_empty_validator(value)
 
-        if is_required and is_not_empty:
-            return True
-        if is_required and not is_not_empty:
-            return False
-        if not is_required:
-            return True
+        if is_required:
+            return is_not_empty
+
+        return True
 
     @classmethod
     def rows_validator(cls, sheet):
