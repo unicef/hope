@@ -193,7 +193,8 @@ export function programCompare(
 }
 
 export function formatCurrency(amount: number): string {
-  return `${amount.toLocaleString('en-US', {
+  const amountCleared = amount || 0;
+  return `${amountCleared.toLocaleString('en-US', {
     currency: 'USD',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
@@ -218,7 +219,6 @@ export function formatCriteriaFilters({ filters }) {
     let values;
     switch (each.fieldAttribute.type) {
       case 'SELECT_ONE':
-        console.log(each)
         comparisionMethod = 'EQUALS';
         values = [each.value];
         break;
