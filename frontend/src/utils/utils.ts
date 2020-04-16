@@ -300,3 +300,16 @@ export function mapCriteriasToInitialValues(criteria) {
     }
     return mappedFilters;
 }
+
+export function targetPopulationStatusMapping(status) {
+  switch(status) {
+    case 'DRAFT':
+      return 'Open';
+    case 'APPROVED':
+      return 'Closed';
+    case 'FINALIZED':
+      return 'Sent';
+    default:
+      return status;
+  }
+}
