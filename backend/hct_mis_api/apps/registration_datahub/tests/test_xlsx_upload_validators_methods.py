@@ -1,5 +1,5 @@
 import operator
-from unittest import TestCase
+from unittest import TestCase, mock
 
 import openpyxl
 
@@ -266,7 +266,7 @@ class TestXLSXValidatorsMethods(TestCase):
         invalid_cols_file_path = f"{self.FILES_DIR_PATH}/invalid_cols.xlsx"
         with open(invalid_cols_file_path, "rb") as file:
             errors = UploadXLSXValidator.validate_file_with_template(file=file)
-            errors.sort(key=operator.itemgetter('row_number', 'header'))
+            errors.sort(key=operator.itemgetter("row_number", "header"))
             expected = [
                 {
                     "row_number": 1,
@@ -285,3 +285,34 @@ class TestXLSXValidatorsMethods(TestCase):
                 },
             ]
             self.assertEqual(errors, expected)
+
+    def test_required_validator(self):
+        with mock.patch.dict(
+            "registration_datahub.validators.UploadXLSXValidator.ALL_FIELDS",
+            {"test": {"required": True}},
+            clear=True,
+        ):
+            result = UploadXLSXValidator.required_validator(
+                value="tak", header="test"
+            )
+            self.assertTrue(result)
+
+        with mock.patch.dict(
+            "registration_datahub.validators.UploadXLSXValidator.ALL_FIELDS",
+            {"test": {"required": True}},
+            clear=True,
+        ):
+            result = UploadXLSXValidator.required_validator(
+                value="", header="test"
+            )
+            self.assertFalse(result)
+
+        with mock.patch.dict(
+            "registration_datahub.validators.UploadXLSXValidator.ALL_FIELDS",
+            {"test": {"required": False}},
+            clear=True,
+        ):
+            result = UploadXLSXValidator.required_validator(
+                value="", header="test"
+            )
+            self.assertTrue(result)
