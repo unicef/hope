@@ -20,12 +20,12 @@ The information contained within this section should all be included within a si
 
 Below the card header will display two tabs:
 
-* Candidate List
-* Final List
+* **Programme Population** \(Suggested: Programme Population \)
+* **Target Population** \(Final List\)
 
-#### **Candidate List**
+#### **Programme Population**
 
-The candidate list will have the following details displayed:
+The Programme Population will have the following details displayed:
 
 * Table Columns:
   * **Household ID**
@@ -38,20 +38,20 @@ The candidate list will have the following details displayed:
 
 This table will display up to 10 rows upon default.
 
-#### Candidate List States
+#### Programme Population States
 
-The candidate list will have two states:
+The Programme Population will have two states:
 
-* Draft
-* Frozen
+* Open
+* Closed
 
-A candidate list will remain in the **Draft** State once the Target Population is first created until the user decides to freeze the list of results the chosen criteria has generated for the Target Population.
+A Programme Population will remain in the **Open** State once the Target Population is first created until the user decides to **Close** the list of results the chosen criteria has generated for the Target Population.
 
-Once the Target Population Candidate List is Frozen, it will remain in the **`Candidate List`** state until **`Finalized`** . **More on this here.**
+Once the Target Population Programme Population is Closed, it will remain in the **`Closed`** state until **`Sent`** . **More on this here.**
 
-#### Final List
+#### Target Population \(Final List\)
 
-The final list will have the following details displayed:
+The Target Population \(final list\) will have the following details displayed:
 
 * Table Columns:
   * **Household ID**
@@ -62,9 +62,9 @@ The final list will have the following details displayed:
   * **Last Inspection**
   * **Programme**
 
-The Final List tab will not display any data until the Target Population has run against Corticon Rule Engine.
+The Target Population \(Final List\) tab will display the same data as the Programme Population until the Target Population has run against Corticon Rule Engine or additional Target Criteria are added to the Target Population.
 
-The Final List information will come from the same data table as the Candidate List, however, it will display unique information and include new details sent from Corticon.
+The Target Population \(Final List\) information will come from the same data table as the Programme Population, minus any households that meet the new criteria added in the tab. The table will also display unique information and include new details sent from Corticon, including vulnerability score and the rules that were applied from the system. 
 
 
 
@@ -92,38 +92,38 @@ With time, the results of a Target Population can change, when new data is enter
 Clicking on this indicator, will enable the Target Population to be [**edited**](manage-target-populations-edit-copy-delete.md#editing-criteria).
 
 {% hint style="danger" %}
-Information in the **Results** card sections will change according to which tab is selected at the top of the screen \(**Candidate List** vs. **Final List**\). These details are still TBD.
+Information in the **Results** card sections will change according to which tab is selected at the top of the screen \(**Programme Population** vs. **Target Population\(Final List\)**\). These details are still TBD.
 {% endhint %}
 
 
 
-### Freeze Candidate List
+### Close Programme Population
 
-On the top-right corner of the Target Population Details screen there will be a button titled: **`Freeze`**. When a user clicks this button, a modal will appear, warning the user if they wish to proceed.
+On the top-right corner of the Target Population Details screen there will be a button titled: **`Close`**. When a user clicks this button, a modal will appear, warning the user if they wish to proceed.
 
 If the user decides to proceed, they will be able to select from a dropdown menu, any **`Active`**Programmes they wish to associate to this Target Population.
 
-Selecting the **`Freeze`** option from the modal to continue will send the Target Population into the **`Candidate List`** \(state from the previous **`Draft`** state\). This will lock in the criteria for this target population and prevent any further changes being made with the selection of beneficiaries \(households\) identified in this target population. 
+Selecting the **`Close`** option from the modal to continue will send the Target Population into the **`Programme Population`** \(state from the previous **`Open`** state\). This will lock in the criteria for this Programme population and prevent any further changes being made with the selection of beneficiaries \(households\) identified in this target population. 
 
-Furthermore, the "Candidate List" tab will change from the **`Draft`** state to the **`Freeze`** state, therefore the text "Draft" will be removed from the label on the UI \(_This is in regards to the label in the tab adjacent to the Final List Tab.\)_
+Furthermore, the "Programme Population" tab will change from the **`Open`** state to the **`Closed`** state.
 
-Once the Target Population is in the **`Candidate List`** state, the user will now be able to run the target population in Corticon to generate additional details such as Vulnerability Scores, and more. 
+Once the Programme Population is in the **`Closed`** state, the user will now be able to run the Target Population in Corticon to generate additional details such as Vulnerability Scores, and more. 
 
 {% hint style="danger" %}
 **NOTE:** How Corticon will connect with HCT-MIS system and what details it will provide are still to be determined. 
 {% endhint %}
 
-Lastly, the button on the top-right, will change from **`Freeze`** to **`Finalize`** . See the next section for details regarding the Finalize process.
+Lastly, the button on the top-right, will change from **`Close`** to **`Send to CashAssist`** . See the next section for details regarding the Send to CashAssist process.
 
-### Finalize
+### Send to Cash Assist
 
-When the user is ready to complete the Target Population and send the results to Cash Assist, they will need to first Finalize the Target Population. To do so, the user will need to click on the button `Finalize` on the top-right of the UI and confirm their intentions through a modal popup.
+When the user is ready to complete the Target Population and send the results to Cash Assist, they will need to first Close the Programme Population. When all the criteria are set, and the user is completed adding their criteria to the Target Population, they can send the final results to Cash Assist. To do so, the user will need to click on the button `Send to CashAssist` on the top-right of the UI and confirm their intentions through a modal popup.
 
-#### Finalize Modal
+#### Send to CashAssist Modal
 
-The finalize Modal that pops up will list the total number of households being pushed to Cash Assist. The user will have the option to `Finalize` or `Cancel` . 
+The Send to CashAssist Modal that pops up will list the total number of households being pushed to Cash Assist. The user will have the option to **`Send`** or `Cancel` . 
 
-The **`Finalize`** button will lock in the criteria for this target population and push the resulting Households to CashAssist.
+The **`Send`** button will lock in the criteria for this target population and push the resulting Households to CashAssist.
 
 This is the last step in the process for creating and sharing a Target Population with Cash Assist. 
 
@@ -131,9 +131,9 @@ This is the last step in the process for creating and sharing a Target Populatio
 
 ### Open In CashAssist
 
-Users will now have the ability to quickly navigate to the Target Population in CashAssist by simply clicking on the **`Open in CashAssist`** button on a Finalized Target Population details screen. This button will be located in the same position the **`Freeze`** and **`Finalize`** button were previously; the top-right of the screen. 
+Users will now have the ability to quickly navigate to the Target Population in CashAssist by simply clicking on the **`Open in CashAssist`** button on a `Sent` Target Population details screen. This button will be located in the same position the `Close` and `Send to CashAssist` button were previously; the top-right of the screen. 
 
-Further details regarding the  **`Finalized`** Target Population can be viewed in **CashAssist**. Clicking on the **`Open in CashAssist`** button will open the Target Population in Cash Assist in a new browser tab. 
+Further details regarding the  `Sent` Target Populations can be viewed in **CashAssist**. Clicking on the **`Open in CashAssist`** button will open the Target Population in Cash Assist in a new browser tab. 
 
 ## User Permissions
 

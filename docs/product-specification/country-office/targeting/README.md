@@ -55,14 +55,7 @@ This table will display up to 10 rows upon default.
 
 Target Populations go through the following states:
 
-* Draft
-* Candidate List
-* Finalized
-
-### 
-
-### ~~Risk:~~
-
-* ~~Rule Engine Criteria for read privileges - Columns vs JSON configuration~~
-  * ~~Corticon Rules Engine - Commercial Product to investigate further.~~ 
+* **Open** - Population segment is accepting new criteria.
+* **Closed** - Population Segment is set, but can accept new criteria to generate final list. 
+* **Sent** - Final list is set, Target Population is frozen and available to share in Cash Assist.
 
