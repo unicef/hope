@@ -58,7 +58,9 @@ description: HCT MIS related glossary and terms
     </tr>
     <tr>
       <td style="text-align:left">Core Attribute</td>
-      <td style="text-align:left"></td>
+      <td style="text-align:left">Common in the business of any Program. Commonly used attributes for Households
+        / Individuals that change with the Country&apos;s needs - <em><b>stored within the HCT System Database. </b></em>
+      </td>
     </tr>
     <tr>
       <td style="text-align:left">Country</td>
@@ -110,7 +112,9 @@ description: HCT MIS related glossary and terms
     <tr>
       <td style="text-align:left">Flexible Attributes</td>
       <td style="text-align:left">Non-Core attributes associated with a household / beneficiary. Also referred
-        to as &quot;Flex Fields&quot;.</td>
+        to as &quot;Flex Fields&quot;. These fields are less common across business
+        and have a likelihood to change. <em><b>Stored in the JSON blob. </b></em>
+      </td>
     </tr>
     <tr>
       <td style="text-align:left">FSP</td>

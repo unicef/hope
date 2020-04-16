@@ -66,7 +66,7 @@ stages:
               install: true
               force: true
               waitForExecution: false
-              timeout: 600s
+              arguments: "--timeout 600s"
               overrideValues: "
                 podDB=true,\
                 backend.staticStorage.secretName=$(staticStorageSecretName),\
@@ -89,6 +89,7 @@ stages:
                 backend.secret.AZURE_CLIENT_ID=$(AZURE_CLIENT_ID),\
                 backend.secret.AZURE_CLIENT_SECRET=$(AZURE_CLIENT_SECRET),\
                 backend.secret.AZURE_TENANT_KEY=$(AZURE_TENANT_KEY),\
+                backend.secret.SENTRY_DSN=$(SENTRY_DSN),\
                 backend.secret.POSTGRES_REGISTRATION_DATAHUB_DB=$(REGISTRATION_DATAHUB_POSTGRES_DB),\
                 backend.secret.POSTGRES_REGISTRATION_DATAHUB_USER=$(REGISTRATION_DATAHUB_POSTGRES_USER),\
                 backend.secret.POSTGRES_REGISTRATION_DATAHUB_PASSWORD=$(REGISTRATION_DATAHUB_POSTGRES_PASSWORD),\

@@ -35,6 +35,7 @@ class HouseholdFactory(factory.DjangoModelFactory):
     )
     # set it manually
     head_of_household = None
+    flex_fields = {}
 
 
 class IndividualFactory(factory.DjangoModelFactory):
