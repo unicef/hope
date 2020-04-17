@@ -6,8 +6,8 @@ import { PageHeader } from '../../../components/PageHeader';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { RegistrationDataImport } from '../import/RegistrationDataImport';
 import { RegistrationDataImportTable } from '../tables/RegistrationdDataImportTable';
-import { RegistrationFilters } from './RegistrationFilter';
 import { useDebounce } from '../../../hooks/useDebounce';
+import { RegistrationFilters } from './RegistrationFilter';
 
 const PageContainer = styled.div`
   display: flex;
