@@ -1,17 +1,14 @@
 import React from 'react';
 import styled from 'styled-components';
-import { InputAdornment, MenuItem, Select } from '@material-ui/core';
+import { InputAdornment, MenuItem } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
 import FormControl from '@material-ui/core/FormControl';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import { DatePicker, KeyboardDatePicker } from '@material-ui/pickers';
-import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
+import { KeyboardDatePicker } from '@material-ui/pickers';
 import { useRegistrationChoicesQuery } from '../../../__generated__/graphql';
-import { UsersAutocomplete } from './UsersAutocomplete';
-import OutlinedInput from '../../../shared/OutlinedInput';
-import { AccountCircle } from '@material-ui/icons';
 import InputLabel from '../../../shared/InputLabel';
 import TextField from '../../../shared/TextField';
+import Select from '../../../shared/Select';
+import { UsersAutocomplete } from './UsersAutocomplete';
 
 const Container = styled.div`
   display: flex;
@@ -105,6 +102,7 @@ export function RegistrationFilters({
         <InputLabel>Status</InputLabel>
         <Select
           value={filter.status || ''}
+          variant='outlined'
           label='Status'
           onChange={(e) => handleFilterChange(e, 'status')}
         >
