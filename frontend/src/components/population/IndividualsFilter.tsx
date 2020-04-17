@@ -4,10 +4,8 @@ import SearchIcon from '@material-ui/icons/Search';
 import CakeIcon from '@material-ui/icons/Cake';
 import WcIcon from '@material-ui/icons/Wc';
 import { InputAdornment, MenuItem } from '@material-ui/core';
-import { clearValue } from '../../utils/utils';
-import InputLabel from '../../shared/InputLabel';
-import FlashOnIcon from '@material-ui/icons/FlashOn';
 import FormControl from '@material-ui/core/FormControl';
+import InputLabel from '../../shared/InputLabel';
 import TextField from '../../shared/TextField';
 import Select from '../../shared/Select';
 
@@ -50,6 +48,9 @@ const SearchTextField = styled(TextField)`
     min-width: 150px;
   }
 `;
+const StartInputAdornment = styled(InputAdornment)`
+  margin-right: 0px;
+`;
 
 interface IndividualsFilterProps {
   onFilterChange;
@@ -87,9 +88,9 @@ export function IndividualsFilter({
           label='Sex'
           InputProps={{
             startAdornment: (
-              <InputAdornment position='start' style={{ marginRight: 0 }}>
+              <StartInputAdornment position='start'>
                 <WcIcon />
-              </InputAdornment>
+              </StartInputAdornment>
             ),
           }}
         >
