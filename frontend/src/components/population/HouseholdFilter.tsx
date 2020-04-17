@@ -3,12 +3,11 @@ import styled from 'styled-components';
 import { InputAdornment, MenuItem } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
 import GroupIcon from '@material-ui/icons/Group';
-import { ProgramNode } from '../../__generated__/graphql';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
-import { clearValue } from '../../utils/utils';
+import FormControl from '@material-ui/core/FormControl';
+import { ProgramNode } from '../../__generated__/graphql';
 import TextField from '../../shared/TextField';
 import InputLabel from '../../shared/InputLabel';
-import FormControl from '@material-ui/core/FormControl';
 import Select from '../../shared/Select';
 
 const Container = styled.div`
@@ -51,6 +50,10 @@ const SearchTextField = styled(TextField)`
   }
 `;
 
+const StartInputAdornment = styled(InputAdornment)`
+  margin-right: 0px;
+`;
+
 interface HouseholdFiltersProps {
   onFilterChange;
   filter;
@@ -88,9 +91,9 @@ export function HouseholdFilters({
           label='Programme'
           InputProps={{
             startAdornment: (
-              <InputAdornment position='start' style={{ marginRight: 0 }}>
+              <StartInputAdornment position='start'>
                 <FlashOnIcon />
-              </InputAdornment>
+              </StartInputAdornment>
             ),
           }}
         >
