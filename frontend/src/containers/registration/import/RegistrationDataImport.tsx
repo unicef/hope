@@ -20,6 +20,7 @@ import { useDropzone } from 'react-dropzone';
 import { Field, Form, Formik } from 'formik';
 import get from 'lodash/get';
 import {
+  UploadImportDataXlsxFileMutation,
   useCreateRegistrationDataImportMutation,
   useUploadImportDataXlsxFileMutation,
 } from '../../../__generated__/graphql';
@@ -67,6 +68,9 @@ const DropzoneContainer = styled.div`
 
   ${({ disabled }) => (disabled ? 'filter: grayscale(100%);' : '')}
 `;
+const Error = styled.div`
+  color: ${({ theme }) => theme.palette.error.dark};
+`;
 
 function DropzoneField({ onChange, loading }) {
   const onDrop = useCallback((acceptedFiles) => {
@@ -106,6 +110,10 @@ export function RegistrationDataImport(): React.ReactElement {
   const [createRegistrationMutate] = useCreateRegistrationDataImportMutation();
   const [importType, setImportType] = useState();
   const { t } = useTranslation();
+  const errors: UploadImportDataXlsxFileMutation['uploadImportDataXlsxFile']['errors'] = get(
+    uploadData,
+    'uploadImportDataXlsxFile.errors',
+  );
   let counters = null;
   if (get(uploadData, 'uploadImportDataXlsxFile.importData')) {
     counters = (
@@ -146,6 +154,15 @@ export function RegistrationDataImport(): React.ReactElement {
             });
           }}
         />
+        <div>
+          {errors
+            ? errors.map((item) => (
+                <Error>
+                  <strong>Row: {item.rowNumber}</strong> {item.message}
+                </Error>
+              ))
+            : null}
+        </div>
       </>
     );
   }

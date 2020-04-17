@@ -627,6 +627,7 @@ type ImportedHouseholdNode implements Node {
   registrationDataImportId: RegistrationDataImportDatahubNode!
   headOfHousehold: ImportedIndividualNode
   registrationDate: Date
+  flexFields: JSONString!
   individuals(before: String, after: String, first: Int, last: Int): ImportedIndividualNodeConnection!
 }
 
@@ -875,6 +876,7 @@ type ImportedIndividualNode implements Node {
   registrationDataImportId: RegistrationDataImportDatahubNode!
   workStatus: ImportedIndividualWorkStatus!
   disability: ImportedIndividualDisability!
+  flexFields: JSONString!
   representedHouseholds(before: String, after: String, first: Int, last: Int): ImportedHouseholdNodeConnection!
   headingHousehold: ImportedHouseholdNode
 }
@@ -1180,6 +1182,8 @@ enum IndividualWorkStatus {
 
 scalar JSONLazyString
 
+scalar JSONString
+
 type LabelNode {
   language: String
   label: String
@@ -1429,6 +1433,7 @@ type Query {
   goldenRecordByTargetingCriteria(targetingCriteria: TargetingCriteriaObjectType!, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection
   candidateHouseholdsListByTargetingCriteria(targetPopulation: ID!, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection
   finalHouseholdsListByTargetingCriteria(targetPopulation: ID!, targetingCriteria: TargetingCriteriaObjectType, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection
+  targetPopulationStatusChoices: [ChoiceObject]
   household(id: ID!): HouseholdNode
   allHouseholds(before: String, after: String, first: Int, last: Int, businessArea: String, nationality: String, nationality_Icontains: String, address: String, address_Icontains: String, representative_FullName: String, representative_FullName_Icontains: String, headOfHousehold_FullName: String, headOfHousehold_FullName_Icontains: String, householdCaId: String, familySize_Range: Int, familySize_Lte: Int, familySize_Gte: Int, targetPopulations: [ID], programs: [ID], familySize: String, orderBy: String): HouseholdNodeConnection
   individual(id: ID!): IndividualNode
@@ -1518,6 +1523,7 @@ type TargetPopulationNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
+  isRemoved: Boolean!
   name: String!
   createdBy: UserNode
   status: TargetPopulationStatus!
