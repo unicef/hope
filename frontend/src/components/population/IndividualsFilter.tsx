@@ -3,8 +3,13 @@ import styled from 'styled-components';
 import SearchIcon from '@material-ui/icons/Search';
 import CakeIcon from '@material-ui/icons/Cake';
 import WcIcon from '@material-ui/icons/Wc';
-import { TextField, InputAdornment, Select, MenuItem } from '@material-ui/core';
+import { InputAdornment, MenuItem } from '@material-ui/core';
 import { clearValue } from '../../utils/utils';
+import InputLabel from '../../shared/InputLabel';
+import FlashOnIcon from '@material-ui/icons/FlashOn';
+import FormControl from '@material-ui/core/FormControl';
+import TextField from '../../shared/TextField';
+import Select from '../../shared/Select';
 
 const Container = styled.div`
   display: flex;
@@ -23,7 +28,6 @@ const Container = styled.div`
     margin: 5px;
   }
 `;
-
 const TextContainer = styled(TextField)`
   input[type='number']::-webkit-inner-spin-button,
   input[type='number']::-webkit-outer-spin-button {
@@ -32,47 +36,18 @@ const TextContainer = styled(TextField)`
   input[type='number'] {
     -moz-appearance: textfield;
   }
-  .MuiFilledInput-root {
-    border-radius: 4px;
-  }
+`;
+
+const StyledFormControl = styled(FormControl)`
+  width: 232px;
+  color: #5f6368;
+  border-bottom: 0;
+`;
+
+const SearchTextField = styled(TextField)`
+  flex: 1;
   && {
-    width: 232px;
-    color: #5f6368;
-    border-bottom: 0;
-  }
-  .MuiFilledInput-underline:before {
-    border-bottom: 0;
-  }
-  .MuiFilledInput-underline:before {
-    border-bottom: 0;
-  }
-  .MuiFilledInput-underline:hover {
-    border-bottom: 0;
-    border-radius: 4px;
-  }
-  .MuiFilledInput-underline:hover::before {
-    border-bottom: 0;
-  }
-  .MuiFilledInput-underline::before {
-    border-bottom: 0;
-  }
-  .MuiFilledInput-underline::after {
-    border-bottom: 0;
-  }
-  .MuiFilledInput-underline::after:hover {
-    border-bottom: 0;
-  }
-  .MuiSvgIcon-root {
-    color: #5f6368;
-  }
-  .MuiFilledInput-input {
-    padding: 10px 15px 10px;
-  }
-  .MuiFilledInput-input[value='none'] {
-    color: red;
-  }
-  .MuiInputAdornment-filled.MuiInputAdornment-positionStart:not(.MuiInputAdornment-hiddenLabel) {
-    margin: 0px;
+    min-width: 150px;
   }
 `;
 
@@ -88,9 +63,10 @@ export function IndividualsFilter({
     onFilterChange({ ...filter, [name]: e.target.value });
   return (
     <Container>
-      <TextContainer
-        placeholder='Search'
-        variant='filled'
+      <SearchTextField
+        label='Search'
+        variant='outlined'
+        margin='dense'
         value={filter.text}
         onChange={(e) => handleFilterChange(e, 'text')}
         InputProps={{
@@ -101,27 +77,34 @@ export function IndividualsFilter({
           ),
         }}
       />
+      <StyledFormControl variant='outlined' margin='dense'>
+        <InputLabel>Sex</InputLabel>
+        <Select
+          /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
+          // @ts-ignore
+          onChange={(e) => handleFilterChange(e, 'sex')}
+          variant='outlined'
+          label='Sex'
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position='start' style={{ marginRight: 0 }}>
+                <WcIcon />
+              </InputAdornment>
+            ),
+          }}
+        >
+          <MenuItem value=''>
+            <em>None</em>
+          </MenuItem>
+          <MenuItem value='MALE'>Male</MenuItem>
+          <MenuItem value='FEMALE'>Female</MenuItem>
+          <MenuItem value='OTHER'>Other</MenuItem>
+        </Select>
+      </StyledFormControl>
       <TextContainer
-        select
-        defaultValue={filter.sex}
-        variant='filled'
-        onChange={(e) => handleFilterChange(e, 'sex')}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position='start'>
-              <WcIcon />
-            </InputAdornment>
-          ),
-        }}
-      >
-        <MenuItem value='none'>Sex</MenuItem>
-        <MenuItem value='MALE'>Male</MenuItem>
-        <MenuItem value='FEMALE'>Female</MenuItem>
-        <MenuItem value='OTHER'>Other</MenuItem>
-      </TextContainer>
-      <TextContainer
-        variant='filled'
-        placeholder='Age'
+        variant='outlined'
+        margin='dense'
+        label='Age'
         value={filter.age.min}
         onChange={(e) =>
           onFilterChange({
@@ -140,8 +123,9 @@ export function IndividualsFilter({
       />
       to
       <TextContainer
-        variant='filled'
-        placeholder='Age'
+        variant='outlined'
+        margin='dense'
+        label='Age'
         value={filter.age.max}
         onChange={(e) =>
           onFilterChange({
