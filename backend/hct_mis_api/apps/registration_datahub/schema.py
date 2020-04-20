@@ -30,32 +30,32 @@ class ImportedHouseholdFilter(FilterSet):
     class Meta:
         model = ImportedHousehold
         fields = {
-            "nationality": ["exact", "icontains"],
+            "country_origin": ["exact", "icontains"],
             "address": ["exact", "icontains"],
-            "representative__full_name": ["exact", "icontains"],
-            "head_of_household__full_name": ["exact", "icontains"],
+            # "representative__full_name": ["exact", "icontains"],
+            # "head_of_household__full_name": ["exact", "icontains"],
             "household_ca_id": ["exact"],
-            "family_size": ["range", "lte", "gte"],
+            "size": ["range", "lte", "gte"],
         }
 
     order_by = OrderingFilter(
         fields=(
             "id",
             "household_ca_id",
-            "head_of_household__full_name",
+            # "head_of_household__full_name",
             "residence_status",
-            "nationality",
-            "family_size",
-            "location",
+            "country_origin",
+            "size",
+            # "location",
             "registration_date",
             "representative__full_name",
-            "registration_data_import_id__name",
+            "registration_data_import__name",
         )
     )
 
     def filter_rdi_id(self, queryset, model_field, value):
         return queryset.filter(
-            registration_data_import_id__hct_id=decode_id_string(value)
+            registration_data_import__hct_id=decode_id_string(value)
         )
 
 
@@ -94,7 +94,7 @@ class ImportedIndividualFilter(FilterSet):
 
     def filter_rdi_id(self, queryset, model_field, value):
         return queryset.filter(
-            registration_data_import_id__hct_id=decode_id_string(value)
+            registration_data_import__hct_id=decode_id_string(value)
         )
 
     def filter_household(self, queryset, model_field, value):

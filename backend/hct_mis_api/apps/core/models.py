@@ -1,13 +1,9 @@
-import operator
 from decimal import Decimal
-from typing import List
 
 import mptt
 import pycountry
 from auditlog.models import AuditlogHistoryField
 from auditlog.registry import auditlog
-from core.coutries import COUNTRY_NAME_TO_ALPHA2_CODE
-from core.utils import unique_slugify, age_to_dob_query
 from django.contrib.gis.db.models import MultiPolygonField, PointField
 from django.contrib.postgres.fields import JSONField
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -18,9 +14,10 @@ from model_utils.models import SoftDeletableModel
 from mptt.fields import TreeForeignKey
 from mptt.managers import TreeManager
 from mptt.models import MPTTModel
+
+from core.coutries import COUNTRY_NAME_TO_ALPHA2_CODE
+from core.utils import unique_slugify
 from utils.models import TimeStampedUUIDModel, SoftDeletionTreeModel
-
-
 
 
 class Country(TimeStampedUUIDModel):
@@ -360,7 +357,6 @@ class FlexibleAttributeChoice(SoftDeletableModel, TimeStampedUUIDModel):
 
     def __str__(self):
         return f"list name: {self.list_name}, name: {self.name}"
-
 
 
 mptt.register(Location, order_insertion_by=["title"])
