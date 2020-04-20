@@ -22,6 +22,7 @@ The goal of Iteration Five is to integrate KoBo Form / Projects and project data
 
 ##  **Technical Deliverables**
 
+* Complete development of any further Core Fields changes from Iteration 4.
 * CO users to be able to view flex fields somewhere in the interface.
 * POC of Kobo DevOps and documentation refinements, API usage needed etc. Technical support from Kobo on DevOps, database structure, API related help may be required.
 * -------------------------------------
