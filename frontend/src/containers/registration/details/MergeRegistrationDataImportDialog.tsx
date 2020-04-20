@@ -6,11 +6,13 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  TextField,
   Typography,
 } from '@material-ui/core';
+import MergeTypeRoundedIcon from '@material-ui/icons/MergeTypeRounded';
 import {
   RegistrationDetailedFragment,
-  useUnapproveRdiMutation,
+  useMergeRdiMutation,
 } from '../../../__generated__/graphql';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 
@@ -31,30 +33,36 @@ const DialogDescription = styled.div`
   color: rgba(0, 0, 0, 0.54);
 `;
 
-interface UnapproveRegistrationDataImportDialogProps {
+interface MergeRegistrationDataImportDialogProps {
   registration: RegistrationDetailedFragment;
 }
 
-export function UnapproveRegistrationDataImportDialog({
+export function MergeRegistrationDataImportDialog({
   registration,
-}: UnapproveRegistrationDataImportDialogProps): React.ReactElement {
+}: MergeRegistrationDataImportDialogProps): React.ReactElement {
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const [mutate] = useUnapproveRdiMutation({
+  const [name, setName] = useState();
+  const [mutate] = useMergeRdiMutation({
     variables: { id: registration.id },
   });
-  const approve = async (): Promise<void> => {
+  const merge = async (): Promise<void> => {
     const { errors } = await mutate();
     if (errors) {
-      showMessage('Error while unapproving Registration Data Import');
+      showMessage('Error while merging Registration Data Import');
       return;
     }
-    showMessage('Registration Data Import Unapproved');
+    showMessage('Registration Data Import Merging started');
   };
   return (
     <span>
-      <Button color='primary' variant='outlined' onClick={() => setOpen(true)}>
-        Unapprove
+      <Button
+        startIcon={<MergeTypeRoundedIcon />}
+        color='primary'
+        variant='contained'
+        onClick={() => setOpen(true)}
+      >
+        Merge
       </Button>
       <Dialog
         open={open}
@@ -64,16 +72,27 @@ export function UnapproveRegistrationDataImportDialog({
       >
         <DialogTitleWrapper>
           <DialogTitle id='scroll-dialog-title'>
-            <Typography variant='h6'>
-              Unapprove Registration Data Import
-            </Typography>
+            <Typography variant='h6'>Approve Import</Typography>
           </DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogDescription>
-            Do you want to unapprove {registration.name} Registration Data
-            Import
+            <div>Are your sure you want to merge this data import?</div>
+            <div>
+              <strong>
+                {registration.numberOfHouseholds} households and{' '}
+                {registration.numberOfIndividuals} individuals will be merged.{' '}
+              </strong>
+              Do you want to proceed?
+            </div>
           </DialogDescription>
+          <TextField
+            label='Name Import'
+            placeholder='Name Import'
+            fullWidth
+            onChange={(e) => setName(e.target.value)}
+            value={name}
+          />
         </DialogContent>
         <DialogFooter>
           <DialogActions>
@@ -82,9 +101,10 @@ export function UnapproveRegistrationDataImportDialog({
               type='submit'
               color='primary'
               variant='contained'
-              onClick={approve}
+              onClick={merge}
+              disabled={registration.name !== name}
             >
-              UNAPPROVE
+              MERGE
             </Button>
           </DialogActions>
         </DialogFooter>
