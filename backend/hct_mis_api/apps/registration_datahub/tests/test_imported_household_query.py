@@ -11,9 +11,8 @@ class TestImportedHouseholdQuery(APITestCase):
       allImportedHouseholds {
         edges {
           node {
-            familySize
-            nationality
-            householdCaId
+            size
+            countryOrigin
             address
           }
         }
@@ -25,9 +24,8 @@ class TestImportedHouseholdQuery(APITestCase):
       allImportedHouseholds(familySize: "{\\"min\\": 3, \\"max\\": 9}") {
         edges {
           node {
-            familySize
-            nationality
-            householdCaId
+            size
+            countryOrigin
             address
           }
         }
@@ -39,9 +37,8 @@ class TestImportedHouseholdQuery(APITestCase):
       allImportedHouseholds(familySize: "{\\"min\\": 3}") {
         edges {
           node {
-            familySize
-            nationality
-            householdCaId
+            size
+            countryOrigin
             address
           }
         }
@@ -53,9 +50,8 @@ class TestImportedHouseholdQuery(APITestCase):
       allImportedHouseholds(familySize: "{\\"max\\": 9}") {
         edges {
           node {
-            familySize
-            nationality
-            householdCaId
+            size
+            countryOrigin
             address
           }
         }
@@ -65,9 +61,8 @@ class TestImportedHouseholdQuery(APITestCase):
     IMPORTED_HOUSEHOLD_QUERY = """
     query ImportedHousehold($id: ID!) {
       importedHousehold(id: $id) {
-        familySize
-        nationality
-        householdCaId
+        size
+        countryOrigin
         address
       }
     }
@@ -76,15 +71,14 @@ class TestImportedHouseholdQuery(APITestCase):
     def setUp(self):
         super().setUp()
         self.user = UserFactory.create()
-        family_sizes_list = (2, 4, 5, 1, 3, 11, 14)
+        sizes_list = (2, 4, 5, 1, 3, 11, 14)
         self.households = [
             ImportedHouseholdFactory(
-                family_size=family_size,
+                size=size,
                 address="Lorem Ipsum",
-                nationality="PL",
-                household_ca_id="123-123-123",
+                country_origin="PL",
             )
-            for family_size in family_sizes_list
+            for size in sizes_list
         ]
 
     def test_imported_household_query_all(self):

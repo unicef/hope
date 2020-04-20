@@ -115,12 +115,12 @@ class Command(BaseCommand):
 
                 household = HouseholdFactory(
                     location=random.choice(locations),
-                    registration_data_import_id=registration_data_import,
+                    registration_data_import=registration_data_import,
                 )
                 individuals = IndividualFactory.create_batch(
                     household.family_size,
                     household=household,
-                    registration_data_import_id=registration_data_import,
+                    registration_data_import=registration_data_import,
                 )
                 household.head_of_household = individuals[0]
                 household.representative = individuals[0]
@@ -175,12 +175,12 @@ class Command(BaseCommand):
         for data_import in data_imports_dth:
             for _ in range(50):
                 imported_household = ImportedHouseholdFactory(
-                    registration_data_import_id=data_import,
+                    registration_data_import=data_import,
                 )
                 imported_individuals = ImportedIndividualFactory.create_batch(
                     imported_household.family_size,
                     household=imported_household,
-                    registration_data_import_id=data_import,
+                    registration_data_import=data_import,
                 )
                 imported_household.head_of_household = imported_individuals[0]
                 imported_household.representative = imported_individuals[0]

@@ -99,10 +99,10 @@ class MergeRegistrationDataImportMutation(BaseValidator, graphene.Mutation):
         with transaction.atomic():
             # move individuals and households to hct db
             imported_households = ImportedHousehold.objects.filter(
-                registration_data_import_id=obj_hub,
+                registration_data_import=obj_hub,
             )
             imported_individuals = ImportedIndividual.objects.filter(
-                registration_data_import_id=obj_hub,
+                registration_data_import=obj_hub,
             )
 
             imported_households_as_values = imported_households.values(
