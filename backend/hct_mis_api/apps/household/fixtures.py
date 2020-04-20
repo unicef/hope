@@ -7,7 +7,8 @@ from household.const import NATIONALITIES
 from household.models import (
     Household,
     EntitlementCard,
-    Individual,
+    Individual, SEX_CHOICE, MARTIAL_STATUS_CHOICE, IDENTIFICATION_TYPE_CHOICE,
+    YES_NO_CHOICE, DISABILITY_CHOICE,
 )
 from registration_data.fixtures import RegistrationDataImportFactory
 
@@ -21,20 +22,17 @@ class HouseholdFactory(factory.DjangoModelFactory):
     residence_status = factory.fuzzy.FuzzyChoice(
         Household.RESIDENCE_STATUS_CHOICE, getter=lambda c: c[0],
     )
-    nationality = factory.fuzzy.FuzzyChoice(
+    country_origin = factory.fuzzy.FuzzyChoice(
         NATIONALITIES, getter=lambda c: c[0],
     )
-    family_size = factory.fuzzy.FuzzyInteger(3, 8)
+    size = factory.fuzzy.FuzzyInteger(3, 8)
     address = factory.Faker("address")
-    location = factory.SubFactory(LocationFactory)
-    registration_data_import_id = factory.SubFactory(
+    registration_data_import = factory.SubFactory(
         RegistrationDataImportFactory,
     )
     registration_date = factory.Faker(
         "date_this_year", before_today=True, after_today=False
     )
-    # set it manually
-    head_of_household = None
     flex_fields = {}
 
 
@@ -44,43 +42,42 @@ class IndividualFactory(factory.DjangoModelFactory):
 
     individual_ca_id = factory.Faker("uuid4")
     full_name = factory.LazyAttribute(
-        lambda o: f"{o.first_name} {o.middle_name} {o.last_name}"
+        lambda o: f"{o.given_name} {o.middle_name} {o.family_name}"
     )
-    first_name = factory.Faker("first_name")
+    given_name = factory.Faker("first_name")
     middle_name = factory.Faker("first_name")
-    last_name = factory.Faker("last_name")
+    family_name = factory.Faker("last_name")
     years_in_school = factory.fuzzy.FuzzyInteger(1, 8)
     sex = factory.fuzzy.FuzzyChoice(
-        Individual.SEX_CHOICE, getter=lambda c: c[0],
+        SEX_CHOICE, getter=lambda c: c[0],
     )
-    dob = factory.Faker(
+    birth_date = factory.Faker(
         "date_of_birth", tzinfo=utc, minimum_age=16, maximum_age=90
     )
-    estimated_dob = None
-    nationality = factory.fuzzy.FuzzyChoice(
+    estimated_birth_date = None
+    country_origin = factory.fuzzy.FuzzyChoice(
         NATIONALITIES, getter=lambda c: c[0],
     )
     martial_status = factory.fuzzy.FuzzyChoice(
-        Individual.MARTIAL_STATUS_CHOICE, getter=lambda c: c[0],
+        MARTIAL_STATUS_CHOICE, getter=lambda c: c[0],
     )
-    phone_number = factory.Faker("phone_number")
-    phone_number_alternative = ""
+    phone_no = factory.Faker("phone_number")
+    phone_no_alternative = ""
     identification_type = factory.fuzzy.FuzzyChoice(
-        Individual.IDENTIFICATION_TYPE_CHOICE, getter=lambda c: c[0],
+        IDENTIFICATION_TYPE_CHOICE, getter=lambda c: c[0],
     )
-    identification_number = factory.Faker("uuid4")
     household = factory.SubFactory(HouseholdFactory)
-    registration_data_import_id = factory.SubFactory(
+    registration_data_import = factory.SubFactory(
         RegistrationDataImportFactory
     )
     work_status = factory.fuzzy.FuzzyChoice(
-        Individual.YES_NO_CHOICE, getter=lambda c: c[0],
+        YES_NO_CHOICE, getter=lambda c: c[0],
     )
     disability = factory.fuzzy.FuzzyChoice(
-        Individual.DISABILITY_CHOICE, getter=lambda c: c[0],
+        DISABILITY_CHOICE, getter=lambda c: c[0],
     )
     serious_illness = factory.fuzzy.FuzzyChoice(
-        Individual.YES_NO_CHOICE, getter=lambda c: c[0],
+        YES_NO_CHOICE, getter=lambda c: c[0],
     )
 
 

@@ -218,11 +218,11 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
 
         for _ in range(350):
             imported_household = ImportedHouseholdFactory(
-                registration_data_import_id=obj_datahub,
+                registration_data_import=obj_datahub,
             )
             individuals = ImportedIndividualFactory.create_batch(
                 imported_household.family_size,
-                registration_data_import_id=obj_datahub,
+                registration_data_import=obj_datahub,
             )
             imported_household.head_of_household = individuals[0]
             imported_household.representative = individuals[0]

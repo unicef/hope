@@ -13,9 +13,8 @@ class TestHouseholdQuery(APITestCase):
       allHouseholds(orderBy: "family_size") {
         edges {
           node {
-            familySize
-            nationality
-            householdCaId
+            size
+            countryOrigin
             address
           }
         }
@@ -30,9 +29,8 @@ class TestHouseholdQuery(APITestCase):
       ) {
         edges {
           node {
-            familySize
-            nationality
-            householdCaId
+            size
+            countryOrigin
             address
           }
         }
@@ -44,9 +42,8 @@ class TestHouseholdQuery(APITestCase):
       allHouseholds(orderBy: "family_size", familySize: "{\\"min\\": 3}") {
         edges {
           node {
-            familySize
-            nationality
-            householdCaId
+            size
+            countryOrigin
             address
           }
         }
@@ -58,9 +55,8 @@ class TestHouseholdQuery(APITestCase):
       allHouseholds(orderBy: "family_size", familySize: "{\\"max\\": 9}") {
         edges {
           node {
-            familySize
-            nationality
-            householdCaId
+            size
+            countryOrigin
             address
           }
         }
@@ -72,9 +68,8 @@ class TestHouseholdQuery(APITestCase):
       allHouseholds(programs: $programs) {
         edges {
           node {
-            familySize
-            nationality
-            householdCaId
+            size
+            countryOrigin
             address
             programs { 
               edges {
@@ -91,9 +86,8 @@ class TestHouseholdQuery(APITestCase):
     HOUSEHOLD_QUERY = """
     query Household($id: ID!) {
       household(id: $id) {
-        familySize
-        nationality
-        householdCaId
+        size
+        countryOrigin
         address
       }
     }
@@ -114,9 +108,9 @@ class TestHouseholdQuery(APITestCase):
         self.households = []
         for index, family_size in enumerate(family_sizes_list):
             household = HouseholdFactory(
-                family_size=family_size,
+                size=family_size,
                 address="Lorem Ipsum",
-                nationality="PL",
+                country_origin="PL",
                 household_ca_id="123-123-123",
             )
             if index % 2:
