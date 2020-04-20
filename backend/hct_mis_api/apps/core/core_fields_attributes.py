@@ -1,7 +1,7 @@
 from functools import reduce
 
 from core.utils import age_to_dob_query
-from household.models import Household
+from household.models import RESIDENCE_STATUS_CHOICE
 
 TYPE_INTEGER = "INTEGER"
 TYPE_SELECT_ONE = "SELECT_ONE"
@@ -51,7 +51,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "residential status of household",
         "choices": [
             {"label": {"English(EN)": label}, "value": str(value),}
-            for value, label in Household.RESIDENCE_STATUS_CHOICE
+            for value, label in RESIDENCE_STATUS_CHOICE
         ],
         "associated_with": _HOUSEHOLD,
     },
