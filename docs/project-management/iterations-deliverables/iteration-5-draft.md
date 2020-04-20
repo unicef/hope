@@ -8,9 +8,10 @@ The goal of Iteration Five is to integrate KoBo Form / Projects and project data
 
 ##  **Architecture / Project Management Deliverables**
 
-* Sign Off the requirements and flows for Registration Data Import deduplication process to be implemented in later Iterations. 
-* Sign Off the requirements & designs for Payment Verification Section to be implemented in later Iterations.
-* Sign Off the requirements & designs for Grievances & Feedback Section to be implemented in later Iterations.
+* **Sign Off the requirements and flows for Registration Data Import deduplication process to be implemented in later Iterations.**
+* **Sign Off the requirements & designs for Payment Verification Section to be implemented in later Iterations.**
+* Sign Off the requirements and designs for CO users to be able to view flex fields somewhere in the interface.
+* _Sign Off the requirements & designs for Grievances & Feedback Section to be implemented in later Iterations._
 * -------------------------------------
 * Interface with core Kobo team on technical / testing details.
 * Execution on ~3 two-week sprints for the iteration deliverable, including necessary demos and scrum ceremonies.
@@ -33,7 +34,9 @@ The goal of Iteration Five is to integrate KoBo Form / Projects and project data
 
 ## **UX / UI Design Deliverables**
 
-* Design final prototype of 
+* **Design final prototype of Registration Data Import Enhancements \(Deduplication\)**
+* **Design final prototype of Payment Verification Tab**
+* _Design final prototype of Grievances & Feedback Tab_
 * Continued refinement of V 3.X mockups. Delivery of V.4.X of mockups to help understanding of elaboration efforts for remaining modules \(deduplication process, payment verification, grievances & feedback, dashboards, user management etc.\)
 * Demo / webinar for peer review with country offices \(if feasible\).
 
