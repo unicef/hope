@@ -1,5 +1,5 @@
 import graphene
-from django.db.models import Sum
+from django.db.models import Sum, Q
 from django_filters import (
     FilterSet,
     OrderingFilter,
@@ -12,21 +12,27 @@ from graphene_django.filter import DjangoFilterConnectionField
 
 from core.filters import AgeRangeFilter, IntegerRangeFilter
 from core.extended_connection import ExtendedConnection
+from core.schema import ChoiceObject
+from core.utils import to_choice_object
 from household.models import Household, Individual
 
 
 class HouseholdFilter(FilterSet):
     business_area = CharFilter(field_name="location__business_area__slug")
     family_size = IntegerRangeFilter(field_name="family_size")
+    search = CharFilter( method="search_filter")
 
     class Meta:
         model = Household
         fields = {
+            "search": [],
             "business_area": ["exact", "icontains"],
             "nationality": ["exact", "icontains"],
             "address": ["exact", "icontains"],
             "representative__full_name": ["exact", "icontains"],
             "head_of_household__full_name": ["exact", "icontains"],
+            "residence_status": ["exact"],
+            "location__title": ["exact"],
             "household_ca_id": ["exact"],
             "family_size": ["range", "lte", "gte"],
             "target_populations": ["exact"],
@@ -49,6 +55,15 @@ class HouseholdFilter(FilterSet):
             "registration_date",
         )
     )
+
+    def search_filter(self, qs, name, value):
+        values = value.split(" ")
+        q_obj = Q()
+        for value in values:
+            q_obj |= Q(head_of_household__first_name__icontains=value)
+            q_obj |= Q(head_of_household__last_name__icontains=value)
+            q_obj |= Q(id__icontains=value)
+        return qs.filter(q_obj)
 
 
 class IndividualFilter(FilterSet):
@@ -112,8 +127,12 @@ class Query(graphene.ObjectType):
     all_individuals = DjangoFilterConnectionField(
         IndividualNode, filterset_class=IndividualFilter,
     )
+    residence_status_choices = graphene.List(ChoiceObject)
 
     def resolve_all_households(self, info, **kwargs):
         return Household.objects.annotate(
             total_cash=Sum("payment_records__entitlement__delivered_quantity")
         ).order_by("created_at")
+
+    def resolve_residence_status_choices(self, info, **kwargs):
+        return to_choice_object(Household.RESIDENCE_STATUS_CHOICE)
