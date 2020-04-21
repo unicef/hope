@@ -8,6 +8,7 @@ from django.core.validators import (
     MaxLengthValidator,
 )
 from django.db import models
+from django_countries.fields import CountryField
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
 
@@ -33,12 +34,9 @@ class ImportedHousehold(TimeStampedUUIDModel):
     country_origin = models.CharField(max_length=255, choices=NATIONALITIES,)
     size = models.PositiveIntegerField()
     address = models.CharField(max_length=255, blank=True)
-    admin1 = models.CharField(
-        max_length=255, blank=True,
-    )
-    admin2 = models.CharField(
-        max_length=255, blank=True,
-    )
+    country = CountryField(blank=True)
+    admin1 = models.CharField(max_length=255, blank=True)
+    admin2 = models.CharField(max_length=255, blank=True)
     geopoint = PointField(blank=True, null=True)
     unhcr_id = models.CharField(max_length=255, blank=True)
     f_0_5_age_group = models.PositiveIntegerField(default=0)
@@ -67,7 +65,7 @@ class ImportedHousehold(TimeStampedUUIDModel):
     flex_fields = JSONField(default=dict)
 
     def __str__(self):
-        return f"Household CashAssist ID: {self.household_ca_id}"
+        return f"Household ID: {self.id}"
 
 
 class ImportedIndividual(TimeStampedUUIDModel):
