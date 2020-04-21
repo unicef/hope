@@ -1,4 +1,5 @@
 import factory.fuzzy
+from django.contrib.gis.geos import Point
 from pytz import utc
 
 from household.const import NATIONALITIES
@@ -32,11 +33,11 @@ class ImportedHouseholdFactory(factory.DjangoModelFactory):
     class Meta:
         model = ImportedHousehold
 
-    household_ca_id = factory.Faker("uuid4")
     consent = factory.django.ImageField(color="blue")
     residence_status = factory.fuzzy.FuzzyChoice(
         RESIDENCE_STATUS_CHOICE, getter=lambda c: c[0],
     )
+    country = factory.Faker("country_code", representation='alpha-2')
     country_origin = factory.fuzzy.FuzzyChoice(
         NATIONALITIES, getter=lambda c: c[0],
     )
@@ -48,6 +49,27 @@ class ImportedHouseholdFactory(factory.DjangoModelFactory):
     registration_date = factory.Faker(
         "date_this_year", before_today=True, after_today=False
     )
+    admin1 = ""
+    admin2 = ""
+    geopoint = factory.LazyAttribute(lambda o: Point(factory.Faker("latlng").generate()))
+    unhcr_id = factory.Faker("uuid4")
+    f_0_5_age_group = factory.fuzzy.FuzzyInteger(3, 8)
+    f_6_11_age_group = factory.fuzzy.FuzzyInteger(3, 8)
+    f_12_17_age_group = factory.fuzzy.FuzzyInteger(3, 8)
+    f_adults = factory.fuzzy.FuzzyInteger(3, 8)
+    f_pregnant = factory.fuzzy.FuzzyInteger(3, 8)
+    m_0_5_age_group = factory.fuzzy.FuzzyInteger(3, 8)
+    m_6_11_age_group = factory.fuzzy.FuzzyInteger(3, 8)
+    m_12_17_age_group = factory.fuzzy.FuzzyInteger(3, 8)
+    m_adults = factory.fuzzy.FuzzyInteger(3, 8)
+    f_0_5_disability = factory.fuzzy.FuzzyInteger(3, 8)
+    f_6_11_disability = factory.fuzzy.FuzzyInteger(3, 8)
+    f_12_17_disability = factory.fuzzy.FuzzyInteger(3, 8)
+    f_adults_disability = factory.fuzzy.FuzzyInteger(3, 8)
+    m_0_5_disability = factory.fuzzy.FuzzyInteger(3, 8)
+    m_6_11_disability = factory.fuzzy.FuzzyInteger(3, 8)
+    m_12_17_disability = factory.fuzzy.FuzzyInteger(3, 8)
+    m_adults_disability = factory.fuzzy.FuzzyInteger(3, 8)
 
 
 class ImportedIndividualFactory(factory.DjangoModelFactory):
