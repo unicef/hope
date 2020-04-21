@@ -26,7 +26,7 @@ from account.schema import UserObjectType
 from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES
 from core.extended_connection import ExtendedConnection
 from core.models import (
-    Location,
+    AdminArea,
     BusinessArea,
     FlexibleAttribute,
     FlexibleAttributeChoice,
@@ -88,9 +88,9 @@ class LogEntryObjectConnection(Connection):
         node = LogEntryObject
 
 
-class LocationNode(DjangoObjectType):
+class AdminAreaNode(DjangoObjectType):
     class Meta:
-        model = Location
+        model = AdminArea
         exclude_fields = ["geom", "point"]
         filter_fields = ["title"]
         interfaces = (relay.Node,)
@@ -235,8 +235,8 @@ def get_fields_attr_generators(flex_field):
 
 
 class Query(graphene.ObjectType):
-    location = relay.Node.Field(LocationNode)
-    all_locations = DjangoFilterConnectionField(LocationNode)
+    admin_area = relay.Node.Field(AdminAreaNode)
+    all_admin_areas = DjangoFilterConnectionField(AdminAreaNode)
     all_business_areas = DjangoFilterConnectionField(BusinessAreaNode)
     all_log_entries = ConnectionField(
         LogEntryObjectConnection, object_id=graphene.String(required=True),

@@ -2,7 +2,7 @@ from django.core.management import call_command
 
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
-from core.fixtures import LocationFactory
+from core.fixtures import AdminAreaFactory
 from core.models import BusinessArea
 from program.fixtures import ProgramFactory
 
@@ -22,7 +22,7 @@ class TestChangeProgramStatus(APITestCase):
         super().setUp()
         call_command("loadbusinessareas")
         self.user = UserFactory.create()
-        self.location = LocationFactory.create()
+        self.location = AdminAreaFactory.create()
 
     def test_draft_to_active(self):
         program = ProgramFactory.create(

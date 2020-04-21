@@ -3,7 +3,7 @@ from factory import fuzzy
 from faker import Faker
 
 from core.countries import COUNTRIES_ALPHA2_CODE, COUNTRIES_ALPHA2_CODE_DICT
-from core.models import Location, AdminAreaType
+from core.models import AdminArea, AdminAreaType
 
 COUNTRY_CODES_LIST = [x[0] for x in COUNTRIES_ALPHA2_CODE]
 COUNTRY_NAMES_LIST = [x[1] for x in COUNTRIES_ALPHA2_CODE]
@@ -24,7 +24,7 @@ class AdminAreaTypeFactory(factory.DjangoModelFactory):
     """
     Arguments:
         country {Country} -- Country ORM objects
-    Ex) GatewayTypeFactory(country=country1)
+    Ex) AdminAreaTypeFactory(country=country1)
     """
 
     class Meta:
@@ -42,7 +42,7 @@ class AdminAreaTypeFactory(factory.DjangoModelFactory):
     business_area = None
 
 
-class LocationFactory(factory.DjangoModelFactory):
+class AdminAreaFactory(factory.DjangoModelFactory):
     """
     Arguments:
         gateway {GatewayType} -- GatewayType ORM objects
@@ -51,7 +51,7 @@ class LocationFactory(factory.DjangoModelFactory):
     """
 
     class Meta:
-        model = Location
+        model = AdminArea
         django_get_or_create = (
             "title",
             "p_code",

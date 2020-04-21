@@ -2,7 +2,7 @@ import factory
 from factory import fuzzy
 from pytz import utc
 
-from core.fixtures import LocationFactory
+from core.fixtures import AdminAreaFactory
 from household.const import NATIONALITIES
 from household.models import (
     Household,
@@ -21,9 +21,8 @@ class HouseholdFactory(factory.DjangoModelFactory):
     residence_status = factory.fuzzy.FuzzyChoice(
         RESIDENCE_STATUS_CHOICE, getter=lambda c: c[0],
     )
-    country_origin = factory.fuzzy.FuzzyChoice(
-        NATIONALITIES, getter=lambda c: c[0],
-    )
+    country_origin = factory.Faker('country_code')
+    country = factory.Faker('country_code')
     size = factory.fuzzy.FuzzyInteger(3, 8)
     address = factory.Faker("address")
     registration_data_import = factory.SubFactory(
