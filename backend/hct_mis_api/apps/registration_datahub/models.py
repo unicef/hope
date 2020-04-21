@@ -89,7 +89,9 @@ class ImportedIndividual(TimeStampedUUIDModel):
     role = models.CharField(max_length=255, blank=True, choices=ROLE_CHOICE,)
     sex = models.CharField(max_length=255, choices=SEX_CHOICE,)
     birth_date = models.DateField()
-    estimated_birth_date = models.DateField(blank=True, null=True)
+    estimated_birth_date = models.CharField(
+        max_length=3, default="NO", choices=YES_NO_CHOICE, blank=True,
+    )
     martial_status = models.CharField(
         max_length=255, choices=MARTIAL_STATUS_CHOICE,
     )

@@ -16,19 +16,19 @@ from household.models import Household, Individual
 
 
 class HouseholdFilter(FilterSet):
-    business_area = CharFilter(field_name="location__business_area__slug")
-    family_size = IntegerRangeFilter(field_name="family_size")
+    # business_area = CharFilter(field_name="location__business_area__slug")
+    size = IntegerRangeFilter(field_name="size")
 
     class Meta:
         model = Household
         fields = {
-            "business_area": ["exact", "icontains"],
-            "nationality": ["exact", "icontains"],
+            # "business_area": ["exact", "icontains"],
+            "country_origin": ["exact", "icontains"],
             "address": ["exact", "icontains"],
-            "representative__full_name": ["exact", "icontains"],
-            "head_of_household__full_name": ["exact", "icontains"],
+            # "representative__full_name": ["exact", "icontains"],
+            # "head_of_household__full_name": ["exact", "icontains"],
             "household_ca_id": ["exact"],
-            "family_size": ["range", "lte", "gte"],
+            "size": ["range", "lte", "gte"],
             "target_populations": ["exact"],
             "programs": ["exact"],
         }
