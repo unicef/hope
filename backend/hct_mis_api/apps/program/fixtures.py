@@ -6,7 +6,7 @@ from factory import fuzzy
 from pytz import utc
 
 from account.fixtures import UserFactory
-from core.fixtures import LocationFactory
+from core.fixtures import AdminAreaFactory
 from program.models import Program, CashPlan
 from targeting.fixtures import TargetPopulationFactory
 
@@ -29,7 +29,7 @@ class ProgramFactory(factory.DjangoModelFactory):
         "sentence", nb_words=10, variable_nb_words=True, ext_word_list=None,
     )
     program_ca_id = factory.Faker("uuid4")
-    locations = factory.SubFactory(LocationFactory)
+    locations = factory.SubFactory(AdminAreaFactory)
     budget = factory.fuzzy.FuzzyDecimal(1000000.0, 900000000.0)
     frequency_of_payments = fuzzy.FuzzyChoice(
         Program.FREQUENCY_OF_PAYMENTS_CHOICE, getter=lambda c: c[0],
@@ -45,7 +45,7 @@ class ProgramFactory(factory.DjangoModelFactory):
     @factory.post_generation
     def locations(self, create, extracted, **kwargs):
         if not create:
-            self.locations.add(LocationFactory())
+            self.locations.add(AdminAreaFactory())
 
         if extracted:
             for location in extracted:
