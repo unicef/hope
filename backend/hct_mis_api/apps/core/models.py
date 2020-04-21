@@ -20,48 +20,6 @@ from core.utils import unique_slugify
 from utils.models import TimeStampedUUIDModel, SoftDeletionTreeModel
 
 
-class Country(TimeStampedUUIDModel):
-    """
-    Represents a country which has many offices and sections.
-    Taken from https://github.com/unicef/etools/blob/master/EquiTrack/users/models.py
-    on Sep. 14, 2017.
-    """
-
-    name = models.CharField(max_length=100)
-    country_short_code = models.CharField(max_length=10, null=True, blank=True)
-    long_name = models.CharField(max_length=255, null=True, blank=True)
-
-    class Meta:
-        ordering = ["name"]
-        verbose_name_plural = "Countries"
-
-    def __str__(self):
-        return self.name
-
-    @property
-    def details(self):
-        """
-        Tries to retrieve a usable country reference
-        :return: pycountry Country object or None
-        """
-        lookup = None
-
-        if not self.country_short_code:
-            lookup = {
-                "alpha_2": COUNTRY_NAME_TO_ALPHA2_CODE.get(self.name, None)
-            }
-        elif len(self.country_short_code) == 3:
-            lookup = {"alpha_3": self.country_short_code}
-        elif len(self.country_short_code) == 2:
-            lookup = {"alpha_2": self.country_short_code}
-
-        if lookup:
-            try:
-                return pycountry.countries.get(**lookup)
-            except KeyError:
-                pass
-
-
 class BusinessArea(TimeStampedUUIDModel):
     """
     BusinessArea (EPRP called Workspace, also synonym was
@@ -102,7 +60,7 @@ class BusinessArea(TimeStampedUUIDModel):
         return any([c.details for c in self.countries.all()])
 
 
-class GatewayType(TimeStampedUUIDModel):
+class AdminAreaType(TimeStampedUUIDModel):
     """
     Represents an Admin Type in location-related models.
     """
@@ -115,14 +73,17 @@ class GatewayType(TimeStampedUUIDModel):
         verbose_name=_("Admin Level")
     )
 
-    country = models.ForeignKey(
-        Country, related_name="gateway_types", on_delete=models.CASCADE
+    business_area = models.ForeignKey(
+        "BusinessArea",
+        on_delete=models.SET_NULL,
+        related_name="admin_area_types",
+        null=True,
     )
 
     class Meta:
         ordering = ["name"]
         verbose_name = "Location type"
-        unique_together = ("country", "admin_level")
+        unique_together = ("business_area", "admin_level")
 
     def __str__(self):
         return "{} - {}".format(self.country, self.name)
@@ -142,7 +103,7 @@ class Location(MPTTModel):
     """
     Location model define place where agents are working.
     The background of the location can be:
-    Country > Region > City > District/Point.
+    BussinesAreaa > State > Province > City > District/Point.
     Either a point or geospatial object.
     pcode should be unique.
     related models:
@@ -152,7 +113,7 @@ class Location(MPTTModel):
     """
 
     class Meta:
-        unique_together = ("title", "p_code")
+        unique_together = ("title", "post_code")
         ordering = ["title"]
 
     objects = LocationManager()
@@ -164,40 +125,7 @@ class Location(MPTTModel):
         related_name="locations",
         null=True,
     )
-    gateway = models.ForeignKey(
-        GatewayType,
-        verbose_name="Location Type",
-        related_name="locations",
-        on_delete=models.CASCADE,
-    )
-    carto_db_table = models.ForeignKey(
-        "core.CartoDBTable",
-        related_name="locations",
-        blank=True,
-        null=True,
-        on_delete=models.CASCADE,
-    )
-    latitude = models.DecimalField(
-        null=True,
-        blank=True,
-        max_digits=8,
-        decimal_places=5,
-        validators=[
-            MinValueValidator(Decimal(-90)),
-            MaxValueValidator(Decimal(90)),
-        ],
-    )
-    longitude = models.DecimalField(
-        null=True,
-        blank=True,
-        max_digits=8,
-        decimal_places=5,
-        validators=[
-            MinValueValidator(Decimal(-180)),
-            MaxValueValidator(Decimal(180)),
-        ],
-    )
-    p_code = models.CharField(
+    post_code = models.CharField(
         max_length=32, blank=True, null=True, verbose_name="Postal Code"
     )
     parent = TreeForeignKey(
@@ -209,6 +137,11 @@ class Location(MPTTModel):
         db_index=True,
         on_delete=models.CASCADE,
     )
+
+    admin_area_type = models.ForeignKey(
+        "AdminAreaType", on_delete=models.CASCADE, related_name='locations'
+    )
+
     geom = MultiPolygonField(null=True, blank=True)
     point = PointField(null=True, blank=True)
 
@@ -238,54 +171,6 @@ class Location(MPTTModel):
     @property
     def point_lat_long(self):
         return "Lat: {}, Long: {}".format(self.point.y, self.point.x)
-
-
-class CartoDBTable(MPTTModel):
-    """
-    Represents a table in CartoDB, it is used to imports locations
-    related models:
-        core.GatewayType: 'gateway'
-        core.Country: 'country'
-    """
-
-    class Meta:
-        verbose_name_plural = "CartoDB tables"
-
-    domain = models.CharField(max_length=254, verbose_name=_("Domain"))
-    table_name = models.CharField(max_length=254, verbose_name=_("Table Name"))
-    display_name = models.CharField(
-        max_length=254, default="", blank=True, verbose_name=_("Display Name")
-    )
-    location_type = models.ForeignKey(
-        GatewayType, verbose_name=_("Location Type"), on_delete=models.CASCADE,
-    )
-    name_col = models.CharField(
-        max_length=254, default="name", verbose_name=_("Name Column")
-    )
-    pcode_col = models.CharField(
-        max_length=254, default="pcode", verbose_name=_("Pcode Column")
-    )
-    parent_code_col = models.CharField(
-        max_length=254,
-        default="",
-        blank=True,
-        verbose_name=_("Parent Code Column"),
-    )
-    parent = TreeForeignKey(
-        "self",
-        null=True,
-        blank=True,
-        related_name="children",
-        db_index=True,
-        verbose_name=_("Parent"),
-        on_delete=models.CASCADE,
-    )
-    country = models.ForeignKey(
-        Country, related_name="carto_db_tables", on_delete=models.CASCADE
-    )
-
-    def __str__(self):
-        return self.table_name
 
 
 class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
@@ -360,7 +245,6 @@ class FlexibleAttributeChoice(SoftDeletableModel, TimeStampedUUIDModel):
 
 
 mptt.register(Location, order_insertion_by=["title"])
-mptt.register(CartoDBTable, order_insertion_by=["table_name"])
 mptt.register(FlexibleAttributeGroup, order_insertion_by=["name"])
 
 auditlog.register(FlexibleAttributeChoice)

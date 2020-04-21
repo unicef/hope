@@ -8,7 +8,7 @@ from household.models import (
     Household,
     EntitlementCard,
     Individual, SEX_CHOICE, MARTIAL_STATUS_CHOICE, IDENTIFICATION_TYPE_CHOICE,
-    YES_NO_CHOICE, DISABILITY_CHOICE,
+    YES_NO_CHOICE, DISABILITY_CHOICE, RESIDENCE_STATUS_CHOICE,
 )
 from registration_data.fixtures import RegistrationDataImportFactory
 
@@ -17,10 +17,9 @@ class HouseholdFactory(factory.DjangoModelFactory):
     class Meta:
         model = Household
 
-    household_ca_id = factory.Faker("uuid4")
     consent = factory.django.ImageField(color="blue")
     residence_status = factory.fuzzy.FuzzyChoice(
-        Household.RESIDENCE_STATUS_CHOICE, getter=lambda c: c[0],
+        RESIDENCE_STATUS_CHOICE, getter=lambda c: c[0],
     )
     country_origin = factory.fuzzy.FuzzyChoice(
         NATIONALITIES, getter=lambda c: c[0],

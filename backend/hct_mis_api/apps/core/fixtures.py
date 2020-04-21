@@ -3,7 +3,7 @@ from factory import fuzzy
 from faker import Faker
 
 from core.countries import COUNTRIES_ALPHA2_CODE, COUNTRIES_ALPHA2_CODE_DICT
-from core.models import Location, CartoDBTable, GatewayType, Country
+from core.models import Location, AdminAreaType
 
 COUNTRY_CODES_LIST = [x[0] for x in COUNTRIES_ALPHA2_CODE]
 COUNTRY_NAMES_LIST = [x[1] for x in COUNTRIES_ALPHA2_CODE]
@@ -20,20 +20,7 @@ def create_fake_multipolygon():
     return MultiPolygon(p1, p2)
 
 
-class CountryFactory(factory.DjangoModelFactory):
-    class Meta:
-        model = Country
-
-    country_short_code = fuzzy.FuzzyChoice(COUNTRY_CODES_LIST)
-    name = factory.LazyAttribute(
-        lambda o: COUNTRIES_ALPHA2_CODE_DICT[o.country_short_code]
-    )
-    long_name = factory.LazyAttribute(
-        lambda o: COUNTRIES_ALPHA2_CODE_DICT[o.country_short_code]
-    )
-
-
-class GatewayTypeFactory(factory.DjangoModelFactory):
+class AdminAreaTypeFactory(factory.DjangoModelFactory):
     """
     Arguments:
         country {Country} -- Country ORM objects
@@ -41,7 +28,7 @@ class GatewayTypeFactory(factory.DjangoModelFactory):
     """
 
     class Meta:
-        model = GatewayType
+        model = AdminAreaType
         django_get_or_create = ("name",)
 
     name = factory.LazyAttribute(
@@ -51,26 +38,8 @@ class GatewayTypeFactory(factory.DjangoModelFactory):
     )
     display_name = factory.LazyAttribute(lambda o: o.name)
     admin_level = factory.Sequence(lambda n: "%d" % n)
-
-    # We are going to fill country manually
-    country = factory.SubFactory(CountryFactory)
-
-
-class CartoDBTableFactory(factory.DjangoModelFactory):
-    class Meta:
-        model = CartoDBTable
-
-    domain = "example"
-    table_name = factory.Faker("uuid4")
-    display_name = factory.Faker("city")
     # We are going to fill location type manually
-    location_type = factory.SubFactory(GatewayTypeFactory)
-    name_col = factory.Faker("word")
-    pcode_col = factory.Faker("word")
-    parent_code_col = ""
-    parent = None
-    # We are going to fill location type manually
-    country = factory.SubFactory(CountryFactory)
+    business_area = None
 
 
 class LocationFactory(factory.DjangoModelFactory):
@@ -83,14 +52,16 @@ class LocationFactory(factory.DjangoModelFactory):
 
     class Meta:
         model = Location
-        django_get_or_create = ("title", "p_code",)
+        django_get_or_create = (
+            "title",
+            "p_code",
+        )
 
     title = factory.LazyFunction(faker.city)
     # We are going to fill location type manually
     business_area = None
-    gateway = factory.SubFactory(GatewayTypeFactory)
+    admin_area_type = factory.SubFactory(AdminAreaTypeFactory)
     # We are going to fill CartoDBTable manually
-    carto_db_table = factory.SubFactory(CartoDBTableFactory)
     latitude = factory.LazyFunction(faker.latitude)
     longitude = factory.LazyFunction(faker.longitude)
     p_code = factory.LazyAttribute(
