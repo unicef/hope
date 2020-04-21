@@ -100,20 +100,20 @@ class Household(TimeStampedUUIDModel):
     size = models.PositiveIntegerField()
     address = models.CharField(max_length=255, blank=True)
     """location contains lowest administrative area info"""
-    location = models.ForeignKey(
-        "core.Location", null=True, on_delete=models.SET_NULL
+    admin_area = models.ForeignKey(
+        "core.AdminArea", null=True, on_delete=models.SET_NULL
     )
     geopoint = PointField(blank=True, null=True)
     unhcr_id = models.CharField(max_length=255, blank=True)
     f_0_5_age_group = models.PositiveIntegerField(default=0)
     f_6_11_age_group = models.PositiveIntegerField(default=0)
     f_12_17_age_group = models.PositiveIntegerField(default=0)
-    f_adults = models.PositiveIntegerField(default=0)
-    f_pregnant = models.PositiveIntegerField(default=0)
     m_0_5_age_group = models.PositiveIntegerField(default=0)
     m_6_11_age_group = models.PositiveIntegerField(default=0)
     m_12_17_age_group = models.PositiveIntegerField(default=0)
+    f_adults = models.PositiveIntegerField(default=0)
     m_adults = models.PositiveIntegerField(default=0)
+    f_pregnant = models.PositiveIntegerField(default=0)
     f_0_5_disability = models.PositiveIntegerField(default=0)
     f_6_11_disability = models.PositiveIntegerField(default=0)
     f_12_17_disability = models.PositiveIntegerField(default=0)

@@ -5,7 +5,7 @@ from django.core.management import BaseCommand, call_command
 from django.db import transaction
 
 from account.fixtures import UserFactory
-from core.fixtures import LocationFactory
+from core.fixtures import AdminAreaFactory
 from core.models import BusinessArea
 from household.fixtures import (
     HouseholdFactory,
@@ -81,7 +81,7 @@ class Command(BaseCommand):
 
         user = UserFactory()
 
-        locations = LocationFactory.create_batch(
+        locations = AdminAreaFactory.create_batch(
             3, business_area=business_area,
         )
         program = ProgramFactory(

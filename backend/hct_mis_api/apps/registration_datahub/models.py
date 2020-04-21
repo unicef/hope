@@ -13,8 +13,6 @@ from sorl.thumbnail import ImageField
 
 from household.const import NATIONALITIES
 from household.models import (
-    ADMIN1_CHOICE,
-    ADMIN2_CHOICE,
     RESIDENCE_STATUS_CHOICE,
     SEX_CHOICE,
     YES_NO_CHOICE,
@@ -36,10 +34,10 @@ class ImportedHousehold(TimeStampedUUIDModel):
     size = models.PositiveIntegerField()
     address = models.CharField(max_length=255, blank=True)
     admin1 = models.CharField(
-        max_length=255, blank=True, choices=ADMIN1_CHOICE,
+        max_length=255, blank=True,
     )
     admin2 = models.CharField(
-        max_length=255, blank=True, choices=ADMIN2_CHOICE,
+        max_length=255, blank=True,
     )
     geopoint = PointField(blank=True, null=True)
     unhcr_id = models.CharField(max_length=255, blank=True)

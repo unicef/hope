@@ -15,7 +15,6 @@ from mptt.fields import TreeForeignKey
 from mptt.managers import TreeManager
 from mptt.models import MPTTModel
 
-from core.coutries import COUNTRY_NAME_TO_ALPHA2_CODE
 from core.utils import unique_slugify
 from utils.models import TimeStampedUUIDModel, SoftDeletionTreeModel
 
@@ -82,33 +81,33 @@ class AdminAreaType(TimeStampedUUIDModel):
 
     class Meta:
         ordering = ["name"]
-        verbose_name = "Location type"
+        verbose_name = "AdminAreaType type"
         unique_together = ("business_area", "admin_level")
 
     def __str__(self):
-        return "{} - {}".format(self.country, self.name)
+        return "{} - {}".format(self.business_area, self.name)
 
 
-class LocationManager(TreeManager):
+class AdminAreaManager(TreeManager):
     def get_queryset(self):
         return (
-            super(LocationManager, self)
+            super(AdminAreaManager, self)
             .get_queryset()
             .order_by("title")
             .select_related("gateway")
         )
 
 
-class Location(MPTTModel):
+class AdminArea(MPTTModel):
     """
-    Location model define place where agents are working.
+    AdminArea model define place where agents are working.
     The background of the location can be:
     BussinesAreaa > State > Province > City > District/Point.
     Either a point or geospatial object.
     pcode should be unique.
     related models:
         indicator.Reportable (ForeignKey): "reportable"
-        core.Location (ForeignKey): "self"
+        core.AdminArea (ForeignKey): "self"
         core.GatewayType: "gateway"
     """
 
@@ -116,7 +115,7 @@ class Location(MPTTModel):
         unique_together = ("title", "post_code")
         ordering = ["title"]
 
-    objects = LocationManager()
+    objects = AdminAreaManager()
 
     title = models.CharField(max_length=255)
     business_area = models.ForeignKey(
@@ -244,7 +243,7 @@ class FlexibleAttributeChoice(SoftDeletableModel, TimeStampedUUIDModel):
         return f"list name: {self.list_name}, name: {self.name}"
 
 
-mptt.register(Location, order_insertion_by=["title"])
+mptt.register(AdminArea, order_insertion_by=["title"])
 mptt.register(FlexibleAttributeGroup, order_insertion_by=["name"])
 
 auditlog.register(FlexibleAttributeChoice)
