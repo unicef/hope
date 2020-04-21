@@ -10,6 +10,7 @@ from django.core.validators import (
 from django.db import models
 from django.db.models import Sum
 from django.utils.translation import ugettext_lazy as _
+from django_countries.fields import CountryField
 from model_utils import Choices
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
@@ -18,103 +19,6 @@ from household.const import NATIONALITIES
 from utils.models import TimeStampedUUIDModel
 
 
-# HOUSEHOLDS
-ADMIN1_CHOICE = (
-    ("SO11", "Awdal - SO11"),
-    ("SO25", "Bakool - SO25"),
-    ("SO22", "Banadir - SO22"),
-    ("SO16", "Bari - SO16"),
-    ("SO24", "Bay - SO24"),
-    ("SO19", "Galgaduud - SO19"),
-    ("SO26", "Gedo - SO26"),
-    ("SO20", "Hiraan - SO20"),
-    ("SO27", "Middle Juba - SO27"),
-    ("SO28", "Lower Juba - SO28"),
-    ("SO18", "Mudug - SO18"),
-    ("SO17", "Nugaal - SO17"),
-    ("SO15", "Sanaag - SO15"),
-    ("SO21", "Middle Shabelle - SO21"),
-    ("SO23", "Lower Shabelle - SO23"),
-    ("SO14", "Sool - SO14"),
-    ("SO13", "Togdheer - SO13"),
-    ("SO12", "Woqooyi Galbeed - SO12"),
-)
-ADMIN2_CHOICE = (
-    ("SO2201", "Banadir - SO2201"),
-    ("SO1101", "Borama - SO1101"),
-    ("SO1102", "Baki - SO1102"),
-    ("SO1103", "Lughaye - SO1103"),
-    ("SO1104", "Zeylac - SO1104"),
-    ("SO1201", "Hargeysa - SO1201"),
-    ("SO1202", "Berbera - SO1202"),
-    ("SO1203", "Gebiley - SO1203"),
-    ("SO1301", "Burco - SO1301"),
-    ("SO1302", "Buuhoodle - SO1302"),
-    ("SO1303", "Owdweyne - SO1303"),
-    ("SO1304", "Sheikh - SO1304"),
-    ("SO1401", "Laas Caanood - SO1401"),
-    ("SO1402", "Caynabo - SO1402"),
-    ("SO1403", "Taleex - SO1403"),
-    ("SO1404", "Xudun - SO1404"),
-    ("SO1501", "Ceerigaabo - SO1501"),
-    ("SO1502", "Ceel Afweyn - SO1502"),
-    ("SO1503", "Laasqoray - SO1503"),
-    ("SO1601", "Bossaso - SO1601"),
-    ("SO1602", "Bandarbeyla - SO1602"),
-    ("SO1603", "Caluula - SO1603"),
-    ("SO1604", "Iskushuban - SO1604"),
-    ("SO1605", "Qandala - SO1605"),
-    ("SO1606", "Qardho - SO1606"),
-    ("SO1701", "Garoowe - SO1701"),
-    ("SO1702", "Burtinle - SO1702"),
-    ("SO1703", "Eyl - SO1703"),
-    ("SO1801", "Gaalkacyo - SO1801"),
-    ("SO1802", "Galdogob - SO1802"),
-    ("SO1803", "Hobyo - SO1803"),
-    ("SO1804", "Jariiban - SO1804"),
-    ("SO1805", "Xarardheere - SO1805"),
-    ("SO1901", "Dhuusamarreeb - SO1901"),
-    ("SO1902", "Cabudwaaq - SO1902"),
-    ("SO1903", "Cadaado - SO1903"),
-    ("SO1904", "Ceel Buur - SO1904"),
-    ("SO1905", "Ceel Dheer - SO1905"),
-    ("SO2001", "Belet Weyne - SO2001"),
-    ("SO2002", "Bulo Burto - SO2002"),
-    ("SO2003", "Jalalaqsi - SO2003"),
-    ("SO2101", "Jowhar - SO2101"),
-    ("SO2102", "Adan Yabaal - SO2102"),
-    ("SO2103", "Balcad - SO2103"),
-    ("SO2104", "Cadale - SO2104"),
-    ("SO2301", "Marka - SO2301"),
-    ("SO2302", "Afgooye - SO2302"),
-    ("SO2303", "Baraawe - SO2303"),
-    ("SO2304", "Kurtunwaarey - SO2304"),
-    ("SO2305", "Qoryooley - SO2305"),
-    ("SO2306", "Sablaale - SO2306"),
-    ("SO2307", "Wanla Weyn - SO2307"),
-    ("SO2401", "Baydhaba - SO2401"),
-    ("SO2402", "Buur Hakaba - SO2402"),
-    ("SO2403", "Diinsoor - SO2403"),
-    ("SO2404", "Qansax Dheere - SO2404"),
-    ("SO2501", "Xudur - SO2501"),
-    ("SO2502", "Ceel Barde - SO2502"),
-    ("SO2503", "Tayeeglow - SO2503"),
-    ("SO2504", "Waajid - SO2504"),
-    ("SO2505", "Rab Dhuure - SO2505"),
-    ("SO2601", "Garbahaarey - SO2601"),
-    ("SO2602", "Baardheere - SO2602"),
-    ("SO2603", "Belet Xaawo - SO2603"),
-    ("SO2604", "Ceel Waaq - SO2604"),
-    ("SO2605", "Doolow - SO2605"),
-    ("SO2606", "Luuq - SO2606"),
-    ("SO2701", "Bu'aale - SO2701"),
-    ("SO2702", "Jilib - SO2702"),
-    ("SO2703", "Saakow - SO2703"),
-    ("SO2801", "Kismaayo - SO2801"),
-    ("SO2802", "Afmadow - SO2802"),
-    ("SO2803", "Badhaadhe - SO2803"),
-    ("SO2804", "Jamaame - SO2804"),
-)
 RESIDENCE_STATUS_CHOICE = (
     ("REFUGEE", _("Refugee")),
     ("MIGRANT", _("Migrant")),
@@ -186,19 +90,18 @@ ROLE_CHOICE = (
 
 
 class Household(TimeStampedUUIDModel):
-    household_ca_id = models.CharField(max_length=255, blank=True)
     consent = ImageField(validators=[validate_image_file_extension])
     residence_status = models.CharField(
         max_length=255, choices=RESIDENCE_STATUS_CHOICE,
     )
-    country_origin = models.CharField(max_length=255, choices=NATIONALITIES,)
+    country_origin = CountryField(blank=True)
+    country = CountryField(blank=True)
+
     size = models.PositiveIntegerField()
     address = models.CharField(max_length=255, blank=True)
-    admin1 = models.CharField(
-        max_length=255, blank=True, choices=ADMIN1_CHOICE,
-    )
-    admin2 = models.CharField(
-        max_length=255, blank=True, choices=ADMIN2_CHOICE,
+    """location contains lowest administrative area info"""
+    location = models.ForeignKey(
+        "core.Location", null=True, on_delete=models.SET_NULL
     )
     geopoint = PointField(blank=True, null=True)
     unhcr_id = models.CharField(max_length=255, blank=True)
@@ -243,7 +146,6 @@ class Household(TimeStampedUUIDModel):
 
 
 class Individual(TimeStampedUUIDModel):
-    individual_ca_id = models.CharField(max_length=255, blank=True,)
     individual_id = models.CharField(max_length=255, blank=True)
     photo = models.ImageField(blank=True)
     full_name = models.CharField(
