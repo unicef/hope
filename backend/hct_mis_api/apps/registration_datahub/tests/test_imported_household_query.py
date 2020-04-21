@@ -21,7 +21,7 @@ class TestImportedHouseholdQuery(APITestCase):
     """
     ALL_IMPORTED_HOUSEHOLD_QUERY_RANGE = """
     query AllImportedHouseholds{
-      allImportedHouseholds(familySize: "{\\"min\\": 3, \\"max\\": 9}") {
+      allImportedHouseholds(size: "{\\"min\\": 3, \\"max\\": 9}") {
         edges {
           node {
             size
@@ -34,7 +34,7 @@ class TestImportedHouseholdQuery(APITestCase):
     """
     ALL_IMPORTED_HOUSEHOLD_QUERY_MIN = """
     query AllImportedHouseholds{
-      allImportedHouseholds(familySize: "{\\"min\\": 3}") {
+      allImportedHouseholds(size: "{\\"min\\": 3}") {
         edges {
           node {
             size
@@ -47,7 +47,7 @@ class TestImportedHouseholdQuery(APITestCase):
     """
     ALL_IMPORTED_HOUSEHOLD_QUERY_MAX = """
     query AllImportedHouseholds{
-      allImportedHouseholds(familySize: "{\\"max\\": 9}") {
+      allImportedHouseholds(size: "{\\"max\\": 9}") {
         edges {
           node {
             size

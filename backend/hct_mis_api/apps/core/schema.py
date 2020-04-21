@@ -3,6 +3,8 @@ from collections import Iterable
 
 import graphene
 from auditlog.models import LogEntry
+from django.contrib.gis.db.models import GeometryField
+from django.contrib.gis.forms import PointField
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Q
 from django.utils.encoding import force_text
@@ -17,6 +19,7 @@ from graphene import (
 )
 from graphene.types.resolver import dict_or_attr_resolver
 from graphene_django import DjangoObjectType
+from graphene_django.converter import convert_django_field
 from graphene_django.filter import DjangoFilterConnectionField
 
 from account.schema import UserObjectType
@@ -207,6 +210,19 @@ class FieldAttributeNode(graphene.ObjectType):
         return dict_or_attr_resolver("label", None, parrent, info)[
             "English(EN)"
         ]
+
+
+class GeoJSON(graphene.Scalar):
+    @classmethod
+    def serialize(cls, value):
+        return json.loads(value.geojson)
+
+
+@convert_django_field.register(GeometryField)
+def convert_field_to_geojson(field, registry=None):
+    return graphene.Field(
+        GeoJSON, description=field.help_text, required=not field.null
+    )
 
 
 def get_fields_attr_generators(flex_field):
