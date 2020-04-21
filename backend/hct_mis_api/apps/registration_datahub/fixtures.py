@@ -65,16 +65,16 @@ class ImportedIndividualFactory(factory.DjangoModelFactory):
     birth_date = factory.Faker(
         "date_of_birth", tzinfo=utc, minimum_age=16, maximum_age=90
     )
-    estimated_dob = factory.fuzzy.FuzzyChoice(
+    estimated_birth_date = factory.fuzzy.FuzzyChoice(
         YES_NO_CHOICE, getter=lambda c: c[0],
     )
 
     martial_status = factory.fuzzy.FuzzyChoice(
         MARTIAL_STATUS_CHOICE, getter=lambda c: c[0],
     )
-    phone_number = factory.Faker("phone_number")
-    phone_number_alternative = ""
-    identification_type = factory.fuzzy.FuzzyChoice(
+    phone_no = factory.Faker("phone_number")
+    phone_no_alternative = ""
+    id_type = factory.fuzzy.FuzzyChoice(
         IDENTIFICATION_TYPE_CHOICE, getter=lambda c: c[0],
     )
     birth_certificate_no = ""

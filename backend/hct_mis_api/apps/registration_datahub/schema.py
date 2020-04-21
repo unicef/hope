@@ -22,7 +22,7 @@ from registration_datahub.models import (
 
 
 class ImportedHouseholdFilter(FilterSet):
-    family_size = IntegerRangeFilter(field_name="family_size")
+    size = IntegerRangeFilter(field_name="size")
     rdi_id = CharFilter(
         field_name="household__programs__name", method="filter_rdi_id"
     )
@@ -48,7 +48,7 @@ class ImportedHouseholdFilter(FilterSet):
             "size",
             # "location",
             "registration_date",
-            "representative__full_name",
+            # "representative__full_name",
             "registration_data_import__name",
         )
     )
@@ -60,7 +60,7 @@ class ImportedHouseholdFilter(FilterSet):
 
 
 class ImportedIndividualFilter(FilterSet):
-    age = AgeRangeFilter(field_name="dob")
+    age = AgeRangeFilter(field_name="birth_date")
     sex = ModelMultipleChoiceFilter(
         to_field_name="sex", queryset=ImportedIndividual.objects.all(),
     )
@@ -88,7 +88,7 @@ class ImportedIndividualFilter(FilterSet):
             "age",
             "sex",
             "work_status",
-            "dob",
+            "birth_date",
         )
     )
 
@@ -107,6 +107,9 @@ class ImportedHouseholdNode(DjangoObjectType):
         filter_fields = []
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
+
+    def resolve_geopint(self, info):
+        import ipdb; ipdb.set_trace()
 
 
 class ImportedIndividualNode(DjangoObjectType):
