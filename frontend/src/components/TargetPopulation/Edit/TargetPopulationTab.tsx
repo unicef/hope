@@ -27,7 +27,7 @@ export function TargetPopulationTab({ values, selectedTab }) {
           id: values.id,
           ...(values.targetPopulationCriterias.length && {
             targetingCriteria: {
-              rules: values.criterias.map((rule) => {
+              rules: values.targetPopulationCriterias.map((rule) => {
                 return {
                   filters: rule.filters.map((each) => {
                     return {
