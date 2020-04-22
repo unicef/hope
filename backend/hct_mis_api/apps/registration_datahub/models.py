@@ -96,6 +96,9 @@ class ImportedIndividual(TimeStampedUUIDModel):
     id_type = models.CharField(
         max_length=255, choices=IDENTIFICATION_TYPE_CHOICE,
     )
+    head_of_household = models.OneToOneField(
+        "ImportedIndividual", on_delete=models.CASCADE, null=True
+    )
     birth_certificate_no = models.CharField(max_length=255, blank=True)
     birth_certificate_photo = models.ImageField(blank=True)
     drivers_license_no = models.CharField(max_length=255, blank=True)

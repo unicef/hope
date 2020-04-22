@@ -49,6 +49,7 @@ class ImportedHouseholdFactory(factory.DjangoModelFactory):
     registration_date = factory.Faker(
         "date_this_year", before_today=True, after_today=False
     )
+    head_of_household = None
     admin1 = ""
     admin2 = ""
     geopoint = factory.LazyAttribute(lambda o: Point(factory.Faker("latlng").generate()))
