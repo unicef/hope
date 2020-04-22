@@ -26,7 +26,6 @@ from utils.models import TimeStampedUUIDModel
 
 
 class ImportedHousehold(TimeStampedUUIDModel):
-    household_ca_id = models.CharField(max_length=255, blank=True)
     consent = ImageField(validators=[validate_image_file_extension])
     residence_status = models.CharField(
         max_length=255, choices=RESIDENCE_STATUS_CHOICE,
@@ -72,7 +71,6 @@ class ImportedHousehold(TimeStampedUUIDModel):
 
 
 class ImportedIndividual(TimeStampedUUIDModel):
-    individual_ca_id = models.CharField(max_length=255, blank=True,)
     individual_id = models.CharField(max_length=255, blank=True)
     photo = models.ImageField(blank=True)
     full_name = models.CharField(

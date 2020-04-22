@@ -78,7 +78,6 @@ class ImportedIndividualFactory(factory.DjangoModelFactory):
     class Meta:
         model = ImportedIndividual
 
-    individual_ca_id = factory.Faker("uuid4")
     full_name = factory.LazyAttribute(
         lambda o: f"{o.given_name} {o.middle_name} {o.family_name}"
     )

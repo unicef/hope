@@ -27,7 +27,7 @@ class HouseholdFilter(FilterSet):
             "address": ["exact", "icontains"],
             # "representative__full_name": ["exact", "icontains"],
             # "head_of_household__full_name": ["exact", "icontains"],
-            "household_ca_id": ["exact"],
+            # "household_ca_id": ["exact"],
             "size": ["range", "lte", "gte"],
             "target_populations": ["exact"],
             "programs": ["exact"],
