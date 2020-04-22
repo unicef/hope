@@ -19,6 +19,7 @@ from registration_datahub.models import (
 class ImportedHouseholdFilter(FilterSet):
     class Meta:
         model = ImportedHousehold
+        fields = ()
 
     order_by = OrderingFilter(
         fields=("id", "head_of_household", "size", "registration_date",)
@@ -28,15 +29,9 @@ class ImportedHouseholdFilter(FilterSet):
 class ImportedIndividualFilter(FilterSet):
     class Meta:
         model = ImportedIndividual
+        fields = ()
 
-    order_by = OrderingFilter(
-        fields=(
-            "id",
-            "full_name",
-            "age",
-            "sex",
-        )
-    )
+    order_by = OrderingFilter(fields=("id", "full_name", "birth_date", "sex",))
 
 
 class ImportedHouseholdNode(DjangoObjectType):
