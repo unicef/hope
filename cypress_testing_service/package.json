@@ -1,0 +1,11 @@
+{
+  "name": "package.json",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "cypress": "^4.4.1",
+    "puppeteer": "^2.1.1"
+  },
+  "cypress:open": "cypress open"
+}
