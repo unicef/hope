@@ -21,6 +21,7 @@ export type Scalars = {
   Decimal: any,
   Arg: any,
   JSONLazyString: any,
+  JSONString: any,
   Upload: any,
 };
 
@@ -756,6 +757,7 @@ export type ImportedHouseholdNode = Node & {
   registrationDataImportId: RegistrationDataImportDatahubNode,
   headOfHousehold?: Maybe<ImportedIndividualNode>,
   registrationDate?: Maybe<Scalars['Date']>,
+  flexFields: Scalars['JSONString'],
   individuals: ImportedIndividualNodeConnection,
 };
 
@@ -1015,6 +1017,7 @@ export type ImportedIndividualNode = Node & {
   registrationDataImportId: RegistrationDataImportDatahubNode,
   workStatus: ImportedIndividualWorkStatus,
   disability: ImportedIndividualDisability,
+  flexFields: Scalars['JSONString'],
   representedHouseholds: ImportedHouseholdNodeConnection,
   headingHousehold?: Maybe<ImportedHouseholdNode>,
 };
@@ -1338,6 +1341,7 @@ export enum IndividualWorkStatus {
   Yes = 'YES',
   No = 'NO'
 }
+
 
 
 export type LabelNode = {
@@ -2242,6 +2246,7 @@ export type TargetPopulationNode = Node & {
   id: Scalars['ID'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
+  isRemoved: Scalars['Boolean'],
   name: Scalars['String'],
   createdBy?: Maybe<UserNode>,
   status: TargetPopulationStatus,
@@ -3579,6 +3584,38 @@ export type CandidateHouseholdsListByTargetingCriteriaQueryVariables = {
 export type CandidateHouseholdsListByTargetingCriteriaQuery = (
   { __typename?: 'Query' }
   & { candidateHouseholdsListByTargetingCriteria: Maybe<(
+    { __typename?: 'HouseholdNodeConnection' }
+    & Pick<HouseholdNodeConnection, 'totalCount' | 'edgeCount'>
+    & { edges: Array<Maybe<(
+      { __typename?: 'HouseholdNodeEdge' }
+      & { node: Maybe<(
+        { __typename?: 'HouseholdNode' }
+        & Pick<HouseholdNode, 'id' | 'familySize' | 'updatedAt'>
+        & { headOfHousehold: Maybe<(
+          { __typename?: 'IndividualNode' }
+          & Pick<IndividualNode, 'firstName' | 'lastName'>
+        )>, location: (
+          { __typename?: 'LocationNode' }
+          & Pick<LocationNode, 'title'>
+        ) }
+      )> }
+    )>> }
+  )> }
+);
+
+export type FinalHouseholdsListByTargetingCriteriaQueryVariables = {
+  id: Scalars['ID'],
+  targetingCriteria: TargetingCriteriaObjectType,
+  first?: Maybe<Scalars['Int']>,
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type FinalHouseholdsListByTargetingCriteriaQuery = (
+  { __typename?: 'Query' }
+  & { finalHouseholdsListByTargetingCriteria: Maybe<(
     { __typename?: 'HouseholdNodeConnection' }
     & Pick<HouseholdNodeConnection, 'totalCount' | 'edgeCount'>
     & { edges: Array<Maybe<(
@@ -6313,6 +6350,76 @@ export function useCandidateHouseholdsListByTargetingCriteriaLazyQuery(baseOptio
 export type CandidateHouseholdsListByTargetingCriteriaQueryHookResult = ReturnType<typeof useCandidateHouseholdsListByTargetingCriteriaQuery>;
 export type CandidateHouseholdsListByTargetingCriteriaLazyQueryHookResult = ReturnType<typeof useCandidateHouseholdsListByTargetingCriteriaLazyQuery>;
 export type CandidateHouseholdsListByTargetingCriteriaQueryResult = ApolloReactCommon.QueryResult<CandidateHouseholdsListByTargetingCriteriaQuery, CandidateHouseholdsListByTargetingCriteriaQueryVariables>;
+export const FinalHouseholdsListByTargetingCriteriaDocument = gql`
+    query FinalHouseholdsListByTargetingCriteria($id: ID!, $targetingCriteria: TargetingCriteriaObjectType!, $first: Int, $after: String, $before: String, $last: Int) {
+  finalHouseholdsListByTargetingCriteria(targetPopulation: $id, targetingCriteria: $targetingCriteria, after: $after, before: $before, first: $first, last: $last) {
+    edges {
+      node {
+        id
+        headOfHousehold {
+          firstName
+          lastName
+        }
+        familySize
+        location {
+          title
+        }
+        updatedAt
+      }
+    }
+    totalCount
+    edgeCount
+  }
+}
+    `;
+export type FinalHouseholdsListByTargetingCriteriaComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<FinalHouseholdsListByTargetingCriteriaQuery, FinalHouseholdsListByTargetingCriteriaQueryVariables>, 'query'> & ({ variables: FinalHouseholdsListByTargetingCriteriaQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const FinalHouseholdsListByTargetingCriteriaComponent = (props: FinalHouseholdsListByTargetingCriteriaComponentProps) => (
+      <ApolloReactComponents.Query<FinalHouseholdsListByTargetingCriteriaQuery, FinalHouseholdsListByTargetingCriteriaQueryVariables> query={FinalHouseholdsListByTargetingCriteriaDocument} {...props} />
+    );
+    
+export type FinalHouseholdsListByTargetingCriteriaProps<TChildProps = {}> = ApolloReactHoc.DataProps<FinalHouseholdsListByTargetingCriteriaQuery, FinalHouseholdsListByTargetingCriteriaQueryVariables> & TChildProps;
+export function withFinalHouseholdsListByTargetingCriteria<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  FinalHouseholdsListByTargetingCriteriaQuery,
+  FinalHouseholdsListByTargetingCriteriaQueryVariables,
+  FinalHouseholdsListByTargetingCriteriaProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, FinalHouseholdsListByTargetingCriteriaQuery, FinalHouseholdsListByTargetingCriteriaQueryVariables, FinalHouseholdsListByTargetingCriteriaProps<TChildProps>>(FinalHouseholdsListByTargetingCriteriaDocument, {
+      alias: 'finalHouseholdsListByTargetingCriteria',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useFinalHouseholdsListByTargetingCriteriaQuery__
+ *
+ * To run a query within a React component, call `useFinalHouseholdsListByTargetingCriteriaQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFinalHouseholdsListByTargetingCriteriaQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFinalHouseholdsListByTargetingCriteriaQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      targetingCriteria: // value for 'targetingCriteria'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      last: // value for 'last'
+ *   },
+ * });
+ */
+export function useFinalHouseholdsListByTargetingCriteriaQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<FinalHouseholdsListByTargetingCriteriaQuery, FinalHouseholdsListByTargetingCriteriaQueryVariables>) {
+        return ApolloReactHooks.useQuery<FinalHouseholdsListByTargetingCriteriaQuery, FinalHouseholdsListByTargetingCriteriaQueryVariables>(FinalHouseholdsListByTargetingCriteriaDocument, baseOptions);
+      }
+export function useFinalHouseholdsListByTargetingCriteriaLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<FinalHouseholdsListByTargetingCriteriaQuery, FinalHouseholdsListByTargetingCriteriaQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<FinalHouseholdsListByTargetingCriteriaQuery, FinalHouseholdsListByTargetingCriteriaQueryVariables>(FinalHouseholdsListByTargetingCriteriaDocument, baseOptions);
+        }
+export type FinalHouseholdsListByTargetingCriteriaQueryHookResult = ReturnType<typeof useFinalHouseholdsListByTargetingCriteriaQuery>;
+export type FinalHouseholdsListByTargetingCriteriaLazyQueryHookResult = ReturnType<typeof useFinalHouseholdsListByTargetingCriteriaLazyQuery>;
+export type FinalHouseholdsListByTargetingCriteriaQueryResult = ApolloReactCommon.QueryResult<FinalHouseholdsListByTargetingCriteriaQuery, FinalHouseholdsListByTargetingCriteriaQueryVariables>;
 export const GoldenRecordByTargetingCriteriaDocument = gql`
     query GoldenRecordByTargetingCriteria($targetingCriteria: TargetingCriteriaObjectType!, $first: Int, $after: String, $before: String, $last: Int) {
   goldenRecordByTargetingCriteria(targetingCriteria: $targetingCriteria, after: $after, before: $before, first: $first, last: $last) {
@@ -6621,6 +6728,7 @@ export type ResolversTypes = {
   ImportedIndividualNodeEdge: ResolverTypeWrapper<ImportedIndividualNodeEdge>,
   ImportedIndividualWorkStatus: ImportedIndividualWorkStatus,
   ImportedIndividualDisability: ImportedIndividualDisability,
+  JSONString: ResolverTypeWrapper<Scalars['JSONString']>,
   RegistrationDataImportDatahubNodeConnection: ResolverTypeWrapper<RegistrationDataImportDatahubNodeConnection>,
   RegistrationDataImportDatahubNodeEdge: ResolverTypeWrapper<RegistrationDataImportDatahubNodeEdge>,
   DjangoDebug: ResolverTypeWrapper<DjangoDebug>,
@@ -6756,6 +6864,7 @@ export type ResolversParentTypes = {
   ImportedIndividualNodeEdge: ImportedIndividualNodeEdge,
   ImportedIndividualWorkStatus: ImportedIndividualWorkStatus,
   ImportedIndividualDisability: ImportedIndividualDisability,
+  JSONString: Scalars['JSONString'],
   RegistrationDataImportDatahubNodeConnection: RegistrationDataImportDatahubNodeConnection,
   RegistrationDataImportDatahubNodeEdge: RegistrationDataImportDatahubNodeEdge,
   DjangoDebug: DjangoDebug,
@@ -7024,6 +7133,7 @@ export type ImportedHouseholdNodeResolvers<ContextType = any, ParentType extends
   registrationDataImportId?: Resolver<ResolversTypes['RegistrationDataImportDatahubNode'], ParentType, ContextType>,
   headOfHousehold?: Resolver<Maybe<ResolversTypes['ImportedIndividualNode']>, ParentType, ContextType>,
   registrationDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
+  flexFields?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   individuals?: Resolver<ResolversTypes['ImportedIndividualNodeConnection'], ParentType, ContextType, ImportedHouseholdNodeIndividualsArgs>,
 };
 
@@ -7061,6 +7171,7 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   registrationDataImportId?: Resolver<ResolversTypes['RegistrationDataImportDatahubNode'], ParentType, ContextType>,
   workStatus?: Resolver<ResolversTypes['ImportedIndividualWorkStatus'], ParentType, ContextType>,
   disability?: Resolver<ResolversTypes['ImportedIndividualDisability'], ParentType, ContextType>,
+  flexFields?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   representedHouseholds?: Resolver<ResolversTypes['ImportedHouseholdNodeConnection'], ParentType, ContextType, ImportedIndividualNodeRepresentedHouseholdsArgs>,
   headingHousehold?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType>,
 };
@@ -7126,6 +7237,10 @@ export type IndividualNodeEdgeResolvers<ContextType = any, ParentType extends Re
 
 export interface JsonLazyStringScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['JSONLazyString'], any> {
   name: 'JSONLazyString'
+}
+
+export interface JsonStringScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['JSONString'], any> {
+  name: 'JSONString'
 }
 
 export type LabelNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['LabelNode'] = ResolversParentTypes['LabelNode']> = {
@@ -7436,6 +7551,7 @@ export type TargetPopulationNodeResolvers<ContextType = any, ParentType extends 
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   status?: Resolver<ResolversTypes['TargetPopulationStatus'], ParentType, ContextType>,
@@ -7588,6 +7704,7 @@ export type Resolvers<ContextType = any> = {
   IndividualNodeConnection?: IndividualNodeConnectionResolvers<ContextType>,
   IndividualNodeEdge?: IndividualNodeEdgeResolvers<ContextType>,
   JSONLazyString?: GraphQLScalarType,
+  JSONString?: GraphQLScalarType,
   LabelNode?: LabelNodeResolvers<ContextType>,
   LocationNode?: LocationNodeResolvers<ContextType>,
   LocationNodeConnection?: LocationNodeConnectionResolvers<ContextType>,
