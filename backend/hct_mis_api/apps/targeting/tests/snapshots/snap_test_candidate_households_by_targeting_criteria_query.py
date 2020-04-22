@@ -23,7 +23,7 @@ snapshots['CandidateListTargetingCriteriaQueryTestCase::test_candidate_household
     }
 }
 
-snapshots['CandidateListTargetingCriteriaQueryTestCase::test_candidate_households_list_by_targeting_criteria_family_size 1'] = {
+snapshots['CandidateListTargetingCriteriaQueryTestCase::test_candidate_households_list_by_targeting_criteria_size 1'] = {
     'data': {
         'candidateHouseholdsListByTargetingCriteria': {
             'edges': [

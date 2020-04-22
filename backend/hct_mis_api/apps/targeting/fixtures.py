@@ -7,7 +7,7 @@ from factory import fuzzy
 from account.fixtures import UserFactory
 from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES
 from household.fixtures import HouseholdFactory
-from household.models import Household
+from household.models import RESIDENCE_STATUS_CHOICE
 from targeting.models import (
     TargetPopulation,
     TargetingCriteriaRuleFilter,
@@ -47,12 +47,12 @@ def arguments_resolver(obj):
     if obj.field_name == "age":
         min = random.randint(1, 100)
         max = random.randint(min, random.randint(min + 1, 116))
-    if obj.field_name == "family_size":
+    if obj.field_name == "size":
         min = random.randint(1, 5)
         max = random.randint(min, random.randint(min + 1, 10))
     if obj.field_name == "residence_status":
         return [
-            random.choice([x[0] for x in Household.RESIDENCE_STATUS_CHOICE])
+            random.choice([x[0] for x in RESIDENCE_STATUS_CHOICE])
         ]
     if (
         obj.comparision_method == "RANGE"

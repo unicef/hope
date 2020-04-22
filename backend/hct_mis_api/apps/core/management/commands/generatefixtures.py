@@ -5,13 +5,14 @@ from django.core.management import BaseCommand, call_command
 from django.db import transaction
 
 from account.fixtures import UserFactory
-from core.fixtures import AdminAreaFactory
-from core.models import BusinessArea
+from core.fixtures import AdminAreaFactory, AdminAreaTypeFactory
+from core.models import BusinessArea, AdminArea
 from household.fixtures import (
     HouseholdFactory,
     IndividualFactory,
     EntitlementCardFactory,
 )
+from household.models import RELATIONSHIP_CHOICE
 from payment.fixtures import PaymentRecordFactory
 from program.fixtures import CashPlanFactory, ProgramFactory
 from registration_data.fixtures import RegistrationDataImportFactory
@@ -73,20 +74,31 @@ class Command(BaseCommand):
             help="Suppresses all user prompts.",
         )
 
+    def _generate_admin_areas(self):
+        business_area = BusinessArea.objects.first()
+        state_area_type = AdminAreaTypeFactory(
+            name="State", business_area=business_area, admin_level=1
+        )
+        province_area_type = AdminAreaTypeFactory(
+            name="Province", business_area=business_area, admin_level=2
+        )
+        AdminAreaFactory(admin_area_type=state_area_type)
+        # AdminAreaFactory.create_batch(
+        #     6, admin_area_type=state_area_type,
+        # )
+        # AdminAreaFactory.create_batch(
+        #     6, admin_area_type=province_area_type,
+        # )
+
     @staticmethod
     def _generate_program_with_dependencies(options):
         cash_plans_amount = options["cash_plans_amount"]
         payment_record_amount = options["payment_record_amount"]
-        business_area = BusinessArea.objects.first()
 
         user = UserFactory()
 
-        locations = AdminAreaFactory.create_batch(
-            3, business_area=business_area,
-        )
-        program = ProgramFactory(
-            business_area=business_area, locations=locations,
-        )
+        program = ProgramFactory(business_area=BusinessArea.objects.first())
+        program.admin_areas.set(AdminArea.objects.order_by("?")[:3])
         targeting_criteria = TargetingCriteriaFactory()
         rules = TargetingCriteriaRuleFactory.create_batch(
             random.randint(1, 3), targeting_criteria=targeting_criteria
@@ -114,16 +126,18 @@ class Command(BaseCommand):
                 )
 
                 household = HouseholdFactory(
-                    location=random.choice(locations),
+                    admin_area=AdminArea.objects.order_by("?").first(),
                     registration_data_import=registration_data_import,
                 )
                 individuals = IndividualFactory.create_batch(
-                    household.family_size,
+                    household.size,
                     household=household,
                     registration_data_import=registration_data_import,
                 )
+
+                individuals[0].relationship = "HEAD"
+                individuals[0].save()
                 household.head_of_household = individuals[0]
-                household.representative = individuals[0]
                 household.save()
 
                 household.programs.add(program)
@@ -140,12 +154,10 @@ class Command(BaseCommand):
 
     @transaction.atomic
     def handle(self, *args, **options):
-        self.stdout.write(
-            f"Generating fixtures..."
-        )
-        call_command('flush','--noinput')
-        call_command('flush','--noinput',database='cash_assist_datahub')
-        call_command('flush','--noinput',database='registration_datahub')
+        self.stdout.write(f"Generating fixtures...")
+        call_command("flush", "--noinput")
+        call_command("flush", "--noinput", database="cash_assist_datahub")
+        call_command("flush", "--noinput", database="registration_datahub")
         start_time = time.time()
         programs_amount = options["programs_amount"]
         business_areas = BusinessArea.objects.all().count()
@@ -164,7 +176,7 @@ class Command(BaseCommand):
                 else:
                     self.stdout.write("Generation canceled")
                     return
-
+        self._generate_admin_areas()
         for _ in range(programs_amount):
             self._generate_program_with_dependencies(options)
 
