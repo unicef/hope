@@ -8,6 +8,7 @@ from django.core.validators import (
     MaxLengthValidator,
 )
 from django.db import models
+from django_countries.fields import CountryField
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
 
@@ -25,7 +26,6 @@ from utils.models import TimeStampedUUIDModel
 
 
 class ImportedHousehold(TimeStampedUUIDModel):
-    household_ca_id = models.CharField(max_length=255, blank=True)
     consent = ImageField(validators=[validate_image_file_extension])
     residence_status = models.CharField(
         max_length=255, choices=RESIDENCE_STATUS_CHOICE,
@@ -33,12 +33,9 @@ class ImportedHousehold(TimeStampedUUIDModel):
     country_origin = models.CharField(max_length=255, choices=NATIONALITIES,)
     size = models.PositiveIntegerField()
     address = models.CharField(max_length=255, blank=True)
-    admin1 = models.CharField(
-        max_length=255, blank=True,
-    )
-    admin2 = models.CharField(
-        max_length=255, blank=True,
-    )
+    country = CountryField(blank=True)
+    admin1 = models.CharField(max_length=255, blank=True)
+    admin2 = models.CharField(max_length=255, blank=True)
     geopoint = PointField(blank=True, null=True)
     unhcr_id = models.CharField(max_length=255, blank=True)
     f_0_5_age_group = models.PositiveIntegerField(default=0)
@@ -58,6 +55,9 @@ class ImportedHousehold(TimeStampedUUIDModel):
     m_6_11_disability = models.PositiveIntegerField(default=0)
     m_12_17_disability = models.PositiveIntegerField(default=0)
     m_adults_disability = models.PositiveIntegerField(default=0)
+    head_of_household = models.OneToOneField(
+        "ImportedIndividual", on_delete=models.CASCADE, null=True
+    )
     registration_data_import = models.ForeignKey(
         "RegistrationDataImportDatahub",
         related_name="households",
@@ -67,11 +67,10 @@ class ImportedHousehold(TimeStampedUUIDModel):
     flex_fields = JSONField(default=dict)
 
     def __str__(self):
-        return f"Household CashAssist ID: {self.household_ca_id}"
+        return f"Household ID: {self.id}"
 
 
 class ImportedIndividual(TimeStampedUUIDModel):
-    individual_ca_id = models.CharField(max_length=255, blank=True,)
     individual_id = models.CharField(max_length=255, blank=True)
     photo = models.ImageField(blank=True)
     full_name = models.CharField(
