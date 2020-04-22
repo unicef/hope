@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { IconButton } from '@material-ui/core';
 import { Delete, Edit } from '@material-ui/icons';
-import { TargetingCriteriaRuleObjectType } from '../../__generated__/graphql';
+import { TargetingCriteriaRuleObjectType } from '../../../__generated__/graphql';
 
 const CriteriaElement = styled.div`
   width: ${(props) => (props.alternative ? 'auto' : '380px')};

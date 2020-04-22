@@ -1,11 +1,10 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Paper, Typography } from '@material-ui/core';
-import { TargetPopulationDetails } from '../../../components/TargetPopulation/TargetPopulationDetails';
-import { TargetingCriteria } from '../../../components/TargetPopulation/TargetingCriteria';
-import { Results } from '../../../components/TargetPopulation/Results';
-import { TargetPopulationHouseholdTable } from '../../tables/TargetPopulationHouseholdTable';
-import { useCandidateHouseholdsListByTargetingCriteriaQuery } from '../../../__generated__/graphql';
+import { TargetingCriteria } from './TargetingCriteria';
+import { Results } from './Results';
+import { TargetPopulationHouseholdTable } from '../../containers/tables/TargetPopulationHouseholdTable';
+import { useCandidateHouseholdsListByTargetingCriteriaQuery } from '../../__generated__/graphql';
 
 const PaperContainer = styled(Paper)`
   display: flex;
@@ -32,6 +31,7 @@ const resultsData = {
 
 export function TargetPopulationCore({
   candidateList,
+  targetPopulationList = null,
   id,
   selectedTab = 0,
 }) {
@@ -42,6 +42,7 @@ export function TargetPopulationCore({
       <TargetingCriteria
         selectedTab={selectedTab}
         candidateListRules={candidateListRules}
+        targetPopulationRules={targetPopulationList?.rules}
       />
       <Results resultsData={resultsData} />
       {candidateListRules.length ? (

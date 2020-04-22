@@ -8,7 +8,7 @@ import {
   TargetPopulationNode,
 } from '../../__generated__/graphql';
 import { EditTargetPopulation } from '../../components/TargetPopulation/EditTargetPopulation';
-import { TargetPopulationCore } from '../dialogs/targetPopulation/TargetPopulationCore';
+import { TargetPopulationCore } from '../../components/TargetPopulation/TargetPopulationCore';
 import { TargetPopulationDetails } from '../../components/TargetPopulation/TargetPopulationDetails';
 
 export function TargetPopulationDetailsPage() {
@@ -44,8 +44,8 @@ export function TargetPopulationDetailsPage() {
     <div>
       {isEdit ? (
         <EditTargetPopulation
-          id={targetPopulation.id}
-          targetPopulationName={targetPopulation.name}
+          targetPopulation={targetPopulation}
+          selectedTab={selectedTab}
           targetPopulationCriterias={
             targetPopulation.candidateListTargetingCriteria
           }
@@ -73,6 +73,7 @@ export function TargetPopulationDetailsPage() {
             <TargetPopulationCore
               id={targetPopulation.id}
               candidateList={targetPopulation.candidateListTargetingCriteria}
+              targetPopulationList={targetPopulation.finalListTargetingCriteria}
               selectedTab={selectedTab}
             />
           </TabPanel>
