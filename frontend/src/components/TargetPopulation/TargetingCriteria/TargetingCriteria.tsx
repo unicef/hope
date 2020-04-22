@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Typography, Paper, Button } from '@material-ui/core';
 import { AddCircleOutline } from '@material-ui/icons';
 import { Criteria } from './Criteria';
-import { TargetCriteriaForm } from '../../containers/forms/TargetCriteriaForm';
+import { TargetCriteriaForm } from '../../../containers/forms/TargetCriteriaForm';
 
 const PaperContainer = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(3)}px
@@ -76,6 +76,7 @@ const Row = styled.div`
 interface TargetingCriteriaProps {
   selectedTab?: number;
   candidateListRules?;
+  targetPopulationRules?;
   isEdit?: boolean;
   helpers?;
 }
@@ -83,6 +84,7 @@ interface TargetingCriteriaProps {
 export function TargetingCriteria({
   selectedTab,
   candidateListRules,
+  targetPopulationRules = [],
   isEdit = false,
   helpers,
 }: TargetingCriteriaProps) {
@@ -169,36 +171,36 @@ export function TargetingCriteria({
                 })}
             </ContentWrapper>
             <ContentWrapper>
-              {candidateListRules.length ? (
-                candidateListRules.map((criteria, index) => {
-                  return (
-                    <>
-                      <Criteria
-                        //eslint-disable-next-line
-                        key={criteria.id || index}
-                        isEdit={isEdit}
-                        canRemove={candidateListRules.length > 1}
-                        rules={criteria.filters}
-                        editFunction={() => editCriteria(criteria, index)}
-                        removeFunction={() => helpers.remove(index)}
-                      />
+              {targetPopulationRules.length
+                ? targetPopulationRules.map((criteria, index) => {
+                    return (
+                      <>
+                        <Criteria
+                          //eslint-disable-next-line
+                          key={criteria.id || index}
+                          isEdit={isEdit}
+                          canRemove={targetPopulationRules.length > 1}
+                          rules={criteria.filters}
+                          editFunction={() => editCriteria(criteria, index)}
+                          removeFunction={() => helpers.remove(index)}
+                        />
 
-                      {index === candidateListRules.length - 1 ||
-                      (candidateListRules.length === 1 &&
-                        index === 0) ? null : (
-                        <Divider>
-                          <DividerLabel>Or</DividerLabel>
-                        </Divider>
-                      )}
-                    </>
-                  );
-                })
-              ) : (
-                <AddCriteria onClick={() => setOpen(true)}>
-                  <AddCircleOutline />
-                  <p>Add Criteria</p>
-                </AddCriteria>
-              )}
+                        {index === targetPopulationRules.length - 1 ||
+                        (targetPopulationRules.length === 1 &&
+                          index === 0) ? null : (
+                          <Divider>
+                            <DividerLabel>Or</DividerLabel>
+                          </Divider>
+                        )}
+                      </>
+                    );
+                  })
+                : isEdit && (
+                    <AddCriteria onClick={() => setOpen(true)}>
+                      <AddCircleOutline />
+                      <p>Add Criteria</p>
+                    </AddCriteria>
+                  )}
             </ContentWrapper>
           </>
         ) : (
