@@ -627,6 +627,7 @@ type ImportedHouseholdNode implements Node {
   registrationDataImportId: RegistrationDataImportDatahubNode!
   headOfHousehold: ImportedIndividualNode
   registrationDate: Date
+  flexFields: JSONString!
   individuals(before: String, after: String, first: Int, last: Int): ImportedIndividualNodeConnection!
 }
 
@@ -875,6 +876,7 @@ type ImportedIndividualNode implements Node {
   registrationDataImportId: RegistrationDataImportDatahubNode!
   workStatus: ImportedIndividualWorkStatus!
   disability: ImportedIndividualDisability!
+  flexFields: JSONString!
   representedHouseholds(before: String, after: String, first: Int, last: Int): ImportedHouseholdNodeConnection!
   headingHousehold: ImportedHouseholdNode
 }
@@ -1179,6 +1181,8 @@ enum IndividualWorkStatus {
 }
 
 scalar JSONLazyString
+
+scalar JSONString
 
 type LabelNode {
   language: String
@@ -1519,6 +1523,7 @@ type TargetPopulationNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
+  isRemoved: Boolean!
   name: String!
   createdBy: UserNode
   status: TargetPopulationStatus!
