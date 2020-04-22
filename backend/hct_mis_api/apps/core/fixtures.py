@@ -31,44 +31,29 @@ class AdminAreaTypeFactory(factory.DjangoModelFactory):
         model = AdminAreaType
         django_get_or_create = ("name",)
 
-    name = factory.LazyAttribute(
-        lambda o: "{}-Admin Level {}".format(
-            o.country.country_short_code, o.admin_level
-        )
-    )
+    name = None
     display_name = factory.LazyAttribute(lambda o: o.name)
-    admin_level = factory.Sequence(lambda n: "%d" % n)
-    # We are going to fill location type manually
+    admin_level = None
     business_area = None
 
 
 class AdminAreaFactory(factory.DjangoModelFactory):
     """
     Arguments:
-        gateway {GatewayType} -- GatewayType ORM objects
-        carto_db_table {Country} -- CartoDBTable ORM objects
-    Ex) LocationFactory(gateway=b, carto_db_table=c)
+        admin_area_type {AdminAreaType} -- AdminAreaType ORM objects
     """
 
     class Meta:
         model = AdminArea
         django_get_or_create = (
             "title",
-            "p_code",
+            "post_code",
         )
 
     title = factory.LazyFunction(faker.city)
-    # We are going to fill location type manually
-    business_area = None
-    admin_area_type = factory.SubFactory(AdminAreaTypeFactory)
-    # We are going to fill CartoDBTable manually
-    latitude = factory.LazyFunction(faker.latitude)
-    longitude = factory.LazyFunction(faker.longitude)
-    p_code = factory.LazyAttribute(
-        lambda o: "{}{}".format(
-            o.gateway.country.country_short_code, faker.random_number(4)
-        )
-    )
+    # We are going to fill admin_area_type type manually
+    admin_area_type = None
+    post_code = factory.LazyAttribute(lambda o: faker.random_number(5))
     parent = None
     geom = factory.LazyFunction(create_fake_multipolygon)
     point = None

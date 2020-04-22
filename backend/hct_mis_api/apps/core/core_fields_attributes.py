@@ -33,8 +33,8 @@ CORE_FIELDS_ATTRIBUTES = [
     {
         "id": "d6aa9669-ae82-4e3c-adfe-79b5d95d0754",
         "type": TYPE_INTEGER,
-        "lookup": "family_size",
-        "name": "family_size",
+        "lookup": "size",
+        "name": "size",
         "label": {"English(EN)": "Family Size"},
         "hint": "how many persons in the household",
         "required": True,

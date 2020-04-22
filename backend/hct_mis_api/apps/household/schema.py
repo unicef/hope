@@ -22,11 +22,11 @@ class HouseholdFilter(FilterSet):
     class Meta:
         model = Household
         fields = {
-            # "business_area": ["exact", "icontains"],
+            "business_area": ["exact", "icontains"],
             "country_origin": ["exact", "icontains"],
             "address": ["exact", "icontains"],
             # "representative__full_name": ["exact", "icontains"],
-            # "head_of_household__full_name": ["exact", "icontains"],
+            "head_of_household__full_name": ["exact", "icontains"],
             "household_ca_id": ["exact"],
             "size": ["range", "lte", "gte"],
             "target_populations": ["exact"],
