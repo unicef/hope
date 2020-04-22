@@ -37,7 +37,7 @@ class ImportedHouseholdFactory(factory.DjangoModelFactory):
     residence_status = factory.fuzzy.FuzzyChoice(
         RESIDENCE_STATUS_CHOICE, getter=lambda c: c[0],
     )
-    country = factory.Faker("country_code", representation='alpha-2')
+    country = factory.Faker("country_code", representation="alpha-2")
     country_origin = factory.fuzzy.FuzzyChoice(
         NATIONALITIES, getter=lambda c: c[0],
     )
@@ -49,10 +49,11 @@ class ImportedHouseholdFactory(factory.DjangoModelFactory):
     registration_date = factory.Faker(
         "date_this_year", before_today=True, after_today=False
     )
-    head_of_household = None
     admin1 = ""
     admin2 = ""
-    geopoint = factory.LazyAttribute(lambda o: Point(factory.Faker("latlng").generate()))
+    geopoint = factory.LazyAttribute(
+        lambda o: Point(factory.Faker("latlng").generate())
+    )
     unhcr_id = factory.Faker("uuid4")
     f_0_5_age_group = factory.fuzzy.FuzzyInteger(3, 8)
     f_6_11_age_group = factory.fuzzy.FuzzyInteger(3, 8)
