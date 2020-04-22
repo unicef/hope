@@ -148,7 +148,7 @@ class Household(TimeStampedUUIDModel):
         )
 
     def __str__(self):
-        return f"Household CashAssist ID: {self.household_ca_id}"
+        return f"Household ID: {self.id}"
 
 
 class Document(TimeStampedUUIDModel):
