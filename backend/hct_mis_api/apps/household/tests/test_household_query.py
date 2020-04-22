@@ -10,7 +10,7 @@ from program.fixtures import ProgramFactory
 class TestHouseholdQuery(APITestCase):
     ALL_HOUSEHOLD_QUERY = """
     query AllHouseholds{
-      allHouseholds(orderBy: "family_size") {
+      allHouseholds(orderBy: "size") {
         edges {
           node {
             size
@@ -24,8 +24,8 @@ class TestHouseholdQuery(APITestCase):
     ALL_HOUSEHOLD_QUERY_RANGE = """
     query AllHouseholds{
       allHouseholds(
-        orderBy: "family_size", 
-        familySize: "{\\"min\\": 3, \\"max\\": 9}"
+        orderBy: "size", 
+        size: "{\\"min\\": 3, \\"max\\": 9}"
       ) {
         edges {
           node {
@@ -39,7 +39,7 @@ class TestHouseholdQuery(APITestCase):
     """
     ALL_HOUSEHOLD_QUERY_MIN = """
     query AllHouseholds{
-      allHouseholds(orderBy: "family_size", familySize: "{\\"min\\": 3}") {
+      allHouseholds(orderBy: "size", size: "{\\"min\\": 3}") {
         edges {
           node {
             size
@@ -52,7 +52,7 @@ class TestHouseholdQuery(APITestCase):
     """
     ALL_HOUSEHOLD_QUERY_MAX = """
     query AllHouseholds{
-      allHouseholds(orderBy: "family_size", familySize: "{\\"max\\": 9}") {
+      allHouseholds(orderBy: "size", size: "{\\"max\\": 9}") {
         edges {
           node {
             size

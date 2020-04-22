@@ -132,6 +132,12 @@ class Household(TimeStampedUUIDModel):
     )
     flex_fields = JSONField(default=dict)
     registration_date = models.DateField(null=True)
+    head_of_household = models.OneToOneField(
+        "Individual",
+        related_name="heading_household",
+        null=True,
+        on_delete=models.SET_NULL,
+    )
 
     @property
     def total_cash_received(self):
@@ -143,6 +149,17 @@ class Household(TimeStampedUUIDModel):
 
     def __str__(self):
         return f"Household CashAssist ID: {self.household_ca_id}"
+
+
+class Document(TimeStampedUUIDModel):
+    document_number = models.CharField(max_length=255, blank=True)
+    photo = models.ImageField(blank=True)
+    id_type = models.CharField(
+        max_length=255, choices=IDENTIFICATION_TYPE_CHOICE,
+    )
+    individual = models.ForeignKey(
+        "Individual", related_name="documents", on_delete=models.CASCADE
+    )
 
 
 class Individual(TimeStampedUUIDModel):
@@ -170,21 +187,6 @@ class Individual(TimeStampedUUIDModel):
     id_type = models.CharField(
         max_length=255, choices=IDENTIFICATION_TYPE_CHOICE,
     )
-    birth_certificate_no = models.CharField(max_length=255, blank=True)
-    birth_certificate_photo = models.ImageField(blank=True)
-    drivers_license_no = models.CharField(max_length=255, blank=True)
-    drivers_license_photo = models.ImageField(blank=True)
-    electoral_card_no = models.CharField(max_length=255, blank=True)
-    electoral_card_photo = models.ImageField(blank=True)
-    unhcr_id_no = models.CharField(max_length=255, blank=True)
-    unhcr_id_photo = models.ImageField(blank=True)
-    national_passport = models.CharField(max_length=255, blank=True)
-    national_passport_photo = models.ImageField(blank=True)
-    scope_id_no = models.CharField(max_length=255, blank=True)
-    scope_id_photo = models.ImageField(blank=True)
-    other_id_type = models.CharField(max_length=255, blank=True)
-    other_id_no = models.CharField(max_length=255, blank=True)
-    other_id_photo = models.ImageField(blank=True)
     household = models.ForeignKey(
         "Household", related_name="individuals", on_delete=models.CASCADE,
     )

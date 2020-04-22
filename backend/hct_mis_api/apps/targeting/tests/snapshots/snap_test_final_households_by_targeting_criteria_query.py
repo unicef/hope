@@ -23,7 +23,7 @@ snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_b
     }
 }
 
-snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_by_targeting_criteria_family_size 1'] = {
+snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_by_targeting_criteria_size 1'] = {
     'data': {
         'finalHouseholdsListByTargetingCriteria': {
             'edges': [
@@ -39,7 +39,7 @@ snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_b
     }
 }
 
-snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_by_targeting_criteria_family_size_1_edit 1'] = {
+snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_by_targeting_criteria_size_1_edit 1'] = {
     'data': {
         'finalHouseholdsListByTargetingCriteria': {
             'edges': [
@@ -61,7 +61,7 @@ snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_b
     }
 }
 
-snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_by_targeting_criteria_family_size_2_edit 1'] = {
+snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_by_targeting_criteria_size_2_edit 1'] = {
     'data': {
         'finalHouseholdsListByTargetingCriteria': {
             'edges': [

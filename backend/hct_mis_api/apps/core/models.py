@@ -94,7 +94,7 @@ class AdminAreaManager(TreeManager):
             super(AdminAreaManager, self)
             .get_queryset()
             .order_by("title")
-            .select_related("gateway")
+            .select_related("admin_area_type")
         )
 
 
@@ -104,11 +104,11 @@ class AdminArea(MPTTModel):
     The background of the location can be:
     BussinesAreaa > State > Province > City > District/Point.
     Either a point or geospatial object.
-    pcode should be unique.
+    post code should be unique.
     related models:
         indicator.Reportable (ForeignKey): "reportable"
         core.AdminArea (ForeignKey): "self"
-        core.GatewayType: "gateway"
+        core.AdminAreaType: "type of admin area state/city"
     """
 
     class Meta:
@@ -118,12 +118,6 @@ class AdminArea(MPTTModel):
     objects = AdminAreaManager()
 
     title = models.CharField(max_length=255)
-    business_area = models.ForeignKey(
-        "BusinessArea",
-        on_delete=models.SET_NULL,
-        related_name="locations",
-        null=True,
-    )
     post_code = models.CharField(
         max_length=32, blank=True, null=True, verbose_name="Postal Code"
     )
@@ -145,16 +139,6 @@ class AdminArea(MPTTModel):
     point = PointField(null=True, blank=True)
 
     def __str__(self):
-        if self.p_code:
-            return "{} ({} {})".format(
-                self.title,
-                self.gateway.name,
-                "{}: {}".format(
-                    "CERD" if self.gateway.name == "School" else "PCode",
-                    self.p_code or "",
-                ),
-            )
-
         return self.title
 
     @property
