@@ -13,23 +13,23 @@ class TestTargetPopulationQuery(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.households = []
-        cls.household_family_size_1_citizen = HouseholdFactory(
-            family_size=1, residence_status="CITIZEN",
+        cls.household_size_1_citizen = HouseholdFactory(
+            size=1, residence_status="CITIZEN",
         )
-        household = HouseholdFactory(family_size=1, residence_status="CITIZEN",)
+        household = HouseholdFactory(size=1, residence_status="CITIZEN",)
         cls.households.append(household)
-        cls.household_family_size_1 = HouseholdFactory(
-            family_size=1, residence_status="IDP",
+        cls.household_size_1 = HouseholdFactory(
+            size=1, residence_status="IDP",
         )
 
-        cls.households.append(cls.household_family_size_1)
-        cls.household_residence_status_citizen = cls.household_family_size_1
-        IndividualFactory(household=cls.household_family_size_1)
+        cls.households.append(cls.household_size_1)
+        cls.household_residence_status_citizen = cls.household_size_1
+        IndividualFactory(household=cls.household_size_1)
         cls.household_residence_status_refugee = HouseholdFactory(
-            family_size=2, residence_status="REFUGEE",
+            size=2, residence_status="REFUGEE",
         )
         cls.households.append(cls.household_residence_status_refugee)
-        cls.household_family_size_2 = cls.household_residence_status_refugee
+        cls.household_size_2 = cls.household_residence_status_refugee
         IndividualFactory(household=cls.household_residence_status_refugee)
         IndividualFactory(household=cls.household_residence_status_refugee)
         cls.user = UserFactory.create()
@@ -49,13 +49,13 @@ class TestTargetPopulationQuery(APITestCase):
     def test_counts_for_draft(self):
         targeting_criteria = self.get_targeting_criteria_for_rule(
             {
-                "field_name": "family_size",
+                "field_name": "size",
                 "arguments": [2],
                 "comparision_method": "EQUALS",
             }
         )
         tp = TargetPopulation(
-            name="target_population_family_size_2",
+            name="target_population_size_2",
             created_by=self.user,
             candidate_list_targeting_criteria=targeting_criteria,
             status="DRAFT",
@@ -71,13 +71,13 @@ class TestTargetPopulationQuery(APITestCase):
     def test_counts_for_draft_changed_criteria(self):
         targeting_criteria = self.get_targeting_criteria_for_rule(
             {
-                "field_name": "family_size",
+                "field_name": "size",
                 "arguments": [2],
                 "comparision_method": "EQUALS",
             }
         )
         tp = TargetPopulation(
-            name="target_population_family_size_2",
+            name="target_population_size_2",
             created_by=self.user,
             candidate_list_targeting_criteria=targeting_criteria,
             status="DRAFT",
@@ -97,12 +97,12 @@ class TestTargetPopulationQuery(APITestCase):
 
     def test_counts_for_approved(self):
         tp = TargetPopulation(
-            name="target_population_family_size_2",
+            name="target_population_size_2",
             created_by=self.user,
             status="APPROVED",
         )
         tp.save()
-        tp.households.add(self.household_family_size_2)
+        tp.households.add(self.household_size_2)
         tp.refresh_from_db()
         self.assertEqual(tp.candidate_list_total_households, 1)
         self.assertEqual(tp.candidate_list_total_individuals, 2)
@@ -112,20 +112,20 @@ class TestTargetPopulationQuery(APITestCase):
     def test_counts_for_approved_with_additional_rules(self):
         targeting_criteria = self.get_targeting_criteria_for_rule(
             {
-                "field_name": "family_size",
+                "field_name": "size",
                 "arguments": [1],
                 "comparision_method": "EQUALS",
             }
         )
         tp = TargetPopulation(
-            name="target_population_family_size_2",
+            name="target_population_size_2",
             created_by=self.user,
             status="APPROVED",
             candidate_list_targeting_criteria=targeting_criteria,
         )
         tp.save()
-        tp.households.add(self.household_family_size_1)
-        tp.households.add(self.household_family_size_1_citizen)
+        tp.households.add(self.household_size_1)
+        tp.households.add(self.household_size_1_citizen)
         tp.refresh_from_db()
         self.assertEqual(tp.candidate_list_total_households, 2)
         self.assertEqual(tp.candidate_list_total_individuals, 2)
@@ -163,12 +163,12 @@ class TestTargetPopulationQuery(APITestCase):
 
     def test_counts_for_finalized(self):
         tp = TargetPopulation(
-            name="target_population_family_size_2",
+            name="target_population_size_2",
             created_by=self.user,
             status="FINALIZED",
         )
         tp.save()
-        tp.households.add(self.household_family_size_2)
+        tp.households.add(self.household_size_2)
         tp.refresh_from_db()
         self.assertEqual(tp.candidate_list_total_households, 1)
         self.assertEqual(tp.candidate_list_total_individuals, 2)
