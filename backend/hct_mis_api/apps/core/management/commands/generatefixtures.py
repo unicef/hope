@@ -82,13 +82,12 @@ class Command(BaseCommand):
         province_area_type = AdminAreaTypeFactory(
             name="Province", business_area=business_area, admin_level=2
         )
-        AdminAreaFactory(admin_area_type=state_area_type)
-        # AdminAreaFactory.create_batch(
-        #     6, admin_area_type=state_area_type,
-        # )
-        # AdminAreaFactory.create_batch(
-        #     6, admin_area_type=province_area_type,
-        # )
+        AdminAreaFactory.create_batch(
+            6, admin_area_type=state_area_type,
+        )
+        AdminAreaFactory.create_batch(
+            6, admin_area_type=province_area_type,
+        )
 
     @staticmethod
     def _generate_program_with_dependencies(options):
@@ -190,7 +189,7 @@ class Command(BaseCommand):
                     registration_data_import=data_import,
                 )
                 imported_individuals = ImportedIndividualFactory.create_batch(
-                    imported_household.family_size,
+                    imported_household.size,
                     household=imported_household,
                     registration_data_import=data_import,
                 )
