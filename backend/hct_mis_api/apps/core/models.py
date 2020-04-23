@@ -98,13 +98,12 @@ class AdminAreaManager(TreeManager):
         )
 
 
-class AdminArea(MPTTModel):
+class AdminArea(MPTTModel, TimeStampedUUIDModel):
     """
     AdminArea model define place where agents are working.
     The background of the location can be:
     BussinesAreaa > State > Province > City > District/Point.
     Either a point or geospatial object.
-    post code should be unique.
     related models:
         indicator.Reportable (ForeignKey): "reportable"
         core.AdminArea (ForeignKey): "self"
@@ -112,15 +111,12 @@ class AdminArea(MPTTModel):
     """
 
     class Meta:
-        unique_together = ("title", "post_code")
+        unique_together = ("title", "admin_area_type")
         ordering = ["title"]
 
     objects = AdminAreaManager()
 
     title = models.CharField(max_length=255)
-    post_code = models.CharField(
-        max_length=32, blank=True, null=True, verbose_name="Postal Code"
-    )
     parent = TreeForeignKey(
         "self",
         verbose_name=_("Parent"),
@@ -132,7 +128,7 @@ class AdminArea(MPTTModel):
     )
 
     admin_area_type = models.ForeignKey(
-        "AdminAreaType", on_delete=models.CASCADE, related_name='locations'
+        "AdminAreaType", on_delete=models.CASCADE, related_name="locations"
     )
 
     geom = MultiPolygonField(null=True, blank=True)

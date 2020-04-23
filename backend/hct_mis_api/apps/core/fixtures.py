@@ -47,13 +47,12 @@ class AdminAreaFactory(factory.DjangoModelFactory):
         model = AdminArea
         django_get_or_create = (
             "title",
-            "post_code",
+            "admin_area_type",
         )
 
     title = factory.LazyFunction(faker.city)
     # We are going to fill admin_area_type type manually
     admin_area_type = None
-    post_code = factory.LazyAttribute(lambda o: faker.random_number(5))
     parent = None
     geom = factory.LazyFunction(create_fake_multipolygon)
     point = None
