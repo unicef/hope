@@ -8,11 +8,14 @@ import {
   Typography,
 } from '@material-ui/core';
 import styled from 'styled-components';
+import { useFinalizeTpMutation } from '../../../__generated__/graphql';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useSnackbar } from '../../../hooks/useSnackBar';
 
 export interface FinalizeTargetPopulationPropTypes {
   open: boolean;
   setOpen: Function;
-};
+}
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -31,7 +34,27 @@ const DialogDescription = styled.div`
   color: rgba(0, 0, 0, 0.54);
 `;
 
-export function FinalizeTargetPopulation({ open, setOpen }) {
+export function FinalizeTargetPopulation({
+  open,
+  setOpen,
+  totalHouseholds,
+  targetPopulationId,
+}) {
+  const { showMessage } = useSnackbar();
+  const businessArea = useBusinessArea();
+  const [mutate, loading] = useFinalizeTpMutation();
+  const onSubmit = (id) => {
+    mutate({
+      variables: {
+        id,
+      },
+    }).then((res) => {
+      setOpen(false);
+      showMessage('Target Population Finalized', {
+        pathname: `/${businessArea}/target-population/${id}`,
+      });
+    });
+  };
   return (
     <Dialog
       open={open}
@@ -46,14 +69,19 @@ export function FinalizeTargetPopulation({ open, setOpen }) {
       </DialogTitleWrapper>
       <DialogContent>
         <DialogDescription>
-          Are you sure you want to push $numberOfHouseholds$ households to
-          CashAssist? This population will be locked (made static).
+          Are you sure you want to push {totalHouseholds} households to
+          CashAssist? Target population will not be eeditable further.
         </DialogDescription>
       </DialogContent>
       <DialogFooter>
         <DialogActions>
           <Button onClick={() => setOpen(false)}>CANCEL</Button>
-          <Button type='submit' color='primary' variant='contained'>
+          <Button
+            onClick={() => onSubmit(targetPopulationId)}
+            color='primary'
+            variant='contained'
+            disabled={!loading}
+          >
             Finalize
           </Button>
         </DialogActions>
