@@ -50,10 +50,10 @@ class HouseholdFilter(FilterSet):
 
 
 class IndividualFilter(FilterSet):
-    # business_area = CharFilter(
-    #     field_name="household__location__business_area__slug",
-    # )
-    age = AgeRangeFilter(field_name="dob")
+    business_area = CharFilter(
+        field_name="household__business_area__slug",
+    )
+    age = AgeRangeFilter(field_name="birth_date")
     sex = ModelMultipleChoiceFilter(
         to_field_name="sex", queryset=Individual.objects.all(),
     )
@@ -63,7 +63,7 @@ class IndividualFilter(FilterSet):
         model = Individual
         fields = {
             "programme": ["exact", "icontains"],
-            # "business_area": ["exact"],
+            "business_area": ["exact"],
             "full_name": ["exact", "icontains"],
             "age": ["range", "lte", "gte"],
             "sex": ["exact"],
@@ -76,8 +76,7 @@ class IndividualFilter(FilterSet):
             "household__id",
             "birth_date",
             "sex",
-            # TODO: change ordering location does not exist
-            # "household__location__title",
+            "household__admin_area__title",
         )
     )
 
