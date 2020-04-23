@@ -2672,6 +2672,77 @@ export type CopyTargetPopulationMutation = (
   )> }
 );
 
+export type FinalizeTpMutationVariables = {
+  id: Scalars['ID']
+};
+
+
+export type FinalizeTpMutation = (
+  { __typename?: 'Mutations' }
+  & { finalizeTargetPopulation: Maybe<(
+    { __typename?: 'FinalizeTargetPopulationMutation' }
+    & { targetPopulation: Maybe<(
+      { __typename?: 'TargetPopulationNode' }
+      & Pick<TargetPopulationNode, 'id' | 'name' | 'status'>
+      & { candidateListTargetingCriteria: Maybe<(
+        { __typename?: 'TargetingCriteriaNode' }
+        & { targetPopulationCandidate: Maybe<(
+          { __typename?: 'TargetPopulationNode' }
+          & { createdBy: Maybe<(
+            { __typename?: 'UserNode' }
+            & Pick<UserNode, 'firstName' | 'lastName'>
+          )>, program: Maybe<(
+            { __typename?: 'ProgramNode' }
+            & Pick<ProgramNode, 'id' | 'name'>
+          )> }
+        )>, rules: Maybe<Array<Maybe<(
+          { __typename?: 'TargetingCriteriaRuleNode' }
+          & Pick<TargetingCriteriaRuleNode, 'id'>
+          & { filters: Maybe<Array<Maybe<(
+            { __typename?: 'TargetingCriteriaRuleFilterNode' }
+            & Pick<TargetingCriteriaRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod'>
+            & { fieldAttribute: Maybe<(
+              { __typename?: 'FieldAttributeNode' }
+              & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
+              & { choices: Maybe<Array<Maybe<(
+                { __typename?: 'CoreFieldChoiceObject' }
+                & Pick<CoreFieldChoiceObject, 'value' | 'labelEn'>
+              )>>> }
+            )> }
+          )>>> }
+        )>>> }
+      )>, finalListTargetingCriteria: Maybe<(
+        { __typename?: 'TargetingCriteriaNode' }
+        & { targetPopulationFinal: Maybe<(
+          { __typename?: 'TargetPopulationNode' }
+          & { createdBy: Maybe<(
+            { __typename?: 'UserNode' }
+            & Pick<UserNode, 'firstName' | 'lastName'>
+          )>, program: Maybe<(
+            { __typename?: 'ProgramNode' }
+            & Pick<ProgramNode, 'id' | 'name'>
+          )> }
+        )>, rules: Maybe<Array<Maybe<(
+          { __typename?: 'TargetingCriteriaRuleNode' }
+          & Pick<TargetingCriteriaRuleNode, 'id'>
+          & { filters: Maybe<Array<Maybe<(
+            { __typename?: 'TargetingCriteriaRuleFilterNode' }
+            & Pick<TargetingCriteriaRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod'>
+            & { fieldAttribute: Maybe<(
+              { __typename?: 'FieldAttributeNode' }
+              & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
+              & { choices: Maybe<Array<Maybe<(
+                { __typename?: 'CoreFieldChoiceObject' }
+                & Pick<CoreFieldChoiceObject, 'value' | 'labelEn'>
+              )>>> }
+            )> }
+          )>>> }
+        )>>> }
+      )> }
+    )> }
+  )> }
+);
+
 export type UpdateProgramMutationVariables = {
   programData: UpdateProgramInput
 };
@@ -3248,7 +3319,7 @@ export type TargetPopulationQuery = (
   { __typename?: 'Query' }
   & { targetPopulation: Maybe<(
     { __typename?: 'TargetPopulationNode' }
-    & Pick<TargetPopulationNode, 'id' | 'name' | 'status'>
+    & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'candidateListTotalHouseholds'>
     & { candidateListTargetingCriteria: Maybe<(
       { __typename?: 'TargetingCriteriaNode' }
       & { targetPopulationCandidate: Maybe<(
@@ -4160,6 +4231,119 @@ export function useCopyTargetPopulationMutation(baseOptions?: ApolloReactHooks.M
 export type CopyTargetPopulationMutationHookResult = ReturnType<typeof useCopyTargetPopulationMutation>;
 export type CopyTargetPopulationMutationResult = ApolloReactCommon.MutationResult<CopyTargetPopulationMutation>;
 export type CopyTargetPopulationMutationOptions = ApolloReactCommon.BaseMutationOptions<CopyTargetPopulationMutation, CopyTargetPopulationMutationVariables>;
+export const FinalizeTpDocument = gql`
+    mutation FinalizeTP($id: ID!) {
+  finalizeTargetPopulation(id: $id) {
+    targetPopulation {
+      id
+      name
+      status
+      candidateListTargetingCriteria {
+        targetPopulationCandidate {
+          createdBy {
+            firstName
+            lastName
+          }
+          program {
+            id
+            name
+          }
+        }
+        rules {
+          id
+          filters {
+            fieldName
+            isFlexField
+            arguments
+            comparisionMethod
+            fieldAttribute {
+              name
+              labelEn
+              type
+              choices {
+                value
+                labelEn
+              }
+            }
+          }
+        }
+      }
+      finalListTargetingCriteria {
+        targetPopulationFinal {
+          createdBy {
+            firstName
+            lastName
+          }
+          program {
+            id
+            name
+          }
+        }
+        rules {
+          id
+          filters {
+            fieldName
+            isFlexField
+            arguments
+            comparisionMethod
+            fieldAttribute {
+              name
+              labelEn
+              type
+              choices {
+                value
+                labelEn
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export type FinalizeTpMutationFn = ApolloReactCommon.MutationFunction<FinalizeTpMutation, FinalizeTpMutationVariables>;
+export type FinalizeTpComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<FinalizeTpMutation, FinalizeTpMutationVariables>, 'mutation'>;
+
+    export const FinalizeTpComponent = (props: FinalizeTpComponentProps) => (
+      <ApolloReactComponents.Mutation<FinalizeTpMutation, FinalizeTpMutationVariables> mutation={FinalizeTpDocument} {...props} />
+    );
+    
+export type FinalizeTpProps<TChildProps = {}> = ApolloReactHoc.MutateProps<FinalizeTpMutation, FinalizeTpMutationVariables> & TChildProps;
+export function withFinalizeTp<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  FinalizeTpMutation,
+  FinalizeTpMutationVariables,
+  FinalizeTpProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, FinalizeTpMutation, FinalizeTpMutationVariables, FinalizeTpProps<TChildProps>>(FinalizeTpDocument, {
+      alias: 'finalizeTp',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useFinalizeTpMutation__
+ *
+ * To run a mutation, you first call `useFinalizeTpMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useFinalizeTpMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [finalizeTpMutation, { data, loading, error }] = useFinalizeTpMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useFinalizeTpMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<FinalizeTpMutation, FinalizeTpMutationVariables>) {
+        return ApolloReactHooks.useMutation<FinalizeTpMutation, FinalizeTpMutationVariables>(FinalizeTpDocument, baseOptions);
+      }
+export type FinalizeTpMutationHookResult = ReturnType<typeof useFinalizeTpMutation>;
+export type FinalizeTpMutationResult = ApolloReactCommon.MutationResult<FinalizeTpMutation>;
+export type FinalizeTpMutationOptions = ApolloReactCommon.BaseMutationOptions<FinalizeTpMutation, FinalizeTpMutationVariables>;
 export const UpdateProgramDocument = gql`
     mutation UpdateProgram($programData: UpdateProgramInput!) {
   updateProgram(programData: $programData) {
@@ -5558,6 +5742,7 @@ export const TargetPopulationDocument = gql`
     id
     name
     status
+    candidateListTotalHouseholds
     candidateListTargetingCriteria {
       targetPopulationCandidate {
         createdBy {
