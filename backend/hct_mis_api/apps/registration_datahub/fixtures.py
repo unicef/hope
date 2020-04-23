@@ -92,7 +92,7 @@ class ImportedIndividualFactory(factory.DjangoModelFactory):
         YES_NO_CHOICE, getter=lambda c: c[0],
     )
 
-    martial_status = factory.fuzzy.FuzzyChoice(
+    marital_status = factory.fuzzy.FuzzyChoice(
         MARTIAL_STATUS_CHOICE, getter=lambda c: c[0],
     )
     phone_no = factory.Faker("phone_number")

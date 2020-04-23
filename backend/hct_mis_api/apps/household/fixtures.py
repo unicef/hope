@@ -55,7 +55,7 @@ class IndividualFactory(factory.DjangoModelFactory):
         "date_of_birth", tzinfo=utc, minimum_age=16, maximum_age=90
     )
     estimated_birth_date = None
-    martial_status = factory.fuzzy.FuzzyChoice(
+    marital_status = factory.fuzzy.FuzzyChoice(
         MARTIAL_STATUS_CHOICE, getter=lambda c: c[0],
     )
     phone_no = factory.Faker("phone_number")
