@@ -99,6 +99,10 @@ description: HCT MIS related glossary and terms
       <td style="text-align:left">Division of Financial and Administrative Management</td>
     </tr>
     <tr>
+      <td style="text-align:left">DP - Down Payment</td>
+      <td style="text-align:left"></td>
+    </tr>
+    <tr>
       <td style="text-align:left">Draft Cash Plan</td>
       <td style="text-align:left">Something that country office could do for basic targeting and cash planning.</td>
     </tr>
@@ -141,7 +145,7 @@ description: HCT MIS related glossary and terms
         payments to beneficiaries.</td>
     </tr>
     <tr>
-      <td style="text-align:left">Fund commitment</td>
+      <td style="text-align:left">FC - Fund Commitment</td>
       <td style="text-align:left"></td>
     </tr>
     <tr>
