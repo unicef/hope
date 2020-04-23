@@ -89,7 +89,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
     estimated_birth_date = models.CharField(
         max_length=3, default="NO", choices=YES_NO_CHOICE, blank=True,
     )
-    martial_status = models.CharField(
+    marital_status = models.CharField(
         max_length=255, choices=MARTIAL_STATUS_CHOICE,
     )
     phone_no = PhoneNumberField(blank=True)

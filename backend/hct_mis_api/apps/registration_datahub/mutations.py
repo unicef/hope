@@ -127,7 +127,7 @@ class MergeRegistrationDataImportMutation(BaseValidator, graphene.Mutation):
                 "sex",
                 "estimated_dob",
                 "nationality",
-                "martial_status",
+                "marital_status",
                 "phone_number",
                 "phone_number_alternative",
                 "identification_type",

@@ -178,8 +178,10 @@ class Individual(TimeStampedUUIDModel):
     role = models.CharField(max_length=255, blank=True, choices=ROLE_CHOICE,)
     sex = models.CharField(max_length=255, choices=SEX_CHOICE,)
     birth_date = models.DateField()
-    estimated_birth_date = models.DateField(blank=True, null=True)
-    martial_status = models.CharField(
+    estimated_birth_date = models.DateField(
+        blank=True, null=True, choices=YES_NO_CHOICE
+    )
+    marital_status = models.CharField(
         max_length=255, choices=MARTIAL_STATUS_CHOICE,
     )
     phone_no = PhoneNumberField(blank=True)
