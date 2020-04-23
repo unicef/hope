@@ -160,6 +160,7 @@ class Document(TimeStampedUUIDModel):
     individual = models.ForeignKey(
         "Individual", related_name="documents", on_delete=models.CASCADE
     )
+    country = CountryField(blank=True)
 
 
 class Individual(TimeStampedUUIDModel):
