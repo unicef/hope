@@ -2360,7 +2360,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'English(EN)'
                     }
                 ],
-                'name': 'family_size',
+                'name': 'size',
                 'required': True,
                 'type': 'INTEGER'
             },
