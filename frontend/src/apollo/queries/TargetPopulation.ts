@@ -6,6 +6,7 @@ export const TargetPopulation = gql`
       id
       name
       status
+      candidateListTotalHouseholds
       candidateListTargetingCriteria {
         targetPopulationCandidate {
           createdBy {
