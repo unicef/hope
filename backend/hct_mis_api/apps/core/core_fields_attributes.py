@@ -1,6 +1,6 @@
 from functools import reduce
 
-from core.utils import age_to_dob_query
+from core.utils import age_to_birth_date_query
 from household.models import RESIDENCE_STATUS_CHOICE
 
 TYPE_INTEGER = "INTEGER"
@@ -26,7 +26,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "label": {"English(EN)": "age"},
         "hint": "age in years",
         "required": True,
-        "get_query": age_to_dob_query,
+        "get_query": age_to_birth_date_query,
         "choices": [],
         "associated_with": _INDIVIDUAL,
     },

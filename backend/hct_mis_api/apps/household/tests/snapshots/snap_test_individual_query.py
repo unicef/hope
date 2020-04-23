@@ -13,7 +13,7 @@ snapshots['TestIndividualQuery::test_individual_programme_filter 1'] = {
             'edges': [
                 {
                     'node': {
-                        'dob': '1969-11-29',
+                        'birth_date': '1969-11-29',
                         'firstName': 'Jenna',
                         'fullName': 'Jenna Franklin',
                         'household': {
@@ -33,7 +33,7 @@ snapshots['TestIndividualQuery::test_individual_programme_filter 1'] = {
                 },
                 {
                     'node': {
-                        'dob': '1983-12-21',
+                        'birth_date': '1983-12-21',
                         'firstName': 'Timothy',
                         'fullName': 'Timothy Perry',
                         'household': {
@@ -53,7 +53,7 @@ snapshots['TestIndividualQuery::test_individual_programme_filter 1'] = {
                 },
                 {
                     'node': {
-                        'dob': '1943-07-30',
+                        'birth_date': '1943-07-30',
                         'firstName': 'Benjamin',
                         'fullName': 'Benjamin Butler',
                         'household': {
@@ -82,7 +82,7 @@ snapshots['TestIndividualQuery::test_individual_query_all 1'] = {
             'edges': [
                 {
                     'node': {
-                        'dob': '1943-07-30',
+                        'birth_date': '1943-07-30',
                         'firstName': 'Benjamin',
                         'fullName': 'Benjamin Butler',
                         'lastName': 'Butler',
@@ -91,7 +91,7 @@ snapshots['TestIndividualQuery::test_individual_query_all 1'] = {
                 },
                 {
                     'node': {
-                        'dob': '1946-02-15',
+                        'birth_date': '1946-02-15',
                         'firstName': 'Robin',
                         'fullName': 'Robin Ford',
                         'lastName': 'Ford',
@@ -100,7 +100,7 @@ snapshots['TestIndividualQuery::test_individual_query_all 1'] = {
                 },
                 {
                     'node': {
-                        'dob': '1983-12-21',
+                        'birth_date': '1983-12-21',
                         'firstName': 'Timothy',
                         'fullName': 'Timothy Perry',
                         'lastName': 'Perry',
@@ -109,7 +109,7 @@ snapshots['TestIndividualQuery::test_individual_query_all 1'] = {
                 },
                 {
                     'node': {
-                        'dob': '1973-03-23',
+                        'birth_date': '1973-03-23',
                         'firstName': 'Eric',
                         'fullName': 'Eric Torres',
                         'lastName': 'Torres',
@@ -118,7 +118,7 @@ snapshots['TestIndividualQuery::test_individual_query_all 1'] = {
                 },
                 {
                     'node': {
-                        'dob': '1969-11-29',
+                        'birth_date': '1969-11-29',
                         'firstName': 'Jenna',
                         'fullName': 'Jenna Franklin',
                         'lastName': 'Franklin',
@@ -133,7 +133,7 @@ snapshots['TestIndividualQuery::test_individual_query_all 1'] = {
 snapshots['TestIndividualQuery::test_individual_query_single 1'] = {
     'data': {
         'individual': {
-            'dob': '1943-07-30',
+            'birth_date': '1943-07-30',
             'firstName': 'Benjamin',
             'fullName': 'Benjamin Butler',
             'lastName': 'Butler',
