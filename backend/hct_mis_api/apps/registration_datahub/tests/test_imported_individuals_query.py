@@ -26,60 +26,24 @@ class TestImportedIndividualQuery(APITestCase):
       }
     }
     """
-    ALL_IMPORTED_INDIVIDUALS_AGE_RANGE = f"""
-    query AllImportedIndividuals {{
-      allImportedIndividuals(
-        age: "{{\\"min\\": {MIN_AGE}, \\"max\\": {MAX_AGE}}}"
-      ) {{
-        edges {{
-          node {{
-            fullName
-            givenName
-            familyName
-            phoneNo
-            birthDate
-          }}
-        }}
-      }}
-    }}
-    """
-    ALL_IMPORTED_INDIVIDUALS_AGE_MIN = f"""
-    query AllImportedIndividuals {{
-      allImportedIndividuals(
-        age: "{{\\"min\\": {MIN_AGE}}}"
-      ) {{
-        edges {{
-          node {{
-            fullName
-            givenName
-            familyName
-            phoneNo
-            birthDate
-          }}
-        }}
-      }}
-    }}
-    """
-    ALL_IMPORTED_INDIVIDUALS_AGE_MAX = f"""
-    query AllImportedIndividuals {{
-      allImportedIndividuals(
-        age: "{{\\"max\\": {MAX_AGE}}}"
-      ) {{
-        edges {{
-          node {{
-            fullName
-            givenName
-            familyName
-            phoneNo
-            birthDate
-          }}
-        }}
-      }}
-    }}
-    """
-    ALL_IMPORTED_INDIVIDUALS_SEX = """
+    ALL_IMPORTED_INDIVIDUALS_ORDER_BY_BIRTH_DATE_A_QUERY = """
     query AllImportedIndividuals {
-      allImportedIndividuals(sex: "FEMALE") {
+      allImportedIndividuals(orderBy: "birth_date") {
+        edges {
+          node {
+            fullName
+            givenName
+            familyName
+            phoneNo
+            birthDate
+          }
+        }
+      }
+    }
+    """
+    ALL_IMPORTED_INDIVIDUALS_ORDER_BY_BIRTH_DATE_D_QUERY = """
+    query AllImportedIndividuals {
+      allImportedIndividuals(orderBy: "-birth_date") {
         edges {
           node {
             fullName
@@ -161,27 +125,15 @@ class TestImportedIndividualQuery(APITestCase):
             context={"user": self.user},
         )
 
-    def test_imported_individual_query_age_range(self):
+    def test_imported_individual_query_order_by_dob_a_all(self):
         self.snapshot_graphql_request(
-            request_string=self.ALL_IMPORTED_INDIVIDUALS_AGE_RANGE,
+            request_string=self.ALL_IMPORTED_INDIVIDUALS_ORDER_BY_BIRTH_DATE_A_QUERY,
             context={"user": self.user},
         )
 
-    def test_imported_individual_query_age_min(self):
+    def test_imported_individual_query_order_by_dob_d_all(self):
         self.snapshot_graphql_request(
-            request_string=self.ALL_IMPORTED_INDIVIDUALS_AGE_MIN,
-            context={"user": self.user},
-        )
-
-    def test_imported_individual_query_age_max(self):
-        self.snapshot_graphql_request(
-            request_string=self.ALL_IMPORTED_INDIVIDUALS_AGE_MAX,
-            context={"user": self.user},
-        )
-
-    def test_imported_individual_query_sex(self):
-        self.snapshot_graphql_request(
-            request_string=self.ALL_IMPORTED_INDIVIDUALS_SEX,
+            request_string=self.ALL_IMPORTED_INDIVIDUALS_ORDER_BY_BIRTH_DATE_D_QUERY,
             context={"user": self.user},
         )
 

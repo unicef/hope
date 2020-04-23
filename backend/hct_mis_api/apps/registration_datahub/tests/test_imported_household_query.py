@@ -19,45 +19,6 @@ class TestImportedHouseholdQuery(APITestCase):
       }
     }
     """
-    ALL_IMPORTED_HOUSEHOLD_QUERY_RANGE = """
-    query AllImportedHouseholds{
-      allImportedHouseholds(size: "{\\"min\\": 3, \\"max\\": 9}") {
-        edges {
-          node {
-            size
-            countryOrigin
-            address
-          }
-        }
-      }
-    }
-    """
-    ALL_IMPORTED_HOUSEHOLD_QUERY_MIN = """
-    query AllImportedHouseholds{
-      allImportedHouseholds(size: "{\\"min\\": 3}") {
-        edges {
-          node {
-            size
-            countryOrigin
-            address
-          }
-        }
-      }
-    }
-    """
-    ALL_IMPORTED_HOUSEHOLD_QUERY_MAX = """
-    query AllImportedHouseholds{
-      allImportedHouseholds(size: "{\\"max\\": 9}") {
-        edges {
-          node {
-            size
-            countryOrigin
-            address
-          }
-        }
-      }
-    }
-    """
     IMPORTED_HOUSEHOLD_QUERY = """
     query ImportedHousehold($id: ID!) {
       importedHousehold(id: $id) {
@@ -84,24 +45,6 @@ class TestImportedHouseholdQuery(APITestCase):
     def test_imported_household_query_all(self):
         self.snapshot_graphql_request(
             request_string=self.ALL_IMPORTED_HOUSEHOLD_QUERY,
-            context={"user": self.user},
-        )
-
-    def test_imported_household_query_all_range(self):
-        self.snapshot_graphql_request(
-            request_string=self.ALL_IMPORTED_HOUSEHOLD_QUERY_RANGE,
-            context={"user": self.user},
-        )
-
-    def test_imported_household_query_all_min(self):
-        self.snapshot_graphql_request(
-            request_string=self.ALL_IMPORTED_HOUSEHOLD_QUERY_MIN,
-            context={"user": self.user},
-        )
-
-    def test_imported_household_query_all_max(self):
-        self.snapshot_graphql_request(
-            request_string=self.ALL_IMPORTED_HOUSEHOLD_QUERY_MAX,
             context={"user": self.user},
         )
 
