@@ -15,7 +15,7 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         )
         IndividualFactory(
             household=households[-1],
-            **{"dob": "1970-11-29", "years_in_school": 1,}
+            **{"birth_date": "1970-11-29", "years_in_school": 1,}
         )
         self.household_50_yo = households[-1]
         households.append(
@@ -23,14 +23,14 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         )
         IndividualFactory(
             household=households[-1],
-            **{"dob": "1991-11-18", "years_in_school": 2,}
+            **{"birth_date": "1991-11-18", "years_in_school": 2,}
         )
         households.append(
             HouseholdFactory(size=1, residence_status="CITIZEN",)
         )
         IndividualFactory(
             household=households[-1],
-            **{"dob": "1991-11-18", "years_in_school": 2,}
+            **{"birth_date": "1991-11-18", "years_in_school": 2,}
         )
         households.append(
             HouseholdFactory(size=2, residence_status="REFUGEE",)
@@ -40,11 +40,11 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         self.household_years_in_school_4 = households[-1]
         IndividualFactory(
             household=households[-1],
-            **{"dob": "1991-11-18", "years_in_school": 2,}
+            **{"birth_date": "1991-11-18", "years_in_school": 2,}
         )
         IndividualFactory(
             household=households[-1],
-            **{"dob": "1991-11-18", "years_in_school": 4,}
+            **{"birth_date": "1991-11-18", "years_in_school": 4,}
         )
 
         self.households = households
