@@ -111,7 +111,6 @@ class TestHouseholdQuery(APITestCase):
                 size=family_size,
                 address="Lorem Ipsum",
                 country_origin="PL",
-                household_ca_id="123-123-123",
             )
             if index % 2:
                 household.programs.add(self.program_one)
