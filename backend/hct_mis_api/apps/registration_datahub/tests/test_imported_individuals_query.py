@@ -17,76 +17,40 @@ class TestImportedIndividualQuery(APITestCase):
         edges {
           node {
             fullName
-            firstName
-            lastName
-            phoneNumber
-            dob
+            givenName
+            familyName
+            phoneNo
+            birthDate
           }
         }
       }
     }
     """
-    ALL_IMPORTED_INDIVIDUALS_AGE_RANGE = f"""
-    query AllImportedIndividuals {{
-      allImportedIndividuals(
-        age: "{{\\"min\\": {MIN_AGE}, \\"max\\": {MAX_AGE}}}"
-      ) {{
-        edges {{
-          node {{
-            fullName
-            firstName
-            lastName
-            phoneNumber
-            dob
-          }}
-        }}
-      }}
-    }}
-    """
-    ALL_IMPORTED_INDIVIDUALS_AGE_MIN = f"""
-    query AllImportedIndividuals {{
-      allImportedIndividuals(
-        age: "{{\\"min\\": {MIN_AGE}}}"
-      ) {{
-        edges {{
-          node {{
-            fullName
-            firstName
-            lastName
-            phoneNumber
-            dob
-          }}
-        }}
-      }}
-    }}
-    """
-    ALL_IMPORTED_INDIVIDUALS_AGE_MAX = f"""
-    query AllImportedIndividuals {{
-      allImportedIndividuals(
-        age: "{{\\"max\\": {MAX_AGE}}}"
-      ) {{
-        edges {{
-          node {{
-            fullName
-            firstName
-            lastName
-            phoneNumber
-            dob
-          }}
-        }}
-      }}
-    }}
-    """
-    ALL_IMPORTED_INDIVIDUALS_SEX = """
+    ALL_IMPORTED_INDIVIDUALS_ORDER_BY_BIRTH_DATE_A_QUERY = """
     query AllImportedIndividuals {
-      allImportedIndividuals(sex: "FEMALE") {
+      allImportedIndividuals(orderBy: "birth_date") {
         edges {
           node {
             fullName
-            firstName
-            lastName
-            phoneNumber
-            dob
+            givenName
+            familyName
+            phoneNo
+            birthDate
+          }
+        }
+      }
+    }
+    """
+    ALL_IMPORTED_INDIVIDUALS_ORDER_BY_BIRTH_DATE_D_QUERY = """
+    query AllImportedIndividuals {
+      allImportedIndividuals(orderBy: "-birth_date") {
+        edges {
+          node {
+            fullName
+            givenName
+            familyName
+            phoneNo
+            birthDate
           }
         }
       }
@@ -96,10 +60,10 @@ class TestImportedIndividualQuery(APITestCase):
     query ImportedIndividual($id: ID!) {
       importedIndividual(id: $id) {
         fullName
-        firstName
-        lastName
-        phoneNumber
-        dob
+        givenName
+        familyName
+        phoneNo
+        birthDate
       }
     }
     """
@@ -110,42 +74,42 @@ class TestImportedIndividualQuery(APITestCase):
         self.individuals_to_create = [
             {
                 "full_name": "Benjamin Butler",
-                "first_name": "Benjamin",
-                "last_name": "Butler",
-                "phone_number": "(953)682-4596",
-                "dob": "1943-07-30",
+                "given_name": "Benjamin",
+                "family_name": "Butler",
+                "phone_no": "(953)682-4596",
+                "birth_date": "1943-07-30",
                 "sex": "MALE",
             },
             {
                 "full_name": "Robin Ford",
-                "first_name": "Robin",
-                "last_name": "Ford",
-                "phone_number": "+18663567905",
-                "dob": "1946-02-15",
+                "given_name": "Robin",
+                "family_name": "Ford",
+                "phone_no": "+18663567905",
+                "birth_date": "1946-02-15",
                 "sex": "MALE",
             },
             {
                 "full_name": "Timothy Perry",
-                "first_name": "Timothy",
-                "last_name": "Perry",
-                "phone_number": "(548)313-1700-902",
-                "dob": "1983-12-21",
+                "given_name": "Timothy",
+                "family_name": "Perry",
+                "phone_no": "(548)313-1700-902",
+                "birth_date": "1983-12-21",
                 "sex": "MALE",
             },
             {
                 "full_name": "Eric Torres",
-                "first_name": "Eric",
-                "last_name": "Torres",
-                "phone_number": "(228)231-5473",
-                "dob": "1973-03-23",
+                "given_name": "Eric",
+                "family_name": "Torres",
+                "phone_no": "(228)231-5473",
+                "birth_date": "1973-03-23",
                 "sex": "MALE",
             },
             {
                 "full_name": "Jenna Franklin",
-                "first_name": "Jenna",
-                "last_name": "Franklin",
-                "phone_number": "001-296-358-5428-607",
-                "dob": "1969-11-29",
+                "given_name": "Jenna",
+                "family_name": "Franklin",
+                "phone_no": "001-296-358-5428-607",
+                "birth_date": "1969-11-29",
                 "sex": "FEMALE",
             },
         ]
@@ -161,27 +125,15 @@ class TestImportedIndividualQuery(APITestCase):
             context={"user": self.user},
         )
 
-    def test_imported_individual_query_age_range(self):
+    def test_imported_individual_query_order_by_dob_a_all(self):
         self.snapshot_graphql_request(
-            request_string=self.ALL_IMPORTED_INDIVIDUALS_AGE_RANGE,
+            request_string=self.ALL_IMPORTED_INDIVIDUALS_ORDER_BY_BIRTH_DATE_A_QUERY,
             context={"user": self.user},
         )
 
-    def test_imported_individual_query_age_min(self):
+    def test_imported_individual_query_order_by_dob_d_all(self):
         self.snapshot_graphql_request(
-            request_string=self.ALL_IMPORTED_INDIVIDUALS_AGE_MIN,
-            context={"user": self.user},
-        )
-
-    def test_imported_individual_query_age_max(self):
-        self.snapshot_graphql_request(
-            request_string=self.ALL_IMPORTED_INDIVIDUALS_AGE_MAX,
-            context={"user": self.user},
-        )
-
-    def test_imported_individual_query_sex(self):
-        self.snapshot_graphql_request(
-            request_string=self.ALL_IMPORTED_INDIVIDUALS_SEX,
+            request_string=self.ALL_IMPORTED_INDIVIDUALS_ORDER_BY_BIRTH_DATE_D_QUERY,
             context={"user": self.user},
         )
 

@@ -13,9 +13,9 @@ snapshots['TestIndividualQuery::test_individual_programme_filter 1'] = {
             'edges': [
                 {
                     'node': {
-                        'dob': '1969-11-29',
-                        'firstName': 'Jenna',
-                        'fullName': 'Jenna Franklin',
+                        'birthDate': '1969-11-29',
+                        'familyName': 'Franklin',
+                        'givenName': 'Jenna',
                         'household': {
                             'programs': {
                                 'edges': [
@@ -27,15 +27,14 @@ snapshots['TestIndividualQuery::test_individual_programme_filter 1'] = {
                                 ]
                             }
                         },
-                        'lastName': 'Franklin',
-                        'phoneNumber': '001-296-358-5428-607'
+                        'phoneNo': '001-296-358-5428-607'
                     }
                 },
                 {
                     'node': {
-                        'dob': '1983-12-21',
-                        'firstName': 'Timothy',
-                        'fullName': 'Timothy Perry',
+                        'birthDate': '1983-12-21',
+                        'familyName': 'Perry',
+                        'givenName': 'Timothy',
                         'household': {
                             'programs': {
                                 'edges': [
@@ -47,15 +46,14 @@ snapshots['TestIndividualQuery::test_individual_programme_filter 1'] = {
                                 ]
                             }
                         },
-                        'lastName': 'Perry',
-                        'phoneNumber': '(548)313-1700-902'
+                        'phoneNo': '(548)313-1700-902'
                     }
                 },
                 {
                     'node': {
-                        'dob': '1943-07-30',
-                        'firstName': 'Benjamin',
-                        'fullName': 'Benjamin Butler',
+                        'birthDate': '1943-07-30',
+                        'familyName': 'Butler',
+                        'givenName': 'Benjamin',
                         'household': {
                             'programs': {
                                 'edges': [
@@ -67,8 +65,7 @@ snapshots['TestIndividualQuery::test_individual_programme_filter 1'] = {
                                 ]
                             }
                         },
-                        'lastName': 'Butler',
-                        'phoneNumber': '(953)682-4596'
+                        'phoneNo': '(953)682-4596'
                     }
                 }
             ]
@@ -82,47 +79,47 @@ snapshots['TestIndividualQuery::test_individual_query_all 1'] = {
             'edges': [
                 {
                     'node': {
-                        'dob': '1943-07-30',
-                        'firstName': 'Benjamin',
+                        'birthDate': '1943-07-30',
+                        'familyName': 'Butler',
                         'fullName': 'Benjamin Butler',
-                        'lastName': 'Butler',
-                        'phoneNumber': '(953)682-4596'
+                        'givenName': 'Benjamin',
+                        'phoneNo': '(953)682-4596'
                     }
                 },
                 {
                     'node': {
-                        'dob': '1946-02-15',
-                        'firstName': 'Robin',
+                        'birthDate': '1946-02-15',
+                        'familyName': 'Ford',
                         'fullName': 'Robin Ford',
-                        'lastName': 'Ford',
-                        'phoneNumber': '+18663567905'
+                        'givenName': 'Robin',
+                        'phoneNo': '+18663567905'
                     }
                 },
                 {
                     'node': {
-                        'dob': '1983-12-21',
-                        'firstName': 'Timothy',
+                        'birthDate': '1983-12-21',
+                        'familyName': 'Perry',
                         'fullName': 'Timothy Perry',
-                        'lastName': 'Perry',
-                        'phoneNumber': '(548)313-1700-902'
+                        'givenName': 'Timothy',
+                        'phoneNo': '(548)313-1700-902'
                     }
                 },
                 {
                     'node': {
-                        'dob': '1973-03-23',
-                        'firstName': 'Eric',
+                        'birthDate': '1973-03-23',
+                        'familyName': 'Torres',
                         'fullName': 'Eric Torres',
-                        'lastName': 'Torres',
-                        'phoneNumber': '+12282315473'
+                        'givenName': 'Eric',
+                        'phoneNo': '+12282315473'
                     }
                 },
                 {
                     'node': {
-                        'dob': '1969-11-29',
-                        'firstName': 'Jenna',
+                        'birthDate': '1969-11-29',
+                        'familyName': 'Franklin',
                         'fullName': 'Jenna Franklin',
-                        'lastName': 'Franklin',
-                        'phoneNumber': '001-296-358-5428-607'
+                        'givenName': 'Jenna',
+                        'phoneNo': '001-296-358-5428-607'
                     }
                 }
             ]
@@ -133,11 +130,11 @@ snapshots['TestIndividualQuery::test_individual_query_all 1'] = {
 snapshots['TestIndividualQuery::test_individual_query_single 1'] = {
     'data': {
         'individual': {
-            'dob': '1943-07-30',
-            'firstName': 'Benjamin',
+            'birthDate': '1943-07-30',
+            'familyName': 'Butler',
             'fullName': 'Benjamin Butler',
-            'lastName': 'Butler',
-            'phoneNumber': '(953)682-4596'
+            'givenName': 'Benjamin',
+            'phoneNo': '(953)682-4596'
         }
     }
 }

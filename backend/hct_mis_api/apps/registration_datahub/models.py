@@ -1,5 +1,6 @@
 from datetime import date
 
+from django.contrib.gis.db.models import PointField
 from django.contrib.postgres.fields import JSONField
 from django.core.validators import (
     validate_image_file_extension,
@@ -7,146 +8,103 @@ from django.core.validators import (
     MaxLengthValidator,
 )
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
+from django_countries.fields import CountryField
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
 
 from household.const import NATIONALITIES
+from household.models import (
+    RESIDENCE_STATUS_CHOICE,
+    SEX_CHOICE,
+    MARITAL_STATUS_CHOICE,
+    RELATIONSHIP_CHOICE,
+    ROLE_CHOICE,
+)
 from utils.models import TimeStampedUUIDModel
 
 
 class ImportedHousehold(TimeStampedUUIDModel):
-    RESIDENCE_STATUS_CHOICE = (
-        ("REFUGEE", _("Refugee")),
-        ("MIGRANT", _("Migrant")),
-        ("CITIZEN", _("Citizen")),
-        ("IDP", _("IDP")),
-        ("OTHER", _("Other")),
-    )
-
-    household_ca_id = models.CharField(max_length=255)
     consent = ImageField(validators=[validate_image_file_extension])
     residence_status = models.CharField(
         max_length=255, choices=RESIDENCE_STATUS_CHOICE,
     )
-    nationality = models.CharField(max_length=255, choices=NATIONALITIES,)
-    family_size = models.PositiveIntegerField()
+    country_origin = models.CharField(max_length=255, choices=NATIONALITIES,)
+    size = models.PositiveIntegerField()
     address = models.CharField(max_length=255, blank=True)
-    location = models.CharField(max_length=255)
-    representative = models.ForeignKey(
-        "ImportedIndividual",
-        on_delete=models.SET_NULL,
-        related_name="represented_households",
-        null=True,
+    country = CountryField(blank=True)
+    admin1 = models.CharField(max_length=255, blank=True)
+    admin2 = models.CharField(max_length=255, blank=True)
+    geopoint = PointField(blank=True, null=True)
+    unhcr_id = models.CharField(max_length=255, blank=True)
+    female_age_group_0_5_count = models.PositiveIntegerField(default=0)
+    female_age_group_6_11_count = models.PositiveIntegerField(default=0)
+    female_age_group_12_17_count = models.PositiveIntegerField(default=0)
+    female_adults_count = models.PositiveIntegerField(default=0)
+    pregnant_count = models.PositiveIntegerField(default=0)
+    male_age_group_0_5_count = models.PositiveIntegerField(default=0)
+    male_age_group_6_11_count = models.PositiveIntegerField(default=0)
+    male_age_group_12_17_count = models.PositiveIntegerField(default=0)
+    male_adults_count = models.PositiveIntegerField(default=0)
+    female_age_group_0_5_disabled_count = models.PositiveIntegerField(default=0)
+    female_age_group_6_11_disabled_count = models.PositiveIntegerField(
+        default=0
     )
-    registration_data_import_id = models.ForeignKey(
+    female_age_group_12_17_disabled_count = models.PositiveIntegerField(
+        default=0
+    )
+    female_adults_disabled_count = models.PositiveIntegerField(default=0)
+    male_age_group_0_5_disabled_count = models.PositiveIntegerField(default=0)
+    male_age_group_6_11_disabled_count = models.PositiveIntegerField(default=0)
+    male_age_group_12_17_disabled_count = models.PositiveIntegerField(default=0)
+    male_adults_disabled_count = models.PositiveIntegerField(default=0)
+    head_of_household = models.OneToOneField(
+        "ImportedIndividual", on_delete=models.CASCADE, null=True
+    )
+    registration_data_import = models.ForeignKey(
         "RegistrationDataImportDatahub",
         related_name="households",
         on_delete=models.CASCADE,
-    )
-    head_of_household = models.OneToOneField(
-        "ImportedIndividual",
-        on_delete=models.CASCADE,
-        related_name="heading_household",
-        null=True,
     )
     registration_date = models.DateField(null=True)
     flex_fields = JSONField(default=dict)
 
     def __str__(self):
-        return f"Household CashAssist ID: {self.household_ca_id}"
+        return f"Household ID: {self.id}"
 
 
 class ImportedIndividual(TimeStampedUUIDModel):
-    SEX_CHOICE = (
-        ("MALE", _("Male")),
-        ("FEMALE", _("Female")),
-        ("OTHER", _("Other")),
-    )
-    MARTIAL_STATUS_CHOICE = (
-        ("SINGLE", _("SINGLE")),
-        ("MARRIED", _("Married")),
-        ("WIDOW", _("Widow")),
-        ("DIVORCED", _("Divorced")),
-        ("SEPARATED", _("Separated")),
-    )
-    IDENTIFICATION_TYPE_CHOICE = (
-        ("NA", _("N/A")),
-        ("BIRTH_CERTIFICATE", _("Birth Certificate")),
-        ("DRIVING_LICENSE", _("Driving License")),
-        ("UNHCR_ID_CARD", _("UNHCR ID card")),
-        ("NATIONAL_ID", _("National ID")),
-        ("NATIONAL_PASSPORT", _("National Passport")),
-    )
-    YES_NO_CHOICE = (
-        ("YES", _("Yes")),
-        ("NO", _("No")),
-    )
-    DISABILITY_CHOICE = (
-        ("NO", _("No")),
-        ("SEEING", _("Difficulty seeing (even if wearing glasses)")),
-        ("HEARING", _("Difficulty hearing (even if using a hearing aid)")),
-        ("WALKING", _("Difficulty walking or climbing steps")),
-        ("MEMORY", _("Difficulty remembering or concentrating")),
-        ("SELF_CARE", _("Difficulty with self care (washing, dressing)")),
-        (
-            "COMMUNICATING",
-            _(
-                "Difficulty communicating "
-                "(e.g understanding or being understood)"
-            ),
-        ),
-    )
-
-    individual_ca_id = models.CharField(max_length=255)
+    individual_id = models.CharField(max_length=255, blank=True)
+    photo = models.ImageField(blank=True)
     full_name = models.CharField(
         max_length=255,
         validators=[MinLengthValidator(3), MaxLengthValidator(255)],
     )
-    first_name = models.CharField(
-        max_length=85,
-        validators=[MinLengthValidator(3), MaxLengthValidator(85)],
+    given_name = models.CharField(max_length=85, blank=True,)
+    middle_name = models.CharField(max_length=85, blank=True,)
+    family_name = models.CharField(max_length=85, blank=True,)
+    relationship = models.CharField(
+        max_length=255, blank=True, choices=RELATIONSHIP_CHOICE,
     )
-    middle_name = models.CharField(
-        max_length=85,
-        validators=[MinLengthValidator(3), MaxLengthValidator(85)],
-        blank=True,
-    )
-    last_name = models.CharField(
-        max_length=85,
-        validators=[MinLengthValidator(3), MaxLengthValidator(85)],
-    )
+    role = models.CharField(max_length=255, blank=True, choices=ROLE_CHOICE,)
     sex = models.CharField(max_length=255, choices=SEX_CHOICE,)
-    dob = models.DateField()
-    estimated_dob = models.CharField(
-        max_length=3, default="NO", choices=YES_NO_CHOICE,
+    birth_date = models.DateField()
+    estimated_birth_date = models.BooleanField(default=False, null=True)
+    marital_status = models.CharField(
+        max_length=255, choices=MARITAL_STATUS_CHOICE,
     )
-    nationality = models.CharField(max_length=255, choices=NATIONALITIES,)
-    martial_status = models.CharField(
-        max_length=255, choices=MARTIAL_STATUS_CHOICE,
-    )
-    phone_number = PhoneNumberField(blank=True)
-    phone_number_alternative = PhoneNumberField(blank=True)
-    identification_type = models.CharField(
-        max_length=255, choices=IDENTIFICATION_TYPE_CHOICE,
-    )
-    identification_number = models.CharField(max_length=255)
+    phone_no = PhoneNumberField(blank=True)
+    phone_no_alternative = PhoneNumberField(blank=True)
     household = models.ForeignKey(
         "ImportedHousehold",
         related_name="individuals",
         on_delete=models.CASCADE,
     )
-    registration_data_import_id = models.ForeignKey(
+    registration_data_import = models.ForeignKey(
         "RegistrationDataImportDatahub",
         related_name="individuals",
         on_delete=models.CASCADE,
     )
-    work_status = models.CharField(
-        max_length=3, default="NO", choices=YES_NO_CHOICE,
-    )
-    disability = models.CharField(
-        max_length=30, default="NO", choices=DISABILITY_CHOICE,
-    )
+    disability = models.BooleanField(default=False)
     flex_fields = JSONField(default=dict)
 
     @property
@@ -154,8 +112,11 @@ class ImportedIndividual(TimeStampedUUIDModel):
         today = date.today()
         return (
             today.year
-            - self.dob.year
-            - ((today.month, today.day) < (self.dob.month, self.dob.day))
+            - self.birth_date.year
+            - (
+                (today.month, today.day)
+                < (self.birth_date.month, self.birth_date.day)
+            )
         )
 
     def __str__(self):
@@ -188,3 +149,44 @@ class ImportData(TimeStampedUUIDModel):
     xlsx_file = models.FileField()
     number_of_households = models.PositiveIntegerField()
     number_of_individuals = models.PositiveIntegerField()
+
+
+class DocumentType(TimeStampedUUIDModel):
+    country = CountryField(blank=True)
+    type = models.CharField(max_length=100)
+    label = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f"{self.label} in {self.country}"
+
+
+class Document(TimeStampedUUIDModel):
+    document_number = models.CharField(max_length=255, blank=True)
+    photo = models.ImageField(blank=True)
+    individual = models.ForeignKey(
+        "ImportedIndividual", related_name="documents", on_delete=models.CASCADE
+    )
+    type = models.ForeignKey(
+        "DocumentType", related_name="documents", on_delete=models.CASCADE
+    )
+
+
+class Agency(models.Model):
+    type = models.CharField(max_length=100,)
+    label = models.CharField(max_length=100,)
+
+    def __str__(self):
+        return f"{self.label}"
+
+
+class Identity(models.Model):
+    agency = models.ForeignKey(
+        "Agency", related_name="identities", on_delete=models.CASCADE
+    )
+    individual = models.ForeignKey(
+        "ImportedIndividual", related_name="identities", on_delete=models.CASCADE
+    )
+    document_number = models.CharField(max_length=255,)
+
+    def __str__(self):
+        return f"{self.agency} {self.individual} {self.document_number}"

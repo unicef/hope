@@ -33,5 +33,9 @@ class RegistrationDataImport(TimeStampedUUIDModel):
     number_of_households = models.PositiveIntegerField()
     datahub_id = models.UUIDField(null=True, default=None)
 
+    business_area = models.ForeignKey(
+        "core.BusinessArea", null=True, on_delete=models.CASCADE
+    )
+
     def __str__(self):
         return self.name
