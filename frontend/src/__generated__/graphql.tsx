@@ -1183,6 +1183,7 @@ export type HouseholdNode = Node & {
   maleAdultsDisabledCount: Scalars['Int'],
   registrationDataImport: RegistrationDataImportNode,
   programs: ProgramNodeConnection,
+  returnee: Scalars['Boolean'],
   registrationDate?: Maybe<Scalars['Date']>,
   headOfHousehold?: Maybe<IndividualNode>,
   individuals: IndividualNodeConnection,
@@ -2028,6 +2029,7 @@ export type ImportedHouseholdNode = Node & {
   headOfHousehold?: Maybe<ImportedIndividualNode>,
   registrationDataImport: RegistrationDataImportDatahubNode,
   registrationDate?: Maybe<Scalars['Date']>,
+  returnee: Scalars['Boolean'],
   flexFields: Scalars['JSONString'],
   individuals: ImportedIndividualNodeConnection,
 };
@@ -2085,7 +2087,7 @@ export type ImportedIndividualNode = Node & {
   role?: Maybe<ImportedIndividualRole>,
   sex: ImportedIndividualSex,
   birthDate: Scalars['Date'],
-  estimatedBirthDate: Scalars['Boolean'],
+  estimatedBirthDate?: Maybe<Scalars['Boolean']>,
   maritalStatus: ImportedIndividualMaritalStatus,
   phoneNo: Scalars['String'],
   phoneNoAlternative: Scalars['String'],
@@ -2170,7 +2172,7 @@ export type IndividualNode = Node & {
   role?: Maybe<IndividualRole>,
   sex: IndividualSex,
   birthDate: Scalars['Date'],
-  estimatedBirthDate: Scalars['Boolean'],
+  estimatedBirthDate?: Maybe<Scalars['Boolean']>,
   maritalStatus: IndividualMaritalStatus,
   phoneNo: Scalars['String'],
   phoneNoAlternative: Scalars['String'],
@@ -3367,7 +3369,7 @@ export type HouseholdDetailedFragment = (
       { __typename?: 'IndividualNodeEdge' }
       & { node: Maybe<(
         { __typename?: 'IndividualNode' }
-        & Pick<IndividualNode, 'relationship'>
+        & Pick<IndividualNode, 'birthDate' | 'relationship'>
         & IndividualMinimalFragment
       )> }
     )>> }
@@ -4548,6 +4550,7 @@ export const HouseholdDetailedFragmentDoc = gql`
     edges {
       node {
         ...individualMinimal
+        birthDate
         relationship
       }
     }
@@ -7880,6 +7883,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   maleAdultsDisabledCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   registrationDataImport?: Resolver<ResolversTypes['RegistrationDataImportNode'], ParentType, ContextType>,
   programs?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, HouseholdNodeProgramsArgs>,
+  returnee?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   registrationDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
   headOfHousehold?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, HouseholdNodeIndividualsArgs>,
@@ -7976,6 +7980,7 @@ export type ImportedHouseholdNodeResolvers<ContextType = any, ParentType extends
   headOfHousehold?: Resolver<Maybe<ResolversTypes['ImportedIndividualNode']>, ParentType, ContextType>,
   registrationDataImport?: Resolver<ResolversTypes['RegistrationDataImportDatahubNode'], ParentType, ContextType>,
   registrationDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
+  returnee?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   flexFields?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   individuals?: Resolver<ResolversTypes['ImportedIndividualNodeConnection'], ParentType, ContextType, ImportedHouseholdNodeIndividualsArgs>,
 };
@@ -8006,7 +8011,7 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   role?: Resolver<Maybe<ResolversTypes['ImportedIndividualRole']>, ParentType, ContextType>,
   sex?: Resolver<ResolversTypes['ImportedIndividualSex'], ParentType, ContextType>,
   birthDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
-  estimatedBirthDate?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  estimatedBirthDate?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   maritalStatus?: Resolver<ResolversTypes['ImportedIndividualMaritalStatus'], ParentType, ContextType>,
   phoneNo?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   phoneNoAlternative?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
@@ -8044,7 +8049,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   role?: Resolver<Maybe<ResolversTypes['IndividualRole']>, ParentType, ContextType>,
   sex?: Resolver<ResolversTypes['IndividualSex'], ParentType, ContextType>,
   birthDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
-  estimatedBirthDate?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  estimatedBirthDate?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   maritalStatus?: Resolver<ResolversTypes['IndividualMaritalStatus'], ParentType, ContextType>,
   phoneNo?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   phoneNoAlternative?: Resolver<ResolversTypes['String'], ParentType, ContextType>,

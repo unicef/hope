@@ -1067,6 +1067,7 @@ type HouseholdNode implements Node {
   maleAdultsDisabledCount: Int!
   registrationDataImport: RegistrationDataImportNode!
   programs(before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
+  returnee: Boolean!
   registrationDate: Date
   headOfHousehold: IndividualNode
   individuals(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
@@ -1846,6 +1847,7 @@ type ImportedHouseholdNode implements Node {
   headOfHousehold: ImportedIndividualNode
   registrationDataImport: RegistrationDataImportDatahubNode!
   registrationDate: Date
+  returnee: Boolean!
   flexFields: JSONString!
   individuals(before: String, after: String, first: Int, last: Int): ImportedIndividualNodeConnection!
 }
@@ -1892,7 +1894,7 @@ type ImportedIndividualNode implements Node {
   role: ImportedIndividualRole
   sex: ImportedIndividualSex!
   birthDate: Date!
-  estimatedBirthDate: Boolean!
+  estimatedBirthDate: Boolean
   maritalStatus: ImportedIndividualMaritalStatus!
   phoneNo: String!
   phoneNoAlternative: String!
@@ -1966,7 +1968,7 @@ type IndividualNode implements Node {
   role: IndividualRole
   sex: IndividualSex!
   birthDate: Date!
-  estimatedBirthDate: Boolean!
+  estimatedBirthDate: Boolean
   maritalStatus: IndividualMaritalStatus!
   phoneNo: String!
   phoneNoAlternative: String!
