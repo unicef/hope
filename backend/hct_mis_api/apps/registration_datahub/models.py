@@ -66,6 +66,7 @@ class ImportedHousehold(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
     )
     registration_date = models.DateField(null=True)
+    returnee = models.BooleanField(default=False, null=True)
     flex_fields = JSONField(default=dict)
 
     def __str__(self):

@@ -39,7 +39,6 @@ interface HouseholdDetailsProps {
 export function HouseholdDetails({
   houseHold,
 }: HouseholdDetailsProps): React.ReactElement {
-  const { paymentRecords } = houseHold;
   return (
     <Container>
       <Title>
@@ -58,7 +57,7 @@ export function HouseholdDetails({
           </Grid>
           <Grid item xs={4}>
             <LabelizedField label='Location'>
-              <div>{houseHold.location.title}</div>
+              <div>{houseHold.adminArea.title}</div>
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>
@@ -68,7 +67,7 @@ export function HouseholdDetails({
           </Grid>
           <Grid item xs={4}>
             <LabelizedField label='Family Nationality'>
-              <div>{houseHold.nationality}</div>
+              <div>{houseHold.countryOrigin}</div>
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>

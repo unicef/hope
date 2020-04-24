@@ -126,6 +126,7 @@ class Household(TimeStampedUUIDModel):
     programs = models.ManyToManyField(
         "program.Program", related_name="households", blank=True,
     )
+    returnee = models.BooleanField(default=False, null=True)
     flex_fields = JSONField(default=dict)
     registration_date = models.DateField(null=True)
     head_of_household = models.OneToOneField(
