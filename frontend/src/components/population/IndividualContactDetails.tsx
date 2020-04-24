@@ -41,7 +41,7 @@ export function IndividualContactDetails({
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='Address'>
-            <div>{household.address ? household.address : '-'}</div>
+            <div>{household.address || '-'}</div>
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
