@@ -41,9 +41,6 @@ def comparision_method_resolver(obj):
 def arguments_resolver(obj):
     min = None
     max = None
-    if obj.field_name == "years_in_school":
-        min = random.randint(1, 4)
-        max = random.randint(min, min + 5)
     if obj.field_name == "age":
         min = random.randint(1, 100)
         max = random.randint(min, random.randint(min + 1, 116))
