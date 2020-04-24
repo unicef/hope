@@ -80,7 +80,6 @@ export function HouseholdIndividualsTable({
   };
 
   const allIndividuals = household.individuals.edges.map((edge) => edge.node);
-
   if (orderBy) {
     if (orderDirection === 'asc') {
       allIndividuals.sort((a, b) => {
@@ -124,9 +123,7 @@ export function HouseholdIndividualsTable({
             <TableCell align='left'>
               <Missing />
             </TableCell>
-            <TableCell align='right'>
-              {row.birthDate ? 'N/A' : row.birthDate}
-            </TableCell>
+            <TableCell align='left'>{row.birthDate || '-'}</TableCell>
             <TableCell align='left'>{sexToCapitalize(row.sex)}</TableCell>
           </ClickableTableRow>
         );
