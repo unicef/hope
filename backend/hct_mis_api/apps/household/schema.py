@@ -28,7 +28,7 @@ from household.models import (
 
 
 class HouseholdFilter(FilterSet):
-    business_area = CharFilter(field_name="business_area__slug")
+    business_area = CharFilter(field_name="registration_data_import__business_area__slug")
     size = IntegerRangeFilter(field_name="size")
 
     class Meta:

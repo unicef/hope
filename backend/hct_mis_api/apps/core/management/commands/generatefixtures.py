@@ -132,7 +132,7 @@ class Command(BaseCommand):
 
             for _ in range(payment_record_amount):
                 registration_data_import = RegistrationDataImportFactory(
-                    imported_by=user,
+                    imported_by=user, business_area=BusinessArea.objects.first()
                 )
 
                 household = HouseholdFactory(
