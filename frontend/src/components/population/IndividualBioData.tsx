@@ -67,7 +67,7 @@ export function IndividualsBioData({
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='Middle Name'>
-            <Missing/>
+            <div>{individual.middleName || '-'}</div>
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
@@ -124,7 +124,7 @@ export function IndividualsBioData({
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='Special Privileges'>
-            <Missing/>
+            <Missing />
           </LabelizedField>
         </Grid>
       </Grid>
