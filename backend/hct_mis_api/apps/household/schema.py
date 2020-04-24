@@ -16,19 +16,17 @@ from household.models import Household, Individual
 
 
 class HouseholdFilter(FilterSet):
-    business_area = CharFilter(field_name="location__business_area__slug")
-    family_size = IntegerRangeFilter(field_name="family_size")
+    business_area = CharFilter(field_name="business_area__slug")
+    size = IntegerRangeFilter(field_name="size")
 
     class Meta:
         model = Household
         fields = {
             "business_area": ["exact", "icontains"],
-            "nationality": ["exact", "icontains"],
+            "country_origin": ["exact", "icontains"],
             "address": ["exact", "icontains"],
-            "representative__full_name": ["exact", "icontains"],
             "head_of_household__full_name": ["exact", "icontains"],
-            "household_ca_id": ["exact"],
-            "family_size": ["range", "lte", "gte"],
+            "size": ["range", "lte", "gte"],
             "target_populations": ["exact"],
             "programs": ["exact"],
         }
@@ -40,11 +38,11 @@ class HouseholdFilter(FilterSet):
             "household__id",
             "id",
             "household_ca_id",
-            "family_size",
+            "size",
             "head_of_household__full_name",
-            "location__title",
+            "admin_area__title",
             "residence_status",
-            "registration_data_import_id__",
+            "registration_data_import__name",
             "total_cash",
             "registration_date",
         )
@@ -53,9 +51,9 @@ class HouseholdFilter(FilterSet):
 
 class IndividualFilter(FilterSet):
     business_area = CharFilter(
-        field_name="household__location__business_area__slug",
+        field_name="household__business_area__slug",
     )
-    age = AgeRangeFilter(field_name="dob")
+    age = AgeRangeFilter(field_name="birth_date")
     sex = ModelMultipleChoiceFilter(
         to_field_name="sex", queryset=Individual.objects.all(),
     )
@@ -76,9 +74,9 @@ class IndividualFilter(FilterSet):
             "id",
             "full_name",
             "household__id",
-            "dob",
+            "birth_date",
             "sex",
-            "household__location__title",
+            "household__admin_area__title",
         )
     )
 

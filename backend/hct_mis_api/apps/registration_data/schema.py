@@ -26,7 +26,7 @@ class RegistrationDataImportFilter(FilterSet):
             "status",
             "import_date",
             "number_of_households",
-            "imported_by__first_name",
+            "imported_by__given_name",
         )
     )
 

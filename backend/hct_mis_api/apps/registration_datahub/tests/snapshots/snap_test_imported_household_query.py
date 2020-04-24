@@ -14,188 +14,50 @@ snapshots['TestImportedHouseholdQuery::test_imported_household_query_all 1'] = {
                 {
                     'node': {
                         'address': 'Lorem Ipsum',
-                        'familySize': 2,
-                        'householdCaId': '123-123-123',
-                        'nationality': 'PL'
+                        'countryOrigin': 'PL',
+                        'size': 2
                     }
                 },
                 {
                     'node': {
                         'address': 'Lorem Ipsum',
-                        'familySize': 4,
-                        'householdCaId': '123-123-123',
-                        'nationality': 'PL'
+                        'countryOrigin': 'PL',
+                        'size': 4
                     }
                 },
                 {
                     'node': {
                         'address': 'Lorem Ipsum',
-                        'familySize': 5,
-                        'householdCaId': '123-123-123',
-                        'nationality': 'PL'
+                        'countryOrigin': 'PL',
+                        'size': 5
                     }
                 },
                 {
                     'node': {
                         'address': 'Lorem Ipsum',
-                        'familySize': 1,
-                        'householdCaId': '123-123-123',
-                        'nationality': 'PL'
+                        'countryOrigin': 'PL',
+                        'size': 1
                     }
                 },
                 {
                     'node': {
                         'address': 'Lorem Ipsum',
-                        'familySize': 3,
-                        'householdCaId': '123-123-123',
-                        'nationality': 'PL'
+                        'countryOrigin': 'PL',
+                        'size': 3
                     }
                 },
                 {
                     'node': {
                         'address': 'Lorem Ipsum',
-                        'familySize': 11,
-                        'householdCaId': '123-123-123',
-                        'nationality': 'PL'
+                        'countryOrigin': 'PL',
+                        'size': 11
                     }
                 },
                 {
                     'node': {
                         'address': 'Lorem Ipsum',
-                        'familySize': 14,
-                        'householdCaId': '123-123-123',
-                        'nationality': 'PL'
-                    }
-                }
-            ]
-        }
-    }
-}
-
-snapshots['TestImportedHouseholdQuery::test_imported_household_query_all_max 1'] = {
-    'data': {
-        'allImportedHouseholds': {
-            'edges': [
-                {
-                    'node': {
-                        'address': 'Lorem Ipsum',
-                        'familySize': 2,
-                        'householdCaId': '123-123-123',
-                        'nationality': 'PL'
-                    }
-                },
-                {
-                    'node': {
-                        'address': 'Lorem Ipsum',
-                        'familySize': 4,
-                        'householdCaId': '123-123-123',
-                        'nationality': 'PL'
-                    }
-                },
-                {
-                    'node': {
-                        'address': 'Lorem Ipsum',
-                        'familySize': 5,
-                        'householdCaId': '123-123-123',
-                        'nationality': 'PL'
-                    }
-                },
-                {
-                    'node': {
-                        'address': 'Lorem Ipsum',
-                        'familySize': 1,
-                        'householdCaId': '123-123-123',
-                        'nationality': 'PL'
-                    }
-                },
-                {
-                    'node': {
-                        'address': 'Lorem Ipsum',
-                        'familySize': 3,
-                        'householdCaId': '123-123-123',
-                        'nationality': 'PL'
-                    }
-                }
-            ]
-        }
-    }
-}
-
-snapshots['TestImportedHouseholdQuery::test_imported_household_query_all_min 1'] = {
-    'data': {
-        'allImportedHouseholds': {
-            'edges': [
-                {
-                    'node': {
-                        'address': 'Lorem Ipsum',
-                        'familySize': 4,
-                        'householdCaId': '123-123-123',
-                        'nationality': 'PL'
-                    }
-                },
-                {
-                    'node': {
-                        'address': 'Lorem Ipsum',
-                        'familySize': 5,
-                        'householdCaId': '123-123-123',
-                        'nationality': 'PL'
-                    }
-                },
-                {
-                    'node': {
-                        'address': 'Lorem Ipsum',
-                        'familySize': 3,
-                        'householdCaId': '123-123-123',
-                        'nationality': 'PL'
-                    }
-                },
-                {
-                    'node': {
-                        'address': 'Lorem Ipsum',
-                        'familySize': 11,
-                        'householdCaId': '123-123-123',
-                        'nationality': 'PL'
-                    }
-                },
-                {
-                    'node': {
-                        'address': 'Lorem Ipsum',
-                        'familySize': 14,
-                        'householdCaId': '123-123-123',
-                        'nationality': 'PL'
-                    }
-                }
-            ]
-        }
-    }
-}
-
-snapshots['TestImportedHouseholdQuery::test_imported_household_query_all_range 1'] = {
-    'data': {
-        'allImportedHouseholds': {
-            'edges': [
-                {
-                    'node': {
-                        'address': 'Lorem Ipsum',
-                        'familySize': 4,
-                        'householdCaId': '123-123-123',
-                        'nationality': 'PL'
-                    }
-                },
-                {
-                    'node': {
-                        'address': 'Lorem Ipsum',
-                        'familySize': 5,
-                        'householdCaId': '123-123-123',
-                        'nationality': 'PL'
-                    }
-                },
-                {
-                    'node': {
-                        'address': 'Lorem Ipsum',
-                        'familySize': 3,
-                        'householdCaId': '123-123-123',
-                        'nationality': 'PL'
+                        'countryOrigin': 'PL',
+                        'size': 14
                     }
                 }
             ]
@@ -207,9 +69,8 @@ snapshots['TestImportedHouseholdQuery::test_imported_household_query_single 1'] 
     'data': {
         'importedHousehold': {
             'address': 'Lorem Ipsum',
-            'familySize': 2,
-            'householdCaId': '123-123-123',
-            'nationality': 'PL'
+            'countryOrigin': 'PL',
+            'size': 2
         }
     }
 }
