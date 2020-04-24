@@ -142,3 +142,44 @@ class ImportData(TimeStampedUUIDModel):
     xlsx_file = models.FileField()
     number_of_households = models.PositiveIntegerField()
     number_of_individuals = models.PositiveIntegerField()
+
+
+class DocumentType(TimeStampedUUIDModel):
+    country = CountryField(blank=True)
+    type = models.CharField(max_length=100)
+    label = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f"{self.label} in {self.country}"
+
+
+class Document(TimeStampedUUIDModel):
+    document_number = models.CharField(max_length=255, blank=True)
+    photo = models.ImageField(blank=True)
+    individual = models.ForeignKey(
+        "ImportedIndividual", related_name="documents", on_delete=models.CASCADE
+    )
+    type = models.ForeignKey(
+        "DocumentType", related_name="documents", on_delete=models.CASCADE
+    )
+
+
+class Agency(models.Model):
+    type = models.CharField(max_length=100,)
+    label = models.CharField(max_length=100,)
+
+    def __str__(self):
+        return f"{self.label}"
+
+
+class Identity(models.Model):
+    agency = models.ForeignKey(
+        "Agency", related_name="identities", on_delete=models.CASCADE
+    )
+    individual = models.ForeignKey(
+        "ImportedIndividual", related_name="identities", on_delete=models.CASCADE
+    )
+    document_number = models.CharField(max_length=255,)
+
+    def __str__(self):
+        return f"{self.agency} {self.individual} {self.document_number}"
