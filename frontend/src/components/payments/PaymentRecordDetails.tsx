@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import moment from 'moment';
 import { Grid, Paper, Typography } from '@material-ui/core';
 import { StatusBox } from '../StatusBox';
-import { paymentRecordStatusToColor } from '../../utils/utils';
+import {decodeIdString, paymentRecordStatusToColor} from '../../utils/utils';
 import { LabelizedField } from '../LabelizedField';
 import { PaymentRecordNode } from '../../__generated__/graphql';
 
@@ -114,7 +114,7 @@ export function PaymentRecordDetails({
                 <LabelizedFieldContainer>
                   <LabelizedField
                     label='household id'
-                    value={paymentRecord.household.householdCaId}
+                    value={decodeIdString(paymentRecord.household.id)}
                   />
                 </LabelizedFieldContainer>
                 <LabelizedFieldContainer>

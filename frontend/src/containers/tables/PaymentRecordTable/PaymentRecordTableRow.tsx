@@ -13,7 +13,7 @@ import { StatusBox } from '../../../components/StatusBox';
 import {
   cashPlanStatusToColor,
   paymentRecordStatusToColor,
-  formatCurrency,
+  formatCurrency, decodeIdString,
 } from '../../../utils/utils';
 
 const StatusContainer = styled.div`
@@ -57,7 +57,7 @@ export function PaymentRecordTableRow({
       </TableCell>
       <TableCell align='left'>{paymentRecord.headOfHousehold}</TableCell>
       <TableCell align='left'>
-        {paymentRecord.household.householdCaId}
+        {decodeIdString(paymentRecord.household.id)}
       </TableCell>
       <TableCell align='left'>{paymentRecord.totalPersonCovered}</TableCell>
       <TableCell align='right'>
