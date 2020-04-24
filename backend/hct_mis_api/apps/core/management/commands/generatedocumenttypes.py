@@ -4,7 +4,7 @@ from django.utils.translation import ugettext_lazy as _
 from django_countries.data import COUNTRIES
 
 from household.models import DocumentType
-from registration_datahub.models import DocumentType as RDHDocumentType
+from registration_datahub.models import ImportedDocumentType as RDHDocumentType
 
 
 class Command(BaseCommand):
