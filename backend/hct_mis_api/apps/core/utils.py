@@ -232,3 +232,10 @@ def get_attr_value(name, object, default=None):
     if isinstance(object, dict):
         return object.get(name, default)
     return getattr(name, object, default)
+
+
+def to_choice_object(choices):
+    return [
+        {"name": name, "value": value}
+        for value, name in choices
+    ]
