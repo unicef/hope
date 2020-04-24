@@ -6,7 +6,6 @@ from household.const import NATIONALITIES
 from household.models import (
     RESIDENCE_STATUS_CHOICE,
     SEX_CHOICE,
-    YES_NO_CHOICE,
     MARITAL_STATUS_CHOICE,
 )
 from registration_datahub.models import (
