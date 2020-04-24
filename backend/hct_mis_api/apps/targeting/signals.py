@@ -23,7 +23,7 @@ def calculate_candidate_counts(target_population):
         households = target_population.households
     households_count = households.count()
     individuals_count = households.aggregate(
-        individuals_count=Sum("family_size")
+        individuals_count=Sum("size")
     ).get("individuals_count")
     target_population.candidate_list_total_households = households_count
     target_population.candidate_list_total_individuals = individuals_count
@@ -45,7 +45,7 @@ def calculate_final_counts(target_population):
         households = target_population.final_list
     households_count = households.count()
     individuals_count = households.aggregate(
-        individuals_count=Sum("family_size")
+        individuals_count=Sum("size")
     ).get("individuals_count")
     target_population.final_list_total_households = households_count
     target_population.final_list_total_individuals = individuals_count

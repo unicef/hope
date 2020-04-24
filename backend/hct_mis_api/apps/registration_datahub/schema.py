@@ -1,18 +1,13 @@
-import django_filters
 import graphene
 from django_filters import (
     FilterSet,
     OrderingFilter,
-    ModelMultipleChoiceFilter,
-    CharFilter,
 )
 from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
 from core.extended_connection import ExtendedConnection
-from core.filters import AgeRangeFilter, IntegerRangeFilter
-from core.utils import decode_id_string
 from registration_datahub.models import (
     ImportedHousehold,
     ImportedIndividual,
@@ -22,83 +17,21 @@ from registration_datahub.models import (
 
 
 class ImportedHouseholdFilter(FilterSet):
-    family_size = IntegerRangeFilter(field_name="family_size")
-    rdi_id = CharFilter(
-        field_name="household__programs__name", method="filter_rdi_id"
-    )
-
     class Meta:
         model = ImportedHousehold
-        fields = {
-            "nationality": ["exact", "icontains"],
-            "address": ["exact", "icontains"],
-            "representative__full_name": ["exact", "icontains"],
-            "head_of_household__full_name": ["exact", "icontains"],
-            "household_ca_id": ["exact"],
-            "family_size": ["range", "lte", "gte"],
-        }
+        fields = ()
 
     order_by = OrderingFilter(
-        fields=(
-            "id",
-            "household_ca_id",
-            "head_of_household__full_name",
-            "residence_status",
-            "nationality",
-            "family_size",
-            "location",
-            "registration_date",
-            "representative__full_name",
-            "registration_data_import_id__name",
-        )
+        fields=("id", "head_of_household", "size", "registration_date",)
     )
-
-    def filter_rdi_id(self, queryset, model_field, value):
-        return queryset.filter(
-            registration_data_import_id__hct_id=decode_id_string(value)
-        )
 
 
 class ImportedIndividualFilter(FilterSet):
-    age = AgeRangeFilter(field_name="dob")
-    sex = ModelMultipleChoiceFilter(
-        to_field_name="sex", queryset=ImportedIndividual.objects.all(),
-    )
-    rdi_id = CharFilter(
-        field_name="household__programs__name", method="filter_rdi_id"
-    )
-    household = django_filters.CharFilter(
-        field_name="household__id", method="filter_household"
-    )
-
     class Meta:
         model = ImportedIndividual
-        fields = {
-            "full_name": ["exact", "icontains"],
-            "age": ["range", "lte", "gte"],
-            "sex": ["exact"],
-            "household": ["exact"],
-        }
+        fields = ()
 
-    order_by = OrderingFilter(
-        fields=(
-            "id",
-            "full_name",
-            "household__id",
-            "age",
-            "sex",
-            "work_status",
-            "dob",
-        )
-    )
-
-    def filter_rdi_id(self, queryset, model_field, value):
-        return queryset.filter(
-            registration_data_import_id__hct_id=decode_id_string(value)
-        )
-
-    def filter_household(self, queryset, model_field, value):
-        return queryset.filter(household__id=decode_id_string(value))
+    order_by = OrderingFilter(fields=("id", "full_name", "birth_date", "sex",))
 
 
 class ImportedHouseholdNode(DjangoObjectType):

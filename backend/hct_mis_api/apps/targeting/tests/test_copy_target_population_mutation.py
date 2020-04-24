@@ -59,7 +59,7 @@ class TestCopyTargetPopulationMutation(APITestCase):
     def setUpTestData(cls):
         cls.user = UserFactory.create()
         cls.household = HouseholdFactory(
-            family_size=1, residence_status="CITIZEN",
+            size=1, residence_status="CITIZEN",
         )
         tp = TargetPopulation(
             name="Original Target Population", status="APPROVED"
@@ -67,14 +67,14 @@ class TestCopyTargetPopulationMutation(APITestCase):
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
             {
-                "field_name": "family_size",
+                "field_name": "size",
                 "arguments": [1],
                 "comparision_method": "EQUALS",
             }
         )
         tp.final_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
             {
-                "field_name": "family_size",
+                "field_name": "size",
                 "arguments": [2],
                 "comparision_method": "EQUALS",
             }
