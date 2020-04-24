@@ -16,8 +16,7 @@ from household.const import NATIONALITIES
 from household.models import (
     RESIDENCE_STATUS_CHOICE,
     SEX_CHOICE,
-    YES_NO_CHOICE,
-    MARITAL_STATUS_CHOICE,
+    MARTIAL_STATUS_CHOICE,
     RELATIONSHIP_CHOICE,
     ROLE_CHOICE,
 )
@@ -37,23 +36,27 @@ class ImportedHousehold(TimeStampedUUIDModel):
     admin2 = models.CharField(max_length=255, blank=True)
     geopoint = PointField(blank=True, null=True)
     unhcr_id = models.CharField(max_length=255, blank=True)
-    f_0_5_age_group = models.PositiveIntegerField(default=0)
-    f_6_11_age_group = models.PositiveIntegerField(default=0)
-    f_12_17_age_group = models.PositiveIntegerField(default=0)
-    f_adults = models.PositiveIntegerField(default=0)
-    f_pregnant = models.PositiveIntegerField(default=0)
-    m_0_5_age_group = models.PositiveIntegerField(default=0)
-    m_6_11_age_group = models.PositiveIntegerField(default=0)
-    m_12_17_age_group = models.PositiveIntegerField(default=0)
-    m_adults = models.PositiveIntegerField(default=0)
-    f_0_5_disability = models.PositiveIntegerField(default=0)
-    f_6_11_disability = models.PositiveIntegerField(default=0)
-    f_12_17_disability = models.PositiveIntegerField(default=0)
-    f_adults_disability = models.PositiveIntegerField(default=0)
-    m_0_5_disability = models.PositiveIntegerField(default=0)
-    m_6_11_disability = models.PositiveIntegerField(default=0)
-    m_12_17_disability = models.PositiveIntegerField(default=0)
-    m_adults_disability = models.PositiveIntegerField(default=0)
+    female_age_group_0_5_count = models.PositiveIntegerField(default=0)
+    female_age_group_6_11_count = models.PositiveIntegerField(default=0)
+    female_age_group_12_17_count = models.PositiveIntegerField(default=0)
+    female_adults_count = models.PositiveIntegerField(default=0)
+    pregnant_count = models.PositiveIntegerField(default=0)
+    male_age_group_0_5_count = models.PositiveIntegerField(default=0)
+    male_age_group_6_11_count = models.PositiveIntegerField(default=0)
+    male_age_group_12_17_count = models.PositiveIntegerField(default=0)
+    male_adults_count = models.PositiveIntegerField(default=0)
+    female_age_group_0_5_disabled_count = models.PositiveIntegerField(default=0)
+    female_age_group_6_11_disabled_count = models.PositiveIntegerField(
+        default=0
+    )
+    female_age_group_12_17_disabled_count = models.PositiveIntegerField(
+        default=0
+    )
+    female_adults_disabled_count = models.PositiveIntegerField(default=0)
+    male_age_group_0_5_disabled_count = models.PositiveIntegerField(default=0)
+    male_age_group_6_11_disabled_count = models.PositiveIntegerField(default=0)
+    male_age_group_12_17_disabled_count = models.PositiveIntegerField(default=0)
+    male_adults_disabled_count = models.PositiveIntegerField(default=0)
     head_of_household = models.OneToOneField(
         "ImportedIndividual", on_delete=models.CASCADE, null=True
     )
@@ -85,29 +88,12 @@ class ImportedIndividual(TimeStampedUUIDModel):
     role = models.CharField(max_length=255, blank=True, choices=ROLE_CHOICE,)
     sex = models.CharField(max_length=255, choices=SEX_CHOICE,)
     birth_date = models.DateField()
-    estimated_birth_date = models.CharField(
-        max_length=3, default="NO", choices=YES_NO_CHOICE, blank=True,
-    )
+    estimated_birth_date = models.BooleanField(default=False, null=True)
     marital_status = models.CharField(
-        max_length=255, choices=MARITAL_STATUS_CHOICE,
+        max_length=255, choices=MARTIAL_STATUS_CHOICE,
     )
     phone_no = PhoneNumberField(blank=True)
     phone_no_alternative = PhoneNumberField(blank=True)
-    birth_certificate_no = models.CharField(max_length=255, blank=True)
-    birth_certificate_photo = models.ImageField(blank=True)
-    drivers_license_no = models.CharField(max_length=255, blank=True)
-    drivers_license_photo = models.ImageField(blank=True)
-    electoral_card_no = models.CharField(max_length=255, blank=True)
-    electoral_card_photo = models.ImageField(blank=True)
-    unhcr_id_no = models.CharField(max_length=255, blank=True)
-    unhcr_id_photo = models.ImageField(blank=True)
-    national_passport = models.CharField(max_length=255, blank=True)
-    national_passport_photo = models.ImageField(blank=True)
-    scope_id_no = models.CharField(max_length=255, blank=True)
-    scope_id_photo = models.ImageField(blank=True)
-    other_id_type = models.CharField(max_length=255, blank=True)
-    other_id_no = models.CharField(max_length=255, blank=True)
-    other_id_photo = models.ImageField(blank=True)
     household = models.ForeignKey(
         "ImportedHousehold",
         related_name="individuals",
@@ -118,12 +104,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
         related_name="individuals",
         on_delete=models.CASCADE,
     )
-    work_status = models.CharField(
-        max_length=3, default="NO", choices=YES_NO_CHOICE,
-    )
-    disability = models.CharField(
-        max_length=30, default="NO", choices=YES_NO_CHOICE,
-    )
+    disability = models.BooleanField(default=False)
     flex_fields = JSONField(default=dict)
 
     @property
