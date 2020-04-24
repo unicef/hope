@@ -21,7 +21,7 @@ interface IndividualContactProps {
 export function IndividualContactDetails({
   individual,
 }: IndividualContactProps): React.ReactElement {
-  const { phoneNumber, household } = individual;
+  const { phoneNo, household, phoneNoAlternative } = individual;
 
   return (
     <Overview>
@@ -31,12 +31,12 @@ export function IndividualContactDetails({
       <Grid container spacing={6}>
         <Grid item xs={4}>
           <LabelizedField label='Phone Number'>
-            <div>{phoneNumber}</div>
+            <div>{phoneNo}</div>
           </LabelizedField>
         </Grid>
         <Grid item xs={8}>
           <LabelizedField label='Alternate Phone Number'>
-            <div>-</div>
+            <div>{phoneNoAlternative}</div>
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
@@ -46,12 +46,12 @@ export function IndividualContactDetails({
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='Location Level'>
-            <div>{household.location ? household.location.level : '-'}</div>
+            <div>{household.adminArea ? household.adminArea.level : '-'}</div>
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='Location Name'>
-            <div>{household.location ? household.location.title : '-'}</div>
+            <div>{household.adminArea ? household.adminArea.title : '-'}</div>
           </LabelizedField>
         </Grid>
       </Grid>

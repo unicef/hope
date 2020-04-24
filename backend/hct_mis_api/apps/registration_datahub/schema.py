@@ -61,6 +61,8 @@ class ImportedHouseholdNode(DjangoObjectType):
 
 
 class ImportedIndividualNode(DjangoObjectType):
+    estimated_birth_date = graphene.Boolean(required=False)
+
     class Meta:
         model = ImportedIndividual
         filter_fields = []
