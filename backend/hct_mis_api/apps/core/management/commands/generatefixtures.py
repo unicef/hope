@@ -3,7 +3,6 @@ import time
 
 from django.core.management import BaseCommand, call_command
 from django.db import transaction
-from django_countries.data import COUNTRIES
 
 from account.fixtures import UserFactory
 from core.fixtures import AdminAreaFactory, AdminAreaTypeFactory
@@ -13,8 +12,7 @@ from household.fixtures import (
     IndividualFactory,
     EntitlementCardFactory,
 )
-from django.utils.translation import ugettext_lazy as _
-from household.models import RELATIONSHIP_CHOICE, DocumentType
+from household.models import DocumentType
 from payment.fixtures import PaymentRecordFactory
 from program.fixtures import CashPlanFactory, ProgramFactory
 from registration_data.fixtures import RegistrationDataImportFactory
