@@ -13,11 +13,11 @@ from household.models import (
     YES_NO_CHOICE,
     DISABILITY_CHOICE,
     RESIDENCE_STATUS_CHOICE,
-    RELATIONSHIP_CHOICE, DocumentType,
+    RELATIONSHIP_CHOICE,
+    DocumentType,
+    Document,
 )
 from registration_data.fixtures import RegistrationDataImportFactory
-
-
 
 
 class HouseholdFactory(factory.DjangoModelFactory):
@@ -39,6 +39,14 @@ class HouseholdFactory(factory.DjangoModelFactory):
         "date_this_year", before_today=True, after_today=False
     )
     flex_fields = {}
+
+
+class DocumentFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = Document
+
+    document_number = factory.Faker("pystr", min_chars=None, max_chars=20)
+    type = factory.LazyAttribute(lambda o: DocumentType.objects.order_by('?').first())
 
 
 class IndividualFactory(factory.DjangoModelFactory):

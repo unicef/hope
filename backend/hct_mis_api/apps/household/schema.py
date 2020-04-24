@@ -12,7 +12,19 @@ from graphene_django.filter import DjangoFilterConnectionField
 
 from core.filters import AgeRangeFilter, IntegerRangeFilter
 from core.extended_connection import ExtendedConnection
-from household.models import Household, Individual
+from core.schema import ChoiceObject
+from core.utils import to_choice_object
+from household.models import (
+    Household,
+    Individual,
+    Document,
+    DocumentType,
+    RESIDENCE_STATUS_CHOICE,
+    RELATIONSHIP_CHOICE,
+    ROLE_CHOICE,
+    MARITAL_STATUS_CHOICE,
+    SEX_CHOICE,
+)
 
 
 class HouseholdFilter(FilterSet):
@@ -50,9 +62,7 @@ class HouseholdFilter(FilterSet):
 
 
 class IndividualFilter(FilterSet):
-    business_area = CharFilter(
-        field_name="household__business_area__slug",
-    )
+    business_area = CharFilter(field_name="household__business_area__slug",)
     age = AgeRangeFilter(field_name="birth_date")
     sex = ModelMultipleChoiceFilter(
         to_field_name="sex", queryset=Individual.objects.all(),
@@ -79,6 +89,19 @@ class IndividualFilter(FilterSet):
             "household__admin_area__title",
         )
     )
+
+
+class DocumentTypeNode(DjangoObjectType):
+    class Meta:
+        model = DocumentType
+
+
+class DocumentNode(DjangoObjectType):
+    class Meta:
+        model = Document
+        filter_fields = []
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
 
 
 class HouseholdNode(DjangoObjectType):
@@ -110,8 +133,28 @@ class Query(graphene.ObjectType):
     all_individuals = DjangoFilterConnectionField(
         IndividualNode, filterset_class=IndividualFilter,
     )
+    residence_status_choices = graphene.List(ChoiceObject)
+    sex_choices = graphene.List(ChoiceObject)
+    marital_status_choices = graphene.List(ChoiceObject)
+    relationship_choices = graphene.List(ChoiceObject)
+    role_choices = graphene.List(ChoiceObject)
 
     def resolve_all_households(self, info, **kwargs):
         return Household.objects.annotate(
             total_cash=Sum("payment_records__entitlement__delivered_quantity")
         ).order_by("created_at")
+
+    def resolve_residence_status_choices(self, info, **kwargs):
+        return to_choice_object(RESIDENCE_STATUS_CHOICE)
+
+    def resolve_sex_choices(self, info, **kwargs):
+        return to_choice_object(SEX_CHOICE)
+
+    def resolve_marital_status_choices(self, info, **kwargs):
+        return to_choice_object(MARITAL_STATUS_CHOICE)
+
+    def resolve_relationship_choices(self, info, **kwargs):
+        return to_choice_object(RELATIONSHIP_CHOICE)
+
+    def resolve_role_choices(self, info, **kwargs):
+        return to_choice_object(ROLE_CHOICE)

@@ -7,7 +7,7 @@ export const ALL_IMPORTED_INDIVIDUALS_QUERY = gql`
     $first: Int
     $last: Int
     $rdiId: String
-    $household: String
+    $household: ID
     $orderBy: String
   ) {
     allImportedIndividuals(
