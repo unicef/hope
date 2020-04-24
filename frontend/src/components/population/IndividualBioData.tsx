@@ -7,10 +7,12 @@ import { useHistory } from 'react-router-dom';
 import {
   getAgeFromDob,
   sexToCapitalize,
-  getIdentificationType, decodeIdString,
+  getIdentificationType,
+  decodeIdString,
 } from '../../utils/utils';
 import Moment from 'react-moment';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { Missing } from '../Missing';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px
@@ -37,9 +39,9 @@ export function IndividualsBioData({
   const businessArea = useBusinessArea();
 
   let age: number | null;
-  const { dob } = individual;
-  if (dob) {
-    age = getAgeFromDob(dob);
+  const { birthDate } = individual;
+  if (birthDate) {
+    age = getAgeFromDob(birthDate);
   }
 
   const openHousehold = (): void => {
@@ -60,17 +62,17 @@ export function IndividualsBioData({
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='Given Name'>
-            <div>{individual.firstName}</div>
+            <div>{individual.givenName}</div>
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='Middle Name'>
-            <div>-</div>
+            <Missing/>
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='Family Name'>
-            <div>{individual.lastName}</div>
+            <div>{individual.familyName}</div>
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
@@ -85,24 +87,32 @@ export function IndividualsBioData({
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='Date of Birth'>
-            <Moment format='DD/MM/YYYY'>{dob}</Moment>
+            <Moment format='DD/MM/YYYY'>{birthDate}</Moment>
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='Estimated Date of Birth'>
             <div>
-              {individual.estimatedDob ? individual.estimatedDob : 'No'}
+              {individual.estimatedBirthDate
+                ? individual.estimatedBirthDate
+                : 'No'}
             </div>
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='ID Type'>
-            <div>{getIdentificationType(individual.identificationType)}</div>
+            <>
+              Wrong design, multiple documents allowed
+              <Missing />
+            </>
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='ID Number'>
-            <div>{individual.identificationNumber}</div>
+            <>
+              Wrong design, multiple documents allowed
+              <Missing />
+            </>
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
@@ -114,7 +124,7 @@ export function IndividualsBioData({
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='Special Privileges'>
-            <div>-</div>
+            <Missing/>
           </LabelizedField>
         </Grid>
       </Grid>
