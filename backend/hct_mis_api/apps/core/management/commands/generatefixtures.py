@@ -11,6 +11,7 @@ from household.fixtures import (
     HouseholdFactory,
     IndividualFactory,
     EntitlementCardFactory,
+    DocumentFactory,
 )
 from household.models import DocumentType
 from payment.fixtures import PaymentRecordFactory
@@ -143,6 +144,8 @@ class Command(BaseCommand):
                     household=household,
                     registration_data_import=registration_data_import,
                 )
+                for individual in individuals:
+                    DocumentFactory(individual=individual)
 
                 individuals[0].relationship = "HEAD"
                 individuals[0].save()
