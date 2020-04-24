@@ -42,14 +42,14 @@ class TestApproveTargetPopulationMutation(APITestCase):
         )
         cls.user = UserFactory.create()
         cls.households = []
-        cls.household_family_size_1 = HouseholdFactory(
-            family_size=1, residence_status="CITIZEN",
+        cls.household_size_1 = HouseholdFactory(
+            size=1, residence_status="CITIZEN",
         )
-        cls.household_family_size_2 = HouseholdFactory(
-            family_size=2, residence_status="CITIZEN",
+        cls.household_size_2 = HouseholdFactory(
+            size=2, residence_status="CITIZEN",
         )
-        cls.households.append(cls.household_family_size_1)
-        cls.households.append(cls.household_family_size_2)
+        cls.households.append(cls.household_size_1)
+        cls.households.append(cls.household_size_2)
 
         tp = TargetPopulation(name="Draft Target Population", status="DRAFT")
 
@@ -77,7 +77,7 @@ class TestApproveTargetPopulationMutation(APITestCase):
         )
         tp.final_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
             {
-                "field_name": "family_size",
+                "field_name": "size",
                 "arguments": [2],
                 "comparision_method": "EQUALS",
             }
@@ -163,14 +163,14 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
     def setUpTestData(cls):
         cls.user = UserFactory.create()
         cls.households = []
-        cls.household_family_size_1 = HouseholdFactory(
-            family_size=1, residence_status="CITIZEN",
+        cls.household_size_1 = HouseholdFactory(
+            size=1, residence_status="CITIZEN",
         )
-        cls.household_family_size_2 = HouseholdFactory(
-            family_size=2, residence_status="CITIZEN",
+        cls.household_size_2 = HouseholdFactory(
+            size=2, residence_status="CITIZEN",
         )
-        cls.households.append(cls.household_family_size_1)
-        cls.households.append(cls.household_family_size_2)
+        cls.households.append(cls.household_size_1)
+        cls.households.append(cls.household_size_2)
 
         tp = TargetPopulation(name="Draft Target Population", status="DRAFT")
 
@@ -198,7 +198,7 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
         )
         tp.final_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
             {
-                "field_name": "family_size",
+                "field_name": "size",
                 "arguments": [2],
                 "comparision_method": "EQUALS",
             }
@@ -290,14 +290,14 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
     def setUpTestData(cls):
         cls.user = UserFactory.create()
         cls.households = []
-        cls.household_family_size_1 = HouseholdFactory(
-            family_size=1, residence_status="CITIZEN",
+        cls.household_size_1 = HouseholdFactory(
+            size=1, residence_status="CITIZEN",
         )
-        cls.household_family_size_2 = HouseholdFactory(
-            family_size=2, residence_status="CITIZEN",
+        cls.household_size_2 = HouseholdFactory(
+            size=2, residence_status="CITIZEN",
         )
-        cls.households.append(cls.household_family_size_1)
-        cls.households.append(cls.household_family_size_2)
+        cls.households.append(cls.household_size_1)
+        cls.households.append(cls.household_size_2)
 
         tp = TargetPopulation(name="Draft Target Population", status="DRAFT")
 
@@ -325,7 +325,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
         )
         tp.final_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
             {
-                "field_name": "family_size",
+                "field_name": "size",
                 "arguments": [2],
                 "comparision_method": "EQUALS",
             }

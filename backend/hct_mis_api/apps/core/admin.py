@@ -104,7 +104,6 @@ class FlexibleAttributeImporter:
             "sex_i_c",
             "birth_date_i_c",
             "estimated_birth_date_i_c",
-            "work_status_i_c",
             "disability_i_c",
         ]
 
