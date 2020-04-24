@@ -12,7 +12,7 @@ from core.utils import get_choices_values
 from core.validators import BaseValidator
 from household.models import (
     YES_NO_CHOICE,
-    MARTIAL_STATUS_CHOICE,
+    MARITAL_STATUS_CHOICE,
     SEX_CHOICE,
     DISABILITY_CHOICE,
     RESIDENCE_STATUS_CHOICE,
@@ -76,7 +76,7 @@ class UploadXLSXValidator(BaseValidator):
             },
             "marital_status": {
                 "type": "SELECT_ONE",
-                "choices": MARTIAL_STATUS_CHOICE,
+                "choices": MARITAL_STATUS_CHOICE,
             },
             "status_as_head_of_household": {
                 "type": "SELECT_ONE",
