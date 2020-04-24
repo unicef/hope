@@ -9,8 +9,7 @@ from household.models import (
     EntitlementCard,
     Individual,
     SEX_CHOICE,
-    MARTIAL_STATUS_CHOICE,
-    IDENTIFICATION_TYPE_CHOICE,
+    MARITAL_STATUS_CHOICE,
     YES_NO_CHOICE,
     DISABILITY_CHOICE,
     RESIDENCE_STATUS_CHOICE,
@@ -56,15 +55,12 @@ class IndividualFactory(factory.DjangoModelFactory):
     )
     estimated_birth_date = None
     marital_status = factory.fuzzy.FuzzyChoice(
-        MARTIAL_STATUS_CHOICE, getter=lambda c: c[0],
+        MARITAL_STATUS_CHOICE, getter=lambda c: c[0],
     )
     phone_no = factory.Faker("phone_number")
     phone_no_alternative = ""
     relationship = factory.fuzzy.FuzzyChoice(
         [value for value, label in RELATIONSHIP_CHOICE if value != "HEAD"]
-    )
-    id_type = factory.fuzzy.FuzzyChoice(
-        IDENTIFICATION_TYPE_CHOICE, getter=lambda c: c[0],
     )
     household = factory.SubFactory(HouseholdFactory)
     registration_data_import = factory.SubFactory(RegistrationDataImportFactory)
