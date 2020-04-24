@@ -30,7 +30,6 @@ RESIDENCE_STATUS_CHOICE = (
 SEX_CHOICE = (
     ("MALE", _("Male")),
     ("FEMALE", _("Female")),
-    ("OTHER", _("Other")),
 )
 MARITAL_STATUS_CHOICE = (
     ("SINGLE", _("SINGLE")),
@@ -39,13 +38,6 @@ MARITAL_STATUS_CHOICE = (
     ("DIVORCED", _("Divorced")),
     ("SEPARATED", _("Separated")),
 )
-DOCUMENT_TYPE_CHOICE = (
-    ("BIRTH_CERTIFICATE", _("Birth Certificate")),
-    ("DRIVING_LICENSE", _("Driving License")),
-    ("NATIONAL_ID", _("National ID")),
-    ("NATIONAL_PASSPORT", _("National Passport")),
-)
-
 
 YES_NO_CHOICE = (
     ("YES", _("Yes")),
