@@ -15,6 +15,7 @@ import {
   registrationDataImportStatusToColor,
 } from '../../../../utils/utils';
 import moment from 'moment';
+import {Missing} from "../../../../components/Missing";
 
 const StatusContainer = styled.div`
   width: 120px;
@@ -44,9 +45,9 @@ export function ImportedIndividualsTableRow({
       <TableCell align='left'>
         {individual.fullName}
       </TableCell>
-      <TableCell align='left'>{individual.workStatus}</TableCell>
+      <TableCell align='left'><Missing/></TableCell>
       <TableCell align='left'>
-        {moment(individual.dob).format('DD MMM YYYY')}
+        {moment(individual.birthDate).format('DD MMM YYYY')}
       </TableCell>
       <TableCell align='left'>{individual.sex}</TableCell>
     </ClickableTableRow>

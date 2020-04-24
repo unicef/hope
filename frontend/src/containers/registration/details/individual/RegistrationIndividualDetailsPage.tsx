@@ -37,9 +37,9 @@ export function RegistrationIndividualDetailsPage(): React.ReactElement {
       to: `/${businessArea}/registration-data-import/`,
     },
     {
-      title: importedIndividual.registrationDataImportId.name,
+      title: importedIndividual.registrationDataImport.name,
       to: `/${businessArea}/registration-data-import/${btoa(
-        `RegistrationDataImportNode:${importedIndividual.registrationDataImportId.hctId}`,
+        `RegistrationDataImportNode:${importedIndividual.registrationDataImport.hctId}`,
       )}`,
     },
     {

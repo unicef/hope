@@ -48,7 +48,7 @@ export function IndividualVulnerabilities({
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='Martial Status'>
-            <div>{individual.martialStatus}</div>
+            <div>{individual.maritalStatus}</div>
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
