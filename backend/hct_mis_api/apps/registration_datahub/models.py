@@ -16,7 +16,7 @@ from household.const import NATIONALITIES
 from household.models import (
     RESIDENCE_STATUS_CHOICE,
     SEX_CHOICE,
-    MARTIAL_STATUS_CHOICE,
+    MARITAL_STATUS_CHOICE,
     RELATIONSHIP_CHOICE,
     ROLE_CHOICE,
 )
@@ -90,7 +90,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
     birth_date = models.DateField()
     estimated_birth_date = models.BooleanField(default=False, null=True)
     marital_status = models.CharField(
-        max_length=255, choices=MARTIAL_STATUS_CHOICE,
+        max_length=255, choices=MARITAL_STATUS_CHOICE,
     )
     phone_no = PhoneNumberField(blank=True)
     phone_no_alternative = PhoneNumberField(blank=True)
