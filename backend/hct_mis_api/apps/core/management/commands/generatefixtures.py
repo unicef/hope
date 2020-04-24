@@ -3,6 +3,7 @@ import time
 
 from django.core.management import BaseCommand, call_command
 from django.db import transaction
+from django_countries.data import COUNTRIES
 
 from account.fixtures import UserFactory
 from core.fixtures import AdminAreaFactory, AdminAreaTypeFactory
@@ -12,7 +13,8 @@ from household.fixtures import (
     IndividualFactory,
     EntitlementCardFactory,
 )
-from household.models import RELATIONSHIP_CHOICE
+from django.utils.translation import ugettext_lazy as _
+from household.models import RELATIONSHIP_CHOICE, DocumentType
 from payment.fixtures import PaymentRecordFactory
 from program.fixtures import CashPlanFactory, ProgramFactory
 from registration_data.fixtures import RegistrationDataImportFactory
@@ -66,6 +68,16 @@ class Command(BaseCommand):
             type=int,
             help="Creates provided amount of payment records assigned to "
             "household and cash plan.",
+        )
+        parser.add_argument(
+            "--flush",
+            dest="flush",
+            const=True,
+            default=True,
+            action="store",
+            nargs="?",
+            type=bool,
+            help="Flush all tables in db.",
         )
 
         parser.add_argument(
@@ -154,9 +166,10 @@ class Command(BaseCommand):
     @transaction.atomic
     def handle(self, *args, **options):
         self.stdout.write(f"Generating fixtures...")
-        call_command("flush", "--noinput")
-        call_command("flush", "--noinput", database="cash_assist_datahub")
-        call_command("flush", "--noinput", database="registration_datahub")
+        if options["flush"]:
+            call_command("flush", "--noinput")
+            call_command("flush", "--noinput", database="cash_assist_datahub")
+            call_command("flush", "--noinput", database="registration_datahub")
         start_time = time.time()
         programs_amount = options["programs_amount"]
         business_areas = BusinessArea.objects.all().count()
@@ -172,6 +185,21 @@ class Command(BaseCommand):
 
                 if user_input.upper() == "Y" or options["noinput"]:
                     call_command("loadbusinessareas")
+                else:
+                    self.stdout.write("Generation canceled")
+                    return
+        if DocumentType.objects.all().count() == 0:
+            if options["noinput"]:
+                call_command("generatedocumenttypes")
+            else:
+                self.stdout.write(
+                    self.style.WARNING("DocumentTypes does not exist, ")
+                )
+
+                user_input = input("Type 'y' to generate, or 'n' to cancel: ")
+
+                if user_input.upper() == "Y" or options["noinput"]:
+                    call_command("generatedocumenttypes")
                 else:
                     self.stdout.write("Generation canceled")
                     return
