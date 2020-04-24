@@ -36,7 +36,7 @@ export function IndividualContactDetails({
         </Grid>
         <Grid item xs={8}>
           <LabelizedField label='Alternate Phone Number'>
-            <div>{phoneNoAlternative}</div>
+            <div>{phoneNoAlternative || '-'}</div>
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
