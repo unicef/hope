@@ -42,13 +42,13 @@ class HouseholdFactory(factory.DjangoModelFactory):
 class IndividualFactory(factory.DjangoModelFactory):
     class Meta:
         model = Individual
+
     full_name = factory.LazyAttribute(
         lambda o: f"{o.given_name} {o.middle_name} {o.family_name}"
     )
     given_name = factory.Faker("first_name")
     middle_name = factory.Faker("first_name")
     family_name = factory.Faker("last_name")
-    years_in_school = factory.fuzzy.FuzzyInteger(1, 8)
     sex = factory.fuzzy.FuzzyChoice(SEX_CHOICE, getter=lambda c: c[0],)
     birth_date = factory.Faker(
         "date_of_birth", tzinfo=utc, minimum_age=16, maximum_age=90
@@ -64,15 +64,7 @@ class IndividualFactory(factory.DjangoModelFactory):
     )
     household = factory.SubFactory(HouseholdFactory)
     registration_data_import = factory.SubFactory(RegistrationDataImportFactory)
-    work_status = factory.fuzzy.FuzzyChoice(
-        YES_NO_CHOICE, getter=lambda c: c[0],
-    )
-    disability = factory.fuzzy.FuzzyChoice(
-        DISABILITY_CHOICE, getter=lambda c: c[0],
-    )
-    serious_illness = factory.fuzzy.FuzzyChoice(
-        YES_NO_CHOICE, getter=lambda c: c[0],
-    )
+    disability = factory.fuzzy.FuzzyChoice([True, False])
 
 
 class EntitlementCardFactory(factory.DjangoModelFactory):
