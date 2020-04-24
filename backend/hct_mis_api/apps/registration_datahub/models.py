@@ -17,8 +17,7 @@ from household.models import (
     RESIDENCE_STATUS_CHOICE,
     SEX_CHOICE,
     YES_NO_CHOICE,
-    MARTIAL_STATUS_CHOICE,
-    IDENTIFICATION_TYPE_CHOICE,
+    MARITAL_STATUS_CHOICE,
     RELATIONSHIP_CHOICE,
     ROLE_CHOICE,
 )
@@ -90,13 +89,10 @@ class ImportedIndividual(TimeStampedUUIDModel):
         max_length=3, default="NO", choices=YES_NO_CHOICE, blank=True,
     )
     marital_status = models.CharField(
-        max_length=255, choices=MARTIAL_STATUS_CHOICE,
+        max_length=255, choices=MARITAL_STATUS_CHOICE,
     )
     phone_no = PhoneNumberField(blank=True)
     phone_no_alternative = PhoneNumberField(blank=True)
-    id_type = models.CharField(
-        max_length=255, choices=IDENTIFICATION_TYPE_CHOICE,
-    )
     birth_certificate_no = models.CharField(max_length=255, blank=True)
     birth_certificate_photo = models.ImageField(blank=True)
     drivers_license_no = models.CharField(max_length=255, blank=True)
