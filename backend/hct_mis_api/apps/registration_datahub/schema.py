@@ -2,21 +2,27 @@ import graphene
 from django_filters import (
     FilterSet,
     OrderingFilter,
+    CharFilter,
 )
 from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
 from core.extended_connection import ExtendedConnection
+from core.utils import decode_id_string
 from registration_datahub.models import (
     ImportedHousehold,
     ImportedIndividual,
     RegistrationDataImportDatahub,
     ImportData,
+    ImportedDocumentType,
+    ImportedDocument,
 )
 
 
 class ImportedHouseholdFilter(FilterSet):
+    rdi_id = CharFilter(method="filter_rdi_id")
+
     class Meta:
         model = ImportedHousehold
         fields = ()
@@ -25,13 +31,25 @@ class ImportedHouseholdFilter(FilterSet):
         fields=("id", "head_of_household", "size", "registration_date",)
     )
 
+    def filter_rdi_id(self, queryset, model_field, value):
+        return queryset.filter(
+            registration_data_import__hct_id=decode_id_string(value)
+        )
+
 
 class ImportedIndividualFilter(FilterSet):
+    rdi_id = CharFilter(method="filter_rdi_id")
+
     class Meta:
         model = ImportedIndividual
-        fields = ()
+        fields = ("household",)
 
     order_by = OrderingFilter(fields=("id", "full_name", "birth_date", "sex",))
+
+    def filter_rdi_id(self, queryset, model_field, value):
+        return queryset.filter(
+            registration_data_import__hct_id=decode_id_string(value)
+        )
 
 
 class ImportedHouseholdNode(DjangoObjectType):
@@ -63,6 +81,19 @@ class ImportDataNode(DjangoObjectType):
         model = ImportData
         filter_fields = []
         interfaces = (relay.Node,)
+
+
+class ImportedDocumentTypeNode(DjangoObjectType):
+    class Meta:
+        model = ImportedDocumentType
+
+
+class ImportedDocumentNode(DjangoObjectType):
+    class Meta:
+        model = ImportedDocument
+        filter_fields = []
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
 
 
 class XlsxRowErrorNode(graphene.ObjectType):

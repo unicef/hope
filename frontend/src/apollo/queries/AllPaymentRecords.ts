@@ -37,8 +37,7 @@ export const AllPaymentRecords = gql`
           totalPersonCovered
           household {
             id
-            householdCaId
-            familySize
+            size
           }
           entitlement {
             id

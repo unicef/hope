@@ -151,7 +151,7 @@ class ImportData(TimeStampedUUIDModel):
     number_of_individuals = models.PositiveIntegerField()
 
 
-class DocumentType(TimeStampedUUIDModel):
+class ImportedDocumentType(TimeStampedUUIDModel):
     country = CountryField(blank=True)
     type = models.CharField(max_length=100)
     label = models.CharField(max_length=100)
@@ -160,14 +160,14 @@ class DocumentType(TimeStampedUUIDModel):
         return f"{self.label} in {self.country}"
 
 
-class Document(TimeStampedUUIDModel):
+class ImportedDocument(TimeStampedUUIDModel):
     document_number = models.CharField(max_length=255, blank=True)
     photo = models.ImageField(blank=True)
     individual = models.ForeignKey(
         "ImportedIndividual", related_name="documents", on_delete=models.CASCADE
     )
     type = models.ForeignKey(
-        "DocumentType", related_name="documents", on_delete=models.CASCADE
+        "ImportedDocumentType", related_name="documents", on_delete=models.CASCADE
     )
 
 
