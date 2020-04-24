@@ -13,9 +13,11 @@ from household.models import (
     YES_NO_CHOICE,
     DISABILITY_CHOICE,
     RESIDENCE_STATUS_CHOICE,
-    RELATIONSHIP_CHOICE,
+    RELATIONSHIP_CHOICE, DocumentType,
 )
 from registration_data.fixtures import RegistrationDataImportFactory
+
+
 
 
 class HouseholdFactory(factory.DjangoModelFactory):
