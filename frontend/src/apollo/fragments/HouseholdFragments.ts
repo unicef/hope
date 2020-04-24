@@ -32,6 +32,7 @@ export const householdDetailed = gql`
       edges {
         node {
           ...individualMinimal
+          birthDate
           relationship
         }
       }

@@ -64,9 +64,9 @@ export function RegistrationHouseholdDetailsPage(): React.ReactElement {
       to: `/${businessArea}/registration-data-import/`,
     },
     {
-      title: importedHousehold.registrationDataImportId.name,
+      title: importedHousehold.registrationDataImport.name,
       to: `/${businessArea}/registration-data-import/${btoa(
-        `RegistrationDataImportNode:${importedHousehold.registrationDataImportId.hctId}`,
+        `RegistrationDataImportNode:${importedHousehold.registrationDataImport.hctId}`,
       )}`,
     },
   ];
@@ -86,7 +86,7 @@ export function RegistrationHouseholdDetailsPage(): React.ReactElement {
           title='Individuals in Household'
         />
         <RegistrationDetails
-          hctId={importedHousehold.registrationDataImportId.hctId}
+          hctId={importedHousehold.registrationDataImport.hctId}
           registrationDate={moment(importedHousehold.registrationDate).format(
             'DD MMM YYYY',
           )}
