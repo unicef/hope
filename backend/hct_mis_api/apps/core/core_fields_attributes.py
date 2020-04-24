@@ -9,17 +9,6 @@ _INDIVIDUAL = "Individual"
 _HOUSEHOLD = "Household"
 CORE_FIELDS_ATTRIBUTES = [
     {
-        "id": "05c6be72-22ac-401b-9d3f-0a7e7352aa87",
-        "type": TYPE_INTEGER,
-        "name": "years_in_school",
-        "label": {"English(EN)": "years in school"},
-        "hint": "number of years spent in school",
-        "required": True,
-        "lookup": "individuals__years_in_school",
-        "choices": [],
-        "associated_with": _INDIVIDUAL,
-    },
-    {
         "id": "a1741e3c-0e24-4a60-8d2f-463943abaebb",
         "type": TYPE_INTEGER,
         "name": "age",

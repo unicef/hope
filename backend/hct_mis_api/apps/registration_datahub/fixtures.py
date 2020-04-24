@@ -7,8 +7,7 @@ from household.models import (
     RESIDENCE_STATUS_CHOICE,
     SEX_CHOICE,
     YES_NO_CHOICE,
-    MARTIAL_STATUS_CHOICE,
-    IDENTIFICATION_TYPE_CHOICE,
+    MARITAL_STATUS_CHOICE,
 )
 from registration_datahub.models import (
     RegistrationDataImportDatahub,
@@ -90,7 +89,7 @@ class ImportedIndividualFactory(factory.DjangoModelFactory):
     )
     estimated_birth_date = factory.fuzzy.FuzzyChoice((True, False))
     marital_status = factory.fuzzy.FuzzyChoice(
-        MARTIAL_STATUS_CHOICE, getter=lambda c: c[0],
+        MARITAL_STATUS_CHOICE, getter=lambda c: c[0],
     )
     phone_no = factory.Faker("phone_number")
     phone_no_alternative = ""

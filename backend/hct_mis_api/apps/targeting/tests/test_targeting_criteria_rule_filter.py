@@ -15,7 +15,7 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         )
         IndividualFactory(
             household=households[-1],
-            **{"birth_date": "1970-11-29", "years_in_school": 1,}
+            **{"birth_date": "1970-11-29", }
         )
         self.household_50_yo = households[-1]
         households.append(
@@ -23,28 +23,27 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         )
         IndividualFactory(
             household=households[-1],
-            **{"birth_date": "1991-11-18", "years_in_school": 2,}
+            **{"birth_date": "1991-11-18", }
         )
         households.append(
             HouseholdFactory(size=1, residence_status="CITIZEN",)
         )
         IndividualFactory(
             household=households[-1],
-            **{"birth_date": "1991-11-18", "years_in_school": 2,}
+            **{"birth_date": "1991-11-18", }
         )
         households.append(
             HouseholdFactory(size=2, residence_status="REFUGEE",)
         )
         self.household_size_2 = households[-1]
         self.household_refugee = households[-1]
-        self.household_years_in_school_4 = households[-1]
         IndividualFactory(
             household=households[-1],
-            **{"birth_date": "1991-11-18", "years_in_school": 2,}
+            **{"birth_date": "1991-11-18",}
         )
         IndividualFactory(
             household=households[-1],
-            **{"birth_date": "1991-11-18", "years_in_school": 4,}
+            **{"birth_date": "1991-11-18", }
         )
 
         self.households = households
@@ -236,18 +235,6 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
             self.household_refugee.pk not in [h.pk for h in queryset]
         )
 
-    def test_rule_filter_years_in_school_equals(self):
-        rule_filter = TargetingCriteriaRuleFilter(
-            comparision_method="EQUALS",
-            field_name="years_in_school",
-            arguments=[4],
-        )
-        query = rule_filter.get_query()
-        queryset = self.get_households_queryset().filter(query).distinct()
-        self.assertEqual(queryset.count(), 1)
-        self.assertTrue(
-            self.household_years_in_school_4.pk in [h.pk for h in queryset]
-        )
 
 
 class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
