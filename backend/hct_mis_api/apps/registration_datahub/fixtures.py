@@ -55,23 +55,23 @@ class ImportedHouseholdFactory(factory.DjangoModelFactory):
         lambda o: Point(factory.Faker("latlng").generate())
     )
     unhcr_id = factory.Faker("uuid4")
-    f_0_5_age_group = factory.fuzzy.FuzzyInteger(3, 8)
-    f_6_11_age_group = factory.fuzzy.FuzzyInteger(3, 8)
-    f_12_17_age_group = factory.fuzzy.FuzzyInteger(3, 8)
-    f_adults = factory.fuzzy.FuzzyInteger(3, 8)
-    f_pregnant = factory.fuzzy.FuzzyInteger(3, 8)
-    m_0_5_age_group = factory.fuzzy.FuzzyInteger(3, 8)
-    m_6_11_age_group = factory.fuzzy.FuzzyInteger(3, 8)
-    m_12_17_age_group = factory.fuzzy.FuzzyInteger(3, 8)
-    m_adults = factory.fuzzy.FuzzyInteger(3, 8)
-    f_0_5_disability = factory.fuzzy.FuzzyInteger(3, 8)
-    f_6_11_disability = factory.fuzzy.FuzzyInteger(3, 8)
-    f_12_17_disability = factory.fuzzy.FuzzyInteger(3, 8)
-    f_adults_disability = factory.fuzzy.FuzzyInteger(3, 8)
-    m_0_5_disability = factory.fuzzy.FuzzyInteger(3, 8)
-    m_6_11_disability = factory.fuzzy.FuzzyInteger(3, 8)
-    m_12_17_disability = factory.fuzzy.FuzzyInteger(3, 8)
-    m_adults_disability = factory.fuzzy.FuzzyInteger(3, 8)
+    female_age_group_0_5_count = factory.fuzzy.FuzzyInteger(3, 8)
+    female_age_group_6_11_count = factory.fuzzy.FuzzyInteger(3, 8)
+    female_age_group_12_17_count = factory.fuzzy.FuzzyInteger(3, 8)
+    female_adults_count = factory.fuzzy.FuzzyInteger(3, 8)
+    pregnant_count = factory.fuzzy.FuzzyInteger(3, 8)
+    male_age_group_0_5_count = factory.fuzzy.FuzzyInteger(3, 8)
+    male_age_group_6_11_count = factory.fuzzy.FuzzyInteger(3, 8)
+    male_age_group_12_17_count = factory.fuzzy.FuzzyInteger(3, 8)
+    male_adults_count = factory.fuzzy.FuzzyInteger(3, 8)
+    female_age_group_0_5_disabled_count = factory.fuzzy.FuzzyInteger(3, 8)
+    female_age_group_6_11_disabled_count = factory.fuzzy.FuzzyInteger(3, 8)
+    female_age_group_12_17_disabled_count = factory.fuzzy.FuzzyInteger(3, 8)
+    female_adults_disabled_count = factory.fuzzy.FuzzyInteger(3, 8)
+    male_age_group_0_5_disabled_count = factory.fuzzy.FuzzyInteger(3, 8)
+    male_age_group_6_11_disabled_count = factory.fuzzy.FuzzyInteger(3, 8)
+    male_age_group_12_17_disabled_count = factory.fuzzy.FuzzyInteger(3, 8)
+    male_adults_disabled_count = factory.fuzzy.FuzzyInteger(3, 8)
 
 
 class ImportedIndividualFactory(factory.DjangoModelFactory):
@@ -88,40 +88,14 @@ class ImportedIndividualFactory(factory.DjangoModelFactory):
     birth_date = factory.Faker(
         "date_of_birth", tzinfo=utc, minimum_age=16, maximum_age=90
     )
-    estimated_birth_date = factory.fuzzy.FuzzyChoice(
-        YES_NO_CHOICE, getter=lambda c: c[0],
-    )
-
+    estimated_birth_date = factory.fuzzy.FuzzyChoice((True, False))
     marital_status = factory.fuzzy.FuzzyChoice(
         MARTIAL_STATUS_CHOICE, getter=lambda c: c[0],
     )
     phone_no = factory.Faker("phone_number")
     phone_no_alternative = ""
-    id_type = factory.fuzzy.FuzzyChoice(
-        IDENTIFICATION_TYPE_CHOICE, getter=lambda c: c[0],
-    )
-    birth_certificate_no = ""
-    birth_certificate_photo = ""
-    drivers_license_no = ""
-    drivers_license_photo = ""
-    electoral_card_no = ""
-    electoral_card_photo = ""
-    unhcr_id_no = ""
-    unhcr_id_photo = ""
-    national_passport = ""
-    national_passport_photo = ""
-    scope_id_no = ""
-    scope_id_photo = ""
-    other_id_type = ""
-    other_id_no = ""
-    other_id_photo = ""
     registration_data_import = factory.SubFactory(
         RegistrationDataImportDatahubFactory
     )
-    work_status = factory.fuzzy.FuzzyChoice(
-        YES_NO_CHOICE, getter=lambda c: c[0],
-    )
-    disability = factory.fuzzy.FuzzyChoice(
-        YES_NO_CHOICE, getter=lambda c: c[0],
-    )
+    disability = factory.fuzzy.FuzzyChoice((True, False))
     household = factory.SubFactory(ImportedHouseholdFactory)
