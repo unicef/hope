@@ -3321,7 +3321,7 @@ export type TargetPopulationQuery = (
   { __typename?: 'Query' }
   & { targetPopulation: Maybe<(
     { __typename?: 'TargetPopulationNode' }
-    & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'candidateListTotalHouseholds'>
+    & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'candidateListTotalHouseholds' | 'finalListTotalHouseholds'>
     & { candidateListTargetingCriteria: Maybe<(
       { __typename?: 'TargetingCriteriaNode' }
       & { targetPopulationCandidate: Maybe<(
@@ -5747,6 +5747,7 @@ export const TargetPopulationDocument = gql`
     name
     status
     candidateListTotalHouseholds
+    finalListTotalHouseholds
     candidateListTargetingCriteria {
       targetPopulationCandidate {
         createdBy {

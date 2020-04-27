@@ -34,6 +34,7 @@ export function TargetPopulationCore({
   id,
   selectedTab = 0,
   status,
+  targetPopulation,
 }) {
   if (!candidateList) return null;
   const { rules: candidateListRules } = candidateList;
@@ -44,7 +45,11 @@ export function TargetPopulationCore({
         candidateListRules={candidateListRules}
         targetPopulationRules={targetPopulationList?.rules}
       />
-      <Results resultsData={resultsData} />
+      <Results
+        resultsData={resultsData}
+        totalNumOfHouseholds={targetPopulation.candidateListTotalHouseholds}
+        finalListTotalHouseholds={targetPopulation.finalListTotalHouseholds}
+      />
       {candidateListRules.length ? (
         <TargetingHouseholds
           id={id}
