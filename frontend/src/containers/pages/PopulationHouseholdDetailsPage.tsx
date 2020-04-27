@@ -19,6 +19,7 @@ import { PaymentRecordTable } from '../tables/PaymentRecordTable';
 import { HouseholdIndividualsTable } from '../tables/HouseholdIndividualsTable';
 import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
 import { decodeIdString } from '../../utils/utils';
+import {PaymentRecordHouseholdTable} from "../tables/PaymentRecordHouseholdTable";
 
 const Container = styled.div`
   padding: 20px;
@@ -89,7 +90,10 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
           choicesData={choicesData}
           household={household as HouseholdNode}
         />
-        <PaymentRecordTable openInNewTab cashPlan={cashPlan} />
+        <PaymentRecordHouseholdTable
+          openInNewTab
+          household={household as HouseholdNode}
+        />
         <HouseholdVulnerabilities />
         <Overview>
           <Title>

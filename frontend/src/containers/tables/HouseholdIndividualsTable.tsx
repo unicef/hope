@@ -47,6 +47,12 @@ const headCells: HeadCell<IndividualNode>[] = [
   },
   {
     disablePadding: false,
+    label: 'Relationship to HoH',
+    id: 'relationship',
+    numeric: false,
+  },
+  {
+    disablePadding: false,
     label: 'Employment / Education',
     id: 'workStatus',
     numeric: false,
@@ -89,6 +95,9 @@ export function HouseholdIndividualsTable({
   const relationshipChoicesDict = choicesToDict(
     choicesData.relationshipChoices,
   );
+  const roleChoicesDict = choicesToDict(
+      choicesData.roleChoices,
+  );
   const allIndividuals = household.individuals.edges.map((edge) => edge.node);
   if (orderBy) {
     if (orderDirection === 'asc') {
@@ -128,6 +137,9 @@ export function HouseholdIndividualsTable({
                   statusToColor={paymentRecordStatusToColor}
                 />
               </StatusContainer>
+            </TableCell>
+            <TableCell align='left'>
+              {roleChoicesDict[row.relationship]}
             </TableCell>
             <TableCell align='left'>
               {relationshipChoicesDict[row.relationship]}
