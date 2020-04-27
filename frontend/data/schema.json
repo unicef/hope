@@ -235,6 +235,26 @@
                   "ofType": null
                 },
                 "defaultValue": null
+              },
+              {
+                "name": "title_Icontains",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "businessArea",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
               }
             ],
             "type": {
@@ -1325,6 +1345,16 @@
                 "defaultValue": null
               },
               {
+                "name": "adminArea",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "targetPopulations",
                 "description": null,
                 "type": {
@@ -1353,7 +1383,27 @@
                 "defaultValue": null
               },
               {
+                "name": "residenceStatus",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "size",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "search",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
