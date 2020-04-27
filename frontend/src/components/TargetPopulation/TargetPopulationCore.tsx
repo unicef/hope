@@ -3,8 +3,7 @@ import styled from 'styled-components';
 import { Paper, Typography } from '@material-ui/core';
 import { TargetingCriteria } from './TargetingCriteria';
 import { Results } from './Results';
-import { TargetPopulationHouseholdTable } from '../../containers/tables/TargetPopulationHouseholdTable';
-import { useCandidateHouseholdsListByTargetingCriteriaQuery } from '../../__generated__/graphql';
+import { TargetingHouseholds } from './TargetingHouseholds';
 
 const PaperContainer = styled(Paper)`
   display: flex;
@@ -34,6 +33,7 @@ export function TargetPopulationCore({
   targetPopulationList = null,
   id,
   selectedTab = 0,
+  status,
 }) {
   if (!candidateList) return null;
   const { rules: candidateListRules } = candidateList;
@@ -46,10 +46,10 @@ export function TargetPopulationCore({
       />
       <Results resultsData={resultsData} />
       {candidateListRules.length ? (
-        <TargetPopulationHouseholdTable
+        <TargetingHouseholds
           id={id}
-          query={useCandidateHouseholdsListByTargetingCriteriaQuery}
-          queryObjectName='candidateHouseholdsListByTargetingCriteria'
+          status={status}
+          selectedTab={selectedTab}
         />
       ) : (
         <PaperContainer>
