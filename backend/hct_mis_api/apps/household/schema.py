@@ -155,6 +155,7 @@ class HouseholdNode(DjangoObjectType):
 
 class IndividualNode(DjangoObjectType):
     estimated_birth_date = graphene.Boolean(required=False)
+    role = graphene.String()
 
     class Meta:
         exclude_fields = ("flex_fields",)

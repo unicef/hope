@@ -990,7 +990,7 @@ export type IndividualNode = Node & {
   middleName: Scalars['String'],
   familyName: Scalars['String'],
   relationship?: Maybe<IndividualRelationship>,
-  role?: Maybe<IndividualRole>,
+  role?: Maybe<Scalars['String']>,
   sex: IndividualSex,
   birthDate: Scalars['Date'],
   estimatedBirthDate?: Maybe<Scalars['Boolean']>,
@@ -1041,12 +1041,6 @@ export enum IndividualRelationship {
   GranddaugherGrandson = 'GRANDDAUGHER_GRANDSON',
   NephewNiece = 'NEPHEW_NIECE',
   Cousin = 'COUSIN'
-}
-
-export enum IndividualRole {
-  Primary = 'PRIMARY',
-  Alternate = 'ALTERNATE',
-  NoRole = 'NO_ROLE'
 }
 
 export enum IndividualSex {
@@ -2232,7 +2226,7 @@ export type HouseholdDetailedFragment = (
 
 export type IndividualMinimalFragment = (
   { __typename?: 'IndividualNode' }
-  & Pick<IndividualNode, 'id' | 'createdAt' | 'updatedAt' | 'fullName' | 'sex' | 'birthDate' | 'maritalStatus' | 'phoneNo'>
+  & Pick<IndividualNode, 'id' | 'createdAt' | 'updatedAt' | 'fullName' | 'sex' | 'birthDate' | 'maritalStatus' | 'phoneNo' | 'role'>
   & { documents: (
     { __typename?: 'DocumentNodeConnection' }
     & { edges: Array<Maybe<(
@@ -2684,7 +2678,8 @@ export type AllLogEntriesQuery = (
 );
 
 export type AllPaymentRecordsQueryVariables = {
-  cashPlan: Scalars['ID'],
+  cashPlan?: Maybe<Scalars['ID']>,
+  household?: Maybe<Scalars['ID']>,
   after?: Maybe<Scalars['String']>,
   before?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>,
@@ -2713,7 +2708,14 @@ export type AllPaymentRecordsQuery = (
         ), entitlement: Maybe<(
           { __typename?: 'PaymentEntitlementNode' }
           & Pick<PaymentEntitlementNode, 'id' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate'>
-        )> }
+        )>, cashPlan: (
+          { __typename?: 'CashPlanNode' }
+          & Pick<CashPlanNode, 'id'>
+          & { program: (
+            { __typename?: 'ProgramNode' }
+            & Pick<ProgramNode, 'id' | 'name'>
+          ) }
+        ) }
       )> }
     )>> }
   )> }
@@ -2841,6 +2843,9 @@ export type HouseholdChoiceDataQuery = (
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
   )>>>, relationshipChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, roleChoices: Maybe<Array<Maybe<(
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
   )>>> }
@@ -3407,6 +3412,7 @@ export const IndividualMinimalFragmentDoc = gql`
   birthDate
   maritalStatus
   phoneNo
+  role
   documents {
     edges {
       node {
@@ -4544,8 +4550,8 @@ export type AllLogEntriesQueryHookResult = ReturnType<typeof useAllLogEntriesQue
 export type AllLogEntriesLazyQueryHookResult = ReturnType<typeof useAllLogEntriesLazyQuery>;
 export type AllLogEntriesQueryResult = ApolloReactCommon.QueryResult<AllLogEntriesQuery, AllLogEntriesQueryVariables>;
 export const AllPaymentRecordsDocument = gql`
-    query AllPaymentRecords($cashPlan: ID!, $after: String, $before: String, $orderBy: String, $first: Int, $last: Int) {
-  allPaymentRecords(cashPlan: $cashPlan, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy) {
+    query AllPaymentRecords($cashPlan: ID, $household: ID, $after: String, $before: String, $orderBy: String, $first: Int, $last: Int) {
+  allPaymentRecords(cashPlan: $cashPlan, household: $household, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -4574,6 +4580,13 @@ export const AllPaymentRecordsDocument = gql`
           deliveredQuantity
           deliveryDate
         }
+        cashPlan {
+          id
+          program {
+            id
+            name
+          }
+        }
       }
     }
     totalCount
@@ -4581,7 +4594,7 @@ export const AllPaymentRecordsDocument = gql`
   }
 }
     `;
-export type AllPaymentRecordsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllPaymentRecordsQuery, AllPaymentRecordsQueryVariables>, 'query'> & ({ variables: AllPaymentRecordsQueryVariables; skip?: boolean; } | { skip: boolean; });
+export type AllPaymentRecordsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllPaymentRecordsQuery, AllPaymentRecordsQueryVariables>, 'query'>;
 
     export const AllPaymentRecordsComponent = (props: AllPaymentRecordsComponentProps) => (
       <ApolloReactComponents.Query<AllPaymentRecordsQuery, AllPaymentRecordsQueryVariables> query={AllPaymentRecordsDocument} {...props} />
@@ -4612,6 +4625,7 @@ export function withAllPaymentRecords<TProps, TChildProps = {}>(operationOptions
  * const { data, loading, error } = useAllPaymentRecordsQuery({
  *   variables: {
  *      cashPlan: // value for 'cashPlan'
+ *      household: // value for 'household'
  *      after: // value for 'after'
  *      before: // value for 'before'
  *      orderBy: // value for 'orderBy'
@@ -4966,6 +4980,10 @@ export const HouseholdChoiceDataDocument = gql`
     value
   }
   relationshipChoices {
+    name
+    value
+  }
+  roleChoices {
     name
     value
   }
@@ -6455,7 +6473,6 @@ export type ResolversTypes = {
   IndividualNodeEdge: ResolverTypeWrapper<IndividualNodeEdge>,
   IndividualNode: ResolverTypeWrapper<IndividualNode>,
   IndividualRelationship: IndividualRelationship,
-  IndividualRole: IndividualRole,
   IndividualSex: IndividualSex,
   IndividualMaritalStatus: IndividualMaritalStatus,
   DocumentNodeConnection: ResolverTypeWrapper<DocumentNodeConnection>,
@@ -6590,7 +6607,6 @@ export type ResolversParentTypes = {
   IndividualNodeEdge: IndividualNodeEdge,
   IndividualNode: IndividualNode,
   IndividualRelationship: IndividualRelationship,
-  IndividualRole: IndividualRole,
   IndividualSex: IndividualSex,
   IndividualMaritalStatus: IndividualMaritalStatus,
   DocumentNodeConnection: DocumentNodeConnection,
@@ -7101,7 +7117,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   middleName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   familyName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   relationship?: Resolver<Maybe<ResolversTypes['IndividualRelationship']>, ParentType, ContextType>,
-  role?: Resolver<Maybe<ResolversTypes['IndividualRole']>, ParentType, ContextType>,
+  role?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   sex?: Resolver<ResolversTypes['IndividualSex'], ParentType, ContextType>,
   birthDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   estimatedBirthDate?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
