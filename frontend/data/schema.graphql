@@ -786,7 +786,7 @@ type IndividualNode implements Node {
   middleName: String!
   familyName: String!
   relationship: IndividualRelationship
-  role: IndividualRole
+  role: String
   sex: IndividualSex!
   birthDate: Date!
   estimatedBirthDate: Boolean
@@ -827,12 +827,6 @@ enum IndividualRelationship {
   GRANDDAUGHER_GRANDSON
   NEPHEW_NIECE
   COUSIN
-}
-
-enum IndividualRole {
-  PRIMARY
-  ALTERNATE
-  NO_ROLE
 }
 
 enum IndividualSex {

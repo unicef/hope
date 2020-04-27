@@ -10,5 +10,9 @@ export const HouseholdChoiceData = gql`
       name
       value
     }
+    roleChoices {
+      name
+      value
+    }
   }
 `;
