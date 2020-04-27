@@ -1,7 +1,8 @@
 import React from 'react';
 import { TargetPopulationHouseholdTable } from '../../containers/tables/TargetPopulationHouseholdTable';
 import { useCandidateHouseholdsListByTargetingCriteriaQuery } from '../../__generated__/graphql';
-import { SentTargetPopulationTable } from '../../containers/tables/TargetPopulation/SentProgrammePopulation';
+import { SentTargetPopulationTable } from '../../containers/tables/TargetPopulation/SentTargeting';
+import { ApprovedTargetPopulationTable } from '../../containers/tables/TargetPopulation/ApprovedTargeting';
 
 export function TargetingHouseholds({ status, id, selectedTab }) {
   let table;
@@ -15,8 +16,13 @@ export function TargetingHouseholds({ status, id, selectedTab }) {
         />
       );
       break;
+    case 'APPROVED':
+      table = (
+        <ApprovedTargetPopulationTable id={id} selectedTab={selectedTab} />
+      )
+      break;
     case 'FINALIZED':
-      table = <SentTargetPopulationTable selectedTab={selectedTab} id={id} />;
+      table = <SentTargetPopulationTable id={id} selectedTab={selectedTab} />;
       break;
     default:
       table = (
