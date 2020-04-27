@@ -24,7 +24,7 @@ export function TargetPopulationTab({ values, selectedTab }) {
 
       <TargetPopulationHouseholdTable
         variables={{
-          id: values.id,
+          targetPopulation: values.id,
           ...(values.targetPopulationCriterias.length && {
             targetingCriteria: {
               rules: values.targetPopulationCriterias.map((rule) => {
