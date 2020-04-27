@@ -82,6 +82,7 @@ class IndividualFilter(FilterSet):
         to_field_name="sex", queryset=Individual.objects.all(),
     )
     programme = CharFilter(field_name="household__programs__name")
+    search = CharFilter(method="search_filter")
 
     class Meta:
         model = Individual
@@ -103,6 +104,16 @@ class IndividualFilter(FilterSet):
             "household__admin_area__title",
         )
     )
+
+    def search_filter(self, qs, name, value):
+        values = value.split(" ")
+        q_obj = Q()
+        for value in values:
+            q_obj |= Q(household__admin_area__title__icontains=value)
+            q_obj |= Q(id__icontains=value)
+            q_obj |= Q(household__id__icontains=value)
+            q_obj |= Q(full_name__icontains=value)
+        return qs.filter(q_obj)
 
 
 class DocumentTypeNode(DjangoObjectType):
