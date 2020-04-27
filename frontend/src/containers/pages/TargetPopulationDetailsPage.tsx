@@ -66,12 +66,14 @@ export function TargetPopulationDetailsPage() {
           <TabPanel value={selectedTab} index={0}>
             <TargetPopulationCore
               id={targetPopulation.id}
+              status={status}
               candidateList={targetPopulation.candidateListTargetingCriteria}
             />
           </TabPanel>
           <TabPanel value={selectedTab} index={1}>
             <TargetPopulationCore
               id={targetPopulation.id}
+              status={status}
               candidateList={targetPopulation.candidateListTargetingCriteria}
               targetPopulationList={targetPopulation.finalListTargetingCriteria}
               selectedTab={selectedTab}

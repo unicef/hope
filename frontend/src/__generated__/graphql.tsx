@@ -3677,8 +3677,8 @@ export type CandidateHouseholdsListByTargetingCriteriaQuery = (
 );
 
 export type FinalHouseholdsListByTargetingCriteriaQueryVariables = {
-  id: Scalars['ID'],
-  targetingCriteria: TargetingCriteriaObjectType,
+  targetPopulation: Scalars['ID'],
+  targetingCriteria?: Maybe<TargetingCriteriaObjectType>,
   first?: Maybe<Scalars['Int']>,
   after?: Maybe<Scalars['String']>,
   before?: Maybe<Scalars['String']>,
@@ -6540,8 +6540,8 @@ export type CandidateHouseholdsListByTargetingCriteriaQueryHookResult = ReturnTy
 export type CandidateHouseholdsListByTargetingCriteriaLazyQueryHookResult = ReturnType<typeof useCandidateHouseholdsListByTargetingCriteriaLazyQuery>;
 export type CandidateHouseholdsListByTargetingCriteriaQueryResult = ApolloReactCommon.QueryResult<CandidateHouseholdsListByTargetingCriteriaQuery, CandidateHouseholdsListByTargetingCriteriaQueryVariables>;
 export const FinalHouseholdsListByTargetingCriteriaDocument = gql`
-    query FinalHouseholdsListByTargetingCriteria($id: ID!, $targetingCriteria: TargetingCriteriaObjectType!, $first: Int, $after: String, $before: String, $last: Int) {
-  finalHouseholdsListByTargetingCriteria(targetPopulation: $id, targetingCriteria: $targetingCriteria, after: $after, before: $before, first: $first, last: $last) {
+    query FinalHouseholdsListByTargetingCriteria($targetPopulation: ID!, $targetingCriteria: TargetingCriteriaObjectType, $first: Int, $after: String, $before: String, $last: Int) {
+  finalHouseholdsListByTargetingCriteria(targetPopulation: $targetPopulation, targetingCriteria: $targetingCriteria, after: $after, before: $before, first: $first, last: $last) {
     edges {
       node {
         id
@@ -6591,7 +6591,7 @@ export function withFinalHouseholdsListByTargetingCriteria<TProps, TChildProps =
  * @example
  * const { data, loading, error } = useFinalHouseholdsListByTargetingCriteriaQuery({
  *   variables: {
- *      id: // value for 'id'
+ *      targetPopulation: // value for 'targetPopulation'
  *      targetingCriteria: // value for 'targetingCriteria'
  *      first: // value for 'first'
  *      after: // value for 'after'
