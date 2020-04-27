@@ -2,15 +2,15 @@ import { gql } from 'apollo-boost';
 
 export const FinalHouseholdsListByTargetingCriteria = gql`
   query FinalHouseholdsListByTargetingCriteria(
-    $id: ID!
-    $targetingCriteria: TargetingCriteriaObjectType!
+    $targetPopulation: ID!
+    $targetingCriteria: TargetingCriteriaObjectType
     $first: Int
     $after: String
     $before: String
     $last: Int
   ) {
     finalHouseholdsListByTargetingCriteria(
-      targetPopulation: $id
+      targetPopulation: $targetPopulation
       targetingCriteria: $targetingCriteria
       after: $after
       before: $before
