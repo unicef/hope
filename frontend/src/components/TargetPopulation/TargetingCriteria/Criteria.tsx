@@ -15,7 +15,7 @@ const CriteriaElement = styled.div`
     props.alternative ? 'transparent' : '#f7faff'};
   padding: ${({ theme }) => theme.spacing(1)}px
     ${({ theme }) => theme.spacing(3)}px;
-  margin: 0 0 ${({ theme }) => theme.spacing(3)}px 0;
+  margin: ${({ theme }) => theme.spacing(2)}px 0;
   p {
     margin: ${({ theme }) => theme.spacing(2)}px 0;
     span {
