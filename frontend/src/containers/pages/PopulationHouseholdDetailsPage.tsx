@@ -46,6 +46,12 @@ const Content = styled.div`
   margin-top: 20px;
 `;
 
+const SubTitle = styled(Typography)`
+  && {
+    font-size: 16px;
+  }
+`;
+
 export function PopulationHouseholdDetailsPage(): React.ReactElement {
   const { id } = useParams();
   const businessArea = useBusinessArea();
@@ -90,46 +96,41 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
             <Typography variant='h6'>Registration Details</Typography>
           </Title>
           <Grid container spacing={6}>
-            <Grid item xs={4}>
+            <Grid item xs={3}>
               <LabelizedField label='Source'>
                 <div>-</div>
               </LabelizedField>
             </Grid>
-            <Grid item xs={4}>
-              <LabelizedField label='Intake group name'>
+            <Grid item xs={3}>
+              <LabelizedField label='Import name'>
                 <div>-</div>
               </LabelizedField>
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={3}>
               <LabelizedField label='Registered Date'>
-                <div>-</div>
-              </LabelizedField>
-            </Grid>
-            <Grid item xs={4}>
-              <LabelizedField label='Number of Rooms'>
                 <div>-</div>
               </LabelizedField>
             </Grid>
           </Grid>
           <hr />
-          <Typography variant='h6'>Data Collection</Typography>
+          <SubTitle variant='h6'>Data Collection</SubTitle>
           <Grid container spacing={6}>
-            <Grid item xs={4}>
+            <Grid item xs={3}>
               <LabelizedField label='Start time'>
                 <div>-</div>
               </LabelizedField>
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={3}>
               <LabelizedField label='End time'>
                 <div>-</div>
               </LabelizedField>
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={3}>
               <LabelizedField label='Device ID'>
                 <div>-</div>
               </LabelizedField>
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={3}>
               <LabelizedField label='User name'>
                 <div>-</div>
               </LabelizedField>
