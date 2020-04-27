@@ -103,15 +103,15 @@ export function TargetPopulationFilters({
         }}
       >
         <MenuItem value=''>None</MenuItem>
-        <MenuItem value='DRAFT'>Draft</MenuItem>
-        <MenuItem value='APPROVED'>Approved</MenuItem>
-        <MenuItem value='FINALIZED'>Finalized</MenuItem>
+        <MenuItem value='DRAFT'>Open</MenuItem>
+        <MenuItem value='APPROVED'>Closed</MenuItem>
+        <MenuItem value='FINALIZED'>Sent</MenuItem>
       </TextContainer>
       <TextContainer
         id='minFilter'
         value={filter.numIndividuals.min}
         variant='filled'
-        placeholder='No. of Individuals'
+        placeholder='Household Size'
         onChange={(e) =>
           onFilterChange({
             ...filter,
@@ -135,7 +135,7 @@ export function TargetPopulationFilters({
         id='maxFilter'
         value={filter.numIndividuals.max}
         variant='filled'
-        placeholder='No. of Individuals'
+        placeholder='Individual Size'
         onChange={(e) =>
           onFilterChange({
             ...filter,
