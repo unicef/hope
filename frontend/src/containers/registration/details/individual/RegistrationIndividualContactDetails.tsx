@@ -22,7 +22,7 @@ interface IndividualContactProps {
 export function RegistrationIndividualContactDetails({
   individual,
 }: IndividualContactProps): React.ReactElement {
-  const { phoneNumber, household, phoneNumberAlternative } = individual;
+  const { phoneNo, household, phoneNoAlternative } = individual;
 
   return (
     <Overview>
@@ -32,12 +32,12 @@ export function RegistrationIndividualContactDetails({
       <Grid container spacing={6}>
         <Grid item xs={4}>
           <LabelizedField label='Phone Number'>
-            <div>{phoneNumber}</div>
+            <div>{phoneNo}</div>
           </LabelizedField>
         </Grid>
         <Grid item xs={8}>
           <LabelizedField label='Alternate Phone Number'>
-            <div>{phoneNumberAlternative}</div>
+            <div>{phoneNoAlternative}</div>
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
@@ -54,7 +54,7 @@ export function RegistrationIndividualContactDetails({
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='Location Name'>
-            <div>{household.location}</div>
+            <div>{household.admin1}</div>
           </LabelizedField>
         </Grid>
       </Grid>

@@ -9,8 +9,7 @@ export const PAYMENT_RECORD_QUERY = gql`
       cashAssistId
       household {
         id
-        householdCaId
-        familySize
+        size
       }
       headOfHousehold
       distributionModality
