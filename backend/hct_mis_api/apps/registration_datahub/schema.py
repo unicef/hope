@@ -53,6 +53,16 @@ class ImportedIndividualFilter(FilterSet):
 
 
 class ImportedHouseholdNode(DjangoObjectType):
+
+    country_origin = graphene.String(description="Country origin name")
+    country = graphene.String(description="Country name")
+
+    def resolve_country(parrent, info):
+        return parrent.country.name
+
+    def resolve_country_origin(parrent, info):
+        return parrent.country_origin.name
+
     class Meta:
         model = ImportedHousehold
         filter_fields = []

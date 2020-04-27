@@ -11,6 +11,9 @@ export const AllHouseholds = gql`
     $familySize: String
     $programs: [ID]
     $headOfHouseholdFullNameIcontains: String
+    $adminArea: ID
+    $search: String
+    $residenceStatus: String
   ) {
     allHouseholds(
       after: $after
@@ -22,6 +25,9 @@ export const AllHouseholds = gql`
       orderBy: $orderBy
       programs: $programs
       headOfHousehold_FullName_Icontains: $headOfHouseholdFullNameIcontains
+      adminArea: $adminArea
+      search: $search
+      residenceStatus: $residenceStatus
     ) {
       pageInfo {
         hasNextPage

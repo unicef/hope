@@ -2659,7 +2659,9 @@ export type QueryAllAdminAreasArgs = {
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  title?: Maybe<Scalars['String']>
+  title?: Maybe<Scalars['String']>,
+  title_Icontains?: Maybe<Scalars['String']>,
+  businessArea?: Maybe<Scalars['String']>
 };
 
 
@@ -2793,9 +2795,12 @@ export type QueryAllHouseholdsArgs = {
   size_Range?: Maybe<Scalars['Int']>,
   size_Lte?: Maybe<Scalars['Int']>,
   size_Gte?: Maybe<Scalars['Int']>,
+  adminArea?: Maybe<Scalars['ID']>,
   targetPopulations?: Maybe<Array<Maybe<Scalars['ID']>>>,
   programs?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  residenceStatus?: Maybe<Scalars['String']>,
   size?: Maybe<Scalars['String']>,
+  search?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -3684,6 +3689,30 @@ export type UpdateTpMutation = (
   )> }
 );
 
+export type AllAdminAreasQueryVariables = {
+  title?: Maybe<Scalars['String']>,
+  businessArea?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>
+};
+
+
+export type AllAdminAreasQuery = (
+  { __typename?: 'Query' }
+  & { allAdminAreas: Maybe<(
+    { __typename?: 'AdminAreaNodeConnection' }
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'endCursor' | 'startCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'AdminAreaNodeEdge' }
+      & { node: Maybe<(
+        { __typename?: 'AdminAreaNode' }
+        & Pick<AdminAreaNode, 'id' | 'title'>
+      )> }
+    )>> }
+  )> }
+);
+
 export type AllBusinessAreasQueryVariables = {};
 
 
@@ -3742,7 +3771,10 @@ export type AllHouseholdsQueryVariables = {
   orderBy?: Maybe<Scalars['String']>,
   familySize?: Maybe<Scalars['String']>,
   programs?: Maybe<Array<Maybe<Scalars['ID']>>>,
-  headOfHouseholdFullNameIcontains?: Maybe<Scalars['String']>
+  headOfHouseholdFullNameIcontains?: Maybe<Scalars['String']>,
+  adminArea?: Maybe<Scalars['ID']>,
+  search?: Maybe<Scalars['String']>,
+  residenceStatus?: Maybe<Scalars['String']>
 };
 
 
@@ -3975,6 +4007,20 @@ export type HouseholdQuery = (
     { __typename?: 'HouseholdNode' }
     & HouseholdDetailedFragment
   )> }
+);
+
+export type HouseholdChoiceDataQueryVariables = {};
+
+
+export type HouseholdChoiceDataQuery = (
+  { __typename?: 'Query' }
+  & { residenceStatusChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, relationshipChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>> }
 );
 
 export type IndividualQueryVariables = {
@@ -4291,6 +4337,22 @@ export type ImportedIndividualQuery = (
   )> }
 );
 
+export type MergeRdiMutationVariables = {
+  id: Scalars['ID']
+};
+
+
+export type MergeRdiMutation = (
+  { __typename?: 'Mutations' }
+  & { mergeRegistrationDataImport: Maybe<(
+    { __typename?: 'MergeRegistrationDataImportMutation' }
+    & { registrationDataImport: Maybe<(
+      { __typename?: 'RegistrationDataImportNode' }
+      & RegistrationDetailedFragment
+    )> }
+  )> }
+);
+
 export type RegistrationChoicesQueryVariables = {};
 
 
@@ -4392,7 +4454,10 @@ export type UploadImportDataXlsxFileMutation = (
   { __typename?: 'Mutations' }
   & { uploadImportDataXlsxFile: Maybe<(
     { __typename?: 'UploadImportDataXLSXFile' }
-    & { importData: Maybe<(
+    & { errors: Maybe<Array<Maybe<(
+      { __typename?: 'XlsxRowErrorNode' }
+      & Pick<XlsxRowErrorNode, 'header' | 'message' | 'rowNumber'>
+    )>>>, importData: Maybe<(
       { __typename?: 'ImportDataNode' }
       & Pick<ImportDataNode, 'id' | 'numberOfIndividuals' | 'numberOfHouseholds'>
       & { registrationDataImport: Maybe<(
@@ -5241,6 +5306,69 @@ export function useUpdateTpMutation(baseOptions?: ApolloReactHooks.MutationHookO
 export type UpdateTpMutationHookResult = ReturnType<typeof useUpdateTpMutation>;
 export type UpdateTpMutationResult = ApolloReactCommon.MutationResult<UpdateTpMutation>;
 export type UpdateTpMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdateTpMutation, UpdateTpMutationVariables>;
+export const AllAdminAreasDocument = gql`
+    query AllAdminAreas($title: String, $businessArea: String, $first: Int) {
+  allAdminAreas(title_Icontains: $title, businessArea: $businessArea, first: $first) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      endCursor
+      startCursor
+    }
+    edges {
+      node {
+        id
+        title
+      }
+    }
+  }
+}
+    `;
+export type AllAdminAreasComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllAdminAreasQuery, AllAdminAreasQueryVariables>, 'query'>;
+
+    export const AllAdminAreasComponent = (props: AllAdminAreasComponentProps) => (
+      <ApolloReactComponents.Query<AllAdminAreasQuery, AllAdminAreasQueryVariables> query={AllAdminAreasDocument} {...props} />
+    );
+    
+export type AllAdminAreasProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllAdminAreasQuery, AllAdminAreasQueryVariables> & TChildProps;
+export function withAllAdminAreas<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllAdminAreasQuery,
+  AllAdminAreasQueryVariables,
+  AllAdminAreasProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllAdminAreasQuery, AllAdminAreasQueryVariables, AllAdminAreasProps<TChildProps>>(AllAdminAreasDocument, {
+      alias: 'allAdminAreas',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllAdminAreasQuery__
+ *
+ * To run a query within a React component, call `useAllAdminAreasQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllAdminAreasQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllAdminAreasQuery({
+ *   variables: {
+ *      title: // value for 'title'
+ *      businessArea: // value for 'businessArea'
+ *      first: // value for 'first'
+ *   },
+ * });
+ */
+export function useAllAdminAreasQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllAdminAreasQuery, AllAdminAreasQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllAdminAreasQuery, AllAdminAreasQueryVariables>(AllAdminAreasDocument, baseOptions);
+      }
+export function useAllAdminAreasLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllAdminAreasQuery, AllAdminAreasQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllAdminAreasQuery, AllAdminAreasQueryVariables>(AllAdminAreasDocument, baseOptions);
+        }
+export type AllAdminAreasQueryHookResult = ReturnType<typeof useAllAdminAreasQuery>;
+export type AllAdminAreasLazyQueryHookResult = ReturnType<typeof useAllAdminAreasLazyQuery>;
+export type AllAdminAreasQueryResult = ApolloReactCommon.QueryResult<AllAdminAreasQuery, AllAdminAreasQueryVariables>;
 export const AllBusinessAreasDocument = gql`
     query AllBusinessAreas {
   allBusinessAreas {
@@ -5378,8 +5506,8 @@ export type AllCashPlansQueryHookResult = ReturnType<typeof useAllCashPlansQuery
 export type AllCashPlansLazyQueryHookResult = ReturnType<typeof useAllCashPlansLazyQuery>;
 export type AllCashPlansQueryResult = ApolloReactCommon.QueryResult<AllCashPlansQuery, AllCashPlansQueryVariables>;
 export const AllHouseholdsDocument = gql`
-    query AllHouseholds($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $programs: [ID], $headOfHouseholdFullNameIcontains: String) {
-  allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, size: $familySize, orderBy: $orderBy, programs: $programs, headOfHousehold_FullName_Icontains: $headOfHouseholdFullNameIcontains) {
+    query AllHouseholds($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $programs: [ID], $headOfHouseholdFullNameIcontains: String, $adminArea: ID, $search: String, $residenceStatus: String) {
+  allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, size: $familySize, orderBy: $orderBy, programs: $programs, headOfHousehold_FullName_Icontains: $headOfHouseholdFullNameIcontains, adminArea: $adminArea, search: $search, residenceStatus: $residenceStatus) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -5435,6 +5563,9 @@ export function withAllHouseholds<TProps, TChildProps = {}>(operationOptions?: A
  *      familySize: // value for 'familySize'
  *      programs: // value for 'programs'
  *      headOfHouseholdFullNameIcontains: // value for 'headOfHouseholdFullNameIcontains'
+ *      adminArea: // value for 'adminArea'
+ *      search: // value for 'search'
+ *      residenceStatus: // value for 'residenceStatus'
  *   },
  * });
  */
@@ -6004,6 +6135,60 @@ export function useHouseholdLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHo
 export type HouseholdQueryHookResult = ReturnType<typeof useHouseholdQuery>;
 export type HouseholdLazyQueryHookResult = ReturnType<typeof useHouseholdLazyQuery>;
 export type HouseholdQueryResult = ApolloReactCommon.QueryResult<HouseholdQuery, HouseholdQueryVariables>;
+export const HouseholdChoiceDataDocument = gql`
+    query householdChoiceData {
+  residenceStatusChoices {
+    name
+    value
+  }
+  relationshipChoices {
+    name
+    value
+  }
+}
+    `;
+export type HouseholdChoiceDataComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<HouseholdChoiceDataQuery, HouseholdChoiceDataQueryVariables>, 'query'>;
+
+    export const HouseholdChoiceDataComponent = (props: HouseholdChoiceDataComponentProps) => (
+      <ApolloReactComponents.Query<HouseholdChoiceDataQuery, HouseholdChoiceDataQueryVariables> query={HouseholdChoiceDataDocument} {...props} />
+    );
+    
+export type HouseholdChoiceDataProps<TChildProps = {}> = ApolloReactHoc.DataProps<HouseholdChoiceDataQuery, HouseholdChoiceDataQueryVariables> & TChildProps;
+export function withHouseholdChoiceData<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  HouseholdChoiceDataQuery,
+  HouseholdChoiceDataQueryVariables,
+  HouseholdChoiceDataProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, HouseholdChoiceDataQuery, HouseholdChoiceDataQueryVariables, HouseholdChoiceDataProps<TChildProps>>(HouseholdChoiceDataDocument, {
+      alias: 'householdChoiceData',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useHouseholdChoiceDataQuery__
+ *
+ * To run a query within a React component, call `useHouseholdChoiceDataQuery` and pass it any options that fit your needs.
+ * When your component renders, `useHouseholdChoiceDataQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useHouseholdChoiceDataQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useHouseholdChoiceDataQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<HouseholdChoiceDataQuery, HouseholdChoiceDataQueryVariables>) {
+        return ApolloReactHooks.useQuery<HouseholdChoiceDataQuery, HouseholdChoiceDataQueryVariables>(HouseholdChoiceDataDocument, baseOptions);
+      }
+export function useHouseholdChoiceDataLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<HouseholdChoiceDataQuery, HouseholdChoiceDataQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<HouseholdChoiceDataQuery, HouseholdChoiceDataQueryVariables>(HouseholdChoiceDataDocument, baseOptions);
+        }
+export type HouseholdChoiceDataQueryHookResult = ReturnType<typeof useHouseholdChoiceDataQuery>;
+export type HouseholdChoiceDataLazyQueryHookResult = ReturnType<typeof useHouseholdChoiceDataLazyQuery>;
+export type HouseholdChoiceDataQueryResult = ApolloReactCommon.QueryResult<HouseholdChoiceDataQuery, HouseholdChoiceDataQueryVariables>;
 export const IndividualDocument = gql`
     query Individual($id: ID!) {
   individual(id: $id) {
@@ -6848,6 +7033,57 @@ export function useImportedIndividualLazyQuery(baseOptions?: ApolloReactHooks.La
 export type ImportedIndividualQueryHookResult = ReturnType<typeof useImportedIndividualQuery>;
 export type ImportedIndividualLazyQueryHookResult = ReturnType<typeof useImportedIndividualLazyQuery>;
 export type ImportedIndividualQueryResult = ApolloReactCommon.QueryResult<ImportedIndividualQuery, ImportedIndividualQueryVariables>;
+export const MergeRdiDocument = gql`
+    mutation MergeRDI($id: ID!) {
+  mergeRegistrationDataImport(id: $id) {
+    registrationDataImport {
+      ...registrationDetailed
+    }
+  }
+}
+    ${RegistrationDetailedFragmentDoc}`;
+export type MergeRdiMutationFn = ApolloReactCommon.MutationFunction<MergeRdiMutation, MergeRdiMutationVariables>;
+export type MergeRdiComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<MergeRdiMutation, MergeRdiMutationVariables>, 'mutation'>;
+
+    export const MergeRdiComponent = (props: MergeRdiComponentProps) => (
+      <ApolloReactComponents.Mutation<MergeRdiMutation, MergeRdiMutationVariables> mutation={MergeRdiDocument} {...props} />
+    );
+    
+export type MergeRdiProps<TChildProps = {}> = ApolloReactHoc.MutateProps<MergeRdiMutation, MergeRdiMutationVariables> & TChildProps;
+export function withMergeRdi<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  MergeRdiMutation,
+  MergeRdiMutationVariables,
+  MergeRdiProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, MergeRdiMutation, MergeRdiMutationVariables, MergeRdiProps<TChildProps>>(MergeRdiDocument, {
+      alias: 'mergeRdi',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useMergeRdiMutation__
+ *
+ * To run a mutation, you first call `useMergeRdiMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useMergeRdiMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [mergeRdiMutation, { data, loading, error }] = useMergeRdiMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useMergeRdiMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<MergeRdiMutation, MergeRdiMutationVariables>) {
+        return ApolloReactHooks.useMutation<MergeRdiMutation, MergeRdiMutationVariables>(MergeRdiDocument, baseOptions);
+      }
+export type MergeRdiMutationHookResult = ReturnType<typeof useMergeRdiMutation>;
+export type MergeRdiMutationResult = ApolloReactCommon.MutationResult<MergeRdiMutation>;
+export type MergeRdiMutationOptions = ApolloReactCommon.BaseMutationOptions<MergeRdiMutation, MergeRdiMutationVariables>;
 export const RegistrationChoicesDocument = gql`
     query registrationChoices {
   registrationDataStatusChoices {
@@ -7002,6 +7238,11 @@ export type UnapproveRdiMutationOptions = ApolloReactCommon.BaseMutationOptions<
 export const UploadImportDataXlsxFileDocument = gql`
     mutation UploadImportDataXlsxFile($file: Upload!) {
   uploadImportDataXlsxFile(file: $file) {
+    errors {
+      header
+      message
+      rowNumber
+    }
     importData {
       id
       numberOfIndividuals
