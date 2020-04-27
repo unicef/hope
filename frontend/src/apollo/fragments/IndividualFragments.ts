@@ -10,6 +10,7 @@ export const individualMinimal = gql`
     birthDate
     maritalStatus
     phoneNo
+    role
     documents {
       edges {
         node {
