@@ -26,7 +26,7 @@ export const IndividualsListTable = ({
     age: JSON.stringify(filter.age),
     businessArea,
     sex: [filter.sex],
-    fullNameContains: filter.text,
+    search: filter.text,
   };
 
   return (
