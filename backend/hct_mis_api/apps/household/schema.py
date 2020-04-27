@@ -32,8 +32,7 @@ class HouseholdFilter(FilterSet):
         field_name="registration_data_import__business_area__slug"
     )
     size = IntegerRangeFilter(field_name="size")
-    search = CharFilter( method="search_filter")
-
+    search = CharFilter(method="search_filter")
 
     class Meta:
         model = Household
@@ -70,8 +69,8 @@ class HouseholdFilter(FilterSet):
         values = value.split(" ")
         q_obj = Q()
         for value in values:
-            q_obj |= Q(head_of_household__first_name__icontains=value)
-            q_obj |= Q(head_of_household__last_name__icontains=value)
+            q_obj |= Q(head_of_household__given_name__icontains=value)
+            q_obj |= Q(head_of_household__family_name__icontains=value)
             q_obj |= Q(id__icontains=value)
         return qs.filter(q_obj)
 
@@ -107,6 +106,11 @@ class IndividualFilter(FilterSet):
 
 
 class DocumentTypeNode(DjangoObjectType):
+    country = graphene.String(description="Country name")
+
+    def resolve_country(parrent, info):
+        return parrent.country.name
+
     class Meta:
         model = DocumentType
 
@@ -121,6 +125,14 @@ class DocumentNode(DjangoObjectType):
 
 class HouseholdNode(DjangoObjectType):
     total_cash_received = graphene.Decimal()
+    country_origin = graphene.String(description="Country origin name")
+    country = graphene.String(description="Country name")
+
+    def resolve_country(parrent, info):
+        return parrent.country.name
+
+    def resolve_country_origin(parrent, info):
+        return parrent.country_origin.name
 
     class Meta:
         model = Household

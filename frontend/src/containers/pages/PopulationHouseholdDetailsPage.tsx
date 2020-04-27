@@ -8,6 +8,7 @@ import { PageHeader } from '../../components/PageHeader';
 import {
   CashPlanNode,
   HouseholdNode,
+  useHouseholdChoiceDataQuery,
   useHouseholdQuery,
 } from '../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
@@ -51,8 +52,13 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
   const { data, loading } = useHouseholdQuery({
     variables: { id },
   });
-
-  if (loading) return null;
+  const {
+    data: choicesData,
+    loading: choicesLoading,
+  } = useHouseholdChoiceDataQuery({
+    variables: { businessArea },
+  });
+  if (loading || choicesLoading) return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -73,7 +79,10 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
       />
       <HouseholdDetails houseHold={household as HouseholdNode} />
       <Container>
-        <HouseholdIndividualsTable household={household as HouseholdNode} />
+        <HouseholdIndividualsTable
+          choicesData={choicesData}
+          household={household as HouseholdNode}
+        />
         <PaymentRecordTable openInNewTab cashPlan={cashPlan} />
         <HouseholdVulnerabilities />
         <Overview>
