@@ -10,12 +10,11 @@ from program.fixtures import ProgramFactory
 class TestHouseholdQuery(APITestCase):
     ALL_HOUSEHOLD_QUERY = """
     query AllHouseholds{
-      allHouseholds(orderBy: "family_size") {
+      allHouseholds(orderBy: "size") {
         edges {
           node {
-            familySize
-            nationality
-            householdCaId
+            size
+            countryOrigin
             address
           }
         }
@@ -25,14 +24,13 @@ class TestHouseholdQuery(APITestCase):
     ALL_HOUSEHOLD_QUERY_RANGE = """
     query AllHouseholds{
       allHouseholds(
-        orderBy: "family_size", 
-        familySize: "{\\"min\\": 3, \\"max\\": 9}"
+        orderBy: "size", 
+        size: "{\\"min\\": 3, \\"max\\": 9}"
       ) {
         edges {
           node {
-            familySize
-            nationality
-            householdCaId
+            size
+            countryOrigin
             address
           }
         }
@@ -41,12 +39,11 @@ class TestHouseholdQuery(APITestCase):
     """
     ALL_HOUSEHOLD_QUERY_MIN = """
     query AllHouseholds{
-      allHouseholds(orderBy: "family_size", familySize: "{\\"min\\": 3}") {
+      allHouseholds(orderBy: "size", size: "{\\"min\\": 3}") {
         edges {
           node {
-            familySize
-            nationality
-            householdCaId
+            size
+            countryOrigin
             address
           }
         }
@@ -55,12 +52,11 @@ class TestHouseholdQuery(APITestCase):
     """
     ALL_HOUSEHOLD_QUERY_MAX = """
     query AllHouseholds{
-      allHouseholds(orderBy: "family_size", familySize: "{\\"max\\": 9}") {
+      allHouseholds(orderBy: "size", size: "{\\"max\\": 9}") {
         edges {
           node {
-            familySize
-            nationality
-            householdCaId
+            size
+            countryOrigin
             address
           }
         }
@@ -72,9 +68,8 @@ class TestHouseholdQuery(APITestCase):
       allHouseholds(programs: $programs) {
         edges {
           node {
-            familySize
-            nationality
-            householdCaId
+            size
+            countryOrigin
             address
             programs { 
               edges {
@@ -91,9 +86,8 @@ class TestHouseholdQuery(APITestCase):
     HOUSEHOLD_QUERY = """
     query Household($id: ID!) {
       household(id: $id) {
-        familySize
-        nationality
-        householdCaId
+        size
+        countryOrigin
         address
       }
     }
@@ -114,10 +108,9 @@ class TestHouseholdQuery(APITestCase):
         self.households = []
         for index, family_size in enumerate(family_sizes_list):
             household = HouseholdFactory(
-                family_size=family_size,
+                size=family_size,
                 address="Lorem Ipsum",
-                nationality="PL",
-                household_ca_id="123-123-123",
+                country_origin="PL",
             )
             if index % 2:
                 household.programs.add(self.program_one)

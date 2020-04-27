@@ -35,8 +35,8 @@ export function HouseHoldTableRow({ household }: HouseHoldTableRowProps) {
       <TableCell align='left'>
         {household.headOfHousehold.fullName}
       </TableCell>
-      <TableCell align='left'>{household.familySize}</TableCell>
-      <TableCell align='left'>{household.location.title}</TableCell>
+      <TableCell align='left'>{household.size}</TableCell>
+      <TableCell align='left'>{household.adminArea.title}</TableCell>
       <TableCell align='left'>{household.residenceStatus}</TableCell>
       <TableCell align='right'>
         {formatCurrency(

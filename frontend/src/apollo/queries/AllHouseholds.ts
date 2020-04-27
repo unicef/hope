@@ -18,7 +18,7 @@ export const AllHouseholds = gql`
       first: $first
       last: $last
       businessArea: $businessArea
-      familySize: $familySize
+      size: $familySize
       orderBy: $orderBy
       programs: $programs
       headOfHousehold_FullName_Icontains: $headOfHouseholdFullNameIcontains
@@ -33,24 +33,7 @@ export const AllHouseholds = gql`
       edges {
         cursor
         node {
-          id
-          createdAt
-          householdCaId
-          residenceStatus
-          familySize
-          totalCashReceived
-          registrationDate
-          headOfHousehold {
-            id
-            fullName
-          }
-          location {
-            id
-            title
-          }
-          individuals {
-            totalCount
-          }
+          ...householdMinimal
         }
       }
     }

@@ -225,7 +225,7 @@ def serialize_flex_attributes():
     return result_dict
 
 
-def age_to_dob_range_query(field_name, age_min, age_max):
+def age_to_birth_date_range_query(field_name, age_min, age_max):
     query_dict = {}
     this_year = dt.date.today().year
     if age_min == age_max and age_min is not None:
@@ -237,8 +237,8 @@ def age_to_dob_range_query(field_name, age_min, age_max):
     return Q(**query_dict)
 
 
-def age_to_dob_query(comparision_method, args):
-    field_name = "individuals__dob"
+def age_to_birth_date_query(comparision_method, args):
+    field_name = "individuals__birth_date"
     comparision_method_args_count = {
         "RANGE": 2,
         "NOT_IN_RANGE": 2,
@@ -257,17 +257,17 @@ def age_to_dob_query(comparision_method, args):
             f"Age {comparision_method} filter query expect {args_count} arguments"
         )
     if comparision_method == "RANGE":
-        return age_to_dob_range_query(field_name, *args)
+        return age_to_birth_date_range_query(field_name, *args)
     if comparision_method == "NOT_IN_RANGE":
-        return ~(age_to_dob_range_query(field_name, *args))
+        return ~(age_to_birth_date_range_query(field_name, *args))
     if comparision_method == "EQUALS":
-        return age_to_dob_range_query(field_name, args[0], args[0])
+        return age_to_birth_date_range_query(field_name, args[0], args[0])
     if comparision_method == "NOT_EQUALS":
-        return ~(age_to_dob_range_query(field_name, args[0], args[0]))
+        return ~(age_to_birth_date_range_query(field_name, args[0], args[0]))
     if comparision_method == "GREATER_THAN":
-        return age_to_dob_range_query(field_name, args[0], None)
+        return age_to_birth_date_range_query(field_name, args[0], None)
     if comparision_method == "LESS_THAN":
-        return age_to_dob_range_query(field_name, None, args[0])
+        return age_to_birth_date_range_query(field_name, None, args[0])
     raise ValidationError(
         f"Age filter query don't supports {comparision_method} type"
     )
@@ -277,6 +277,7 @@ def get_attr_value(name, object, default=None):
     if isinstance(object, dict):
         return object.get(name, default)
     return getattr(name, object, default)
+
 
 def to_choice_object(choices):
     return [
