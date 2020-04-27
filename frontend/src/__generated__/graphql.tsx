@@ -3058,7 +3058,9 @@ export type AllTargetPopulationsQueryVariables = {
   last?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>,
   name?: Maybe<Scalars['String']>,
-  status?: Maybe<Scalars['String']>
+  status?: Maybe<Scalars['String']>,
+  candidateListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalHouseholdsMax?: Maybe<Scalars['Int']>
 };
 
 
@@ -5065,8 +5067,8 @@ export type AllProgramsQueryHookResult = ReturnType<typeof useAllProgramsQuery>;
 export type AllProgramsLazyQueryHookResult = ReturnType<typeof useAllProgramsLazyQuery>;
 export type AllProgramsQueryResult = ApolloReactCommon.QueryResult<AllProgramsQuery, AllProgramsQueryVariables>;
 export const AllTargetPopulationsDocument = gql`
-    query AllTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String) {
-  allTargetPopulation(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name: $name, status: $status) {
+    query AllTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String, $candidateListTotalHouseholdsMin: Int, $candidateListTotalHouseholdsMax: Int) {
+  allTargetPopulation(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name: $name, status: $status, candidateListTotalHouseholdsMin: $candidateListTotalHouseholdsMin, candidateListTotalHouseholdsMax: $candidateListTotalHouseholdsMax) {
     edges {
       node {
         id
@@ -5125,6 +5127,8 @@ export function withAllTargetPopulations<TProps, TChildProps = {}>(operationOpti
  *      orderBy: // value for 'orderBy'
  *      name: // value for 'name'
  *      status: // value for 'status'
+ *      candidateListTotalHouseholdsMin: // value for 'candidateListTotalHouseholdsMin'
+ *      candidateListTotalHouseholdsMax: // value for 'candidateListTotalHouseholdsMax'
  *   },
  * });
  */
