@@ -2,7 +2,7 @@
 
 **Iteration 5: KoBo Helm Chart / Kubernetes Deliverables**
 
-The goal of Iteration Five is to integrate KoBo Form / Projects and project data into HCT-MIS Registration Datahub along with push/pull of data from the CashAssist Datahub.
+The goal of Iteration Five is to integrate KoBo Form / Projects and project data into HCT-MIS Registration module, along with push/pull of data from the CashAssist Datahub.
 
 **Expected start/end date:** May 11th - July 3rd, 2020 \(8 weeks\)
 
