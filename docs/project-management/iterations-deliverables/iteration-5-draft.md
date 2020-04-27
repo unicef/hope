@@ -4,7 +4,7 @@
 
 The goal of Iteration Five is to integrate KoBo Form / Projects and project data into HCT-MIS Registration Datahub.
 
-**Expected delivery date: June 19th, 2020**
+**Expected delivery date: July 3rd, 2020**
 
 ##  **Architecture / Project Management Deliverables**
 
