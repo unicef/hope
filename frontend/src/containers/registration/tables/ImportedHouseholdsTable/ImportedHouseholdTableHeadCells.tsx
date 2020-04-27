@@ -17,13 +17,13 @@ export const headCells: HeadCell<ImportedHouseholdMinimalFragment>[] = [
   {
     disablePadding: false,
     label: 'Household Size',
-    id: 'familySize',
+    id: 'size',
     numeric: true,
   },
   {
     disablePadding: false,
     label: 'Location',
-    id: 'location',
+    id: 'admin1',
     numeric: false,
   },
   {

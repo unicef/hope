@@ -35,7 +35,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
                         "filters": [
                             {
                                 "comparisionMethod": "EQUALS",
-                                "fieldName": "family_size",
+                                "fieldName": "size",
                                 "arguments": [3],
                                 "isFlexField": False,
                             }
@@ -50,13 +50,13 @@ class TestCreateTargetPopulationMutation(APITestCase):
     def setUpTestData(cls):
         cls.user = UserFactory.create()
         HouseholdFactory(
-            family_size=2, residence_status="CITIZEN",
+            size=2, residence_status="CITIZEN",
         )
         HouseholdFactory(
-            family_size=3, residence_status="CITIZEN",
+            size=3, residence_status="CITIZEN",
         )
         HouseholdFactory(
-            family_size=3, residence_status="CITIZEN",
+            size=3, residence_status="CITIZEN",
         )
 
     def test_create_mutation(self):

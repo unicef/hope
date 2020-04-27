@@ -20,7 +20,7 @@ snapshots['TestCopyTargetPopulationMutation::test_copy_target 1'] = {
                                         1
                                     ],
                                     'comparisionMethod': 'EQUALS',
-                                    'fieldName': 'family_size',
+                                    'fieldName': 'size',
                                     'isFlexField': False
                                 }
                             ]

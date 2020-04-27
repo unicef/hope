@@ -3,6 +3,8 @@ from collections import Iterable
 
 import graphene
 from auditlog.models import LogEntry
+from django.contrib.gis.db.models import GeometryField
+from django.contrib.gis.forms import PointField
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Q
 from django.utils.encoding import force_text
@@ -17,13 +19,14 @@ from graphene import (
 )
 from graphene.types.resolver import dict_or_attr_resolver
 from graphene_django import DjangoObjectType
+from graphene_django.converter import convert_django_field
 from graphene_django.filter import DjangoFilterConnectionField
 
 from account.schema import UserObjectType
 from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES
 from core.extended_connection import ExtendedConnection
 from core.models import (
-    Location,
+    AdminArea,
     BusinessArea,
     FlexibleAttribute,
     FlexibleAttributeChoice,
@@ -85,9 +88,9 @@ class LogEntryObjectConnection(Connection):
         node = LogEntryObject
 
 
-class LocationNode(DjangoObjectType):
+class AdminAreaNode(DjangoObjectType):
     class Meta:
-        model = Location
+        model = AdminArea
         exclude_fields = ["geom", "point"]
         filter_fields = ["title"]
         interfaces = (relay.Node,)
@@ -209,6 +212,19 @@ class FieldAttributeNode(graphene.ObjectType):
         ]
 
 
+class GeoJSON(graphene.Scalar):
+    @classmethod
+    def serialize(cls, value):
+        return json.loads(value.geojson)
+
+
+@convert_django_field.register(GeometryField)
+def convert_field_to_geojson(field, registry=None):
+    return graphene.Field(
+        GeoJSON, description=field.help_text, required=not field.null
+    )
+
+
 def get_fields_attr_generators(flex_field):
     if flex_field != False:
         for attr in FlexibleAttribute.objects.all():
@@ -219,8 +235,8 @@ def get_fields_attr_generators(flex_field):
 
 
 class Query(graphene.ObjectType):
-    location = relay.Node.Field(LocationNode)
-    all_locations = DjangoFilterConnectionField(LocationNode)
+    admin_area = relay.Node.Field(AdminAreaNode)
+    all_admin_areas = DjangoFilterConnectionField(AdminAreaNode)
     all_business_areas = DjangoFilterConnectionField(BusinessAreaNode)
     all_log_entries = ConnectionField(
         LogEntryObjectConnection, object_id=graphene.String(required=True),
