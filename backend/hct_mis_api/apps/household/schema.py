@@ -14,29 +14,39 @@ from core.filters import AgeRangeFilter, IntegerRangeFilter
 from core.extended_connection import ExtendedConnection
 from core.schema import ChoiceObject
 from core.utils import to_choice_object
-from household.models import Household, Individual
+from household.models import (
+    Household,
+    Individual,
+    Document,
+    DocumentType,
+    RESIDENCE_STATUS_CHOICE,
+    RELATIONSHIP_CHOICE,
+    ROLE_CHOICE,
+    MARITAL_STATUS_CHOICE,
+    SEX_CHOICE,
+)
 
 
 class HouseholdFilter(FilterSet):
-    business_area = CharFilter(field_name="location__business_area__slug")
-    family_size = IntegerRangeFilter(field_name="family_size")
+    business_area = CharFilter(
+        field_name="registration_data_import__business_area__slug"
+    )
+    size = IntegerRangeFilter(field_name="size")
     search = CharFilter( method="search_filter")
+
 
     class Meta:
         model = Household
         fields = {
-            "search": [],
             "business_area": ["exact", "icontains"],
-            "nationality": ["exact", "icontains"],
+            "country_origin": ["exact", "icontains"],
             "address": ["exact", "icontains"],
-            "representative__full_name": ["exact", "icontains"],
             "head_of_household__full_name": ["exact", "icontains"],
-            "residence_status": ["exact"],
-            "location__title": ["exact"],
-            "household_ca_id": ["exact"],
-            "family_size": ["range", "lte", "gte"],
+            "size": ["range", "lte", "gte"],
+            "admin_area": ["exact"],
             "target_populations": ["exact"],
             "programs": ["exact"],
+            "residence_status": ["exact"],
         }
 
     order_by = OrderingFilter(
@@ -46,11 +56,11 @@ class HouseholdFilter(FilterSet):
             "household__id",
             "id",
             "household_ca_id",
-            "family_size",
+            "size",
             "head_of_household__full_name",
-            "location__title",
+            "admin_area__title",
             "residence_status",
-            "registration_data_import_id__",
+            "registration_data_import__name",
             "total_cash",
             "registration_date",
         )
@@ -67,10 +77,8 @@ class HouseholdFilter(FilterSet):
 
 
 class IndividualFilter(FilterSet):
-    business_area = CharFilter(
-        field_name="household__location__business_area__slug",
-    )
-    age = AgeRangeFilter(field_name="dob")
+    business_area = CharFilter(field_name="household__business_area__slug",)
+    age = AgeRangeFilter(field_name="birth_date")
     sex = ModelMultipleChoiceFilter(
         to_field_name="sex", queryset=Individual.objects.all(),
     )
@@ -91,11 +99,24 @@ class IndividualFilter(FilterSet):
             "id",
             "full_name",
             "household__id",
-            "dob",
+            "birth_date",
             "sex",
-            "household__location__title",
+            "household__admin_area__title",
         )
     )
+
+
+class DocumentTypeNode(DjangoObjectType):
+    class Meta:
+        model = DocumentType
+
+
+class DocumentNode(DjangoObjectType):
+    class Meta:
+        model = Document
+        filter_fields = []
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
 
 
 class HouseholdNode(DjangoObjectType):
@@ -110,6 +131,8 @@ class HouseholdNode(DjangoObjectType):
 
 
 class IndividualNode(DjangoObjectType):
+    estimated_birth_date = graphene.Boolean(required=False)
+
     class Meta:
         exclude_fields = ("flex_fields",)
         model = Individual
@@ -128,6 +151,10 @@ class Query(graphene.ObjectType):
         IndividualNode, filterset_class=IndividualFilter,
     )
     residence_status_choices = graphene.List(ChoiceObject)
+    sex_choices = graphene.List(ChoiceObject)
+    marital_status_choices = graphene.List(ChoiceObject)
+    relationship_choices = graphene.List(ChoiceObject)
+    role_choices = graphene.List(ChoiceObject)
 
     def resolve_all_households(self, info, **kwargs):
         return Household.objects.annotate(
@@ -135,4 +162,16 @@ class Query(graphene.ObjectType):
         ).order_by("created_at")
 
     def resolve_residence_status_choices(self, info, **kwargs):
-        return to_choice_object(Household.RESIDENCE_STATUS_CHOICE)
+        return to_choice_object(RESIDENCE_STATUS_CHOICE)
+
+    def resolve_sex_choices(self, info, **kwargs):
+        return to_choice_object(SEX_CHOICE)
+
+    def resolve_marital_status_choices(self, info, **kwargs):
+        return to_choice_object(MARITAL_STATUS_CHOICE)
+
+    def resolve_relationship_choices(self, info, **kwargs):
+        return to_choice_object(RELATIONSHIP_CHOICE)
+
+    def resolve_role_choices(self, info, **kwargs):
+        return to_choice_object(ROLE_CHOICE)

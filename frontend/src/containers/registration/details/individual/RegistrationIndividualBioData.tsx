@@ -39,9 +39,9 @@ export function RegistrationIndividualsBioData({
   const businessArea = useBusinessArea();
 
   let age: number | null;
-  const { dob } = individual;
-  if (dob) {
-    age = getAgeFromDob(dob);
+  const { birthDate } = individual;
+  if (birthDate) {
+    age = getAgeFromDob(birthDate);
   }
 
   const openHousehold = (): void => {
@@ -62,7 +62,7 @@ export function RegistrationIndividualsBioData({
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='Given Name'>
-            <div>{individual.firstName}</div>
+            <div>{individual.givenName}</div>
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
@@ -72,7 +72,7 @@ export function RegistrationIndividualsBioData({
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='Family Name'>
-            <div>{individual.lastName}</div>
+            <div>{individual.familyName}</div>
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
@@ -87,22 +87,28 @@ export function RegistrationIndividualsBioData({
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='Date of Birth'>
-            <Moment format='DD/MM/YYYY'>{dob}</Moment>
+            <Moment format='DD/MM/YYYY'>{birthDate}</Moment>
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='Estimated Date of Birth'>
-            <div>{individual.estimatedDob}</div>
+            <div>{individual.estimatedBirthDate?'YES':'NO'}</div>
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='ID Type'>
-            <div>{getIdentificationType(individual.identificationType)}</div>
+            <>
+              Multiple id document allowed
+              <Missing/>
+            </>
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='ID Number'>
-            <div>{individual.identificationNumber}</div>
+            <>
+              Multiple id document allowed
+              <Missing/>
+            </>
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
