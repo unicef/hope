@@ -30,6 +30,7 @@ const Divider = styled.div`
   border-left: 1px solid #b1b1b5;
   margin: 0 ${({ theme }) => theme.spacing(10)}px;
   position: relative;
+  transform: scale(0.9);
 `;
 
 const DividerLabel = styled.div`
