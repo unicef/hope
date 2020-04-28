@@ -60,15 +60,62 @@ Respondents were also asked if they could summarize each section with a single a
 
 
 
-### **Feature Requests**
+### **Feature Requests Summary**
 
-#### Total amount:
+{% hint style="warning" %}
+**Work In Progress**
+{% endhint %}
 
-**Section with most requests:**
+#### _Total amount: `TBD`_
 
-* x
-* y
-* z
+_**Section with most requests:**_
+
+* _Registration - **`#`**_
+* _Population - **`#`**_
+* _Targeting - **`#`**_
+* _Programme Management - **`#`**_
+
+### **Feature Requests By Section:**
+
+**Registration:**
+
+* _"I want to see **more graphics / analysis** - summary idea of the situation of my upload. "_
+* "_All the **lists are sorted by status** then chron order of list of imports "_
+* _"**Better summary / reporting features**. See other notes... "_
+* _"Data imported, if you want to discard a previous list, how can we **discard the list**."_ 
+* _"Would be nice to **see** how many **bens** being imported from file or kobo are **already in the system**. "_
+* _"Audit trail recorded on the system for **deduplication process** - Golden rule is to never touch the files you receive... so documentation of any changes is very important to have. Better to keep them into the system, rather than to have to mess up the original file." "_
+* _"Unicef Branding :\) "_
+* _"A few **changes in the flow** - main concern being template standard format should be earlier presented."_
+
+**Population:**
+
+* **Aesthetics:** _"Picture and to be a little less paginating. Would like to see a nice profile of the person."_
+* _"Need ability to **edit ben data easily in system** or will never use if restricted to import funct. Best resolution is through Grievance ticket."_
+* _"**Ability to flag** from a list. "_
+* _"Ability to **update ben data easily** within the system. A predefined workflow to go through a verification process, etc. - Registration process can be a bit troublesome - is there a risk of changing too much information breaking the data."_
+* _"Search has to be very powerful to find ben in I'm looking for."_ 
+* _"Fonts could be larger for users. "_
+
+**Targeting:**
+
+* _"Create an admin role for some admins who can search on types of rules. A **maker/checker role** may be relevant."_
+* _"**Visually** - a **clearer** way to see you are working on a diff page and the status of the progress. "_
+* _"**Links to Programmes** for showing Targeting Criteria"_
+* _"If on results, I can see which ones correspond to which criteria, maybe on the table ie: criteria 1 / Criteria 2 - relate results to criteria."_
+* _"Showing **estimated budget for Target Pop**."_
+* _"It's not **live data updating to criteria**"_
+* _"I don't see on one single page all my criteria. "_ 
+* _"Ability to delete as mentioned before..."_ 
+* _"A bit more on the vulnerabilities - ability to select by one or many."_
+
+**Programme Management:**
+
+* _"My **graphs**! :\)"_
+* _"The things mentioned before: **Adding FSP on overview** / Use the same label to indicate the same data. "_
+* _"How many are **successful vs** how many are **pending** vs how many are in **error**"_
+* _"Ability to **Filter** Payment Records **by Status**, delivery date range, etc."_ 
+* _"**Linkages** between payment record and households and troubleshooting - What if a household is not able to reach payments due to whaterver reason \(road blocked, etc.\). Linkage to **greiveance and feedback**."_
 
 **Please keep in mind, we are still processing the information we received from the initial participants. Further elaboration on these details will be shared by the end of this Iteration.** 
 
