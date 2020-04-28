@@ -16,13 +16,13 @@ export const headCells: HeadCell<TargetPopulationNode>[] = [
     },
     {
       disablePadding: false,
-      label: 'No. of Households Candidate List',
+      label: 'Programme Population',
       id: 'candidateListTotalHouseholds',
       numeric: false,
     },
     {
       disablePadding: false,
-      label: 'No. of Households Final List',
+      label: 'Target Population',
       id: 'finalListTotalHouseholds',
       numeric: false,
     },
