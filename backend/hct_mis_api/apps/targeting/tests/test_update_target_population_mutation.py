@@ -55,7 +55,7 @@ class TestUpdateTargetPopulationMutation(APITestCase):
                         "filters": [
                             {
                                 "comparisionMethod": "EQUALS",
-                                "fieldName": "family_size",
+                                "fieldName": "size",
                                 "arguments": [3],
                                 "isFlexField": False,
                             }
@@ -73,7 +73,7 @@ class TestUpdateTargetPopulationMutation(APITestCase):
                         "filters": [
                             {
                                 "comparisionMethod": "EQUALS",
-                                "fieldName": "family_size",
+                                "fieldName": "size",
                                 "arguments": [3, 3],
                                 "isFlexField": False,
                             }
@@ -91,7 +91,7 @@ class TestUpdateTargetPopulationMutation(APITestCase):
                         "filters": [
                             {
                                 "comparisionMethod": "CONTAINS",
-                                "fieldName": "family_size",
+                                "fieldName": "size",
                                 "arguments": [3],
                                 "isFlexField": False,
                             }
@@ -109,7 +109,7 @@ class TestUpdateTargetPopulationMutation(APITestCase):
                         "filters": [
                             {
                                 "comparisionMethod": "BLABLA",
-                                "fieldName": "family_size",
+                                "fieldName": "size",
                                 "arguments": [3],
                                 "isFlexField": False,
                             }
@@ -160,19 +160,19 @@ class TestUpdateTargetPopulationMutation(APITestCase):
     def setUpTestData(cls):
         cls.user = UserFactory.create()
         HouseholdFactory(
-            family_size=2, residence_status="CITIZEN",
+            size=2, residence_status="CITIZEN",
         )
         HouseholdFactory(
-            family_size=3, residence_status="CITIZEN",
+            size=3, residence_status="CITIZEN",
         )
         HouseholdFactory(
-            family_size=3, residence_status="CITIZEN",
+            size=3, residence_status="CITIZEN",
         )
         cls.draft_target_population = TargetPopulation(
             name="draft_target_population",
             candidate_list_targeting_criteria=cls.get_targeting_criteria_for_rule(
                 {
-                    "field_name": "family_size",
+                    "field_name": "size",
                     "arguments": [2],
                     "comparision_method": "EQUALS",
                 }
@@ -183,7 +183,7 @@ class TestUpdateTargetPopulationMutation(APITestCase):
             name="approved_target_population",
             candidate_list_targeting_criteria=cls.get_targeting_criteria_for_rule(
                 {
-                    "field_name": "family_size",
+                    "field_name": "size",
                     "arguments": [1],
                     "comparision_method": "GREATER_THAN",
                 }
