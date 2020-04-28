@@ -59,7 +59,7 @@ export function ApprovedTargetPopulationHeaderButtons({
           color='primary'
           onClick={() => setOpenFinalize(true)}
         >
-          Finalize
+          Send to cash assist
         </Button>
       </ButtonContainer>
       <DuplicateTargetPopulation
@@ -67,7 +67,12 @@ export function ApprovedTargetPopulationHeaderButtons({
         setOpen={setOpenDuplicate}
         targetPopulationId={targetPopulation.id}
       />
-      <FinalizeTargetPopulation open={openFinalize} setOpen={setOpenFinalize} />
+      <FinalizeTargetPopulation
+        open={openFinalize}
+        setOpen={setOpenFinalize}
+        targetPopulationId={targetPopulation.id}
+        totalHouseholds={targetPopulation.candidateListTotalHouseholds}
+      />
     </div>
   );
 }
