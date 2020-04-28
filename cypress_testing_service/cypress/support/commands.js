@@ -36,8 +36,8 @@ Cypress.Commands.add('loginToAD', (ad_username, ad_password, login_url) => {
         loginUrl: login_url,
         postLoginSelector: '.MuiList-root',
         headless: true,
-        logs: true,
-        getAllBrowserCookies: false
+        logs: false,
+        getAllBrowserCookies: true
     }
 
     // see why we need this task
