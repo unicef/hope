@@ -213,11 +213,13 @@ export function TargetCriteriaForm({
                                 }
                                 component={FormikSelectField}
                               />
-                              <IconButton>
-                                <Delete
-                                  onClick={() => arrayHelpers.remove(index)}
-                                />
-                              </IconButton>
+                              {values.filters.length > 1 && (
+                                <IconButton>
+                                  <Delete
+                                    onClick={() => arrayHelpers.remove(index)}
+                                  />
+                                </IconButton>
+                              )}
                             </FlexWrapper>
                             {each.fieldName && SubField(each, index)}
                             {(values.filters.length === 1 && index === 0) ||

@@ -96,7 +96,7 @@ class Household(TimeStampedUUIDModel):
         "core.AdminArea", null=True, on_delete=models.SET_NULL
     )
     geopoint = PointField(blank=True, null=True)
-    unhcr_id = models.CharField(max_length=255, blank=True)
+    unhcr_case_id = models.CharField(max_length=255, blank=True)
     female_age_group_0_5_count = models.PositiveIntegerField(default=0)
     female_age_group_6_11_count = models.PositiveIntegerField(default=0)
     female_age_group_12_17_count = models.PositiveIntegerField(default=0)
@@ -132,8 +132,7 @@ class Household(TimeStampedUUIDModel):
     head_of_household = models.OneToOneField(
         "Individual",
         related_name="heading_household",
-        null=True,
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
     )
 
     @property
@@ -167,13 +166,16 @@ class Document(TimeStampedUUIDModel):
         "DocumentType", related_name="documents", on_delete=models.CASCADE
     )
 
+    class Meta:
+        unique_together = ("type", "document_number")
+
 
 class Agency(models.Model):
     type = models.CharField(max_length=100,)
     label = models.CharField(max_length=100,)
 
     def __str__(self):
-        return f"{self.label}"
+        return self.label
 
 
 class Identity(models.Model):
@@ -183,7 +185,10 @@ class Identity(models.Model):
     individual = models.ForeignKey(
         "Individual", related_name="identities", on_delete=models.CASCADE
     )
-    document_number = models.CharField(max_length=255,)
+    number = models.CharField(max_length=255,)
+
+    class Meta:
+        unique_together = ("agency", "number")
 
     def __str__(self):
         return f"{self.agency} {self.individual} {self.document_number}"
@@ -205,7 +210,7 @@ class Individual(TimeStampedUUIDModel):
     role = models.CharField(max_length=255, blank=True, choices=ROLE_CHOICE,)
     sex = models.CharField(max_length=255, choices=SEX_CHOICE,)
     birth_date = models.DateField()
-    estimated_birth_date = models.BooleanField(null=True)
+    estimated_birth_date = models.BooleanField(default=False)
     marital_status = models.CharField(
         max_length=255, choices=MARITAL_STATUS_CHOICE,
     )
