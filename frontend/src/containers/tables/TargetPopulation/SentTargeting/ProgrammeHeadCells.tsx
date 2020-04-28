@@ -1,47 +1,47 @@
-import { HeadCell } from '../../../components/table/EnhancedTableHead';
-import { TargetPopulationNode } from '../../../__generated__/graphql';
+import { HeadCell } from '../../../../components/table/EnhancedTableHead';
+import { TargetPopulationNode } from '../../../../__generated__/graphql';
 
 export const headCells: HeadCell<TargetPopulationNode>[] = [
     {
       disablePadding: false,
-      label: 'Name',
-      id: 'name',
+      label: 'Id',
+      id: 'id',
       numeric: false,
     },
     {
       disablePadding: false,
-      label: 'Status',
+      label: 'Final List',
       id: 'status',
       numeric: false,
     },
     {
       disablePadding: false,
-      label: 'Programme Population',
-      id: 'candidateListTotalHouseholds',
+      label: 'Head of Household',
+      id: 'headOfHousehold',
       numeric: false,
     },
     {
       disablePadding: false,
-      label: 'Target Population',
-      id: 'finalListTotalHouseholds',
+      label: 'Household size',
+      id: 'householdSize',
       numeric: false,
     },
     {
       disablePadding: false,
-      label: 'Date Created',
-      id: 'createdAt',
+      label: 'Admin Level',
+      id: 'adminLevel',
       numeric: false,
     },
     {
       disablePadding: false,
-      label: 'Last edited',
+      label: 'Location',
+      id: 'location',
+      numeric: false,
+    },
+    {
+      disablePadding: false,
+      label: 'Last Inspection',
       id: 'lastEditedAt',
-      numeric: false,
-    },
-    {
-      disablePadding: false,
-      label: 'Created by',
-      id: 'createdByName',
       numeric: false,
     },
   ];

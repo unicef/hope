@@ -10,7 +10,7 @@ import { FinalizedTargetPopulationHeaderButtons } from './FinalizedTargetPopulat
 import { EditTargetPopulationHeader } from './EditTargetPopulationHeader';
 import { ApprovedTargetPopulationHeaderButtons } from './ApprovedTargetPopulationHeaderButtons';
 import { StatusBox } from '../../../components/StatusBox';
-import { targetPopulationStatusToColor } from '../../../utils/utils';
+import { targetPopulationStatusToColor, targetPopulationStatusMapping } from '../../../utils/utils';
 
 const HeaderWrapper = styled.div`
   display: flex;
@@ -91,6 +91,7 @@ export function TargetPopulationPageHeader({
               <StatusBox
                 status={targetPopulation.status}
                 statusToColor={targetPopulationStatusToColor}
+                statusNameMapping={targetPopulationStatusMapping}
               />
             </StatusWrapper>
           </HeaderWrapper>
