@@ -166,6 +166,7 @@ def serialize_flex_attributes():
 
     return result_dict
 
+
 def get_combined_attributes():
     from core.core_fields_attributes import (
         CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY,
