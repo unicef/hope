@@ -21,7 +21,7 @@ class DocumentAdmin(admin.ModelAdmin):
 
 @admin.register(DocumentType)
 class DocumentTypeAdmin(admin.ModelAdmin):
-    list_display = ("label", "type", "country")
+    list_display = ("label", "country")
 
 
 @admin.register(Household)
