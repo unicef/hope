@@ -8,7 +8,12 @@ import { HeadCell } from '../../components/table/EnhancedTableHead';
 import { ClickableTableRow } from '../../components/table/ClickableTableRow';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { StatusBox } from '../../components/StatusBox';
-import { paymentRecordStatusToColor, sexToCapitalize } from '../../utils/utils';
+import {
+  decodeIdString,
+  paymentRecordStatusToColor,
+  sexToCapitalize,
+} from '../../utils/utils';
+import { Missing } from '../../components/Missing';
 
 const headCells: HeadCell<IndividualNode>[] = [
   {
@@ -44,7 +49,7 @@ const headCells: HeadCell<IndividualNode>[] = [
   {
     disablePadding: false,
     label: 'Date of Birth',
-    id: 'dob',
+    id: 'birthDate',
     numeric: true,
   },
   {
@@ -75,7 +80,6 @@ export function HouseholdIndividualsTable({
   };
 
   const allIndividuals = household.individuals.edges.map((edge) => edge.node);
-
   if (orderBy) {
     if (orderDirection === 'asc') {
       allIndividuals.sort((a, b) => {
@@ -105,7 +109,7 @@ export function HouseholdIndividualsTable({
             role='checkbox'
             key={row.id}
           >
-            <TableCell align='left'>{row.individualCaId}</TableCell>
+            <TableCell align='left'>{decodeIdString(row.id)}</TableCell>
             <TableCell align='left'>{row.fullName}</TableCell>
             <TableCell align='left'>
               <StatusContainer>
@@ -115,19 +119,11 @@ export function HouseholdIndividualsTable({
                 />
               </StatusContainer>
             </TableCell>
+            <TableCell align='left'>{row.relationship}</TableCell>
             <TableCell align='left'>
-              {row.representedHouseholds &&
-                row.representedHouseholds.edges.map(
-                  (edge) =>
-                    edge.node.representative &&
-                    edge.node.representative.fullName === row.fullName &&
-                    'Head of Household',
-                )}
+              <Missing />
             </TableCell>
-            <TableCell align='left'>
-              {row.workStatus === 'YES' ? 'Yes' : 'No'}
-            </TableCell>
-            <TableCell align='right'>{row.dob ? 'N/A' : row.dob}</TableCell>
+            <TableCell align='left'>{row.birthDate || '-'}</TableCell>
             <TableCell align='left'>{sexToCapitalize(row.sex)}</TableCell>
           </ClickableTableRow>
         );

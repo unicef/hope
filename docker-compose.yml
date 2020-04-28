@@ -81,83 +81,83 @@ services:
       - "5433:5432"
 
   cash_assist_datahub_db:
-    image: postgres:9.5.15-alpine
+    image: mdillon/postgis:9.5-alpine
     volumes:
        - db_ca:/data/postgres
     env_file:
       - .env
 
   registration_datahub_db:
-    image: postgres:9.5.15-alpine
+    image: mdillon/postgis:9.5-alpine
     volumes:
        - db_reg:/data/postgres
     env_file:
       - .env
 
-  airflow_db:
-    image: postgres:9.5.15-alpine
-    volumes:
-       - db_airflow:/data/postgres
-    env_file:
-      - .env
-
-  airflow_webserver:
-     image: unicef/hct-airflow-webserver
-     build:
-         context: ./airflow
-         dockerfile: ./Dockerfile
-     ports:
-         - "4200:8080"
-     env_file:
-       - .env
-     restart: always
-     depends_on:
-         - airflow_db
-         - db
-         - registration_datahub_db
-         - cash_assist_datahub_db
-         - airflow_worker
-     links:
-         - airflow_worker
-     volumes:
-         - ./airflow/connectors:/usr/local/airflow/connectors
-         - ./airflow/dags:/usr/local/airflow/dags
-         - ./backend:/usr/local/airflow/backend
-     logging:  #NOTE: the output of this can be noisy by default, this makes it silent. Comment out if you wish to see logs
-       driver: "none"
-     command: webserver
-
-  airflow_scheduler:
-     image: unicef/hct-airflow-scheduler
-     build:
-         context: ./airflow
-         dockerfile: ./Dockerfile
-     env_file:
-         - .env
-     restart: always
-     logging:  #NOTE: the output of this can be noisy by default, this makes it silent. Comment out if you wish to see logs
-       driver: "none"
-     volumes:
-         - ./airflow/connectors:/usr/local/airflow/connectors
-         - ./airflow/dags:/usr/local/airflow/dags
-         - backend-data:/usr/local/airflow/backend
-     command: scheduler
-     depends_on:
-         - airflow_webserver
-
-  airflow_worker:
-     image: unicef/hct-airflow-worker
-     build:
-         context: ./airflow
-         dockerfile: ./Dockerfile
-     env_file:
-       - .env
-     restart: always
-     volumes:
-         - ./airflow/dags:/usr/local/airflow/dags
-         - ./airflow/connectors:/usr/local/airflow/connectors
-         - ./backend-data:/usr/local/airflow/backend
-     command: worker
+#  airflow_db:
+#    image: postgres:9.5.15-alpine
+#    volumes:
+#       - db_airflow:/data/postgres
+#    env_file:
+#      - .env
+#
+#  airflow_webserver:
+#     image: unicef/hct-airflow-webserver
+#     build:
+#         context: ./airflow
+#         dockerfile: ./Dockerfile
+#     ports:
+#         - "4200:8080"
+#     env_file:
+#       - .env
+#     restart: always
+#     depends_on:
+#         - airflow_db
+#         - db
+#         - registration_datahub_db
+#         - cash_assist_datahub_db
+#         - airflow_worker
+#     links:
+#         - airflow_worker
+#     volumes:
+#         - ./airflow/connectors:/usr/local/airflow/connectors
+#         - ./airflow/dags:/usr/local/airflow/dags
+#         - ./backend:/usr/local/airflow/backend
+#     logging:  #NOTE: the output of this can be noisy by default, this makes it silent. Comment out if you wish to see logs
+#       driver: "none"
+#     command: webserver
+#
+#  airflow_scheduler:
+#     image: unicef/hct-airflow-scheduler
+#     build:
+#         context: ./airflow
+#         dockerfile: ./Dockerfile
+#     env_file:
+#         - .env
+#     restart: always
+#     logging:  #NOTE: the output of this can be noisy by default, this makes it silent. Comment out if you wish to see logs
+#       driver: "none"
+#     volumes:
+#         - ./airflow/connectors:/usr/local/airflow/connectors
+#         - ./airflow/dags:/usr/local/airflow/dags
+#         - backend-data:/usr/local/airflow/backend
+#     command: scheduler
+#     depends_on:
+#         - airflow_webserver
+#
+#  airflow_worker:
+#     image: unicef/hct-airflow-worker
+#     build:
+#         context: ./airflow
+#         dockerfile: ./Dockerfile
+#     env_file:
+#       - .env
+#     restart: always
+#     volumes:
+#         - ./airflow/dags:/usr/local/airflow/dags
+#         - ./airflow/connectors:/usr/local/airflow/connectors
+#         - ./backend-data:/usr/local/airflow/backend
+#     command: worker
 
   frontend:
     image: unicef/hct-mis-frontend
