@@ -20,8 +20,8 @@ describe('User auth flows', () => {
         before(function() {
             cy.log('Signing in user to AD')
             cy.loginToAD(
-                Cypress.env('ad_username'), 
-                Cypress.env('ad_password'), 
+                Cypress.env('country_admin').ad_username, 
+                Cypress.env('country_admin').ad_password, 
                 Cypress.env('loginUrl')
             )
             cy.visit(Cypress.env('loginUrl'))
