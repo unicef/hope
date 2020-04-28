@@ -11,14 +11,69 @@ class RegistrationXLSXImportOperator(DjangoOperator):
     that registration data import instance.
     """
 
+    business_area = "PL"
     households = None
     individuals = None
+    documents = None
 
-    # TODO: probably won't be needed
-    def _handle_location(self, value):
-        from geopy.geocoders import ArcGIS
+    def _handle_document_fields(self, value, header, *args, **kwargs):
+        if header == "other_id_type_i_c":
+            doc_type = value
+        else:
+            doc_type = (
+                header.replace("_no_", "")
+                .replace("_i_c", "")
+                .replace("_", " ")
+                .capitalize()
+            )
+        individual = kwargs.get("individual")
+        row_num = kwargs.get("row_number")
+        document_data = self.documents.get(f"individual_{row_num}")
+        if document_data:
+            document_data["value"] = value
+        else:
+            self.documents[f"individual_{row_num}"] = {
+                "individual": individual,
+                "header": header,
+                "type": doc_type,
+                "value": value,
+            }
 
-        location = ArcGIS().reverse(value)
+    def _handle_document_photo_fields(self, value, header, *args, **kwargs):
+        row_num = kwargs.get("row_number")
+        individual = kwargs.get("individual")
+        document_data = self.documents.get(f"individual_{row_num}")
+        if document_data:
+            document_data["photo"] = value
+        else:
+            self.documents[f"individual_{row_num}"] = {
+                "individual": individual,
+                "header": header,
+                "photo": value,
+            }
+
+    def _create_documents(self):
+        from registration_datahub.models import (
+            ImportedDocument,
+            ImportedDocumentType,
+        )
+
+        docs_to_create = []
+        for document_data in self.documents.values():
+            doc_type = ImportedDocumentType.objects.get(
+                country=self.business_area, label=document_data.get("type"),
+            )
+            # TODO: do some stuff with photo there
+            photo = document_data.get("photo")
+            obj = ImportedDocument(
+                document_number=document_data.get("value"),
+                photo=photo,
+                individual=document_data.get("individual"),
+                type=doc_type,
+            )
+            docs_to_create.append(obj)
+
+        ImportedDocument.objects.bulk_create(docs_to_create)
 
     def _create_objects(self, sheet, registration_data_import):
         from registration_datahub.models import (
@@ -27,7 +82,25 @@ class RegistrationXLSXImportOperator(DjangoOperator):
         )
 
         complex_fields = {
-            "individuals": {"location": self.handle_location,},
+            "individuals": {
+                "birth_certificate_no_i_c": self._handle_document_fields,
+                "birth_certificate_photo_i_c": self._handle_document_photo_fields,
+                "drivers_license_no_i_c": self._handle_document_fields,
+                "drivers_license_photo_i_c": self._handle_document_photo_fields,
+                "electoral_card_no_i_c": self._handle_document_fields,
+                "electoral_card_photo_i_c": self._handle_document_photo_fields,
+                "unhcr_id_no_i_c": self._handle_document_fields,
+                "unhcr_id_photo_i_c": self._handle_document_photo_fields,
+                "national_id_no_ic": self._handle_document_fields,
+                "national_id_photo_ic": self._handle_document_photo_fields,
+                "national_passport_i_c": self._handle_document_fields,
+                "national_passport_photo_i_c": self._handle_document_photo_fields,
+                "scope_id_no_i_c": self._handle_document_fields,
+                "scope_id_photo_i_c": self._handle_document_photo_fields,
+                "other_id_type_i_c": self._handle_document_fields,
+                "other_id_no_i_c": self._handle_document_fields,
+                "other_id_photo_i_c": self._handle_document_photo_fields,
+            },
             "households": {},
         }
 
@@ -43,7 +116,6 @@ class RegistrationXLSXImportOperator(DjangoOperator):
 
             if sheet_title == "households":
                 obj_to_create = ImportedHousehold(
-                    household_ca_id="NOT PROVIDED",
                     registration_data_import_id=registration_data_import,
                 )
             else:
@@ -54,7 +126,10 @@ class RegistrationXLSXImportOperator(DjangoOperator):
             household_id = None
             for cell, header in zip(row, first_row):
                 current_field = combined_fields.get(header.value)
-                if not current_field:
+                is_not_required_and_empty = (
+                    current_field.get("required") and not cell.value
+                )
+                if not current_field or is_not_required_and_empty:
                     continue
 
                 if header == "household_id":
@@ -65,36 +140,24 @@ class RegistrationXLSXImportOperator(DjangoOperator):
                         )
 
                 if (
-                    hasattr(obj_to_create, header)
+                    hasattr(obj_to_create, combined_fields.get(header))
                     and header not in complex_fields.keys()
                 ):
-                    # TODO: probably won't be needed
-                    # if header == "representative":
-                    #     household = self.households.get(household_id)
-                    #     household.representative = obj_to_create
-                    #     households_to_update.append(household)
-                    # elif header == "head_of_household":
-                    #     household = self.households.get(household_id)
-                    #     household.head_of_household = obj_to_create
-                    #     households_to_update.append(household)
-                    # else:
-                    setattr(obj_to_create, header, cell.value)
+                    if header == "relationship" and cell.value == "HEAD":
+                        household = self.households.get(household_id)
+                        household.head_of_household = obj_to_create
+                        households_to_update.append(household)
+                    else:
+                        setattr(obj_to_create, header, cell.value)
                 elif header in complex_fields[sheet_title]:
                     fn = complex_fields[sheet_title].get(header)
-                    value = fn(cell.value)
-                    setattr(obj_to_create, header, value)
+                    value = fn(value=cell.value, header=header)
+                    if value is not None:
+                        setattr(obj_to_create, header, value)
 
             if sheet_title == "households":
                 self.households[household_id] = obj_to_create
             else:
-                first_name = obj_to_create.first_name
-                middle_name = obj_to_create.middle_name
-                last_name = obj_to_create.last_name
-                obj_to_create.full_name = (
-                    first_name + f" {middle_name}"
-                    if middle_name
-                    else "" + f" {last_name}"
-                )
                 self.individuals.append(obj_to_create)
 
         if sheet_title == "households":
@@ -106,6 +169,7 @@ class RegistrationXLSXImportOperator(DjangoOperator):
                 ["representative", "head_of_household"],
                 1000,
             )
+            self._create_documents()
 
     @transaction.atomic()
     def execute(self, context, **kwargs):
@@ -114,9 +178,8 @@ class RegistrationXLSXImportOperator(DjangoOperator):
         from registration_datahub.models import RegistrationDataImportDatahub
         from registration_datahub.models import ImportData
 
-        # households have to be dict with id as key
-        # to match household to individuals
         self.households = {}
+        self.documents = {}
         self.individuals = []
 
         dag_run = context["dag_run"]
