@@ -30,6 +30,7 @@ export const FinalHouseholdsListByTargetingCriteria = gql`
           }
           updatedAt
         }
+        cursor
       }
       totalCount
       edgeCount
