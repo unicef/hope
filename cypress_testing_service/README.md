@@ -16,3 +16,7 @@ Create a ```cypress.env.json``` file (copy the ```cypress.env.json.example``` fi
 Make sure your local development environment is up and running on http://localhost:*/
 
 To start then run ```$(npm bin)/cypress open``` in this directory. You can now run the tests.
+
+To run the tests on the commandline run ```$(npm bin)/cypress run --spec=**/*.feature```. This uses the Electron browser.
+
+To use Chrome instead  ```$(npm bin)/cypress run --spec=**/*.feature --browser=chrome```.
