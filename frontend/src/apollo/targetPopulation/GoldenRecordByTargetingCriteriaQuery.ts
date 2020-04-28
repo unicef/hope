@@ -28,6 +28,7 @@ export const GoldenRecordByTargetingCriteria = gql`
           }
           updatedAt
         }
+        cursor
       }
       totalCount
       edgeCount
