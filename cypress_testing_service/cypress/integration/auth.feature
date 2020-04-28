@@ -11,6 +11,3 @@ Feature: Authentication
         Given I login to AD as country_admin
         When I visit /
         Then I should see the Dashboard
-
-        When I visit /
-        Then I should see the Dashboard
