@@ -8,7 +8,6 @@ import {
   DialogTitle,
   Typography,
 } from '@material-ui/core';
-import CheckRoundedIcon from '@material-ui/icons/CheckRounded';
 import {
   RegistrationDetailedFragment,
   useUnapproveRdiMutation,
@@ -54,12 +53,7 @@ export function UnapproveRegistrationDataImportDialog({
   };
   return (
     <span>
-      <Button
-        startIcon={<CheckRoundedIcon />}
-        color='primary'
-        variant='contained'
-        onClick={() => setOpen(true)}
-      >
+      <Button color='primary' variant='outlined' onClick={() => setOpen(true)}>
         Unapprove
       </Button>
       <Dialog
@@ -77,7 +71,8 @@ export function UnapproveRegistrationDataImportDialog({
         </DialogTitleWrapper>
         <DialogContent>
           <DialogDescription>
-            Do you want to unapprove {registration.name} Registration Data Import
+            Do you want to unapprove {registration.name} Registration Data
+            Import
           </DialogDescription>
         </DialogContent>
         <DialogFooter>
