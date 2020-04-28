@@ -2,7 +2,7 @@ import json
 from datetime import datetime, date
 
 from django.forms import Field, IntegerField
-from django_filters import Filter
+from django_filters import Filter, OrderingFilter
 
 
 class RangeField(Field):

@@ -10,7 +10,13 @@ from openpyxl import load_workbook
 from core.models import BusinessArea
 from core.utils import get_choices_values
 from core.validators import BaseValidator
-from household.models import Individual, Household
+from household.models import (
+    YES_NO_CHOICE,
+    MARITAL_STATUS_CHOICE,
+    SEX_CHOICE,
+    DISABILITY_CHOICE,
+    RESIDENCE_STATUS_CHOICE,
+)
 
 
 class UploadXLSXValidator(BaseValidator):
@@ -66,11 +72,11 @@ class UploadXLSXValidator(BaseValidator):
             "household_id": {"type": "INTEGER"},
             "head_of_household": {
                 "type": "SELECT_ONE",
-                "choices": Individual.YES_NO_CHOICE,
+                "choices": YES_NO_CHOICE,
             },
             "marital_status": {
                 "type": "SELECT_ONE",
-                "choices": Individual.MARTIAL_STATUS_CHOICE,
+                "choices": MARITAL_STATUS_CHOICE,
             },
             "status_as_head_of_household": {
                 "type": "SELECT_ONE",
@@ -90,20 +96,14 @@ class UploadXLSXValidator(BaseValidator):
             "given_name": {"type": "STRING"},
             "last_name": {"type": "STRING"},
             "middle_name": {"type": "STRING"},
-            "sex": {"type": "SELECT_ONE", "choices": Individual.SEX_CHOICE,},
+            "sex": {"type": "SELECT_ONE", "choices": SEX_CHOICE,},
             "birth_date": {"type": "DATE"},
             "estimated_birth_date": {
                 "type": "SELECT_ONE",
-                "choices": Individual.YES_NO_CHOICE,
+                "choices": YES_NO_CHOICE,
             },
-            "work_status": {
-                "type": "SELECT_ONE",
-                "choices": Individual.YES_NO_CHOICE,
-            },
-            "disability": {
-                "type": "SELECT_ONE",
-                "choices": Individual.DISABILITY_CHOICE,
-            },
+            "work_status": {"type": "SELECT_ONE", "choices": YES_NO_CHOICE,},
+            "disability": {"type": "SELECT_ONE", "choices": DISABILITY_CHOICE,},
             # TODO: this field is missing, temp. get it from file
             "severity_of_disability": {
                 "type": "SELECT_ONE",
@@ -117,13 +117,10 @@ class UploadXLSXValidator(BaseValidator):
         "households": {
             "household_id": {"type": "INTEGER"},
             "household_location": {"type": "GEOLOCATION"},
-            "consent": {
-                "type": "SELECT_ONE",
-                "choices": Individual.YES_NO_CHOICE,
-            },
+            "consent": {"type": "SELECT_ONE", "choices": YES_NO_CHOICE,},
             "residence_status": {
                 "type": "SELECT_ONE",
-                "choices": Household.RESIDENCE_STATUS_CHOICE,
+                "choices": RESIDENCE_STATUS_CHOICE,
             },
             "family_nationality": {
                 "type": "SELECT_ONE",

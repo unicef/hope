@@ -9,6 +9,8 @@ from model_utils import Choices
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 
 
+# TODO THIS MODELS MUST BE CHANGED
+
 class Household(TimeStampedUUIDModel):
     # TODO Get correct RECEPTION_TYPE_CHOICE
     RECEPTION_TYPE_CHOICE = (
