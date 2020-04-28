@@ -1,6 +1,6 @@
 import React, { ReactElement } from 'react';
 import styled from 'styled-components';
-import { useFinalHouseholdsListByTargetingCriteriaQuery, useCandidateHouseholdsListByTargetingCriteriaQuery} from '../../../../__generated__/graphql';
+import { useCandidateHouseholdsListByTargetingCriteriaQuery} from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../UniversalTable';
 import { ProgrammeTableRow } from '../SentTargeting/ProgrammeTableRow';
 import { headCells as programmeHeadCells } from '../SentTargeting/ProgrammeHeadCells';
