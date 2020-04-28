@@ -135,7 +135,7 @@ class Command(BaseCommand):
                     imported_by=user, business_area=BusinessArea.objects.first()
                 )
 
-                household = HouseholdFactory(
+                household = HouseholdFactory.build(
                     admin_area=AdminArea.objects.order_by("?").first(),
                     registration_data_import=registration_data_import,
                 )

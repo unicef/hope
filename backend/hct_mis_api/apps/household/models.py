@@ -1,3 +1,4 @@
+import re
 from datetime import date
 
 from django.contrib.gis.db.models import PointField
@@ -147,9 +148,15 @@ class Household(TimeStampedUUIDModel):
         return f"Household ID: {self.id}"
 
 
+class DocumentValidator(TimeStampedUUIDModel):
+    type = models.ForeignKey(
+        "DocumentType", related_name="validators", on_delete=models.CASCADE
+    )
+    regex = models.CharField(max_length=100, default=".*")
+
+
 class DocumentType(TimeStampedUUIDModel):
     country = CountryField(blank=True)
-    type = models.CharField(max_length=100)
     label = models.CharField(max_length=100)
 
     def __str__(self):
@@ -165,6 +172,12 @@ class Document(TimeStampedUUIDModel):
     type = models.ForeignKey(
         "DocumentType", related_name="documents", on_delete=models.CASCADE
     )
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        for validator in self.type.validators:
+            if not re.match(validator.regex, self.document_number):
+                raise ValidationError("Document number is not validating")
 
     class Meta:
         unique_together = ("type", "document_number")
