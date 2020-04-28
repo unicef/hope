@@ -35,7 +35,6 @@ export function InProgressTargetPopulationHeaderButtons({
   const [openApprove, setOpenApprove] = useState(false);
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
-  //TODO: Add finalize query and connect to dialog
   return (
     <div>
       <IconContainer>
@@ -64,7 +63,7 @@ export function InProgressTargetPopulationHeaderButtons({
           color='primary'
           onClick={() => setOpenApprove(true)}
         >
-          Approve
+          Close
         </Button>
       </ButtonContainer>
       <DuplicateTargetPopulation

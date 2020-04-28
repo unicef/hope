@@ -256,42 +256,60 @@ export function formatCriteriaFilters({ filters }) {
 }
 
 export function mapCriteriasToInitialValues(criteria) {
-  const mappedFilters = [];
-  if (criteria.filters) {
-    criteria.filters.map((each) => {
-      switch (each.comparisionMethod) {
-        case 'RANGE':
-          return mappedFilters.push({
-            ...each,
-            value: {
-              from: each.arguments[0],
-              to: each.arguments[1],
-            },
-          });
-        case 'LESS_THAN':
-          return mappedFilters.push({
-            ...each,
-            value: {
-              from: '',
-              to: each.arguments[0],
-            },
-          });
-        case 'GREATER_THAN':
-          return mappedFilters.push({
-            ...each,
-            value: {
-              from: each.arguments[0],
-              to: '',
-            },
-          });
-        default:
-          return mappedFilters.push({
-            ...each,
-          });
-      }
-    });
-  } else {
-    mappedFilters.push({ fieldName: '' });
+    const mappedFilters = [];
+    if(criteria.filters) {
+      criteria.filters.map(each => {
+        switch(each.comparisionMethod) {
+          case 'RANGE':
+            return mappedFilters.push({
+              ...each,
+              value: {
+                from: each.arguments[0],
+                to: each.arguments[1],
+              }
+            })
+          case 'LESS_THAN':
+            return mappedFilters.push({
+              ...each,
+              value: {
+                from: '',
+                to: each.arguments[0],
+              }
+            })
+          case 'GREATER_THAN':
+            return mappedFilters.push({
+              ...each,
+              value: {
+                from: each.arguments[0],
+                to: '',
+              }
+            })
+          case 'EQUALS':
+            return mappedFilters.push({
+              ...each,
+              value: each.arguments[0]
+            })
+          default:
+            return mappedFilters.push({
+              ...each
+            })
+        }
+      })
+    } else {
+      mappedFilters.push({fieldName: ''})
+    }
+    return mappedFilters;
+}
+
+export function targetPopulationStatusMapping(status) {
+  switch(status) {
+    case 'DRAFT':
+      return 'Open';
+    case 'APPROVED':
+      return 'Closed';
+    case 'FINALIZED':
+      return 'Sent';
+    default:
+      return status;
   }
-  return mappedFilters;
 }
