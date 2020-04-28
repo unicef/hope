@@ -1,7 +1,7 @@
 from functools import reduce
 
-from core.utils import age_to_dob_query
-from household.models import Household
+from core.utils import age_to_birth_date_query
+from household.models import RESIDENCE_STATUS_CHOICE, YES_NO_CHOICE
 
 TYPE_INTEGER = "INTEGER"
 TYPE_STRING = "STRING"
@@ -9,11 +9,9 @@ TYPE_DATE = "DATE"
 TYPE_IMAGE = "IMAGE"
 TYPE_SELECT_ONE = "SELECT_ONE"
 TYPE_SELECT_MANY = "SELECT_MANY"
-TYPE_GEOPOINT = "SELECT_MANY"
+TYPE_GEOPOINT = "GEOPOINT"
 _INDIVIDUAL = "Individual"
 _HOUSEHOLD = "Household"
-
-CALCULATED_FIELDS = ("age",)
 
 CORE_FIELDS_ATTRIBUTES = [
     {
@@ -23,9 +21,10 @@ CORE_FIELDS_ATTRIBUTES = [
         "label": {"English(EN)": "Age (calculated)"},
         "hint": "",
         "required": False,
-        "get_query": age_to_dob_query,
+        "get_query": age_to_birth_date_query,
         "choices": [],
         "associated_with": _INDIVIDUAL,
+        "xlsx_field": "age",
     },
     {
         "id": "d6aa9669-ae82-4e3c-adfe-79b5d95d0754",
@@ -37,6 +36,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "required": True,
         "choices": [],
         "associated_with": _HOUSEHOLD,
+        "xlsx_field": "hh_size_hc",
     },
     {
         "id": "3c2473d6-1e81-4025-86c7-e8036dd92f4b",
@@ -48,9 +48,10 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [
             {"label": {"English(EN)": label}, "value": str(value),}
-            for value, label in Household.RESIDENCE_STATUS_CHOICE
+            for value, label in RESIDENCE_STATUS_CHOICE
         ],
         "associated_with": _HOUSEHOLD,
+        "xlsx_field": "residence_status_h_c",
     },
     {
         "id": "",
@@ -62,6 +63,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "image of consent",
         "choices": [],
         "associated_with": _INDIVIDUAL,
+        "xlsx_field": "consent_h_c",
     },
     {
         "id": "",
@@ -73,6 +75,19 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "country origin",
         "choices": [],
         "associated_with": _HOUSEHOLD,
+        "xlsx_field": "country_origin_h_c",
+    },
+    {
+        "id": "",
+        "type": TYPE_SELECT_ONE,
+        "name": "country",
+        "lookup": "country",
+        "required": False,
+        "label": {"English(EN)": "Country"},
+        "hint": "",
+        "choices": [],
+        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "country_h_c",
     },
     {
         "id": "",
@@ -84,6 +99,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _HOUSEHOLD,
+        "xlsx_field": "address_h_c",
     },
     {
         "id": "",
@@ -97,6 +113,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _HOUSEHOLD,
+        "xlsx_field": "admin1_h_c",
     },
     {
         "id": "",
@@ -110,6 +127,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _HOUSEHOLD,
+        "xlsx_field": "admin2_h_c",
     },
     {
         "id": "",
@@ -121,17 +139,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "latitude and longitude of household",
         "choices": [],
         "associated_with": _HOUSEHOLD,
-    },
-    {
-        "id": "",
-        "type": TYPE_GEOPOINT,
-        "name": "geopoint",
-        "lookup": "geopoint",
-        "required": False,
-        "label": {"English(EN)": "Household Geopoint"},
-        "hint": "latitude and longitude of household",
-        "choices": [],
-        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "hh_geopoint_h_c",
     },
     {
         "id": "",
@@ -143,17 +151,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _HOUSEHOLD,
-    },
-    {
-        "id": "",
-        "type": TYPE_STRING,
-        "name": "unhcr_id",
-        "lookup": "unhcr_id",
-        "required": False,
-        "label": {"English(EN)": "UNHCR Case ID"},
-        "hint": "",
-        "choices": [],
-        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "unhcr_hh_id_h_c",
     },
     {
         "id": "",
@@ -165,6 +163,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _HOUSEHOLD,
+        "xlsx_field": "returnee_h_c",
     },
     {
         "id": "",
@@ -176,6 +175,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _HOUSEHOLD,
+        "xlsx_field": "size_h_c",
     },
     {
         "id": "",
@@ -187,6 +187,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
+        "xlsx_field": "relationship_i_c",
     },
     {
         "id": "",
@@ -198,6 +199,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
+        "xlsx_field": "role_i_c",
     },
     {
         "id": "",
@@ -209,6 +211,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
+        "xlsx_field": "full_name_i_c",
     },
     {
         "id": "",
@@ -220,6 +223,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
+        "xlsx_field": "given_name_i_c",
     },
     {
         "id": "",
@@ -231,6 +235,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
+        "xlsx_field": "middle_name_i_c",
     },
     {
         "id": "",
@@ -242,6 +247,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
+        "xlsx_field": "family_name_i_c",
     },
     {
         "id": "",
@@ -253,6 +259,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
+        "xlsx_field": "sex_i_c",
     },
     {
         "id": "",
@@ -264,28 +271,34 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
+        "xlsx_field": "birth_date_i_c",
     },
     {
         "id": "",
-        "type": TYPE_DATE,
+        "type": TYPE_SELECT_ONE,
         "name": "estimated_birth_date",
         "lookup": "estimated_birth_date",
-        "required": True,
+        "required": False,
         "label": {"English(EN)": "Estimated Birth Date?"},
         "hint": "",
-        "choices": [],
+        "choices": [
+            {"label": {"English(EN)": label}, "value": str(value),}
+            for value, label in YES_NO_CHOICE
+        ],
         "associated_with": _INDIVIDUAL,
+        "xlsx_field": "estimated_birth_date_i_c",
     },
     {
         "id": "",
         "type": TYPE_IMAGE,
         "name": "photo",
         "lookup": "photo",
-        "required": True,
+        "required": False,
         "label": {"English(EN)": "Photo"},
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
+        "xlsx_field": "photo_i_c",
     },
     {
         "id": "",
@@ -297,17 +310,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
-    },
-    {
-        "id": "",
-        "type": TYPE_SELECT_ONE,
-        "name": "marital_status",
-        "lookup": "marital_status",
-        "required": False,
-        "label": {"English(EN)": "Marital Status"},
-        "hint": "",
-        "choices": [],
-        "associated_with": _INDIVIDUAL,
+        "xlsx_field": "marital_status_i_c",
     },
     {
         "id": "",
@@ -319,6 +322,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
+        "xlsx_field": "phone_no_i_c",
     },
     {
         "id": "",
@@ -330,6 +334,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
+        "xlsx_field": "phone_no_alternative_i_c",
     },
     {
         "id": "",
@@ -343,6 +348,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
+        "xlsx_field": "id_type_i_c",
     },
     {
         "id": "",
@@ -354,6 +360,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
+        "xlsx_field": "birth_certificate_no_i_c",
     },
     {
         "id": "",
@@ -365,6 +372,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
+        "xlsx_field": "birth_certificate_photo_i_c",
     },
     {
         "id": "",
@@ -376,6 +384,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
+        "xlsx_field": "drivers_license_no_i_c",
     },
     {
         "id": "",
@@ -387,6 +396,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
+        "xlsx_field": "drivers_license_photo_i_c",
     },
     {
         "id": "",
@@ -398,6 +408,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
+        "xlsx_field": "electoral_card_no_i_c",
     },
     {
         "id": "",
@@ -409,6 +420,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
+        "xlsx_field": "electoral_card_photo_i_c",
     },
     {
         "id": "",
@@ -420,6 +432,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
+        "xlsx_field": "unhcr_id_no_i_c",
     },
     {
         "id": "",
@@ -431,6 +444,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
+        "xlsx_field": "unhcr_id_photo_i_c",
     },
     {
         "id": "",
@@ -442,6 +456,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
+        "xlsx_field": "national_passport_i_c",
     },
     {
         "id": "",
@@ -453,6 +468,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
+        "xlsx_field": "national_passport_photo_i_c",
     },
     {
         "id": "",
@@ -464,6 +480,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
+        "xlsx_field": "scope_id_no_i_c",
     },
     {
         "id": "",
@@ -475,6 +492,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
+        "xlsx_field": "scope_id_photo_i_c",
     },
     {
         "id": "",
@@ -486,6 +504,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
+        "xlsx_field": "other_id_type_i_c",
     },
     {
         "id": "",
@@ -497,6 +516,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
+        "xlsx_field": "other_id_no_i_c",
     },
     {
         "id": "",
@@ -508,17 +528,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
-    },
-    {
-        "id": "",
-        "type": TYPE_SELECT_ONE,
-        "name": "work_status",
-        "lookup": "work_status",
-        "required": False,
-        "label": {"English(EN)": "Does the individual  work?"},
-        "hint": "",
-        "choices": [],
-        "associated_with": _INDIVIDUAL,
+        "xlsx_field": "other_id_type_i_c",
     },
     {
         "id": "",
@@ -532,6 +542,245 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _HOUSEHOLD,
+        "xlsx_field": "pregnant_member_h_c",
+    },
+    {
+        "id": "",
+        "type": TYPE_INTEGER,
+        "name": "female_age_group_0_5_count",
+        "lookup": "female_age_group_0_5_count",
+        "required": True,
+        "label": {
+            "Females Age 0-5"
+        },
+        "hint": "",
+        "choices": [],
+        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "f_0_5_age_group_h_c",
+    },
+    {
+        "id": "",
+        "type": TYPE_INTEGER,
+        "name": "female_age_group_6_11_count",
+        "lookup": "female_age_group_6_11_count",
+        "required": True,
+        "label": {
+            "Females Age 6-11"
+        },
+        "hint": "",
+        "choices": [],
+        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "f_6_11_age_group_h_c",
+    },
+    {
+        "id": "",
+        "type": TYPE_INTEGER,
+        "name": "female_age_group_12_17_count",
+        "lookup": "female_age_group_12_17_count",
+        "required": True,
+        "label": {
+            "Females Age 12-17"
+        },
+        "hint": "",
+        "choices": [],
+        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "f_12_17_age_group_h_c",
+    },
+    {
+        "id": "",
+        "type": TYPE_INTEGER,
+        "name": "female_adults_count",
+        "lookup": "female_adults_count",
+        "required": True,
+        "label": {
+            "Female Adults"
+        },
+        "hint": "",
+        "choices": [],
+        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "f_adults_h_c",
+    },
+    {
+        "id": "",
+        "type": TYPE_INTEGER,
+        "name": "pregnant_count",
+        "lookup": "pregnant_count",
+        "required": True,
+        "label": {
+            "Pregnant females"
+        },
+        "hint": "",
+        "choices": [],
+        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "f_pregnant_h_c",
+    },
+    {
+        "id": "",
+        "type": TYPE_INTEGER,
+        "name": "male_age_group_0_5_count",
+        "lookup": "male_age_group_0_5_count",
+        "required": True,
+        "label": {
+            "Males Age 0-5"
+        },
+        "hint": "",
+        "choices": [],
+        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "m_0_5_age_group_h_c",
+    },
+    {
+        "id": "",
+        "type": TYPE_INTEGER,
+        "name": "male_age_group_6_11_count",
+        "lookup": "male_age_group_6_11_count",
+        "required": True,
+        "label": {
+            "Males Age 6-11"
+        },
+        "hint": "",
+        "choices": [],
+        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "m_6_11_age_group_h_c",
+    },
+    {
+        "id": "",
+        "type": TYPE_INTEGER,
+        "name": "male_age_group_12_17_count",
+        "lookup": "male_age_group_12_17_count",
+        "required": True,
+        "label": {
+            "Males Age 12-17"
+        },
+        "hint": "",
+        "choices": [],
+        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "m_12_17_age_group_h_c",
+    },
+    {
+        "id": "",
+        "type": TYPE_INTEGER,
+        "name": "male_adults_count",
+        "lookup": "male_adults_count",
+        "required": True,
+        "label": {
+            "Male Adults"
+        },
+        "hint": "",
+        "choices": [],
+        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "m_adults_h_c",
+    },
+    {
+        "id": "",
+        "type": TYPE_INTEGER,
+        "name": "female_age_group_0_5_disabled_count",
+        "lookup": "female_age_group_0_5_disabled_count",
+        "required": True,
+        "label": {
+            "Female members with Disability age 0-5"
+        },
+        "hint": "",
+        "choices": [],
+        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "f_0_5_disability_h_c",
+    },
+    {
+        "id": "",
+        "type": TYPE_INTEGER,
+        "name": "female_age_group_6_11_disabled_count",
+        "lookup": "female_age_group_6_11_disabled_count",
+        "required": True,
+        "label": {
+            "Female members with Disability age 6-11"
+        },
+        "hint": "",
+        "choices": [],
+        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "f_6_11_disability_h_c",
+    },
+    {
+        "id": "",
+        "type": TYPE_INTEGER,
+        "name": "female_age_group_12_17_disabled_count",
+        "lookup": "female_age_group_12_17_disabled_count",
+        "required": True,
+        "label": {
+            "Female members with Disability age 12-17"
+        },
+        "hint": "",
+        "choices": [],
+        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "f_12_17_disability_h_c",
+    },
+    {
+        "id": "",
+        "type": TYPE_INTEGER,
+        "name": "female_adults_disabled_count",
+        "lookup": "female_adults_disabled_count",
+        "required": True,
+        "label": {
+            "Female members with Disability adults"
+        },
+        "hint": "",
+        "choices": [],
+        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "f_adults_disability_h_c",
+    },
+    {
+        "id": "",
+        "type": TYPE_INTEGER,
+        "name": "male_age_group_0_5_disabled_count",
+        "lookup": "male_age_group_0_5_disabled_count",
+        "required": True,
+        "label": {
+            "Male members with Disability age 0-5"
+        },
+        "hint": "",
+        "choices": [],
+        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "m_0_5_disability_h_c",
+    },
+    {
+        "id": "",
+        "type": TYPE_INTEGER,
+        "name": "male_age_group_6_11_disabled_count",
+        "lookup": "male_age_group_6_11_disabled_count",
+        "required": True,
+        "label": {
+            "Male members with Disability age 6-11"
+        },
+        "hint": "",
+        "choices": [],
+        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "m_6_11_disability_h_c",
+    },
+    {
+        "id": "",
+        "type": TYPE_INTEGER,
+        "name": "male_age_group_12_17_disabled_count",
+        "lookup": "male_age_group_12_17_disabled_count",
+        "required": True,
+        "label": {
+            "Male members with Disability age 12-17"
+        },
+        "hint": "",
+        "choices": [],
+        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "m_12_17_disability_h_c",
+    },
+    {
+        "id": "",
+        "type": TYPE_INTEGER,
+        "name": "male_adults_disabled_count",
+        "lookup": "male_adults_disabled_count",
+        "required": True,
+        "label": {
+            "Male members with Disability adults"
+        },
+        "hint": "",
+        "choices": [],
+        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "m_adults_disability_h_c",
     },
 ]
 
@@ -548,7 +797,7 @@ def _core_fields_to_separated_dict():
     }
     for field in CORE_FIELDS_ATTRIBUTES:
         associated_key = field["associated_with"].lower() + "s"
-        result_dict[associated_key][field["name"]] = field
+        result_dict[associated_key][field["xlsx_field"]] = field
 
     return result_dict
 

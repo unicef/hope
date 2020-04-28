@@ -9,11 +9,11 @@ from django.core.validators import (
     MaxLengthValidator,
 )
 from django.db import models
+from django.utils.translation import ugettext_lazy as _
 from django_countries.fields import CountryField
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
 
-from household.const import NATIONALITIES
 from household.models import (
     RESIDENCE_STATUS_CHOICE,
     SEX_CHOICE,
