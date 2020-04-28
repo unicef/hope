@@ -2,16 +2,16 @@ import React from 'react';
 import styled from 'styled-components';
 import TableCell from '@material-ui/core/TableCell';
 import { useHistory } from 'react-router-dom';
-import { HouseholdNode } from '../../../__generated__/graphql';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
-import { decodeIdString } from '../../../utils/utils';
+import { HouseholdNode } from '../../../../__generated__/graphql';
+import { useBusinessArea } from '../../../../hooks/useBusinessArea';
+import { ClickableTableRow } from '../../../../components/table/ClickableTableRow';
+import { decodeIdString } from '../../../../utils/utils';
 
 interface TargetPopulationHouseholdTableRowProps {
   household: HouseholdNode;
 }
 
-export function TargetPopulationHouseholdTableRow({ household }) {
+export function ProgrammeTableRow({ household }) {
   const history = useHistory();
   const businessArea = useBusinessArea();
 
@@ -27,8 +27,10 @@ export function TargetPopulationHouseholdTableRow({ household }) {
       key={household.id}
     >
       <TableCell align='left'>{decodeIdString(household.id)}</TableCell>
+      <TableCell align='left'>final list</TableCell>
       <TableCell align='left'>{`${household.headOfHousehold.firstName} ${household.headOfHousehold.lastName}`}</TableCell>
       <TableCell align='left'>{household.familySize}</TableCell>
+      <TableCell align='left'>-</TableCell>
       <TableCell align='left'>-</TableCell>
       <TableCell align='left'>{household.location.title}</TableCell>
     </ClickableTableRow>
