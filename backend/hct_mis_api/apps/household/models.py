@@ -187,6 +187,9 @@ class Identity(models.Model):
     )
     number = models.CharField(max_length=255,)
 
+    class Meta:
+        unique_together = ("agency", "number")
+
     def __str__(self):
         return f"{self.agency} {self.individual} {self.document_number}"
 
