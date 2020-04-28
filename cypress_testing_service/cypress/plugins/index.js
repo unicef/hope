@@ -18,3 +18,10 @@ const AzureAdSingleSignOn = require('./azure-ad-sso/plugin').AzureAdSingleSignOn
 module.exports = (on, config) => {
     on('task', {AzureAdSingleSignOn:AzureAdSingleSignOn})
 }
+
+const cucumber = require('cypress-cucumber-preprocessor').default
+
+module.exports = (on, config) => {
+  on('file:preprocessor', cucumber()),
+  on('task', {AzureAdSingleSignOn:AzureAdSingleSignOn})
+}
