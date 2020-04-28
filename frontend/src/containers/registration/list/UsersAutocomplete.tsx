@@ -3,10 +3,11 @@ import styled from 'styled-components';
 import {useDebounce} from "../../../hooks/useDebounce";
 import {AllUsersQuery, useAllUsersQuery} from "../../../__generated__/graphql";
 import get from "lodash/get";
-import {InputAdornment, TextField} from "@material-ui/core";
+import {InputAdornment} from "@material-ui/core";
 import PersonIcon from "@material-ui/icons/Person";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Autocomplete from "@material-ui/lab/Autocomplete";
+import TextField from "../../../shared/TextField";
 
 const StyledAutocomplete = styled(Autocomplete)`
   width: 232px;
@@ -50,6 +51,7 @@ export function UsersAutocomplete({value, onChange, onInputTextChange, inputValu
             options={get(data, 'allUsers.edges', [])}
             loading={loading}
             renderInput={(params) => (
+
                 <TextField
                     {...params}
                     label='Imported By'

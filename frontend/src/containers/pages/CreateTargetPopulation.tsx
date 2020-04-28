@@ -15,6 +15,7 @@ import {
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
+import { CreateTable } from '../tables/TargetPopulation/Create';
 
 const PaperContainer = styled(Paper)`
   display: flex;
@@ -126,14 +127,14 @@ export function CreateTargetPopulation() {
             render={(arrayHelpers) => (
               <TargetingCriteria
                 helpers={arrayHelpers}
-                criterias={values.criterias}
+                candidateListRules={values.criterias}
                 isEdit
               />
             )}
           />
           <Results />
           {values.criterias.length ? (
-            <TargetPopulationHouseholdTable
+            <CreateTable
               variables={{
                 targetingCriteria: {
                   rules: values.criterias.map((rule) => {
@@ -150,8 +151,6 @@ export function CreateTargetPopulation() {
                   }),
                 },
               }}
-              query={useGoldenRecordByTargetingCriteriaQuery}
-              queryObjectName='goldenRecordByTargetingCriteria'
             />
           ) : (
             <PaperContainer>

@@ -9,6 +9,8 @@ export const AllTargetPopulations = gql`
     $orderBy: String
     $name: String
     $status: String
+    $candidateListTotalHouseholdsMin: Int
+    $candidateListTotalHouseholdsMax: Int
   ) {
     allTargetPopulation(
       after: $after
@@ -18,6 +20,8 @@ export const AllTargetPopulations = gql`
       orderBy: $orderBy
       name: $name
       status: $status
+      candidateListTotalHouseholdsMin: $candidateListTotalHouseholdsMin
+      candidateListTotalHouseholdsMax: $candidateListTotalHouseholdsMax
     ) {
       edges {
         node {

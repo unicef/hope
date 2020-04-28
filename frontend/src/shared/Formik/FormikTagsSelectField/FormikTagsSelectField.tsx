@@ -1,17 +1,17 @@
 import React from 'react';
 import { TextField, InputAdornment } from '@material-ui/core';
-import Autocomplete from "@material-ui/lab/Autocomplete";
+import Autocomplete from '@material-ui/lab/Autocomplete';
 
-import styled from 'styled-components'
+import styled from 'styled-components';
 
 const StyledTextField = styled(TextField)`
-input[type=number]::-webkit-inner-spin-button, 
-input[type=number]::-webkit-outer-spin-button { 
-  -webkit-appearance: none; 
-}
-input[type=number] {
-  -moz-appearance:textfield;
-}
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number']::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+  }
+  input[type='number'] {
+    -moz-appearance: textfield;
+  }
 `;
 
 export const FormikTagsSelectField = ({
@@ -19,6 +19,7 @@ export const FormikTagsSelectField = ({
   form,
   decoratorStart,
   decoratorEnd,
+  label,
   type,
   precision,
   ...otherProps
@@ -48,24 +49,26 @@ export const FormikTagsSelectField = ({
         {...otherProps}
         multiple
         name={field.name}
-        id="tags-standard"
+        id='tags-standard'
         options={[]}
         value={field.value}
         onChange={form.handleChange}
         freeSolo
-        placeholder="Favorites"
-        renderInput={params => (
-          <TextField
-            {...params}
-            id={`textField-${field.name}`}
-            margin='dense'
-            onBlur={onBlur}
-            error={isInvalid}
-            helperText={isInvalid && form.errors[field.name]}
-            variant="standard"
-            label="Multiple values"
-          />
-        )}
+        placeholder={label}
+        renderInput={(params) => {
+          return (
+            <TextField
+              {...params}
+              id={`textField-${field.name}`}
+              margin='dense'
+              onBlur={onBlur}
+              error={isInvalid}
+              helperText={isInvalid && form.errors[field.name]}
+              variant='filled'
+              label={label}
+            />
+          );
+        }}
       />
     </>
   );
