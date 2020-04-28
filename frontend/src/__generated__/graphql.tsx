@@ -3661,6 +3661,7 @@ export type CandidateHouseholdsListByTargetingCriteriaQuery = (
     & Pick<HouseholdNodeConnection, 'totalCount' | 'edgeCount'>
     & { edges: Array<Maybe<(
       { __typename?: 'HouseholdNodeEdge' }
+      & Pick<HouseholdNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'HouseholdNode' }
         & Pick<HouseholdNode, 'id' | 'familySize' | 'updatedAt'>
@@ -3693,6 +3694,7 @@ export type FinalHouseholdsListByTargetingCriteriaQuery = (
     & Pick<HouseholdNodeConnection, 'totalCount' | 'edgeCount'>
     & { edges: Array<Maybe<(
       { __typename?: 'HouseholdNodeEdge' }
+      & Pick<HouseholdNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'HouseholdNode' }
         & Pick<HouseholdNode, 'id' | 'familySize' | 'updatedAt'>
@@ -3724,6 +3726,7 @@ export type GoldenRecordByTargetingCriteriaQuery = (
     & Pick<HouseholdNodeConnection, 'totalCount' | 'edgeCount'>
     & { edges: Array<Maybe<(
       { __typename?: 'HouseholdNodeEdge' }
+      & Pick<HouseholdNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'HouseholdNode' }
         & Pick<HouseholdNode, 'id' | 'familySize' | 'updatedAt'>
@@ -6487,6 +6490,7 @@ export const CandidateHouseholdsListByTargetingCriteriaDocument = gql`
         }
         updatedAt
       }
+      cursor
     }
     totalCount
     edgeCount
@@ -6556,6 +6560,7 @@ export const FinalHouseholdsListByTargetingCriteriaDocument = gql`
         }
         updatedAt
       }
+      cursor
     }
     totalCount
     edgeCount
@@ -6626,6 +6631,7 @@ export const GoldenRecordByTargetingCriteriaDocument = gql`
         }
         updatedAt
       }
+      cursor
     }
     totalCount
     edgeCount

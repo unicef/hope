@@ -71,7 +71,7 @@ const CriteriaField = ({ field }) => {
     case 'LESS_THAN':
       fieldElement = (
         <p>
-          {field.fieldAttribute.labelEn || field.fieldName}: {'>'}{' '}
+          {field.fieldAttribute.labelEn || field.fieldName}: {'<'}{' '}
           <span>{field.arguments[0]}</span>
         </p>
       );
@@ -79,7 +79,7 @@ const CriteriaField = ({ field }) => {
     case 'GREATER_THAN':
       fieldElement = (
         <p>
-          {field.fieldAttribute.labelEn || field.fieldName}: {'<'}{' '}
+          {field.fieldAttribute.labelEn || field.fieldName}: {'>'}{' '}
           <span>{field.arguments[0]}</span>
         </p>
       );
