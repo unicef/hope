@@ -63,7 +63,6 @@ class IndividualFactory(factory.DjangoModelFactory):
     birth_date = factory.Faker(
         "date_of_birth", tzinfo=utc, minimum_age=16, maximum_age=90
     )
-    estimated_birth_date = None
     marital_status = factory.fuzzy.FuzzyChoice(
         MARITAL_STATUS_CHOICE, getter=lambda c: c[0],
     )
