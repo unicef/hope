@@ -6,7 +6,8 @@ import { Delete, Edit } from '@material-ui/icons';
 import { TargetingCriteriaRuleObjectType } from '../../../__generated__/graphql';
 
 const CriteriaElement = styled.div`
-  width: ${(props) => (props.alternative ? 'auto' : '380px')};
+  width: auto;
+  max-width: 380px;
   position: relative;
   border: ${(props) => (props.alternative ? '0' : '2px solid #033f91')};
   border-radius: 3px;
@@ -14,7 +15,9 @@ const CriteriaElement = styled.div`
   background-color: ${(props) =>
     props.alternative ? 'transparent' : '#f7faff'};
   padding: ${({ theme }) => theme.spacing(1)}px
-    ${({ theme }) => theme.spacing(3)}px;
+    ${({ theme }) => theme.spacing(15)}px
+    ${({ theme }) => theme.spacing(1)}px
+    ${({ theme }) => theme.spacing(4)}px;
   margin: ${({ theme }) => theme.spacing(2)}px 0;
   p {
     margin: ${({ theme }) => theme.spacing(2)}px 0;
@@ -62,16 +65,16 @@ const CriteriaField = ({ field }) => {
       break;
     case 'EQUALS':
       fieldElement = (
-        <p>
-          {field.fieldAttribute.labelEn || field.fieldName}:{' '}
-          <span>{field.arguments[0]}</span>
-        </p>
+          <p>
+            {field.fieldAttribute.labelEn || field.fieldName}:{' '}
+            <span>{field.fieldAttribute.choices.length ? field.fieldAttribute.choices.find(each => each.value === field.arguments[0]).labelEn : field.arguments[0]}</span>
+          </p>
       );
       break;
     case 'LESS_THAN':
       fieldElement = (
         <p>
-          {field.fieldAttribute.labelEn || field.fieldName}: {'>'}{' '}
+          {field.fieldAttribute.labelEn || field.fieldName}: {'<'}{' '}
           <span>{field.arguments[0]}</span>
         </p>
       );
@@ -79,9 +82,25 @@ const CriteriaField = ({ field }) => {
     case 'GREATER_THAN':
       fieldElement = (
         <p>
-          {field.fieldAttribute.labelEn || field.fieldName}: {'<'}{' '}
+          {field.fieldAttribute.labelEn || field.fieldName}: {'>'}{' '}
           <span>{field.arguments[0]}</span>
         </p>
+      );
+      break;
+    case 'CONTAINS':
+      fieldElement = (
+        field.arguments.length > 1 ?
+          <p>
+            {field.fieldAttribute.labelEn || field.fieldName}:{' '}
+            {field.arguments.map((argument, index) => {
+              return <><span>{field.fieldAttribute.choices.length ? field.fieldAttribute.choices.find(each => each.value === argument).labelEn : field.arguments[0]}</span>{index !== field.arguments.length - 1 && ', '}</>
+            }
+            )}
+          </p> :
+          <p>
+            {field.fieldAttribute.labelEn || field.fieldName}:{' '}
+            <span>{field.arguments[0]}</span>
+          </p>
       );
       break;
     default:

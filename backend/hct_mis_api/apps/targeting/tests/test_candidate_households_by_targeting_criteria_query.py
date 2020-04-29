@@ -21,7 +21,7 @@ class CandidateListTargetingCriteriaQueryTestCase(APITestCase):
         totalCount
         edges {
           node {
-            familySize
+            size
             residenceStatus
           }
         }
@@ -34,7 +34,7 @@ class CandidateListTargetingCriteriaQueryTestCase(APITestCase):
             totalCount
             edges {
               node {
-                familySize
+                size
                 residenceStatus
               }
             }

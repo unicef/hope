@@ -234,7 +234,7 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
             "arguments": 1,
             "lookup": "__contains",
             "negative": False,
-            "supported_types": [],
+            "supported_types": ["SELECT_MANY"],
         },
         "NOT_CONTAINS": {
             "arguments": 1,
@@ -287,7 +287,7 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
     )
     is_flex_field = models.BooleanField(default=False)
-    field_name = models.CharField(max_length=20)
+    field_name = models.CharField(max_length=50)
     arguments = JSONField(
         help_text="""
             Array of arguments

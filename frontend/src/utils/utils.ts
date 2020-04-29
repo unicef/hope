@@ -1,10 +1,10 @@
+import moment from 'moment';
 import { theme as themeObj } from '../theme';
 import {
   AllProgramsQuery,
   ChoiceObject,
   ProgramStatus,
 } from '../__generated__/graphql';
-import moment from 'moment';
 
 const Gender = new Map([
   ['MALE', 'Male'],
@@ -109,16 +109,6 @@ export function targetPopulationStatusToColor(
       return theme.palette.error.main;
   }
 }
-export function getCookie(name): string | null {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2)
-    return parts
-      .pop()
-      .split(';')
-      .shift();
-  return null;
-}
 
 export function isAuthenticated(): boolean {
   return Boolean(localStorage.getItem('AUTHENTICATED'));
@@ -175,7 +165,7 @@ export function programStatusToPriority(status: ProgramStatus): number {
       return 3;
   }
 }
-export function decodeIdString(idString) {
+export function decodeIdString(idString): string | null {
   if (!idString) {
     return null;
   }
@@ -201,18 +191,11 @@ export function formatCurrency(amount: number): string {
   })} USD`;
 }
 
-export function clearValue(value) {
-  if (!value) {
-    return undefined;
-  }
-
-  return parseInt(value, 10);
-}
-
 export function getAgeFromDob(date: string): number {
   return moment().diff(moment(date), 'years');
 }
-
+// TODO Marcin make Type to this function
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function formatCriteriaFilters({ filters }) {
   return filters.map((each) => {
     let comparisionMethod;
@@ -223,8 +206,8 @@ export function formatCriteriaFilters({ filters }) {
         values = [each.value];
         break;
       case 'SELECT_MANY':
-        comparisionMethod = 'EQUALS';
-        values = [each.value];
+        comparisionMethod = 'CONTAINS';
+        values = [...each.value];
         break;
       case 'STRING':
         comparisionMethod = 'CONTAINS';
@@ -289,6 +272,11 @@ export function mapCriteriasToInitialValues(criteria) {
               ...each,
               value: each.arguments[0]
             })
+          case 'CONTAINS':
+            return mappedFilters.push({
+              ...each,
+              value: each.arguments
+            })
           default:
             return mappedFilters.push({
               ...each
@@ -301,8 +289,8 @@ export function mapCriteriasToInitialValues(criteria) {
     return mappedFilters;
 }
 
-export function targetPopulationStatusMapping(status) {
-  switch(status) {
+export function targetPopulationStatusMapping(status): string {
+  switch (status) {
     case 'DRAFT':
       return 'Open';
     case 'APPROVED':

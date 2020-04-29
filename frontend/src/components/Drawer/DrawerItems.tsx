@@ -4,7 +4,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import ExpandLess from '@material-ui/icons/ExpandLess';
-import { useHistory, useLocation, Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import styled from 'styled-components';
 import React from 'react';
@@ -56,7 +56,7 @@ export function DrawerItems({ currentLocation }: Props): React.ReactElement {
       {menuItems.map((item, index) => {
         if (item.collapsable) {
           return (
-            <>
+            <div key={item.name + item.href}>
               <ListItem
                 button
                 onClick={() => {
@@ -69,7 +69,6 @@ export function DrawerItems({ currentLocation }: Props): React.ReactElement {
                     history.push(`/${businessArea}${item.href}`);
                   }
                 }}
-                key={item.name}
               >
                 <Icon>{item.icon}</Icon>
                 <Text primary={item.name} />
@@ -98,14 +97,14 @@ export function DrawerItems({ currentLocation }: Props): React.ReactElement {
                     ))}
                 </SubList>
               </Collapse>
-            </>
+            </div>
           );
         }
         return (
           <ListItem
             button
             component={Link}
-            key={item.name}
+            key={item.name + item.href}
             to={`/${businessArea}${item.href}`}
             onClick={() => {
               setExpandedItem(null);
