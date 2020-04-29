@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Tabs, Tab } from '@material-ui/core';
 import { TabPanel } from '../../components/TabPanel';
-import { TargetPopulationPageHeader } from './headers/TargetPopulationPageHeader';
 import {
   useTargetPopulationQuery,
   TargetPopulationNode,
@@ -10,6 +9,7 @@ import {
 import { EditTargetPopulation } from '../../components/TargetPopulation/EditTargetPopulation';
 import { TargetPopulationCore } from '../../components/TargetPopulation/TargetPopulationCore';
 import { TargetPopulationDetails } from '../../components/TargetPopulation/TargetPopulationDetails';
+import { TargetPopulationPageHeader } from './headers/TargetPopulationPageHeader';
 
 export function TargetPopulationDetailsPage() {
   const { id } = useParams();
@@ -55,7 +55,6 @@ export function TargetPopulationDetailsPage() {
         <>
           <TargetPopulationPageHeader
             targetPopulation={targetPopulation}
-            isEditMode={isEdit}
             setEditState={setEditState}
             tabs={tabs}
             selectedTab={selectedTab}
