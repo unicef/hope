@@ -18,7 +18,6 @@ export const individualMinimal = gql`
           documentNumber
           type {
             country
-            type
             label
           }
         }

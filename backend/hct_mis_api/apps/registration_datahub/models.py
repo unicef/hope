@@ -1,3 +1,4 @@
+import re
 from datetime import date
 
 from django.contrib.gis.db.models import PointField
@@ -23,6 +24,19 @@ from household.models import (
 from utils.models import TimeStampedUUIDModel
 
 
+class ImportedHouseholdIdentity(models.Model):
+    agency = models.ForeignKey(
+        "Agency", related_name="households_identities", on_delete=models.CASCADE
+    )
+    household = models.ForeignKey(
+        "ImportedHousehold", related_name="identities", on_delete=models.CASCADE
+    )
+    document_number = models.CharField(max_length=255,)
+
+    def __str__(self):
+        return f"{self.agency} {self.individual} {self.document_number}"
+
+
 class ImportedHousehold(TimeStampedUUIDModel):
     consent = ImageField(validators=[validate_image_file_extension])
     residence_status = models.CharField(
@@ -35,7 +49,6 @@ class ImportedHousehold(TimeStampedUUIDModel):
     admin1 = models.CharField(max_length=255, blank=True)
     admin2 = models.CharField(max_length=255, blank=True)
     geopoint = PointField(blank=True, null=True)
-    unhcr_id = models.CharField(max_length=255, blank=True)
     female_age_group_0_5_count = models.PositiveIntegerField(default=0)
     female_age_group_6_11_count = models.PositiveIntegerField(default=0)
     female_age_group_12_17_count = models.PositiveIntegerField(default=0)
@@ -145,9 +158,17 @@ class ImportData(TimeStampedUUIDModel):
     number_of_individuals = models.PositiveIntegerField()
 
 
+class DocumentValidator(TimeStampedUUIDModel):
+    type = models.ForeignKey(
+        "ImportedDocumentType",
+        related_name="validators",
+        on_delete=models.CASCADE,
+    )
+    regex = models.CharField(max_length=100, default=".*")
+
+
 class ImportedDocumentType(TimeStampedUUIDModel):
     country = CountryField(blank=True)
-    type = models.CharField(max_length=100)
     label = models.CharField(max_length=100)
 
     def __str__(self):
@@ -161,8 +182,17 @@ class ImportedDocument(TimeStampedUUIDModel):
         "ImportedIndividual", related_name="documents", on_delete=models.CASCADE
     )
     type = models.ForeignKey(
-        "ImportedDocumentType", related_name="documents", on_delete=models.CASCADE
+        "ImportedDocumentType",
+        related_name="documents",
+        on_delete=models.CASCADE,
     )
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+
+        for validator in self.type.validators:
+            if not re.match(validator.regex, self.document_number):
+                raise ValidationError("Document number is not validating")
 
 
 class Agency(models.Model):
@@ -173,12 +203,14 @@ class Agency(models.Model):
         return f"{self.label}"
 
 
-class Identity(models.Model):
+class ImportedIndividualIdentity(models.Model):
     agency = models.ForeignKey(
         "Agency", related_name="identities", on_delete=models.CASCADE
     )
     individual = models.ForeignKey(
-        "ImportedIndividual", related_name="identities", on_delete=models.CASCADE
+        "ImportedIndividual",
+        related_name="identities",
+        on_delete=models.CASCADE,
     )
     document_number = models.CharField(max_length=255,)
 

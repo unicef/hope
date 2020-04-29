@@ -361,7 +361,6 @@ export type DocumentTypeNode = {
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
   country?: Maybe<Scalars['String']>,
-  type: Scalars['String'],
   label: Scalars['String'],
   documents: DocumentNodeConnection,
 };
@@ -407,7 +406,6 @@ export type HouseholdNode = Node & {
   address: Scalars['String'],
   adminArea?: Maybe<AdminAreaNode>,
   geopoint?: Maybe<Scalars['GeoJSON']>,
-  unhcrId: Scalars['String'],
   femaleAgeGroup05Count: Scalars['Int'],
   femaleAgeGroup611Count: Scalars['Int'],
   femaleAgeGroup1217Count: Scalars['Int'],
@@ -429,7 +427,7 @@ export type HouseholdNode = Node & {
   programs: ProgramNodeConnection,
   returnee: Scalars['Boolean'],
   registrationDate?: Maybe<Scalars['Date']>,
-  headOfHousehold?: Maybe<IndividualNode>,
+  headOfHousehold: IndividualNode,
   individuals: IndividualNodeConnection,
   paymentRecords: PaymentRecordNodeConnection,
   targetPopulations: TargetPopulationNodeConnection,
@@ -802,7 +800,6 @@ export type ImportedDocumentTypeNode = {
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
   country?: Maybe<ImportedDocumentTypeCountry>,
-  type: Scalars['String'],
   label: Scalars['String'],
   documents: ImportedDocumentNodeConnection,
 };
@@ -829,7 +826,6 @@ export type ImportedHouseholdNode = Node & {
   admin1: Scalars['String'],
   admin2: Scalars['String'],
   geopoint?: Maybe<Scalars['GeoJSON']>,
-  unhcrId: Scalars['String'],
   femaleAgeGroup05Count: Scalars['Int'],
   femaleAgeGroup611Count: Scalars['Int'],
   femaleAgeGroup1217Count: Scalars['Int'],
@@ -2168,10 +2164,10 @@ export type XlsxRowErrorNode = {
 export type HouseholdMinimalFragment = (
   { __typename?: 'HouseholdNode' }
   & Pick<HouseholdNode, 'id' | 'createdAt' | 'residenceStatus' | 'size' | 'totalCashReceived' | 'registrationDate' | 'address'>
-  & { headOfHousehold: Maybe<(
+  & { headOfHousehold: (
     { __typename?: 'IndividualNode' }
     & Pick<IndividualNode, 'id' | 'fullName'>
-  )>, adminArea: Maybe<(
+  ), adminArea: Maybe<(
     { __typename?: 'AdminAreaNode' }
     & Pick<AdminAreaNode, 'id' | 'title'>
   )>, individuals: (
@@ -2236,7 +2232,7 @@ export type IndividualMinimalFragment = (
         & Pick<DocumentNode, 'id' | 'documentNumber'>
         & { type: (
           { __typename?: 'DocumentTypeNode' }
-          & Pick<DocumentTypeNode, 'country' | 'type' | 'label'>
+          & Pick<DocumentTypeNode, 'country' | 'label'>
         ) }
       )> }
     )>> }
@@ -2263,10 +2259,10 @@ export type IndividualDetailedFragment = (
   ), headingHousehold: Maybe<(
     { __typename?: 'HouseholdNode' }
     & Pick<HouseholdNode, 'id'>
-    & { headOfHousehold: Maybe<(
+    & { headOfHousehold: (
       { __typename?: 'IndividualNode' }
       & Pick<IndividualNode, 'id'>
-    )> }
+    ) }
   )> }
   & IndividualMinimalFragment
 );
@@ -2414,6 +2410,77 @@ export type CopyTargetPopulationMutation = (
     & { targetPopulation: Maybe<(
       { __typename?: 'TargetPopulationNode' }
       & Pick<TargetPopulationNode, 'id'>
+    )> }
+  )> }
+);
+
+export type FinalizeTpMutationVariables = {
+  id: Scalars['ID']
+};
+
+
+export type FinalizeTpMutation = (
+  { __typename?: 'Mutations' }
+  & { finalizeTargetPopulation: Maybe<(
+    { __typename?: 'FinalizeTargetPopulationMutation' }
+    & { targetPopulation: Maybe<(
+      { __typename?: 'TargetPopulationNode' }
+      & Pick<TargetPopulationNode, 'id' | 'name' | 'status'>
+      & { candidateListTargetingCriteria: Maybe<(
+        { __typename?: 'TargetingCriteriaNode' }
+        & { targetPopulationCandidate: Maybe<(
+          { __typename?: 'TargetPopulationNode' }
+          & { createdBy: Maybe<(
+            { __typename?: 'UserNode' }
+            & Pick<UserNode, 'firstName' | 'lastName'>
+          )>, program: Maybe<(
+            { __typename?: 'ProgramNode' }
+            & Pick<ProgramNode, 'id' | 'name'>
+          )> }
+        )>, rules: Maybe<Array<Maybe<(
+          { __typename?: 'TargetingCriteriaRuleNode' }
+          & Pick<TargetingCriteriaRuleNode, 'id'>
+          & { filters: Maybe<Array<Maybe<(
+            { __typename?: 'TargetingCriteriaRuleFilterNode' }
+            & Pick<TargetingCriteriaRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod'>
+            & { fieldAttribute: Maybe<(
+              { __typename?: 'FieldAttributeNode' }
+              & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
+              & { choices: Maybe<Array<Maybe<(
+                { __typename?: 'CoreFieldChoiceObject' }
+                & Pick<CoreFieldChoiceObject, 'value' | 'labelEn'>
+              )>>> }
+            )> }
+          )>>> }
+        )>>> }
+      )>, finalListTargetingCriteria: Maybe<(
+        { __typename?: 'TargetingCriteriaNode' }
+        & { targetPopulationFinal: Maybe<(
+          { __typename?: 'TargetPopulationNode' }
+          & { createdBy: Maybe<(
+            { __typename?: 'UserNode' }
+            & Pick<UserNode, 'firstName' | 'lastName'>
+          )>, program: Maybe<(
+            { __typename?: 'ProgramNode' }
+            & Pick<ProgramNode, 'id' | 'name'>
+          )> }
+        )>, rules: Maybe<Array<Maybe<(
+          { __typename?: 'TargetingCriteriaRuleNode' }
+          & Pick<TargetingCriteriaRuleNode, 'id'>
+          & { filters: Maybe<Array<Maybe<(
+            { __typename?: 'TargetingCriteriaRuleFilterNode' }
+            & Pick<TargetingCriteriaRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod'>
+            & { fieldAttribute: Maybe<(
+              { __typename?: 'FieldAttributeNode' }
+              & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
+              & { choices: Maybe<Array<Maybe<(
+                { __typename?: 'CoreFieldChoiceObject' }
+                & Pick<CoreFieldChoiceObject, 'value' | 'labelEn'>
+              )>>> }
+            )> }
+          )>>> }
+        )>>> }
+      )> }
     )> }
   )> }
 );
@@ -2751,7 +2818,9 @@ export type AllTargetPopulationsQueryVariables = {
   last?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>,
   name?: Maybe<Scalars['String']>,
-  status?: Maybe<Scalars['String']>
+  status?: Maybe<Scalars['String']>,
+  candidateListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalHouseholdsMax?: Maybe<Scalars['Int']>
 };
 
 
@@ -2957,7 +3026,7 @@ export type TargetPopulationQuery = (
   { __typename?: 'Query' }
   & { targetPopulation: Maybe<(
     { __typename?: 'TargetPopulationNode' }
-    & Pick<TargetPopulationNode, 'id' | 'name' | 'status'>
+    & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'candidateListTotalHouseholds' | 'finalListTotalHouseholds'>
     & { candidateListTargetingCriteria: Maybe<(
       { __typename?: 'TargetingCriteriaNode' }
       & { targetPopulationCandidate: Maybe<(
@@ -3315,12 +3384,44 @@ export type CandidateHouseholdsListByTargetingCriteriaQuery = (
       & { node: Maybe<(
         { __typename?: 'HouseholdNode' }
         & Pick<HouseholdNode, 'id' | 'size' | 'updatedAt'>
-        & { headOfHousehold: Maybe<(
+        & { headOfHousehold: (
           { __typename?: 'IndividualNode' }
           & Pick<IndividualNode, 'givenName' | 'familyName'>
-        )>, adminArea: Maybe<(
+        ), adminArea: Maybe<(
           { __typename?: 'AdminAreaNode' }
           & Pick<AdminAreaNode, 'id' | 'title'>
+        )> }
+      )> }
+    )>> }
+  )> }
+);
+
+export type FinalHouseholdsListByTargetingCriteriaQueryVariables = {
+  targetPopulation: Scalars['ID'],
+  targetingCriteria?: Maybe<TargetingCriteriaObjectType>,
+  first?: Maybe<Scalars['Int']>,
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type FinalHouseholdsListByTargetingCriteriaQuery = (
+  { __typename?: 'Query' }
+  & { finalHouseholdsListByTargetingCriteria: Maybe<(
+    { __typename?: 'HouseholdNodeConnection' }
+    & Pick<HouseholdNodeConnection, 'totalCount' | 'edgeCount'>
+    & { edges: Array<Maybe<(
+      { __typename?: 'HouseholdNodeEdge' }
+      & { node: Maybe<(
+        { __typename?: 'HouseholdNode' }
+        & Pick<HouseholdNode, 'id' | 'size' | 'updatedAt'>
+        & { headOfHousehold: (
+          { __typename?: 'IndividualNode' }
+          & Pick<IndividualNode, 'givenName' | 'familyName'>
+        ), adminArea: Maybe<(
+          { __typename?: 'AdminAreaNode' }
+          & Pick<AdminAreaNode, 'title'>
         )> }
       )> }
     )>> }
@@ -3346,10 +3447,10 @@ export type GoldenRecordByTargetingCriteriaQuery = (
       & { node: Maybe<(
         { __typename?: 'HouseholdNode' }
         & Pick<HouseholdNode, 'id' | 'size' | 'updatedAt'>
-        & { headOfHousehold: Maybe<(
+        & { headOfHousehold: (
           { __typename?: 'IndividualNode' }
           & Pick<IndividualNode, 'givenName' | 'familyName'>
-        )>, adminArea: Maybe<(
+        ), adminArea: Maybe<(
           { __typename?: 'AdminAreaNode' }
           & Pick<AdminAreaNode, 'id' | 'title'>
         )> }
@@ -3420,7 +3521,6 @@ export const IndividualMinimalFragmentDoc = gql`
         documentNumber
         type {
           country
-          type
           label
         }
       }
@@ -3957,6 +4057,119 @@ export function useCopyTargetPopulationMutation(baseOptions?: ApolloReactHooks.M
 export type CopyTargetPopulationMutationHookResult = ReturnType<typeof useCopyTargetPopulationMutation>;
 export type CopyTargetPopulationMutationResult = ApolloReactCommon.MutationResult<CopyTargetPopulationMutation>;
 export type CopyTargetPopulationMutationOptions = ApolloReactCommon.BaseMutationOptions<CopyTargetPopulationMutation, CopyTargetPopulationMutationVariables>;
+export const FinalizeTpDocument = gql`
+    mutation FinalizeTP($id: ID!) {
+  finalizeTargetPopulation(id: $id) {
+    targetPopulation {
+      id
+      name
+      status
+      candidateListTargetingCriteria {
+        targetPopulationCandidate {
+          createdBy {
+            firstName
+            lastName
+          }
+          program {
+            id
+            name
+          }
+        }
+        rules {
+          id
+          filters {
+            fieldName
+            isFlexField
+            arguments
+            comparisionMethod
+            fieldAttribute {
+              name
+              labelEn
+              type
+              choices {
+                value
+                labelEn
+              }
+            }
+          }
+        }
+      }
+      finalListTargetingCriteria {
+        targetPopulationFinal {
+          createdBy {
+            firstName
+            lastName
+          }
+          program {
+            id
+            name
+          }
+        }
+        rules {
+          id
+          filters {
+            fieldName
+            isFlexField
+            arguments
+            comparisionMethod
+            fieldAttribute {
+              name
+              labelEn
+              type
+              choices {
+                value
+                labelEn
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export type FinalizeTpMutationFn = ApolloReactCommon.MutationFunction<FinalizeTpMutation, FinalizeTpMutationVariables>;
+export type FinalizeTpComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<FinalizeTpMutation, FinalizeTpMutationVariables>, 'mutation'>;
+
+    export const FinalizeTpComponent = (props: FinalizeTpComponentProps) => (
+      <ApolloReactComponents.Mutation<FinalizeTpMutation, FinalizeTpMutationVariables> mutation={FinalizeTpDocument} {...props} />
+    );
+    
+export type FinalizeTpProps<TChildProps = {}> = ApolloReactHoc.MutateProps<FinalizeTpMutation, FinalizeTpMutationVariables> & TChildProps;
+export function withFinalizeTp<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  FinalizeTpMutation,
+  FinalizeTpMutationVariables,
+  FinalizeTpProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, FinalizeTpMutation, FinalizeTpMutationVariables, FinalizeTpProps<TChildProps>>(FinalizeTpDocument, {
+      alias: 'finalizeTp',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useFinalizeTpMutation__
+ *
+ * To run a mutation, you first call `useFinalizeTpMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useFinalizeTpMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [finalizeTpMutation, { data, loading, error }] = useFinalizeTpMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useFinalizeTpMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<FinalizeTpMutation, FinalizeTpMutationVariables>) {
+        return ApolloReactHooks.useMutation<FinalizeTpMutation, FinalizeTpMutationVariables>(FinalizeTpDocument, baseOptions);
+      }
+export type FinalizeTpMutationHookResult = ReturnType<typeof useFinalizeTpMutation>;
+export type FinalizeTpMutationResult = ApolloReactCommon.MutationResult<FinalizeTpMutation>;
+export type FinalizeTpMutationOptions = ApolloReactCommon.BaseMutationOptions<FinalizeTpMutation, FinalizeTpMutationVariables>;
 export const UpdateProgramDocument = gql`
     mutation UpdateProgram($programData: UpdateProgramInput!) {
   updateProgram(programData: $programData) {
@@ -4716,8 +4929,8 @@ export type AllProgramsQueryHookResult = ReturnType<typeof useAllProgramsQuery>;
 export type AllProgramsLazyQueryHookResult = ReturnType<typeof useAllProgramsLazyQuery>;
 export type AllProgramsQueryResult = ApolloReactCommon.QueryResult<AllProgramsQuery, AllProgramsQueryVariables>;
 export const AllTargetPopulationsDocument = gql`
-    query AllTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String) {
-  allTargetPopulation(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name: $name, status: $status) {
+    query AllTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String, $candidateListTotalHouseholdsMin: Int, $candidateListTotalHouseholdsMax: Int) {
+  allTargetPopulation(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name: $name, status: $status, candidateListTotalHouseholdsMin: $candidateListTotalHouseholdsMin, candidateListTotalHouseholdsMax: $candidateListTotalHouseholdsMax) {
     edges {
       node {
         id
@@ -4776,6 +4989,8 @@ export function withAllTargetPopulations<TProps, TChildProps = {}>(operationOpti
  *      orderBy: // value for 'orderBy'
  *      name: // value for 'name'
  *      status: // value for 'status'
+ *      candidateListTotalHouseholdsMin: // value for 'candidateListTotalHouseholdsMin'
+ *      candidateListTotalHouseholdsMax: // value for 'candidateListTotalHouseholdsMax'
  *   },
  * });
  */
@@ -5359,6 +5574,8 @@ export const TargetPopulationDocument = gql`
     id
     name
     status
+    candidateListTotalHouseholds
+    finalListTotalHouseholds
     candidateListTargetingCriteria {
       targetPopulationCandidate {
         createdBy {
@@ -6208,6 +6425,76 @@ export function useCandidateHouseholdsListByTargetingCriteriaLazyQuery(baseOptio
 export type CandidateHouseholdsListByTargetingCriteriaQueryHookResult = ReturnType<typeof useCandidateHouseholdsListByTargetingCriteriaQuery>;
 export type CandidateHouseholdsListByTargetingCriteriaLazyQueryHookResult = ReturnType<typeof useCandidateHouseholdsListByTargetingCriteriaLazyQuery>;
 export type CandidateHouseholdsListByTargetingCriteriaQueryResult = ApolloReactCommon.QueryResult<CandidateHouseholdsListByTargetingCriteriaQuery, CandidateHouseholdsListByTargetingCriteriaQueryVariables>;
+export const FinalHouseholdsListByTargetingCriteriaDocument = gql`
+    query FinalHouseholdsListByTargetingCriteria($targetPopulation: ID!, $targetingCriteria: TargetingCriteriaObjectType, $first: Int, $after: String, $before: String, $last: Int) {
+  finalHouseholdsListByTargetingCriteria(targetPopulation: $targetPopulation, targetingCriteria: $targetingCriteria, after: $after, before: $before, first: $first, last: $last) {
+    edges {
+      node {
+        id
+        headOfHousehold {
+          givenName
+          familyName
+        }
+        size
+        adminArea {
+          title
+        }
+        updatedAt
+      }
+    }
+    totalCount
+    edgeCount
+  }
+}
+    `;
+export type FinalHouseholdsListByTargetingCriteriaComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<FinalHouseholdsListByTargetingCriteriaQuery, FinalHouseholdsListByTargetingCriteriaQueryVariables>, 'query'> & ({ variables: FinalHouseholdsListByTargetingCriteriaQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const FinalHouseholdsListByTargetingCriteriaComponent = (props: FinalHouseholdsListByTargetingCriteriaComponentProps) => (
+      <ApolloReactComponents.Query<FinalHouseholdsListByTargetingCriteriaQuery, FinalHouseholdsListByTargetingCriteriaQueryVariables> query={FinalHouseholdsListByTargetingCriteriaDocument} {...props} />
+    );
+    
+export type FinalHouseholdsListByTargetingCriteriaProps<TChildProps = {}> = ApolloReactHoc.DataProps<FinalHouseholdsListByTargetingCriteriaQuery, FinalHouseholdsListByTargetingCriteriaQueryVariables> & TChildProps;
+export function withFinalHouseholdsListByTargetingCriteria<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  FinalHouseholdsListByTargetingCriteriaQuery,
+  FinalHouseholdsListByTargetingCriteriaQueryVariables,
+  FinalHouseholdsListByTargetingCriteriaProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, FinalHouseholdsListByTargetingCriteriaQuery, FinalHouseholdsListByTargetingCriteriaQueryVariables, FinalHouseholdsListByTargetingCriteriaProps<TChildProps>>(FinalHouseholdsListByTargetingCriteriaDocument, {
+      alias: 'finalHouseholdsListByTargetingCriteria',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useFinalHouseholdsListByTargetingCriteriaQuery__
+ *
+ * To run a query within a React component, call `useFinalHouseholdsListByTargetingCriteriaQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFinalHouseholdsListByTargetingCriteriaQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFinalHouseholdsListByTargetingCriteriaQuery({
+ *   variables: {
+ *      targetPopulation: // value for 'targetPopulation'
+ *      targetingCriteria: // value for 'targetingCriteria'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      last: // value for 'last'
+ *   },
+ * });
+ */
+export function useFinalHouseholdsListByTargetingCriteriaQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<FinalHouseholdsListByTargetingCriteriaQuery, FinalHouseholdsListByTargetingCriteriaQueryVariables>) {
+        return ApolloReactHooks.useQuery<FinalHouseholdsListByTargetingCriteriaQuery, FinalHouseholdsListByTargetingCriteriaQueryVariables>(FinalHouseholdsListByTargetingCriteriaDocument, baseOptions);
+      }
+export function useFinalHouseholdsListByTargetingCriteriaLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<FinalHouseholdsListByTargetingCriteriaQuery, FinalHouseholdsListByTargetingCriteriaQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<FinalHouseholdsListByTargetingCriteriaQuery, FinalHouseholdsListByTargetingCriteriaQueryVariables>(FinalHouseholdsListByTargetingCriteriaDocument, baseOptions);
+        }
+export type FinalHouseholdsListByTargetingCriteriaQueryHookResult = ReturnType<typeof useFinalHouseholdsListByTargetingCriteriaQuery>;
+export type FinalHouseholdsListByTargetingCriteriaLazyQueryHookResult = ReturnType<typeof useFinalHouseholdsListByTargetingCriteriaLazyQuery>;
+export type FinalHouseholdsListByTargetingCriteriaQueryResult = ApolloReactCommon.QueryResult<FinalHouseholdsListByTargetingCriteriaQuery, FinalHouseholdsListByTargetingCriteriaQueryVariables>;
 export const GoldenRecordByTargetingCriteriaDocument = gql`
     query GoldenRecordByTargetingCriteria($targetingCriteria: TargetingCriteriaObjectType!, $first: Int, $after: String, $before: String, $last: Int) {
   goldenRecordByTargetingCriteria(targetingCriteria: $targetingCriteria, after: $after, before: $before, first: $first, last: $last) {
@@ -6896,7 +7183,6 @@ export type DocumentTypeNodeResolvers<ContextType = any, ParentType extends Reso
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  type?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   label?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, DocumentTypeNodeDocumentsArgs>,
 };
@@ -6934,7 +7220,6 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   address?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   adminArea?: Resolver<Maybe<ResolversTypes['AdminAreaNode']>, ParentType, ContextType>,
   geopoint?: Resolver<Maybe<ResolversTypes['GeoJSON']>, ParentType, ContextType>,
-  unhcrId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   femaleAgeGroup05Count?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   femaleAgeGroup611Count?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   femaleAgeGroup1217Count?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
@@ -6956,7 +7241,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   programs?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, HouseholdNodeProgramsArgs>,
   returnee?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   registrationDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
-  headOfHousehold?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
+  headOfHousehold?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, HouseholdNodeIndividualsArgs>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, HouseholdNodePaymentRecordsArgs>,
   targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, HouseholdNodeTargetPopulationsArgs>,
@@ -7012,7 +7297,6 @@ export type ImportedDocumentTypeNodeResolvers<ContextType = any, ParentType exte
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['ImportedDocumentTypeCountry']>, ParentType, ContextType>,
-  type?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   label?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['ImportedDocumentNodeConnection'], ParentType, ContextType, ImportedDocumentTypeNodeDocumentsArgs>,
 };
@@ -7030,7 +7314,6 @@ export type ImportedHouseholdNodeResolvers<ContextType = any, ParentType extends
   admin1?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   admin2?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   geopoint?: Resolver<Maybe<ResolversTypes['GeoJSON']>, ParentType, ContextType>,
-  unhcrId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   femaleAgeGroup05Count?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   femaleAgeGroup611Count?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   femaleAgeGroup1217Count?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,

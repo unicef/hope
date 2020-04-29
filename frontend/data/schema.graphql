@@ -255,7 +255,6 @@ type DocumentTypeNode {
   createdAt: DateTime!
   updatedAt: DateTime!
   country: String
-  type: String!
   label: String!
   documents(before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
 }
@@ -291,7 +290,6 @@ type HouseholdNode implements Node {
   address: String!
   adminArea: AdminAreaNode
   geopoint: GeoJSON
-  unhcrId: String!
   femaleAgeGroup05Count: Int!
   femaleAgeGroup611Count: Int!
   femaleAgeGroup1217Count: Int!
@@ -313,7 +311,7 @@ type HouseholdNode implements Node {
   programs(before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
   returnee: Boolean!
   registrationDate: Date
-  headOfHousehold: IndividualNode
+  headOfHousehold: IndividualNode!
   individuals(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
   targetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, orderBy: String): TargetPopulationNodeConnection!
@@ -629,7 +627,6 @@ type ImportedDocumentTypeNode {
   createdAt: DateTime!
   updatedAt: DateTime!
   country: ImportedDocumentTypeCountry
-  type: String!
   label: String!
   documents(before: String, after: String, first: Int, last: Int): ImportedDocumentNodeConnection!
 }
@@ -647,7 +644,6 @@ type ImportedHouseholdNode implements Node {
   admin1: String!
   admin2: String!
   geopoint: GeoJSON
-  unhcrId: String!
   femaleAgeGroup05Count: Int!
   femaleAgeGroup611Count: Int!
   femaleAgeGroup1217Count: Int!
