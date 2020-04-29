@@ -6,7 +6,6 @@ import Moment from 'react-moment';
 import {
   decodeIdString,
   getAgeFromDob,
-  getIdentificationType,
   sexToCapitalize,
 } from '../../../../utils/utils';
 import { ImportedIndividualDetailedFragment } from '../../../../__generated__/graphql';
@@ -92,14 +91,14 @@ export function RegistrationIndividualsBioData({
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='Estimated Date of Birth'>
-            <div>{individual.estimatedBirthDate?'YES':'NO'}</div>
+            <div>{individual.estimatedBirthDate ? 'YES' : 'NO'}</div>
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='ID Type'>
             <>
               Multiple id document allowed
-              <Missing/>
+              <Missing />
             </>
           </LabelizedField>
         </Grid>
@@ -107,7 +106,7 @@ export function RegistrationIndividualsBioData({
           <LabelizedField label='ID Number'>
             <>
               Multiple id document allowed
-              <Missing/>
+              <Missing />
             </>
           </LabelizedField>
         </Grid>

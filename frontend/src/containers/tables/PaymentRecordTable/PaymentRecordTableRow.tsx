@@ -3,17 +3,14 @@ import TableCell from '@material-ui/core/TableCell';
 import Moment from 'react-moment';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import {
-  CashPlanNode,
-  PaymentRecordNode,
-} from '../../../__generated__/graphql';
+import { PaymentRecordNode } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
 import { StatusBox } from '../../../components/StatusBox';
 import {
-  cashPlanStatusToColor,
+  decodeIdString,
+  formatCurrency,
   paymentRecordStatusToColor,
-  formatCurrency, decodeIdString,
 } from '../../../utils/utils';
 
 const StatusContainer = styled.div`
@@ -28,7 +25,7 @@ interface PaymentRecordTableRowProps {
 export function PaymentRecordTableRow({
   paymentRecord,
   openInNewTab,
-}: PaymentRecordTableRowProps) {
+}: PaymentRecordTableRowProps): React.ReactElement {
   const businessArea = useBusinessArea();
   const history = useHistory();
   const handleClick = (): void => {
