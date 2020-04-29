@@ -2279,7 +2279,7 @@ export type ApproveTpMutation = (
     { __typename?: 'ApproveTargetPopulationMutation' }
     & { targetPopulation: Maybe<(
       { __typename?: 'TargetPopulationNode' }
-      & Pick<TargetPopulationNode, 'id' | 'name' | 'status'>
+      & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'candidateListTotalHouseholds' | 'finalListTotalHouseholds'>
       & { candidateListTargetingCriteria: Maybe<(
         { __typename?: 'TargetingCriteriaNode' }
         & { targetPopulationCandidate: Maybe<(
@@ -2366,7 +2366,7 @@ export type CreateTpMutation = (
     { __typename?: 'CreateTargetPopulationMutation' }
     & { targetPopulation: Maybe<(
       { __typename?: 'TargetPopulationNode' }
-      & Pick<TargetPopulationNode, 'id' | 'status'>
+      & Pick<TargetPopulationNode, 'id' | 'status' | 'candidateListTotalHouseholds' | 'finalListTotalHouseholds'>
     )> }
   )> }
 );
@@ -2425,7 +2425,7 @@ export type FinalizeTpMutation = (
     { __typename?: 'FinalizeTargetPopulationMutation' }
     & { targetPopulation: Maybe<(
       { __typename?: 'TargetPopulationNode' }
-      & Pick<TargetPopulationNode, 'id' | 'name' | 'status'>
+      & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'candidateListTotalHouseholds' | 'finalListTotalHouseholds'>
       & { candidateListTargetingCriteria: Maybe<(
         { __typename?: 'TargetingCriteriaNode' }
         & { targetPopulationCandidate: Maybe<(
@@ -2512,7 +2512,7 @@ export type UpdateTpMutation = (
     { __typename?: 'UpdateTargetPopulationMutation' }
     & { targetPopulation: Maybe<(
       { __typename?: 'TargetPopulationNode' }
-      & Pick<TargetPopulationNode, 'id' | 'name' | 'status'>
+      & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'candidateListTotalHouseholds' | 'finalListTotalHouseholds'>
       & { candidateListTargetingCriteria: Maybe<(
         { __typename?: 'TargetingCriteriaNode' }
         & { targetPopulationCandidate: Maybe<(
@@ -3381,12 +3381,13 @@ export type CandidateHouseholdsListByTargetingCriteriaQuery = (
     & Pick<HouseholdNodeConnection, 'totalCount' | 'edgeCount'>
     & { edges: Array<Maybe<(
       { __typename?: 'HouseholdNodeEdge' }
+      & Pick<HouseholdNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'HouseholdNode' }
         & Pick<HouseholdNode, 'id' | 'size' | 'updatedAt'>
         & { headOfHousehold: (
           { __typename?: 'IndividualNode' }
-          & Pick<IndividualNode, 'givenName' | 'familyName'>
+          & Pick<IndividualNode, 'id' | 'givenName' | 'familyName'>
         ), adminArea: Maybe<(
           { __typename?: 'AdminAreaNode' }
           & Pick<AdminAreaNode, 'id' | 'title'>
@@ -3413,15 +3414,16 @@ export type FinalHouseholdsListByTargetingCriteriaQuery = (
     & Pick<HouseholdNodeConnection, 'totalCount' | 'edgeCount'>
     & { edges: Array<Maybe<(
       { __typename?: 'HouseholdNodeEdge' }
+      & Pick<HouseholdNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'HouseholdNode' }
         & Pick<HouseholdNode, 'id' | 'size' | 'updatedAt'>
         & { headOfHousehold: (
           { __typename?: 'IndividualNode' }
-          & Pick<IndividualNode, 'givenName' | 'familyName'>
+          & Pick<IndividualNode, 'id' | 'givenName' | 'familyName'>
         ), adminArea: Maybe<(
           { __typename?: 'AdminAreaNode' }
-          & Pick<AdminAreaNode, 'title'>
+          & Pick<AdminAreaNode, 'id' | 'title'>
         )> }
       )> }
     )>> }
@@ -3444,12 +3446,13 @@ export type GoldenRecordByTargetingCriteriaQuery = (
     & Pick<HouseholdNodeConnection, 'totalCount' | 'edgeCount'>
     & { edges: Array<Maybe<(
       { __typename?: 'HouseholdNodeEdge' }
+      & Pick<HouseholdNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'HouseholdNode' }
         & Pick<HouseholdNode, 'id' | 'size' | 'updatedAt'>
         & { headOfHousehold: (
           { __typename?: 'IndividualNode' }
-          & Pick<IndividualNode, 'givenName' | 'familyName'>
+          & Pick<IndividualNode, 'id' | 'givenName' | 'familyName'>
         ), adminArea: Maybe<(
           { __typename?: 'AdminAreaNode' }
           & Pick<AdminAreaNode, 'id' | 'title'>
@@ -3685,6 +3688,8 @@ export const ApproveTpDocument = gql`
       id
       name
       status
+      candidateListTotalHouseholds
+      finalListTotalHouseholds
       candidateListTargetingCriteria {
         targetPopulationCandidate {
           createdBy {
@@ -3861,6 +3866,8 @@ export const CreateTpDocument = gql`
     targetPopulation {
       id
       status
+      candidateListTotalHouseholds
+      finalListTotalHouseholds
     }
   }
 }
@@ -4064,6 +4071,8 @@ export const FinalizeTpDocument = gql`
       id
       name
       status
+      candidateListTotalHouseholds
+      finalListTotalHouseholds
       candidateListTargetingCriteria {
         targetPopulationCandidate {
           createdBy {
@@ -4242,6 +4251,8 @@ export const UpdateTpDocument = gql`
       id
       name
       status
+      candidateListTotalHouseholds
+      finalListTotalHouseholds
       candidateListTargetingCriteria {
         targetPopulationCandidate {
           createdBy {
@@ -6362,6 +6373,7 @@ export const CandidateHouseholdsListByTargetingCriteriaDocument = gql`
       node {
         id
         headOfHousehold {
+          id
           givenName
           familyName
         }
@@ -6372,6 +6384,7 @@ export const CandidateHouseholdsListByTargetingCriteriaDocument = gql`
         }
         updatedAt
       }
+      cursor
     }
     totalCount
     edgeCount
@@ -6432,15 +6445,18 @@ export const FinalHouseholdsListByTargetingCriteriaDocument = gql`
       node {
         id
         headOfHousehold {
+          id
           givenName
           familyName
         }
         size
         adminArea {
+          id
           title
         }
         updatedAt
       }
+      cursor
     }
     totalCount
     edgeCount
@@ -6502,6 +6518,7 @@ export const GoldenRecordByTargetingCriteriaDocument = gql`
       node {
         id
         headOfHousehold {
+          id
           givenName
           familyName
         }
@@ -6512,6 +6529,7 @@ export const GoldenRecordByTargetingCriteriaDocument = gql`
         }
         updatedAt
       }
+      cursor
     }
     totalCount
     edgeCount
