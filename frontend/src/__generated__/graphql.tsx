@@ -3387,7 +3387,7 @@ export type CandidateHouseholdsListByTargetingCriteriaQuery = (
         & Pick<HouseholdNode, 'id' | 'size' | 'updatedAt'>
         & { headOfHousehold: (
           { __typename?: 'IndividualNode' }
-          & Pick<IndividualNode, 'givenName' | 'familyName'>
+          & Pick<IndividualNode, 'id' | 'givenName' | 'familyName'>
         ), adminArea: Maybe<(
           { __typename?: 'AdminAreaNode' }
           & Pick<AdminAreaNode, 'id' | 'title'>
@@ -3420,10 +3420,10 @@ export type FinalHouseholdsListByTargetingCriteriaQuery = (
         & Pick<HouseholdNode, 'id' | 'size' | 'updatedAt'>
         & { headOfHousehold: (
           { __typename?: 'IndividualNode' }
-          & Pick<IndividualNode, 'givenName' | 'familyName'>
+          & Pick<IndividualNode, 'id' | 'givenName' | 'familyName'>
         ), adminArea: Maybe<(
           { __typename?: 'AdminAreaNode' }
-          & Pick<AdminAreaNode, 'title'>
+          & Pick<AdminAreaNode, 'id' | 'title'>
         )> }
       )> }
     )>> }
@@ -3452,7 +3452,7 @@ export type GoldenRecordByTargetingCriteriaQuery = (
         & Pick<HouseholdNode, 'id' | 'size' | 'updatedAt'>
         & { headOfHousehold: (
           { __typename?: 'IndividualNode' }
-          & Pick<IndividualNode, 'givenName' | 'familyName'>
+          & Pick<IndividualNode, 'id' | 'givenName' | 'familyName'>
         ), adminArea: Maybe<(
           { __typename?: 'AdminAreaNode' }
           & Pick<AdminAreaNode, 'id' | 'title'>
@@ -6373,6 +6373,7 @@ export const CandidateHouseholdsListByTargetingCriteriaDocument = gql`
       node {
         id
         headOfHousehold {
+          id
           givenName
           familyName
         }
@@ -6444,11 +6445,13 @@ export const FinalHouseholdsListByTargetingCriteriaDocument = gql`
       node {
         id
         headOfHousehold {
+          id
           givenName
           familyName
         }
         size
         adminArea {
+          id
           title
         }
         updatedAt
@@ -6515,6 +6518,7 @@ export const GoldenRecordByTargetingCriteriaDocument = gql`
       node {
         id
         headOfHousehold {
+          id
           givenName
           familyName
         }

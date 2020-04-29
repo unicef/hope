@@ -21,11 +21,13 @@ export const FinalHouseholdsListByTargetingCriteria = gql`
         node {
           id
           headOfHousehold {
+            id
             givenName
             familyName
           }
           size
-          adminArea{
+          adminArea {
+            id
             title
           }
           updatedAt
