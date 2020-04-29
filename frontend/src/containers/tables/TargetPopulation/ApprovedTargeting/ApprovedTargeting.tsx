@@ -77,11 +77,11 @@ export const ApprovedTargetPopulationTable = ({
               <TargetPopulationHouseholdTableRow household={row} />
             )}
           />
-          {hasSameResults && (
+          {/* {hasSameResults && (
             <Indicator>
               <Warning /> Same Results as Programme Population
             </Indicator>
-          )}
+          )} */}
         </>
       )}
     </TableWrapper>

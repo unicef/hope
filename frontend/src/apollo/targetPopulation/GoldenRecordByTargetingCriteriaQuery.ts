@@ -19,6 +19,7 @@ export const GoldenRecordByTargetingCriteria = gql`
         node {
           id
           headOfHousehold {
+            id
             givenName
             familyName
           }
