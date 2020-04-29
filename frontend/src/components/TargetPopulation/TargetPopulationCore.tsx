@@ -55,6 +55,8 @@ export function TargetPopulationCore({
           id={id}
           status={status}
           selectedTab={selectedTab}
+          totalNumOfHouseholds={targetPopulation.candidateListTotalHouseholds}
+          finalListTotalHouseholds={targetPopulation.finalListTotalHouseholds}
         />
       ) : (
         <PaperContainer>

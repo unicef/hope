@@ -10,11 +10,10 @@ import {
   DialogActions,
   IconButton,
 } from '@material-ui/core';
+import { AddCircleOutline, Delete } from '@material-ui/icons';
 import { Field, Formik, FieldArray } from 'formik';
 import { useImportedIndividualFieldsQuery } from '../../__generated__/graphql';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
-import { AddCircleOutline, Delete, FilterSharp } from '@material-ui/icons';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { SubField } from '../../components/TargetPopulation/SubField';
 import {
   formatCriteriaFilters,
