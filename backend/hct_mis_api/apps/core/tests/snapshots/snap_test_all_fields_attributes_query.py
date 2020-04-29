@@ -2317,23 +2317,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Individual',
                 'choices': [
                 ],
-                'hint': 'number of years spent in school',
-                'isFlexField': False,
-                'labelEn': 'years in school',
-                'labels': [
-                    {
-                        'label': 'years in school',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'years_in_school',
-                'required': True,
-                'type': 'INTEGER'
-            },
-            {
-                'associatedWith': 'Individual',
-                'choices': [
-                ],
                 'hint': 'age in years',
                 'isFlexField': False,
                 'labelEn': 'age',
@@ -2360,7 +2343,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'English(EN)'
                     }
                 ],
-                'name': 'family_size',
+                'name': 'size',
                 'required': True,
                 'type': 'INTEGER'
             },

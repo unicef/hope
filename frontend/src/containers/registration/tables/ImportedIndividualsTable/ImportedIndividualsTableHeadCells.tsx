@@ -26,7 +26,7 @@ export const headCells: HeadCell<ImportedIndividualMinimalFragment>[] = [
   {
     disablePadding: false,
     label: 'Date of Birth',
-    id: 'dob',
+    id: 'birthDate',
     numeric: false,
   },
   {

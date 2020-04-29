@@ -20,6 +20,7 @@ import { useDropzone } from 'react-dropzone';
 import { Field, Form, Formik } from 'formik';
 import get from 'lodash/get';
 import {
+  UploadImportDataXlsxFileMutation,
   useCreateRegistrationDataImportMutation,
   useUploadImportDataXlsxFileMutation,
 } from '../../../__generated__/graphql';
@@ -27,6 +28,7 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { FormikTextField } from '../../../shared/Formik/FormikTextField';
 import { LoadingComponent } from '../../../components/LoadingComponent';
+import { FormikTagsSelectField } from '../../../shared/Formik/FormikTagsSelectField';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -65,6 +67,9 @@ const DropzoneContainer = styled.div`
   cursor: pointer;
 
   ${({ disabled }) => (disabled ? 'filter: grayscale(100%);' : '')}
+`;
+const Error = styled.div`
+  color: ${({ theme }) => theme.palette.error.dark};
 `;
 
 function DropzoneField({ onChange, loading }) {
@@ -105,6 +110,10 @@ export function RegistrationDataImport(): React.ReactElement {
   const [createRegistrationMutate] = useCreateRegistrationDataImportMutation();
   const [importType, setImportType] = useState();
   const { t } = useTranslation();
+  const errors: UploadImportDataXlsxFileMutation['uploadImportDataXlsxFile']['errors'] = get(
+    uploadData,
+    'uploadImportDataXlsxFile.errors',
+  );
   let counters = null;
   if (get(uploadData, 'uploadImportDataXlsxFile.importData')) {
     counters = (
@@ -145,6 +154,15 @@ export function RegistrationDataImport(): React.ReactElement {
             });
           }}
         />
+        <div>
+          {errors
+            ? errors.map((item) => (
+                <Error>
+                  <strong>Row: {item.rowNumber}</strong> {item.message}
+                </Error>
+              ))
+            : null}
+        </div>
       </>
     );
   }
@@ -168,6 +186,7 @@ export function RegistrationDataImport(): React.ReactElement {
         <Formik
           validationSchema={validationSchema}
           onSubmit={async (values) => {
+            console.log('values', values);
             const { data } = await createRegistrationMutate({
               variables: {
                 registrationDataImportData: {
@@ -225,6 +244,13 @@ export function RegistrationDataImport(): React.ReactElement {
                   required
                   variant='filled'
                   component={FormikTextField}
+                />
+                <Field
+                  name='tags'
+                  fullWidth
+                  label='Tags'
+                  required
+                  component={FormikTagsSelectField}
                 />
               </DialogContent>
               <DialogFooter>
