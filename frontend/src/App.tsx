@@ -13,7 +13,6 @@ import { ProfilePage } from './containers/pages/ProfilePage';
 import { client } from './apollo/client';
 import { LoginPage } from './containers/pages/LoginPage';
 import { DefaultRoute } from './containers/DefaultRoute';
-import {useSnackbar} from "./hooks/useSnackBar";
 
 export const App: React.FC = () => {
   return (
