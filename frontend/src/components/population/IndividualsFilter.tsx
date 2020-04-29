@@ -49,7 +49,7 @@ const SearchTextField = styled(TextField)`
   }
 `;
 const StartInputAdornment = styled(InputAdornment)`
-  margin-right: 0px;
+  margin-right: 0;
 `;
 
 interface IndividualsFilterProps {
@@ -60,7 +60,7 @@ export function IndividualsFilter({
   onFilterChange,
   filter,
 }: IndividualsFilterProps): React.ReactElement {
-  const handleFilterChange = (e, name) =>
+  const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
   return (
     <Container>

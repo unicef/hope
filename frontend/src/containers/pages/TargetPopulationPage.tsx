@@ -17,7 +17,7 @@ const Container = styled.div`
   }
 `;
 
-export function TargetPopulationPage() {
+export function TargetPopulationPage(): React.ReactElement {
   const { t } = useTranslation();
   const history = useHistory();
   const businessArea = useBusinessArea();
@@ -28,10 +28,10 @@ export function TargetPopulationPage() {
     },
     name: '',
     status: '',
-  })
+  });
   const debouncedFilter = useDebounce(filter, 500);
 
-  const redirectToCreate = () => {
+  const redirectToCreate = (): void => {
     const path = `/${businessArea}/target-population/create`;
     return history.push(path);
   };

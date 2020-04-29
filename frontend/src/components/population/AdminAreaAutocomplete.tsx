@@ -20,7 +20,10 @@ const StyledAutocomplete = styled(Autocomplete)`
   }
 `;
 
-export function AdminAreasAutocomplete({ value, onChange }) {
+export function AdminAreasAutocomplete({
+  value,
+  onChange,
+}): React.ReactElement {
   const [open, setOpen] = React.useState(false);
   const [inputValue, onInputTextChange] = React.useState('');
 

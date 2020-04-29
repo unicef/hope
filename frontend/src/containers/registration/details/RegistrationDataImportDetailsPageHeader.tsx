@@ -1,9 +1,9 @@
 import React from 'react';
+import styled from 'styled-components';
 import {
   RegistrationDataImportStatus,
   RegistrationDetailedFragment,
 } from '../../../__generated__/graphql';
-import styled from 'styled-components';
 import { PageHeader } from '../../../components/PageHeader';
 import { BreadCrumbsItem } from '../../../components/BreadCrumbs';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';

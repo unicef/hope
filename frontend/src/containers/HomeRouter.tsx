@@ -7,6 +7,7 @@ import { MiśTheme } from '../theme';
 import { Drawer } from '../components/Drawer/Drawer';
 import { AppBar } from '../components/AppBar';
 import { isAuthenticated } from '../utils/utils';
+import { useSnackbar } from '../hooks/useSnackBar';
 import { DashboardPage } from './pages/DashboardPage';
 import { ProgramsPage } from './pages/ProgramsPage';
 import { ProgramDetailsPage } from './pages/ProgramDetailsPage';
@@ -20,11 +21,9 @@ import { PopulationIndividualsDetailsPage } from './pages/PopulationIndividualsD
 import { TargetPopulationPage } from './pages/TargetPopulationPage';
 import { TargetPopulationDetailsPage } from './pages/TargetPopulationDetailsPage';
 import { CreateTargetPopulation } from './pages/CreateTargetPopulation';
-import { RegistrationDataImport } from './registration/import/RegistrationDataImport';
 import { RegistrationDataImportDetailsPage } from './registration/details/RegistrationDataImportDetailsPage';
 import { RegistrationHouseholdDetailsPage } from './registration/details/households/RegistrationHouseholdDetailsPage';
 import { RegistrationIndividualDetailsPage } from './registration/details/individual/RegistrationIndividualDetailsPage';
-import { useSnackbar } from '../hooks/useSnackBar';
 
 const Root = styled.div`
   display: flex;
