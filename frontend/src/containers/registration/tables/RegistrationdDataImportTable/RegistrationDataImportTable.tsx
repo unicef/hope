@@ -34,7 +34,11 @@ export function RegistrationDataImportTable({ filter }): ReactElement {
         AllRegistrationDataImportsQueryVariables
       >
         title='List of Imports'
+        getTitle={(data) =>
+          `List of Import (${data.allRegistrationDataImports.totalCount})`
+        }
         headCells={headCells}
+        rowsPerPageOptions={[10, 15, 20]}
         query={useAllRegistrationDataImportsQuery}
         queriedObjectName='allRegistrationDataImports'
         initialVariables={initialVariables}

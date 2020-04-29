@@ -68,6 +68,14 @@ const DropzoneContainer = styled.div`
 
   ${({ disabled }) => (disabled ? 'filter: grayscale(100%);' : '')}
 `;
+
+const StyledDialogFooter = styled(DialogFooter)`
+  && {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+`;
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};
 `;
@@ -253,7 +261,15 @@ export function RegistrationDataImport(): React.ReactElement {
                   component={FormikTagsSelectField}
                 />
               </DialogContent>
-              <DialogFooter>
+              <StyledDialogFooter>
+                <Button
+                  variant='text'
+                  color='primary'
+                  component='a'
+                  href='/api/download-template'
+                >
+                  DOWNLOAD TEMPLATE
+                </Button>
                 <DialogActions>
                   <Button onClick={() => setOpen(false)}>CANCEL</Button>
                   <Button
@@ -268,7 +284,7 @@ export function RegistrationDataImport(): React.ReactElement {
                     {t('IMPORT')}
                   </Button>
                 </DialogActions>
-              </DialogFooter>
+              </StyledDialogFooter>
             </Form>
           )}
         </Formik>

@@ -99,7 +99,6 @@ export function IndividualsFilter({
           </MenuItem>
           <MenuItem value='MALE'>Male</MenuItem>
           <MenuItem value='FEMALE'>Female</MenuItem>
-          <MenuItem value='OTHER'>Other</MenuItem>
         </Select>
       </StyledFormControl>
       <TextContainer
