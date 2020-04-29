@@ -4,7 +4,11 @@ import { useCandidateHouseholdsListByTargetingCriteriaQuery } from '../../__gene
 import { SentTargetPopulationTable } from '../../containers/tables/TargetPopulation/SentTargeting';
 import { ApprovedTargetPopulationTable } from '../../containers/tables/TargetPopulation/ApprovedTargeting';
 
-export function TargetingHouseholds({ status, id, selectedTab }) {
+export function TargetingHouseholds({
+  status,
+  id,
+  selectedTab,
+}): React.ReactElement {
   let table;
   switch (status) {
     case 'DRAFT':
@@ -19,7 +23,7 @@ export function TargetingHouseholds({ status, id, selectedTab }) {
     case 'APPROVED':
       table = (
         <ApprovedTargetPopulationTable id={id} selectedTab={selectedTab} />
-      )
+      );
       break;
     case 'FINALIZED':
       table = <SentTargetPopulationTable id={id} selectedTab={selectedTab} />;

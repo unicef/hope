@@ -5,11 +5,10 @@ import { HouseholdFilters } from '../../components/population/HouseholdFilter';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { HouseholdTable } from '../tables/HouseholdTable';
 import {
-  useAllProgramsQuery,
   ProgramNode,
+  useAllProgramsQuery,
   useHouseholdChoiceDataQuery,
 } from '../../__generated__/graphql';
-import { BreadCrumbsItem } from '../../components/BreadCrumbs';
 import { useDebounce } from '../../hooks/useDebounce';
 
 const Container = styled.div`
