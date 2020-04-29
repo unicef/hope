@@ -3,7 +3,7 @@ from django.core.management import call_command
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
 from core.models import BusinessArea
-from household.fixtures import HouseholdFactory
+from household.fixtures import HouseholdFactory, create_household
 from program.fixtures import ProgramFactory
 from targeting.models import (
     TargetingCriteria,
@@ -42,12 +42,14 @@ class TestApproveTargetPopulationMutation(APITestCase):
         )
         cls.user = UserFactory.create()
         cls.households = []
-        cls.household_size_1 = HouseholdFactory(
-            size=1, residence_status="CITIZEN",
+        (household, individuals) = create_household(
+            {"size": 1, "residence_status": "CITIZEN", },
         )
-        cls.household_size_2 = HouseholdFactory(
-            size=2, residence_status="CITIZEN",
+        cls.household_size_1 = household
+        (household, individuals) = create_household(
+            {"size": 2, "residence_status": "CITIZEN", },
         )
+        cls.household_size_2 = household
         cls.households.append(cls.household_size_1)
         cls.households.append(cls.household_size_2)
 
@@ -163,12 +165,15 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
     def setUpTestData(cls):
         cls.user = UserFactory.create()
         cls.households = []
-        cls.household_size_1 = HouseholdFactory(
-            size=1, residence_status="CITIZEN",
+
+        (household, individuals) = create_household(
+            {"size": 1, "residence_status": "CITIZEN", },
         )
-        cls.household_size_2 = HouseholdFactory(
-            size=2, residence_status="CITIZEN",
+        cls.household_size_1 = household
+        (household, individuals) = create_household(
+            {"size": 2, "residence_status": "CITIZEN", },
         )
+        cls.household_size_2 = household
         cls.households.append(cls.household_size_1)
         cls.households.append(cls.household_size_2)
 
@@ -290,12 +295,15 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
     def setUpTestData(cls):
         cls.user = UserFactory.create()
         cls.households = []
-        cls.household_size_1 = HouseholdFactory(
-            size=1, residence_status="CITIZEN",
+
+        (household, individuals) = create_household(
+            {"size": 1, "residence_status": "CITIZEN", },
         )
-        cls.household_size_2 = HouseholdFactory(
-            size=2, residence_status="CITIZEN",
+        cls.household_size_1 = household
+        (household, individuals) = create_household(
+            {"size": 2, "residence_status": "CITIZEN", },
         )
+        cls.household_size_2 = household
         cls.households.append(cls.household_size_1)
         cls.households.append(cls.household_size_2)
 
