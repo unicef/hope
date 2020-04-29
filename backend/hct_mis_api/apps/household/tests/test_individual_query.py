@@ -3,7 +3,11 @@ from django.core.management import call_command
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
 from core.models import BusinessArea
-from household.fixtures import IndividualFactory, HouseholdFactory
+from household.fixtures import (
+    IndividualFactory,
+    HouseholdFactory,
+    create_household,
+)
 from program.fixtures import ProgramFactory
 
 
@@ -68,8 +72,13 @@ class TestIndividualQuery(APITestCase):
         program_two = ProgramFactory(
             name="Test program TWO", business_area=BusinessArea.objects.first(),
         )
-        household_one = HouseholdFactory()
-        household_two = HouseholdFactory()
+
+        household_one = HouseholdFactory.build()
+        household_two = HouseholdFactory.build()
+        household_one.registration_data_import.imported_by.save()
+        household_one.registration_data_import.save()
+        household_two.registration_data_import.imported_by.save()
+        household_two.registration_data_import.save()
         household_one.programs.add(program_one)
         household_two.programs.add(program_two)
 
@@ -118,6 +127,10 @@ class TestIndividualQuery(APITestCase):
             )
             for index, individual in enumerate(self.individuals_to_create)
         ]
+        household_one.head_of_household = self.individuals[0]
+        household_two.head_of_household = self.individuals[1]
+        household_one.save()
+        household_two.save()
 
     def test_individual_query_all(self):
         self.snapshot_graphql_request(
