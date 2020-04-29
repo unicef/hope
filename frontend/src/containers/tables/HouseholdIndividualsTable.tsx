@@ -53,12 +53,6 @@ const headCells: HeadCell<IndividualNode>[] = [
   },
   {
     disablePadding: false,
-    label: 'Employment / Education',
-    id: 'workStatus',
-    numeric: false,
-  },
-  {
-    disablePadding: false,
     label: 'Date of Birth',
     id: 'birthDate',
     numeric: true,
@@ -143,9 +137,6 @@ export function HouseholdIndividualsTable({
             </TableCell>
             <TableCell align='left'>
               {relationshipChoicesDict[row.relationship]}
-            </TableCell>
-            <TableCell align='left'>
-              <Missing />
             </TableCell>
             <TableCell align='left'>{row.birthDate || '-'}</TableCell>
             <TableCell align='left'>{sexToCapitalize(row.sex)}</TableCell>
