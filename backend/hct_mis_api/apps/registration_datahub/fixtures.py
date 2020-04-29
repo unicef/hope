@@ -52,7 +52,6 @@ class ImportedHouseholdFactory(factory.DjangoModelFactory):
     geopoint = factory.LazyAttribute(
         lambda o: Point(factory.Faker("latlng").generate())
     )
-    unhcr_id = factory.Faker("uuid4")
     female_age_group_0_5_count = factory.fuzzy.FuzzyInteger(3, 8)
     female_age_group_6_11_count = factory.fuzzy.FuzzyInteger(3, 8)
     female_age_group_12_17_count = factory.fuzzy.FuzzyInteger(3, 8)
