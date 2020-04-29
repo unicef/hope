@@ -1,4 +1,6 @@
-Feature: Authentication
+Feature: Authentication related functionality. Logging in, redirects
+    to login etc. when user is not logged in and trying to access any urls.
+
     Scenario: Redirect to login screen if not logged in
         Given I visit /
         Then I should get redirected to login
