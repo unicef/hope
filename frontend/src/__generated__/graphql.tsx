@@ -3417,7 +3417,7 @@ export type FinalHouseholdsListByTargetingCriteriaQuery = (
       & Pick<HouseholdNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'HouseholdNode' }
-        & Pick<HouseholdNode, 'id' | 'size' | 'updatedAt'>
+        & Pick<HouseholdNode, 'id' | 'size' | 'updatedAt' | 'address'>
         & { headOfHousehold: (
           { __typename?: 'IndividualNode' }
           & Pick<IndividualNode, 'id' | 'givenName' | 'familyName'>
@@ -6456,6 +6456,7 @@ export const FinalHouseholdsListByTargetingCriteriaDocument = gql`
           title
         }
         updatedAt
+        address
       }
       cursor
     }
