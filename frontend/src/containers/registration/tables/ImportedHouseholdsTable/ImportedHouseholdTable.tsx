@@ -23,7 +23,9 @@ export function ImportedHouseholdTable({ rdiId }): ReactElement {
       rowsPerPageOptions={[10, 15, 20]}
       initialVariables={initialVariables}
       isOnPaper={false}
-      renderRow={(row) => <ImportedHouseholdTableRow household={row} />}
+      renderRow={(row) => (
+        <ImportedHouseholdTableRow key={row.id} household={row} />
+      )}
     />
   );
 }
