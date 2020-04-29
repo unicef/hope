@@ -355,264 +355,12 @@ export type DocumentNodeEdge = {
   cursor: Scalars['String'],
 };
 
-export enum DocumentTypeCountry {
-  Af = 'AF',
-  Ax = 'AX',
-  Al = 'AL',
-  Dz = 'DZ',
-  As = 'AS',
-  Ad = 'AD',
-  Ao = 'AO',
-  Ai = 'AI',
-  Aq = 'AQ',
-  Ag = 'AG',
-  Ar = 'AR',
-  Am = 'AM',
-  Aw = 'AW',
-  Au = 'AU',
-  At = 'AT',
-  Az = 'AZ',
-  Bs = 'BS',
-  Bh = 'BH',
-  Bd = 'BD',
-  Bb = 'BB',
-  By = 'BY',
-  Be = 'BE',
-  Bz = 'BZ',
-  Bj = 'BJ',
-  Bm = 'BM',
-  Bt = 'BT',
-  Bo = 'BO',
-  Bq = 'BQ',
-  Ba = 'BA',
-  Bw = 'BW',
-  Bv = 'BV',
-  Br = 'BR',
-  Io = 'IO',
-  Bn = 'BN',
-  Bg = 'BG',
-  Bf = 'BF',
-  Bi = 'BI',
-  Cv = 'CV',
-  Kh = 'KH',
-  Cm = 'CM',
-  Ca = 'CA',
-  Ky = 'KY',
-  Cf = 'CF',
-  Td = 'TD',
-  Cl = 'CL',
-  Cn = 'CN',
-  Cx = 'CX',
-  Cc = 'CC',
-  Co = 'CO',
-  Km = 'KM',
-  Cg = 'CG',
-  Cd = 'CD',
-  Ck = 'CK',
-  Cr = 'CR',
-  Ci = 'CI',
-  Hr = 'HR',
-  Cu = 'CU',
-  Cw = 'CW',
-  Cy = 'CY',
-  Cz = 'CZ',
-  Dk = 'DK',
-  Dj = 'DJ',
-  Dm = 'DM',
-  Do = 'DO',
-  Ec = 'EC',
-  Eg = 'EG',
-  Sv = 'SV',
-  Gq = 'GQ',
-  Er = 'ER',
-  Ee = 'EE',
-  Sz = 'SZ',
-  Et = 'ET',
-  Fk = 'FK',
-  Fo = 'FO',
-  Fj = 'FJ',
-  Fi = 'FI',
-  Fr = 'FR',
-  Gf = 'GF',
-  Pf = 'PF',
-  Tf = 'TF',
-  Ga = 'GA',
-  Gm = 'GM',
-  Ge = 'GE',
-  De = 'DE',
-  Gh = 'GH',
-  Gi = 'GI',
-  Gr = 'GR',
-  Gl = 'GL',
-  Gd = 'GD',
-  Gp = 'GP',
-  Gu = 'GU',
-  Gt = 'GT',
-  Gg = 'GG',
-  Gn = 'GN',
-  Gw = 'GW',
-  Gy = 'GY',
-  Ht = 'HT',
-  Hm = 'HM',
-  Va = 'VA',
-  Hn = 'HN',
-  Hk = 'HK',
-  Hu = 'HU',
-  Is = 'IS',
-  In = 'IN',
-  Id = 'ID',
-  Ir = 'IR',
-  Iq = 'IQ',
-  Ie = 'IE',
-  Im = 'IM',
-  Il = 'IL',
-  It = 'IT',
-  Jm = 'JM',
-  Jp = 'JP',
-  Je = 'JE',
-  Jo = 'JO',
-  Kz = 'KZ',
-  Ke = 'KE',
-  Ki = 'KI',
-  Kw = 'KW',
-  Kg = 'KG',
-  La = 'LA',
-  Lv = 'LV',
-  Lb = 'LB',
-  Ls = 'LS',
-  Lr = 'LR',
-  Ly = 'LY',
-  Li = 'LI',
-  Lt = 'LT',
-  Lu = 'LU',
-  Mo = 'MO',
-  Mg = 'MG',
-  Mw = 'MW',
-  My = 'MY',
-  Mv = 'MV',
-  Ml = 'ML',
-  Mt = 'MT',
-  Mh = 'MH',
-  Mq = 'MQ',
-  Mr = 'MR',
-  Mu = 'MU',
-  Yt = 'YT',
-  Mx = 'MX',
-  Fm = 'FM',
-  Md = 'MD',
-  Mc = 'MC',
-  Mn = 'MN',
-  Me = 'ME',
-  Ms = 'MS',
-  Ma = 'MA',
-  Mz = 'MZ',
-  Mm = 'MM',
-  Na = 'NA',
-  Nr = 'NR',
-  Np = 'NP',
-  Nl = 'NL',
-  Nc = 'NC',
-  Nz = 'NZ',
-  Ni = 'NI',
-  Ne = 'NE',
-  Ng = 'NG',
-  Nu = 'NU',
-  Nf = 'NF',
-  Kp = 'KP',
-  Mk = 'MK',
-  Mp = 'MP',
-  No = 'NO',
-  Om = 'OM',
-  Pk = 'PK',
-  Pw = 'PW',
-  Ps = 'PS',
-  Pa = 'PA',
-  Pg = 'PG',
-  Py = 'PY',
-  Pe = 'PE',
-  Ph = 'PH',
-  Pn = 'PN',
-  Pl = 'PL',
-  Pt = 'PT',
-  Pr = 'PR',
-  Qa = 'QA',
-  Re = 'RE',
-  Ro = 'RO',
-  Ru = 'RU',
-  Rw = 'RW',
-  Bl = 'BL',
-  Sh = 'SH',
-  Kn = 'KN',
-  Lc = 'LC',
-  Mf = 'MF',
-  Pm = 'PM',
-  Vc = 'VC',
-  Ws = 'WS',
-  Sm = 'SM',
-  St = 'ST',
-  Sa = 'SA',
-  Sn = 'SN',
-  Rs = 'RS',
-  Sc = 'SC',
-  Sl = 'SL',
-  Sg = 'SG',
-  Sx = 'SX',
-  Sk = 'SK',
-  Si = 'SI',
-  Sb = 'SB',
-  So = 'SO',
-  Za = 'ZA',
-  Gs = 'GS',
-  Kr = 'KR',
-  Ss = 'SS',
-  Es = 'ES',
-  Lk = 'LK',
-  Sd = 'SD',
-  Sr = 'SR',
-  Sj = 'SJ',
-  Se = 'SE',
-  Ch = 'CH',
-  Sy = 'SY',
-  Tw = 'TW',
-  Tj = 'TJ',
-  Tz = 'TZ',
-  Th = 'TH',
-  Tl = 'TL',
-  Tg = 'TG',
-  Tk = 'TK',
-  To = 'TO',
-  Tt = 'TT',
-  Tn = 'TN',
-  Tr = 'TR',
-  Tm = 'TM',
-  Tc = 'TC',
-  Tv = 'TV',
-  Ug = 'UG',
-  Ua = 'UA',
-  Ae = 'AE',
-  Gb = 'GB',
-  Um = 'UM',
-  Us = 'US',
-  Uy = 'UY',
-  Uz = 'UZ',
-  Vu = 'VU',
-  Ve = 'VE',
-  Vn = 'VN',
-  Vg = 'VG',
-  Vi = 'VI',
-  Wf = 'WF',
-  Eh = 'EH',
-  Ye = 'YE',
-  Zm = 'ZM',
-  Zw = 'ZW'
-}
-
 export type DocumentTypeNode = {
    __typename?: 'DocumentTypeNode',
   id: Scalars['UUID'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
-  country?: Maybe<DocumentTypeCountry>,
+  country?: Maybe<Scalars['String']>,
   label: Scalars['String'],
   documents: DocumentNodeConnection,
 };
@@ -645,510 +393,6 @@ export type FinalizeTargetPopulationMutation = {
 };
 
 
-export enum HouseholdCountry {
-  Af = 'AF',
-  Ax = 'AX',
-  Al = 'AL',
-  Dz = 'DZ',
-  As = 'AS',
-  Ad = 'AD',
-  Ao = 'AO',
-  Ai = 'AI',
-  Aq = 'AQ',
-  Ag = 'AG',
-  Ar = 'AR',
-  Am = 'AM',
-  Aw = 'AW',
-  Au = 'AU',
-  At = 'AT',
-  Az = 'AZ',
-  Bs = 'BS',
-  Bh = 'BH',
-  Bd = 'BD',
-  Bb = 'BB',
-  By = 'BY',
-  Be = 'BE',
-  Bz = 'BZ',
-  Bj = 'BJ',
-  Bm = 'BM',
-  Bt = 'BT',
-  Bo = 'BO',
-  Bq = 'BQ',
-  Ba = 'BA',
-  Bw = 'BW',
-  Bv = 'BV',
-  Br = 'BR',
-  Io = 'IO',
-  Bn = 'BN',
-  Bg = 'BG',
-  Bf = 'BF',
-  Bi = 'BI',
-  Cv = 'CV',
-  Kh = 'KH',
-  Cm = 'CM',
-  Ca = 'CA',
-  Ky = 'KY',
-  Cf = 'CF',
-  Td = 'TD',
-  Cl = 'CL',
-  Cn = 'CN',
-  Cx = 'CX',
-  Cc = 'CC',
-  Co = 'CO',
-  Km = 'KM',
-  Cg = 'CG',
-  Cd = 'CD',
-  Ck = 'CK',
-  Cr = 'CR',
-  Ci = 'CI',
-  Hr = 'HR',
-  Cu = 'CU',
-  Cw = 'CW',
-  Cy = 'CY',
-  Cz = 'CZ',
-  Dk = 'DK',
-  Dj = 'DJ',
-  Dm = 'DM',
-  Do = 'DO',
-  Ec = 'EC',
-  Eg = 'EG',
-  Sv = 'SV',
-  Gq = 'GQ',
-  Er = 'ER',
-  Ee = 'EE',
-  Sz = 'SZ',
-  Et = 'ET',
-  Fk = 'FK',
-  Fo = 'FO',
-  Fj = 'FJ',
-  Fi = 'FI',
-  Fr = 'FR',
-  Gf = 'GF',
-  Pf = 'PF',
-  Tf = 'TF',
-  Ga = 'GA',
-  Gm = 'GM',
-  Ge = 'GE',
-  De = 'DE',
-  Gh = 'GH',
-  Gi = 'GI',
-  Gr = 'GR',
-  Gl = 'GL',
-  Gd = 'GD',
-  Gp = 'GP',
-  Gu = 'GU',
-  Gt = 'GT',
-  Gg = 'GG',
-  Gn = 'GN',
-  Gw = 'GW',
-  Gy = 'GY',
-  Ht = 'HT',
-  Hm = 'HM',
-  Va = 'VA',
-  Hn = 'HN',
-  Hk = 'HK',
-  Hu = 'HU',
-  Is = 'IS',
-  In = 'IN',
-  Id = 'ID',
-  Ir = 'IR',
-  Iq = 'IQ',
-  Ie = 'IE',
-  Im = 'IM',
-  Il = 'IL',
-  It = 'IT',
-  Jm = 'JM',
-  Jp = 'JP',
-  Je = 'JE',
-  Jo = 'JO',
-  Kz = 'KZ',
-  Ke = 'KE',
-  Ki = 'KI',
-  Kw = 'KW',
-  Kg = 'KG',
-  La = 'LA',
-  Lv = 'LV',
-  Lb = 'LB',
-  Ls = 'LS',
-  Lr = 'LR',
-  Ly = 'LY',
-  Li = 'LI',
-  Lt = 'LT',
-  Lu = 'LU',
-  Mo = 'MO',
-  Mg = 'MG',
-  Mw = 'MW',
-  My = 'MY',
-  Mv = 'MV',
-  Ml = 'ML',
-  Mt = 'MT',
-  Mh = 'MH',
-  Mq = 'MQ',
-  Mr = 'MR',
-  Mu = 'MU',
-  Yt = 'YT',
-  Mx = 'MX',
-  Fm = 'FM',
-  Md = 'MD',
-  Mc = 'MC',
-  Mn = 'MN',
-  Me = 'ME',
-  Ms = 'MS',
-  Ma = 'MA',
-  Mz = 'MZ',
-  Mm = 'MM',
-  Na = 'NA',
-  Nr = 'NR',
-  Np = 'NP',
-  Nl = 'NL',
-  Nc = 'NC',
-  Nz = 'NZ',
-  Ni = 'NI',
-  Ne = 'NE',
-  Ng = 'NG',
-  Nu = 'NU',
-  Nf = 'NF',
-  Kp = 'KP',
-  Mk = 'MK',
-  Mp = 'MP',
-  No = 'NO',
-  Om = 'OM',
-  Pk = 'PK',
-  Pw = 'PW',
-  Ps = 'PS',
-  Pa = 'PA',
-  Pg = 'PG',
-  Py = 'PY',
-  Pe = 'PE',
-  Ph = 'PH',
-  Pn = 'PN',
-  Pl = 'PL',
-  Pt = 'PT',
-  Pr = 'PR',
-  Qa = 'QA',
-  Re = 'RE',
-  Ro = 'RO',
-  Ru = 'RU',
-  Rw = 'RW',
-  Bl = 'BL',
-  Sh = 'SH',
-  Kn = 'KN',
-  Lc = 'LC',
-  Mf = 'MF',
-  Pm = 'PM',
-  Vc = 'VC',
-  Ws = 'WS',
-  Sm = 'SM',
-  St = 'ST',
-  Sa = 'SA',
-  Sn = 'SN',
-  Rs = 'RS',
-  Sc = 'SC',
-  Sl = 'SL',
-  Sg = 'SG',
-  Sx = 'SX',
-  Sk = 'SK',
-  Si = 'SI',
-  Sb = 'SB',
-  So = 'SO',
-  Za = 'ZA',
-  Gs = 'GS',
-  Kr = 'KR',
-  Ss = 'SS',
-  Es = 'ES',
-  Lk = 'LK',
-  Sd = 'SD',
-  Sr = 'SR',
-  Sj = 'SJ',
-  Se = 'SE',
-  Ch = 'CH',
-  Sy = 'SY',
-  Tw = 'TW',
-  Tj = 'TJ',
-  Tz = 'TZ',
-  Th = 'TH',
-  Tl = 'TL',
-  Tg = 'TG',
-  Tk = 'TK',
-  To = 'TO',
-  Tt = 'TT',
-  Tn = 'TN',
-  Tr = 'TR',
-  Tm = 'TM',
-  Tc = 'TC',
-  Tv = 'TV',
-  Ug = 'UG',
-  Ua = 'UA',
-  Ae = 'AE',
-  Gb = 'GB',
-  Um = 'UM',
-  Us = 'US',
-  Uy = 'UY',
-  Uz = 'UZ',
-  Vu = 'VU',
-  Ve = 'VE',
-  Vn = 'VN',
-  Vg = 'VG',
-  Vi = 'VI',
-  Wf = 'WF',
-  Eh = 'EH',
-  Ye = 'YE',
-  Zm = 'ZM',
-  Zw = 'ZW'
-}
-
-export enum HouseholdCountryOrigin {
-  Af = 'AF',
-  Ax = 'AX',
-  Al = 'AL',
-  Dz = 'DZ',
-  As = 'AS',
-  Ad = 'AD',
-  Ao = 'AO',
-  Ai = 'AI',
-  Aq = 'AQ',
-  Ag = 'AG',
-  Ar = 'AR',
-  Am = 'AM',
-  Aw = 'AW',
-  Au = 'AU',
-  At = 'AT',
-  Az = 'AZ',
-  Bs = 'BS',
-  Bh = 'BH',
-  Bd = 'BD',
-  Bb = 'BB',
-  By = 'BY',
-  Be = 'BE',
-  Bz = 'BZ',
-  Bj = 'BJ',
-  Bm = 'BM',
-  Bt = 'BT',
-  Bo = 'BO',
-  Bq = 'BQ',
-  Ba = 'BA',
-  Bw = 'BW',
-  Bv = 'BV',
-  Br = 'BR',
-  Io = 'IO',
-  Bn = 'BN',
-  Bg = 'BG',
-  Bf = 'BF',
-  Bi = 'BI',
-  Cv = 'CV',
-  Kh = 'KH',
-  Cm = 'CM',
-  Ca = 'CA',
-  Ky = 'KY',
-  Cf = 'CF',
-  Td = 'TD',
-  Cl = 'CL',
-  Cn = 'CN',
-  Cx = 'CX',
-  Cc = 'CC',
-  Co = 'CO',
-  Km = 'KM',
-  Cg = 'CG',
-  Cd = 'CD',
-  Ck = 'CK',
-  Cr = 'CR',
-  Ci = 'CI',
-  Hr = 'HR',
-  Cu = 'CU',
-  Cw = 'CW',
-  Cy = 'CY',
-  Cz = 'CZ',
-  Dk = 'DK',
-  Dj = 'DJ',
-  Dm = 'DM',
-  Do = 'DO',
-  Ec = 'EC',
-  Eg = 'EG',
-  Sv = 'SV',
-  Gq = 'GQ',
-  Er = 'ER',
-  Ee = 'EE',
-  Sz = 'SZ',
-  Et = 'ET',
-  Fk = 'FK',
-  Fo = 'FO',
-  Fj = 'FJ',
-  Fi = 'FI',
-  Fr = 'FR',
-  Gf = 'GF',
-  Pf = 'PF',
-  Tf = 'TF',
-  Ga = 'GA',
-  Gm = 'GM',
-  Ge = 'GE',
-  De = 'DE',
-  Gh = 'GH',
-  Gi = 'GI',
-  Gr = 'GR',
-  Gl = 'GL',
-  Gd = 'GD',
-  Gp = 'GP',
-  Gu = 'GU',
-  Gt = 'GT',
-  Gg = 'GG',
-  Gn = 'GN',
-  Gw = 'GW',
-  Gy = 'GY',
-  Ht = 'HT',
-  Hm = 'HM',
-  Va = 'VA',
-  Hn = 'HN',
-  Hk = 'HK',
-  Hu = 'HU',
-  Is = 'IS',
-  In = 'IN',
-  Id = 'ID',
-  Ir = 'IR',
-  Iq = 'IQ',
-  Ie = 'IE',
-  Im = 'IM',
-  Il = 'IL',
-  It = 'IT',
-  Jm = 'JM',
-  Jp = 'JP',
-  Je = 'JE',
-  Jo = 'JO',
-  Kz = 'KZ',
-  Ke = 'KE',
-  Ki = 'KI',
-  Kw = 'KW',
-  Kg = 'KG',
-  La = 'LA',
-  Lv = 'LV',
-  Lb = 'LB',
-  Ls = 'LS',
-  Lr = 'LR',
-  Ly = 'LY',
-  Li = 'LI',
-  Lt = 'LT',
-  Lu = 'LU',
-  Mo = 'MO',
-  Mg = 'MG',
-  Mw = 'MW',
-  My = 'MY',
-  Mv = 'MV',
-  Ml = 'ML',
-  Mt = 'MT',
-  Mh = 'MH',
-  Mq = 'MQ',
-  Mr = 'MR',
-  Mu = 'MU',
-  Yt = 'YT',
-  Mx = 'MX',
-  Fm = 'FM',
-  Md = 'MD',
-  Mc = 'MC',
-  Mn = 'MN',
-  Me = 'ME',
-  Ms = 'MS',
-  Ma = 'MA',
-  Mz = 'MZ',
-  Mm = 'MM',
-  Na = 'NA',
-  Nr = 'NR',
-  Np = 'NP',
-  Nl = 'NL',
-  Nc = 'NC',
-  Nz = 'NZ',
-  Ni = 'NI',
-  Ne = 'NE',
-  Ng = 'NG',
-  Nu = 'NU',
-  Nf = 'NF',
-  Kp = 'KP',
-  Mk = 'MK',
-  Mp = 'MP',
-  No = 'NO',
-  Om = 'OM',
-  Pk = 'PK',
-  Pw = 'PW',
-  Ps = 'PS',
-  Pa = 'PA',
-  Pg = 'PG',
-  Py = 'PY',
-  Pe = 'PE',
-  Ph = 'PH',
-  Pn = 'PN',
-  Pl = 'PL',
-  Pt = 'PT',
-  Pr = 'PR',
-  Qa = 'QA',
-  Re = 'RE',
-  Ro = 'RO',
-  Ru = 'RU',
-  Rw = 'RW',
-  Bl = 'BL',
-  Sh = 'SH',
-  Kn = 'KN',
-  Lc = 'LC',
-  Mf = 'MF',
-  Pm = 'PM',
-  Vc = 'VC',
-  Ws = 'WS',
-  Sm = 'SM',
-  St = 'ST',
-  Sa = 'SA',
-  Sn = 'SN',
-  Rs = 'RS',
-  Sc = 'SC',
-  Sl = 'SL',
-  Sg = 'SG',
-  Sx = 'SX',
-  Sk = 'SK',
-  Si = 'SI',
-  Sb = 'SB',
-  So = 'SO',
-  Za = 'ZA',
-  Gs = 'GS',
-  Kr = 'KR',
-  Ss = 'SS',
-  Es = 'ES',
-  Lk = 'LK',
-  Sd = 'SD',
-  Sr = 'SR',
-  Sj = 'SJ',
-  Se = 'SE',
-  Ch = 'CH',
-  Sy = 'SY',
-  Tw = 'TW',
-  Tj = 'TJ',
-  Tz = 'TZ',
-  Th = 'TH',
-  Tl = 'TL',
-  Tg = 'TG',
-  Tk = 'TK',
-  To = 'TO',
-  Tt = 'TT',
-  Tn = 'TN',
-  Tr = 'TR',
-  Tm = 'TM',
-  Tc = 'TC',
-  Tv = 'TV',
-  Ug = 'UG',
-  Ua = 'UA',
-  Ae = 'AE',
-  Gb = 'GB',
-  Um = 'UM',
-  Us = 'US',
-  Uy = 'UY',
-  Uz = 'UZ',
-  Vu = 'VU',
-  Ve = 'VE',
-  Vn = 'VN',
-  Vg = 'VG',
-  Vi = 'VI',
-  Wf = 'WF',
-  Eh = 'EH',
-  Ye = 'YE',
-  Zm = 'ZM',
-  Zw = 'ZW'
-}
-
 export type HouseholdNode = Node & {
    __typename?: 'HouseholdNode',
   id: Scalars['ID'],
@@ -1156,8 +400,8 @@ export type HouseholdNode = Node & {
   updatedAt: Scalars['DateTime'],
   consent: Scalars['String'],
   residenceStatus: HouseholdResidenceStatus,
-  countryOrigin?: Maybe<HouseholdCountryOrigin>,
-  country?: Maybe<HouseholdCountry>,
+  countryOrigin?: Maybe<Scalars['String']>,
+  country?: Maybe<Scalars['String']>,
   size: Scalars['Int'],
   address: Scalars['String'],
   adminArea?: Maybe<AdminAreaNode>,
@@ -1568,510 +812,6 @@ export type ImportedDocumentTypeNodeDocumentsArgs = {
   last?: Maybe<Scalars['Int']>
 };
 
-export enum ImportedHouseholdCountry {
-  Af = 'AF',
-  Ax = 'AX',
-  Al = 'AL',
-  Dz = 'DZ',
-  As = 'AS',
-  Ad = 'AD',
-  Ao = 'AO',
-  Ai = 'AI',
-  Aq = 'AQ',
-  Ag = 'AG',
-  Ar = 'AR',
-  Am = 'AM',
-  Aw = 'AW',
-  Au = 'AU',
-  At = 'AT',
-  Az = 'AZ',
-  Bs = 'BS',
-  Bh = 'BH',
-  Bd = 'BD',
-  Bb = 'BB',
-  By = 'BY',
-  Be = 'BE',
-  Bz = 'BZ',
-  Bj = 'BJ',
-  Bm = 'BM',
-  Bt = 'BT',
-  Bo = 'BO',
-  Bq = 'BQ',
-  Ba = 'BA',
-  Bw = 'BW',
-  Bv = 'BV',
-  Br = 'BR',
-  Io = 'IO',
-  Bn = 'BN',
-  Bg = 'BG',
-  Bf = 'BF',
-  Bi = 'BI',
-  Cv = 'CV',
-  Kh = 'KH',
-  Cm = 'CM',
-  Ca = 'CA',
-  Ky = 'KY',
-  Cf = 'CF',
-  Td = 'TD',
-  Cl = 'CL',
-  Cn = 'CN',
-  Cx = 'CX',
-  Cc = 'CC',
-  Co = 'CO',
-  Km = 'KM',
-  Cg = 'CG',
-  Cd = 'CD',
-  Ck = 'CK',
-  Cr = 'CR',
-  Ci = 'CI',
-  Hr = 'HR',
-  Cu = 'CU',
-  Cw = 'CW',
-  Cy = 'CY',
-  Cz = 'CZ',
-  Dk = 'DK',
-  Dj = 'DJ',
-  Dm = 'DM',
-  Do = 'DO',
-  Ec = 'EC',
-  Eg = 'EG',
-  Sv = 'SV',
-  Gq = 'GQ',
-  Er = 'ER',
-  Ee = 'EE',
-  Sz = 'SZ',
-  Et = 'ET',
-  Fk = 'FK',
-  Fo = 'FO',
-  Fj = 'FJ',
-  Fi = 'FI',
-  Fr = 'FR',
-  Gf = 'GF',
-  Pf = 'PF',
-  Tf = 'TF',
-  Ga = 'GA',
-  Gm = 'GM',
-  Ge = 'GE',
-  De = 'DE',
-  Gh = 'GH',
-  Gi = 'GI',
-  Gr = 'GR',
-  Gl = 'GL',
-  Gd = 'GD',
-  Gp = 'GP',
-  Gu = 'GU',
-  Gt = 'GT',
-  Gg = 'GG',
-  Gn = 'GN',
-  Gw = 'GW',
-  Gy = 'GY',
-  Ht = 'HT',
-  Hm = 'HM',
-  Va = 'VA',
-  Hn = 'HN',
-  Hk = 'HK',
-  Hu = 'HU',
-  Is = 'IS',
-  In = 'IN',
-  Id = 'ID',
-  Ir = 'IR',
-  Iq = 'IQ',
-  Ie = 'IE',
-  Im = 'IM',
-  Il = 'IL',
-  It = 'IT',
-  Jm = 'JM',
-  Jp = 'JP',
-  Je = 'JE',
-  Jo = 'JO',
-  Kz = 'KZ',
-  Ke = 'KE',
-  Ki = 'KI',
-  Kw = 'KW',
-  Kg = 'KG',
-  La = 'LA',
-  Lv = 'LV',
-  Lb = 'LB',
-  Ls = 'LS',
-  Lr = 'LR',
-  Ly = 'LY',
-  Li = 'LI',
-  Lt = 'LT',
-  Lu = 'LU',
-  Mo = 'MO',
-  Mg = 'MG',
-  Mw = 'MW',
-  My = 'MY',
-  Mv = 'MV',
-  Ml = 'ML',
-  Mt = 'MT',
-  Mh = 'MH',
-  Mq = 'MQ',
-  Mr = 'MR',
-  Mu = 'MU',
-  Yt = 'YT',
-  Mx = 'MX',
-  Fm = 'FM',
-  Md = 'MD',
-  Mc = 'MC',
-  Mn = 'MN',
-  Me = 'ME',
-  Ms = 'MS',
-  Ma = 'MA',
-  Mz = 'MZ',
-  Mm = 'MM',
-  Na = 'NA',
-  Nr = 'NR',
-  Np = 'NP',
-  Nl = 'NL',
-  Nc = 'NC',
-  Nz = 'NZ',
-  Ni = 'NI',
-  Ne = 'NE',
-  Ng = 'NG',
-  Nu = 'NU',
-  Nf = 'NF',
-  Kp = 'KP',
-  Mk = 'MK',
-  Mp = 'MP',
-  No = 'NO',
-  Om = 'OM',
-  Pk = 'PK',
-  Pw = 'PW',
-  Ps = 'PS',
-  Pa = 'PA',
-  Pg = 'PG',
-  Py = 'PY',
-  Pe = 'PE',
-  Ph = 'PH',
-  Pn = 'PN',
-  Pl = 'PL',
-  Pt = 'PT',
-  Pr = 'PR',
-  Qa = 'QA',
-  Re = 'RE',
-  Ro = 'RO',
-  Ru = 'RU',
-  Rw = 'RW',
-  Bl = 'BL',
-  Sh = 'SH',
-  Kn = 'KN',
-  Lc = 'LC',
-  Mf = 'MF',
-  Pm = 'PM',
-  Vc = 'VC',
-  Ws = 'WS',
-  Sm = 'SM',
-  St = 'ST',
-  Sa = 'SA',
-  Sn = 'SN',
-  Rs = 'RS',
-  Sc = 'SC',
-  Sl = 'SL',
-  Sg = 'SG',
-  Sx = 'SX',
-  Sk = 'SK',
-  Si = 'SI',
-  Sb = 'SB',
-  So = 'SO',
-  Za = 'ZA',
-  Gs = 'GS',
-  Kr = 'KR',
-  Ss = 'SS',
-  Es = 'ES',
-  Lk = 'LK',
-  Sd = 'SD',
-  Sr = 'SR',
-  Sj = 'SJ',
-  Se = 'SE',
-  Ch = 'CH',
-  Sy = 'SY',
-  Tw = 'TW',
-  Tj = 'TJ',
-  Tz = 'TZ',
-  Th = 'TH',
-  Tl = 'TL',
-  Tg = 'TG',
-  Tk = 'TK',
-  To = 'TO',
-  Tt = 'TT',
-  Tn = 'TN',
-  Tr = 'TR',
-  Tm = 'TM',
-  Tc = 'TC',
-  Tv = 'TV',
-  Ug = 'UG',
-  Ua = 'UA',
-  Ae = 'AE',
-  Gb = 'GB',
-  Um = 'UM',
-  Us = 'US',
-  Uy = 'UY',
-  Uz = 'UZ',
-  Vu = 'VU',
-  Ve = 'VE',
-  Vn = 'VN',
-  Vg = 'VG',
-  Vi = 'VI',
-  Wf = 'WF',
-  Eh = 'EH',
-  Ye = 'YE',
-  Zm = 'ZM',
-  Zw = 'ZW'
-}
-
-export enum ImportedHouseholdCountryOrigin {
-  Af = 'AF',
-  Ax = 'AX',
-  Al = 'AL',
-  Dz = 'DZ',
-  As = 'AS',
-  Ad = 'AD',
-  Ao = 'AO',
-  Ai = 'AI',
-  Aq = 'AQ',
-  Ag = 'AG',
-  Ar = 'AR',
-  Am = 'AM',
-  Aw = 'AW',
-  Au = 'AU',
-  At = 'AT',
-  Az = 'AZ',
-  Bs = 'BS',
-  Bh = 'BH',
-  Bd = 'BD',
-  Bb = 'BB',
-  By = 'BY',
-  Be = 'BE',
-  Bz = 'BZ',
-  Bj = 'BJ',
-  Bm = 'BM',
-  Bt = 'BT',
-  Bo = 'BO',
-  Bq = 'BQ',
-  Ba = 'BA',
-  Bw = 'BW',
-  Bv = 'BV',
-  Br = 'BR',
-  Io = 'IO',
-  Bn = 'BN',
-  Bg = 'BG',
-  Bf = 'BF',
-  Bi = 'BI',
-  Cv = 'CV',
-  Kh = 'KH',
-  Cm = 'CM',
-  Ca = 'CA',
-  Ky = 'KY',
-  Cf = 'CF',
-  Td = 'TD',
-  Cl = 'CL',
-  Cn = 'CN',
-  Cx = 'CX',
-  Cc = 'CC',
-  Co = 'CO',
-  Km = 'KM',
-  Cg = 'CG',
-  Cd = 'CD',
-  Ck = 'CK',
-  Cr = 'CR',
-  Ci = 'CI',
-  Hr = 'HR',
-  Cu = 'CU',
-  Cw = 'CW',
-  Cy = 'CY',
-  Cz = 'CZ',
-  Dk = 'DK',
-  Dj = 'DJ',
-  Dm = 'DM',
-  Do = 'DO',
-  Ec = 'EC',
-  Eg = 'EG',
-  Sv = 'SV',
-  Gq = 'GQ',
-  Er = 'ER',
-  Ee = 'EE',
-  Sz = 'SZ',
-  Et = 'ET',
-  Fk = 'FK',
-  Fo = 'FO',
-  Fj = 'FJ',
-  Fi = 'FI',
-  Fr = 'FR',
-  Gf = 'GF',
-  Pf = 'PF',
-  Tf = 'TF',
-  Ga = 'GA',
-  Gm = 'GM',
-  Ge = 'GE',
-  De = 'DE',
-  Gh = 'GH',
-  Gi = 'GI',
-  Gr = 'GR',
-  Gl = 'GL',
-  Gd = 'GD',
-  Gp = 'GP',
-  Gu = 'GU',
-  Gt = 'GT',
-  Gg = 'GG',
-  Gn = 'GN',
-  Gw = 'GW',
-  Gy = 'GY',
-  Ht = 'HT',
-  Hm = 'HM',
-  Va = 'VA',
-  Hn = 'HN',
-  Hk = 'HK',
-  Hu = 'HU',
-  Is = 'IS',
-  In = 'IN',
-  Id = 'ID',
-  Ir = 'IR',
-  Iq = 'IQ',
-  Ie = 'IE',
-  Im = 'IM',
-  Il = 'IL',
-  It = 'IT',
-  Jm = 'JM',
-  Jp = 'JP',
-  Je = 'JE',
-  Jo = 'JO',
-  Kz = 'KZ',
-  Ke = 'KE',
-  Ki = 'KI',
-  Kw = 'KW',
-  Kg = 'KG',
-  La = 'LA',
-  Lv = 'LV',
-  Lb = 'LB',
-  Ls = 'LS',
-  Lr = 'LR',
-  Ly = 'LY',
-  Li = 'LI',
-  Lt = 'LT',
-  Lu = 'LU',
-  Mo = 'MO',
-  Mg = 'MG',
-  Mw = 'MW',
-  My = 'MY',
-  Mv = 'MV',
-  Ml = 'ML',
-  Mt = 'MT',
-  Mh = 'MH',
-  Mq = 'MQ',
-  Mr = 'MR',
-  Mu = 'MU',
-  Yt = 'YT',
-  Mx = 'MX',
-  Fm = 'FM',
-  Md = 'MD',
-  Mc = 'MC',
-  Mn = 'MN',
-  Me = 'ME',
-  Ms = 'MS',
-  Ma = 'MA',
-  Mz = 'MZ',
-  Mm = 'MM',
-  Na = 'NA',
-  Nr = 'NR',
-  Np = 'NP',
-  Nl = 'NL',
-  Nc = 'NC',
-  Nz = 'NZ',
-  Ni = 'NI',
-  Ne = 'NE',
-  Ng = 'NG',
-  Nu = 'NU',
-  Nf = 'NF',
-  Kp = 'KP',
-  Mk = 'MK',
-  Mp = 'MP',
-  No = 'NO',
-  Om = 'OM',
-  Pk = 'PK',
-  Pw = 'PW',
-  Ps = 'PS',
-  Pa = 'PA',
-  Pg = 'PG',
-  Py = 'PY',
-  Pe = 'PE',
-  Ph = 'PH',
-  Pn = 'PN',
-  Pl = 'PL',
-  Pt = 'PT',
-  Pr = 'PR',
-  Qa = 'QA',
-  Re = 'RE',
-  Ro = 'RO',
-  Ru = 'RU',
-  Rw = 'RW',
-  Bl = 'BL',
-  Sh = 'SH',
-  Kn = 'KN',
-  Lc = 'LC',
-  Mf = 'MF',
-  Pm = 'PM',
-  Vc = 'VC',
-  Ws = 'WS',
-  Sm = 'SM',
-  St = 'ST',
-  Sa = 'SA',
-  Sn = 'SN',
-  Rs = 'RS',
-  Sc = 'SC',
-  Sl = 'SL',
-  Sg = 'SG',
-  Sx = 'SX',
-  Sk = 'SK',
-  Si = 'SI',
-  Sb = 'SB',
-  So = 'SO',
-  Za = 'ZA',
-  Gs = 'GS',
-  Kr = 'KR',
-  Ss = 'SS',
-  Es = 'ES',
-  Lk = 'LK',
-  Sd = 'SD',
-  Sr = 'SR',
-  Sj = 'SJ',
-  Se = 'SE',
-  Ch = 'CH',
-  Sy = 'SY',
-  Tw = 'TW',
-  Tj = 'TJ',
-  Tz = 'TZ',
-  Th = 'TH',
-  Tl = 'TL',
-  Tg = 'TG',
-  Tk = 'TK',
-  To = 'TO',
-  Tt = 'TT',
-  Tn = 'TN',
-  Tr = 'TR',
-  Tm = 'TM',
-  Tc = 'TC',
-  Tv = 'TV',
-  Ug = 'UG',
-  Ua = 'UA',
-  Ae = 'AE',
-  Gb = 'GB',
-  Um = 'UM',
-  Us = 'US',
-  Uy = 'UY',
-  Uz = 'UZ',
-  Vu = 'VU',
-  Ve = 'VE',
-  Vn = 'VN',
-  Vg = 'VG',
-  Vi = 'VI',
-  Wf = 'WF',
-  Eh = 'EH',
-  Ye = 'YE',
-  Zm = 'ZM',
-  Zw = 'ZW'
-}
-
 export type ImportedHouseholdNode = Node & {
    __typename?: 'ImportedHouseholdNode',
   id: Scalars['ID'],
@@ -2079,10 +819,10 @@ export type ImportedHouseholdNode = Node & {
   updatedAt: Scalars['DateTime'],
   consent: Scalars['String'],
   residenceStatus: ImportedHouseholdResidenceStatus,
-  countryOrigin: ImportedHouseholdCountryOrigin,
+  countryOrigin?: Maybe<Scalars['String']>,
   size: Scalars['Int'],
   address: Scalars['String'],
-  country?: Maybe<ImportedHouseholdCountry>,
+  country?: Maybe<Scalars['String']>,
   admin1: Scalars['String'],
   admin2: Scalars['String'],
   geopoint?: Maybe<Scalars['GeoJSON']>,
@@ -2246,7 +986,7 @@ export type IndividualNode = Node & {
   middleName: Scalars['String'],
   familyName: Scalars['String'],
   relationship?: Maybe<IndividualRelationship>,
-  role?: Maybe<IndividualRole>,
+  role?: Maybe<Scalars['String']>,
   sex: IndividualSex,
   birthDate: Scalars['Date'],
   estimatedBirthDate?: Maybe<Scalars['Boolean']>,
@@ -2297,12 +1037,6 @@ export enum IndividualRelationship {
   GranddaugherGrandson = 'GRANDDAUGHER_GRANDSON',
   NephewNiece = 'NEPHEW_NIECE',
   Cousin = 'COUSIN'
-}
-
-export enum IndividualRole {
-  Primary = 'PRIMARY',
-  Alternate = 'ALTERNATE',
-  NoRole = 'NO_ROLE'
 }
 
 export enum IndividualSex {
@@ -2736,7 +1470,9 @@ export type QueryAllAdminAreasArgs = {
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  title?: Maybe<Scalars['String']>
+  title?: Maybe<Scalars['String']>,
+  title_Icontains?: Maybe<Scalars['String']>,
+  businessArea?: Maybe<Scalars['String']>
 };
 
 
@@ -2870,9 +1606,12 @@ export type QueryAllHouseholdsArgs = {
   size_Range?: Maybe<Scalars['Int']>,
   size_Lte?: Maybe<Scalars['Int']>,
   size_Gte?: Maybe<Scalars['Int']>,
+  adminArea?: Maybe<Scalars['ID']>,
   targetPopulations?: Maybe<Array<Maybe<Scalars['ID']>>>,
   programs?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  residenceStatus?: Maybe<Scalars['String']>,
   size?: Maybe<Scalars['String']>,
+  search?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -2893,6 +1632,7 @@ export type QueryAllIndividualsArgs = {
   fullName_Icontains?: Maybe<Scalars['String']>,
   sex?: Maybe<Array<Maybe<Scalars['ID']>>>,
   age?: Maybe<Scalars['String']>,
+  search?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -3482,7 +2222,7 @@ export type HouseholdDetailedFragment = (
 
 export type IndividualMinimalFragment = (
   { __typename?: 'IndividualNode' }
-  & Pick<IndividualNode, 'id' | 'createdAt' | 'updatedAt' | 'fullName' | 'sex' | 'birthDate' | 'maritalStatus' | 'phoneNo'>
+  & Pick<IndividualNode, 'id' | 'createdAt' | 'updatedAt' | 'fullName' | 'sex' | 'birthDate' | 'maritalStatus' | 'phoneNo' | 'role'>
   & { documents: (
     { __typename?: 'DocumentNodeConnection' }
     & { edges: Array<Maybe<(
@@ -3539,7 +2279,7 @@ export type ApproveTpMutation = (
     { __typename?: 'ApproveTargetPopulationMutation' }
     & { targetPopulation: Maybe<(
       { __typename?: 'TargetPopulationNode' }
-      & Pick<TargetPopulationNode, 'id' | 'name' | 'status'>
+      & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'candidateListTotalHouseholds' | 'finalListTotalHouseholds'>
       & { candidateListTargetingCriteria: Maybe<(
         { __typename?: 'TargetingCriteriaNode' }
         & { targetPopulationCandidate: Maybe<(
@@ -3626,7 +2366,7 @@ export type CreateTpMutation = (
     { __typename?: 'CreateTargetPopulationMutation' }
     & { targetPopulation: Maybe<(
       { __typename?: 'TargetPopulationNode' }
-      & Pick<TargetPopulationNode, 'id' | 'status'>
+      & Pick<TargetPopulationNode, 'id' | 'status' | 'candidateListTotalHouseholds' | 'finalListTotalHouseholds'>
     )> }
   )> }
 );
@@ -3685,7 +2425,7 @@ export type FinalizeTpMutation = (
     { __typename?: 'FinalizeTargetPopulationMutation' }
     & { targetPopulation: Maybe<(
       { __typename?: 'TargetPopulationNode' }
-      & Pick<TargetPopulationNode, 'id' | 'name' | 'status'>
+      & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'candidateListTotalHouseholds' | 'finalListTotalHouseholds'>
       & { candidateListTargetingCriteria: Maybe<(
         { __typename?: 'TargetingCriteriaNode' }
         & { targetPopulationCandidate: Maybe<(
@@ -3772,7 +2512,7 @@ export type UpdateTpMutation = (
     { __typename?: 'UpdateTargetPopulationMutation' }
     & { targetPopulation: Maybe<(
       { __typename?: 'TargetPopulationNode' }
-      & Pick<TargetPopulationNode, 'id' | 'name' | 'status'>
+      & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'candidateListTotalHouseholds' | 'finalListTotalHouseholds'>
       & { candidateListTargetingCriteria: Maybe<(
         { __typename?: 'TargetingCriteriaNode' }
         & { targetPopulationCandidate: Maybe<(
@@ -3829,6 +2569,30 @@ export type UpdateTpMutation = (
         )>>> }
       )> }
     )> }
+  )> }
+);
+
+export type AllAdminAreasQueryVariables = {
+  title?: Maybe<Scalars['String']>,
+  businessArea?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>
+};
+
+
+export type AllAdminAreasQuery = (
+  { __typename?: 'Query' }
+  & { allAdminAreas: Maybe<(
+    { __typename?: 'AdminAreaNodeConnection' }
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'endCursor' | 'startCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'AdminAreaNodeEdge' }
+      & { node: Maybe<(
+        { __typename?: 'AdminAreaNode' }
+        & Pick<AdminAreaNode, 'id' | 'title'>
+      )> }
+    )>> }
   )> }
 );
 
@@ -3890,7 +2654,10 @@ export type AllHouseholdsQueryVariables = {
   orderBy?: Maybe<Scalars['String']>,
   familySize?: Maybe<Scalars['String']>,
   programs?: Maybe<Array<Maybe<Scalars['ID']>>>,
-  headOfHouseholdFullNameIcontains?: Maybe<Scalars['String']>
+  headOfHouseholdFullNameIcontains?: Maybe<Scalars['String']>,
+  adminArea?: Maybe<Scalars['ID']>,
+  search?: Maybe<Scalars['String']>,
+  residenceStatus?: Maybe<Scalars['String']>
 };
 
 
@@ -3921,7 +2688,8 @@ export type AllIndividualsQueryVariables = {
   fullNameContains?: Maybe<Scalars['String']>,
   sex?: Maybe<Array<Maybe<Scalars['ID']>>>,
   age?: Maybe<Scalars['String']>,
-  orderBy?: Maybe<Scalars['String']>
+  orderBy?: Maybe<Scalars['String']>,
+  search?: Maybe<Scalars['String']>
 };
 
 
@@ -3977,7 +2745,8 @@ export type AllLogEntriesQuery = (
 );
 
 export type AllPaymentRecordsQueryVariables = {
-  cashPlan: Scalars['ID'],
+  cashPlan?: Maybe<Scalars['ID']>,
+  household?: Maybe<Scalars['ID']>,
   after?: Maybe<Scalars['String']>,
   before?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>,
@@ -4006,7 +2775,14 @@ export type AllPaymentRecordsQuery = (
         ), entitlement: Maybe<(
           { __typename?: 'PaymentEntitlementNode' }
           & Pick<PaymentEntitlementNode, 'id' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate'>
-        )> }
+        )>, cashPlan: (
+          { __typename?: 'CashPlanNode' }
+          & Pick<CashPlanNode, 'id'>
+          & { program: (
+            { __typename?: 'ProgramNode' }
+            & Pick<ProgramNode, 'id' | 'name'>
+          ) }
+        ) }
       )> }
     )>> }
   )> }
@@ -4125,6 +2901,23 @@ export type HouseholdQuery = (
     { __typename?: 'HouseholdNode' }
     & HouseholdDetailedFragment
   )> }
+);
+
+export type HouseholdChoiceDataQueryVariables = {};
+
+
+export type HouseholdChoiceDataQuery = (
+  { __typename?: 'Query' }
+  & { residenceStatusChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, relationshipChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, roleChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>> }
 );
 
 export type IndividualQueryVariables = {
@@ -4588,12 +3381,13 @@ export type CandidateHouseholdsListByTargetingCriteriaQuery = (
     & Pick<HouseholdNodeConnection, 'totalCount' | 'edgeCount'>
     & { edges: Array<Maybe<(
       { __typename?: 'HouseholdNodeEdge' }
+      & Pick<HouseholdNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'HouseholdNode' }
         & Pick<HouseholdNode, 'id' | 'size' | 'updatedAt'>
         & { headOfHousehold: (
           { __typename?: 'IndividualNode' }
-          & Pick<IndividualNode, 'givenName' | 'familyName'>
+          & Pick<IndividualNode, 'id' | 'givenName' | 'familyName'>
         ), adminArea: Maybe<(
           { __typename?: 'AdminAreaNode' }
           & Pick<AdminAreaNode, 'id' | 'title'>
@@ -4620,15 +3414,16 @@ export type FinalHouseholdsListByTargetingCriteriaQuery = (
     & Pick<HouseholdNodeConnection, 'totalCount' | 'edgeCount'>
     & { edges: Array<Maybe<(
       { __typename?: 'HouseholdNodeEdge' }
+      & Pick<HouseholdNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'HouseholdNode' }
         & Pick<HouseholdNode, 'id' | 'size' | 'updatedAt'>
         & { headOfHousehold: (
           { __typename?: 'IndividualNode' }
-          & Pick<IndividualNode, 'givenName' | 'familyName'>
+          & Pick<IndividualNode, 'id' | 'givenName' | 'familyName'>
         ), adminArea: Maybe<(
           { __typename?: 'AdminAreaNode' }
-          & Pick<AdminAreaNode, 'title'>
+          & Pick<AdminAreaNode, 'id' | 'title'>
         )> }
       )> }
     )>> }
@@ -4651,12 +3446,13 @@ export type GoldenRecordByTargetingCriteriaQuery = (
     & Pick<HouseholdNodeConnection, 'totalCount' | 'edgeCount'>
     & { edges: Array<Maybe<(
       { __typename?: 'HouseholdNodeEdge' }
+      & Pick<HouseholdNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'HouseholdNode' }
         & Pick<HouseholdNode, 'id' | 'size' | 'updatedAt'>
         & { headOfHousehold: (
           { __typename?: 'IndividualNode' }
-          & Pick<IndividualNode, 'givenName' | 'familyName'>
+          & Pick<IndividualNode, 'id' | 'givenName' | 'familyName'>
         ), adminArea: Maybe<(
           { __typename?: 'AdminAreaNode' }
           & Pick<AdminAreaNode, 'id' | 'title'>
@@ -4720,6 +3516,7 @@ export const IndividualMinimalFragmentDoc = gql`
   birthDate
   maritalStatus
   phoneNo
+  role
   documents {
     edges {
       node {
@@ -4891,6 +3688,8 @@ export const ApproveTpDocument = gql`
       id
       name
       status
+      candidateListTotalHouseholds
+      finalListTotalHouseholds
       candidateListTargetingCriteria {
         targetPopulationCandidate {
           createdBy {
@@ -5067,6 +3866,8 @@ export const CreateTpDocument = gql`
     targetPopulation {
       id
       status
+      candidateListTotalHouseholds
+      finalListTotalHouseholds
     }
   }
 }
@@ -5270,6 +4071,8 @@ export const FinalizeTpDocument = gql`
       id
       name
       status
+      candidateListTotalHouseholds
+      finalListTotalHouseholds
       candidateListTargetingCriteria {
         targetPopulationCandidate {
           createdBy {
@@ -5448,6 +4251,8 @@ export const UpdateTpDocument = gql`
       id
       name
       status
+      candidateListTotalHouseholds
+      finalListTotalHouseholds
       candidateListTargetingCriteria {
         targetPopulationCandidate {
           createdBy {
@@ -5554,6 +4359,69 @@ export function useUpdateTpMutation(baseOptions?: ApolloReactHooks.MutationHookO
 export type UpdateTpMutationHookResult = ReturnType<typeof useUpdateTpMutation>;
 export type UpdateTpMutationResult = ApolloReactCommon.MutationResult<UpdateTpMutation>;
 export type UpdateTpMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdateTpMutation, UpdateTpMutationVariables>;
+export const AllAdminAreasDocument = gql`
+    query AllAdminAreas($title: String, $businessArea: String, $first: Int) {
+  allAdminAreas(title_Icontains: $title, businessArea: $businessArea, first: $first) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      endCursor
+      startCursor
+    }
+    edges {
+      node {
+        id
+        title
+      }
+    }
+  }
+}
+    `;
+export type AllAdminAreasComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllAdminAreasQuery, AllAdminAreasQueryVariables>, 'query'>;
+
+    export const AllAdminAreasComponent = (props: AllAdminAreasComponentProps) => (
+      <ApolloReactComponents.Query<AllAdminAreasQuery, AllAdminAreasQueryVariables> query={AllAdminAreasDocument} {...props} />
+    );
+    
+export type AllAdminAreasProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllAdminAreasQuery, AllAdminAreasQueryVariables> & TChildProps;
+export function withAllAdminAreas<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllAdminAreasQuery,
+  AllAdminAreasQueryVariables,
+  AllAdminAreasProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllAdminAreasQuery, AllAdminAreasQueryVariables, AllAdminAreasProps<TChildProps>>(AllAdminAreasDocument, {
+      alias: 'allAdminAreas',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllAdminAreasQuery__
+ *
+ * To run a query within a React component, call `useAllAdminAreasQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllAdminAreasQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllAdminAreasQuery({
+ *   variables: {
+ *      title: // value for 'title'
+ *      businessArea: // value for 'businessArea'
+ *      first: // value for 'first'
+ *   },
+ * });
+ */
+export function useAllAdminAreasQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllAdminAreasQuery, AllAdminAreasQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllAdminAreasQuery, AllAdminAreasQueryVariables>(AllAdminAreasDocument, baseOptions);
+      }
+export function useAllAdminAreasLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllAdminAreasQuery, AllAdminAreasQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllAdminAreasQuery, AllAdminAreasQueryVariables>(AllAdminAreasDocument, baseOptions);
+        }
+export type AllAdminAreasQueryHookResult = ReturnType<typeof useAllAdminAreasQuery>;
+export type AllAdminAreasLazyQueryHookResult = ReturnType<typeof useAllAdminAreasLazyQuery>;
+export type AllAdminAreasQueryResult = ApolloReactCommon.QueryResult<AllAdminAreasQuery, AllAdminAreasQueryVariables>;
 export const AllBusinessAreasDocument = gql`
     query AllBusinessAreas {
   allBusinessAreas {
@@ -5691,8 +4559,8 @@ export type AllCashPlansQueryHookResult = ReturnType<typeof useAllCashPlansQuery
 export type AllCashPlansLazyQueryHookResult = ReturnType<typeof useAllCashPlansLazyQuery>;
 export type AllCashPlansQueryResult = ApolloReactCommon.QueryResult<AllCashPlansQuery, AllCashPlansQueryVariables>;
 export const AllHouseholdsDocument = gql`
-    query AllHouseholds($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $programs: [ID], $headOfHouseholdFullNameIcontains: String) {
-  allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, size: $familySize, orderBy: $orderBy, programs: $programs, headOfHousehold_FullName_Icontains: $headOfHouseholdFullNameIcontains) {
+    query AllHouseholds($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $programs: [ID], $headOfHouseholdFullNameIcontains: String, $adminArea: ID, $search: String, $residenceStatus: String) {
+  allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, size: $familySize, orderBy: $orderBy, programs: $programs, headOfHousehold_FullName_Icontains: $headOfHouseholdFullNameIcontains, adminArea: $adminArea, search: $search, residenceStatus: $residenceStatus) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -5748,6 +4616,9 @@ export function withAllHouseholds<TProps, TChildProps = {}>(operationOptions?: A
  *      familySize: // value for 'familySize'
  *      programs: // value for 'programs'
  *      headOfHouseholdFullNameIcontains: // value for 'headOfHouseholdFullNameIcontains'
+ *      adminArea: // value for 'adminArea'
+ *      search: // value for 'search'
+ *      residenceStatus: // value for 'residenceStatus'
  *   },
  * });
  */
@@ -5761,8 +4632,8 @@ export type AllHouseholdsQueryHookResult = ReturnType<typeof useAllHouseholdsQue
 export type AllHouseholdsLazyQueryHookResult = ReturnType<typeof useAllHouseholdsLazyQuery>;
 export type AllHouseholdsQueryResult = ApolloReactCommon.QueryResult<AllHouseholdsQuery, AllHouseholdsQueryVariables>;
 export const AllIndividualsDocument = gql`
-    query AllIndividuals($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [ID], $age: String, $orderBy: String) {
-  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Icontains: $fullNameContains, sex: $sex, age: $age, orderBy: $orderBy) {
+    query AllIndividuals($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [ID], $age: String, $orderBy: String, $search: String) {
+  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Icontains: $fullNameContains, sex: $sex, age: $age, orderBy: $orderBy, search: $search) {
     totalCount
     pageInfo {
       startCursor
@@ -5815,6 +4686,7 @@ export function withAllIndividuals<TProps, TChildProps = {}>(operationOptions?: 
  *      sex: // value for 'sex'
  *      age: // value for 'age'
  *      orderBy: // value for 'orderBy'
+ *      search: // value for 'search'
  *   },
  * });
  */
@@ -5902,8 +4774,8 @@ export type AllLogEntriesQueryHookResult = ReturnType<typeof useAllLogEntriesQue
 export type AllLogEntriesLazyQueryHookResult = ReturnType<typeof useAllLogEntriesLazyQuery>;
 export type AllLogEntriesQueryResult = ApolloReactCommon.QueryResult<AllLogEntriesQuery, AllLogEntriesQueryVariables>;
 export const AllPaymentRecordsDocument = gql`
-    query AllPaymentRecords($cashPlan: ID!, $after: String, $before: String, $orderBy: String, $first: Int, $last: Int) {
-  allPaymentRecords(cashPlan: $cashPlan, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy) {
+    query AllPaymentRecords($cashPlan: ID, $household: ID, $after: String, $before: String, $orderBy: String, $first: Int, $last: Int) {
+  allPaymentRecords(cashPlan: $cashPlan, household: $household, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -5932,6 +4804,13 @@ export const AllPaymentRecordsDocument = gql`
           deliveredQuantity
           deliveryDate
         }
+        cashPlan {
+          id
+          program {
+            id
+            name
+          }
+        }
       }
     }
     totalCount
@@ -5939,7 +4818,7 @@ export const AllPaymentRecordsDocument = gql`
   }
 }
     `;
-export type AllPaymentRecordsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllPaymentRecordsQuery, AllPaymentRecordsQueryVariables>, 'query'> & ({ variables: AllPaymentRecordsQueryVariables; skip?: boolean; } | { skip: boolean; });
+export type AllPaymentRecordsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllPaymentRecordsQuery, AllPaymentRecordsQueryVariables>, 'query'>;
 
     export const AllPaymentRecordsComponent = (props: AllPaymentRecordsComponentProps) => (
       <ApolloReactComponents.Query<AllPaymentRecordsQuery, AllPaymentRecordsQueryVariables> query={AllPaymentRecordsDocument} {...props} />
@@ -5970,6 +4849,7 @@ export function withAllPaymentRecords<TProps, TChildProps = {}>(operationOptions
  * const { data, loading, error } = useAllPaymentRecordsQuery({
  *   variables: {
  *      cashPlan: // value for 'cashPlan'
+ *      household: // value for 'household'
  *      after: // value for 'after'
  *      before: // value for 'before'
  *      orderBy: // value for 'orderBy'
@@ -6319,6 +5199,64 @@ export function useHouseholdLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHo
 export type HouseholdQueryHookResult = ReturnType<typeof useHouseholdQuery>;
 export type HouseholdLazyQueryHookResult = ReturnType<typeof useHouseholdLazyQuery>;
 export type HouseholdQueryResult = ApolloReactCommon.QueryResult<HouseholdQuery, HouseholdQueryVariables>;
+export const HouseholdChoiceDataDocument = gql`
+    query householdChoiceData {
+  residenceStatusChoices {
+    name
+    value
+  }
+  relationshipChoices {
+    name
+    value
+  }
+  roleChoices {
+    name
+    value
+  }
+}
+    `;
+export type HouseholdChoiceDataComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<HouseholdChoiceDataQuery, HouseholdChoiceDataQueryVariables>, 'query'>;
+
+    export const HouseholdChoiceDataComponent = (props: HouseholdChoiceDataComponentProps) => (
+      <ApolloReactComponents.Query<HouseholdChoiceDataQuery, HouseholdChoiceDataQueryVariables> query={HouseholdChoiceDataDocument} {...props} />
+    );
+    
+export type HouseholdChoiceDataProps<TChildProps = {}> = ApolloReactHoc.DataProps<HouseholdChoiceDataQuery, HouseholdChoiceDataQueryVariables> & TChildProps;
+export function withHouseholdChoiceData<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  HouseholdChoiceDataQuery,
+  HouseholdChoiceDataQueryVariables,
+  HouseholdChoiceDataProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, HouseholdChoiceDataQuery, HouseholdChoiceDataQueryVariables, HouseholdChoiceDataProps<TChildProps>>(HouseholdChoiceDataDocument, {
+      alias: 'householdChoiceData',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useHouseholdChoiceDataQuery__
+ *
+ * To run a query within a React component, call `useHouseholdChoiceDataQuery` and pass it any options that fit your needs.
+ * When your component renders, `useHouseholdChoiceDataQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useHouseholdChoiceDataQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useHouseholdChoiceDataQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<HouseholdChoiceDataQuery, HouseholdChoiceDataQueryVariables>) {
+        return ApolloReactHooks.useQuery<HouseholdChoiceDataQuery, HouseholdChoiceDataQueryVariables>(HouseholdChoiceDataDocument, baseOptions);
+      }
+export function useHouseholdChoiceDataLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<HouseholdChoiceDataQuery, HouseholdChoiceDataQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<HouseholdChoiceDataQuery, HouseholdChoiceDataQueryVariables>(HouseholdChoiceDataDocument, baseOptions);
+        }
+export type HouseholdChoiceDataQueryHookResult = ReturnType<typeof useHouseholdChoiceDataQuery>;
+export type HouseholdChoiceDataLazyQueryHookResult = ReturnType<typeof useHouseholdChoiceDataLazyQuery>;
+export type HouseholdChoiceDataQueryResult = ApolloReactCommon.QueryResult<HouseholdChoiceDataQuery, HouseholdChoiceDataQueryVariables>;
 export const IndividualDocument = gql`
     query Individual($id: ID!) {
   individual(id: $id) {
@@ -7435,6 +6373,7 @@ export const CandidateHouseholdsListByTargetingCriteriaDocument = gql`
       node {
         id
         headOfHousehold {
+          id
           givenName
           familyName
         }
@@ -7445,6 +6384,7 @@ export const CandidateHouseholdsListByTargetingCriteriaDocument = gql`
         }
         updatedAt
       }
+      cursor
     }
     totalCount
     edgeCount
@@ -7505,15 +6445,18 @@ export const FinalHouseholdsListByTargetingCriteriaDocument = gql`
       node {
         id
         headOfHousehold {
+          id
           givenName
           familyName
         }
         size
         adminArea {
+          id
           title
         }
         updatedAt
       }
+      cursor
     }
     totalCount
     edgeCount
@@ -7575,6 +6518,7 @@ export const GoldenRecordByTargetingCriteriaDocument = gql`
       node {
         id
         headOfHousehold {
+          id
           givenName
           familyName
         }
@@ -7585,6 +6529,7 @@ export const GoldenRecordByTargetingCriteriaDocument = gql`
         }
         updatedAt
       }
+      cursor
     }
     totalCount
     edgeCount
@@ -7798,8 +6743,6 @@ export type ResolversTypes = {
   HouseholdNodeEdge: ResolverTypeWrapper<HouseholdNodeEdge>,
   HouseholdNode: ResolverTypeWrapper<HouseholdNode>,
   HouseholdResidenceStatus: HouseholdResidenceStatus,
-  HouseholdCountryOrigin: HouseholdCountryOrigin,
-  HouseholdCountry: HouseholdCountry,
   GeoJSON: ResolverTypeWrapper<Scalars['GeoJSON']>,
   RegistrationDataImportNode: ResolverTypeWrapper<RegistrationDataImportNode>,
   RegistrationDataImportStatus: RegistrationDataImportStatus,
@@ -7835,14 +6778,12 @@ export type ResolversTypes = {
   IndividualNodeEdge: ResolverTypeWrapper<IndividualNodeEdge>,
   IndividualNode: ResolverTypeWrapper<IndividualNode>,
   IndividualRelationship: IndividualRelationship,
-  IndividualRole: IndividualRole,
   IndividualSex: IndividualSex,
   IndividualMaritalStatus: IndividualMaritalStatus,
   DocumentNodeConnection: ResolverTypeWrapper<DocumentNodeConnection>,
   DocumentNodeEdge: ResolverTypeWrapper<DocumentNodeEdge>,
   DocumentNode: ResolverTypeWrapper<DocumentNode>,
   DocumentTypeNode: ResolverTypeWrapper<DocumentTypeNode>,
-  DocumentTypeCountry: DocumentTypeCountry,
   Decimal: ResolverTypeWrapper<Scalars['Decimal']>,
   ProgramFrequencyOfPayments: ProgramFrequencyOfPayments,
   ProgramSector: ProgramSector,
@@ -7863,8 +6804,6 @@ export type ResolversTypes = {
   UserObjectType: ResolverTypeWrapper<UserObjectType>,
   ImportedHouseholdNode: ResolverTypeWrapper<ImportedHouseholdNode>,
   ImportedHouseholdResidenceStatus: ImportedHouseholdResidenceStatus,
-  ImportedHouseholdCountryOrigin: ImportedHouseholdCountryOrigin,
-  ImportedHouseholdCountry: ImportedHouseholdCountry,
   ImportedIndividualNode: ResolverTypeWrapper<ImportedIndividualNode>,
   ImportedIndividualRelationship: ImportedIndividualRelationship,
   ImportedIndividualRole: ImportedIndividualRole,
@@ -7938,8 +6877,6 @@ export type ResolversParentTypes = {
   HouseholdNodeEdge: HouseholdNodeEdge,
   HouseholdNode: HouseholdNode,
   HouseholdResidenceStatus: HouseholdResidenceStatus,
-  HouseholdCountryOrigin: HouseholdCountryOrigin,
-  HouseholdCountry: HouseholdCountry,
   GeoJSON: Scalars['GeoJSON'],
   RegistrationDataImportNode: RegistrationDataImportNode,
   RegistrationDataImportStatus: RegistrationDataImportStatus,
@@ -7975,14 +6912,12 @@ export type ResolversParentTypes = {
   IndividualNodeEdge: IndividualNodeEdge,
   IndividualNode: IndividualNode,
   IndividualRelationship: IndividualRelationship,
-  IndividualRole: IndividualRole,
   IndividualSex: IndividualSex,
   IndividualMaritalStatus: IndividualMaritalStatus,
   DocumentNodeConnection: DocumentNodeConnection,
   DocumentNodeEdge: DocumentNodeEdge,
   DocumentNode: DocumentNode,
   DocumentTypeNode: DocumentTypeNode,
-  DocumentTypeCountry: DocumentTypeCountry,
   Decimal: Scalars['Decimal'],
   ProgramFrequencyOfPayments: ProgramFrequencyOfPayments,
   ProgramSector: ProgramSector,
@@ -8003,8 +6938,6 @@ export type ResolversParentTypes = {
   UserObjectType: UserObjectType,
   ImportedHouseholdNode: ImportedHouseholdNode,
   ImportedHouseholdResidenceStatus: ImportedHouseholdResidenceStatus,
-  ImportedHouseholdCountryOrigin: ImportedHouseholdCountryOrigin,
-  ImportedHouseholdCountry: ImportedHouseholdCountry,
   ImportedIndividualNode: ImportedIndividualNode,
   ImportedIndividualRelationship: ImportedIndividualRelationship,
   ImportedIndividualRole: ImportedIndividualRole,
@@ -8267,7 +7200,7 @@ export type DocumentTypeNodeResolvers<ContextType = any, ParentType extends Reso
   id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  country?: Resolver<Maybe<ResolversTypes['DocumentTypeCountry']>, ParentType, ContextType>,
+  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   label?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, DocumentTypeNodeDocumentsArgs>,
 };
@@ -8299,8 +7232,8 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   consent?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   residenceStatus?: Resolver<ResolversTypes['HouseholdResidenceStatus'], ParentType, ContextType>,
-  countryOrigin?: Resolver<Maybe<ResolversTypes['HouseholdCountryOrigin']>, ParentType, ContextType>,
-  country?: Resolver<Maybe<ResolversTypes['HouseholdCountry']>, ParentType, ContextType>,
+  countryOrigin?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   size?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   address?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   adminArea?: Resolver<Maybe<ResolversTypes['AdminAreaNode']>, ParentType, ContextType>,
@@ -8392,10 +7325,10 @@ export type ImportedHouseholdNodeResolvers<ContextType = any, ParentType extends
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   consent?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   residenceStatus?: Resolver<ResolversTypes['ImportedHouseholdResidenceStatus'], ParentType, ContextType>,
-  countryOrigin?: Resolver<ResolversTypes['ImportedHouseholdCountryOrigin'], ParentType, ContextType>,
+  countryOrigin?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   size?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   address?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  country?: Resolver<Maybe<ResolversTypes['ImportedHouseholdCountry']>, ParentType, ContextType>,
+  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   admin1?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   admin2?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   geopoint?: Resolver<Maybe<ResolversTypes['GeoJSON']>, ParentType, ContextType>,
@@ -8485,7 +7418,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   middleName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   familyName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   relationship?: Resolver<Maybe<ResolversTypes['IndividualRelationship']>, ParentType, ContextType>,
-  role?: Resolver<Maybe<ResolversTypes['IndividualRole']>, ParentType, ContextType>,
+  role?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   sex?: Resolver<ResolversTypes['IndividualSex'], ParentType, ContextType>,
   birthDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   estimatedBirthDate?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,

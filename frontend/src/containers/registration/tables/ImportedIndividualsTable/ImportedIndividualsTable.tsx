@@ -39,7 +39,9 @@ export function ImportedIndividualsTable({
       rowsPerPageOptions={rowsPerPageOptions}
       initialVariables={initialVariables}
       isOnPaper={isOnPaper}
-      renderRow={(row) => <ImportedIndividualsTableRow individual={row} />}
+      renderRow={(row) => (
+        <ImportedIndividualsTableRow key={row.id} individual={row} />
+      )}
     />
   );
 }

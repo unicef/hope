@@ -1,15 +1,15 @@
 import { useEffect, useRef } from 'react';
 
-export function useInterval(callback, delay) {
+export function useInterval(callback, delay): void {
   const savedCallback = useRef();
 
-  useEffect(() => {
+  useEffect((): void => {
     savedCallback.current = callback;
   }, [callback]);
 
   // eslint-disable-next-line consistent-return
-  useEffect(() => {
-    function tick() {
+  useEffect((): (() => void) => {
+    function tick(): void {
       if (savedCallback.current !== undefined) {
         // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
         // @ts-ignore

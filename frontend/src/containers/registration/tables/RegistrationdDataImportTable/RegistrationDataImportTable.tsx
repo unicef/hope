@@ -1,15 +1,15 @@
 import React, { ReactElement } from 'react';
 import styled from 'styled-components';
+import moment from 'moment';
 import {
   AllRegistrationDataImportsQueryVariables,
   RegistrationDataImportNode,
   useAllRegistrationDataImportsQuery,
 } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../../tables/UniversalTable';
+import { decodeIdString } from '../../../../utils/utils';
 import { headCells } from './RegistrationDataImportTableHeadCells';
 import { RegistrationDataImportTableRow } from './RegistrationDataImportTableRow';
-import moment from 'moment';
-import { decodeIdString } from '../../../../utils/utils';
 
 const TableWrapper = styled.div`
   padding: 20px;
@@ -34,12 +34,19 @@ export function RegistrationDataImportTable({ filter }): ReactElement {
         AllRegistrationDataImportsQueryVariables
       >
         title='List of Imports'
+        getTitle={(data) =>
+          `List of Import (${data.allRegistrationDataImports.totalCount})`
+        }
         headCells={headCells}
+        rowsPerPageOptions={[10, 15, 20]}
         query={useAllRegistrationDataImportsQuery}
         queriedObjectName='allRegistrationDataImports'
         initialVariables={initialVariables}
         renderRow={(row) => (
-          <RegistrationDataImportTableRow registrationDataImport={row} />
+          <RegistrationDataImportTableRow
+            key={row.id}
+            registrationDataImport={row}
+          />
         )}
       />
     </TableWrapper>

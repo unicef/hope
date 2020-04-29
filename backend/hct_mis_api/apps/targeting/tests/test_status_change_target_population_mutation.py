@@ -23,7 +23,7 @@ class TestApproveTargetPopulationMutation(APITestCase):
                     totalCount
                     edges {
                       node {
-                        familySize
+                        size
                         residenceStatus
                       }
                     }
@@ -151,7 +151,7 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
                     totalCount
                     edges {
                       node {
-                        familySize
+                        size
                         residenceStatus
                       }
                     }
@@ -272,7 +272,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
                   finalList{
                     edges{
                       node{
-                        familySize
+                        size
                         residenceStatus
                       }
                     }
@@ -281,7 +281,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
                     totalCount
                     edges {
                       node {
-                        familySize
+                        size
                         residenceStatus
                       }
                     }

@@ -4,7 +4,6 @@ import { PageHeader } from '../../components/PageHeader';
 import { IndividualsListTable } from '../tables/IndividualsListTable';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { IndividualsFilter } from '../../components/population/IndividualsFilter';
-import { BreadCrumbsItem } from '../../components/BreadCrumbs';
 import { useDebounce } from '../../hooks/useDebounce';
 
 const Container = styled.div`
@@ -16,7 +15,7 @@ const Container = styled.div`
 export function PopulationIndividualsPage(): React.ReactElement {
   const businessArea = useBusinessArea();
   const [filter, setFilter] = useState({
-    sex: 'none',
+    sex: '',
     age: { min: undefined, max: undefined },
   });
   const debouncedFilter = useDebounce(filter, 500);

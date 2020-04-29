@@ -19,6 +19,7 @@ export const GoldenRecordByTargetingCriteria = gql`
         node {
           id
           headOfHousehold {
+            id
             givenName
             familyName
           }
@@ -29,6 +30,7 @@ export const GoldenRecordByTargetingCriteria = gql`
           }
           updatedAt
         }
+        cursor
       }
       totalCount
       edgeCount
