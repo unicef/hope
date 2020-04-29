@@ -34,7 +34,7 @@ class PaymentRecordFilter(FilterSet):
             "head_of_household",
             "total_person_covered",
             "distribution_modality",
-            "household__household_ca_id",
+            "household__id",
             "entitlement__entitlement_quantity",
             "entitlement__delivered_quantity",
             "entitlement__delivery_date",

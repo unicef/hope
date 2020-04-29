@@ -1,0 +1,6 @@
+node_modules/
+cypress/screenshots/
+cypress/videos/
+cypress/integration/examples/
+yarn-error.log
+cypress.env.json

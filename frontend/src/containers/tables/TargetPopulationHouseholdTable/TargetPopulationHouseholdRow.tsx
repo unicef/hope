@@ -27,10 +27,10 @@ export function TargetPopulationHouseholdTableRow({ household }) {
       key={household.id}
     >
       <TableCell align='left'>{decodeIdString(household.id)}</TableCell>
-      <TableCell align='left'>{`${household.headOfHousehold.firstName} ${household.headOfHousehold.lastName}`}</TableCell>
-      <TableCell align='left'>{household.familySize}</TableCell>
+      <TableCell align='left'>{`${household.headOfHousehold.givenName} ${household.headOfHousehold.familyName}`}</TableCell>
+      <TableCell align='left'>{household.size}</TableCell>
       <TableCell align='left'>-</TableCell>
-      <TableCell align='left'>{household.location.title}</TableCell>
+      <TableCell align='left'>{household.adminArea.title}</TableCell>
     </ClickableTableRow>
   );
 }

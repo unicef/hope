@@ -1,0 +1,6 @@
+{
+    "baseUrl": "http://localhost:8082/",
+    "testFiles": "**/*.feature",
+    "viewportWidth": 1366,
+    "viewportHeight": 768
+}

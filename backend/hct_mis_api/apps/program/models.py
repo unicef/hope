@@ -77,8 +77,8 @@ class Program(TimeStampedUUIDModel):
         validators=[MinLengthValidator(3), MaxLengthValidator(255)],
     )
     program_ca_id = models.CharField(max_length=255)
-    locations = models.ManyToManyField(
-        "core.Location", related_name="programs", blank=True,
+    admin_areas = models.ManyToManyField(
+        "core.AdminArea", related_name="programs", blank=True,
     )
     business_area = models.ForeignKey(
         "core.BusinessArea", on_delete=models.CASCADE
