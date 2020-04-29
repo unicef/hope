@@ -3,7 +3,7 @@ from django.core.management import call_command
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
 from core.models import BusinessArea
-from household.fixtures import IndividualFactory, HouseholdFactory
+from household.fixtures import IndividualFactory, HouseholdFactory, create_household
 from program.fixtures import ProgramFactory
 
 
@@ -68,8 +68,12 @@ class TestIndividualQuery(APITestCase):
         program_two = ProgramFactory(
             name="Test program TWO", business_area=BusinessArea.objects.first(),
         )
-        household_one = HouseholdFactory()
-        household_two = HouseholdFactory()
+        (household_one, individuals) = create_household(
+
+        )
+        (household_two, individuals) = create_household(
+
+        )
         household_one.programs.add(program_one)
         household_two.programs.add(program_two)
 
