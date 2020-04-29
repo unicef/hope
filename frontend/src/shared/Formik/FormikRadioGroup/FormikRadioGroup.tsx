@@ -1,10 +1,9 @@
 import React from 'react';
 import {
-  FormControl,
   FormControlLabel,
   FormLabel,
-  RadioGroup,
   Radio,
+  RadioGroup,
 } from '@material-ui/core';
 import styled from 'styled-components';
 

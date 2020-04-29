@@ -14,7 +14,7 @@ const TableWrapper = styled.div`
 `;
 
 interface IndividualsListTableProps {
-  filter
+  filter;
   businessArea?: string;
 }
 
@@ -26,7 +26,7 @@ export const IndividualsListTable = ({
     age: JSON.stringify(filter.age),
     businessArea,
     sex: [filter.sex],
-    fullNameContains: filter.text,
+    search: filter.text,
   };
 
   return (
@@ -38,7 +38,9 @@ export const IndividualsListTable = ({
         query={useAllIndividualsQuery}
         queriedObjectName='allIndividuals'
         initialVariables={initialVariables}
-        renderRow={(row) => <IndividualsListTableRow individual={row} />}
+        renderRow={(row) => (
+          <IndividualsListTableRow key={row.id} individual={row} />
+        )}
       />
     </TableWrapper>
   );

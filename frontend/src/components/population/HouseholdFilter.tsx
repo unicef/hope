@@ -5,10 +5,15 @@ import SearchIcon from '@material-ui/icons/Search';
 import GroupIcon from '@material-ui/icons/Group';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
 import FormControl from '@material-ui/core/FormControl';
-import { ProgramNode } from '../../__generated__/graphql';
+import AssignmentIndRoundedIcon from '@material-ui/icons/AssignmentIndRounded';
+import {
+  HouseholdChoiceDataQuery,
+  ProgramNode,
+} from '../../__generated__/graphql';
 import TextField from '../../shared/TextField';
 import InputLabel from '../../shared/InputLabel';
 import Select from '../../shared/Select';
+import { AdminAreasAutocomplete } from './AdminAreaAutocomplete';
 
 const Container = styled.div`
   display: flex;
@@ -51,20 +56,22 @@ const SearchTextField = styled(TextField)`
 `;
 
 const StartInputAdornment = styled(InputAdornment)`
-  margin-right: 0px;
+  margin-right: 0;
 `;
 
 interface HouseholdFiltersProps {
   onFilterChange;
   filter;
   programs: ProgramNode[];
+  choicesData: HouseholdChoiceDataQuery;
 }
 export function HouseholdFilters({
   onFilterChange,
   filter,
   programs,
+  choicesData,
 }: HouseholdFiltersProps): React.ReactElement {
-  const handleFilterChange = (e, name) =>
+  const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
   return (
     <Container>
@@ -89,6 +96,7 @@ export function HouseholdFilters({
           onChange={(e) => handleFilterChange(e, 'program')}
           variant='outlined'
           label='Programme'
+          value={filter.program||""}
           InputProps={{
             startAdornment: (
               <StartInputAdornment position='start'>
@@ -101,10 +109,47 @@ export function HouseholdFilters({
             <em>None</em>
           </MenuItem>
           {programs.map((program) => (
-            <MenuItem value={program.id}>{program.name}</MenuItem>
+            <MenuItem key={program.id} value={program.id}>
+              {program.name}
+            </MenuItem>
           ))}
         </Select>
       </StyledFormControl>
+      <StyledFormControl variant='outlined' margin='dense'>
+        <InputLabel>Residence Status</InputLabel>
+        <Select
+          /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
+          // @ts-ignore
+          onChange={(e) => handleFilterChange(e, 'residenceStatus')}
+          variant='outlined'
+          label='Residence Status'
+          value={filter.residenceStatus||""}
+          InputProps={{
+            startAdornment: (
+              <StartInputAdornment position='start'>
+                <AssignmentIndRoundedIcon />
+              </StartInputAdornment>
+            ),
+          }}
+        >
+          <MenuItem value=''>
+            <em>None</em>
+          </MenuItem>
+          {choicesData.residenceStatusChoices.map((program) => (
+            <MenuItem key={program.value} value={program.value}>{program.name}</MenuItem>
+          ))}
+        </Select>
+      </StyledFormControl>
+      <AdminAreasAutocomplete
+        value={filter.adminArea}
+        onChange={(e, option) => {
+          if (!option) {
+            onFilterChange({ ...filter, adminArea: undefined });
+            return;
+          }
+          onFilterChange({ ...filter, adminArea: option.node.id });
+        }}
+      />
       <TextContainer
         id='minFilter'
         value={filter.householdSize.min}

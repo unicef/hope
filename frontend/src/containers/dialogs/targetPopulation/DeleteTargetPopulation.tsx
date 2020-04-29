@@ -63,7 +63,7 @@ export function DeleteTargetPopulation({ open, setOpen, targetPopulationId }) {
           });
         }}
       >
-        {({ submitForm, values }) => (
+        {({ submitForm }) => (
           <>
             <DialogTitleWrapper>
               <DialogTitle id='scroll-dialog-title'>

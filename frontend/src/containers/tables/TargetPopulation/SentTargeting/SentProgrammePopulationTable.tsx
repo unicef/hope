@@ -41,9 +41,9 @@ export const SentTargetPopulationTable = ({
         initialVariables={initialVariables}
         renderRow={(row) => {
           return selectedTab === 0 ? (
-            <ProgrammeTableRow household={row} />
+            <ProgrammeTableRow key={row.name} household={row} />
           ) : (
-            <TargetPopulationHouseholdTableRow household={row} />
+            <TargetPopulationHouseholdTableRow key={row.name} household={row} />
           );
         }}
       />

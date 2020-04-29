@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
-import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { Field } from 'formik';
+import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 
 const FlexWrapper = styled.div`
