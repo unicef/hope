@@ -36,6 +36,7 @@ interface ProgramDetailsProps {
 export function TargetPopulationDetails({
     targetPopulation,
 }: ProgramDetailsProps): React.ReactElement {
+  const { firstName, lastName } = targetPopulation.candidateListTargetingCriteria.targetPopulationCandidate.createdBy;
   return (
     <Container>
       <Title>
@@ -45,13 +46,13 @@ export function TargetPopulationDetails({
         <Grid container spacing={6}>
         <Grid item xs={4}>
             <LabelizedField
-              label='Target population used in'
-              value='some random id'
+              label='created by'
+              value={`${firstName} ${lastName}`}
             />
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
-              label='Vulnerability score'
+              label='Programme population close date'
               value='some random score'
             />
           </Grid>
@@ -63,13 +64,13 @@ export function TargetPopulationDetails({
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
-              label='Finalized by'
+              label='Send by'
               value='name surname'
             />
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
-              label='END DATE'
+              label='Send date'
               value={moment(targetPopulation.createdAt).format('DD MMM YYYY')}
             />
           </Grid>

@@ -7,34 +7,30 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['GoldenRecordTargetingCriteriaQueryTestCase::test_golden_record_by_targeting_criteria_family_size 1'] = {
-    'data': {
-        'goldenRecordByTargetingCriteria': {
-            'edges': [
+snapshots['GoldenRecordTargetingCriteriaQueryTestCase::test_golden_record_by_targeting_criteria_size 1'] = {
+    'errors': [
+        {
+            'locations': [
                 {
-                    'node': {
-                        'familySize': 2,
-                        'residenceStatus': 'REFUGEE'
-                    }
+                    'column': 13,
+                    'line': 7
                 }
             ],
-            'totalCount': 1
+            'message': 'Cannot query field "familySize" on type "HouseholdNode".'
         }
-    }
+    ]
 }
 
 snapshots['GoldenRecordTargetingCriteriaQueryTestCase::test_golden_record_by_targeting_criteria_residence_status 1'] = {
-    'data': {
-        'goldenRecordByTargetingCriteria': {
-            'edges': [
+    'errors': [
+        {
+            'locations': [
                 {
-                    'node': {
-                        'familySize': 2,
-                        'residenceStatus': 'REFUGEE'
-                    }
+                    'column': 13,
+                    'line': 7
                 }
             ],
-            'totalCount': 1
+            'message': 'Cannot query field "familySize" on type "HouseholdNode".'
         }
-    }
+    ]
 }

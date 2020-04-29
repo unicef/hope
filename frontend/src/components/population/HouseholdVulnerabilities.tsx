@@ -4,6 +4,7 @@ import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import { Typography } from '@material-ui/core';
 import { LabelizedField } from '../LabelizedField';
+import {Missing} from "../Missing";
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px
@@ -29,42 +30,42 @@ export function HouseholdVulnerabilities(): React.ReactElement {
         <Grid container spacing={6}>
           <Grid item xs={4}>
             <LabelizedField label='Living Situation'>
-              <div>-</div>
+              <Missing/>
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>
             <LabelizedField label='Construction Material'>
-              <div>-</div>
+              <Missing/>
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>
             <LabelizedField label='Shelter Quality'>
-              <div>-</div>
+              <Missing/>
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>
             <LabelizedField label='Number of Rooms'>
-              <div>-</div>
+              <Missing/>
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>
             <LabelizedField label='Total Dweller'>
-              <div>-</div>
+              <Missing/>
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>
             <LabelizedField label='Dwellers in one room'>
-              <div>-</div>
+              <Missing/>
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>
             <LabelizedField label='Total Households'>
-              <div>-</div>
+              <Missing/>
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>
             <LabelizedField label='Source of water'>
-              <div>-</div>
+              <Missing/>
             </LabelizedField>
           </Grid>
         </Grid>
