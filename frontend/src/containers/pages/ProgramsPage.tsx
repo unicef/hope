@@ -1,7 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
-import { Snackbar, SnackbarContent } from '@material-ui/core';
 import { ProgramCard } from '../../components/programs/ProgramCard';
 import { PageHeader } from '../../components/PageHeader';
 import {
@@ -12,7 +11,6 @@ import {
 import { CreateProgram } from '../dialogs/programs/CreateProgram';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { LoadingComponent } from '../../components/LoadingComponent';
-import { useSnackbar } from '../../hooks/useSnackBar'
 
 const PageContainer = styled.div`
   display: flex;

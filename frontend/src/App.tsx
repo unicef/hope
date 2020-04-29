@@ -1,5 +1,5 @@
 import React from 'react';
-import {Dialog, Snackbar, SnackbarContent, ThemeProvider} from '@material-ui/core';
+import { ThemeProvider } from '@material-ui/core';
 import { ThemeProvider as StyledThemeProvider } from 'styled-components';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import CssBaseline from '@material-ui/core/CssBaseline';

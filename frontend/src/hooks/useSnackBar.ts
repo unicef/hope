@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import get from 'lodash/get';
 
-export function useSnackbar() {
+export function useSnackbar(): { show; setShow; message; showMessage } {
   const history = useHistory();
   const location = useLocation();
   const [show, setShow] = useState(
@@ -22,7 +22,7 @@ export function useSnackbar() {
   const showMessage = (
     messageContent: string,
     options?: { pathname?: string; historyMethod?: keyof typeof history },
-  ) => {
+  ): void => {
     history[get(options, 'historyMethod', 'replace')]({
       pathname: get(options, 'pathname', history.location.pathname),
       state: { showSnackbar: true, message: messageContent },
