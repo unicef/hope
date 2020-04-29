@@ -29,6 +29,7 @@ export const GoldenRecordByTargetingCriteria = gql`
             title
           }
           updatedAt
+          address
         }
         cursor
       }
