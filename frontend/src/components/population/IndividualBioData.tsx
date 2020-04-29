@@ -1,16 +1,15 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Paper, Typography, Grid } from '@material-ui/core';
+import { Grid, Paper, Typography } from '@material-ui/core';
+import { useHistory } from 'react-router-dom';
+import Moment from 'react-moment';
 import { LabelizedField } from '../LabelizedField';
 import { IndividualNode } from '../../__generated__/graphql';
-import { useHistory } from 'react-router-dom';
 import {
+  decodeIdString,
   getAgeFromDob,
   sexToCapitalize,
-  getIdentificationType,
-  decodeIdString,
 } from '../../utils/utils';
-import Moment from 'react-moment';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { Missing } from '../Missing';
 
