@@ -64,19 +64,10 @@ const CriteriaField = ({ field }) => {
       break;
     case 'EQUALS':
       fieldElement = (
-        typeof field.arguments[0] === 'object' ?
-          <p>
-            {field.fieldAttribute.labelEn || field.fieldName}:{' '}
-            {field.arguments[0].map((argument, index) => {
-              return <><span>{field.fieldAttribute.choices.find(each => each.value === argument).labelEn}</span>{index !== field.arguments[0].length - 1 && ', '}</>
-            }
-            )}
-          </p> :
           <p>
             {field.fieldAttribute.labelEn || field.fieldName}:{' '}
             <span>{field.fieldAttribute.choices.find(each => each.value === field.arguments[0]).labelEn || field.arguments[0]}</span>
           </p>
-
       );
       break;
     case 'LESS_THAN':
@@ -95,15 +86,21 @@ const CriteriaField = ({ field }) => {
         </p>
       );
       break;
-    case 'SELECT_MANY':
-      //eslint-disable-next-line
-      debugger
+    case 'CONTAINS':
       fieldElement = (
-        <p>
-          {field.fieldAttribute.labelEn || field.fieldName}:{' '}
-          <span>{field.fieldAttribute.choices.find(each => each.value === field.arguments[0]).labelEn || field.arguments[0]}</span>
-        </p>
-      )
+        field.arguments.length > 1 ?
+          <p>
+            {field.fieldAttribute.labelEn || field.fieldName}:{' '}
+            {field.arguments.map((argument, index) => {
+              return <><span>{field.fieldAttribute.choices.find(each => each.value === argument).labelEn}</span>{index !== field.arguments.length - 1 && ', '}</>
+            }
+            )}
+          </p> :
+          <p>
+            {field.fieldAttribute.labelEn || field.fieldName}:{' '}
+            <span>{field.arguments[0]}</span>
+          </p>
+      );
       break;
     default:
       fieldElement = (
