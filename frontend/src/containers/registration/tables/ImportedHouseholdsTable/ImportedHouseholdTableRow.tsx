@@ -1,16 +1,11 @@
-import styled from 'styled-components';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import moment from 'moment';
 import { ImportedHouseholdMinimalFragment } from '../../../../__generated__/graphql';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../../components/table/ClickableTableRow';
 import { decodeIdString } from '../../../../utils/utils';
-import moment from 'moment';
-
-const StatusContainer = styled.div`
-  width: 120px;
-`;
 
 interface PaymentRecordTableRowProps {
   household: ImportedHouseholdMinimalFragment;
@@ -18,7 +13,7 @@ interface PaymentRecordTableRowProps {
 
 export function ImportedHouseholdTableRow({
   household,
-}: PaymentRecordTableRowProps) {
+}: PaymentRecordTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
 
@@ -34,9 +29,7 @@ export function ImportedHouseholdTableRow({
       key={household.id}
     >
       <TableCell align='left'>{decodeIdString(household.id)}</TableCell>
-      <TableCell align='left'>
-        {household.headOfHousehold && household.headOfHousehold.fullName}
-      </TableCell>
+      <TableCell align='left'>{household?.headOfHousehold?.fullName}</TableCell>
       <TableCell align='right'>{household.size}</TableCell>
       <TableCell align='left'>{household.admin1}</TableCell>
       <TableCell align='left'>

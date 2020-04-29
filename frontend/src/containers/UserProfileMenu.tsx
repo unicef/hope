@@ -23,15 +23,17 @@ const MenuButtonText = styled.span`
 interface UserProfileMenuProps {
   meData: MeQuery;
 }
-export function UserProfileMenu({ meData }: UserProfileMenuProps) {
+export function UserProfileMenu({
+  meData,
+}: UserProfileMenuProps): React.ReactElement {
   const [open, setOpen] = React.useState(false);
   const anchorRef = React.useRef<HTMLButtonElement>(null);
 
-  const handleToggle = () => {
+  const handleToggle = (): void => {
     setOpen((prevOpen) => !prevOpen);
   };
 
-  const handleClose = (event: React.MouseEvent<EventTarget>) => {
+  const handleClose = (event: React.MouseEvent<EventTarget>): void => {
     if (
       anchorRef.current &&
       anchorRef.current.contains(event.target as HTMLElement)
@@ -41,11 +43,11 @@ export function UserProfileMenu({ meData }: UserProfileMenuProps) {
 
     setOpen(false);
   };
-  const handleLogout = (event: React.MouseEvent<EventTarget>) => {
+  const handleLogout = (event: React.MouseEvent<EventTarget>): void => {
     window.location.assign('/api/logout');
     handleClose(event);
   };
-  function handleListKeyDown(event: React.KeyboardEvent) {
+  function handleListKeyDown(event: React.KeyboardEvent): void {
     if (event.key === 'Tab') {
       event.preventDefault();
       setOpen(false);

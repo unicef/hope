@@ -20,7 +20,7 @@ export function PaymentRecordHouseholdTable({
   openInNewTab = false,
 }: PaymentRecordTableProps): ReactElement {
   const initialVariables = {
-    household: household && household.id,
+    household: household?.id,
   };
   return (
     <UniversalTable<PaymentRecordNode, AllPaymentRecordsQueryVariables>
