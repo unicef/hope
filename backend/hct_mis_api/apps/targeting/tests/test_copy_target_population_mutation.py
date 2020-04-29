@@ -1,7 +1,7 @@
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
 from core.utils import decode_id_string
-from household.fixtures import HouseholdFactory
+from household.fixtures import HouseholdFactory, create_household
 from targeting.models import (
     TargetingCriteria,
     TargetingCriteriaRule,
@@ -58,9 +58,11 @@ class TestCopyTargetPopulationMutation(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = UserFactory.create()
-        cls.household = HouseholdFactory(
-            size=1, residence_status="CITIZEN",
+
+        (household, individuals) = create_household(
+            {"size": 1, "residence_status": "CITIZEN",},
         )
+        cls.household = household
         tp = TargetPopulation(
             name="Original Target Population", status="APPROVED"
         )
