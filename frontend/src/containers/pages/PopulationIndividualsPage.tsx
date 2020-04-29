@@ -4,7 +4,6 @@ import { PageHeader } from '../../components/PageHeader';
 import { IndividualsListTable } from '../tables/IndividualsListTable';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { IndividualsFilter } from '../../components/population/IndividualsFilter';
-import { BreadCrumbsItem } from '../../components/BreadCrumbs';
 import { useDebounce } from '../../hooks/useDebounce';
 
 const Container = styled.div`

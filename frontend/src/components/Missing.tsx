@@ -10,7 +10,7 @@ const Value = styled.span`
   line-height: 19px;
   color: ${({ missing }) => (missing ? red : black)};
 `;
-export function Missing() {
+export function Missing(): React.ReactElement {
   const [missing, setMissing] = useState(false);
   useInterval(() => {
     setMissing(!missing);

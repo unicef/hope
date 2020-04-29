@@ -1,13 +1,7 @@
 import React, { useState } from 'react';
 import moment from 'moment';
-import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import {
-  Button,
-  DialogActions,
-  Snackbar,
-  SnackbarContent,
-} from '@material-ui/core';
+import { Button, DialogActions } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/EditRounded';
 import {
   ProgramNode,
