@@ -1,6 +1,10 @@
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
-from household.fixtures import HouseholdFactory, IndividualFactory
+from household.fixtures import (
+    HouseholdFactory,
+    IndividualFactory,
+    create_household,
+)
 from targeting.models import (
     TargetPopulation,
     TargetingCriteria,
@@ -40,20 +44,20 @@ class CandidateListTargetingCriteriaQueryTestCase(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        HouseholdFactory(
-            size=1, residence_status="CITIZEN",
+        (household, individuals) = create_household(
+            {"size": 1, "residence_status": "CITIZEN",},
         )
-        cls.household_size_1 = HouseholdFactory(
-            size=1, residence_status="CITIZEN",
+        (household, individuals) = create_household(
+            {"size": 1, "residence_status": "CITIZEN",},
         )
-        cls.household_residence_status_citizen = cls.household_size_1
-        IndividualFactory(household=cls.household_size_1)
-        cls.household_residence_status_refugee = HouseholdFactory(
-            size=2, residence_status="REFUGEE",
+        cls.household_size_1 = household
+        cls.household_residence_status_citizen = household
+
+        (household, individuals) = create_household(
+            {"size": 2, "residence_status": "REFUGEE",},
         )
-        cls.household_size_2 = cls.household_residence_status_refugee
-        IndividualFactory(household=cls.household_residence_status_refugee)
-        IndividualFactory(household=cls.household_residence_status_refugee)
+        cls.household_residence_status_refugee = household
+        cls.household_size_2 = household
         cls.user = UserFactory.create()
         targeting_criteria = cls.get_targeting_criteria_for_rule(
             {

@@ -2277,6 +2277,27 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
                 'isFlexField': True,
+                'labelEn': 'How many years has the child been in school?',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'How many years has the child been in school?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'years_in_school_i_f',
+                'required': False,
+                'type': 'INTEGER'
+            },
+            {
+                'associatedWith': '1',
+                'choices': [
+                ],
+                'hint': "{'French(FR)': '', 'English(EN)': ''}",
+                'isFlexField': True,
                 'labelEn': 'How many minutes does it take for the child to go to the nearest available school?',
                 'labels': [
                     {
