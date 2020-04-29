@@ -3,7 +3,7 @@ from django.core.management import call_command
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
 from core.models import BusinessArea
-from household.fixtures import HouseholdFactory
+from household.fixtures import HouseholdFactory, create_household
 from program.fixtures import ProgramFactory
 
 
@@ -107,10 +107,12 @@ class TestHouseholdQuery(APITestCase):
 
         self.households = []
         for index, family_size in enumerate(family_sizes_list):
-            household = HouseholdFactory(
-                size=family_size,
-                address="Lorem Ipsum",
-                country_origin="PL",
+            (household, individuals) = create_household(
+                {
+                    "size": family_size,
+                    "address": "Lorem Ipsum",
+                    "country_origin": "PL",
+                },
             )
             if index % 2:
                 household.programs.add(self.program_one)
@@ -147,9 +149,7 @@ class TestHouseholdQuery(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.ALL_HOUSEHOLD_FILTER_PROGRAMS_QUERY,
             variables={
-                "programs": [
-                    self.id_to_base64(self.program_one.id, "Program")
-                ]
+                "programs": [self.id_to_base64(self.program_one.id, "Program")]
             },
             context={"user": self.user},
         )
