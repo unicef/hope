@@ -1,15 +1,12 @@
 import React from 'react';
 import styled from 'styled-components';
-import { useTranslation } from 'react-i18next';
 import { Button, Typography, Paper, Tabs, Tab } from '@material-ui/core';
 import { Field, Form, Formik, FieldArray } from 'formik';
 import { PageHeader } from '../../components/PageHeader';
 import { TargetingCriteria } from '../../components/TargetPopulation/TargetingCriteria';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { Results } from '../../components/TargetPopulation/Results';
-import { TargetPopulationHouseholdTable } from '../tables/TargetPopulationHouseholdTable';
 import {
-  useGoldenRecordByTargetingCriteriaQuery,
   useCreateTpMutation,
 } from '../../__generated__/graphql';
 import { useSnackbar } from '../../hooks/useSnackBar';
@@ -35,7 +32,6 @@ const Label = styled.p`
 `;
 
 export function CreateTargetPopulation() {
-  const { t } = useTranslation();
   const initialValues = {
     name: '',
     criterias: [],
@@ -153,13 +149,13 @@ export function CreateTargetPopulation() {
               }}
             />
           ) : (
-            <PaperContainer>
-              <Typography variant='h6'>
-                Target Population Entries (Households)
+              <PaperContainer>
+                <Typography variant='h6'>
+                  Target Population Entries (Households)
               </Typography>
-              <Label>Add targeting criteria to see results.</Label>
-            </PaperContainer>
-          )}
+                <Label>Add targeting criteria to see results.</Label>
+              </PaperContainer>
+            )}
         </Form>
       )}
     </Formik>

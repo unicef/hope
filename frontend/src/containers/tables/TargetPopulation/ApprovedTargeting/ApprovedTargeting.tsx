@@ -1,5 +1,6 @@
 import React, { ReactElement } from 'react';
 import styled from 'styled-components';
+import { Warning } from '@material-ui/icons';
 import {
   useCandidateHouseholdsListByTargetingCriteriaQuery,
   useFinalHouseholdsListByTargetingCriteriaQuery,
@@ -9,7 +10,6 @@ import { ProgrammeTableRow } from '../SentTargeting/ProgrammeTableRow';
 import { headCells as programmeHeadCells } from '../SentTargeting/ProgrammeHeadCells';
 import { headCells as targetPopulationHeadCells } from '../SentTargeting/TargetPopulationHeadCells';
 import { TargetPopulationHouseholdTableRow } from '../SentTargeting/TargetPopulationTableRow';
-import { Warning } from '@material-ui/icons';
 
 const TableWrapper = styled.div`
   padding: 20px;
@@ -77,11 +77,11 @@ export const ApprovedTargetPopulationTable = ({
               <TargetPopulationHouseholdTableRow household={row} />
             )}
           />
-          {/* {hasSameResults && (
+          {hasSameResults && (
             <Indicator>
               <Warning /> Same Results as Programme Population
             </Indicator>
-          )} */}
+          )}
         </>
       )}
     </TableWrapper>
