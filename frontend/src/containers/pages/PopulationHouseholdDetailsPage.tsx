@@ -6,7 +6,6 @@ import { useParams } from 'react-router-dom';
 import { HouseholdDetails } from '../../components/population/HouseholdDetails';
 import { PageHeader } from '../../components/PageHeader';
 import {
-  CashPlanNode,
   HouseholdNode,
   useHouseholdChoiceDataQuery,
   useHouseholdQuery,
@@ -15,11 +14,10 @@ import { BreadCrumbsItem } from '../../components/BreadCrumbs';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { HouseholdVulnerabilities } from '../../components/population/HouseholdVulnerabilities';
 import { LabelizedField } from '../../components/LabelizedField';
-import { PaymentRecordTable } from '../tables/PaymentRecordTable';
 import { HouseholdIndividualsTable } from '../tables/HouseholdIndividualsTable';
 import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
 import { decodeIdString } from '../../utils/utils';
-import {PaymentRecordHouseholdTable} from "../tables/PaymentRecordHouseholdTable";
+import { PaymentRecordHouseholdTable } from '../tables/PaymentRecordHouseholdTable';
 
 const Container = styled.div`
   padding: 20px;
@@ -40,7 +38,7 @@ const Overview = styled(Paper)`
     ${({ theme }) => theme.spacing(11)}px;
   margin-top: 20px;
   &:first-child {
-    margin-top: 0px;
+    margin-top: 0;
   }
 `;
 const Content = styled.div`
@@ -75,8 +73,6 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
   ];
 
   const { household } = data;
-  const cashPlan = household.paymentRecords.edges[0].node
-    .cashPlan as CashPlanNode;
 
   return (
     <div>

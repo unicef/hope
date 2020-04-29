@@ -80,11 +80,11 @@ const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};
 `;
 
-function DropzoneField({ onChange, loading }) {
+function DropzoneField({ onChange, loading }): React.ReactElement {
   const onDrop = useCallback((acceptedFiles) => {
     onChange(acceptedFiles);
   }, []);
-  const { getRootProps, getInputProps, acceptedFiles, rootRef } = useDropzone({
+  const { getRootProps, getInputProps, acceptedFiles } = useDropzone({
     disabled: loading,
     accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     onDrop,
@@ -194,7 +194,6 @@ export function RegistrationDataImport(): React.ReactElement {
         <Formik
           validationSchema={validationSchema}
           onSubmit={async (values) => {
-            console.log('values', values);
             const { data } = await createRegistrationMutate({
               variables: {
                 registrationDataImportData: {
@@ -211,7 +210,7 @@ export function RegistrationDataImport(): React.ReactElement {
           }}
           initialValues={{ name: '' }}
         >
-          {({ submitForm, values }) => (
+          {({ submitForm }) => (
             <Form>
               <DialogTitleWrapper>
                 <DialogTitle id='scroll-dialog-title'>

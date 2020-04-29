@@ -1,5 +1,5 @@
 import { HeadCell } from '../../../../components/table/EnhancedTableHead';
-import { ImportedHouseholdMinimalFragment, RegistrationDataImportNode, } from '../../../../__generated__/graphql';
+import { ImportedHouseholdMinimalFragment } from '../../../../__generated__/graphql';
 
 export const headCells: HeadCell<ImportedHouseholdMinimalFragment>[] = [
   {

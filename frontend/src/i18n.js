@@ -5,11 +5,12 @@ import { initReactI18next } from 'react-i18next';
 const resources = {
   en: {
     translation: {
-      'Programme Management': 'Programme Management'
+      'Programme Management': 'Programme Management',
     },
   },
 };
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export default function setupInternalization() {
   return i18n
     .use(initReactI18next) // passes i18n down to react-i18next

@@ -1,27 +1,14 @@
-import styled from 'styled-components';
 import TableCell from '@material-ui/core/TableCell';
-import Moment from 'react-moment';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import {
-  CashPlanNode,
-  HouseholdNode,
-  IndividualNode,
-} from '../../../__generated__/graphql';
+import { IndividualNode } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
-import { StatusBox } from '../../../components/StatusBox';
 import {
-  cashPlanStatusToColor,
   decodeIdString,
-  formatCurrency,
   getAgeFromDob,
   sexToCapitalize,
 } from '../../../utils/utils';
-
-const StatusContainer = styled.div`
-  width: 120px;
-`;
 
 interface IndividualsListTableRowProps {
   individual: IndividualNode;
@@ -29,7 +16,7 @@ interface IndividualsListTableRowProps {
 
 export function IndividualsListTableRow({
   individual,
-}: IndividualsListTableRowProps) {
+}: IndividualsListTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
   let age: number | string = 'N/A';

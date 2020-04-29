@@ -1,5 +1,4 @@
 import React, { ReactElement } from 'react';
-import styled from 'styled-components';
 import {
   AllImportedHouseholdsQueryVariables,
   ImportedHouseholdMinimalFragment,
@@ -8,7 +7,6 @@ import {
 import { UniversalTable } from '../../../tables/UniversalTable';
 import { ImportedHouseholdTableRow } from './ImportedHouseholdTableRow';
 import { headCells } from './ImportedHouseholdTableHeadCells';
-
 
 export function ImportedHouseholdTable({ rdiId }): ReactElement {
   const initialVariables = {
@@ -22,7 +20,7 @@ export function ImportedHouseholdTable({ rdiId }): ReactElement {
       headCells={headCells}
       query={useAllImportedHouseholdsQuery}
       queriedObjectName='allImportedHouseholds'
-      rowsPerPageOptions={[10,15,20]}
+      rowsPerPageOptions={[10, 15, 20]}
       initialVariables={initialVariables}
       isOnPaper={false}
       renderRow={(row) => <ImportedHouseholdTableRow household={row} />}
