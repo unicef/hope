@@ -1,3 +1,4 @@
+
 import React from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
@@ -63,9 +64,11 @@ const Label = styled.p`
 
 interface ResultsProps {
   resultsData?;
+  totalNumOfHouseholds?;
+  finalListTotalHouseholds?;
 }
 
-export function Results({ resultsData }: ResultsProps) {
+export function Results({ resultsData, totalNumOfHouseholds, finalListTotalHouseholds }: ResultsProps) {
   const { t } = useTranslation();
 
   return (
@@ -159,14 +162,14 @@ export function Results({ resultsData }: ResultsProps) {
                 <SummaryBorder>
                   <LabelizedField label='Total Number of Households'>
                     <SummaryValue>
-                      {resultsData.totalNumberOfHouseholds}
+                      {totalNumOfHouseholds || "N/A"}
                     </SummaryValue>
                   </LabelizedField>
                 </SummaryBorder>
                 <SummaryBorder>
                   <LabelizedField label='Targeted Individuals'>
                     <SummaryValue>
-                      {resultsData.targetedIndividuals}
+                      {finalListTotalHouseholds || "N/A"}
                     </SummaryValue>
                   </LabelizedField>
                 </SummaryBorder>

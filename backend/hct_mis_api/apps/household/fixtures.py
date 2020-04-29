@@ -46,7 +46,9 @@ class DocumentFactory(factory.DjangoModelFactory):
         model = Document
 
     document_number = factory.Faker("pystr", min_chars=None, max_chars=20)
-    type = factory.LazyAttribute(lambda o: DocumentType.objects.order_by('?').first())
+    type = factory.LazyAttribute(
+        lambda o: DocumentType.objects.order_by("?").first()
+    )
 
 
 class IndividualFactory(factory.DjangoModelFactory):
@@ -63,7 +65,6 @@ class IndividualFactory(factory.DjangoModelFactory):
     birth_date = factory.Faker(
         "date_of_birth", tzinfo=utc, minimum_age=16, maximum_age=90
     )
-    estimated_birth_date = None
     marital_status = factory.fuzzy.FuzzyChoice(
         MARITAL_STATUS_CHOICE, getter=lambda c: c[0],
     )
@@ -90,3 +91,21 @@ class EntitlementCardFactory(factory.DjangoModelFactory):
     card_custodian = factory.Faker("name")
     service_provider = factory.Faker("company")
     household = factory.SubFactory(HouseholdFactory)
+
+
+def create_household(household_args=None, individual_args=None):
+    if household_args is None:
+        household_args = {}
+    if individual_args is None:
+        individual_args = {}
+    household = HouseholdFactory.build(**household_args)
+    individuals = IndividualFactory.create_batch(
+        household.size, household=household, **individual_args
+    )
+    individuals[0].relationship = "HEAD"
+    individuals[0].save()
+    household.head_of_household = individuals[0]
+    household.registration_data_import.imported_by.save()
+    household.registration_data_import.save()
+    household.save()
+    return household, individuals
