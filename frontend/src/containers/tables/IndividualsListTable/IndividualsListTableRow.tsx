@@ -33,8 +33,8 @@ export function IndividualsListTableRow({
   const history = useHistory();
   const businessArea = useBusinessArea();
   let age: number | string = 'N/A';
-  if (individual.dob) {
-    age = getAgeFromDob(individual.dob);
+  if (individual.birthDate) {
+    age = getAgeFromDob(individual.birthDate);
   }
   const handleClick = (): void => {
     const path = `/${businessArea}/population/individuals/${individual.id}`;
@@ -54,7 +54,7 @@ export function IndividualsListTableRow({
       </TableCell>
       <TableCell align='right'>{age}</TableCell>
       <TableCell align='left'>{sexToCapitalize(individual.sex)}</TableCell>
-      <TableCell align='left'>{individual.household.location.title}</TableCell>
+      <TableCell align='left'>{individual.household.adminArea.title}</TableCell>
     </ClickableTableRow>
   );
 }

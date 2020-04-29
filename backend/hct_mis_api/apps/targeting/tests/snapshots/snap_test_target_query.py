@@ -17,7 +17,7 @@ snapshots['TestTargetPopulationQuery::test_simple_all_targets_query 1'] = {
                         'candidateListTotalIndividuals': 2,
                         'finalListTotalHouseholds': None,
                         'finalListTotalIndividuals': None,
-                        'name': 'target_population_family_size_2',
+                        'name': 'target_population_size_2',
                         'status': 'DRAFT'
                     }
                 },
@@ -37,7 +37,7 @@ snapshots['TestTargetPopulationQuery::test_simple_all_targets_query 1'] = {
                         'candidateListTotalIndividuals': 1,
                         'finalListTotalHouseholds': 1,
                         'finalListTotalIndividuals': 1,
-                        'name': 'target_population_family_size_1_approved',
+                        'name': 'target_population_size_1_approved',
                         'status': 'APPROVED'
                     }
                 }
@@ -56,7 +56,7 @@ snapshots['TestTargetPopulationQuery::test_simple_all_targets_query_filter_final
                         'candidateListTotalIndividuals': 1,
                         'finalListTotalHouseholds': 1,
                         'finalListTotalIndividuals': 1,
-                        'name': 'target_population_family_size_1_approved',
+                        'name': 'target_population_size_1_approved',
                         'status': 'APPROVED'
                     }
                 }
@@ -81,7 +81,7 @@ snapshots['TestTargetPopulationQuery::test_simple_target_query 1'] = {
                                     'labelEn': 'Family Size',
                                     'type': 'INTEGER'
                                 },
-                                'fieldName': 'family_size',
+                                'fieldName': 'size',
                                 'isFlexField': False
                             }
                         ]
@@ -93,7 +93,7 @@ snapshots['TestTargetPopulationQuery::test_simple_target_query 1'] = {
             'finalListTargetingCriteria': None,
             'finalListTotalHouseholds': 1,
             'finalListTotalIndividuals': 1,
-            'name': 'target_population_family_size_1_approved',
+            'name': 'target_population_size_1_approved',
             'status': 'APPROVED'
         }
     }

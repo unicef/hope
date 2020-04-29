@@ -1,5 +1,9 @@
 from core.base_test_case import APITestCase
-from household.fixtures import HouseholdFactory, IndividualFactory
+from household.fixtures import (
+    HouseholdFactory,
+    IndividualFactory,
+    create_household,
+)
 
 
 class GoldenRecordTargetingCriteriaQueryTestCase(APITestCase):
@@ -24,7 +28,7 @@ class GoldenRecordTargetingCriteriaQueryTestCase(APITestCase):
                         {
                             "comparisionMethod": "EQUALS",
                             "arguments": [2],
-                            "fieldName": "family_size",
+                            "fieldName": "size",
                             "isFlexField": False,
                         }
                     ]
@@ -52,19 +56,19 @@ class GoldenRecordTargetingCriteriaQueryTestCase(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.household_family_size_1 = HouseholdFactory(
-            family_size=1, residence_status="CITIZEN",
+        (household, individuals) = create_household(
+            {"size": 1, "residence_status": "CITIZEN",},
         )
-        cls.household_residence_status_citizen = cls.household_family_size_1
-        IndividualFactory(household=cls.household_family_size_1)
-        cls.household_residence_status_refugee = HouseholdFactory(
-            family_size=2, residence_status="REFUGEE",
-        )
-        cls.household_family_size_2 = cls.household_residence_status_refugee
-        IndividualFactory(household=cls.household_residence_status_refugee)
-        IndividualFactory(household=cls.household_residence_status_refugee)
+        cls.household_size_1 = household
+        cls.household_residence_status_citizen = cls.household_size_1
 
-    def test_golden_record_by_targeting_criteria_family_size(self):
+        (household, individuals) = create_household(
+            {"size": 2, "residence_status": "REFUGEE",},
+        )
+        cls.household_residence_status_refugee = household
+        cls.household_size_2 = cls.household_residence_status_refugee
+
+    def test_golden_record_by_targeting_criteria_size(self):
         self.snapshot_graphql_request(
             request_string=GoldenRecordTargetingCriteriaQueryTestCase.QUERY,
             variables=GoldenRecordTargetingCriteriaQueryTestCase.FAMILY_SIZE_2_VARIABLES,

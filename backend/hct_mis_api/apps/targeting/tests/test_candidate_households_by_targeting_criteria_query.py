@@ -1,6 +1,10 @@
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
-from household.fixtures import HouseholdFactory, IndividualFactory
+from household.fixtures import (
+    HouseholdFactory,
+    IndividualFactory,
+    create_household,
+)
 from targeting.models import (
     TargetPopulation,
     TargetingCriteria,
@@ -40,34 +44,34 @@ class CandidateListTargetingCriteriaQueryTestCase(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        HouseholdFactory(
-            family_size=1, residence_status="CITIZEN",
+        (household, individuals) = create_household(
+            {"size": 1, "residence_status": "CITIZEN",},
         )
-        cls.household_family_size_1 = HouseholdFactory(
-            family_size=1, residence_status="CITIZEN",
+        (household, individuals) = create_household(
+            {"size": 1, "residence_status": "CITIZEN",},
         )
-        cls.household_residence_status_citizen = cls.household_family_size_1
-        IndividualFactory(household=cls.household_family_size_1)
-        cls.household_residence_status_refugee = HouseholdFactory(
-            family_size=2, residence_status="REFUGEE",
+        cls.household_size_1 = household
+        cls.household_residence_status_citizen = household
+
+        (household, individuals) = create_household(
+            {"size": 2, "residence_status": "REFUGEE",},
         )
-        cls.household_family_size_2 = cls.household_residence_status_refugee
-        IndividualFactory(household=cls.household_residence_status_refugee)
-        IndividualFactory(household=cls.household_residence_status_refugee)
+        cls.household_residence_status_refugee = household
+        cls.household_size_2 = household
         cls.user = UserFactory.create()
         targeting_criteria = cls.get_targeting_criteria_for_rule(
             {
-                "field_name": "family_size",
+                "field_name": "size",
                 "arguments": [2],
                 "comparision_method": "EQUALS",
             }
         )
-        cls.target_population_family_size_2 = TargetPopulation(
-            name="target_population_family_size_2",
+        cls.target_population_size_2 = TargetPopulation(
+            name="target_population_size_2",
             created_by=cls.user,
             candidate_list_targeting_criteria=targeting_criteria,
         )
-        cls.target_population_family_size_2.save()
+        cls.target_population_size_2.save()
         targeting_criteria = cls.get_targeting_criteria_for_rule(
             {
                 "field_name": "residence_status",
@@ -84,21 +88,21 @@ class CandidateListTargetingCriteriaQueryTestCase(APITestCase):
 
         targeting_criteria = cls.get_targeting_criteria_for_rule(
             {
-                "field_name": "family_size",
+                "field_name": "size",
                 "arguments": [1],
                 "comparision_method": "EQUALS",
             }
         )
-        cls.target_population_family_size_1_approved = TargetPopulation(
-            name="target_population_family_size_1_approved",
+        cls.target_population_size_1_approved = TargetPopulation(
+            name="target_population_size_1_approved",
             created_by=cls.user,
             candidate_list_targeting_criteria=targeting_criteria,
             status="APPROVED",
         )
-        cls.target_population_family_size_1_approved.save()
+        cls.target_population_size_1_approved.save()
         HouseholdSelection.objects.create(
-            household=cls.household_family_size_1,
-            target_population=cls.target_population_family_size_1_approved,
+            household=cls.household_size_1,
+            target_population=cls.target_population_size_1_approved,
         )
 
     @staticmethod
@@ -113,12 +117,12 @@ class CandidateListTargetingCriteriaQueryTestCase(APITestCase):
         rule_filter.save()
         return targeting_criteria
 
-    def test_candidate_households_list_by_targeting_criteria_family_size(self):
+    def test_candidate_households_list_by_targeting_criteria_size(self):
         self.snapshot_graphql_request(
             request_string=CandidateListTargetingCriteriaQueryTestCase.QUERY,
             variables={
                 "targetPopulation": self.id_to_base64(
-                    self.target_population_family_size_2.id, "TargetPopulation"
+                    self.target_population_size_2.id, "TargetPopulation"
                 )
             },
         )
@@ -141,7 +145,7 @@ class CandidateListTargetingCriteriaQueryTestCase(APITestCase):
             request_string=CandidateListTargetingCriteriaQueryTestCase.QUERY,
             variables={
                 "targetPopulation": self.id_to_base64(
-                    self.target_population_family_size_1_approved.id,
+                    self.target_population_size_1_approved.id,
                     "TargetPopulation",
                 )
             },
@@ -152,7 +156,7 @@ class CandidateListTargetingCriteriaQueryTestCase(APITestCase):
             request_string=CandidateListTargetingCriteriaQueryTestCase.QUERY_FIRST_10,
             variables={
                 "targetPopulation": self.id_to_base64(
-                    self.target_population_family_size_2.id, "TargetPopulation"
+                    self.target_population_size_2.id, "TargetPopulation"
                 )
             },
         )

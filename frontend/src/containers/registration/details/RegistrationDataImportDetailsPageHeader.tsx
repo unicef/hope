@@ -3,15 +3,21 @@ import {
   RegistrationDataImportStatus,
   RegistrationDetailedFragment,
 } from '../../../__generated__/graphql';
+import styled from 'styled-components';
 import { PageHeader } from '../../../components/PageHeader';
 import { BreadCrumbsItem } from '../../../components/BreadCrumbs';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ApproveRegistrationDataImportDialog } from './ApproveRegistrationDataImportDialog';
 import { UnapproveRegistrationDataImportDialog } from './UnapproveRegistrationDataImportDialog';
+import { MergeRegistrationDataImportDialog } from './MergeRegistrationDataImportDialog';
 
 export interface RegistrationDataImportDetailsPageHeaderPropTypes {
   registration: RegistrationDetailedFragment;
 }
+
+const MergeButtonContainer = styled.span`
+  margin-left: ${({ theme }) => theme.spacing(4)}px;
+`;
 
 export function RegistrationDataImportDetailsPageHeader({
   registration,
@@ -26,7 +32,12 @@ export function RegistrationDataImportDetailsPageHeader({
       break;
     case RegistrationDataImportStatus.Approved:
       buttons = (
-        <UnapproveRegistrationDataImportDialog registration={registration} />
+        <div>
+          <UnapproveRegistrationDataImportDialog registration={registration} />
+          <MergeButtonContainer>
+            <MergeRegistrationDataImportDialog registration={registration} />
+          </MergeButtonContainer>
+        </div>
       );
       break;
   }
