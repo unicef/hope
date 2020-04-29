@@ -1,6 +1,7 @@
 import React, { ReactElement, useState, useEffect } from 'react';
 import { Order, TableComponent } from '../../components/table/TableComponent';
 import { HeadCell } from '../../components/table/EnhancedTableHead';
+import { EmptyTable } from '../../components/table/EmptyTable';
 import { columnToOrderBy } from '../../utils/utils';
 
 interface UniversalTableProps<T, K> {
@@ -41,7 +42,7 @@ export function UniversalTable<T, K>({
   }, [initialVariables]);
 
   if (!data) {
-    return null;
+    return <EmptyTable />
   }
 
   let correctTitle = title;
@@ -50,7 +51,7 @@ export function UniversalTable<T, K>({
   }
   const { edges } = data[queriedObjectName];
   const typedEdges = edges.map((edge) => edge.node as T);
-  
+
   return (
     <TableComponent<T>
       title={correctTitle}
