@@ -17,13 +17,13 @@ export const headCells: HeadCell<HouseholdNode>[] = [
   {
     disablePadding: false,
     label: 'Household Size',
-    id: 'familySize',
+    id: 'size',
     numeric: false,
   },
   {
     disablePadding: false,
     label: 'Location',
-    id: 'location__title',
+    id: 'admin_area__title',
     numeric: false,
   },
   {
