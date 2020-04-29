@@ -29,10 +29,10 @@ class Command(BaseCommand):
         for alpha2 in COUNTRIES:
             for type, label in identification_type_choice:
                 document_types.append(
-                    DocumentType(country=alpha2, type=type, label=label)
+                    DocumentType(country=alpha2, label=label)
                 )
                 rdh_document_types.append(
-                    RDHDocumentType(country=alpha2, type=type, label=label)
+                    RDHDocumentType(country=alpha2, label=label)
                 )
         DocumentType.objects.bulk_create(document_types)
         RDHDocumentType.objects.bulk_create(rdh_document_types)
