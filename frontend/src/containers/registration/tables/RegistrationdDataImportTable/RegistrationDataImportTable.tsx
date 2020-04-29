@@ -43,7 +43,10 @@ export function RegistrationDataImportTable({ filter }): ReactElement {
         queriedObjectName='allRegistrationDataImports'
         initialVariables={initialVariables}
         renderRow={(row) => (
-          <RegistrationDataImportTableRow registrationDataImport={row} />
+          <RegistrationDataImportTableRow
+            key={row.id}
+            registrationDataImport={row}
+          />
         )}
       />
     </TableWrapper>
