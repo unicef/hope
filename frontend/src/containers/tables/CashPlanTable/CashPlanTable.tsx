@@ -24,7 +24,7 @@ export function CashPlanTable({ program }: CashPlanTableProps): ReactElement {
       query={useAllCashPlansQuery}
       queriedObjectName='allCashPlans'
       initialVariables={initialVariables}
-      renderRow={(row) => <CashPlanTableRow cashPlan={row} />}
+      renderRow={(row) => <CashPlanTableRow key={row.id} cashPlan={row} />}
     />
   );
 }
