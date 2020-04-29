@@ -33,7 +33,6 @@ export function UniversalTable<T, K>({
     variables: { ...initialVariables, first: rowsPerPage },
     fetchPolicy: 'network-only',
   });
-  console.log('error', error)
 
   useEffect(() => {
     if (initialVariables) {
