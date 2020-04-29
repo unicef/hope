@@ -9,6 +9,7 @@ import { ProgrammeTableRow } from '../SentTargeting/ProgrammeTableRow';
 import { headCells as programmeHeadCells } from '../SentTargeting/ProgrammeHeadCells';
 import { headCells as targetPopulationHeadCells } from '../SentTargeting/TargetPopulationHeadCells';
 import { TargetPopulationHouseholdTableRow } from '../SentTargeting/TargetPopulationTableRow';
+import { Warning } from '@material-ui/icons';
 
 const TableWrapper = styled.div`
   padding: 20px;
@@ -24,6 +25,9 @@ const Indicator = styled.div`
   right: 0;
   transform: translate(-32px, 32px);
   background-color: rgba(245, 128, 25, 0.06);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 `;
 
 interface TargetPopulationHouseholdProps {
@@ -74,7 +78,9 @@ export const ApprovedTargetPopulationTable = ({
             )}
           />
           {hasSameResults && (
-            <Indicator>Same Results as Programme Population</Indicator>
+            <Indicator>
+              <Warning /> Same Results as Programme Population
+            </Indicator>
           )}
         </>
       )}
