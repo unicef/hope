@@ -29,7 +29,7 @@ export function UniversalTable<T, K>({
   const [rowsPerPage, setRowsPerPage] = useState(rowsPerPageOptions[0]);
   const [orderBy, setOrderBy] = useState(null);
   const [orderDirection, setOrderDirection] = useState('asc');
-  const { data, refetch, loading } = query({
+  const { data, refetch, loading, error } = query({
     variables: { ...initialVariables, first: rowsPerPage },
     fetchPolicy: 'network-only',
   });
@@ -50,6 +50,8 @@ export function UniversalTable<T, K>({
   }
   const { edges } = data[queriedObjectName];
   const typedEdges = edges.map((edge) => edge.node as T);
+  //eslint-disable-next-line
+  
   return (
     <TableComponent<T>
       title={correctTitle}
