@@ -23,7 +23,7 @@ export const headCells: HeadCell<IndividualNode>[] = [
   {
     disablePadding: false,
     label: 'Age',
-    id: '-dob',
+    id: '-birthDate',
     numeric: true,
   },
   {
@@ -35,7 +35,7 @@ export const headCells: HeadCell<IndividualNode>[] = [
   {
     disablePadding: false,
     label: 'Location',
-    id: 'household__location__title',
+    id: 'household__admin_area__title',
     numeric: false,
   },
 ];

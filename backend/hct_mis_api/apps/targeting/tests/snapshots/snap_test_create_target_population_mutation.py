@@ -20,7 +20,7 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation 1'] = {
                                         3
                                     ],
                                     'comparisionMethod': 'EQUALS',
-                                    'fieldName': 'family_size',
+                                    'fieldName': 'size',
                                     'isFlexField': False
                                 }
                             ]
