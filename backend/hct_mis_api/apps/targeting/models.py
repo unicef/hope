@@ -234,7 +234,7 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
             "arguments": 1,
             "lookup": "__contains",
             "negative": False,
-            "supported_types": [],
+            "supported_types": ["SELECT_MANY"],
         },
         "NOT_CONTAINS": {
             "arguments": 1,
