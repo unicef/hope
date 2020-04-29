@@ -2,13 +2,18 @@ import React, { ReactElement, useState } from 'react';
 import TableCell from '@material-ui/core/TableCell';
 import styled from 'styled-components';
 import { useHistory } from 'react-router-dom';
-import { HouseholdNode, IndividualNode } from '../../__generated__/graphql';
+import {
+  HouseholdChoiceDataQuery,
+  HouseholdNode,
+  IndividualNode,
+} from '../../__generated__/graphql';
 import { Order, TableComponent } from '../../components/table/TableComponent';
 import { HeadCell } from '../../components/table/EnhancedTableHead';
 import { ClickableTableRow } from '../../components/table/ClickableTableRow';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { StatusBox } from '../../components/StatusBox';
 import {
+  choicesToDict,
   decodeIdString,
   paymentRecordStatusToColor,
   sexToCapitalize,
@@ -42,6 +47,12 @@ const headCells: HeadCell<IndividualNode>[] = [
   },
   {
     disablePadding: false,
+    label: 'Relationship to HoH',
+    id: 'relationship',
+    numeric: false,
+  },
+  {
+    disablePadding: false,
     label: 'Employment / Education',
     id: 'workStatus',
     numeric: false,
@@ -65,9 +76,11 @@ const StatusContainer = styled.div`
 
 interface HouseholdIndividualsTableProps {
   household: HouseholdNode;
+  choicesData: HouseholdChoiceDataQuery;
 }
 export function HouseholdIndividualsTable({
   household,
+  choicesData,
 }: HouseholdIndividualsTableProps): ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
@@ -79,6 +92,12 @@ export function HouseholdIndividualsTable({
     history.push(`/${businessArea}/population/individuals/${row.id}`);
   };
 
+  const relationshipChoicesDict = choicesToDict(
+    choicesData.relationshipChoices,
+  );
+  const roleChoicesDict = choicesToDict(
+      choicesData.roleChoices,
+  );
   const allIndividuals = household.individuals.edges.map((edge) => edge.node);
   if (orderBy) {
     if (orderDirection === 'asc') {
@@ -119,7 +138,12 @@ export function HouseholdIndividualsTable({
                 />
               </StatusContainer>
             </TableCell>
-            <TableCell align='left'>{row.relationship}</TableCell>
+            <TableCell align='left'>
+              {roleChoicesDict[row.relationship]}
+            </TableCell>
+            <TableCell align='left'>
+              {relationshipChoicesDict[row.relationship]}
+            </TableCell>
             <TableCell align='left'>
               <Missing />
             </TableCell>
