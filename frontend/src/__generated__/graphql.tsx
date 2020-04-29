@@ -613,7 +613,6 @@ export type DocumentTypeNode = {
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
   country?: Maybe<DocumentTypeCountry>,
-  type: Scalars['String'],
   label: Scalars['String'],
   documents: DocumentNodeConnection,
 };
@@ -1163,7 +1162,6 @@ export type HouseholdNode = Node & {
   address: Scalars['String'],
   adminArea?: Maybe<AdminAreaNode>,
   geopoint?: Maybe<Scalars['GeoJSON']>,
-  unhcrId: Scalars['String'],
   femaleAgeGroup05Count: Scalars['Int'],
   femaleAgeGroup611Count: Scalars['Int'],
   femaleAgeGroup1217Count: Scalars['Int'],
@@ -1185,7 +1183,7 @@ export type HouseholdNode = Node & {
   programs: ProgramNodeConnection,
   returnee: Scalars['Boolean'],
   registrationDate?: Maybe<Scalars['Date']>,
-  headOfHousehold?: Maybe<IndividualNode>,
+  headOfHousehold: IndividualNode,
   individuals: IndividualNodeConnection,
   paymentRecords: PaymentRecordNodeConnection,
   targetPopulations: TargetPopulationNodeConnection,
@@ -1558,7 +1556,6 @@ export type ImportedDocumentTypeNode = {
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
   country?: Maybe<ImportedDocumentTypeCountry>,
-  type: Scalars['String'],
   label: Scalars['String'],
   documents: ImportedDocumentNodeConnection,
 };
@@ -1825,13 +1822,19 @@ export enum ImportedHouseholdCountry {
 
 export enum ImportedHouseholdCountryOrigin {
   Af = 'AF',
+  Ax = 'AX',
   Al = 'AL',
   Dz = 'DZ',
+  As = 'AS',
   Ad = 'AD',
   Ao = 'AO',
+  Ai = 'AI',
+  Aq = 'AQ',
+  Ag = 'AG',
   Ar = 'AR',
   Am = 'AM',
-  A = 'A',
+  Aw = 'AW',
+  Au = 'AU',
   At = 'AT',
   Az = 'AZ',
   Bs = 'BS',
@@ -1842,29 +1845,40 @@ export enum ImportedHouseholdCountryOrigin {
   Be = 'BE',
   Bz = 'BZ',
   Bj = 'BJ',
+  Bm = 'BM',
   Bt = 'BT',
   Bo = 'BO',
+  Bq = 'BQ',
   Ba = 'BA',
   Bw = 'BW',
+  Bv = 'BV',
   Br = 'BR',
-  Gb = 'GB',
+  Io = 'IO',
   Bn = 'BN',
   Bg = 'BG',
   Bf = 'BF',
-  Mm = 'MM',
-  Bf_28 = 'BF_28',
   Bi = 'BI',
+  Cv = 'CV',
+  Kh = 'KH',
   Cm = 'CM',
   Ca = 'CA',
-  Cv = 'CV',
+  Ky = 'KY',
+  Cf = 'CF',
   Td = 'TD',
   Cl = 'CL',
   Cn = 'CN',
+  Cx = 'CX',
+  Cc = 'CC',
   Co = 'CO',
+  Km = 'KM',
   Cg = 'CG',
+  Cd = 'CD',
+  Ck = 'CK',
   Cr = 'CR',
+  Ci = 'CI',
   Hr = 'HR',
-  C = 'C',
+  Cu = 'CU',
+  Cw = 'CW',
   Cy = 'CY',
   Cz = 'CZ',
   Dk = 'DK',
@@ -1874,100 +1888,153 @@ export enum ImportedHouseholdCountryOrigin {
   Ec = 'EC',
   Eg = 'EG',
   Sv = 'SV',
-  Gb_50 = 'GB_50',
+  Gq = 'GQ',
   Er = 'ER',
   Ee = 'EE',
+  Sz = 'SZ',
   Et = 'ET',
+  Fk = 'FK',
+  Fo = 'FO',
   Fj = 'FJ',
   Fi = 'FI',
   Fr = 'FR',
+  Gf = 'GF',
+  Pf = 'PF',
+  Tf = 'TF',
   Ga = 'GA',
   Gm = 'GM',
   Ge = 'GE',
   De = 'DE',
   Gh = 'GH',
+  Gi = 'GI',
   Gr = 'GR',
+  Gl = 'GL',
   Gd = 'GD',
+  Gp = 'GP',
+  Gu = 'GU',
   Gt = 'GT',
-  Gq = 'GQ',
+  Gg = 'GG',
+  Gn = 'GN',
+  Gw = 'GW',
   Gy = 'GY',
   Ht = 'HT',
-  Nl = 'NL',
+  Hm = 'HM',
+  Va = 'VA',
   Hn = 'HN',
-  H = 'H',
+  Hk = 'HK',
+  Hu = 'HU',
   Is = 'IS',
-  Io = 'IO',
+  In = 'IN',
   Id = 'ID',
   Ir = 'IR',
   Iq = 'IQ',
   Ie = 'IE',
+  Im = 'IM',
   Il = 'IL',
   It = 'IT',
   Jm = 'JM',
   Jp = 'JP',
+  Je = 'JE',
   Jo = 'JO',
   Kz = 'KZ',
   Ke = 'KE',
+  Ki = 'KI',
   Kw = 'KW',
+  Kg = 'KG',
   La = 'LA',
   Lv = 'LV',
   Lb = 'LB',
+  Ls = 'LS',
   Lr = 'LR',
   Ly = 'LY',
+  Li = 'LI',
   Lt = 'LT',
-  Mk = 'MK',
+  Lu = 'LU',
+  Mo = 'MO',
   Mg = 'MG',
   Mw = 'MW',
   My = 'MY',
   Mv = 'MV',
   Ml = 'ML',
   Mt = 'MT',
+  Mh = 'MH',
+  Mq = 'MQ',
   Mr = 'MR',
-  M = 'M',
+  Mu = 'MU',
+  Yt = 'YT',
   Mx = 'MX',
+  Fm = 'FM',
   Md = 'MD',
   Mc = 'MC',
   Mn = 'MN',
   Me = 'ME',
+  Ms = 'MS',
   Ma = 'MA',
   Mz = 'MZ',
+  Mm = 'MM',
   Na = 'NA',
+  Nr = 'NR',
   Np = 'NP',
+  Nl = 'NL',
+  Nc = 'NC',
+  Nz = 'NZ',
   Ni = 'NI',
   Ne = 'NE',
   Ng = 'NG',
+  Nu = 'NU',
+  Nf = 'NF',
   Kp = 'KP',
+  Mk = 'MK',
+  Mp = 'MP',
   No = 'NO',
   Om = 'OM',
   Pk = 'PK',
+  Pw = 'PW',
+  Ps = 'PS',
   Pa = 'PA',
   Pg = 'PG',
   Py = 'PY',
   Pe = 'PE',
   Ph = 'PH',
+  Pn = 'PN',
   Pl = 'PL',
   Pt = 'PT',
+  Pr = 'PR',
   Qa = 'QA',
+  Re = 'RE',
   Ro = 'RO',
-  R = 'R',
+  Ru = 'RU',
   Rw = 'RW',
+  Bl = 'BL',
+  Sh = 'SH',
+  Kn = 'KN',
+  Lc = 'LC',
+  Mf = 'MF',
+  Pm = 'PM',
+  Vc = 'VC',
+  Ws = 'WS',
+  Sm = 'SM',
+  St = 'ST',
   Sa = 'SA',
-  Ae = 'AE',
   Sn = 'SN',
   Rs = 'RS',
   Sc = 'SC',
   Sl = 'SL',
   Sg = 'SG',
+  Sx = 'SX',
   Sk = 'SK',
   Si = 'SI',
+  Sb = 'SB',
   So = 'SO',
   Za = 'ZA',
+  Gs = 'GS',
   Kr = 'KR',
+  Ss = 'SS',
   Es = 'ES',
   Lk = 'LK',
   Sd = 'SD',
   Sr = 'SR',
-  Sz = 'SZ',
+  Sj = 'SJ',
   Se = 'SE',
   Ch = 'CH',
   Sy = 'SY',
@@ -1975,20 +2042,31 @@ export enum ImportedHouseholdCountryOrigin {
   Tj = 'TJ',
   Tz = 'TZ',
   Th = 'TH',
+  Tl = 'TL',
   Tg = 'TG',
+  Tk = 'TK',
+  To = 'TO',
   Tt = 'TT',
   Tn = 'TN',
   Tr = 'TR',
   Tm = 'TM',
+  Tc = 'TC',
   Tv = 'TV',
   Ug = 'UG',
   Ua = 'UA',
+  Ae = 'AE',
+  Gb = 'GB',
+  Um = 'UM',
+  Us = 'US',
   Uy = 'UY',
   Uz = 'UZ',
-  V = 'V',
+  Vu = 'VU',
   Ve = 'VE',
   Vn = 'VN',
-  Gb_164 = 'GB_164',
+  Vg = 'VG',
+  Vi = 'VI',
+  Wf = 'WF',
+  Eh = 'EH',
   Ye = 'YE',
   Zm = 'ZM',
   Zw = 'ZW'
@@ -2008,7 +2086,6 @@ export type ImportedHouseholdNode = Node & {
   admin1: Scalars['String'],
   admin2: Scalars['String'],
   geopoint?: Maybe<Scalars['GeoJSON']>,
-  unhcrId: Scalars['String'],
   femaleAgeGroup05Count: Scalars['Int'],
   femaleAgeGroup611Count: Scalars['Int'],
   femaleAgeGroup1217Count: Scalars['Int'],
@@ -3347,10 +3424,10 @@ export type XlsxRowErrorNode = {
 export type HouseholdMinimalFragment = (
   { __typename?: 'HouseholdNode' }
   & Pick<HouseholdNode, 'id' | 'createdAt' | 'residenceStatus' | 'size' | 'totalCashReceived' | 'registrationDate' | 'address'>
-  & { headOfHousehold: Maybe<(
+  & { headOfHousehold: (
     { __typename?: 'IndividualNode' }
     & Pick<IndividualNode, 'id' | 'fullName'>
-  )>, adminArea: Maybe<(
+  ), adminArea: Maybe<(
     { __typename?: 'AdminAreaNode' }
     & Pick<AdminAreaNode, 'id' | 'title'>
   )>, individuals: (
@@ -3415,7 +3492,7 @@ export type IndividualMinimalFragment = (
         & Pick<DocumentNode, 'id' | 'documentNumber'>
         & { type: (
           { __typename?: 'DocumentTypeNode' }
-          & Pick<DocumentTypeNode, 'country' | 'type' | 'label'>
+          & Pick<DocumentTypeNode, 'country' | 'label'>
         ) }
       )> }
     )>> }
@@ -3442,10 +3519,10 @@ export type IndividualDetailedFragment = (
   ), headingHousehold: Maybe<(
     { __typename?: 'HouseholdNode' }
     & Pick<HouseholdNode, 'id'>
-    & { headOfHousehold: Maybe<(
+    & { headOfHousehold: (
       { __typename?: 'IndividualNode' }
       & Pick<IndividualNode, 'id'>
-    )> }
+    ) }
   )> }
   & IndividualMinimalFragment
 );
@@ -3593,6 +3670,77 @@ export type CopyTargetPopulationMutation = (
     & { targetPopulation: Maybe<(
       { __typename?: 'TargetPopulationNode' }
       & Pick<TargetPopulationNode, 'id'>
+    )> }
+  )> }
+);
+
+export type FinalizeTpMutationVariables = {
+  id: Scalars['ID']
+};
+
+
+export type FinalizeTpMutation = (
+  { __typename?: 'Mutations' }
+  & { finalizeTargetPopulation: Maybe<(
+    { __typename?: 'FinalizeTargetPopulationMutation' }
+    & { targetPopulation: Maybe<(
+      { __typename?: 'TargetPopulationNode' }
+      & Pick<TargetPopulationNode, 'id' | 'name' | 'status'>
+      & { candidateListTargetingCriteria: Maybe<(
+        { __typename?: 'TargetingCriteriaNode' }
+        & { targetPopulationCandidate: Maybe<(
+          { __typename?: 'TargetPopulationNode' }
+          & { createdBy: Maybe<(
+            { __typename?: 'UserNode' }
+            & Pick<UserNode, 'firstName' | 'lastName'>
+          )>, program: Maybe<(
+            { __typename?: 'ProgramNode' }
+            & Pick<ProgramNode, 'id' | 'name'>
+          )> }
+        )>, rules: Maybe<Array<Maybe<(
+          { __typename?: 'TargetingCriteriaRuleNode' }
+          & Pick<TargetingCriteriaRuleNode, 'id'>
+          & { filters: Maybe<Array<Maybe<(
+            { __typename?: 'TargetingCriteriaRuleFilterNode' }
+            & Pick<TargetingCriteriaRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod'>
+            & { fieldAttribute: Maybe<(
+              { __typename?: 'FieldAttributeNode' }
+              & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
+              & { choices: Maybe<Array<Maybe<(
+                { __typename?: 'CoreFieldChoiceObject' }
+                & Pick<CoreFieldChoiceObject, 'value' | 'labelEn'>
+              )>>> }
+            )> }
+          )>>> }
+        )>>> }
+      )>, finalListTargetingCriteria: Maybe<(
+        { __typename?: 'TargetingCriteriaNode' }
+        & { targetPopulationFinal: Maybe<(
+          { __typename?: 'TargetPopulationNode' }
+          & { createdBy: Maybe<(
+            { __typename?: 'UserNode' }
+            & Pick<UserNode, 'firstName' | 'lastName'>
+          )>, program: Maybe<(
+            { __typename?: 'ProgramNode' }
+            & Pick<ProgramNode, 'id' | 'name'>
+          )> }
+        )>, rules: Maybe<Array<Maybe<(
+          { __typename?: 'TargetingCriteriaRuleNode' }
+          & Pick<TargetingCriteriaRuleNode, 'id'>
+          & { filters: Maybe<Array<Maybe<(
+            { __typename?: 'TargetingCriteriaRuleFilterNode' }
+            & Pick<TargetingCriteriaRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod'>
+            & { fieldAttribute: Maybe<(
+              { __typename?: 'FieldAttributeNode' }
+              & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
+              & { choices: Maybe<Array<Maybe<(
+                { __typename?: 'CoreFieldChoiceObject' }
+                & Pick<CoreFieldChoiceObject, 'value' | 'labelEn'>
+              )>>> }
+            )> }
+          )>>> }
+        )>>> }
+      )> }
     )> }
   )> }
 );
@@ -3894,7 +4042,9 @@ export type AllTargetPopulationsQueryVariables = {
   last?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>,
   name?: Maybe<Scalars['String']>,
-  status?: Maybe<Scalars['String']>
+  status?: Maybe<Scalars['String']>,
+  candidateListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalHouseholdsMax?: Maybe<Scalars['Int']>
 };
 
 
@@ -4083,7 +4233,7 @@ export type TargetPopulationQuery = (
   { __typename?: 'Query' }
   & { targetPopulation: Maybe<(
     { __typename?: 'TargetPopulationNode' }
-    & Pick<TargetPopulationNode, 'id' | 'name' | 'status'>
+    & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'candidateListTotalHouseholds' | 'finalListTotalHouseholds'>
     & { candidateListTargetingCriteria: Maybe<(
       { __typename?: 'TargetingCriteriaNode' }
       & { targetPopulationCandidate: Maybe<(
@@ -4291,6 +4441,22 @@ export type ImportedIndividualQuery = (
   )> }
 );
 
+export type MergeRdiMutationVariables = {
+  id: Scalars['ID']
+};
+
+
+export type MergeRdiMutation = (
+  { __typename?: 'Mutations' }
+  & { mergeRegistrationDataImport: Maybe<(
+    { __typename?: 'MergeRegistrationDataImportMutation' }
+    & { registrationDataImport: Maybe<(
+      { __typename?: 'RegistrationDataImportNode' }
+      & RegistrationDetailedFragment
+    )> }
+  )> }
+);
+
 export type RegistrationChoicesQueryVariables = {};
 
 
@@ -4392,7 +4558,10 @@ export type UploadImportDataXlsxFileMutation = (
   { __typename?: 'Mutations' }
   & { uploadImportDataXlsxFile: Maybe<(
     { __typename?: 'UploadImportDataXLSXFile' }
-    & { importData: Maybe<(
+    & { errors: Maybe<Array<Maybe<(
+      { __typename?: 'XlsxRowErrorNode' }
+      & Pick<XlsxRowErrorNode, 'header' | 'message' | 'rowNumber'>
+    )>>>, importData: Maybe<(
       { __typename?: 'ImportDataNode' }
       & Pick<ImportDataNode, 'id' | 'numberOfIndividuals' | 'numberOfHouseholds'>
       & { registrationDataImport: Maybe<(
@@ -4422,12 +4591,44 @@ export type CandidateHouseholdsListByTargetingCriteriaQuery = (
       & { node: Maybe<(
         { __typename?: 'HouseholdNode' }
         & Pick<HouseholdNode, 'id' | 'size' | 'updatedAt'>
-        & { headOfHousehold: Maybe<(
+        & { headOfHousehold: (
           { __typename?: 'IndividualNode' }
           & Pick<IndividualNode, 'givenName' | 'familyName'>
-        )>, adminArea: Maybe<(
+        ), adminArea: Maybe<(
           { __typename?: 'AdminAreaNode' }
           & Pick<AdminAreaNode, 'id' | 'title'>
+        )> }
+      )> }
+    )>> }
+  )> }
+);
+
+export type FinalHouseholdsListByTargetingCriteriaQueryVariables = {
+  targetPopulation: Scalars['ID'],
+  targetingCriteria?: Maybe<TargetingCriteriaObjectType>,
+  first?: Maybe<Scalars['Int']>,
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type FinalHouseholdsListByTargetingCriteriaQuery = (
+  { __typename?: 'Query' }
+  & { finalHouseholdsListByTargetingCriteria: Maybe<(
+    { __typename?: 'HouseholdNodeConnection' }
+    & Pick<HouseholdNodeConnection, 'totalCount' | 'edgeCount'>
+    & { edges: Array<Maybe<(
+      { __typename?: 'HouseholdNodeEdge' }
+      & { node: Maybe<(
+        { __typename?: 'HouseholdNode' }
+        & Pick<HouseholdNode, 'id' | 'size' | 'updatedAt'>
+        & { headOfHousehold: (
+          { __typename?: 'IndividualNode' }
+          & Pick<IndividualNode, 'givenName' | 'familyName'>
+        ), adminArea: Maybe<(
+          { __typename?: 'AdminAreaNode' }
+          & Pick<AdminAreaNode, 'title'>
         )> }
       )> }
     )>> }
@@ -4453,10 +4654,10 @@ export type GoldenRecordByTargetingCriteriaQuery = (
       & { node: Maybe<(
         { __typename?: 'HouseholdNode' }
         & Pick<HouseholdNode, 'id' | 'size' | 'updatedAt'>
-        & { headOfHousehold: Maybe<(
+        & { headOfHousehold: (
           { __typename?: 'IndividualNode' }
           & Pick<IndividualNode, 'givenName' | 'familyName'>
-        )>, adminArea: Maybe<(
+        ), adminArea: Maybe<(
           { __typename?: 'AdminAreaNode' }
           & Pick<AdminAreaNode, 'id' | 'title'>
         )> }
@@ -4526,7 +4727,6 @@ export const IndividualMinimalFragmentDoc = gql`
         documentNumber
         type {
           country
-          type
           label
         }
       }
@@ -5063,6 +5263,119 @@ export function useCopyTargetPopulationMutation(baseOptions?: ApolloReactHooks.M
 export type CopyTargetPopulationMutationHookResult = ReturnType<typeof useCopyTargetPopulationMutation>;
 export type CopyTargetPopulationMutationResult = ApolloReactCommon.MutationResult<CopyTargetPopulationMutation>;
 export type CopyTargetPopulationMutationOptions = ApolloReactCommon.BaseMutationOptions<CopyTargetPopulationMutation, CopyTargetPopulationMutationVariables>;
+export const FinalizeTpDocument = gql`
+    mutation FinalizeTP($id: ID!) {
+  finalizeTargetPopulation(id: $id) {
+    targetPopulation {
+      id
+      name
+      status
+      candidateListTargetingCriteria {
+        targetPopulationCandidate {
+          createdBy {
+            firstName
+            lastName
+          }
+          program {
+            id
+            name
+          }
+        }
+        rules {
+          id
+          filters {
+            fieldName
+            isFlexField
+            arguments
+            comparisionMethod
+            fieldAttribute {
+              name
+              labelEn
+              type
+              choices {
+                value
+                labelEn
+              }
+            }
+          }
+        }
+      }
+      finalListTargetingCriteria {
+        targetPopulationFinal {
+          createdBy {
+            firstName
+            lastName
+          }
+          program {
+            id
+            name
+          }
+        }
+        rules {
+          id
+          filters {
+            fieldName
+            isFlexField
+            arguments
+            comparisionMethod
+            fieldAttribute {
+              name
+              labelEn
+              type
+              choices {
+                value
+                labelEn
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export type FinalizeTpMutationFn = ApolloReactCommon.MutationFunction<FinalizeTpMutation, FinalizeTpMutationVariables>;
+export type FinalizeTpComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<FinalizeTpMutation, FinalizeTpMutationVariables>, 'mutation'>;
+
+    export const FinalizeTpComponent = (props: FinalizeTpComponentProps) => (
+      <ApolloReactComponents.Mutation<FinalizeTpMutation, FinalizeTpMutationVariables> mutation={FinalizeTpDocument} {...props} />
+    );
+    
+export type FinalizeTpProps<TChildProps = {}> = ApolloReactHoc.MutateProps<FinalizeTpMutation, FinalizeTpMutationVariables> & TChildProps;
+export function withFinalizeTp<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  FinalizeTpMutation,
+  FinalizeTpMutationVariables,
+  FinalizeTpProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, FinalizeTpMutation, FinalizeTpMutationVariables, FinalizeTpProps<TChildProps>>(FinalizeTpDocument, {
+      alias: 'finalizeTp',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useFinalizeTpMutation__
+ *
+ * To run a mutation, you first call `useFinalizeTpMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useFinalizeTpMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [finalizeTpMutation, { data, loading, error }] = useFinalizeTpMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useFinalizeTpMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<FinalizeTpMutation, FinalizeTpMutationVariables>) {
+        return ApolloReactHooks.useMutation<FinalizeTpMutation, FinalizeTpMutationVariables>(FinalizeTpDocument, baseOptions);
+      }
+export type FinalizeTpMutationHookResult = ReturnType<typeof useFinalizeTpMutation>;
+export type FinalizeTpMutationResult = ApolloReactCommon.MutationResult<FinalizeTpMutation>;
+export type FinalizeTpMutationOptions = ApolloReactCommon.BaseMutationOptions<FinalizeTpMutation, FinalizeTpMutationVariables>;
 export const UpdateProgramDocument = gql`
     mutation UpdateProgram($programData: UpdateProgramInput!) {
   updateProgram(programData: $programData) {
@@ -5747,8 +6060,8 @@ export type AllProgramsQueryHookResult = ReturnType<typeof useAllProgramsQuery>;
 export type AllProgramsLazyQueryHookResult = ReturnType<typeof useAllProgramsLazyQuery>;
 export type AllProgramsQueryResult = ApolloReactCommon.QueryResult<AllProgramsQuery, AllProgramsQueryVariables>;
 export const AllTargetPopulationsDocument = gql`
-    query AllTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String) {
-  allTargetPopulation(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name: $name, status: $status) {
+    query AllTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String, $candidateListTotalHouseholdsMin: Int, $candidateListTotalHouseholdsMax: Int) {
+  allTargetPopulation(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name: $name, status: $status, candidateListTotalHouseholdsMin: $candidateListTotalHouseholdsMin, candidateListTotalHouseholdsMax: $candidateListTotalHouseholdsMax) {
     edges {
       node {
         id
@@ -5807,6 +6120,8 @@ export function withAllTargetPopulations<TProps, TChildProps = {}>(operationOpti
  *      orderBy: // value for 'orderBy'
  *      name: // value for 'name'
  *      status: // value for 'status'
+ *      candidateListTotalHouseholdsMin: // value for 'candidateListTotalHouseholdsMin'
+ *      candidateListTotalHouseholdsMax: // value for 'candidateListTotalHouseholdsMax'
  *   },
  * });
  */
@@ -6332,6 +6647,8 @@ export const TargetPopulationDocument = gql`
     id
     name
     status
+    candidateListTotalHouseholds
+    finalListTotalHouseholds
     candidateListTargetingCriteria {
       targetPopulationCandidate {
         createdBy {
@@ -6848,6 +7165,57 @@ export function useImportedIndividualLazyQuery(baseOptions?: ApolloReactHooks.La
 export type ImportedIndividualQueryHookResult = ReturnType<typeof useImportedIndividualQuery>;
 export type ImportedIndividualLazyQueryHookResult = ReturnType<typeof useImportedIndividualLazyQuery>;
 export type ImportedIndividualQueryResult = ApolloReactCommon.QueryResult<ImportedIndividualQuery, ImportedIndividualQueryVariables>;
+export const MergeRdiDocument = gql`
+    mutation MergeRDI($id: ID!) {
+  mergeRegistrationDataImport(id: $id) {
+    registrationDataImport {
+      ...registrationDetailed
+    }
+  }
+}
+    ${RegistrationDetailedFragmentDoc}`;
+export type MergeRdiMutationFn = ApolloReactCommon.MutationFunction<MergeRdiMutation, MergeRdiMutationVariables>;
+export type MergeRdiComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<MergeRdiMutation, MergeRdiMutationVariables>, 'mutation'>;
+
+    export const MergeRdiComponent = (props: MergeRdiComponentProps) => (
+      <ApolloReactComponents.Mutation<MergeRdiMutation, MergeRdiMutationVariables> mutation={MergeRdiDocument} {...props} />
+    );
+    
+export type MergeRdiProps<TChildProps = {}> = ApolloReactHoc.MutateProps<MergeRdiMutation, MergeRdiMutationVariables> & TChildProps;
+export function withMergeRdi<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  MergeRdiMutation,
+  MergeRdiMutationVariables,
+  MergeRdiProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, MergeRdiMutation, MergeRdiMutationVariables, MergeRdiProps<TChildProps>>(MergeRdiDocument, {
+      alias: 'mergeRdi',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useMergeRdiMutation__
+ *
+ * To run a mutation, you first call `useMergeRdiMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useMergeRdiMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [mergeRdiMutation, { data, loading, error }] = useMergeRdiMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useMergeRdiMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<MergeRdiMutation, MergeRdiMutationVariables>) {
+        return ApolloReactHooks.useMutation<MergeRdiMutation, MergeRdiMutationVariables>(MergeRdiDocument, baseOptions);
+      }
+export type MergeRdiMutationHookResult = ReturnType<typeof useMergeRdiMutation>;
+export type MergeRdiMutationResult = ApolloReactCommon.MutationResult<MergeRdiMutation>;
+export type MergeRdiMutationOptions = ApolloReactCommon.BaseMutationOptions<MergeRdiMutation, MergeRdiMutationVariables>;
 export const RegistrationChoicesDocument = gql`
     query registrationChoices {
   registrationDataStatusChoices {
@@ -7002,6 +7370,11 @@ export type UnapproveRdiMutationOptions = ApolloReactCommon.BaseMutationOptions<
 export const UploadImportDataXlsxFileDocument = gql`
     mutation UploadImportDataXlsxFile($file: Upload!) {
   uploadImportDataXlsxFile(file: $file) {
+    errors {
+      header
+      message
+      rowNumber
+    }
     importData {
       id
       numberOfIndividuals
@@ -7125,6 +7498,76 @@ export function useCandidateHouseholdsListByTargetingCriteriaLazyQuery(baseOptio
 export type CandidateHouseholdsListByTargetingCriteriaQueryHookResult = ReturnType<typeof useCandidateHouseholdsListByTargetingCriteriaQuery>;
 export type CandidateHouseholdsListByTargetingCriteriaLazyQueryHookResult = ReturnType<typeof useCandidateHouseholdsListByTargetingCriteriaLazyQuery>;
 export type CandidateHouseholdsListByTargetingCriteriaQueryResult = ApolloReactCommon.QueryResult<CandidateHouseholdsListByTargetingCriteriaQuery, CandidateHouseholdsListByTargetingCriteriaQueryVariables>;
+export const FinalHouseholdsListByTargetingCriteriaDocument = gql`
+    query FinalHouseholdsListByTargetingCriteria($targetPopulation: ID!, $targetingCriteria: TargetingCriteriaObjectType, $first: Int, $after: String, $before: String, $last: Int) {
+  finalHouseholdsListByTargetingCriteria(targetPopulation: $targetPopulation, targetingCriteria: $targetingCriteria, after: $after, before: $before, first: $first, last: $last) {
+    edges {
+      node {
+        id
+        headOfHousehold {
+          givenName
+          familyName
+        }
+        size
+        adminArea {
+          title
+        }
+        updatedAt
+      }
+    }
+    totalCount
+    edgeCount
+  }
+}
+    `;
+export type FinalHouseholdsListByTargetingCriteriaComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<FinalHouseholdsListByTargetingCriteriaQuery, FinalHouseholdsListByTargetingCriteriaQueryVariables>, 'query'> & ({ variables: FinalHouseholdsListByTargetingCriteriaQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const FinalHouseholdsListByTargetingCriteriaComponent = (props: FinalHouseholdsListByTargetingCriteriaComponentProps) => (
+      <ApolloReactComponents.Query<FinalHouseholdsListByTargetingCriteriaQuery, FinalHouseholdsListByTargetingCriteriaQueryVariables> query={FinalHouseholdsListByTargetingCriteriaDocument} {...props} />
+    );
+    
+export type FinalHouseholdsListByTargetingCriteriaProps<TChildProps = {}> = ApolloReactHoc.DataProps<FinalHouseholdsListByTargetingCriteriaQuery, FinalHouseholdsListByTargetingCriteriaQueryVariables> & TChildProps;
+export function withFinalHouseholdsListByTargetingCriteria<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  FinalHouseholdsListByTargetingCriteriaQuery,
+  FinalHouseholdsListByTargetingCriteriaQueryVariables,
+  FinalHouseholdsListByTargetingCriteriaProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, FinalHouseholdsListByTargetingCriteriaQuery, FinalHouseholdsListByTargetingCriteriaQueryVariables, FinalHouseholdsListByTargetingCriteriaProps<TChildProps>>(FinalHouseholdsListByTargetingCriteriaDocument, {
+      alias: 'finalHouseholdsListByTargetingCriteria',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useFinalHouseholdsListByTargetingCriteriaQuery__
+ *
+ * To run a query within a React component, call `useFinalHouseholdsListByTargetingCriteriaQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFinalHouseholdsListByTargetingCriteriaQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFinalHouseholdsListByTargetingCriteriaQuery({
+ *   variables: {
+ *      targetPopulation: // value for 'targetPopulation'
+ *      targetingCriteria: // value for 'targetingCriteria'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      last: // value for 'last'
+ *   },
+ * });
+ */
+export function useFinalHouseholdsListByTargetingCriteriaQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<FinalHouseholdsListByTargetingCriteriaQuery, FinalHouseholdsListByTargetingCriteriaQueryVariables>) {
+        return ApolloReactHooks.useQuery<FinalHouseholdsListByTargetingCriteriaQuery, FinalHouseholdsListByTargetingCriteriaQueryVariables>(FinalHouseholdsListByTargetingCriteriaDocument, baseOptions);
+      }
+export function useFinalHouseholdsListByTargetingCriteriaLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<FinalHouseholdsListByTargetingCriteriaQuery, FinalHouseholdsListByTargetingCriteriaQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<FinalHouseholdsListByTargetingCriteriaQuery, FinalHouseholdsListByTargetingCriteriaQueryVariables>(FinalHouseholdsListByTargetingCriteriaDocument, baseOptions);
+        }
+export type FinalHouseholdsListByTargetingCriteriaQueryHookResult = ReturnType<typeof useFinalHouseholdsListByTargetingCriteriaQuery>;
+export type FinalHouseholdsListByTargetingCriteriaLazyQueryHookResult = ReturnType<typeof useFinalHouseholdsListByTargetingCriteriaLazyQuery>;
+export type FinalHouseholdsListByTargetingCriteriaQueryResult = ApolloReactCommon.QueryResult<FinalHouseholdsListByTargetingCriteriaQuery, FinalHouseholdsListByTargetingCriteriaQueryVariables>;
 export const GoldenRecordByTargetingCriteriaDocument = gql`
     query GoldenRecordByTargetingCriteria($targetingCriteria: TargetingCriteriaObjectType!, $first: Int, $after: String, $before: String, $last: Int) {
   goldenRecordByTargetingCriteria(targetingCriteria: $targetingCriteria, after: $after, before: $before, first: $first, last: $last) {
@@ -7825,7 +8268,6 @@ export type DocumentTypeNodeResolvers<ContextType = any, ParentType extends Reso
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['DocumentTypeCountry']>, ParentType, ContextType>,
-  type?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   label?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, DocumentTypeNodeDocumentsArgs>,
 };
@@ -7863,7 +8305,6 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   address?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   adminArea?: Resolver<Maybe<ResolversTypes['AdminAreaNode']>, ParentType, ContextType>,
   geopoint?: Resolver<Maybe<ResolversTypes['GeoJSON']>, ParentType, ContextType>,
-  unhcrId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   femaleAgeGroup05Count?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   femaleAgeGroup611Count?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   femaleAgeGroup1217Count?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
@@ -7885,7 +8326,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   programs?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, HouseholdNodeProgramsArgs>,
   returnee?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   registrationDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
-  headOfHousehold?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
+  headOfHousehold?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, HouseholdNodeIndividualsArgs>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, HouseholdNodePaymentRecordsArgs>,
   targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, HouseholdNodeTargetPopulationsArgs>,
@@ -7941,7 +8382,6 @@ export type ImportedDocumentTypeNodeResolvers<ContextType = any, ParentType exte
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['ImportedDocumentTypeCountry']>, ParentType, ContextType>,
-  type?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   label?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['ImportedDocumentNodeConnection'], ParentType, ContextType, ImportedDocumentTypeNodeDocumentsArgs>,
 };
@@ -7959,7 +8399,6 @@ export type ImportedHouseholdNodeResolvers<ContextType = any, ParentType extends
   admin1?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   admin2?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   geopoint?: Resolver<Maybe<ResolversTypes['GeoJSON']>, ParentType, ContextType>,
-  unhcrId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   femaleAgeGroup05Count?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   femaleAgeGroup611Count?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   femaleAgeGroup1217Count?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,

@@ -2,7 +2,7 @@ import copy
 
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
-from household.fixtures import HouseholdFactory
+from household.fixtures import HouseholdFactory, create_household
 from household.models import Household
 from targeting.models import (
     TargetingCriteria,
@@ -159,14 +159,14 @@ class TestUpdateTargetPopulationMutation(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = UserFactory.create()
-        HouseholdFactory(
-            size=2, residence_status="CITIZEN",
+        create_household(
+            {"size": 2, "residence_status": "CITIZEN",}
         )
-        HouseholdFactory(
-            size=3, residence_status="CITIZEN",
+        create_household(
+            {"size": 3, "residence_status": "CITIZEN",}
         )
-        HouseholdFactory(
-            size=3, residence_status="CITIZEN",
+        create_household(
+            {"size": 3, "residence_status": "CITIZEN",}
         )
         cls.draft_target_population = TargetPopulation(
             name="draft_target_population",
