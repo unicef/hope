@@ -256,9 +256,12 @@ class Query(graphene.ObjectType):
             return []
         if target_population_model.status == "APPROVED":
             if targeting_criteria is None:
-                return target_population_model.households.filter(
-                    target_population_model.final_list_targeting_criteria.get_query()
-                )
+                if target_population_model.final_list_targeting_criteria:
+                    return target_population_model.households.filter(
+                        target_population_model.final_list_targeting_criteria.get_query()
+                    )
+                else:
+                    return target_population_model.households.all()
             return target_population_model.households.filter(
                 targeting_criteria_object_type_to_query(targeting_criteria)
             ).all()
