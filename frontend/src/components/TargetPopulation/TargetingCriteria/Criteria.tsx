@@ -14,7 +14,9 @@ const CriteriaElement = styled.div`
   background-color: ${(props) =>
     props.alternative ? 'transparent' : '#f7faff'};
   padding: ${({ theme }) => theme.spacing(1)}px
-    ${({ theme }) => theme.spacing(3)}px;
+    ${({ theme }) => theme.spacing(15)}px
+    ${({ theme }) => theme.spacing(1)}px
+    ${({ theme }) => theme.spacing(4)}px;
   margin: ${({ theme }) => theme.spacing(2)}px 0;
   p {
     margin: ${({ theme }) => theme.spacing(2)}px 0;
@@ -62,10 +64,19 @@ const CriteriaField = ({ field }) => {
       break;
     case 'EQUALS':
       fieldElement = (
-        <p>
-          {field.fieldAttribute.labelEn || field.fieldName}:{' '}
-          <span>{field.arguments[0]}</span>
-        </p>
+        typeof field.arguments[0] === 'object' ?
+          <p>
+            {field.fieldAttribute.labelEn || field.fieldName}:{' '}
+            {field.arguments[0].map((argument, index) => {
+              return <><span>{field.fieldAttribute.choices.find(each => each.value === argument).labelEn}</span>{index !== field.arguments[0].length - 1 && ', '}</>
+            }
+            )}
+          </p> :
+          <p>
+            {field.fieldAttribute.labelEn || field.fieldName}:{' '}
+            <span>{field.fieldAttribute.choices.find(each => each.value === field.arguments[0]).labelEn || field.arguments[0]}</span>
+          </p>
+
       );
       break;
     case 'LESS_THAN':
@@ -83,6 +94,16 @@ const CriteriaField = ({ field }) => {
           <span>{field.arguments[0]}</span>
         </p>
       );
+      break;
+    case 'SELECT_MANY':
+      //eslint-disable-next-line
+      debugger
+      fieldElement = (
+        <p>
+          {field.fieldAttribute.labelEn || field.fieldName}:{' '}
+          <span>{field.fieldAttribute.choices.find(each => each.value === field.arguments[0]).labelEn || field.arguments[0]}</span>
+        </p>
+      )
       break;
     default:
       fieldElement = (

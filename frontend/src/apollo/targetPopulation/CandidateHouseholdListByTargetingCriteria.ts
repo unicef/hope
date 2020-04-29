@@ -19,6 +19,7 @@ export const CandidateHouseholdsListByTargetingCriteria = gql`
         node {
           id
           headOfHousehold {
+            id
             givenName
             familyName
           }
