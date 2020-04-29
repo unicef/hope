@@ -139,7 +139,6 @@ const Select = React.forwardRef(function Select(props, ref) {
       outlined: <OutlinedInput label={label} labelWidth={labelWidth} />,
       filled: <FilledInput />,
     }[variant];
-  console.log('InputProps', inputProps);
   return React.cloneElement(InputComponent, {
     // Most of the logic is implemented in `SelectInput`.
     // The `Select` component is a simple API wrapper to expose something better to play with.
