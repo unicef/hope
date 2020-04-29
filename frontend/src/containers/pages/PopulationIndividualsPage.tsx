@@ -15,7 +15,7 @@ const Container = styled.div`
 export function PopulationIndividualsPage(): React.ReactElement {
   const businessArea = useBusinessArea();
   const [filter, setFilter] = useState({
-    sex: 'none',
+    sex: '',
     age: { min: undefined, max: undefined },
   });
   const debouncedFilter = useDebounce(filter, 500);
