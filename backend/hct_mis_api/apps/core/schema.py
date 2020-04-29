@@ -9,6 +9,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Q
 from django.utils.encoding import force_text
 from django.utils.functional import Promise
+from django_filters import FilterSet, CharFilter
 from graphene import (
     String,
     DateTime,
@@ -32,6 +33,19 @@ from core.models import (
     FlexibleAttributeChoice,
 )
 from core.utils import decode_id_string
+
+
+class AdminAreaFilter(FilterSet):
+    business_area = CharFilter(
+        field_name="admin_area_type__business_area__slug",
+    )
+
+    class Meta:
+        model = AdminArea
+        fields = {
+            "title": ["exact", "icontains"],
+            "business_area": ["exact"],
+        }
 
 
 class ChoiceObject(graphene.ObjectType):
@@ -236,7 +250,9 @@ def get_fields_attr_generators(flex_field):
 
 class Query(graphene.ObjectType):
     admin_area = relay.Node.Field(AdminAreaNode)
-    all_admin_areas = DjangoFilterConnectionField(AdminAreaNode)
+    all_admin_areas = DjangoFilterConnectionField(
+        AdminAreaNode, filterset_class=AdminAreaFilter
+    )
     all_business_areas = DjangoFilterConnectionField(BusinessAreaNode)
     all_log_entries = ConnectionField(
         LogEntryObjectConnection, object_id=graphene.String(required=True),

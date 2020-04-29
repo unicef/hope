@@ -10,6 +10,7 @@ interface UniversalTableProps<T, K> {
   queriedObjectName: string;
   renderRow: (row: T) => ReactElement;
   headCells: HeadCell<T>[];
+  getTitle?: (data) => string;
   title?: string;
   isOnPaper?: boolean;
 }
@@ -21,6 +22,7 @@ export function UniversalTable<T, K>({
   renderRow,
   headCells,
   title,
+  getTitle,
   isOnPaper,
 }: UniversalTableProps<T, K>): ReactElement {
   const [page, setPage] = useState(0);
@@ -42,11 +44,15 @@ export function UniversalTable<T, K>({
     return null;
   }
 
+  let correctTitle = title;
+  if (getTitle) {
+    correctTitle = getTitle(data);
+  }
   const { edges } = data[queriedObjectName];
   const typedEdges = edges.map((edge) => edge.node as T);
   return (
     <TableComponent<T>
-      title={title}
+      title={correctTitle}
       data={typedEdges}
       loading={loading}
       renderRow={renderRow}
