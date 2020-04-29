@@ -96,6 +96,7 @@ export function HouseholdFilters({
           onChange={(e) => handleFilterChange(e, 'program')}
           variant='outlined'
           label='Programme'
+          value={filter.program||""}
           InputProps={{
             startAdornment: (
               <StartInputAdornment position='start'>
@@ -108,7 +109,9 @@ export function HouseholdFilters({
             <em>None</em>
           </MenuItem>
           {programs.map((program) => (
-            <MenuItem value={program.id}>{program.name}</MenuItem>
+            <MenuItem key={program.id} value={program.id}>
+              {program.name}
+            </MenuItem>
           ))}
         </Select>
       </StyledFormControl>
@@ -120,6 +123,7 @@ export function HouseholdFilters({
           onChange={(e) => handleFilterChange(e, 'residenceStatus')}
           variant='outlined'
           label='Residence Status'
+          value={filter.residenceStatus||""}
           InputProps={{
             startAdornment: (
               <StartInputAdornment position='start'>
@@ -132,7 +136,7 @@ export function HouseholdFilters({
             <em>None</em>
           </MenuItem>
           {choicesData.residenceStatusChoices.map((program) => (
-            <MenuItem value={program.value}>{program.name}</MenuItem>
+            <MenuItem key={program.value} value={program.value}>{program.name}</MenuItem>
           ))}
         </Select>
       </StyledFormControl>
