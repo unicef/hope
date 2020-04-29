@@ -8,57 +8,65 @@ from snapshottest import Snapshot
 snapshots = Snapshot()
 
 snapshots['CandidateListTargetingCriteriaQueryTestCase::test_candidate_households_list_by_targeting_criteria_approved 1'] = {
-    'errors': [
-        {
-            'locations': [
+    'data': {
+        'candidateHouseholdsListByTargetingCriteria': {
+            'edges': [
                 {
-                    'column': 13,
-                    'line': 7
+                    'node': {
+                        'residenceStatus': 'CITIZEN',
+                        'size': 1
+                    }
                 }
             ],
-            'message': 'Cannot query field "familySize" on type "HouseholdNode".'
+            'totalCount': 1
         }
-    ]
+    }
 }
 
 snapshots['CandidateListTargetingCriteriaQueryTestCase::test_candidate_households_list_by_targeting_criteria_size 1'] = {
-    'errors': [
-        {
-            'locations': [
+    'data': {
+        'candidateHouseholdsListByTargetingCriteria': {
+            'edges': [
                 {
-                    'column': 13,
-                    'line': 7
+                    'node': {
+                        'residenceStatus': 'REFUGEE',
+                        'size': 2
+                    }
                 }
             ],
-            'message': 'Cannot query field "familySize" on type "HouseholdNode".'
+            'totalCount': 1
         }
-    ]
+    }
 }
 
 snapshots['CandidateListTargetingCriteriaQueryTestCase::test_candidate_households_list_by_targeting_criteria_residence_status 1'] = {
-    'errors': [
-        {
-            'locations': [
+    'data': {
+        'candidateHouseholdsListByTargetingCriteria': {
+            'edges': [
                 {
-                    'column': 13,
-                    'line': 7
+                    'node': {
+                        'residenceStatus': 'REFUGEE',
+                        'size': 2
+                    }
                 }
             ],
-            'message': 'Cannot query field "familySize" on type "HouseholdNode".'
+            'totalCount': 1
         }
-    ]
+    }
 }
 
 snapshots['CandidateListTargetingCriteriaQueryTestCase::test_candidate_households_list_by_targeting_criteria_first_10 1'] = {
-    'errors': [
-        {
-            'locations': [
+    'data': {
+        'candidateHouseholdsListByTargetingCriteria': {
+            'edges': [
                 {
-                    'column': 17,
-                    'line': 7
+                    'node': {
+                        'residenceStatus': 'REFUGEE',
+                        'size': 2
+                    }
                 }
             ],
-            'message': 'Cannot query field "familySize" on type "HouseholdNode".'
+            'totalCount': 1
         }
-    ]
+    }
 }

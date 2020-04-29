@@ -13,7 +13,7 @@ import { TargetPopulationDetails } from '../../components/TargetPopulation/Targe
 
 export function TargetPopulationDetailsPage() {
   const { id } = useParams();
-  const { data, loading } = useTargetPopulationQuery({
+  const { data } = useTargetPopulationQuery({
     variables: { id },
   });
   const [isEdit, setEditState] = useState(false);

@@ -17,7 +17,7 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
         totalCount
         edges {
           node {
-            familySize
+            size
             residenceStatus
           }
         }

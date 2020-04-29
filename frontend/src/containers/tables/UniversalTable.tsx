@@ -10,6 +10,7 @@ interface UniversalTableProps<T, K> {
   queriedObjectName: string;
   renderRow: (row: T) => ReactElement;
   headCells: HeadCell<T>[];
+  getTitle?: (data) => string;
   title?: string;
   isOnPaper?: boolean;
 }
@@ -21,13 +22,14 @@ export function UniversalTable<T, K>({
   renderRow,
   headCells,
   title,
+  getTitle,
   isOnPaper,
 }: UniversalTableProps<T, K>): ReactElement {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(rowsPerPageOptions[0]);
   const [orderBy, setOrderBy] = useState(null);
   const [orderDirection, setOrderDirection] = useState('asc');
-  const { data, refetch, loading } = query({
+  const { data, refetch, loading, error } = query({
     variables: { ...initialVariables, first: rowsPerPage },
     fetchPolicy: 'network-only',
   });
@@ -42,11 +44,17 @@ export function UniversalTable<T, K>({
     return null;
   }
 
+  let correctTitle = title;
+  if (getTitle) {
+    correctTitle = getTitle(data);
+  }
   const { edges } = data[queriedObjectName];
   const typedEdges = edges.map((edge) => edge.node as T);
+  //eslint-disable-next-line
+  
   return (
     <TableComponent<T>
-      title={title}
+      title={correctTitle}
       data={typedEdges}
       loading={loading}
       renderRow={renderRow}

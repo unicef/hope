@@ -29,6 +29,7 @@ export function PaymentRecordTable({
       initialVariables={initialVariables}
       renderRow={(row) => (
         <PaymentRecordTableRow
+          key={row.id}
           paymentRecord={row}
           openInNewTab={openInNewTab}
         />

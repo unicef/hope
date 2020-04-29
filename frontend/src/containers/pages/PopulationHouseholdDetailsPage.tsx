@@ -6,18 +6,18 @@ import { useParams } from 'react-router-dom';
 import { HouseholdDetails } from '../../components/population/HouseholdDetails';
 import { PageHeader } from '../../components/PageHeader';
 import {
-  CashPlanNode,
   HouseholdNode,
+  useHouseholdChoiceDataQuery,
   useHouseholdQuery,
 } from '../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { HouseholdVulnerabilities } from '../../components/population/HouseholdVulnerabilities';
 import { LabelizedField } from '../../components/LabelizedField';
-import { PaymentRecordTable } from '../tables/PaymentRecordTable';
 import { HouseholdIndividualsTable } from '../tables/HouseholdIndividualsTable';
 import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
 import { decodeIdString } from '../../utils/utils';
+import { PaymentRecordHouseholdTable } from '../tables/PaymentRecordHouseholdTable';
 
 const Container = styled.div`
   padding: 20px;
@@ -38,11 +38,17 @@ const Overview = styled(Paper)`
     ${({ theme }) => theme.spacing(11)}px;
   margin-top: 20px;
   &:first-child {
-    margin-top: 0px;
+    margin-top: 0;
   }
 `;
 const Content = styled.div`
   margin-top: 20px;
+`;
+
+const SubTitle = styled(Typography)`
+  && {
+    font-size: 16px;
+  }
 `;
 
 export function PopulationHouseholdDetailsPage(): React.ReactElement {
@@ -51,8 +57,13 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
   const { data, loading } = useHouseholdQuery({
     variables: { id },
   });
-
-  if (loading) return null;
+  const {
+    data: choicesData,
+    loading: choicesLoading,
+  } = useHouseholdChoiceDataQuery({
+    variables: { businessArea },
+  });
+  if (loading || choicesLoading) return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -62,8 +73,6 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
   ];
 
   const { household } = data;
-  const cashPlan = household.paymentRecords.edges[0].node
-    .cashPlan as CashPlanNode;
 
   return (
     <div>
@@ -73,54 +82,55 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
       />
       <HouseholdDetails houseHold={household as HouseholdNode} />
       <Container>
-        <HouseholdIndividualsTable household={household as HouseholdNode} />
-        <PaymentRecordTable openInNewTab cashPlan={cashPlan} />
+        <HouseholdIndividualsTable
+          choicesData={choicesData}
+          household={household as HouseholdNode}
+        />
+        <PaymentRecordHouseholdTable
+          openInNewTab
+          household={household as HouseholdNode}
+        />
         <HouseholdVulnerabilities />
         <Overview>
           <Title>
             <Typography variant='h6'>Registration Details</Typography>
           </Title>
           <Grid container spacing={6}>
-            <Grid item xs={4}>
+            <Grid item xs={3}>
               <LabelizedField label='Source'>
                 <div>-</div>
               </LabelizedField>
             </Grid>
-            <Grid item xs={4}>
-              <LabelizedField label='Intake group name'>
+            <Grid item xs={3}>
+              <LabelizedField label='Import name'>
                 <div>-</div>
               </LabelizedField>
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={3}>
               <LabelizedField label='Registered Date'>
-                <div>-</div>
-              </LabelizedField>
-            </Grid>
-            <Grid item xs={4}>
-              <LabelizedField label='Number of Rooms'>
                 <div>-</div>
               </LabelizedField>
             </Grid>
           </Grid>
           <hr />
-          <Typography variant='h6'>Data Collection</Typography>
+          <SubTitle variant='h6'>Data Collection</SubTitle>
           <Grid container spacing={6}>
-            <Grid item xs={4}>
+            <Grid item xs={3}>
               <LabelizedField label='Start time'>
                 <div>-</div>
               </LabelizedField>
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={3}>
               <LabelizedField label='End time'>
                 <div>-</div>
               </LabelizedField>
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={3}>
               <LabelizedField label='Device ID'>
                 <div>-</div>
               </LabelizedField>
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={3}>
               <LabelizedField label='User name'>
                 <div>-</div>
               </LabelizedField>

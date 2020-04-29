@@ -8,7 +8,7 @@ import {
   Typography,
 } from '@material-ui/core';
 import styled from 'styled-components';
-import { Field, Formik, Form } from 'formik';
+import { Field, Formik } from 'formik';
 import * as Yup from 'yup';
 import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
 import {
@@ -66,7 +66,7 @@ export function ApproveCandidateList({ open, setOpen, targetPopulationId }) {
         onSubmit={(values) => {
           mutate({
             variables: { id: targetPopulationId, programId: values.program },
-          }).then((res) => {
+          }).then(() => {
             setOpen(false);
             showMessage('Candidate List Approved', {
               pathname: `/${businessArea}/target-population/${targetPopulationId}`,
@@ -78,7 +78,7 @@ export function ApproveCandidateList({ open, setOpen, targetPopulationId }) {
           <>
             <DialogTitleWrapper>
               <DialogTitle id='scroll-dialog-title'>
-                <Typography variant='h6'>Approve Candidate List</Typography>
+                <Typography variant='h6'>Close Candidate List</Typography>
               </DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
@@ -87,6 +87,9 @@ export function ApproveCandidateList({ open, setOpen, targetPopulationId }) {
                 Candidate List? Once a Candidate List is{' '}
                 <strong>Approved</strong> the targeting criteria will be
                 permanently frozen.
+              </DialogDescription>
+              <DialogDescription>
+                Note: You may duplicate tthe Programme Population target criteria at any time.
               </DialogDescription>
               <DialogDescription>
                 Please select a Programme you would like to associate this
@@ -109,7 +112,7 @@ export function ApproveCandidateList({ open, setOpen, targetPopulationId }) {
                   onClick={submitForm}
                   disabled={!loading || !values.program}
                 >
-                  Approve
+                  Close
                 </Button>
               </DialogActions>
             </DialogFooter>

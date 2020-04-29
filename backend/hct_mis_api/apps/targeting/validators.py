@@ -74,7 +74,14 @@ class TargetingCriteriaRuleFilterInputValidator:
             )
         args_count = comparision_attribute.get("arguments")
         given_args_count = len(rule_filter.arguments)
-        if given_args_count != args_count:
+        select_many = get_attr_value("type", attribute) == "SELECT_MANY"
+        if select_many:
+            if given_args_count < 1:
+                raise ValidationError(
+                    f"SELECT_MANY expect at least 1 argument"
+                    f"expect {args_count} arguments, {given_args_count} given"
+                )
+        elif given_args_count != args_count:
             raise ValidationError(
                 f"Comparision method - {rule_filter.comparision_method} "
                 f"expect {args_count} arguments, {given_args_count} given"

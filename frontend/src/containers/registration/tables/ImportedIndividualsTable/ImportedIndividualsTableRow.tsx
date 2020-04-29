@@ -1,33 +1,20 @@
-import styled from 'styled-components';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import {
-  ImportedHouseholdMinimalFragment,
-  ImportedHouseholdNode, ImportedIndividualMinimalFragment,
-  RegistrationDataImportNode,
-} from '../../../../__generated__/graphql';
+import moment from 'moment';
+import { ImportedIndividualMinimalFragment } from '../../../../__generated__/graphql';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../../components/table/ClickableTableRow';
-import { StatusBox } from '../../../../components/StatusBox';
-import {
-  decodeIdString,
-  registrationDataImportStatusToColor,
-} from '../../../../utils/utils';
-import moment from 'moment';
-import {Missing} from "../../../../components/Missing";
-
-const StatusContainer = styled.div`
-  width: 120px;
-`;
+import { decodeIdString } from '../../../../utils/utils';
+import { Missing } from '../../../../components/Missing';
 
 interface ImportedIndividualsTableRowProps {
   individual: ImportedIndividualMinimalFragment;
 }
 
 export function ImportedIndividualsTableRow({
-                                              individual,
-}: ImportedIndividualsTableRowProps) {
+  individual,
+}: ImportedIndividualsTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
 
@@ -36,16 +23,12 @@ export function ImportedIndividualsTableRow({
     history.push(path);
   };
   return (
-    <ClickableTableRow
-      hover
-      onClick={handleClick}
-      key={individual.id}
-    >
+    <ClickableTableRow hover onClick={handleClick} key={individual.id}>
       <TableCell align='left'>{decodeIdString(individual.id)}</TableCell>
+      <TableCell align='left'>{individual.fullName}</TableCell>
       <TableCell align='left'>
-        {individual.fullName}
+        <Missing />
       </TableCell>
-      <TableCell align='left'><Missing/></TableCell>
       <TableCell align='left'>
         {moment(individual.birthDate).format('DD MMM YYYY')}
       </TableCell>
