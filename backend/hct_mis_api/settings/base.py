@@ -99,14 +99,14 @@ DATABASES = {
         "PORT": 5432,
     },
     "cash_assist_datahub": {
-        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "ENGINE": "django.contrib.gis.db.backends.postgis",
         "NAME": os.getenv("POSTGRES_CASHASSIST_DATAHUB_DB"),
         "USER": os.getenv("POSTGRES_CASHASSIST_DATAHUB_USER"),
         "PASSWORD": os.getenv("POSTGRES_CASHASSIST_DATAHUB_PASSWORD"),
         "HOST": os.getenv("POSTGRES_CASHASSIST_DATAHUB_HOST"),
     },
     "registration_datahub": {
-         "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "ENGINE": "django.contrib.gis.db.backends.postgis",
         "NAME": os.getenv("POSTGRES_REGISTRATION_DATAHUB_DB"),
         "USER": os.getenv("POSTGRES_REGISTRATION_DATAHUB_USER"),
         "PASSWORD": os.getenv("POSTGRES_REGISTRATION_DATAHUB_PASSWORD"),
