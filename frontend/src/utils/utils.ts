@@ -223,8 +223,8 @@ export function formatCriteriaFilters({ filters }) {
         values = [each.value];
         break;
       case 'SELECT_MANY':
-        comparisionMethod = 'EQUALS';
-        values = [each.value];
+        comparisionMethod = 'CONTAINS';
+        values = [...each.value];
         break;
       case 'STRING':
         comparisionMethod = 'CONTAINS';
@@ -288,6 +288,11 @@ export function mapCriteriasToInitialValues(criteria) {
             return mappedFilters.push({
               ...each,
               value: each.arguments[0]
+            })
+          case 'CONTAINS':
+            return mappedFilters.push({
+              ...each,
+              value: each.arguments
             })
           default:
             return mappedFilters.push({
