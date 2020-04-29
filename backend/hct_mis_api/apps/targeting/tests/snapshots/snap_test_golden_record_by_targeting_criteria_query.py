@@ -48,3 +48,13 @@ snapshots['GoldenRecordTargetingCriteriaQueryTestCase::test_golden_record_by_tar
         }
     }
 }
+
+snapshots['GoldenRecordTargetingCriteriaQueryTestCase::test_golden_record_by_targeting_criteria_select_many 1'] = {
+    'data': {
+        'goldenRecordByTargetingCriteria': {
+            'edges': [
+            ],
+            'totalCount': 0
+        }
+    }
+}

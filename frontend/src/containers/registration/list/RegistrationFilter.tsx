@@ -49,7 +49,7 @@ export function RegistrationFilters({
   onFilterChange,
   filter,
 }: RegistrationFiltersProps): React.ReactElement {
-  const handleFilterChange = (e, name) =>
+  const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
   const { data: registrationChoicesData } = useRegistrationChoicesQuery();
   if (!registrationChoicesData) {
