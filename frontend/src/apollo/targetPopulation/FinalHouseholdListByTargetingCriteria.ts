@@ -31,6 +31,7 @@ export const FinalHouseholdsListByTargetingCriteria = gql`
             title
           }
           updatedAt
+          address
         }
         cursor
       }
