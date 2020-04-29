@@ -12,6 +12,7 @@ from household.fixtures import (
     IndividualFactory,
     EntitlementCardFactory,
     DocumentFactory,
+    create_household,
 )
 from household.models import DocumentType
 from payment.fixtures import PaymentRecordFactory
@@ -134,23 +135,15 @@ class Command(BaseCommand):
                 registration_data_import = RegistrationDataImportFactory(
                     imported_by=user, business_area=BusinessArea.objects.first()
                 )
-
-                household = HouseholdFactory.build(
-                    admin_area=AdminArea.objects.order_by("?").first(),
-                    registration_data_import=registration_data_import,
-                )
-                individuals = IndividualFactory.create_batch(
-                    household.size,
-                    household=household,
-                    registration_data_import=registration_data_import,
+                household, individuals = create_household(
+                    {
+                        "registration_data_import": registration_data_import,
+                        "admin_area": AdminArea.objects.order_by("?").first(),
+                    },
+                    {"registration_data_import": registration_data_import,},
                 )
                 for individual in individuals:
                     DocumentFactory(individual=individual)
-
-                individuals[0].relationship = "HEAD"
-                individuals[0].save()
-                household.head_of_household = individuals[0]
-                household.save()
 
                 household.programs.add(program)
 
