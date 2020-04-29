@@ -29,6 +29,7 @@ export const CandidateHouseholdsListByTargetingCriteria = gql`
             title
           }
           updatedAt
+          address
         }
         cursor
       }

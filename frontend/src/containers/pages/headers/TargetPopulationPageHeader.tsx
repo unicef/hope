@@ -5,12 +5,11 @@ import { TargetPopulationNode } from '../../../__generated__/graphql';
 import { PageHeader } from '../../../components/PageHeader';
 import { BreadCrumbsItem } from '../../../components/BreadCrumbs';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { InProgressTargetPopulationHeaderButtons } from './InProgressTargetPopulationHeaderButtons';
-import { FinalizedTargetPopulationHeaderButtons } from './FinalizedTargetPopulationHeaderButtons';
-import { EditTargetPopulationHeader } from './EditTargetPopulationHeader';
-import { ApprovedTargetPopulationHeaderButtons } from './ApprovedTargetPopulationHeaderButtons';
 import { StatusBox } from '../../../components/StatusBox';
 import { targetPopulationStatusToColor, targetPopulationStatusMapping } from '../../../utils/utils';
+import { InProgressTargetPopulationHeaderButtons } from './InProgressTargetPopulationHeaderButtons';
+import { FinalizedTargetPopulationHeaderButtons } from './FinalizedTargetPopulationHeaderButtons';
+import { ApprovedTargetPopulationHeaderButtons } from './ApprovedTargetPopulationHeaderButtons';
 
 const HeaderWrapper = styled.div`
   display: flex;
@@ -25,8 +24,6 @@ const StatusWrapper = styled.div`
 `;
 
 export interface ProgramDetailsPageHeaderPropTypes {
-  // targetPopulation: TargetPopulationNode;
-  isEditMode: boolean;
   setEditState: Function;
   targetPopulation: TargetPopulationNode;
   tabs: React.ReactElement;
@@ -35,7 +32,6 @@ export interface ProgramDetailsPageHeaderPropTypes {
 
 export function TargetPopulationPageHeader({
   targetPopulation,
-  isEditMode,
   setEditState,
   tabs,
   selectedTab,
@@ -68,17 +64,12 @@ export function TargetPopulationPageHeader({
         />
       );
       break;
-    case 'FINALIZED':
+    default: //FINALIZED
       buttons = (
         <FinalizedTargetPopulationHeaderButtons
           targetPopulation={targetPopulation}
         />
       );
-      break;
-    default:
-      //TODO: this could be edit case, in such scenario
-      //wrap other components in page header
-      buttons = <EditTargetPopulationHeader />;
       break;
   }
   return (
