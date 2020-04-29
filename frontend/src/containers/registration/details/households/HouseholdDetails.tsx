@@ -61,7 +61,7 @@ export function HouseholdDetails({
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>
-            <LabelizedField label='Family Nationality'>
+            <LabelizedField label='Country of Origin'>
               <div>{household.countryOrigin}</div>
             </LabelizedField>
           </Grid>
