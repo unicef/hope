@@ -104,6 +104,7 @@ DATABASES = {
         "USER": os.getenv("POSTGRES_CASHASSIST_DATAHUB_USER"),
         "PASSWORD": os.getenv("POSTGRES_CASHASSIST_DATAHUB_PASSWORD"),
         "HOST": os.getenv("POSTGRES_CASHASSIST_DATAHUB_HOST"),
+        "PORT": 5432,
     },
     "registration_datahub": {
         "ENGINE": "django.contrib.gis.db.backends.postgis",
@@ -114,6 +115,7 @@ DATABASES = {
         "PORT": 5432,
     },
 }
+
 
 # If app is not specified here it will use default db
 DATABASE_APPS_MAPPING = {
