@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "devDependencies": {
-    "cypress": "^4.4.1",
+    "cypress": "^4.5",
     "puppeteer": "^2.1.1"
   },
   "cypress:open": "cypress open",
