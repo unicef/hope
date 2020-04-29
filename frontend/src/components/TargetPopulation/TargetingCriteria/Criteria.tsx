@@ -14,7 +14,7 @@ const CriteriaElement = styled.div`
   background-color: ${(props) =>
     props.alternative ? 'transparent' : '#f7faff'};
   padding: ${({ theme }) => theme.spacing(1)}px
-    ${({ theme }) => theme.spacing(17)}px
+    ${({ theme, alternative }) => alternative ? theme.spacing(1) : theme.spacing(17)}px
     ${({ theme }) => theme.spacing(1)}px
     ${({ theme }) => theme.spacing(4)}px;
   margin: ${({ theme }) => theme.spacing(2)}px 0;
@@ -64,10 +64,10 @@ const CriteriaField = ({ field }) => {
       break;
     case 'EQUALS':
       fieldElement = (
-          <p>
-            {field.fieldAttribute.labelEn || field.fieldName}:{' '}
-            <span>{field.fieldAttribute.choices.length ? field.fieldAttribute.choices.find(each => each.value === field.arguments[0]).labelEn : field.arguments[0]}</span>
-          </p>
+        <p>
+          {field.fieldAttribute.labelEn || field.fieldName}:{' '}
+          <span>{field.fieldAttribute.choices.length ? field.fieldAttribute.choices.find(each => each.value === field.arguments[0]).labelEn : field.arguments[0]}</span>
+        </p>
       );
       break;
     case 'LESS_THAN':

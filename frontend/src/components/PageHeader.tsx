@@ -39,7 +39,7 @@ const TabsWrapper = styled.div`
 
 const TitleWrapper = styled.div`
   width: 60%;
-  min-width: 400px;
+  min-width: 600px;
   transform: translateY(-12px);
   label:first-child {
     font-size: ${({ theme }) => theme.spacing(6)}px;
