@@ -71,7 +71,7 @@ export function HouseholdFilters({
   programs,
   choicesData,
 }: HouseholdFiltersProps): React.ReactElement {
-  const handleFilterChange = (e, name) =>
+  const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
   return (
     <Container>
