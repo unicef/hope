@@ -276,11 +276,8 @@ def age_to_birth_date_query(comparision_method, args):
 def get_attr_value(name, object, default=None):
     if isinstance(object, dict):
         return object.get(name, default)
-    return getattr(name, object, default)
+    return getattr(object, name, default)
 
 
 def to_choice_object(choices):
-    return [
-        {"name": name, "value": value}
-        for value, name in choices
-    ]
+    return [{"name": name, "value": value} for value, name in choices]
