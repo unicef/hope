@@ -4,12 +4,9 @@ import { useCandidateHouseholdsListByTargetingCriteriaQuery } from '../../__gene
 import { SentTargetPopulationTable } from '../../containers/tables/TargetPopulation/SentTargeting';
 import { ApprovedTargetPopulationTable } from '../../containers/tables/TargetPopulation/ApprovedTargeting';
 
-export function TargetingHouseholds({
-  status,
-  id,
-  selectedTab,
-}): React.ReactElement {
+export function TargetingHouseholds({ status, id, selectedTab, totalNumOfHouseholds, finalListTotalHouseholds }) {
   let table;
+  const hasSameResults = totalNumOfHouseholds === finalListTotalHouseholds;
   switch (status) {
     case 'DRAFT':
       table = (
@@ -22,8 +19,8 @@ export function TargetingHouseholds({
       break;
     case 'APPROVED':
       table = (
-        <ApprovedTargetPopulationTable id={id} selectedTab={selectedTab} />
-      );
+        <ApprovedTargetPopulationTable id={id} selectedTab={selectedTab} hasSameResults={hasSameResults}/>
+      )
       break;
     case 'FINALIZED':
       table = <SentTargetPopulationTable id={id} selectedTab={selectedTab} />;
