@@ -85,6 +85,7 @@ export function IndividualsFilter({
           // @ts-ignore
           onChange={(e) => handleFilterChange(e, 'sex')}
           variant='outlined'
+          value={filter.sex || ''}
           label='Sex'
           InputProps={{
             startAdornment: (

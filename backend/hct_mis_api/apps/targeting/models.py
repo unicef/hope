@@ -287,7 +287,7 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
     )
     is_flex_field = models.BooleanField(default=False)
-    field_name = models.CharField(max_length=20)
+    field_name = models.CharField(max_length=50)
     arguments = JSONField(
         help_text="""
             Array of arguments
