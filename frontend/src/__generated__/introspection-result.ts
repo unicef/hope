@@ -27,25 +27,28 @@
             "name": "ProgramNode"
           },
           {
-            "name": "LocationNode"
-          },
-          {
-            "name": "BusinessAreaNode"
-          },
-          {
-            "name": "UserNode"
-          },
-          {
-            "name": "TargetPopulationNode"
+            "name": "AdminAreaNode"
           },
           {
             "name": "HouseholdNode"
           },
           {
+            "name": "RegistrationDataImportNode"
+          },
+          {
+            "name": "UserNode"
+          },
+          {
+            "name": "BusinessAreaNode"
+          },
+          {
+            "name": "TargetPopulationNode"
+          },
+          {
             "name": "IndividualNode"
           },
           {
-            "name": "RegistrationDataImportNode"
+            "name": "DocumentNode"
           },
           {
             "name": "ImportedHouseholdNode"
@@ -58,6 +61,9 @@
           },
           {
             "name": "ImportDataNode"
+          },
+          {
+            "name": "ImportedDocumentNode"
           }
         ]
       }

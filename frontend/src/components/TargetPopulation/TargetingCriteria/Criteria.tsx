@@ -3,20 +3,23 @@ import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { IconButton } from '@material-ui/core';
 import { Delete, Edit } from '@material-ui/icons';
+import { TargetingCriteriaRuleObjectType } from '../../../__generated__/graphql';
 
 const CriteriaElement = styled.div`
-  width: 380px;
+  width: ${(props) => (props.alternative ? 'auto' : '380px')};
   position: relative;
-  border: 2px solid #033f91;
+  border: ${(props) => (props.alternative ? '0' : '2px solid #033f91')};
   border-radius: 3px;
   font-size: 16px;
-  background-color: #f7faff;
+  background-color: ${(props) =>
+    props.alternative ? 'transparent' : '#f7faff'};
   padding: ${({ theme }) => theme.spacing(1)}px
     ${({ theme }) => theme.spacing(3)}px;
+  margin: ${({ theme }) => theme.spacing(2)}px 0;
   p {
     margin: ${({ theme }) => theme.spacing(2)}px 0;
     span {
-      color: #003c8f;
+      color: ${(props) => (props.alternative ? '#000' : '#003c8f')};
       font-weight: bold;
     }
   }
@@ -36,15 +39,16 @@ const ButtonsContainer = styled.div`
   }
 `;
 
-const CriteriaField = ({field}) => {
+const CriteriaField = ({ field }) => {
   let fieldElement;
   switch (field.comparisionMethod) {
     case 'NOT_EQUALS':
       fieldElement = (
         <p>
-          {field.fieldAttribute.labelEn || field.fieldName}: <span>{field.arguments[0]}</span>
+          {field.fieldAttribute.labelEn || field.fieldName}:{' '}
+          <span>{field.arguments[0]}</span>
         </p>
-      )
+      );
       break;
     case 'RANGE':
       fieldElement = (
@@ -54,55 +58,77 @@ const CriteriaField = ({field}) => {
             {field.arguments[0]} - {field.arguments[1]}
           </span>
         </p>
-      )
+      );
       break;
     case 'EQUALS':
       fieldElement = (
         <p>
-          {field.fieldAttribute.labelEn || field.fieldName}: <span>{field.arguments[0]}</span>
+          {field.fieldAttribute.labelEn || field.fieldName}:{' '}
+          <span>{field.arguments[0]}</span>
         </p>
-      )
+      );
       break;
     case 'LESS_THAN':
       fieldElement = (
         <p>
-          {field.fieldAttribute.labelEn || field.fieldName}: {'>'} <span>{field.arguments[0]}</span>
+          {field.fieldAttribute.labelEn || field.fieldName}: {'>'}{' '}
+          <span>{field.arguments[0]}</span>
         </p>
-      )
+      );
       break;
     case 'GREATER_THAN':
       fieldElement = (
         <p>
-          {field.fieldAttribute.labelEn || field.fieldName}: {'<'} <span>{field.arguments[0]}</span>
+          {field.fieldAttribute.labelEn || field.fieldName}: {'<'}{' '}
+          <span>{field.arguments[0]}</span>
         </p>
-      )
+      );
       break;
     default:
       fieldElement = (
         <p>
           {field.fieldAttribute.labelEn}: <span>{field.arguments[0]}</span>
         </p>
-      )
+      );
       break;
   }
   return fieldElement;
 };
 
-export function Criteria({ rules, removeFunction, editFunction, isEdit }) {
+interface CriteriaProps {
+  rules: [TargetingCriteriaRuleObjectType];
+  removeFunction?;
+  editFunction?;
+  isEdit: boolean;
+  canRemove: boolean;
+  alternative?: boolean;
+}
+
+export function Criteria({
+  rules,
+  removeFunction,
+  editFunction,
+  isEdit,
+  canRemove,
+  alternative,
+}: CriteriaProps) {
   const { t } = useTranslation();
   return (
-    <CriteriaElement>
-      {rules.map((each) => (
-        <CriteriaField key={each.id} field={each} />
-      ))}
+    <CriteriaElement alternative={alternative}>
+      {rules.map((each, index) => {
+        //eslint-disable-next-line
+        return <CriteriaField key={index} field={each} />;
+      })}
       {isEdit && (
         <ButtonsContainer>
           <IconButton>
             <Edit onClick={editFunction} />
           </IconButton>
-          <IconButton onClick={removeFunction}>
-            <Delete />
-          </IconButton>
+          {canRemove && (
+            <IconButton onClick={removeFunction}>
+              <Delete />
+            </IconButton>
+          )}
         </ButtonsContainer>
       )}
     </CriteriaElement>

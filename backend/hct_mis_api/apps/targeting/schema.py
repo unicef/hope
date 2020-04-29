@@ -58,8 +58,8 @@ class TargetPopulationFilter(django_filters.FilterSet):
     @staticmethod
     def filter_created_by_name(queryset, model_field, value):
         """Gets full name of the associated user from query."""
-        fname_query_key = f"{model_field}__first_name__icontains"
-        lname_query_key = f"{model_field}__last_name__icontains"
+        fname_query_key = f"{model_field}__given_name__icontains"
+        lname_query_key = f"{model_field}__family_name__icontains"
         for name in value.strip().split():
             queryset = queryset.filter(
                 Q(**{fname_query_key: name,}) | Q(**{lname_query_key: name,})

@@ -87,9 +87,9 @@ export function DuplicateTargetPopulation({
             <DialogContent>
               <DialogDescription>
                 Please use a unique name for the copy of this Target Population.
-                <br /> <strong>Note</strong>: This duplicate will result in a
-                snapshot of this Target Population List data, any changes will
-                result in new data for this copy.
+                <br /> <strong>Note</strong>: This duplicate will copy the
+                Target Criteria of the Programme Population and update to the
+                latest results from the system.
               </DialogDescription>
               <Field
                 name='name'
