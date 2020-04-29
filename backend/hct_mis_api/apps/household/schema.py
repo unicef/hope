@@ -1,5 +1,5 @@
 import graphene
-from django.db.models import Sum
+from django.db.models import Sum, Q
 from django_filters import (
     FilterSet,
     OrderingFilter,
@@ -28,8 +28,11 @@ from household.models import (
 
 
 class HouseholdFilter(FilterSet):
-    business_area = CharFilter(field_name="registration_data_import__business_area__slug")
+    business_area = CharFilter(
+        field_name="registration_data_import__business_area__slug"
+    )
     size = IntegerRangeFilter(field_name="size")
+    search = CharFilter(method="search_filter")
 
     class Meta:
         model = Household
@@ -39,8 +42,10 @@ class HouseholdFilter(FilterSet):
             "address": ["exact", "icontains"],
             "head_of_household__full_name": ["exact", "icontains"],
             "size": ["range", "lte", "gte"],
+            "admin_area": ["exact"],
             "target_populations": ["exact"],
             "programs": ["exact"],
+            "residence_status": ["exact"],
         }
 
     order_by = OrderingFilter(
@@ -60,6 +65,15 @@ class HouseholdFilter(FilterSet):
         )
     )
 
+    def search_filter(self, qs, name, value):
+        values = value.split(" ")
+        q_obj = Q()
+        for value in values:
+            q_obj |= Q(head_of_household__given_name__icontains=value)
+            q_obj |= Q(head_of_household__family_name__icontains=value)
+            q_obj |= Q(id__icontains=value)
+        return qs.filter(q_obj)
+
 
 class IndividualFilter(FilterSet):
     business_area = CharFilter(field_name="household__business_area__slug",)
@@ -68,6 +82,7 @@ class IndividualFilter(FilterSet):
         to_field_name="sex", queryset=Individual.objects.all(),
     )
     programme = CharFilter(field_name="household__programs__name")
+    search = CharFilter(method="search_filter")
 
     class Meta:
         model = Individual
@@ -90,8 +105,23 @@ class IndividualFilter(FilterSet):
         )
     )
 
+    def search_filter(self, qs, name, value):
+        values = value.split(" ")
+        q_obj = Q()
+        for value in values:
+            q_obj |= Q(household__admin_area__title__icontains=value)
+            q_obj |= Q(id__icontains=value)
+            q_obj |= Q(household__id__icontains=value)
+            q_obj |= Q(full_name__icontains=value)
+        return qs.filter(q_obj)
+
 
 class DocumentTypeNode(DjangoObjectType):
+    country = graphene.String(description="Country name")
+
+    def resolve_country(parrent, info):
+        return parrent.country.name
+
     class Meta:
         model = DocumentType
 
@@ -106,6 +136,14 @@ class DocumentNode(DjangoObjectType):
 
 class HouseholdNode(DjangoObjectType):
     total_cash_received = graphene.Decimal()
+    country_origin = graphene.String(description="Country origin name")
+    country = graphene.String(description="Country name")
+
+    def resolve_country(parrent, info):
+        return parrent.country.name
+
+    def resolve_country_origin(parrent, info):
+        return parrent.country_origin.name
 
     class Meta:
         model = Household
@@ -117,6 +155,7 @@ class HouseholdNode(DjangoObjectType):
 
 class IndividualNode(DjangoObjectType):
     estimated_birth_date = graphene.Boolean(required=False)
+    role = graphene.String()
 
     class Meta:
         exclude_fields = ("flex_fields",)
