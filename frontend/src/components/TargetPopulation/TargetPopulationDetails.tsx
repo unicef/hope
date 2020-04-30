@@ -34,9 +34,12 @@ interface ProgramDetailsProps {
 }
 
 export function TargetPopulationDetails({
-    targetPopulation,
+  targetPopulation,
 }: ProgramDetailsProps): React.ReactElement {
-  const { firstName, lastName } = targetPopulation.createdBy;
+  const { createdBy, finalizedBy, approvedAt, finalizedAt, program } = targetPopulation;
+  const closeDate = approvedAt ? moment(approvedAt).format('DD MMM YYYY') : '-';
+  const sendBy = finalizedBy ? `${finalizedBy.firstName} ${finalizedBy.lastName}` : '-';
+  const sendDate = finalizedAt ? moment(finalizedAt).format('DD MMM YYYY') : '-';
   return (
     <Container>
       <Title>
@@ -44,34 +47,34 @@ export function TargetPopulationDetails({
       </Title>
       <OverviewContainer>
         <Grid container spacing={6}>
-        <Grid item xs={4}>
+          <Grid item xs={4}>
             <LabelizedField
               label='created by'
-              value={`${firstName} ${lastName}`}
+              value={`${createdBy.firstName} ${createdBy.lastName}`}
             />
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
               label='Programme population close date'
-              value='closing date'
+              value={closeDate}
             />
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
               label='Programme'
-              value='programme name with link'
+              value={program.name}
             />
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
               label='Send by'
-              value='name surname'
+              value={sendBy}
             />
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
               label='Send date'
-              value={moment(targetPopulation.createdAt).format('DD MMM YYYY')}
+              value={sendDate}
             />
           </Grid>
         </Grid>
