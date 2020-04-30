@@ -13,7 +13,7 @@ from model_utils import Choices
 from model_utils.models import SoftDeletableModel
 from psycopg2.extras import NumericRange
 
-from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES
+from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES, _INDIVIDUAL
 from core.models import FlexibleAttribute
 from utils.models import TimeStampedUUIDModel
 
@@ -331,10 +331,9 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
                 f"arguments gets {args_input_count}"
             )
         argument = self.arguments if args_input_count > 1 else self.arguments[0]
+
         if select_many:
-            query = Q(
-                **{f"{lookup}__contains": argument}
-            )
+            query = Q(**{f"{lookup}__contains": argument})
         else:
             query = Q(
                 **{f"{lookup}{comparision_attribute.get('lookup')}": argument}
@@ -363,7 +362,8 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
                 f" doesn't have get_query method or lookup field"
             )
         return self.get_query_for_lookup(
-            lookup, select_many=core_field_attr.get("type") == "SELECT_MANY",
+            f"{'individuals__' if core_field_attr['associated_with']==_INDIVIDUAL else ''}{lookup}",
+            select_many=core_field_attr.get("type") == "SELECT_MANY",
         )
 
     def get_query_for_flex_field(self):
