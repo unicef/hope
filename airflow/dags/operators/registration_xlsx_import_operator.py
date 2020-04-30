@@ -181,9 +181,7 @@ class RegistrationXLSXImportOperator(DjangoOperator):
         else:
             ImportedIndividual.objects.bulk_create(self.individuals)
             ImportedHousehold.objects.bulk_update(
-                households_to_update,
-                ["representative", "head_of_household"],
-                1000,
+                households_to_update, ["head_of_household"], 1000,
             )
             self._create_documents()
 
