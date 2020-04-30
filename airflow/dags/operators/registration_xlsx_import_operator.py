@@ -52,6 +52,9 @@ class RegistrationXLSXImportOperator(DjangoOperator):
                 "photo": value,
             }
 
+    def _handle_image_field(self, value, header, *args, **kwargs):
+        return
+
     def _create_documents(self):
         from registration_datahub.models import (
             ImportedDocument,
@@ -82,7 +85,7 @@ class RegistrationXLSXImportOperator(DjangoOperator):
         ImportedDocument.objects.bulk_create(docs_to_create)
 
     def _create_objects(self, sheet, registration_data_import):
-        from backend.hct_mis_api.apps.core.utils import (
+        from core.utils import (
             get_combined_attributes,
             serialize_flex_attributes,
         )
@@ -111,7 +114,7 @@ class RegistrationXLSXImportOperator(DjangoOperator):
                 "other_id_no_i_c": self._handle_document_fields,
                 "other_id_photo_i_c": self._handle_document_photo_fields,
             },
-            "households": {},
+            "households": {"consent_h_c": self._handle_image_field,},
         }
 
         sheet_title = sheet.title.lower()
@@ -127,16 +130,17 @@ class RegistrationXLSXImportOperator(DjangoOperator):
 
             if sheet_title == "households":
                 obj_to_create = ImportedHousehold(
-                    registration_data_import_id=registration_data_import,
+                    registration_data_import=registration_data_import,
                 )
             else:
                 obj_to_create = ImportedIndividual(
-                    registration_data_import_id=registration_data_import,
+                    registration_data_import=registration_data_import,
                 )
 
             household_id = None
-            for cell, header in zip(row, first_row):
-                current_field = combined_fields.get(header.value)
+            for cell, header_cell in zip(row, first_row):
+                header = header_cell.value
+                current_field = combined_fields.get(header)
                 is_not_required_and_empty = (
                     current_field.get("required") and not cell.value
                 )
@@ -151,7 +155,7 @@ class RegistrationXLSXImportOperator(DjangoOperator):
                         )
 
                 if (
-                    hasattr(obj_to_create, combined_fields.get(header))
+                    hasattr(obj_to_create, header)
                     and header not in complex_fields.keys()
                 ):
                     if header == "relationship" and cell.value == "HEAD":
@@ -166,9 +170,8 @@ class RegistrationXLSXImportOperator(DjangoOperator):
                     if value is not None:
                         setattr(obj_to_create, header, value)
                 elif header in flex_fields[sheet_title]:
-                    if flex_fields[sheet_title]["type"] == "IMAGE":
-                        # TODO: handle image
-                        pass
+                    if flex_fields[sheet_title][header]["type"] == "IMAGE":
+                        image = self._handle_image_field(cell.value, header)
                     obj_to_create.flex_fields[header] = cell.value
 
             if sheet_title == "households":
@@ -177,7 +180,8 @@ class RegistrationXLSXImportOperator(DjangoOperator):
                 self.individuals.append(obj_to_create)
 
         if sheet_title == "households":
-            ImportedHousehold.objects.bulk_create(self.households)
+            # FIXME: ADD ALL REQUIRED FIELDS, HANDLE CONSENT IMAGE AND OTHER STUFF
+            ImportedHousehold.objects.bulk_create(self.households.values())
         else:
             ImportedIndividual.objects.bulk_create(self.individuals)
             ImportedHousehold.objects.bulk_update(
@@ -200,8 +204,7 @@ class RegistrationXLSXImportOperator(DjangoOperator):
         dag_run = context["dag_run"]
         config_vars = dag_run.conf
 
-        reg_data_qs = RegistrationDataImportDatahub.objects.select_for_update()
-        registration_data_import = reg_data_qs.get(
+        registration_data_import = RegistrationDataImportDatahub.objects.get(
             id=config_vars.get("registration_data_import_id")
         )
         import_data = ImportData.objects.get(
@@ -214,7 +217,8 @@ class RegistrationXLSXImportOperator(DjangoOperator):
         wb = openpyxl.load_workbook(import_data.xlsx_file, data_only=True)
 
         for sheet in wb.worksheets:
-            self._create_objects(sheet, registration_data_import)
+            if sheet.title in ("Individuals", "Households"):
+                self._create_objects(sheet, registration_data_import)
 
         registration_data_import.import_done = True
         registration_data_import.save()

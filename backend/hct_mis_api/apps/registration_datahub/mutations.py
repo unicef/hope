@@ -1,7 +1,6 @@
 import graphene
 import openpyxl
 from django.core.exceptions import ValidationError
-from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import transaction
 from graphene_file_upload.scalars import Upload
 
@@ -26,7 +25,7 @@ from registration_datahub.validators import UploadXLSXValidator
 class CreateRegistrationDataImportExcelInput(graphene.InputObjectType):
     import_data_id = graphene.ID()
     name = graphene.String()
-    business_area_slug = graphene.String()
+    business_area_slug = graphene.String(required=False)
 
 
 class CreateRegistrationDataImport(BaseValidator, graphene.Mutation):
@@ -46,7 +45,7 @@ class CreateRegistrationDataImport(BaseValidator, graphene.Mutation):
         import_data_obj = ImportData.objects.get(id=import_data_id)
 
         business_area = BusinessArea.objects.get(
-            slug=registration_data_import_data.pop("business_area_slug")
+            slug=registration_data_import_data.pop("business_area_slug", "afghanistan")
         )
 
         created_obj_datahub = RegistrationDataImportDatahub.objects.create(
