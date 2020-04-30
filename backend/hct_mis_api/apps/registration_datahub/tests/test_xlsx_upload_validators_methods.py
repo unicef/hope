@@ -1,5 +1,5 @@
 import operator
-from unittest import TestCase
+from unittest import TestCase, mock
 
 import openpyxl
 
@@ -17,7 +17,7 @@ class TestXLSXValidatorsMethods(TestCase):
             "54.1234252, 67.535232",
         )
         for value in correct_values:
-            self.assertTrue(UploadXLSXValidator.geolocation_validator(value))
+            self.assertTrue(UploadXLSXValidator.geolocation_validator(value, "hh_geopoint_h_c"))
 
         # test incorrect values:
         incorrect_values = (
@@ -28,7 +28,7 @@ class TestXLSXValidatorsMethods(TestCase):
         )
 
         for value in incorrect_values:
-            self.assertFalse(UploadXLSXValidator.geolocation_validator(value))
+            self.assertFalse(UploadXLSXValidator.geolocation_validator(value, "hh_geopoint_h_c"))
 
     def test_date_validator(self):
         # test correct values:
@@ -41,7 +41,7 @@ class TestXLSXValidatorsMethods(TestCase):
             "27.12.2020",
         )
         for value in correct_values:
-            self.assertTrue(UploadXLSXValidator.date_validator(value))
+            self.assertTrue(UploadXLSXValidator.date_validator(value, "birth_date_i_c"))
 
         # test incorrect values:
         incorrect_values = (
@@ -53,7 +53,7 @@ class TestXLSXValidatorsMethods(TestCase):
         )
 
         for value in incorrect_values:
-            self.assertFalse(UploadXLSXValidator.date_validator(value))
+            self.assertFalse(UploadXLSXValidator.date_validator(value, "birth_date_i_c"))
 
     def test_integer_validator(self):
         # test correct values:
@@ -66,7 +66,7 @@ class TestXLSXValidatorsMethods(TestCase):
             -12,
         )
         for value in correct_values:
-            self.assertTrue(UploadXLSXValidator.integer_validator(value))
+            self.assertTrue(UploadXLSXValidator.integer_validator(value, "size_h_c"))
 
         # test incorrect values:
         incorrect_values = (
@@ -78,7 +78,7 @@ class TestXLSXValidatorsMethods(TestCase):
         )
 
         for value in incorrect_values:
-            self.assertFalse(UploadXLSXValidator.integer_validator(value))
+            self.assertFalse(UploadXLSXValidator.integer_validator(value, "size_h_c"))
 
     def test_phone_validator(self):
         # test correct values:
@@ -92,8 +92,7 @@ class TestXLSXValidatorsMethods(TestCase):
             "+48 69 563 7300",
         )
         for value in correct_values:
-            res = UploadXLSXValidator.phone_validator(value)
-            self.assertTrue(UploadXLSXValidator.phone_validator(value))
+            self.assertTrue(UploadXLSXValidator.phone_validator(value, "phone_no_i_c"))
 
         # test incorrect values:
         incorrect_values = (
@@ -108,16 +107,15 @@ class TestXLSXValidatorsMethods(TestCase):
         )
 
         for value in incorrect_values:
-            self.assertFalse(UploadXLSXValidator.phone_validator(value))
+            self.assertFalse(UploadXLSXValidator.phone_validator(value, "phone_no_i_c"))
 
     def test_choice_validator(self):
         test_correct_values = (
-            ("YES", "work_status"),
             ("HEARING", "disability"),
             ("Option 1, Option 2, Option 3", "assistance_type_h_f"),
         )
         test_incorrect_values = (
-            ("yes", "work_status"),
+            ("YES", "work_status"),
             ("OTHER", "work_status"),
             ("Hearing Problems", "disability"),
             ("Option 37", "assistance_type_h_f"),
@@ -137,7 +135,7 @@ class TestXLSXValidatorsMethods(TestCase):
         )
 
         wb_valid = openpyxl.load_workbook(
-            f"{self.FILES_DIR_PATH}/Registration Data Import XLS Template.xlsx",
+            f"{self.FILES_DIR_PATH}/new_reg_data_import.xlsx",
             data_only=True,
         )
 
@@ -264,25 +262,39 @@ class TestXLSXValidatorsMethods(TestCase):
                 )
 
     def test_validate_file_with_template(self):
-        invalid_cols_file_path = f"{self.FILES_DIR_PATH}/invalid_cols.xlsx"
+        invalid_cols_file_path = f"{self.FILES_DIR_PATH}/new_reg_data_import.xlsx"
         with open(invalid_cols_file_path, "rb") as file:
             errors = UploadXLSXValidator.validate_file_with_template(file=file)
-            errors.sort(key=operator.itemgetter('row_number', 'header'))
-            expected = [
-                {
-                    "row_number": 1,
-                    "header": "address",
-                    "message": "Missing column name address",
-                },
-                {
-                    "row_number": 1,
-                    "header": "consent",
-                    "message": "Missing column name consent",
-                },
-                {
-                    "row_number": 1,
-                    "header": "household_location",
-                    "message": "Missing column name household_location",
-                },
-            ]
-            self.assertEqual(errors, expected)
+            errors.sort(key=operator.itemgetter("row_number", "header"))
+            self.assertEqual(errors, [])
+
+    def test_required_validator(self):
+        with mock.patch.dict(
+            "registration_datahub.validators.UploadXLSXValidator.ALL_FIELDS",
+            {"test": {"required": True}},
+            clear=True,
+        ):
+            result = UploadXLSXValidator.required_validator(
+                value="tak", header="test"
+            )
+            self.assertTrue(result)
+
+        with mock.patch.dict(
+            "registration_datahub.validators.UploadXLSXValidator.ALL_FIELDS",
+            {"test": {"required": True}},
+            clear=True,
+        ):
+            result = UploadXLSXValidator.required_validator(
+                value="", header="test"
+            )
+            self.assertFalse(result)
+
+        with mock.patch.dict(
+            "registration_datahub.validators.UploadXLSXValidator.ALL_FIELDS",
+            {"test": {"required": False}},
+            clear=True,
+        ):
+            result = UploadXLSXValidator.required_validator(
+                value="", header="test"
+            )
+            self.assertTrue(result)

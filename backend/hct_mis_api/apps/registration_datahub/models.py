@@ -13,7 +13,6 @@ from django_countries.fields import CountryField
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
 
-from household.const import NATIONALITIES
 from household.models import (
     RESIDENCE_STATUS_CHOICE,
     SEX_CHOICE,
@@ -147,6 +146,7 @@ class RegistrationDataImportDatahub(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
         null=True,
     )
+    import_done = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
