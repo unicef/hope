@@ -26,7 +26,7 @@
     * [Approval Process](product-specification/country-office/registration-data-import/approval-process.md)
   * [Population](product-specification/country-office/population-management/README.md)
     * [Core fields on households & individuals](product-specification/country-office/population-management/core-fields-on-households-and-individuals.md)
-  * [Target Population\(s\)](product-specification/country-office/targeting/README.md)
+  * [Targeting](product-specification/country-office/targeting/README.md)
     * [Targeting Criteria \[Create\]](product-specification/country-office/targeting/targeting-criteria.md)
     * [Target Population Details](product-specification/country-office/targeting/view-copy-delete.md)
     * [Manage Target Populations \[Edit / Copy / Delete\]](product-specification/country-office/targeting/manage-target-populations-edit-copy-delete.md)
