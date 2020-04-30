@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 
 from core import utils
 from core.permissions import is_authenticated
@@ -184,11 +185,14 @@ class ApproveTargetPopulationMutation(ValidatedMutation):
     @classmethod
     @transaction.atomic
     def validated_mutate(cls, root, info, **kwargs):
+        user = info.context.user
         program = get_object_or_404(
             Program, pk=decode_id_string(kwargs.get("program_id"))
         )
         target_population = kwargs.get("model_object")
         target_population.status = "APPROVED"
+        target_population.approved_by = user
+        target_population.approved_at = timezone.now()
         households = Household.objects.filter(
             target_population.candidate_list_targeting_criteria.get_query()
         )
@@ -225,8 +229,11 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
     @classmethod
     @transaction.atomic
     def validated_mutate(cls, root, info, **kwargs):
+        user = info.context.user
         target_population = kwargs.get("model_object")
         target_population.status = "FINALIZED"
+        target_population.approved_by = user
+        target_population.approved_at = timezone.now()
         if target_population.final_list_targeting_criteria:
             """Gets all households from candidate list which 
             don't meet final_list_targeting_criteria and set them (HouseholdSelection m2m model)
