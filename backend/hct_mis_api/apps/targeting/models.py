@@ -53,11 +53,26 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
         related_name="target_populations",
         null=True,
     )
+    approved_at = models.DateTimeField(null=True)
+    approved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="approved_target_populations",
+        null=True,
+    )
+    finalized_at = models.DateTimeField(null=True)
+    finalized_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="finalized_target_populations",
+        null=True,
+    )
     STATUS_CHOICES = (
         ("DRAFT", _("Open")),
         ("APPROVED", _("Closed")),
         ("FINALIZED", _("Sent")),
     )
+
     status = models.CharField(
         max_length=_MAX_LEN, choices=STATUS_CHOICES, default="DRAFT",
     )
@@ -234,7 +249,7 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
             "arguments": 1,
             "lookup": "__contains",
             "negative": False,
-            "supported_types": ["SELECT_MANY"],
+            "supported_types": ["SELECT_MANY", "STRING"],
         },
         "NOT_CONTAINS": {
             "arguments": 1,
