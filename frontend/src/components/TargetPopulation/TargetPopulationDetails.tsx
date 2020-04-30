@@ -40,6 +40,7 @@ export function TargetPopulationDetails({
   const closeDate = approvedAt ? moment(approvedAt).format('DD MMM YYYY') : '-';
   const sendBy = finalizedBy ? `${finalizedBy.firstName} ${finalizedBy.lastName}` : '-';
   const sendDate = finalizedAt ? moment(finalizedAt).format('DD MMM YYYY') : '-';
+  const programName = program && program.name ? program.name : '-';
   return (
     <Container>
       <Title>
@@ -62,7 +63,7 @@ export function TargetPopulationDetails({
           <Grid item xs={4}>
             <LabelizedField
               label='Programme'
-              value={program.name}
+              value={programName}
             />
           </Grid>
           <Grid item xs={4}>
