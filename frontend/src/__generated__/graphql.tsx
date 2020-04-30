@@ -38,7 +38,7 @@ export type AdminAreaNode = Node & {
   treeId: Scalars['Int'],
   level: Scalars['Int'],
   children: AdminAreaNodeConnection,
-  householdSet: HouseholdNodeConnection,
+  householdSet: HouseholdTpNodeConnection,
   programs: ProgramNodeConnection,
 };
 
@@ -505,6 +505,112 @@ export enum HouseholdResidenceStatus {
   Idp = 'IDP',
   Other = 'OTHER'
 }
+
+export type HouseholdTpNode = Node & {
+   __typename?: 'HouseholdTPNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  consent: Scalars['String'],
+  residenceStatus: HouseholdResidenceStatus,
+  countryOrigin?: Maybe<Scalars['String']>,
+  country?: Maybe<Scalars['String']>,
+  size: Scalars['Int'],
+  address: Scalars['String'],
+  adminArea?: Maybe<AdminAreaNode>,
+  geopoint?: Maybe<Scalars['GeoJSON']>,
+  femaleAgeGroup05Count: Scalars['Int'],
+  femaleAgeGroup611Count: Scalars['Int'],
+  femaleAgeGroup1217Count: Scalars['Int'],
+  femaleAdultsCount: Scalars['Int'],
+  pregnantCount: Scalars['Int'],
+  maleAgeGroup05Count: Scalars['Int'],
+  maleAgeGroup611Count: Scalars['Int'],
+  maleAgeGroup1217Count: Scalars['Int'],
+  maleAdultsCount: Scalars['Int'],
+  femaleAgeGroup05DisabledCount: Scalars['Int'],
+  femaleAgeGroup611DisabledCount: Scalars['Int'],
+  femaleAgeGroup1217DisabledCount: Scalars['Int'],
+  femaleAdultsDisabledCount: Scalars['Int'],
+  maleAgeGroup05DisabledCount: Scalars['Int'],
+  maleAgeGroup611DisabledCount: Scalars['Int'],
+  maleAgeGroup1217DisabledCount: Scalars['Int'],
+  maleAdultsDisabledCount: Scalars['Int'],
+  registrationDataImport: RegistrationDataImportNode,
+  programs: ProgramNodeConnection,
+  returnee: Scalars['Boolean'],
+  registrationDate?: Maybe<Scalars['Date']>,
+  headOfHousehold: IndividualNode,
+  individuals: IndividualNodeConnection,
+  paymentRecords: PaymentRecordNodeConnection,
+  targetPopulations: TargetPopulationNodeConnection,
+  totalCashReceived?: Maybe<Scalars['Decimal']>,
+};
+
+
+export type HouseholdTpNodeProgramsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>
+};
+
+
+export type HouseholdTpNodeIndividualsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type HouseholdTpNodePaymentRecordsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  cashPlan?: Maybe<Scalars['ID']>,
+  household?: Maybe<Scalars['ID']>
+};
+
+
+export type HouseholdTpNodeTargetPopulationsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>,
+  createdByName?: Maybe<Scalars['String']>,
+  createdAt?: Maybe<Scalars['DateTime']>,
+  updatedAt?: Maybe<Scalars['DateTime']>,
+  status?: Maybe<Scalars['String']>,
+  households?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  candidateListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividualsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
+  finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+export type HouseholdTpNodeConnection = {
+   __typename?: 'HouseholdTPNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<HouseholdTpNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  individualsCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type HouseholdTpNodeEdge = {
+   __typename?: 'HouseholdTPNodeEdge',
+  node?: Maybe<HouseholdTpNode>,
+  cursor: Scalars['String'],
+};
 
 export type ImportDataNode = Node & {
    __typename?: 'ImportDataNode',
@@ -993,10 +1099,10 @@ export type IndividualNode = Node & {
   maritalStatus: IndividualMaritalStatus,
   phoneNo: Scalars['String'],
   phoneNoAlternative: Scalars['String'],
-  household: HouseholdNode,
+  household: HouseholdTpNode,
   registrationDataImport: RegistrationDataImportNode,
   disability: Scalars['Boolean'],
-  headingHousehold?: Maybe<HouseholdNode>,
+  headingHousehold?: Maybe<HouseholdTpNode>,
   documents: DocumentNodeConnection,
 };
 
@@ -1236,7 +1342,7 @@ export type PaymentRecordNode = Node & {
   statusDate: Scalars['DateTime'],
   cashAssistId: Scalars['String'],
   cashPlan: CashPlanNode,
-  household: HouseholdNode,
+  household: HouseholdTpNode,
   headOfHousehold: Scalars['String'],
   totalPersonCovered: Scalars['Int'],
   distributionModality: Scalars['String'],
@@ -1289,7 +1395,7 @@ export type ProgramNode = Node & {
   cashPlus: Scalars['Boolean'],
   populationGoal: Scalars['Int'],
   administrativeAreasOfImplementation: Scalars['String'],
-  households: HouseholdNodeConnection,
+  households: HouseholdTpNodeConnection,
   cashPlans: CashPlanNodeConnection,
   targetpopulationSet: TargetPopulationNodeConnection,
   totalEntitledQuantity?: Maybe<Scalars['Decimal']>,
@@ -1415,9 +1521,9 @@ export type Query = {
   cashPlanStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   targetPopulation?: Maybe<TargetPopulationNode>,
   allTargetPopulation?: Maybe<TargetPopulationNodeConnection>,
-  goldenRecordByTargetingCriteria?: Maybe<HouseholdNodeConnection>,
-  candidateHouseholdsListByTargetingCriteria?: Maybe<HouseholdNodeConnection>,
-  finalHouseholdsListByTargetingCriteria?: Maybe<HouseholdNodeConnection>,
+  goldenRecordByTargetingCriteria?: Maybe<HouseholdTpNodeConnection>,
+  candidateHouseholdsListByTargetingCriteria?: Maybe<HouseholdTpNodeConnection>,
+  finalHouseholdsListByTargetingCriteria?: Maybe<HouseholdTpNodeConnection>,
   targetPopulationStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   household?: Maybe<HouseholdNode>,
   allHouseholds?: Maybe<HouseholdNodeConnection>,
@@ -1563,7 +1669,8 @@ export type QueryGoldenRecordByTargetingCriteriaArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
+  last?: Maybe<Scalars['Int']>,
+  orderBy?: Maybe<Scalars['String']>
 };
 
 
@@ -1572,7 +1679,8 @@ export type QueryCandidateHouseholdsListByTargetingCriteriaArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
+  last?: Maybe<Scalars['Int']>,
+  orderBy?: Maybe<Scalars['String']>
 };
 
 
@@ -1582,7 +1690,8 @@ export type QueryFinalHouseholdsListByTargetingCriteriaArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
+  last?: Maybe<Scalars['Int']>,
+  orderBy?: Maybe<Scalars['String']>
 };
 
 
@@ -1778,7 +1887,7 @@ export type RegistrationDataImportNode = Node & {
   numberOfHouseholds: Scalars['Int'],
   datahubId?: Maybe<Scalars['UUID']>,
   businessArea?: Maybe<BusinessAreaNode>,
-  households: HouseholdNodeConnection,
+  households: HouseholdTpNodeConnection,
   individuals: IndividualNodeConnection,
 };
 
@@ -1885,8 +1994,12 @@ export type TargetPopulationNode = Node & {
   isRemoved: Scalars['Boolean'],
   name: Scalars['String'],
   createdBy?: Maybe<UserNode>,
+  approvedAt?: Maybe<Scalars['DateTime']>,
+  approvedBy?: Maybe<UserNode>,
+  finalizedAt?: Maybe<Scalars['DateTime']>,
+  finalizedBy?: Maybe<UserNode>,
   status: TargetPopulationStatus,
-  households: HouseholdNodeConnection,
+  households: HouseholdTpNodeConnection,
   candidateListTotalHouseholds?: Maybe<Scalars['Int']>,
   candidateListTotalIndividuals?: Maybe<Scalars['Int']>,
   finalListTotalHouseholds?: Maybe<Scalars['Int']>,
@@ -2022,6 +2135,8 @@ export type UserNode = Node & {
   businessAreas: BusinessAreaNodeConnection,
   cashPlans: CashPlanNodeConnection,
   targetPopulations: TargetPopulationNodeConnection,
+  approvedTargetPopulations: TargetPopulationNodeConnection,
+  finalizedTargetPopulations: TargetPopulationNodeConnection,
   registrationDataImports: RegistrationDataImportNodeConnection,
 };
 
@@ -2044,6 +2159,52 @@ export type UserNodeCashPlansArgs = {
 
 
 export type UserNodeTargetPopulationsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>,
+  createdByName?: Maybe<Scalars['String']>,
+  createdAt?: Maybe<Scalars['DateTime']>,
+  updatedAt?: Maybe<Scalars['DateTime']>,
+  status?: Maybe<Scalars['String']>,
+  households?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  candidateListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividualsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
+  finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type UserNodeApprovedTargetPopulationsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>,
+  createdByName?: Maybe<Scalars['String']>,
+  createdAt?: Maybe<Scalars['DateTime']>,
+  updatedAt?: Maybe<Scalars['DateTime']>,
+  status?: Maybe<Scalars['String']>,
+  households?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  candidateListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividualsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
+  finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type UserNodeFinalizedTargetPopulationsArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -2102,6 +2263,8 @@ export type UserObjectType = {
   businessAreas: BusinessAreaNodeConnection,
   cashPlans: CashPlanNodeConnection,
   targetPopulations: TargetPopulationNodeConnection,
+  approvedTargetPopulations: TargetPopulationNodeConnection,
+  finalizedTargetPopulations: TargetPopulationNodeConnection,
   registrationDataImports: RegistrationDataImportNodeConnection,
 };
 
@@ -2124,6 +2287,52 @@ export type UserObjectTypeCashPlansArgs = {
 
 
 export type UserObjectTypeTargetPopulationsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>,
+  createdByName?: Maybe<Scalars['String']>,
+  createdAt?: Maybe<Scalars['DateTime']>,
+  updatedAt?: Maybe<Scalars['DateTime']>,
+  status?: Maybe<Scalars['String']>,
+  households?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  candidateListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividualsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
+  finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type UserObjectTypeApprovedTargetPopulationsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>,
+  createdByName?: Maybe<Scalars['String']>,
+  createdAt?: Maybe<Scalars['DateTime']>,
+  updatedAt?: Maybe<Scalars['DateTime']>,
+  status?: Maybe<Scalars['String']>,
+  households?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  candidateListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividualsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
+  finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type UserObjectTypeFinalizedTargetPopulationsArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -2237,8 +2446,8 @@ export type IndividualMinimalFragment = (
       )> }
     )>> }
   ), household: (
-    { __typename?: 'HouseholdNode' }
-    & Pick<HouseholdNode, 'id'>
+    { __typename?: 'HouseholdTPNode' }
+    & Pick<HouseholdTpNode, 'id'>
     & { adminArea: Maybe<(
       { __typename?: 'AdminAreaNode' }
       & Pick<AdminAreaNode, 'id' | 'title'>
@@ -2250,15 +2459,15 @@ export type IndividualDetailedFragment = (
   { __typename?: 'IndividualNode' }
   & Pick<IndividualNode, 'givenName' | 'familyName' | 'estimatedBirthDate'>
   & { household: (
-    { __typename?: 'HouseholdNode' }
-    & Pick<HouseholdNode, 'id' | 'address' | 'countryOrigin'>
+    { __typename?: 'HouseholdTPNode' }
+    & Pick<HouseholdTpNode, 'id' | 'address' | 'countryOrigin'>
     & { adminArea: Maybe<(
       { __typename?: 'AdminAreaNode' }
       & Pick<AdminAreaNode, 'id' | 'title' | 'level'>
     )> }
   ), headingHousehold: Maybe<(
-    { __typename?: 'HouseholdNode' }
-    & Pick<HouseholdNode, 'id'>
+    { __typename?: 'HouseholdTPNode' }
+    & Pick<HouseholdTpNode, 'id'>
     & { headOfHousehold: (
       { __typename?: 'IndividualNode' }
       & Pick<IndividualNode, 'id'>
@@ -2770,8 +2979,8 @@ export type AllPaymentRecordsQuery = (
         { __typename?: 'PaymentRecordNode' }
         & Pick<PaymentRecordNode, 'id' | 'createdAt' | 'updatedAt' | 'name' | 'statusDate' | 'status' | 'headOfHousehold' | 'cashAssistId' | 'totalPersonCovered'>
         & { household: (
-          { __typename?: 'HouseholdNode' }
-          & Pick<HouseholdNode, 'id' | 'size'>
+          { __typename?: 'HouseholdTPNode' }
+          & Pick<HouseholdTpNode, 'id' | 'size'>
         ), entitlement: Maybe<(
           { __typename?: 'PaymentEntitlementNode' }
           & Pick<PaymentEntitlementNode, 'id' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate'>
@@ -2965,8 +3174,8 @@ export type PaymentRecordQuery = (
     { __typename?: 'PaymentRecordNode' }
     & Pick<PaymentRecordNode, 'id' | 'status' | 'statusDate' | 'cashAssistId' | 'headOfHousehold' | 'distributionModality' | 'totalPersonCovered'>
     & { household: (
-      { __typename?: 'HouseholdNode' }
-      & Pick<HouseholdNode, 'id' | 'size'>
+      { __typename?: 'HouseholdTPNode' }
+      & Pick<HouseholdTpNode, 'id' | 'size'>
     ), targetPopulation: (
       { __typename?: 'TargetPopulationNode' }
       & Pick<TargetPopulationNode, 'id' | 'name'>
@@ -3373,21 +3582,22 @@ export type CandidateHouseholdsListByTargetingCriteriaQueryVariables = {
   first?: Maybe<Scalars['Int']>,
   after?: Maybe<Scalars['String']>,
   before?: Maybe<Scalars['String']>,
-  last?: Maybe<Scalars['Int']>
+  last?: Maybe<Scalars['Int']>,
+  orderBy?: Maybe<Scalars['String']>
 };
 
 
 export type CandidateHouseholdsListByTargetingCriteriaQuery = (
   { __typename?: 'Query' }
   & { candidateHouseholdsListByTargetingCriteria: Maybe<(
-    { __typename?: 'HouseholdNodeConnection' }
-    & Pick<HouseholdNodeConnection, 'totalCount' | 'edgeCount'>
+    { __typename?: 'HouseholdTPNodeConnection' }
+    & Pick<HouseholdTpNodeConnection, 'totalCount' | 'edgeCount'>
     & { edges: Array<Maybe<(
-      { __typename?: 'HouseholdNodeEdge' }
-      & Pick<HouseholdNodeEdge, 'cursor'>
+      { __typename?: 'HouseholdTPNodeEdge' }
+      & Pick<HouseholdTpNodeEdge, 'cursor'>
       & { node: Maybe<(
-        { __typename?: 'HouseholdNode' }
-        & Pick<HouseholdNode, 'id' | 'size' | 'updatedAt' | 'address'>
+        { __typename?: 'HouseholdTPNode' }
+        & Pick<HouseholdTpNode, 'id' | 'size' | 'updatedAt' | 'address'>
         & { headOfHousehold: (
           { __typename?: 'IndividualNode' }
           & Pick<IndividualNode, 'id' | 'givenName' | 'familyName'>
@@ -3406,21 +3616,22 @@ export type FinalHouseholdsListByTargetingCriteriaQueryVariables = {
   first?: Maybe<Scalars['Int']>,
   after?: Maybe<Scalars['String']>,
   before?: Maybe<Scalars['String']>,
-  last?: Maybe<Scalars['Int']>
+  last?: Maybe<Scalars['Int']>,
+  orderBy?: Maybe<Scalars['String']>
 };
 
 
 export type FinalHouseholdsListByTargetingCriteriaQuery = (
   { __typename?: 'Query' }
   & { finalHouseholdsListByTargetingCriteria: Maybe<(
-    { __typename?: 'HouseholdNodeConnection' }
-    & Pick<HouseholdNodeConnection, 'totalCount' | 'edgeCount'>
+    { __typename?: 'HouseholdTPNodeConnection' }
+    & Pick<HouseholdTpNodeConnection, 'totalCount' | 'edgeCount'>
     & { edges: Array<Maybe<(
-      { __typename?: 'HouseholdNodeEdge' }
-      & Pick<HouseholdNodeEdge, 'cursor'>
+      { __typename?: 'HouseholdTPNodeEdge' }
+      & Pick<HouseholdTpNodeEdge, 'cursor'>
       & { node: Maybe<(
-        { __typename?: 'HouseholdNode' }
-        & Pick<HouseholdNode, 'id' | 'size' | 'updatedAt' | 'address'>
+        { __typename?: 'HouseholdTPNode' }
+        & Pick<HouseholdTpNode, 'id' | 'size' | 'updatedAt' | 'address'>
         & { headOfHousehold: (
           { __typename?: 'IndividualNode' }
           & Pick<IndividualNode, 'id' | 'givenName' | 'familyName'>
@@ -3438,21 +3649,22 @@ export type GoldenRecordByTargetingCriteriaQueryVariables = {
   first?: Maybe<Scalars['Int']>,
   after?: Maybe<Scalars['String']>,
   before?: Maybe<Scalars['String']>,
-  last?: Maybe<Scalars['Int']>
+  last?: Maybe<Scalars['Int']>,
+  orderBy?: Maybe<Scalars['String']>
 };
 
 
 export type GoldenRecordByTargetingCriteriaQuery = (
   { __typename?: 'Query' }
   & { goldenRecordByTargetingCriteria: Maybe<(
-    { __typename?: 'HouseholdNodeConnection' }
-    & Pick<HouseholdNodeConnection, 'totalCount' | 'edgeCount'>
+    { __typename?: 'HouseholdTPNodeConnection' }
+    & Pick<HouseholdTpNodeConnection, 'totalCount' | 'edgeCount'>
     & { edges: Array<Maybe<(
-      { __typename?: 'HouseholdNodeEdge' }
-      & Pick<HouseholdNodeEdge, 'cursor'>
+      { __typename?: 'HouseholdTPNodeEdge' }
+      & Pick<HouseholdTpNodeEdge, 'cursor'>
       & { node: Maybe<(
-        { __typename?: 'HouseholdNode' }
-        & Pick<HouseholdNode, 'id' | 'size' | 'updatedAt' | 'address'>
+        { __typename?: 'HouseholdTPNode' }
+        & Pick<HouseholdTpNode, 'id' | 'size' | 'updatedAt' | 'address'>
         & { headOfHousehold: (
           { __typename?: 'IndividualNode' }
           & Pick<IndividualNode, 'id' | 'givenName' | 'familyName'>
@@ -6384,8 +6596,8 @@ export type UploadImportDataXlsxFileMutationHookResult = ReturnType<typeof useUp
 export type UploadImportDataXlsxFileMutationResult = ApolloReactCommon.MutationResult<UploadImportDataXlsxFileMutation>;
 export type UploadImportDataXlsxFileMutationOptions = ApolloReactCommon.BaseMutationOptions<UploadImportDataXlsxFileMutation, UploadImportDataXlsxFileMutationVariables>;
 export const CandidateHouseholdsListByTargetingCriteriaDocument = gql`
-    query candidateHouseholdsListByTargetingCriteria($targetPopulation: ID!, $first: Int, $after: String, $before: String, $last: Int) {
-  candidateHouseholdsListByTargetingCriteria(targetPopulation: $targetPopulation, after: $after, before: $before, first: $first, last: $last) {
+    query candidateHouseholdsListByTargetingCriteria($targetPopulation: ID!, $first: Int, $after: String, $before: String, $last: Int, $orderBy: String) {
+  candidateHouseholdsListByTargetingCriteria(targetPopulation: $targetPopulation, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy) {
     edges {
       node {
         id
@@ -6444,6 +6656,7 @@ export function withCandidateHouseholdsListByTargetingCriteria<TProps, TChildPro
  *      after: // value for 'after'
  *      before: // value for 'before'
  *      last: // value for 'last'
+ *      orderBy: // value for 'orderBy'
  *   },
  * });
  */
@@ -6457,8 +6670,8 @@ export type CandidateHouseholdsListByTargetingCriteriaQueryHookResult = ReturnTy
 export type CandidateHouseholdsListByTargetingCriteriaLazyQueryHookResult = ReturnType<typeof useCandidateHouseholdsListByTargetingCriteriaLazyQuery>;
 export type CandidateHouseholdsListByTargetingCriteriaQueryResult = ApolloReactCommon.QueryResult<CandidateHouseholdsListByTargetingCriteriaQuery, CandidateHouseholdsListByTargetingCriteriaQueryVariables>;
 export const FinalHouseholdsListByTargetingCriteriaDocument = gql`
-    query FinalHouseholdsListByTargetingCriteria($targetPopulation: ID!, $targetingCriteria: TargetingCriteriaObjectType, $first: Int, $after: String, $before: String, $last: Int) {
-  finalHouseholdsListByTargetingCriteria(targetPopulation: $targetPopulation, targetingCriteria: $targetingCriteria, after: $after, before: $before, first: $first, last: $last) {
+    query FinalHouseholdsListByTargetingCriteria($targetPopulation: ID!, $targetingCriteria: TargetingCriteriaObjectType, $first: Int, $after: String, $before: String, $last: Int, $orderBy: String) {
+  finalHouseholdsListByTargetingCriteria(targetPopulation: $targetPopulation, targetingCriteria: $targetingCriteria, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy) {
     edges {
       node {
         id
@@ -6518,6 +6731,7 @@ export function withFinalHouseholdsListByTargetingCriteria<TProps, TChildProps =
  *      after: // value for 'after'
  *      before: // value for 'before'
  *      last: // value for 'last'
+ *      orderBy: // value for 'orderBy'
  *   },
  * });
  */
@@ -6531,8 +6745,8 @@ export type FinalHouseholdsListByTargetingCriteriaQueryHookResult = ReturnType<t
 export type FinalHouseholdsListByTargetingCriteriaLazyQueryHookResult = ReturnType<typeof useFinalHouseholdsListByTargetingCriteriaLazyQuery>;
 export type FinalHouseholdsListByTargetingCriteriaQueryResult = ApolloReactCommon.QueryResult<FinalHouseholdsListByTargetingCriteriaQuery, FinalHouseholdsListByTargetingCriteriaQueryVariables>;
 export const GoldenRecordByTargetingCriteriaDocument = gql`
-    query GoldenRecordByTargetingCriteria($targetingCriteria: TargetingCriteriaObjectType!, $first: Int, $after: String, $before: String, $last: Int) {
-  goldenRecordByTargetingCriteria(targetingCriteria: $targetingCriteria, after: $after, before: $before, first: $first, last: $last) {
+    query GoldenRecordByTargetingCriteria($targetingCriteria: TargetingCriteriaObjectType!, $first: Int, $after: String, $before: String, $last: Int, $orderBy: String) {
+  goldenRecordByTargetingCriteria(targetingCriteria: $targetingCriteria, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy) {
     edges {
       node {
         id
@@ -6591,6 +6805,7 @@ export function withGoldenRecordByTargetingCriteria<TProps, TChildProps = {}>(op
  *      after: // value for 'after'
  *      before: // value for 'before'
  *      last: // value for 'last'
+ *      orderBy: // value for 'orderBy'
  *   },
  * });
  */
@@ -6759,9 +6974,9 @@ export type ResolversTypes = {
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>,
   AdminAreaNodeEdge: ResolverTypeWrapper<AdminAreaNodeEdge>,
   AdminAreaNode: ResolverTypeWrapper<AdminAreaNode>,
-  HouseholdNodeConnection: ResolverTypeWrapper<HouseholdNodeConnection>,
-  HouseholdNodeEdge: ResolverTypeWrapper<HouseholdNodeEdge>,
-  HouseholdNode: ResolverTypeWrapper<HouseholdNode>,
+  HouseholdTPNodeConnection: ResolverTypeWrapper<HouseholdTpNodeConnection>,
+  HouseholdTPNodeEdge: ResolverTypeWrapper<HouseholdTpNodeEdge>,
+  HouseholdTPNode: ResolverTypeWrapper<HouseholdTpNode>,
   HouseholdResidenceStatus: HouseholdResidenceStatus,
   GeoJSON: ResolverTypeWrapper<Scalars['GeoJSON']>,
   RegistrationDataImportNode: ResolverTypeWrapper<RegistrationDataImportNode>,
@@ -6793,9 +7008,9 @@ export type ResolversTypes = {
   CoreFieldChoiceObject: ResolverTypeWrapper<CoreFieldChoiceObject>,
   PaymentRecordNodeConnection: ResolverTypeWrapper<PaymentRecordNodeConnection>,
   PaymentRecordNodeEdge: ResolverTypeWrapper<PaymentRecordNodeEdge>,
-  RegistrationDataImportDataSource: RegistrationDataImportDataSource,
-  IndividualNodeConnection: ResolverTypeWrapper<IndividualNodeConnection>,
-  IndividualNodeEdge: ResolverTypeWrapper<IndividualNodeEdge>,
+  HouseholdNodeConnection: ResolverTypeWrapper<HouseholdNodeConnection>,
+  HouseholdNodeEdge: ResolverTypeWrapper<HouseholdNodeEdge>,
+  HouseholdNode: ResolverTypeWrapper<HouseholdNode>,
   IndividualNode: ResolverTypeWrapper<IndividualNode>,
   IndividualRelationship: IndividualRelationship,
   IndividualSex: IndividualSex,
@@ -6804,7 +7019,10 @@ export type ResolversTypes = {
   DocumentNodeEdge: ResolverTypeWrapper<DocumentNodeEdge>,
   DocumentNode: ResolverTypeWrapper<DocumentNode>,
   DocumentTypeNode: ResolverTypeWrapper<DocumentTypeNode>,
+  IndividualNodeConnection: ResolverTypeWrapper<IndividualNodeConnection>,
+  IndividualNodeEdge: ResolverTypeWrapper<IndividualNodeEdge>,
   Decimal: ResolverTypeWrapper<Scalars['Decimal']>,
+  RegistrationDataImportDataSource: RegistrationDataImportDataSource,
   ProgramFrequencyOfPayments: ProgramFrequencyOfPayments,
   ProgramSector: ProgramSector,
   ProgramScope: ProgramScope,
@@ -6893,9 +7111,9 @@ export type ResolversParentTypes = {
   Boolean: Scalars['Boolean'],
   AdminAreaNodeEdge: AdminAreaNodeEdge,
   AdminAreaNode: AdminAreaNode,
-  HouseholdNodeConnection: HouseholdNodeConnection,
-  HouseholdNodeEdge: HouseholdNodeEdge,
-  HouseholdNode: HouseholdNode,
+  HouseholdTPNodeConnection: HouseholdTpNodeConnection,
+  HouseholdTPNodeEdge: HouseholdTpNodeEdge,
+  HouseholdTPNode: HouseholdTpNode,
   HouseholdResidenceStatus: HouseholdResidenceStatus,
   GeoJSON: Scalars['GeoJSON'],
   RegistrationDataImportNode: RegistrationDataImportNode,
@@ -6927,9 +7145,9 @@ export type ResolversParentTypes = {
   CoreFieldChoiceObject: CoreFieldChoiceObject,
   PaymentRecordNodeConnection: PaymentRecordNodeConnection,
   PaymentRecordNodeEdge: PaymentRecordNodeEdge,
-  RegistrationDataImportDataSource: RegistrationDataImportDataSource,
-  IndividualNodeConnection: IndividualNodeConnection,
-  IndividualNodeEdge: IndividualNodeEdge,
+  HouseholdNodeConnection: HouseholdNodeConnection,
+  HouseholdNodeEdge: HouseholdNodeEdge,
+  HouseholdNode: HouseholdNode,
   IndividualNode: IndividualNode,
   IndividualRelationship: IndividualRelationship,
   IndividualSex: IndividualSex,
@@ -6938,7 +7156,10 @@ export type ResolversParentTypes = {
   DocumentNodeEdge: DocumentNodeEdge,
   DocumentNode: DocumentNode,
   DocumentTypeNode: DocumentTypeNode,
+  IndividualNodeConnection: IndividualNodeConnection,
+  IndividualNodeEdge: IndividualNodeEdge,
   Decimal: Scalars['Decimal'],
+  RegistrationDataImportDataSource: RegistrationDataImportDataSource,
   ProgramFrequencyOfPayments: ProgramFrequencyOfPayments,
   ProgramSector: ProgramSector,
   ProgramScope: ProgramScope,
@@ -7019,7 +7240,7 @@ export type AdminAreaNodeResolvers<ContextType = any, ParentType extends Resolve
   treeId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   level?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   children?: Resolver<ResolversTypes['AdminAreaNodeConnection'], ParentType, ContextType, AdminAreaNodeChildrenArgs>,
-  householdSet?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, AdminAreaNodeHouseholdSetArgs>,
+  householdSet?: Resolver<ResolversTypes['HouseholdTPNodeConnection'], ParentType, ContextType, AdminAreaNodeHouseholdSetArgs>,
   programs?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, AdminAreaNodeProgramsArgs>,
 };
 
@@ -7298,6 +7519,59 @@ export type HouseholdNodeEdgeResolvers<ContextType = any, ParentType extends Res
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
 };
 
+export type HouseholdTpNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['HouseholdTPNode'] = ResolversParentTypes['HouseholdTPNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  consent?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  residenceStatus?: Resolver<ResolversTypes['HouseholdResidenceStatus'], ParentType, ContextType>,
+  countryOrigin?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  size?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  address?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  adminArea?: Resolver<Maybe<ResolversTypes['AdminAreaNode']>, ParentType, ContextType>,
+  geopoint?: Resolver<Maybe<ResolversTypes['GeoJSON']>, ParentType, ContextType>,
+  femaleAgeGroup05Count?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  femaleAgeGroup611Count?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  femaleAgeGroup1217Count?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  femaleAdultsCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  pregnantCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  maleAgeGroup05Count?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  maleAgeGroup611Count?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  maleAgeGroup1217Count?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  maleAdultsCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  femaleAgeGroup05DisabledCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  femaleAgeGroup611DisabledCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  femaleAgeGroup1217DisabledCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  femaleAdultsDisabledCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  maleAgeGroup05DisabledCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  maleAgeGroup611DisabledCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  maleAgeGroup1217DisabledCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  maleAdultsDisabledCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  registrationDataImport?: Resolver<ResolversTypes['RegistrationDataImportNode'], ParentType, ContextType>,
+  programs?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, HouseholdTpNodeProgramsArgs>,
+  returnee?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  registrationDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
+  headOfHousehold?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
+  individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, HouseholdTpNodeIndividualsArgs>,
+  paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, HouseholdTpNodePaymentRecordsArgs>,
+  targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, HouseholdTpNodeTargetPopulationsArgs>,
+  totalCashReceived?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
+};
+
+export type HouseholdTpNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['HouseholdTPNodeConnection'] = ResolversParentTypes['HouseholdTPNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['HouseholdTPNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  individualsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type HouseholdTpNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['HouseholdTPNodeEdge'] = ResolversParentTypes['HouseholdTPNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['HouseholdTPNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
 export type ImportDataNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportDataNode'] = ResolversParentTypes['ImportDataNode']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
@@ -7445,10 +7719,10 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   maritalStatus?: Resolver<ResolversTypes['IndividualMaritalStatus'], ParentType, ContextType>,
   phoneNo?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   phoneNoAlternative?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  household?: Resolver<ResolversTypes['HouseholdNode'], ParentType, ContextType>,
+  household?: Resolver<ResolversTypes['HouseholdTPNode'], ParentType, ContextType>,
   registrationDataImport?: Resolver<ResolversTypes['RegistrationDataImportNode'], ParentType, ContextType>,
   disability?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  headingHousehold?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
+  headingHousehold?: Resolver<Maybe<ResolversTypes['HouseholdTPNode']>, ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, IndividualNodeDocumentsArgs>,
 };
 
@@ -7525,7 +7799,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'AdminAreaNode' | 'HouseholdNode' | 'RegistrationDataImportNode' | 'UserNode' | 'BusinessAreaNode' | 'TargetPopulationNode' | 'IndividualNode' | 'DocumentNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'ImportedDocumentNode', ParentType, ContextType>,
+  __resolveType: TypeResolveFn<'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'AdminAreaNode' | 'HouseholdTPNode' | 'RegistrationDataImportNode' | 'UserNode' | 'BusinessAreaNode' | 'TargetPopulationNode' | 'HouseholdNode' | 'IndividualNode' | 'DocumentNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'ImportedDocumentNode', ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
 };
 
@@ -7561,7 +7835,7 @@ export type PaymentRecordNodeResolvers<ContextType = any, ParentType extends Res
   statusDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   cashAssistId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   cashPlan?: Resolver<ResolversTypes['CashPlanNode'], ParentType, ContextType>,
-  household?: Resolver<ResolversTypes['HouseholdNode'], ParentType, ContextType>,
+  household?: Resolver<ResolversTypes['HouseholdTPNode'], ParentType, ContextType>,
   headOfHousehold?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   totalPersonCovered?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   distributionModality?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
@@ -7600,7 +7874,7 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   cashPlus?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   populationGoal?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   administrativeAreasOfImplementation?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, ProgramNodeHouseholdsArgs>,
+  households?: Resolver<ResolversTypes['HouseholdTPNodeConnection'], ParentType, ContextType, ProgramNodeHouseholdsArgs>,
   cashPlans?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, ProgramNodeCashPlansArgs>,
   targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, ProgramNodeTargetpopulationSetArgs>,
   totalEntitledQuantity?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
@@ -7643,9 +7917,9 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   cashPlanStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType, RequireFields<QueryTargetPopulationArgs, 'id'>>,
   allTargetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNodeConnection']>, ParentType, ContextType, QueryAllTargetPopulationArgs>,
-  goldenRecordByTargetingCriteria?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, RequireFields<QueryGoldenRecordByTargetingCriteriaArgs, 'targetingCriteria'>>,
-  candidateHouseholdsListByTargetingCriteria?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, RequireFields<QueryCandidateHouseholdsListByTargetingCriteriaArgs, 'targetPopulation'>>,
-  finalHouseholdsListByTargetingCriteria?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, RequireFields<QueryFinalHouseholdsListByTargetingCriteriaArgs, 'targetPopulation'>>,
+  goldenRecordByTargetingCriteria?: Resolver<Maybe<ResolversTypes['HouseholdTPNodeConnection']>, ParentType, ContextType, RequireFields<QueryGoldenRecordByTargetingCriteriaArgs, 'targetingCriteria'>>,
+  candidateHouseholdsListByTargetingCriteria?: Resolver<Maybe<ResolversTypes['HouseholdTPNodeConnection']>, ParentType, ContextType, RequireFields<QueryCandidateHouseholdsListByTargetingCriteriaArgs, 'targetPopulation'>>,
+  finalHouseholdsListByTargetingCriteria?: Resolver<Maybe<ResolversTypes['HouseholdTPNodeConnection']>, ParentType, ContextType, RequireFields<QueryFinalHouseholdsListByTargetingCriteriaArgs, 'targetPopulation'>>,
   targetPopulationStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType, RequireFields<QueryHouseholdArgs, 'id'>>,
   allHouseholds?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, QueryAllHouseholdsArgs>,
@@ -7708,7 +7982,7 @@ export type RegistrationDataImportNodeResolvers<ContextType = any, ParentType ex
   numberOfHouseholds?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   datahubId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
   businessArea?: Resolver<Maybe<ResolversTypes['BusinessAreaNode']>, ParentType, ContextType>,
-  households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeHouseholdsArgs>,
+  households?: Resolver<ResolversTypes['HouseholdTPNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeHouseholdsArgs>,
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeIndividualsArgs>,
 };
 
@@ -7760,8 +8034,12 @@ export type TargetPopulationNodeResolvers<ContextType = any, ParentType extends 
   isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
+  approvedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  approvedBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
+  finalizedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  finalizedBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   status?: Resolver<ResolversTypes['TargetPopulationStatus'], ParentType, ContextType>,
-  households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, TargetPopulationNodeHouseholdsArgs>,
+  households?: Resolver<ResolversTypes['HouseholdTPNodeConnection'], ParentType, ContextType, TargetPopulationNodeHouseholdsArgs>,
   candidateListTotalHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   candidateListTotalIndividuals?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   finalListTotalHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
@@ -7828,6 +8106,8 @@ export type UserNodeResolvers<ContextType = any, ParentType extends ResolversPar
   businessAreas?: Resolver<ResolversTypes['BusinessAreaNodeConnection'], ParentType, ContextType, UserNodeBusinessAreasArgs>,
   cashPlans?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, UserNodeCashPlansArgs>,
   targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserNodeTargetPopulationsArgs>,
+  approvedTargetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserNodeApprovedTargetPopulationsArgs>,
+  finalizedTargetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserNodeFinalizedTargetPopulationsArgs>,
   registrationDataImports?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, UserNodeRegistrationDataImportsArgs>,
 };
 
@@ -7857,6 +8137,8 @@ export type UserObjectTypeResolvers<ContextType = any, ParentType extends Resolv
   businessAreas?: Resolver<ResolversTypes['BusinessAreaNodeConnection'], ParentType, ContextType, UserObjectTypeBusinessAreasArgs>,
   cashPlans?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, UserObjectTypeCashPlansArgs>,
   targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserObjectTypeTargetPopulationsArgs>,
+  approvedTargetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserObjectTypeApprovedTargetPopulationsArgs>,
+  finalizedTargetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserObjectTypeFinalizedTargetPopulationsArgs>,
   registrationDataImports?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, UserObjectTypeRegistrationDataImportsArgs>,
 };
 
@@ -7907,6 +8189,9 @@ export type Resolvers<ContextType = any> = {
   HouseholdNode?: HouseholdNodeResolvers<ContextType>,
   HouseholdNodeConnection?: HouseholdNodeConnectionResolvers<ContextType>,
   HouseholdNodeEdge?: HouseholdNodeEdgeResolvers<ContextType>,
+  HouseholdTPNode?: HouseholdTpNodeResolvers<ContextType>,
+  HouseholdTPNodeConnection?: HouseholdTpNodeConnectionResolvers<ContextType>,
+  HouseholdTPNodeEdge?: HouseholdTpNodeEdgeResolvers<ContextType>,
   ImportDataNode?: ImportDataNodeResolvers<ContextType>,
   ImportedDocumentNode?: ImportedDocumentNodeResolvers<ContextType>,
   ImportedDocumentNodeConnection?: ImportedDocumentNodeConnectionResolvers<ContextType>,
