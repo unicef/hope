@@ -246,6 +246,9 @@ class FlexibleAttributeImporter:
             row = sheets["choices"].row(row_number)
             self._reset_model_fields_variables()
 
+            if not any([cell.value for cell in row]):
+                continue
+
             if row[0].value not in choices_assigned_to_fields:
                 raise ValidationError(
                     f"Row {row_number + 1}: "
@@ -300,6 +303,10 @@ class FlexibleAttributeImporter:
         all_groups = []
         for row_number in range(1, sheet.nrows):
             row = sheet.row(row_number)
+
+            if not any([cell.value for cell in row]):
+                continue
+
             object_type_to_add = (
                 "group"
                 if row[0].value in ("begin_group", "begin_repeat")
