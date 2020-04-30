@@ -101,10 +101,7 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
             charset=None,
         )
 
-        xlsx_valid_file_path = (
-            "hct_mis_api/apps/registration_datahub/tests/test_file/"
-            "Registration Data Import XLS Template.xlsx"
-        )
+        xlsx_valid_file_path = "hct_mis_api/apps/registration_datahub/tests/test_file/new_reg_data_import.xlsx"
 
         with open(xlsx_valid_file_path, "rb") as file:
             self.valid_file = SimpleUploadedFile(file.name, file.read())
@@ -117,10 +114,9 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
         )
 
         import_data_obj = ImportData.objects.first()
-
+        import ipdb; ipdb.set_trace()
         self.assertIn(
-            "Registration_Data_Import_XLS_Template",
-            import_data_obj.xlsx_file.name,
+            "new_reg_data_import", import_data_obj.xlsx_file.name,
         )
 
     def test_registration_data_import_create(self):
