@@ -1,4 +1,4 @@
-# Target Population\(s\)
+# Targeting
 
 #### **Feature details:** 
 
