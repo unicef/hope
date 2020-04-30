@@ -245,7 +245,6 @@ class HouseholdTPNode(HouseholdNode):
     class Meta:
         model = Household
         filter_fields = []
-        exclude_fields = ("flex_fields",)
         interfaces = (relay.Node,)
         connection_class = ExtendedHouseHoldTPConnection
 
