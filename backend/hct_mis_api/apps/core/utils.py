@@ -87,7 +87,9 @@ def _slug_strip(value, separator="-"):
     return value
 
 
-def get_choices_values(choices):
+def get_choices_values(choices, header):
+    if header in ("admin1", "admin2"):
+        choices = get_admin_areas_as_choices(header[-1])
     return tuple(
         choice[0] if isinstance(choice, tuple) else choice for choice in choices
     )

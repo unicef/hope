@@ -1,10 +1,12 @@
 import re
+from datetime import datetime
 from pathlib import Path
 from zipfile import BadZipfile
 
 import openpyxl
 import phonenumbers
 from dateutil import parser
+from graphql.error import GraphQLLocatedError
 from openpyxl import load_workbook
 
 from core.core_fields_attributes import CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY
@@ -39,6 +41,8 @@ class UploadXLSXValidator(BaseValidator):
     def string_validator(cls, value, header, *args, **kwargs):
         if not cls.required_validator(value, header):
             return False
+        if value is None:
+            return True
 
         return isinstance(value, str)
 
@@ -47,16 +51,22 @@ class UploadXLSXValidator(BaseValidator):
         if not cls.required_validator(value, header):
             return False
 
+        if value is None:
+            return True
+
         try:
             int(value)
             return True
-        except ValueError:
+        # need to use Exception because of how Graphene catches errors
+        except Exception as e:
             return False
 
     @classmethod
     def float_validator(cls, value, header, *args, **kwargs):
         if not cls.required_validator(value, header):
             return False
+        if value is None:
+            return True
 
         return isinstance(value, float)
 
@@ -64,6 +74,8 @@ class UploadXLSXValidator(BaseValidator):
     def geolocation_validator(cls, value, header, *args, **kwargs):
         if not cls.required_validator(value, header):
             return False
+        if value is None:
+            return True
 
         pattern = re.compile(r"^(\-?\d+\.\d+?,\s*\-?\d+\.\d+?)$")
         return bool(re.match(pattern, value))
@@ -72,9 +84,14 @@ class UploadXLSXValidator(BaseValidator):
     def date_validator(cls, value, header, *args, **kwargs):
         if cls.integer_validator(value, header):
             return False
+
+        if isinstance(value, datetime):
+            return True
+
         try:
             parser.parse(value)
-        except ValueError:
+        # need to use Exception because of how Graphene catches errors
+        except Exception as e:
             return False
         return True
 
@@ -82,6 +99,8 @@ class UploadXLSXValidator(BaseValidator):
     def phone_validator(cls, value, header, *args, **kwargs):
         if not cls.required_validator(value, header):
             return False
+        if value is None:
+            return True
 
         try:
             phonenumbers.parse(value)
@@ -91,14 +110,21 @@ class UploadXLSXValidator(BaseValidator):
 
     @classmethod
     def choice_validator(cls, value, header, *args, **kwargs):
-        choices = get_choices_values(cls.ALL_FIELDS[header]["choices"])
+        choices = get_choices_values(
+            cls.ALL_FIELDS[header]["choices"], header=header
+        )
         choice_type = cls.ALL_FIELDS[header]["type"]
 
         if not cls.required_validator(value, header):
             return False
+        if value is None:
+            return True
 
         if choice_type == "SELECT_ONE":
-            return value.strip() not in choices
+            if isinstance(value, str):
+                return value.strip() not in choices
+            else:
+                return value not in choices
         elif choice_type == "SELECT_MANY":
             selected_choices = value.split(",")
             for choice in selected_choices:
@@ -110,10 +136,13 @@ class UploadXLSXValidator(BaseValidator):
 
     @classmethod
     def not_empty_validator(cls, value, *args, **kwargs):
-        return bool(value)
+        return not (value is None or value == "")
 
     @classmethod
     def bool_validator(cls, value, header, *args, **kwargs):
+        if isinstance(value, bool):
+            return True
+
         if cls.string_validator(value, header):
             value = value.capitalize()
 
@@ -239,9 +268,6 @@ class UploadXLSXValidator(BaseValidator):
 
     @classmethod
     def validate_file_with_template(cls, *args, **kwargs):
-        # TODO: temporarily check for a flex fields and core fields
-        #  that are in template excel, have to check for all
-
         if cls.WB is None:
             xlsx_file = kwargs.get("file")
             wb = openpyxl.load_workbook(xlsx_file, data_only=True)
@@ -253,13 +279,18 @@ class UploadXLSXValidator(BaseValidator):
             sheet = wb[name.capitalize()]
             first_row = sheet[1]
 
-            expected_column_names = {
-                *cls.CORE_FIELDS[name].keys(),
-                *cls.FLEX_FIELDS[name].keys(),
-            }
+            all_fields = list(fields.values()) + list(
+                cls.FLEX_FIELDS[name].values()
+            )
+
+            required_fields = set(
+                field["xlsx_field"] for field in all_fields if field["required"]
+            )
+
             column_names = {cell.value for cell in first_row}
 
-            columns_difference = expected_column_names.difference(column_names)
+            columns_difference = required_fields.difference(column_names)
+
             if columns_difference:
                 errors.extend(
                     [
@@ -271,6 +302,7 @@ class UploadXLSXValidator(BaseValidator):
                         for col in columns_difference
                     ]
                 )
+
         return errors
 
     @classmethod

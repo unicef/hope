@@ -255,59 +255,38 @@ class UploadImportDataXLSXFile(
     @classmethod
     @is_authenticated
     def mutate(cls, root, info, file):
-        # TODO: FOR TESTING REMOVE IT LATER
-        xlsx_valid_file_path = (
-            "hct_mis_api/apps/registration_datahub/tests/test_file/"
-            "Registration Data Import XLS Template.xlsx"
+        errors = cls.validate(file=file)
+        import ipdb; ipdb.set_trace()
+        if errors:
+            return UploadImportDataXLSXFile(None, errors)
+
+        wb = openpyxl.load_workbook(file)
+
+        hh_sheet = wb["Households"]
+        ind_sheet = wb["Individuals"]
+
+        number_of_households = 0
+        number_of_individuals = 0
+
+        # Could just return max_row if openpyxl won't count empty rows too
+        for row in hh_sheet.iter_rows(min_row=3):
+            if not any([cell.value for cell in row]):
+                continue
+            number_of_households += 1
+
+        for row in ind_sheet.iter_rows(min_row=3):
+
+            if not any([cell.value for cell in row]):
+                continue
+            number_of_individuals += 1
+
+        created = ImportData.objects.create(
+            xlsx_file=file,
+            number_of_households=number_of_households,
+            number_of_individuals=number_of_individuals,
         )
 
-        with open(xlsx_valid_file_path, "rb") as file:
-            valid_file = SimpleUploadedFile(file.name, file.read())
-            created = ImportData.objects.create(
-                xlsx_file=valid_file,
-                number_of_households=23,
-                number_of_individuals=47,
-            )
-            AirflowApi.start_dag(
-                dag_id="CreateRegistrationDataImportXLSX",
-                context={
-                    "registration_data_import_id": 12,
-                    "import_data_id": str(created.id),
-                },
-            )
-
-            errors = cls.validate(file=file)
-
-            if errors:
-                return UploadImportDataXLSXFile(None, errors)
-
-            wb = openpyxl.load_workbook(file)
-
-            hh_sheet = wb["Households"]
-            ind_sheet = wb["Individuals"]
-
-            number_of_households = 0
-            number_of_individuals = 0
-
-            # Could just return max_row if openpyxl won't count empty rows too
-            for row in hh_sheet.iter_rows(min_row=3):
-                if not any([cell.value for cell in row]):
-                    continue
-                number_of_households += 1
-
-            for row in ind_sheet.iter_rows(min_row=3):
-
-                if not any([cell.value for cell in row]):
-                    continue
-                number_of_individuals += 1
-
-            created = ImportData.objects.create(
-                xlsx_file=file,
-                number_of_households=number_of_households,
-                number_of_individuals=number_of_individuals,
-            )
-
-            return UploadImportDataXLSXFile(created, [])
+        return UploadImportDataXLSXFile(created, [])
 
 
 class DeleteRegistrationDataImport(graphene.Mutation):
