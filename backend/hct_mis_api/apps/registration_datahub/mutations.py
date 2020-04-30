@@ -1,4 +1,5 @@
 import operator
+from functools import reduce
 
 import graphene
 import openpyxl
@@ -82,88 +83,144 @@ class MergeRegistrationDataImportMutation(BaseValidator, graphene.Mutation):
             )
 
     @classmethod
+    def merge_household(
+        cls, imported_household, household_values, registration_obj
+    ):
+        imported_individuals_as_values = imported_household.individuals.values(
+            "id",
+            "photo",
+            "full_name",
+            "given_name",
+            "middle_name",
+            "family_name",
+            "relationship",
+            "role",
+            "sex",
+            "birth_date",
+            "estimated_birth_date",
+            "marital_status",
+            "phone_no",
+            "phone_no_alternative",
+            "disability",
+            "flex_fields",
+        )
+
+        def id_reducer(old, new):
+            old[new.id] = new
+            return old
+
+        imported_individuals_as_values_id_dict = reduce(
+            id_reducer, imported_household.individuals.all(), {}
+        )
+        individuals_to_add = []
+        del household_values["id"]
+        household = Household(**{**household_values})
+        household.registration_data_import = registration_obj
+        for individual_values in imported_individuals_as_values:
+            imported_individual = imported_individuals_as_values_id_dict[
+                individual_values.get("id")
+            ]
+            individual = cls.merge_individual(
+                imported_individual,
+                individual_values,
+                household,
+                registration_obj,
+            )
+            if individual_values["relationship"] == "HEAD":
+                household.head_of_household = individual
+            individuals_to_add.append(individual)
+        return household, individuals_to_add
+
+    @classmethod
+    def merge_individual(
+        cls, imported_individual, individual_values, household, registration_obj
+    ):
+        del individual_values["id"]
+        individual = Individual(**{**individual_values})
+        individual.household = household
+        individual.registration_data_import = registration_obj
+        return individual
+
+    @classmethod
     @is_authenticated
     def mutate(cls, root, info, id):
         decode_id = decode_id_string(id)
 
-        obj_hub = RegistrationDataImportDatahub.objects.select_for_update().get(
-            hct_id=decode_id,
-        )
-
-        obj_hct = RegistrationDataImport.objects.select_for_update().get(
-            id=decode_id,
-        )
-
-        cls.validate(status=obj_hct.status)
-
         with transaction.atomic():
+            print(
+                "**********************************************************************"
+            )
+            obj_hub = RegistrationDataImportDatahub.objects.get(
+                hct_id=decode_id,
+            )
+
+            obj_hct = RegistrationDataImport.objects.get(id=decode_id,)
+            cls.validate(status=obj_hct.status)
+
             # move individuals and households to hct db
             imported_households = ImportedHousehold.objects.filter(
                 registration_data_import=obj_hub,
             )
+
+            def id_reducer(old, new):
+                old[new.id] = new
+                return old
+
+            imported_households_id_dict = reduce(
+                id_reducer, imported_households, {}
+            )
+            imported_households.all()
             imported_individuals = ImportedIndividual.objects.filter(
                 registration_data_import=obj_hub,
             )
 
             imported_households_as_values = imported_households.values(
-                "household_ca_id",
+                "id",
                 "consent",
                 "residence_status",
-                "nationality",
-                "family_size",
+                "country_origin",
+                "size",
                 "address",
-                "location",
-                "representative",
-                "head_of_household",
+                "country",
+                "female_age_group_0_5_count",
+                "female_age_group_6_11_count",
+                "female_age_group_12_17_count",
+                "female_adults_count",
+                "pregnant_count",
+                "male_age_group_0_5_count",
+                "male_age_group_6_11_count",
+                "male_age_group_12_17_count",
+                "male_adults_count",
+                "female_age_group_0_5_disabled_count",
+                "female_age_group_6_11_disabled_count",
+                "female_age_group_12_17_disabled_count",
+                "female_adults_disabled_count",
+                "male_age_group_0_5_disabled_count",
+                "male_age_group_6_11_disabled_count",
+                "male_age_group_12_17_disabled_count",
+                "male_adults_disabled_count",
                 "registration_date",
+                "flex_fields",
             )
-            imported_individuals_as_values = imported_individuals.values(
-                "individual_ca_id",
-                "full_name",
-                "first_name",
-                "middle_name",
-                "last_name",
-                "dob",
-                "sex",
-                "estimated_dob",
-                "nationality",
-                "marital_status",
-                "phone_number",
-                "phone_number_alternative",
-                "identification_type",
-                "identification_number",
-                "household",
-                "work_status",
-                "disability",
-            )
-
-            households_to_create = (
-                Household(
-                    **{
-                        **hh,
-                        "representative": None,
-                        "head_of_household": None,
-                        # TODO: cannot be empty should we also have Location,
-                        #  GatewayType models in registration datahub
-                        "location": None,
-                    }
+            households_to_add = []
+            individuals_to_add = []
+            for hh_values in imported_households_as_values:
+                imported_household = imported_households_id_dict[
+                    hh_values.get("id")
+                ]
+                (household, hh_individuals_to_add) = cls.merge_household(
+                    imported_household, hh_values, obj_hct
                 )
-                for hh in imported_households_as_values
-            )
-
-            Household.objects.bulk_create(households_to_create)
-
-            individuals_to_create = (
-                Individual(**ind) for ind in imported_individuals_as_values
-            )
-
-            Individual.objects.bulk_create(individuals_to_create)
+                households_to_add.append(household)
+                individuals_to_add.extend(hh_individuals_to_add)
+            Individual.objects.bulk_create(individuals_to_add)
+            Household.objects.bulk_create(households_to_add)
 
             # TODO: update household head and representative
 
             # cleanup datahub
-            imported_households.delete()
-            imported_individuals.delete()
+            # imported_households.delete()
+            # imported_individuals.delete()
 
             obj_hct.status = "MERGED"
             obj_hct.save()
@@ -246,7 +303,7 @@ class UploadImportDataXLSXFile(
         errors = cls.validate(file=file)
 
         if errors:
-            errors.sort(key=operator.itemgetter('row_number', 'header'))
+            errors.sort(key=operator.itemgetter("row_number", "header"))
             return UploadImportDataXLSXFile(None, errors)
 
         wb = openpyxl.load_workbook(file)
