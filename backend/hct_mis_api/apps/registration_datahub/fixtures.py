@@ -96,3 +96,19 @@ class ImportedIndividualFactory(factory.DjangoModelFactory):
     )
     disability = factory.fuzzy.FuzzyChoice((True, False))
     household = factory.SubFactory(ImportedHouseholdFactory)
+
+def create_imported_household(household_args=None, individual_args=None):
+    if household_args is None:
+        household_args = {}
+    if individual_args is None:
+        individual_args = {}
+    household = ImportedHouseholdFactory.build(**household_args)
+    household.save()
+    individuals = ImportedIndividualFactory.create_batch(
+        household.size, household=household, **individual_args
+    )
+    individuals[0].relationship = "HEAD"
+    individuals[0].save()
+    household.head_of_household = individuals[0]
+    household.save()
+    return household, individuals
