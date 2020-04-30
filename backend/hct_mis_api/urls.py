@@ -23,7 +23,7 @@ urlpatterns = [
     path("api/", include("social_django.urls", namespace="social")),
     path("api/logout",logout_view),
     path('api/sentry-debug/', trigger_error),
-    path("api/download_template", registration_datahub.views.download_template)
+    path("api/download-template", registration_datahub.views.download_template)
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 urlpatterns += staticfiles_urlpatterns()
