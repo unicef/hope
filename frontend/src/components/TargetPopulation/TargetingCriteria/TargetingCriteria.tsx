@@ -109,7 +109,6 @@ export function TargetingCriteria({
   };
 
   const addCriteria = (values) => {
-    //rework to use arguments and add index for update
     if (criteriaIndex !== null) {
       helpers.replace(criteriaIndex, { filters: [...values.filters] });
     } else {

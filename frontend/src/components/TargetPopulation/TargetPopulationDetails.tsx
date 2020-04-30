@@ -36,7 +36,7 @@ interface ProgramDetailsProps {
 export function TargetPopulationDetails({
     targetPopulation,
 }: ProgramDetailsProps): React.ReactElement {
-  const { firstName, lastName } = targetPopulation.candidateListTargetingCriteria.targetPopulationCandidate.createdBy;
+  const { firstName, lastName } = targetPopulation.createdBy;
   return (
     <Container>
       <Title>
@@ -53,13 +53,13 @@ export function TargetPopulationDetails({
           <Grid item xs={4}>
             <LabelizedField
               label='Programme population close date'
-              value='some random score'
+              value='closing date'
             />
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
               label='Programme'
-              value='some random programme name'
+              value='programme name with link'
             />
           </Grid>
           <Grid item xs={4}>

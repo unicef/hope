@@ -8,7 +8,9 @@ export const UpdateTP = gql`
         name
         status
         candidateListTotalHouseholds
+        candidateListTotalIndividuals
         finalListTotalHouseholds
+        finalListTotalIndividuals
         candidateListTargetingCriteria {
           targetPopulationCandidate {
             createdBy {
