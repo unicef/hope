@@ -114,7 +114,6 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
         )
 
         import_data_obj = ImportData.objects.first()
-        import ipdb; ipdb.set_trace()
         self.assertIn(
             "new_reg_data_import", import_data_obj.xlsx_file.name,
         )

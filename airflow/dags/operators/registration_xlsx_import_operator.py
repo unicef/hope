@@ -189,6 +189,7 @@ class RegistrationXLSXImportOperator(DjangoOperator):
     def execute(self, context, **kwargs):
         import openpyxl
 
+        from core.models import BusinessArea
         from registration_datahub.models import RegistrationDataImportDatahub
         from registration_datahub.models import ImportData
 
@@ -207,7 +208,8 @@ class RegistrationXLSXImportOperator(DjangoOperator):
             id=config_vars.get("import_data_id"),
         )
 
-        self.business_area = config_vars.get("business_area")
+        business_area_id = config_vars.get("business_area")
+        self.business_area = BusinessArea.objects.get(id=business_area_id)
 
         wb = openpyxl.load_workbook(import_data.xlsx_file, data_only=True)
 

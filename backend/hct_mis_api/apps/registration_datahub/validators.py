@@ -110,8 +110,12 @@ class UploadXLSXValidator(BaseValidator):
 
     @classmethod
     def choice_validator(cls, value, header, *args, **kwargs):
+        field = cls.ALL_FIELDS.get(header)
+        if field is None:
+            return False
+
         choices = get_choices_values(
-            cls.ALL_FIELDS[header]["choices"], header=header
+            field["choices"], header=header
         )
         choice_type = cls.ALL_FIELDS[header]["type"]
 

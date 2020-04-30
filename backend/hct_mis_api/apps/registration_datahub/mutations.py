@@ -71,9 +71,9 @@ class CreateRegistrationDataImport(BaseValidator, graphene.Mutation):
         AirflowApi.start_dag(
             dag_id="CreateRegistrationDataImportXLSX",
             context={
-                "registration_data_import_id": created_obj_datahub.id,
-                "import_data_id": import_data_id,
-                "business_area": business_area,
+                "registration_data_import_id": str(created_obj_datahub.id),
+                "import_data_id": str(import_data_id),
+                "business_area": str(business_area.id),
             },
         )
 
@@ -256,7 +256,6 @@ class UploadImportDataXLSXFile(
     @is_authenticated
     def mutate(cls, root, info, file):
         errors = cls.validate(file=file)
-        import ipdb; ipdb.set_trace()
         if errors:
             return UploadImportDataXLSXFile(None, errors)
 
