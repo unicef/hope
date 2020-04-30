@@ -139,6 +139,7 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
                         import_data_obj.id, "ImportData"
                     ),
                     "name": "New Import of Data 123",
+                    "businessAreaSlug": "afghanistan",
                 }
             },
         )

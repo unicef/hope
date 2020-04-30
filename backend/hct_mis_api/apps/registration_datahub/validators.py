@@ -113,6 +113,14 @@ class UploadXLSXValidator(BaseValidator):
         return bool(value)
 
     @classmethod
+    def bool_validator(cls, value, header, *args, **kwargs):
+        if cls.string_validator(value, header):
+            value = value.capitalize()
+
+            if value in ("True", "False"):
+                return True
+
+    @classmethod
     def required_validator(cls, value, header, *args, **kwargs):
         is_required = cls.ALL_FIELDS[header]["required"]
         is_not_empty = cls.not_empty_validator(value)
@@ -120,6 +128,10 @@ class UploadXLSXValidator(BaseValidator):
         if is_required:
             return is_not_empty
 
+        return True
+
+    @classmethod
+    def image_validator(cls, value, header, *args, **kwargs):
         return True
 
     @classmethod
@@ -135,15 +147,14 @@ class UploadXLSXValidator(BaseValidator):
             "STRING": cls.string_validator,
             "INTEGER": cls.integer_validator,
             "DECIMAL": cls.float_validator,
+            "BOOL": cls.bool_validator,
             "DATE": cls.date_validator,
             "DATETIME": cls.date_validator,
             "SELECT_ONE": cls.choice_validator,
             "SELECT_MANY": cls.choice_validator,
             "PHONE_NUMBER": cls.phone_validator,
-            "GEOLOCATION": cls.geolocation_validator,
             "GEOPOINT": cls.geolocation_validator,
-            # TODO: add image validator, how image will be attached to file?
-            # "IMAGE": cls.geolocation_validator,
+            "IMAGE": cls.image_validator,
         }
 
         # create set of household ids to validate
