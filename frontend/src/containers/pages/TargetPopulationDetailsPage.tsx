@@ -36,7 +36,7 @@ export function TargetPopulationDetailsPage() {
       indicatorColor='primary'
       textColor='primary'
     >
-      <Tab label='Candidate list' />
+      <Tab label='Programme Population' />
       <Tab label='Target Population' disabled={status === 'DRAFT'} />
     </Tabs>
   );

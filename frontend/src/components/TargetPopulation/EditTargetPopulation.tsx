@@ -53,7 +53,7 @@ export function EditTargetPopulation({
       indicatorColor='primary'
       textColor='primary'
     >
-      <Tab label='Candidate list' disabled={selectedTab !== 0} />
+      <Tab label='Programme Population' disabled={selectedTab !== 0} />
       <Tab label='Target Population' disabled={selectedTab !== 1} />
     </Tabs>
   );
