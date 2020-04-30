@@ -1,12 +1,12 @@
 import graphene
 import openpyxl
-import requests
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import transaction
 from graphene_file_upload.scalars import Upload
 
 from core.airflow_api import AirflowApi
+from core.models import BusinessArea
 from core.permissions import is_authenticated
 from core.utils import decode_id_string
 from core.validators import BaseValidator
@@ -26,6 +26,7 @@ from registration_datahub.validators import UploadXLSXValidator
 class CreateRegistrationDataImportExcelInput(graphene.InputObjectType):
     import_data_id = graphene.ID()
     name = graphene.String()
+    business_area_slug = graphene.String()
 
 
 class CreateRegistrationDataImport(BaseValidator, graphene.Mutation):
@@ -43,6 +44,10 @@ class CreateRegistrationDataImport(BaseValidator, graphene.Mutation):
             registration_data_import_data.pop("import_data_id")
         )
         import_data_obj = ImportData.objects.get(id=import_data_id)
+
+        business_area = BusinessArea.objects.get(
+            slug=registration_data_import_data.pop("business_area_slug")
+        )
 
         created_obj_datahub = RegistrationDataImportDatahub.objects.create(
             import_data=import_data_obj, **registration_data_import_data,
@@ -68,6 +73,7 @@ class CreateRegistrationDataImport(BaseValidator, graphene.Mutation):
             context={
                 "registration_data_import_id": created_obj_datahub.id,
                 "import_data_id": import_data_id,
+                "business_area": business_area,
             },
         )
 
@@ -269,39 +275,39 @@ class UploadImportDataXLSXFile(
                     "import_data_id": str(created.id),
                 },
             )
+
+            errors = cls.validate(file=file)
+
+            if errors:
+                return UploadImportDataXLSXFile(None, errors)
+
+            wb = openpyxl.load_workbook(file)
+
+            hh_sheet = wb["Households"]
+            ind_sheet = wb["Individuals"]
+
+            number_of_households = 0
+            number_of_individuals = 0
+
+            # Could just return max_row if openpyxl won't count empty rows too
+            for row in hh_sheet.iter_rows(min_row=3):
+                if not any([cell.value for cell in row]):
+                    continue
+                number_of_households += 1
+
+            for row in ind_sheet.iter_rows(min_row=3):
+
+                if not any([cell.value for cell in row]):
+                    continue
+                number_of_individuals += 1
+
+            created = ImportData.objects.create(
+                xlsx_file=file,
+                number_of_households=number_of_households,
+                number_of_individuals=number_of_individuals,
+            )
+
             return UploadImportDataXLSXFile(created, [])
-        # errors = cls.validate(file=file)
-        #
-        # if errors:
-        #     return UploadImportDataXLSXFile(None, errors)
-        #
-        # wb = openpyxl.load_workbook(file)
-        #
-        # hh_sheet = wb["Households"]
-        # ind_sheet = wb["Individuals"]
-        #
-        # number_of_households = 0
-        # number_of_individuals = 0
-        #
-        # # Could just return max_row if openpyxl won't count empty rows too
-        # for row in hh_sheet.iter_rows(min_row=3):
-        #     if not any([cell.value for cell in row]):
-        #         continue
-        #     number_of_households += 1
-        #
-        # for row in ind_sheet.iter_rows(min_row=3):
-        #
-        #     if not any([cell.value for cell in row]):
-        #         continue
-        #     number_of_individuals += 1
-        #
-        # created = ImportData.objects.create(
-        #     xlsx_file=file,
-        #     number_of_households=number_of_households,
-        #     number_of_individuals=number_of_individuals,
-        # )
-        #
-        # return UploadImportDataXLSXFile(created, [])
 
 
 class DeleteRegistrationDataImport(graphene.Mutation):

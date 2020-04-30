@@ -10,8 +10,6 @@ from household.models import (
     Individual,
     SEX_CHOICE,
     MARITAL_STATUS_CHOICE,
-    YES_NO_CHOICE,
-    DISABILITY_CHOICE,
     RESIDENCE_STATUS_CHOICE,
     RELATIONSHIP_CHOICE,
     DocumentType,

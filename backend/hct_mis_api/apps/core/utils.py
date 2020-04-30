@@ -237,3 +237,14 @@ def get_attr_value(name, object, default=None):
 
 def to_choice_object(choices):
     return [{"name": name, "value": value} for value, name in choices]
+
+
+def get_admin_areas_as_choices(admin_level):
+    from core.models import AdminArea
+
+    return [
+        {"label": {"English(EN)": admin_area.title}, "value": admin_area.title,}
+        for admin_area in AdminArea.objects.filter(
+            admin_area_type__admin_level=admin_level
+        )
+    ]

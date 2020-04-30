@@ -9,7 +9,6 @@ from django.core.validators import (
     MaxLengthValidator,
 )
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
 from django_countries.fields import CountryField
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
@@ -138,10 +137,6 @@ class ImportedIndividual(TimeStampedUUIDModel):
 
 
 class RegistrationDataImportDatahub(TimeStampedUUIDModel):
-    STATUS_CHOICE = (
-        ("IN_PROGRESS", _("In progress")),
-        ("DONE", _("Done")),
-    )
     name = models.CharField(max_length=255, blank=True)
     import_date = models.DateTimeField(auto_now_add=True)
     hct_id = models.UUIDField(null=True)
@@ -151,9 +146,7 @@ class RegistrationDataImportDatahub(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
         null=True,
     )
-    status = models.CharField(
-        max_length=15, choices=STATUS_CHOICE, default="IN_PROGRESS"
-    )
+    import_done = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name

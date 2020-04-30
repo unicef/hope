@@ -1,6 +1,6 @@
 from django.db import transaction
+from django.utils import timezone
 
-from backend.hct_mis_api.apps.core.utils import get_combined_attributes
 from .base import DjangoOperator
 
 
@@ -11,7 +11,7 @@ class RegistrationXLSXImportOperator(DjangoOperator):
     that registration data import instance.
     """
 
-    business_area = "PL"
+    business_area = None
     households = None
     individuals = None
     documents = None
@@ -63,19 +63,29 @@ class RegistrationXLSXImportOperator(DjangoOperator):
             doc_type = ImportedDocumentType.objects.get(
                 country=self.business_area, label=document_data.get("type"),
             )
-            # TODO: do some stuff with photo there
+            # TODO: do some stuff with photo
             photo = document_data.get("photo")
+            individual = document_data.get("individual")
+            photo_name = (
+                f"{individual.full_name.lower().replace(' ', '_')}"
+                f"_{timezone.now()}.jpg"
+            )
             obj = ImportedDocument(
                 document_number=document_data.get("value"),
-                photo=photo,
-                individual=document_data.get("individual"),
+                photo=None,
+                individual=individual,
                 type=doc_type,
             )
+            # obj.photo.save(photo_name, photo, save=False)
             docs_to_create.append(obj)
 
         ImportedDocument.objects.bulk_create(docs_to_create)
 
     def _create_objects(self, sheet, registration_data_import):
+        from backend.hct_mis_api.apps.core.utils import (
+            get_combined_attributes,
+            serialize_flex_attributes,
+        )
         from registration_datahub.models import (
             ImportedHousehold,
             ImportedIndividual,
@@ -107,6 +117,7 @@ class RegistrationXLSXImportOperator(DjangoOperator):
         sheet_title = sheet.title.lower()
 
         combined_fields = get_combined_attributes()
+        flex_fields = serialize_flex_attributes()
 
         first_row = sheet[1]
         households_to_update = []
@@ -154,6 +165,11 @@ class RegistrationXLSXImportOperator(DjangoOperator):
                     value = fn(value=cell.value, header=header)
                     if value is not None:
                         setattr(obj_to_create, header, value)
+                elif header in flex_fields[sheet_title]:
+                    if flex_fields[sheet_title]["type"] == "IMAGE":
+                        # TODO: handle image
+                        pass
+                    obj_to_create.flex_fields[header] = cell.value
 
             if sheet_title == "households":
                 self.households[household_id] = obj_to_create
@@ -193,10 +209,12 @@ class RegistrationXLSXImportOperator(DjangoOperator):
             id=config_vars.get("import_data_id"),
         )
 
+        self.business_area = config_vars.get("business_area")
+
         wb = openpyxl.load_workbook(import_data.xlsx_file, data_only=True)
 
         for sheet in wb.worksheets:
             self._create_objects(sheet, registration_data_import)
 
-        registration_data_import.status = "DONE"
+        registration_data_import.import_done = True
         registration_data_import.save()

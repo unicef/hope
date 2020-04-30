@@ -13,8 +13,8 @@ snapshots['TestRegistrationDataImportDatahubMutations::test_registration_data_im
             'errors': [
             ],
             'importData': {
-                'numberOfHouseholds': 19,
-                'numberOfIndividuals': 27
+                'numberOfHouseholds': 23,
+                'numberOfIndividuals': 47
             }
         }
     }
