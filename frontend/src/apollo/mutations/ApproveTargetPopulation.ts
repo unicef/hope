@@ -7,7 +7,9 @@ export const ApproveTargetPopulation = gql`
         name
         status
         candidateListTotalHouseholds
+        candidateListTotalIndividuals
         finalListTotalHouseholds
+        finalListTotalIndividuals
         candidateListTargetingCriteria {
           targetPopulationCandidate {
             createdBy {

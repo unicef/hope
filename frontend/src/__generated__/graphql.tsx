@@ -2279,7 +2279,7 @@ export type ApproveTpMutation = (
     { __typename?: 'ApproveTargetPopulationMutation' }
     & { targetPopulation: Maybe<(
       { __typename?: 'TargetPopulationNode' }
-      & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'candidateListTotalHouseholds' | 'finalListTotalHouseholds'>
+      & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'candidateListTotalHouseholds' | 'candidateListTotalIndividuals' | 'finalListTotalHouseholds' | 'finalListTotalIndividuals'>
       & { candidateListTargetingCriteria: Maybe<(
         { __typename?: 'TargetingCriteriaNode' }
         & { targetPopulationCandidate: Maybe<(
@@ -2366,7 +2366,7 @@ export type CreateTpMutation = (
     { __typename?: 'CreateTargetPopulationMutation' }
     & { targetPopulation: Maybe<(
       { __typename?: 'TargetPopulationNode' }
-      & Pick<TargetPopulationNode, 'id' | 'status' | 'candidateListTotalHouseholds' | 'finalListTotalHouseholds'>
+      & Pick<TargetPopulationNode, 'id' | 'status' | 'candidateListTotalHouseholds' | 'candidateListTotalIndividuals' | 'finalListTotalHouseholds' | 'finalListTotalIndividuals'>
     )> }
   )> }
 );
@@ -2425,7 +2425,7 @@ export type FinalizeTpMutation = (
     { __typename?: 'FinalizeTargetPopulationMutation' }
     & { targetPopulation: Maybe<(
       { __typename?: 'TargetPopulationNode' }
-      & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'candidateListTotalHouseholds' | 'finalListTotalHouseholds'>
+      & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'candidateListTotalHouseholds' | 'candidateListTotalIndividuals' | 'finalListTotalHouseholds' | 'finalListTotalIndividuals'>
       & { candidateListTargetingCriteria: Maybe<(
         { __typename?: 'TargetingCriteriaNode' }
         & { targetPopulationCandidate: Maybe<(
@@ -2512,7 +2512,7 @@ export type UpdateTpMutation = (
     { __typename?: 'UpdateTargetPopulationMutation' }
     & { targetPopulation: Maybe<(
       { __typename?: 'TargetPopulationNode' }
-      & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'candidateListTotalHouseholds' | 'finalListTotalHouseholds'>
+      & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'candidateListTotalHouseholds' | 'candidateListTotalIndividuals' | 'finalListTotalHouseholds' | 'finalListTotalIndividuals'>
       & { candidateListTargetingCriteria: Maybe<(
         { __typename?: 'TargetingCriteriaNode' }
         & { targetPopulationCandidate: Maybe<(
@@ -3026,8 +3026,11 @@ export type TargetPopulationQuery = (
   { __typename?: 'Query' }
   & { targetPopulation: Maybe<(
     { __typename?: 'TargetPopulationNode' }
-    & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'candidateListTotalHouseholds' | 'finalListTotalHouseholds'>
-    & { candidateListTargetingCriteria: Maybe<(
+    & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'candidateListTotalHouseholds' | 'candidateListTotalIndividuals' | 'finalListTotalHouseholds' | 'finalListTotalIndividuals'>
+    & { createdBy: Maybe<(
+      { __typename?: 'UserNode' }
+      & Pick<UserNode, 'firstName' | 'lastName'>
+    )>, candidateListTargetingCriteria: Maybe<(
       { __typename?: 'TargetingCriteriaNode' }
       & { targetPopulationCandidate: Maybe<(
         { __typename?: 'TargetPopulationNode' }
@@ -3689,7 +3692,9 @@ export const ApproveTpDocument = gql`
       name
       status
       candidateListTotalHouseholds
+      candidateListTotalIndividuals
       finalListTotalHouseholds
+      finalListTotalIndividuals
       candidateListTargetingCriteria {
         targetPopulationCandidate {
           createdBy {
@@ -3867,7 +3872,9 @@ export const CreateTpDocument = gql`
       id
       status
       candidateListTotalHouseholds
+      candidateListTotalIndividuals
       finalListTotalHouseholds
+      finalListTotalIndividuals
     }
   }
 }
@@ -4072,7 +4079,9 @@ export const FinalizeTpDocument = gql`
       name
       status
       candidateListTotalHouseholds
+      candidateListTotalIndividuals
       finalListTotalHouseholds
+      finalListTotalIndividuals
       candidateListTargetingCriteria {
         targetPopulationCandidate {
           createdBy {
@@ -4252,7 +4261,9 @@ export const UpdateTpDocument = gql`
       name
       status
       candidateListTotalHouseholds
+      candidateListTotalIndividuals
       finalListTotalHouseholds
+      finalListTotalIndividuals
       candidateListTargetingCriteria {
         targetPopulationCandidate {
           createdBy {
@@ -5586,7 +5597,13 @@ export const TargetPopulationDocument = gql`
     name
     status
     candidateListTotalHouseholds
+    candidateListTotalIndividuals
     finalListTotalHouseholds
+    finalListTotalIndividuals
+    createdBy {
+      firstName
+      lastName
+    }
     candidateListTargetingCriteria {
       targetPopulationCandidate {
         createdBy {
