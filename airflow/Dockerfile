@@ -14,15 +14,12 @@ RUN apt-get update -yqq \
         graphviz \
         acl
 
-#ARG AIRFLOW_HOME=/usr/local/airflow
-#ENV AIRFLOW_HOME=${AIRFLOW_HOME}
+ARG AIRFLOW_HOME=/usr/local/airflow
+ENV AIRFLOW_HOME=${AIRFLOW_HOME}
 
 RUN chown -R airflow: ${AIRFLOW_HOME}
-RUN setfacl -Rdm u:airflow:rwx /usr/local/airflow/
 
 ENV PATH="/usr/local/airflow/.local/bin:$PATH"
-
-#USER airflow
 
 COPY requirements.txt /usr/local/airflow/requirements.txt
 RUN pip install -r requirements.txt
