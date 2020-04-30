@@ -54,9 +54,7 @@ export const ApprovedTargetPopulationTable = ({
       {selectedTab === 0 && (
         <UniversalTable
           title='Households'
-          headCells={
-            selectedTab === 0 ? programmeHeadCells : targetPopulationHeadCells
-          }
+          headCells={programmeHeadCells}
           rowsPerPageOptions={[10, 15, 20]}
           query={useCandidateHouseholdsListByTargetingCriteriaQuery}
           queriedObjectName='candidateHouseholdsListByTargetingCriteria'
