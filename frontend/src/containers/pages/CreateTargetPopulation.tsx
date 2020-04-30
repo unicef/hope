@@ -52,7 +52,7 @@ export function CreateTargetPopulation() {
       indicatorColor='primary'
       textColor='primary'
     >
-      <Tab label='Candidate list' />
+      <Tab label='Programme Population' />
       <Tab label='Target Population' disabled />
     </Tabs>
   );

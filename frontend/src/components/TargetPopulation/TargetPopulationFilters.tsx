@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { TextField, InputAdornment, Select, MenuItem } from '@material-ui/core';
+import { TextField, InputAdornment, MenuItem } from '@material-ui/core';
 import { Person, Search, Group } from '@material-ui/icons';
 
 const Container = styled.div`
@@ -73,8 +73,7 @@ export function TargetPopulationFilters({
   onFilterChange,
   filter,
 }: HouseholdFiltersProps): React.ReactElement {
-  const handleFilterChange = (e, name) =>
-    onFilterChange({ ...filter, [name]: e.target.value });
+  const handleFilterChange = (e, name) => onFilterChange({ ...filter, [name]: e.target.value });
   return (
     <Container>
       <TextContainer

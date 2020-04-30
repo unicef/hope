@@ -8,6 +8,7 @@ export const FinalHouseholdsListByTargetingCriteria = gql`
     $after: String
     $before: String
     $last: Int
+    $orderBy: String
   ) {
     finalHouseholdsListByTargetingCriteria(
       targetPopulation: $targetPopulation
@@ -16,6 +17,7 @@ export const FinalHouseholdsListByTargetingCriteria = gql`
       before: $before
       first: $first
       last: $last
+      orderBy: $orderBy
     ) {
       edges {
         node {
@@ -31,6 +33,7 @@ export const FinalHouseholdsListByTargetingCriteria = gql`
             title
           }
           updatedAt
+          address
         }
         cursor
       }

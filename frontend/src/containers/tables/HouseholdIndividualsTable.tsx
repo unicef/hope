@@ -18,7 +18,6 @@ import {
   paymentRecordStatusToColor,
   sexToCapitalize,
 } from '../../utils/utils';
-import { Missing } from '../../components/Missing';
 
 const headCells: HeadCell<IndividualNode>[] = [
   {
