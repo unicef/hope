@@ -135,7 +135,7 @@ class TestXLSXValidatorsMethods(TestCase):
         )
 
         wb_valid = openpyxl.load_workbook(
-            f"{self.FILES_DIR_PATH}/Registration Data Import XLS Template.xlsx",
+            f"{self.FILES_DIR_PATH}/new_reg_data_import.xlsx",
             data_only=True,
         )
 
@@ -262,28 +262,11 @@ class TestXLSXValidatorsMethods(TestCase):
                 )
 
     def test_validate_file_with_template(self):
-        invalid_cols_file_path = f"{self.FILES_DIR_PATH}/invalid_cols.xlsx"
+        invalid_cols_file_path = f"{self.FILES_DIR_PATH}/new_reg_data_import.xlsx"
         with open(invalid_cols_file_path, "rb") as file:
             errors = UploadXLSXValidator.validate_file_with_template(file=file)
             errors.sort(key=operator.itemgetter("row_number", "header"))
-            expected = [
-                {
-                    "row_number": 1,
-                    "header": "address",
-                    "message": "Missing column name address",
-                },
-                {
-                    "row_number": 1,
-                    "header": "consent",
-                    "message": "Missing column name consent",
-                },
-                {
-                    "row_number": 1,
-                    "header": "household_location",
-                    "message": "Missing column name household_location",
-                },
-            ]
-            self.assertEqual(errors, expected)
+            self.assertEqual(errors, [])
 
     def test_required_validator(self):
         with mock.patch.dict(

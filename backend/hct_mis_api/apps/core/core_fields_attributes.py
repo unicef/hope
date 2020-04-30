@@ -2,7 +2,7 @@ from functools import reduce
 
 from django_countries.data import COUNTRIES
 
-from core.utils import age_to_birth_date_query
+from core.utils import age_to_birth_date_query, get_admin_areas_as_choices
 from household.models import (
     RESIDENCE_STATUS_CHOICE,
     RELATIONSHIP_CHOICE,
@@ -45,7 +45,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "label": {"English(EN)": "Residence status"},
         "hint": "",
         "choices": [
-            {"label": {"English(EN)": label}, "value": str(value),}
+            {"label": {"English(EN)": label}, "value": value,}
             for value, label in RESIDENCE_STATUS_CHOICE
         ],
         "associated_with": _HOUSEHOLD,
@@ -72,7 +72,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "label": {"English(EN)": "Country origin"},
         "hint": "country origin",
         "choices": [
-            {"label": {"English(EN)": label}, "value": str(value),}
+            {"label": {"English(EN)": label}, "value": value,}
             for value, label in COUNTRIES.items()
         ],
         "associated_with": _HOUSEHOLD,
@@ -87,7 +87,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "label": {"English(EN)": "Country"},
         "hint": "",
         "choices": [
-            {"label": {"English(EN)": label}, "value": str(value),}
+            {"label": {"English(EN)": label}, "value": value,}
             for value, label in COUNTRIES.items()
         ],
         "associated_with": _HOUSEHOLD,
@@ -190,7 +190,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "label": {"English(EN)": "Relationship to Head of Household"},
         "hint": "",
         "choices": [
-            {"label": {"English(EN)": label}, "value": str(value),}
+            {"label": {"English(EN)": label}, "value": value,}
             for value, label in RELATIONSHIP_CHOICE
         ],
         "associated_with": _INDIVIDUAL,
@@ -205,7 +205,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "label": {"English(EN)": "Role"},
         "hint": "",
         "choices": [
-            {"label": {"English(EN)": label}, "value": str(value),}
+            {"label": {"English(EN)": label}, "value": value,}
             for value, label in ROLE_CHOICE
         ],
         "associated_with": _INDIVIDUAL,
@@ -268,7 +268,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "label": {"English(EN)": "Sex"},
         "hint": "",
         "choices": [
-            {"label": {"English(EN)": label}, "value": str(value),}
+            {"label": {"English(EN)": label}, "value": value,}
             for value, label in SEX_CHOICE
         ],
         "associated_with": _INDIVIDUAL,
@@ -319,7 +319,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "label": {"English(EN)": "Marital Status"},
         "hint": "",
         "choices": [
-            {"label": {"English(EN)": label}, "value": str(value),}
+            {"label": {"English(EN)": label}, "value": value,}
             for value, label in MARITAL_STATUS_CHOICE
         ],
         "associated_with": _INDIVIDUAL,
@@ -363,7 +363,7 @@ CORE_FIELDS_ATTRIBUTES = [
     },
     {
         "id": "12ceb917-8942-4cb6-a9d0-6a97a097258a",
-        "type": None,
+        "type": TYPE_IMAGE,
         "name": "birth_certificate_photo",
         "lookup": "birth_certificate_photo",
         "required": False,
@@ -387,7 +387,7 @@ CORE_FIELDS_ATTRIBUTES = [
     },
     {
         "id": "7e6a41c5-0fbd-4f99-98ba-2c6a7da8dbe4",
-        "type": None,
+        "type": TYPE_IMAGE,
         "name": "drivers_license_photo",
         "lookup": "drivers_license_photo",
         "required": False,
@@ -411,7 +411,7 @@ CORE_FIELDS_ATTRIBUTES = [
     },
     {
         "id": "ffb6a487-a806-47d6-a12f-fe3c6c516976",
-        "type": None,
+        "type": TYPE_IMAGE,
         "name": "electoral_card_photo",
         "lookup": "electoral_card_photo",
         "required": False,
@@ -435,7 +435,7 @@ CORE_FIELDS_ATTRIBUTES = [
     },
     {
         "id": "2f9ca147-afde-4311-9d61-e906a8ef2334",
-        "type": None,
+        "type": TYPE_IMAGE,
         "name": "unhcr_id_photo",
         "lookup": "unhcr_id_photo",
         "required": False,
@@ -459,7 +459,7 @@ CORE_FIELDS_ATTRIBUTES = [
     },
     {
         "id": "234a1b5b-7900-4f67-86a9-5fcaede3d09d",
-        "type": None,
+        "type": TYPE_IMAGE,
         "name": "national_passport_photo",
         "lookup": "national_passport_photo",
         "required": False,
@@ -483,7 +483,7 @@ CORE_FIELDS_ATTRIBUTES = [
     },
     {
         "id": "4aa3d595-131a-48df-8752-ec171eabe3be",
-        "type": None,
+        "type": TYPE_IMAGE,
         "name": "scope_id_photo",
         "lookup": "scope_id_photo",
         "required": False,
@@ -519,7 +519,7 @@ CORE_FIELDS_ATTRIBUTES = [
     },
     {
         "id": "d4279a74-377f-4f74-baf2-e1ebd001ec5c",
-        "type": None,
+        "type": TYPE_IMAGE,
         "name": "other_id_photo",
         "lookup": "other_id_photo",
         "required": False,
@@ -752,7 +752,7 @@ CORE_FIELDS_ATTRIBUTES = [
 HOUSEHOLD_ID_FIELDS = [
     {
         "id": "746b3d2d-19c5-4b91-ad37-d230e1d33eb5",
-        "type": TYPE_STRING,
+        "type": TYPE_INTEGER,
         "name": "household_id",
         "lookup": "household_id",
         "required": False,
@@ -764,7 +764,7 @@ HOUSEHOLD_ID_FIELDS = [
     },
     {
         "id": "1079bfd0-fc51-41ab-aa10-667e6b2034b9",
-        "type": TYPE_STRING,
+        "type": TYPE_INTEGER,
         "name": "household_id",
         "lookup": "household_id",
         "required": False,
