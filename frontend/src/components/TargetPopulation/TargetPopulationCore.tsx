@@ -38,6 +38,8 @@ export function TargetPopulationCore({
 }) {
   if (!candidateList) return null;
   const { rules: candidateListRules } = candidateList;
+  const totalNumOfHouseholds = selectedTab === 0 ? targetPopulation.candidateListTotalHouseholds : targetPopulation.finalListTotalHouseholds;
+  const totalNumOfIndividuals = selectedTab === 0 ? targetPopulation.candidateListTotalIndividuals : targetPopulation.finalListTotalIndividuals;
   return (
     <>
       <TargetingCriteria
@@ -47,15 +49,15 @@ export function TargetPopulationCore({
       />
       <Results
         resultsData={resultsData}
-        totalNumOfHouseholds={targetPopulation.candidateListTotalHouseholds}
-        finalListTotalHouseholds={targetPopulation.finalListTotalHouseholds}
+        totalNumOfHouseholds={totalNumOfHouseholds}
+        totalNumOfIndividuals={totalNumOfIndividuals}
       />
       {candidateListRules.length ? (
         <TargetingHouseholds
           id={id}
           status={status}
           selectedTab={selectedTab}
-          totalNumOfHouseholds={targetPopulation.candidateListTotalHouseholds}
+          candidateListTotalHouseholds={targetPopulation.candidateListTotalHouseholds}
           finalListTotalHouseholds={targetPopulation.finalListTotalHouseholds}
         />
       ) : (

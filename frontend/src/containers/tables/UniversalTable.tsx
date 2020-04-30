@@ -1,6 +1,7 @@
 import React, { ReactElement, useState, useEffect } from 'react';
 import { Order, TableComponent } from '../../components/table/TableComponent';
 import { HeadCell } from '../../components/table/EnhancedTableHead';
+import { EmptyTable } from '../../components/table/EmptyTable';
 import { columnToOrderBy } from '../../utils/utils';
 
 interface UniversalTableProps<T, K> {
@@ -29,7 +30,7 @@ export function UniversalTable<T, K>({
   const [rowsPerPage, setRowsPerPage] = useState(rowsPerPageOptions[0]);
   const [orderBy, setOrderBy] = useState(null);
   const [orderDirection, setOrderDirection] = useState('asc');
-  const { data, refetch, loading, error } = query({
+  const { data, refetch, loading } = query({
     variables: { ...initialVariables, first: rowsPerPage },
     fetchPolicy: 'network-only',
   });
@@ -41,7 +42,7 @@ export function UniversalTable<T, K>({
   }, [initialVariables]);
 
   if (!data) {
-    return null;
+    return <EmptyTable />
   }
 
   let correctTitle = title;
@@ -50,8 +51,7 @@ export function UniversalTable<T, K>({
   }
   const { edges } = data[queriedObjectName];
   const typedEdges = edges.map((edge) => edge.node as T);
-  //eslint-disable-next-line
-  
+
   return (
     <TableComponent<T>
       title={correctTitle}

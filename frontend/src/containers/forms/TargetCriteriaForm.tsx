@@ -110,7 +110,6 @@ interface ProgramFormPropTypes {
 
 export function TargetCriteriaForm({
   criteria,
-  //onSubmit,
   addCriteria,
   open,
   onClose,
