@@ -1,142 +1,28 @@
 import re
+from datetime import datetime
 from pathlib import Path
 from zipfile import BadZipfile
 
 import openpyxl
 import phonenumbers
 from dateutil import parser
+from graphql.error import GraphQLLocatedError
 from openpyxl import load_workbook
 
-from core.models import BusinessArea
-from core.utils import get_choices_values
-from core.validators import BaseValidator
-from household.models import (
-    YES_NO_CHOICE,
-    MARITAL_STATUS_CHOICE,
-    SEX_CHOICE,
-    DISABILITY_CHOICE,
-    RESIDENCE_STATUS_CHOICE,
+from core.core_fields_attributes import CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY
+from core.utils import (
+    serialize_flex_attributes,
+    get_combined_attributes,
+    get_choices_values,
 )
+from core.validators import BaseValidator
 
 
 class UploadXLSXValidator(BaseValidator):
-    # TODO: Will be provided by utils.serialize_flex_attributes,
-    #  temporarily hardcoded
-    #  FLEX_ATTRS = serialize_flex_attributes()
     WB = None
-
-    FLEX_ATTRS = {
-        "individuals": {
-            "id_type_i_f": {
-                "type": "SELECT_ONE",
-                "choices": (
-                    "BIRTH_CERTIFICATE",
-                    "DRIVERS_LICENSE",
-                    "UNHCR_ID",
-                    "NATIONAL_ID",
-                    "NATIONAL_PASSPORT",
-                    "OTHER",
-                    "NOT_AVAILABLE",
-                ),
-            },
-        },
-        "households": {
-            "assistance_type_h_f": {
-                "type": "SELECT_MANY",
-                "choices": (
-                    "Option 1",
-                    "Option 2",
-                    "Option 3",
-                    "Option 4",
-                    "Option 5",
-                    "Option 6",
-                    "Option 7",
-                ),
-            },
-            "water_source_h_f": {
-                "type": "SELECT_ONE",
-                "choices": (
-                    "Buy bottled water",
-                    "From piped water",
-                    "From private vendor",
-                    "To buy water from water tank",
-                    "Collect water from rain water",
-                    "Collect water from a well/source directly",
-                ),
-            },
-        },
-    }
-    # TODO: Probably need to fetch fields directly from models
-    CORE_FIELDS = {
-        "individuals": {
-            "household_id": {"type": "INTEGER"},
-            "head_of_household": {
-                "type": "SELECT_ONE",
-                "choices": YES_NO_CHOICE,
-            },
-            "marital_status": {
-                "type": "SELECT_ONE",
-                "choices": MARITAL_STATUS_CHOICE,
-            },
-            "status_as_head_of_household": {
-                "type": "SELECT_ONE",
-                "choices": ("ACTIVE", "N/A",),
-            },
-            "address": {"type": "STRING"},
-            # TODO: We need to query locations and check,
-            #  currently hardcoded
-            #  those two fields are also missing in model fields
-            "admin_level_1": {
-                "type": "SELECT_ONE",
-                "choices": ("Afghanistan",),
-            },
-            "admin_level_2": {"type": "SELECT_ONE", "choices": ("Kabul",),},
-            "phone_number_1": {"type": "PHONE_NUMBER"},
-            "phone_number_2": {"type": "PHONE_NUMBER"},
-            "given_name": {"type": "STRING"},
-            "last_name": {"type": "STRING"},
-            "middle_name": {"type": "STRING"},
-            "sex": {"type": "SELECT_ONE", "choices": SEX_CHOICE,},
-            "birth_date": {"type": "DATE"},
-            "estimated_birth_date": {
-                "type": "SELECT_ONE",
-                "choices": YES_NO_CHOICE,
-            },
-            "work_status": {"type": "SELECT_ONE", "choices": YES_NO_CHOICE,},
-            "disability": {"type": "SELECT_ONE", "choices": DISABILITY_CHOICE,},
-            # TODO: this field is missing, temp. get it from file
-            "severity_of_disability": {
-                "type": "SELECT_ONE",
-                "choices": ("A_LOT", "CANNOT_ALL", "SOME",),
-            },
-            "school_type": {
-                "type": "SELECT_ONE",
-                "choices": ("PUBLIC", "INFORMAL", "OTHER", "PRIVATE",),
-            },
-        },
-        "households": {
-            "household_id": {"type": "INTEGER"},
-            "household_location": {"type": "GEOLOCATION"},
-            "consent": {"type": "SELECT_ONE", "choices": YES_NO_CHOICE,},
-            "residence_status": {
-                "type": "SELECT_ONE",
-                "choices": RESIDENCE_STATUS_CHOICE,
-            },
-            "family_nationality": {
-                "type": "SELECT_ONE",
-                "choices": BusinessArea.objects.values_list("name", flat=True),
-            },
-            "household_size_h_c": {"type": "INTEGER"},
-            "distance_from_school": {"type": "DECIMAL"},
-        },
-    }
-
-    COMBINED_FIELDS_DICT = {
-        **CORE_FIELDS["individuals"],
-        **FLEX_ATTRS["individuals"],
-        **CORE_FIELDS["households"],
-        **FLEX_ATTRS["households"],
-    }
+    CORE_FIELDS = CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY
+    FLEX_FIELDS = serialize_flex_attributes()
+    ALL_FIELDS = get_combined_attributes()
 
     @classmethod
     def validate(cls, *args, **kwargs):
@@ -152,40 +38,70 @@ class UploadXLSXValidator(BaseValidator):
         return errors_list
 
     @classmethod
-    def string_validator(cls, value, *args, **kwargs):
+    def string_validator(cls, value, header, *args, **kwargs):
+        if not cls.required_validator(value, header):
+            return False
+        if value is None:
+            return True
+
         return isinstance(value, str)
 
     @classmethod
-    def integer_validator(cls, value, *args, **kwargs):
-        if cls.float_validator(value) is True:
+    def integer_validator(cls, value, header, *args, **kwargs):
+        if not cls.required_validator(value, header):
             return False
+
+        if value is None:
+            return True
+
         try:
             int(value)
             return True
-        except ValueError:
+        # need to use Exception because of how Graphene catches errors
+        except Exception as e:
             return False
 
     @classmethod
-    def float_validator(cls, value, *args, **kwargs):
+    def float_validator(cls, value, header, *args, **kwargs):
+        if not cls.required_validator(value, header):
+            return False
+        if value is None:
+            return True
+
         return isinstance(value, float)
 
     @classmethod
-    def geolocation_validator(cls, value, *args, **kwargs):
+    def geolocation_validator(cls, value, header, *args, **kwargs):
+        if not cls.required_validator(value, header):
+            return False
+        if value is None:
+            return True
+
         pattern = re.compile(r"^(\-?\d+\.\d+?,\s*\-?\d+\.\d+?)$")
         return bool(re.match(pattern, value))
 
     @classmethod
-    def date_validator(cls, value, *args, **kwargs):
-        if cls.integer_validator(value):
+    def date_validator(cls, value, header, *args, **kwargs):
+        if cls.integer_validator(value, header):
             return False
+
+        if isinstance(value, datetime):
+            return True
+
         try:
             parser.parse(value)
-        except ValueError:
+        # need to use Exception because of how Graphene catches errors
+        except Exception as e:
             return False
         return True
 
     @classmethod
-    def phone_validator(cls, value, *args, **kwargs):
+    def phone_validator(cls, value, header, *args, **kwargs):
+        if not cls.required_validator(value, header):
+            return False
+        if value is None:
+            return True
+
         try:
             phonenumbers.parse(value)
             return True
@@ -195,12 +111,20 @@ class UploadXLSXValidator(BaseValidator):
     @classmethod
     def choice_validator(cls, value, header, *args, **kwargs):
         choices = get_choices_values(
-            cls.COMBINED_FIELDS_DICT[header]["choices"]
+            cls.ALL_FIELDS[header]["choices"], header=header
         )
-        choice_type = cls.COMBINED_FIELDS_DICT[header]["type"]
+        choice_type = cls.ALL_FIELDS[header]["type"]
+
+        if not cls.required_validator(value, header):
+            return False
+        if value is None:
+            return True
 
         if choice_type == "SELECT_ONE":
-            return value.strip() in choices
+            if isinstance(value, str):
+                return value.strip() not in choices
+            else:
+                return value not in choices
         elif choice_type == "SELECT_MANY":
             selected_choices = value.split(",")
             for choice in selected_choices:
@@ -212,14 +136,39 @@ class UploadXLSXValidator(BaseValidator):
 
     @classmethod
     def not_empty_validator(cls, value, *args, **kwargs):
-        return bool(value)
+        return not (value is None or value == "")
+
+    @classmethod
+    def bool_validator(cls, value, header, *args, **kwargs):
+        if isinstance(value, bool):
+            return True
+
+        if cls.string_validator(value, header):
+            value = value.capitalize()
+
+            if value in ("True", "False"):
+                return True
+
+    @classmethod
+    def required_validator(cls, value, header, *args, **kwargs):
+        is_required = cls.ALL_FIELDS[header]["required"]
+        is_not_empty = cls.not_empty_validator(value)
+
+        if is_required:
+            return is_not_empty
+
+        return True
+
+    @classmethod
+    def image_validator(cls, value, header, *args, **kwargs):
+        return True
 
     @classmethod
     def rows_validator(cls, sheet):
         first_row = sheet[1]
         combined_fields = {
             **cls.CORE_FIELDS[sheet.title.lower()],
-            **cls.FLEX_ATTRS[sheet.title.lower()],
+            **cls.FLEX_FIELDS[sheet.title.lower()],
         }
 
         switch_dict = {
@@ -227,15 +176,14 @@ class UploadXLSXValidator(BaseValidator):
             "STRING": cls.string_validator,
             "INTEGER": cls.integer_validator,
             "DECIMAL": cls.float_validator,
+            "BOOL": cls.bool_validator,
             "DATE": cls.date_validator,
             "DATETIME": cls.date_validator,
             "SELECT_ONE": cls.choice_validator,
             "SELECT_MANY": cls.choice_validator,
             "PHONE_NUMBER": cls.phone_validator,
-            "GEOLOCATION": cls.geolocation_validator,
             "GEOPOINT": cls.geolocation_validator,
-            # TODO: add image validator, how image will be attached to file?
-            # "IMAGE": cls.geolocation_validator,
+            "IMAGE": cls.image_validator,
         }
 
         # create set of household ids to validate
@@ -320,9 +268,6 @@ class UploadXLSXValidator(BaseValidator):
 
     @classmethod
     def validate_file_with_template(cls, *args, **kwargs):
-        # TODO: temporarily check for a flex fields and core fields
-        #  that are in template excel, have to check for all
-
         if cls.WB is None:
             xlsx_file = kwargs.get("file")
             wb = openpyxl.load_workbook(xlsx_file, data_only=True)
@@ -334,13 +279,18 @@ class UploadXLSXValidator(BaseValidator):
             sheet = wb[name.capitalize()]
             first_row = sheet[1]
 
-            expected_column_names = {
-                *cls.CORE_FIELDS[name].keys(),
-                *cls.FLEX_ATTRS[name].keys(),
-            }
+            all_fields = list(fields.values()) + list(
+                cls.FLEX_FIELDS[name].values()
+            )
+
+            required_fields = set(
+                field["xlsx_field"] for field in all_fields if field["required"]
+            )
+
             column_names = {cell.value for cell in first_row}
 
-            columns_difference = expected_column_names.difference(column_names)
+            columns_difference = required_fields.difference(column_names)
+
             if columns_difference:
                 errors.extend(
                     [
@@ -352,6 +302,7 @@ class UploadXLSXValidator(BaseValidator):
                         for col in columns_difference
                     ]
                 )
+
         return errors
 
     @classmethod
