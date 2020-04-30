@@ -10,6 +10,16 @@ export const TargetPopulation = gql`
       candidateListTotalIndividuals
       finalListTotalHouseholds
       finalListTotalIndividuals
+      approvedAt
+      finalizedAt
+      finalizedBy {
+        firstName
+        lastName
+      }
+      program {
+        id
+        name
+      }
       createdBy {
         firstName
         lastName
@@ -19,10 +29,6 @@ export const TargetPopulation = gql`
           createdBy {
             firstName
             lastName
-          }
-          program {
-            id
-            name
           }
         }
         rules {
@@ -49,10 +55,6 @@ export const TargetPopulation = gql`
           createdBy {
             firstName
             lastName
-          }
-          program {
-            id
-            name
           }
         }
         rules {
