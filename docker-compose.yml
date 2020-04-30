@@ -86,14 +86,14 @@ services:
       - "5433:5432"
 
   cash_assist_datahub_db:
-    image: postgres:9.5.15-alpine
+    image: mdillon/postgis:9.5-alpine
     volumes:
       - db_ca:/data/postgres
     env_file:
       - .env
 
   registration_datahub_db:
-    image: postgres:9.5.15-alpine
+    image: mdillon/postgis:9.5-alpine
     volumes:
       - db_reg:/data/postgres
     env_file:
@@ -171,6 +171,7 @@ services:
     command: scheduler
     depends_on:
       - airflow_webserver
+      - airflow_db
 
   airflow_worker:
     image: unicef/hct-airflow-worker
