@@ -6,8 +6,8 @@ Given('I visit {word}', (path) => {
 })
 
 When('I click Logout', (path) => {
-    cy.get('#logged_in_user_header_button').click();
-    cy.get('#logout_link').click();
+    cy.get('[data-cy=logged_in_user_header_button]').click();
+    cy.get('[data-cy=logout_link]').click();
 })
 
 
