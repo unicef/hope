@@ -1,6 +1,5 @@
 import { Given, Then } from 'cypress-cucumber-preprocessor/steps';
 
-
 // assert path within the current business area
 Given('I get taken to {word} in current business area', (path_to_check_for) => {
     cy.location('pathname').then((current_path) => {
