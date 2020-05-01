@@ -4,12 +4,15 @@
   "main": "index.js",
   "license": "MIT",
   "devDependencies": {
+    "@types/cypress-cucumber-preprocessor": "^1.14.1",
     "cypress": "^4.5",
     "puppeteer": "^2.1.1"
   },
   "cypress:open": "cypress open",
   "dependencies": {
-    "cypress-cucumber-preprocessor": "^2.3.1"
+    "cypress-cucumber-preprocessor": "^2.3.1",
+    "tsify": "^4.0.1",
+    "typescript": "^3.8.3"
   },
   "cypress-cucumber-preprocessor": {
     "nonGlobalStepDefinitions": true
