@@ -1,6 +1,5 @@
 import { Given, When, Then } from 'cypress-cucumber-preprocessor/steps';
 
-
 Then('I should get redirected to login', () => {
     cy.location('pathname').should('eq', '/login')
     cy.get('a').contains('Sign in')
