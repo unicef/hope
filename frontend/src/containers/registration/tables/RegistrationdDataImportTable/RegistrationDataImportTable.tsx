@@ -35,7 +35,7 @@ export function RegistrationDataImportTable({ filter }): ReactElement {
       >
         title='List of Imports'
         getTitle={(data) =>
-          `List of Import (${data.allRegistrationDataImports.totalCount})`
+          `List of Imports (${data.allRegistrationDataImports.totalCount})`
         }
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}

@@ -65,7 +65,7 @@ export function UserProfileMenu({
   }, [open]);
   return (
     <>
-      <UserProfileButton ref={anchorRef} onClick={handleToggle} id="logged_in_user_header_button">
+      <UserProfileButton ref={anchorRef} onClick={handleToggle} data-cy="logged_in_user_header_button">
         <Avatar alt={meData.me.email} src='/static/images/avatar/1.jpg' />
         <MenuButtonText> {meData.me.email}</MenuButtonText>
       </UserProfileButton>
@@ -92,7 +92,7 @@ export function UserProfileMenu({
                   onKeyDown={handleListKeyDown}
                 >
                   <MenuItem onClick={handleClose}>Profile</MenuItem>
-                  <MenuItem onClick={handleLogout} id="logout_link">Logout</MenuItem>
+                  <MenuItem onClick={handleLogout} data-cy="logout_link">Logout</MenuItem>
                 </MenuList>
               </ClickAwayListener>
             </Paper>
