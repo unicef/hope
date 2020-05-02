@@ -3,9 +3,17 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "lint": "eslint 'cypress/**/*.{js,ts,tsx}'"
+  },
   "devDependencies": {
     "@types/cypress-cucumber-preprocessor": "^1.14.1",
+    "@typescript-eslint/eslint-plugin": "^2.24.0",
     "cypress": "^4.5",
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-typescript": "^7.2.1",
+    "eslint-plugin-cypress": "^2.10.3",
+    "eslint-plugin-import": "^2.20.1",
     "puppeteer": "^2.1.1"
   },
   "cypress:open": "cypress open",
