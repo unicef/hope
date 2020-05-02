@@ -19,13 +19,13 @@ const browserify = require('@cypress/browserify-preprocessor');
 const { AzureAdSingleSignOn } = require('./azure-ad-sso/plugin');
 
 module.exports = (on) => {
-    const options = browserify.defaultOptions;
+  const options = browserify.defaultOptions;
 
-    options.browserifyOptions.plugin.unshift([
-        'tsify',
-        { project: 'cypress/tsconfig.json' },
-    ]);
+  options.browserifyOptions.plugin.unshift([
+    'tsify',
+    { project: 'cypress/tsconfig.json' },
+  ]);
 
-    on('file:preprocessor', cucumber(options));
-    on('task', { AzureAdSingleSignOn });
+  on('file:preprocessor', cucumber(options));
+  on('task', { AzureAdSingleSignOn });
 };
