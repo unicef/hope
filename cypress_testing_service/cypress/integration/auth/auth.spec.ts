@@ -1,11 +1,10 @@
 import { Given, When, Then } from 'cypress-cucumber-preprocessor/steps';
 
-
 Given('I visit {word}', (path) => {
     cy.visit(path);
 });
 
-When('I click Logout', (path) => {
+When('I click Logout', () => {
     cy.get('[data-cy=logged_in_user_header_button]').click();
     cy.get('[data-cy=logout_link]').click();
 });

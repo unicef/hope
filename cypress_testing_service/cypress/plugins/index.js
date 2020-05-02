@@ -13,11 +13,12 @@
 
 // https://gist.github.com/csuzw/845b589549b61d3a5fe18e49592e166f
 
-const AzureAdSingleSignOn = require('./azure-ad-sso/plugin').AzureAdSingleSignOn;
 const cucumber = require('cypress-cucumber-preprocessor').default;
+// eslint-disable-next-line import/no-extraneous-dependencies
 const browserify = require('@cypress/browserify-preprocessor');
+const { AzureAdSingleSignOn } = require('./azure-ad-sso/plugin');
 
-module.exports = (on, config) => {
+module.exports = (on) => {
     const options = browserify.defaultOptions;
 
     options.browserifyOptions.plugin.unshift([
@@ -26,5 +27,5 @@ module.exports = (on, config) => {
     ]);
 
     on('file:preprocessor', cucumber(options));
-    on('task', { AzureAdSingleSignOn: AzureAdSingleSignOn });
+    on('task', { AzureAdSingleSignOn });
 };

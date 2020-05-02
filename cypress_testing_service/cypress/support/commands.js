@@ -28,34 +28,33 @@
 // This is an example of how you might use the plugin in your tests
 // https://gist.github.com/csuzw/845b589549b61d3a5fe18e49592e166f
 
-Cypress.Commands.add('loginToAD', (ad_username, ad_password, login_url) => {
-        
+Cypress.Commands.add('loginToAD', (username, password, loginUrl) => {
     const options = {
-        username: ad_username,
-        password: ad_password,
-        loginUrl: login_url,
+        username,
+        password,
+        loginUrl,
         postLoginSelector: '.MuiList-root',
         headless: true,
         logs: false,
-        getAllBrowserCookies: true
-    }
+        getAllBrowserCookies: true,
+    };
 
     // see why we need this task
     // https://github.com/cypress-io/cypress/issues/1342
     // https://github.com/cypress-io/cypress/issues/944
-    cy.task('AzureAdSingleSignOn', options).then(result => {
-        cy.clearCookies()
+    cy.task('AzureAdSingleSignOn', options).then((result) => {
+        cy.clearCookies();
 
-        result.cookies.forEach(cookie => {
-          cy.setCookie(cookie.name, cookie.value, {
-            domain: cookie.domain,
-            expiry: cookie.expires,
-            httpOnly: cookie.httpOnly,
-            path: cookie.path,
-            secure: cookie.secure,
-            sameSite: cookie.sameSite
-          })
-          Cypress.Cookies.preserveOnce(cookie.name)
-        })
-    })
-})
+        result.cookies.forEach((cookie) => {
+            cy.setCookie(cookie.name, cookie.value, {
+                domain: cookie.domain,
+                expiry: cookie.expires,
+                httpOnly: cookie.httpOnly,
+                path: cookie.path,
+                secure: cookie.secure,
+                sameSite: cookie.sameSite,
+            });
+            Cypress.Cookies.preserveOnce(cookie.name);
+        });
+    });
+});
