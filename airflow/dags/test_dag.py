@@ -6,12 +6,13 @@ from operators.test_connection import TestConnectionOperator
 dag = DAG(
     "Test_Connection",
     description="Test Django connections",
-    schedule_interval=timedelta(days=1),
+    schedule_interval=None,
     start_date=datetime.now() - timedelta(days=1),
-
 )
 
 django_operator = TestConnectionOperator(
     task_id="django_orm_connect",
     dag=dag,
+    retries=3,
+    retry_delay=timedelta(seconds=3),
 )

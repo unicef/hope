@@ -1,5 +1,3 @@
-import random
-
 import factory
 from factory import fuzzy
 from pytz import utc
@@ -12,48 +10,12 @@ from household.models import (
     Individual,
     SEX_CHOICE,
     MARITAL_STATUS_CHOICE,
-    YES_NO_CHOICE,
-    DISABILITY_CHOICE,
     RESIDENCE_STATUS_CHOICE,
     RELATIONSHIP_CHOICE,
     DocumentType,
     Document,
 )
 from registration_data.fixtures import RegistrationDataImportFactory
-
-
-def flex_field_households(o):
-    return {
-        "treatment_facility_h_f": random.sample(
-            [
-                "governent_health_center",
-                "governent_hospital",
-                "other_public",
-                "private_hospital",
-                "pharmacy",
-                "private_doctor",
-                "other_private",
-            ],
-            k=2,
-        ),
-        "other_treatment_facility_h_f": random.choice(
-            ["testing other", "narodowy fundusz zdrowia", None]
-        ),
-    }
-
-
-def flex_field_individual(o):
-    return {
-        "seeing_disability_i_f": random.choice(
-            ["some_difficulty", "lot_difficulty", "cannot_do", None]
-        ),
-        "hearing_disability_i_f": random.choice(
-            ["some_difficulty", "lot_difficulty", "cannot_do", None]
-        ),
-        "physical_disability_i_f": random.choice(
-            ["some_difficulty", "lot_difficulty", "cannot_do", None]
-        ),
-    }
 
 
 class HouseholdFactory(factory.DjangoModelFactory):
@@ -74,7 +36,7 @@ class HouseholdFactory(factory.DjangoModelFactory):
     registration_date = factory.Faker(
         "date_this_year", before_today=True, after_today=False
     )
-    flex_fields = factory.LazyAttribute(flex_field_households)
+    flex_fields = {}
 
 
 class DocumentFactory(factory.DjangoModelFactory):
@@ -112,7 +74,6 @@ class IndividualFactory(factory.DjangoModelFactory):
     household = factory.SubFactory(HouseholdFactory)
     registration_data_import = factory.SubFactory(RegistrationDataImportFactory)
     disability = factory.fuzzy.FuzzyChoice([True, False])
-    flex_fields = factory.LazyAttribute(flex_field_individual)
 
 
 class EntitlementCardFactory(factory.DjangoModelFactory):

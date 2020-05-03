@@ -229,12 +229,10 @@ class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
                         "other_public",
                         "private_doctor",
                     ],
-                    "other_treatment_facility_h_f": "testing other",
                 },
             }
         )
         self.household_total_households_2 = household
-        self.other_treatment_facility = household
         (household, individuals) = create_household(
             {
                 "size": 1,
@@ -294,17 +292,6 @@ class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
             comparision_method="NOT_CONTAINS",
             field_name="treatment_facility_h_f",
             arguments=["other_public", "governent_health_center",],
-            is_flex_field=True,
-        )
-        query = rule_filter.get_query()
-        queryset = Household.objects.filter(query)
-        self.assertEqual(queryset.count(), 1)
-
-    def test_rule_filter_string_contains(self):
-        rule_filter = TargetingCriteriaRuleFilter(
-            comparision_method="CONTAINS",
-            field_name="other_treatment_facility_h_f",
-            arguments=["other"],
             is_flex_field=True,
         )
         query = rule_filter.get_query()
