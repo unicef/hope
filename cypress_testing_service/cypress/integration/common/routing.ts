@@ -1,7 +1,7 @@
-import { Given } from 'cypress-cucumber-preprocessor/steps';
+import { When } from 'cypress-cucumber-preprocessor/steps';
 
 // figures our business area slug and appends pathname to it
-Given('I visit {word} in current business area', (newPath) => {
+When('I visit {word} in current business area', (newPath) => {
   cy.location('pathname').then((currentPath) => {
     const businessAreaSlug = currentPath.split('/')[1];
     cy.visit('/'.concat(businessAreaSlug, newPath));
@@ -9,12 +9,12 @@ Given('I visit {word} in current business area', (newPath) => {
 });
 
 // Simply visit an absolute url/path
-Given('I visit {word}', (path) => {
+When('I visit {word}', (path) => {
   cy.visit(path);
 });
 
 // Find item in navigation and click it
-Given('I click {word} in navigation', (navItemLabel) => {
+When('I click {word} in navigation', (navItemLabel) => {
   cy.get('.MuiDrawer-root').contains(navItemLabel).click();
 });
 
