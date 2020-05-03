@@ -1,6 +1,6 @@
-import { Given, When, Then } from 'cypress-cucumber-preprocessor/steps';
+import { When, Then } from 'cypress-cucumber-preprocessor/steps';
 
-Given('I visit {word}', (path) => {
+When('I visit {word}', (path) => {
   cy.visit(path);
 });
 

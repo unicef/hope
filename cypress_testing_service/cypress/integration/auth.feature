@@ -6,11 +6,11 @@ Feature: Authentication related functionality. Logging in, redirects
     TODO: Add functionality around the user profile itself one the feature works.
 
     Scenario: Redirect to login screen if not logged in
-        Given I visit /
+        When I visit /
         Then I should get redirected to login
-    
+
     Scenario: Redirects to login screen if accessing internal url
-        Given I visit /afghanistan/
+        When I visit /afghanistan/
         Then I should get redirected to login
 
     Scenario: Login user via AD and see dashboard
