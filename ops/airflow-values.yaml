@@ -21,7 +21,7 @@ airflow:
   ## Extra environment variables to mount in the web, scheduler, and worker pods:
   extraEnv:
     - name: C_FORCE_ROOT
-      value: 1
+      value: "1"
 
     - name: SECRET_KEY
       valueFrom:
