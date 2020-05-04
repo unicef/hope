@@ -25,8 +25,8 @@ ENV PATH="/usr/local/airflow/.local/bin:$PATH"
 COPY requirements.txt /usr/local/airflow/requirements.txt
 RUN pip install -r requirements.txt
 
-ADD ../backend/. /usr/local/airflow/backend
-ADD ./dags/. /usr/local/airflow/dags
-ADD ./connectors/. /usr/local/airflow/connectors
+ADD ./backend/. /usr/local/airflow/backend
+ADD ./airflow/dags/. /usr/local/airflow/dags
+ADD ./airflow/connectors/. /usr/local/airflow/connectors
 
-COPY ./config/airflow.cfg /usr/local/airflow/airflow.cfg
+COPY ./airflow/config/airflow.cfg /usr/local/airflow/airflow.cfg
