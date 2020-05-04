@@ -17,17 +17,21 @@ class TestTemplateFileGenerator(TestCase):
             "test": {
                 "label": {"English(EN)": "My Test Label"},
                 "required": True,
+                "type": "STRING",
+                "choices": [],
             },
             "test_h_f": {
                 "label": {"English(EN)": "Flex Test Label"},
                 "required": False,
+                "type": "STRING",
+                "choices": [],
             },
         }
 
         result = TemplateFileGenerator._handle_name_and_label_row(fields)
         expected = (
             ["test", "test_h_f"],
-            ["My Test Label - required", "Flex Test Label"],
+            ["My Test Label - STRING - required", "Flex Test Label - STRING"],
         )
         self.assertEqual(expected, result)
 
@@ -38,12 +42,16 @@ class TestTemplateFileGenerator(TestCase):
                 "test_h_f": {
                     "label": {"English(EN)": "Flex Test Label"},
                     "required": False,
+                    "type": "STRING",
+                    "choices": [],
                 }
             },
             "individuals": {
                 "test_i_f": {
                     "label": {"English(EN)": "Flex Test Label 2"},
                     "required": True,
+                    "type": "STRING",
+                    "choices": [],
                 }
             },
         },
@@ -55,12 +63,16 @@ class TestTemplateFileGenerator(TestCase):
                 "test": {
                     "label": {"English(EN)": "My Test Label"},
                     "required": True,
+                    "type": "STRING",
+                    "choices": [],
                 }
             },
             "individuals": {
                 "test2": {
                     "label": {"English(EN)": "My Test Label 2"},
                     "required": False,
+                    "type": "STRING",
+                    "choices": [],
                 }
             },
         },
@@ -72,7 +84,7 @@ class TestTemplateFileGenerator(TestCase):
 
         expected_households_rows = (
             ("test", "test_h_f",),
-            ("My Test Label - required", "Flex Test Label",),
+            ("My Test Label - STRING - required", "Flex Test Label - STRING",),
         )
         households_rows = tuple(
             result_wb["Households"].iter_rows(values_only=True)
@@ -82,7 +94,10 @@ class TestTemplateFileGenerator(TestCase):
 
         expected_individuals_rows = (
             ("test2", "test_i_f",),
-            ("My Test Label 2", "Flex Test Label 2 - required",),
+            (
+                "My Test Label 2 - STRING",
+                "Flex Test Label 2 - STRING - required",
+            ),
         )
         individuals_rows = tuple(
             result_wb["Individuals"].iter_rows(values_only=True)

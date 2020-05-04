@@ -104,7 +104,7 @@ services:
     volumes:
       - db_airflow:/data/postgres
     env_file:
-      - .env
+      - ./airflow/config/.env_airflow
 
   airflow_webserver:
     image: unicef/hct-airflow-webserver
