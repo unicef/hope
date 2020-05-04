@@ -1,6 +1,4 @@
 from django.utils.translation import ugettext_lazy as _
-from django_countries.data import COUNTRIES
-
 
 NATIONALITIES = (
     ("AF", _("Afghan")),
@@ -172,5 +170,3 @@ NATIONALITIES = (
     ("ZM", _("Zambian")),
     ("ZW", _("Zimbabwean")),
 )
-
-COUNTRIES_NAME_ALPHA2 = {str(name): code for code, name in COUNTRIES.items()}

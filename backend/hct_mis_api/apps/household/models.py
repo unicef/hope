@@ -16,6 +16,7 @@ from model_utils import Choices
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
 
+from household.const import NATIONALITIES
 from utils.models import TimeStampedUUIDModel
 
 
@@ -39,6 +40,10 @@ MARITAL_STATUS_CHOICE = (
     ("SEPARATED", _("Separated")),
 )
 
+YES_NO_CHOICE = (
+    ("YES", _("Yes")),
+    ("NO", _("No")),
+)
 DISABILITY_CHOICE = (
     ("NO", _("No")),
     ("SEEING", _("Difficulty seeing (even if wearing glasses)")),
