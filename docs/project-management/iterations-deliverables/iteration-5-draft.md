@@ -19,14 +19,15 @@ The goal of Iteration Five is to integrate KoBo Form / Projects and project data
 
 * Complete development of any further Core Fields changes from Iteration 4 that were not fully finalized.
 * CO users to be able to **view flex fields** somewhere in the interface.
+  * Show flex fields that are in the system to the user aka Catalogue.
 * Kobo setup within Azure:
   * Deliver a **helm chart** for Kobo that can be deployed on Azure environments of HCT \(dev/staging/uat/prod\).
-  * Work to make the helm chart be potentially public available / maintained then by the open-source community or the Kobo team.
+  * _`Nice to have` - Work to make the helm chart be potentially public available / maintained then by the open-source community or the Kobo team._
   * Leverage the Kobo service setup via this helm package then, to interface with the HCT MIS system.
-  * _Nice to have_ \(out of scope if no time remaining\): helm chart tested and working in AWS environment as well. AWS is something that the Kobo team leverages and might find useful long-term.
+  * `Nice to have` \(out of scope if no time remaining\): helm chart tested and working in AWS environment as well. AWS is something that the Kobo team leverages and might find useful long-term.
 * Frontend and backend HCT MIS **integration with Kobo** to import data \(extension of XLS based registration data import\).
 * Airflow based integration to **pull and push data from CashAssist Datahub**. This includes things like: programs, target population \(and included households/individuals as necessary\), cash plans, payment records etc. 
-  * Out of scope: Integrating CashAssist with the Datahub is not Tivix responsibility and will be done by CashAssist team with help from UNICEF ICTD team.
+  * `Out of scope:` Integrating CashAssist with the Datahub is not Tivix responsibility and will be done by CashAssist team with help from UNICEF ICTD team.
 * E2E testing / QA support to UNICEF QA team
 
 ## **UX / UI Design Deliverables**

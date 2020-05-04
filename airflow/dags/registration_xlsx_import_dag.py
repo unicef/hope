@@ -16,6 +16,6 @@ django_operator = RegistrationXLSXImportOperator(
     task_id="create_registration_data_import_from_xlsx",
     dag=dag,
     provide_context=True,
-    retries=3,
+    retries=0,
     retry_delay=timedelta(seconds=3),
 )
