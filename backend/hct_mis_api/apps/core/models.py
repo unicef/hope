@@ -213,7 +213,6 @@ class FlexibleAttributeChoice(SoftDeletableModel, TimeStampedUUIDModel):
     list_name = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
     label = JSONField(default=dict)
-    admin = models.CharField(max_length=255)
     flex_attributes = models.ManyToManyField(
         "core.FlexibleAttribute", related_name="choices"
     )
