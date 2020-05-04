@@ -1,0 +1,24 @@
+{
+    "name": "cypress-testing-service-extensions",
+    "displayName": "Cypress Testing Service for HCT",
+    "description": "Extensions for the Cypress Testing Service for HCT development",
+    "version": "0.0.1",
+    "publisher": "Tivix",
+    "private": true,
+    "scripts": {
+        "package": "npx vsce package"
+    },
+    "engines": {
+        "vscode": "^1.44.0"
+    },
+    "categories": [
+        "Extension Packs"
+    ],
+    "extensionPack": [
+        "alexkrechik.cucumberautocomplete",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "JosefBiehler.cypress-fixture-intellisense",
+        "Shelex.vscode-cy-helper"
+    ]
+}
