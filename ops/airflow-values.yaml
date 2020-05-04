@@ -22,7 +22,12 @@ airflow:
   extraEnv:
     - name: C_FORCE_ROOT
       value: "1"
-
+    - name: POSTGRES_HOST
+      value: "backend-db"
+    - name: POSTGRES_CASHASSIST_DATAHUB_HOST
+      value: "postgres-cash-assist-datahub-db"
+    - name: POSTGRES_REGISTRATION_DATAHUB_HOST
+      value: "registration-datahub-db"
     - name: SECRET_KEY
       valueFrom:
         secretKeyRef:
