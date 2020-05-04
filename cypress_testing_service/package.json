@@ -10,6 +10,7 @@
   "devDependencies": {
     "@types/cypress-cucumber-preprocessor": "^1.14.1",
     "@typescript-eslint/eslint-plugin": "^2.24.0",
+    "@typescript-eslint/parser": "^2.30.0",
     "cypress": "^4.5",
     "eslint": "^6.8.0",
     "eslint-config-airbnb-typescript": "^7.2.1",
@@ -24,7 +25,7 @@
   "dependencies": {
     "cypress-cucumber-preprocessor": "^2.3.1",
     "tsify": "^4.0.1",
-    "typescript": "^3.8.3"
+    "typescript": "^3.8.0"
   },
   "cypress-cucumber-preprocessor": {
     "nonGlobalStepDefinitions": true
