@@ -25,4 +25,6 @@ ENV PATH="/usr/local/airflow/.local/bin:$PATH"
 COPY requirements.txt /usr/local/airflow/requirements.txt
 RUN pip install -r requirements.txt
 
+ADD ../backend/. /usr/local/airflow/backend
+
 COPY ./config/airflow.cfg /usr/local/airflow/airflow.cfg
