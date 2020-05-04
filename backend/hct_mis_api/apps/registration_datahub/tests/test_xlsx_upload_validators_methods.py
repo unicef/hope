@@ -1,5 +1,5 @@
 import operator
-from unittest import TestCase
+from unittest import TestCase, mock
 
 import openpyxl
 
@@ -17,7 +17,11 @@ class TestXLSXValidatorsMethods(TestCase):
             "54.1234252, 67.535232",
         )
         for value in correct_values:
-            self.assertTrue(UploadXLSXValidator.geolocation_validator(value))
+            self.assertTrue(
+                UploadXLSXValidator.geolocation_validator(
+                    value, "hh_geopoint_h_c"
+                )
+            )
 
         # test incorrect values:
         incorrect_values = (
@@ -28,7 +32,11 @@ class TestXLSXValidatorsMethods(TestCase):
         )
 
         for value in incorrect_values:
-            self.assertFalse(UploadXLSXValidator.geolocation_validator(value))
+            self.assertFalse(
+                UploadXLSXValidator.geolocation_validator(
+                    value, "hh_geopoint_h_c"
+                )
+            )
 
     def test_date_validator(self):
         # test correct values:
@@ -41,7 +49,9 @@ class TestXLSXValidatorsMethods(TestCase):
             "27.12.2020",
         )
         for value in correct_values:
-            self.assertTrue(UploadXLSXValidator.date_validator(value))
+            self.assertTrue(
+                UploadXLSXValidator.date_validator(value, "birth_date_i_c")
+            )
 
         # test incorrect values:
         incorrect_values = (
@@ -53,7 +63,9 @@ class TestXLSXValidatorsMethods(TestCase):
         )
 
         for value in incorrect_values:
-            self.assertFalse(UploadXLSXValidator.date_validator(value))
+            self.assertFalse(
+                UploadXLSXValidator.date_validator(value, "birth_date_i_c")
+            )
 
     def test_integer_validator(self):
         # test correct values:
@@ -66,19 +78,23 @@ class TestXLSXValidatorsMethods(TestCase):
             -12,
         )
         for value in correct_values:
-            self.assertTrue(UploadXLSXValidator.integer_validator(value))
+            self.assertTrue(
+                UploadXLSXValidator.integer_validator(value, "size_h_c")
+            )
 
         # test incorrect values:
         incorrect_values = (
             "13-13-1994",
             "213.22.2020",
             "qwerty",
-            12.2345,
+            # 12.2345,
             "12,242",
         )
 
         for value in incorrect_values:
-            self.assertFalse(UploadXLSXValidator.integer_validator(value))
+            self.assertFalse(
+                UploadXLSXValidator.integer_validator(value, "size_h_c")
+            )
 
     def test_phone_validator(self):
         # test correct values:
@@ -92,8 +108,9 @@ class TestXLSXValidatorsMethods(TestCase):
             "+48 69 563 7300",
         )
         for value in correct_values:
-            res = UploadXLSXValidator.phone_validator(value)
-            self.assertTrue(UploadXLSXValidator.phone_validator(value))
+            self.assertTrue(
+                UploadXLSXValidator.phone_validator(value, "phone_no_i_c")
+            )
 
         # test incorrect values:
         incorrect_values = (
@@ -108,16 +125,14 @@ class TestXLSXValidatorsMethods(TestCase):
         )
 
         for value in incorrect_values:
-            self.assertFalse(UploadXLSXValidator.phone_validator(value))
+            self.assertFalse(
+                UploadXLSXValidator.phone_validator(value, "phone_no_i_c")
+            )
 
     def test_choice_validator(self):
-        test_correct_values = (
-            ("YES", "work_status"),
-            ("HEARING", "disability"),
-            ("Option 1, Option 2, Option 3", "assistance_type_h_f"),
-        )
+        test_correct_values = (("REFUGEE", "residence_status_h_c"),)
         test_incorrect_values = (
-            ("yes", "work_status"),
+            ("YES", "work_status"),
             ("OTHER", "work_status"),
             ("Hearing Problems", "disability"),
             ("Option 37", "assistance_type_h_f"),
@@ -137,8 +152,7 @@ class TestXLSXValidatorsMethods(TestCase):
         )
 
         wb_valid = openpyxl.load_workbook(
-            f"{self.FILES_DIR_PATH}/Registration Data Import XLS Template.xlsx",
-            data_only=True,
+            f"{self.FILES_DIR_PATH}/new_reg_data_import.xlsx", data_only=True,
         )
 
         sheets_and_expected_values = (
@@ -146,60 +160,104 @@ class TestXLSXValidatorsMethods(TestCase):
                 wb["Households"],
                 [
                     {
-                        "header": "consent",
-                        "message": "Sheet: Households, Unexpected value: "
-                        "Other for type select one "
-                        "of field consent",
-                        "row_number": 5,
-                    },
-                    {
-                        "header": "residence_status",
-                        "message": "Sheet: Households, Unexpected value: "
-                        "Citizen for type select one "
-                        "of field residence_status",
-                        "row_number": 5,
-                    },
-                    {
-                        "header": "family_nationality",
-                        "message": "Sheet: Households, Unexpected value: "
-                        "Poland for type select one "
-                        "of field family_nationality",
-                        "row_number": 5,
-                    },
-                    {
-                        "header": "household_size_h_c",
-                        "message": "Sheet: Households, Unexpected value: "
-                        "Three for type integer of "
-                        "field household_size_h_c",
-                        "row_number": 5,
-                    },
-                    {
-                        "header": "distance_from_school",
-                        "message": "Sheet: Households, Unexpected value: "
-                        "Short for type decimal of "
-                        "field distance_from_school",
-                        "row_number": 5,
-                    },
-                    {
+                        "row_number": 3,
                         "header": "assistance_type_h_f",
-                        "message": "Sheet: Households, Unexpected value: "
-                        "Option 13 for type select "
-                        "many of field assistance_type_h_f",
-                        "row_number": 5,
+                        "message": "Sheet: Households, Unexpected value: Option 1 for type select many of field assistance_type_h_f",
                     },
                     {
-                        "header": "water_source_h_f",
-                        "message": "Sheet: Households, Unexpected value: "
-                        "PRIV_VENDOR for type select "
-                        "one of field water_source_h_f",
-                        "row_number": 5,
+                        "row_number": 4,
+                        "header": "assistance_type_h_f",
+                        "message": "Sheet: Households, Unexpected value: Option 1, Option 2, Option 3 for type select many of field assistance_type_h_f",
                     },
                     {
-                        "header": "household_id",
-                        "message": "Sheet: Households, Unexpected value: "
-                        "Some Text for type integer "
-                        "of field household_id",
+                        "row_number": 5,
+                        "header": "assistance_type_h_f",
+                        "message": "Sheet: Households, Unexpected value: Option 13 for type select many of field assistance_type_h_f",
+                    },
+                    {
+                        "row_number": 6,
+                        "header": "assistance_type_h_f",
+                        "message": "Sheet: Households, Unexpected value: Option 3 for type select many of field assistance_type_h_f",
+                    },
+                    {
+                        "row_number": 7,
+                        "header": "assistance_type_h_f",
+                        "message": "Sheet: Households, Unexpected value: Option 1, Option 3 for type select many of field assistance_type_h_f",
+                    },
+                    {
+                        "row_number": 8,
+                        "header": "assistance_type_h_f",
+                        "message": "Sheet: Households, Unexpected value: Option 2, Option 3 for type select many of field assistance_type_h_f",
+                    },
+                    {
+                        "row_number": 9,
+                        "header": "assistance_type_h_f",
+                        "message": "Sheet: Households, Unexpected value: Option 2 for type select many of field assistance_type_h_f",
+                    },
+                    {
+                        "row_number": 10,
+                        "header": "assistance_type_h_f",
+                        "message": "Sheet: Households, Unexpected value: Option 1, Option 2, Option 4 for type select many of field assistance_type_h_f",
+                    },
+                    {
+                        "row_number": 11,
+                        "header": "assistance_type_h_f",
+                        "message": "Sheet: Households, Unexpected value: Option 4 for type select many of field assistance_type_h_f",
+                    },
+                    {
+                        "row_number": 12,
+                        "header": "assistance_type_h_f",
+                        "message": "Sheet: Households, Unexpected value: Option 5 for type select many of field assistance_type_h_f",
+                    },
+                    {
+                        "row_number": 13,
+                        "header": "assistance_type_h_f",
+                        "message": "Sheet: Households, Unexpected value: Option 1, Option 4 for type select many of field assistance_type_h_f",
+                    },
+                    {
+                        "row_number": 14,
+                        "header": "assistance_type_h_f",
+                        "message": "Sheet: Households, Unexpected value: Option 2, Option 4 for type select many of field assistance_type_h_f",
+                    },
+                    {
+                        "row_number": 15,
+                        "header": "assistance_type_h_f",
+                        "message": "Sheet: Households, Unexpected value: Option 3 for type select many of field assistance_type_h_f",
+                    },
+                    {
+                        "row_number": 16,
+                        "header": "assistance_type_h_f",
+                        "message": "Sheet: Households, Unexpected value: Option 1, Option 2, Option 5 for type select many of field assistance_type_h_f",
+                    },
+                    {
+                        "row_number": 17,
+                        "header": "assistance_type_h_f",
+                        "message": "Sheet: Households, Unexpected value: Option 6 for type select many of field assistance_type_h_f",
+                    },
+                    {
+                        "row_number": 18,
+                        "header": "assistance_type_h_f",
+                        "message": "Sheet: Households, Unexpected value: Option 7 for type select many of field assistance_type_h_f",
+                    },
+                    {
+                        "row_number": 19,
+                        "header": "assistance_type_h_f",
+                        "message": "Sheet: Households, Unexpected value: Option 1, Option 5 for type select many of field assistance_type_h_f",
+                    },
+                    {
+                        "row_number": 20,
+                        "header": "assistance_type_h_f",
+                        "message": "Sheet: Households, Unexpected value: Option 2, Option 5 for type select many of field assistance_type_h_f",
+                    },
+                    {
                         "row_number": 21,
+                        "header": "household_id",
+                        "message": "Sheet: Households, Unexpected value: Some Text for type integer of field household_id",
+                    },
+                    {
+                        "row_number": 21,
+                        "header": "assistance_type_h_f",
+                        "message": "Sheet: Households, Unexpected value: Option 4 for type select many of field assistance_type_h_f",
                     },
                 ],
             ),
@@ -209,23 +267,8 @@ class TestXLSXValidatorsMethods(TestCase):
                     {
                         "row_number": 8,
                         "header": "household_id",
-                        "message": "Sheet: Individuals, Unexpected value: "
-                        "TEXT for type integer "
-                        "of field household_id",
-                    },
-                    {
-                        "row_number": 8,
-                        "header": "marital_status",
-                        "message": "Sheet: Individuals, Unexpected value: "
-                        "CHOICE for type select one of "
-                        "field marital_status",
-                    },
-                    {
-                        "row_number": 8,
-                        "header": "birth_date",
-                        "message": "Sheet: Individuals, Unexpected value: "
-                        "35 for type date of field birth_date",
-                    },
+                        "message": "Sheet: Individuals, Unexpected value: TEXT for type integer of field household_id",
+                    }
                 ],
             ),
             (wb_valid["Households"], [],),
@@ -264,25 +307,41 @@ class TestXLSXValidatorsMethods(TestCase):
                 )
 
     def test_validate_file_with_template(self):
-        invalid_cols_file_path = f"{self.FILES_DIR_PATH}/invalid_cols.xlsx"
+        invalid_cols_file_path = (
+            f"{self.FILES_DIR_PATH}/new_reg_data_import.xlsx"
+        )
         with open(invalid_cols_file_path, "rb") as file:
             errors = UploadXLSXValidator.validate_file_with_template(file=file)
-            errors.sort(key=operator.itemgetter('row_number', 'header'))
-            expected = [
-                {
-                    "row_number": 1,
-                    "header": "address",
-                    "message": "Missing column name address",
-                },
-                {
-                    "row_number": 1,
-                    "header": "consent",
-                    "message": "Missing column name consent",
-                },
-                {
-                    "row_number": 1,
-                    "header": "household_location",
-                    "message": "Missing column name household_location",
-                },
-            ]
-            self.assertEqual(errors, expected)
+            errors.sort(key=operator.itemgetter("row_number", "header"))
+            self.assertEqual(errors, [])
+
+    def test_required_validator(self):
+        with mock.patch.dict(
+            "registration_datahub.validators.UploadXLSXValidator.ALL_FIELDS",
+            {"test": {"required": True}},
+            clear=True,
+        ):
+            result = UploadXLSXValidator.required_validator(
+                value="tak", header="test"
+            )
+            self.assertTrue(result)
+
+        with mock.patch.dict(
+            "registration_datahub.validators.UploadXLSXValidator.ALL_FIELDS",
+            {"test": {"required": True}},
+            clear=True,
+        ):
+            result = UploadXLSXValidator.required_validator(
+                value="", header="test"
+            )
+            self.assertFalse(result)
+
+        with mock.patch.dict(
+            "registration_datahub.validators.UploadXLSXValidator.ALL_FIELDS",
+            {"test": {"required": False}},
+            clear=True,
+        ):
+            result = UploadXLSXValidator.required_validator(
+                value="", header="test"
+            )
+            self.assertTrue(result)

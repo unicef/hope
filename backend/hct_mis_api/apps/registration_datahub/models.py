@@ -13,7 +13,6 @@ from django_countries.fields import CountryField
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
 
-from household.const import NATIONALITIES
 from household.models import (
     RESIDENCE_STATUS_CHOICE,
     SEX_CHOICE,
@@ -44,11 +43,11 @@ class ImportedHousehold(TimeStampedUUIDModel):
     )
     country_origin = CountryField()
     size = models.PositiveIntegerField()
-    address = models.CharField(max_length=255, blank=True)
-    country = CountryField(blank=True)
-    admin1 = models.CharField(max_length=255, blank=True)
-    admin2 = models.CharField(max_length=255, blank=True)
-    geopoint = PointField(blank=True, null=True)
+    address = models.CharField(max_length=255, blank=True, default="")
+    country = CountryField(blank=True, default="")
+    admin1 = models.CharField(max_length=255, blank=True, default="")
+    admin2 = models.CharField(max_length=255, blank=True, default="")
+    geopoint = PointField(null=True, default=None)
     female_age_group_0_5_count = models.PositiveIntegerField(default=0)
     female_age_group_6_11_count = models.PositiveIntegerField(default=0)
     female_age_group_12_17_count = models.PositiveIntegerField(default=0)
@@ -78,8 +77,8 @@ class ImportedHousehold(TimeStampedUUIDModel):
         related_name="households",
         on_delete=models.CASCADE,
     )
-    registration_date = models.DateField(null=True)
-    returnee = models.BooleanField(default=False, null=True)
+    registration_date = models.DateField(null=True, auto_now_add=True)
+    returnee = models.BooleanField(default=False)
     flex_fields = JSONField(default=dict)
 
     def __str__(self):
@@ -93,21 +92,21 @@ class ImportedIndividual(TimeStampedUUIDModel):
         max_length=255,
         validators=[MinLengthValidator(3), MaxLengthValidator(255)],
     )
-    given_name = models.CharField(max_length=85, blank=True,)
-    middle_name = models.CharField(max_length=85, blank=True,)
-    family_name = models.CharField(max_length=85, blank=True,)
+    given_name = models.CharField(max_length=85, blank=True, default="")
+    middle_name = models.CharField(max_length=85, blank=True, default="")
+    family_name = models.CharField(max_length=85, blank=True, default="")
     relationship = models.CharField(
-        max_length=255, blank=True, choices=RELATIONSHIP_CHOICE,
+        max_length=255, blank=True, choices=RELATIONSHIP_CHOICE, default="",
     )
     role = models.CharField(max_length=255, blank=True, choices=ROLE_CHOICE,)
     sex = models.CharField(max_length=255, choices=SEX_CHOICE,)
     birth_date = models.DateField()
-    estimated_birth_date = models.BooleanField(default=False, null=True)
+    estimated_birth_date = models.BooleanField(default=False)
     marital_status = models.CharField(
         max_length=255, choices=MARITAL_STATUS_CHOICE,
     )
-    phone_no = PhoneNumberField(blank=True)
-    phone_no_alternative = PhoneNumberField(blank=True)
+    phone_no = PhoneNumberField(blank=True, default="")
+    phone_no_alternative = PhoneNumberField(blank=True, default="")
     household = models.ForeignKey(
         "ImportedHousehold",
         related_name="individuals",
@@ -147,6 +146,7 @@ class RegistrationDataImportDatahub(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
         null=True,
     )
+    import_done = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
