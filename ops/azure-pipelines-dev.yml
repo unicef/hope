@@ -63,6 +63,7 @@ stages:
     displayName: Deploy app to K8S cluster.
     condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
     jobs:
+      
       - job: deploy_hct_mis
         displayName: Deploy HCT-MIS
         steps:
@@ -122,6 +123,14 @@ stages:
       - job: deploy_airflow
         displayName: Deploy Airflow
         steps:
+        - task: HelmDeploy@0
+          displayName: Helm init
+          inputs:
+            command: init
+            upgradetiller: false
+            waitForExecution: true
+            arguments: --client-only
+
         - task: HelmDeploy@0
           displayName: Deploy Airflow
           inputs:
