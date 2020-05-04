@@ -203,14 +203,13 @@ class Command(BaseCommand):
             self._generate_program_with_dependencies(options)
 
         # Data imports generation
-        data_imports_dth = RegistrationDataImportDatahubFactory.create_batch(
-            1, hct_id=RegistrationDataImport.objects.all()[0].id
-        )
-        for data_import in data_imports_dth:
-            for _ in range(1):
+
+        for rdi in RegistrationDataImport.objects.all()[0:100]:
+            rdi_datahub = RegistrationDataImportDatahubFactory(hct_id=rdi.id)
+            for _ in range(15):
                 create_imported_household(
-                    {"registration_data_import": data_import,},
-                    {"registration_data_import": data_import,},
+                    {"registration_data_import": rdi_datahub,},
+                    {"registration_data_import": rdi_datahub,},
                 )
 
         self.stdout.write(
