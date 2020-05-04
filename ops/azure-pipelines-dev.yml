@@ -128,8 +128,9 @@ stages:
           inputs:
             connectionType: 'Kubernetes Service Connection'
             kubernetesServiceConnection: 'ICTD-HCT-MIS-Demo-uni-apps-K8s-dev-hct-ims-dev-1574767480012'
-            command: repo
-            arguments: update
+            command: init
+            namespace: 'hct-ims-dev'
+            arguments: '--client-only'
 
         - task: HelmDeploy@0
           displayName: Deploy Airflow
