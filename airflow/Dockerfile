@@ -22,7 +22,11 @@ RUN chown -R airflow: ${AIRFLOW_HOME}
 
 ENV PATH="/usr/local/airflow/.local/bin:$PATH"
 
-COPY requirements.txt /usr/local/airflow/requirements.txt
+COPY ./airflow/requirements.txt /usr/local/airflow/requirements.txt
 RUN pip install -r requirements.txt
 
-COPY ./config/airflow.cfg /usr/local/airflow/airflow.cfg
+ADD ./backend/. /usr/local/airflow/backend
+ADD ./airflow/dags/. /usr/local/airflow/dags
+ADD ./airflow/connectors/. /usr/local/airflow/connectors
+
+COPY ./airflow/config/airflow.cfg /usr/local/airflow/airflow.cfg
