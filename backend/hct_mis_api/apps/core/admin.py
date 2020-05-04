@@ -343,7 +343,10 @@ class FlexibleAttributeImporter:
                     parent = None
 
                 if obj:
-                    if obj.type != self.object_fields_to_create["type"]:
+                    if (
+                        obj.type != self.object_fields_to_create["type"]
+                        and not obj.is_removed
+                    ):
                         raise ValidationError(
                             f"Survey Sheet: Row {row_number + 1}: Type of the "
                             f"attribute cannot be changed!"
