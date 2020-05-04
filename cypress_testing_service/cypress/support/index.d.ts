@@ -6,6 +6,12 @@ declare namespace Cypress {
       url: string,
     ): Chainable<Element>;
 
-    getByTestId(value: string);
+    loginWithMock(): Chainable<Element>;
+
+    getByTestId(value: string): Chainable<Element>;
+
+    navigateTo(newPath: string): Chainable<Element>;
+
+    pickDayOfTheMonth(day: number, fieldName: string): Chainable<Element>;
   }
 }

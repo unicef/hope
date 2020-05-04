@@ -48,6 +48,14 @@ export const FormikDateField = ({
           <InputAdornment position='end'>{decoratorEnd}</InputAdornment>
         ),
       }}
+      // https://github.com/mui-org/material-ui/issues/12805
+      // eslint-disable-next-line react/jsx-no-duplicate-props
+      inputProps={{
+        'data-cy': `date-input-${field.name}`,
+      }}
+      PopoverProps={{
+        'data-cy': `date-picker-container-${field.name}`,
+      }}
     />
   );
 };

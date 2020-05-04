@@ -51,7 +51,12 @@ export function CreateProgram(): ReactElement {
 
   return (
     <div>
-      <Button variant='contained' color='primary' onClick={() => setOpen(true)}>
+      <Button
+        variant='contained'
+        color='primary'
+        onClick={() => setOpen(true)}
+        data-cy='btn-new-programme'
+      >
         new programme
       </Button>
 

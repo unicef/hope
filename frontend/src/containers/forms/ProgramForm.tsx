@@ -7,6 +7,7 @@ import {
   DialogTitle,
   DialogActions,
   Typography,
+  Paper,
 } from '@material-ui/core';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
 import { Field, Form, Formik } from 'formik';
@@ -127,6 +128,15 @@ export function ProgramForm({
         open={open}
         onClose={onClose}
         scroll='paper'
+        PaperComponent={React.forwardRef((props, ref) => (
+          <Paper
+            {...{
+              ...props,
+              ref,
+            }}
+            data-cy='dialog-setup-new-programme'
+          />
+        ))}
         aria-labelledby='form-dialog-title'
       >
         <Formik
@@ -266,7 +276,9 @@ export function ProgramForm({
                 </Form>
               </DialogContent>
               <DialogFooter>
-                <DialogActions>{renderSubmit(submitForm)}</DialogActions>
+                <DialogActions data-cy='dialog-actions-container'>
+                  {renderSubmit(submitForm)}
+                </DialogActions>
               </DialogFooter>
             </>
           )}

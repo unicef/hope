@@ -5,8 +5,8 @@ When('I visit {word}', (path) => {
 });
 
 When('I click Logout', () => {
-  cy.getByTestId('logged_in_user_header_button').click();
-  cy.getByTestId('logout_link').click();
+  cy.getByTestId('menu-btn-user-profile').click();
+  cy.getByTestId('menu-item-logout').click();
 });
 
 Then('I should get redirected to login', () => {
@@ -15,7 +15,7 @@ Then('I should get redirected to login', () => {
 });
 
 Then('I should see the Dashboard', () => {
-  cy.get('.MuiList-root').contains('Dashboard');
+  cy.getByTestId('main-content').contains('Dashboard');
 });
 
 Then('I see my email address in the header', () => {
