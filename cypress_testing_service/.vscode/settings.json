@@ -19,7 +19,7 @@
   ],
   "cucumberautocomplete.skipDocStringsFormat": true,
   "cucumberautocomplete.formatConfOverride": {
-    "And": 3,
+    "And": "relative",
     "But": "relative",
   },
   "cucumberautocomplete.onTypeFormat": true,

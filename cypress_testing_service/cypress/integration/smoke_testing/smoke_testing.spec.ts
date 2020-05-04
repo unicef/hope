@@ -6,7 +6,7 @@ Then('I should get redirected to login', () => {
 });
 
 Then('I should see the Dashboard', () => {
-  cy.get('.MuiList-root').contains('Dashboard');
+  cy.getByTestId('main-content').contains('Dashboard');
 });
 
 When('I make a request to GraphQL endpoint', () => {

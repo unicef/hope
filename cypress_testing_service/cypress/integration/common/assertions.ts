@@ -10,3 +10,7 @@ Then('I get taken to {word} in current business area', (pathToCheckFor) => {
     );
   });
 });
+
+Then('I see user profile menu', () => {
+  cy.getByTestId('menu-btn-user-profile').should('be.visible');
+});
