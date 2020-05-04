@@ -5,8 +5,8 @@ When('I visit {word}', (path) => {
 });
 
 When('I click Logout', () => {
-  cy.get('[data-cy=logged_in_user_header_button]').click();
-  cy.get('[data-cy=logout_link]').click();
+  cy.getByTestId('logged_in_user_header_button').click();
+  cy.getByTestId('logout_link').click();
 });
 
 Then('I should get redirected to login', () => {
