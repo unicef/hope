@@ -62,11 +62,11 @@ stages:
     displayName: Deploy app to K8S cluster.
     condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
     jobs:
-      - job: Deploy HCT-MIS
-        displayName: Deploy helm chart
+      - job: deploy_hct_mis
+        displayName: Deploy HCT-MIS
         steps:
           - task: HelmDeploy@0
-            displayName: Deploy Helm chart
+            displayName: Deploy HCT-MIS
             inputs:
               connectionType: 'Kubernetes Service Connection'
               kubernetesServiceConnection: 'ICTD-HCT-MIS-Demo-uni-apps-K8s-dev-hct-ims-dev-1574767480012'
@@ -118,11 +118,11 @@ stages:
                 databases.postgres-cash-assist-datahub-db.secret.POSTGRES_USER=$(CASH_ASSIST_REGISTRATION_DATAHUB_POSTGRES_USER),\
                 databases.postgres-cash-assist-datahub-db.secret.POSTGRES_PASSWORD=$(CASH_ASSIST_REGISTRATION_DATAHUB_POSTGRES_PASSWORD),"
 
-      - job: Deploy Airflow
-        displayName: Deploy helm chart
+      - job: deploy_airflow
+        displayName: Deploy Airflow
         steps:
         - task: HelmDeploy@0
-          displayName: Deploy Helm chart
+          displayName: Deploy Airflow
           inputs:
             connectionType: 'Kubernetes Service Connection'
             kubernetesServiceConnection: 'ICTD-HCT-MIS-Demo-uni-apps-K8s-dev-hct-ims-dev-1574767480012'
