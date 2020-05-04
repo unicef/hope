@@ -119,22 +119,22 @@ stages:
                 databases.postgres-cash-assist-datahub-db.secret.POSTGRES_PASSWORD=$(CASH_ASSIST_REGISTRATION_DATAHUB_POSTGRES_PASSWORD),"
 
       - job: Deploy Airflow
-         displayName: Deploy helm chart
-         steps:
-          - task: HelmDeploy@0
-            displayName: Deploy Helm chart
-            inputs:
-              connectionType: 'Kubernetes Service Connection'
-              kubernetesServiceConnection: 'ICTD-HCT-MIS-Demo-uni-apps-K8s-dev-hct-ims-dev-1574767480012'
-              namespace: 'hct-ims-dev'
-              command: 'upgrade'
-              chartName: "stable/airflow"
-              releaseName: 'hct-mis-airflow'
-              valueFile: "**/ops/airflow-values.yaml"
-              install: true
-              force: true
-              waitForExecution: false
-              arguments: "--timeout 600s"
-              overrideValues: "
-              airflow.image.repository=uniappsk8sdevacr.azurecr.io/$(airflowImageRepository),\
-              airflow.image.tag=$(Build.BuildId),"
+        displayName: Deploy helm chart
+        steps:
+        - task: HelmDeploy@0
+          displayName: Deploy Helm chart
+          inputs:
+            connectionType: 'Kubernetes Service Connection'
+            kubernetesServiceConnection: 'ICTD-HCT-MIS-Demo-uni-apps-K8s-dev-hct-ims-dev-1574767480012'
+            namespace: 'hct-ims-dev'
+            command: 'upgrade'
+            chartName: "stable/airflow"
+            releaseName: 'hct-mis-airflow'
+            valueFile: "**/ops/airflow-values.yaml"
+            install: true
+            force: true
+            waitForExecution: false
+            arguments: "--timeout 600s"
+            overrideValues: "
+            airflow.image.repository=uniappsk8sdevacr.azurecr.io/$(airflowImageRepository),\
+            airflow.image.tag=$(Build.BuildId),"
