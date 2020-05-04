@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { Button } from '@material-ui/core';
 import { EditRounded, Delete, FileCopy } from '@material-ui/icons';
 import { TargetPopulationNode } from '../../../__generated__/graphql';
+import { FinalizeTargetPopulation } from '../../dialogs/targetPopulation/FinalizeTargetPopulation';
 import { DeleteTargetPopulation } from '../../dialogs/targetPopulation/DeleteTargetPopulation';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 import { ApproveCandidateList } from '../../dialogs/targetPopulation/ApproveCandidateList';

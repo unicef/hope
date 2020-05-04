@@ -1,4 +1,5 @@
 import React from 'react';
+import styled from 'styled-components';
 import TableCell from '@material-ui/core/TableCell';
 import { useHistory } from 'react-router-dom';
 import { HouseholdNode } from '../../../../__generated__/graphql';
@@ -28,7 +29,7 @@ export function TargetPopulationHouseholdTableRow({ household }) {
       <TableCell align='left'>{decodeIdString(household.id)}</TableCell>
       <TableCell align='left'>{`${household.headOfHousehold.givenName} ${household.headOfHousehold.lastName}`}</TableCell>
       <TableCell align='left'>{household.size}</TableCell>
-      <TableCell align='left'>{household.address}</TableCell>
+      <TableCell align='left'>-</TableCell>
       <TableCell align='left'>{household.adminArea.title}</TableCell>
     </ClickableTableRow>
   );

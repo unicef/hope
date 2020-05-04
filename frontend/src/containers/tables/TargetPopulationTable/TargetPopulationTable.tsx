@@ -14,10 +14,12 @@ const TableWrapper = styled.div`
 `;
 
 interface TargetPopulationProps {
+  businessArea: string;
   filter;
 }
 
 export const TargetPopulationTable = ({
+  businessArea,
   filter
 }: TargetPopulationProps): ReactElement => {
   const initialVariables = {

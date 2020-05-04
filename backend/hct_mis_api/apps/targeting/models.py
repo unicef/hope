@@ -53,11 +53,26 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
         related_name="target_populations",
         null=True,
     )
+    approved_at = models.DateTimeField(null=True)
+    approved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="approved_target_populations",
+        null=True,
+    )
+    finalized_at = models.DateTimeField(null=True)
+    finalized_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="finalized_target_populations",
+        null=True,
+    )
     STATUS_CHOICES = (
         ("DRAFT", _("Open")),
         ("APPROVED", _("Closed")),
         ("FINALIZED", _("Sent")),
     )
+
     status = models.CharField(
         max_length=_MAX_LEN, choices=STATUS_CHOICES, default="DRAFT",
     )
@@ -221,7 +236,7 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
             "arguments": 1,
             "lookup": "",
             "negative": False,
-            "supported_types": ["INTEGER", "SELECT_ONE"],
+            "supported_types": ["INTEGER", "SELECT_ONE", "STRING"],
         },
         "NOT_EQUALS": {
             "arguments": 1,
@@ -232,15 +247,15 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
         "CONTAINS": {
             "min_arguments": 1,
             "arguments": 1,
-            "lookup": "__contains",
+            "lookup": "__icontains",
             "negative": False,
-            "supported_types": ["SELECT_MANY"],
+            "supported_types": ["SELECT_MANY", "STRING"],
         },
         "NOT_CONTAINS": {
             "arguments": 1,
-            "lookup": "__contains",
+            "lookup": "__icontains",
             "negative": True,
-            "supported_types": [],
+            "supported_types": ["STRING"],
         },
         "RANGE": {
             "arguments": 2,
@@ -316,9 +331,14 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
                 f"arguments gets {args_input_count}"
             )
         argument = self.arguments if args_input_count > 1 else self.arguments[0]
-        query = Q(
-            **{f"{lookup}{comparision_attribute.get('lookup')}": argument}
-        )
+        if select_many:
+            query = Q(
+                **{f"{lookup}__contains": argument}
+            )
+        else:
+            query = Q(
+                **{f"{lookup}{comparision_attribute.get('lookup')}": argument}
+            )
         if comparision_attribute.get("negative"):
             return ~query
         return query

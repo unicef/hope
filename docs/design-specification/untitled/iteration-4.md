@@ -2,42 +2,22 @@
 description: Respondent Feedback Analysis
 ---
 
-# I.4 Summary
+# Iteration 4
 
 ![](../../.gitbook/assets/nate-greno-0-ldysznjq4-unsplash.png)
 
 ## Overview
 
-### Synopsis
-
-#### Purpose:
-
-The purpose / goal of this study was to gather qualitative feedback from a select group of Pilot Users identified and classified under the User Persona's designated for the HCT-MIS system.The feedback received would then help Unicef determine the level of quality the application was designed, to-date.  
-
-#### Process:
-
-During these sessions a representative from Tivix asked a series of questions to the users both before and after a demonstration of a particular section was given. The collection of responses were then stored in a Google Sheet spreadsheet to then be later used for analysis. The structure of the questions and feedback received, helped to determine several factors. 
-
-#### Observations:
-
-For one,  how well the content was understood by a user's first impression or first glance at a screen with no explanation. Doing so provided us with insight as to how intuitive the application was designed for the user base. 
-
-We also asked the users to make assumptions of what was possible in the entire section, from looking at a single screen. This task helped us gage how closely we were meeting user's expectations without imposing any ideas or elements to steer their process of thinking.
-
-Additional questions were asked after a demo was given to re-evaluate the user's responses to what what they've seen and to see if it meet's their expectations. This was helpful in securing our understanding of what the users need from the HCT-MIS system and gage how closely we are to meeting those expectations. 
-
-
-
 ### Participants
 
-| Name | Email | Persona / Role |
-| :--- | :--- | :--- |
-| Christian Alvarez | calvarez@unicef.org | Peter / Program Staff |
-| Alexis Boncenne | aboncenne@unicef.or | \*Peter / Program Staff |
-| Ali Haidar | ahaidar@unicef.org | \*Peter / Program Staff |
-| ZON Hermann | hzon@unicef.org | Janice/Finance Officer |
-| Peta Barns | pbarns@unicef.org | Peter / Program Staff |
-| Giulio Andrea Franco | gfranco@unicef.org | Roberto / Enumerator |
+| Email |
+| :--- |
+| calvarez@unicef.org |
+| pbarns@unicef.org |
+| aboncenne@unicef.org |
+| hzon@unicef.org |
+| hkamanan@unicef.org |
+| mgavric@unicef.org |
 
 ## Key Findings:
 

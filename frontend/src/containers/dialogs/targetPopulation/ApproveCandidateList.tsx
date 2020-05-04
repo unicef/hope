@@ -68,7 +68,7 @@ export function ApproveCandidateList({ open, setOpen, targetPopulationId }) {
             variables: { id: targetPopulationId, programId: values.program },
           }).then(() => {
             setOpen(false);
-            showMessage('Programme Population Approved', {
+            showMessage('Candidate List Approved', {
               pathname: `/${businessArea}/target-population/${targetPopulationId}`,
             });
           });
@@ -78,13 +78,13 @@ export function ApproveCandidateList({ open, setOpen, targetPopulationId }) {
           <>
             <DialogTitleWrapper>
               <DialogTitle id='scroll-dialog-title'>
-                <Typography variant='h6'>Close Programme Population</Typography>
+                <Typography variant='h6'>Close Candidate List</Typography>
               </DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
               <DialogDescription>
                 Are you sure you want to approve the targeting criteria for this
-                Programme Population? Once a Programme Population is{' '}
+                Candidate List? Once a Candidate List is{' '}
                 <strong>Approved</strong> the targeting criteria will be
                 permanently frozen.
               </DialogDescription>
@@ -93,7 +93,7 @@ export function ApproveCandidateList({ open, setOpen, targetPopulationId }) {
               </DialogDescription>
               <DialogDescription>
                 Please select a Programme you would like to associate this
-                Programme Population with:
+                candidate list with:
               </DialogDescription>
               <Field
                 name='program'

@@ -7,9 +7,7 @@ export const CreateTP = gql`
         id
         status
         candidateListTotalHouseholds
-        candidateListTotalIndividuals
         finalListTotalHouseholds
-        finalListTotalIndividuals
       }
     }
   }

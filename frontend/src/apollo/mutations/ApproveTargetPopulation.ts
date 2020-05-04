@@ -7,19 +7,7 @@ export const ApproveTargetPopulation = gql`
         name
         status
         candidateListTotalHouseholds
-        candidateListTotalIndividuals
         finalListTotalHouseholds
-        finalListTotalIndividuals
-        approvedAt
-        finalizedAt
-        finalizedBy {
-          firstName
-          lastName
-        }
-        program {
-          id
-          name
-        }
         candidateListTargetingCriteria {
           targetPopulationCandidate {
             createdBy {

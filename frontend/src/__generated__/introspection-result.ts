@@ -30,7 +30,7 @@
             "name": "AdminAreaNode"
           },
           {
-            "name": "HouseholdTPNode"
+            "name": "HouseholdNode"
           },
           {
             "name": "RegistrationDataImportNode"
@@ -43,9 +43,6 @@
           },
           {
             "name": "TargetPopulationNode"
-          },
-          {
-            "name": "HouseholdNode"
           },
           {
             "name": "IndividualNode"
@@ -74,4 +71,3 @@
   }
 };
       export default result;
-    

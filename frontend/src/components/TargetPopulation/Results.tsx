@@ -65,10 +65,10 @@ const Label = styled.p`
 interface ResultsProps {
   resultsData?;
   totalNumOfHouseholds?;
-  totalNumOfIndividuals?;
+  finalListTotalHouseholds?;
 }
 
-export function Results({ resultsData, totalNumOfHouseholds, totalNumOfIndividuals }: ResultsProps) {
+export function Results({ resultsData, totalNumOfHouseholds, finalListTotalHouseholds }: ResultsProps) {
   const { t } = useTranslation();
 
   return (
@@ -169,7 +169,7 @@ export function Results({ resultsData, totalNumOfHouseholds, totalNumOfIndividua
                 <SummaryBorder>
                   <LabelizedField label='Targeted Individuals'>
                     <SummaryValue>
-                      {totalNumOfIndividuals || "N/A"}
+                      {finalListTotalHouseholds || "N/A"}
                     </SummaryValue>
                   </LabelizedField>
                 </SummaryBorder>

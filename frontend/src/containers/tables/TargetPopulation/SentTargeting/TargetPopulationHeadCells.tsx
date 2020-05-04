@@ -11,13 +11,13 @@ export const headCells: HeadCell<TargetPopulationNode>[] = [
     {
       disablePadding: false,
       label: 'Head of Household',
-      id: 'head_of_household__full_name',
+      id: 'headOfHousehold',
       numeric: false,
     },
     {
       disablePadding: false,
       label: 'Household size',
-      id: 'size',
+      id: 'householdSize',
       numeric: false,
     },
     {
@@ -29,7 +29,7 @@ export const headCells: HeadCell<TargetPopulationNode>[] = [
     {
       disablePadding: false,
       label: 'Location',
-      id: 'admin_area__title',
+      id: 'location',
       numeric: false,
     },
     {

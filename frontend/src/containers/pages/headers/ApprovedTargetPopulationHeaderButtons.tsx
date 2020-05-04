@@ -71,7 +71,7 @@ export function ApprovedTargetPopulationHeaderButtons({
         open={openFinalize}
         setOpen={setOpenFinalize}
         targetPopulationId={targetPopulation.id}
-        totalHouseholds={targetPopulation.totalHouseholds}
+        totalHouseholds={targetPopulation.candidateListTotalHouseholds}
       />
     </div>
   );

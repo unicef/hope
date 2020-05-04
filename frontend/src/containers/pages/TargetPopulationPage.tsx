@@ -55,6 +55,7 @@ export function TargetPopulationPage(): React.ReactElement {
       <Container>
         <TargetPopulationTable
           filter={debouncedFilter}
+          businessArea={businessArea}
         />
       </Container>
     </div>

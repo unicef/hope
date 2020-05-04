@@ -3,8 +3,8 @@ import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { Typography, Paper, Button } from '@material-ui/core';
 import { AddCircleOutline } from '@material-ui/icons';
-import { TargetCriteriaForm } from '../../../containers/forms/TargetCriteriaForm';
 import { Criteria } from './Criteria';
+import { TargetCriteriaForm } from '../../../containers/forms/TargetCriteriaForm';
 
 const PaperContainer = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(3)}px
@@ -101,14 +101,15 @@ export function TargetingCriteria({
   const closeModal = () => {
     setCriteria({});
     setIndex(null);
-    return setOpen(false);
+    setOpen(false);
   };
   const editCriteria = (criteria, index) => {
     setIndex(index);
-    return openModal(criteria);
+    openModal(criteria);
   };
 
   const addCriteria = (values) => {
+    //rework to use arguments and add index for update
     if (criteriaIndex !== null) {
       helpers.replace(criteriaIndex, { filters: [...values.filters] });
     } else {

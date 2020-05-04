@@ -55,7 +55,7 @@
 
 * [User Personas](design-specification/untitled/README.md)
   * [User Feedback](design-specification/untitled/user-feedback.md)
-  * [I.4 Summary](design-specification/untitled/iteration-4.md)
+  * [Iteration 4](design-specification/untitled/iteration-4.md)
 * [User Flows](design-specification/user-flows.md)
 * [Style Guide](design-specification/style-guide.md)
 * [Site Map](design-specification/site-map.md)

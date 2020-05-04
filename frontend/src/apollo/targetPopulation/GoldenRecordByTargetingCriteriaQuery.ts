@@ -7,7 +7,6 @@ export const GoldenRecordByTargetingCriteria = gql`
     $after: String
     $before: String
     $last: Int
-    $orderBy: String
   ) {
     goldenRecordByTargetingCriteria(
       targetingCriteria: $targetingCriteria
@@ -15,7 +14,6 @@ export const GoldenRecordByTargetingCriteria = gql`
       before: $before
       first: $first
       last: $last
-      orderBy: $orderBy
     ) {
       edges {
         node {
@@ -31,7 +29,6 @@ export const GoldenRecordByTargetingCriteria = gql`
             title
           }
           updatedAt
-          address
         }
         cursor
       }

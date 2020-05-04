@@ -41,17 +41,11 @@ const validationSchema = Yup.object().shape({
   name: Yup.string().required('Name is required'),
 });
 
-interface DuplicateTargetPopulationPropTypes {
-  open: boolean;
-  setOpen: Function;
-  targetPopulationId: string;
-}
-
 export function DuplicateTargetPopulation({
   open,
   setOpen,
   targetPopulationId,
-}:DuplicateTargetPopulationPropTypes) {
+}) {
   const [mutate] = useCopyTargetPopulationMutation();
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
@@ -81,7 +75,7 @@ export function DuplicateTargetPopulation({
           });
         }}
       >
-        {({ submitForm }) => (
+        {({ submitForm, values }) => (
           <>
             <DialogTitleWrapper>
               <DialogTitle id='scroll-dialog-title'>

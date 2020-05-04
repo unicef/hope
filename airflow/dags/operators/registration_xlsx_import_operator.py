@@ -125,7 +125,7 @@ class RegistrationXLSXImportOperator(DjangoOperator):
                 individual=individual,
                 type=doc_type,
             )
-            # obj.photo.save(photo_name, photo, save=False)
+
             docs_to_create.append(obj)
 
         ImportedDocument.objects.bulk_create(docs_to_create)
@@ -258,7 +258,6 @@ class RegistrationXLSXImportOperator(DjangoOperator):
                 self.individuals.append(obj_to_create)
 
         if sheet_title == "households":
-            # FIXME: ADD ALL REQUIRED FIELDS, HANDLE CONSENT IMAGE AND OTHER STUFF
             ImportedHousehold.objects.bulk_create(self.households.values())
         else:
             ImportedIndividual.objects.bulk_create(self.individuals)

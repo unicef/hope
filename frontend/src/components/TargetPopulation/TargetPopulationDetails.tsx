@@ -34,13 +34,9 @@ interface ProgramDetailsProps {
 }
 
 export function TargetPopulationDetails({
-  targetPopulation,
+    targetPopulation,
 }: ProgramDetailsProps): React.ReactElement {
-  const { createdBy, finalizedBy, approvedAt, finalizedAt, program } = targetPopulation;
-  const closeDate = approvedAt ? moment(approvedAt).format('DD MMM YYYY') : '-';
-  const sendBy = finalizedBy ? `${finalizedBy.firstName} ${finalizedBy.lastName}` : '-';
-  const sendDate = finalizedAt ? moment(finalizedAt).format('DD MMM YYYY') : '-';
-  const programName = program && program.name ? program.name : '-';
+  const { firstName, lastName } = targetPopulation.candidateListTargetingCriteria.targetPopulationCandidate.createdBy;
   return (
     <Container>
       <Title>
@@ -48,34 +44,34 @@ export function TargetPopulationDetails({
       </Title>
       <OverviewContainer>
         <Grid container spacing={6}>
-          <Grid item xs={4}>
+        <Grid item xs={4}>
             <LabelizedField
               label='created by'
-              value={`${createdBy.firstName} ${createdBy.lastName}`}
+              value={`${firstName} ${lastName}`}
             />
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
               label='Programme population close date'
-              value={closeDate}
+              value='some random score'
             />
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
               label='Programme'
-              value={programName}
+              value='some random programme name'
             />
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
               label='Send by'
-              value={sendBy}
+              value='name surname'
             />
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
               label='Send date'
-              value={sendDate}
+              value={moment(targetPopulation.createdAt).format('DD MMM YYYY')}
             />
           </Grid>
         </Grid>
