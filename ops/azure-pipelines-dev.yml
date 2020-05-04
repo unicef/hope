@@ -124,12 +124,9 @@ stages:
         displayName: Deploy Airflow
         steps:
         - task: HelmDeploy@0
-          displayName: Helm init
+          displayName: Helm repo update
           inputs:
-            command: init
-            upgradetiller: false
-            waitForExecution: true
-            arguments: --client-only
+            command: repo update
 
         - task: HelmDeploy@0
           displayName: Deploy Airflow
