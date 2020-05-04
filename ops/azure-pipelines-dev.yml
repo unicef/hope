@@ -128,9 +128,9 @@ stages:
           inputs:
             connectionType: 'Kubernetes Service Connection'
             kubernetesServiceConnection: 'ICTD-HCT-MIS-Demo-uni-apps-K8s-dev-hct-ims-dev-1574767480012'
-            command: init
+            command: repo
             namespace: 'hct-ims-dev'
-            arguments: '--client-only'
+            arguments: add stable https://kubernetes-charts.storage.googleapis.com
 
         - task: HelmDeploy@0
           displayName: Deploy Airflow
