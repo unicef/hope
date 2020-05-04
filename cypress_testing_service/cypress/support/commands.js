@@ -57,3 +57,7 @@ Cypress.Commands.add('loginToAD', (username, password, loginUrl) => {
     });
   });
 });
+
+Cypress.Commands.add('getByTestId', (value) => {
+  return cy.get(`[data-cy=${value}]`);
+});

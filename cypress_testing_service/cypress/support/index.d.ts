@@ -5,5 +5,7 @@ declare namespace Cypress {
       password: string,
       url: string,
     ): Chainable<Element>;
+
+    getByTestId(value: string);
   }
 }
