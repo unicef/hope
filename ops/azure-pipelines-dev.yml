@@ -43,6 +43,7 @@ stages:
               command: buildAndPush
               dockerfile: $(airflowDockerFilePath)
               repository: $(airflowImageRepository)
+              buildContext: "$(Build.SourcesDirectory)"
               containerRegistry: $(containerRegistry)
               tags: |
                 $(Build.BuildId)
