@@ -807,6 +807,9 @@ def _core_fields_to_separated_dict(append_household_id=True):
     return result_dict
 
 
+
+
+
 FILTERABLE_CORE_FIELDS_ATTRIBUTES = [
     x for x in CORE_FIELDS_ATTRIBUTES if x.get("type") in FILTERABLE_TYPES
 ]

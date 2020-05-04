@@ -6,6 +6,7 @@ RUN apt-get update -yqq \
     && apt-get upgrade -yqq \
     && apt-get install -yqq --no-install-recommends \
         git \
+        gcc \
         libgraphviz-dev \
         python-gdal \
         gdal-bin \

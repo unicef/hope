@@ -114,7 +114,6 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
         )
 
         import_data_obj = ImportData.objects.first()
-        import ipdb; ipdb.set_trace()
         self.assertIn(
             "new_reg_data_import", import_data_obj.xlsx_file.name,
         )
@@ -122,8 +121,8 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
     def test_registration_data_import_create(self):
         import_data_obj = ImportData.objects.create(
             xlsx_file=self.valid_file,
-            number_of_households=500,
-            number_of_individuals=1000,
+            number_of_households=3,
+            number_of_individuals=6,
         )
 
         self.snapshot_graphql_request(
