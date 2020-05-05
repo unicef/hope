@@ -203,11 +203,15 @@ class RegistrationXLSXImportOperator(DjangoOperator):
             for cell, header_cell in zip(row, first_row):
                 header = header_cell.value
                 current_field = combined_fields.get(header)
+
+                if not current_field:
+                    continue
+
                 is_not_required_and_empty = (
                     not current_field.get("required") and cell.value is None
                 )
 
-                if not current_field or is_not_required_and_empty:
+                if is_not_required_and_empty:
                     continue
 
                 if header == "household_id":
@@ -245,12 +249,12 @@ class RegistrationXLSXImportOperator(DjangoOperator):
                         household = self.households.get(household_id)
                         household.head_of_household = obj_to_create
                         households_to_update.append(household)
-                    else:
-                        setattr(
-                            obj_to_create,
-                            combined_fields[header]["name"],
-                            value,
-                        )
+
+                    setattr(
+                        obj_to_create,
+                        combined_fields[header]["name"],
+                        value,
+                    )
                 elif header in flex_fields[sheet_title]:
                     value = cell.value
                     type_name = flex_fields[sheet_title][header]["type"]
