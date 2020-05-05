@@ -1,20 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, ReactElement } from 'react';
 import moment from 'moment';
-import styled from 'styled-components';
-import { Button, DialogActions } from '@material-ui/core';
+import { Button } from '@material-ui/core';
 import { useCreateProgramMutation } from '../../../__generated__/graphql';
 import { ProgramForm } from '../../forms/ProgramForm';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 
-const DialogFooter = styled.div`
-  padding: 12px 16px;
-  margin: 0;
-  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  text-align: right;
-`;
-
-export function CreateProgram(): React.ReactElement {
+export function CreateProgram(): ReactElement {
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const [mutate] = useCreateProgramMutation();
@@ -41,21 +33,19 @@ export function CreateProgram(): React.ReactElement {
     }
   };
 
-  const renderSubmit = (submit): React.ReactElement => {
+  const renderSubmit = (submit): ReactElement => {
     return (
-      <DialogFooter>
-        <DialogActions>
-          <Button onClick={() => setOpen(false)}>Cancel</Button>
-          <Button
-            onClick={submit}
-            type='submit'
-            color='primary'
-            variant='contained'
-          >
-            Save
-          </Button>
-        </DialogActions>
-      </DialogFooter>
+      <>
+        <Button onClick={() => setOpen(false)}>Cancel</Button>
+        <Button
+          onClick={submit}
+          type='submit'
+          color='primary'
+          variant='contained'
+        >
+          Save
+        </Button>
+      </>
     );
   };
 
