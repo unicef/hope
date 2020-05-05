@@ -6,7 +6,6 @@ from .base import DjangoOperator
 
 
 class MergeRegistrationImportDataOperator(DjangoOperator):
-    @classmethod
     def merge_household(
         self, imported_household, household_values, registration_obj
     ):
@@ -42,6 +41,9 @@ class MergeRegistrationImportDataOperator(DjangoOperator):
         del household_values["id"]
         household = Household(**{**household_values})
         household.registration_data_import = registration_obj
+        self.merge_admin_area(
+            imported_household, household_values, household
+        )
         for individual_values in imported_individuals_as_values:
             imported_individual = imported_individuals_as_values_id_dict[
                 individual_values.get("id")
@@ -57,7 +59,6 @@ class MergeRegistrationImportDataOperator(DjangoOperator):
             individuals_to_add.append(individual)
         return household, individuals_to_add
 
-    @classmethod
     def merge_individual(
         self,
         imported_individual,
@@ -71,7 +72,48 @@ class MergeRegistrationImportDataOperator(DjangoOperator):
         individual = Individual(**{**individual_values})
         individual.household = household
         individual.registration_data_import = registration_obj
+        self.merge_individual_document(
+            imported_individual, individual_values, individual
+        )
         return individual
+
+    def merge_individual_document(
+        self, imported_individual, individual_values, individual,
+    ):
+        from household.models import Document, DocumentType
+
+        documents_to_create = []
+        for imported_document in imported_individual.documents.all():
+            document_type = DocumentType.objects.get(
+                country=imported_document.type.country,
+                label=imported_document.type.label,
+            )
+            document = Document(
+                document_number=imported_document.document_number,
+                type=document_type,
+                individual=individual,
+            )
+            documents_to_create.append(document)
+        Document.objects.bulk_create(documents_to_create)
+
+    def merge_admin_area(
+        self, imported_household, household_values, household,
+    ):
+        from core.models import AdminArea
+
+        admin1 = imported_household.admin1
+        admin2 = imported_household.admin2
+        try:
+            if admin2 is not None:
+                admin_area = AdminArea.objects.get(title=admin2)
+                household.admin_area = admin_area
+                return
+            if admin1 is not None:
+                admin_area = AdminArea.objects.get(title=admin1)
+                household.admin_area = admin_area
+                return
+        except AdminArea.DoesNotExist:
+            print("does not exsit")
 
     @transaction.atomic()
     def execute(self, context, **kwargs):
