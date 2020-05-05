@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, ReactElement } from 'react';
 import moment from 'moment';
-import styled from 'styled-components';
-import { Button, DialogActions } from '@material-ui/core';
+import { Button } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/EditRounded';
 import {
   ProgramNode,
@@ -13,18 +12,11 @@ import { PROGRAM_QUERY } from '../../../apollo/queries/Program';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { ALL_LOG_ENTRIES_QUERY } from '../../../apollo/queries/AllLogEntries';
 
-const DialogFooter = styled.div`
-  padding: 12px 16px;
-  margin: 0;
-  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  text-align: right;
-`;
-
 interface EditProgramProps {
   program: ProgramNode;
 }
 
-export function EditProgram({ program }: EditProgramProps): React.ReactElement {
+export function EditProgram({ program }: EditProgramProps): ReactElement {
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const [mutate] = useUpdateProgramMutation({
@@ -71,21 +63,19 @@ export function EditProgram({ program }: EditProgramProps): React.ReactElement {
     }
   };
 
-  const renderSubmit = (submit): React.ReactElement => {
+  const renderSubmit = (submit): ReactElement => {
     return (
-      <DialogFooter>
-        <DialogActions>
-          <Button onClick={() => setOpen(false)}>Cancel</Button>
-          <Button
-            onClick={submit}
-            type='submit'
-            color='primary'
-            variant='contained'
-          >
-            Save
-          </Button>
-        </DialogActions>
-      </DialogFooter>
+      <>
+        <Button onClick={() => setOpen(false)}>Cancel</Button>
+        <Button
+          onClick={submit}
+          type='submit'
+          color='primary'
+          variant='contained'
+        >
+          Save
+        </Button>
+      </>
     );
   };
 
