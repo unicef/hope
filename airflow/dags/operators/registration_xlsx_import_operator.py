@@ -2,6 +2,7 @@ from io import BytesIO
 
 from django.contrib.gis.geos import Point
 from django.core.files import File
+from django.core.files.storage import default_storage
 from django.db import transaction
 from django.utils import timezone
 from openpyxl_image_loader import SheetImageLoader
@@ -79,7 +80,9 @@ class RegistrationXLSXImportOperator(DjangoOperator):
                 "photo": file_name,
             }
 
-    def _handle_image_field(self, cell, header, *args, **kwargs):
+    def _handle_image_field(
+        self, cell, is_flex_field=False, *args, **kwargs
+    ):
         if self.image_loader.image_in(cell.coordinate):
             image = self.image_loader.get(cell.coordinate)
             file_name = f"{cell.coordinate}-{timezone.now()}.jpg"
@@ -88,6 +91,10 @@ class RegistrationXLSXImportOperator(DjangoOperator):
             image.save(file_io, image.format)
 
             file = File(file_io, name=file_name)
+
+            if is_flex_field:
+                return default_storage.save(file_name, file)
+
             return file
 
     def _handle_geopoint_field(self, value, header, *args, **kwargs):
@@ -249,7 +256,12 @@ class RegistrationXLSXImportOperator(DjangoOperator):
                     type_name = flex_fields[sheet_title][header]["type"]
                     if type_name in complex_types:
                         fn = complex_types[type_name]
-                        value = fn(value=cell.value, cell=cell, header=header)
+                        value = fn(
+                            value=cell.value,
+                            cell=cell,
+                            header=header,
+                            is_flex_field=True,
+                        )
                     obj_to_create.flex_fields[header] = value
 
             if sheet_title == "households":
