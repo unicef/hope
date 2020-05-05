@@ -123,23 +123,23 @@ export function ProgramForm({
   if (!data) return null;
   return (
     <DialogContainer>
-      <Formik
-        initialValues={initialValue}
-        onSubmit={(values) => {
-          const newValues = { ...values };
-          newValues.budget = Number(values.budget).toFixed(2);
-          return onSubmit(values);
-        }}
-        validationSchema={validationSchema}
+      <Dialog
+        open={open}
+        onClose={onClose}
+        scroll='paper'
+        aria-labelledby='form-dialog-title'
       >
-        {({ submitForm, values }) => (
-          <Form>
-            <Dialog
-              open={open}
-              onClose={onClose}
-              scroll='paper'
-              aria-labelledby='form-dialog-title'
-            >
+        <Formik
+          initialValues={initialValue}
+          onSubmit={(values) => {
+            const newValues = { ...values };
+            newValues.budget = Number(values.budget).toFixed(2);
+            return onSubmit(values);
+          }}
+          validationSchema={validationSchema}
+        >
+          {({ submitForm, values }) => (
+            <>
               <DialogTitleWrapper>
                 <DialogTitle id='scroll-dialog-title' disableTypography>
                   <Typography variant='h6'>{title}</Typography>
@@ -151,127 +151,127 @@ export function ProgramForm({
                   here. We will send updates occasionally.
                 </DialogDescription>
 
-                <Field
-                  name='name'
-                  label='Programme Name'
-                  type='text'
-                  fullWidth
-                  required
-                  variant='filled'
-                  component={FormikTextField}
-                />
+                <Form>
+                  <Field
+                    name='name'
+                    label='Programme Name'
+                    type='text'
+                    fullWidth
+                    required
+                    variant='filled'
+                    component={FormikTextField}
+                  />
 
-                <MediumLabel>
-                  <Field
-                    name='scope'
-                    label='CashAssist Scope'
-                    fullWidth
-                    required
-                    choices={data.programScopeChoices}
-                    component={FormikSelectField}
-                  />
-                </MediumLabel>
-                <DateFields>
-                  <DateField>
+                  <MediumLabel>
                     <Field
-                      name='startDate'
-                      label='Start Date'
-                      component={FormikDateField}
-                      required
+                      name='scope'
+                      label='CashAssist Scope'
                       fullWidth
-                      decoratorEnd={
-                        <CalendarTodayRoundedIcon color='disabled' />
-                      }
-                    />
-                  </DateField>
-                  <DateField>
-                    <Field
-                      name='endDate'
-                      label='End Date'
-                      component={FormikDateField}
                       required
-                      disabled={!values.startDate}
-                      initialFocusedDate={values.startDate}
-                      fullWidth
-                      decoratorEnd={
-                        <CalendarTodayRoundedIcon color='disabled' />
-                      }
-                      minDate={values.startDate}
+                      choices={data.programScopeChoices}
+                      component={FormikSelectField}
                     />
-                  </DateField>
-                </DateFields>
-                <Field
-                  name='description'
-                  label='Description'
-                  type='text'
-                  fullWidth
-                  multiline
-                  variant='filled'
-                  component={FormikTextField}
-                />
-                <MediumLabel>
+                  </MediumLabel>
+                  <DateFields>
+                    <DateField>
+                      <Field
+                        name='startDate'
+                        label='Start Date'
+                        component={FormikDateField}
+                        required
+                        fullWidth
+                        decoratorEnd={
+                          <CalendarTodayRoundedIcon color='disabled' />
+                        }
+                      />
+                    </DateField>
+                    <DateField>
+                      <Field
+                        name='endDate'
+                        label='End Date'
+                        component={FormikDateField}
+                        required
+                        disabled={!values.startDate}
+                        initialFocusedDate={values.startDate}
+                        fullWidth
+                        decoratorEnd={
+                          <CalendarTodayRoundedIcon color='disabled' />
+                        }
+                        minDate={values.startDate}
+                      />
+                    </DateField>
+                  </DateFields>
                   <Field
-                    name='budget'
-                    label='Budget'
-                    type='number'
+                    name='description'
+                    label='Description'
+                    type='text'
                     fullWidth
-                    precision={2}
+                    multiline
                     variant='filled'
                     component={FormikTextField}
                   />
-                </MediumLabel>
-                <Field
-                  name='frequencyOfPayments'
-                  label='Frequency of Payment'
-                  choices={data.programFrequencyOfPaymentsChoices}
-                  component={FormikRadioGroup}
-                />
-                <Field
-                  name='administrativeAreasOfImplementation'
-                  label='Administrative Areas of Implementation'
-                  type='text'
-                  fullWidth
-                  variant='filled'
-                  component={FormikTextField}
-                />
-                <MediumLabel>
+                  <MediumLabel>
+                    <Field
+                      name='budget'
+                      label='Budget'
+                      type='number'
+                      fullWidth
+                      precision={2}
+                      variant='filled'
+                      component={FormikTextField}
+                    />
+                  </MediumLabel>
                   <Field
-                    name='populationGoal'
-                    label='Population goal'
-                    type='number'
+                    name='frequencyOfPayments'
+                    label='Frequency of Payment'
+                    choices={data.programFrequencyOfPaymentsChoices}
+                    component={FormikRadioGroup}
+                  />
+                  <Field
+                    name='administrativeAreasOfImplementation'
+                    label='Administrative Areas of Implementation'
+                    type='text'
                     fullWidth
                     variant='filled'
                     component={FormikTextField}
                   />
-                </MediumLabel>
-                <MediumLabel>
-                  <Field
-                    name='sector'
-                    label='Sector'
-                    fullWidth
-                    required
-                    choices={data.programSectorChoices}
-                    component={FormikSelectField}
-                  />
-                </MediumLabel>
-                <MediumLabel>
-                  <Field
-                    name='cashPlus'
-                    label='Cash+'
-                    color='primary'
-                    component={FormikSwitchField}
-                  />
-                </MediumLabel>
+                  <MediumLabel>
+                    <Field
+                      name='populationGoal'
+                      label='Population goal'
+                      type='number'
+                      fullWidth
+                      variant='filled'
+                      component={FormikTextField}
+                    />
+                  </MediumLabel>
+                  <MediumLabel>
+                    <Field
+                      name='sector'
+                      label='Sector'
+                      fullWidth
+                      required
+                      choices={data.programSectorChoices}
+                      component={FormikSelectField}
+                    />
+                  </MediumLabel>
+                  <MediumLabel>
+                    <Field
+                      name='cashPlus'
+                      label='Cash+'
+                      color='primary'
+                      component={FormikSwitchField}
+                    />
+                  </MediumLabel>
+                </Form>
               </DialogContent>
               <DialogFooter>
-                <DialogActions>
-                  {renderSubmit(submitForm)}
-                </DialogActions>
+                <DialogActions>{renderSubmit(submitForm)}</DialogActions>
               </DialogFooter>
-            </Dialog>
-          </Form>
-        )}
-      </Formik>
+            </>
+          )}
+        </Formik>
+      </Dialog>
     </DialogContainer>
   );
 }
