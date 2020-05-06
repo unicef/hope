@@ -99,7 +99,6 @@ export function EditTargetPopulation({
     <Formik
       initialValues={initialValues}
       onSubmit={async (values) => {
-        console.log(values)
         const { data } = await mutate({
           variables: {
             input: {
