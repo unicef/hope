@@ -15,6 +15,7 @@ from core.utils import (
     serialize_flex_attributes,
 )
 from household.const import COUNTRIES_NAME_ALPHA2
+from registration_data.models import RegistrationDataImport
 from registration_datahub.models import ImportData
 from registration_datahub.models import (
     ImportedDocument,
@@ -304,3 +305,7 @@ class RdiCreateTask:
 
         registration_data_import.import_done = True
         registration_data_import.save()
+
+        RegistrationDataImport.objects.filter(
+            id=registration_data_import.hct_id
+        ).update(status="IN_REVIEW")
