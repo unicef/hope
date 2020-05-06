@@ -147,7 +147,7 @@ export function ProgramForm({
               </DialogTitleWrapper>
               <DialogContent>
                 <DialogDescription>
-                  "To create a new Programme, please complete all required fields on the form below and save."
+                  To create a new Programme, please complete all required fields on the form below and save.
                 </DialogDescription>
 
                 <Field
