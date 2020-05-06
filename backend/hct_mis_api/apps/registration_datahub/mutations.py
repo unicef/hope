@@ -54,7 +54,7 @@ class CreateRegistrationDataImport(BaseValidator, graphene.Mutation):
             import_data=import_data_obj, **registration_data_import_data,
         )
         created_obj_hct = RegistrationDataImport.objects.create(
-            status="IN_REVIEW",
+            status="IMPORTING",
             imported_by=info.context.user,
             data_source="XLS",
             number_of_individuals=import_data_obj.number_of_individuals,
