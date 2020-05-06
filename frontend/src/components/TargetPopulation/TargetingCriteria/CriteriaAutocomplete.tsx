@@ -18,7 +18,7 @@ export function CriteriaAutocomplete({
   const [open, setOpen] = useState(false);
   const [newValue, setNewValue] = useState(null);
   useEffect(() => { 
-    const optionValue = otherProps.choices.find(choice => choice.name === field.value)
+    const optionValue = otherProps.choices.find(choice => choice.name === field.value) || null;
     setNewValue(optionValue)
   }, [field.value, otherProps.choices]);
   return (

@@ -13,7 +13,6 @@ import {
 import { AddCircleOutline, Delete } from '@material-ui/icons';
 import { Field, Formik, FieldArray } from 'formik';
 import { useImportedIndividualFieldsQuery } from '../../__generated__/graphql';
-import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { SubField } from '../../components/TargetPopulation/SubField';
 import {
   formatCriteriaFilters,
