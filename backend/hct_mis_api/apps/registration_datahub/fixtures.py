@@ -12,6 +12,7 @@ from registration_datahub.models import (
     RegistrationDataImportDatahub,
     ImportedHousehold,
     ImportedIndividual,
+    ImportData,
 )
 
 
