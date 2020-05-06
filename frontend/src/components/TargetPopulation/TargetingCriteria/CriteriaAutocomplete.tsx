@@ -16,7 +16,7 @@ export function CriteriaAutocomplete({
   ...otherProps
 }): React.ReactElement {
   const [open, setOpen] = useState(false);
-  const [newValue, setNewValue] = useState(null);
+  const [newValue, setNewValue] = useState();
   useEffect(() => { 
     const optionValue = otherProps.choices.find(choice => choice.name === field.value) || null;
     setNewValue(optionValue)
