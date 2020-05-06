@@ -23,6 +23,13 @@ TYPE_GEOPOINT = "GEOPOINT"
 _INDIVIDUAL = "Individual"
 _HOUSEHOLD = "Household"
 
+FILTERABLE_TYPES = [
+    TYPE_INTEGER,
+    TYPE_STRING,
+    TYPE_SELECT_ONE,
+    TYPE_SELECT_MANY,
+]
+
 CORE_FIELDS_ATTRIBUTES = [
     {
         "id": "a1741e3c-0e24-4a60-8d2f-463943abaebb",
@@ -799,6 +806,13 @@ def _core_fields_to_separated_dict(append_household_id=True):
 
     return result_dict
 
+
+
+
+
+FILTERABLE_CORE_FIELDS_ATTRIBUTES = [
+    x for x in CORE_FIELDS_ATTRIBUTES if x.get("type") in FILTERABLE_TYPES
+]
 
 CORE_FIELDS_ATTRIBUTES_DICTIONARY = reduce(
     _reduce_core_field_attr, CORE_FIELDS_ATTRIBUTES, {}

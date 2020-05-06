@@ -1,6 +1,9 @@
+import operator
+
 import graphene
 import openpyxl
 from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import transaction
 from graphene_file_upload.scalars import Upload
 
@@ -25,7 +28,6 @@ from registration_datahub.validators import UploadXLSXValidator
 class CreateRegistrationDataImportExcelInput(graphene.InputObjectType):
     import_data_id = graphene.ID()
     name = graphene.String()
-    business_area_slug = graphene.String(required=False)
 
 
 class CreateRegistrationDataImport(BaseValidator, graphene.Mutation):
@@ -98,89 +100,14 @@ class MergeRegistrationDataImportMutation(BaseValidator, graphene.Mutation):
     @is_authenticated
     def mutate(cls, root, info, id):
         decode_id = decode_id_string(id)
-
-        obj_hub = RegistrationDataImportDatahub.objects.select_for_update().get(
-            hct_id=decode_id,
-        )
-
-        obj_hct = RegistrationDataImport.objects.select_for_update().get(
-            id=decode_id,
-        )
-
+        obj_hct = RegistrationDataImport.objects.get(id=decode_id,)
         cls.validate(status=obj_hct.status)
-
-        with transaction.atomic():
-            # move individuals and households to hct db
-            imported_households = ImportedHousehold.objects.filter(
-                registration_data_import=obj_hub,
-            )
-            imported_individuals = ImportedIndividual.objects.filter(
-                registration_data_import=obj_hub,
-            )
-
-            imported_households_as_values = imported_households.values(
-                "household_ca_id",
-                "consent",
-                "residence_status",
-                "nationality",
-                "family_size",
-                "address",
-                "location",
-                "representative",
-                "head_of_household",
-                "registration_date",
-            )
-            imported_individuals_as_values = imported_individuals.values(
-                "individual_ca_id",
-                "full_name",
-                "first_name",
-                "middle_name",
-                "last_name",
-                "dob",
-                "sex",
-                "estimated_dob",
-                "nationality",
-                "marital_status",
-                "phone_number",
-                "phone_number_alternative",
-                "identification_type",
-                "identification_number",
-                "household",
-                "work_status",
-                "disability",
-            )
-
-            households_to_create = (
-                Household(
-                    **{
-                        **hh,
-                        "representative": None,
-                        "head_of_household": None,
-                        # TODO: cannot be empty should we also have Location,
-                        #  GatewayType models in registration datahub
-                        "location": None,
-                    }
-                )
-                for hh in imported_households_as_values
-            )
-
-            Household.objects.bulk_create(households_to_create)
-
-            individuals_to_create = (
-                Individual(**ind) for ind in imported_individuals_as_values
-            )
-
-            Individual.objects.bulk_create(individuals_to_create)
-
-            # TODO: update household head and representative
-
-            # cleanup datahub
-            imported_households.delete()
-            imported_individuals.delete()
-
-            obj_hct.status = "MERGED"
-            obj_hct.save()
-
+        AirflowApi.start_dag(
+            dag_id="MergeRegistrationImportData",
+            context={"registration_data_import_id": decode_id,},
+        )
+        obj_hct.status = "MERGING"
+        obj_hct.save()
         return MergeRegistrationDataImportMutation(obj_hct)
 
 
@@ -254,8 +181,12 @@ class UploadImportDataXLSXFile(
     @classmethod
     @is_authenticated
     def mutate(cls, root, info, file):
+        # TODO: Is it good approach?
+        #  consult this with Janek
         errors = cls.validate(file=file)
+
         if errors:
+            errors.sort(key=operator.itemgetter('row_number', 'header'))
             return UploadImportDataXLSXFile(None, errors)
 
         wb = openpyxl.load_workbook(file)
