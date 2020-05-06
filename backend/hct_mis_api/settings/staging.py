@@ -62,3 +62,5 @@ sentry_sdk.init(
     dsn=os.getenv("SENTRY_DSN"),
     integrations=[DjangoIntegration()],
 )
+
+AIRFLOW_HOST = "hct-mis-airflow-web"
