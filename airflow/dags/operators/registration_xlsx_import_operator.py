@@ -238,12 +238,11 @@ class RegistrationXLSXImportOperator(DjangoOperator):
                         household = self.households.get(household_id)
                         household.head_of_household = obj_to_create
                         households_to_update.append(household)
-                    else:
-                        setattr(
-                            obj_to_create,
-                            combined_fields[header]["name"],
-                            value,
-                        )
+                    setattr(
+                        obj_to_create,
+                        combined_fields[header]["name"],
+                        value,
+                    )
                 elif header in flex_fields[sheet_title]:
                     value = cell.value
                     type_name = flex_fields[sheet_title][header]["type"]
