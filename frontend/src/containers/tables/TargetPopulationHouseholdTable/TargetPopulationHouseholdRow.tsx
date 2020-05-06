@@ -29,7 +29,7 @@ export function TargetPopulationHouseholdTableRow({ household }) {
       <TableCell align='left'>{`${household.headOfHousehold.givenName} ${household.headOfHousehold.familyName}`}</TableCell>
       <TableCell align='left'>{household.size}</TableCell>
       <TableCell align='left'>{household.address}</TableCell>
-      <TableCell align='left'>{household.adminArea.title}</TableCell>
+      <TableCell align='left'>{household.adminArea?.title}</TableCell>
     </ClickableTableRow>
   );
 }
