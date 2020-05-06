@@ -78,7 +78,7 @@ snapshots['TestTargetPopulationQuery::test_simple_target_query 1'] = {
                                 ],
                                 'comparisionMethod': 'EQUALS',
                                 'fieldAttribute': {
-                                    'labelEn': 'Family Size',
+                                    'labelEn': 'What is the household size?',
                                     'type': 'INTEGER'
                                 },
                                 'fieldName': 'size',
@@ -112,7 +112,7 @@ snapshots['TestTargetPopulationQuery::test_simple_target_query_2 1'] = {
                                 ],
                                 'comparisionMethod': 'EQUALS',
                                 'fieldAttribute': {
-                                    'labelEn': 'Residence Status',
+                                    'labelEn': 'Residence status',
                                     'type': 'SELECT_ONE'
                                 },
                                 'fieldName': 'residence_status',
