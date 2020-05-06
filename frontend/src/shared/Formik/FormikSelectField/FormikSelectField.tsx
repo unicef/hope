@@ -15,7 +15,7 @@ export const FormikSelectField = ({
   const isInvalid = form.errors[field.name] && form.touched[field.name];
   return (
     <>
-      <FormControl variant='filled' margin='dense' fullWidth {...otherProps}>
+      <FormControl variant='outlined' margin='dense' fullWidth {...otherProps}>
         <InputLabel>{otherProps.label}</InputLabel>
         <Select
           {...field}

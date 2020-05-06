@@ -1,0 +1,21 @@
+[
+{
+  "model": "account.user",
+  "pk": "4196c2c5-c2dd-48d2-887f-3a9d39e78916",
+  "fields": {
+    "password": "pbkdf2_sha256$150000$CdnX4BaLhW3g$WbYJLKspIQK1ynWJ0yuV68J4DwF/17D7+YNjzXigHig=",
+    "last_login": null,
+    "is_superuser": true,
+    "username": "root",
+    "first_name": "",
+    "last_name": "",
+    "email": "root@root.com",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2020-05-06T11:57:00.706",
+    "groups": [],
+    "user_permissions": [],
+    "business_areas": []
+  }
+}
+]

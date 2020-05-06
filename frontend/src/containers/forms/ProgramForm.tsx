@@ -157,8 +157,7 @@ export function ProgramForm({
               </DialogTitleWrapper>
               <DialogContent>
                 <DialogDescription>
-                  To subscribe to this website, please enter your email address
-                  here. We will send updates occasionally.
+                  To create a new Programme, please complete all required fields on the form below and save.
                 </DialogDescription>
 
                 <Form>

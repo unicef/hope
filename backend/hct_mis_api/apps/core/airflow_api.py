@@ -1,8 +1,9 @@
 import requests
+from django.conf import settings
 
 
 class AirflowApi:
-    _BASE_URL = "http://airflow_webserver:4200/api/experimental"
+    _BASE_URL = f"http://{settings.AIRFLOW_HOST}:8080/api/experimental"
 
     @classmethod
     def start_dag(

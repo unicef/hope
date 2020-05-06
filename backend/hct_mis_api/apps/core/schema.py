@@ -24,7 +24,7 @@ from graphene_django.converter import convert_django_field
 from graphene_django.filter import DjangoFilterConnectionField
 
 from account.schema import UserObjectType
-from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES
+from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES, FILTERABLE_CORE_FIELDS_ATTRIBUTES
 from core.extended_connection import ExtendedConnection
 from core.models import (
     AdminArea,
@@ -244,7 +244,7 @@ def get_fields_attr_generators(flex_field):
         for attr in FlexibleAttribute.objects.all():
             yield attr
     if flex_field != True:
-        for attr in CORE_FIELDS_ATTRIBUTES:
+        for attr in FILTERABLE_CORE_FIELDS_ATTRIBUTES:
             yield attr
 
 

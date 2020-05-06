@@ -12,11 +12,9 @@ class RegistrationDataImportFactory(factory.DjangoModelFactory):
         django_get_or_create = ("name",)
 
     name = factory.Faker(
-        "sentence", nb_words=6, variable_nb_words=True, ext_word_list=None,
+        "sentence", nb_words=3, variable_nb_words=True, ext_word_list=None,
     )
-    status = factory.fuzzy.FuzzyChoice(
-        RegistrationDataImport.STATUS_CHOICE, getter=lambda c: c[0],
-    )
+    status = 'IN_REVIEW'
     import_date = factory.Faker(
         "date_time_this_decade", before_now=True, tzinfo=utc,
     )
