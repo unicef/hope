@@ -138,7 +138,7 @@ class FlexibleAttributeImporter:
                     ] = self.TYPE_CHOICE_MAP.get(choice_key)
             else:
                 is_attribute_name_empty = (
-                    header_name == "name" and value is None
+                    header_name == "name" and value in (None, "")
                 )
                 is_choice_list_name_empty = (
                     header_name == "list_name"
@@ -156,8 +156,6 @@ class FlexibleAttributeImporter:
                 self.object_fields_to_create[header_name] = (
                     value if value else ""
                 )
-        elif header_name.startswith("admin"):
-            self.object_fields_to_create["admin"] = value if value else ""
 
     def _can_add_row(self, row):
         is_core_field = any(
