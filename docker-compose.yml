@@ -112,7 +112,7 @@ services:
       context: .
       dockerfile: ./airflow/Dockerfile
     ports:
-      - "4200:4200"
+      - "4200:8080"
     env_file:
       - ./airflow/config/.env_airflow
     restart: always
