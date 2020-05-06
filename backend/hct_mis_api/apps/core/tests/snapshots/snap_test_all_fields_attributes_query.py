@@ -2400,23 +2400,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
             {
                 'associatedWith': 'Household',
                 'choices': [
-                ],
-                'hint': 'image of consent',
-                'isFlexField': False,
-                'labelEn': 'Do you consent?',
-                'labels': [
-                    {
-                        'label': 'Do you consent?',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'consent',
-                'required': True,
-                'type': 'IMAGE'
-            },
-            {
-                'associatedWith': 'Household',
-                'choices': [
                     {
                         'labelEn': 'Afghanistan',
                         'labels': [
@@ -7483,23 +7466,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                 ],
-                'hint': 'latitude and longitude of household',
-                'isFlexField': False,
-                'labelEn': 'Household Geopoint',
-                'labels': [
-                    {
-                        'label': 'Household Geopoint',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'geopoint',
-                'required': False,
-                'type': 'GEOPOINT'
-            },
-            {
-                'associatedWith': 'Household',
-                'choices': [
-                ],
                 'hint': '',
                 'isFlexField': False,
                 'labelEn': 'UNHCR Case ID',
@@ -7512,23 +7478,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'name': 'unhcr_id',
                 'required': False,
                 'type': 'STRING'
-            },
-            {
-                'associatedWith': 'Household',
-                'choices': [
-                ],
-                'hint': '',
-                'isFlexField': False,
-                'labelEn': 'Is this a returnee household?',
-                'labels': [
-                    {
-                        'label': 'Is this a returnee household?',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'returnee',
-                'required': False,
-                'type': 'BOOL'
             },
             {
                 'associatedWith': 'Household',
@@ -7859,57 +7808,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
             {
                 'associatedWith': 'Individual',
                 'choices': [
-                ],
-                'hint': '',
-                'isFlexField': False,
-                'labelEn': 'Birth Date',
-                'labels': [
-                    {
-                        'label': 'Birth Date',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'birth_date',
-                'required': True,
-                'type': 'DATE'
-            },
-            {
-                'associatedWith': 'Individual',
-                'choices': [
-                ],
-                'hint': '',
-                'isFlexField': False,
-                'labelEn': 'Estimated Birth Date?',
-                'labels': [
-                    {
-                        'label': 'Estimated Birth Date?',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'estimated_birth_date',
-                'required': False,
-                'type': 'BOOL'
-            },
-            {
-                'associatedWith': 'Individual',
-                'choices': [
-                ],
-                'hint': '',
-                'isFlexField': False,
-                'labelEn': 'Photo',
-                'labels': [
-                    {
-                        'label': 'Photo',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'photo',
-                'required': False,
-                'type': 'IMAGE'
-            },
-            {
-                'associatedWith': 'Individual',
-                'choices': [
                     {
                         'labelEn': 'SINGLE',
                         'labels': [
@@ -8031,23 +7929,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Birth certificate photo',
-                'labels': [
-                    {
-                        'label': 'Birth certificate photo',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'birth_certificate_photo',
-                'required': False,
-                'type': 'IMAGE'
-            },
-            {
-                'associatedWith': 'Individual',
-                'choices': [
-                ],
-                'hint': '',
-                'isFlexField': False,
                 'labelEn': "Driver's license number",
                 'labels': [
                     {
@@ -8058,23 +7939,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'name': 'drivers_license_no',
                 'required': False,
                 'type': 'STRING'
-            },
-            {
-                'associatedWith': 'Individual',
-                'choices': [
-                ],
-                'hint': '',
-                'isFlexField': False,
-                'labelEn': "Driver's license photo",
-                'labels': [
-                    {
-                        'label': "Driver's license photo",
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'drivers_license_photo',
-                'required': False,
-                'type': 'IMAGE'
             },
             {
                 'associatedWith': 'Individual',
@@ -8099,23 +7963,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Electoral card photo',
-                'labels': [
-                    {
-                        'label': 'Electoral card photo',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'electoral_card_photo',
-                'required': False,
-                'type': 'IMAGE'
-            },
-            {
-                'associatedWith': 'Individual',
-                'choices': [
-                ],
-                'hint': '',
-                'isFlexField': False,
                 'labelEn': 'UNHCR ID number',
                 'labels': [
                     {
@@ -8126,23 +7973,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'name': 'unhcr_id_no',
                 'required': False,
                 'type': 'STRING'
-            },
-            {
-                'associatedWith': 'Individual',
-                'choices': [
-                ],
-                'hint': '',
-                'isFlexField': False,
-                'labelEn': 'UNHCR ID photo',
-                'labels': [
-                    {
-                        'label': 'UNHCR ID photo',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'unhcr_id_photo',
-                'required': False,
-                'type': 'IMAGE'
             },
             {
                 'associatedWith': 'Individual',
@@ -8167,23 +7997,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'National passport photo',
-                'labels': [
-                    {
-                        'label': 'National passport photo',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'national_passport_photo',
-                'required': False,
-                'type': 'IMAGE'
-            },
-            {
-                'associatedWith': 'Individual',
-                'choices': [
-                ],
-                'hint': '',
-                'isFlexField': False,
                 'labelEn': 'WFP Scope ID number',
                 'labels': [
                     {
@@ -8194,23 +8007,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'name': 'scope_id_no',
                 'required': False,
                 'type': 'STRING'
-            },
-            {
-                'associatedWith': 'Individual',
-                'choices': [
-                ],
-                'hint': '',
-                'isFlexField': False,
-                'labelEn': 'WFP Scope ID photo',
-                'labels': [
-                    {
-                        'label': 'WFP Scope ID photo',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'scope_id_photo',
-                'required': False,
-                'type': 'IMAGE'
             },
             {
                 'associatedWith': 'Individual',
@@ -8245,23 +8041,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'name': 'other_id_no',
                 'required': False,
                 'type': 'STRING'
-            },
-            {
-                'associatedWith': 'Individual',
-                'choices': [
-                ],
-                'hint': '',
-                'isFlexField': False,
-                'labelEn': 'ID photo',
-                'labels': [
-                    {
-                        'label': 'ID photo',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'other_id_photo',
-                'required': False,
-                'type': 'IMAGE'
             },
             {
                 'associatedWith': 'Household',
