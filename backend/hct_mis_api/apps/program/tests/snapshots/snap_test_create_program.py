@@ -29,26 +29,6 @@ snapshots['TestCreateProgram::test_create_program_authenticated 1'] = {
     }
 }
 
-snapshots['TestCreateProgram::test_create_program_not_authenticated 1'] = {
-    'data': {
-        'createProgram': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 7,
-                    'line': 3
-                }
-            ],
-            'message': 'Permission Denied: User is not authenticated.',
-            'path': [
-                'createProgram'
-            ]
-        }
-    ]
-}
-
 snapshots['TestCreateProgram::test_create_program_invalid_dates 1'] = {
     'data': {
         'createProgram': {
@@ -69,4 +49,24 @@ snapshots['TestCreateProgram::test_create_program_invalid_dates 1'] = {
             }
         }
     }
+}
+
+snapshots['TestCreateProgram::test_create_program_not_authenticated 1'] = {
+    'data': {
+        'createProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied: User is not authenticated.',
+            'path': [
+                'createProgram'
+            ]
+        }
+    ]
 }

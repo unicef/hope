@@ -23,6 +23,7 @@ from registration_datahub.fixtures import (
     RegistrationDataImportDatahubFactory,
     ImportedIndividualFactory,
     ImportedHouseholdFactory,
+    create_imported_household,
 )
 from targeting.fixtures import (
     TargetPopulationFactory,
@@ -202,22 +203,14 @@ class Command(BaseCommand):
             self._generate_program_with_dependencies(options)
 
         # Data imports generation
-        data_imports_dth = RegistrationDataImportDatahubFactory.create_batch(
-            5, hct_id=RegistrationDataImport.objects.all()[0].id
-        )
-        for data_import in data_imports_dth:
-            for _ in range(50):
-                imported_household = ImportedHouseholdFactory(
-                    registration_data_import=data_import,
+
+        for rdi in RegistrationDataImport.objects.all()[0:100]:
+            rdi_datahub = RegistrationDataImportDatahubFactory(hct_id=rdi.id)
+            for _ in range(15):
+                create_imported_household(
+                    {"registration_data_import": rdi_datahub,},
+                    {"registration_data_import": rdi_datahub,},
                 )
-                imported_individuals = ImportedIndividualFactory.create_batch(
-                    imported_household.size,
-                    household=imported_household,
-                    registration_data_import=data_import,
-                )
-                imported_household.head_of_household = imported_individuals[0]
-                imported_household.representative = imported_individuals[0]
-                imported_household.save()
 
         self.stdout.write(
             f"Generated fixtures in {(time.time() - start_time)} seconds"
