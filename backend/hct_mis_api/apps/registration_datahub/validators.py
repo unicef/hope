@@ -6,7 +6,6 @@ from zipfile import BadZipfile
 import openpyxl
 import phonenumbers
 from dateutil import parser
-from graphql.error import GraphQLLocatedError
 from openpyxl import load_workbook
 
 from core.core_fields_attributes import CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY
@@ -114,9 +113,7 @@ class UploadXLSXValidator(BaseValidator):
         if field is None:
             return False
 
-        choices = get_choices_values(
-            field["choices"], header=header
-        )
+        choices = get_choices_values(field["choices"], header=header)
         choice_type = cls.ALL_FIELDS[header]["type"]
 
         if not cls.required_validator(value, header):
@@ -176,7 +173,7 @@ class UploadXLSXValidator(BaseValidator):
         }
 
         switch_dict = {
-            "ID": cls.string_validator,
+            "ID": cls.not_empty_validator,
             "STRING": cls.string_validator,
             "INTEGER": cls.integer_validator,
             "DECIMAL": cls.float_validator,
@@ -199,6 +196,9 @@ class UploadXLSXValidator(BaseValidator):
         )
 
         invalid_rows = []
+        current_household_id = None
+        head_of_household_count = 0
+        error_appended_flag = False
         for row in sheet.iter_rows(min_row=3):
             # openpyxl keeps iterating on empty rows so need to omit empty rows
             if not any([cell.value for cell in row]):
@@ -208,6 +208,34 @@ class UploadXLSXValidator(BaseValidator):
                 current_field = combined_fields.get(header.value)
                 if not current_field:
                     continue
+
+                # Validate there is only one head of household per household
+                if (
+                    header.value == "household_id"
+                    and current_household_id != cell.value
+                ):
+                    current_household_id = cell.value
+                    head_of_household_count = 0
+                    error_appended_flag = False
+
+                if header.value == "relationship_i_c" and cell.value == "HEAD":
+                    head_of_household_count += 1
+
+                if head_of_household_count > 1 and not error_appended_flag:
+                    message = (
+                        "Sheet: Individuals, There are multiple head of "
+                        "households for household with "
+                        f"id: {current_household_id}"
+                    )
+                    invalid_rows.append(
+                        {
+                            "row_number": cell.row,
+                            "header": "relationship_i_c",
+                            "message": message,
+                        }
+                    )
+                    error_appended_flag = True
+
                 field_type = current_field["type"]
                 fn = switch_dict.get(field_type)
 
