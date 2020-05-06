@@ -165,6 +165,9 @@ class Command(BaseCommand):
             call_command("flush", "--noinput")
             call_command("flush", "--noinput", database="cash_assist_datahub")
             call_command("flush", "--noinput", database="registration_datahub")
+            call_command(
+                "loaddata", "hct_mis_api/apps/account/fixtures/superuser.json", verbosity=0
+            )
         start_time = time.time()
         programs_amount = options["programs_amount"]
         business_areas = BusinessArea.objects.all().count()
@@ -204,7 +207,7 @@ class Command(BaseCommand):
 
         # Data imports generation
 
-        for rdi in RegistrationDataImport.objects.all()[0:100]:
+        for rdi in RegistrationDataImport.objects.all()[0:40]:
             rdi_datahub = RegistrationDataImportDatahubFactory(hct_id=rdi.id)
             for _ in range(15):
                 create_imported_household(
