@@ -22,7 +22,7 @@ export const SubField = (field, index) => {
                 name={`filters[${index}].value.from`}
                 label={`${field.fieldAttribute.labelEn} from`}
                 type='number'
-                variant='filled'
+                variant='outlined'
                 fullWidth
                 component={FormikTextField}
               />
@@ -32,7 +32,7 @@ export const SubField = (field, index) => {
                 name={`filters[${index}].value.to`}
                 label={`${field.fieldAttribute.labelEn} to`}
                 type='number'
-                variant='filled'
+                variant='outlined'
                 fullWidth
                 component={FormikTextField}
               />
@@ -66,7 +66,6 @@ export const SubField = (field, index) => {
             name={`filters[${index}].value`}
             label={`${field.fieldAttribute.labelEn}`}
             fullWidth
-            variant='filled'
             component={FormikTextField}
           />
         );
