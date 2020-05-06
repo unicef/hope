@@ -41,7 +41,7 @@ STATIC_URL = f"https://{AZURE_CUSTOM_DOMAIN}/{STATIC_LOCATION}/"
 MEDIA_URL = f"https://{AZURE_CUSTOM_DOMAIN}/{MEDIA_LOCATION}/"
 
 DEFAULT_FILE_STORAGE = "core.storage.AzureMediaStorage"
-STATICFILES_STORAGE = "core.storage.AzureStaticStorage"
+STATICFILES_STORAGE = "settings.azure_storage.AzureMediaStorage"
 SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
 
 if os.getenv("POSTGRES_SSL", False):
