@@ -51,18 +51,16 @@ snapshots['TestRegistrationDataImportDatahubMutations::test_approve_registration
 }
 
 snapshots['TestRegistrationDataImportDatahubMutations::test_registration_data_import_create 1'] = {
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 7,
-                    'line': 3
-                }
-            ],
-            'message': '''Variable "$registrationDataImportData" got invalid value {"businessAreaSlug": "afghanistan", "importDataId": "SW1wb3J0RGF0YU5vZGU6ZTZhMTgzY2EtM2E4NS00ZjE1LWE3NGItODU0MDY3ZDEwZWY2", "name": "New Import of Data 123"}.
-In field "businessAreaSlug": Unknown field.'''
+    'data': {
+        'createRegistrationDataImport': {
+            'registrationDataImport': {
+                'name': 'New Import of Data 123',
+                'numberOfHouseholds': 3,
+                'numberOfIndividuals': 6,
+                'status': 'IN_REVIEW'
+            }
         }
-    ]
+    }
 }
 
 snapshots['TestRegistrationDataImportDatahubMutations::test_unapprove_registration_data_import 1'] = {
