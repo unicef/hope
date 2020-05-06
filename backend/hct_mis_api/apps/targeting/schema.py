@@ -286,7 +286,7 @@ class Query(graphene.ObjectType):
         if target_population_model.status == "DRAFT":
             return Household.objects.filter(
                 target_population_model.candidate_list_targeting_criteria.get_query()
-            )
+            ).distinct()
         return target_population_model.households.all()
 
     def resolve_final_households_list_by_targeting_criteria(
@@ -303,12 +303,12 @@ class Query(graphene.ObjectType):
                 if target_population_model.final_list_targeting_criteria:
                     return target_population_model.households.filter(
                         target_population_model.final_list_targeting_criteria.get_query()
-                    )
+                    ).distinct()
                 else:
                     return target_population_model.households.all()
             return target_population_model.households.filter(
                 targeting_criteria_object_type_to_query(targeting_criteria)
-            ).all()
+            ).all().distinct()
 
         return target_population_model.final_list.all()
 
@@ -317,4 +317,4 @@ class Query(graphene.ObjectType):
     ):
         return Household.objects.filter(
             targeting_criteria_object_type_to_query(targeting_criteria)
-        )
+        ).distinct()

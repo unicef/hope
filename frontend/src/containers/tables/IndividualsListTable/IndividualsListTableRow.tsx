@@ -41,7 +41,7 @@ export function IndividualsListTableRow({
       </TableCell>
       <TableCell align='right'>{age}</TableCell>
       <TableCell align='left'>{sexToCapitalize(individual.sex)}</TableCell>
-      <TableCell align='left'>{individual.household.adminArea.title}</TableCell>
+      <TableCell align='left'>{individual.household.adminArea?.title}</TableCell>
     </ClickableTableRow>
   );
 }
