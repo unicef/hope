@@ -156,8 +156,6 @@ class FlexibleAttributeImporter:
                 self.object_fields_to_create[header_name] = (
                     value if value else ""
                 )
-        elif header_name.startswith("admin"):
-            self.object_fields_to_create["admin"] = value if value else ""
 
     def _can_add_row(self, row):
         is_core_field = any(
