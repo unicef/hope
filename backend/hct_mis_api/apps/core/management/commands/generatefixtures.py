@@ -23,6 +23,7 @@ from registration_datahub.fixtures import (
     RegistrationDataImportDatahubFactory,
     ImportedIndividualFactory,
     ImportedHouseholdFactory,
+    create_imported_household,
 )
 from targeting.fixtures import (
     TargetPopulationFactory,
@@ -164,6 +165,9 @@ class Command(BaseCommand):
             call_command("flush", "--noinput")
             call_command("flush", "--noinput", database="cash_assist_datahub")
             call_command("flush", "--noinput", database="registration_datahub")
+            call_command(
+                "loaddata", "hct_mis_api/apps/account/fixtures/superuser.json", verbosity=0
+            )
         start_time = time.time()
         programs_amount = options["programs_amount"]
         business_areas = BusinessArea.objects.all().count()
@@ -202,22 +206,14 @@ class Command(BaseCommand):
             self._generate_program_with_dependencies(options)
 
         # Data imports generation
-        data_imports_dth = RegistrationDataImportDatahubFactory.create_batch(
-            5, hct_id=RegistrationDataImport.objects.all()[0].id
-        )
-        for data_import in data_imports_dth:
-            for _ in range(50):
-                imported_household = ImportedHouseholdFactory(
-                    registration_data_import=data_import,
+
+        for rdi in RegistrationDataImport.objects.all()[0:40]:
+            rdi_datahub = RegistrationDataImportDatahubFactory(hct_id=rdi.id)
+            for _ in range(15):
+                create_imported_household(
+                    {"registration_data_import": rdi_datahub,},
+                    {"registration_data_import": rdi_datahub,},
                 )
-                imported_individuals = ImportedIndividualFactory.create_batch(
-                    imported_household.size,
-                    household=imported_household,
-                    registration_data_import=data_import,
-                )
-                imported_household.head_of_household = imported_individuals[0]
-                imported_household.representative = imported_individuals[0]
-                imported_household.save()
 
         self.stdout.write(
             f"Generated fixtures in {(time.time() - start_time)} seconds"

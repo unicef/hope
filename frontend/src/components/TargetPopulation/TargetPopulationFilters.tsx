@@ -78,7 +78,8 @@ export function TargetPopulationFilters({
     <Container>
       <TextContainer
         placeholder='Search'
-        variant='filled'
+        variant='outlined'
+        margin='dense'
         onChange={(e) => handleFilterChange(e, 'name')}
         InputProps={{
           startAdornment: (
@@ -91,7 +92,8 @@ export function TargetPopulationFilters({
       <TextContainer
         select
         placeholder='Status'
-        variant='filled'
+        variant='outlined'
+        margin='dense'
         onChange={(e) => handleFilterChange(e, 'status')}
         InputProps={{
           startAdornment: (
@@ -109,7 +111,8 @@ export function TargetPopulationFilters({
       <TextContainer
         id='minFilter'
         value={filter.numIndividuals.min}
-        variant='filled'
+        variant='outlined'
+        margin='dense'
         placeholder='Household Size'
         onChange={(e) =>
           onFilterChange({
@@ -133,7 +136,8 @@ export function TargetPopulationFilters({
       <TextContainer
         id='maxFilter'
         value={filter.numIndividuals.max}
-        variant='filled'
+        variant='outlined'
+        margin='dense'
         placeholder='Individual Size'
         onChange={(e) =>
           onFilterChange({

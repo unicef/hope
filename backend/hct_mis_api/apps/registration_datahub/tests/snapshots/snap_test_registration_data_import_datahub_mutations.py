@@ -55,8 +55,8 @@ snapshots['TestRegistrationDataImportDatahubMutations::test_registration_data_im
         'createRegistrationDataImport': {
             'registrationDataImport': {
                 'name': 'New Import of Data 123',
-                'numberOfHouseholds': 500,
-                'numberOfIndividuals': 1000,
+                'numberOfHouseholds': 3,
+                'numberOfIndividuals': 6,
                 'status': 'IN_REVIEW'
             }
         }
