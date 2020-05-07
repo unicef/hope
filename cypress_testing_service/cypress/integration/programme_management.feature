@@ -8,28 +8,26 @@ Feature: Programme Management
     as well.
 
     Background:
-        Given I login to AD as country_admin
-        # Given I login with mocked cookies
+        # Given I login to AD as country_admin
+        Given I login with mocked cookies
         Then I see user profile menu
 
+    @createProgramme
     Scenario: Create a New Programme
         When User starts creating New Programme
         Then the New Programme form is shown
 
         When the User completes all required fields on the form
-        And the User clicks the Save button
+            And the User clicks the Save button
         Then the User is redirected to the new Programme Details screen
-        And status of this Progrmame is Draft
+            And status of this Progrmame is Draft
 
-# Scenario: Remove Draft Programme
-#     Given The User is viewing the Details screen of a Programme that has the state = 'Draft'
-#     When A User clicks the 'Remove' Button
-#     Then A Confirmation Modal screen displays
-
-#     Given the Confirmation Modal screen is present
-#     When The User clicks the 'Remove' Button
-#     Then The Programme is soft deleted
-#     And The Programme is no longer accessible within the System UI
+    @removeProgramme
+    Scenario: Remove Draft Programme
+        Given the User is viewing existing Programme in Draft state
+        When the User takes action to remove Programme
+        Then the Programme is soft deleted
+            And the Programme is no longer accessible
 
 # Scenario: Activating a Programme
 #     Given The User is viewing the details page of a 'Draft' Programme

@@ -15,7 +15,12 @@
 
 // Import commands.js using ES2015 syntax:
 import './commands';
+import './chaiSubset';
+import 'cypress-promise/register';
 
-// Alternatively you can use CommonJS syntax:
-// require('./commands')
-
+// TODO remove if no optimization gain
+// Cypress.Cookies.defaults({
+//   whitelist: [
+//     ...mockAuthCookies.map(({ name }) => name),
+//   ],
+// });
