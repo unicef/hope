@@ -11,6 +11,7 @@ class RegistrationDataImport(TimeStampedUUIDModel):
         ("APPROVED", _("Approved")),
         ("MERGED", _("Merged")),
         ("MERGING", _("Merging")),
+        ("IMPORTING", _("Importing")),
     )
     DATA_SOURCE_CHOICE = (
         ("XLS", "Excel"),
