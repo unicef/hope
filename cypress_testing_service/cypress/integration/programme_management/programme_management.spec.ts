@@ -22,7 +22,6 @@ After({ tags: '@createProgramme' }, () => {
   });
 });
 
-// TODO needed?
 After({ tags: '@removeProgramme' }, () => {
   cy.getBusinessAreaSlug().then((businessAreaSlug) => {
     api.getAllPrograms(businessAreaSlug).then((response) => {

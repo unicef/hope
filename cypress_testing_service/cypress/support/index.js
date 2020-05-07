@@ -17,3 +17,10 @@
 import './commands';
 import './chaiSubset';
 import 'cypress-promise/register';
+
+// TODO remove if no optimization gain
+// Cypress.Cookies.defaults({
+//   whitelist: [
+//     ...mockAuthCookies.map(({ name }) => name),
+//   ],
+// });
