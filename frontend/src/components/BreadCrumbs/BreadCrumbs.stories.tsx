@@ -11,7 +11,7 @@ export default {
 };
 
 const propsData = [
-  { title: 'Programme Management XYZ', to: '/first-url' },
+  { title: 'Programme Management', to: '/first-url' },
   { title: 'Cash Plan', to: '/second-url' },
   { title: 'Payment Record', to: '/third-url' },
 ];
