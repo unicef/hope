@@ -68,7 +68,7 @@ export function HouseholdDetails({
           </Grid>
           <Grid item xs={4}>
             <LabelizedField label='Location'>
-              <div>{houseHold.adminArea.title}</div>
+              <div>{houseHold.adminArea?.title||"-"}</div>
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>

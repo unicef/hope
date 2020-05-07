@@ -14,7 +14,7 @@ type AdminAreaNode implements Node {
   treeId: Int!
   level: Int!
   children(before: String, after: String, first: Int, last: Int, title: String): AdminAreaNodeConnection!
-  householdSet(before: String, after: String, first: Int, last: Int): HouseholdTPNodeConnection!
+  householdSet(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   programs(before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
 }
 
@@ -172,6 +172,7 @@ type CreateRegistrationDataImport {
 input CreateRegistrationDataImportExcelInput {
   importDataId: ID
   name: String
+  businessAreaSlug: String
 }
 
 input CreateTargetPopulationInput {
@@ -276,6 +277,8 @@ type FinalizeTargetPopulationMutation {
   targetPopulation: TargetPopulationNode
 }
 
+scalar FlexFieldsScalar
+
 scalar GeoJSON
 
 type HouseholdNode implements Node {
@@ -310,6 +313,7 @@ type HouseholdNode implements Node {
   registrationDataImport: RegistrationDataImportNode!
   programs(before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
   returnee: Boolean!
+  flexFields: FlexFieldsScalar
   registrationDate: Date
   headOfHousehold: IndividualNode!
   individuals(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
@@ -322,6 +326,7 @@ type HouseholdNodeConnection {
   pageInfo: PageInfo!
   edges: [HouseholdNodeEdge]!
   totalCount: Int
+  individualsCount: Int
   edgeCount: Int
 }
 
@@ -336,59 +341,6 @@ enum HouseholdResidenceStatus {
   CITIZEN
   IDP
   OTHER
-}
-
-type HouseholdTPNode implements Node {
-  id: ID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  consent: String!
-  residenceStatus: HouseholdResidenceStatus!
-  countryOrigin: String
-  country: String
-  size: Int!
-  address: String!
-  adminArea: AdminAreaNode
-  geopoint: GeoJSON
-  femaleAgeGroup05Count: Int!
-  femaleAgeGroup611Count: Int!
-  femaleAgeGroup1217Count: Int!
-  femaleAdultsCount: Int!
-  pregnantCount: Int!
-  maleAgeGroup05Count: Int!
-  maleAgeGroup611Count: Int!
-  maleAgeGroup1217Count: Int!
-  maleAdultsCount: Int!
-  femaleAgeGroup05DisabledCount: Int!
-  femaleAgeGroup611DisabledCount: Int!
-  femaleAgeGroup1217DisabledCount: Int!
-  femaleAdultsDisabledCount: Int!
-  maleAgeGroup05DisabledCount: Int!
-  maleAgeGroup611DisabledCount: Int!
-  maleAgeGroup1217DisabledCount: Int!
-  maleAdultsDisabledCount: Int!
-  registrationDataImport: RegistrationDataImportNode!
-  programs(before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
-  returnee: Boolean!
-  registrationDate: Date
-  headOfHousehold: IndividualNode!
-  individuals(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
-  paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
-  targetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, orderBy: String): TargetPopulationNodeConnection!
-  totalCashReceived: Decimal
-}
-
-type HouseholdTPNodeConnection {
-  pageInfo: PageInfo!
-  edges: [HouseholdTPNodeEdge]!
-  totalCount: Int
-  individualsCount: Int
-  edgeCount: Int
-}
-
-type HouseholdTPNodeEdge {
-  node: HouseholdTPNode
-  cursor: String!
 }
 
 type ImportDataNode implements Node {
@@ -842,10 +794,11 @@ type IndividualNode implements Node {
   maritalStatus: IndividualMaritalStatus!
   phoneNo: String!
   phoneNoAlternative: String!
-  household: HouseholdTPNode!
+  household: HouseholdNode!
   registrationDataImport: RegistrationDataImportNode!
   disability: Boolean!
-  headingHousehold: HouseholdTPNode
+  flexFields: FlexFieldsScalar
+  headingHousehold: HouseholdNode
   documents(before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
 }
 
@@ -987,7 +940,7 @@ type PaymentRecordNode implements Node {
   statusDate: DateTime!
   cashAssistId: String!
   cashPlan: CashPlanNode!
-  household: HouseholdTPNode!
+  household: HouseholdNode!
   headOfHousehold: String!
   totalPersonCovered: Int!
   distributionModality: String!
@@ -1037,7 +990,7 @@ type ProgramNode implements Node {
   cashPlus: Boolean!
   populationGoal: Int!
   administrativeAreasOfImplementation: String!
-  households(before: String, after: String, first: Int, last: Int): HouseholdTPNodeConnection!
+  households(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   cashPlans(before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
   targetpopulationSet(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, orderBy: String): TargetPopulationNodeConnection!
   totalEntitledQuantity: Decimal
@@ -1104,9 +1057,9 @@ type Query {
   cashPlanStatusChoices: [ChoiceObject]
   targetPopulation(id: ID!): TargetPopulationNode
   allTargetPopulation(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, orderBy: String): TargetPopulationNodeConnection
-  goldenRecordByTargetingCriteria(targetingCriteria: TargetingCriteriaObjectType!, before: String, after: String, first: Int, last: Int, orderBy: String): HouseholdTPNodeConnection
-  candidateHouseholdsListByTargetingCriteria(targetPopulation: ID!, before: String, after: String, first: Int, last: Int, orderBy: String): HouseholdTPNodeConnection
-  finalHouseholdsListByTargetingCriteria(targetPopulation: ID!, targetingCriteria: TargetingCriteriaObjectType, before: String, after: String, first: Int, last: Int, orderBy: String): HouseholdTPNodeConnection
+  goldenRecordByTargetingCriteria(targetingCriteria: TargetingCriteriaObjectType!, before: String, after: String, first: Int, last: Int, orderBy: String): HouseholdNodeConnection
+  candidateHouseholdsListByTargetingCriteria(targetPopulation: ID!, before: String, after: String, first: Int, last: Int, orderBy: String): HouseholdNodeConnection
+  finalHouseholdsListByTargetingCriteria(targetPopulation: ID!, targetingCriteria: TargetingCriteriaObjectType, before: String, after: String, first: Int, last: Int, orderBy: String): HouseholdNodeConnection
   targetPopulationStatusChoices: [ChoiceObject]
   household(id: ID!): HouseholdNode
   allHouseholds(before: String, after: String, first: Int, last: Int, businessArea: String, countryOrigin: String, countryOrigin_Icontains: String, address: String, address_Icontains: String, headOfHousehold_FullName: String, headOfHousehold_FullName_Icontains: String, size_Range: Int, size_Lte: Int, size_Gte: Int, adminArea: ID, targetPopulations: [ID], programs: [ID], residenceStatus: String, size: String, search: String, orderBy: String): HouseholdNodeConnection
@@ -1147,6 +1100,7 @@ type RegistrationDataImportDatahubNode implements Node {
   importDate: DateTime!
   hctId: UUID
   importData: ImportDataNode
+  importDone: Boolean!
   households(before: String, after: String, first: Int, last: Int): ImportedHouseholdNodeConnection!
   individuals(before: String, after: String, first: Int, last: Int): ImportedIndividualNodeConnection!
 }
@@ -1176,7 +1130,7 @@ type RegistrationDataImportNode implements Node {
   numberOfHouseholds: Int!
   datahubId: UUID
   businessArea: BusinessAreaNode
-  households(before: String, after: String, first: Int, last: Int): HouseholdTPNodeConnection!
+  households(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
 }
 
@@ -1197,6 +1151,7 @@ enum RegistrationDataImportStatus {
   APPROVED
   MERGED
   MERGING
+  IMPORTING
 }
 
 type TargetPopulationNode implements Node {
@@ -1211,7 +1166,7 @@ type TargetPopulationNode implements Node {
   finalizedAt: DateTime
   finalizedBy: UserNode
   status: TargetPopulationStatus!
-  households(before: String, after: String, first: Int, last: Int): HouseholdTPNodeConnection!
+  households(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   candidateListTotalHouseholds: Int
   candidateListTotalIndividuals: Int
   finalListTotalHouseholds: Int
