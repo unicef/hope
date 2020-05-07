@@ -11,8 +11,7 @@ from openpyxl import load_workbook
 from core.core_fields_attributes import CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY
 from core.utils import (
     serialize_flex_attributes,
-    get_combined_attributes,
-    get_choices_values,
+    get_combined_attributes, get_admin_areas_as_choices,
 )
 from core.validators import BaseValidator
 
@@ -42,8 +41,6 @@ class UploadXLSXValidator(BaseValidator):
             return False
         if value is None:
             return True
-
-        return isinstance(value, str) or isinstance(value, int)
 
     @classmethod
     def integer_validator(cls, value, header, *args, **kwargs):
@@ -112,7 +109,13 @@ class UploadXLSXValidator(BaseValidator):
         field = cls.ALL_FIELDS.get(header)
         if field is None:
             return False
-        choices = [x.get("value") for x in field["choices"]]
+
+        if header in ("admin1", "admin2"):
+            choices_list = get_admin_areas_as_choices(header[-1])
+            choices = [x.get("value") for x in choices_list]
+        else:
+            choices = [x.get("value") for x in field["choices"]]
+
         choice_type = cls.ALL_FIELDS[header]["type"]
 
         if not cls.required_validator(value, header):
@@ -124,11 +127,23 @@ class UploadXLSXValidator(BaseValidator):
             if isinstance(value, str):
                 return value.strip() in choices
             else:
-                return value in choices
+                if isinstance(value, float):
+                    if value.is_integer():
+                        return int(value) in choices
+                    return value in choices
+                else:
+                    if value not in choices:
+                        return str(value) in choices
+
         elif choice_type == "SELECT_MANY":
-            selected_choices = value.split(",")
+            if isinstance(value, str):
+                selected_choices = value.split(",")
+            else:
+                selected_choices = value
             for choice in selected_choices:
-                if choice.strip() not in choices:
+                if isinstance(choice, str):
+                    choice = choice.strip()
+                if choice not in choices:
                     return False
             return True
 
@@ -238,10 +253,15 @@ class UploadXLSXValidator(BaseValidator):
                 field_type = current_field["type"]
                 fn = switch_dict.get(field_type)
 
-                if fn(cell.value, header.value) is False:
+                value = cell.value
+                if isinstance(cell.value, float):
+                    if cell.value.is_integer():
+                        value = int(cell.value)
+
+                if fn(value, header.value) is False:
                     message = (
                         f"Sheet: {sheet.title}, Unexpected value: "
-                        f"{cell.value} for type "
+                        f"{value} for type "
                         f"{field_type.replace('_', ' ').lower()} "
                         f"of field {header.value}"
                     )
@@ -255,7 +275,7 @@ class UploadXLSXValidator(BaseValidator):
 
                 is_not_matched_with_household = (
                     household_ids and header.value == "household_id"
-                ) and cell.value not in household_ids
+                ) and value not in household_ids
 
                 if is_not_matched_with_household:
                     message = "Individual is not matched with any household"
