@@ -3,6 +3,7 @@ import {
   AllImportedIndividualsQueryVariables,
   ImportedIndividualMinimalFragment,
   useAllImportedIndividualsQuery,
+  useHouseholdChoiceDataQuery,
 } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../../tables/UniversalTable';
 import { ImportedIndividualsTableRow } from './ImportedIndividualsTableRow';
@@ -27,6 +28,11 @@ export function ImportedIndividualsTable({
     rdiId,
     household,
   };
+
+  const {
+    data: choicesData,
+    loading: choicesLoading,
+  } = useHouseholdChoiceDataQuery();
   return (
     <UniversalTable<
       ImportedIndividualMinimalFragment,
@@ -40,7 +46,11 @@ export function ImportedIndividualsTable({
       initialVariables={initialVariables}
       isOnPaper={isOnPaper}
       renderRow={(row) => (
-        <ImportedIndividualsTableRow key={row.id} individual={row} />
+        <ImportedIndividualsTableRow
+          choices={choicesData}
+          key={row.id}
+          individual={row}
+        />
       )}
     />
   );

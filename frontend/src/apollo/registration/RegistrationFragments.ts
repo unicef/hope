@@ -57,6 +57,8 @@ export const importedIndividualMinimal = gql`
     fullName
     birthDate
     sex
+    role
+    relationship
   }
 `;
 

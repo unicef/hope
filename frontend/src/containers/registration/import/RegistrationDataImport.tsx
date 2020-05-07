@@ -200,6 +200,7 @@ export function RegistrationDataImport(): React.ReactElement {
                   importDataId:
                     uploadData.uploadImportDataXlsxFile.importData.id,
                   name: values.name,
+                  businessAreaSlug: businessArea,
                 },
               },
             });

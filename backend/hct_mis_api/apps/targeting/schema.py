@@ -173,6 +173,13 @@ class TargetingCriteriaNode(DjangoObjectType):
         model = target_models.TargetingCriteria
 
 
+class StatsObjectType(graphene.ObjectType):
+    child_male = graphene.Int()
+    child_female = graphene.Int()
+    adult_male = graphene.Int()
+    adult_female = graphene.Int()
+
+
 class TargetPopulationNode(DjangoObjectType):
     """Defines an individual target population record."""
 
@@ -181,6 +188,9 @@ class TargetPopulationNode(DjangoObjectType):
     candidate_list_targeting_criteria = TargetingCriteriaRuleFilterNode()
     final_list_targeting_criteria = TargetingCriteriaRuleFilterNode()
     final_list = DjangoConnectionField(HouseholdNode)
+    candidate_stats = graphene.Field(StatsObjectType)
+    final_stats = graphene.Field(StatsObjectType)
+
 
     class Meta:
         model = target_models.TargetPopulation
@@ -223,47 +233,21 @@ def targeting_criteria_object_type_to_query(targeting_criteria_object_type):
     return targeting_criteria_querying.get_query()
 
 
-class ExtendedHouseHoldTPConnection(graphene.Connection):
-    class Meta:
-        abstract = True
-
-    total_count = graphene.Int()
-    individuals_count = graphene.Int()
-    edge_count = graphene.Int()
-
-    def resolve_total_count(root, info, **kwargs):
-        return root.length
-
-    def resolve_edge_count(root, info, **kwargs):
-        return len(root.edges)
-
-    def resolve_individuals_count(root, info, **kwargs):
-        return root.iterable.aggregate(sum=Sum("size")).get("sum")
-
-
-class HouseholdTPNode(HouseholdNode):
-    class Meta:
-        model = Household
-        filter_fields = []
-        interfaces = (relay.Node,)
-        connection_class = ExtendedHouseHoldTPConnection
-
-
 class Query(graphene.ObjectType):
     target_population = relay.Node.Field(TargetPopulationNode)
     all_target_population = DjangoFilterConnectionField(TargetPopulationNode)
     golden_record_by_targeting_criteria = DjangoFilterConnectionField(
-        HouseholdTPNode,
+        HouseholdNode,
         targeting_criteria=TargetingCriteriaObjectType(required=True),
         filterset_class=HouseholdFilter,
     )
     candidate_households_list_by_targeting_criteria = DjangoFilterConnectionField(
-        HouseholdTPNode,
+        HouseholdNode,
         target_population=graphene.Argument(graphene.ID, required=True),
         filterset_class=HouseholdFilter,
     )
     final_households_list_by_targeting_criteria = DjangoFilterConnectionField(
-        HouseholdTPNode,
+        HouseholdNode,
         target_population=graphene.Argument(graphene.ID, required=True),
         targeting_criteria=TargetingCriteriaObjectType(),
         filterset_class=HouseholdFilter,
@@ -306,9 +290,13 @@ class Query(graphene.ObjectType):
                     ).distinct()
                 else:
                     return target_population_model.households.all()
-            return target_population_model.households.filter(
-                targeting_criteria_object_type_to_query(targeting_criteria)
-            ).all().distinct()
+            return (
+                target_population_model.households.filter(
+                    targeting_criteria_object_type_to_query(targeting_criteria)
+                )
+                .all()
+                .distinct()
+            )
         return target_population_model.final_list.all()
 
     def resolve_golden_record_by_targeting_criteria(

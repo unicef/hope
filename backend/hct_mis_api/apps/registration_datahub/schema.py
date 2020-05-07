@@ -72,6 +72,8 @@ class ImportedHouseholdNode(DjangoObjectType):
 
 class ImportedIndividualNode(DjangoObjectType):
     estimated_birth_date = graphene.Boolean(required=False)
+    role = graphene.String()
+    relationship = graphene.String()
 
     class Meta:
         model = ImportedIndividual
