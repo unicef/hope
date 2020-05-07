@@ -18,7 +18,7 @@ interface TargetPopulationProps {
 }
 
 export const TargetPopulationTable = ({
-  filter
+  filter,
 }: TargetPopulationProps): ReactElement => {
   const initialVariables = {
     name: filter.name,
@@ -34,6 +34,8 @@ export const TargetPopulationTable = ({
         rowsPerPageOptions={[10, 15, 20]}
         query={useAllTargetPopulationsQuery}
         queriedObjectName='allTargetPopulation'
+        defaultOrderBy='createdAt'
+        defaultOrderDirection='desc'
         initialVariables={initialVariables}
         renderRow={(row) => <TargetPopulationTableRow targetPopulation={row} />}
       />
