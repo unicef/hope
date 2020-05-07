@@ -45,7 +45,7 @@ const validationSchema = Yup.object().shape({
 });
 
 export function ApproveCandidateList({ open, setOpen, targetPopulationId }) {
-  const { data: programs } = useAllProgramsQuery();
+  const { data: programs } = useAllProgramsQuery({variables: { status: 'ACTIVE' }});
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
   const [mutate, loading] = useApproveTpMutation();
