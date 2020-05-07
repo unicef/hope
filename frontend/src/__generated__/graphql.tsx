@@ -905,8 +905,8 @@ export type ImportedIndividualNode = Node & {
   givenName: Scalars['String'],
   middleName: Scalars['String'],
   familyName: Scalars['String'],
-  relationship?: Maybe<ImportedIndividualRelationship>,
-  role?: Maybe<ImportedIndividualRole>,
+  relationship?: Maybe<Scalars['String']>,
+  role?: Maybe<Scalars['String']>,
   sex: ImportedIndividualSex,
   birthDate: Scalars['Date'],
   estimatedBirthDate?: Maybe<Scalars['Boolean']>,
@@ -942,29 +942,6 @@ export type ImportedIndividualNodeEdge = {
   node?: Maybe<ImportedIndividualNode>,
   cursor: Scalars['String'],
 };
-
-export enum ImportedIndividualRelationship {
-  NonBeneficiary = 'NON_BENEFICIARY',
-  Head = 'HEAD',
-  SonDaughter = 'SON_DAUGHTER',
-  WifeHusband = 'WIFE_HUSBAND',
-  BrotherSister = 'BROTHER_SISTER',
-  MotherFather = 'MOTHER_FATHER',
-  AuntUncle = 'AUNT_UNCLE',
-  GrandmotherGrandfather = 'GRANDMOTHER_GRANDFATHER',
-  MotherinlawFatherinlaw = 'MOTHERINLAW_FATHERINLAW',
-  DaughterinlawSoninlaw = 'DAUGHTERINLAW_SONINLAW',
-  SisterinlawBrotherinlaw = 'SISTERINLAW_BROTHERINLAW',
-  GranddaugherGrandson = 'GRANDDAUGHER_GRANDSON',
-  NephewNiece = 'NEPHEW_NIECE',
-  Cousin = 'COUSIN'
-}
-
-export enum ImportedIndividualRole {
-  Primary = 'PRIMARY',
-  Alternate = 'ALTERNATE',
-  NoRole = 'NO_ROLE'
-}
 
 export enum ImportedIndividualSex {
   Male = 'MALE',
@@ -2289,7 +2266,7 @@ export type HouseholdMinimalFragment = (
 
 export type HouseholdDetailedFragment = (
   { __typename?: 'HouseholdNode' }
-  & Pick<HouseholdNode, 'countryOrigin'>
+  & Pick<HouseholdNode, 'countryOrigin' | 'flexFields'>
   & { individuals: (
     { __typename?: 'IndividualNodeConnection' }
     & Pick<IndividualNodeConnection, 'totalCount'>
@@ -2359,7 +2336,7 @@ export type IndividualMinimalFragment = (
 
 export type IndividualDetailedFragment = (
   { __typename?: 'IndividualNode' }
-  & Pick<IndividualNode, 'givenName' | 'familyName' | 'estimatedBirthDate'>
+  & Pick<IndividualNode, 'givenName' | 'familyName' | 'estimatedBirthDate' | 'flexFields'>
   & { household: (
     { __typename?: 'HouseholdNode' }
     & Pick<HouseholdNode, 'id' | 'address' | 'countryOrigin'>
@@ -3442,7 +3419,7 @@ export type ImportedHouseholdDetailedFragment = (
 
 export type ImportedIndividualMinimalFragment = (
   { __typename?: 'ImportedIndividualNode' }
-  & Pick<ImportedIndividualNode, 'id' | 'fullName' | 'birthDate' | 'sex'>
+  & Pick<ImportedIndividualNode, 'id' | 'fullName' | 'birthDate' | 'sex' | 'role' | 'relationship'>
 );
 
 export type ImportedIndividualDetailedFragment = (
@@ -3712,6 +3689,7 @@ export const HouseholdDetailedFragmentDoc = gql`
       }
     }
   }
+  flexFields
 }
     ${HouseholdMinimalFragmentDoc}
 ${IndividualMinimalFragmentDoc}`;
@@ -3737,6 +3715,7 @@ export const IndividualDetailedFragmentDoc = gql`
       id
     }
   }
+  flexFields
 }
     ${IndividualMinimalFragmentDoc}`;
 export const RegistrationMinimalFragmentDoc = gql`
@@ -3792,6 +3771,8 @@ export const ImportedIndividualMinimalFragmentDoc = gql`
   fullName
   birthDate
   sex
+  role
+  relationship
 }
     `;
 export const ImportedIndividualDetailedFragmentDoc = gql`
@@ -6993,8 +6974,6 @@ export type ResolversTypes = {
   ImportedHouseholdNode: ResolverTypeWrapper<ImportedHouseholdNode>,
   ImportedHouseholdResidenceStatus: ImportedHouseholdResidenceStatus,
   ImportedIndividualNode: ResolverTypeWrapper<ImportedIndividualNode>,
-  ImportedIndividualRelationship: ImportedIndividualRelationship,
-  ImportedIndividualRole: ImportedIndividualRole,
   ImportedIndividualSex: ImportedIndividualSex,
   ImportedIndividualMaritalStatus: ImportedIndividualMaritalStatus,
   RegistrationDataImportDatahubNode: ResolverTypeWrapper<RegistrationDataImportDatahubNode>,
@@ -7128,8 +7107,6 @@ export type ResolversParentTypes = {
   ImportedHouseholdNode: ImportedHouseholdNode,
   ImportedHouseholdResidenceStatus: ImportedHouseholdResidenceStatus,
   ImportedIndividualNode: ImportedIndividualNode,
-  ImportedIndividualRelationship: ImportedIndividualRelationship,
-  ImportedIndividualRole: ImportedIndividualRole,
   ImportedIndividualSex: ImportedIndividualSex,
   ImportedIndividualMaritalStatus: ImportedIndividualMaritalStatus,
   RegistrationDataImportDatahubNode: RegistrationDataImportDatahubNode,
@@ -7574,8 +7551,8 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   givenName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   middleName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   familyName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  relationship?: Resolver<Maybe<ResolversTypes['ImportedIndividualRelationship']>, ParentType, ContextType>,
-  role?: Resolver<Maybe<ResolversTypes['ImportedIndividualRole']>, ParentType, ContextType>,
+  relationship?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  role?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   sex?: Resolver<ResolversTypes['ImportedIndividualSex'], ParentType, ContextType>,
   birthDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   estimatedBirthDate?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
