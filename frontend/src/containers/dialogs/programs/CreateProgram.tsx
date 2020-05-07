@@ -65,7 +65,7 @@ export function CreateProgram(): ReactElement {
         renderSubmit={renderSubmit}
         open={open}
         onClose={() => setOpen(false)}
-        title='Set-up a new Programme ABABABA FFFF GGGG'
+        title='Set-up a new Programme'
       />
     </div>
   );
