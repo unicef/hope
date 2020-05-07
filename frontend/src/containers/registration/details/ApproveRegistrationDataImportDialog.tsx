@@ -42,7 +42,6 @@ export function ApproveRegistrationDataImportDialog({
 }: ApproveRegistrationDataImportDialogProps): React.ReactElement {
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const [name, setName] = useState();
   const [mutate] = useApproveRdiMutation({
     variables: { id: registration.id },
   });
@@ -83,13 +82,6 @@ export function ApproveRegistrationDataImportDialog({
               Do you want to proceed?
             </div>
           </DialogDescription>
-          <TextField
-            label='Name Import'
-            placeholder='Name Import'
-            fullWidth
-            onChange={(e) => setName(e.target.value)}
-            value={name}
-          />
         </DialogContent>
         <DialogFooter>
           <DialogActions>
@@ -99,7 +91,6 @@ export function ApproveRegistrationDataImportDialog({
               color='primary'
               variant='contained'
               onClick={approve}
-              disabled={registration.name !== name}
             >
               APPROVE
             </Button>

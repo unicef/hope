@@ -309,7 +309,6 @@ class Query(graphene.ObjectType):
             return target_population_model.households.filter(
                 targeting_criteria_object_type_to_query(targeting_criteria)
             ).all().distinct()
-
         return target_population_model.final_list.all()
 
     def resolve_golden_record_by_targeting_criteria(
