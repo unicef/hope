@@ -53,6 +53,10 @@
 
 ## Design Specification
 
+* [States](design-specification/states/README.md)
+  * [Merging](design-specification/states/merging.md)
+  * [Importing](design-specification/states/importing.md)
+  * [Sending](design-specification/states/sending.md)
 * [User Personas](design-specification/untitled/README.md)
   * [User Feedback](design-specification/untitled/user-feedback.md)
   * [I.4 Summary](design-specification/untitled/iteration-4.md)
