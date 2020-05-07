@@ -43,7 +43,7 @@ class UploadXLSXValidator(BaseValidator):
         if value is None:
             return True
 
-        return isinstance(value, str)
+        return isinstance(value, str) or isinstance(value, int)
 
     @classmethod
     def integer_validator(cls, value, header, *args, **kwargs):
@@ -112,8 +112,7 @@ class UploadXLSXValidator(BaseValidator):
         field = cls.ALL_FIELDS.get(header)
         if field is None:
             return False
-
-        choices = get_choices_values(field["choices"], header=header)
+        choices = [x.get("value") for x in field["choices"]]
         choice_type = cls.ALL_FIELDS[header]["type"]
 
         if not cls.required_validator(value, header):
@@ -123,9 +122,9 @@ class UploadXLSXValidator(BaseValidator):
 
         if choice_type == "SELECT_ONE":
             if isinstance(value, str):
-                return value.strip() not in choices
+                return value.strip() in choices
             else:
-                return value not in choices
+                return value in choices
         elif choice_type == "SELECT_MANY":
             selected_choices = value.split(",")
             for choice in selected_choices:
