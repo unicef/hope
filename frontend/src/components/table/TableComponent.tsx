@@ -53,7 +53,7 @@ interface TableComponentProps<T> {
     event: React.MouseEvent<unknown>,
     property: string,
   ) => void;
-  orderBy: keyof T;
+  orderBy: string;
   order: Order;
   title?: string;
   loading?: boolean;
