@@ -32,7 +32,7 @@ export function ProgrammeTableRow({ household }) {
       <TableCell align='left'>{household.size}</TableCell>
       <TableCell align='left'>-</TableCell>
       <TableCell align='left'>{household.address}</TableCell>
-      <TableCell align='left'>{household.adminArea.title}</TableCell>
+      <TableCell align='left'>{household.adminArea?.title}</TableCell>
     </ClickableTableRow>
   );
 }
