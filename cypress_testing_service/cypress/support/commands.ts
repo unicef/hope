@@ -38,7 +38,14 @@ Cypress.Commands.add('loginToAD', (username, password, loginUrl) => {
 });
 
 Cypress.Commands.add('loginWithMock', () => {
-  login(mockAuthCookies);
+  mockAuthCookies.forEach(({ name, value, sameSite, ...rest }) => {
+    cy.setCookie(name, value, { ...rest });
+  });
+
+  cy.navigateTo('/');
+
+  // TODO: remove if method above faster
+  // login(mockAuthCookies);
 });
 
 Cypress.Commands.add('getByTestId', (value) => {
