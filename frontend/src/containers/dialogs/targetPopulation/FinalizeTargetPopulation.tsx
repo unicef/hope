@@ -64,7 +64,7 @@ export function FinalizeTargetPopulation({
     >
       <DialogTitleWrapper>
         <DialogTitle id='scroll-dialog-title'>
-          <Typography variant='h6'>Finalize Target Population</Typography>
+          <Typography variant='h6'>Send to Cash Assist</Typography>
         </DialogTitle>
       </DialogTitleWrapper>
       <DialogContent>
@@ -82,7 +82,7 @@ export function FinalizeTargetPopulation({
             variant='contained'
             disabled={!loading}
           >
-            Finalize
+            Send to cash assist
           </Button>
         </DialogActions>
       </DialogFooter>
