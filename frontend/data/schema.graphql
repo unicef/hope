@@ -1131,6 +1131,13 @@ enum RegistrationDataImportStatus {
   IMPORTING
 }
 
+type StatsObjectType {
+  childMale: Int
+  childFemale: Int
+  adultMale: Int
+  adultFemale: Int
+}
+
 type TargetPopulationNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -1157,6 +1164,8 @@ type TargetPopulationNode implements Node {
   totalHouseholds: Int
   totalFamilySize: Int
   finalList(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection
+  candidateStats: StatsObjectType
+  finalStats: StatsObjectType
 }
 
 type TargetPopulationNodeConnection {
