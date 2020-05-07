@@ -25,63 +25,28 @@ interface IndividualVulnerabilitesProps {
 export function IndividualVulnerabilities({
   individual,
 }: IndividualVulnerabilitesProps): React.ReactElement {
+  const fields = [];
+  // eslint-disable-next-line guard-for-in,no-restricted-syntax
+  for (const flexFieldKey in individual.flexFields) {
+    fields.push(
+      <LabelizedField
+        label={flexFieldKey}
+        value={individual.flexFields[flexFieldKey] || '-'}
+      />,
+    );
+  }
   return (
-    <Overview>
-      <Title>
-        <Typography variant='h6'>Vulnerabilities</Typography>
-      </Title>
-      <Grid container spacing={6}>
-        <Grid item xs={4}>
-          <LabelizedField label='Disability'>
-            <div>-</div>
-          </LabelizedField>
+    <div>
+      <Overview>
+        <Title>
+          <Typography variant='h6'>Vulnerabilities</Typography>
+        </Title>
+        <Grid container spacing={6}>
+          <Grid item xs={4}>
+            {fields}
+          </Grid>
         </Grid>
-        <Grid item xs={4}>
-          <LabelizedField label='Working'>
-            <div>-</div>
-          </LabelizedField>
-        </Grid>
-        <Grid item xs={4}>
-          <LabelizedField label='Serious Illness'>
-            <div>-</div>
-          </LabelizedField>
-        </Grid>
-        <Grid item xs={4}>
-          <LabelizedField label='Martial Status'>
-            <div>{individual.maritalStatus}</div>
-          </LabelizedField>
-        </Grid>
-        <Grid item xs={4}>
-          <LabelizedField label='Age first Marriage'>
-            <div>-</div>
-          </LabelizedField>
-        </Grid>
-        <Grid item xs={4}>
-          <LabelizedField label='Enrolled in School'>
-            <div>-</div>
-          </LabelizedField>
-        </Grid>
-        <Grid item xs={4}>
-          <LabelizedField label='School Attendance'>
-            <div>-</div>
-          </LabelizedField>
-        </Grid>
-        <Grid item xs={4}>
-          <LabelizedField label='School Type'>
-            <div>-</div>
-          </LabelizedField>
-        </Grid>
-        <Grid item xs={4}>
-          <LabelizedField label='Years in School'>
-            <div>-</div>
-          </LabelizedField>
-        </Grid>
-        <Grid item xs={4}>
-          <LabelizedField label='Minutes to School'>
-            <div>-</div>
-          </LabelizedField>
-        </Grid>
-      </Grid>
-    </Overview>
+      </Overview>
+    </div>
   );
 }

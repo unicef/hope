@@ -30,7 +30,7 @@ export function UniversalTable<T, K>({
   const [rowsPerPage, setRowsPerPage] = useState(rowsPerPageOptions[0]);
   const [orderBy, setOrderBy] = useState(null);
   const [orderDirection, setOrderDirection] = useState('asc');
-  const { data, refetch, loading } = query({
+  const { data, refetch, loading, error } = query({
     variables: { ...initialVariables, first: rowsPerPage },
     fetchPolicy: 'network-only',
   });
@@ -40,9 +40,11 @@ export function UniversalTable<T, K>({
       setPage(0);
     }
   }, [initialVariables]);
-
+  if (error) {
+    console.error(error);
+  }
   if (!data) {
-    return <EmptyTable />
+    return <EmptyTable />;
   }
 
   let correctTitle = title;

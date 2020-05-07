@@ -55,5 +55,6 @@ export const individualDetailed = gql`
         id
       }
     }
+    flexFields
   }
 `;
