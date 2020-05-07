@@ -59,8 +59,12 @@ class CreateRegistrationDataImport(BaseValidator, graphene.Mutation):
             data_source="XLS",
             number_of_individuals=import_data_obj.number_of_individuals,
             number_of_households=import_data_obj.number_of_households,
+            business_area=business_area,
             **registration_data_import_data,
         )
+        print("business_area")
+        print(business_area)
+        print(created_obj_hct.business_area)
 
         created_obj_datahub.hct_id = created_obj_hct.id
         created_obj_datahub.save()
