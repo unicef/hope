@@ -1,31 +1,4 @@
-// ***********************************************
-// This example commands.js shows you how to
-// create various custom commands and overwrite
-// existing commands.
-//
-// For more comprehensive examples of custom
-// commands please read more here:
-// https://on.cypress.io/custom-commands
-// ***********************************************
-//
-//
-// -- This is a parent command --
-// Cypress.Commands.add("login", (email, password) => { ... })
-//
-//
-// -- This is a child command --
-// Cypress.Commands.add("drag", { prevSubject: 'element'}, (subject, options) => { ... })
-//
-//
-// -- This is a dual command --
-// Cypress.Commands.add("dismiss", { prevSubject: 'optional'}, (subject, options) => { ... })
-//
-//
-// -- This will overwrite an existing command --
-// Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
-
-// This is an example of how you might use the plugin in your tests
-// https://gist.github.com/csuzw/845b589549b61d3a5fe18e49592e166f
+import mockAuthCookies from './mockAuthCookies.json';
 
 const login = (cookies) => {
   cy.clearCookies();
@@ -57,14 +30,14 @@ Cypress.Commands.add('loginToAD', (username, password, loginUrl) => {
   // see why we need this task
   // https://github.com/cypress-io/cypress/issues/1342
   // https://github.com/cypress-io/cypress/issues/944
-  cy.task('AzureAdSingleSignOn', options).then((result) => {
-    login(result.cookies);
-  });
+  cy.task('AzureAdSingleSignOn', options).then(
+    ({ cookies }: { cookies: Cypress.Cookie }) => {
+      login(cookies);
+    },
+  );
 });
 
 Cypress.Commands.add('loginWithMock', () => {
-  // eslint-disable-next-line global-require
-  const mockAuthCookies = []; // require('./mockAuthCookies.json');
   login(mockAuthCookies);
 });
 
@@ -72,9 +45,17 @@ Cypress.Commands.add('getByTestId', (value) => {
   return cy.get(`[data-cy=${value}]`);
 });
 
-Cypress.Commands.add('navigateTo', (newPath) => {
-  return cy.location('pathname').then((pathname) => {
+Cypress.Commands.add('getBusinessAreaSlug', () => {
+  cy.location('pathname').then((pathname) => {
     const businessAreaSlug = pathname.split('/')[1];
+    cy.wrap(businessAreaSlug).as('businessAreaSlug');
+  });
+
+  return cy.get('@businessAreaSlug');
+});
+
+Cypress.Commands.add('navigateTo', (newPath) => {
+  return cy.getBusinessAreaSlug().then((businessAreaSlug) => {
     cy.visit('/'.concat(businessAreaSlug, newPath));
   });
 });

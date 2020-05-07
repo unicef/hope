@@ -53,9 +53,9 @@ export const FormikDateField = ({
       inputProps={{
         'data-cy': `date-input-${field.name}`,
       }}
-      PopoverProps={{
-        'data-cy': `date-picker-container-${field.name}`,
-      }}
+      // PopoverProps={{
+      //   'data-cy': `date-picker-container-${field.name}`,
+      // }}
     />
   );
 };

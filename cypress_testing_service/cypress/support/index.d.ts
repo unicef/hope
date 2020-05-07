@@ -1,17 +1,19 @@
 declare namespace Cypress {
-  interface Chainable {
+  interface Chainable<Subject> {
     loginToAD(
       username: string,
       password: string,
       url: string,
-    ): Chainable<Element>;
+    ): Chainable<Subject>;
 
-    loginWithMock(): Chainable<Element>;
+    loginWithMock(): Chainable<Subject>;
 
-    getByTestId(value: string): Chainable<Element>;
+    getByTestId(value: string): Chainable<Subject>;
 
-    navigateTo(newPath: string): Chainable<Element>;
+    getBusinessAreaSlug(): Chainable<Subject>;
 
-    pickDayOfTheMonth(day: number, fieldName: string): Chainable<Element>;
+    navigateTo(newPath: string): Chainable<Subject>;
+
+    pickDayOfTheMonth(day: number, fieldName: string): Chainable<Subject>;
   }
 }
