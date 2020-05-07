@@ -1,0 +1,14 @@
+{
+  "name": "another test",
+  "scope": "FULL",
+  "startDate": "2020-05-03",
+  "endDate": "2020-05-03",
+  "description": "",
+  "budget": "0.00",
+  "administrativeAreasOfImplementation": "",
+  "populationGoal": 0,
+  "frequencyOfPayments": "REGULAR",
+  "sector": "EDUCATION",
+  "cashPlus": false,
+  "businessAreaSlug": "afghanistan"
+}
