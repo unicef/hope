@@ -1,4 +1,3 @@
-
 import React from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
@@ -6,6 +5,7 @@ import { Typography, Paper, Grid } from '@material-ui/core';
 import { Pie } from 'react-chartjs-2';
 import { MiśTheme } from '../../theme';
 import { LabelizedField } from '../LabelizedField';
+import { TargetPopulationQuery } from '../../__generated__/graphql';
 
 const colors = {
   femaleChildren: '#023E90',
@@ -63,12 +63,18 @@ const Label = styled.p`
 `;
 
 interface ResultsProps {
-  resultsData?;
+  resultsData?:
+    | TargetPopulationQuery['targetPopulation']['candidateStats']
+    | TargetPopulationQuery['targetPopulation']['finalStats'];
   totalNumOfHouseholds?;
   totalNumOfIndividuals?;
 }
 
-export function Results({ resultsData, totalNumOfHouseholds, totalNumOfIndividuals }: ResultsProps) {
+export function Results({
+  resultsData,
+  totalNumOfHouseholds,
+  totalNumOfIndividuals,
+}: ResultsProps) {
   const { t } = useTranslation();
 
   return (
@@ -85,7 +91,7 @@ export function Results({ resultsData, totalNumOfHouseholds, totalNumOfIndividua
                   <FieldBorder color={colors.femaleChildren}>
                     <LabelizedField
                       label='Female Children'
-                      value={resultsData.femaleChildren}
+                      value={resultsData.childFemale}
                     />
                   </FieldBorder>
                 </Grid>
@@ -93,7 +99,7 @@ export function Results({ resultsData, totalNumOfHouseholds, totalNumOfIndividua
                   <FieldBorder color={colors.femaleAdult}>
                     <LabelizedField
                       label='Female Adults'
-                      value={resultsData.femaleAdults}
+                      value={resultsData.adultFemale}
                     />
                   </FieldBorder>
                 </Grid>
@@ -101,7 +107,7 @@ export function Results({ resultsData, totalNumOfHouseholds, totalNumOfIndividua
                   <FieldBorder color={colors.maleChildren}>
                     <LabelizedField
                       label='Male Children'
-                      value={resultsData.maleChildren}
+                      value={resultsData.childMale}
                     />
                   </FieldBorder>
                 </Grid>
@@ -109,7 +115,7 @@ export function Results({ resultsData, totalNumOfHouseholds, totalNumOfIndividua
                   <FieldBorder color={colors.maleAdult}>
                     <LabelizedField
                       label='Male Adults'
-                      value={resultsData.maleAdults}
+                      value={resultsData.adultMale}
                     />
                   </FieldBorder>
                 </Grid>
@@ -128,7 +134,7 @@ export function Results({ resultsData, totalNumOfHouseholds, totalNumOfIndividua
                       options={{
                         legend: {
                           display: false,
-                        }
+                        },
                       }}
                       data={{
                         labels: [
@@ -140,10 +146,10 @@ export function Results({ resultsData, totalNumOfHouseholds, totalNumOfIndividua
                         datasets: [
                           {
                             data: [
-                              resultsData.femaleChildren,
-                              resultsData.femaleAdults,
-                              resultsData.maleChildren,
-                              resultsData.maleAdults,
+                              resultsData.childFemale,
+                              resultsData.adultFemale,
+                              resultsData.childMale,
+                              resultsData.adultMale,
                             ],
                             backgroundColor: [
                               colors.femaleChildren,
@@ -161,15 +167,13 @@ export function Results({ resultsData, totalNumOfHouseholds, totalNumOfIndividua
               <Grid container spacing={0} justify='flex-end'>
                 <SummaryBorder>
                   <LabelizedField label='Total Number of Households'>
-                    <SummaryValue>
-                      {totalNumOfHouseholds || "N/A"}
-                    </SummaryValue>
+                    <SummaryValue>{totalNumOfHouseholds || 'N/A'}</SummaryValue>
                   </LabelizedField>
                 </SummaryBorder>
                 <SummaryBorder>
                   <LabelizedField label='Targeted Individuals'>
                     <SummaryValue>
-                      {totalNumOfIndividuals || "N/A"}
+                      {totalNumOfIndividuals || 'N/A'}
                     </SummaryValue>
                   </LabelizedField>
                 </SummaryBorder>
