@@ -2,7 +2,7 @@ from functools import reduce
 
 from django_countries.data import COUNTRIES
 
-from core.utils import age_to_birth_date_query, get_admin_areas_as_choices
+from core.utils import age_to_birth_date_query
 from household.models import (
     RESIDENCE_STATUS_CHOICE,
     RELATIONSHIP_CHOICE,
@@ -11,6 +11,7 @@ from household.models import (
     MARITAL_STATUS_CHOICE,
 )
 
+TYPE_ID = "ID"
 TYPE_INTEGER = "INTEGER"
 TYPE_STRING = "STRING"
 TYPE_BOOL = "BOOL"
@@ -759,7 +760,7 @@ CORE_FIELDS_ATTRIBUTES = [
 HOUSEHOLD_ID_FIELDS = [
     {
         "id": "746b3d2d-19c5-4b91-ad37-d230e1d33eb5",
-        "type": TYPE_INTEGER,
+        "type": TYPE_ID,
         "name": "household_id",
         "lookup": "household_id",
         "required": False,
@@ -771,7 +772,7 @@ HOUSEHOLD_ID_FIELDS = [
     },
     {
         "id": "1079bfd0-fc51-41ab-aa10-667e6b2034b9",
-        "type": TYPE_INTEGER,
+        "type": TYPE_ID,
         "name": "household_id",
         "lookup": "household_id",
         "required": False,
@@ -805,9 +806,6 @@ def _core_fields_to_separated_dict(append_household_id=True):
         result_dict[associated_key][field["xlsx_field"]] = field
 
     return result_dict
-
-
-
 
 
 FILTERABLE_CORE_FIELDS_ATTRIBUTES = [
