@@ -145,6 +145,22 @@ class TestXLSXValidatorsMethods(TestCase):
                 UploadXLSXValidator.choice_validator(value, header)
             )
 
+    def test_rows_validator_too_many_head_of_households(self):
+        wb = openpyxl.load_workbook(
+            f"{self.FILES_DIR_PATH}/error-xlsx.xlsx", data_only=True,
+        )
+        result = UploadXLSXValidator.rows_validator(wb["Individuals"])
+        expected = [
+            {
+                "row_number": 7,
+                "header": "relationship_i_c",
+                "message": "Sheet: Individuals, There are multiple head of "
+                           "households for household with id: 3",
+            }
+        ]
+
+        self.assertEqual(expected, result)
+
     def test_rows_validator(self):
 
         wb = openpyxl.load_workbook(
