@@ -152,6 +152,22 @@ class FlexFieldsScalar(graphene.Scalar):
     @staticmethod
     def parse_value(value):
         return value
+class ExtendedHouseHoldConnection(graphene.Connection):
+    class Meta:
+        abstract = True
+
+    total_count = graphene.Int()
+    individuals_count = graphene.Int()
+    edge_count = graphene.Int()
+
+    def resolve_total_count(root, info, **kwargs):
+        return root.length
+
+    def resolve_edge_count(root, info, **kwargs):
+        return len(root.edges)
+
+    def resolve_individuals_count(root, info, **kwargs):
+        return root.iterable.aggregate(sum=Sum("size")).get("sum")
 
 class HouseholdNode(DjangoObjectType):
     total_cash_received = graphene.Decimal()
@@ -169,7 +185,7 @@ class HouseholdNode(DjangoObjectType):
         model = Household
         filter_fields = []
         interfaces = (relay.Node,)
-        connection_class = ExtendedConnection
+        connection_class = ExtendedHouseHoldConnection
 
 
 

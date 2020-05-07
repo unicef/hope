@@ -59,6 +59,7 @@ class CreateRegistrationDataImport(BaseValidator, graphene.Mutation):
             data_source="XLS",
             number_of_individuals=import_data_obj.number_of_individuals,
             number_of_households=import_data_obj.number_of_households,
+            business_area=business_area,
             **registration_data_import_data,
         )
 

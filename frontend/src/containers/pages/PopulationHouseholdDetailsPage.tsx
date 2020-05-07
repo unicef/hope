@@ -6,6 +6,7 @@ import { useParams } from 'react-router-dom';
 import { HouseholdDetails } from '../../components/population/HouseholdDetails';
 import { PageHeader } from '../../components/PageHeader';
 import {
+  HouseholdDetailedFragment,
   HouseholdNode,
   useHouseholdChoiceDataQuery,
   useHouseholdQuery,
@@ -60,9 +61,7 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
   const {
     data: choicesData,
     loading: choicesLoading,
-  } = useHouseholdChoiceDataQuery({
-    variables: { businessArea },
-  });
+  } = useHouseholdChoiceDataQuery();
   if (loading || choicesLoading) return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
@@ -90,7 +89,7 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
           openInNewTab
           household={household as HouseholdNode}
         />
-        <HouseholdVulnerabilities />
+        <HouseholdVulnerabilities household={household as HouseholdDetailedFragment}/>
         <Overview>
           <Title>
             <Typography variant='h6'>Registration Details</Typography>
