@@ -112,7 +112,7 @@ services:
       context: .
       dockerfile: ./airflow/Dockerfile
     ports:
-      - "4200:4200"
+      - "4200:8080"
     env_file:
       - ./airflow/config/.env_airflow
     restart: always
@@ -131,6 +131,8 @@ services:
       - ./backend:/usr/local/airflow/backend
       - backend-data:/usr/local/airflow/data
     command: webserver
+    logging:  #NOTE: noisy output silenced
+      driver: "none"
     healthcheck:
       test: ["CMD-SHELL", "[ -f /usr/local/airflow/airflow-webserver.pid ]"]
       interval: 30s
@@ -171,6 +173,8 @@ services:
       - ./backend:/usr/local/airflow/backend
       - backend-data:/usr/local/airflow/data
     command: scheduler
+    logging:  #NOTE: noisy output silenced
+      driver: "none"
     depends_on:
       - airflow_webserver
       - airflow_db

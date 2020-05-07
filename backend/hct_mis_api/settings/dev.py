@@ -30,3 +30,5 @@ try:
     from .local import *  # noqa: ignore=F403
 except ImportError:
     pass
+
+AIRFLOW_HOST = "airflow_webserver"

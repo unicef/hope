@@ -138,7 +138,7 @@ class FlexibleAttributeImporter:
                     ] = self.TYPE_CHOICE_MAP.get(choice_key)
             else:
                 is_attribute_name_empty = (
-                    header_name == "name" and value is None
+                    header_name == "name" and value in (None, "")
                 )
                 is_choice_list_name_empty = (
                     header_name == "list_name"
