@@ -62,9 +62,6 @@ class CreateRegistrationDataImport(BaseValidator, graphene.Mutation):
             business_area=business_area,
             **registration_data_import_data,
         )
-        print("business_area")
-        print(business_area)
-        print(created_obj_hct.business_area)
 
         created_obj_datahub.hct_id = created_obj_hct.id
         created_obj_datahub.save()
