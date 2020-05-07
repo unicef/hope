@@ -71,18 +71,6 @@ export function DuplicateTargetPopulation({
         validationSchema={validationSchema}
         initialValues={initialValues}
         onSubmit={(values) => {
-          // const { data, errors } = await mutate({
-          //   variables: { input: { targetPopulationData: { ...values } } },
-          // });
-
-          // if (errors) {
-          //   return showMessage('Name already exist');
-          // }
-          // setOpen(false);
-          // return showMessage('Target Population Duplicated', {
-          //   pathname: `/${businessArea}/target-population/${data.copyTargetPopulation.targetPopulation.id}`,
-          //   historyMethod: 'push',
-          // });
           mutate({
             variables: { input: { targetPopulationData: { ...values } } },
           }).then((res) => {
