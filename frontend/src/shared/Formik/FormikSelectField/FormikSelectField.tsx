@@ -31,7 +31,6 @@ export const FormikSelectField = ({
             <MenuItem
               key={each.value ? each.value : each.name}
               value={each.value ? each.value : each.name}
-              data-cy="menu-item-foo-bar-baz"
             >
               {each.labelEn || each.name || each.label}
             </MenuItem>
