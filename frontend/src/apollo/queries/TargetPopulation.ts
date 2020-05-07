@@ -76,6 +76,18 @@ export const TargetPopulation = gql`
           }
         }
       }
+      candidateStats{
+        childMale
+        childFemale
+        adultMale
+        adultFemale
+      }
+      finalStats{
+        childMale
+        childFemale
+        adultMale
+        adultFemale
+      }
     }
   }
 `;

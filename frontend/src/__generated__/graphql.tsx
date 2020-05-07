@@ -1807,6 +1807,14 @@ export enum RegistrationDataImportStatus {
   Importing = 'IMPORTING'
 }
 
+export type StatsObjectType = {
+   __typename?: 'StatsObjectType',
+  childMale?: Maybe<Scalars['Int']>,
+  childFemale?: Maybe<Scalars['Int']>,
+  adultMale?: Maybe<Scalars['Int']>,
+  adultFemale?: Maybe<Scalars['Int']>,
+};
+
 export type TargetingCriteriaNode = {
    __typename?: 'TargetingCriteriaNode',
   id: Scalars['UUID'],
@@ -1892,6 +1900,8 @@ export type TargetPopulationNode = Node & {
   totalHouseholds?: Maybe<Scalars['Int']>,
   totalFamilySize?: Maybe<Scalars['Int']>,
   finalList?: Maybe<HouseholdNodeConnection>,
+  candidateStats?: Maybe<StatsObjectType>,
+  finalStats?: Maybe<StatsObjectType>,
 };
 
 
@@ -2428,6 +2438,12 @@ export type ApproveTpMutation = (
             )> }
           )>>> }
         )>>> }
+      )>, candidateStats: Maybe<(
+        { __typename?: 'StatsObjectType' }
+        & Pick<StatsObjectType, 'childMale' | 'childFemale' | 'adultMale' | 'adultFemale'>
+      )>, finalStats: Maybe<(
+        { __typename?: 'StatsObjectType' }
+        & Pick<StatsObjectType, 'childMale' | 'childFemale' | 'adultMale' | 'adultFemale'>
       )> }
     )> }
   )> }
@@ -2580,6 +2596,12 @@ export type FinalizeTpMutation = (
             )> }
           )>>> }
         )>>> }
+      )>, candidateStats: Maybe<(
+        { __typename?: 'StatsObjectType' }
+        & Pick<StatsObjectType, 'childMale' | 'childFemale' | 'adultMale' | 'adultFemale'>
+      )>, finalStats: Maybe<(
+        { __typename?: 'StatsObjectType' }
+        & Pick<StatsObjectType, 'childMale' | 'childFemale' | 'adultMale' | 'adultFemale'>
       )> }
     )> }
   )> }
@@ -2673,6 +2695,12 @@ export type UpdateTpMutation = (
             )> }
           )>>> }
         )>>> }
+      )>, candidateStats: Maybe<(
+        { __typename?: 'StatsObjectType' }
+        & Pick<StatsObjectType, 'childMale' | 'childFemale' | 'adultMale' | 'adultFemale'>
+      )>, finalStats: Maybe<(
+        { __typename?: 'StatsObjectType' }
+        & Pick<StatsObjectType, 'childMale' | 'childFemale' | 'adultMale' | 'adultFemale'>
       )> }
     )> }
   )> }
@@ -3190,6 +3218,12 @@ export type TargetPopulationQuery = (
           )> }
         )>>> }
       )>>> }
+    )>, candidateStats: Maybe<(
+      { __typename?: 'StatsObjectType' }
+      & Pick<StatsObjectType, 'childMale' | 'childFemale' | 'adultMale' | 'adultFemale'>
+    )>, finalStats: Maybe<(
+      { __typename?: 'StatsObjectType' }
+      & Pick<StatsObjectType, 'childMale' | 'childFemale' | 'adultMale' | 'adultFemale'>
     )> }
   )> }
 );
@@ -3878,6 +3912,18 @@ export const ApproveTpDocument = gql`
           }
         }
       }
+      candidateStats {
+        childMale
+        childFemale
+        adultMale
+        adultFemale
+      }
+      finalStats {
+        childMale
+        childFemale
+        adultMale
+        adultFemale
+      }
     }
   }
 }
@@ -4275,6 +4321,18 @@ export const FinalizeTpDocument = gql`
           }
         }
       }
+      candidateStats {
+        childMale
+        childFemale
+        adultMale
+        adultFemale
+      }
+      finalStats {
+        childMale
+        childFemale
+        adultMale
+        adultFemale
+      }
     }
   }
 }
@@ -4466,6 +4524,18 @@ export const UpdateTpDocument = gql`
             }
           }
         }
+      }
+      candidateStats {
+        childMale
+        childFemale
+        adultMale
+        adultFemale
+      }
+      finalStats {
+        childMale
+        childFemale
+        adultMale
+        adultFemale
       }
     }
   }
@@ -5809,6 +5879,18 @@ export const TargetPopulationDocument = gql`
         }
       }
     }
+    candidateStats {
+      childMale
+      childFemale
+      adultMale
+      adultFemale
+    }
+    finalStats {
+      childMale
+      childFemale
+      adultMale
+      adultFemale
+    }
   }
 }
     `;
@@ -6941,6 +7023,7 @@ export type ResolversTypes = {
   CoreFieldChoiceObject: ResolverTypeWrapper<CoreFieldChoiceObject>,
   PaymentRecordNodeConnection: ResolverTypeWrapper<PaymentRecordNodeConnection>,
   PaymentRecordNodeEdge: ResolverTypeWrapper<PaymentRecordNodeEdge>,
+  StatsObjectType: ResolverTypeWrapper<StatsObjectType>,
   RegistrationDataImportDataSource: RegistrationDataImportDataSource,
   IndividualNodeConnection: ResolverTypeWrapper<IndividualNodeConnection>,
   IndividualNodeEdge: ResolverTypeWrapper<IndividualNodeEdge>,
@@ -7074,6 +7157,7 @@ export type ResolversParentTypes = {
   CoreFieldChoiceObject: CoreFieldChoiceObject,
   PaymentRecordNodeConnection: PaymentRecordNodeConnection,
   PaymentRecordNodeEdge: PaymentRecordNodeEdge,
+  StatsObjectType: StatsObjectType,
   RegistrationDataImportDataSource: RegistrationDataImportDataSource,
   IndividualNodeConnection: IndividualNodeConnection,
   IndividualNodeEdge: IndividualNodeEdge,
@@ -7878,6 +7962,13 @@ export type RegistrationDataImportNodeEdgeResolvers<ContextType = any, ParentTyp
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
 };
 
+export type StatsObjectTypeResolvers<ContextType = any, ParentType extends ResolversParentTypes['StatsObjectType'] = ResolversParentTypes['StatsObjectType']> = {
+  childMale?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  childFemale?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  adultMale?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  adultFemale?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
 export type TargetingCriteriaNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetingCriteriaNode'] = ResolversParentTypes['TargetingCriteriaNode']> = {
   id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
@@ -7933,6 +8024,8 @@ export type TargetPopulationNodeResolvers<ContextType = any, ParentType extends 
   totalHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   totalFamilySize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   finalList?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, TargetPopulationNodeFinalListArgs>,
+  candidateStats?: Resolver<Maybe<ResolversTypes['StatsObjectType']>, ParentType, ContextType>,
+  finalStats?: Resolver<Maybe<ResolversTypes['StatsObjectType']>, ParentType, ContextType>,
 };
 
 export type TargetPopulationNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetPopulationNodeConnection'] = ResolversParentTypes['TargetPopulationNodeConnection']> = {
@@ -8108,6 +8201,7 @@ export type Resolvers<ContextType = any> = {
   RegistrationDataImportNode?: RegistrationDataImportNodeResolvers<ContextType>,
   RegistrationDataImportNodeConnection?: RegistrationDataImportNodeConnectionResolvers<ContextType>,
   RegistrationDataImportNodeEdge?: RegistrationDataImportNodeEdgeResolvers<ContextType>,
+  StatsObjectType?: StatsObjectTypeResolvers<ContextType>,
   TargetingCriteriaNode?: TargetingCriteriaNodeResolvers<ContextType>,
   TargetingCriteriaRuleFilterNode?: TargetingCriteriaRuleFilterNodeResolvers<ContextType>,
   TargetingCriteriaRuleNode?: TargetingCriteriaRuleNodeResolvers<ContextType>,
