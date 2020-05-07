@@ -173,6 +173,13 @@ class TargetingCriteriaNode(DjangoObjectType):
         model = target_models.TargetingCriteria
 
 
+class StatsObjectType(graphene.ObjectType):
+    child_male = graphene.Int()
+    child_female = graphene.Int()
+    adult_male = graphene.Int()
+    adult_female = graphene.Int()
+
+
 class TargetPopulationNode(DjangoObjectType):
     """Defines an individual target population record."""
 
@@ -181,6 +188,9 @@ class TargetPopulationNode(DjangoObjectType):
     candidate_list_targeting_criteria = TargetingCriteriaRuleFilterNode()
     final_list_targeting_criteria = TargetingCriteriaRuleFilterNode()
     final_list = DjangoConnectionField(HouseholdNode)
+    candidate_stats = graphene.Field(StatsObjectType)
+    final_stats = graphene.Field(StatsObjectType)
+
 
     class Meta:
         model = target_models.TargetPopulation
@@ -221,12 +231,6 @@ def targeting_criteria_object_type_to_query(targeting_criteria_object_type):
             targeting_criteria_rule_querying
         )
     return targeting_criteria_querying.get_query()
-
-
-
-
-
-
 
 
 class Query(graphene.ObjectType):
@@ -286,9 +290,13 @@ class Query(graphene.ObjectType):
                     ).distinct()
                 else:
                     return target_population_model.households.all()
-            return target_population_model.households.filter(
-                targeting_criteria_object_type_to_query(targeting_criteria)
-            ).all().distinct()
+            return (
+                target_population_model.households.filter(
+                    targeting_criteria_object_type_to_query(targeting_criteria)
+                )
+                .all()
+                .distinct()
+            )
         return target_population_model.final_list.all()
 
     def resolve_golden_record_by_targeting_criteria(

@@ -712,8 +712,8 @@ type ImportedIndividualNode implements Node {
   givenName: String!
   middleName: String!
   familyName: String!
-  relationship: ImportedIndividualRelationship
-  role: ImportedIndividualRole
+  relationship: String
+  role: String
   sex: ImportedIndividualSex!
   birthDate: Date!
   estimatedBirthDate: Boolean
@@ -738,29 +738,6 @@ type ImportedIndividualNodeConnection {
 type ImportedIndividualNodeEdge {
   node: ImportedIndividualNode
   cursor: String!
-}
-
-enum ImportedIndividualRelationship {
-  NON_BENEFICIARY
-  HEAD
-  SON_DAUGHTER
-  WIFE_HUSBAND
-  BROTHER_SISTER
-  MOTHER_FATHER
-  AUNT_UNCLE
-  GRANDMOTHER_GRANDFATHER
-  MOTHERINLAW_FATHERINLAW
-  DAUGHTERINLAW_SONINLAW
-  SISTERINLAW_BROTHERINLAW
-  GRANDDAUGHER_GRANDSON
-  NEPHEW_NIECE
-  COUSIN
-}
-
-enum ImportedIndividualRole {
-  PRIMARY
-  ALTERNATE
-  NO_ROLE
 }
 
 enum ImportedIndividualSex {
