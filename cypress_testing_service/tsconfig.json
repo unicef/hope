@@ -5,9 +5,19 @@
     "lib": ["dom","es6"],
     "types": ["cypress"],
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "*": ["cypress/*", "cypress/@types/*"]
+    }
   },
   "include": [
+    "node_modules/cypress",
+    "node_modules/chai-subset",
     "cypress"
+  ],
+  "exclude": [
+    "node_modules/cypress-promise/index.d.ts"
   ]
 }
