@@ -14,6 +14,8 @@ interface UniversalTableProps<T, K> {
   getTitle?: (data) => string;
   title?: string;
   isOnPaper?: boolean;
+  defaultOrderBy?: string;
+  defaultOrderDirection?: string;
 }
 export function UniversalTable<T, K>({
   rowsPerPageOptions = [5, 10, 15],
@@ -25,13 +27,25 @@ export function UniversalTable<T, K>({
   title,
   getTitle,
   isOnPaper,
+  defaultOrderBy,
+  defaultOrderDirection,
 }: UniversalTableProps<T, K>): ReactElement {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(rowsPerPageOptions[0]);
-  const [orderBy, setOrderBy] = useState(null);
-  const [orderDirection, setOrderDirection] = useState('asc');
+  const [orderBy, setOrderBy] = useState(defaultOrderBy);
+  const [orderDirection, setOrderDirection] = useState(
+    defaultOrderDirection || 'asc',
+  );
+  const initVariables = {
+    ...initialVariables,
+    first: rowsPerPage,
+    orderBy: null,
+  };
+  if (orderBy) {
+    initVariables.orderBy = columnToOrderBy(orderBy, orderDirection);
+  }
   const { data, refetch, loading, error } = query({
-    variables: { ...initialVariables, first: rowsPerPage },
+    variables: initVariables,
     fetchPolicy: 'network-only',
   });
 
