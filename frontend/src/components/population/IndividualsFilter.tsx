@@ -77,6 +77,7 @@ export function IndividualsFilter({
             </InputAdornment>
           ),
         }}
+        data-cy='filters-search'
       />
       <StyledFormControl variant='outlined' margin='dense'>
         <InputLabel>Sex</InputLabel>
@@ -93,6 +94,12 @@ export function IndividualsFilter({
                 <WcIcon />
               </StartInputAdornment>
             ),
+          }}
+          SelectDisplayProps={{
+            'data-cy': 'filters-sex',
+          }}
+          MenuProps={{
+            'data-cy': 'filters-sex-options',
           }}
         >
           <MenuItem value=''>

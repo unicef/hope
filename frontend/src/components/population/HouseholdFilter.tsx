@@ -87,7 +87,7 @@ export function HouseholdFilters({
             </InputAdornment>
           ),
         }}
-        data-cy='population-household-filters-search'
+        data-cy='filters-search'
       />
       <StyledFormControl variant='outlined' margin='dense'>
         <InputLabel>Programme</InputLabel>
@@ -133,10 +133,10 @@ export function HouseholdFilters({
             ),
           }}
           SelectDisplayProps={{
-            'data-cy': 'population-household-filters-residence-status',
+            'data-cy': 'filters-residence-status',
           }}
           MenuProps={{
-            'data-cy': 'population-household-filters-residence-status-options',
+            'data-cy': 'filters-residence-status-options',
           }}
         >
           <MenuItem value=''>
