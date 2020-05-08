@@ -24,7 +24,7 @@ export function PopulationIndividualsPage(): React.ReactElement {
     <>
       <PageHeader title='Individuals' />
       <IndividualsFilter filter={filter} onFilterChange={setFilter} />
-      <Container>
+      <Container data-cy='page-details-container'>
         <IndividualsListTable
           filter={debouncedFilter}
           businessArea={businessArea}
