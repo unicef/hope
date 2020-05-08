@@ -41,43 +41,6 @@ class RdiCreateTask:
     individuals = None
     documents = None
 
-    def _cast_choice(self, value, choices_list):
-        choices = [x.get("value") for x in choices_list]
-        if isinstance(value, float):
-            if value.is_integer():
-                return int(value)
-
-        if value in choices:
-            return value
-        elif str(value) in choices:
-            return str(value)
-        elif int(value) in choices:
-            return int(value)
-
-    def _cast_to_correct_type(self, value, header):
-        if value in (None, ""):
-            return value
-
-        combined_fields = get_combined_attributes()
-
-        TYPES_SWITCH_DICT = {
-            "STRING": str,
-            "INTEGER": int,
-            "DECIMAL": float,
-            "BOOL": bool,
-            "SELECT_ONE": self._cast_choice,
-        }
-
-        value_type = combined_fields[header]["type"]
-        fn = TYPES_SWITCH_DICT.get(value_type)
-
-        if fn is None:
-            return value
-        if value_type == "SELECT_ONE":
-            choices = combined_fields[header]["choices"]
-            return self._cast_choice(value, choices)
-        return fn(value)
-
     def _handle_document_fields(
         self, value, header, individual, *args, **kwargs
     ):
@@ -279,9 +242,14 @@ class RdiCreateTask:
                     hasattr(obj_to_create, combined_fields[header]["name"],)
                     and header != "household_id"
                 ):
-                    value = self._cast_to_correct_type(cell.value, header)
+
+                    value = cell.value
                     if value in (None, ""):
                         continue
+
+                    if isinstance(value, float) and value.is_integer():
+                        value = int(cell.value)
+
                     if header == "relationship_i_c" and value == "HEAD":
                         household = self.households.get(household_id)
                         household.head_of_household = obj_to_create
@@ -291,7 +259,9 @@ class RdiCreateTask:
                         obj_to_create, combined_fields[header]["name"], value,
                     )
                 elif header in flex_fields[sheet_title]:
-                    value = self._cast_to_correct_type(cell.value, header)
+                    value = cell.value
+                    if isinstance(value, float) and value.is_integer():
+                        value = int(value)
                     type_name = flex_fields[sheet_title][header]["type"]
                     if type_name in complex_types:
                         fn = complex_types[type_name]
