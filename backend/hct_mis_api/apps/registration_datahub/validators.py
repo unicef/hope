@@ -127,13 +127,10 @@ class UploadXLSXValidator(BaseValidator):
             if isinstance(value, str):
                 return value.strip() in choices
             else:
-                if isinstance(value, float):
-                    if value.is_integer():
-                        return int(value) in choices
-                    return value in choices
-                else:
-                    if value not in choices:
-                        return str(value) in choices
+                if isinstance(value, float) and value.is_integer():
+                    return int(value) in choices
+                if value not in choices:
+                    return str(value) in choices
 
         elif choice_type == "SELECT_MANY":
             if isinstance(value, str):
@@ -254,9 +251,8 @@ class UploadXLSXValidator(BaseValidator):
                 fn = switch_dict.get(field_type)
 
                 value = cell.value
-                if isinstance(cell.value, float):
-                    if cell.value.is_integer():
-                        value = int(cell.value)
+                if isinstance(cell.value, float) and cell.value.is_integer():
+                    value = int(cell.value)
 
                 if fn(value, header.value) is False:
                     message = (
