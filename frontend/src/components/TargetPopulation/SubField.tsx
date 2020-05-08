@@ -66,7 +66,6 @@ export const SubField = (field, index) => {
           name={`filters[${index}].value`}
           label={`${field.fieldAttribute.labelEn}`}
           fullWidth
-          type='number'
           variant='outlined'
           component={FormikTextField}
         />

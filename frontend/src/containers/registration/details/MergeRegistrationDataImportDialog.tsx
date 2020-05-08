@@ -42,7 +42,6 @@ export function MergeRegistrationDataImportDialog({
 }: MergeRegistrationDataImportDialogProps): React.ReactElement {
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const [name, setName] = useState();
   const [mutate] = useMergeRdiMutation({
     variables: { id: registration.id },
   });
@@ -86,13 +85,6 @@ export function MergeRegistrationDataImportDialog({
               Do you want to proceed?
             </div>
           </DialogDescription>
-          <TextField
-            label='Name Import'
-            placeholder='Name Import'
-            fullWidth
-            onChange={(e) => setName(e.target.value)}
-            value={name}
-          />
         </DialogContent>
         <DialogFooter>
           <DialogActions>
@@ -102,7 +94,6 @@ export function MergeRegistrationDataImportDialog({
               color='primary'
               variant='contained'
               onClick={merge}
-              disabled={registration.name !== name}
             >
               MERGE
             </Button>

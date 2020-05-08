@@ -335,7 +335,7 @@ CORE_FIELDS_ATTRIBUTES = [
     },
     {
         "id": "01c1ae70-d8f8-4451-96c5-09afb4ff3057",
-        "type": TYPE_INTEGER,
+        "type": TYPE_STRING,
         "name": "phone_no",
         "lookup": "phone_no",
         "required": False,
@@ -347,7 +347,7 @@ CORE_FIELDS_ATTRIBUTES = [
     },
     {
         "id": "f7609980-95c4-4b18-82dc-132a04ce7d65",
-        "type": TYPE_INTEGER,
+        "type": TYPE_STRING,
         "name": "phone_no_alternative",
         "lookup": "phone_no_alternative",
         "required": False,

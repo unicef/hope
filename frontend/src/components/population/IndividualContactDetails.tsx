@@ -46,12 +46,12 @@ export function IndividualContactDetails({
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='Location Level'>
-            <div>{household.adminArea ? household.adminArea.level : '-'}</div>
+            <div>{household.adminArea?.level || '-'}</div>
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='Location Name'>
-            <div>{household.adminArea ? household.adminArea.title : '-'}</div>
+            <div>{household.adminArea?.title || '-'}</div>
           </LabelizedField>
         </Grid>
       </Grid>

@@ -16,8 +16,14 @@ export const headCells: HeadCell<ImportedIndividualMinimalFragment>[] = [
   },
   {
     disablePadding: false,
-    label: 'Employment/Education',
-    id: 'workStatus',
+    label: 'Role',
+    id: 'role',
+    numeric: false,
+  },
+  {
+    disablePadding: false,
+    label: 'Relationship',
+    id: 'relationship',
     numeric: false,
   },
   {

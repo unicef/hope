@@ -132,7 +132,7 @@ export function HouseholdIndividualsTable({
               </StatusContainer>
             </TableCell>
             <TableCell align='left'>
-              {roleChoicesDict[row.relationship]}
+              {roleChoicesDict[row.role]}
             </TableCell>
             <TableCell align='left'>
               {relationshipChoicesDict[row.relationship]}
