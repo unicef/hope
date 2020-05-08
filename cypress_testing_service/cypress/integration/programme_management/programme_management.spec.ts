@@ -24,6 +24,18 @@ const expectStatusWithin = <E>(
   });
 };
 
+const executeProgramAction = (action) => {
+  cy.getByTestId('page-header-container')
+    .contains(action, { matchCase: false })
+    .click();
+  cy.get('.MuiDialogActions-root').within(() => {
+    cy.contains(action, { matchCase: false }).click();
+  });
+
+  // TODO: data-cy for confirmation modal
+  cy.contains(`programme ${action}`, { matchCase: false });
+};
+
 Before(() => {
   // to hold list of ids for programs created during program management
   cy.wrap<string[]>([]).as('programIds');
@@ -76,8 +88,10 @@ When('the User completes all required fields on the form', () => {
   });
 });
 
-And('the User clicks the {word} button', (action) => {
-  cy.getByTestId('dialog-actions-container').contains(action).click();
+And('the User submits the form', () => {
+  cy.getByTestId('dialog-actions-container')
+    .contains('save', { matchCase: false })
+    .click();
 });
 
 Then('the User is redirected to the new Programme Details screen', () => {
@@ -97,10 +111,7 @@ Then('the User is redirected to the new Programme Details screen', () => {
 });
 
 Then('status of this Programme is {word}', (status) => {
-  expectStatusWithin(
-    cy.getByTestId('program-details-container'),
-    status,
-  );
+  expectStatusWithin(cy.getByTestId('program-details-container'), status);
 });
 
 Given(
@@ -130,8 +141,8 @@ Given(
 
           expect(id).not.eq(undefined);
 
-          // update program status, if needed
           if (status.toLowerCase() === 'active') {
+            // update program status, if needed
             api.updateProgram({ id, status }).then(() => {
               completeApiRequests(id);
             });
@@ -159,39 +170,13 @@ And('the Programme is no longer accessible', () => {
 });
 
 When('the User removes the Programme', () => {
-  cy.contains('remove', { matchCase: false }).click();
-
-  cy.get('.MuiDialogActions-root').within(() => {
-    cy.contains('remove', { matchCase: false }).click();
-  });
-
-  cy.contains('programme removed', { matchCase: false });
+  executeProgramAction('remove');
 });
 
 When('the User activates the Programme', () => {
-  const action = 'activate';
-
-  cy.getByTestId('page-header-container')
-    .contains(action, { matchCase: false })
-    .click();
-  cy.get('.MuiDialogActions-root').within(() => {
-    cy.contains(action, { matchCase: false }).click();
-  });
-
-  // TODO: data-cy for confirmation modal
-  cy.contains('programme activated', { matchCase: false });
+  executeProgramAction('activate');
 });
 
 When('the User finishes the Programme', () => {
-  const action = 'finish';
-
-  cy.getByTestId('page-header-container')
-    .contains(action, { matchCase: false })
-    .click();
-  cy.get('.MuiDialogActions-root').within(() => {
-    cy.contains(action, { matchCase: false }).click();
-  });
-
-  // TODO: data-cy for confirmation modal
-  cy.contains('programme finish', { matchCase: false });
+  executeProgramAction('finish');
 });

@@ -8,31 +8,30 @@ Feature: Programme Management
     as well.
 
     Background:
-        # Given I login to AD as country_admin
-        Given I login with mocked cookies
+        Given I login to AD as country_admin
         Then I see user profile menu
 
-    # Scenario: Create a New Programme
-    #     When User starts creating New Programme
-    #     Then the New Programme form is shown
+    Scenario: Create a New Programme
+        When User starts creating New Programme
+        Then the New Programme form is shown
 
-    #     When the User completes all required fields on the form
-    #         And the User clicks the Save button
-    #     Then the User is redirected to the new Programme Details screen
-    #         And status of this Programme is Draft
+        When the User completes all required fields on the form
+            And the User submits the form
+        Then the User is redirected to the new Programme Details screen
+            And status of this Programme is Draft
 
-    # Scenario: Remove Draft Programme
-    #     Given the User is viewing existing Programme in Draft state
-    #     When the User removes the Programme
-    #     Then the Programme is soft deleted
-    #         And the Programme is no longer accessible
+    Scenario: Remove Draft Programme
+        Given the User is viewing existing Programme in Draft state
+        When the User removes the Programme
+        Then the Programme is soft deleted
+            And the Programme is no longer accessible
 
-    # Scenario: Activating a Programme
-    #     Given the User is viewing existing Programme in Draft state
-    #     When the User activates the Programme
-    #     Then status of this Programme is Active
-    #         # TODO test as targeting.feature scenario
-    #         # And the Programme can then be associated with a 'Closed' Programme Population in Targeting
+    Scenario: Activating a Programme
+        Given the User is viewing existing Programme in Draft state
+        When the User activates the Programme
+        Then status of this Programme is Active
+            # TODO test as targeting.feature scenario
+            # And the Programme can then be associated with a 'Closed' Programme Population in Targeting
 
     Scenario: Finish an Active Programme
         Given the User is viewing existing Programme in Active state
