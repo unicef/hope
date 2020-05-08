@@ -13,8 +13,7 @@ services:
     image: unicef/hct-mis-proxy
     environment:
       - DJANGO_APPLICATION_SERVICE_HOST=backend
-      - FRONTEND_HOST=host.docker.internal
-      - FRONTEND_PORT=3000
+      - FRONTEND_HOST=host.docker.internal:3000
     build:
       context: ./proxy
       dockerfile: ./Dockerfile

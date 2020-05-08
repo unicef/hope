@@ -1,0 +1,31 @@
+version: '3.7'
+volumes:
+  node_modules:
+
+
+services:
+  proxy:
+    environment:
+      - DJANGO_APPLICATION_SERVICE_HOST=backend
+      - FRONTEND_HOST=frontend:3000
+    depends_on:
+      - backend
+      - frontend
+
+  frontend:
+    image: unicef/hct-mis-frontend
+    env_file:
+      - .env
+    build:
+      context: ./frontend
+      dockerfile: ./Dockerfile
+      target: dev
+      args:
+        ENV: dev
+    ports:
+      - "8088:80"
+      - "3000:3000"
+    volumes:
+      - ./frontend/:/code
+      - /code/node_modules
+    command: sh -c 'npm start'
