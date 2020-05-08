@@ -12,7 +12,6 @@ Feature: Programme Management
         Given I login with mocked cookies
         Then I see user profile menu
 
-    @createProgramme
     Scenario: Create a New Programme
         When User starts creating New Programme
         Then the New Programme form is shown
@@ -22,7 +21,6 @@ Feature: Programme Management
         Then the User is redirected to the new Programme Details screen
             And status of this Progrmame is Draft
 
-    @removeProgramme
     Scenario: Remove Draft Programme
         Given the User is viewing existing Programme in Draft state
         When the User takes action to remove Programme

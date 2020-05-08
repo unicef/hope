@@ -1,53 +1,43 @@
-import { Before, After, When, Then, And, Given } from 'cypress-cucumber-preprocessor/steps';
+import {
+  Before,
+  After,
+  When,
+  Then,
+  And,
+  Given,
+} from 'cypress-cucumber-preprocessor/steps';
 import { api } from '../../support/api';
 
-const removeProgramme = () => {
-  cy.contains('remove', { matchCase: false }).click();
-
-  cy.get('.MuiDialogActions-root').within(() => {
-    cy.contains('remove', { matchCase: false }).click();
+const addToProgramIds = (programId: string) => {
+  cy.get<string[]>('@programIds').then((programIds) => {
+    cy.wrap([...programIds, programId]).as('programIds');
   });
-
-  cy.contains('programme removed', { matchCase: false });
 };
 
-Before({ tags: '@createProgramme' }, () => {
-  cy.wrap(undefined).as('programUrl');
+Before(() => {
+  // to hold list of ids for programs created during program management
+  cy.wrap<string[]>([]).as('programIds');
 });
 
-After({ tags: '@createProgramme' }, () => {
-  cy.get('@programUrl').then((programUrl) => {
-    cy.navigateTo(`${programUrl}`);
-    removeProgramme();
-  });
-});
-
-After({ tags: '@removeProgramme' }, () => {
-  cy.getBusinessAreaSlug().then((businessAreaSlug) => {
-    api.getAllPrograms(businessAreaSlug).then((response) => {
-      const {
-        body: {
-          data: {
-            allPrograms: { edges },
-          },
-        },
-      } = response;
-
-      edges.reduce(async (previousRequest, { node: { id } }) => {
-        await previousRequest;
-        return new Cypress.Promise((resolve) => {
-          api.deleteProgram(id).then(() => resolve());
-        });
-      }, Cypress.Promise.resolve());
-    });
+After(() => {
+  // remove programs created during test suite run
+  cy.get<string[]>('@programIds').then((programIds) => {
+    programIds.reduce(async (previousRequest, programId) => {
+      await previousRequest;
+      return new Cypress.Promise((resolve) => {
+        api.deleteProgram(programId).then(() => resolve());
+      });
+    }, Cypress.Promise.resolve());
   });
 });
 
 When('User starts creating New Programme', () => {
   cy.navigateTo('/programs');
-
   cy.getByTestId('main-content').contains('Programme Management');
-  cy.getByTestId('btn-new-programme').click();
+  cy.getByTestId('programs-page-container').children('a').should('have.length.gte', 0);
+  cy.getByTestId('main-content').scrollTo('top');
+  // TODO: check why its not able to scroll properly and hence we're using force:true for now
+  cy.getByTestId('btn-new-programme').click({ force: true });
 });
 
 Then('the New Programme form is shown', () => {
@@ -80,13 +70,17 @@ And('the User clicks the {word} button', (action) => {
 
 Then('the User is redirected to the new Programme Details screen', () => {
   cy.getByTestId('main-content').contains('Programme Details');
+  cy.fixture('program').then(({ name }) => {
+    cy.getByTestId('main-content').contains(name);
+  });
 
   cy.location('pathname').then((pathname) => {
-    const matchGroups = pathname.match(/\/programs\/[^\\/]+$/);
+    // get program id from url pathname
+    const matchGroups = pathname.match(/[^\\/]+$/);
     expect(matchGroups.length).eq(1);
 
-    const programUrl = matchGroups[0];
-    cy.wrap(programUrl).as('programUrl');
+    const programId = matchGroups[0];
+    addToProgramIds(programId);
   });
 });
 
@@ -124,7 +118,13 @@ Given(
 );
 
 When('the User takes action to remove Programme', () => {
-  removeProgramme();
+  cy.contains('remove', { matchCase: false }).click();
+
+  cy.get('.MuiDialogActions-root').within(() => {
+    cy.contains('remove', { matchCase: false }).click();
+  });
+
+  cy.contains('programme removed', { matchCase: false });
 });
 
 Then('the Programme is soft deleted', () => {

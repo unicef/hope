@@ -52,7 +52,7 @@ export function ProgramsPage(): React.ReactElement {
   return (
     <div>
       {toolbar}
-      <PageContainer>{programsList}</PageContainer>
+      <PageContainer data-cy='programs-page-container'>{programsList}</PageContainer>
     </div>
   );
 }
