@@ -13,6 +13,17 @@ const addToProgramIds = (programId: string) => {
   });
 };
 
+const expectStatusWithin = <E>(
+  chainable: Cypress.Chainable<JQuery<E>>,
+  status: string,
+) => {
+  return chainable.within(() => {
+    cy.getByTestId('status-container').contains(status, {
+      matchCase: false,
+    });
+  });
+};
+
 Before(() => {
   // to hold list of ids for programs created during program management
   cy.wrap<string[]>([]).as('programIds');
@@ -37,7 +48,7 @@ When('User starts creating New Programme', () => {
     .children('a')
     .should('have.length.gte', 0);
   cy.getByTestId('main-content').scrollTo('top');
-  // TODO: check why its not able to scroll properly and hence we're using force:true for now
+  // TODO: check why its not able to scroll properly, using { force: true } for now
   cy.getByTestId('btn-new-programme').click({ force: true });
 });
 
@@ -86,18 +97,25 @@ Then('the User is redirected to the new Programme Details screen', () => {
 });
 
 Then('status of this Programme is {word}', (status) => {
-  cy.getByTestId('program-details-container').contains(status, {
-    matchCase: false,
-  });
+  expectStatusWithin(
+    cy.getByTestId('program-details-container'),
+    status,
+  );
 });
 
 Given(
   'the User is viewing existing Programme in {word} state',
   (status: string) => {
-    const today = new Date().toISOString().split('T')[0];
+    const completeApiRequests = (programId: string) => {
+      // to remove created program in tests tear down
+      addToProgramIds(programId);
+      cy.navigateTo(`/programs/${programId}`);
+      cy.getByTestId('program-details-container').as('programDetails');
+    };
 
     cy.fixture('program').then((program) => {
       const { name } = program;
+      const today = new Date().toISOString().split('T')[0];
 
       api
         .createProgram({ ...program, startDate: today, endDate: today })
@@ -106,32 +124,28 @@ Given(
 
           const {
             createProgram: {
-              program: { id, status: receivedStatus },
+              program: { id },
             },
           } = response.body.data;
 
           expect(id).not.eq(undefined);
-          expect(receivedStatus).eq(status.toUpperCase());
 
-          cy.navigateTo(`/programs/${id}`);
-          cy.getByTestId('main-content').contains(name);
-
-          // to remove created program in 'After'
-          addToProgramIds(id);
+          // update program status, if needed
+          if (status.toLowerCase() === 'active') {
+            api.updateProgram({ id, status }).then(() => {
+              completeApiRequests(id);
+            });
+          } else {
+            completeApiRequests(id);
+          }
         });
+
+      // verify it's shown in the UI
+      expectStatusWithin(cy.get('@programDetails'), status);
+      cy.getByTestId('page-header-container').contains(name);
     });
   },
 );
-
-When('the User removes the Programme', () => {
-  cy.contains('remove', { matchCase: false }).click();
-
-  cy.get('.MuiDialogActions-root').within(() => {
-    cy.contains('remove', { matchCase: false }).click();
-  });
-
-  cy.contains('programme removed', { matchCase: false });
-});
 
 Then('the Programme is soft deleted', () => {
   // TODO checking soft delete state
@@ -144,15 +158,40 @@ And('the Programme is no longer accessible', () => {
   });
 });
 
+When('the User removes the Programme', () => {
+  cy.contains('remove', { matchCase: false }).click();
+
+  cy.get('.MuiDialogActions-root').within(() => {
+    cy.contains('remove', { matchCase: false }).click();
+  });
+
+  cy.contains('programme removed', { matchCase: false });
+});
+
 When('the User activates the Programme', () => {
   const action = 'activate';
 
-  cy.get('[data-cy^=program-container]')
+  cy.getByTestId('page-header-container')
     .contains(action, { matchCase: false })
     .click();
   cy.get('.MuiDialogActions-root').within(() => {
     cy.contains(action, { matchCase: false }).click();
   });
 
+  // TODO: data-cy for confirmation modal
   cy.contains('programme activated', { matchCase: false });
+});
+
+When('the User finishes the Programme', () => {
+  const action = 'finish';
+
+  cy.getByTestId('page-header-container')
+    .contains(action, { matchCase: false })
+    .click();
+  cy.get('.MuiDialogActions-root').within(() => {
+    cy.contains(action, { matchCase: false }).click();
+  });
+
+  // TODO: data-cy for confirmation modal
+  cy.contains('programme finish', { matchCase: false });
 });

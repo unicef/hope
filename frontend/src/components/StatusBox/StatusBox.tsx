@@ -33,7 +33,7 @@ export function StatusBox({
     <StatusBoxContainer
       status={status}
       statusToColor={statusToColor}
-      data-cy='program-status-container'
+      data-cy='status-container'
     >
       {statusNameMapping
         ? statusNameMapping(status.replace(underscoreRemoveRegex, ' '))
