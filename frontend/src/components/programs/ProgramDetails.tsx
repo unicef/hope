@@ -72,7 +72,7 @@ export function ProgramDetails({
   const programSectorChoicesDict = choicesToDict(programSectorChoices);
   const programScopeChoicesDict = choicesToDict(programScopeChoices);
   return (
-    <Container>
+    <Container data-cy='program-details-container'>
       <Title>
         <Typography variant='h6'>Programme Details</Typography>
       </Title>

@@ -30,7 +30,11 @@ export function StatusBox({
 }: Props): React.ReactElement {
   const underscoreRemoveRegex = /_/g;
   return (
-    <StatusBoxContainer status={status} statusToColor={statusToColor}>
+    <StatusBoxContainer
+      status={status}
+      statusToColor={statusToColor}
+      data-cy='program-status-container'
+    >
       {statusNameMapping
         ? statusNameMapping(status.replace(underscoreRemoveRegex, ' '))
         : status.replace(underscoreRemoveRegex, ' ')}
