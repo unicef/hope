@@ -19,24 +19,20 @@ Feature: Programme Management
         When the User completes all required fields on the form
             And the User clicks the Save button
         Then the User is redirected to the new Programme Details screen
-            And status of this Progrmame is Draft
+            And status of this Programme is Draft
 
     Scenario: Remove Draft Programme
         Given the User is viewing existing Programme in Draft state
-        When the User takes action to remove Programme
+        When the User removes the Programme
         Then the Programme is soft deleted
             And the Programme is no longer accessible
 
-# Scenario: Activating a Programme
-#     Given The User is viewing the details page of a 'Draft' Programme
-#     When The User clicks 'Activate' Button
-#     Then A Confirmation Modal displays
-
-#     Given The Confirmation Modal is present
-#     When The User clicks the 'Activate' Button
-#     Then The Confirmation Modal dissapears
-#     And The Programme state changes from 'Draft' to 'Active'
-#     And The Programme can then be associated with a 'Closed' Programme Population in Targeting
+    Scenario: Activating a Programme
+        Given the User is viewing existing Programme in Draft state
+        When the User activates the Programme
+        Then status of this Programme is Active
+            # TODO test as targeting.feature scenario
+            # And the Programme can then be associated with a 'Closed' Programme Population in Targeting
 
 # Scenario: Finish/Terminate an Active Programme
 #     Given The User is viewing an Active Programme Detail screen
