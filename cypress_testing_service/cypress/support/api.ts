@@ -34,6 +34,41 @@ const api = {
     });
   },
 
+  updateProgram({ status, ...rest }) {
+    return request('POST', {
+      operationName: 'UpdateProgram',
+      query: `
+        mutation UpdateProgram($programData: UpdateProgramInput!) {
+          updateProgram(programData: $programData) {
+            program {
+              id
+              name
+              startDate
+              endDate
+              status
+              programCaId
+              description
+              budget
+              frequencyOfPayments
+              cashPlus
+              populationGoal
+              scope
+              sector
+              totalNumberOfHouseholds
+              administrativeAreasOfImplementation
+            }
+          }
+        }
+      `,
+      variables: {
+        programData: {
+          status: status && status.toUpperCase(),
+          ...rest
+        },
+      },
+    });
+  },
+
   getProgram(businessArea: string, programId: string) {
     return request('POST', {
       operationName: 'AllPrograms',
@@ -85,9 +120,9 @@ const api = {
           }
         }
       `,
-      variables: { programId }
+      variables: { programId },
     });
-  }
+  },
 };
 
 // TODO don't prefer default export!
