@@ -94,7 +94,7 @@ And('the User submits the form', () => {
     .click();
 });
 
-Then('the User is redirected to the new Programme Details screen', () => {
+Then('the User is redirected to the new Programme details screen', () => {
   cy.getByTestId('main-content').contains('Programme Details');
   cy.fixture('program').then(({ name }) => {
     cy.getByTestId('main-content').contains(name);

@@ -17,7 +17,7 @@ Feature: Programme Management
 
         When the User completes all required fields on the form
             And the User submits the form
-        Then the User is redirected to the new Programme Details screen
+        Then the User is redirected to the new Programme details screen
             And status of this Programme is Draft
 
     Scenario: Remove Draft Programme

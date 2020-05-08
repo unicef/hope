@@ -87,6 +87,7 @@ export function HouseholdFilters({
             </InputAdornment>
           ),
         }}
+        data-cy='population-household-filters-search'
       />
       <StyledFormControl variant='outlined' margin='dense'>
         <InputLabel>Programme</InputLabel>

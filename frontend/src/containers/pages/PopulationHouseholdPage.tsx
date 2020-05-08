@@ -46,7 +46,7 @@ export function PopulationHouseholdPage(): React.ReactElement {
         onFilterChange={setFilter}
         choicesData={choicesData}
       />
-      <Container>
+      <Container data-cy='population-household-details-container'>
         <HouseholdTable
           filter={debouncedFilter}
           businessArea={businessArea}
