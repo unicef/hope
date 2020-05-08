@@ -97,7 +97,7 @@ export function HouseholdFilters({
           onChange={(e) => handleFilterChange(e, 'program')}
           variant='outlined'
           label='Programme'
-          value={filter.program||""}
+          value={filter.program || ''}
           InputProps={{
             startAdornment: (
               <StartInputAdornment position='start'>
@@ -124,7 +124,7 @@ export function HouseholdFilters({
           onChange={(e) => handleFilterChange(e, 'residenceStatus')}
           variant='outlined'
           label='Residence Status'
-          value={filter.residenceStatus||""}
+          value={filter.residenceStatus || ''}
           InputProps={{
             startAdornment: (
               <StartInputAdornment position='start'>
@@ -132,12 +132,20 @@ export function HouseholdFilters({
               </StartInputAdornment>
             ),
           }}
+          SelectDisplayProps={{
+            'data-cy': 'population-household-filters-residence-status',
+          }}
+          MenuProps={{
+            'data-cy': 'population-household-filters-residence-status-options',
+          }}
         >
           <MenuItem value=''>
             <em>None</em>
           </MenuItem>
           {choicesData.residenceStatusChoices.map((program) => (
-            <MenuItem key={program.value} value={program.value}>{program.name}</MenuItem>
+            <MenuItem key={program.value} value={program.value}>
+              {program.name}
+            </MenuItem>
           ))}
         </Select>
       </StyledFormControl>
