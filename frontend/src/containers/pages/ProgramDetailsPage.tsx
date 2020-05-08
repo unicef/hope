@@ -62,7 +62,7 @@ export function ProgramDetailsPage(): React.ReactElement {
   }
   const program = data.program as ProgramNode;
   return (
-    <div data-cy={`program-container-${program.id}`}>
+    <div>
       <ProgramDetailsPageHeader program={program} />
       <Container>
         <ProgramDetails program={program} choices={choices} />

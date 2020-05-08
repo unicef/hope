@@ -12,35 +12,31 @@ Feature: Programme Management
         Given I login with mocked cookies
         Then I see user profile menu
 
-    Scenario: Create a New Programme
-        When User starts creating New Programme
-        Then the New Programme form is shown
+    # Scenario: Create a New Programme
+    #     When User starts creating New Programme
+    #     Then the New Programme form is shown
 
-        When the User completes all required fields on the form
-            And the User clicks the Save button
-        Then the User is redirected to the new Programme Details screen
-            And status of this Programme is Draft
+    #     When the User completes all required fields on the form
+    #         And the User clicks the Save button
+    #     Then the User is redirected to the new Programme Details screen
+    #         And status of this Programme is Draft
 
-    Scenario: Remove Draft Programme
-        Given the User is viewing existing Programme in Draft state
-        When the User removes the Programme
-        Then the Programme is soft deleted
-            And the Programme is no longer accessible
+    # Scenario: Remove Draft Programme
+    #     Given the User is viewing existing Programme in Draft state
+    #     When the User removes the Programme
+    #     Then the Programme is soft deleted
+    #         And the Programme is no longer accessible
 
-    Scenario: Activating a Programme
-        Given the User is viewing existing Programme in Draft state
-        When the User activates the Programme
-        Then status of this Programme is Active
+    # Scenario: Activating a Programme
+    #     Given the User is viewing existing Programme in Draft state
+    #     When the User activates the Programme
+    #     Then status of this Programme is Active
+    #         # TODO test as targeting.feature scenario
+    #         # And the Programme can then be associated with a 'Closed' Programme Population in Targeting
+
+    Scenario: Finish an Active Programme
+        Given the User is viewing existing Programme in Active state
+        When the User finishes the Programme
+        Then status of this Programme is Finished
             # TODO test as targeting.feature scenario
-            # And the Programme can then be associated with a 'Closed' Programme Population in Targeting
-
-# Scenario: Finish/Terminate an Active Programme
-#     Given The User is viewing an Active Programme Detail screen
-#     When The User clikc the 'Finalize' Button
-#     Then A Confirmation Modal displays
-
-#     Given The Confirmation Modal is present
-#     When the User clicks 'Finalize' Button
-#     Then The Confirmation Modal dissapears
-#     And The Programme changes state from 'Active' to 'Finalized'
-#     And The Programme will no longer be available to associated with new 'Closed' Programme Population in Targeting
+            # And The Programme will no longer be available to associated with new 'Closed' Programme Population in Targeting
