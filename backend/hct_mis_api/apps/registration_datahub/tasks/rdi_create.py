@@ -35,11 +35,32 @@ class RdiCreateTask:
     that registration data import instance.
     """
 
+    COMBINED_FIELDS = get_combined_attributes()
+    FLEX_FIELDS = serialize_flex_attributes()
+
     image_loader = None
     business_area = None
     households = None
     individuals = None
     documents = None
+
+    def _cast_value(self, value, header):
+        if value in (None, ""):
+            return value
+
+        value_type = self.COMBINED_FIELDS[header]["type"]
+
+        if value_type == "INTEGER":
+            return int(value)
+
+        if value_type == "SELECT_ONE":
+            choices = [
+                x.get("value") for x in self.COMBINED_FIELDS[header]["choices"]
+            ]
+            if value not in choices:
+                return int(value)
+
+        return value
 
     def _handle_document_fields(
         self, value, header, individual, *args, **kwargs
@@ -181,9 +202,6 @@ class RdiCreateTask:
 
         sheet_title = sheet.title.lower()
 
-        combined_fields = get_combined_attributes()
-        flex_fields = serialize_flex_attributes()
-
         first_row = sheet[1]
         households_to_update = []
         for row in sheet.iter_rows(min_row=3):
@@ -202,7 +220,7 @@ class RdiCreateTask:
             household_id = None
             for cell, header_cell in zip(row, first_row):
                 header = header_cell.value
-                current_field = combined_fields.get(header)
+                current_field = self.COMBINED_FIELDS.get(header)
 
                 if not current_field:
                     continue
@@ -235,20 +253,19 @@ class RdiCreateTask:
                     if value is not None:
                         setattr(
                             obj_to_create,
-                            combined_fields[header]["name"],
+                            self.COMBINED_FIELDS[header]["name"],
                             value,
                         )
                 elif (
-                    hasattr(obj_to_create, combined_fields[header]["name"],)
+                    hasattr(
+                        obj_to_create, self.COMBINED_FIELDS[header]["name"],
+                    )
                     and header != "household_id"
                 ):
 
-                    value = cell.value
+                    value = self._cast_value(cell.value, header)
                     if value in (None, ""):
                         continue
-
-                    if isinstance(value, float) and value.is_integer():
-                        value = int(cell.value)
 
                     if header == "relationship_i_c" and value == "HEAD":
                         household = self.households.get(household_id)
@@ -256,13 +273,13 @@ class RdiCreateTask:
                         households_to_update.append(household)
 
                     setattr(
-                        obj_to_create, combined_fields[header]["name"], value,
+                        obj_to_create,
+                        self.COMBINED_FIELDS[header]["name"],
+                        value,
                     )
-                elif header in flex_fields[sheet_title]:
-                    value = cell.value
-                    if isinstance(value, float) and value.is_integer():
-                        value = int(value)
-                    type_name = flex_fields[sheet_title][header]["type"]
+                elif header in self.FLEX_FIELDS[sheet_title]:
+                    value = self._cast_value(cell.value, header)
+                    type_name = self.FLEX_FIELDS[sheet_title][header]["type"]
                     if type_name in complex_types:
                         fn = complex_types[type_name]
                         value = fn(
