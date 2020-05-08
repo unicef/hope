@@ -89,7 +89,7 @@ services:
     image: unicef/hct-airflow-webserver
     build:
       context: ./airflow
-      dockerfile: airflow/local.Dockerfile
+      dockerfile: local.Dockerfile
     ports:
       - "4200:8080"
     env_file:
@@ -122,7 +122,7 @@ services:
     image: unicef/hct-airflow-flower
     build:
       context: ./airflow
-      dockerfile: airflow/local.Dockerfile
+      dockerfile: local.Dockerfile
     restart: always
     depends_on:
       - airflow_db
@@ -142,7 +142,7 @@ services:
     image: unicef/hct-airflow-scheduler
     build:
       context: ./airflow
-      dockerfile: airflow/local.Dockerfile
+      dockerfile: local.Dockerfile
     env_file:
       - ./airflow/config/.env_airflow
     restart: always
@@ -162,7 +162,7 @@ services:
     image: unicef/hct-airflow-worker
     build:
       context: ./airflow
-      dockerfile: airflow/local.Dockerfile
+      dockerfile: local.Dockerfile
     env_file:
       - ./airflow/config/.env_airflow
     restart: always
