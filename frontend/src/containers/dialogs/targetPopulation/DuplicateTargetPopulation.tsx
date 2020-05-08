@@ -51,7 +51,7 @@ export function DuplicateTargetPopulation({
   open,
   setOpen,
   targetPopulationId,
-}:DuplicateTargetPopulationPropTypes) {
+}: DuplicateTargetPopulationPropTypes) {
   const [mutate] = useCopyTargetPopulationMutation();
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
@@ -70,15 +70,19 @@ export function DuplicateTargetPopulation({
       <Formik
         validationSchema={validationSchema}
         initialValues={initialValues}
-        onSubmit={async (values) => {
-          const { data } = await mutate({
+        onSubmit={(values) => {
+          mutate({
             variables: { input: { targetPopulationData: { ...values } } },
-          });
-          setOpen(false);
-          showMessage('Target Population Duplicated', {
-            pathname: `/${businessArea}/target-population/${data.copyTargetPopulation.targetPopulation.id}`,
-            historyMethod: 'push',
-          });
+          }).then((res) => {
+            setOpen(false);
+            return showMessage('Target Population Duplicated', {
+              pathname: `/${businessArea}/target-population/${res.data.copyTargetPopulation.targetPopulation.id}`,
+              historyMethod: 'push',
+            });
+          }, (error) => {
+            return showMessage('Name already exist');
+          })
+
         }}
       >
         {({ submitForm }) => (
@@ -102,7 +106,7 @@ export function DuplicateTargetPopulation({
                 fullWidth
                 label='Name Copy of Target Population'
                 required
-                variant='filled'
+                variant='outlined'
                 component={FormikTextField}
               />
             </DialogContent>

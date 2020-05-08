@@ -81,6 +81,18 @@ export const FinalizeTP = gql`
             }
           }
         }
+        candidateStats {
+          childMale
+          childFemale
+          adultMale
+          adultFemale
+        }
+        finalStats {
+          childMale
+          childFemale
+          adultMale
+          adultFemale
+        }
       }
     }
   }

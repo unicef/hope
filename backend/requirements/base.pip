@@ -26,6 +26,7 @@ openpyxl==3.0.3
 xlrd==1.2.0
 ipdb
 sentry-sdk==0.14.3
+openpyxl_image_loader
 
 # API
 graphene-django==2.7.1

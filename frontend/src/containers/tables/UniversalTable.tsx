@@ -14,6 +14,8 @@ interface UniversalTableProps<T, K> {
   getTitle?: (data) => string;
   title?: string;
   isOnPaper?: boolean;
+  defaultOrderBy?: string;
+  defaultOrderDirection?: string;
 }
 export function UniversalTable<T, K>({
   rowsPerPageOptions = [5, 10, 15],
@@ -25,13 +27,25 @@ export function UniversalTable<T, K>({
   title,
   getTitle,
   isOnPaper,
+  defaultOrderBy,
+  defaultOrderDirection,
 }: UniversalTableProps<T, K>): ReactElement {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(rowsPerPageOptions[0]);
-  const [orderBy, setOrderBy] = useState(null);
-  const [orderDirection, setOrderDirection] = useState('asc');
-  const { data, refetch, loading } = query({
-    variables: { ...initialVariables, first: rowsPerPage },
+  const [orderBy, setOrderBy] = useState(defaultOrderBy);
+  const [orderDirection, setOrderDirection] = useState(
+    defaultOrderDirection || 'asc',
+  );
+  const initVariables = {
+    ...initialVariables,
+    first: rowsPerPage,
+    orderBy: null,
+  };
+  if (orderBy) {
+    initVariables.orderBy = columnToOrderBy(orderBy, orderDirection);
+  }
+  const { data, refetch, loading, error } = query({
+    variables: initVariables,
     fetchPolicy: 'network-only',
   });
 
@@ -40,9 +54,11 @@ export function UniversalTable<T, K>({
       setPage(0);
     }
   }, [initialVariables]);
-
+  if (error) {
+    console.error(error);
+  }
   if (!data) {
-    return <EmptyTable />
+    return <EmptyTable />;
   }
 
   let correctTitle = title;

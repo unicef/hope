@@ -1,3 +1,6 @@
+import datetime
+
+from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.postgres.fields import IntegerRangeField
 from django.contrib.postgres.fields import JSONField
@@ -15,6 +18,7 @@ from psycopg2.extras import NumericRange
 
 from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES, _INDIVIDUAL
 from core.models import FlexibleAttribute
+from household.models import Individual, Household
 from utils.models import TimeStampedUUIDModel
 
 _MAX_LEN = 256
@@ -131,6 +135,68 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
             .order_by("created_at")
             .distinct()
         )
+
+    @property
+    def candidate_stats(self):
+        if self.status == "DRAFT":
+            households_ids = Household.objects.filter(
+                self.candidate_list_targeting_criteria.get_query()
+            ).values_list("id")
+        else:
+            households_ids = self.households.values_list("id")
+        delta18 = relativedelta(years=+18)
+        date18ago = datetime.datetime.now() - delta18
+        child_male = Individual.objects.filter(
+            household__id__in=households_ids, birth_date__gt=date18ago, sex="MALE"
+        ).count()
+        child_female = Individual.objects.filter(
+            household__id__in=households_ids, birth_date__gt=date18ago, sex="FEMALE"
+        ).count()
+
+        adult_male = Individual.objects.filter(
+            household__id__in=households_ids, birth_date__lte=date18ago, sex="MALE"
+        ).count()
+        adult_female = Individual.objects.filter(
+            household__id__in=households_ids, birth_date__lte=date18ago, sex="FEMALE"
+        ).count()
+        return {
+            "child_male": child_male,
+            "child_female": child_female,
+            "adult_male": adult_male,
+            "adult_female": adult_female,
+        }
+
+    @property
+    def final_stats(self):
+        if self.status == "Draft":
+            return None
+        elif self.status == "APPROVED":
+            households_ids = Household.objects.filter(
+                self.candidate_list_targeting_criteria.get_query()
+            ).values_list("id")
+        else:
+            households_ids = self.final_list.values_list("id")
+        delta18 = relativedelta(years=+18)
+        date18ago = datetime.datetime.now() - delta18
+        child_male = Individual.objects.filter(
+            household__id__in=households_ids, birth_date__gt=date18ago, sex="MALE"
+        ).count()
+        child_female = Individual.objects.filter(
+            household__id__in=households_ids, birth_date__gt=date18ago, sex="FEMALE"
+        ).count()
+
+        adult_male = Individual.objects.filter(
+            household__id__in=households_ids, birth_date__lte=date18ago, sex="MALE"
+        ).count()
+        adult_female = Individual.objects.filter(
+            household__id__in=households_ids, birth_date__lte=date18ago, sex="FEMALE"
+        ).count()
+        return {
+            "child_male": child_male,
+            "child_female": child_female,
+            "adult_male": adult_male,
+            "adult_female": adult_female,
+        }
 
 
 class HouseholdSelection(TimeStampedUUIDModel):

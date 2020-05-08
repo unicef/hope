@@ -62,5 +62,6 @@ export const householdDetailed = gql`
         }
       }
     }
+    flexFields
   }
 `;
