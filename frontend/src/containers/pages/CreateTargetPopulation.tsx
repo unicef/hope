@@ -59,8 +59,8 @@ export function CreateTargetPopulation() {
   return (
     <Formik
       initialValues={initialValues}
-      onSubmit={async (values) => {
-        const { data } = await mutate({
+      onSubmit={(values) => {
+        mutate({
           variables: {
             input: {
               name: values.name,
@@ -81,11 +81,14 @@ export function CreateTargetPopulation() {
               },
             },
           },
-        });
-        showMessage('Target Population Created', {
-          pathname: `/${businessArea}/target-population/${data.createTargetPopulation.targetPopulation.id}`,
-          historyMethod: 'push',
-        });
+        }).then(res => {
+          return showMessage('Target Population Created', {
+            pathname: `/${businessArea}/target-population/${res.data.createTargetPopulation.targetPopulation.id}`,
+            historyMethod: 'push',
+          });
+        }, () => {
+          return showMessage('Name already exist');
+        })
       }}
     >
       {({ submitForm, values }) => (

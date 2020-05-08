@@ -34,11 +34,6 @@ class CopyTargetPopulationInput(graphene.InputObjectType):
     name = graphene.String()
 
 
-class CreateTarget:
-    # TODO(codecakes): Implement
-    pass
-
-
 class ValidatedMutation(graphene.Mutation):
     arguments_validators = []
     object_validators = []
@@ -189,6 +184,10 @@ class ApproveTargetPopulationMutation(ValidatedMutation):
         program = get_object_or_404(
             Program, pk=decode_id_string(kwargs.get("program_id"))
         )
+        if program.status != "ACTIVE":
+            raise ValidationError(
+                "Only Active program can be assigned to Targeting"
+            )
         target_population = kwargs.get("model_object")
         target_population.status = "APPROVED"
         target_population.approved_by = user

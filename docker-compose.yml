@@ -2,7 +2,6 @@ version: '3.7'
 
 volumes:
   backend-data:
-  node_modules:
   db:
   db_ca:
   db_reg:
@@ -14,7 +13,7 @@ services:
     image: unicef/hct-mis-proxy
     environment:
       - DJANGO_APPLICATION_SERVICE_HOST=backend
-      - FRONTEND_SERVICE_HOST=frontend
+      - FRONTEND_HOST=host.docker.internal:3000
     build:
       context: ./proxy
       dockerfile: ./Dockerfile
@@ -22,7 +21,6 @@ services:
       - "8082:80"
     depends_on:
       - backend
-      - frontend
     volumes:
       - backend-data:/data
 
@@ -57,25 +55,6 @@ services:
       - redis
       - cash_assist_datahub_db
       - registration_datahub_db
-
-  #    backend-jobs:
-  #        image: unicef/hct-mis-backend
-  #        env_file:
-  #            - .env
-  #        environment:
-  #            - REDIS_INSTANCE=redis:6379
-  #        build:
-  #            context: ./backend
-  #            dockerfile: ./Dockerfile
-  #            args:
-  #                ENV: dev
-  #                REQUIREMENT_FILE: dev.pip
-  #        volumes:
-  #            - ./backend:/code/
-  #        depends_on:
-  #            - backend
-  #        command: bash -c "/./worker-entrypoint.sh"
-
   db:
     image: mdillon/postgis:9.5-alpine
     volumes:
@@ -109,8 +88,8 @@ services:
   airflow_webserver:
     image: unicef/hct-airflow-webserver
     build:
-      context: .
-      dockerfile: ./airflow/Dockerfile
+      context: ./airflow
+      dockerfile: airflow/local.Dockerfile
     ports:
       - "4200:8080"
     env_file:
@@ -142,8 +121,8 @@ services:
   airflow_flower:
     image: unicef/hct-airflow-flower
     build:
-      context: .
-      dockerfile: ./airflow/Dockerfile
+      context: ./airflow
+      dockerfile: airflow/local.Dockerfile
     restart: always
     depends_on:
       - airflow_db
@@ -162,8 +141,8 @@ services:
   airflow_scheduler:
     image: unicef/hct-airflow-scheduler
     build:
-      context: .
-      dockerfile: ./airflow/Dockerfile
+      context: ./airflow
+      dockerfile: airflow/local.Dockerfile
     env_file:
       - ./airflow/config/.env_airflow
     restart: always
@@ -182,8 +161,8 @@ services:
   airflow_worker:
     image: unicef/hct-airflow-worker
     build:
-      context: .
-      dockerfile: ./airflow/Dockerfile
+      context: ./airflow
+      dockerfile: airflow/local.Dockerfile
     env_file:
       - ./airflow/config/.env_airflow
     restart: always
@@ -194,20 +173,4 @@ services:
       - backend-data:/usr/local/airflow/data
     command: worker
 
-  frontend:
-    image: unicef/hct-mis-frontend
-    env_file:
-      - .env
-    build:
-      context: ./frontend
-      dockerfile: ./Dockerfile
-      target: dev
-      args:
-        ENV: dev
-    ports:
-      - "8088:80"
-      - "3000:3000"
-    volumes:
-      - ./frontend/:/code
-      - /code/node_modules
-    command: sh -c 'npm start'
+

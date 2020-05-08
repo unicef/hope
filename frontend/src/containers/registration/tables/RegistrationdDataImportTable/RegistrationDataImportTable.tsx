@@ -38,6 +38,8 @@ export function RegistrationDataImportTable({ filter }): ReactElement {
           `List of Imports (${data.allRegistrationDataImports.totalCount})`
         }
         headCells={headCells}
+        defaultOrderBy='importDate'
+        defaultOrderDirection='desc'
         rowsPerPageOptions={[10, 15, 20]}
         query={useAllRegistrationDataImportsQuery}
         queriedObjectName='allRegistrationDataImports'

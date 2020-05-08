@@ -42,7 +42,7 @@ export function HouseHoldTableRow({
       <TableCell align='left'>{decodeIdString(household.id)}</TableCell>
       <TableCell align='left'>{household.headOfHousehold.fullName}</TableCell>
       <TableCell align='left'>{household.size}</TableCell>
-      <TableCell align='left'>{household.adminArea.title}</TableCell>
+      <TableCell align='left'>{household.adminArea?.title || '-'}</TableCell>
       <TableCell align='left'>
         {residanceStatusChoiceDict[household.residenceStatus]}
       </TableCell>
