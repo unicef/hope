@@ -290,13 +290,6 @@ export function RegistrationDataImport(): React.ReactElement {
                   variant='filled'
                   component={FormikTextField}
                 />
-                <Field
-                  name='tags'
-                  fullWidth
-                  label='Tags'
-                  required
-                  component={FormikTagsSelectField}
-                />
               </DialogContent>
               <StyledDialogFooter>
                 <Button
