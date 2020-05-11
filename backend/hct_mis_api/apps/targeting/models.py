@@ -71,6 +71,9 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
         related_name="finalized_target_populations",
         null=True,
     )
+    business_area = models.ForeignKey(
+        "core.BusinessArea", null=True, on_delete=models.CASCADE
+    )
     STATUS_CHOICES = (
         ("DRAFT", _("Open")),
         ("APPROVED", _("Closed")),
@@ -147,17 +150,25 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
         delta18 = relativedelta(years=+18)
         date18ago = datetime.datetime.now() - delta18
         child_male = Individual.objects.filter(
-            household__id__in=households_ids, birth_date__gt=date18ago, sex="MALE"
+            household__id__in=households_ids,
+            birth_date__gt=date18ago,
+            sex="MALE",
         ).count()
         child_female = Individual.objects.filter(
-            household__id__in=households_ids, birth_date__gt=date18ago, sex="FEMALE"
+            household__id__in=households_ids,
+            birth_date__gt=date18ago,
+            sex="FEMALE",
         ).count()
 
         adult_male = Individual.objects.filter(
-            household__id__in=households_ids, birth_date__lte=date18ago, sex="MALE"
+            household__id__in=households_ids,
+            birth_date__lte=date18ago,
+            sex="MALE",
         ).count()
         adult_female = Individual.objects.filter(
-            household__id__in=households_ids, birth_date__lte=date18ago, sex="FEMALE"
+            household__id__in=households_ids,
+            birth_date__lte=date18ago,
+            sex="FEMALE",
         ).count()
         return {
             "child_male": child_male,
@@ -179,17 +190,25 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
         delta18 = relativedelta(years=+18)
         date18ago = datetime.datetime.now() - delta18
         child_male = Individual.objects.filter(
-            household__id__in=households_ids, birth_date__gt=date18ago, sex="MALE"
+            household__id__in=households_ids,
+            birth_date__gt=date18ago,
+            sex="MALE",
         ).count()
         child_female = Individual.objects.filter(
-            household__id__in=households_ids, birth_date__gt=date18ago, sex="FEMALE"
+            household__id__in=households_ids,
+            birth_date__gt=date18ago,
+            sex="FEMALE",
         ).count()
 
         adult_male = Individual.objects.filter(
-            household__id__in=households_ids, birth_date__lte=date18ago, sex="MALE"
+            household__id__in=households_ids,
+            birth_date__lte=date18ago,
+            sex="MALE",
         ).count()
         adult_female = Individual.objects.filter(
-            household__id__in=households_ids, birth_date__lte=date18ago, sex="FEMALE"
+            household__id__in=households_ids,
+            birth_date__lte=date18ago,
+            sex="FEMALE",
         ).count()
         return {
             "child_male": child_male,
@@ -197,6 +216,9 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
             "adult_male": adult_male,
             "adult_female": adult_female,
         }
+
+    class Meta:
+        unique_together = ("name", "business_area")
 
 
 class HouseholdSelection(TimeStampedUUIDModel):

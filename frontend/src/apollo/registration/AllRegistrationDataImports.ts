@@ -11,6 +11,7 @@ export const ALL_REGISTRATION_DATA_IMPORT_QUERY = gql`
     $importedBy_Id: UUID
     $status: String
     $importDate: Date
+    $businessArea: String
   ) {
     allRegistrationDataImports(
       after: $after
@@ -22,6 +23,7 @@ export const ALL_REGISTRATION_DATA_IMPORT_QUERY = gql`
       importedBy_Id: $importedBy_Id
       status: $status
       importDate: $importDate
+      businessArea: $businessArea
     ) {
       pageInfo {
         hasNextPage
@@ -33,7 +35,7 @@ export const ALL_REGISTRATION_DATA_IMPORT_QUERY = gql`
       edges {
         cursor
         node {
-            ...registrationMinimal
+          ...registrationMinimal
         }
       }
     }

@@ -8,6 +8,7 @@ import {
 import { UniversalTable } from '../UniversalTable';
 import { headCells } from './TargetPopulationTableHeadCells';
 import { TargetPopulationTableRow } from './TargetPopulationTableRow';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
 
 const TableWrapper = styled.div`
   padding: 20px;
@@ -20,11 +21,13 @@ interface TargetPopulationProps {
 export const TargetPopulationTable = ({
   filter,
 }: TargetPopulationProps): ReactElement => {
+  const businessArea = useBusinessArea();
   const initialVariables = {
     name: filter.name,
     candidateListTotalHouseholdsMin: filter.numIndividuals.min,
     candidateListTotalHouseholdsMax: filter.numIndividuals.max,
     status: filter.status,
+    businessArea,
   };
   return (
     <TableWrapper>
