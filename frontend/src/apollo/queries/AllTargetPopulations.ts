@@ -11,6 +11,7 @@ export const AllTargetPopulations = gql`
     $status: String
     $candidateListTotalHouseholdsMin: Int
     $candidateListTotalHouseholdsMax: Int
+    $businessArea: String
   ) {
     allTargetPopulation(
       after: $after
@@ -22,6 +23,7 @@ export const AllTargetPopulations = gql`
       status: $status
       candidateListTotalHouseholdsMin: $candidateListTotalHouseholdsMin
       candidateListTotalHouseholdsMax: $candidateListTotalHouseholdsMax
+      businessArea: $businessArea
     ) {
       edges {
         node {

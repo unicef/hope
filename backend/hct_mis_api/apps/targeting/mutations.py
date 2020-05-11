@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
 from core import utils
+from core.models import BusinessArea
 from core.permissions import is_authenticated
 from core.utils import decode_id_string
 from household.models import Household
@@ -71,6 +72,7 @@ class UpdateTargetPopulationInput(graphene.InputObjectType):
 class CreateTargetPopulationInput(graphene.InputObjectType):
     name = graphene.String(required=True)
     targeting_criteria = TargetingCriteriaObjectType(required=True)
+    business_area_slug = graphene.String(required=True)
 
 
 class CreateTargetPopulationMutation(graphene.Mutation):
@@ -87,6 +89,9 @@ class CreateTargetPopulationMutation(graphene.Mutation):
         input = kwargs.pop("input")
 
         targeting_criteria_input = input.get("targeting_criteria")
+        business_area = BusinessArea.objects.get(
+            slug=input.pop("business_area_slug")
+        )
         TargetingCriteriaInputValidator.validate(targeting_criteria_input)
         targeting_criteria = TargetingCriteria()
         targeting_criteria.save()
@@ -99,7 +104,7 @@ class CreateTargetPopulationMutation(graphene.Mutation):
                 )
                 rule_filter.save()
         target_population = TargetPopulation(
-            name=input.get("name"), created_by=user,
+            name=input.get("name"), created_by=user, business_area=business_area
         )
         target_population.candidate_list_targeting_criteria = targeting_criteria
         target_population.save()

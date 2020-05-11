@@ -3,7 +3,7 @@ from functools import reduce
 import django_filters
 import graphene
 from django.db.models import Q, Sum
-from django_filters import FilterSet
+from django_filters import FilterSet, CharFilter
 from graphene import relay, Scalar
 from graphene_django import DjangoObjectType, DjangoConnectionField
 from graphene_django.filter import DjangoFilterConnectionField
@@ -69,6 +69,7 @@ class TargetPopulationFilter(django_filters.FilterSet):
     final_list_total_individuals_max = IntegerFilter(
         field_name="final_list_total_individuals", lookup_expr="lte",
     )
+    business_area = CharFilter(field_name="business_area__slug")
 
     @staticmethod
     def filter_created_by_name(queryset, model_field, value):
