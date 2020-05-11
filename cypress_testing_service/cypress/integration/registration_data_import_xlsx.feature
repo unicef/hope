@@ -22,16 +22,28 @@ Feature: Be able to download a template and upload households and individuals to
         Then the XLSX file stored in the system is downloaded
             And the downloaded XLSX file has the Households, Individuals and Choices sheets
 
-# Scenario: User successfully imports Beneficiary Registration Data
-#     Given User is prompted to select a file from the Import Excel screen
-#     And Import file selected is in XLSX format
-#     And File has no errors
-#     When The User completes all required fields
-#     And Clicks 'Import'
-#     Then The Import Modal dissapears
-#     And Information from file is added to Registration Datahub
-#     And A new Import Source is made in the Registration Datahub
-#     And The User is taken to the 'Import Preview' screen
+    Scenario: User successfully imports Beneficiary Registration Data
+        Given the User is viewing the Registration Data Import screen
+
+        When the User starts to import new data
+            And the User selects Excel as their import source
+            And the User uploads file
+            And the file has no errors
+            And the User completes all required fields
+            And the User confirms the import
+
+        Then the User is taken to the Import details screen
+            And the information from uploaded file is visible
+
+        # Given the User is prompted to select a file from the Import Excel screen
+        #     And Import file selected is in XLSX format
+        #     And File has no errors
+        # When The User completes all required fields
+        #     And Clicks 'Import'
+        # Then The Import Modal dissapears
+        #     And Information from file is added to Registration Datahub
+        #     And A new Import Source is made in the Registration Datahub
+        #     And The User is taken to the 'Import Preview' screen
 
 # Scenario: Approving an import: Reviewed and ready to approve source of import data
 #     Given The source of import data has been cleaned
