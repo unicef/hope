@@ -133,6 +133,7 @@ class RdiCreateTask:
                 return default_storage.save(file_name, file)
 
             return file
+        return ""
 
     def _handle_geopoint_field(self, value, header, *args, **kwargs):
         if not value:
@@ -225,8 +226,12 @@ class RdiCreateTask:
                 if not current_field:
                     continue
 
+                is_not_image = current_field["type"] != "IMAGE"
+
                 is_not_required_and_empty = (
-                    not current_field.get("required") and cell.value is None
+                    not current_field.get("required")
+                    and cell.value is None
+                    and is_not_image
                 )
 
                 if is_not_required_and_empty:
