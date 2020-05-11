@@ -17,6 +17,7 @@
 import './commands';
 import './chaiSubset';
 import 'cypress-promise/register';
+import 'cypress-file-upload';
 
 // TODO remove if no optimization gain
 // Cypress.Cookies.defaults({

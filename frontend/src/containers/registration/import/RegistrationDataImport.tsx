@@ -108,7 +108,7 @@ function DropzoneField({ onChange, loading }): React.ReactElement {
     <div>
       <DropzoneContainer {...getRootProps()} disabled={loading}>
         <LoadingComponent isLoading={loading} absolute />
-        <input {...getInputProps()} />
+        <input {...getInputProps()} data-cy='rdi-file-input' />
         {acceptedFilename || 'UPLOAD FILE'}
       </DropzoneContainer>
     </div>
@@ -126,7 +126,7 @@ function Errors({
   }
   return (
     <>
-      <ErrorsContainer>
+      <ErrorsContainer data-cy='errors-container'>
         <Error>Errors</Error>
         <IconButton
           onClick={() => setExpanded(!expanded)}
