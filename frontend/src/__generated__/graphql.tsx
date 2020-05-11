@@ -108,6 +108,7 @@ export type BusinessAreaNode = Node & {
   slug: Scalars['String'],
   userSet: UserNodeConnection,
   programSet: ProgramNodeConnection,
+  targetpopulationSet: TargetPopulationNodeConnection,
   registrationdataimportSet: RegistrationDataImportNodeConnection,
 };
 
@@ -126,6 +127,30 @@ export type BusinessAreaNodeProgramSetArgs = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   name?: Maybe<Scalars['String']>
+};
+
+
+export type BusinessAreaNodeTargetpopulationSetArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>,
+  createdByName?: Maybe<Scalars['String']>,
+  createdAt?: Maybe<Scalars['DateTime']>,
+  updatedAt?: Maybe<Scalars['DateTime']>,
+  status?: Maybe<Scalars['String']>,
+  households?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  candidateListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividualsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
+  finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  businessArea?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
 };
 
 
@@ -278,6 +303,7 @@ export type CreateRegistrationDataImportExcelInput = {
 export type CreateTargetPopulationInput = {
   name: Scalars['String'],
   targetingCriteria: TargetingCriteriaObjectType,
+  businessAreaSlug: Scalars['String'],
 };
 
 export type CreateTargetPopulationMutation = {
@@ -485,6 +511,7 @@ export type HouseholdNodeTargetPopulationsArgs = {
   finalListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
   finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
   finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  businessArea?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -1327,6 +1354,7 @@ export type ProgramNodeTargetpopulationSetArgs = {
   finalListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
   finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
   finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  businessArea?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -1537,6 +1565,7 @@ export type QueryAllTargetPopulationArgs = {
   finalListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
   finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
   finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  businessArea?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -1697,6 +1726,7 @@ export type QueryAllRegistrationDataImportsArgs = {
   status?: Maybe<Scalars['String']>,
   name?: Maybe<Scalars['String']>,
   name_Icontains?: Maybe<Scalars['String']>,
+  businessArea?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -1885,6 +1915,7 @@ export type TargetPopulationNode = Node & {
   approvedBy?: Maybe<UserNode>,
   finalizedAt?: Maybe<Scalars['DateTime']>,
   finalizedBy?: Maybe<UserNode>,
+  businessArea?: Maybe<BusinessAreaNode>,
   status: TargetPopulationStatus,
   households: HouseholdNodeConnection,
   candidateListTotalHouseholds?: Maybe<Scalars['Int']>,
@@ -2066,6 +2097,7 @@ export type UserNodeTargetPopulationsArgs = {
   finalListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
   finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
   finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  businessArea?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -2089,6 +2121,7 @@ export type UserNodeApprovedTargetPopulationsArgs = {
   finalListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
   finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
   finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  businessArea?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -2112,6 +2145,7 @@ export type UserNodeFinalizedTargetPopulationsArgs = {
   finalListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
   finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
   finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  businessArea?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -2194,6 +2228,7 @@ export type UserObjectTypeTargetPopulationsArgs = {
   finalListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
   finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
   finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  businessArea?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -2217,6 +2252,7 @@ export type UserObjectTypeApprovedTargetPopulationsArgs = {
   finalListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
   finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
   finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  businessArea?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -2240,6 +2276,7 @@ export type UserObjectTypeFinalizedTargetPopulationsArgs = {
   finalListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
   finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
   finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  businessArea?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -2954,7 +2991,8 @@ export type AllTargetPopulationsQueryVariables = {
   name?: Maybe<Scalars['String']>,
   status?: Maybe<Scalars['String']>,
   candidateListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
-  candidateListTotalHouseholdsMax?: Maybe<Scalars['Int']>
+  candidateListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  businessArea?: Maybe<Scalars['String']>
 };
 
 
@@ -3296,7 +3334,8 @@ export type AllRegistrationDataImportsQueryVariables = {
   name_Icontains?: Maybe<Scalars['String']>,
   importedBy_Id?: Maybe<Scalars['UUID']>,
   status?: Maybe<Scalars['String']>,
-  importDate?: Maybe<Scalars['Date']>
+  importDate?: Maybe<Scalars['Date']>,
+  businessArea?: Maybe<Scalars['String']>
 };
 
 
@@ -5164,8 +5203,8 @@ export type AllProgramsQueryHookResult = ReturnType<typeof useAllProgramsQuery>;
 export type AllProgramsLazyQueryHookResult = ReturnType<typeof useAllProgramsLazyQuery>;
 export type AllProgramsQueryResult = ApolloReactCommon.QueryResult<AllProgramsQuery, AllProgramsQueryVariables>;
 export const AllTargetPopulationsDocument = gql`
-    query AllTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String, $candidateListTotalHouseholdsMin: Int, $candidateListTotalHouseholdsMax: Int) {
-  allTargetPopulation(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name: $name, status: $status, candidateListTotalHouseholdsMin: $candidateListTotalHouseholdsMin, candidateListTotalHouseholdsMax: $candidateListTotalHouseholdsMax) {
+    query AllTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String, $candidateListTotalHouseholdsMin: Int, $candidateListTotalHouseholdsMax: Int, $businessArea: String) {
+  allTargetPopulation(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name: $name, status: $status, candidateListTotalHouseholdsMin: $candidateListTotalHouseholdsMin, candidateListTotalHouseholdsMax: $candidateListTotalHouseholdsMax, businessArea: $businessArea) {
     edges {
       node {
         id
@@ -5226,6 +5265,7 @@ export function withAllTargetPopulations<TProps, TChildProps = {}>(operationOpti
  *      status: // value for 'status'
  *      candidateListTotalHouseholdsMin: // value for 'candidateListTotalHouseholdsMin'
  *      candidateListTotalHouseholdsMax: // value for 'candidateListTotalHouseholdsMax'
+ *      businessArea: // value for 'businessArea'
  *   },
  * });
  */
@@ -6073,8 +6113,8 @@ export type AllImportedIndividualsQueryHookResult = ReturnType<typeof useAllImpo
 export type AllImportedIndividualsLazyQueryHookResult = ReturnType<typeof useAllImportedIndividualsLazyQuery>;
 export type AllImportedIndividualsQueryResult = ApolloReactCommon.QueryResult<AllImportedIndividualsQuery, AllImportedIndividualsQueryVariables>;
 export const AllRegistrationDataImportsDocument = gql`
-    query AllRegistrationDataImports($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name_Icontains: String, $importedBy_Id: UUID, $status: String, $importDate: Date) {
-  allRegistrationDataImports(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name_Icontains: $name_Icontains, importedBy_Id: $importedBy_Id, status: $status, importDate: $importDate) {
+    query AllRegistrationDataImports($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name_Icontains: String, $importedBy_Id: UUID, $status: String, $importDate: Date, $businessArea: String) {
+  allRegistrationDataImports(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name_Icontains: $name_Icontains, importedBy_Id: $importedBy_Id, status: $status, importDate: $importDate, businessArea: $businessArea) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -6130,6 +6170,7 @@ export function withAllRegistrationDataImports<TProps, TChildProps = {}>(operati
  *      importedBy_Id: // value for 'importedBy_Id'
  *      status: // value for 'status'
  *      importDate: // value for 'importDate'
+ *      businessArea: // value for 'businessArea'
  *   },
  * });
  */
@@ -7005,10 +7046,6 @@ export type ResolversTypes = {
   UserNodeEdge: ResolverTypeWrapper<UserNodeEdge>,
   ProgramNodeConnection: ResolverTypeWrapper<ProgramNodeConnection>,
   ProgramNodeEdge: ResolverTypeWrapper<ProgramNodeEdge>,
-  RegistrationDataImportNodeConnection: ResolverTypeWrapper<RegistrationDataImportNodeConnection>,
-  RegistrationDataImportNodeEdge: ResolverTypeWrapper<RegistrationDataImportNodeEdge>,
-  CashPlanNodeConnection: ResolverTypeWrapper<CashPlanNodeConnection>,
-  CashPlanNodeEdge: ResolverTypeWrapper<CashPlanNodeEdge>,
   TargetPopulationNodeConnection: ResolverTypeWrapper<TargetPopulationNodeConnection>,
   TargetPopulationNodeEdge: ResolverTypeWrapper<TargetPopulationNodeEdge>,
   TargetPopulationNode: ResolverTypeWrapper<TargetPopulationNode>,
@@ -7023,7 +7060,11 @@ export type ResolversTypes = {
   CoreFieldChoiceObject: ResolverTypeWrapper<CoreFieldChoiceObject>,
   PaymentRecordNodeConnection: ResolverTypeWrapper<PaymentRecordNodeConnection>,
   PaymentRecordNodeEdge: ResolverTypeWrapper<PaymentRecordNodeEdge>,
+  CashPlanNodeConnection: ResolverTypeWrapper<CashPlanNodeConnection>,
+  CashPlanNodeEdge: ResolverTypeWrapper<CashPlanNodeEdge>,
   StatsObjectType: ResolverTypeWrapper<StatsObjectType>,
+  RegistrationDataImportNodeConnection: ResolverTypeWrapper<RegistrationDataImportNodeConnection>,
+  RegistrationDataImportNodeEdge: ResolverTypeWrapper<RegistrationDataImportNodeEdge>,
   RegistrationDataImportDataSource: RegistrationDataImportDataSource,
   IndividualNodeConnection: ResolverTypeWrapper<IndividualNodeConnection>,
   IndividualNodeEdge: ResolverTypeWrapper<IndividualNodeEdge>,
@@ -7139,10 +7180,6 @@ export type ResolversParentTypes = {
   UserNodeEdge: UserNodeEdge,
   ProgramNodeConnection: ProgramNodeConnection,
   ProgramNodeEdge: ProgramNodeEdge,
-  RegistrationDataImportNodeConnection: RegistrationDataImportNodeConnection,
-  RegistrationDataImportNodeEdge: RegistrationDataImportNodeEdge,
-  CashPlanNodeConnection: CashPlanNodeConnection,
-  CashPlanNodeEdge: CashPlanNodeEdge,
   TargetPopulationNodeConnection: TargetPopulationNodeConnection,
   TargetPopulationNodeEdge: TargetPopulationNodeEdge,
   TargetPopulationNode: TargetPopulationNode,
@@ -7157,7 +7194,11 @@ export type ResolversParentTypes = {
   CoreFieldChoiceObject: CoreFieldChoiceObject,
   PaymentRecordNodeConnection: PaymentRecordNodeConnection,
   PaymentRecordNodeEdge: PaymentRecordNodeEdge,
+  CashPlanNodeConnection: CashPlanNodeConnection,
+  CashPlanNodeEdge: CashPlanNodeEdge,
   StatsObjectType: StatsObjectType,
+  RegistrationDataImportNodeConnection: RegistrationDataImportNodeConnection,
+  RegistrationDataImportNodeEdge: RegistrationDataImportNodeEdge,
   RegistrationDataImportDataSource: RegistrationDataImportDataSource,
   IndividualNodeConnection: IndividualNodeConnection,
   IndividualNodeEdge: IndividualNodeEdge,
@@ -7290,6 +7331,7 @@ export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends Reso
   slug?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   userSet?: Resolver<ResolversTypes['UserNodeConnection'], ParentType, ContextType, BusinessAreaNodeUserSetArgs>,
   programSet?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, BusinessAreaNodeProgramSetArgs>,
+  targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, BusinessAreaNodeTargetpopulationSetArgs>,
   registrationdataimportSet?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, BusinessAreaNodeRegistrationdataimportSetArgs>,
 };
 
@@ -8009,6 +8051,7 @@ export type TargetPopulationNodeResolvers<ContextType = any, ParentType extends 
   approvedBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   finalizedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   finalizedBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
+  businessArea?: Resolver<Maybe<ResolversTypes['BusinessAreaNode']>, ParentType, ContextType>,
   status?: Resolver<ResolversTypes['TargetPopulationStatus'], ParentType, ContextType>,
   households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, TargetPopulationNodeHouseholdsArgs>,
   candidateListTotalHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,

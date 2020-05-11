@@ -24,8 +24,7 @@ from registration_datahub.validators import UploadXLSXValidator
 class CreateRegistrationDataImportExcelInput(graphene.InputObjectType):
     import_data_id = graphene.ID()
     name = graphene.String()
-    # TODO: temporary
-    business_area_slug = graphene.String(required=False)
+    business_area_slug = graphene.String()
 
 
 class CreateRegistrationDataImport(BaseValidator, graphene.Mutation):
@@ -45,9 +44,7 @@ class CreateRegistrationDataImport(BaseValidator, graphene.Mutation):
         import_data_obj = ImportData.objects.get(id=import_data_id)
 
         business_area = BusinessArea.objects.get(
-            slug=registration_data_import_data.pop(
-                "business_area_slug", "afghanistan"
-            )
+            slug=registration_data_import_data.pop("business_area_slug")
         )
 
         created_obj_datahub = RegistrationDataImportDatahub.objects.create(
