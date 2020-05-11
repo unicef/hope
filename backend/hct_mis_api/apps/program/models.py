@@ -107,6 +107,9 @@ class Program(TimeStampedUUIDModel):
             households=Coalesce(Sum("number_of_households"), 0),
         )["households"]
 
+    class Meta:
+        unique_together = ("name", "business_area")
+
 
 class CashPlan(TimeStampedUUIDModel):
     NOT_STARTED = "NOT_STARTED"
