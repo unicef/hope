@@ -6,9 +6,7 @@ import { PageHeader } from '../../components/PageHeader';
 import { TargetingCriteria } from '../../components/TargetPopulation/TargetingCriteria';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { Results } from '../../components/TargetPopulation/Results';
-import {
-  useCreateTpMutation,
-} from '../../__generated__/graphql';
+import { useCreateTpMutation } from '../../__generated__/graphql';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
@@ -64,6 +62,7 @@ export function CreateTargetPopulation() {
           variables: {
             input: {
               name: values.name,
+              businessAreaSlug: businessArea,
               targetingCriteria: {
                 rules: values.criterias.map((rule) => {
                   return {
@@ -81,14 +80,17 @@ export function CreateTargetPopulation() {
               },
             },
           },
-        }).then(res => {
-          return showMessage('Target Population Created', {
-            pathname: `/${businessArea}/target-population/${res.data.createTargetPopulation.targetPopulation.id}`,
-            historyMethod: 'push',
-          });
-        }, () => {
-          return showMessage('Name already exist');
-        })
+        }).then(
+          (res) => {
+            return showMessage('Target Population Created', {
+              pathname: `/${businessArea}/target-population/${res.data.createTargetPopulation.targetPopulation.id}`,
+              historyMethod: 'push',
+            });
+          },
+          () => {
+            return showMessage('Name already exist');
+          },
+        );
       }}
     >
       {({ submitForm, values }) => (
@@ -152,13 +154,13 @@ export function CreateTargetPopulation() {
               }}
             />
           ) : (
-              <PaperContainer>
-                <Typography variant='h6'>
-                  Target Population Entries (Households)
+            <PaperContainer>
+              <Typography variant='h6'>
+                Target Population Entries (Households)
               </Typography>
-                <Label>Add targeting criteria to see results.</Label>
-              </PaperContainer>
-            )}
+              <Label>Add targeting criteria to see results.</Label>
+            </PaperContainer>
+          )}
         </Form>
       )}
     </Formik>
