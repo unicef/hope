@@ -5,16 +5,22 @@ import * as Yup from 'yup';
 import { useTranslation } from 'react-i18next';
 import {
   Button,
+  CardActions,
+  Collapse,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   FormControl,
+  IconButton,
   InputLabel,
   MenuItem,
   Select,
   Typography,
 } from '@material-ui/core';
+import ExpandMoreRoundedIcon from '@material-ui/icons/ExpandMoreRounded';
+import ExpandLessRoundedIcon from '@material-ui/icons/ExpandLessRounded';
+
 import ExitToAppRoundedIcon from '@material-ui/icons/ExitToAppRounded';
 import { useDropzone } from 'react-dropzone';
 import { Field, Form, Formik } from 'formik';
@@ -23,6 +29,7 @@ import {
   UploadImportDataXlsxFileMutation,
   useCreateRegistrationDataImportMutation,
   useUploadImportDataXlsxFileMutation,
+  XlsxRowErrorNode,
 } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
@@ -79,6 +86,12 @@ const StyledDialogFooter = styled(DialogFooter)`
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};
 `;
+const ErrorsContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+`;
 
 function DropzoneField({ onChange, loading }): React.ReactElement {
   const onDrop = useCallback((acceptedFiles) => {
@@ -99,6 +112,38 @@ function DropzoneField({ onChange, loading }): React.ReactElement {
         {acceptedFilename || 'UPLOAD FILE'}
       </DropzoneContainer>
     </div>
+  );
+}
+
+function Errors({
+  errors,
+}: {
+  errors: XlsxRowErrorNode[];
+}): React.ReactElement {
+  const [expanded, setExpanded] = useState(false);
+  if (!errors || !errors.length) {
+    return null;
+  }
+  return (
+    <>
+      <ErrorsContainer>
+        <Error>Errors</Error>
+        <IconButton
+          onClick={() => setExpanded(!expanded)}
+          aria-expanded={expanded}
+          aria-label='show more'
+        >
+          {expanded ? <ExpandLessRoundedIcon /> : <ExpandMoreRoundedIcon />}
+        </IconButton>
+      </ErrorsContainer>
+      <Collapse in={expanded} timeout='auto' unmountOnExit>
+        {errors.map((item) => (
+          <Error>
+            <strong>Row: {item.rowNumber}</strong> {item.message}
+          </Error>
+        ))}
+      </Collapse>
+    </>
   );
 }
 
@@ -162,15 +207,7 @@ export function RegistrationDataImport(): React.ReactElement {
             });
           }}
         />
-        <div>
-          {errors
-            ? errors.map((item) => (
-                <Error>
-                  <strong>Row: {item.rowNumber}</strong> {item.message}
-                </Error>
-              ))
-            : null}
-        </div>
+        <Errors errors={errors as XlsxRowErrorNode[]} />
       </>
     );
   }
