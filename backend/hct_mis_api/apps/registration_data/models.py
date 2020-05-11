@@ -40,3 +40,6 @@ class RegistrationDataImport(TimeStampedUUIDModel):
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        unique_together = ("name", "business_area")
