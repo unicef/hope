@@ -71,6 +71,9 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
         related_name="finalized_target_populations",
         null=True,
     )
+    business_area = models.ForeignKey(
+        "core.BusinessArea", null=True, on_delete=models.CASCADE
+    )
     STATUS_CHOICES = (
         ("DRAFT", _("Open")),
         ("APPROVED", _("Closed")),
