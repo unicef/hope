@@ -8,12 +8,19 @@ declare namespace Cypress {
 
     loginWithMock(): Chainable<Subject>;
 
-    getByTestId(value: string): Chainable<Subject>;
+    getByTestId<E extends Node = HTMLElement>(
+      value: string,
+      options?: Partial<Loggable & Timeoutable & Withinable>,
+    ): Chainable<JQuery<E>>;
 
     getBusinessAreaSlug(): Chainable<Subject>;
 
     navigateTo(newPath: string): Chainable<Subject>;
 
     pickDayOfTheMonth(day: number, fieldName: string): Chainable<Subject>;
+
+    downloadXlsxData(url: string): Chainable<any>;
+
+    parseXlsxData(nameOrIndex?: string | number): Chainable<any>;
   }
 }

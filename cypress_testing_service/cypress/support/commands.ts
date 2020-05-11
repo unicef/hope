@@ -41,8 +41,8 @@ Cypress.Commands.add('loginWithMock', () => {
   login(mockAuthCookies);
 });
 
-Cypress.Commands.add('getByTestId', (value) => {
-  return cy.get(`[data-cy=${value}]`);
+Cypress.Commands.add('getByTestId', (value, options) => {
+  return cy.get(`[data-cy=${value}]`, options);
 });
 
 Cypress.Commands.add('getBusinessAreaSlug', () => {
@@ -65,4 +65,35 @@ Cypress.Commands.add('pickDayOfTheMonth', (day, inputName) => {
   cy.get('.MuiPickersBasePicker-pickerView button')
     .contains(new RegExp(`^${day}$`, 'g'))
     .click();
+});
+
+Cypress.Commands.add(
+  'parseXlsxData',
+  { prevSubject: 'optional' },
+  (data, nameOrIndex) => {
+    return cy.task('parseXlsxData', { data, nameOrIndex });
+  },
+);
+
+Cypress.Commands.add('downloadXlsxData', (url) => {
+  return cy.wrap(
+    new Promise((resolve) => {
+      const request = new XMLHttpRequest();
+      request.open('GET', url, true);
+      request.responseType = 'blob';
+
+      request.onload = () => {
+        expect(request.status).eq(200, 'XLSX data download failed');
+
+        const blob = request.response;
+
+        const reader = new FileReader();
+        reader.onload = () => {
+          resolve(reader.result);
+        };
+        reader.readAsBinaryString(blob);
+      };
+      request.send();
+    }),
+  );
 });
