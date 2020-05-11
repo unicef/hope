@@ -7,11 +7,13 @@ import openpyxl
 import phonenumbers
 from dateutil import parser
 from openpyxl import load_workbook
+from openpyxl_image_loader import SheetImageLoader
 
 from core.core_fields_attributes import CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY
 from core.utils import (
     serialize_flex_attributes,
-    get_combined_attributes, get_admin_areas_as_choices,
+    get_combined_attributes,
+    get_admin_areas_as_choices,
 )
 from core.validators import BaseValidator
 
@@ -38,7 +40,7 @@ class UploadXLSXValidator(BaseValidator):
     @classmethod
     def string_validator(cls, value, header, *args, **kwargs):
         if not cls.required_validator(value, header):
-            return False
+            return True
         if value is None:
             return True
 
@@ -110,6 +112,11 @@ class UploadXLSXValidator(BaseValidator):
         if field is None:
             return False
 
+        if not cls.required_validator(value, header):
+            return False
+        if value is None:
+            return True
+
         if header in ("admin1", "admin2"):
             choices_list = get_admin_areas_as_choices(header[-1])
             choices = [x.get("value") for x in choices_list]
@@ -118,19 +125,14 @@ class UploadXLSXValidator(BaseValidator):
 
         choice_type = cls.ALL_FIELDS[header]["type"]
 
-        if not cls.required_validator(value, header):
-            return False
-        if value is None:
-            return True
-
         if choice_type == "SELECT_ONE":
             if isinstance(value, str):
                 return value.strip() in choices
             else:
-                if isinstance(value, float) and value.is_integer():
-                    return int(value) in choices
                 if value not in choices:
-                    return str(value) in choices
+                    str_value = str(value)
+                    return str_value in choices
+            return False
 
         elif choice_type == "SELECT_MANY":
             if isinstance(value, str):
@@ -172,8 +174,10 @@ class UploadXLSXValidator(BaseValidator):
         return True
 
     @classmethod
-    def image_validator(cls, value, header, *args, **kwargs):
-        return True
+    def image_validator(cls, value, header, cell, *args, **kwargs):
+        if cls.required_validator(value, header):
+            return True
+        return cls.image_loader.image_in(cell.coordinate)
 
     @classmethod
     def rows_validator(cls, sheet):
@@ -251,10 +255,10 @@ class UploadXLSXValidator(BaseValidator):
                 fn = switch_dict.get(field_type)
 
                 value = cell.value
-                if isinstance(cell.value, float) and cell.value.is_integer():
-                    value = int(cell.value)
+                if isinstance(value, float) and value.is_integer():
+                    value = int(value)
 
-                if fn(value, header.value) is False:
+                if fn(value, header.value, cell) is False:
                     message = (
                         f"Sheet: {sheet.title}, Unexpected value: "
                         f"{value} for type "
@@ -301,7 +305,8 @@ class UploadXLSXValidator(BaseValidator):
         # Checking only extensions is not enough,
         # loading workbook to check if it is in fact true .xlsx file
         try:
-            load_workbook(xlsx_file, data_only=True)
+            wb = load_workbook(xlsx_file, data_only=True)
+            cls.WB = wb
         except BadZipfile:
             return [
                 {
@@ -360,6 +365,7 @@ class UploadXLSXValidator(BaseValidator):
         else:
             wb = cls.WB
         household_sheet = wb["Households"]
+        cls.image_loader = SheetImageLoader(household_sheet)
         return cls.rows_validator(household_sheet)
 
     @classmethod
@@ -369,5 +375,6 @@ class UploadXLSXValidator(BaseValidator):
             wb = openpyxl.load_workbook(xlsx_file, data_only=True)
         else:
             wb = cls.WB
-        household_sheet = wb["Individuals"]
-        return cls.rows_validator(household_sheet)
+        individuals_sheet = wb["Individuals"]
+        cls.image_loader = SheetImageLoader(individuals_sheet)
+        return cls.rows_validator(individuals_sheet)
