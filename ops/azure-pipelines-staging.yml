@@ -48,8 +48,8 @@ stages:
               containerRegistry: $(containerRegistry)
               tags: |
                 $(Build.BuildId)
-            - task: Docker@2
 
+          - task: Docker@2
             displayName: Build and push frontend image
             inputs:
               command: buildAndPush
