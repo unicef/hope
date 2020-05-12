@@ -42,7 +42,7 @@ export function TargetPopulationDetails({
   const sendDate = finalizedAt ? moment(finalizedAt).format('DD MMM YYYY') : '-';
   const programName = program && program.name ? program.name : '-';
   return (
-    <Container>
+    <Container data-cy='target-population-details-container'>
       <Title>
         <Typography variant='h6'>Details</Typography>
       </Title>
