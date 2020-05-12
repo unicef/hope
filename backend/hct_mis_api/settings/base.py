@@ -370,3 +370,5 @@ GRAPH_MODELS = {
 }
 
 PHONENUMBER_DEFAULT_REGION = "US"
+
+AIRFLOW_HOST = "airflow_webserver"
