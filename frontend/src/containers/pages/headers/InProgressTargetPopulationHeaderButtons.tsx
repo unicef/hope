@@ -61,6 +61,7 @@ export function InProgressTargetPopulationHeaderButtons({
           variant='contained'
           color='primary'
           onClick={() => setOpenApprove(true)}
+          data-cy='btn-target-population-close'
         >
           Close
         </Button>
