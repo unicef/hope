@@ -124,10 +124,13 @@ And(
   },
 );
 
-Given('the User is viewing existing Programme Population in Open state', () => {
+Given('the User is viewing existing Target Population in Open state', () => {
   createTargetPopulation();
   cy.get<{ id: string }>('@targetPopulation').then(({ id }) => {
     cy.navigateTo(`/target-population/${id}`);
+    cy.getByTestId('criteria-container').then(($el) => {
+      cy.wrap($el.text()).as('targetPopulationCriteria');
+    });
   });
 });
 
@@ -228,3 +231,66 @@ Then('the details for the Target Population are sent to Cash Assist', () => {
     .getByTestId('status-container')
     .contains('sent', { matchCase: false });
 });
+
+When('the User starts duplicating the existing Target Population', () => {
+  cy.getByTestId('btn-target-population-duplicate').click({ force: true });
+});
+
+Then(
+  'the confirmation dialog for duplicating Target Population is shown',
+  () => {
+    cy.get('.MuiDialog-container').contains('duplicate target population', {
+      matchCase: false,
+    });
+  },
+);
+
+When('the User provides a unique name for copy of Target Population', () => {
+  cy.fixture<{ name: string }>('targetPopulation').then(({ name }) => {
+    const duplicatedTargetPopulationName = `${name} ${uuid()}`;
+    cy.get('.MuiDialog-container')
+      .getByTestId('input-name')
+      .type(duplicatedTargetPopulationName);
+
+    cy.wrap(duplicatedTargetPopulationName).as(
+      'duplicatedTargetPopulationName',
+    );
+  });
+});
+
+And('the User confirms to duplicate the Target Population', () => {
+  cy.get('.MuiDialogActions-root')
+    .getByTestId('btn-target-population-duplicate')
+    .click({ force: true });
+});
+
+Then(
+  'the User is directed to the duplicated Target Population details screen',
+  () => {
+    cy.getByTestId('main-content').scrollTo('top');
+
+    cy.getByTestId('page-header-container').contains('targeting', {
+      matchCase: false,
+    });
+  },
+);
+
+And(
+  'the duplicated Target Population has title as provided by the User',
+  () => {
+    cy.get<string>('@duplicatedTargetPopulationName').then((duplicatedTargetPopulationName) => {
+      cy.getByTestId('page-header-container').contains(duplicatedTargetPopulationName);
+    });
+  },
+);
+
+And(
+  'the duplicated Target Population have other details as original Target Population',
+  () => {
+    cy.get<string>('@targetPopulationCriteria').then((targetPopulationCriteria) => {
+      cy.getByTestId('criteria-container').then(($el) => {
+        expect($el.text()).eq(targetPopulationCriteria);
+      });
+    });
+  },
+);

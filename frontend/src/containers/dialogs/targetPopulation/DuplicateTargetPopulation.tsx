@@ -118,6 +118,7 @@ export function DuplicateTargetPopulation({
                   color='primary'
                   variant='contained'
                   onClick={submitForm}
+                  data-cy='btn-target-population-duplicate'
                 >
                   Save
                 </Button>

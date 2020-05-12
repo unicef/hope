@@ -37,7 +37,10 @@ export function InProgressTargetPopulationHeaderButtons({
   return (
     <div>
       <IconContainer>
-        <Button onClick={() => setOpenDuplicate(true)}>
+        <Button
+          onClick={() => setOpenDuplicate(true)}
+          data-cy='btn-target-population-duplicate'
+        >
           <FileCopy />
         </Button>
       </IconContainer>
