@@ -14,9 +14,11 @@ resources:
 variables:
   frontendDockerFilePath: "**/frontend/Dockerfile"
   backendDockerFilePath: "**/backend/Dockerfile"
+  airflowDockerFilePath: "**/airflow/Dockerfile"
   kubernetesServiceConnection: 'ICTD-HCT-MIS-Demo-uni-apps-K8s-dev-hct-ims-dev-1574767480012'
   backendImageRepository: "hct-mis-backend"
   frontendImageRepository: "hct-mis-frontend"
+  airflowImageRepository: "hct-mis-airflow"
   containerRegistry: "uniappsk8sdevacr"
 
 stages:
@@ -37,6 +39,17 @@ stages:
                 $(Build.BuildId)
 
           - task: Docker@2
+            displayName: Build and push airflow image
+            inputs:
+              command: buildAndPush
+              dockerfile: $(airflowDockerFilePath)
+              repository: $(airflowImageRepository)
+              buildContext: "$(Build.SourcesDirectory)"
+              containerRegistry: $(containerRegistry)
+              tags: |
+                $(Build.BuildId)
+            - task: Docker@2
+
             displayName: Build and push frontend image
             inputs:
               command: buildAndPush
@@ -108,3 +121,33 @@ stages:
                 databases.postgres-cash-assist-datahub-db.secret.POSTGRES_DB=$(CASH_ASSIST_DATAHUB_POSTGRES_DB),\
                 databases.postgres-cash-assist-datahub-db.secret.POSTGRES_USER=$(CASH_ASSIST_REGISTRATION_DATAHUB_POSTGRES_USER),\
                 databases.postgres-cash-assist-datahub-db.secret.POSTGRES_PASSWORD=$(CASH_ASSIST_REGISTRATION_DATAHUB_POSTGRES_PASSWORD),"
+      
+      - job: deploy_airflow
+        displayName: Deploy Airflow
+        steps:
+        - task: HelmDeploy@0
+          displayName: Helm repo update
+          inputs:
+            connectionType: 'Kubernetes Service Connection'
+            kubernetesServiceConnection: 'ICTD-HCT-MIS-Demo-uni-apps-K8s-dev-hct-ims-dev-1574767480012'
+            command: repo
+            namespace: 'hct-ims-staging'
+            arguments: add stable https://kubernetes-charts.storage.googleapis.com
+
+        - task: HelmDeploy@0
+          displayName: Deploy
+          inputs:
+            connectionType: 'Kubernetes Service Connection'
+            kubernetesServiceConnection: 'ICTD-HCT-MIS-Demo-uni-apps-K8s-dev-hct-ims-dev-1574767480012'
+            namespace: 'hct-ims-staging'
+            command: 'upgrade'
+            chartName: "stable/airflow"
+            releaseName: 'hct-mis-airflow'
+            valueFile: "**/ops/airflow-stg-values.yaml"
+            install: true
+            force: true
+            waitForExecution: false
+            arguments: "--timeout 600s"
+            overrideValues: "
+            airflow.image.repository=uniappsk8sdevacr.azurecr.io/$(airflowImageRepository),\
+            airflow.image.tag=$(Build.BuildId),"
