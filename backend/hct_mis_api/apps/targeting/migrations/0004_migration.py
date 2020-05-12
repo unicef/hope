@@ -10,7 +10,7 @@ def set_business_area(apps, schema_editor):
     if afghanistan is None:
         return
     TargetPopulation = apps.get_model("targeting", "TargetPopulation")
-    TargetPopulation.objects.filter(business_area=None).update(
+    TargetPopulation.objects.filter(business_area__isnull=True).update(
         business_area=afghanistan
     )
 
