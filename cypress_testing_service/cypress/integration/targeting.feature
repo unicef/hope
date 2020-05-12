@@ -27,31 +27,31 @@ Feature: Target Population
   # I want to lock in the Beneficiary Data selected from my criteria set
   # So I can use it in CashAssist
 
-  Scenario: Preparing potential list of beneficiaries to be added to a Cash Plan of a particular Program
-    Given the User is viewing existing Programme Population in Open state
-    When the User closes the Programme Population
-    Then the confirmation dialog for closing Programme Population is shown
-      And the User is asked to provide associated Program
+  # Scenario: Preparing potential list of beneficiaries to be added to a Cash Plan of a particular Program
+  #   Given the User is viewing existing Programme Population in Open state
+  #   When the User closes the Programme Population
+  #   Then the confirmation dialog for closing Programme Population is shown
+  #     And the User is asked to provide associated Program
 
-    When the User selects a Programme to associate with
-      And the User confirms to close the Programme Population
+  #   When the User selects a Programme to associate with
+  #     And the User confirms to close the Programme Population
 
-    Then the Programme population becomes Closed
-      And the User can no longer edit the Programme Population
-      And the Programme Population details are locked
+  #   Then the Programme population becomes Closed
+  #     And the User can no longer edit the Programme Population
+  #     And the Programme Population details are locked
 
-# Send Target Population to CashAssist
-# As a User
-# I want to send the final Target Populationt to CashAssist
-# So that it can be used for Programme Cash Plans
+  # Send Target Population to CashAssist
+  # As a User
+  # I want to send the final Target Populationt to Cash Assist
+  # So that it can be used for Programme Cash Plans
 
-# Scenario: Finalizing list of Targeted Beneficiaries to send to CashAssist
-#   Given the User is viewing existing Target Population in Closed state
-#   When the User sends the Target Population to Cash Assist
-#   Then the confirmation dialog for Send to Cash Assist is shown
+  Scenario: Finalizing list of Targeted Beneficiaries to send to CashAssist
+    Given the User is viewing existing Target Population in Closed state
+    When the User sends the Target Population to Cash Assist
+    Then the confirmation dialog for Send to Cash Assist is shown
 
-#   When the User confirms sending to Cash Assist
-#   Then the details for the Target Population are sent to Cash Assist
+    When the User confirms sending to Cash Assist
+    Then the details for the Target Population are sent to Cash Assist
 
 # @Targeting
 # Feature: Duplicate Programme Population

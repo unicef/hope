@@ -81,6 +81,7 @@ export function FinalizeTargetPopulation({
             color='primary'
             variant='contained'
             disabled={!loading}
+            data-cy='btn-target-population-send-to-cash-assist'
           >
             Send to cash assist
           </Button>
