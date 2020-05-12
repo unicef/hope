@@ -1,8 +1,5 @@
 import { HeadCell } from '../../../../components/table/EnhancedTableHead';
-import {
-  ImportedHouseholdMinimalFragment, ImportedIndividualMinimalFragment,
-  RegistrationDataImportNode,
-} from '../../../../__generated__/graphql';
+import { ImportedIndividualMinimalFragment } from '../../../../__generated__/graphql';
 
 export const headCells: HeadCell<ImportedIndividualMinimalFragment>[] = [
   {
@@ -19,14 +16,20 @@ export const headCells: HeadCell<ImportedIndividualMinimalFragment>[] = [
   },
   {
     disablePadding: false,
-    label: 'Employment/Education',
-    id: 'workStatus',
+    label: 'Role',
+    id: 'role',
+    numeric: false,
+  },
+  {
+    disablePadding: false,
+    label: 'Relationship',
+    id: 'relationship',
     numeric: false,
   },
   {
     disablePadding: false,
     label: 'Date of Birth',
-    id: 'dob',
+    id: 'birthDate',
     numeric: false,
   },
   {

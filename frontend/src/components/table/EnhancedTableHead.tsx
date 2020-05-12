@@ -61,7 +61,7 @@ interface EnhancedTableProps<T> {
     property: keyof T | string,
   ) => void;
   order: Order;
-  orderBy: keyof T;
+  orderBy: string;
   rowCount: number;
   headCells: HeadCell<T>[];
   allowSort?: boolean;

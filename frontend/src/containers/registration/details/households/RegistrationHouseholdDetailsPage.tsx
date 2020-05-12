@@ -1,26 +1,15 @@
 import React from 'react';
 import styled from 'styled-components';
-import Paper from '@material-ui/core/Paper';
-import { Grid, Typography } from '@material-ui/core';
 import { useParams } from 'react-router-dom';
-import { HouseholdDetails } from './HouseholdDetails';
+import moment from 'moment';
 import { PageHeader } from '../../../../components/PageHeader';
-import {
-  CashPlanNode,
-  HouseholdNode,
-  useHouseholdQuery,
-  useImportedHouseholdQuery,
-} from '../../../../__generated__/graphql';
+import { useImportedHouseholdQuery } from '../../../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../../../components/BreadCrumbs';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { HouseholdVulnerabilities } from '../../../../components/population/HouseholdVulnerabilities';
-import { LabelizedField } from '../../../../components/LabelizedField';
-import { PaymentRecordTable } from '../../../tables/PaymentRecordTable';
-import { HouseholdIndividualsTable } from '../../../tables/HouseholdIndividualsTable';
 import { decodeIdString } from '../../../../utils/utils';
 import { ImportedIndividualsTable } from '../../tables/ImportedIndividualsTable';
+import { HouseholdDetails } from './HouseholdDetails';
 import { RegistrationDetails } from './RegistrationDetails';
-import moment from 'moment';
 
 const Container = styled.div`
   padding: 20px;
@@ -31,22 +20,6 @@ const Container = styled.div`
   }
 `;
 
-const Title = styled.div`
-  width: 100%;
-  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
-`;
-
-const Overview = styled(Paper)`
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
-  margin-top: 20px;
-  &:first-child {
-    margin-top: 0px;
-  }
-`;
-const Content = styled.div`
-  margin-top: 20px;
-`;
 
 export function RegistrationHouseholdDetailsPage(): React.ReactElement {
   const { id } = useParams();
@@ -64,9 +37,9 @@ export function RegistrationHouseholdDetailsPage(): React.ReactElement {
       to: `/${businessArea}/registration-data-import/`,
     },
     {
-      title: importedHousehold.registrationDataImportId.name,
+      title: importedHousehold.registrationDataImport.name,
       to: `/${businessArea}/registration-data-import/${btoa(
-        `RegistrationDataImportNode:${importedHousehold.registrationDataImportId.hctId}`,
+        `RegistrationDataImportNode:${importedHousehold.registrationDataImport.hctId}`,
       )}`,
     },
   ];
@@ -86,7 +59,7 @@ export function RegistrationHouseholdDetailsPage(): React.ReactElement {
           title='Individuals in Household'
         />
         <RegistrationDetails
-          hctId={importedHousehold.registrationDataImportId.hctId}
+          hctId={importedHousehold.registrationDataImport.hctId}
           registrationDate={moment(importedHousehold.registrationDate).format(
             'DD MMM YYYY',
           )}

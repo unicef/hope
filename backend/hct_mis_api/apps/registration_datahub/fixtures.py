@@ -1,11 +1,18 @@
 import factory.fuzzy
+from django.contrib.gis.geos import Point
 from pytz import utc
 
 from household.const import NATIONALITIES
+from household.models import (
+    RESIDENCE_STATUS_CHOICE,
+    SEX_CHOICE,
+    MARITAL_STATUS_CHOICE,
+)
 from registration_datahub.models import (
     RegistrationDataImportDatahub,
     ImportedHousehold,
     ImportedIndividual,
+    ImportData,
 )
 
 
@@ -25,67 +32,84 @@ class ImportedHouseholdFactory(factory.DjangoModelFactory):
     class Meta:
         model = ImportedHousehold
 
-    household_ca_id = factory.Faker("uuid4")
     consent = factory.django.ImageField(color="blue")
     residence_status = factory.fuzzy.FuzzyChoice(
-        ImportedHousehold.RESIDENCE_STATUS_CHOICE, getter=lambda c: c[0],
+        RESIDENCE_STATUS_CHOICE, getter=lambda c: c[0],
     )
-    nationality = factory.fuzzy.FuzzyChoice(
+    country = factory.Faker("country_code", representation="alpha-2")
+    country_origin = factory.fuzzy.FuzzyChoice(
         NATIONALITIES, getter=lambda c: c[0],
     )
-    family_size = factory.fuzzy.FuzzyInteger(3, 8)
+    size = factory.fuzzy.FuzzyInteger(3, 8)
     address = factory.Faker("address")
-    location = "Lorem Ipsum"
-    registration_data_import_id = factory.SubFactory(
+    registration_data_import = factory.SubFactory(
         RegistrationDataImportDatahubFactory,
     )
-    # set it manually
-    head_of_household = None
-    representative = None
     registration_date = factory.Faker(
         "date_this_year", before_today=True, after_today=False
     )
+    admin1 = ""
+    admin2 = ""
+    geopoint = factory.LazyAttribute(
+        lambda o: Point(factory.Faker("latlng").generate())
+    )
+    female_age_group_0_5_count = factory.fuzzy.FuzzyInteger(3, 8)
+    female_age_group_6_11_count = factory.fuzzy.FuzzyInteger(3, 8)
+    female_age_group_12_17_count = factory.fuzzy.FuzzyInteger(3, 8)
+    female_adults_count = factory.fuzzy.FuzzyInteger(3, 8)
+    pregnant_count = factory.fuzzy.FuzzyInteger(3, 8)
+    male_age_group_0_5_count = factory.fuzzy.FuzzyInteger(3, 8)
+    male_age_group_6_11_count = factory.fuzzy.FuzzyInteger(3, 8)
+    male_age_group_12_17_count = factory.fuzzy.FuzzyInteger(3, 8)
+    male_adults_count = factory.fuzzy.FuzzyInteger(3, 8)
+    female_age_group_0_5_disabled_count = factory.fuzzy.FuzzyInteger(3, 8)
+    female_age_group_6_11_disabled_count = factory.fuzzy.FuzzyInteger(3, 8)
+    female_age_group_12_17_disabled_count = factory.fuzzy.FuzzyInteger(3, 8)
+    female_adults_disabled_count = factory.fuzzy.FuzzyInteger(3, 8)
+    male_age_group_0_5_disabled_count = factory.fuzzy.FuzzyInteger(3, 8)
+    male_age_group_6_11_disabled_count = factory.fuzzy.FuzzyInteger(3, 8)
+    male_age_group_12_17_disabled_count = factory.fuzzy.FuzzyInteger(3, 8)
+    male_adults_disabled_count = factory.fuzzy.FuzzyInteger(3, 8)
 
 
 class ImportedIndividualFactory(factory.DjangoModelFactory):
     class Meta:
         model = ImportedIndividual
 
-    individual_ca_id = factory.Faker("uuid4")
     full_name = factory.LazyAttribute(
-        lambda o: f"{o.first_name} {o.middle_name} {o.last_name}"
+        lambda o: f"{o.given_name} {o.middle_name} {o.family_name}"
     )
-    first_name = factory.Faker("first_name")
+    given_name = factory.Faker("first_name")
     middle_name = factory.Faker("first_name")
-    last_name = factory.Faker("last_name")
-    sex = factory.fuzzy.FuzzyChoice(
-        ImportedIndividual.SEX_CHOICE, getter=lambda c: c[0],
-    )
-    dob = factory.Faker(
+    family_name = factory.Faker("last_name")
+    sex = factory.fuzzy.FuzzyChoice(SEX_CHOICE, getter=lambda c: c[0],)
+    birth_date = factory.Faker(
         "date_of_birth", tzinfo=utc, minimum_age=16, maximum_age=90
     )
-    estimated_dob = factory.fuzzy.FuzzyChoice(
-        ImportedIndividual.YES_NO_CHOICE, getter=lambda c: c[0],
+    estimated_birth_date = factory.fuzzy.FuzzyChoice((True, False))
+    marital_status = factory.fuzzy.FuzzyChoice(
+        MARITAL_STATUS_CHOICE, getter=lambda c: c[0],
     )
-    nationality = factory.fuzzy.FuzzyChoice(
-        NATIONALITIES, getter=lambda c: c[0],
-    )
-    martial_status = factory.fuzzy.FuzzyChoice(
-        ImportedIndividual.MARTIAL_STATUS_CHOICE, getter=lambda c: c[0],
-    )
-    phone_number = factory.Faker("phone_number")
-    phone_number_alternative = ""
-    identification_type = factory.fuzzy.FuzzyChoice(
-        ImportedIndividual.IDENTIFICATION_TYPE_CHOICE, getter=lambda c: c[0],
-    )
-    identification_number = factory.Faker("uuid4")
-    registration_data_import_id = factory.SubFactory(
+    phone_no = factory.Faker("phone_number")
+    phone_no_alternative = ""
+    registration_data_import = factory.SubFactory(
         RegistrationDataImportDatahubFactory
     )
-    work_status = factory.fuzzy.FuzzyChoice(
-        ImportedIndividual.YES_NO_CHOICE, getter=lambda c: c[0],
-    )
-    disability = factory.fuzzy.FuzzyChoice(
-        ImportedIndividual.DISABILITY_CHOICE, getter=lambda c: c[0],
-    )
+    disability = factory.fuzzy.FuzzyChoice((True, False))
     household = factory.SubFactory(ImportedHouseholdFactory)
+
+def create_imported_household(household_args=None, individual_args=None):
+    if household_args is None:
+        household_args = {}
+    if individual_args is None:
+        individual_args = {}
+    household = ImportedHouseholdFactory.build(**household_args)
+    household.save()
+    individuals = ImportedIndividualFactory.create_batch(
+        household.size, household=household, **individual_args
+    )
+    individuals[0].relationship = "HEAD"
+    individuals[0].save()
+    household.head_of_household = individuals[0]
+    household.save()
+    return household, individuals

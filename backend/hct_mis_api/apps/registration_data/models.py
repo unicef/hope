@@ -11,6 +11,7 @@ class RegistrationDataImport(TimeStampedUUIDModel):
         ("APPROVED", _("Approved")),
         ("MERGED", _("Merged")),
         ("MERGING", _("Merging")),
+        ("IMPORTING", _("Importing")),
     )
     DATA_SOURCE_CHOICE = (
         ("XLS", "Excel"),
@@ -33,5 +34,12 @@ class RegistrationDataImport(TimeStampedUUIDModel):
     number_of_households = models.PositiveIntegerField()
     datahub_id = models.UUIDField(null=True, default=None)
 
+    business_area = models.ForeignKey(
+        "core.BusinessArea", null=True, on_delete=models.CASCADE
+    )
+
     def __str__(self):
         return self.name
+
+    class Meta:
+        unique_together = ("name", "business_area")

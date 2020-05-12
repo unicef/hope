@@ -34,8 +34,13 @@ interface ProgramDetailsProps {
 }
 
 export function TargetPopulationDetails({
-    targetPopulation,
+  targetPopulation,
 }: ProgramDetailsProps): React.ReactElement {
+  const { createdBy, finalizedBy, approvedAt, finalizedAt, program } = targetPopulation;
+  const closeDate = approvedAt ? moment(approvedAt).format('DD MMM YYYY') : '-';
+  const sendBy = finalizedBy ? `${finalizedBy.firstName} ${finalizedBy.lastName}` : '-';
+  const sendDate = finalizedAt ? moment(finalizedAt).format('DD MMM YYYY') : '-';
+  const programName = program && program.name ? program.name : '-';
   return (
     <Container>
       <Title>
@@ -43,34 +48,34 @@ export function TargetPopulationDetails({
       </Title>
       <OverviewContainer>
         <Grid container spacing={6}>
-        <Grid item xs={4}>
+          <Grid item xs={4}>
             <LabelizedField
-              label='Target population used in'
-              value='some random id'
+              label='created by'
+              value={`${createdBy.firstName} ${createdBy.lastName}`}
             />
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
-              label='Vulnerability score'
-              value='some random score'
+              label='Programme population close date'
+              value={closeDate}
             />
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
               label='Programme'
-              value='some random programme name'
+              value={programName}
             />
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
-              label='Finalized by'
-              value='name surname'
+              label='Send by'
+              value={sendBy}
             />
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
-              label='END DATE'
-              value={moment(targetPopulation.createdAt).format('DD MMM YYYY')}
+              label='Send date'
+              value={sendDate}
             />
           </Grid>
         </Grid>

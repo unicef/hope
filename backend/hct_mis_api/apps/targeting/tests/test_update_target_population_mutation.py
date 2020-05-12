@@ -2,7 +2,7 @@ import copy
 
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
-from household.fixtures import HouseholdFactory
+from household.fixtures import HouseholdFactory, create_household
 from household.models import Household
 from targeting.models import (
     TargetingCriteria,
@@ -55,7 +55,7 @@ class TestUpdateTargetPopulationMutation(APITestCase):
                         "filters": [
                             {
                                 "comparisionMethod": "EQUALS",
-                                "fieldName": "family_size",
+                                "fieldName": "size",
                                 "arguments": [3],
                                 "isFlexField": False,
                             }
@@ -73,7 +73,7 @@ class TestUpdateTargetPopulationMutation(APITestCase):
                         "filters": [
                             {
                                 "comparisionMethod": "EQUALS",
-                                "fieldName": "family_size",
+                                "fieldName": "size",
                                 "arguments": [3, 3],
                                 "isFlexField": False,
                             }
@@ -91,7 +91,7 @@ class TestUpdateTargetPopulationMutation(APITestCase):
                         "filters": [
                             {
                                 "comparisionMethod": "CONTAINS",
-                                "fieldName": "family_size",
+                                "fieldName": "size",
                                 "arguments": [3],
                                 "isFlexField": False,
                             }
@@ -109,7 +109,7 @@ class TestUpdateTargetPopulationMutation(APITestCase):
                         "filters": [
                             {
                                 "comparisionMethod": "BLABLA",
-                                "fieldName": "family_size",
+                                "fieldName": "size",
                                 "arguments": [3],
                                 "isFlexField": False,
                             }
@@ -159,20 +159,20 @@ class TestUpdateTargetPopulationMutation(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = UserFactory.create()
-        HouseholdFactory(
-            family_size=2, residence_status="CITIZEN",
+        create_household(
+            {"size": 2, "residence_status": "CITIZEN",}
         )
-        HouseholdFactory(
-            family_size=3, residence_status="CITIZEN",
+        create_household(
+            {"size": 3, "residence_status": "CITIZEN",}
         )
-        HouseholdFactory(
-            family_size=3, residence_status="CITIZEN",
+        create_household(
+            {"size": 3, "residence_status": "CITIZEN",}
         )
         cls.draft_target_population = TargetPopulation(
             name="draft_target_population",
             candidate_list_targeting_criteria=cls.get_targeting_criteria_for_rule(
                 {
-                    "field_name": "family_size",
+                    "field_name": "size",
                     "arguments": [2],
                     "comparision_method": "EQUALS",
                 }
@@ -183,7 +183,7 @@ class TestUpdateTargetPopulationMutation(APITestCase):
             name="approved_target_population",
             candidate_list_targeting_criteria=cls.get_targeting_criteria_for_rule(
                 {
-                    "field_name": "family_size",
+                    "field_name": "size",
                     "arguments": [1],
                     "comparision_method": "GREATER_THAN",
                 }

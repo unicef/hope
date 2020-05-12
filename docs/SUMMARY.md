@@ -26,7 +26,7 @@
     * [Approval Process](product-specification/country-office/registration-data-import/approval-process.md)
   * [Population](product-specification/country-office/population-management/README.md)
     * [Core fields on households & individuals](product-specification/country-office/population-management/core-fields-on-households-and-individuals.md)
-  * [Target Population\(s\)](product-specification/country-office/targeting/README.md)
+  * [Targeting](product-specification/country-office/targeting/README.md)
     * [Targeting Criteria \[Create\]](product-specification/country-office/targeting/targeting-criteria.md)
     * [Target Population Details](product-specification/country-office/targeting/view-copy-delete.md)
     * [Manage Target Populations \[Edit / Copy / Delete\]](product-specification/country-office/targeting/manage-target-populations-edit-copy-delete.md)
@@ -53,7 +53,13 @@
 
 ## Design Specification
 
-* [User Personas](design-specification/untitled.md)
+* [States](design-specification/states/README.md)
+  * [Merging](design-specification/states/merging.md)
+  * [Importing](design-specification/states/importing.md)
+  * [Sending](design-specification/states/sending.md)
+* [User Personas](design-specification/untitled/README.md)
+  * [User Feedback](design-specification/untitled/user-feedback.md)
+  * [I.4 Summary](design-specification/untitled/iteration-4.md)
 * [User Flows](design-specification/user-flows.md)
 * [Style Guide](design-specification/style-guide.md)
 * [Site Map](design-specification/site-map.md)
@@ -92,6 +98,7 @@
   * [Iteration 3](project-management/iterations-deliverables/iteration-3.md)
   * [Iteration 4](project-management/iterations-deliverables/iteration-4/README.md)
     * [Change Request](project-management/iterations-deliverables/iteration-4/change-request.md)
+  * [Iteration 5](project-management/iterations-deliverables/iteration-5.md)
 * [Sprint Cadence](project-management/sprint-cadence.md)
 * [CO / User testing](project-management/co-user-testing.md)
 * [Definition of Ready/Done](project-management/definition-of-ready-and-done.md)

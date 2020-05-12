@@ -1,3 +1,6 @@
+import datetime
+
+from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.postgres.fields import IntegerRangeField
 from django.contrib.postgres.fields import JSONField
@@ -13,8 +16,9 @@ from model_utils import Choices
 from model_utils.models import SoftDeletableModel
 from psycopg2.extras import NumericRange
 
-from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES
+from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES, _INDIVIDUAL
 from core.models import FlexibleAttribute
+from household.models import Individual, Household
 from utils.models import TimeStampedUUIDModel
 
 _MAX_LEN = 256
@@ -53,11 +57,29 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
         related_name="target_populations",
         null=True,
     )
+    approved_at = models.DateTimeField(null=True)
+    approved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="approved_target_populations",
+        null=True,
+    )
+    finalized_at = models.DateTimeField(null=True)
+    finalized_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="finalized_target_populations",
+        null=True,
+    )
+    business_area = models.ForeignKey(
+        "core.BusinessArea", null=True, on_delete=models.CASCADE
+    )
     STATUS_CHOICES = (
         ("DRAFT", _("Open")),
         ("APPROVED", _("Closed")),
         ("FINALIZED", _("Sent")),
     )
+
     status = models.CharField(
         max_length=_MAX_LEN, choices=STATUS_CHOICES, default="DRAFT",
     )
@@ -116,6 +138,87 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
             .order_by("created_at")
             .distinct()
         )
+
+    @property
+    def candidate_stats(self):
+        if self.status == "DRAFT":
+            households_ids = Household.objects.filter(
+                self.candidate_list_targeting_criteria.get_query()
+            ).values_list("id")
+        else:
+            households_ids = self.households.values_list("id")
+        delta18 = relativedelta(years=+18)
+        date18ago = datetime.datetime.now() - delta18
+        child_male = Individual.objects.filter(
+            household__id__in=households_ids,
+            birth_date__gt=date18ago,
+            sex="MALE",
+        ).count()
+        child_female = Individual.objects.filter(
+            household__id__in=households_ids,
+            birth_date__gt=date18ago,
+            sex="FEMALE",
+        ).count()
+
+        adult_male = Individual.objects.filter(
+            household__id__in=households_ids,
+            birth_date__lte=date18ago,
+            sex="MALE",
+        ).count()
+        adult_female = Individual.objects.filter(
+            household__id__in=households_ids,
+            birth_date__lte=date18ago,
+            sex="FEMALE",
+        ).count()
+        return {
+            "child_male": child_male,
+            "child_female": child_female,
+            "adult_male": adult_male,
+            "adult_female": adult_female,
+        }
+
+    @property
+    def final_stats(self):
+        if self.status == "Draft":
+            return None
+        elif self.status == "APPROVED":
+            households_ids = Household.objects.filter(
+                self.candidate_list_targeting_criteria.get_query()
+            ).values_list("id")
+        else:
+            households_ids = self.final_list.values_list("id")
+        delta18 = relativedelta(years=+18)
+        date18ago = datetime.datetime.now() - delta18
+        child_male = Individual.objects.filter(
+            household__id__in=households_ids,
+            birth_date__gt=date18ago,
+            sex="MALE",
+        ).count()
+        child_female = Individual.objects.filter(
+            household__id__in=households_ids,
+            birth_date__gt=date18ago,
+            sex="FEMALE",
+        ).count()
+
+        adult_male = Individual.objects.filter(
+            household__id__in=households_ids,
+            birth_date__lte=date18ago,
+            sex="MALE",
+        ).count()
+        adult_female = Individual.objects.filter(
+            household__id__in=households_ids,
+            birth_date__lte=date18ago,
+            sex="FEMALE",
+        ).count()
+        return {
+            "child_male": child_male,
+            "child_female": child_female,
+            "adult_male": adult_male,
+            "adult_female": adult_female,
+        }
+
+    class Meta:
+        unique_together = ("name", "business_area")
 
 
 class HouseholdSelection(TimeStampedUUIDModel):
@@ -221,7 +324,7 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
             "arguments": 1,
             "lookup": "",
             "negative": False,
-            "supported_types": ["INTEGER", "SELECT_ONE"],
+            "supported_types": ["INTEGER", "SELECT_ONE", "STRING"],
         },
         "NOT_EQUALS": {
             "arguments": 1,
@@ -232,15 +335,15 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
         "CONTAINS": {
             "min_arguments": 1,
             "arguments": 1,
-            "lookup": "__contains",
+            "lookup": "__icontains",
             "negative": False,
-            "supported_types": [],
+            "supported_types": ["SELECT_MANY", "STRING"],
         },
         "NOT_CONTAINS": {
             "arguments": 1,
-            "lookup": "__contains",
+            "lookup": "__icontains",
             "negative": True,
-            "supported_types": [],
+            "supported_types": ["STRING"],
         },
         "RANGE": {
             "arguments": 2,
@@ -287,7 +390,7 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
     )
     is_flex_field = models.BooleanField(default=False)
-    field_name = models.CharField(max_length=20)
+    field_name = models.CharField(max_length=50)
     arguments = JSONField(
         help_text="""
             Array of arguments
@@ -316,9 +419,13 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
                 f"arguments gets {args_input_count}"
             )
         argument = self.arguments if args_input_count > 1 else self.arguments[0]
-        query = Q(
-            **{f"{lookup}{comparision_attribute.get('lookup')}": argument}
-        )
+
+        if select_many:
+            query = Q(**{f"{lookup}__contains": argument})
+        else:
+            query = Q(
+                **{f"{lookup}{comparision_attribute.get('lookup')}": argument}
+            )
         if comparision_attribute.get("negative"):
             return ~query
         return query
@@ -343,7 +450,8 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
                 f" doesn't have get_query method or lookup field"
             )
         return self.get_query_for_lookup(
-            lookup, select_many=core_field_attr.get("type") == "SELECT_MANY",
+            f"{'individuals__' if core_field_attr['associated_with']==_INDIVIDUAL else ''}{lookup}",
+            select_many=core_field_attr.get("type") == "SELECT_MANY",
         )
 
     def get_query_for_flex_field(self):

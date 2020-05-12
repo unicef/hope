@@ -23,8 +23,10 @@ Pillow==7.0.0
 psycopg2==2.8.4
 pycountry==19.8.18
 openpyxl==3.0.3
-xlrd
+xlrd==1.2.0
 ipdb
+sentry-sdk==0.14.3
+openpyxl_image_loader
 
 # API
 graphene-django==2.7.1

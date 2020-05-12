@@ -11,6 +11,9 @@ export const AllHouseholds = gql`
     $familySize: String
     $programs: [ID]
     $headOfHouseholdFullNameIcontains: String
+    $adminArea: ID
+    $search: String
+    $residenceStatus: String
   ) {
     allHouseholds(
       after: $after
@@ -18,10 +21,13 @@ export const AllHouseholds = gql`
       first: $first
       last: $last
       businessArea: $businessArea
-      familySize: $familySize
+      size: $familySize
       orderBy: $orderBy
       programs: $programs
       headOfHousehold_FullName_Icontains: $headOfHouseholdFullNameIcontains
+      adminArea: $adminArea
+      search: $search
+      residenceStatus: $residenceStatus
     ) {
       pageInfo {
         hasNextPage
@@ -33,24 +39,7 @@ export const AllHouseholds = gql`
       edges {
         cursor
         node {
-          id
-          createdAt
-          householdCaId
-          residenceStatus
-          familySize
-          totalCashReceived
-          registrationDate
-          headOfHousehold {
-            id
-            fullName
-          }
-          location {
-            id
-            title
-          }
-          individuals {
-            totalCount
-          }
+          ...householdMinimal
         }
       }
     }

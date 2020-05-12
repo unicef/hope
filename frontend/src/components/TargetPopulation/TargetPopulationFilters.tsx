@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { TextField, InputAdornment, Select, MenuItem } from '@material-ui/core';
+import { TextField, InputAdornment, MenuItem } from '@material-ui/core';
 import { Person, Search, Group } from '@material-ui/icons';
 
 const Container = styled.div`
@@ -73,13 +73,13 @@ export function TargetPopulationFilters({
   onFilterChange,
   filter,
 }: HouseholdFiltersProps): React.ReactElement {
-  const handleFilterChange = (e, name) =>
-    onFilterChange({ ...filter, [name]: e.target.value });
+  const handleFilterChange = (e, name) => onFilterChange({ ...filter, [name]: e.target.value });
   return (
     <Container>
       <TextContainer
         placeholder='Search'
-        variant='filled'
+        variant='outlined'
+        margin='dense'
         onChange={(e) => handleFilterChange(e, 'name')}
         InputProps={{
           startAdornment: (
@@ -92,7 +92,8 @@ export function TargetPopulationFilters({
       <TextContainer
         select
         placeholder='Status'
-        variant='filled'
+        variant='outlined'
+        margin='dense'
         onChange={(e) => handleFilterChange(e, 'status')}
         InputProps={{
           startAdornment: (
@@ -103,15 +104,16 @@ export function TargetPopulationFilters({
         }}
       >
         <MenuItem value=''>None</MenuItem>
-        <MenuItem value='DRAFT'>Draft</MenuItem>
-        <MenuItem value='APPROVED'>Approved</MenuItem>
-        <MenuItem value='FINALIZED'>Finalized</MenuItem>
+        <MenuItem value='DRAFT'>Open</MenuItem>
+        <MenuItem value='APPROVED'>Closed</MenuItem>
+        <MenuItem value='FINALIZED'>Sent</MenuItem>
       </TextContainer>
       <TextContainer
         id='minFilter'
         value={filter.numIndividuals.min}
-        variant='filled'
-        placeholder='No. of Individuals'
+        variant='outlined'
+        margin='dense'
+        placeholder='Household Size'
         onChange={(e) =>
           onFilterChange({
             ...filter,
@@ -134,8 +136,9 @@ export function TargetPopulationFilters({
       <TextContainer
         id='maxFilter'
         value={filter.numIndividuals.max}
-        variant='filled'
-        placeholder='No. of Individuals'
+        variant='outlined'
+        margin='dense'
+        placeholder='Individual Size'
         onChange={(e) =>
           onFilterChange({
             ...filter,

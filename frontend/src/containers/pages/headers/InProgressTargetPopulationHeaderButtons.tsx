@@ -3,7 +3,6 @@ import styled from 'styled-components';
 import { Button } from '@material-ui/core';
 import { EditRounded, Delete, FileCopy } from '@material-ui/icons';
 import { TargetPopulationNode } from '../../../__generated__/graphql';
-import { FinalizeTargetPopulation } from '../../dialogs/targetPopulation/FinalizeTargetPopulation';
 import { DeleteTargetPopulation } from '../../dialogs/targetPopulation/DeleteTargetPopulation';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 import { ApproveCandidateList } from '../../dialogs/targetPopulation/ApproveCandidateList';
@@ -35,7 +34,6 @@ export function InProgressTargetPopulationHeaderButtons({
   const [openApprove, setOpenApprove] = useState(false);
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
-  //TODO: Add finalize query and connect to dialog
   return (
     <div>
       <IconContainer>
@@ -64,7 +62,7 @@ export function InProgressTargetPopulationHeaderButtons({
           color='primary'
           onClick={() => setOpenApprove(true)}
         >
-          Approve
+          Close
         </Button>
       </ButtonContainer>
       <DuplicateTargetPopulation

@@ -101,10 +101,7 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
             charset=None,
         )
 
-        xlsx_valid_file_path = (
-            "hct_mis_api/apps/registration_datahub/tests/test_file/"
-            "Registration Data Import XLS Template.xlsx"
-        )
+        xlsx_valid_file_path = "hct_mis_api/apps/registration_datahub/tests/test_file/new_reg_data_import.xlsx"
 
         with open(xlsx_valid_file_path, "rb") as file:
             self.valid_file = SimpleUploadedFile(file.name, file.read())
@@ -117,17 +114,15 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
         )
 
         import_data_obj = ImportData.objects.first()
-
         self.assertIn(
-            "Registration_Data_Import_XLS_Template",
-            import_data_obj.xlsx_file.name,
+            "new_reg_data_import", import_data_obj.xlsx_file.name,
         )
 
     def test_registration_data_import_create(self):
         import_data_obj = ImportData.objects.create(
             xlsx_file=self.valid_file,
-            number_of_households=500,
-            number_of_individuals=1000,
+            number_of_households=3,
+            number_of_individuals=6,
         )
 
         self.snapshot_graphql_request(
@@ -139,6 +134,7 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
                         import_data_obj.id, "ImportData"
                     ),
                     "name": "New Import of Data 123",
+                    "businessAreaSlug": "afghanistan",
                 }
             },
         )
@@ -218,11 +214,11 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
 
         for _ in range(350):
             imported_household = ImportedHouseholdFactory(
-                registration_data_import_id=obj_datahub,
+                registration_data_import=obj_datahub,
             )
             individuals = ImportedIndividualFactory.create_batch(
                 imported_household.family_size,
-                registration_data_import_id=obj_datahub,
+                registration_data_import=obj_datahub,
             )
             imported_household.head_of_household = individuals[0]
             imported_household.representative = individuals[0]

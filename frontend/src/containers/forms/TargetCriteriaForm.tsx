@@ -10,16 +10,15 @@ import {
   DialogActions,
   IconButton,
 } from '@material-ui/core';
+import { AddCircleOutline, Delete } from '@material-ui/icons';
 import { Field, Formik, FieldArray } from 'formik';
 import { useImportedIndividualFieldsQuery } from '../../__generated__/graphql';
-import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
-import { AddCircleOutline, Delete, FilterSharp } from '@material-ui/icons';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { SubField } from '../../components/TargetPopulation/SubField';
 import {
   formatCriteriaFilters,
   mapCriteriasToInitialValues,
 } from '../../utils/utils';
+import { CriteriaAutocomplete } from '../../components/TargetPopulation/TargetingCriteria/CriteriaAutocomplete';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -111,7 +110,6 @@ interface ProgramFormPropTypes {
 
 export function TargetCriteriaForm({
   criteria,
-  //onSubmit,
   addCriteria,
   open,
   onClose,
@@ -123,30 +121,26 @@ export function TargetCriteriaForm({
     filters: mappedFilters,
   };
 
-  //create a hook?
-  const chooseFieldType = (e, arrayHelpers, index) => {
-    const subFieldData = data.allFieldsAttributes.find(
-      (attributes) => attributes.name === e.target.value,
-    );
+  const chooseFieldType = (value, arrayHelpers, index) => {
     const values = {
-      isFlexField: subFieldData.isFlexField,
+      isFlexField: value.isFlexField,
       fieldAttribute: {
-        labelEn: subFieldData.labelEn,
-        type: subFieldData.type,
+        labelEn: value.labelEn,
+        type: value.type,
         choices: null,
       },
       value: null,
     };
-    switch (subFieldData.type) {
+    switch (value.type) {
       case 'INTEGER':
         values.value = { from: '', to: '' };
         break;
       case 'SELECT_ONE':
-        values.fieldAttribute.choices = subFieldData.choices;
+        values.fieldAttribute.choices = value.choices;
         break;
       case 'SELECT_MANY':
         values.value = [];
-        values.fieldAttribute.choices = subFieldData.choices;
+        values.fieldAttribute.choices = value.choices;
         break;
       default:
         values.value = null;
@@ -154,10 +148,15 @@ export function TargetCriteriaForm({
     }
     arrayHelpers.replace(index, {
       ...values,
-      fieldName: e.target.value,
-      type: subFieldData.type,
+      fieldName: value.name,
+      type: value.type,
     });
   };
+
+  const clearField = (arrayHelpers, index) => {
+    return arrayHelpers.replace(index, {
+    });
+  }
 
   if (loading) return null;
 
@@ -203,29 +202,34 @@ export function TargetCriteriaForm({
                               <Field
                                 name={`filters[${index}].fieldName`}
                                 label='Choose field type'
-                                fullWidth
                                 required
                                 choices={data.allFieldsAttributes}
                                 index={index}
                                 value={each.fieldName || null}
-                                onChange={(e) =>
-                                  chooseFieldType(e, arrayHelpers, index)
+                                onChange={(e, object) => {
+                                  if (object) {
+                                    return chooseFieldType(object, arrayHelpers, index)
+                                  }
+                                  return clearField(arrayHelpers, index)
                                 }
-                                component={FormikSelectField}
+                                }
+                                component={CriteriaAutocomplete}
                               />
-                              <IconButton>
-                                <Delete
-                                  onClick={() => arrayHelpers.remove(index)}
-                                />
-                              </IconButton>
+                              {values.filters.length > 1 && (
+                                <IconButton>
+                                  <Delete
+                                    onClick={() => arrayHelpers.remove(index)}
+                                  />
+                                </IconButton>
+                              )}
                             </FlexWrapper>
                             {each.fieldName && SubField(each, index)}
                             {(values.filters.length === 1 && index === 0) ||
-                            index === values.filters.length - 1 ? null : (
-                              <Divider>
-                                <DividerLabel>And</DividerLabel>
-                              </Divider>
-                            )}
+                              index === values.filters.length - 1 ? null : (
+                                <Divider>
+                                  <DividerLabel>And</DividerLabel>
+                                </Divider>
+                              )}
                           </div>
                         );
                       })}

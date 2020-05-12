@@ -47,12 +47,12 @@ export function HouseholdDetails({
         <Grid container spacing={6}>
           <Grid item xs={4}>
             <LabelizedField label='Household Size'>
-              <div>{household.familySize}</div>
+              <div>{household.size}</div>
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>
             <LabelizedField label='Location'>
-              <div>{household.location}</div>
+              <div>{household.admin1}</div>
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>
@@ -61,8 +61,8 @@ export function HouseholdDetails({
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>
-            <LabelizedField label='Family Nationality'>
-              <div>{household.nationality}</div>
+            <LabelizedField label='Country of Origin'>
+              <div>{household.countryOrigin}</div>
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>
