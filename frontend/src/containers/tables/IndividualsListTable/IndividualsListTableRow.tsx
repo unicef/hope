@@ -1,27 +1,14 @@
-import styled from 'styled-components';
 import TableCell from '@material-ui/core/TableCell';
-import Moment from 'react-moment';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import {
-  CashPlanNode,
-  HouseholdNode,
-  IndividualNode,
-} from '../../../__generated__/graphql';
+import { IndividualNode } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
-import { StatusBox } from '../../../components/StatusBox';
 import {
-  cashPlanStatusToColor,
   decodeIdString,
-  formatCurrency,
   getAgeFromDob,
   sexToCapitalize,
 } from '../../../utils/utils';
-
-const StatusContainer = styled.div`
-  width: 120px;
-`;
 
 interface IndividualsListTableRowProps {
   individual: IndividualNode;
@@ -29,12 +16,12 @@ interface IndividualsListTableRowProps {
 
 export function IndividualsListTableRow({
   individual,
-}: IndividualsListTableRowProps) {
+}: IndividualsListTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
   let age: number | string = 'N/A';
-  if (individual.dob) {
-    age = getAgeFromDob(individual.dob);
+  if (individual.birthDate) {
+    age = getAgeFromDob(individual.birthDate);
   }
   const handleClick = (): void => {
     const path = `/${businessArea}/population/individuals/${individual.id}`;
@@ -54,7 +41,7 @@ export function IndividualsListTableRow({
       </TableCell>
       <TableCell align='right'>{age}</TableCell>
       <TableCell align='left'>{sexToCapitalize(individual.sex)}</TableCell>
-      <TableCell align='left'>{individual.household.location.title}</TableCell>
+      <TableCell align='left'>{individual.household.adminArea?.title}</TableCell>
     </ClickableTableRow>
   );
 }

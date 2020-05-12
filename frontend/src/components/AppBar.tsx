@@ -8,13 +8,12 @@ import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core';
 import { MiśTheme } from '../theme';
 import { BusinessAreaSelect } from '../containers/BusinessAreaSelect';
+import { useMeQuery } from '../__generated__/graphql';
+import { UserProfileMenu } from '../containers/UserProfileMenu';
 
 const useStyles = makeStyles((theme: MiśTheme) => ({
   root: {
     display: 'flex',
-  },
-  toolbar: {
-    paddingRight: 24,
   },
   toolbarIcon: {
     display: 'flex',
@@ -53,15 +52,25 @@ const useStyles = makeStyles((theme: MiśTheme) => ({
 const BusinessAreaContainer = styled.div`
   margin-left: ${({ theme }) => theme.spacing(11)}px;
 `;
+const StyledToolbar = styled(Toolbar)`
+  display: flex;
+  justify-content: space-between;
+`;
 
 export function AppBar({ open, handleDrawerOpen }): React.ReactElement {
+  const { data: meData, loading: meLoading } = useMeQuery({
+    fetchPolicy: 'cache-and-network',
+  });
   const classes = useStyles({});
+  if (meLoading) {
+    return null;
+  }
   return (
     <MuiAppBar
       position='absolute'
       className={clsx(classes.appBar, open && classes.appBarShift)}
     >
-      <Toolbar className={classes.toolbar}>
+      <StyledToolbar>
         <IconButton
           edge='start'
           color='inherit'
@@ -74,7 +83,8 @@ export function AppBar({ open, handleDrawerOpen }): React.ReactElement {
         <BusinessAreaContainer>
           <BusinessAreaSelect />
         </BusinessAreaContainer>
-      </Toolbar>
+        <UserProfileMenu meData={meData} />
+      </StyledToolbar>
     </MuiAppBar>
   );
 }

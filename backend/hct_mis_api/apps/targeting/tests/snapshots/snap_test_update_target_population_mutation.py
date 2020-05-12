@@ -99,7 +99,7 @@ snapshots['TestUpdateTargetPopulationMutation::test_fail_update_draft_mutation_w
                     'line': 3
                 }
             ],
-            'message': "['family_size is INTEGER type filter and does not accept - CONTAINS comparision method']",
+            'message': "['size is INTEGER type filter and does not accept - CONTAINS comparision method']",
             'path': [
                 'updateTargetPopulation'
             ]
@@ -120,7 +120,7 @@ snapshots['TestUpdateTargetPopulationMutation::test_update_approved_mutation 1']
                                         1
                                     ],
                                     'comparisionMethod': 'GREATER_THAN',
-                                    'fieldName': 'family_size',
+                                    'fieldName': 'size',
                                     'isFlexField': False
                                 }
                             ]
@@ -138,7 +138,7 @@ snapshots['TestUpdateTargetPopulationMutation::test_update_approved_mutation 1']
                                         3
                                     ],
                                     'comparisionMethod': 'EQUALS',
-                                    'fieldName': 'family_size',
+                                    'fieldName': 'size',
                                     'isFlexField': False
                                 }
                             ]
@@ -167,7 +167,7 @@ snapshots['TestUpdateTargetPopulationMutation::test_update_draft_mutation 1'] = 
                                         3
                                     ],
                                     'comparisionMethod': 'EQUALS',
-                                    'fieldName': 'family_size',
+                                    'fieldName': 'size',
                                     'isFlexField': False
                                 }
                             ]

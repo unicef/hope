@@ -7,6 +7,20 @@ export const UpdateTP = gql`
         id
         name
         status
+        candidateListTotalHouseholds
+        candidateListTotalIndividuals
+        finalListTotalHouseholds
+        finalListTotalIndividuals
+        approvedAt
+        finalizedAt
+        finalizedBy {
+          firstName
+          lastName
+        }
+        program {
+          id
+          name
+        }
         candidateListTargetingCriteria {
           targetPopulationCandidate {
             createdBy {
@@ -66,6 +80,18 @@ export const UpdateTP = gql`
               }
             }
           }
+        }
+        candidateStats{
+          childMale
+          childFemale
+          adultMale
+          adultFemale
+        }
+        finalStats{
+          childMale
+          childFemale
+          adultMale
+          adultFemale
         }
       }
     }

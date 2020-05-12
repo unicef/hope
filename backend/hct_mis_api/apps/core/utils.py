@@ -1,14 +1,8 @@
-import concurrent.futures as concurrent_futures
 import datetime as dt
-import functools
-import json
 import re
-from typing import List
 
-import django
-import factory
 from django.core.exceptions import ValidationError
-from django.db.models import Q
+from django.db.models import Q, F
 from django.template.defaultfilters import slugify
 import datetime as dt
 
@@ -93,80 +87,9 @@ def _slug_strip(value, separator="-"):
     return value
 
 
-class JSONFactory(factory.DictFactory):
-    """A Json factory class to get JSON strings."""
-
-    @classmethod
-    def _generate(cls, create, attrs):
-        obj_dict = super()._generate(create, attrs)
-        return json.dumps(obj_dict)
-
-
-def update_model(model: django.db.models.Model, changeset: dict):
-    for attrib, value in changeset.items():
-        if hasattr(model, attrib):
-            setattr(model, attrib, value)
-    model.save()
-
-
-def filter_relational_fields(model: django.db.models.Model) -> list:
-    """Get Only Relational Fields."""
-    return list(
-        filter(
-            lambda field: field not in model._meta.fields,
-            model._meta.get_fields(),
-        )
-    )
-
-
-def set_field_object_association(
-    from_model: django.db.models.Model,
-    to_model: django.db.models.Model,
-    field: django.db.models.Field,
-):
-    """Adds an association field to a model from another model.
-
-    Args:
-        from_model (django.db.models.Model): The model to copy associated field from.
-        to_model (django.db.models.Model): The model to copy associated field to.
-        field (django.db.models.Field): The Field value(s) to copy.
-    """
-    from_model_foreign_relation_set = getattr(from_model, field.name)
-    to_model_foreign_relation_set = getattr(to_model, field.name)
-    to_model_foreign_relation_set.set(from_model_foreign_relation_set.all())
-
-
-def copy_associations_async(
-    from_model: django.db.models.Model,
-    to_model: django.db.models.Model,
-    exclude_foreign_fields: list,
-) -> django.db.models.Model:
-    """Copy reverse and M2M associations concurrently.
-
-    Args:
-        from_model (django.db.models.Model): The model to copy associated field from.
-        to_model (django.db.models.Model): The model to copy associated field to.
-        field (django.db.models.Field): The Field value(s) to copy.
-        exclude_foreign_fields (List[django.db.models.Field]): List of relatable field value(s) to copy.
-
-    Returns:
-        The updated model to copy associations to.
-    """
-    set_assocation_partial_fn = functools.partial(
-        set_field_object_association, from_model, to_model
-    )
-    # You can't use context manager. See Why: graphene/relay/mutation.py line 70
-    executor = concurrent_futures.ThreadPoolExecutor(
-        max_workers=len(exclude_foreign_fields)
-    )
-    _results = list(
-        executor.map(set_assocation_partial_fn, exclude_foreign_fields,)
-    )
-    executor.shutdown(wait=True)
-    return to_model
-
-
-def get_choices_values(choices):
+def get_choices_values(choices, header):
+    if header in ("admin1", "admin2"):
+        choices = get_admin_areas_as_choices(header[-1])
     return tuple(
         choice[0] if isinstance(choice, tuple) else choice for choice in choices
     )
@@ -176,31 +99,43 @@ def serialize_flex_attributes():
     """
     Flexible Attributes objects to dict mapping:
         "individuals": {
-            "id_type_i_f": {
-                "type": "SINGLE_CHOICE",
-                "choices": (
-                    ("BIRTH_CERTIFICATE", "Birth Certificate"),
-                    ("DRIVERS_LICENSE", "Driver's License"),
-                    ("UNHCR_ID", "UNHCR ID"),
-                    ("NATIONAL_ID", "National ID"),
-                    ("NATIONAL_PASSPORT", "National Passport"),
-                    ("OTHER", "Other"),
-                    ("NOT_AVAILABLE", "Not Available"),
-                ),
+            "test_i_f": {
+                "id": "a1741e3c-0e24-4a60-8d2f-463943abaebb",
+                "type": "SELECT_ONE",
+                "name": "test_i_f",
+                "lookup": "test_i_f",
+                "required": True,
+                "label": {
+                    "English(EN)": "This is test label"
+                },
+                "hint": "",
+                "choices": [
+                    {
+                        "English(EN)": "Yes",
+                        "value": 0
+                    }
+                ],
+                "associated_with": Individual,
             },
         },
         "households": {
-            "assistance_type_h_f": {
-                "type": "MULTIPLE_CHOICE",
-                "choices": (
-                    (1, "Option 1"),
-                    (2, "Option 2"),
-                    (3, "Option 3"),
-                    (4, "Option 4"),
-                    (5, "Option 5"),
-                    (6, "Option 6"),
-                    (7, "Option 7"),
-                ),
+            "test_h_f": {
+                "id": "a1741e3c-0e24-4a60-8d2f-463943abaebb",
+                "type": "SELECT_ONE",
+                "name": "test_h_f",
+                "lookup": "test_h_f",
+                "required": True,
+                "label": {
+                    "English(EN)": "This is test label"
+                },
+                "hint": "",
+                "choices": [
+                    {
+                        "English(EN)": "Yes",
+                        "value": 0
+                    }
+                ],
+                "associated_with": Household,
             },
         }
     """
@@ -215,17 +150,40 @@ def serialize_flex_attributes():
 
     for attr in flex_attributes:
         associated_with = (
-            "households" if attr.associated_with == 0 else "individuals"
+            "Household" if attr.associated_with == 0 else "Individual"
         )
+        dict_key = associated_with.lower() + "s"
 
-        result_dict[associated_with][attr.name] = {
+        result_dict[dict_key][attr.name] = {
+            "id": attr.id,
             "type": attr.type,
-            "choices": list(attr.choices.values_list("name", flat=True)),
+            "name": attr.name,
+            "lookup": attr.name,
+            "required": attr.required,
+            "label": attr.label,
+            "hint": attr.hint,
+            "choices": list(attr.choices.values("label", value=F("name"))),
+            "associated_with": associated_with,
         }
+
     return result_dict
 
 
-def age_to_dob_range_query(field_name, age_min, age_max):
+def get_combined_attributes():
+    from core.core_fields_attributes import (
+        CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY,
+    )
+
+    flex_attrs = serialize_flex_attributes()
+    return {
+        **CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY["individuals"],
+        **flex_attrs["individuals"],
+        **CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY["households"],
+        **flex_attrs["households"],
+    }
+
+
+def age_to_birth_date_range_query(field_name, age_min, age_max):
     query_dict = {}
     this_year = dt.date.today().year
     if age_min == age_max and age_min is not None:
@@ -237,8 +195,8 @@ def age_to_dob_range_query(field_name, age_min, age_max):
     return Q(**query_dict)
 
 
-def age_to_dob_query(comparision_method, args):
-    field_name = "individuals__dob"
+def age_to_birth_date_query(comparision_method, args):
+    field_name = "individuals__birth_date"
     comparision_method_args_count = {
         "RANGE": 2,
         "NOT_IN_RANGE": 2,
@@ -257,17 +215,17 @@ def age_to_dob_query(comparision_method, args):
             f"Age {comparision_method} filter query expect {args_count} arguments"
         )
     if comparision_method == "RANGE":
-        return age_to_dob_range_query(field_name, *args)
+        return age_to_birth_date_range_query(field_name, *args)
     if comparision_method == "NOT_IN_RANGE":
-        return ~(age_to_dob_range_query(field_name, *args))
+        return ~(age_to_birth_date_range_query(field_name, *args))
     if comparision_method == "EQUALS":
-        return age_to_dob_range_query(field_name, args[0], args[0])
+        return age_to_birth_date_range_query(field_name, args[0], args[0])
     if comparision_method == "NOT_EQUALS":
-        return ~(age_to_dob_range_query(field_name, args[0], args[0]))
+        return ~(age_to_birth_date_range_query(field_name, args[0], args[0]))
     if comparision_method == "GREATER_THAN":
-        return age_to_dob_range_query(field_name, args[0], None)
+        return age_to_birth_date_range_query(field_name, args[0], None)
     if comparision_method == "LESS_THAN":
-        return age_to_dob_range_query(field_name, None, args[0])
+        return age_to_birth_date_range_query(field_name, None, args[0])
     raise ValidationError(
         f"Age filter query don't supports {comparision_method} type"
     )
@@ -276,4 +234,19 @@ def age_to_dob_query(comparision_method, args):
 def get_attr_value(name, object, default=None):
     if isinstance(object, dict):
         return object.get(name, default)
-    return getattr(name, object, default)
+    return getattr(object, name, default)
+
+
+def to_choice_object(choices):
+    return [{"name": name, "value": value} for value, name in choices]
+
+
+def get_admin_areas_as_choices(admin_level):
+    from core.models import AdminArea
+
+    return [
+        {"label": {"English(EN)": admin_area.title}, "value": admin_area.title,}
+        for admin_area in AdminArea.objects.filter(
+            admin_area_type__admin_level=admin_level
+        )
+    ]

@@ -31,29 +31,19 @@ export const importedHouseholdMinimal = gql`
       id
       fullName
     }
-    familySize
-    location
+    size
+    admin1
+    admin2
     registrationDate
   }
 `;
 export const importedHouseholdDetailed = gql`
   fragment importedHouseholdDetailed on ImportedHouseholdNode {
-    id
-    headOfHousehold {
-      id
-      fullName
-    }
-    familySize
-    location
-    registrationDate
+    ...importedHouseholdMinimal
 
     residenceStatus
-    nationality
-    representative {
-      id
-      fullName
-    }
-    registrationDataImportId {
+    countryOrigin
+    registrationDataImport {
       id
       hctId
       name
@@ -65,37 +55,33 @@ export const importedIndividualMinimal = gql`
   fragment importedIndividualMinimal on ImportedIndividualNode {
     id
     fullName
-    workStatus
-    dob
+    birthDate
     sex
+    role
+    relationship
   }
 `;
 
 export const importedIndividualDetailed = gql`
   fragment importedIndividualDetailed on ImportedIndividualNode {
-    id
-    fullName
-    workStatus
-    dob
-    sex
-    firstName
-    lastName
+    ...importedIndividualMinimal
+    givenName
+    familyName
     middleName
-    estimatedDob
-    identificationType
-    identificationNumber
+    estimatedBirthDate
+
     household {
       id
-      location
+      admin1
+      admin2
       address
     }
-    registrationDataImportId{
+    registrationDataImport {
       id
       hctId
       name
     }
-    phoneNumber
-    phoneNumberAlternative
-    
+    phoneNo
+    phoneNoAlternative
   }
 `;

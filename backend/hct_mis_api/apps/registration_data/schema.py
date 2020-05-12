@@ -1,5 +1,5 @@
 import graphene
-from django_filters import FilterSet, OrderingFilter, DateFilter
+from django_filters import FilterSet, OrderingFilter, DateFilter, CharFilter
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
@@ -9,7 +9,8 @@ from registration_data.models import RegistrationDataImport
 
 
 class RegistrationDataImportFilter(FilterSet):
-    import_date = DateFilter(field_name='import_date__date')
+    import_date = DateFilter(field_name="import_date__date")
+    business_area = CharFilter(field_name="business_area__slug")
 
     class Meta:
         model = RegistrationDataImport
@@ -18,6 +19,7 @@ class RegistrationDataImportFilter(FilterSet):
             "import_date": ["exact"],
             "status": ["exact"],
             "name": ["exact", "icontains"],
+            "business_area": ["exact"],
         }
 
     order_by = OrderingFilter(
@@ -26,7 +28,7 @@ class RegistrationDataImportFilter(FilterSet):
             "status",
             "import_date",
             "number_of_households",
-            "imported_by__first_name",
+            "imported_by__given_name",
         )
     )
 

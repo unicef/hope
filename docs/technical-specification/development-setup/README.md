@@ -6,6 +6,8 @@
 2. Receive .env file from your team member. There are AD secrets there.
 3. Run 
 
+Frontend in Docker
+
 ```bash
 docker-compose build
 docker-compose up
@@ -15,9 +17,18 @@ docker-compose exec backend bash
 ./manage.py init
 ```
 
-4. Go to [`localhost:8082/api/admin/`](http://localhost:8082/api/admin/) Flexible Attributes, click **Import XLS** choose file: backend/data/FlexibleAttributesInit.xls then load.
+Frontend on Local Machine \(use node 13\)
 
-Access the frontend in your browser at [`localhost:8082/login`](http://localhost:8082/login) . 
+```bash
+yarn
+yarn start
+# in anthorer terminal
+docker-compose -f docker-compose.yml build
+docker-compose -f docker-compose.yml run backend ./manage.py init
+docker-compose -f docker-compose.yml up
+```
+
+Access the frontend in your browser at [`localhost:8082/login`](http://localhost:8082/login) 
 
 Backend can be accessed at `/api/` i.e. [`localhost:8082/api/admin/`](http://localhost:8082/api/admin/) 
 

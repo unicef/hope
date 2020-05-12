@@ -1,5 +1,11 @@
+from django.core.management import call_command
+
 from core.base_test_case import APITestCase
-from household.fixtures import HouseholdFactory, IndividualFactory
+from household.fixtures import (
+    HouseholdFactory,
+    IndividualFactory,
+    create_household,
+)
 
 
 class GoldenRecordTargetingCriteriaQueryTestCase(APITestCase):
@@ -9,7 +15,7 @@ class GoldenRecordTargetingCriteriaQueryTestCase(APITestCase):
         totalCount
         edges {
           node {
-            familySize
+            size
             residenceStatus
           }
         }
@@ -24,7 +30,7 @@ class GoldenRecordTargetingCriteriaQueryTestCase(APITestCase):
                         {
                             "comparisionMethod": "EQUALS",
                             "arguments": [2],
-                            "fieldName": "family_size",
+                            "fieldName": "size",
                             "isFlexField": False,
                         }
                     ]
@@ -49,22 +55,61 @@ class GoldenRecordTargetingCriteriaQueryTestCase(APITestCase):
             ]
         }
     }
+    FLEX_FIELD_VARIABLES = {
+        "targetingCriteria": {
+            "rules": [
+                {
+                    "filters": [
+                        {
+                            "comparisionMethod": "EQUALS",
+                            "arguments": ["0"],
+                            "fieldName": "unaccompanied_child_h_f",
+                            "isFlexField": True,
+                        }
+                    ]
+                }
+            ]
+        },
+        "first": 10,
+    }
+
+    SELECT_MANY_VARIABLES = {
+        "targetingCriteria": {
+            "rules": [
+                {
+                    "filters": [
+                        {
+                            "comparisionMethod": "CONTAINS",
+                            "arguments": [
+                                "other_public",
+                                "pharmacy",
+                                "other_private",
+                            ],
+                            "fieldName": "treatment_facility_h_f",
+                            "isFlexField": True,
+                        }
+                    ]
+                }
+            ]
+        }
+    }
 
     @classmethod
     def setUpTestData(cls):
-        cls.household_family_size_1 = HouseholdFactory(
-            family_size=1, residence_status="CITIZEN",
+        call_command("loadflexfieldsattributes")
+        (household, individuals) = create_household(
+            {"size": 1, "residence_status": "CITIZEN",},
         )
-        cls.household_residence_status_citizen = cls.household_family_size_1
-        IndividualFactory(household=cls.household_family_size_1)
-        cls.household_residence_status_refugee = HouseholdFactory(
-            family_size=2, residence_status="REFUGEE",
-        )
-        cls.household_family_size_2 = cls.household_residence_status_refugee
-        IndividualFactory(household=cls.household_residence_status_refugee)
-        IndividualFactory(household=cls.household_residence_status_refugee)
+        cls.household_size_1 = household
+        cls.household_residence_status_citizen = cls.household_size_1
 
-    def test_golden_record_by_targeting_criteria_family_size(self):
+        (household, individuals) = create_household(
+            {"size": 2, "residence_status": "REFUGEE",},
+        )
+        cls.household_residence_status_refugee = household
+        cls.household_size_2 = cls.household_residence_status_refugee
+
+    def test_golden_record_by_targeting_criteria_size(self):
         self.snapshot_graphql_request(
             request_string=GoldenRecordTargetingCriteriaQueryTestCase.QUERY,
             variables=GoldenRecordTargetingCriteriaQueryTestCase.FAMILY_SIZE_2_VARIABLES,
@@ -74,4 +119,15 @@ class GoldenRecordTargetingCriteriaQueryTestCase(APITestCase):
         self.snapshot_graphql_request(
             request_string=GoldenRecordTargetingCriteriaQueryTestCase.QUERY,
             variables=GoldenRecordTargetingCriteriaQueryTestCase.RESIDENCE_STATUS_REFUGEE_VARIABLES,
+        )
+
+    def test_golden_record_by_targeting_criteria_flex_field(self):
+        self.snapshot_graphql_request(
+            request_string=GoldenRecordTargetingCriteriaQueryTestCase.QUERY,
+            variables=GoldenRecordTargetingCriteriaQueryTestCase.FLEX_FIELD_VARIABLES,
+        )
+    def test_golden_record_by_targeting_criteria_select_many(self):
+        self.snapshot_graphql_request(
+            request_string=GoldenRecordTargetingCriteriaQueryTestCase.QUERY,
+            variables=GoldenRecordTargetingCriteriaQueryTestCase.SELECT_MANY_VARIABLES,
         )

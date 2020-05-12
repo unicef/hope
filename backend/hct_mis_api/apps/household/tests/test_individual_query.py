@@ -3,7 +3,11 @@ from django.core.management import call_command
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
 from core.models import BusinessArea
-from household.fixtures import IndividualFactory, HouseholdFactory
+from household.fixtures import (
+    IndividualFactory,
+    HouseholdFactory,
+    create_household,
+)
 from program.fixtures import ProgramFactory
 
 
@@ -14,10 +18,10 @@ class TestIndividualQuery(APITestCase):
         edges {
           node {
             fullName
-            firstName
-            lastName
-            phoneNumber
-            dob
+            givenName
+            familyName
+            phoneNo
+            birthDate
           }
         }
       }
@@ -28,11 +32,10 @@ class TestIndividualQuery(APITestCase):
       allIndividuals(programme: "Test program TWO") {
         edges {
           node {
-            fullName
-            firstName
-            lastName
-            phoneNumber
-            dob
+            givenName
+            familyName
+            phoneNo
+            birthDate
             household {
               programs { 
                 edges {
@@ -51,10 +54,10 @@ class TestIndividualQuery(APITestCase):
     query Individual($id: ID!) {
       individual(id: $id) {
         fullName
-        firstName
-        lastName
-        phoneNumber
-        dob
+        givenName
+        familyName
+        phoneNo
+        birthDate
       }
     }
     """
@@ -69,46 +72,51 @@ class TestIndividualQuery(APITestCase):
         program_two = ProgramFactory(
             name="Test program TWO", business_area=BusinessArea.objects.first(),
         )
-        household_one = HouseholdFactory()
-        household_two = HouseholdFactory()
+
+        household_one = HouseholdFactory.build()
+        household_two = HouseholdFactory.build()
+        household_one.registration_data_import.imported_by.save()
+        household_one.registration_data_import.save()
+        household_two.registration_data_import.imported_by.save()
+        household_two.registration_data_import.save()
         household_one.programs.add(program_one)
         household_two.programs.add(program_two)
 
         self.individuals_to_create = [
             {
                 "full_name": "Benjamin Butler",
-                "first_name": "Benjamin",
-                "last_name": "Butler",
-                "phone_number": "(953)682-4596",
-                "dob": "1943-07-30",
+                "given_name": "Benjamin",
+                "family_name": "Butler",
+                "phone_no": "(953)682-4596",
+                "birth_date": "1943-07-30",
             },
             {
                 "full_name": "Robin Ford",
-                "first_name": "Robin",
-                "last_name": "Ford",
-                "phone_number": "+18663567905",
-                "dob": "1946-02-15",
+                "given_name": "Robin",
+                "family_name": "Ford",
+                "phone_no": "+18663567905",
+                "birth_date": "1946-02-15",
             },
             {
                 "full_name": "Timothy Perry",
-                "first_name": "Timothy",
-                "last_name": "Perry",
-                "phone_number": "(548)313-1700-902",
-                "dob": "1983-12-21",
+                "given_name": "Timothy",
+                "family_name": "Perry",
+                "phone_no": "(548)313-1700-902",
+                "birth_date": "1983-12-21",
             },
             {
                 "full_name": "Eric Torres",
-                "first_name": "Eric",
-                "last_name": "Torres",
-                "phone_number": "(228)231-5473",
-                "dob": "1973-03-23",
+                "given_name": "Eric",
+                "family_name": "Torres",
+                "phone_no": "(228)231-5473",
+                "birth_date": "1973-03-23",
             },
             {
                 "full_name": "Jenna Franklin",
-                "first_name": "Jenna",
-                "last_name": "Franklin",
-                "phone_number": "001-296-358-5428-607",
-                "dob": "1969-11-29",
+                "given_name": "Jenna",
+                "family_name": "Franklin",
+                "phone_no": "001-296-358-5428-607",
+                "birth_date": "1969-11-29",
             },
         ]
 
@@ -119,6 +127,10 @@ class TestIndividualQuery(APITestCase):
             )
             for index, individual in enumerate(self.individuals_to_create)
         ]
+        household_one.head_of_household = self.individuals[0]
+        household_two.head_of_household = self.individuals[1]
+        household_one.save()
+        household_two.save()
 
     def test_individual_query_all(self):
         self.snapshot_graphql_request(

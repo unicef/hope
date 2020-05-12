@@ -99,22 +99,23 @@ DATABASES = {
         "PORT": 5432,
     },
     "cash_assist_datahub": {
-        "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": os.getenv("POSTGRES_DB"),
-        "USER": os.getenv("POSTGRES_USER"),
-        "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
-        "HOST": os.getenv("POSTGRES_HOST_CA"),
+        "ENGINE": "django.contrib.gis.db.backends.postgis",
+        "NAME": os.getenv("POSTGRES_CASHASSIST_DATAHUB_DB"),
+        "USER": os.getenv("POSTGRES_CASHASSIST_DATAHUB_USER"),
+        "PASSWORD": os.getenv("POSTGRES_CASHASSIST_DATAHUB_PASSWORD"),
+        "HOST": os.getenv("POSTGRES_CASHASSIST_DATAHUB_HOST"),
         "PORT": 5432,
     },
     "registration_datahub": {
-        "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": os.getenv("POSTGRES_DB"),
-        "USER": os.getenv("POSTGRES_USER"),
-        "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
-        "HOST": os.getenv("POSTGRES_HOST_REG"),
+        "ENGINE": "django.contrib.gis.db.backends.postgis",
+        "NAME": os.getenv("POSTGRES_REGISTRATION_DATAHUB_DB"),
+        "USER": os.getenv("POSTGRES_REGISTRATION_DATAHUB_USER"),
+        "PASSWORD": os.getenv("POSTGRES_REGISTRATION_DATAHUB_PASSWORD"),
+        "HOST": os.getenv("POSTGRES_REGISTRATION_DATAHUB_HOST"),
         "PORT": 5432,
     },
 }
+
 
 # If app is not specified here it will use default db
 DATABASE_APPS_MAPPING = {
@@ -188,6 +189,7 @@ DJANGO_APPS = [
     "django.contrib.sites",
     "django.contrib.sitemaps",
     "django.contrib.staticfiles",
+    "django.contrib.gis",
 ]
 
 OTHER_APPS = [

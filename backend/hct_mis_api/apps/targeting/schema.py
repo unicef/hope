@@ -1,6 +1,9 @@
+from functools import reduce
+
 import django_filters
 import graphene
-from django.db.models import Q
+from django.db.models import Q, Sum
+from django_filters import FilterSet, CharFilter
 from graphene import relay, Scalar
 from graphene_django import DjangoObjectType, DjangoConnectionField
 from graphene_django.filter import DjangoFilterConnectionField
@@ -17,6 +20,18 @@ from household.schema import HouseholdNode
 # TODO(codecakes): see if later the format can be kept consistent in FilterAttrType model.
 # by using FlexFieldNode and CoreFieldNode to return target filter rules.
 from targeting.validators import TargetingCriteriaInputValidator
+
+
+class HouseholdFilter(FilterSet):
+    order_by = django_filters.OrderingFilter(
+        fields=(
+            "id",
+            "head_of_household__full_name",
+            "size",
+            "admin_area__title",
+            "updated_at",
+        )
+    )
 
 
 class TargetPopulationFilter(django_filters.FilterSet):
@@ -54,12 +69,13 @@ class TargetPopulationFilter(django_filters.FilterSet):
     final_list_total_individuals_max = IntegerFilter(
         field_name="final_list_total_individuals", lookup_expr="lte",
     )
+    business_area = CharFilter(field_name="business_area__slug")
 
     @staticmethod
     def filter_created_by_name(queryset, model_field, value):
         """Gets full name of the associated user from query."""
-        fname_query_key = f"{model_field}__first_name__icontains"
-        lname_query_key = f"{model_field}__last_name__icontains"
+        fname_query_key = f"{model_field}__given_name__icontains"
+        lname_query_key = f"{model_field}__family_name__icontains"
         for name in value.strip().split():
             queryset = queryset.filter(
                 Q(**{fname_query_key: name,}) | Q(**{lname_query_key: name,})
@@ -158,6 +174,13 @@ class TargetingCriteriaNode(DjangoObjectType):
         model = target_models.TargetingCriteria
 
 
+class StatsObjectType(graphene.ObjectType):
+    child_male = graphene.Int()
+    child_female = graphene.Int()
+    adult_male = graphene.Int()
+    adult_female = graphene.Int()
+
+
 class TargetPopulationNode(DjangoObjectType):
     """Defines an individual target population record."""
 
@@ -166,6 +189,9 @@ class TargetPopulationNode(DjangoObjectType):
     candidate_list_targeting_criteria = TargetingCriteriaRuleFilterNode()
     final_list_targeting_criteria = TargetingCriteriaRuleFilterNode()
     final_list = DjangoConnectionField(HouseholdNode)
+    candidate_stats = graphene.Field(StatsObjectType)
+    final_stats = graphene.Field(StatsObjectType)
+
 
     class Meta:
         model = target_models.TargetPopulation
@@ -211,18 +237,21 @@ def targeting_criteria_object_type_to_query(targeting_criteria_object_type):
 class Query(graphene.ObjectType):
     target_population = relay.Node.Field(TargetPopulationNode)
     all_target_population = DjangoFilterConnectionField(TargetPopulationNode)
-    golden_record_by_targeting_criteria = DjangoConnectionField(
+    golden_record_by_targeting_criteria = DjangoFilterConnectionField(
         HouseholdNode,
         targeting_criteria=TargetingCriteriaObjectType(required=True),
+        filterset_class=HouseholdFilter,
     )
     candidate_households_list_by_targeting_criteria = DjangoFilterConnectionField(
         HouseholdNode,
         target_population=graphene.Argument(graphene.ID, required=True),
+        filterset_class=HouseholdFilter,
     )
     final_households_list_by_targeting_criteria = DjangoFilterConnectionField(
         HouseholdNode,
         target_population=graphene.Argument(graphene.ID, required=True),
         targeting_criteria=TargetingCriteriaObjectType(),
+        filterset_class=HouseholdFilter,
     )
     target_population_status_choices = graphene.List(ChoiceObject)
 
@@ -242,7 +271,7 @@ class Query(graphene.ObjectType):
         if target_population_model.status == "DRAFT":
             return Household.objects.filter(
                 target_population_model.candidate_list_targeting_criteria.get_query()
-            )
+            ).distinct()
         return target_population_model.households.all()
 
     def resolve_final_households_list_by_targeting_criteria(
@@ -256,13 +285,19 @@ class Query(graphene.ObjectType):
             return []
         if target_population_model.status == "APPROVED":
             if targeting_criteria is None:
-                return target_population_model.households.filter(
-                    target_population_model.final_list_targeting_criteria.get_query()
+                if target_population_model.final_list_targeting_criteria:
+                    return target_population_model.households.filter(
+                        target_population_model.final_list_targeting_criteria.get_query()
+                    ).distinct()
+                else:
+                    return target_population_model.households.all()
+            return (
+                target_population_model.households.filter(
+                    targeting_criteria_object_type_to_query(targeting_criteria)
                 )
-            return target_population_model.households.filter(
-                targeting_criteria_object_type_to_query(targeting_criteria)
-            ).all()
-
+                .all()
+                .distinct()
+            )
         return target_population_model.final_list.all()
 
     def resolve_golden_record_by_targeting_criteria(
@@ -270,4 +305,4 @@ class Query(graphene.ObjectType):
     ):
         return Household.objects.filter(
             targeting_criteria_object_type_to_query(targeting_criteria)
-        )
+        ).distinct()
