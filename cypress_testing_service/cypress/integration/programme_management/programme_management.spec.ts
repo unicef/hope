@@ -5,6 +5,7 @@ import {
   And,
   Given,
 } from 'cypress-cucumber-preprocessor/steps';
+import { uuid } from 'uuidv4';
 import { api } from '../../support/api';
 
 const addToProgramIds = (programId: string) => {
@@ -70,10 +71,11 @@ Then('the New Programme form is shown', () => {
 });
 
 When('the User completes all required fields on the form', () => {
-  cy.fixture('program').then((program) => {
-    const { name } = program;
+  cy.fixture<{ name: string }>('program').then(({ name }) => {
+    const uniqueName = `${name} ${uuid()}`;
 
-    cy.getByTestId('input-name').type(name);
+    cy.getByTestId('input-name').type(uniqueName);
+    cy.wrap(uniqueName).as('uniqueProgramName');
 
     cy.getByTestId('select-field-collapsed-scope').click();
     cy.getByTestId('select-field-options-scope').within(() => {
@@ -97,7 +99,7 @@ And('the User submits the form', () => {
 
 Then('the User is redirected to the new Programme details screen', () => {
   cy.getByTestId('main-content').contains('Programme Details');
-  cy.fixture('program').then(({ name }) => {
+  cy.get<string>('@uniqueProgramName').then((name) => {
     cy.getByTestId('main-content').contains(name);
   });
 
@@ -118,43 +120,55 @@ Then('status of this Programme is {word}', (status) => {
 Given(
   'the User is viewing existing Programme in {word} state',
   (status: string) => {
-    const completeApiRequests = (programId: string) => {
+    const completeApiRequests = (program) => {
+      const { id } = program;
+
       // to remove created program in tests tear down
-      addToProgramIds(programId);
-      cy.navigateTo(`/programs/${programId}`);
+      addToProgramIds(id);
+
+      cy.navigateTo(`/programs/${id}`);
       cy.getByTestId('program-details-container').as('programDetails');
+      cy.wrap(program).as('program');
     };
 
     cy.fixture('program').then((program) => {
-      const { name } = program;
+      const uniqueName = `${program.name} ${uuid()}`;
       const today = new Date().toISOString().split('T')[0];
 
       api
-        .createProgram({ ...program, startDate: today, endDate: today })
-        .then((response) => {
-          expect(response.status).eq(200);
+        .createProgram({
+          ...program,
+          name: uniqueName,
+          startDate: today,
+          endDate: today,
+        })
+        .then((createResponse) => {
+          expect(createResponse.status).eq(200);
 
           const {
             createProgram: {
-              program: { id },
+              program: createdProgram,
             },
-          } = response.body.data;
-
+          } = createResponse.body.data;
+          const { id } = createdProgram;
           expect(id).not.eq(undefined);
 
           if (status.toLowerCase() === 'active') {
             // update program status, if needed
-            api.updateProgram({ id, status }).then(() => {
-              completeApiRequests(id);
+            api.updateProgram({ id, status }).then((updateResponse) => {
+              const {
+                updateProgram: { program: updatedProgram },
+              } = updateResponse.body.data;
+              completeApiRequests(updatedProgram);
             });
           } else {
-            completeApiRequests(id);
+            completeApiRequests(createdProgram);
           }
         });
 
       // verify it's shown in the UI
       expectStatusWithin(cy.get('@programDetails'), status);
-      cy.getByTestId('page-header-container').contains(name);
+      cy.getByTestId('page-header-container').contains(uniqueName);
     });
   },
 );
@@ -165,7 +179,7 @@ Then('the Programme is soft deleted', () => {
 
 And('the Programme is no longer accessible', () => {
   cy.navigateTo('/programs');
-  cy.fixture('program').then(({ name }) => {
+  cy.get<{ name: string }>('@program').then(({ name }) => {
     cy.getByTestId('main-content').contains(name).should('not.be.visible');
   });
 });
