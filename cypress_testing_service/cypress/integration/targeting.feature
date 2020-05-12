@@ -1,40 +1,53 @@
-# @Targeting
-# Feature: Create New Programme Population
+@Targeting
+Feature: Target Population
 
-#     As a User
-#     I want to create a new Programme Population based on Targeting Criteria
-#     So I can create useful Cash Plans
-
-#     Scenario: Target Beneficiaries from the 'HCT MIS DB'
-#         Given The User has clicked 'Create New' Button from the Targeting List View screen
-#         When The User has given new criteria a Title
-#         * At least one Target Criteria
-#         * Clicked 'Save' Button
-#         Then The Programme Population will be created in the HCT MIS DB
-#         And The User will be directed to the Programme Population Details screen
-#         And The Status of the Programme Population will be set to 'Open'
+  Background:
+    # Given I login to AD as country_admin
+    Given I login with mocked cookies
+    Then I see user profile menu
 
 
-# @Targeting
-# Feature: Close Programme Population
+  # Create New Programme Population
+  # As a User
+  # I want to create a new Programme Population based on Targeting Criteria
+  # So I can create useful Cash Plans
 
-#     As a User
-#     I want to lock in the Beneficiary Data selected from my criteria set
-#     So I can use it in CashAssist
+  Scenario: Target Beneficiaries from the 'HCT MIS DB'
+    Given the User is viewing the Targeting List screen
+    When the User starts creating new Target Population
+      And the User gives new Target Population a name
+      And the User selects at least one Target Criteria
+      And the User completes creating new Target Population
 
-#     Scenario: Preparing potential list of beneficiaries to be added to a Cash Plan of a particular Program
-#         Given The User is in the Programme Population Details screen
-#         When The User clicks 'Close' Button
-#         Then A Confirmation Modal display
+    Then the User will be directed to the Programme Population details screen
+      And the Status of the Programme Population will be set to Open
 
-#         Given The Confirmation Modal is present
-#         When The User Selects a Programme from the dropdown list
-#         And The User clicks 'Close' Button on the Confirmation Modal
-#         Then The Confirmation Modal dissapears
-#         And The Programme Population state becomes 'Closed'
-#         And The User can no longer select the 'Edit' Button from the Programme Population Details screen
-#         And The Programme Population Details are locked
-#         And A Target Population is created with the same details from the Programme Population
+  # Close Programme Population
+  # As a User
+  # I want to lock in the Beneficiary Data selected from my criteria set
+  # So I can use it in CashAssist
+
+  Scenario: Preparing potential list of beneficiaries to be added to a Cash Plan of a particular Program
+    Given the User is viewing the Targeting List screen
+    When the User starts creating new Target Population
+      And the User gives new Target Population a name
+      And the User selects at least one Target Criteria
+      And the User completes creating new Target Population
+
+    Then the User will be directed to the Programme Population details screen
+      And the Status of the Programme Population will be set to Open
+# Given The User is in the Programme Population Details screen
+# When The User clicks 'Close' Button
+# Then A Confirmation Modal display
+
+# Given The Confirmation Modal is present
+# When The User Selects a Programme from the dropdown list
+# And The User clicks 'Close' Button on the Confirmation Modal
+# Then The Confirmation Modal dissapears
+# And The Programme Population state becomes 'Closed'
+# And The User can no longer select the 'Edit' Button from the Programme Population Details screen
+# And The Programme Population Details are locked
+# And A Target Population is created with the same details from the Programme Population
 
 
 # @Targeting

@@ -63,6 +63,7 @@ Given(
     );
 
     // TODO: within certain context?
+    // TODO: separate action (when) from given
     cy.getByTestId('btn-rdi-import').should('be.visible').click();
   },
 );
