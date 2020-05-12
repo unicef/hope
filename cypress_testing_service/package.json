@@ -31,6 +31,7 @@
     "puppeteer": "^2.1.1",
     "tsify": "^4.0.1",
     "typescript": "^3.8.0",
+    "uuidv4": "^6.0.8",
     "xlsx": "^0.16.0"
   },
   "cypress-cucumber-preprocessor": {

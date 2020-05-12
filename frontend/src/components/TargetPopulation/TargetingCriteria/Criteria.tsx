@@ -131,7 +131,7 @@ export function Criteria({
   alternative,
 }: CriteriaProps) {
   return (
-    <CriteriaElement alternative={alternative}>
+    <CriteriaElement alternative={alternative} data-cy='criteria-container'>
       {rules.map((each, index) => {
         //eslint-disable-next-line
         return <CriteriaField key={index} field={each} />;
