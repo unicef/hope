@@ -111,6 +111,7 @@ export function ApproveCandidateList({ open, setOpen, targetPopulationId }) {
                   variant='contained'
                   onClick={submitForm}
                   disabled={!loading || !values.program}
+                  data-cy='btn-target-population-close'
                 >
                   Close
                 </Button>

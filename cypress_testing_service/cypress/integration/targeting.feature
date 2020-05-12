@@ -12,15 +12,15 @@ Feature: Target Population
   # I want to create a new Programme Population based on Targeting Criteria
   # So I can create useful Cash Plans
 
-  Scenario: Target Beneficiaries from the 'HCT MIS DB'
-    Given the User is viewing the Targeting List screen
-    When the User starts creating new Target Population
-      And the User gives new Target Population a name
-      And the User selects at least one Target Criteria
-      And the User completes creating new Target Population
+  # Scenario: Target Beneficiaries from the 'HCT MIS DB'
+  #   Given the User is viewing the Targeting List screen
+  #   When the User starts creating new Target Population
+  #     And the User gives new Target Population a name
+  #     And the User selects at least one Target Criteria
+  #     And the User completes creating new Target Population
 
-    Then the User will be directed to the Programme Population details screen
-      And the Status of the Programme Population will be set to Open
+  #   Then the User will be directed to the Programme Population details screen
+  #     And the Status of the Programme Population will be set to Open
 
   # Close Programme Population
   # As a User
@@ -28,46 +28,30 @@ Feature: Target Population
   # So I can use it in CashAssist
 
   Scenario: Preparing potential list of beneficiaries to be added to a Cash Plan of a particular Program
-    Given the User is viewing the Targeting List screen
-    When the User starts creating new Target Population
-      And the User gives new Target Population a name
-      And the User selects at least one Target Criteria
-      And the User completes creating new Target Population
+    Given the User is viewing existing Programme Population in Open state
+    When the User closes the Programme Population
+    Then the confirmation dialog for closing Programme Population is shown
+      And the User is asked to provide associated Program
 
-    Then the User will be directed to the Programme Population details screen
-      And the Status of the Programme Population will be set to Open
-# Given The User is in the Programme Population Details screen
-# When The User clicks 'Close' Button
-# Then A Confirmation Modal display
+    When the User selects a Programme to associate with
+      And the User confirms to close the Programme Population
 
-# Given The Confirmation Modal is present
-# When The User Selects a Programme from the dropdown list
-# And The User clicks 'Close' Button on the Confirmation Modal
-# Then The Confirmation Modal dissapears
-# And The Programme Population state becomes 'Closed'
-# And The User can no longer select the 'Edit' Button from the Programme Population Details screen
-# And The Programme Population Details are locked
-# And A Target Population is created with the same details from the Programme Population
+    Then the Programme population becomes Closed
+      And the User can no longer edit the Programme Population
+      And the Programme Population details are locked
 
+# Send Target Population to CashAssist
+# As a User
+# I want to send the final Target Populationt to CashAssist
+# So that it can be used for Programme Cash Plans
 
-# @Targeting
-# Feature: Send Target Population to CashAssist
+# Scenario: Finalizing list of Targeted Beneficiaries to send to CashAssist
+#   Given the User is viewing existing Target Population in Closed state
+#   When the User sends the Target Population to Cash Assist
+#   Then the confirmation dialog for Send to Cash Assist is shown
 
-#     As a User
-#     I want to send the final Target Populationt to CashAssist
-#     So that it can be used for Programme Cash Plans
-
-#     Scenario: Finalizing list of Targeted Beneficiaries to send to CashAssist
-#         Given A User is viewing a 'Closed' Target Population
-#         When The User clicks on the 'Send to CashAssist' Button
-#         Then A Confirmation Modal will display
-
-#         Given the Confirmation Modal is present
-#         And the correct total amount of Households are displayed in the description text
-#         When The User clicks 'Send to CashAssist'
-#         Then The Confirmation Modal screen dissapears
-#         And The Details for the Target Population are sent to CashAssist
-
+#   When the User confirms sending to Cash Assist
+#   Then the details for the Target Population are sent to Cash Assist
 
 # @Targeting
 # Feature: Duplicate Programme Population

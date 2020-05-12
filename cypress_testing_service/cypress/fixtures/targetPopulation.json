@@ -1,3 +1,17 @@
 {
-  "name": "Automated Test Target Population"
+  "name": "Automated Test Target Population",
+  "targetingCriteria": {
+    "rules": [
+      {
+        "filters": [
+          {
+            "comparisionMethod": "EQUALS",
+            "arguments": ["1"],
+            "fieldName": "unaccompanied_child_h_f",
+            "isFlexField": true
+          }
+        ]
+      }
+    ]
+  }
 }

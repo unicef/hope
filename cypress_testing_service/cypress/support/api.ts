@@ -63,7 +63,7 @@ const api = {
       variables: {
         programData: {
           status: status && status.toUpperCase(),
-          ...rest
+          ...rest,
         },
       },
     });
@@ -121,6 +121,132 @@ const api = {
         }
       `,
       variables: { programId },
+    });
+  },
+
+  createTargetPopulation(input) {
+    return request('POST', {
+      operationName: 'CreateTP',
+      query: `
+        mutation CreateTP($input: CreateTargetPopulationInput!) {
+          createTargetPopulation(input: $input) {
+            targetPopulation {
+              id
+              status
+              candidateListTotalHouseholds
+              candidateListTotalIndividuals
+              finalListTotalHouseholds
+              finalListTotalIndividuals
+            }
+          }
+        }
+      `,
+      variables: { input },
+    });
+  },
+
+  finalizeTargetPopulation(id) {
+    return request('POST', {
+      operationName: 'FinalizeTP',
+      variables: { id },
+      // TODO simplify for now
+      query: `
+        mutation FinalizeTP($id: ID!) {
+          finalizeTargetPopulation(id: $id) {
+            targetPopulation {
+              id
+              name
+              status
+              candidateListTotalHouseholds
+              candidateListTotalIndividuals
+              finalListTotalHouseholds
+              finalListTotalIndividuals
+              approvedAt
+              finalizedAt
+              finalizedBy {
+                firstName
+                lastName
+              }
+              program {
+                id
+                name
+              }
+              candidateListTargetingCriteria {
+                targetPopulationCandidate {
+                  createdBy {
+                    firstName
+                    lastName
+                  }
+                  program {
+                    id
+                    name
+                  }
+                }
+                rules {
+                  id
+                  filters {
+                    fieldName
+                    isFlexField
+                    arguments
+                    comparisionMethod
+                    fieldAttribute {
+                      name
+                      labelEn
+                      type
+                      choices {
+                        value
+                        labelEn
+                      }
+                    }
+                  }
+                }
+              }
+              finalListTargetingCriteria {
+                targetPopulationFinal {
+                  createdBy {
+                    firstName
+                    lastName
+                  }
+                  program {
+                    id
+                    name
+                  }
+                }
+                rules {
+                  id
+                  filters {
+                    fieldName
+                    isFlexField
+                    arguments
+                    comparisionMethod
+                    fieldAttribute {
+                      name
+                      labelEn
+                      type
+                      choices {
+                        value
+                        labelEn
+                      }
+                    }
+                  }
+                }
+              }
+              candidateStats {
+                childMale
+                childFemale
+                adultMale
+                adultFemale
+              }
+              finalStats {
+                childMale
+                childFemale
+                adultMale
+                adultFemale
+              }
+            }
+          }
+        }
+     `,
     });
   },
 };
