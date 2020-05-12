@@ -118,7 +118,9 @@ Then(
 And(
   'the Status of the Programme Population will be set to {word}',
   (status) => {
-    cy.getByTestId('status-container').contains(status, { matchCase: false });
+    cy.getByTestId('page-header-container')
+      .getByTestId('status-container')
+      .contains(status, { matchCase: false });
   },
 );
 
@@ -182,19 +184,47 @@ And('the Programme Population details are locked', () => {
   });
 });
 
-Given(
-  'the User is viewing existing Target Population in Closed state',
-  () => {
-    createTargetPopulation();
-    cy.get<{ id: string }>('@targetPopulation').then(({ id }) => {
-      api.finalizeTargetPopulation(id).should((response) => {
-        expect(response.status).eq(200);
-      });
-    });
-  },
-);
-When('the User sends the Target Population to Cash Assist', () => {});
-Then('the confirmation dialog for Send to Cash Assist is shown', () => {});
+Given('the User is viewing existing Target Population in Closed state', () => {
+  createTargetPopulation();
+  cy.get<{ id: string }>('@targetPopulation').then(({ id }) => {
+    cy.navigateTo(`/target-population/${id}`);
 
-When('the User confirms sending to Cash Assist', () => {});
-Then('the details for the Target Population are sent to Cash Assist', () => {});
+    // perform sequence of UI steps to close target population
+    cy.getByTestId('btn-target-population-close').click({ force: true });
+    cy.getByTestId('select-field-collapsed-program').click();
+    cy.get('.MuiPopover-root').find('ul li').first().click();
+    cy.get('.MuiDialogActions-root')
+      .getByTestId('btn-target-population-close')
+      .click({ force: true });
+
+    cy.getByTestId('status-container').contains('closed', { matchCase: false });
+  });
+});
+
+When('the User sends the Target Population to Cash Assist', () => {
+  cy.getByTestId('btn-target-population-send-to-cash-assist').click({
+    force: true,
+  });
+});
+
+Then('the confirmation dialog for Send to Cash Assist is shown', () => {
+  cy.get('.MuiDialog-container').contains('send to cash assist', {
+    matchCase: false,
+  });
+
+  cy.get('.MuiDialog-container').contains('are you sure you want to', {
+    matchCase: false,
+  });
+});
+
+When('the User confirms sending to Cash Assist', () => {
+  cy.get('.MuiDialogActions-root')
+    .getByTestId('btn-target-population-send-to-cash-assist')
+    .click({ force: true });
+});
+
+Then('the details for the Target Population are sent to Cash Assist', () => {
+  cy.getByTestId('page-header-container')
+    .getByTestId('status-container')
+    .contains('sent', { matchCase: false });
+});
