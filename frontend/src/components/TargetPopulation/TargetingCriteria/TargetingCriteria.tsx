@@ -229,7 +229,7 @@ export function TargetingCriteria({
                 );
               })
             ) : (
-              <AddCriteria onClick={() => setOpen(true)}>
+              <AddCriteria onClick={() => setOpen(true)} data-cy='btn-target-population-add-criteria'>
                 <AddCircleOutline />
                 <p>Add Criteria</p>
               </AddCriteria>

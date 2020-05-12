@@ -8,7 +8,6 @@ Feature: Be able to download a template and upload households and individuals to
     then via a deterministic search.
 
     Background:
-        # TODO rephrase to some past form
         # Given I login to AD as country_admin
         Given I login with mocked cookies
         Then I see user profile menu
