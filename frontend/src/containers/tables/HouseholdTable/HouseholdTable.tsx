@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import {
   AllHouseholdsQueryVariables,
+  HouseholdChoiceDataQuery,
   HouseholdNode,
   useAllHouseholdsQuery,
 } from '../../../__generated__/graphql';
@@ -16,16 +17,20 @@ const TableWrapper = styled.div`
 interface HouseholdTableProps {
   businessArea: string;
   filter;
+  choicesData: HouseholdChoiceDataQuery;
 }
 
 export const HouseholdTable = ({
   businessArea,
   filter,
+  choicesData,
 }: HouseholdTableProps): React.ReactElement => {
   const initialVariables: AllHouseholdsQueryVariables = {
     businessArea,
     familySize: JSON.stringify(filter.householdSize),
-    headOfHouseholdFullNameIcontains: filter.text,
+    search: filter.text,
+    adminArea: filter.adminArea,
+    residenceStatus: filter.residenceStatus,
   };
   if (filter.program) {
     initialVariables.programs = [filter.program];
@@ -40,7 +45,7 @@ export const HouseholdTable = ({
         query={useAllHouseholdsQuery}
         queriedObjectName='allHouseholds'
         initialVariables={initialVariables}
-        renderRow={(row) => <HouseHoldTableRow household={row} />}
+        renderRow={(row) => <HouseHoldTableRow key={row.id} household={row} choicesData={choicesData}/>}
       />
     </TableWrapper>
   );

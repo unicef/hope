@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { ReactElement } from 'react';
 import * as Yup from 'yup';
 import styled from 'styled-components';
 import {
   Dialog,
   DialogContent,
   DialogTitle,
+  DialogActions,
   Typography,
 } from '@material-ui/core';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
@@ -29,6 +30,13 @@ const DialogDescription = styled.div`
   margin: 20px 0;
   font-size: 14px;
   color: rgba(0, 0, 0, 0.54);
+`;
+
+const DialogFooter = styled.div`
+  padding: 12px 16px;
+  margin: 0;
+  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
+  text-align: right;
 `;
 
 const MediumLabel = styled.div`
@@ -75,7 +83,7 @@ const validationSchema = Yup.object().shape({
 interface ProgramFormPropTypes {
   program?: ProgramNode;
   onSubmit: (values) => Promise<void>;
-  renderSubmit: (submit: () => Promise<void>) => void;
+  renderSubmit: (submit: () => Promise<void>) => ReactElement;
   open: boolean;
   onClose: () => void;
   title: string;
@@ -88,7 +96,7 @@ export function ProgramForm({
   open,
   onClose,
   title,
-}: ProgramFormPropTypes): React.ReactElement {
+}: ProgramFormPropTypes): ReactElement {
   const { data } = useProgrammeChoiceDataQuery();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let initialValue: { [key: string]: any } = {
@@ -139,8 +147,7 @@ export function ProgramForm({
               </DialogTitleWrapper>
               <DialogContent>
                 <DialogDescription>
-                  To subscribe to this website, please enter your email address
-                  here. We will send updates occasionally.
+                  To create a new Programme, please complete all required fields on the form below and save.
                 </DialogDescription>
 
                 <Field
@@ -255,7 +262,11 @@ export function ProgramForm({
                   />
                 </MediumLabel>
               </DialogContent>
-              {renderSubmit(submitForm)}
+              <DialogFooter>
+                <DialogActions>
+                  {renderSubmit(submitForm)}
+                </DialogActions>
+              </DialogFooter>
             </Dialog>
           </Form>
         )}

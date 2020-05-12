@@ -3,7 +3,7 @@ from django.core.management import call_command
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
 from core.models import BusinessArea
-from household.fixtures import HouseholdFactory
+from household.fixtures import HouseholdFactory, create_household
 from program.fixtures import ProgramFactory
 from targeting.models import (
     TargetingCriteria,
@@ -23,7 +23,7 @@ class TestApproveTargetPopulationMutation(APITestCase):
                     totalCount
                     edges {
                       node {
-                        familySize
+                        size
                         residenceStatus
                       }
                     }
@@ -42,14 +42,16 @@ class TestApproveTargetPopulationMutation(APITestCase):
         )
         cls.user = UserFactory.create()
         cls.households = []
-        cls.household_family_size_1 = HouseholdFactory(
-            family_size=1, residence_status="CITIZEN",
+        (household, individuals) = create_household(
+            {"size": 1, "residence_status": "CITIZEN", },
         )
-        cls.household_family_size_2 = HouseholdFactory(
-            family_size=2, residence_status="CITIZEN",
+        cls.household_size_1 = household
+        (household, individuals) = create_household(
+            {"size": 2, "residence_status": "CITIZEN", },
         )
-        cls.households.append(cls.household_family_size_1)
-        cls.households.append(cls.household_family_size_2)
+        cls.household_size_2 = household
+        cls.households.append(cls.household_size_1)
+        cls.households.append(cls.household_size_2)
 
         tp = TargetPopulation(name="Draft Target Population", status="DRAFT")
 
@@ -77,7 +79,7 @@ class TestApproveTargetPopulationMutation(APITestCase):
         )
         tp.final_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
             {
-                "field_name": "family_size",
+                "field_name": "size",
                 "arguments": [2],
                 "comparision_method": "EQUALS",
             }
@@ -149,7 +151,7 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
                     totalCount
                     edges {
                       node {
-                        familySize
+                        size
                         residenceStatus
                       }
                     }
@@ -163,14 +165,17 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
     def setUpTestData(cls):
         cls.user = UserFactory.create()
         cls.households = []
-        cls.household_family_size_1 = HouseholdFactory(
-            family_size=1, residence_status="CITIZEN",
+
+        (household, individuals) = create_household(
+            {"size": 1, "residence_status": "CITIZEN", },
         )
-        cls.household_family_size_2 = HouseholdFactory(
-            family_size=2, residence_status="CITIZEN",
+        cls.household_size_1 = household
+        (household, individuals) = create_household(
+            {"size": 2, "residence_status": "CITIZEN", },
         )
-        cls.households.append(cls.household_family_size_1)
-        cls.households.append(cls.household_family_size_2)
+        cls.household_size_2 = household
+        cls.households.append(cls.household_size_1)
+        cls.households.append(cls.household_size_2)
 
         tp = TargetPopulation(name="Draft Target Population", status="DRAFT")
 
@@ -198,7 +203,7 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
         )
         tp.final_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
             {
-                "field_name": "family_size",
+                "field_name": "size",
                 "arguments": [2],
                 "comparision_method": "EQUALS",
             }
@@ -267,7 +272,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
                   finalList{
                     edges{
                       node{
-                        familySize
+                        size
                         residenceStatus
                       }
                     }
@@ -276,7 +281,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
                     totalCount
                     edges {
                       node {
-                        familySize
+                        size
                         residenceStatus
                       }
                     }
@@ -290,14 +295,17 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
     def setUpTestData(cls):
         cls.user = UserFactory.create()
         cls.households = []
-        cls.household_family_size_1 = HouseholdFactory(
-            family_size=1, residence_status="CITIZEN",
+
+        (household, individuals) = create_household(
+            {"size": 1, "residence_status": "CITIZEN", },
         )
-        cls.household_family_size_2 = HouseholdFactory(
-            family_size=2, residence_status="CITIZEN",
+        cls.household_size_1 = household
+        (household, individuals) = create_household(
+            {"size": 2, "residence_status": "CITIZEN", },
         )
-        cls.households.append(cls.household_family_size_1)
-        cls.households.append(cls.household_family_size_2)
+        cls.household_size_2 = household
+        cls.households.append(cls.household_size_1)
+        cls.households.append(cls.household_size_2)
 
         tp = TargetPopulation(name="Draft Target Population", status="DRAFT")
 
@@ -325,7 +333,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
         )
         tp.final_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
             {
-                "field_name": "family_size",
+                "field_name": "size",
                 "arguments": [2],
                 "comparision_method": "EQUALS",
             }

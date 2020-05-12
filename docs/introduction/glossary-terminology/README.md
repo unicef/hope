@@ -15,8 +15,9 @@ description: HCT MIS related glossary and terms
   </thead>
   <tbody>
     <tr>
-      <td style="text-align:left">Alternate</td>
-      <td style="text-align:left">Used interchangeable for Representative/alternate recipient.</td>
+      <td style="text-align:left">Alternate Cash Collector</td>
+      <td style="text-align:left">Person who comes second in line to collect cash. May or may not be a member
+        of the household, for this reason can be used interchangeable with Representative.</td>
     </tr>
     <tr>
       <td style="text-align:left">Attribute</td>
@@ -30,6 +31,19 @@ description: HCT MIS related glossary and terms
     <tr>
       <td style="text-align:left">BCM</td>
       <td style="text-align:left"></td>
+    </tr>
+    <tr>
+      <td style="text-align:left">Business Area</td>
+      <td style="text-align:left">
+        <p>In SAP, BA is an organizational unit within accounting that represents
+          a separate area of operations or responsibilities in a business organization.</p>
+        <p>In HCT MIS, BA represents the area dedicated to a country (with some exceptions)
+          and used for isolating data that belongs to different country operations</p>
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align:left">Business Unit</td>
+      <td style="text-align:left">UNHCR&apos;s terminology for Business Area.</td>
     </tr>
     <tr>
       <td style="text-align:left">Cash+</td>
@@ -58,7 +72,9 @@ description: HCT MIS related glossary and terms
     </tr>
     <tr>
       <td style="text-align:left">Core Attribute</td>
-      <td style="text-align:left"></td>
+      <td style="text-align:left">Common in the business of any Program. Commonly used attributes for Households
+        / Individuals that change with the Country&apos;s needs - <em><b>stored within the HCT System Database. </b></em>
+      </td>
     </tr>
     <tr>
       <td style="text-align:left">Country</td>
@@ -74,8 +90,17 @@ description: HCT MIS related glossary and terms
       <td style="text-align:left">Is process monitoring.</td>
     </tr>
     <tr>
+      <td style="text-align:left">Data Collection</td>
+      <td style="text-align:left">Collecting data on households and individuals for initial registration
+        or updating of the existing information.</td>
+    </tr>
+    <tr>
       <td style="text-align:left">DFAM</td>
       <td style="text-align:left">Division of Financial and Administrative Management</td>
+    </tr>
+    <tr>
+      <td style="text-align:left">DP - Down Payment</td>
+      <td style="text-align:left"></td>
     </tr>
     <tr>
       <td style="text-align:left">Draft Cash Plan</td>
@@ -110,7 +135,9 @@ description: HCT MIS related glossary and terms
     <tr>
       <td style="text-align:left">Flexible Attributes</td>
       <td style="text-align:left">Non-Core attributes associated with a household / beneficiary. Also referred
-        to as &quot;Flex Fields&quot;.</td>
+        to as &quot;Flex Fields&quot;. These fields are less common across business
+        and have a likelihood to change. <em><b>Stored in the JSON blob. </b></em>
+      </td>
     </tr>
     <tr>
       <td style="text-align:left">FSP</td>
@@ -118,7 +145,7 @@ description: HCT MIS related glossary and terms
         payments to beneficiaries.</td>
     </tr>
     <tr>
-      <td style="text-align:left">Fund commitment</td>
+      <td style="text-align:left">FC - Fund Commitment</td>
       <td style="text-align:left"></td>
     </tr>
     <tr>
@@ -131,11 +158,15 @@ description: HCT MIS related glossary and terms
     </tr>
     <tr>
       <td style="text-align:left">Head of Household</td>
-      <td style="text-align:left">Person who is primary in the household who gets paid.</td>
+      <td style="text-align:left">The head of household is defined as a usual resident member of the household
+        who is acknowledged by the other members of the household as the household
+        head.</td>
     </tr>
     <tr>
       <td style="text-align:left">Household</td>
-      <td style="text-align:left">A group of 1 or more beneficiaries.</td>
+      <td style="text-align:left">A household consists of a person or a group of related or unrelated persons,
+        who live together in the same dwelling unit, who share common living arrangements,
+        who acknowledge the same person as the household head, and who eat together.</td>
     </tr>
     <tr>
       <td style="text-align:left">Household Baseline</td>
@@ -152,6 +183,10 @@ description: HCT MIS related glossary and terms
     <tr>
       <td style="text-align:left">IDP</td>
       <td style="text-align:left">Internally Displaced Person</td>
+    </tr>
+    <tr>
+      <td style="text-align:left">Individual</td>
+      <td style="text-align:left">Person who is member of a Household</td>
     </tr>
     <tr>
       <td style="text-align:left">Individual Baseline</td>
@@ -215,6 +250,12 @@ description: HCT MIS related glossary and terms
         used at UNICEF more commonly than intervention.</td>
     </tr>
     <tr>
+      <td style="text-align:left">Programme Population</td>
+      <td style="text-align:left">Households or Individuals who fit the first set of targeting critera and
+        are potential targets of a given programme. They may or may not be further
+        trimmed down with additional criterias or filter in the Target Population.</td>
+    </tr>
+    <tr>
       <td style="text-align:left">Proof of Life</td>
       <td style="text-align:left">Refugee concept. Check 1X / month for example if the person is still there.</td>
     </tr>
@@ -237,20 +278,25 @@ description: HCT MIS related glossary and terms
       </td>
     </tr>
     <tr>
+      <td style="text-align:left">Registration</td>
+      <td style="text-align:left">Act of recording of unique households and individuals by data collection.
+        The registration data can be shared by other organizations that have done
+        this activity.</td>
+    </tr>
+    <tr>
       <td style="text-align:left">Registration Campaign</td>
       <td style="text-align:left">Campaign can be related to an intervention or not. This is the &quot;purpose&quot;
         for why households are being registered.</td>
     </tr>
     <tr>
       <td style="text-align:left">Representative</td>
-      <td style="text-align:left">Secondary person/alternate recipient to receive cash for household in
-        place of the head of household. May or may not be part of the household
-        member at all.</td>
+      <td style="text-align:left">Person who is not a member of the household but given authority to collect
+        cash on behalf of the Individual or Household.</td>
     </tr>
     <tr>
       <td style="text-align:left">Requisition</td>
-      <td style="text-align:left">Conceptually a bucket / budget for initiatives. PO&apos;s are issued associated
-        with a requisition. You typically fill it with fund reservations.</td>
+      <td style="text-align:left">UNHCR&apos;s terminology for blocking funds for initiatives. PO&apos;s
+        are issued associated with a requisition.</td>
     </tr>
     <tr>
       <td style="text-align:left">SAP PO</td>
@@ -282,6 +328,11 @@ description: HCT MIS related glossary and terms
         <p>In other cases targeting is the term to limit set of beneficiaries within
           an intervention.</p>
       </td>
+    </tr>
+    <tr>
+      <td style="text-align:left">Target Population</td>
+      <td style="text-align:left">Households or Individuals who are eligible for assistance based programme&apos;s
+        targeting criteria.</td>
     </tr>
     <tr>
       <td style="text-align:left">Transaction</td>

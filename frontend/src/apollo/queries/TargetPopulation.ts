@@ -6,15 +6,29 @@ export const TargetPopulation = gql`
       id
       name
       status
+      candidateListTotalHouseholds
+      candidateListTotalIndividuals
+      finalListTotalHouseholds
+      finalListTotalIndividuals
+      approvedAt
+      finalizedAt
+      finalizedBy {
+        firstName
+        lastName
+      }
+      program {
+        id
+        name
+      }
+      createdBy {
+        firstName
+        lastName
+      }
       candidateListTargetingCriteria {
         targetPopulationCandidate {
           createdBy {
             firstName
             lastName
-          }
-          program {
-            id
-            name
           }
         }
         rules {
@@ -42,10 +56,6 @@ export const TargetPopulation = gql`
             firstName
             lastName
           }
-          program {
-            id
-            name
-          }
         }
         rules {
           id
@@ -65,6 +75,18 @@ export const TargetPopulation = gql`
             }
           }
         }
+      }
+      candidateStats{
+        childMale
+        childFemale
+        adultMale
+        adultFemale
+      }
+      finalStats{
+        childMale
+        childFemale
+        adultMale
+        adultFemale
       }
     }
   }

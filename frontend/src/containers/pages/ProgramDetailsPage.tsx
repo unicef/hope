@@ -1,9 +1,8 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
-import { Snackbar, SnackbarContent } from '@material-ui/core';
 import { ProgramDetails } from '../../components/programs/ProgramDetails';
-import { CashPlanTable } from '../tables/CashPlanTable/CashPlanTable';
+import { CashPlanTable } from '../tables/CashPlanTable';
 import {
   ProgramNode,
   ProgramStatus,
@@ -11,9 +10,8 @@ import {
   useProgramQuery,
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../../components/LoadingComponent';
-import { ProgramDetailsPageHeader } from './headers/ProgramDetailsPageHeader';
-import { useSnackbar } from '../../hooks/useSnackBar';
 import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
+import { ProgramDetailsPageHeader } from './headers/ProgramDetailsPageHeader';
 
 const Container = styled.div`
   && {

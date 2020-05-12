@@ -10,6 +10,7 @@ export const AllIndividuals = gql`
     $sex: [ID]
     $age: String
     $orderBy: String
+    $search: String
   ) {
     allIndividuals(
       before: $before
@@ -20,6 +21,7 @@ export const AllIndividuals = gql`
       sex: $sex
       age: $age
       orderBy: $orderBy
+      search: $search
     ) {
       totalCount
       pageInfo {
@@ -29,26 +31,7 @@ export const AllIndividuals = gql`
       edges {
         cursor
         node {
-          id
-          createdAt
-          updatedAt
-          individualCaId
-          fullName
-          sex
-          dob
-          nationality
-          martialStatus
-          phoneNumber
-          identificationType
-          identificationNumber
-          household {
-            id
-            householdCaId
-            location {
-              id
-              title
-            }
-          }
+          ...individualMinimal
         }
       }
     }

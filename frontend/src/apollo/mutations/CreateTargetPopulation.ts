@@ -6,6 +6,10 @@ export const CreateTP = gql`
       targetPopulation {
         id
         status
+        candidateListTotalHouseholds
+        candidateListTotalIndividuals
+        finalListTotalHouseholds
+        finalListTotalIndividuals
       }
     }
   }

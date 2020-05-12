@@ -1,62 +1,41 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
-import { Typography, Paper, Button, Tabs, Tab } from '@material-ui/core';
-import { Formik, Form, Field, FieldArray } from 'formik';
-import { Results } from './Results';
-import { TargetingCriteria } from './TargetingCriteria';
+import { Button, Tabs, Tab } from '@material-ui/core';
+import { Formik, Form, Field } from 'formik';
 import { PageHeader } from '../PageHeader';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { BreadCrumbsItem } from '../BreadCrumbs';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { TargetPopulationHouseholdTable } from '../../containers/tables/TargetPopulationHouseholdTable';
-import {
-  useGoldenRecordByTargetingCriteriaQuery,
-  useUpdateTpMutation
-} from '../../__generated__/graphql';
+import { useUpdateTpMutation } from '../../__generated__/graphql';
 import { useSnackbar } from '../../hooks/useSnackBar';
-
-const PaperContainer = styled(Paper)`
-  display: flex;
-  padding: ${({ theme }) => theme.spacing(3)}px
-    ${({ theme }) => theme.spacing(4)}px;
-  margin: ${({ theme }) => theme.spacing(5)}px;
-  flex-direction: column;
-  border-bottom: 1px solid rgba(224, 224, 224, 1);
-`;
+import { TabPanel } from '../TabPanel';
+import { CandidateListTab } from './Edit/CandidateListTab';
+import { TargetPopulationTab } from './Edit/TargetPopulationTab';
+import { TargetPopulationDetails } from './TargetPopulationDetails';
 
 const ButtonContainer = styled.span`
   margin: 0 ${({ theme }) => theme.spacing(2)}px;
 `;
 
-const Label = styled.p`
-  color: #b1b1b5;
-`;
-
-const resultsData = {
-  totalNumberOfHouseholds: 125,
-  targetedIndividuals: 254,
-  femaleChildren: 43,
-  maleChildren: 50,
-  femaleAdults: 35,
-  maleAdults: 12,
-};
-
 interface EditTargetPopulationProps {
-  id?;
   targetPopulationCriterias?;
-  targetPopulationName?;
   cancelEdit?;
+  selectedTab?: number;
+  targetPopulation?;
 }
 
 export function EditTargetPopulation({
-  id,
-  targetPopulationName,
   targetPopulationCriterias,
   cancelEdit,
+  selectedTab = 0,
+  targetPopulation,
 }: EditTargetPopulationProps) {
   const initialValues = {
-    name: targetPopulationName || '',
+    id: targetPopulation.id,
+    name: targetPopulation.name || '',
     criterias: targetPopulationCriterias.rules || [],
+    candidateListCriterias: targetPopulation.candidateListTargetingCriteria?.rules || [],
+    targetPopulationCriterias: targetPopulation.finalListTargetingCriteria?.rules || [],
   };
   const [mutate] = useUpdateTpMutation();
   const { showMessage } = useSnackbar();
@@ -69,15 +48,53 @@ export function EditTargetPopulation({
   ];
   const tabs = (
     <Tabs
-      value={0}
+      value={selectedTab}
       aria-label='tabs'
       indicatorColor='primary'
       textColor='primary'
     >
-      <Tab label='Candidate list' />
-      <Tab label='Target Population' disabled />
+      <Tab label='Programme Population' disabled={selectedTab !== 0} />
+      <Tab label='Target Population' disabled={selectedTab !== 1} />
     </Tabs>
   );
+  const isTitleEditable = () => {
+    switch (targetPopulation.status) {
+      case 'APPROVED':
+        return false;
+      default:
+        return true;
+    }
+  };
+  const mapRules = (status, values) => {
+    switch(status) {
+      case 'DRAFT':
+        return values.candidateListCriterias.map((rule) => {
+          return {
+            filters: rule.filters.map((each) => {
+              return {
+                comparisionMethod: each.comparisionMethod,
+                arguments: each.arguments,
+                fieldName: each.fieldName,
+                isFlexField: each.isFlexField,
+              };
+            }),
+          };
+        })
+      default:
+        return values.targetPopulationCriterias.map((rule) => {
+          return {
+            filters: rule.filters.map((each) => {
+              return {
+                comparisionMethod: each.comparisionMethod,
+                arguments: each.arguments,
+                fieldName: each.fieldName,
+                isFlexField: each.isFlexField,
+              };
+            }),
+          };
+        })
+    }
+  }
   return (
     <Formik
       initialValues={initialValues}
@@ -85,28 +102,17 @@ export function EditTargetPopulation({
         const { data } = await mutate({
           variables: {
             input: {
-              id,
-              name: values.name,
+              id: values.id,
+              ...(targetPopulation.status === 'DRAFT' && { name: values.name }),
               targetingCriteria: {
-                rules: values.criterias.map((rule) => {
-                  return {
-                    filters: rule.filters.map((each) => {
-                      return {
-                        comparisionMethod: each.comparisionMethod,
-                        arguments: each.arguments,
-                        fieldName: each.fieldName,
-                        isFlexField: each.isFlexField,
-                      };
-                    }),
-                  };
-                }),
+                rules: mapRules(targetPopulation.status, values)
               },
             },
           },
         });
         cancelEdit();
         showMessage('Target Population Updated', {
-          pathname: `/${businessArea}/target-population/${id}`,
+          pathname: `/${businessArea}/target-population/${values.id}`,
           historyMethod: 'push',
         });
       }}
@@ -115,14 +121,18 @@ export function EditTargetPopulation({
         <Form>
           <PageHeader
             title={
-              <Field
-                name='name'
-                label='Programme Name'
-                type='text'
-                fullWidth
-                required
-                component={FormikTextField}
-              />
+              isTitleEditable() ? (
+                <Field
+                  name='name'
+                  label='Programme Name'
+                  type='text'
+                  fullWidth
+                  required
+                  component={FormikTextField}
+                />
+              ) : (
+                values.name
+              )
             }
             tabs={tabs}
             breadCrumbs={breadCrumbsItems}
@@ -153,46 +163,13 @@ export function EditTargetPopulation({
               </ButtonContainer>
             </>
           </PageHeader>
-          <FieldArray
-            name='criterias'
-            render={(arrayHelpers) => (
-              <TargetingCriteria
-                helpers={arrayHelpers}
-                criterias={values.criterias}
-                isEdit
-              />
-            )}
-          />
-          <Results />
-          {values.criterias.length ? (
-            <TargetPopulationHouseholdTable
-              variables={{
-                targetingCriteria: {
-                  rules: values.criterias.map((rule) => {
-                    return {
-                      filters: rule.filters.map((each) => {
-                        return {
-                          comparisionMethod: each.comparisionMethod,
-                          arguments: each.arguments,
-                          fieldName: each.fieldName,
-                          isFlexField: each.isFlexField,
-                        };
-                      }),
-                    };
-                  }),
-                },
-              }}
-              query={useGoldenRecordByTargetingCriteriaQuery}
-              queryObjectName='goldenRecordByTargetingCriteria'
-            />
-          ) : (
-            <PaperContainer>
-              <Typography variant='h6'>
-                Target Population Entries (Households)
-              </Typography>
-              <Label>Add targeting criteria to see results.</Label>
-            </PaperContainer>
-          )}
+          <TabPanel value={selectedTab} index={0}>
+            <CandidateListTab values={values} />
+          </TabPanel>
+          <TabPanel value={selectedTab} index={1}>
+            <TargetPopulationDetails targetPopulation={targetPopulation} />
+            <TargetPopulationTab values={values} selectedTab={selectedTab} />
+          </TabPanel>
         </Form>
       )}
     </Formik>

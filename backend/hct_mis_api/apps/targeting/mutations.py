@@ -3,8 +3,10 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 
 from core import utils
+from core.models import BusinessArea
 from core.permissions import is_authenticated
 from core.utils import decode_id_string
 from household.models import Household
@@ -31,11 +33,6 @@ class CopyTargetPopulationInput(graphene.InputObjectType):
 
     id = graphene.ID()
     name = graphene.String()
-
-
-class CreateTarget:
-    # TODO(codecakes): Implement
-    pass
 
 
 class ValidatedMutation(graphene.Mutation):
@@ -75,6 +72,7 @@ class UpdateTargetPopulationInput(graphene.InputObjectType):
 class CreateTargetPopulationInput(graphene.InputObjectType):
     name = graphene.String(required=True)
     targeting_criteria = TargetingCriteriaObjectType(required=True)
+    business_area_slug = graphene.String(required=True)
 
 
 class CreateTargetPopulationMutation(graphene.Mutation):
@@ -91,6 +89,9 @@ class CreateTargetPopulationMutation(graphene.Mutation):
         input = kwargs.pop("input")
 
         targeting_criteria_input = input.get("targeting_criteria")
+        business_area = BusinessArea.objects.get(
+            slug=input.pop("business_area_slug")
+        )
         TargetingCriteriaInputValidator.validate(targeting_criteria_input)
         targeting_criteria = TargetingCriteria()
         targeting_criteria.save()
@@ -103,7 +104,7 @@ class CreateTargetPopulationMutation(graphene.Mutation):
                 )
                 rule_filter.save()
         target_population = TargetPopulation(
-            name=input.get("name"), created_by=user,
+            name=input.get("name"), created_by=user, business_area=business_area
         )
         target_population.candidate_list_targeting_criteria = targeting_criteria
         target_population.save()
@@ -184,11 +185,18 @@ class ApproveTargetPopulationMutation(ValidatedMutation):
     @classmethod
     @transaction.atomic
     def validated_mutate(cls, root, info, **kwargs):
+        user = info.context.user
         program = get_object_or_404(
             Program, pk=decode_id_string(kwargs.get("program_id"))
         )
+        if program.status != "ACTIVE":
+            raise ValidationError(
+                "Only Active program can be assigned to Targeting"
+            )
         target_population = kwargs.get("model_object")
         target_population.status = "APPROVED"
+        target_population.approved_by = user
+        target_population.approved_at = timezone.now()
         households = Household.objects.filter(
             target_population.candidate_list_targeting_criteria.get_query()
         )
@@ -225,8 +233,11 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
     @classmethod
     @transaction.atomic
     def validated_mutate(cls, root, info, **kwargs):
+        user = info.context.user
         target_population = kwargs.get("model_object")
         target_population.status = "FINALIZED"
+        target_population.approved_by = user
+        target_population.approved_at = timezone.now()
         if target_population.final_list_targeting_criteria:
             """Gets all households from candidate list which 
             don't meet final_list_targeting_criteria and set them (HouseholdSelection m2m model)

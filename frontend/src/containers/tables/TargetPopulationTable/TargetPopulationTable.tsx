@@ -8,25 +8,26 @@ import {
 import { UniversalTable } from '../UniversalTable';
 import { headCells } from './TargetPopulationTableHeadCells';
 import { TargetPopulationTableRow } from './TargetPopulationTableRow';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
 
 const TableWrapper = styled.div`
   padding: 20px;
 `;
 
 interface TargetPopulationProps {
-  businessArea: string;
   filter;
 }
 
 export const TargetPopulationTable = ({
-  businessArea,
-  filter
+  filter,
 }: TargetPopulationProps): ReactElement => {
+  const businessArea = useBusinessArea();
   const initialVariables = {
     name: filter.name,
-    numIndividualsMin: filter.numIndividuals.min,
-    numIndividualsMax: filter.numIndividuals.max,
+    candidateListTotalHouseholdsMin: filter.numIndividuals.min,
+    candidateListTotalHouseholdsMax: filter.numIndividuals.max,
     status: filter.status,
+    businessArea,
   };
   return (
     <TableWrapper>
@@ -36,6 +37,8 @@ export const TargetPopulationTable = ({
         rowsPerPageOptions={[10, 15, 20]}
         query={useAllTargetPopulationsQuery}
         queriedObjectName='allTargetPopulation'
+        defaultOrderBy='createdAt'
+        defaultOrderDirection='desc'
         initialVariables={initialVariables}
         renderRow={(row) => <TargetPopulationTableRow targetPopulation={row} />}
       />

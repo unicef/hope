@@ -41,11 +41,17 @@ const validationSchema = Yup.object().shape({
   name: Yup.string().required('Name is required'),
 });
 
+interface DuplicateTargetPopulationPropTypes {
+  open: boolean;
+  setOpen: Function;
+  targetPopulationId: string;
+}
+
 export function DuplicateTargetPopulation({
   open,
   setOpen,
   targetPopulationId,
-}) {
+}: DuplicateTargetPopulationPropTypes) {
   const [mutate] = useCopyTargetPopulationMutation();
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
@@ -64,18 +70,22 @@ export function DuplicateTargetPopulation({
       <Formik
         validationSchema={validationSchema}
         initialValues={initialValues}
-        onSubmit={async (values) => {
-          const { data } = await mutate({
+        onSubmit={(values) => {
+          mutate({
             variables: { input: { targetPopulationData: { ...values } } },
-          });
-          setOpen(false);
-          showMessage('Target Population Duplicated', {
-            pathname: `/${businessArea}/target-population/${data.copyTargetPopulation.targetPopulation.id}`,
-            historyMethod: 'push',
-          });
+          }).then((res) => {
+            setOpen(false);
+            return showMessage('Target Population Duplicated', {
+              pathname: `/${businessArea}/target-population/${res.data.copyTargetPopulation.targetPopulation.id}`,
+              historyMethod: 'push',
+            });
+          }, (error) => {
+            return showMessage('Name already exist');
+          })
+
         }}
       >
-        {({ submitForm, values }) => (
+        {({ submitForm }) => (
           <>
             <DialogTitleWrapper>
               <DialogTitle id='scroll-dialog-title'>
@@ -87,16 +97,16 @@ export function DuplicateTargetPopulation({
             <DialogContent>
               <DialogDescription>
                 Please use a unique name for the copy of this Target Population.
-                <br /> <strong>Note</strong>: This duplicate will result in a
-                snapshot of this Target Population List data, any changes will
-                result in new data for this copy.
+                <br /> <strong>Note</strong>: This duplicate will copy the
+                Target Criteria of the Programme Population and update to the
+                latest results from the system.
               </DialogDescription>
               <Field
                 name='name'
                 fullWidth
                 label='Name Copy of Target Population'
                 required
-                variant='filled'
+                variant='outlined'
                 component={FormikTextField}
               />
             </DialogContent>

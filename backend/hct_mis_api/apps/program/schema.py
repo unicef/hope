@@ -6,6 +6,7 @@ from graphene_django.filter import DjangoFilterConnectionField
 
 from core.schema import ChoiceObject, LogEntryObjectConnection
 from core.extended_connection import ExtendedConnection
+from core.utils import to_choice_object
 from program.models import Program, CashPlan
 from django_filters import FilterSet, OrderingFilter, CharFilter
 
@@ -93,31 +94,16 @@ class Query(graphene.ObjectType):
         ).order_by("custom_order")
 
     def resolve_program_status_choices(self, info, **kwargs):
-        return [
-            {"name": name, "value": value}
-            for value, name in Program.STATUS_CHOICE
-        ]
+        return to_choice_object(Program.STATUS_CHOICE)
 
     def resolve_program_frequency_of_payments_choices(self, info, **kwargs):
-        return [
-            {"name": name, "value": value}
-            for value, name in Program.FREQUENCY_OF_PAYMENTS_CHOICE
-        ]
+        return to_choice_object(Program.FREQUENCY_OF_PAYMENTS_CHOICE)
 
     def resolve_program_sector_choices(self, info, **kwargs):
-        return [
-            {"name": name, "value": value}
-            for value, name in Program.SECTOR_CHOICE
-        ]
+        return to_choice_object(Program.SECTOR_CHOICE)
 
     def resolve_program_scope_choices(self, info, **kwargs):
-        return [
-            {"name": name, "value": value}
-            for value, name in Program.SCOPE_CHOICE
-        ]
+        return to_choice_object(Program.SCOPE_CHOICE)
 
     def resolve_cash_plan_status_choices(self, info, **kwargs):
-        return [
-            {"name": name, "value": value}
-            for value, name in Program.STATUS_CHOICE
-        ]
+        return to_choice_object(Program.STATUS_CHOICE)

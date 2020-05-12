@@ -35,14 +35,14 @@ snapshots['TestApproveTargetPopulationMutation::test_approve_target_population 1
                     'edges': [
                         {
                             'node': {
-                                'familySize': 1,
-                                'residenceStatus': 'CITIZEN'
+                                'residenceStatus': 'CITIZEN',
+                                'size': 1
                             }
                         },
                         {
                             'node': {
-                                'familySize': 2,
-                                'residenceStatus': 'CITIZEN'
+                                'residenceStatus': 'CITIZEN',
+                                'size': 2
                             }
                         }
                     ],
@@ -82,14 +82,14 @@ snapshots['TestFinalizeTargetPopulationMutation::test_finalize_target_population
                     'edges': [
                         {
                             'node': {
-                                'familySize': 1,
-                                'residenceStatus': 'CITIZEN'
+                                'residenceStatus': 'CITIZEN',
+                                'size': 1
                             }
                         },
                         {
                             'node': {
-                                'familySize': 2,
-                                'residenceStatus': 'CITIZEN'
+                                'residenceStatus': 'CITIZEN',
+                                'size': 2
                             }
                         }
                     ]
@@ -98,14 +98,14 @@ snapshots['TestFinalizeTargetPopulationMutation::test_finalize_target_population
                     'edges': [
                         {
                             'node': {
-                                'familySize': 1,
-                                'residenceStatus': 'CITIZEN'
+                                'residenceStatus': 'CITIZEN',
+                                'size': 1
                             }
                         },
                         {
                             'node': {
-                                'familySize': 2,
-                                'residenceStatus': 'CITIZEN'
+                                'residenceStatus': 'CITIZEN',
+                                'size': 2
                             }
                         }
                     ],
@@ -125,8 +125,8 @@ snapshots['TestFinalizeTargetPopulationMutation::test_finalize_target_population
                     'edges': [
                         {
                             'node': {
-                                'familySize': 2,
-                                'residenceStatus': 'CITIZEN'
+                                'residenceStatus': 'CITIZEN',
+                                'size': 2
                             }
                         }
                     ]
@@ -135,14 +135,14 @@ snapshots['TestFinalizeTargetPopulationMutation::test_finalize_target_population
                     'edges': [
                         {
                             'node': {
-                                'familySize': 1,
-                                'residenceStatus': 'CITIZEN'
+                                'residenceStatus': 'CITIZEN',
+                                'size': 1
                             }
                         },
                         {
                             'node': {
-                                'familySize': 2,
-                                'residenceStatus': 'CITIZEN'
+                                'residenceStatus': 'CITIZEN',
+                                'size': 2
                             }
                         }
                     ],
@@ -182,14 +182,14 @@ snapshots['TestUnapproveTargetPopulationMutation::test_unapprove_target_populati
                     'edges': [
                         {
                             'node': {
-                                'familySize': 1,
-                                'residenceStatus': 'CITIZEN'
+                                'residenceStatus': 'CITIZEN',
+                                'size': 1
                             }
                         },
                         {
                             'node': {
-                                'familySize': 2,
-                                'residenceStatus': 'CITIZEN'
+                                'residenceStatus': 'CITIZEN',
+                                'size': 2
                             }
                         }
                     ],

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { useHistory } from 'react-router-dom';
 import {
   Button,
   Dialog,
@@ -8,8 +7,6 @@ import {
   DialogContent,
   DialogTitle,
   Typography,
-  Snackbar,
-  SnackbarContent,
 } from '@material-ui/core';
 import {
   AllProgramsQuery,
@@ -81,7 +78,9 @@ export function ReactivateProgram({
       },
     });
     if (!response.errors && response.data.updateProgram) {
-      showMessage('Programme reactivated.',{pathname: `/${businessArea}/programs/${response.data.updateProgram.program.id}`});
+      showMessage('Programme reactivated.', {
+        pathname: `/${businessArea}/programs/${response.data.updateProgram.program.id}`,
+      });
       setOpen(false);
     } else {
       showMessage('Programme reactivate action failed.');

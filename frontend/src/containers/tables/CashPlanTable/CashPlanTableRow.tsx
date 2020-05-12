@@ -17,7 +17,9 @@ interface CashPlanTableRowProps {
   cashPlan: CashPlanNode;
 }
 
-export function CashPlanTableRow({ cashPlan }: CashPlanTableRowProps) {
+export function CashPlanTableRow({
+  cashPlan,
+}: CashPlanTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
   const handleClick = (): void => {

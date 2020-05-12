@@ -4,6 +4,8 @@ import { Typography, Grid } from '@material-ui/core';
 import { LabelizedField } from '../LabelizedField';
 import { HouseholdNode } from '../../__generated__/graphql';
 import { formatCurrency } from '../../utils/utils';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
+import {MiśTheme} from "../../theme";
 
 const Container = styled.div`
   display: flex;
@@ -33,13 +35,21 @@ const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
+const ContentLink = styled.a`
+  font-family: ${({ theme }: { theme: MiśTheme }) =>
+    theme.hctTypography.fontFamily};
+  color: #253b46;
+  font-size: 14px;
+  line-height: 19px;
+`;
+
 interface HouseholdDetailsProps {
   houseHold: HouseholdNode;
 }
 export function HouseholdDetails({
   houseHold,
 }: HouseholdDetailsProps): React.ReactElement {
-  const { paymentRecords } = houseHold;
+  const businessArea = useBusinessArea();
   return (
     <Container>
       <Title>
@@ -58,7 +68,7 @@ export function HouseholdDetails({
           </Grid>
           <Grid item xs={4}>
             <LabelizedField label='Location'>
-              <div>{houseHold.location.title}</div>
+              <div>{houseHold.adminArea?.title||"-"}</div>
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>
@@ -67,13 +77,17 @@ export function HouseholdDetails({
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>
-            <LabelizedField label='Family Nationality'>
-              <div>{houseHold.nationality}</div>
+            <LabelizedField label='Country of Origin'>
+              <div>{houseHold.countryOrigin}</div>
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>
             <LabelizedField label='Head of Household'>
-              <div>{houseHold.headOfHousehold.fullName}</div>
+              <ContentLink
+                href={`/${businessArea}/population/individuals/${houseHold.headOfHousehold.id}`}
+              >
+                {houseHold.headOfHousehold.fullName}
+              </ContentLink>
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>
@@ -82,7 +96,7 @@ export function HouseholdDetails({
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>
-            <LabelizedField label='Programme(s)'>
+            <LabelizedField label='PrOgRAmmE(S) ENROLLED'>
               <div>
                 {houseHold.programs.edges.map((item) => (
                   <div>{item.node.name}</div>

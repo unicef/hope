@@ -1,20 +1,16 @@
 import React from 'react';
 import styled from 'styled-components';
-import { useTranslation } from 'react-i18next';
 import { Button, Typography, Paper, Tabs, Tab } from '@material-ui/core';
 import { Field, Form, Formik, FieldArray } from 'formik';
 import { PageHeader } from '../../components/PageHeader';
 import { TargetingCriteria } from '../../components/TargetPopulation/TargetingCriteria';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { Results } from '../../components/TargetPopulation/Results';
-import { TargetPopulationHouseholdTable } from '../tables/TargetPopulationHouseholdTable';
-import {
-  useGoldenRecordByTargetingCriteriaQuery,
-  useCreateTpMutation,
-} from '../../__generated__/graphql';
+import { useCreateTpMutation } from '../../__generated__/graphql';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
+import { CreateTable } from '../tables/TargetPopulation/Create';
 
 const PaperContainer = styled(Paper)`
   display: flex;
@@ -34,7 +30,6 @@ const Label = styled.p`
 `;
 
 export function CreateTargetPopulation() {
-  const { t } = useTranslation();
   const initialValues = {
     name: '',
     criterias: [],
@@ -55,18 +50,19 @@ export function CreateTargetPopulation() {
       indicatorColor='primary'
       textColor='primary'
     >
-      <Tab label='Candidate list' />
+      <Tab label='Programme Population' />
       <Tab label='Target Population' disabled />
     </Tabs>
   );
   return (
     <Formik
       initialValues={initialValues}
-      onSubmit={async (values) => {
-        const { data } = await mutate({
+      onSubmit={(values) => {
+        mutate({
           variables: {
             input: {
               name: values.name,
+              businessAreaSlug: businessArea,
               targetingCriteria: {
                 rules: values.criterias.map((rule) => {
                   return {
@@ -84,11 +80,17 @@ export function CreateTargetPopulation() {
               },
             },
           },
-        });
-        showMessage('Target Population Created', {
-          pathname: `/${businessArea}/target-population/${data.createTargetPopulation.targetPopulation.id}`,
-          historyMethod: 'push',
-        });
+        }).then(
+          (res) => {
+            return showMessage('Target Population Created', {
+              pathname: `/${businessArea}/target-population/${res.data.createTargetPopulation.targetPopulation.id}`,
+              historyMethod: 'push',
+            });
+          },
+          () => {
+            return showMessage('Name already exist');
+          },
+        );
       }}
     >
       {({ submitForm, values }) => (
@@ -126,14 +128,14 @@ export function CreateTargetPopulation() {
             render={(arrayHelpers) => (
               <TargetingCriteria
                 helpers={arrayHelpers}
-                criterias={values.criterias}
+                candidateListRules={values.criterias}
                 isEdit
               />
             )}
           />
           <Results />
           {values.criterias.length ? (
-            <TargetPopulationHouseholdTable
+            <CreateTable
               variables={{
                 targetingCriteria: {
                   rules: values.criterias.map((rule) => {
@@ -150,8 +152,6 @@ export function CreateTargetPopulation() {
                   }),
                 },
               }}
-              query={useGoldenRecordByTargetingCriteriaQuery}
-              queryObjectName='goldenRecordByTargetingCriteria'
             />
           ) : (
             <PaperContainer>
