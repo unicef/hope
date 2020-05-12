@@ -1,4 +1,5 @@
 import { Given, When, And, Then } from 'cypress-cucumber-preprocessor/steps';
+import { uuid } from 'uuidv4';
 import { WorkBook } from 'xlsx';
 
 Given('the User is viewing the Registration Data Import screen', () => {
@@ -69,7 +70,7 @@ Given(
 );
 
 And('the User uploads file', () => {
-  const fileName = 'rdi-small.xlsx';
+  const fileName = 'rdiSmall.xlsx';
   cy.fixture(fileName, 'base64').then((fileContent) => {
     // @ts-ignore
     cy.get('[data-cy=rdi-file-input]').upload({
@@ -93,11 +94,11 @@ And('the file has no errors', () => {
 });
 
 And('the User completes all required fields', () => {
-  cy.get('.MuiDialogContent-root').within(() => {
-    // TODO: add some hash to name
-    const uploadName = 'Test RDI Import';
-    cy.getByTestId('input-name').type(uploadName);
-    cy.wrap(uploadName).as('uploadedXlsx');
+  cy.fixture('rdi').then(({ name }) => {
+    const uniqueName = `${name} ${uuid()}`;
+    cy.get('.MuiDialogContent-root').getByTestId('input-name').type(uniqueName);
+
+    cy.wrap(uniqueName).as('uploadedXlsx');
   });
 });
 
@@ -105,6 +106,8 @@ And('the User confirms the import', () => {
   cy.get('.MuiDialogActions-root')
     .contains('import', { matchCase: false })
     .click();
+
+  cy.get('.MuiDialog-container').should('not.be.visible');
 });
 
 Then('the User is taken to the Import details screen', () => {
@@ -119,6 +122,7 @@ Then('the User is taken to the Import details screen', () => {
 
 And('the information from uploaded file is visible', () => {
   // TODO: clarify level of details to be tested
+  // TODO: consider getting data from fixtures
   cy.getByTestId('labelized-field-container-households').contains('18');
   cy.getByTestId('labelized-field-container-individuals').contains('72');
 });
