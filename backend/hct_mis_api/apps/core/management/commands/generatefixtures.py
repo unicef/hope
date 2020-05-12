@@ -124,6 +124,7 @@ class Command(BaseCommand):
         target_population = TargetPopulationFactory(
             created_by=user,
             candidate_list_targeting_criteria=targeting_criteria,
+            business_area=BusinessArea.objects.first(),
         )
         for _ in range(cash_plans_amount):
             cash_plan = CashPlanFactory.build(
@@ -166,7 +167,9 @@ class Command(BaseCommand):
             call_command("flush", "--noinput", database="cash_assist_datahub")
             call_command("flush", "--noinput", database="registration_datahub")
             call_command(
-                "loaddata", "hct_mis_api/apps/account/fixtures/superuser.json", verbosity=0
+                "loaddata",
+                "hct_mis_api/apps/account/fixtures/superuser.json",
+                verbosity=0,
             )
         start_time = time.time()
         programs_amount = options["programs_amount"]
