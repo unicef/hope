@@ -63,6 +63,43 @@ Then('the XLS file is not uploaded', () => {
   cy.get('.messagelist').should('be.not.be.visible');
 });
 
-And('error messages about empty label is shown', () => {
+And('error message about empty label is shown', () => {
   cy.get('.errorlist').contains('label cannot be empty');
+});
+
+And(
+  'the User imports flexible attributes XLS file containing choices without name',
+  () => {
+    importXlsDocument('choicesNoName');
+  },
+);
+
+And('error message about required name is shown', () => {
+  cy.get('.errorlist').contains('name is required', { matchCase: false });
+});
+
+And(
+  'the User imports a valid XLS file with default dairy_h_f attribute',
+  () => {
+    importXlsDocument('valid_dairy_h_f_default');
+  },
+);
+
+Then('the dairy_h_f attribute has default value', () => {
+  cy.get('table tbody tr').contains('dairy_h_f').click();
+  cy.get('#content').contains('Change flexible attribute');
+  cy.get('#content form textarea').contains('Milk and dairy products: yoghurt, cheese');
+});
+
+And(
+  'the User imports a valid XLS file with modified dairy_h_f attribute',
+  () => {
+    importXlsDocument('valid_dairy_h_f_default_with_eggs');
+  },
+);
+
+Then('the dairy_h_f attribute has modified value', () => {
+  cy.get('table tbody tr').contains('dairy_h_f').click();
+  cy.get('#content').contains('Change flexible attribute');
+  cy.get('#content form textarea').contains('Milk and dairy products: yoghurt, cheese, eggs');
 });
