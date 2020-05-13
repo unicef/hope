@@ -14,10 +14,10 @@
 // ***********************************************************
 
 // Import commands.js using ES2015 syntax:
-import './commands';
-import './chaiSubset';
 import 'cypress-promise/register';
 import 'cypress-file-upload';
+import './commands';
+import './chai';
 
 // TODO remove if no optimization gain
 // Cypress.Cookies.defaults({
