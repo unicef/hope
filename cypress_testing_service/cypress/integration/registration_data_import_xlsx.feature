@@ -8,8 +8,7 @@ Feature: Be able to download a template and upload households and individuals to
     then via a deterministic search.
 
     Background:
-        # Given I login to AD as country_admin
-        Given I login with mocked cookies
+        Given I login to AD as country_admin
         Then I see user profile menu
 
     Scenario: Download Template: User successfully downloads Registration Template
