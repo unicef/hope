@@ -4,8 +4,7 @@ Feature: Search and Filter Households / Individuals in the Population tab.
     and individuals that are part of the golden record.
 
     Background:
-        # Given I login to AD as country_admin
-        Given I login with mocked cookies
+        Given I login to AD as country_admin
         Then I see user profile menu
 
     Scenario: Search Households in 'HCT MIS DB'

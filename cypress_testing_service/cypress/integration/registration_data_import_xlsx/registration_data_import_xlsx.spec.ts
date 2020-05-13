@@ -70,23 +70,25 @@ Given(
 );
 
 And('the User uploads file', () => {
-  const fileName = 'rdiSmall.xlsx';
-  cy.fixture(fileName, 'base64').then((fileContent) => {
-    // @ts-ignore
-    cy.get('[data-cy=rdi-file-input]').upload({
-      fileContent,
-      fileName,
-      encoding: 'base64',
-      mimeType:
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  const path = 'documents/rdi';
+  cy.fixture(`${path}/meta`).then(({ valid }) => {
+    const { fileName, ...otherMeta } = valid;
+    cy.fixture(`${path}/${fileName}`, 'base64').then((fileContent) => {
+      // @ts-ignore
+      cy.get('[data-cy=rdi-file-input]').upload({
+        fileName,
+        fileContent,
+        encoding: 'base64',
+        ...otherMeta,
+      });
     });
-  });
 
-  cy.getByTestId('loading-container').should('be.visible');
-  cy.get('.MuiDialogContent-root').contains(fileName);
-  cy.getByTestId('loading-container', { timeout: 10000 }).should(
-    'not.be.visible',
-  );
+    cy.getByTestId('loading-container').should('be.visible');
+    cy.get('.MuiDialogContent-root').contains(fileName);
+    cy.getByTestId('loading-container', { timeout: 10000 }).should(
+      'not.be.visible',
+    );
+  });
 });
 
 And('the file has no errors', () => {

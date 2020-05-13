@@ -1,0 +1,10 @@
+{
+  "valid": {
+    "fileName": "valid.xls",
+    "mimeType": "application/vnd.ms-excel"
+  },
+  "emptyLabel": {
+    "fileName": "emptyLabel.xls",
+    "mimeType": "application/vnd.ms-excel"
+  }
+}
