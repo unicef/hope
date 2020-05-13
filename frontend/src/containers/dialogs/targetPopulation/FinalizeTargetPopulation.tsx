@@ -70,7 +70,7 @@ export function FinalizeTargetPopulation({
       <DialogContent>
         <DialogDescription>
           Are you sure you want to push {totalHouseholds} households to
-          CashAssist? Target population will not be eeditable further.
+          CashAssist? Target population will not be editable further.
         </DialogDescription>
       </DialogContent>
       <DialogFooter>
