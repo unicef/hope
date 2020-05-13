@@ -63,13 +63,31 @@ class RdiCreateTask:
         return value
 
     def _handle_document_fields(
-        self, value, header, individual, *args, **kwargs
+        self, value, header, row_num, individual, *args, **kwargs
     ):
         if value is None:
             return
 
+        document_data = self.documents.get(f"individual_{row_num}")
+
         if header == "other_id_type_i_c":
-            doc_type = value
+            if document_data:
+                document_data["type"] = value
+            else:
+                self.documents[f"individual_{row_num}"] = {
+                    "individual": individual,
+                    "name": header,
+                    "type": value,
+                }
+        elif header == "other_id_no_i_c":
+            if document_data:
+                document_data["value"] = value
+            else:
+                self.documents[f"individual_{row_num}"] = {
+                    "individual": individual,
+                    "name": header,
+                    "value": value,
+                }
         else:
             readable_name = (
                 header.replace("_no", "").replace("_i_c", "").replace("_", " ")
@@ -82,17 +100,16 @@ class RdiCreateTask:
                 else:
                     doc_type += word.capitalize() + " "
             doc_type = doc_type.strip()
-        row_num = kwargs.get("row_number")
-        document_data = self.documents.get(f"individual_{row_num}")
-        if document_data:
-            document_data["value"] = value
-        else:
-            self.documents[f"individual_{row_num}"] = {
-                "individual": individual,
-                "header": header,
-                "type": doc_type,
-                "value": value,
-            }
+
+            if document_data:
+                document_data["value"] = value
+            else:
+                self.documents[f"individual_{row_num}"] = {
+                    "individual": individual,
+                    "header": header,
+                    "type": doc_type,
+                    "value": value,
+                }
 
     def _handle_document_photo_fields(
         self, cell, header, row_num, individual, *args, **kwargs
@@ -115,7 +132,7 @@ class RdiCreateTask:
         else:
             self.documents[f"individual_{row_num}"] = {
                 "individual": individual,
-                "header": header,
+                "name": header,
                 "photo": file_name,
             }
 
@@ -144,17 +161,23 @@ class RdiCreateTask:
         latitude = values_as_list[1].strip()
         return Point(x=float(longitude), y=float(latitude), srid=4326)
 
+    def _handle_identity_photo(
+        self, cell, header, row_num, individual, *args, **kwargs
+    ):
+        pass
+
     def _create_documents(self):
         docs_to_create = []
         for document_data in self.documents.values():
-            doc_type = ImportedDocumentType.objects.filter(
+            doc_type, is_created = ImportedDocumentType.objects.get_or_create(
                 country=Country(
                     COUNTRIES_NAME_ALPHA2.get(
                         self.business_area.name.capitalize()
                     )
                 ),
-                label=document_data.get("type"),
-            ).first()
+                label=document_data["name"],
+                type=document_data["type"],
+            )
             photo = document_data.get("photo")
             individual = document_data.get("individual")
             obj = ImportedDocument(
@@ -177,14 +200,12 @@ class RdiCreateTask:
                 "drivers_license_photo_i_c": self._handle_document_photo_fields,
                 "electoral_card_no_i_c": self._handle_document_fields,
                 "electoral_card_photo_i_c": self._handle_document_photo_fields,
-                "unhcr_id_no_i_c": self._handle_document_fields,
-                "unhcr_id_photo_i_c": self._handle_document_photo_fields,
+                "unhcr_id_no_i_c": self._handle_identity_fields,
                 "national_id_no_ic": self._handle_document_fields,
                 "national_id_photo_ic": self._handle_document_photo_fields,
                 "national_passport_i_c": self._handle_document_fields,
                 "national_passport_photo_i_c": self._handle_document_photo_fields,
-                "scope_id_no_i_c": self._handle_document_fields,
-                "scope_id_photo_i_c": self._handle_document_photo_fields,
+                "scope_id_no_i_c": self._handle_identity_fields,
                 "other_id_type_i_c": self._handle_document_fields,
                 "other_id_no_i_c": self._handle_document_fields,
                 "other_id_photo_i_c": self._handle_document_photo_fields,
