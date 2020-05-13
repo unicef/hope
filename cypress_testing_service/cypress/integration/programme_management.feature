@@ -8,8 +8,7 @@ Feature: Programme Management
     as well.
 
     Background:
-        # Given I login to AD as country_admin
-        Given I login with mocked cookies
+        Given I login to AD as country_admin
         Then I see user profile menu
 
     Scenario: Create a New Programme
