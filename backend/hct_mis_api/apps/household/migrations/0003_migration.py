@@ -16,7 +16,7 @@ def remove_duplicates(apps, schema_editor):
 
     for master in master_qs_types:
         DocumentType.objects.filter(
-            country=master.country, label=master.type
+            country=master.country, label=master.label
         ).exclude(pk=master.pk).delete()
 
 
