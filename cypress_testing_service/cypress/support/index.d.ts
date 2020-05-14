@@ -22,5 +22,7 @@ declare namespace Cypress {
     downloadXlsxData(url: string): Chainable<any>;
 
     parseXlsxData(nameOrIndex?: string | number): Chainable<any>;
+
+    gqlUploadFile(url: string, operations: object, blob: Blob, fileName: string): Chainable<object>;
   }
 }

@@ -1,8 +1,10 @@
 // TODO: remove
 // import promisify from 'cypress-promise';
 
+export const apiUrl = '/api/graphql';
+
 const request = (method: string, body: string | object) => {
-  return cy.request(method, 'api/graphql', body);
+  return cy.request(method, apiUrl, body);
 };
 
 const api = {
@@ -142,6 +144,55 @@ const api = {
         }
       `,
       variables: { input },
+    });
+  },
+
+  getUploadImportDataXlsxFileOperation() {
+    return {
+      operationName: 'UploadImportDataXlsxFile',
+      query: `
+        mutation UploadImportDataXlsxFile($file: Upload!) {
+          uploadImportDataXlsxFile(file: $file) {
+            errors {
+              header
+              message
+              rowNumber
+            }
+            importData {
+              id
+              numberOfIndividuals
+              numberOfHouseholds
+              registrationDataImport {
+                id
+              }
+            }
+          }
+        }
+      `,
+      variables: { file: null },
+    };
+  },
+
+  createRegistrationDataImport(registrationDataImportData) {
+    return request('POST', {
+      operationName: 'CreateRegistrationDataImport',
+      query: `
+        mutation CreateRegistrationDataImport(
+          $registrationDataImportData: CreateRegistrationDataImportExcelInput!
+        ) {
+          createRegistrationDataImport(
+            registrationDataImportData: $registrationDataImportData
+          ) {
+            registrationDataImport {
+              id
+              name
+              dataSource
+              datahubId
+            }
+          }
+        }
+      `,
+      variables: { registrationDataImportData },
     });
   },
 };
