@@ -12,6 +12,7 @@ from household.models import (
     RELATIONSHIP_CHOICE,
     ROLE_CHOICE,
     MARITAL_STATUS_CHOICE,
+    INDIVIDUAL_HOUSEHOLD_STATUS,
 )
 from utils.models import TimeStampedUUIDModel
 
@@ -36,13 +37,18 @@ class Session(models.Model):
 
 class SessionModel(models.Model):
     last_sync_on = models.DateTimeField(null=True)
-    session_id = models.ForeignKey("cash_assist_datahub.Session",on_delete=models.CASCADE)
+    session_id = models.ForeignKey(
+        "cash_assist_datahub.Session", on_delete=models.CASCADE
+    )
 
     class Meta:
         abstract = True
 
 
 class Household(SessionModel):
+    status = models.CharField(
+        max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default="ACTIVE"
+    )
     household_id = UUIDField(primary_key=True, version=4,)
     status = models.CharField(
         max_length=50, choices=(("INACTIVE", "Inactive"), ("ACTIVE", "Active")),
@@ -141,9 +147,8 @@ class Program(SessionModel):
         ("COMPLETE", _("COMPLETE")),
     )
     SCOPE_CHOICE = (
-        ("FULL", _("Full")),
-        ("PARTIAL", _("Partial")),
-        ("NO_INTEGRATION", _("No Integration")),
+        ("FOR_PARTNERS", _("For partners")),
+        ("UNICEF", _("Unicef")),
     )
     program_unhcr_id = models.CharField(max_length=255)
     program_hash_id = models.CharField(max_length=255)
@@ -154,66 +159,117 @@ class Program(SessionModel):
     description = models.CharField(max_length=255, blank=True)
 
 
-class CashPlan(TimeStampedUUIDModel):
-    program = models.ForeignKey(
-        "Program", on_delete=models.CASCADE, related_name="cash_plans"
+class CashPlan(SessionModel):
+    business_area = models.CharField(max_length=20)
+    cash_plan_id = models.CharField(max_length=255)
+    cash_plan_hash_id = UUIDField(primary_key=True, version=4,)
+    status = models.CharField(
+        max_length=255,
+        choices=(
+            ("Distribution Completed", "Distribution Completed"),
+            (
+                "Distribution Completed with Errors",
+                "Distribution Completed with Errors",
+            ),
+            ("Transaction Completed", "Transaction Completed"),
+            (
+                "Transaction Completed with Errors",
+                "Transaction Completed with Errors",
+            ),
+        ),
     )
-    cash_assist_id = models.CharField(max_length=255)
+    status_date = models.DateTimeField()
     name = models.CharField(max_length=255)
     distribution_level = models.CharField(max_length=255)
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
     dispersion_date = models.DateTimeField()
-    coverage_date = models.DateTimeField(auto_now_add=True)
     coverage_duration = models.PositiveIntegerField()
     coverage_unit = models.CharField(max_length=255)
-    program_ca_id = models.CharField(max_length=255)
+    comments = models.CharField(max_length=255)
+    program = models.ForeignKey(
+        "Program", on_delete=models.CASCADE, related_name="cash_plans"
+    )
+    delivery_type = models.CharField(max_length=255)
+    assistance_measurement = models.CharField(max_length=255)
+    assistance_through = models.CharField(max_length=255)
+    vision_id = models.CharField(max_length=255)
+    funds_commitment = models.CharField(max_length=255)
+    down_payment = models.CharField(max_length=255)
+    validation_alerts_count = models.IntegerField()
+    total_persons_covered = models.IntegerField()
+    total_persons_covered_revised = models.IntegerField()
+    payment_records_count = models.IntegerField()
+    total_entitled_quantity = models.DecimalField(
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0.01"))],
+    )
+    total_entitled_quantity_revised = models.DecimalField(
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0.01"))],
+    )
+    total_delivered_quantity = models.DecimalField(
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0.01"))],
+    )
+    total_undelivered_quantity = models.DecimalField(
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0.01"))],
+    )
 
 
-class PaymentRecord(TimeStampedUUIDModel):
+class PaymentRecord(SessionModel):
     STATUS_CHOICE = (
         ("SUCCESS", _("Sucess")),
         ("PENDING", _("Pending")),
         ("ERROR", _("Error")),
     )
-    status = models.CharField(max_length=255, choices=STATUS_CHOICE,)
-    name = models.CharField(max_length=255)
-    status_date = models.DateTimeField()
-    cash_assist_id = models.CharField(max_length=255)
-    cash_plan = models.ForeignKey(
-        "CashPlan", on_delete=models.CASCADE, related_name="payment_records",
+    ENTITLEMENT_CARD_STATUS_CHOICE = Choices(
+        ("ACTIVE", _("Active")), ("INACTIVE", _("Inactive")),
     )
-
-    household = models.ForeignKey(
-        "Household", on_delete=models.CASCADE, related_name="payment_records",
-    )
-    head_of_household = models.CharField(max_length=255)
-    total_person_covered = models.PositiveIntegerField()
-
-    distribution_modality = models.CharField(max_length=255,)
-
-    target_population = models.ForeignKey(
-        "TargetPopulation",
-        related_name="payment_records",
-        on_delete=models.CASCADE,
-    )
-    entitlement = models.OneToOneField(
-        "PaymentEntitlement",
-        on_delete=models.SET_NULL,
-        related_name="payment_record",
-        null=True,
-    )
-
-
-class PaymentEntitlement(TimeStampedUUIDModel):
     DELIVERY_TYPE_CHOICE = (
         ("CASH", _("Cash")),
         ("DEPOSIT_TO_CARD", _("Deposit to Card")),
         ("TRANSFER", _("Transfer")),
     )
-    delivery_type = models.CharField(
-        max_length=255, choices=DELIVERY_TYPE_CHOICE,
+    business_area = models.CharField(max_length=20)
+    status = models.CharField(max_length=255, choices=STATUS_CHOICE,)
+    status_date = models.DateTimeField()
+    payment_id = models.CharField(max_length=255)
+    payment_hash_id = UUIDField(primary_key=True, version=4,)
+    cash_plan = models.ForeignKey(
+        "CashPlan", on_delete=models.CASCADE, related_name="payment_records",
     )
+    unhcr_registration_id = models.CharField(max_length=255)
+    household = models.ForeignKey(
+        "Household", on_delete=models.CASCADE, related_name="payment_records",
+    )
+    # head of household
+    focal_point = models.ForeignKey(
+        "Individual", on_delete=models.CASCADE, related_name="payment_records",
+    )
+    full_name = models.CharField(max_length=255)
+    total_persons_covered = models.IntegerField()
+    distribution_modality = models.CharField(max_length=255,)
+    target_population = models.ForeignKey(
+        "TargetPopulation",
+        on_delete=models.CASCADE,
+        related_name="payment_records",
+    )
+    target_population_cash_assist_id = models.CharField(max_length=255)
+    entitlement_card_number = models.CharField(max_length=255,)
+    entitlement_card_status = models.CharField(
+        choices=STATUS_CHOICE, default="ACTIVE", max_length=20,
+    )
+    entitlement_card_issue_date = models.DateField()
+    delivery_type = models.CharField(
+        choices=DELIVERY_TYPE_CHOICE, default="ACTIVE", max_length=20,
+    )
+    currency = models.CharField(max_length=4,)
     entitlement_quantity = models.DecimalField(
         decimal_places=2,
         max_digits=12,
@@ -222,37 +278,20 @@ class PaymentEntitlement(TimeStampedUUIDModel):
     delivered_quantity = models.DecimalField(
         decimal_places=2,
         max_digits=12,
-        blank=True,
-        null=True,
         validators=[MinValueValidator(Decimal("0.01"))],
     )
-    entitlement_card_issue_date = models.DateTimeField(blank=True, null=True)
-    entitlement_card_number = models.CharField(
-        max_length=255, choices=DELIVERY_TYPE_CHOICE,
+    delivery_date = models.DateTimeField()
+    service_provider = models.ForeignKey(
+        "ServiceProvider",
+        on_delete=models.CASCADE,
+        related_name="payment_records",
     )
-    currency = models.CharField(max_length=255)
-    delivery_date = models.DateTimeField(blank=True, null=True)
-    transaction_reference_id = models.CharField(max_length=255)
-    fsp = models.CharField(max_length=255)
 
 
-class EntitlementCard(TimeStampedUUIDModel):
-    STATUS_CHOICE = Choices(
-        ("ACTIVE", _("Active")),
-        ("ERRONEOUS", _("Erroneous")),
-        ("CLOSED", _("Closed")),
-    )
-    card_number = models.CharField(max_length=255)
-    status = models.CharField(
-        choices=STATUS_CHOICE, default=STATUS_CHOICE.ACTIVE, max_length=10,
-    )
-    card_type = models.CharField(max_length=255)
-    current_card_size = models.CharField(max_length=255)
-    card_custodian = models.CharField(max_length=255)
-    service_provider = models.CharField(max_length=255)
-    household = models.ForeignKey(
-        "Household",
-        related_name="entitlement_cards",
-        on_delete=models.SET_NULL,
-        null=True,
-    )
+class ServiceProvider(SessionModel):
+    business_area = models.CharField(max_length=20)
+    id = models.CharField(max_length=255, primary_key=True)
+    full_name = models.CharField(max_length=255, primary_key=True)
+    short_name = models.CharField(max_length=4, primary_key=True)
+    country = models.CharField(max_length=3, primary_key=True)
+    vision_id = models.CharField(max_length=255, primary_key=True)
