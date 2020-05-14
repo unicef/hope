@@ -5,7 +5,10 @@ import factory
 from factory import fuzzy
 
 from account.fixtures import UserFactory
-from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES, FILTERABLE_CORE_FIELDS_ATTRIBUTES
+from core.core_fields_attributes import (
+    CORE_FIELDS_ATTRIBUTES,
+    FILTERABLE_CORE_FIELDS_ATTRIBUTES,
+)
 from household.fixtures import HouseholdFactory
 from household.models import RESIDENCE_STATUS_CHOICE
 from targeting.models import (
@@ -38,8 +41,6 @@ def comparision_method_resolver(obj):
         return random.choice(["EQUALS", "NOT_EQUALS",])
     if core_field_attr.get("type") == "STRING":
         return "CONTAINS"
-    print("**************************************")
-    print(core_field_attr.get("type") )
 
 
 def arguments_resolver(obj):
@@ -62,9 +63,7 @@ def arguments_resolver(obj):
 
 
 class TargetingCriteriaRuleFilterFactory(factory.DjangoModelFactory):
-    field_name = factory.fuzzy.FuzzyChoice(
-        ['age','size','residence_status'],
-    )
+    field_name = factory.fuzzy.FuzzyChoice(["age", "size", "residence_status"],)
     comparision_method = factory.LazyAttribute(comparision_method_resolver)
     arguments = factory.LazyAttribute(arguments_resolver)
 
@@ -97,6 +96,7 @@ class TargetPopulationFactory(factory.DjangoModelFactory):
         lambda t: t.created_at + dt.timedelta(days=random.randint(60, 1000))
     )
     status = factory.fuzzy.FuzzyChoice(["DRAFT"])
+    business_area = None
 
     @factory.post_generation
     def households(self, create, extracted, **kwargs):
