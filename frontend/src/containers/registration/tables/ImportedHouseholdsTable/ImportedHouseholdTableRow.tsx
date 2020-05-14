@@ -18,8 +18,11 @@ export function ImportedHouseholdTableRow({
   const businessArea = useBusinessArea();
 
   const handleClick = (): void => {
-    const path = `/${businessArea}/registration-data-import/household/${household.id}`;
-    history.push(path);
+    const path = `/${businessArea}/population/household/${household.id}`;
+    const win = window.open(path, '_blank');
+    if (win != null) {
+      win.focus();
+    }
   };
   return (
     <ClickableTableRow
