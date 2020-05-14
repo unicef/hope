@@ -25,6 +25,7 @@ from household.models import (
     MARITAL_STATUS_CHOICE,
     SEX_CHOICE,
 )
+from targeting.models import HouseholdSelection
 
 
 class HouseholdFilter(FilterSet):
@@ -133,6 +134,7 @@ class DocumentNode(DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
+
 class FlexFieldsScalar(graphene.Scalar):
     """
     Allows use of a JSON String for input / output from the GraphQL schema.
@@ -152,6 +154,8 @@ class FlexFieldsScalar(graphene.Scalar):
     @staticmethod
     def parse_value(value):
         return value
+
+
 class ExtendedHouseHoldConnection(graphene.Connection):
     class Meta:
         abstract = True
@@ -169,11 +173,18 @@ class ExtendedHouseHoldConnection(graphene.Connection):
     def resolve_individuals_count(root, info, **kwargs):
         return root.iterable.aggregate(sum=Sum("size")).get("sum")
 
+
+class HouseholdSelection(DjangoObjectType):
+    class Meta:
+        model = HouseholdSelection
+
+
 class HouseholdNode(DjangoObjectType):
     total_cash_received = graphene.Decimal()
     country_origin = graphene.String(description="Country origin name")
     country = graphene.String(description="Country name")
     flex_fields = FlexFieldsScalar()
+    selection = graphene.Field(HouseholdSelection)
 
     def resolve_country(parrent, info):
         return parrent.country.name
@@ -181,13 +192,15 @@ class HouseholdNode(DjangoObjectType):
     def resolve_country_origin(parrent, info):
         return parrent.country_origin.name
 
+    def resolve_selection(parent, info):
+        selection = parent.selections.first()
+        return selection
+
     class Meta:
         model = Household
         filter_fields = []
         interfaces = (relay.Node,)
         connection_class = ExtendedHouseHoldConnection
-
-
 
 
 class IndividualNode(DjangoObjectType):

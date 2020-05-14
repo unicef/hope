@@ -1,3 +1,5 @@
+from django.core.management import call_command
+
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
 from household.fixtures import HouseholdFactory, create_household
@@ -26,9 +28,12 @@ class TestCreateTargetPopulationMutation(APITestCase):
       }
     }
     """
+
+
     VARIABLES = {
         "createTargetPopulationInput": {
             "name": "Example name 5",
+            "businessAreaSlug":"afghanistan",
             "targetingCriteria": {
                 "rules": [
                     {
@@ -49,6 +54,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = UserFactory.create()
+        call_command("loadbusinessareas")
         create_household(
             {"size": 2, "residence_status": "CITIZEN", },
         )
