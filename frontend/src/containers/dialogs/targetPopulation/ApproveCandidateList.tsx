@@ -54,9 +54,6 @@ export function ApproveCandidateList({ open, setOpen, targetPopulationId }) {
   const choices = programs.allPrograms.edges.map((program) => {
     return { ...program.node, value: program.node.id };
   });
-  const setProgramme = (programme) => {
-    console.log(programme);
-  }
   return (
     <Dialog
       open={open}
