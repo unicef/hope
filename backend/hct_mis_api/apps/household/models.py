@@ -76,8 +76,15 @@ ROLE_CHOICE = (
     ("NO_ROLE", "None"),
 )
 
+INDIVIDUAL_HOUSEHOLD_STATUS = (("ACTIVE", "Active"), ("INACTIVE", "Inactive"))
+
 
 class Household(TimeStampedUUIDModel):
+
+    status = models.CharField(
+        max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default="ACTIVE"
+    )
+
     consent = ImageField(validators=[validate_image_file_extension])
     residence_status = models.CharField(
         max_length=255, choices=RESIDENCE_STATUS_CHOICE,
@@ -216,6 +223,9 @@ class IndividualIdentity(models.Model):
 
 
 class Individual(TimeStampedUUIDModel):
+    status = models.CharField(
+        max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default="ACTIVE"
+    )
     individual_id = models.CharField(max_length=255, blank=True)
     photo = models.ImageField(blank=True)
     full_name = models.CharField(
