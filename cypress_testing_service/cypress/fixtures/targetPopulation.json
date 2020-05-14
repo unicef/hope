@@ -6,9 +6,9 @@
         "filters": [
           {
             "comparisionMethod": "EQUALS",
-            "arguments": ["1"],
-            "fieldName": "unaccompanied_child_h_f",
-            "isFlexField": true
+            "arguments": ["CITIZEN"],
+            "fieldName": "residence_status",
+            "isFlexField": false
           }
         ]
       }

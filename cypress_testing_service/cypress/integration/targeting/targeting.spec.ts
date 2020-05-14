@@ -59,7 +59,13 @@ And('the User gives new Target Population a name', () => {
 And('the User selects at least one Target Criteria', () => {
   cy.getByTestId('btn-target-population-add-criteria').click();
 
-  cy.getByTestId('autocomplete-target-criteria-options').first().click();
+  cy.getByTestId('autocomplete-target-criteria-options')
+    .first()
+    .click()
+    // To simplify, pick residence status as one of the guaranteed core fields.
+    // Ref. to backend/hct_mis_api/apps/core/core_fields_attributes.py for more details.
+    .type('Residence status');
+
   cy.get('.MuiAutocomplete-popper')
     .find('ul li')
     .first()
@@ -278,19 +284,25 @@ Then(
 And(
   'the duplicated Target Population has title as provided by the User',
   () => {
-    cy.get<string>('@duplicatedTargetPopulationName').then((duplicatedTargetPopulationName) => {
-      cy.getByTestId('page-header-container').contains(duplicatedTargetPopulationName);
-    });
+    cy.get<string>('@duplicatedTargetPopulationName').then(
+      (duplicatedTargetPopulationName) => {
+        cy.getByTestId('page-header-container').contains(
+          duplicatedTargetPopulationName,
+        );
+      },
+    );
   },
 );
 
 And(
   'the duplicated Target Population have other details as original Target Population',
   () => {
-    cy.get<string>('@targetPopulationCriteria').then((targetPopulationCriteria) => {
-      cy.getByTestId('criteria-container').then(($el) => {
-        expect($el.text()).eq(targetPopulationCriteria);
-      });
-    });
+    cy.get<string>('@targetPopulationCriteria').then(
+      (targetPopulationCriteria) => {
+        cy.getByTestId('criteria-container').then(($el) => {
+          expect($el.text()).eq(targetPopulationCriteria);
+        });
+      },
+    );
   },
 );
