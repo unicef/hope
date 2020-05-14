@@ -1,6 +1,7 @@
 import { Given, When, And, Then } from 'cypress-cucumber-preprocessor/steps';
 import { uuid } from 'uuidv4';
 import { WorkBook } from 'xlsx';
+import { apiUrl, api } from '../../support/api';
 
 Given('the User is viewing the Registration Data Import screen', () => {
   cy.navigateTo('/registration-data-import');
@@ -127,4 +128,103 @@ And('the information from uploaded file is visible', () => {
   // TODO: consider getting data from fixtures
   cy.getByTestId('labelized-field-container-households').contains('18');
   cy.getByTestId('labelized-field-container-individuals').contains('72');
+});
+
+Given('the has an RDI import in review', () => {
+  // TODO: use for optimized scenario
+  const fileName = 'valid.xlsx';
+  cy.fixture(`documents/rdi/${fileName}`, 'binary').then((file) => {
+    Cypress.Blob.binaryStringToBlob(
+      file,
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    ).then((blob) => {
+      cy.gqlUploadFile(
+        apiUrl,
+        api.getUploadImportDataXlsxFileOperation(),
+        blob,
+        fileName,
+      ).as('fileUploadResponse');
+    });
+  });
+
+  cy.get<{ data: any }>('@fileUploadResponse').then((fileUploadResponse) => {
+    const {
+      data: {
+        uploadImportDataXlsxFile: {
+          importData: { id: importDataId },
+        },
+      },
+    } = fileUploadResponse;
+
+    cy.getBusinessAreaSlug().then((businessAreaSlug) => {
+      const name = `Automated RDI Import ${uuid()}`;
+      api
+        .createRegistrationDataImport({ name, businessAreaSlug, importDataId })
+        .then((response) => {
+          const {
+            data: {
+              createRegistrationDataImport: { registrationDataImport },
+            },
+          } = response.body;
+          cy.wrap(registrationDataImport).as('registrationDataImport');
+        });
+    });
+  });
+
+  cy.get<{ id: string }>('@registrationDataImport').then(({ id }) => {
+    cy.navigateTo(`/registration-data-import/${id}`);
+
+    const getStatus = (status: string) => {
+      cy.getByTestId('status-container').then(($status) => {
+        if ($status.text().toLowerCase().includes(status)) {
+          cy.wrap($status).as('status');
+          return;
+        }
+
+        // eslint-disable-next-line cypress/no-unnecessary-waiting
+        cy.wait(5000);
+        cy.reload();
+        getStatus(status);
+      });
+    };
+
+    getStatus('in review');
+    cy.get('@status', { timeout: 60000 });
+  });
+});
+
+And('the User has reviewed all import data content', () => {
+  // TODO: add 1-2 assertions to verify
+});
+
+When('the User approves the RDI import', () => {
+  cy.getByTestId('page-header-container')
+    .find('button')
+    .contains('approve', { matchCase: false })
+    .click({ force: true });
+
+  cy.get('.MuiDialogActions-root')
+    .find('button')
+    .contains('approve', { matchCase: false })
+    .click();
+});
+
+Then('the RDI import becomes approved', () => {
+  cy.getByTestId('status-container').contains('approved', { matchCase: false });
+});
+
+When('the User unapproves the RDI import', () => {
+  cy.getByTestId('page-header-container')
+    .find('button')
+    .contains('unapprove', { matchCase: false })
+    .click({ force: true });
+
+  cy.get('.MuiDialogActions-root')
+    .find('button')
+    .contains('unapprove', { matchCase: false })
+    .click();
+});
+
+Then('the RDI import changes status to in review', () => {
+  cy.getByTestId('status-container').contains('in review', { matchCase: false });
 });

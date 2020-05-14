@@ -113,3 +113,27 @@ Cypress.Commands.add('downloadXlsxData', (url) => {
     }),
   );
 });
+
+Cypress.Commands.add(
+  'gqlUploadFile',
+  (url: string, operations: object, blob: Blob, fileName: string) => {
+    return cy.wrap(
+      new Cypress.Promise((resolve) => {
+        const formData = new FormData();
+        formData.append('operations', JSON.stringify(operations));
+        formData.append('map', JSON.stringify({ '0': ['variables.file'] }));
+        formData.append('0', blob, fileName);
+
+        const request = new XMLHttpRequest();
+        request.open('POST', url, true);
+        request.responseType = 'json';
+        request.onload = () => {
+          expect(request.status).eq(200, 'XLSX data download failed');
+          resolve(request.response);
+        };
+
+        request.send(formData);
+      }),
+    );
+  },
+);
