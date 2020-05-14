@@ -13,17 +13,27 @@ Given('the User is viewing the Population Household details screen', () => {
 });
 
 When('the User enters alphanumeric string in search field', () => {
-  const searchQuery = 'Julia';
-  cy.wrap(searchQuery).as('searchQuery');
-
-  // TODO using force b/c filter is covered by some other element in the UI, investigate
-  cy.getByTestId('filters-search').find('input').type(searchQuery, {
-    force: true,
+  cy.get('table thead tr th').each(($header, index) => {
+    // TODO: rework to use data-cy to identify specific col
+    if ($header.text().toLowerCase().includes('household id')) {
+      cy.get('table tbody tr')
+        .first()
+        .then(($el) => {
+          cy.wrap($el.children()[index].textContent).as('searchQuery');
+        });
+    }
   });
 
-  cy.getByTestId('page-details-container')
-    .getByTestId('loading-container')
-    .should('be.visible');
+  cy.get<string>('@searchQuery').then((searchQuery) => {
+    // TODO using force b/c filter is covered by some other element in the UI, investigate
+    cy.getByTestId('filters-search').find('input').type(searchQuery, {
+      force: true,
+    });
+
+    cy.getByTestId('page-details-container')
+      .getByTestId('loading-container')
+      .should('be.visible');
+  });
 });
 
 Then('a list of the {word} that meet the text in search is shown', () => {
