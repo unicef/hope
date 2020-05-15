@@ -8,7 +8,7 @@ from django.core.validators import (
     MaxLengthValidator,
 )
 from django.db import models
-from django.db.models import Sum
+from django.db.models import Sum, UUIDField
 from django.db.models.functions import Coalesce
 from django.utils.translation import ugettext_lazy as _
 
@@ -112,47 +112,54 @@ class Program(TimeStampedUUIDModel):
 
 
 class CashPlan(TimeStampedUUIDModel):
-    NOT_STARTED = "NOT_STARTED"
-    STARTED = "STARTED"
-    COMPLETE = "COMPLETE"
-
-    STATUS_CHOICE = (
-        (NOT_STARTED, _("NOT_STARTED")),
-        (STARTED, _("STARTED")),
-        ("COMPLETE", _("COMPLETE")),
+    business_area = models.ForeignKey(
+        "core.BusinessArea", on_delete=models.CASCADE
     )
-
-    program = models.ForeignKey(
-        "Program", on_delete=models.CASCADE, related_name="cash_plans",
-    )
-    name = models.CharField(
+    ca_id = models.CharField(max_length=255)
+    ca_hash_id = UUIDField(primary_key=True, version=4,)
+    status = models.CharField(
         max_length=255,
-        validators=[MinLengthValidator(3), MaxLengthValidator(255)],
+        choices=(
+            ("Distribution Completed", "Distribution Completed"),
+            (
+                "Distribution Completed with Errors",
+                "Distribution Completed with Errors",
+            ),
+            ("Transaction Completed", "Transaction Completed"),
+            (
+                "Transaction Completed with Errors",
+                "Transaction Completed with Errors",
+            ),
+        ),
     )
+    status_date = models.DateTimeField()
+    name = models.CharField(max_length=255)
+    distribution_level = models.CharField(max_length=255)
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
-    disbursement_date = models.DateTimeField()
-    number_of_households = models.PositiveIntegerField()
-    created_date = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        related_name="cash_plans",
-        null=True,
-    )
+    dispersion_date = models.DateTimeField()
     coverage_duration = models.PositiveIntegerField()
-    coverage_units = models.CharField(max_length=255)
-    target_population = models.ForeignKey(
-        "targeting.TargetPopulation",
-        on_delete=models.CASCADE,
-        related_name="cash_plans",
+    coverage_unit = models.CharField(max_length=255)
+    comments = models.CharField(max_length=255)
+    program = models.ForeignKey(
+        "program.Program", on_delete=models.CASCADE, related_name="cash_plans"
     )
-    cash_assist_id = models.CharField(max_length=255)
-    distribution_modality = models.CharField(max_length=255)
-    fsp = models.CharField(max_length=255)
-    status = models.CharField(max_length=50, choices=STATUS_CHOICE)
-    currency = models.CharField(max_length=255)
+    delivery_type = models.CharField(max_length=255)
+    assistance_measurement = models.CharField(max_length=255)
+    assistance_through = models.CharField(max_length=255)
+    vision_id = models.CharField(max_length=255)
+    funds_commitment = models.CharField(max_length=255)
+    down_payment = models.CharField(max_length=255)
+    validation_alerts_count = models.IntegerField()
+    total_persons_covered = models.IntegerField()
+    total_persons_covered_revised = models.IntegerField()
+    payment_records_count = models.IntegerField()
     total_entitled_quantity = models.DecimalField(
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0.01"))],
+    )
+    total_entitled_quantity_revised = models.DecimalField(
         decimal_places=2,
         max_digits=12,
         validators=[MinValueValidator(Decimal("0.01"))],
@@ -167,11 +174,6 @@ class CashPlan(TimeStampedUUIDModel):
         max_digits=12,
         validators=[MinValueValidator(Decimal("0.01"))],
     )
-    dispersion_date = models.DateField()
-    delivery_type = models.CharField(max_length=255)
-    assistance_through = models.CharField(max_length=255)
-    fc_id = models.CharField(max_length=255)
-    dp_id = models.CharField(max_length=255)
 
 
 auditlog.register(Program)
