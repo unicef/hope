@@ -9,7 +9,7 @@ from model_utils import Choices
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 
 
-class PaymentRecord(SessionModel):
+class PaymentRecord(TimeStampedUUIDModel):
     STATUS_CHOICE = (
         ("SUCCESS", _("Sucess")),
         ("PENDING", _("Pending")),
@@ -23,19 +23,16 @@ class PaymentRecord(SessionModel):
         ("DEPOSIT_TO_CARD", _("Deposit to Card")),
         ("TRANSFER", _("Transfer")),
     )
-    business_area = models.CharField(max_length=20)
+    business_area = models.ForeignKey(
+        "core.BusinessArea", on_delete=models.CASCADE
+    )
     status = models.CharField(max_length=255, choices=STATUS_CHOICE,)
     status_date = models.DateTimeField()
     cash_plan = models.ForeignKey(
-        "CashPlan", on_delete=models.CASCADE, related_name="payment_records",
+        "program.CashPlan", on_delete=models.CASCADE, related_name="payment_records",
     )
-    unhcr_registration_id = models.CharField(max_length=255)
     household = models.ForeignKey(
         "Household", on_delete=models.CASCADE, related_name="payment_records",
-    )
-    # head of household
-    focal_point = models.ForeignKey(
-        "Individual", on_delete=models.CASCADE, related_name="payment_records",
     )
     full_name = models.CharField(max_length=255)
     total_persons_covered = models.IntegerField()
@@ -67,7 +64,7 @@ class PaymentRecord(SessionModel):
     )
     delivery_date = models.DateTimeField()
     service_provider = models.ForeignKey(
-        "ServiceProvider",
+        "payment.ServiceProvider",
         on_delete=models.CASCADE,
         related_name="payment_records",
     )
