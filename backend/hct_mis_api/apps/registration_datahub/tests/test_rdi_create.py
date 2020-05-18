@@ -3,7 +3,10 @@ from django.core.management import call_command
 from django.test import TestCase
 
 from core.models import BusinessArea
-from registration_datahub.fixtures import RegistrationDataImportDatahubFactory
+from registration_datahub.fixtures import (
+    RegistrationDataImportDatahubFactory,
+    ImportedIndividualFactory,
+)
 from registration_datahub.models import (
     ImportData,
     ImportedHousehold,
@@ -26,9 +29,7 @@ class TestRdiCreateTask(TestCase):
         ) as excel_file:
             file = File(excel_file)
             cls.import_data = ImportData.objects.create(
-                xlsx_file=file,
-                number_of_households=3,
-                number_of_individuals=6,
+                xlsx_file=file, number_of_households=3, number_of_individuals=6,
             )
         cls.registration_data_import = RegistrationDataImportDatahubFactory(
             import_data=cls.import_data
