@@ -78,7 +78,8 @@ Cypress.Commands.add('navigateTo', (newPath) => {
 
 Cypress.Commands.add('pickDayOfTheMonth', (day, inputName) => {
   cy.getByTestId(`date-input-${inputName}`).click();
-  cy.get('.MuiPickersBasePicker-pickerView button')
+  cy.getByTestId('date-picker-container')
+    .find('button p')
     .contains(new RegExp(`^${day}$`, 'g'))
     .click();
 });
