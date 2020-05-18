@@ -1,4 +1,9 @@
-import { Given, When, Then } from 'cypress-cucumber-preprocessor/steps';
+import { Given, When, Then, Before } from 'cypress-cucumber-preprocessor/steps';
+import { overrideSrollingStrategy } from '../../support/utils';
+
+Before(() => {
+  overrideSrollingStrategy();
+});
 
 Given('the User is viewing the Population Household details screen', () => {
   cy.navigateTo('/population/household');
@@ -25,10 +30,7 @@ When('the User enters alphanumeric string in search field', () => {
   });
 
   cy.get<string>('@searchQuery').then((searchQuery) => {
-    // TODO using force b/c filter is covered by some other element in the UI, investigate
-    cy.getByTestId('filters-search').find('input').type(searchQuery, {
-      force: true,
-    });
+    cy.getByTestId('filters-search').find('input').type(searchQuery);
 
     cy.getByTestId('page-details-container')
       .getByTestId('loading-container')
@@ -56,18 +58,12 @@ When(
     const filterQuery = 'refugee';
     cy.wrap(filterQuery).as('filterQuery');
 
-    cy.getByTestId('main-content').scrollTo('top');
+    cy.getByTestId('filters-residence-status').click();
 
-    // TODO using force b/c filter is covered by some other element in the UI, investigate
-    cy.getByTestId('filters-residence-status').click({
-      force: true,
-    });
-
-    // TODO using force b/c filter is covered by some other element in the UI, investigate
     cy.getByTestId('filters-residence-status-options')
       .find('ul')
       .contains(filterQuery, { matchCase: false })
-      .click({ force: true });
+      .click();
 
     cy.getByTestId('page-details-container')
       .getByTestId('loading-container')
@@ -110,18 +106,12 @@ When(
     const filterQuery = 'male';
     cy.wrap(filterQuery).as('filterQuery');
 
-    cy.getByTestId('main-content').scrollTo('top');
+    cy.getByTestId('filters-sex').click();
 
-    // TODO using force b/c filter is covered by some other element in the UI, investigate
-    cy.getByTestId('filters-sex').click({
-      force: true,
-    });
-
-    // TODO using force b/c filter is covered by some other element in the UI, investigate
     cy.getByTestId('filters-sex-options')
       .find('ul')
       .contains(filterQuery, { matchCase: false })
-      .click({ force: true });
+      .click();
 
     cy.getByTestId('page-details-container')
       .getByTestId('loading-container')

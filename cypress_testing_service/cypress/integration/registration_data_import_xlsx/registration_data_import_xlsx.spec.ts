@@ -1,7 +1,18 @@
-import { Given, When, And, Then } from 'cypress-cucumber-preprocessor/steps';
+import {
+  Given,
+  When,
+  And,
+  Then,
+  Before,
+} from 'cypress-cucumber-preprocessor/steps';
 import { uuid } from 'uuidv4';
 import { WorkBook } from 'xlsx';
 import { apiUrl, api } from '../../support/api';
+import { overrideSrollingStrategy } from '../../support/utils';
+
+Before(() => {
+  overrideSrollingStrategy();
+});
 
 Given('the User is viewing the Registration Data Import screen', () => {
   cy.navigateTo('/registration-data-import');
@@ -130,7 +141,7 @@ And('the information from uploaded file is visible', () => {
   cy.getByTestId('labelized-field-container-individuals').contains('72');
 });
 
-Given('the has an RDI import in review', () => {
+Given('the User has an RDI import in review', () => {
   // TODO: use for optimized scenario
   const fileName = 'valid.xlsx';
   cy.fixture(`documents/rdi/${fileName}`, 'binary').then((file) => {
@@ -201,7 +212,7 @@ When('the User approves the RDI import', () => {
   cy.getByTestId('page-header-container')
     .find('button')
     .contains('approve', { matchCase: false })
-    .click({ force: true });
+    .click();
 
   cy.get('.MuiDialogActions-root')
     .find('button')
@@ -217,7 +228,7 @@ When('the User unapproves the RDI import', () => {
   cy.getByTestId('page-header-container')
     .find('button')
     .contains('unapprove', { matchCase: false })
-    .click({ force: true });
+    .click();
 
   cy.get('.MuiDialogActions-root')
     .find('button')
@@ -226,5 +237,7 @@ When('the User unapproves the RDI import', () => {
 });
 
 Then('the RDI import changes status to in review', () => {
-  cy.getByTestId('status-container').contains('in review', { matchCase: false });
+  cy.getByTestId('status-container').contains('in review', {
+    matchCase: false,
+  });
 });
