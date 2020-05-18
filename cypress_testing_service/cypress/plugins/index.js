@@ -15,7 +15,6 @@
 
 const cucumber = require('cypress-cucumber-preprocessor').default;
 const xlsx = require('xlsx');
-// eslint-disable-next-line import/no-extraneous-dependencies
 const browserify = require('@cypress/browserify-preprocessor');
 const { AzureAdSingleSignOn } = require('./azure-ad-sso/plugin');
 

@@ -21,6 +21,7 @@
   },
   "cypress:open": "cypress open",
   "dependencies": {
+    "@cypress/browserify-preprocessor": "^2.2.4",
     "@types/chai-string": "^1.4.2",
     "@types/chai-subset": "^1.3.3",
     "chai": "^4.2.0",
