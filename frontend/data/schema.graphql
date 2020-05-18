@@ -259,7 +259,17 @@ type DocumentTypeNode {
   updatedAt: DateTime!
   country: String
   label: String!
+  type: DocumentTypeType!
   documents(before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
+}
+
+enum DocumentTypeType {
+  BIRTH_CERTIFICATE
+  DRIVERS_LICENSE
+  NATIONAL_ID
+  NATIONAL_PASSPORT
+  ELECTORAL_CARD
+  OTHER
 }
 
 type FieldAttributeNode {
@@ -635,7 +645,17 @@ type ImportedDocumentTypeNode {
   updatedAt: DateTime!
   country: ImportedDocumentTypeCountry
   label: String!
+  type: ImportedDocumentTypeType!
   documents(before: String, after: String, first: Int, last: Int): ImportedDocumentNodeConnection!
+}
+
+enum ImportedDocumentTypeType {
+  BIRTH_CERTIFICATE
+  DRIVERS_LICENSE
+  NATIONAL_ID
+  NATIONAL_PASSPORT
+  ELECTORAL_CARD
+  OTHER
 }
 
 type ImportedHouseholdNode implements Node {
@@ -869,7 +889,7 @@ type Mutations {
   createProgram(programData: CreateProgramInput!): CreateProgram
   updateProgram(programData: UpdateProgramInput): UpdateProgram
   deleteProgram(programId: String!): DeleteProgram
-  uploadImportDataXlsxFile(file: Upload!): UploadImportDataXLSXFile
+  uploadImportDataXlsxFile(businessAreaSlug: String!, file: Upload!): UploadImportDataXLSXFile
   deleteRegistrationDataImport(registrationDataImportId: String!): DeleteRegistrationDataImport
   createRegistrationDataImport(registrationDataImportData: CreateRegistrationDataImportExcelInput!): CreateRegistrationDataImport
   approveRegistrationDataImport(id: ID!): ApproveRegistrationDataImportMutation
