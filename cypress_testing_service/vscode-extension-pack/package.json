@@ -1,7 +1,7 @@
 {
     "name": "cypress-testing-service-extensions",
-    "displayName": "Cypress Testing Service for HCT",
-    "description": "Extensions for the Cypress Testing Service for HCT development",
+    "displayName": "Cypress Testing Service VSCode Extensions",
+    "description": "Extensions for the Cypress Testing Service tests development with VSCode",
     "version": "0.0.1",
     "publisher": "Tivix",
     "private": true,
