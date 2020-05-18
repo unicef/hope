@@ -42,6 +42,7 @@ export function CreateProgram(): ReactElement {
           type='submit'
           color='primary'
           variant='contained'
+          data-cy='button-save'
         >
           Save
         </Button>
@@ -55,7 +56,7 @@ export function CreateProgram(): ReactElement {
         variant='contained'
         color='primary'
         onClick={() => setOpen(true)}
-        data-cy='btn-new-programme'
+        data-cy='button-new-program'
       >
         new programme
       </Button>
