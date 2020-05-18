@@ -160,7 +160,10 @@ export function RegistrationDataImport(): React.ReactElement {
     uploadMutate,
     { data: uploadData, loading: fileLoading },
   ] = useUploadImportDataXlsxFileMutation();
-  const [createRegistrationMutate] = useCreateRegistrationDataImportMutation();
+  const [
+    createRegistrationMutate,
+    { loading: createLoading },
+  ] = useCreateRegistrationDataImportMutation();
   const [importType, setImportType] = useState();
   const { t } = useTranslation();
   const errors: UploadImportDataXlsxFileMutation['uploadImportDataXlsxFile']['errors'] = get(
@@ -307,7 +310,7 @@ export function RegistrationDataImport(): React.ReactElement {
                     type='submit'
                     color='primary'
                     variant='contained'
-                    disabled={!uploadData}
+                    disabled={!uploadData || createLoading}
                     onClick={() => {
                       submitForm();
                     }}

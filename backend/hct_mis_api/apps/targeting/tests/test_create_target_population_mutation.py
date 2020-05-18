@@ -28,9 +28,12 @@ class TestCreateTargetPopulationMutation(APITestCase):
       }
     }
     """
+
+
     VARIABLES = {
         "createTargetPopulationInput": {
             "name": "Example name 5",
+            "businessAreaSlug":"afghanistan",
             "targetingCriteria": {
                 "rules": [
                     {
@@ -51,11 +54,17 @@ class TestCreateTargetPopulationMutation(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        call_command("loadbusinessareas")
         cls.user = UserFactory.create()
-        create_household({"size": 2, "residence_status": "CITIZEN",},)
-        create_household({"size": 3, "residence_status": "CITIZEN",},)
-        create_household({"size": 3, "residence_status": "CITIZEN",},)
+        call_command("loadbusinessareas")
+        create_household(
+            {"size": 2, "residence_status": "CITIZEN", },
+        )
+        create_household(
+            {"size": 3, "residence_status": "CITIZEN", },
+        )
+        create_household(
+            {"size": 3, "residence_status": "CITIZEN", },
+        )
 
     def test_create_mutation(self):
         self.snapshot_graphql_request(
