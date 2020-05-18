@@ -43,7 +43,7 @@ export function TargetPopulationPage(): React.ReactElement {
           variant='contained'
           color='primary'
           onClick={() => redirectToCreate()}
-          data-cy='btn-target-population-create-new'
+          data-cy='button-target-population-create-new'
         >
           Create new
         </Button>

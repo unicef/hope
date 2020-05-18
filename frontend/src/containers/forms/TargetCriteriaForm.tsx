@@ -7,7 +7,6 @@ import {
   DialogTitle,
   Typography,
   Button,
-  DialogActions,
   IconButton,
 } from '@material-ui/core';
 import { AddCircleOutline, Delete } from '@material-ui/icons';
@@ -19,6 +18,7 @@ import {
   mapCriteriasToInitialValues,
 } from '../../utils/utils';
 import { CriteriaAutocomplete } from '../../components/TargetPopulation/TargetingCriteria/CriteriaAutocomplete';
+import { DialogActions } from '../dialogs/DialogActions'
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -226,7 +226,9 @@ export function TargetCriteriaForm({
                               )}
                             </FlexWrapper>
                             {each.fieldName && (
-                              <div data-cy='autocomplete-target-criteria-values'>{SubField(each, index)}</div>
+                              <div data-cy='autocomplete-target-criteria-values'>
+                                {SubField(each, index)}
+                              </div>
                             )}
                             {(values.filters.length === 1 && index === 0) ||
                             index === values.filters.length - 1 ? null : (
@@ -257,6 +259,7 @@ export function TargetCriteriaForm({
                     type='submit'
                     color='primary'
                     variant='contained'
+                    data-cy='button-target-population-add-criteria'
                   >
                     Save
                   </Button>

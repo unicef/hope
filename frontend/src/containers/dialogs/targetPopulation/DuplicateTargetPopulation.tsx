@@ -2,8 +2,6 @@ import React from 'react';
 import * as Yup from 'yup';
 import {
   Button,
-  Dialog,
-  DialogActions,
   DialogContent,
   DialogTitle,
   Typography,
@@ -14,6 +12,8 @@ import { useCopyTargetPopulationMutation } from '../../../__generated__/graphql'
 import { FormikTextField } from '../../../shared/Formik/FormikTextField';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { Dialog } from '../Dialog';
+import { DialogActions } from '../DialogActions';
 
 export interface FinalizeTargetPopulationPropTypes {
   open: boolean;
@@ -118,7 +118,7 @@ export function DuplicateTargetPopulation({
                   color='primary'
                   variant='contained'
                   onClick={submitForm}
-                  data-cy='btn-target-population-duplicate'
+                  data-cy='button-target-population-duplicate'
                 >
                   Save
                 </Button>

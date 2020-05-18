@@ -51,7 +51,7 @@ Given('the User is viewing the Targeting List screen', () => {
 });
 
 When('the User starts creating new Target Population', () => {
-  cy.getByTestId('btn-target-population-create-new')
+  cy.getByTestId('button-target-population-create-new')
     .should('be.visible')
     .click();
 });
@@ -68,16 +68,15 @@ And('the User gives new Target Population a name', () => {
 });
 
 And('the User selects at least one Target Criteria', () => {
-  cy.getByTestId('btn-target-population-add-criteria').click();
+  cy.getByTestId('button-target-population-add-criteria').click();
 
-  cy.getByTestId('autocomplete-target-criteria-options')
-    .first()
+  cy.getByTestId('autocomplete-target-criteria')
     .click()
     // To simplify, pick residence status as one of the guaranteed core fields.
     // Ref. to backend/hct_mis_api/apps/core/core_fields_attributes.py for more details.
     .type('Residence status');
 
-  cy.get('.MuiAutocomplete-popper')
+  cy.getByTestId('autocomplete-target-criteria-options')
     .find('ul li')
     .first()
     .then(($el) => {
@@ -85,10 +84,10 @@ And('the User selects at least one Target Criteria', () => {
       $el.click();
     });
 
-  cy.getByTestId('autocomplete-target-criteria-values').first().click();
-  cy.get('.MuiPopover-root')
-    .find('ul li')
-    .first()
+  cy.getByTestId('autocomplete-target-criteria-values').click();
+
+  cy.getByTestId('select-options-container')
+    .getByTestId('select-option-0')
     .then(($el) => {
       cy.wrap($el.text()).as('targetCriteriaAnswer');
       $el.click();
@@ -96,19 +95,17 @@ And('the User selects at least one Target Criteria', () => {
 });
 
 And('the User completes creating new Target Population', () => {
-  cy.get('.MuiDialogActions-root')
-    .contains('save', { matchCase: false })
+  cy.getByTestId('dialog-actions-container')
+    .getByTestId('button-target-population-add-criteria')
     .click();
 
-  cy.getByTestId('btn-target-population-create').click();
-  cy.getByTestId('btn-target-population-create').should('not.be.visible');
+  cy.getByTestId('button-target-population-create').click();
+  cy.getByTestId('button-target-population-create').should('not.be.visible');
 });
 
 Then(
   'the User will be directed to the Programme Population details screen',
   () => {
-    cy.getByTestId('main-content').scrollTo('top');
-
     cy.getByTestId('page-header-container').contains('targeting', {
       matchCase: false,
     });
@@ -152,26 +149,24 @@ Given('the User is viewing existing Target Population in Open state', () => {
 });
 
 When('the User closes the Programme Population', () => {
-  cy.getByTestId('btn-target-population-close').click();
+  cy.getByTestId('button-target-population-close').click();
 });
 
 Then(
   'the confirmation dialog for closing Programme Population is shown',
   () => {
-    cy.get('.MuiDialog-container').contains('close programme population', {
+    cy.getByTestId('dialog-root').contains('close programme population', {
       matchCase: false,
     });
-    cy.get('.MuiDialog-container').contains(
-      'are you sure you want to approve',
-      {
-        matchCase: false,
-      },
-    );
+
+    cy.getByTestId('dialog-root').contains('are you sure you want to approve', {
+      matchCase: false,
+    });
   },
 );
 
 And('the User is asked to provide associated Program', () => {
-  cy.get('.MuiDialog-container').contains('please select a programme', {
+  cy.getByTestId('dialog-root').contains('please select a programme', {
     matchCase: false,
   });
 });
@@ -179,12 +174,14 @@ And('the User is asked to provide associated Program', () => {
 When('the User selects a Programme to associate with', () => {
   cy.getByTestId('select-program').click();
 
-  cy.get('.MuiPopover-root').find('ul li').first().click();
+  cy.getByTestId('select-options-container')
+    .getByTestId('select-option-0')
+    .click();
 });
 
 And('the User confirms to close the Programme Population', () => {
-  cy.get('.MuiDialogActions-root')
-    .getByTestId('btn-target-population-close')
+  cy.getByTestId('dialog-actions-container')
+    .getByTestId('button-target-population-close')
     .click();
 });
 
@@ -210,11 +207,11 @@ Given('the User is viewing existing Target Population in Closed state', () => {
     cy.navigateTo(`/target-population/${id}`);
 
     // perform sequence of UI steps to close target population
-    cy.getByTestId('btn-target-population-close').click();
+    cy.getByTestId('button-target-population-close').click();
     cy.getByTestId('select-program').click();
-    cy.get('.MuiPopover-root').find('ul li').first().click();
-    cy.get('.MuiDialogActions-root')
-      .getByTestId('btn-target-population-close')
+    cy.getByTestId('select-options-container').getByTestId('select-option-0').click();
+    cy.getByTestId('dialog-actions-container')
+      .getByTestId('button-target-population-close')
       .click();
 
     cy.getByTestId('status-container').contains('closed', { matchCase: false });
@@ -222,22 +219,22 @@ Given('the User is viewing existing Target Population in Closed state', () => {
 });
 
 When('the User sends the Target Population to Cash Assist', () => {
-  cy.getByTestId('btn-target-population-send-to-cash-assist').click();
+  cy.getByTestId('button-target-population-send-to-cash-assist').click();
 });
 
 Then('the confirmation dialog for Send to Cash Assist is shown', () => {
-  cy.get('.MuiDialog-container').contains('send to cash assist', {
+  cy.getByTestId('dialog-root').contains('send to cash assist', {
     matchCase: false,
   });
 
-  cy.get('.MuiDialog-container').contains('are you sure you want to', {
+  cy.getByTestId('dialog-root').contains('are you sure you want to', {
     matchCase: false,
   });
 });
 
 When('the User confirms sending to Cash Assist', () => {
-  cy.get('.MuiDialogActions-root')
-    .getByTestId('btn-target-population-send-to-cash-assist')
+  cy.getByTestId('dialog-actions-container')
+    .getByTestId('button-target-population-send-to-cash-assist')
     .click();
 });
 
@@ -248,13 +245,13 @@ Then('the details for the Target Population are sent to Cash Assist', () => {
 });
 
 When('the User starts duplicating the existing Target Population', () => {
-  cy.getByTestId('btn-target-population-duplicate').click();
+  cy.getByTestId('button-target-population-duplicate').click();
 });
 
 Then(
   'the confirmation dialog for duplicating Target Population is shown',
   () => {
-    cy.get('.MuiDialog-container').contains('duplicate target population', {
+    cy.getByTestId('dialog-root').contains('duplicate target population', {
       matchCase: false,
     });
   },
@@ -263,7 +260,7 @@ Then(
 When('the User provides a unique name for copy of Target Population', () => {
   cy.fixture<{ name: string }>('targetPopulation').then(({ name }) => {
     const duplicatedTargetPopulationName = `${name} ${uuid()}`;
-    cy.get('.MuiDialog-container')
+    cy.getByTestId('dialog-root')
       .getByTestId('input-name')
       .type(duplicatedTargetPopulationName);
 
@@ -274,16 +271,14 @@ When('the User provides a unique name for copy of Target Population', () => {
 });
 
 And('the User confirms to duplicate the Target Population', () => {
-  cy.get('.MuiDialogActions-root')
-    .getByTestId('btn-target-population-duplicate')
+  cy.getByTestId('dialog-actions-container')
+    .getByTestId('button-target-population-duplicate')
     .click();
 });
 
 Then(
   'the User is directed to the duplicated Target Population details screen',
   () => {
-    cy.getByTestId('main-content').scrollTo('top');
-
     cy.getByTestId('page-header-container').contains('targeting', {
       matchCase: false,
     });
