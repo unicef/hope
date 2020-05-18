@@ -45,13 +45,13 @@ snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_b
             'edges': [
                 {
                     'node': {
-                        'residenceStatus': 'CITIZEN',
+                        'residenceStatus': 'IDP',
                         'size': 1
                     }
                 },
                 {
                     'node': {
-                        'residenceStatus': 'IDP',
+                        'residenceStatus': 'CITIZEN',
                         'size': 1
                     }
                 }

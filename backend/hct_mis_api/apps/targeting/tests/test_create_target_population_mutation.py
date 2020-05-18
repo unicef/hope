@@ -2,7 +2,7 @@ from django.core.management import call_command
 
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
-from household.fixtures import HouseholdFactory, create_household
+from household.fixtures import create_household
 
 
 class TestCreateTargetPopulationMutation(APITestCase):
@@ -48,6 +48,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
                     }
                 ]
             },
+            "businessAreaSlug": "afghanistan",
         }
     }
 
