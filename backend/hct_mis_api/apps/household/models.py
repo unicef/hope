@@ -191,7 +191,7 @@ class Document(TimeStampedUUIDModel):
 
 
 class Agency(models.Model):
-    type = models.CharField(max_length=100,)
+    type = models.CharField(max_length=100, unique=True)
     label = models.CharField(max_length=100,)
 
     def __str__(self):

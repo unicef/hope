@@ -203,6 +203,7 @@ export function RegistrationDataImport(): React.ReactElement {
             uploadMutate({
               variables: {
                 file,
+                businessAreaSlug: businessArea,
               },
             });
           }}

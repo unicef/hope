@@ -26,7 +26,9 @@ from utils.models import TimeStampedUUIDModel
 
 class ImportedHouseholdIdentity(models.Model):
     agency = models.ForeignKey(
-        "Agency", related_name="households_identities", on_delete=models.CASCADE
+        "ImportedAgency",
+        related_name="households_identities",
+        on_delete=models.CASCADE,
     )
     household = models.ForeignKey(
         "ImportedHousehold", related_name="identities", on_delete=models.CASCADE
@@ -203,7 +205,7 @@ class ImportedDocument(TimeStampedUUIDModel):
         unique_together = ("type", "document_number")
 
 
-class Agency(models.Model):
+class ImportedAgency(models.Model):
     type = models.CharField(max_length=100,)
     label = models.CharField(max_length=100,)
 
@@ -213,7 +215,7 @@ class Agency(models.Model):
 
 class ImportedIndividualIdentity(models.Model):
     agency = models.ForeignKey(
-        "Agency", related_name="identities", on_delete=models.CASCADE
+        "ImportedAgency", related_name="identities", on_delete=models.CASCADE
     )
     individual = models.ForeignKey(
         "ImportedIndividual",
