@@ -166,7 +166,7 @@ And('the User is asked to provide associated Program', () => {
 });
 
 When('the User selects a Programme to associate with', () => {
-  cy.getByTestId('select-field-collapsed-program').click();
+  cy.getByTestId('select-program').click();
 
   cy.get('.MuiPopover-root').find('ul li').first().click();
 });
@@ -200,7 +200,7 @@ Given('the User is viewing existing Target Population in Closed state', () => {
 
     // perform sequence of UI steps to close target population
     cy.getByTestId('btn-target-population-close').click({ force: true });
-    cy.getByTestId('select-field-collapsed-program').click();
+    cy.getByTestId('select-program').click();
     cy.get('.MuiPopover-root').find('ul li').first().click();
     cy.get('.MuiDialogActions-root')
       .getByTestId('btn-target-population-close')

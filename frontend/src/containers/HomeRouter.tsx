@@ -123,7 +123,7 @@ export function HomeRouter(): React.ReactElement {
           autoHideDuration={5000}
           onClose={() => snackBar.setShow(false)}
         >
-          <SnackbarContent message={snackBar.message} />
+          <SnackbarContent message={snackBar.message} data-cy={snackBar.dataCy} />
         </Snackbar>
       )}
     </Root>
