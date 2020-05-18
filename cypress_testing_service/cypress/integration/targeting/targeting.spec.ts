@@ -1,6 +1,13 @@
-import { Given, When, Then, And } from 'cypress-cucumber-preprocessor/steps';
+import {
+  Given,
+  When,
+  Then,
+  And,
+  Before,
+} from 'cypress-cucumber-preprocessor/steps';
 import { uuid } from 'uuidv4';
 import { api } from '../../support/api';
+import { overrideSrollingStrategy } from '../../support/utils';
 
 const createTargetPopulation = () => {
   cy.navigateTo('/target-population');
@@ -30,6 +37,10 @@ const createTargetPopulation = () => {
     });
   });
 };
+
+Before(() => {
+  overrideSrollingStrategy();
+});
 
 Given('the User is viewing the Targeting List screen', () => {
   cy.navigateTo('/target-population');
@@ -89,7 +100,7 @@ And('the User completes creating new Target Population', () => {
     .contains('save', { matchCase: false })
     .click();
 
-  cy.getByTestId('btn-target-population-create').click({ force: true });
+  cy.getByTestId('btn-target-population-create').click();
   cy.getByTestId('btn-target-population-create').should('not.be.visible');
 });
 
@@ -141,7 +152,7 @@ Given('the User is viewing existing Target Population in Open state', () => {
 });
 
 When('the User closes the Programme Population', () => {
-  cy.getByTestId('btn-target-population-close').click({ force: true });
+  cy.getByTestId('btn-target-population-close').click();
 });
 
 Then(
@@ -174,7 +185,7 @@ When('the User selects a Programme to associate with', () => {
 And('the User confirms to close the Programme Population', () => {
   cy.get('.MuiDialogActions-root')
     .getByTestId('btn-target-population-close')
-    .click({ force: true });
+    .click();
 });
 
 Then('the Programme population becomes Closed', () => {
@@ -199,21 +210,19 @@ Given('the User is viewing existing Target Population in Closed state', () => {
     cy.navigateTo(`/target-population/${id}`);
 
     // perform sequence of UI steps to close target population
-    cy.getByTestId('btn-target-population-close').click({ force: true });
+    cy.getByTestId('btn-target-population-close').click();
     cy.getByTestId('select-program').click();
     cy.get('.MuiPopover-root').find('ul li').first().click();
     cy.get('.MuiDialogActions-root')
       .getByTestId('btn-target-population-close')
-      .click({ force: true });
+      .click();
 
     cy.getByTestId('status-container').contains('closed', { matchCase: false });
   });
 });
 
 When('the User sends the Target Population to Cash Assist', () => {
-  cy.getByTestId('btn-target-population-send-to-cash-assist').click({
-    force: true,
-  });
+  cy.getByTestId('btn-target-population-send-to-cash-assist').click();
 });
 
 Then('the confirmation dialog for Send to Cash Assist is shown', () => {
@@ -229,7 +238,7 @@ Then('the confirmation dialog for Send to Cash Assist is shown', () => {
 When('the User confirms sending to Cash Assist', () => {
   cy.get('.MuiDialogActions-root')
     .getByTestId('btn-target-population-send-to-cash-assist')
-    .click({ force: true });
+    .click();
 });
 
 Then('the details for the Target Population are sent to Cash Assist', () => {
@@ -239,7 +248,7 @@ Then('the details for the Target Population are sent to Cash Assist', () => {
 });
 
 When('the User starts duplicating the existing Target Population', () => {
-  cy.getByTestId('btn-target-population-duplicate').click({ force: true });
+  cy.getByTestId('btn-target-population-duplicate').click();
 });
 
 Then(
@@ -267,7 +276,7 @@ When('the User provides a unique name for copy of Target Population', () => {
 And('the User confirms to duplicate the Target Population', () => {
   cy.get('.MuiDialogActions-root')
     .getByTestId('btn-target-population-duplicate')
-    .click({ force: true });
+    .click();
 });
 
 Then(

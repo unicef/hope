@@ -32,14 +32,14 @@ Feature: Be able to download a template and upload households and individuals to
             And the information from uploaded file is visible
 
     Scenario: Approving an import: Reviewed and ready to approve source of import data
-        Given the has an RDI import in review
+        Given the User has an RDI import in review
             And the User has reviewed all import data content
 
         When the User approves the RDI import
         Then the RDI import becomes approved
 
     Scenario: Unapprove an import: Approved Data is discovered to be faulty, and needs to be un-approved
-        Given the has an RDI import in review
+        Given the User has an RDI import in review
             And the User approves the RDI import
 
         When the User unapproves the RDI import
