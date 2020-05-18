@@ -5,8 +5,6 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django_countries.fields import CountryField
 from model_utils import Choices
-from model_utils.fields import UUIDField
-from model_utils.models import UUIDModel
 
 from household.models import (
     RELATIONSHIP_CHOICE,
@@ -14,11 +12,10 @@ from household.models import (
     MARITAL_STATUS_CHOICE,
     INDIVIDUAL_HOUSEHOLD_STATUS,
 )
-from utils.models import TimeStampedUUIDModel
 
 
 class Session(models.Model):
-    timestamp = models.DateTimeField()
+    timestamp = models.DateTimeField(auto_now_add=True)
     source = models.CharField(
         max_length=3, choices=(("MIS", "HCT-MIS"), ("CA", "Cash Assist")),
     )
@@ -36,7 +33,6 @@ class Session(models.Model):
 
 
 class SessionModel(models.Model):
-    last_sync_on = models.DateTimeField(null=True)
     session_id = models.ForeignKey(
         "cash_assist_datahub.Session", on_delete=models.CASCADE
     )
@@ -49,30 +45,30 @@ class Household(SessionModel):
     status = models.CharField(
         max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default="ACTIVE"
     )
-    household_id = UUIDField(primary_key=True, version=4,)
+    household_id = models.UUIDField(primary_key=True, version=4,)
     status = models.CharField(
         max_length=50, choices=(("INACTIVE", "Inactive"), ("ACTIVE", "Active")),
     )
     household_size = models.PositiveIntegerField()
     # head of household document id
-    government_form_number = models.CharField(max_length=255, blank=True)
+    government_form_number = models.CharField(max_length=255, null=True)
     # registration household id
-    form_number = models.CharField(max_length=255, blank=True)
-    agency_id = models.CharField(max_length=255, blank=True)
+    form_number = models.CharField(max_length=255, null=True)
+    agency_id = models.CharField(max_length=255, null=True)
     #  individual_id head of household
     focal_point = models.ForeignKey(
         "cash_assist_datahub.Individual",
         db_column="focal_point",
         on_delete=models.CASCADE,
     )
-    address = models.CharField(max_length=255, blank=True)
-    admin1 = models.CharField(max_length=255, blank=True)
-    admin2 = models.CharField(max_length=255, blank=True)
-    country = CountryField(blank=True)
+    address = models.CharField(max_length=255, null=True)
+    admin1 = models.CharField(max_length=255, null=True)
+    admin2 = models.CharField(max_length=255, null=True)
+    country = CountryField(null=True)
 
 
 class Individual(SessionModel):
-    individual_id = UUIDField(primary_key=True, version=4,)
+    individual_id = models.UUIDField(primary_key=True, version=4,)
     household = models.ForeignKey(
         "cash_assist_datahub.Household",
         db_column="household_id",
@@ -81,40 +77,39 @@ class Individual(SessionModel):
     status = models.CharField(
         max_length=50,
         choices=(("INACTIVE", "Inactive"), ("ACTIVE", "Active")),
-        blank=True,
+        null=True,
     )
     SEX_CHOICE = (
         ("MALE", _("Male")),
         ("FEMALE", _("Female")),
     )
     full_name = models.CharField(max_length=255)
-    family_name = models.CharField(max_length=255, blank=True)
-    given_name = models.CharField(max_length=255, blank=True)
-    middle_name = models.CharField(max_length=255, blank=True)
+    family_name = models.CharField(max_length=255, null=True)
+    given_name = models.CharField(max_length=255, null=True)
+    middle_name = models.CharField(max_length=255, null=True)
     sex = models.CharField(max_length=255, choices=SEX_CHOICE,)
     date_of_birth = models.DateField()
     estimated_date_of_birth = models.BooleanField()
     relationship = models.CharField(
-        max_length=255, blank=True, choices=RELATIONSHIP_CHOICE,
+        max_length=255, null=True, choices=RELATIONSHIP_CHOICE,
     )
-    role = models.CharField(max_length=255, blank=True, choices=ROLE_CHOICE,)
+    role = models.CharField(max_length=255, null=True, choices=ROLE_CHOICE,)
     marital_status = models.CharField(
         max_length=255, choices=MARITAL_STATUS_CHOICE,
     )
-    phone_number = models.CharField(max_length=14, blank=True)
+    phone_number = models.CharField(max_length=14, null=True)
 
     def __str__(self):
         return self.family_name
 
 
 class TargetPopulation(SessionModel):
-    tp_unicef_id = UUIDField(primary_key=True, version=4,)
+    tp_unicef_id = models.UUIDField(primary_key=True, version=4,)
     name = models.CharField(max_length=255)
     population_type = models.CharField(default="HOUSEHOLD")
     targeting_criteria = models.TextField()
 
     active_households = models.PositiveIntegerField(default=0)
-    inactive_households = models.PositiveIntegerField(default=0)
     program = models.ForeignKey(
         "cash_assist_datahub.Program",
         db_column="program_id",
@@ -139,7 +134,7 @@ class TargetPopulationEntries(SessionModel):
 
 
 class Program(SessionModel):
-    program_id = UUIDField(primary_key=True, version=4,)
+    program_id = models.UUIDField(primary_key=True, version=4,)
     business_area = models.CharField(max_length=20)
     STATUS_CHOICE = (
         ("NOT_STARTED", _("NOT_STARTED")),
@@ -156,13 +151,13 @@ class Program(SessionModel):
     scope = models.PositiveIntegerField()
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
-    description = models.CharField(max_length=255, blank=True)
+    description = models.CharField(max_length=255, null=True)
 
 
 class CashPlan(SessionModel):
     business_area = models.CharField(max_length=20)
     cash_plan_id = models.CharField(max_length=255)
-    cash_plan_hash_id = UUIDField(primary_key=True, version=4,)
+    cash_plan_hash_id = models.UUIDField(primary_key=True, version=4,)
     status = models.CharField(
         max_length=255,
         choices=(
@@ -240,7 +235,7 @@ class PaymentRecord(SessionModel):
     status = models.CharField(max_length=255, choices=STATUS_CHOICE,)
     status_date = models.DateTimeField()
     payment_id = models.CharField(max_length=255)
-    payment_hash_id = UUIDField(primary_key=True, version=4,)
+    payment_hash_id = models.UUIDField(primary_key=True, version=4,)
     cash_plan = models.ForeignKey(
         "CashPlan", on_delete=models.CASCADE, related_name="payment_records",
     )
