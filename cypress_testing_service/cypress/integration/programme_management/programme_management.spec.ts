@@ -7,6 +7,7 @@ import {
 } from 'cypress-cucumber-preprocessor/steps';
 import { uuid } from 'uuidv4';
 import { api } from '../../support/api';
+import { overrideSrollingStrategy } from '../../support/utils';
 
 const addToProgramIds = (programId: string) => {
   cy.get<string[]>('@programIds').then((programIds) => {
@@ -40,6 +41,7 @@ const executeProgramAction = (action) => {
 Before(() => {
   // to hold list of ids for programs created during program management
   cy.wrap<string[]>([]).as('programIds');
+  overrideSrollingStrategy();
 });
 
 after(() => {
@@ -61,8 +63,7 @@ When('User starts creating New Programme', () => {
     .children('a')
     .should('have.length.gte', 0);
 
-  // TODO: check why its not able to scroll properly, using { force: true } for now
-  cy.getByTestId('button-new-program').click({ force: true });
+  cy.getByTestId('button-new-program').click();
 });
 
 Then('the New Programme form is shown', () => {
