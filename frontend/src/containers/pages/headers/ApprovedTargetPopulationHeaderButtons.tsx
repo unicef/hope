@@ -58,7 +58,7 @@ export function ApprovedTargetPopulationHeaderButtons({
           variant='contained'
           color='primary'
           onClick={() => setOpenFinalize(true)}
-          data-cy='btn-target-population-send-to-cash-assist'
+          data-cy='button-target-population-send-to-cash-assist'
         >
           Send to cash assist
         </Button>
