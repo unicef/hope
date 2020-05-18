@@ -72,6 +72,7 @@ export function EditProgram({ program }: EditProgramProps): ReactElement {
           type='submit'
           color='primary'
           variant='contained'
+          data-cy='button-save'
         >
           Save
         </Button>

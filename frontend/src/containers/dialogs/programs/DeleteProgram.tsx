@@ -4,7 +4,6 @@ import CloseIcon from '@material-ui/icons/CloseRounded';
 import {
   Button,
   Dialog,
-  DialogActions,
   DialogContent,
   DialogTitle,
   Typography,
@@ -17,6 +16,7 @@ import {
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/AllPrograms';
 import { useSnackbar } from '../../../hooks/useSnackBar';
+import { DialogActions } from '../DialogActions';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -93,15 +93,22 @@ export function DeleteProgram({
       showMessage('Programme removed.', {
         pathname: `/${businessArea}/programs/`,
         historyMethod: 'push',
+        dataCy: 'snackbar-program-remove-success',
       });
       setOpen(false);
     } else {
-      showMessage('Programme remove action failed.');
+      showMessage('Programme remove action failed.', {
+        dataCy: 'snackbar-program-remove-failure',
+      });
     }
   };
   return (
     <span>
-      <RemoveButton startIcon={<CloseIcon />} onClick={() => setOpen(true)}>
+      <RemoveButton
+        startIcon={<CloseIcon />}
+        onClick={() => setOpen(true)}
+        data-cy='button-remove-program'
+      >
         REMOVE
       </RemoveButton>
       <MidDialog
@@ -128,6 +135,7 @@ export function DeleteProgram({
               color='primary'
               variant='contained'
               onClick={deleteProgram}
+              data-cy='button-remove-program'
             >
               REMOVE
             </RemoveModalButton>

@@ -5,7 +5,6 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
-  DialogActions,
   Typography,
   Paper,
 } from '@material-ui/core';
@@ -22,6 +21,7 @@ import {
 import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
 import { FormikDateField } from '../../shared/Formik/FormikDateField';
 import { selectFields } from '../../utils/utils';
+import { DialogActions } from '../dialogs/DialogActions';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -157,7 +157,8 @@ export function ProgramForm({
               </DialogTitleWrapper>
               <DialogContent>
                 <DialogDescription>
-                  To create a new Programme, please complete all required fields on the form below and save.
+                  To create a new Programme, please complete all required fields
+                  on the form below and save.
                 </DialogDescription>
 
                 <Form>
@@ -275,9 +276,7 @@ export function ProgramForm({
                 </Form>
               </DialogContent>
               <DialogFooter>
-                <DialogActions data-cy='dialog-actions-container'>
-                  {renderSubmit(submitForm)}
-                </DialogActions>
+                <DialogActions>{renderSubmit(submitForm)}</DialogActions>
               </DialogFooter>
             </>
           )}

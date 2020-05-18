@@ -27,14 +27,14 @@ const expectStatusWithin = <E>(
 
 const executeProgramAction = (action) => {
   cy.getByTestId('page-header-container')
-    .contains(action, { matchCase: false })
+    .getByTestId(`button-${action}-program`)
     .click();
-  cy.get('.MuiDialogActions-root').within(() => {
-    cy.contains(action, { matchCase: false }).click();
-  });
 
-  // TODO: data-cy for confirmation modal
-  cy.contains(`programme ${action}`, { matchCase: false });
+  cy.getByTestId('dialog-actions-container')
+    .getByTestId(`button-${action}-program`)
+    .click();
+
+  cy.getByTestId(`snackbar-program-${action}-success`);
 };
 
 Before(() => {
@@ -55,15 +55,14 @@ after(() => {
 });
 
 When('User starts creating New Programme', () => {
-  // TODO: move to given
   cy.navigateTo('/programs');
   cy.getByTestId('main-content').contains('Programme Management');
   cy.getByTestId('programs-page-container')
     .children('a')
     .should('have.length.gte', 0);
-  cy.getByTestId('main-content').scrollTo('top');
+
   // TODO: check why its not able to scroll properly, using { force: true } for now
-  cy.getByTestId('btn-new-programme').click({ force: true });
+  cy.getByTestId('button-new-program').click({ force: true });
 });
 
 Then('the New Programme form is shown', () => {
@@ -77,24 +76,24 @@ When('the User completes all required fields on the form', () => {
     cy.getByTestId('input-name').type(uniqueName);
     cy.wrap(uniqueName).as('uniqueProgramName');
 
-    cy.getByTestId('select-field-collapsed-scope').click();
-    cy.getByTestId('select-field-options-scope').within(() => {
-      cy.contains('Full').click();
-    });
+    cy.getByTestId('select-scope').click();
+    cy.getByTestId('select-options-scope')
+      .getByTestId('select-option-0')
+      .click();
 
     const today = new Date().getDay();
     cy.pickDayOfTheMonth(today, 'startDate');
     cy.pickDayOfTheMonth(today + 1, 'endDate');
 
-    cy.getByTestId('select-field-collapsed-sector').click();
-    cy.getByTestId('select-field-options-sector').contains('Education').click();
+    cy.getByTestId('select-sector').click();
+    cy.getByTestId('select-options-sector')
+      .getByTestId('select-option-0')
+      .click();
   });
 });
 
 And('the User submits the form', () => {
-  cy.getByTestId('dialog-actions-container')
-    .contains('save', { matchCase: false })
-    .click();
+  cy.getByTestId('dialog-actions-container').getByTestId('button-save').click();
 });
 
 Then('the User is redirected to the new Programme details screen', () => {
@@ -146,9 +145,7 @@ Given(
           expect(createResponse.status).eq(200);
 
           const {
-            createProgram: {
-              program: createdProgram,
-            },
+            createProgram: { program: createdProgram },
           } = createResponse.body.data;
           const { id } = createdProgram;
           expect(id).not.eq(undefined);
