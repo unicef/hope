@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import { TextField } from '@material-ui/core';
+import { TextField, Paper } from '@material-ui/core';
 import styled from 'styled-components';
 
 const StyledAutocomplete = styled(Autocomplete)`
@@ -59,7 +59,16 @@ export function CriteriaAutocomplete({
           }}
         />
       )}
-      data-cy='autocomplete-target-criteria-options'
+      data-cy='autocomplete-target-criteria'
+      PaperComponent={React.forwardRef((props, ref) => (
+        <Paper
+          {...{
+            ...props,
+            ref,
+          }}
+          data-cy='autocomplete-target-criteria-options'
+        />
+      ))}
     />
   );
 }

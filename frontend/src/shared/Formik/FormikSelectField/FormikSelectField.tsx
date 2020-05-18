@@ -24,8 +24,11 @@ export const FormikSelectField = ({
           value={field.value || otherProps.value}
           id={`textField-${field.name}`}
           error={isInvalid}
-          SelectDisplayProps={{ 'data-cy': `select-${field.name}`}}
-          MenuProps={{ 'data-cy': `select-options-${field.name}`}}
+          SelectDisplayProps={{ 'data-cy': `select-${field.name}` }}
+          MenuProps={{
+            'data-cy': `select-options-${field.name}`,
+            MenuListProps: { 'data-cy': 'select-options-container' },
+          }}
         >
           {otherProps.choices.map((each, index) => (
             <MenuItem
