@@ -26,7 +26,7 @@ export function useSnackbar(): { show; setShow; message; showMessage; dataCy?; }
   ): void => {
     history[get(options, 'historyMethod', 'replace')]({
       pathname: get(options, 'pathname', history.location.pathname),
-      state: { showSnackbar: true, message: messageContent, dataCy: options.dataCy },
+      state: { showSnackbar: true, message: messageContent, dataCy: get(options, 'dataCy') },
     });
   };
 

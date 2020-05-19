@@ -18,10 +18,3 @@ import 'cypress-promise/register';
 import 'cypress-file-upload';
 import './commands';
 import './chai';
-
-// TODO remove if no optimization gain
-// Cypress.Cookies.defaults({
-//   whitelist: [
-//     ...mockAuthCookies.map(({ name }) => name),
-//   ],
-// });
