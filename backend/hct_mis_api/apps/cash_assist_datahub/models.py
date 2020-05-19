@@ -120,7 +120,7 @@ class TargetPopulation(SessionModel):
         return self.name
 
 
-class TargetPopulationEntries(SessionModel):
+class TargetPopulationEntry(SessionModel):
     target_population = models.ForeignKey(
         "cash_assist_datahub.TargetPopulation", on_delete=models.CASCADE,
     )
@@ -131,6 +131,13 @@ class TargetPopulationEntries(SessionModel):
         "cash_assist_datahub.Individual", on_delete=models.CASCADE, null=True
     )
     unhcr_household_id = models.CharField(max_length=255)
+    vulnerability_score = models.DecimalField(
+        blank=True,
+        null=True,
+        decimal_places=3,
+        max_digits=6,
+        help_text="Written by a tool such as Corticon.",
+    )
 
 
 class Program(SessionModel):
