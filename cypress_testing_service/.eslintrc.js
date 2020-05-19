@@ -12,6 +12,7 @@ module.exports = {
     indent: ['error', 2],
     '@typescript-eslint/indent': ['error', 2],
     semi: ['error', 'always'],
+    'import/prefer-default-export': 'off',
   },
   parserOptions: {
     project: './tsconfig.json',
