@@ -32,7 +32,7 @@ class PaymentRecord(TimeStampedUUIDModel):
         "program.CashPlan", on_delete=models.CASCADE, related_name="payment_records",
     )
     household = models.ForeignKey(
-        "Household", on_delete=models.CASCADE, related_name="payment_records",
+        "household.Household", on_delete=models.CASCADE, related_name="payment_records",
     )
     full_name = models.CharField(max_length=255)
     total_persons_covered = models.IntegerField()
@@ -74,8 +74,8 @@ class ServiceProvider(TimeStampedUUIDModel):
     business_area = models.ForeignKey(
         "core.BusinessArea", on_delete=models.CASCADE
     )
-    cash_assist_id = models.CharField(max_length=255, primary_key=True)
-    full_name = models.CharField(max_length=255, primary_key=True)
-    short_name = models.CharField(max_length=4, primary_key=True)
-    country = models.CharField(max_length=3, primary_key=True)
-    vision_id = models.CharField(max_length=255, primary_key=True)
+    cash_assist_id = models.CharField(max_length=255, unique=True)
+    full_name = models.CharField(max_length=255)
+    short_name = models.CharField(max_length=4)
+    country = models.CharField(max_length=3)
+    vision_id = models.CharField(max_length=255)
