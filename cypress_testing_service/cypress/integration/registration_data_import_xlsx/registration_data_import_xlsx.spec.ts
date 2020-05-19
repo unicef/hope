@@ -142,32 +142,34 @@ And('the information from uploaded file is visible', () => {
 });
 
 Given('the User has an RDI import in review', () => {
-  // TODO: use for optimized scenario
-  const fileName = 'valid.xlsx';
-  cy.fixture(`documents/rdi/${fileName}`, 'binary').then((file) => {
-    Cypress.Blob.binaryStringToBlob(
-      file,
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    ).then((blob) => {
-      cy.gqlUploadFile(
-        apiUrl,
-        api.getUploadImportDataXlsxFileOperation(),
-        blob,
-        fileName,
-      ).as('fileUploadResponse');
+  cy.getBusinessAreaSlug().then((businessAreaSlug) => {
+    const path = 'documents/rdi';
+    cy.fixture(`${path}/meta`).then(({ valid }) => {
+      const { fileName } = valid;
+      cy.fixture(`${path}/${fileName}`, 'base64').then((file) => {
+        Cypress.Blob.base64StringToBlob(
+          file,
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ).then((blob) => {
+          cy.gqlUploadFile(
+            apiUrl,
+            api.getUploadImportDataXlsxFileOperation(businessAreaSlug),
+            blob,
+            fileName,
+          ).as('fileUploadResponse');
+        });
+      });
     });
-  });
 
-  cy.get<{ data: any }>('@fileUploadResponse').then((fileUploadResponse) => {
-    const {
-      data: {
-        uploadImportDataXlsxFile: {
-          importData: { id: importDataId },
+    cy.get<{ data: any }>('@fileUploadResponse').then((fileUploadResponse) => {
+      const {
+        data: {
+          uploadImportDataXlsxFile: {
+            importData: { id: importDataId },
+          },
         },
-      },
-    } = fileUploadResponse;
+      } = fileUploadResponse;
 
-    cy.getBusinessAreaSlug().then((businessAreaSlug) => {
       const name = `Automated RDI Import ${uuid()}`;
       api
         .createRegistrationDataImport({ name, businessAreaSlug, importDataId })

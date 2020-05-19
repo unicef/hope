@@ -147,29 +147,29 @@ const api = {
     });
   },
 
-  getUploadImportDataXlsxFileOperation() {
+  getUploadImportDataXlsxFileOperation(businessAreaSlug) {
     return {
       operationName: 'UploadImportDataXlsxFile',
       query: `
-        mutation UploadImportDataXlsxFile($file: Upload!) {
-          uploadImportDataXlsxFile(file: $file) {
-            errors {
-              header
-              message
-              rowNumber
-            }
-            importData {
+      mutation UploadImportDataXlsxFile($file: Upload!, $businessAreaSlug: String!) {
+        uploadImportDataXlsxFile(file: $file, businessAreaSlug: $businessAreaSlug) {
+          errors {
+            header
+            message
+            rowNumber
+          }
+          importData {
+            id
+            numberOfIndividuals
+            numberOfHouseholds
+            registrationDataImport {
               id
-              numberOfIndividuals
-              numberOfHouseholds
-              registrationDataImport {
-                id
-              }
             }
           }
         }
+    }
       `,
-      variables: { file: null },
+      variables: { file: null, businessAreaSlug },
     };
   },
 
