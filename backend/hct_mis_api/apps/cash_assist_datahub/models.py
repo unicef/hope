@@ -45,7 +45,7 @@ class Household(SessionModel):
     status = models.CharField(
         max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default="ACTIVE"
     )
-    household_id = models.UUIDField(primary_key=True, version=4,)
+    household_id = models.UUIDField(primary_key=True,)
     status = models.CharField(
         max_length=50, choices=(("INACTIVE", "Inactive"), ("ACTIVE", "Active")),
     )
@@ -60,6 +60,7 @@ class Household(SessionModel):
         "cash_assist_datahub.Individual",
         db_column="focal_point",
         on_delete=models.CASCADE,
+        related_name="heading_household",
     )
     address = models.CharField(max_length=255, null=True)
     admin1 = models.CharField(max_length=255, null=True)
@@ -68,7 +69,7 @@ class Household(SessionModel):
 
 
 class Individual(SessionModel):
-    individual_id = models.UUIDField(primary_key=True, version=4,)
+    individual_id = models.UUIDField(primary_key=True,)
     household = models.ForeignKey(
         "cash_assist_datahub.Household",
         db_column="household_id",
@@ -104,9 +105,9 @@ class Individual(SessionModel):
 
 
 class TargetPopulation(SessionModel):
-    tp_unicef_id = models.UUIDField(primary_key=True, version=4,)
+    tp_unicef_id = models.UUIDField(primary_key=True,)
     name = models.CharField(max_length=255)
-    population_type = models.CharField(default="HOUSEHOLD")
+    population_type = models.CharField(default="HOUSEHOLD", max_length=20)
     targeting_criteria = models.TextField()
 
     active_households = models.PositiveIntegerField(default=0)
@@ -141,7 +142,7 @@ class TargetPopulationEntry(SessionModel):
 
 
 class Program(SessionModel):
-    program_id = models.UUIDField(primary_key=True, version=4,)
+    program_id = models.UUIDField(primary_key=True,)
     business_area = models.CharField(max_length=20)
     STATUS_CHOICE = (
         ("NOT_STARTED", _("NOT_STARTED")),
@@ -164,7 +165,7 @@ class Program(SessionModel):
 class CashPlan(SessionModel):
     business_area = models.CharField(max_length=20)
     cash_plan_id = models.CharField(max_length=255)
-    cash_plan_hash_id = models.UUIDField(primary_key=True, version=4,)
+    cash_plan_hash_id = models.UUIDField(primary_key=True,)
     status = models.CharField(
         max_length=255,
         choices=(
@@ -242,17 +243,17 @@ class PaymentRecord(SessionModel):
     status = models.CharField(max_length=255, choices=STATUS_CHOICE,)
     status_date = models.DateTimeField()
     payment_id = models.CharField(max_length=255)
-    payment_hash_id = models.UUIDField(primary_key=True, version=4,)
+    payment_hash_id = models.UUIDField(primary_key=True,)
     cash_plan = models.ForeignKey(
-        "CashPlan", on_delete=models.CASCADE, related_name="payment_records",
+        "cash_assist_datahub.CashPlan", on_delete=models.CASCADE, related_name="payment_records",
     )
     unhcr_registration_id = models.CharField(max_length=255)
     household = models.ForeignKey(
-        "Household", on_delete=models.CASCADE, related_name="payment_records",
+        "cash_assist_datahub.Household", on_delete=models.CASCADE, related_name="payment_records",
     )
     # head of household
     focal_point = models.ForeignKey(
-        "Individual", on_delete=models.CASCADE, related_name="payment_records",
+        "cash_assist_datahub.Individual", on_delete=models.CASCADE, related_name="payment_records",
     )
     full_name = models.CharField(max_length=255)
     total_persons_covered = models.IntegerField()
@@ -293,7 +294,7 @@ class PaymentRecord(SessionModel):
 class ServiceProvider(SessionModel):
     business_area = models.CharField(max_length=20)
     id = models.CharField(max_length=255, primary_key=True)
-    full_name = models.CharField(max_length=255, primary_key=True)
-    short_name = models.CharField(max_length=4, primary_key=True)
-    country = models.CharField(max_length=3, primary_key=True)
-    vision_id = models.CharField(max_length=255, primary_key=True)
+    full_name = models.CharField(max_length=255)
+    short_name = models.CharField(max_length=4)
+    country = models.CharField(max_length=3,)
+    vision_id = models.CharField(max_length=255)
