@@ -90,7 +90,7 @@ And('the User uploads file', () => {
     const { fileName, ...otherMeta } = valid;
     cy.fixture(`${path}/${fileName}`, 'base64').then((fileContent) => {
       // @ts-ignore
-      cy.get('[data-cy=rdi-file-input]').upload({
+      cy.getByTestId('rdi-file-input').upload({
         fileName,
         fileContent,
         encoding: 'base64',
@@ -148,19 +148,24 @@ Given('the User has an RDI import in review', () => {
     const path = 'documents/rdi';
     cy.fixture(`${path}/meta`).then(({ valid }) => {
       const { fileName } = valid;
-      cy.fixture(`${path}/${fileName}`, 'base64').then((file) => {
-        Cypress.Blob.base64StringToBlob(
-          file,
-          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        ).then((blob) => {
-          cy.gqlUploadFile(
-            apiUrl,
-            api.getUploadImportDataXlsxFileOperation(businessAreaSlug),
-            blob,
-            fileName,
-          ).as('fileUploadResponse');
-        });
-      });
+      cy.fixture(`${path}/${fileName}`, 'base64')
+        .then((file) => {
+          // https://github.com/abramenal/cypress-file-upload/issues/12
+          return Cypress.Blob.base64StringToBlob(
+            file,
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          );
+        })
+        .as('blob');
+    });
+
+    cy.get<Blob>('@blob').then((blob) => {
+      cy.gqlUploadFile(
+        apiUrl,
+        api.getUploadImportDataXlsxFileOperation(businessAreaSlug),
+        blob,
+        'valid.xlsx',
+      ).as('fileUploadResponse');
     });
 
     cy.get<{ data: any }>('@fileUploadResponse').then((fileUploadResponse) => {
@@ -174,7 +179,11 @@ Given('the User has an RDI import in review', () => {
 
       const name = `Automated RDI Import ${uuid()}`;
       api
-        .createRegistrationDataImport({ name, businessAreaSlug, importDataId })
+        .createRegistrationDataImport({
+          name,
+          businessAreaSlug,
+          importDataId,
+        })
         .then((response) => {
           const {
             data: {
