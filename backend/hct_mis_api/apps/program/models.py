@@ -116,7 +116,7 @@ class CashPlan(TimeStampedUUIDModel):
         "core.BusinessArea", on_delete=models.CASCADE
     )
     ca_id = models.CharField(max_length=255)
-    ca_hash_id = UUIDField(primary_key=True, version=4,)
+    ca_hash_id = models.UUIDField(unique=True)
     status = models.CharField(
         max_length=255,
         choices=(
