@@ -23,8 +23,10 @@ Given('the User is viewing the Registration Data Import screen', () => {
 });
 
 When('the User starts to import new data', () => {
-  // TODO: within certain context?
-  cy.getByTestId('btn-rdi-import').should('be.visible').click();
+  cy.getByTestId('page-header-container')
+    .getByTestId('button-import')
+    .should('be.visible')
+    .click();
 });
 
 And('the User selects {word} as their import source', (source) => {
@@ -75,9 +77,10 @@ Given(
       },
     );
 
-    // TODO: within certain context?
-    // TODO: separate action (when) from given
-    cy.getByTestId('btn-rdi-import').should('be.visible').click();
+    cy.getByTestId('page-header-container')
+      .getByTestId('button-import')
+      .should('be.visible')
+      .click();
   },
 );
 
@@ -96,7 +99,7 @@ And('the User uploads file', () => {
     });
 
     cy.getByTestId('loading-container').should('be.visible');
-    cy.get('.MuiDialogContent-root').contains(fileName);
+    cy.getByTestId('dialog-root').contains(fileName);
     cy.getByTestId('loading-container', { timeout: 10000 }).should(
       'not.be.visible',
     );
@@ -110,18 +113,17 @@ And('the file has no errors', () => {
 And('the User completes all required fields', () => {
   cy.fixture('rdi').then(({ name }) => {
     const uniqueName = `${name} ${uuid()}`;
-    cy.get('.MuiDialogContent-root').getByTestId('input-name').type(uniqueName);
+    cy.getByTestId('dialog-root').getByTestId('input-name').type(uniqueName);
 
     cy.wrap(uniqueName).as('uploadedXlsx');
   });
 });
 
 And('the User confirms the import', () => {
-  cy.get('.MuiDialogActions-root')
-    .contains('import', { matchCase: false })
+  cy.getByTestId('dialog-actions-container')
+    .getByTestId('button-import')
     .click();
-
-  cy.get('.MuiDialog-container').should('not.be.visible');
+  cy.getByTestId('dialog-root').should('not.be.visible');
 });
 
 Then('the User is taken to the Import details screen', () => {
@@ -211,14 +213,9 @@ And('the User has reviewed all import data content', () => {
 });
 
 When('the User approves the RDI import', () => {
-  cy.getByTestId('page-header-container')
-    .find('button')
-    .contains('approve', { matchCase: false })
-    .click();
-
-  cy.get('.MuiDialogActions-root')
-    .find('button')
-    .contains('approve', { matchCase: false })
+  cy.getByTestId('page-header-container').getByTestId('button-approve').click();
+  cy.getByTestId('dialog-actions-container')
+    .getByTestId('button-approve')
     .click();
 });
 
@@ -228,13 +225,11 @@ Then('the RDI import becomes approved', () => {
 
 When('the User unapproves the RDI import', () => {
   cy.getByTestId('page-header-container')
-    .find('button')
-    .contains('unapprove', { matchCase: false })
+    .getByTestId('button-unapprove')
     .click();
 
-  cy.get('.MuiDialogActions-root')
-    .find('button')
-    .contains('unapprove', { matchCase: false })
+  cy.getByTestId('dialog-actions-container')
+    .getByTestId('button-unapprove')
     .click();
 });
 

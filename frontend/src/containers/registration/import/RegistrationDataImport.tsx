@@ -7,8 +7,6 @@ import {
   Button,
   CardActions,
   Collapse,
-  Dialog,
-  DialogActions,
   DialogContent,
   DialogTitle,
   FormControl,
@@ -36,6 +34,8 @@ import { useSnackbar } from '../../../hooks/useSnackBar';
 import { FormikTextField } from '../../../shared/Formik/FormikTextField';
 import { LoadingComponent } from '../../../components/LoadingComponent';
 import { FormikTagsSelectField } from '../../../shared/Formik/FormikTagsSelectField';
+import { Dialog } from '../../dialogs/Dialog';
+import { DialogActions } from '../../dialogs/DialogActions';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -223,7 +223,7 @@ export function RegistrationDataImport(): React.ReactElement {
         color='primary'
         startIcon={<ExitToAppRoundedIcon />}
         onClick={() => setOpen(true)}
-        data-cy='btn-rdi-import'
+        data-cy='button-import'
       >
         IMPORT
       </Button>
@@ -329,6 +329,7 @@ export function RegistrationDataImport(): React.ReactElement {
                     onClick={() => {
                       submitForm();
                     }}
+                    data-cy='button-import'
                   >
                     {t('IMPORT')}
                   </Button>
