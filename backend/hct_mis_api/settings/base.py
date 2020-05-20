@@ -98,8 +98,27 @@ DATABASES = {
         "HOST": os.getenv("POSTGRES_HOST"),
         "PORT": 5432,
     },
-    "cash_assist_datahub": {
+    "cash_assist_datahub_mis": {
         "ENGINE": "django.contrib.gis.db.backends.postgis",
+        "OPTIONS": {"options": "-c search_path=mis,public"},
+        "NAME": os.getenv("POSTGRES_CASHASSIST_DATAHUB_DB"),
+        "USER": os.getenv("POSTGRES_CASHASSIST_DATAHUB_USER"),
+        "PASSWORD": os.getenv("POSTGRES_CASHASSIST_DATAHUB_PASSWORD"),
+        "HOST": os.getenv("POSTGRES_CASHASSIST_DATAHUB_HOST"),
+        "PORT": 5432,
+    },
+    "cash_assist_datahub_ca": {
+        "ENGINE": "django.contrib.gis.db.backends.postgis",
+        "OPTIONS": {"options": "-c search_path=ca,public"},
+        "NAME": os.getenv("POSTGRES_CASHASSIST_DATAHUB_DB"),
+        "USER": os.getenv("POSTGRES_CASHASSIST_DATAHUB_USER"),
+        "PASSWORD": os.getenv("POSTGRES_CASHASSIST_DATAHUB_PASSWORD"),
+        "HOST": os.getenv("POSTGRES_CASHASSIST_DATAHUB_HOST"),
+        "PORT": 5432,
+    },
+    "cash_assist_datahub_erp": {
+        "ENGINE": "django.contrib.gis.db.backends.postgis",
+        "OPTIONS": {"options": "-c search_path=erp,public"},
         "NAME": os.getenv("POSTGRES_CASHASSIST_DATAHUB_DB"),
         "USER": os.getenv("POSTGRES_CASHASSIST_DATAHUB_USER"),
         "PASSWORD": os.getenv("POSTGRES_CASHASSIST_DATAHUB_PASSWORD"),
@@ -119,7 +138,9 @@ DATABASES = {
 
 # If app is not specified here it will use default db
 DATABASE_APPS_MAPPING = {
-    "cash_assist_datahub": "cash_assist_datahub",
+    "cash_assist_datahub": "cash_assist_datahub_ca",
+    "mis_datahub": "cash_assist_datahub_mis",
+    "erp_datahub": "cash_assist_datahub_mis_erp",
     "registration_datahub": "registration_datahub",
 }
 
