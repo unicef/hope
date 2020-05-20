@@ -172,11 +172,8 @@ And('the User is asked to provide associated Program', () => {
 });
 
 When('the User selects a Programme to associate with', () => {
-  cy.getByTestId('select-program').click();
-
-  cy.getByTestId('select-options-container')
-    .getByTestId('select-option-0')
-    .click();
+  cy.getByTestId('autocomplete-program').click();
+  cy.getByTestId('autocomplete-program-options').find('ul li').first().click();
 });
 
 And('the User confirms to close the Programme Population', () => {
@@ -208,8 +205,13 @@ Given('the User is viewing existing Target Population in Closed state', () => {
 
     // perform sequence of UI steps to close target population
     cy.getByTestId('button-target-population-close').click();
-    cy.getByTestId('select-program').click();
-    cy.getByTestId('select-options-container').getByTestId('select-option-0').click();
+
+    cy.getByTestId('autocomplete-program').click();
+    cy.getByTestId('autocomplete-program-options')
+      .find('ul li')
+      .first()
+      .click();
+
     cy.getByTestId('dialog-actions-container')
       .getByTestId('button-target-population-close')
       .click();
