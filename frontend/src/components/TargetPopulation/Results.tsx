@@ -167,13 +167,13 @@ export function Results({
               <Grid container spacing={0} justify='flex-end'>
                 <SummaryBorder>
                   <LabelizedField label='Total Number of Households'>
-                    <SummaryValue>{totalNumOfHouseholds || 'N/A'}</SummaryValue>
+                    <SummaryValue>{totalNumOfHouseholds || '0'}</SummaryValue>
                   </LabelizedField>
                 </SummaryBorder>
                 <SummaryBorder>
                   <LabelizedField label='Targeted Individuals'>
                     <SummaryValue>
-                      {totalNumOfIndividuals || 'N/A'}
+                      {totalNumOfIndividuals || '0'}
                     </SummaryValue>
                   </LabelizedField>
                 </SummaryBorder>
