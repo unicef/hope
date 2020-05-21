@@ -64,7 +64,7 @@ const api = {
       `,
       variables: {
         programData: {
-          status: status && status.toUpperCase(),
+          status,
           ...rest,
         },
       },
