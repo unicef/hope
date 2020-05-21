@@ -198,6 +198,8 @@ PROJECT_APPS = [
     "django_extensions",
     "auditlog",
     "registration_data",
+    "mis_datahub",
+    "erp_datahub"
 ]
 
 DJANGO_APPS = [

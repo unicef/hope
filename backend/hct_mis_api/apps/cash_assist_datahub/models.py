@@ -3,20 +3,20 @@ from decimal import Decimal
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from django_countries.fields import CountryField
 from model_utils import Choices
 
-from household.models import (
-    RELATIONSHIP_CHOICE,
-    ROLE_CHOICE,
-    MARITAL_STATUS_CHOICE,
-    INDIVIDUAL_HOUSEHOLD_STATUS,
-)
-from utils.models import AbstractSession, SessionModel
+from utils.models import AbstractSession
 
 
 class Session(AbstractSession):
     pass
+
+
+class SessionModel(models.Model):
+    session_id = models.ForeignKey("Session", on_delete=models.CASCADE)
+
+    class Meta:
+        abstract = True
 
 
 class TargetPopulation(SessionModel):
@@ -28,7 +28,7 @@ class TargetPopulation(SessionModel):
 class Programme(SessionModel):
     mis_id = models.UUIDField(unique=True,)
     ca_id = models.CharField(max_length=255, primary_key=True)
-    ca_hash_id = models.CharField(max_length=255, primary_key=True)
+    ca_hash_id = models.CharField(max_length=255, unique=True)
 
 
 class CashPlan(SessionModel):
