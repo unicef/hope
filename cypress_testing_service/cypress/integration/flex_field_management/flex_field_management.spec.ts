@@ -1,4 +1,4 @@
-import { When, Then, And } from 'cypress-cucumber-preprocessor/steps';
+import { Given, When, Then, And } from 'cypress-cucumber-preprocessor/steps';
 
 const importXlsDocument = (type) => {
   const path = 'documents/flexibleAttributes';
@@ -78,7 +78,7 @@ And('error message about required name is shown', () => {
   cy.get('.errorlist').contains('name is required', { matchCase: false });
 });
 
-And(
+When(
   'the User imports a valid XLS file with default dairy_h_f attribute',
   () => {
     importXlsDocument('valid_dairy_h_f_default');
