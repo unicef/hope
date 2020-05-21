@@ -11,6 +11,7 @@ import {
 } from '@material-ui/core';
 import { Close } from '@material-ui/icons';
 import styled from 'styled-components';
+import { TabPanel } from '../../../components/TabPanel';
 
 export interface FinalizeTargetPopulationPropTypes {
   open: boolean;
@@ -49,15 +50,19 @@ export function TargetingInfoDialog({
   setOpen,
 }) {
   const [selectedTab, setTab] = useState(0);
+  const changeTab = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setTab(newValue);
+  };
   const HeaderTabs = (
     <Tabs
       value={selectedTab}
+      onChange={changeTab}
       aria-label='tabs'
       indicatorColor='primary'
       textColor='primary'
     >
       <Tab label='Targeting Diagram' />
-      <Tab label='Flex Field List' disabled />
+      <Tab label='Flex Field List' disabled/>
     </Tabs>
   )
   return (
@@ -75,7 +80,12 @@ export function TargetingInfoDialog({
       </DialogTitleWrapper>
       <DialogContent>
         <DialogDescription>
-          <ImagePlaceholder />
+          <TabPanel value={selectedTab} index={0}>
+            <ImagePlaceholder />
+          </TabPanel>
+          <TabPanel value={selectedTab} index={1}>
+            <div>Flex list is going to be here</div>
+          </TabPanel>
         </DialogDescription>
       </DialogContent>
     </DialogWrapper>
