@@ -1,7 +1,7 @@
 from dateutil.parser import parse
 
 
-def reduce_asset(asset: dict) -> dict:
+def reduce_asset(asset: dict, *args, **kwargs) -> dict:
     """
     Takes from asset only values that are needed by our frontend.
 
@@ -22,11 +22,21 @@ def reduce_asset(asset: dict) -> dict:
         if element["format"] == "xls":
             download_link = element["url"]
 
+    settings = asset.get("settings")
+    country = None
+    sector = None
+
+    if settings:
+        if settings.get("sector"):
+            sector = settings["sector"].get("label")
+        if settings.get("country"):
+            country = settings["country"].get("label")
+
     return {
         "uid": asset["uid"],
         "name": asset["name"],
-        "sector": asset["settings"]["sector"]["label"],
-        "country": asset["settings"]["country"]["label"],
+        "sector": sector,
+        "country": country,
         "asset_type": asset["asset_type"],
         "date_modified": parse(asset["date_modified"]),
         "deployment_active": asset["deployment__active"],
@@ -35,7 +45,9 @@ def reduce_asset(asset: dict) -> dict:
     }
 
 
-def reduce_assets_list(assets: list, only_deployed: bool = False) -> list:
+def reduce_assets_list(
+    assets: list, only_deployed: bool = False, *args, **kwarg
+) -> list:
     if only_deployed:
         return [
             reduce_asset(asset)
