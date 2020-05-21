@@ -68,10 +68,4 @@ class AbstractSession(models.Model):
         abstract = True
 
 
-class SessionModel(models.Model):
-    session_id = models.ForeignKey(
-        "cash_assist_datahub.Session", on_delete=models.CASCADE
-    )
 
-    class Meta:
-        abstract = True

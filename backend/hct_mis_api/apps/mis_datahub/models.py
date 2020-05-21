@@ -12,11 +12,18 @@ from household.models import (
     MARITAL_STATUS_CHOICE,
     INDIVIDUAL_HOUSEHOLD_STATUS,
 )
-from utils.models import AbstractSession, SessionModel
+from utils.models import AbstractSession
 
 
-class MisSession(AbstractSession):
+class Session(AbstractSession):
     pass
+
+
+class SessionModel(models.Model):
+    session_id = models.ForeignKey("Session", on_delete=models.CASCADE)
+
+    class Meta:
+        abstract = True
 
 
 class Household(SessionModel):
@@ -35,8 +42,8 @@ class Household(SessionModel):
     agency_id = models.CharField(max_length=255, null=True)
     #  individual_id head of household
     focal_point = models.ForeignKey(
-        "cash_assist_datahub.Individual",
-        db_column="focal_point",
+        "mis_datahub.Individual",
+        db_column="focal_point_mis_id",
         on_delete=models.CASCADE,
         related_name="heading_household",
     )
@@ -49,8 +56,8 @@ class Household(SessionModel):
 class Individual(SessionModel):
     mis_id = models.UUIDField(primary_key=True,)
     household = models.ForeignKey(
-        "cash_assist_datahub.Household",
-        db_column="household_id",
+        "mis_datahub.Household",
+        db_column="household_mis_id",
         on_delete=models.CASCADE,
     )
     status = models.CharField(
@@ -90,8 +97,8 @@ class TargetPopulation(SessionModel):
 
     active_households = models.PositiveIntegerField(default=0)
     program = models.ForeignKey(
-        "cash_assist_datahub.Program",
-        db_column="program_id",
+        "mis_datahub.Program",
+        db_column="program_mis_id",
         on_delete=models.CASCADE,
     )
 
@@ -102,15 +109,23 @@ class TargetPopulation(SessionModel):
 class TargetPopulationEntry(SessionModel):
 
     target_population = models.ForeignKey(
-        "cash_assist_datahub.TargetPopulation", on_delete=models.CASCADE,
+        "mis_datahub.TargetPopulation",
+        on_delete=models.CASCADE,
+        db_column="target_population_mis_id",
     )
     household = models.ForeignKey(
-        "cash_assist_datahub.Household", on_delete=models.CASCADE, null=True
+        "mis_datahub.Household",
+        on_delete=models.CASCADE,
+        null=True,
+        db_column="household_mis_id",
     )
     individual = models.ForeignKey(
-        "cash_assist_datahub.Individual", on_delete=models.CASCADE, null=True
+        "mis_datahub.Individual",
+        on_delete=models.CASCADE,
+        null=True,
+        db_column="individual_mis_id",
     )
-    unhcr_household_id = models.CharField(max_length=255)
+    ca_household_id = models.CharField(max_length=255)
     vulnerability_score = models.DecimalField(
         blank=True,
         null=True,
