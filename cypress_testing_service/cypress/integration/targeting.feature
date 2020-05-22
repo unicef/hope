@@ -25,9 +25,9 @@ Feature: Target Population
   # I want to lock in the Beneficiary Data selected from my criteria set
   # So I can use it in CashAssist
 
-  # TODO: clarify Target Population vs Programme Population
   Scenario: Preparing potential list of beneficiaries to be added to a Cash Plan of a particular Program
-    Given the User is viewing existing Target Population in Open state
+    Given the User is viewing existing Target Population
+      And the Target Population is in Open state
     When the User closes the Programme Population
     Then the confirmation dialog for closing Programme Population is shown
       And the User is asked to provide associated Program
@@ -45,7 +45,8 @@ Feature: Target Population
   # So that it can be used for Programme Cash Plans
 
   Scenario: Finalizing list of Targeted Beneficiaries to send to CashAssist
-    Given the User is viewing existing Target Population in Closed state
+    Given the User is viewing existing Target Population
+      And the Target Population is in Closed state
     When the User sends the Target Population to Cash Assist
     Then the confirmation dialog for Send to Cash Assist is shown
 
@@ -56,8 +57,8 @@ Feature: Target Population
   # As a User I want to Duplicate the Target Criteria of a particular Programme Population
 
   Scenario: Refresh Eligible Beneficiaries with Current Population in the 'HCT MIS DB'
-    # TODO: parametrize over Closed and Sent
-    Given the User is viewing existing Target Population in Open state
+    Given the User is viewing existing Target Population
+      And the Target Population is in Open state
     When the User starts duplicating the existing Target Population
     Then the confirmation dialog for duplicating Target Population is shown
 

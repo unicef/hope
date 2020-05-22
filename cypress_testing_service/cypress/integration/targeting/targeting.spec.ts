@@ -9,35 +9,6 @@ import { uuid } from 'uuidv4';
 import { api } from '../../support/api';
 import { overrideSrollingStrategy } from '../../support/utils';
 
-const createTargetPopulation = () => {
-  cy.navigateTo('/target-population');
-
-  cy.getBusinessAreaSlug().then((businessAreaSlug) => {
-    cy.fixture('targetPopulation').then((targetPopulation) => {
-      const targetPopulationName = `${targetPopulation.name} ${uuid()}`;
-      api
-        .createTargetPopulation({
-          ...targetPopulation,
-          businessAreaSlug,
-          name: targetPopulationName,
-        })
-        .then((response) => {
-          expect(response.status).eq(200);
-
-          const {
-            data: {
-              createTargetPopulation: {
-                targetPopulation: createdTargetPopulation,
-              },
-            },
-          } = response.body;
-
-          cy.wrap(createdTargetPopulation).as('targetPopulation');
-        });
-    });
-  });
-};
-
 Before(() => {
   overrideSrollingStrategy();
 });
@@ -138,14 +109,43 @@ And(
   },
 );
 
-Given('the User is viewing existing Target Population in Open state', () => {
-  createTargetPopulation();
-  cy.get<{ id: string }>('@targetPopulation').then(({ id }) => {
-    cy.navigateTo(`/target-population/${id}`);
-    cy.getByTestId('criteria-container').then(($el) => {
-      cy.wrap($el.text()).as('targetPopulationCriteria');
+Given('the User is viewing existing Target Population', () => {
+  cy.navigateTo('/target-population');
+  cy.getBusinessAreaSlug().then((businessAreaSlug) => {
+    cy.fixture('targetPopulation').then((targetPopulation) => {
+      const targetPopulationName = `${targetPopulation.name} ${uuid()}`;
+      api
+        .createTargetPopulation({
+          ...targetPopulation,
+          businessAreaSlug,
+          name: targetPopulationName,
+        })
+        .then((response) => {
+          expect(response.status).eq(200);
+
+          const {
+            data: {
+              createTargetPopulation: {
+                targetPopulation: createdTargetPopulation,
+              },
+            },
+          } = response.body;
+
+          cy.wrap(createdTargetPopulation).as('targetPopulation');
+        });
     });
   });
+
+  cy.get<{ id: string }>('@targetPopulation').then(({ id }) => {
+    cy.navigateTo(`/target-population/${id}`);
+    cy.getByTestId('page-header-container')
+      .contains('target population', { matchCase: false })
+      .should('be.visible');
+  });
+});
+
+And('the Target Population is in Open state', () => {
+  cy.getByTestId('status-container').contains('open', { matchCase: false });
 });
 
 When('the User closes the Programme Population', () => {
@@ -198,26 +198,18 @@ And('the Programme Population details are locked', () => {
   });
 });
 
-Given('the User is viewing existing Target Population in Closed state', () => {
-  createTargetPopulation();
-  cy.get<{ id: string }>('@targetPopulation').then(({ id }) => {
-    cy.navigateTo(`/target-population/${id}`);
+// gdx
+And('the Target Population is in Closed state', () => {
+  cy.getByTestId('button-target-population-close').click();
 
-    // perform sequence of UI steps to close target population
-    cy.getByTestId('button-target-population-close').click();
+  cy.getByTestId('autocomplete-program').click();
+  cy.getByTestId('autocomplete-program-options').find('ul li').first().click();
 
-    cy.getByTestId('autocomplete-program').click();
-    cy.getByTestId('autocomplete-program-options')
-      .find('ul li')
-      .first()
-      .click();
+  cy.getByTestId('dialog-actions-container')
+    .getByTestId('button-target-population-close')
+    .click();
 
-    cy.getByTestId('dialog-actions-container')
-      .getByTestId('button-target-population-close')
-      .click();
-
-    cy.getByTestId('status-container').contains('closed', { matchCase: false });
-  });
+  cy.getByTestId('status-container').contains('closed', { matchCase: false });
 });
 
 When('the User sends the Target Population to Cash Assist', () => {
@@ -247,6 +239,9 @@ Then('the details for the Target Population are sent to Cash Assist', () => {
 });
 
 When('the User starts duplicating the existing Target Population', () => {
+  cy.getByTestId('criteria-container').then(($el) => {
+    cy.wrap($el.text()).as('targetPopulationCriteria');
+  });
   cy.getByTestId('button-target-population-duplicate').click();
 });
 
