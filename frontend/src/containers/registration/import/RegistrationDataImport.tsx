@@ -174,11 +174,11 @@ export function RegistrationDataImport(): React.ReactElement {
   if (get(uploadData, 'uploadImportDataXlsxFile.importData')) {
     counters = (
       <>
-        <div>
+        <div data-cy='import-available-households-counter'>
           {uploadData.uploadImportDataXlsxFile.importData.numberOfHouseholds}{' '}
           Households available to Import
         </div>
-        <div>
+        <div data-cy='import-available-individuals-counter'>
           {uploadData.uploadImportDataXlsxFile.importData.numberOfIndividuals}{' '}
           Individuals available to Import
         </div>
