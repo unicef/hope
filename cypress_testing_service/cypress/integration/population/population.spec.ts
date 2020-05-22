@@ -19,8 +19,7 @@ Given('the User is viewing the Population Household details screen', () => {
 
 When('the User enters alphanumeric string in search field', () => {
   cy.get('table thead tr th').each(($header, index) => {
-    // TODO: rework to use data-cy to identify specific col
-    if ($header.text().toLowerCase().includes('household id')) {
+    if ($header.attr('data-cy') === 'household-id') {
       cy.get('table tbody tr')
         .first()
         .then(($el) => {
