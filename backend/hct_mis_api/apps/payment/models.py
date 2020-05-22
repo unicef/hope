@@ -6,7 +6,7 @@ from django.db.models import Sum, UUIDField
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 
-from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
+from utils.models import TimeStampedUUIDModel
 
 
 class PaymentRecord(TimeStampedUUIDModel):
@@ -28,11 +28,17 @@ class PaymentRecord(TimeStampedUUIDModel):
     )
     status = models.CharField(max_length=255, choices=STATUS_CHOICE,)
     status_date = models.DateTimeField()
+    ca_id = models.CharField(max_length=255)
+    ca_hash_id = models.UUIDField(unique=True,)
     cash_plan = models.ForeignKey(
-        "program.CashPlan", on_delete=models.CASCADE, related_name="payment_records",
+        "program.CashPlan",
+        on_delete=models.CASCADE,
+        related_name="payment_records",
     )
     household = models.ForeignKey(
-        "household.Household", on_delete=models.CASCADE, related_name="payment_records",
+        "household.Household",
+        on_delete=models.CASCADE,
+        related_name="payment_records",
     )
     full_name = models.CharField(max_length=255)
     total_persons_covered = models.IntegerField()
@@ -45,7 +51,7 @@ class PaymentRecord(TimeStampedUUIDModel):
     target_population_cash_assist_id = models.CharField(max_length=255)
     entitlement_card_number = models.CharField(max_length=255,)
     entitlement_card_status = models.CharField(
-        choices=STATUS_CHOICE, default="ACTIVE", max_length=20,
+        choices=ENTITLEMENT_CARD_STATUS_CHOICE, default="ACTIVE", max_length=20,
     )
     entitlement_card_issue_date = models.DateField()
     delivery_type = models.CharField(
@@ -74,7 +80,7 @@ class ServiceProvider(TimeStampedUUIDModel):
     business_area = models.ForeignKey(
         "core.BusinessArea", on_delete=models.CASCADE
     )
-    cash_assist_id = models.CharField(max_length=255, unique=True)
+    ca_id = models.CharField(max_length=255, unique=True)
     full_name = models.CharField(max_length=255)
     short_name = models.CharField(max_length=4)
     country = models.CharField(max_length=3)
