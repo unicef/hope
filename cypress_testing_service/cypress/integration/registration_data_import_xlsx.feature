@@ -45,10 +45,10 @@ Feature: Be able to download a template and upload households and individuals to
         When the User unapproves the RDI import
         Then the RDI import changes status to in review
 
-# Scenario: Merging to golden record: Clean and Approved Import Data is merged to HCT Golden Records
-#     Given The User has the appropriate role and permissions
-#     And The source of Import Data is in the 'Approved' state
-#     When The User clicks on 'Merge' Button
-#     Then Import Source will be merged to HCT Datahub Golden Records
+    # Scenario: Merging to golden record: Clean and Approved Import Data is merged to HCT Golden Records
+    #     Given The User has the appropriate role and permissions
+    #     And The source of Import Data is in the 'Approved' state
+    #     When The User clicks on 'Merge' Button
+    #     Then Import Source will be merged to HCT Datahub Golden Records
 
-# Scenario: Verify that the data uploaded is visible in the golden record (population tab)
+    # Scenario: Verify that the data uploaded is visible in the golden record (population tab)
