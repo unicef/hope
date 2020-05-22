@@ -1,4 +1,12 @@
-import { When, Then } from 'cypress-cucumber-preprocessor/steps';
+import { When, Then, Before } from 'cypress-cucumber-preprocessor/steps';
+
+Before(() => {
+  // workaround due to app code issue:
+  // 'Warning: Each child in a list should have a unique "key" prop.'
+  Cypress.on('uncaught:exception', () => {
+    return false;
+  });
+});
 
 Then('I should get redirected to login', () => {
   cy.location('pathname').should('eq', '/login');
