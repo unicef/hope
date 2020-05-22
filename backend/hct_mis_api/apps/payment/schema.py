@@ -6,15 +6,7 @@ from graphene_django.filter import DjangoFilterConnectionField
 
 from core.schema import ChoiceObject
 from core.extended_connection import ExtendedConnection
-from payment.models import PaymentRecord, PaymentEntitlement
-
-
-class PaymentEntitlementNode(DjangoObjectType):
-    entitlement_quantity = graphene.Decimal()
-    delivered_quantity = graphene.Decimal()
-
-    class Meta:
-        model = PaymentEntitlement
+from payment.models import PaymentRecord
 
 
 class PaymentRecordFilter(FilterSet):
@@ -56,7 +48,6 @@ class Query(graphene.ObjectType):
         PaymentRecordNode, filterset_class=PaymentRecordFilter,
     )
     payment_record_status_choices = graphene.List(ChoiceObject)
-    all_payment_entitlements = graphene.List(PaymentEntitlementNode)
 
     def resolve_payment_record_status_choices(self, info, **kwargs):
         return [

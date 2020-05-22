@@ -111,8 +111,8 @@ class PaymentRecord(SessionModel):
     business_area = models.CharField(max_length=20)
     status = models.CharField(max_length=255, choices=STATUS_CHOICE,)
     status_date = models.DateTimeField()
-    payment_ca_id = models.CharField(max_length=255)
-    payment_ca_hash_id = models.UUIDField(primary_key=True,)
+    ca_id = models.CharField(max_length=255)
+    ca_hash_id = models.UUIDField(primary_key=True,)
     registration_ca_id = models.CharField(max_length=255)
     household_mis_id = models.UUIDField()
     # head of household
