@@ -11,7 +11,19 @@ class Command(makemigrations.Command):
             "reset_db",
             "--noinput",
             "--close-sessions",
-            router="cash_assist_datahub",
+            router="cash_assist_datahub_ca",
+        )
+        call_command(
+            "reset_db",
+            "--noinput",
+            "--close-sessions",
+            router="cash_assist_datahub_mis",
+        )
+        call_command(
+            "reset_db",
+            "--noinput",
+            "--close-sessions",
+            router="cash_assist_datahub_erp",
         )
         call_command(
             "reset_db",

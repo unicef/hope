@@ -112,26 +112,24 @@ class Program(TimeStampedUUIDModel):
 
 
 class CashPlan(TimeStampedUUIDModel):
+    STATUS_CHOICE = (
+        ("Distribution Completed", "Distribution Completed"),
+        (
+            "Distribution Completed with Errors",
+            "Distribution Completed with Errors",
+        ),
+        ("Transaction Completed", "Transaction Completed"),
+        (
+            "Transaction Completed with Errors",
+            "Transaction Completed with Errors",
+        ),
+    )
     business_area = models.ForeignKey(
         "core.BusinessArea", on_delete=models.CASCADE
     )
     ca_id = models.CharField(max_length=255)
     ca_hash_id = models.UUIDField(unique=True)
-    status = models.CharField(
-        max_length=255,
-        choices=(
-            ("Distribution Completed", "Distribution Completed"),
-            (
-                "Distribution Completed with Errors",
-                "Distribution Completed with Errors",
-            ),
-            ("Transaction Completed", "Transaction Completed"),
-            (
-                "Transaction Completed with Errors",
-                "Transaction Completed with Errors",
-            ),
-        ),
-    )
+    status = models.CharField(max_length=255, choices=STATUS_CHOICE,)
     status_date = models.DateTimeField()
     name = models.CharField(max_length=255)
     distribution_level = models.CharField(max_length=255)
@@ -153,7 +151,6 @@ class CashPlan(TimeStampedUUIDModel):
     validation_alerts_count = models.IntegerField()
     total_persons_covered = models.IntegerField()
     total_persons_covered_revised = models.IntegerField()
-    payment_records_count = models.IntegerField()
     total_entitled_quantity = models.DecimalField(
         decimal_places=2,
         max_digits=12,
@@ -175,5 +172,8 @@ class CashPlan(TimeStampedUUIDModel):
         validators=[MinValueValidator(Decimal("0.01"))],
     )
 
+    @property
+    def payment_records_count(self):
+        return self.payment_records.count()
 
 auditlog.register(Program)
