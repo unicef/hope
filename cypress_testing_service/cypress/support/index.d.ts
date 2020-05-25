@@ -1,5 +1,10 @@
 declare namespace Cypress {
   interface Chainable<Subject> {
+    /**
+     * Allows to login using AD or authMock.
+     * The 'role' is not supported currently by authMock.
+     * Ref. to cypress.env.json for additional details.
+     */
     login({ role }: { role: string }): Chainable<Subject>;
 
     loginToAD(

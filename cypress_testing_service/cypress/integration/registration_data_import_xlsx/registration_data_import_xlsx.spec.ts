@@ -8,10 +8,10 @@ import {
 import { uuid } from 'uuidv4';
 import { WorkBook } from 'xlsx';
 import { apiUrl, api } from '../../support/api';
-import { overrideSrollingStrategy } from '../../support/utils';
+import { overrideScrollingStrategy } from '../../support/utils';
 
 Before(() => {
-  overrideSrollingStrategy();
+  overrideScrollingStrategy();
 
   // workaround due to app code issue:
   // 'Warning: validateDOMNesting(...): <h6> cannot appear as a child of <h2>.'

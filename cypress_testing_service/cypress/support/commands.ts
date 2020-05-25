@@ -1,4 +1,3 @@
-// TODO:
 Cypress.Commands.add('login', ({ role }) => {
   const { username, password } = Cypress.env(role);
   const loginUrl = Cypress.env('loginUrl');
