@@ -4,6 +4,8 @@ Feature: Authentication related functionality. Logging in, redirects
     Also tests the logout functionality.
 
     TODO: Add functionality around the user profile itself one the feature works.
+    Background:
+        Given I am not logged in to AD
 
     Scenario: Redirect to login screen if not logged in
         When I visit /
