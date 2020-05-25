@@ -11,4 +11,13 @@ Given('I login to AD as {word}', (role: string) => {
   cy.visit(loginUrl);
 });
 
+Given('I login once to AD as {word}', () => {
+  // do nothing, perform login procedure in scope of
+  // before.ts located together with spec file,
+  // so that login would be invoked only once before
+  // all scenarios for the given feature
+});
 
+Given('I am not logged in to AD', () => {
+  cy.request('/api/logout');
+});
