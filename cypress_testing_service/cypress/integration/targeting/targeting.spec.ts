@@ -7,10 +7,10 @@ import {
 } from 'cypress-cucumber-preprocessor/steps';
 import { uuid } from 'uuidv4';
 import { api } from '../../support/api';
-import { overrideSrollingStrategy } from '../../support/utils';
+import { overrideScrollingStrategy } from '../../support/utils';
 
 Before(() => {
-  overrideSrollingStrategy();
+  overrideScrollingStrategy();
 });
 
 Given('the User is viewing the Targeting List screen', () => {
@@ -198,7 +198,6 @@ And('the Programme Population details are locked', () => {
   });
 });
 
-// gdx
 And('the Target Population is in Closed state', () => {
   cy.getByTestId('button-target-population-close').click();
 

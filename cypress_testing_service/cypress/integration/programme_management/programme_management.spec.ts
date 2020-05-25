@@ -7,7 +7,7 @@ import {
 } from 'cypress-cucumber-preprocessor/steps';
 import { uuid } from 'uuidv4';
 import { api } from '../../support/api';
-import { overrideSrollingStrategy } from '../../support/utils';
+import { overrideScrollingStrategy } from '../../support/utils';
 
 let state: any = {
   createdProgram: {},
@@ -26,7 +26,7 @@ const executeProgramAction = (action) => {
 };
 
 Before(() => {
-  overrideSrollingStrategy();
+  overrideScrollingStrategy();
 });
 
 When('User starts creating New Programme', () => {
@@ -155,7 +155,7 @@ And('the Programme is in {word} state', (status: string) => {
 });
 
 Then('the Programme is soft deleted', () => {
-  // TODO checking soft delete state
+  // TODO: check soft delete state
 });
 
 And('the Programme is no longer accessible', () => {
