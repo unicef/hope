@@ -1,6 +1,6 @@
 declare namespace Cypress {
   interface Chainable<Subject> {
-    login(): Chainable<Subject>;
+    login({ role }: { role: string }): Chainable<Subject>;
 
     loginToAD(
       username: string,
@@ -9,6 +9,8 @@ declare namespace Cypress {
     ): Chainable<Subject>;
 
     loginWithMock(): Chainable<Subject>;
+
+    logout(): Chainable<Subject>;
 
     getByTestId<E extends Node = HTMLElement>(
       testId: string,
@@ -25,6 +27,11 @@ declare namespace Cypress {
 
     parseXlsxData(nameOrIndex?: string | number): Chainable<any>;
 
-    gqlUploadFile(url: string, operations: object, blob: Blob, fileName: string): Chainable<object>;
+    gqlUploadFile(
+      url: string,
+      operations: object,
+      blob: Blob,
+      fileName: string,
+    ): Chainable<object>;
   }
 }

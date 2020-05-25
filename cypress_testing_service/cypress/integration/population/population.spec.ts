@@ -6,8 +6,6 @@ Before(() => {
 });
 
 Given('the User is viewing the Population Household details screen', () => {
-//   cy.contains('user management', { matchCase: false }).click();
-
   cy.navigateTo('/population/household');
 
   cy.getByTestId('page-header-container').contains('households', {
