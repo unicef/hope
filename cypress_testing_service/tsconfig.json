@@ -19,6 +19,7 @@
     "cypress"
   ],
   "exclude": [
-    "node_modules/cypress-promise/index.d.ts"
+    "node_modules/cypress-promise/index.d.ts",
+    "cypress/support/localStorage"
   ]
 }

@@ -1,20 +1,20 @@
-import mockAuthCookies from './mockAuthCookies.json';
+Cypress.Commands.add('login', () => {
+  const userRole = 'countryAdmin';
+  const { username, password } = Cypress.env(userRole);
+  const loginUrl = Cypress.env('loginUrl');
 
-const login = (cookies) => {
-  cy.clearCookies();
+  if (!Cypress.env('useAuthMock')) {
+    cy.log(`Signing in user to AD as ${userRole}`);
+    cy.loginToAD(username, password, loginUrl);
+    cy.visit(loginUrl);
+  } else {
+    cy.log('Signing in user with mock');
+    cy.loginWithMock();
+    cy.visit('/');
+  }
 
-  cookies.forEach((cookie) => {
-    cy.setCookie(cookie.name, cookie.value, {
-      domain: cookie.domain,
-      expiry: cookie.expires,
-      httpOnly: cookie.httpOnly,
-      path: cookie.path,
-      secure: cookie.secure,
-      sameSite: cookie.sameSite,
-    });
-    Cypress.Cookies.preserveOnce(cookie.name);
-  });
-};
+  cy.wrap({ username }).as('loggedUser');
+});
 
 Cypress.Commands.add('loginToAD', (username, password, loginUrl) => {
   const options = {
@@ -31,14 +31,54 @@ Cypress.Commands.add('loginToAD', (username, password, loginUrl) => {
   // https://github.com/cypress-io/cypress/issues/1342
   // https://github.com/cypress-io/cypress/issues/944
   cy.task('AzureAdSingleSignOn', options).then(
-    ({ cookies }: { cookies: Cypress.Cookie }) => {
-      login(cookies);
+    ({ cookies }: { cookies: any }) => {
+      cy.clearCookies();
+
+      const whitelist: string[] = [];
+      cookies.forEach((cookie) => {
+        cy.setCookie(cookie.name, cookie.value, {
+          domain: cookie.domain,
+          expiry: cookie.expires,
+          httpOnly: cookie.httpOnly,
+          path: cookie.path,
+          secure: cookie.secure,
+          sameSite: cookie.sameSite,
+        });
+
+        whitelist.push(cookie.name);
+      });
+
+      Cypress.Cookies.defaults({ whitelist });
     },
   );
 });
 
 Cypress.Commands.add('loginWithMock', () => {
-  login(mockAuthCookies);
+  cy.clearCookies();
+  cy.clearLocalStorage();
+
+  const { cookies: mockCookies, localStorage: mockStorage } = Cypress.env(
+    'authMock',
+  );
+
+  mockCookies.forEach((cookie) => {
+    cy.setCookie(cookie.name, cookie.value, {
+      domain: cookie.domain,
+      expiry: cookie.expires,
+      httpOnly: cookie.httpOnly,
+      path: cookie.path,
+      secure: cookie.secure,
+      sameSite: cookie.sameSite.toLowerCase() as Cypress.SameSiteStatus,
+    });
+  });
+
+  Cypress.Cookies.defaults({
+    whitelist: Cypress.env('whitelist').cookies,
+  });
+
+  Object.keys(mockStorage).forEach((key) =>
+    localStorage.setItem(key, mockStorage[key]),
+  );
 });
 
 Cypress.Commands.add(
