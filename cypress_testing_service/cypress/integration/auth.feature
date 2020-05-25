@@ -4,8 +4,6 @@ Feature: Authentication related functionality. Logging in, redirects
     Also tests the logout functionality.
 
     TODO: Add functionality around the user profile itself one the feature works.
-    Background:
-        Given I am not logged in to AD
 
     Scenario: Redirect to login screen if not logged in
         When I visit /
@@ -22,6 +20,5 @@ Feature: Authentication related functionality. Logging in, redirects
         Then I see my email address in the header
 
     Scenario: Logging out of HCT
-        Given I login to AD as countryAdmin
         When I click Logout
         Then I should get redirected to login

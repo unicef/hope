@@ -1,10 +1,10 @@
-Cypress.Commands.add('login', () => {
-  const userRole = 'countryAdmin';
-  const { username, password } = Cypress.env(userRole);
+// TODO:
+Cypress.Commands.add('login', ({ role }) => {
+  const { username, password } = Cypress.env(role);
   const loginUrl = Cypress.env('loginUrl');
 
   if (!Cypress.env('useAuthMock')) {
-    cy.log(`Signing in user to AD as ${userRole}`);
+    cy.log(`Signing in user to AD as ${role}`);
     cy.loginToAD(username, password, loginUrl);
     cy.visit(loginUrl);
   } else {
@@ -54,9 +54,6 @@ Cypress.Commands.add('loginToAD', (username, password, loginUrl) => {
 });
 
 Cypress.Commands.add('loginWithMock', () => {
-  cy.clearCookies();
-  cy.clearLocalStorage();
-
   const { cookies: mockCookies, localStorage: mockStorage } = Cypress.env(
     'authMock',
   );
@@ -81,6 +78,12 @@ Cypress.Commands.add('loginWithMock', () => {
   );
 });
 
+Cypress.Commands.add('logout', () => {
+  localStorage.removeItem('AUTHENTICATED');
+  cy.clearCookies();
+  cy.request('/api/logout');
+});
+
 Cypress.Commands.add(
   'getByTestId',
   {
@@ -96,10 +99,6 @@ Cypress.Commands.add(
     }
   },
 );
-
-// Cypress.Commands.add('getByTestId', (value, options) => {
-//   return cy.get(`[data-cy=${value}]`, options);
-// });
 
 Cypress.Commands.add('getBusinessAreaSlug', () => {
   cy.location('pathname').then((pathname) => {

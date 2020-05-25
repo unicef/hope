@@ -19,3 +19,4 @@ import 'cypress-file-upload';
 import './commands';
 import './chai';
 import './localStorage';
+import './before';
