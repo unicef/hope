@@ -7887,7 +7887,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'name': 'phone_no',
                 'required': False,
-                'type': 'INTEGER'
+                'type': 'STRING'
             },
             {
                 'associatedWith': 'Individual',
@@ -7904,7 +7904,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'name': 'phone_no_alternative',
                 'required': False,
-                'type': 'INTEGER'
+                'type': 'STRING'
             },
             {
                 'associatedWith': 'Individual',
@@ -7988,6 +7988,23 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                     }
                 ],
                 'name': 'national_passport',
+                'required': False,
+                'type': 'STRING'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'National ID number',
+                'labels': [
+                    {
+                        'label': 'National ID number',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'national_id',
                 'required': False,
                 'type': 'STRING'
             },

@@ -15,8 +15,10 @@ from core.utils import (
     serialize_flex_attributes,
 )
 from household.const import COUNTRIES_NAME_ALPHA2
+from household.models import IDENTIFICATION_TYPE_CHOICE
 from registration_data.models import RegistrationDataImport
-from registration_datahub.models import ImportData
+from registration_datahub.models import ImportData, ImportedAgency, \
+    ImportedIndividualIdentity
 from registration_datahub.models import (
     ImportedDocument,
     ImportedDocumentType,
@@ -43,6 +45,7 @@ class RdiCreateTask:
     households = None
     individuals = None
     documents = None
+    identities = None
 
     def _cast_value(self, value, header):
         if value in (None, ""):
@@ -63,39 +66,49 @@ class RdiCreateTask:
         return value
 
     def _handle_document_fields(
-        self, value, header, individual, *args, **kwargs
+        self, value, header, row_num, individual, *args, **kwargs
     ):
         if value is None:
             return
 
+        document_data = self.documents.get(f"individual_{row_num}")
+
         if header == "other_id_type_i_c":
-            doc_type = value
+            if document_data:
+                document_data["name"] = value
+            else:
+                self.documents[f"individual_{row_num}"] = {
+                    "individual": individual,
+                    "name": value,
+                    "type": "OTHER",
+                }
+        elif header == "other_id_no_i_c":
+            if document_data:
+                document_data["value"] = value
+            else:
+                self.documents[f"individual_{row_num}"] = {
+                    "individual": individual,
+                    "value": value,
+                    "type": "OTHER",
+                }
         else:
             readable_name = (
                 header.replace("_no", "").replace("_i_c", "").replace("_", " ")
             )
-            readable_name_split = readable_name.split(" ")
-            doc_type = ""
-            for word in readable_name_split:
-                if word == "id":
-                    doc_type += word.upper() + " "
-                else:
-                    doc_type += word.capitalize() + " "
-            doc_type = doc_type.strip()
-        row_num = kwargs.get("row_number")
-        document_data = self.documents.get(f"individual_{row_num}")
-        if document_data:
-            document_data["value"] = value
-        else:
-            self.documents[f"individual_{row_num}"] = {
-                "individual": individual,
-                "header": header,
-                "type": doc_type,
-                "value": value,
-            }
+            doc_type = readable_name.split(" ").upper().strip()
+
+            if document_data:
+                document_data["value"] = value
+            else:
+                self.documents[f"individual_{row_num}"] = {
+                    "individual": individual,
+                    "name": IDENTIFICATION_TYPE_CHOICE.get(doc_type),
+                    "type": doc_type,
+                    "value": value,
+                }
 
     def _handle_document_photo_fields(
-        self, cell, header, row_num, individual, *args, **kwargs
+        self, cell, row_num, individual, *args, **kwargs
     ):
         if not self.image_loader.image_in(cell.coordinate):
             return
@@ -115,7 +128,6 @@ class RdiCreateTask:
         else:
             self.documents[f"individual_{row_num}"] = {
                 "individual": individual,
-                "header": header,
                 "photo": file_name,
             }
 
@@ -135,26 +147,74 @@ class RdiCreateTask:
             return file
         return ""
 
-    def _handle_geopoint_field(self, value, header, *args, **kwargs):
+    def _handle_geopoint_field(self, value, *args, **kwargs):
         if not value:
             return ""
 
         values_as_list = value.split(",")
         longitude = values_as_list[0].strip()
         latitude = values_as_list[1].strip()
+
         return Point(x=float(longitude), y=float(latitude), srid=4326)
+
+    def _handle_identity_fields(
+        self, value, header, row_num, individual, *args, **kwargs
+    ):
+        if value is None:
+            return
+
+        agency = ImportedAgency.objects.get(
+            type="WFP" if header == "scope_id_no" else "UNHCR"
+        )
+
+        identities_data = self.identities.get(f"individual_{row_num}")
+
+        if identities_data:
+            identities_data["number"] = value
+            identities_data["agency"] = agency
+
+        self.documents[f"individual_{row_num}"] = {
+            "individual": individual,
+            "number": value,
+            "agency": agency,
+        }
+
+    def _handle_identity_photo(
+        self, cell, row_num, individual, *args, **kwargs
+    ):
+        if not self.image_loader.image_in(cell.coordinate):
+            return
+
+        identity_data = self.documents.get(f"individual_{row_num}")
+
+        image = self.image_loader.get(cell.coordinate)
+        file_name = f"{cell.coordinate}-{timezone.now()}.jpg"
+        file_io = BytesIO()
+
+        image.save(file_io, image.format)
+
+        file = File(file_io, name=file_name)
+
+        if identity_data:
+            identity_data["photo"] = file
+        else:
+            self.identities[f"individual_{row_num}"] = {
+                "individual": individual,
+                "photo": file_name,
+            }
 
     def _create_documents(self):
         docs_to_create = []
         for document_data in self.documents.values():
-            doc_type = ImportedDocumentType.objects.filter(
+            doc_type, is_created = ImportedDocumentType.objects.get_or_create(
                 country=Country(
                     COUNTRIES_NAME_ALPHA2.get(
                         self.business_area.name.capitalize()
                     )
                 ),
-                label=document_data.get("type"),
-            ).first()
+                label=document_data["name"],
+                type=document_data["type"],
+            )
             photo = document_data.get("photo")
             individual = document_data.get("individual")
             obj = ImportedDocument(
@@ -168,6 +228,17 @@ class RdiCreateTask:
 
         ImportedDocument.objects.bulk_create(docs_to_create)
 
+    def _create_identities(self):
+        idents_to_create = [
+            ImportedIndividualIdentity(
+                agency=ident_data["agency"],
+                individual=ident_data["individual"],
+                document_number=ident_data["number"],
+            ) for ident_data in self.identities.values()
+        ]
+
+        ImportedIndividualIdentity.objects.bulk_create(idents_to_create)
+
     def _create_objects(self, sheet, registration_data_import):
         complex_fields = {
             "individuals": {
@@ -177,14 +248,12 @@ class RdiCreateTask:
                 "drivers_license_photo_i_c": self._handle_document_photo_fields,
                 "electoral_card_no_i_c": self._handle_document_fields,
                 "electoral_card_photo_i_c": self._handle_document_photo_fields,
-                "unhcr_id_no_i_c": self._handle_document_fields,
-                "unhcr_id_photo_i_c": self._handle_document_photo_fields,
+                "unhcr_id_no_i_c": self._handle_identity_fields,
                 "national_id_no_ic": self._handle_document_fields,
                 "national_id_photo_ic": self._handle_document_photo_fields,
                 "national_passport_i_c": self._handle_document_fields,
                 "national_passport_photo_i_c": self._handle_document_photo_fields,
-                "scope_id_no_i_c": self._handle_document_fields,
-                "scope_id_photo_i_c": self._handle_document_photo_fields,
+                "scope_id_no_i_c": self._handle_identity_fields,
                 "other_id_type_i_c": self._handle_document_fields,
                 "other_id_no_i_c": self._handle_document_fields,
                 "other_id_photo_i_c": self._handle_document_photo_fields,
@@ -308,6 +377,7 @@ class RdiCreateTask:
                 households_to_update, ["head_of_household"], 1000,
             )
             self._create_documents()
+            self._create_identities()
 
     @transaction.atomic()
     def execute(
@@ -315,6 +385,7 @@ class RdiCreateTask:
     ):
         self.households = {}
         self.documents = {}
+        self.identities = {}
         self.individuals = []
 
         registration_data_import = RegistrationDataImportDatahub.objects.get(

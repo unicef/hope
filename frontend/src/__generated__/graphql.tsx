@@ -390,6 +390,7 @@ export type DocumentTypeNode = {
   updatedAt: Scalars['DateTime'],
   country?: Maybe<Scalars['String']>,
   label: Scalars['String'],
+  type: DocumentTypeType,
   documents: DocumentNodeConnection,
 };
 
@@ -400,6 +401,15 @@ export type DocumentTypeNodeDocumentsArgs = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>
 };
+
+export enum DocumentTypeType {
+  BirthCertificate = 'BIRTH_CERTIFICATE',
+  DriversLicense = 'DRIVERS_LICENSE',
+  NationalId = 'NATIONAL_ID',
+  NationalPassport = 'NATIONAL_PASSPORT',
+  ElectoralCard = 'ELECTORAL_CARD',
+  Other = 'OTHER'
+}
 
 export type FieldAttributeNode = {
    __typename?: 'FieldAttributeNode',
@@ -833,6 +843,7 @@ export type ImportedDocumentTypeNode = {
   updatedAt: Scalars['DateTime'],
   country?: Maybe<ImportedDocumentTypeCountry>,
   label: Scalars['String'],
+  type: ImportedDocumentTypeType,
   documents: ImportedDocumentNodeConnection,
 };
 
@@ -843,6 +854,15 @@ export type ImportedDocumentTypeNodeDocumentsArgs = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>
 };
+
+export enum ImportedDocumentTypeType {
+  BirthCertificate = 'BIRTH_CERTIFICATE',
+  DriversLicense = 'DRIVERS_LICENSE',
+  NationalId = 'NATIONAL_ID',
+  NationalPassport = 'NATIONAL_PASSPORT',
+  ElectoralCard = 'ELECTORAL_CARD',
+  Other = 'OTHER'
+}
 
 export type ImportedHouseholdNode = Node & {
    __typename?: 'ImportedHouseholdNode',
@@ -1173,6 +1193,7 @@ export type MutationsDeleteProgramArgs = {
 
 
 export type MutationsUploadImportDataXlsxFileArgs = {
+  businessAreaSlug: Scalars['String'],
   file: Scalars['Upload']
 };
 
@@ -3525,7 +3546,8 @@ export type UnapproveRdiMutation = (
 );
 
 export type UploadImportDataXlsxFileMutationVariables = {
-  file: Scalars['Upload']
+  file: Scalars['Upload'],
+  businessAreaSlug: Scalars['String']
 };
 
 
@@ -6591,8 +6613,8 @@ export type UnapproveRdiMutationHookResult = ReturnType<typeof useUnapproveRdiMu
 export type UnapproveRdiMutationResult = ApolloReactCommon.MutationResult<UnapproveRdiMutation>;
 export type UnapproveRdiMutationOptions = ApolloReactCommon.BaseMutationOptions<UnapproveRdiMutation, UnapproveRdiMutationVariables>;
 export const UploadImportDataXlsxFileDocument = gql`
-    mutation UploadImportDataXlsxFile($file: Upload!) {
-  uploadImportDataXlsxFile(file: $file) {
+    mutation UploadImportDataXlsxFile($file: Upload!, $businessAreaSlug: String!) {
+  uploadImportDataXlsxFile(file: $file, businessAreaSlug: $businessAreaSlug) {
     errors {
       header
       message
@@ -6642,6 +6664,7 @@ export function withUploadImportDataXlsxFile<TProps, TChildProps = {}>(operation
  * const [uploadImportDataXlsxFileMutation, { data, loading, error }] = useUploadImportDataXlsxFileMutation({
  *   variables: {
  *      file: // value for 'file'
+ *      businessAreaSlug: // value for 'businessAreaSlug'
  *   },
  * });
  */
@@ -7077,6 +7100,7 @@ export type ResolversTypes = {
   DocumentNodeEdge: ResolverTypeWrapper<DocumentNodeEdge>,
   DocumentNode: ResolverTypeWrapper<DocumentNode>,
   DocumentTypeNode: ResolverTypeWrapper<DocumentTypeNode>,
+  DocumentTypeType: DocumentTypeType,
   Decimal: ResolverTypeWrapper<Scalars['Decimal']>,
   ProgramFrequencyOfPayments: ProgramFrequencyOfPayments,
   ProgramSector: ProgramSector,
@@ -7112,6 +7136,7 @@ export type ResolversTypes = {
   ImportedDocumentNode: ResolverTypeWrapper<ImportedDocumentNode>,
   ImportedDocumentTypeNode: ResolverTypeWrapper<ImportedDocumentTypeNode>,
   ImportedDocumentTypeCountry: ImportedDocumentTypeCountry,
+  ImportedDocumentTypeType: ImportedDocumentTypeType,
   RegistrationDataImportDatahubNodeConnection: ResolverTypeWrapper<RegistrationDataImportDatahubNodeConnection>,
   RegistrationDataImportDatahubNodeEdge: ResolverTypeWrapper<RegistrationDataImportDatahubNodeEdge>,
   DjangoDebug: ResolverTypeWrapper<DjangoDebug>,
@@ -7211,6 +7236,7 @@ export type ResolversParentTypes = {
   DocumentNodeEdge: DocumentNodeEdge,
   DocumentNode: DocumentNode,
   DocumentTypeNode: DocumentTypeNode,
+  DocumentTypeType: DocumentTypeType,
   Decimal: Scalars['Decimal'],
   ProgramFrequencyOfPayments: ProgramFrequencyOfPayments,
   ProgramSector: ProgramSector,
@@ -7246,6 +7272,7 @@ export type ResolversParentTypes = {
   ImportedDocumentNode: ImportedDocumentNode,
   ImportedDocumentTypeNode: ImportedDocumentTypeNode,
   ImportedDocumentTypeCountry: ImportedDocumentTypeCountry,
+  ImportedDocumentTypeType: ImportedDocumentTypeType,
   RegistrationDataImportDatahubNodeConnection: RegistrationDataImportDatahubNodeConnection,
   RegistrationDataImportDatahubNodeEdge: RegistrationDataImportDatahubNodeEdge,
   DjangoDebug: DjangoDebug,
@@ -7494,6 +7521,7 @@ export type DocumentTypeNodeResolvers<ContextType = any, ParentType extends Reso
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   label?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  type?: Resolver<ResolversTypes['DocumentTypeType'], ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, DocumentTypeNodeDocumentsArgs>,
 };
 
@@ -7614,6 +7642,7 @@ export type ImportedDocumentTypeNodeResolvers<ContextType = any, ParentType exte
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['ImportedDocumentTypeCountry']>, ParentType, ContextType>,
   label?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  type?: Resolver<ResolversTypes['ImportedDocumentTypeType'], ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['ImportedDocumentNodeConnection'], ParentType, ContextType, ImportedDocumentTypeNodeDocumentsArgs>,
 };
 
@@ -7795,7 +7824,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   createProgram?: Resolver<Maybe<ResolversTypes['CreateProgram']>, ParentType, ContextType, RequireFields<MutationsCreateProgramArgs, 'programData'>>,
   updateProgram?: Resolver<Maybe<ResolversTypes['UpdateProgram']>, ParentType, ContextType, MutationsUpdateProgramArgs>,
   deleteProgram?: Resolver<Maybe<ResolversTypes['DeleteProgram']>, ParentType, ContextType, RequireFields<MutationsDeleteProgramArgs, 'programId'>>,
-  uploadImportDataXlsxFile?: Resolver<Maybe<ResolversTypes['UploadImportDataXLSXFile']>, ParentType, ContextType, RequireFields<MutationsUploadImportDataXlsxFileArgs, 'file'>>,
+  uploadImportDataXlsxFile?: Resolver<Maybe<ResolversTypes['UploadImportDataXLSXFile']>, ParentType, ContextType, RequireFields<MutationsUploadImportDataXlsxFileArgs, 'businessAreaSlug' | 'file'>>,
   deleteRegistrationDataImport?: Resolver<Maybe<ResolversTypes['DeleteRegistrationDataImport']>, ParentType, ContextType, RequireFields<MutationsDeleteRegistrationDataImportArgs, 'registrationDataImportId'>>,
   createRegistrationDataImport?: Resolver<Maybe<ResolversTypes['CreateRegistrationDataImport']>, ParentType, ContextType, RequireFields<MutationsCreateRegistrationDataImportArgs, 'registrationDataImportData'>>,
   approveRegistrationDataImport?: Resolver<Maybe<ResolversTypes['ApproveRegistrationDataImportMutation']>, ParentType, ContextType, RequireFields<MutationsApproveRegistrationDataImportArgs, 'id'>>,

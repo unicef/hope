@@ -2,6 +2,7 @@ import operator
 from unittest import TestCase, mock
 
 import openpyxl
+from openpyxl_image_loader import SheetImageLoader
 
 from registration_datahub.validators import UploadXLSXValidator
 
@@ -155,7 +156,7 @@ class TestXLSXValidatorsMethods(TestCase):
                 "row_number": 7,
                 "header": "relationship_i_c",
                 "message": "Sheet: Individuals, There are multiple head of "
-                           "households for household with id: 3",
+                "households for household with id: 3",
             }
         ]
 
@@ -181,9 +182,19 @@ class TestXLSXValidatorsMethods(TestCase):
                         "message": "Sheet: Households, Unexpected value: Option 1 for type select many of field assistance_type_h_f",
                     },
                     {
+                        "row_number": 3,
+                        "header": "water_source_h_f",
+                        "message": "Sheet: Households, Unexpected value: Buy bottled water for type select one of field water_source_h_f",
+                    },
+                    {
                         "row_number": 4,
                         "header": "assistance_type_h_f",
                         "message": "Sheet: Households, Unexpected value: Option 1, Option 2, Option 3 for type select many of field assistance_type_h_f",
+                    },
+                    {
+                        "row_number": 4,
+                        "header": "water_source_h_f",
+                        "message": "Sheet: Households, Unexpected value: From piped water for type select one of field water_source_h_f",
                     },
                     {
                         "row_number": 5,
@@ -191,9 +202,19 @@ class TestXLSXValidatorsMethods(TestCase):
                         "message": "Sheet: Households, Unexpected value: Option 13 for type select many of field assistance_type_h_f",
                     },
                     {
+                        "row_number": 5,
+                        "header": "water_source_h_f",
+                        "message": "Sheet: Households, Unexpected value: PRIV_VENDOR for type select one of field water_source_h_f",
+                    },
+                    {
                         "row_number": 6,
                         "header": "assistance_type_h_f",
                         "message": "Sheet: Households, Unexpected value: Option 3 for type select many of field assistance_type_h_f",
+                    },
+                    {
+                        "row_number": 6,
+                        "header": "water_source_h_f",
+                        "message": "Sheet: Households, Unexpected value: To buy water from water tank for type select one of field water_source_h_f",
                     },
                     {
                         "row_number": 7,
@@ -201,9 +222,19 @@ class TestXLSXValidatorsMethods(TestCase):
                         "message": "Sheet: Households, Unexpected value: Option 1, Option 3 for type select many of field assistance_type_h_f",
                     },
                     {
+                        "row_number": 7,
+                        "header": "water_source_h_f",
+                        "message": "Sheet: Households, Unexpected value: Collect water from rain water for type select one of field water_source_h_f",
+                    },
+                    {
                         "row_number": 8,
                         "header": "assistance_type_h_f",
                         "message": "Sheet: Households, Unexpected value: Option 2, Option 3 for type select many of field assistance_type_h_f",
+                    },
+                    {
+                        "row_number": 8,
+                        "header": "water_source_h_f",
+                        "message": "Sheet: Households, Unexpected value: Collect water from a well/source directly for type select one of field water_source_h_f",
                     },
                     {
                         "row_number": 9,
@@ -211,9 +242,19 @@ class TestXLSXValidatorsMethods(TestCase):
                         "message": "Sheet: Households, Unexpected value: Option 2 for type select many of field assistance_type_h_f",
                     },
                     {
+                        "row_number": 9,
+                        "header": "water_source_h_f",
+                        "message": "Sheet: Households, Unexpected value: Buy bottled water for type select one of field water_source_h_f",
+                    },
+                    {
                         "row_number": 10,
                         "header": "assistance_type_h_f",
                         "message": "Sheet: Households, Unexpected value: Option 1, Option 2, Option 4 for type select many of field assistance_type_h_f",
+                    },
+                    {
+                        "row_number": 10,
+                        "header": "water_source_h_f",
+                        "message": "Sheet: Households, Unexpected value: From piped water for type select one of field water_source_h_f",
                     },
                     {
                         "row_number": 11,
@@ -221,9 +262,19 @@ class TestXLSXValidatorsMethods(TestCase):
                         "message": "Sheet: Households, Unexpected value: Option 4 for type select many of field assistance_type_h_f",
                     },
                     {
+                        "row_number": 11,
+                        "header": "water_source_h_f",
+                        "message": "Sheet: Households, Unexpected value: From private vendor for type select one of field water_source_h_f",
+                    },
+                    {
                         "row_number": 12,
                         "header": "assistance_type_h_f",
                         "message": "Sheet: Households, Unexpected value: Option 5 for type select many of field assistance_type_h_f",
+                    },
+                    {
+                        "row_number": 12,
+                        "header": "water_source_h_f",
+                        "message": "Sheet: Households, Unexpected value: To buy water from water tank for type select one of field water_source_h_f",
                     },
                     {
                         "row_number": 13,
@@ -231,9 +282,19 @@ class TestXLSXValidatorsMethods(TestCase):
                         "message": "Sheet: Households, Unexpected value: Option 1, Option 4 for type select many of field assistance_type_h_f",
                     },
                     {
+                        "row_number": 13,
+                        "header": "water_source_h_f",
+                        "message": "Sheet: Households, Unexpected value: Collect water from rain water for type select one of field water_source_h_f",
+                    },
+                    {
                         "row_number": 14,
                         "header": "assistance_type_h_f",
                         "message": "Sheet: Households, Unexpected value: Option 2, Option 4 for type select many of field assistance_type_h_f",
+                    },
+                    {
+                        "row_number": 14,
+                        "header": "water_source_h_f",
+                        "message": "Sheet: Households, Unexpected value: Collect water from a well/source directly for type select one of field water_source_h_f",
                     },
                     {
                         "row_number": 15,
@@ -241,9 +302,19 @@ class TestXLSXValidatorsMethods(TestCase):
                         "message": "Sheet: Households, Unexpected value: Option 3 for type select many of field assistance_type_h_f",
                     },
                     {
+                        "row_number": 15,
+                        "header": "water_source_h_f",
+                        "message": "Sheet: Households, Unexpected value: Buy bottled water for type select one of field water_source_h_f",
+                    },
+                    {
                         "row_number": 16,
                         "header": "assistance_type_h_f",
                         "message": "Sheet: Households, Unexpected value: Option 1, Option 2, Option 5 for type select many of field assistance_type_h_f",
+                    },
+                    {
+                        "row_number": 16,
+                        "header": "water_source_h_f",
+                        "message": "Sheet: Households, Unexpected value: From piped water for type select one of field water_source_h_f",
                     },
                     {
                         "row_number": 17,
@@ -251,9 +322,19 @@ class TestXLSXValidatorsMethods(TestCase):
                         "message": "Sheet: Households, Unexpected value: Option 6 for type select many of field assistance_type_h_f",
                     },
                     {
+                        "row_number": 17,
+                        "header": "water_source_h_f",
+                        "message": "Sheet: Households, Unexpected value: From private vendor for type select one of field water_source_h_f",
+                    },
+                    {
                         "row_number": 18,
                         "header": "assistance_type_h_f",
                         "message": "Sheet: Households, Unexpected value: Option 7 for type select many of field assistance_type_h_f",
+                    },
+                    {
+                        "row_number": 18,
+                        "header": "water_source_h_f",
+                        "message": "Sheet: Households, Unexpected value: To buy water from water tank for type select one of field water_source_h_f",
                     },
                     {
                         "row_number": 19,
@@ -261,19 +342,29 @@ class TestXLSXValidatorsMethods(TestCase):
                         "message": "Sheet: Households, Unexpected value: Option 1, Option 5 for type select many of field assistance_type_h_f",
                     },
                     {
+                        "row_number": 19,
+                        "header": "water_source_h_f",
+                        "message": "Sheet: Households, Unexpected value: Collect water from rain water for type select one of field water_source_h_f",
+                    },
+                    {
                         "row_number": 20,
                         "header": "assistance_type_h_f",
                         "message": "Sheet: Households, Unexpected value: Option 2, Option 5 for type select many of field assistance_type_h_f",
                     },
                     {
-                        "row_number": 21,
-                        "header": "household_id",
-                        "message": "Sheet: Households, Unexpected value: Some Text for type integer of field household_id",
+                        "row_number": 20,
+                        "header": "water_source_h_f",
+                        "message": "Sheet: Households, Unexpected value: Collect water from a well/source directly for type select one of field water_source_h_f",
                     },
                     {
                         "row_number": 21,
                         "header": "assistance_type_h_f",
                         "message": "Sheet: Households, Unexpected value: Option 4 for type select many of field assistance_type_h_f",
+                    },
+                    {
+                        "row_number": 21,
+                        "header": "water_source_h_f",
+                        "message": "Sheet: Households, Unexpected value: Buy bottled water for type select one of field water_source_h_f",
                     },
                 ],
             ),
@@ -281,10 +372,140 @@ class TestXLSXValidatorsMethods(TestCase):
                 wb["Individuals"],
                 [
                     {
+                        "row_number": 3,
+                        "header": "id_type_i_f",
+                        "message": "Sheet: Individuals, Unexpected value: BIRTH_CERTIFICATE for type select one of field id_type_i_f",
+                    },
+                    {
+                        "row_number": 4,
+                        "header": "id_type_i_f",
+                        "message": "Sheet: Individuals, Unexpected value: DRIVERS_LICENSE for type select one of field id_type_i_f",
+                    },
+                    {
+                        "row_number": 5,
+                        "header": "id_type_i_f",
+                        "message": "Sheet: Individuals, Unexpected value: UNHCR_ID for type select one of field id_type_i_f",
+                    },
+                    {
+                        "row_number": 6,
+                        "header": "id_type_i_f",
+                        "message": "Sheet: Individuals, Unexpected value: NATIONAL_ID for type select one of field id_type_i_f",
+                    },
+                    {
+                        "row_number": 7,
+                        "header": "id_type_i_f",
+                        "message": "Sheet: Individuals, Unexpected value: NATIONAL_PASSPORT for type select one of field id_type_i_f",
+                    },
+                    {
                         "row_number": 8,
-                        "header": "household_id",
-                        "message": "Sheet: Individuals, Unexpected value: TEXT for type integer of field household_id",
-                    }
+                        "header": "id_type_i_f",
+                        "message": "Sheet: Individuals, Unexpected value: OTHER for type select one of field id_type_i_f",
+                    },
+                    {
+                        "row_number": 9,
+                        "header": "id_type_i_f",
+                        "message": "Sheet: Individuals, Unexpected value: NOT_AVAILABLE for type select one of field id_type_i_f",
+                    },
+                    {
+                        "row_number": 10,
+                        "header": "id_type_i_f",
+                        "message": "Sheet: Individuals, Unexpected value: BIRTH_CERTIFICATE for type select one of field id_type_i_f",
+                    },
+                    {
+                        "row_number": 11,
+                        "header": "id_type_i_f",
+                        "message": "Sheet: Individuals, Unexpected value: DRIVERS_LICENSE for type select one of field id_type_i_f",
+                    },
+                    {
+                        "row_number": 12,
+                        "header": "id_type_i_f",
+                        "message": "Sheet: Individuals, Unexpected value: UNHCR_ID for type select one of field id_type_i_f",
+                    },
+                    {
+                        "row_number": 13,
+                        "header": "id_type_i_f",
+                        "message": "Sheet: Individuals, Unexpected value: NATIONAL_ID for type select one of field id_type_i_f",
+                    },
+                    {
+                        "row_number": 14,
+                        "header": "id_type_i_f",
+                        "message": "Sheet: Individuals, Unexpected value: NATIONAL_PASSPORT for type select one of field id_type_i_f",
+                    },
+                    {
+                        "row_number": 15,
+                        "header": "id_type_i_f",
+                        "message": "Sheet: Individuals, Unexpected value: OTHER for type select one of field id_type_i_f",
+                    },
+                    {
+                        "row_number": 16,
+                        "header": "id_type_i_f",
+                        "message": "Sheet: Individuals, Unexpected value: NOT_AVAILABLE for type select one of field id_type_i_f",
+                    },
+                    {
+                        "row_number": 17,
+                        "header": "id_type_i_f",
+                        "message": "Sheet: Individuals, Unexpected value: BIRTH_CERTIFICATE for type select one of field id_type_i_f",
+                    },
+                    {
+                        "row_number": 18,
+                        "header": "id_type_i_f",
+                        "message": "Sheet: Individuals, Unexpected value: DRIVERS_LICENSE for type select one of field id_type_i_f",
+                    },
+                    {
+                        "row_number": 19,
+                        "header": "id_type_i_f",
+                        "message": "Sheet: Individuals, Unexpected value: UNHCR_ID for type select one of field id_type_i_f",
+                    },
+                    {
+                        "row_number": 20,
+                        "header": "id_type_i_f",
+                        "message": "Sheet: Individuals, Unexpected value: NATIONAL_ID for type select one of field id_type_i_f",
+                    },
+                    {
+                        "row_number": 21,
+                        "header": "id_type_i_f",
+                        "message": "Sheet: Individuals, Unexpected value: NATIONAL_PASSPORT for type select one of field id_type_i_f",
+                    },
+                    {
+                        "row_number": 22,
+                        "header": "id_type_i_f",
+                        "message": "Sheet: Individuals, Unexpected value: OTHER for type select one of field id_type_i_f",
+                    },
+                    {
+                        "row_number": 23,
+                        "header": "id_type_i_f",
+                        "message": "Sheet: Individuals, Unexpected value: NOT_AVAILABLE for type select one of field id_type_i_f",
+                    },
+                    {
+                        "row_number": 24,
+                        "header": "id_type_i_f",
+                        "message": "Sheet: Individuals, Unexpected value: BIRTH_CERTIFICATE for type select one of field id_type_i_f",
+                    },
+                    {
+                        "row_number": 25,
+                        "header": "id_type_i_f",
+                        "message": "Sheet: Individuals, Unexpected value: DRIVERS_LICENSE for type select one of field id_type_i_f",
+                    },
+                    {
+                        "row_number": 26,
+                        "header": "id_type_i_f",
+                        "message": "Sheet: Individuals, Unexpected value: UNHCR_ID for type select one of field id_type_i_f",
+                    },
+                    {
+                        "row_number": 27,
+                        "header": "id_type_i_f",
+                        "message": "Sheet: Individuals, Unexpected value: NATIONAL_ID for type select one of field id_type_i_f",
+                    },
+                    {
+                        "row_number": 28,
+                        "header": "id_type_i_f",
+                        "message": "Sheet: Individuals, Unexpected value: NATIONAL_PASSPORT for type select one of field id_type_i_f",
+                    },
+                    {
+                        "row_number": 29,
+                        "header": "id_type_i_f",
+                        "message": "Sheet: Individuals, Unexpected value: OTHER for type select one of field id_type_i_f",
+                    },
                 ],
             ),
             (wb_valid["Households"], [],),
@@ -292,7 +513,9 @@ class TestXLSXValidatorsMethods(TestCase):
         )
 
         for sheet, expected_values in sheets_and_expected_values:
-            result = UploadXLSXValidator.rows_validator(sheet)
+            validator_class = UploadXLSXValidator()
+            validator_class.image_loader = SheetImageLoader(sheet)
+            result = validator_class.rows_validator(sheet)
             self.assertEqual(result, expected_values)
 
     def test_validate_file_extension(self):

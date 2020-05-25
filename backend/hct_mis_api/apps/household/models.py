@@ -75,6 +75,14 @@ ROLE_CHOICE = (
     ("ALTERNATE", "Alternate collector"),
     ("NO_ROLE", "None"),
 )
+IDENTIFICATION_TYPE_CHOICE = (
+    ("BIRTH_CERTIFICATE", _("Birth Certificate")),
+    ("DRIVERS_LICENSE", _("Driver's License")),
+    ("NATIONAL_ID", _("National ID")),
+    ("NATIONAL_PASSPORT", _("National Passport")),
+    ("ELECTORAL_CARD", _("Electoral Card")),
+    ("OTHER", _("Other")),
+)
 
 INDIVIDUAL_HOUSEHOLD_STATUS = (("ACTIVE", "Active"), ("INACTIVE", "Inactive"))
 
@@ -159,6 +167,10 @@ class DocumentValidator(TimeStampedUUIDModel):
 class DocumentType(TimeStampedUUIDModel):
     country = CountryField(blank=True)
     label = models.CharField(max_length=100)
+    type = models.CharField(max_length=50, choices=IDENTIFICATION_TYPE_CHOICE)
+
+    class Meta:
+        unique_together = ("country", "type")
 
     def __str__(self):
         return f"{self.label} in {self.country}"
@@ -186,7 +198,7 @@ class Document(TimeStampedUUIDModel):
 
 
 class Agency(models.Model):
-    type = models.CharField(max_length=100,)
+    type = models.CharField(max_length=100, unique=True)
     label = models.CharField(max_length=100,)
 
     def __str__(self):
