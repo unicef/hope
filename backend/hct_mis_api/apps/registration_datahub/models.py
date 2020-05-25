@@ -19,13 +19,16 @@ from household.models import (
     MARITAL_STATUS_CHOICE,
     RELATIONSHIP_CHOICE,
     ROLE_CHOICE,
+    IDENTIFICATION_TYPE_CHOICE,
 )
 from utils.models import TimeStampedUUIDModel
 
 
 class ImportedHouseholdIdentity(models.Model):
     agency = models.ForeignKey(
-        "Agency", related_name="households_identities", on_delete=models.CASCADE
+        "ImportedAgency",
+        related_name="households_identities",
+        on_delete=models.CASCADE,
     )
     household = models.ForeignKey(
         "ImportedHousehold", related_name="identities", on_delete=models.CASCADE
@@ -170,6 +173,10 @@ class DocumentValidator(TimeStampedUUIDModel):
 class ImportedDocumentType(TimeStampedUUIDModel):
     country = CountryField(blank=True)
     label = models.CharField(max_length=100)
+    type = models.CharField(max_length=50, choices=IDENTIFICATION_TYPE_CHOICE)
+
+    class Meta:
+        unique_together = ("country", "type")
 
     def __str__(self):
         return f"{self.label} in {self.country}"
@@ -194,8 +201,11 @@ class ImportedDocument(TimeStampedUUIDModel):
             if not re.match(validator.regex, self.document_number):
                 raise ValidationError("Document number is not validating")
 
+    class Meta:
+        unique_together = ("type", "document_number")
 
-class Agency(models.Model):
+
+class ImportedAgency(models.Model):
     type = models.CharField(max_length=100,)
     label = models.CharField(max_length=100,)
 
@@ -205,7 +215,7 @@ class Agency(models.Model):
 
 class ImportedIndividualIdentity(models.Model):
     agency = models.ForeignKey(
-        "Agency", related_name="identities", on_delete=models.CASCADE
+        "ImportedAgency", related_name="identities", on_delete=models.CASCADE
     )
     individual = models.ForeignKey(
         "ImportedIndividual",

@@ -18,13 +18,13 @@ def calculate_candidate_counts(target_population):
             return
         households = Household.objects.filter(
             target_population.candidate_list_targeting_criteria.get_query()
-        )
+        ).distinct()
     else:
         households = target_population.households
     households_count = households.count()
-    individuals_count = households.aggregate(
-        individuals_count=Sum("size")
-    ).get("individuals_count")
+    individuals_count = households.aggregate(individuals_count=Sum("size")).get(
+        "individuals_count"
+    )
     target_population.candidate_list_total_households = households_count
     target_population.candidate_list_total_individuals = individuals_count
 
@@ -40,13 +40,13 @@ def calculate_final_counts(target_population):
         else:
             households = target_population.households.filter(
                 target_population.final_list_targeting_criteria.get_query()
-            )
+            ).distinct()
     else:
         households = target_population.final_list
     households_count = households.count()
-    individuals_count = households.aggregate(
-        individuals_count=Sum("size")
-    ).get("individuals_count")
+    individuals_count = households.aggregate(individuals_count=Sum("size")).get(
+        "individuals_count"
+    )
     target_population.final_list_total_households = households_count
     target_population.final_list_total_individuals = individuals_count
 

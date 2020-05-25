@@ -11,6 +11,7 @@ import styled from 'styled-components';
 import { Field, Formik } from 'formik';
 import * as Yup from 'yup';
 import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
+import { ProgrammeAutocomplete } from '../../../shared/ProgrammeAutocomplete'
 import {
   useAllProgramsQuery,
   useApproveTpMutation,
@@ -74,7 +75,7 @@ export function ApproveCandidateList({ open, setOpen, targetPopulationId }) {
           });
         }}
       >
-        {({ submitForm, values }) => (
+        {({ submitForm, values, setFieldValue }) => (
           <>
             <DialogTitleWrapper>
               <DialogTitle id='scroll-dialog-title'>
@@ -99,7 +100,12 @@ export function ApproveCandidateList({ open, setOpen, targetPopulationId }) {
                 name='program'
                 label='Programme'
                 choices={choices}
-                component={FormikSelectField}
+                onChange={(e, object) => {
+                  if(object) {
+                    setFieldValue('program', object.id)
+                  }
+                }}
+                component={ProgrammeAutocomplete}
               />
             </DialogContent>
             <DialogFooter>
