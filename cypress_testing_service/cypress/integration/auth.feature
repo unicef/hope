@@ -14,12 +14,12 @@ Feature: Authentication related functionality. Logging in, redirects
         Then I should get redirected to login
 
     Scenario: Login user via AD and see dashboard
-        Given I login to AD as country_admin
+        Given I login to AD as countryAdmin
         When I visit /
         Then I should see the Dashboard
         Then I see my email address in the header
 
     Scenario: Logging out of HCT
-        Given I login to AD as country_admin
+        Given I login to AD as countryAdmin
         When I click Logout
         Then I should get redirected to login
