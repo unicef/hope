@@ -2,7 +2,7 @@ from functools import reduce
 
 import django_filters
 import graphene
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, Prefetch
 from django_filters import FilterSet, CharFilter
 from graphene import relay, Scalar
 from graphene_django import DjangoObjectType, DjangoConnectionField
@@ -192,7 +192,6 @@ class TargetPopulationNode(DjangoObjectType):
     candidate_stats = graphene.Field(StatsObjectType)
     final_stats = graphene.Field(StatsObjectType)
 
-
     class Meta:
         model = target_models.TargetPopulation
         interfaces = (relay.Node,)
@@ -234,6 +233,17 @@ def targeting_criteria_object_type_to_query(targeting_criteria_object_type):
     return targeting_criteria_querying.get_query()
 
 
+def prefetch_selections(qs, target_population=None):
+    return qs.prefetch_related(
+        Prefetch(
+            "selections",
+            queryset=target_models.HouseholdSelection.objects.filter(
+                target_population=target_population
+            ),
+        )
+    )
+
+
 class Query(graphene.ObjectType):
     target_population = relay.Node.Field(TargetPopulationNode)
     all_target_population = DjangoFilterConnectionField(TargetPopulationNode)
@@ -269,10 +279,14 @@ class Query(graphene.ObjectType):
             pk=target_population_id
         )
         if target_population_model.status == "DRAFT":
-            return Household.objects.filter(
-                target_population_model.candidate_list_targeting_criteria.get_query()
+            return prefetch_selections(
+                Household.objects.filter(
+                    target_population_model.candidate_list_targeting_criteria.get_query()
+                ),
             ).distinct()
-        return target_population_model.households.all()
+        return prefetch_selections(
+            target_population_model.households, target_population_model
+        ).all()
 
     def resolve_final_households_list_by_targeting_criteria(
         parent, info, target_population, targeting_criteria=None, **kwargs
@@ -286,23 +300,43 @@ class Query(graphene.ObjectType):
         if target_population_model.status == "APPROVED":
             if targeting_criteria is None:
                 if target_population_model.final_list_targeting_criteria:
-                    return target_population_model.households.filter(
-                        target_population_model.final_list_targeting_criteria.get_query()
+                    return prefetch_selections(
+                        target_population_model.households.filter(
+                            target_population_model.final_list_targeting_criteria.get_query()
+                        ),
+                        target_population_model,
                     ).distinct()
                 else:
-                    return target_population_model.households.all()
+                    return prefetch_selections(
+                        target_population_model.households,
+                        target_population_model,
+                    ).all()
             return (
-                target_population_model.households.filter(
-                    targeting_criteria_object_type_to_query(targeting_criteria)
+                prefetch_selections(
+                    target_population_model.households.filter(
+                        targeting_criteria_object_type_to_query(
+                            targeting_criteria
+                        )
+                    ),
+                    target_population_model,
                 )
                 .all()
                 .distinct()
             )
-        return target_population_model.final_list.all()
+        return target_population_model.final_list.prefetch_related(
+            Prefetch(
+                "selections",
+                queryset=target_models.HouseholdSelection.objects.filter(
+                    target_population=target_population_model
+                ),
+            )
+        ).all()
 
     def resolve_golden_record_by_targeting_criteria(
         parent, info, targeting_criteria, **kwargs
     ):
-        return Household.objects.filter(
-            targeting_criteria_object_type_to_query(targeting_criteria)
+        return prefetch_selections(
+            Household.objects.filter(
+                targeting_criteria_object_type_to_query(targeting_criteria)
+            )
         ).distinct()

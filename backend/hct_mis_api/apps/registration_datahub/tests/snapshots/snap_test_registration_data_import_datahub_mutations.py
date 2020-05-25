@@ -57,7 +57,7 @@ snapshots['TestRegistrationDataImportDatahubMutations::test_registration_data_im
                 'name': 'New Import of Data 123',
                 'numberOfHouseholds': 3,
                 'numberOfIndividuals': 6,
-                'status': 'IN_REVIEW'
+                'status': 'IMPORTING'
             }
         }
     }

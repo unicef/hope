@@ -23,8 +23,12 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
     multi_db = True
 
     UPLOAD_REGISTRATION_DATA_IMPORT_DATAHUB = """
-    mutation UploadImportDataXLSXFile($file: Upload!) {
-      uploadImportDataXlsxFile(file: $file) {
+    mutation UploadImportDataXLSXFile(
+      $file: Upload!, $businessAreaSlug: String!
+    ) {
+      uploadImportDataXlsxFile(
+        file: $file, businessAreaSlug: $businessAreaSlug
+      ) {
         importData {
           numberOfHouseholds
           numberOfIndividuals
@@ -110,7 +114,10 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.UPLOAD_REGISTRATION_DATA_IMPORT_DATAHUB,
             context={"user": self.user},
-            variables={"file": self.valid_file},
+            variables={
+                "file": self.valid_file,
+                "businessAreaSlug": "afghanistan",
+            },
         )
 
         import_data_obj = ImportData.objects.first()

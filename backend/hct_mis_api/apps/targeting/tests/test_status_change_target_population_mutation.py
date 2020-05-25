@@ -3,7 +3,7 @@ from django.core.management import call_command
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
 from core.models import BusinessArea
-from household.fixtures import HouseholdFactory, create_household
+from household.fixtures import create_household
 from program.fixtures import ProgramFactory
 from targeting.models import (
     TargetingCriteria,
@@ -43,11 +43,11 @@ class TestApproveTargetPopulationMutation(APITestCase):
         cls.user = UserFactory.create()
         cls.households = []
         (household, individuals) = create_household(
-            {"size": 1, "residence_status": "CITIZEN", },
+            {"size": 1, "residence_status": "CITIZEN",},
         )
         cls.household_size_1 = household
         (household, individuals) = create_household(
-            {"size": 2, "residence_status": "CITIZEN", },
+            {"size": 2, "residence_status": "CITIZEN",},
         )
         cls.household_size_2 = household
         cls.households.append(cls.household_size_1)
@@ -167,11 +167,11 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
         cls.households = []
 
         (household, individuals) = create_household(
-            {"size": 1, "residence_status": "CITIZEN", },
+            {"size": 1, "residence_status": "CITIZEN",},
         )
         cls.household_size_1 = household
         (household, individuals) = create_household(
-            {"size": 2, "residence_status": "CITIZEN", },
+            {"size": 2, "residence_status": "CITIZEN",},
         )
         cls.household_size_2 = household
         cls.households.append(cls.household_size_1)
@@ -297,11 +297,11 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
         cls.households = []
 
         (household, individuals) = create_household(
-            {"size": 1, "residence_status": "CITIZEN", },
+            {"size": 1, "residence_status": "CITIZEN",},
         )
         cls.household_size_1 = household
         (household, individuals) = create_household(
-            {"size": 2, "residence_status": "CITIZEN", },
+            {"size": 2, "residence_status": "CITIZEN",},
         )
         cls.household_size_2 = household
         cls.households.append(cls.household_size_1)
