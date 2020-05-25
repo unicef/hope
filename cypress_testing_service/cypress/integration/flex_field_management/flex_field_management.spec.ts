@@ -1,11 +1,10 @@
-import { Given, When, Then, And } from 'cypress-cucumber-preprocessor/steps';
+import { When, Then, And } from 'cypress-cucumber-preprocessor/steps';
 
 const importXlsDocument = (type) => {
   const path = 'documents/flexibleAttributes';
   cy.fixture(`${path}/meta`).then((meta) => {
     const { fileName, ...otherMeta } = meta[type];
     cy.fixture(`${path}/${fileName}`, 'base64').then((fileContent) => {
-      // @ts-ignore
       cy.get('input[type=file]').upload(
         {
           fileName,

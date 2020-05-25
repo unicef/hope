@@ -7,7 +7,7 @@
 //
 // For now, the following workaround is recommended:
 // https://github.com/cypress-io/cypress/issues/871#issuecomment-509392310
-export const overrideSrollingStrategy = () => {
+export const overrideScrollingStrategy = () => {
   Cypress.on('scrolled', ($el) => {
     $el.get(0).scrollIntoView({
       block: 'center',

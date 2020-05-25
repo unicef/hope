@@ -5,8 +5,7 @@ When('I visit {word}', (path) => {
 });
 
 When('I click Logout', () => {
-  // TODO:
-  cy.getByTestId('menu-btn-user-profile').click();
+  cy.getByTestId('menu-user-profile').click();
   cy.getByTestId('menu-item-logout').click();
 });
 

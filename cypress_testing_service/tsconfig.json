@@ -17,9 +17,5 @@
     "node_modules/cypress-file-upload",
     "node_modules/chai-subset",
     "cypress"
-  ],
-  "exclude": [
-    "node_modules/cypress-promise/index.d.ts",
-    "cypress/support/localStorage"
   ]
 }

@@ -1,8 +1,8 @@
 import { Given, When, Then, Before } from 'cypress-cucumber-preprocessor/steps';
-import { overrideSrollingStrategy } from '../../support/utils';
+import { overrideScrollingStrategy } from '../../support/utils';
 
 Before(() => {
-  overrideSrollingStrategy();
+  overrideScrollingStrategy();
 });
 
 Given('the User is viewing the Population Household details screen', () => {

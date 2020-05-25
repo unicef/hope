@@ -1,6 +1,3 @@
-// TODO: remove
-// import promisify from 'cypress-promise';
-
 export const apiUrl = '/api/graphql';
 
 const request = (method: string, body: string | object) => {
@@ -197,6 +194,4 @@ const api = {
   },
 };
 
-// TODO don't prefer default export!
-// eslint-disable-next-line import/prefer-default-export
 export { api };
