@@ -6,8 +6,7 @@ Feature: Be able to download a template and upload households and individuals to
     then via a deterministic search.
 
     Background:
-        Given I login to AD as country_admin
-        Then I see user profile menu
+        Given I login once to AD as countryAdmin
 
     Scenario: Download Template: User successfully downloads Registration Template
         Given the User is viewing the Registration Data Import screen

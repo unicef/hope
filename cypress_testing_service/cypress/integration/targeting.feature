@@ -2,8 +2,7 @@
 Feature: Target Population
 
   Background:
-    Given I login to AD as country_admin
-    Then I see user profile menu
+    Given I login once to AD as countryAdmin
 
   # Create New Programme Population
   # As a User
