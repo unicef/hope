@@ -149,8 +149,8 @@ class Household(TimeStampedUUIDModel):
     def total_cash_received(self):
         return (
             self.payment_records.filter()
-            .aggregate(Sum("entitlement__delivered_quantity"))
-            .get("entitlement__delivered_quantity__sum")
+            .aggregate(Sum("delivered_quantity"))
+            .get("delivered_quantity__sum")
         )
 
     def __str__(self):

@@ -104,7 +104,7 @@ class Program(TimeStampedUUIDModel):
     @property
     def total_number_of_households(self):
         return self.cash_plans.aggregate(
-            households=Coalesce(Sum("number_of_households"), 0),
+            households=Coalesce(Sum("total_persons_covered"), 0),
         )["households"]
 
     class Meta:

@@ -6,7 +6,7 @@ from graphene_django.filter import DjangoFilterConnectionField
 
 from core.schema import ChoiceObject
 from core.extended_connection import ExtendedConnection
-from payment.models import PaymentRecord
+from payment.models import PaymentRecord, ServiceProvider
 
 
 class PaymentRecordFilter(FilterSet):
@@ -38,6 +38,13 @@ class PaymentRecordNode(DjangoObjectType):
     class Meta:
         model = PaymentRecord
         filter_fields = ["cash_plan", "household"]
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
+class ServiceProviderNode(DjangoObjectType):
+    class Meta:
+        model = ServiceProvider
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
