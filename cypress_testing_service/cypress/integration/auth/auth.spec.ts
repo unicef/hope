@@ -5,6 +5,7 @@ When('I visit {word}', (path) => {
 });
 
 When('I click Logout', () => {
+  // TODO:
   cy.getByTestId('menu-btn-user-profile').click();
   cy.getByTestId('menu-item-logout').click();
 });
@@ -19,5 +20,7 @@ Then('I should see the Dashboard', () => {
 });
 
 Then('I see my email address in the header', () => {
-  cy.get('header').contains(Cypress.env('logged_in_user_username'));
+  cy.get<{ username: string }>('@loggedUser').then(({ username }) => {
+    cy.get('header').should('be.visible').contains(username);
+  });
 });
