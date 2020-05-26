@@ -137,11 +137,11 @@ class PaymentRecord(SessionModel):
     target_population_cash_assist_id = models.CharField(max_length=255)
     entitlement_card_number = models.CharField(max_length=255,)
     entitlement_card_status = models.CharField(
-        choices=STATUS_CHOICE, default="ACTIVE", max_length=20,
+        choices=STATUS_CHOICE, default=STATUS_PENDING, max_length=20,
     )
     entitlement_card_issue_date = models.DateField()
     delivery_type = models.CharField(
-        choices=DELIVERY_TYPE_CHOICE, default="ACTIVE", max_length=20,
+        choices=DELIVERY_TYPE_CHOICE, default=DELIVERY_TYPE_CASH, max_length=20,
     )
     currency = models.CharField(max_length=4,)
     entitlement_quantity = models.DecimalField(
