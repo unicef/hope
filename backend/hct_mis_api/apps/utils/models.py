@@ -49,23 +49,29 @@ class SoftDeletionTreeModel(TimeStampedUUIDModel, MPTTModel):
 
 class AbstractSession(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
+    SOURCE_MIS = "MIS"
+    SOURCE_CA = "CA"
+    STATUS_NEW = "NEW"
+    STATUS_READY = "NEW"
+    STATUS_PROCESSING = "NEW"
+    STATUS_COMPLETED = "NEW"
+    STATUS_FAILED = "NEW"
+
     source = models.CharField(
-        max_length=3, choices=(("MIS", "HCT-MIS"), ("CA", "Cash Assist")),
+        max_length=3,
+        choices=((SOURCE_MIS, "HCT-MIS"), (SOURCE_CA, "Cash Assist")),
     )
     status = models.CharField(
         max_length=11,
         choices=(
-            ("NEW", "New"),
-            ("READY", "Ready"),
-            ("PROCESSING", "Processing"),
-            ("COMPLETED", "Completed"),
-            ("FAILED", "Failed"),
+            (STATUS_NEW, "New"),
+            (STATUS_READY, "Ready"),
+            (STATUS_PROCESSING, "Processing"),
+            (STATUS_COMPLETED, "Completed"),
+            (STATUS_FAILED, "Failed"),
         ),
     )
     last_modified_date = models.DateTimeField(auto_now=True)
 
     class Meta:
         abstract = True
-
-
-
