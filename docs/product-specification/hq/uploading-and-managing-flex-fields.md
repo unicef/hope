@@ -32,7 +32,7 @@ The following field types will be supported:
 * Geo location/Point
 * Select one
 * Select many
-* File field \(audio/video/photo\)
+* File field \(photo\)
 * Text field
 
 Any grouping of fields and choices associated with the select one/many fields will also be stored.
