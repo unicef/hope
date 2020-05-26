@@ -33,7 +33,7 @@ class Programme(SessionModel):
 
 class CashPlan(SessionModel):
     DISTRIBUTION_COMPLETED = (
-        "Distribution Completed"  # or "DISTRIBUTION_COMPLETED"
+        "Distribution Completed"
     )
     DISTRIBUTION_COMPLETED_WITH_ERRORS = "Distribution Completed with Errors"
     TRANSACTION_COMPLETED = "Transaction Completed"
