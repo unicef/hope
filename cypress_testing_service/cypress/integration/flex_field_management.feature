@@ -6,7 +6,7 @@ Feature: Upload KoBo export file in Django admin
     flex fields
 
     Background:
-        Given I login to AD as hqAdmin
+        Given I login once to AD as hqAdmin
         When the User navigates to Django Administration page
         Then the Site Administration page is shown
 
