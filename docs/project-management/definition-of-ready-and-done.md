@@ -4,8 +4,6 @@
 
 To align the team on expectations for building new features, it is important to be consistent with the definition of ready. 
 
-To align the team on expectations for building new features, it is important to be consistent with the definition of ready. 
-
 Tickets are created as pieces of functionality to support a larger goal. Tickets should always include the following:
 
 Tickets are created as pieces of functionality to support a larger goal. Tickets should always include the following:
