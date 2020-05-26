@@ -112,16 +112,23 @@ class Program(TimeStampedUUIDModel):
 
 
 class CashPlan(TimeStampedUUIDModel):
+    DISTRIBUTION_COMPLETED = (
+        "Distribution Completed"  # or "DISTRIBUTION_COMPLETED"
+    )
+    DISTRIBUTION_COMPLETED_WITH_ERRORS = "Distribution Completed with Errors"
+    TRANSACTION_COMPLETED = "Transaction Completed"
+    TRANSACTION_COMPLETED_WITH_ERRORS = "Transaction Completed with Errors"
+
     STATUS_CHOICE = (
-        ("Distribution Completed", "Distribution Completed"),
+        (DISTRIBUTION_COMPLETED, _("Distribution Completed")),
         (
-            "Distribution Completed with Errors",
-            "Distribution Completed with Errors",
+            DISTRIBUTION_COMPLETED_WITH_ERRORS,
+            _("Distribution Completed with Errors"),
         ),
-        ("Transaction Completed", "Transaction Completed"),
+        (TRANSACTION_COMPLETED, _("Transaction Completed")),
         (
-            "Transaction Completed with Errors",
-            "Transaction Completed with Errors",
+            TRANSACTION_COMPLETED_WITH_ERRORS,
+            _("Transaction Completed with Errors"),
         ),
     )
     business_area = models.ForeignKey(
@@ -175,5 +182,6 @@ class CashPlan(TimeStampedUUIDModel):
     @property
     def payment_records_count(self):
         return self.payment_records.count()
+
 
 auditlog.register(Program)

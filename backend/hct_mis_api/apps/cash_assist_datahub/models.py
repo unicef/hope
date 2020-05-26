@@ -32,22 +32,27 @@ class Programme(SessionModel):
 
 
 class CashPlan(SessionModel):
-
+    DISTRIBUTION_COMPLETED = (
+        "Distribution Completed"  # or "DISTRIBUTION_COMPLETED"
+    )
+    DISTRIBUTION_COMPLETED_WITH_ERRORS = "Distribution Completed with Errors"
+    TRANSACTION_COMPLETED = "Transaction Completed"
+    TRANSACTION_COMPLETED_WITH_ERRORS = "Transaction Completed with Errors"
     business_area = models.CharField(max_length=20)
     cash_plan_id = models.CharField(max_length=255)
     cash_plan_hash_id = models.UUIDField(primary_key=True,)
     status = models.CharField(
         max_length=255,
         choices=(
-            ("Distribution Completed", "Distribution Completed"),
+            (DISTRIBUTION_COMPLETED, _("Distribution Completed")),
             (
-                "Distribution Completed with Errors",
-                "Distribution Completed with Errors",
+                DISTRIBUTION_COMPLETED_WITH_ERRORS,
+                _("Distribution Completed with Errors"),
             ),
-            ("Transaction Completed", "Transaction Completed"),
+            (TRANSACTION_COMPLETED, _("Transaction Completed")),
             (
-                "Transaction Completed with Errors",
-                "Transaction Completed with Errors",
+                TRANSACTION_COMPLETED_WITH_ERRORS,
+                _("Transaction Completed with Errors"),
             ),
         ),
     )
@@ -94,19 +99,27 @@ class CashPlan(SessionModel):
 
 
 class PaymentRecord(SessionModel):
-
+    STATUS_SUCCESS = "SUCCESS"
+    STATUS_PENDING = "PENDING"
+    STATUS_ERROR = "ERROR"
+    ENTITLEMENT_CARD_STATUS_ACTIVE = "ACTIVE"
+    ENTITLEMENT_CARD_STATUS_INACTIVE = "INACTIVE"
+    DELIVERY_TYPE_CASH = "CASH"
+    DELIVERY_TYPE_DEPOSIT_TO_CARD = "DEPOSIT_TO_CARD"
+    DELIVERY_TYPE_TRANSFER = "TRANSFER"
     STATUS_CHOICE = (
-        ("SUCCESS", _("Sucess")),
-        ("PENDING", _("Pending")),
-        ("ERROR", _("Error")),
+        (STATUS_SUCCESS, _("Sucess")),
+        (STATUS_PENDING, _("Pending")),
+        (STATUS_ERROR, _("Error")),
     )
     ENTITLEMENT_CARD_STATUS_CHOICE = Choices(
-        ("ACTIVE", _("Active")), ("INACTIVE", _("Inactive")),
+        (ENTITLEMENT_CARD_STATUS_ACTIVE, _("Active")),
+        (ENTITLEMENT_CARD_STATUS_INACTIVE, _("Inactive")),
     )
     DELIVERY_TYPE_CHOICE = (
-        ("CASH", _("Cash")),
-        ("DEPOSIT_TO_CARD", _("Deposit to Card")),
-        ("TRANSFER", _("Transfer")),
+        (DELIVERY_TYPE_CASH, _("Cash")),
+        (DELIVERY_TYPE_DEPOSIT_TO_CARD, _("Deposit to Card")),
+        (DELIVERY_TYPE_TRANSFER, _("Transfer")),
     )
     business_area = models.CharField(max_length=20)
     status = models.CharField(max_length=255, choices=STATUS_CHOICE,)
