@@ -6,7 +6,6 @@ import { LabelizedField } from '../LabelizedField';
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px
     ${({ theme }) => theme.spacing(11)}px;
-  margin-top: ${({ theme }) => theme.spacing(6)}px;
   margin-bottom: ${({ theme }) => theme.spacing(6)}px;
 `;
 
@@ -15,7 +14,8 @@ const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
-export function CashPlus() {
+export function CashPlus({individual}) {
+  const { enrolledInNutritionProgramme, administrationOfRutf } = individual;
   return (
     <Overview>
       <Title>
@@ -23,10 +23,10 @@ export function CashPlus() {
       </Title>
       <Grid container spacing={6}>
         <Grid item xs={4}>
-          <LabelizedField label='Enrolled in nutrition programme' value='YES' />
+          <LabelizedField label='Enrolled in nutrition programme' value={enrolledInNutritionProgramme ? "YES" : "NO"} />
         </Grid>
         <Grid item xs={4}>
-          <LabelizedField label='Administratiion of rutf' value='NO' />
+          <LabelizedField label='Administratiion of rutf' value={administrationOfRutf ? "YES" : "NO"} />
         </Grid>
       </Grid>
     </Overview>

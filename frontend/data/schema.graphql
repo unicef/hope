@@ -331,7 +331,9 @@ type HouseholdNode implements Node {
   individuals(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
   targetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, orderBy: String): TargetPopulationNodeConnection!
+  selections: [HouseholdSelection!]!
   totalCashReceived: Decimal
+  selection: HouseholdSelection
 }
 
 type HouseholdNodeConnection {
@@ -353,6 +355,16 @@ enum HouseholdResidenceStatus {
   CITIZEN
   IDP
   OTHER
+}
+
+type HouseholdSelection {
+  id: UUID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  household: HouseholdNode!
+  targetPopulation: TargetPopulationNode!
+  vulnerabilityScore: Float
+  final: Boolean!
 }
 
 type ImportDataNode implements Node {
@@ -797,6 +809,8 @@ type IndividualNode implements Node {
   registrationDataImport: RegistrationDataImportNode!
   disability: Boolean!
   flexFields: FlexFieldsScalar
+  enrolledInNutritionProgramme: Boolean!
+  administrationOfRutf: Boolean!
   headingHousehold: HouseholdNode
   documents(before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
 }
@@ -1184,6 +1198,7 @@ type TargetPopulationNode implements Node {
   finalListTargetingCriteria: TargetingCriteriaNode
   paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
   cashPlans(before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
+  selections: [HouseholdSelection!]!
   totalHouseholds: Int
   totalFamilySize: Int
   finalList(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection
