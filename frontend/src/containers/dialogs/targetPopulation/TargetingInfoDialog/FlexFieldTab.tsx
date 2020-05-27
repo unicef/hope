@@ -61,10 +61,11 @@ const FilterWrapper = styled.div`
 
 export function FlexFieldTab() {
   const { data } = useFlexFieldsQuery();
+  const [searchValue, setSearchValue] = useState('')
   const [selectOptions, setSelectOptions] = useState([]);
   const [selectedOption, setSelectedOption] = useState('');
   useEffect(() => {
-    if (data) {
+    if (data && !selectOptions.length) {
       const options = data.allFieldsAttributes.reduce(function (accumulator, currentValue) {
         if (!accumulator.includes(currentValue.type)) {
           accumulator.push(currentValue.type)
@@ -73,7 +74,7 @@ export function FlexFieldTab() {
       }, [])
       setSelectOptions(options)
     }
-  }, [data])
+  }, [data, selectOptions])
   if (!data) {
     return null;
   }
@@ -84,7 +85,8 @@ export function FlexFieldTab() {
           placeholder='Search'
           variant='outlined'
           margin='dense'
-          //onChange={(e) => handleFilterChange(e, 'name')}
+          onChange={(e) => setSearchValue(e.target.value)}
+          value={searchValue}
           InputProps={{
             startAdornment: (
               <InputAdornment position='start'>
