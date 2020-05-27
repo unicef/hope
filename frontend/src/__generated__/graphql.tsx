@@ -471,7 +471,9 @@ export type HouseholdNode = Node & {
   individuals: IndividualNodeConnection,
   paymentRecords: PaymentRecordNodeConnection,
   targetPopulations: TargetPopulationNodeConnection,
+  selections: Array<HouseholdSelection>,
   totalCashReceived?: Maybe<Scalars['Decimal']>,
+  selection?: Maybe<HouseholdSelection>,
 };
 
 
@@ -547,6 +549,17 @@ export enum HouseholdResidenceStatus {
   Idp = 'IDP',
   Other = 'OTHER'
 }
+
+export type HouseholdSelection = {
+   __typename?: 'HouseholdSelection',
+  id: Scalars['UUID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  household: HouseholdNode,
+  targetPopulation: TargetPopulationNode,
+  vulnerabilityScore?: Maybe<Scalars['Float']>,
+  final: Scalars['Boolean'],
+};
 
 export type ImportDataNode = Node & {
    __typename?: 'ImportDataNode',
@@ -1076,6 +1089,32 @@ export enum IndividualSex {
 
 
 
+export type KoboAssetObject = {
+   __typename?: 'KoboAssetObject',
+  uid?: Maybe<Scalars['String']>,
+  name?: Maybe<Scalars['String']>,
+  sector?: Maybe<Scalars['String']>,
+  country?: Maybe<Scalars['String']>,
+  assetType?: Maybe<Scalars['String']>,
+  dateModified?: Maybe<Scalars['DateTime']>,
+  deploymentActive?: Maybe<Scalars['Boolean']>,
+  hasDeployment?: Maybe<Scalars['Boolean']>,
+  xlsLink?: Maybe<Scalars['String']>,
+};
+
+export type KoboAssetObjectConnection = {
+   __typename?: 'KoboAssetObjectConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<KoboAssetObjectEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+};
+
+export type KoboAssetObjectEdge = {
+   __typename?: 'KoboAssetObjectEdge',
+  node?: Maybe<KoboAssetObject>,
+  cursor: Scalars['String'],
+};
+
 export type LabelNode = {
    __typename?: 'LabelNode',
   language?: Maybe<Scalars['String']>,
@@ -1436,6 +1475,8 @@ export type Query = {
   allBusinessAreas?: Maybe<BusinessAreaNodeConnection>,
   allLogEntries?: Maybe<LogEntryObjectConnection>,
   allFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
+  koboProject?: Maybe<KoboAssetObject>,
+  allKoboProjects?: Maybe<KoboAssetObjectConnection>,
   program?: Maybe<ProgramNode>,
   allPrograms?: Maybe<ProgramNodeConnection>,
   cashPlan?: Maybe<CashPlanNode>,
@@ -1528,6 +1569,20 @@ export type QueryAllLogEntriesArgs = {
 
 export type QueryAllFieldsAttributesArgs = {
   flexField?: Maybe<Scalars['Boolean']>
+};
+
+
+export type QueryKoboProjectArgs = {
+  uid: Scalars['String']
+};
+
+
+export type QueryAllKoboProjectsArgs = {
+  onlyDeployed?: Maybe<Scalars['Boolean']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -1949,6 +2004,7 @@ export type TargetPopulationNode = Node & {
   finalListTargetingCriteria?: Maybe<TargetingCriteriaNode>,
   paymentRecords: PaymentRecordNodeConnection,
   cashPlans: CashPlanNodeConnection,
+  selections: Array<HouseholdSelection>,
   totalHouseholds?: Maybe<Scalars['Int']>,
   totalFamilySize?: Maybe<Scalars['Int']>,
   finalList?: Maybe<HouseholdNodeConnection>,
@@ -3634,6 +3690,17 @@ export type FinalHouseholdsListByTargetingCriteriaQuery = (
       )> }
     )>> }
   )> }
+);
+
+export type FlexFieldsQueryVariables = {};
+
+
+export type FlexFieldsQuery = (
+  { __typename?: 'Query' }
+  & { allFieldsAttributes: Maybe<Array<Maybe<(
+    { __typename?: 'FieldAttributeNode' }
+    & Pick<FieldAttributeNode, 'type' | 'name'>
+  )>>> }
 );
 
 export type GoldenRecordByTargetingCriteriaQueryVariables = {
@@ -6823,6 +6890,56 @@ export function useFinalHouseholdsListByTargetingCriteriaLazyQuery(baseOptions?:
 export type FinalHouseholdsListByTargetingCriteriaQueryHookResult = ReturnType<typeof useFinalHouseholdsListByTargetingCriteriaQuery>;
 export type FinalHouseholdsListByTargetingCriteriaLazyQueryHookResult = ReturnType<typeof useFinalHouseholdsListByTargetingCriteriaLazyQuery>;
 export type FinalHouseholdsListByTargetingCriteriaQueryResult = ApolloReactCommon.QueryResult<FinalHouseholdsListByTargetingCriteriaQuery, FinalHouseholdsListByTargetingCriteriaQueryVariables>;
+export const FlexFieldsDocument = gql`
+    query FlexFields {
+  allFieldsAttributes(flexField: true) {
+    type
+    name
+  }
+}
+    `;
+export type FlexFieldsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<FlexFieldsQuery, FlexFieldsQueryVariables>, 'query'>;
+
+    export const FlexFieldsComponent = (props: FlexFieldsComponentProps) => (
+      <ApolloReactComponents.Query<FlexFieldsQuery, FlexFieldsQueryVariables> query={FlexFieldsDocument} {...props} />
+    );
+    
+export type FlexFieldsProps<TChildProps = {}> = ApolloReactHoc.DataProps<FlexFieldsQuery, FlexFieldsQueryVariables> & TChildProps;
+export function withFlexFields<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  FlexFieldsQuery,
+  FlexFieldsQueryVariables,
+  FlexFieldsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, FlexFieldsQuery, FlexFieldsQueryVariables, FlexFieldsProps<TChildProps>>(FlexFieldsDocument, {
+      alias: 'flexFields',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useFlexFieldsQuery__
+ *
+ * To run a query within a React component, call `useFlexFieldsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFlexFieldsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFlexFieldsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useFlexFieldsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<FlexFieldsQuery, FlexFieldsQueryVariables>) {
+        return ApolloReactHooks.useQuery<FlexFieldsQuery, FlexFieldsQueryVariables>(FlexFieldsDocument, baseOptions);
+      }
+export function useFlexFieldsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<FlexFieldsQuery, FlexFieldsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<FlexFieldsQuery, FlexFieldsQueryVariables>(FlexFieldsDocument, baseOptions);
+        }
+export type FlexFieldsQueryHookResult = ReturnType<typeof useFlexFieldsQuery>;
+export type FlexFieldsLazyQueryHookResult = ReturnType<typeof useFlexFieldsLazyQuery>;
+export type FlexFieldsQueryResult = ApolloReactCommon.QueryResult<FlexFieldsQuery, FlexFieldsQueryVariables>;
 export const GoldenRecordByTargetingCriteriaDocument = gql`
     query GoldenRecordByTargetingCriteria($targetingCriteria: TargetingCriteriaObjectType!, $first: Int, $after: String, $before: String, $last: Int, $orderBy: String) {
   goldenRecordByTargetingCriteria(targetingCriteria: $targetingCriteria, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy) {
@@ -7085,6 +7202,8 @@ export type ResolversTypes = {
   PaymentRecordNodeEdge: ResolverTypeWrapper<PaymentRecordNodeEdge>,
   CashPlanNodeConnection: ResolverTypeWrapper<CashPlanNodeConnection>,
   CashPlanNodeEdge: ResolverTypeWrapper<CashPlanNodeEdge>,
+  HouseholdSelection: ResolverTypeWrapper<HouseholdSelection>,
+  Float: ResolverTypeWrapper<Scalars['Float']>,
   StatsObjectType: ResolverTypeWrapper<StatsObjectType>,
   RegistrationDataImportNodeConnection: ResolverTypeWrapper<RegistrationDataImportNodeConnection>,
   RegistrationDataImportNodeEdge: ResolverTypeWrapper<RegistrationDataImportNodeEdge>,
@@ -7111,10 +7230,12 @@ export type ResolversTypes = {
   LogEntryAction: LogEntryAction,
   JSONLazyString: ResolverTypeWrapper<Scalars['JSONLazyString']>,
   CashPlanStatus: CashPlanStatus,
-  Float: ResolverTypeWrapper<Scalars['Float']>,
   PaymentEntitlementNode: ResolverTypeWrapper<PaymentEntitlementNode>,
   PaymentEntitlementDeliveryType: PaymentEntitlementDeliveryType,
   ChoiceObject: ResolverTypeWrapper<ChoiceObject>,
+  KoboAssetObject: ResolverTypeWrapper<KoboAssetObject>,
+  KoboAssetObjectConnection: ResolverTypeWrapper<KoboAssetObjectConnection>,
+  KoboAssetObjectEdge: ResolverTypeWrapper<KoboAssetObjectEdge>,
   TargetingCriteriaObjectType: TargetingCriteriaObjectType,
   TargetingCriteriaRuleObjectType: TargetingCriteriaRuleObjectType,
   TargetingCriteriaRuleFilterObjectType: TargetingCriteriaRuleFilterObjectType,
@@ -7221,6 +7342,8 @@ export type ResolversParentTypes = {
   PaymentRecordNodeEdge: PaymentRecordNodeEdge,
   CashPlanNodeConnection: CashPlanNodeConnection,
   CashPlanNodeEdge: CashPlanNodeEdge,
+  HouseholdSelection: HouseholdSelection,
+  Float: Scalars['Float'],
   StatsObjectType: StatsObjectType,
   RegistrationDataImportNodeConnection: RegistrationDataImportNodeConnection,
   RegistrationDataImportNodeEdge: RegistrationDataImportNodeEdge,
@@ -7247,10 +7370,12 @@ export type ResolversParentTypes = {
   LogEntryAction: LogEntryAction,
   JSONLazyString: Scalars['JSONLazyString'],
   CashPlanStatus: CashPlanStatus,
-  Float: Scalars['Float'],
   PaymentEntitlementNode: PaymentEntitlementNode,
   PaymentEntitlementDeliveryType: PaymentEntitlementDeliveryType,
   ChoiceObject: ChoiceObject,
+  KoboAssetObject: KoboAssetObject,
+  KoboAssetObjectConnection: KoboAssetObjectConnection,
+  KoboAssetObjectEdge: KoboAssetObjectEdge,
   TargetingCriteriaObjectType: TargetingCriteriaObjectType,
   TargetingCriteriaRuleObjectType: TargetingCriteriaRuleObjectType,
   TargetingCriteriaRuleFilterObjectType: TargetingCriteriaRuleFilterObjectType,
@@ -7588,7 +7713,9 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, HouseholdNodeIndividualsArgs>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, HouseholdNodePaymentRecordsArgs>,
   targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, HouseholdNodeTargetPopulationsArgs>,
+  selections?: Resolver<Array<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
   totalCashReceived?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
+  selection?: Resolver<Maybe<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
 };
 
 export type HouseholdNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['HouseholdNodeConnection'] = ResolversParentTypes['HouseholdNodeConnection']> = {
@@ -7602,6 +7729,16 @@ export type HouseholdNodeConnectionResolvers<ContextType = any, ParentType exten
 export type HouseholdNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['HouseholdNodeEdge'] = ResolversParentTypes['HouseholdNodeEdge']> = {
   node?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type HouseholdSelectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['HouseholdSelection'] = ResolversParentTypes['HouseholdSelection']> = {
+  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  household?: Resolver<ResolversTypes['HouseholdNode'], ParentType, ContextType>,
+  targetPopulation?: Resolver<ResolversTypes['TargetPopulationNode'], ParentType, ContextType>,
+  vulnerabilityScore?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  final?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
 };
 
 export type ImportDataNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportDataNode'] = ResolversParentTypes['ImportDataNode']> = {
@@ -7780,6 +7917,29 @@ export interface JsonStringScalarConfig extends GraphQLScalarTypeConfig<Resolver
   name: 'JSONString'
 }
 
+export type KoboAssetObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['KoboAssetObject'] = ResolversParentTypes['KoboAssetObject']> = {
+  uid?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  sector?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  assetType?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  dateModified?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  deploymentActive?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  hasDeployment?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  xlsLink?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
+export type KoboAssetObjectConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['KoboAssetObjectConnection'] = ResolversParentTypes['KoboAssetObjectConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['KoboAssetObjectEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type KoboAssetObjectEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['KoboAssetObjectEdge'] = ResolversParentTypes['KoboAssetObjectEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['KoboAssetObject']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
 export type LabelNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['LabelNode'] = ResolversParentTypes['LabelNode']> = {
   language?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   label?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
@@ -7940,6 +8100,8 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allBusinessAreas?: Resolver<Maybe<ResolversTypes['BusinessAreaNodeConnection']>, ParentType, ContextType, QueryAllBusinessAreasArgs>,
   allLogEntries?: Resolver<Maybe<ResolversTypes['LogEntryObjectConnection']>, ParentType, ContextType, RequireFields<QueryAllLogEntriesArgs, 'objectId'>>,
   allFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType, QueryAllFieldsAttributesArgs>,
+  koboProject?: Resolver<Maybe<ResolversTypes['KoboAssetObject']>, ParentType, ContextType, RequireFields<QueryKoboProjectArgs, 'uid'>>,
+  allKoboProjects?: Resolver<Maybe<ResolversTypes['KoboAssetObjectConnection']>, ParentType, ContextType, QueryAllKoboProjectsArgs>,
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType, RequireFields<QueryProgramArgs, 'id'>>,
   allPrograms?: Resolver<Maybe<ResolversTypes['ProgramNodeConnection']>, ParentType, ContextType, QueryAllProgramsArgs>,
   cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType, RequireFields<QueryCashPlanArgs, 'id'>>,
@@ -8093,6 +8255,7 @@ export type TargetPopulationNodeResolvers<ContextType = any, ParentType extends 
   finalListTargetingCriteria?: Resolver<Maybe<ResolversTypes['TargetingCriteriaNode']>, ParentType, ContextType>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, TargetPopulationNodePaymentRecordsArgs>,
   cashPlans?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, TargetPopulationNodeCashPlansArgs>,
+  selections?: Resolver<Array<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
   totalHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   totalFamilySize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   finalList?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, TargetPopulationNodeFinalListArgs>,
@@ -8235,6 +8398,7 @@ export type Resolvers<ContextType = any> = {
   HouseholdNode?: HouseholdNodeResolvers<ContextType>,
   HouseholdNodeConnection?: HouseholdNodeConnectionResolvers<ContextType>,
   HouseholdNodeEdge?: HouseholdNodeEdgeResolvers<ContextType>,
+  HouseholdSelection?: HouseholdSelectionResolvers<ContextType>,
   ImportDataNode?: ImportDataNodeResolvers<ContextType>,
   ImportedDocumentNode?: ImportedDocumentNodeResolvers<ContextType>,
   ImportedDocumentNodeConnection?: ImportedDocumentNodeConnectionResolvers<ContextType>,
@@ -8251,6 +8415,9 @@ export type Resolvers<ContextType = any> = {
   IndividualNodeEdge?: IndividualNodeEdgeResolvers<ContextType>,
   JSONLazyString?: GraphQLScalarType,
   JSONString?: GraphQLScalarType,
+  KoboAssetObject?: KoboAssetObjectResolvers<ContextType>,
+  KoboAssetObjectConnection?: KoboAssetObjectConnectionResolvers<ContextType>,
+  KoboAssetObjectEdge?: KoboAssetObjectEdgeResolvers<ContextType>,
   LabelNode?: LabelNodeResolvers<ContextType>,
   LogEntryObject?: LogEntryObjectResolvers<ContextType>,
   LogEntryObjectConnection?: LogEntryObjectConnectionResolvers<ContextType>,
