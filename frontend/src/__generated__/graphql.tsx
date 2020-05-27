@@ -471,7 +471,9 @@ export type HouseholdNode = Node & {
   individuals: IndividualNodeConnection,
   paymentRecords: PaymentRecordNodeConnection,
   targetPopulations: TargetPopulationNodeConnection,
+  selections: Array<HouseholdSelection>,
   totalCashReceived?: Maybe<Scalars['Decimal']>,
+  selection?: Maybe<HouseholdSelection>,
 };
 
 
@@ -547,6 +549,17 @@ export enum HouseholdResidenceStatus {
   Idp = 'IDP',
   Other = 'OTHER'
 }
+
+export type HouseholdSelection = {
+   __typename?: 'HouseholdSelection',
+  id: Scalars['UUID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  household: HouseholdNode,
+  targetPopulation: TargetPopulationNode,
+  vulnerabilityScore?: Maybe<Scalars['Float']>,
+  final: Scalars['Boolean'],
+};
 
 export type ImportDataNode = Node & {
    __typename?: 'ImportDataNode',
@@ -1026,6 +1039,8 @@ export type IndividualNode = Node & {
   registrationDataImport: RegistrationDataImportNode,
   disability: Scalars['Boolean'],
   flexFields?: Maybe<Scalars['FlexFieldsScalar']>,
+  enrolledInNutritionProgramme: Scalars['Boolean'],
+  administrationOfRutf: Scalars['Boolean'],
   headingHousehold?: Maybe<HouseholdNode>,
   documents: DocumentNodeConnection,
 };
@@ -1949,6 +1964,7 @@ export type TargetPopulationNode = Node & {
   finalListTargetingCriteria?: Maybe<TargetingCriteriaNode>,
   paymentRecords: PaymentRecordNodeConnection,
   cashPlans: CashPlanNodeConnection,
+  selections: Array<HouseholdSelection>,
   totalHouseholds?: Maybe<Scalars['Int']>,
   totalFamilySize?: Maybe<Scalars['Int']>,
   finalList?: Maybe<HouseholdNodeConnection>,
@@ -2404,7 +2420,7 @@ export type IndividualMinimalFragment = (
 
 export type IndividualDetailedFragment = (
   { __typename?: 'IndividualNode' }
-  & Pick<IndividualNode, 'givenName' | 'familyName' | 'estimatedBirthDate' | 'flexFields'>
+  & Pick<IndividualNode, 'givenName' | 'familyName' | 'estimatedBirthDate' | 'enrolledInNutritionProgramme' | 'administrationOfRutf' | 'flexFields'>
   & { household: (
     { __typename?: 'HouseholdNode' }
     & Pick<HouseholdNode, 'id' | 'address' | 'countryOrigin'>
@@ -3794,6 +3810,8 @@ export const IndividualDetailedFragmentDoc = gql`
   givenName
   familyName
   estimatedBirthDate
+  enrolledInNutritionProgramme
+  administrationOfRutf
   household {
     id
     address
@@ -7085,6 +7103,8 @@ export type ResolversTypes = {
   PaymentRecordNodeEdge: ResolverTypeWrapper<PaymentRecordNodeEdge>,
   CashPlanNodeConnection: ResolverTypeWrapper<CashPlanNodeConnection>,
   CashPlanNodeEdge: ResolverTypeWrapper<CashPlanNodeEdge>,
+  HouseholdSelection: ResolverTypeWrapper<HouseholdSelection>,
+  Float: ResolverTypeWrapper<Scalars['Float']>,
   StatsObjectType: ResolverTypeWrapper<StatsObjectType>,
   RegistrationDataImportNodeConnection: ResolverTypeWrapper<RegistrationDataImportNodeConnection>,
   RegistrationDataImportNodeEdge: ResolverTypeWrapper<RegistrationDataImportNodeEdge>,
@@ -7111,7 +7131,6 @@ export type ResolversTypes = {
   LogEntryAction: LogEntryAction,
   JSONLazyString: ResolverTypeWrapper<Scalars['JSONLazyString']>,
   CashPlanStatus: CashPlanStatus,
-  Float: ResolverTypeWrapper<Scalars['Float']>,
   PaymentEntitlementNode: ResolverTypeWrapper<PaymentEntitlementNode>,
   PaymentEntitlementDeliveryType: PaymentEntitlementDeliveryType,
   ChoiceObject: ResolverTypeWrapper<ChoiceObject>,
@@ -7221,6 +7240,8 @@ export type ResolversParentTypes = {
   PaymentRecordNodeEdge: PaymentRecordNodeEdge,
   CashPlanNodeConnection: CashPlanNodeConnection,
   CashPlanNodeEdge: CashPlanNodeEdge,
+  HouseholdSelection: HouseholdSelection,
+  Float: Scalars['Float'],
   StatsObjectType: StatsObjectType,
   RegistrationDataImportNodeConnection: RegistrationDataImportNodeConnection,
   RegistrationDataImportNodeEdge: RegistrationDataImportNodeEdge,
@@ -7247,7 +7268,6 @@ export type ResolversParentTypes = {
   LogEntryAction: LogEntryAction,
   JSONLazyString: Scalars['JSONLazyString'],
   CashPlanStatus: CashPlanStatus,
-  Float: Scalars['Float'],
   PaymentEntitlementNode: PaymentEntitlementNode,
   PaymentEntitlementDeliveryType: PaymentEntitlementDeliveryType,
   ChoiceObject: ChoiceObject,
@@ -7588,7 +7608,9 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, HouseholdNodeIndividualsArgs>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, HouseholdNodePaymentRecordsArgs>,
   targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, HouseholdNodeTargetPopulationsArgs>,
+  selections?: Resolver<Array<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
   totalCashReceived?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
+  selection?: Resolver<Maybe<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
 };
 
 export type HouseholdNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['HouseholdNodeConnection'] = ResolversParentTypes['HouseholdNodeConnection']> = {
@@ -7602,6 +7624,16 @@ export type HouseholdNodeConnectionResolvers<ContextType = any, ParentType exten
 export type HouseholdNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['HouseholdNodeEdge'] = ResolversParentTypes['HouseholdNodeEdge']> = {
   node?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type HouseholdSelectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['HouseholdSelection'] = ResolversParentTypes['HouseholdSelection']> = {
+  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  household?: Resolver<ResolversTypes['HouseholdNode'], ParentType, ContextType>,
+  targetPopulation?: Resolver<ResolversTypes['TargetPopulationNode'], ParentType, ContextType>,
+  vulnerabilityScore?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  final?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
 };
 
 export type ImportDataNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportDataNode'] = ResolversParentTypes['ImportDataNode']> = {
@@ -7756,6 +7788,8 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   registrationDataImport?: Resolver<ResolversTypes['RegistrationDataImportNode'], ParentType, ContextType>,
   disability?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   flexFields?: Resolver<Maybe<ResolversTypes['FlexFieldsScalar']>, ParentType, ContextType>,
+  enrolledInNutritionProgramme?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  administrationOfRutf?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   headingHousehold?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, IndividualNodeDocumentsArgs>,
 };
@@ -8093,6 +8127,7 @@ export type TargetPopulationNodeResolvers<ContextType = any, ParentType extends 
   finalListTargetingCriteria?: Resolver<Maybe<ResolversTypes['TargetingCriteriaNode']>, ParentType, ContextType>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, TargetPopulationNodePaymentRecordsArgs>,
   cashPlans?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, TargetPopulationNodeCashPlansArgs>,
+  selections?: Resolver<Array<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
   totalHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   totalFamilySize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   finalList?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, TargetPopulationNodeFinalListArgs>,
@@ -8235,6 +8270,7 @@ export type Resolvers<ContextType = any> = {
   HouseholdNode?: HouseholdNodeResolvers<ContextType>,
   HouseholdNodeConnection?: HouseholdNodeConnectionResolvers<ContextType>,
   HouseholdNodeEdge?: HouseholdNodeEdgeResolvers<ContextType>,
+  HouseholdSelection?: HouseholdSelectionResolvers<ContextType>,
   ImportDataNode?: ImportDataNodeResolvers<ContextType>,
   ImportedDocumentNode?: ImportedDocumentNodeResolvers<ContextType>,
   ImportedDocumentNodeConnection?: ImportedDocumentNodeConnectionResolvers<ContextType>,
