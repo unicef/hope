@@ -53,6 +53,10 @@ const FilterWrapper = styled.div`
 `
 
 export function FlexFieldTab() {
+  const { data } = useFlexFieldsQuery();
+  if (!data) {
+    return null;
+  }
   return (
     <>
       <FilterWrapper>
@@ -83,7 +87,7 @@ export function FlexFieldTab() {
           }}
         />
       </FilterWrapper>
-      <FlexFieldsTable />
+      <FlexFieldsTable fields={data.allFieldsAttributes} />
     </>
   )
 }
