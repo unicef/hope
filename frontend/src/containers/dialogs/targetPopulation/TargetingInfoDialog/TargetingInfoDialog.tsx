@@ -2,16 +2,14 @@ import React, { useState } from 'react';
 import {
   IconButton,
   Dialog,
-  DialogActions,
   DialogContent,
-  DialogTitle,
-  Typography,
   Tabs,
   Tab
 } from '@material-ui/core';
 import { Close } from '@material-ui/icons';
 import styled from 'styled-components';
-import { TabPanel } from '../../../components/TabPanel';
+import { TabPanel } from '../../../../components/TabPanel';
+import { FlexFieldTab } from './FlexFieldTab';
 
 export interface FinalizeTargetPopulationPropTypes {
   open: boolean;
@@ -23,6 +21,9 @@ const DialogWrapper = styled(Dialog)`
     .MuiPaper-root {
       max-width: fit-content;
     }
+    .MuiDialogContent-root {
+      padding: 0;
+    }
   }
 `
 
@@ -33,15 +34,15 @@ const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
 `;
 
-const DialogDescription = styled.div`
-  margin: 20px 0;
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.54);
+const StyledDialogContent = styled(DialogContent)`
+  width: 900px;
+  height: 600px;
 `;
 
 const ImagePlaceholder = styled.div`
   width: 754px;
   height: 525px;
+  margin: 0 auto;
   background-color: #f8f8f8;
 `
 
@@ -62,7 +63,7 @@ export function TargetingInfoDialog({
       textColor='primary'
     >
       <Tab label='Targeting Diagram' />
-      <Tab label='Flex Field List' disabled/>
+      <Tab label='Flex Field List' />
     </Tabs>
   )
   return (
@@ -78,16 +79,14 @@ export function TargetingInfoDialog({
           <Close />
         </IconButton>
       </DialogTitleWrapper>
-      <DialogContent>
-        <DialogDescription>
-          <TabPanel value={selectedTab} index={0}>
-            <ImagePlaceholder />
-          </TabPanel>
-          <TabPanel value={selectedTab} index={1}>
-            <div>Flex list is going to be here</div>
-          </TabPanel>
-        </DialogDescription>
-      </DialogContent>
+      <StyledDialogContent>
+        <TabPanel value={selectedTab} index={0}>
+          <ImagePlaceholder />
+        </TabPanel>
+        <TabPanel value={selectedTab} index={1}>
+          <FlexFieldTab />
+        </TabPanel>
+      </StyledDialogContent>
     </DialogWrapper>
   );
 }
