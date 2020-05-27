@@ -53,7 +53,7 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
         <IndividualsBioData individual={individual as IndividualNode} />
         <IndividualContactDetails individual={individual as IndividualNode} />
         <IndividualVulnerabilities individual={individual as IndividualNode} />
-        <CashPlus />
+        <CashPlus individual={individual as IndividualNode} />
         <UniversalActivityLogTable objectId={individual.id} />
       </Container>
     </div>
