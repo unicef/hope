@@ -52,7 +52,10 @@ type BusinessAreaNode implements Node {
   koboToken: String
   slug: String!
   userSet(before: String, after: String, first: Int, last: Int): UserNodeConnection!
+  paymentrecordSet(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
+  serviceproviderSet(before: String, after: String, first: Int, last: Int): ServiceProviderNodeConnection!
   programSet(before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
+  cashplanSet(before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
   targetpopulationSet(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, orderBy: String): TargetPopulationNodeConnection!
   registrationdataimportSet(before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
 }
@@ -73,30 +76,33 @@ type CashPlanNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  program: ProgramNode!
+  businessArea: BusinessAreaNode!
+  caId: String!
+  caHashId: UUID!
+  status: CashPlanStatus!
+  statusDate: DateTime!
   name: String!
+  distributionLevel: String!
   startDate: DateTime!
   endDate: DateTime!
-  disbursementDate: DateTime!
-  numberOfHouseholds: Int!
-  createdDate: DateTime!
-  createdBy: UserNode
+  dispersionDate: DateTime!
   coverageDuration: Int!
-  coverageUnits: String!
-  targetPopulation: TargetPopulationNode!
-  cashAssistId: String!
-  distributionModality: String!
-  fsp: String!
-  status: CashPlanStatus!
-  currency: String!
+  coverageUnit: String!
+  comments: String!
+  program: ProgramNode!
+  deliveryType: String!
+  assistanceMeasurement: String!
+  assistanceThrough: String!
+  visionId: String!
+  fundsCommitment: String!
+  downPayment: String!
+  validationAlertsCount: Int!
+  totalPersonsCovered: Int!
+  totalPersonsCoveredRevised: Int!
   totalEntitledQuantity: Float!
+  totalEntitledQuantityRevised: Float!
   totalDeliveredQuantity: Float!
   totalUndeliveredQuantity: Float!
-  dispersionDate: Date!
-  deliveryType: String!
-  assistanceThrough: String!
-  fcId: String!
-  dpId: String!
   paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
 }
 
@@ -113,9 +119,10 @@ type CashPlanNodeEdge {
 }
 
 enum CashPlanStatus {
-  NOT_STARTED
-  STARTED
-  COMPLETE
+  DISTRIBUTION_COMPLETED
+  DISTRIBUTION_COMPLETED_WITH_ERRORS
+  TRANSACTION_COMPLETED
+  TRANSACTION_COMPLETED_WITH_ERRORS
 }
 
 type ChoiceObject {
@@ -297,6 +304,7 @@ type HouseholdNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
+  status: HouseholdStatus!
   consent: String!
   residenceStatus: HouseholdResidenceStatus!
   countryOrigin: String
@@ -331,7 +339,9 @@ type HouseholdNode implements Node {
   individuals(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
   targetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, orderBy: String): TargetPopulationNodeConnection!
+  selections: [HouseholdSelection!]!
   totalCashReceived: Decimal
+  selection: HouseholdSelection
 }
 
 type HouseholdNodeConnection {
@@ -353,6 +363,21 @@ enum HouseholdResidenceStatus {
   CITIZEN
   IDP
   OTHER
+}
+
+type HouseholdSelection {
+  id: UUID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  household: HouseholdNode!
+  targetPopulation: TargetPopulationNode!
+  vulnerabilityScore: Float
+  final: Boolean!
+}
+
+enum HouseholdStatus {
+  ACTIVE
+  INACTIVE
 }
 
 type ImportDataNode implements Node {
@@ -779,6 +804,7 @@ type IndividualNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
+  status: IndividualStatus!
   individualId: String!
   photo: String!
   fullName: String!
@@ -835,9 +861,37 @@ enum IndividualSex {
   FEMALE
 }
 
+enum IndividualStatus {
+  ACTIVE
+  INACTIVE
+}
+
 scalar JSONLazyString
 
 scalar JSONString
+
+type KoboAssetObject {
+  uid: String
+  name: String
+  sector: String
+  country: String
+  assetType: String
+  dateModified: DateTime
+  deploymentActive: Boolean
+  hasDeployment: Boolean
+  xlsLink: String
+}
+
+type KoboAssetObjectConnection {
+  pageInfo: PageInfo!
+  edges: [KoboAssetObjectEdge]!
+  totalCount: Int
+}
+
+type KoboAssetObjectEdge {
+  node: KoboAssetObject
+  cursor: String!
+}
 
 type LabelNode {
   language: String
@@ -908,43 +962,42 @@ type PageInfo {
   endCursor: String
 }
 
-enum PaymentEntitlementDeliveryType {
+enum PaymentRecordDeliveryType {
   CASH
   DEPOSIT_TO_CARD
   TRANSFER
 }
 
-type PaymentEntitlementNode {
-  id: UUID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  deliveryType: PaymentEntitlementDeliveryType!
-  entitlementQuantity: Decimal
-  deliveredQuantity: Decimal
-  entitlementCardIssueDate: Date
-  entitlementCardNumber: String!
-  currency: String!
-  deliveryDate: DateTime
-  transactionReferenceId: String!
-  fsp: String!
-  paymentRecord: PaymentRecordNode
+enum PaymentRecordEntitlementCardStatus {
+  ACTIVE
+  INACTIVE
 }
 
 type PaymentRecordNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
+  businessArea: BusinessAreaNode!
   status: PaymentRecordStatus!
-  name: String!
   statusDate: DateTime!
-  cashAssistId: String!
+  caId: String!
+  caHashId: UUID!
   cashPlan: CashPlanNode!
   household: HouseholdNode!
-  headOfHousehold: String!
-  totalPersonCovered: Int!
+  fullName: String!
+  totalPersonsCovered: Int!
   distributionModality: String!
   targetPopulation: TargetPopulationNode!
-  entitlement: PaymentEntitlementNode
+  targetPopulationCashAssistId: String!
+  entitlementCardNumber: String!
+  entitlementCardStatus: PaymentRecordEntitlementCardStatus!
+  entitlementCardIssueDate: Date!
+  deliveryType: PaymentRecordDeliveryType!
+  currency: String!
+  entitlementQuantity: Float!
+  deliveredQuantity: Float!
+  deliveryDate: DateTime!
+  serviceProvider: ServiceProviderNode!
 }
 
 type PaymentRecordNodeConnection {
@@ -1039,12 +1092,13 @@ type Query {
   paymentRecord(id: ID!): PaymentRecordNode
   allPaymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID, orderBy: String): PaymentRecordNodeConnection
   paymentRecordStatusChoices: [ChoiceObject]
-  allPaymentEntitlements: [PaymentEntitlementNode]
   adminArea(id: ID!): AdminAreaNode
   allAdminAreas(before: String, after: String, first: Int, last: Int, title: String, title_Icontains: String, businessArea: String): AdminAreaNodeConnection
   allBusinessAreas(before: String, after: String, first: Int, last: Int, id: UUID): BusinessAreaNodeConnection
   allLogEntries(objectId: String!, before: String, after: String, first: Int, last: Int): LogEntryObjectConnection
   allFieldsAttributes(flexField: Boolean): [FieldAttributeNode]
+  koboProject(uid: String!, businessAreaSlug: String!): KoboAssetObject
+  allKoboProjects(businessAreaSlug: String!, onlyDeployed: Boolean, before: String, after: String, first: Int, last: Int): KoboAssetObjectConnection
   program(id: ID!): ProgramNode
   allPrograms(before: String, after: String, first: Int, last: Int, id: UUID, status: String, businessArea: String): ProgramNodeConnection
   cashPlan(id: ID!): CashPlanNode
@@ -1153,6 +1207,31 @@ enum RegistrationDataImportStatus {
   IMPORTING
 }
 
+type ServiceProviderNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  businessArea: BusinessAreaNode!
+  caId: String!
+  fullName: String!
+  shortName: String!
+  country: String!
+  visionId: String!
+  paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
+}
+
+type ServiceProviderNodeConnection {
+  pageInfo: PageInfo!
+  edges: [ServiceProviderNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type ServiceProviderNodeEdge {
+  node: ServiceProviderNode
+  cursor: String!
+}
+
 type StatsObjectType {
   childMale: Int
   childFemale: Int
@@ -1183,7 +1262,7 @@ type TargetPopulationNode implements Node {
   candidateListTargetingCriteria: TargetingCriteriaNode
   finalListTargetingCriteria: TargetingCriteriaNode
   paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
-  cashPlans(before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
+  selections: [HouseholdSelection!]!
   totalHouseholds: Int
   totalFamilySize: Int
   finalList(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection
@@ -1325,7 +1404,6 @@ type UserNode implements Node {
   dateJoined: DateTime!
   id: ID!
   businessAreas(before: String, after: String, first: Int, last: Int, id: UUID): BusinessAreaNodeConnection!
-  cashPlans(before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
   targetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, orderBy: String): TargetPopulationNodeConnection!
   approvedTargetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, orderBy: String): TargetPopulationNodeConnection!
   finalizedTargetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, orderBy: String): TargetPopulationNodeConnection!
@@ -1356,7 +1434,6 @@ type UserObjectType {
   dateJoined: DateTime!
   id: UUID!
   businessAreas(before: String, after: String, first: Int, last: Int, id: UUID): BusinessAreaNodeConnection!
-  cashPlans(before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
   targetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, orderBy: String): TargetPopulationNodeConnection!
   approvedTargetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, orderBy: String): TargetPopulationNodeConnection!
   finalizedTargetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, orderBy: String): TargetPopulationNodeConnection!

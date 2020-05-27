@@ -41,7 +41,7 @@ export function PaymentRecordDetailsPage(): React.ReactElement {
       to: `/${businessArea}/programs/${data.paymentRecord.cashPlan.program.id}/`,
     },
     {
-      title: `Cash Plan #${data.paymentRecord.cashPlan.cashAssistId}`,
+      title: `Cash Plan #${data.paymentRecord.cashPlan.caId}`,
       to: `/${businessArea}/cashplans/${data.paymentRecord.cashPlan.id}`,
     },
   ];
@@ -49,7 +49,7 @@ export function PaymentRecordDetailsPage(): React.ReactElement {
   return (
     <div>
       <PageHeader
-        title={`Payment ID ${paymentRecord.cashAssistId}`}
+        title={`Payment ID ${paymentRecord.caId}`}
         breadCrumbs={breadCrumbsItems}
       />
       <Container>

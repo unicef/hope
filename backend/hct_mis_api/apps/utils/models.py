@@ -20,7 +20,8 @@ class SoftDeletionTreeManager(TreeManager):
         """
         return (
             super(TreeManager, self)
-            .get_queryset(*args, **kwargs).filter(is_removed=False)
+            .get_queryset(*args, **kwargs)
+            .filter(is_removed=False)
             .order_by(self.tree_id_attr, self.left_attr)
         )
 
@@ -44,3 +45,33 @@ class SoftDeletionTreeModel(TimeStampedUUIDModel, MPTTModel):
             self.save(using=using)
         else:
             return super().delete(using=using, *args, **kwargs)
+
+
+class AbstractSession(models.Model):
+    timestamp = models.DateTimeField(auto_now_add=True)
+    SOURCE_MIS = "MIS"
+    SOURCE_CA = "CA"
+    STATUS_NEW = "NEW"
+    STATUS_READY = "NEW"
+    STATUS_PROCESSING = "NEW"
+    STATUS_COMPLETED = "NEW"
+    STATUS_FAILED = "NEW"
+
+    source = models.CharField(
+        max_length=3,
+        choices=((SOURCE_MIS, "HCT-MIS"), (SOURCE_CA, "Cash Assist")),
+    )
+    status = models.CharField(
+        max_length=11,
+        choices=(
+            (STATUS_NEW, "New"),
+            (STATUS_READY, "Ready"),
+            (STATUS_PROCESSING, "Processing"),
+            (STATUS_COMPLETED, "Completed"),
+            (STATUS_FAILED, "Failed"),
+        ),
+    )
+    last_modified_date = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        abstract = True

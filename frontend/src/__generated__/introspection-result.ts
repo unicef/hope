@@ -21,34 +21,37 @@
             "name": "PaymentRecordNode"
           },
           {
-            "name": "CashPlanNode"
-          },
-          {
-            "name": "ProgramNode"
-          },
-          {
-            "name": "AdminAreaNode"
-          },
-          {
-            "name": "HouseholdNode"
-          },
-          {
-            "name": "RegistrationDataImportNode"
+            "name": "BusinessAreaNode"
           },
           {
             "name": "UserNode"
           },
           {
-            "name": "BusinessAreaNode"
+            "name": "TargetPopulationNode"
           },
           {
-            "name": "TargetPopulationNode"
+            "name": "HouseholdNode"
+          },
+          {
+            "name": "AdminAreaNode"
+          },
+          {
+            "name": "ProgramNode"
+          },
+          {
+            "name": "CashPlanNode"
+          },
+          {
+            "name": "RegistrationDataImportNode"
           },
           {
             "name": "IndividualNode"
           },
           {
             "name": "DocumentNode"
+          },
+          {
+            "name": "ServiceProviderNode"
           },
           {
             "name": "ImportedHouseholdNode"

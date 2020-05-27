@@ -57,45 +57,47 @@ class CashPlanFactory(factory.DjangoModelFactory):
         model = CashPlan
 
     program = factory.SubFactory(ProgramFactory)
+    ca_id = factory.Faker("uuid4")
+    ca_hash_id = factory.Faker("uuid4")
+    status_date = factory.Faker(
+        "date_time_this_decade", before_now=False, after_now=True, tzinfo=utc,
+    )
+    status = fuzzy.FuzzyChoice(CashPlan.STATUS_CHOICE, getter=lambda c: c[0],)
     name = factory.Faker(
         "sentence", nb_words=6, variable_nb_words=True, ext_word_list=None,
     )
+    distribution_level = "Registration Group"
     start_date = factory.Faker(
         "date_time_this_decade", before_now=False, after_now=True, tzinfo=utc,
     )
     end_date = factory.LazyAttribute(
         lambda o: o.start_date + timedelta(days=randint(60, 1000))
     )
-    disbursement_date = factory.LazyAttribute(
-        lambda o: o.end_date - timedelta(days=5)
+    dispersion_date = factory.LazyAttribute(
+        lambda o: o.start_date + timedelta(days=randint(60, 1000))
     )
-    number_of_households = factory.fuzzy.FuzzyInteger(100, 550)
-    created_date = factory.LazyAttribute(
-        lambda o: o.start_date - timedelta(days=5)
-    )
-    created_by = factory.SubFactory(UserFactory)
-    coverage_duration = factory.fuzzy.FuzzyInteger(10, 30)
-    coverage_units = factory.Faker(
+    coverage_duration = factory.fuzzy.FuzzyInteger(1, 4)
+    coverage_unit = factory.Faker(
         "random_element", elements=["Day(s)", "Week(s)", "Month(s)", "Year(s)"],
     )
-    target_population = factory.SubFactory(TargetPopulationFactory)
-    cash_assist_id = factory.Faker("uuid4")
-    distribution_modality = factory.Faker(
-        "pystr_format", string_format="###-##",
-    )
-    fsp = factory.Faker("company")
-    status = fuzzy.FuzzyChoice(CashPlan.STATUS_CHOICE, getter=lambda c: c[0],)
-    currency = factory.Faker("currency_name")
-    total_entitled_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
-    total_delivered_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
-    total_undelivered_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
-    dispersion_date = fuzzy.FuzzyDate(
-        start_date=datetime.now() + timedelta(days=30),
-        end_date=datetime.now() + timedelta(days=365),
+    comments = factory.Faker(
+        "sentence", nb_words=6, variable_nb_words=True, ext_word_list=None,
     )
     delivery_type = factory.Faker(
         "random_element", elements=["Deposit to Card", "Transfer", "Cash"]
     )
-    assistance_through = factory.Faker('company')
-    fc_id = factory.Faker("itin")
-    dp_id = factory.Faker("itin")
+    assistance_measurement = factory.Faker("currency_name")
+    assistance_through = factory.Faker(
+        "random_element", elements=["ING", "Bank of America", "mBank"]
+    )
+    vision_id = factory.Faker("uuid4")
+    funds_commitment = factory.fuzzy.FuzzyInteger(1000, 99999999)
+    down_payment = factory.fuzzy.FuzzyInteger(1000, 99999999)
+    validation_alerts_count = factory.fuzzy.FuzzyInteger(1, 3)
+    total_persons_covered = factory.fuzzy.FuzzyInteger(1, 4)
+    total_persons_covered_revised = factory.fuzzy.FuzzyInteger(1, 4)
+
+    total_entitled_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
+    total_entitled_quantity_revised = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
+    total_delivered_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
+    total_undelivered_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)

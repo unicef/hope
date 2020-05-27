@@ -28,10 +28,10 @@ export const AllCashPlans = gql`
         cursor
         node {
           id
-          cashAssistId
-          numberOfHouseholds
-          disbursementDate
-          currency
+          caId
+          totalPersonsCovered
+          dispersionDate
+          assistanceMeasurement
           status
           totalEntitledQuantity
           totalDeliveredQuantity

@@ -48,16 +48,16 @@ export const householdDetailed = gql`
       edges {
         node {
           id
-          headOfHousehold
+          fullName
           cashPlan {
             id
-            numberOfHouseholds
+            totalPersonsCovered
             program {
               id
               name
             }
             totalDeliveredQuantity
-            currency
+            assistanceMeasurement
           }
         }
       }
