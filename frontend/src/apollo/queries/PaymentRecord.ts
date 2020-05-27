@@ -6,37 +6,37 @@ export const PAYMENT_RECORD_QUERY = gql`
       id
       status
       statusDate
-      cashAssistId
+      caId
       household {
         id
         size
       }
-      headOfHousehold
+      fullName
       distributionModality
-      totalPersonCovered
+      totalPersonsCovered
       targetPopulation {
         id
         name
       }
       cashPlan {
         id
-        cashAssistId
+        caId
         program {
           id
           name
         }
       }
-      entitlement {
+      currency
+      entitlementQuantity
+      deliveredQuantity
+      deliveryDate
+      deliveryDate
+      entitlementCardIssueDate
+      entitlementCardNumber
+      serviceProvider{
         id
-        currency
-        entitlementQuantity
-        deliveredQuantity
-        deliveryType
-        deliveryDate
-        entitlementCardIssueDate
-        transactionReferenceId
-        fsp
-        entitlementCardNumber
+        fullName
+        shortName
       }
     }
   }
