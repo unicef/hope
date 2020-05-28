@@ -41,12 +41,7 @@ class Household(SessionModel):
     form_number = models.CharField(max_length=255, null=True)
     agency_id = models.CharField(max_length=255, null=True)
     #  individual_id head of household
-    focal_point = models.ForeignKey(
-        "mis_datahub.Individual",
-        db_column="focal_point_mis_id",
-        on_delete=models.CASCADE,
-        related_name="heading_household",
-    )
+    focal_point = models.UUIDField()
     address = models.CharField(max_length=255, null=True)
     admin1 = models.CharField(max_length=255, null=True)
     admin2 = models.CharField(max_length=255, null=True)
