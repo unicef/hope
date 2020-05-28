@@ -42,7 +42,7 @@ const StyledCell = styled(TableCell)`
 
 type Order = 'asc' | 'desc';
 
-export const FlexFieldsTable = ({ fields }): ReactElement => {
+export const FlexFieldsTable = ({ fields, selectedOption, searchValue }): ReactElement => {
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('');
   const classes = useStyles({});
@@ -53,6 +53,27 @@ export const FlexFieldsTable = ({ fields }): ReactElement => {
     setOrderBy(property);
   };
 
+  const filterTable = () => {
+    const filters = {
+      labelEn: searchValue,
+      type: selectedOption
+    };
+    return fields.filter(field => {
+      if(!searchValue && !selectedOption) {
+        return true;
+      }
+      //eslint-disable-next-line
+      for (const key in filters) {
+        if (field[key] === undefined || (field[key] !== filters[key] && !field[key].includes(filters[key]))) {
+          return false;
+        }
+      }
+      return true;
+    })
+  };
+
+  const filteredFields = filterTable()
+  
   return (
     <TableWrapper>
       <Table aria-label="simple table">
@@ -65,8 +86,8 @@ export const FlexFieldsTable = ({ fields }): ReactElement => {
           rowCount={fields.length - 1}
         />
         <TableBody>
-          {stableSort(fields, getComparator(order, orderBy)).map((row) => (
-            <TableRow key={row.name}>
+          {stableSort(filteredFields, getComparator(order, orderBy)).map((row) => (
+            <TableRow key={row.id}>
               <StyledCell>
                 {row.labelEn}
               </StyledCell>

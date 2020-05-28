@@ -3699,7 +3699,7 @@ export type FlexFieldsQuery = (
   { __typename?: 'Query' }
   & { allFieldsAttributes: Maybe<Array<Maybe<(
     { __typename?: 'FieldAttributeNode' }
-    & Pick<FieldAttributeNode, 'type' | 'name' | 'labelEn'>
+    & Pick<FieldAttributeNode, 'id' | 'type' | 'name' | 'labelEn'>
   )>>> }
 );
 
@@ -6893,6 +6893,7 @@ export type FinalHouseholdsListByTargetingCriteriaQueryResult = ApolloReactCommo
 export const FlexFieldsDocument = gql`
     query FlexFields {
   allFieldsAttributes(flexField: true) {
+    id
     type
     name
     labelEn

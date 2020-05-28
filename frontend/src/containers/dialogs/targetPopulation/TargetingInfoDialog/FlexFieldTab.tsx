@@ -128,7 +128,7 @@ export function FlexFieldTab() {
           </StyledFormControl>
         }
       </FilterWrapper>
-      <FlexFieldsTable fields={data.allFieldsAttributes} />
+      <FlexFieldsTable selectedOption={selectedOption} searchValue={searchValue} fields={data.allFieldsAttributes} />
     </>
   )
 }
