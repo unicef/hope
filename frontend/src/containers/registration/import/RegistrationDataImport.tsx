@@ -26,6 +26,8 @@ import { useDropzone } from 'react-dropzone';
 import { Field, Form, Formik } from 'formik';
 import get from 'lodash/get';
 import {
+  KoboErrorNode,
+  SaveKoboImportDataMutation,
   UploadImportDataXlsxFileMutation,
   useAllKoboProjectsQuery,
   useCreateRegistrationKoboImportMutation,
@@ -149,7 +151,37 @@ function Errors({
     </>
   );
 }
-
+function ErrorsKobo({
+  errors,
+}: {
+  errors: KoboErrorNode[];
+}): React.ReactElement {
+  const [expanded, setExpanded] = useState(false);
+  if (!errors || !errors.length) {
+    return null;
+  }
+  return (
+    <>
+      <ErrorsContainer>
+        <Error>Errors</Error>
+        <IconButton
+          onClick={() => setExpanded(!expanded)}
+          aria-expanded={expanded}
+          aria-label='show more'
+        >
+          {expanded ? <ExpandLessRoundedIcon /> : <ExpandMoreRoundedIcon />}
+        </IconButton>
+      </ErrorsContainer>
+      <Collapse in={expanded} timeout='auto' unmountOnExit>
+        {errors.map((item) => (
+          <Error>
+            <strong>Field: {item.header}</strong> {item.message}
+          </Error>
+        ))}
+      </Collapse>
+    </>
+  );
+}
 const validationSchema = Yup.object().shape({
   name: Yup.string().required('Name Upload is required'),
 });
@@ -181,12 +213,14 @@ export function RegistrationDataImport(): React.ReactElement {
     variables: { businessAreaSlug: businessArea },
   });
   const { t } = useTranslation();
-  const errors: UploadImportDataXlsxFileMutation['uploadImportDataXlsxFile']['errors'] = get(
+  const xlsxErrors: UploadImportDataXlsxFileMutation['uploadImportDataXlsxFile']['errors'] = get(
     uploadData,
     'uploadImportDataXlsxFile.errors',
   );
+  const koboErrors: SaveKoboImportDataMutation['saveKoboImportData']['errors'] =
+    koboImportData?.saveKoboImportData?.errors;
   let counters = null;
-  if (get(uploadData, 'uploadImportDataXlsxFile.importData')) {
+  if (uploadData?.uploadImportDataXlsxFile?.importData) {
     counters = (
       <>
         <div>
@@ -195,6 +229,20 @@ export function RegistrationDataImport(): React.ReactElement {
         </div>
         <div>
           {uploadData.uploadImportDataXlsxFile.importData.numberOfIndividuals}{' '}
+          Individuals available to Import
+        </div>
+      </>
+    );
+  }
+  if (koboImportData?.saveKoboImportData?.importData) {
+    counters = (
+      <>
+        <div>
+          {koboImportData?.saveKoboImportData?.importData.numberOfHouseholds}{' '}
+          Households available to Import
+        </div>
+        <div>
+          {koboImportData?.saveKoboImportData?.importData.numberOfIndividuals}{' '}
           Individuals available to Import
         </div>
       </>
@@ -226,7 +274,7 @@ export function RegistrationDataImport(): React.ReactElement {
             });
           }}
         />
-        <Errors errors={errors as XlsxRowErrorNode[]} />
+        <Errors errors={xlsxErrors as XlsxRowErrorNode[]} />
       </>
     );
   } else if (importType === 'kobo') {
@@ -257,6 +305,7 @@ export function RegistrationDataImport(): React.ReactElement {
             ))}
           </ComboBox>
         </FormControl>
+        <ErrorsKobo errors={koboErrors as KoboErrorNode[]} />
       </div>
     );
   }
@@ -375,7 +424,7 @@ export function RegistrationDataImport(): React.ReactElement {
                       !uploadData ||
                       createLoading ||
                       saveKoboLoading ||
-                      !!koboImportData
+                      !koboImportData
                     }
                     onClick={() => {
                       submitForm();
