@@ -39,7 +39,7 @@ export function CashPlanTableRow({
             textOverflow: 'ellipsis',
           }}
         >
-          {cashPlan.cashAssistId}
+          {cashPlan.caId}
         </div>
       </TableCell>
       <TableCell align='left'>
@@ -50,8 +50,8 @@ export function CashPlanTableRow({
           />
         </StatusContainer>
       </TableCell>
-      <TableCell align='right'>{cashPlan.numberOfHouseholds}</TableCell>
-      <TableCell align='left'>{cashPlan.currency}</TableCell>
+      <TableCell align='right'>{cashPlan.totalPersonsCovered}</TableCell>
+      <TableCell align='left'>{cashPlan.assistanceMeasurement}</TableCell>
       <TableCell align='right'>
         {cashPlan.totalEntitledQuantity.toLocaleString('en-US', {
           minimumFractionDigits: 2,

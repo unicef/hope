@@ -43,7 +43,7 @@ The **domain name** part of an email address has to conform to strict guidelines
 
 ## Program Management
 
-#### Text Fields:
+### Text Fields:
 
 * Name
 * Description
@@ -56,7 +56,7 @@ The **domain name** part of an email address has to conform to strict guidelines
 * A minimum length of 3 
 * A maximum length of 30
 
-#### Amount Fields:
+### Amount Fields:
 
 * Budget
 
