@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { InputAdornment, TextField, MenuItem } from '@material-ui/core';
+import { InputAdornment, TextField, MenuItem, FormControl } from '@material-ui/core';
 import { Search } from '@material-ui/icons';
 import { FlexFieldsTable } from '../../../tables/TargetPopulation/FlexFields';
 import { useFlexFieldsQuery } from '../../../../__generated__/graphql';
+import InputLabel from '../../../../shared/InputLabel';
+import Select from '../../../../shared/Select';
 
 const TextContainer = styled(TextField)`
   .MuiFilledInput-root {
@@ -51,13 +53,23 @@ const SelectContainer = styled(TextContainer)`
   && {
     width: 33%;
   }
-`
+`;
 
 const FilterWrapper = styled.div`
   padding: 20px;
   display: flex;
   justify-content: space-between;
-`
+`;
+
+const StyledFormControl = styled(FormControl)`
+  width: 232px;
+  color: #5f6368;
+  border-bottom: 0;
+`;
+
+const StartInputAdornment = styled(InputAdornment)`
+  margin-right: 0;
+`;
 
 export function FlexFieldTab() {
   const { data } = useFlexFieldsQuery();
@@ -96,18 +108,24 @@ export function FlexFieldTab() {
           }}
         />
         {selectOptions.length &&
-          <SelectContainer
-            placeholder='Type'
-            variant='outlined'
-            margin='dense'
-            select
-            value={selectedOption}
-            onChange={(e) => setSelectedOption(e.target.value)}
-          >
-            {selectOptions.map(type => {
-              return <MenuItem key={type} value={type}>{type}</MenuItem>
-            })}
-          </SelectContainer>
+          <StyledFormControl variant='outlined' margin='dense'>
+            <InputLabel>Type</InputLabel>
+            <Select
+              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
+              // @ts-ignore
+              onChange={(e) => setSelectedOption(e.target.value)}
+              variant='outlined'
+              label='Type'
+              value={selectedOption}
+            >
+              <MenuItem value=''>
+                <em>None</em>
+              </MenuItem>
+              {selectOptions.map(type => {
+                return <MenuItem key={type} value={type}>{type}</MenuItem>
+              })}
+            </Select>
+          </StyledFormControl>
         }
       </FilterWrapper>
       <FlexFieldsTable fields={data.allFieldsAttributes} />
