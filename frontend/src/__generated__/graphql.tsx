@@ -322,17 +322,6 @@ export type CreateProgramInput = {
   businessAreaSlug?: Maybe<Scalars['String']>,
 };
 
-export type CreateRegistrationDataImport = {
-   __typename?: 'CreateRegistrationDataImport',
-  registrationDataImport?: Maybe<RegistrationDataImportNode>,
-};
-
-export type CreateRegistrationDataImportExcelInput = {
-  importDataId?: Maybe<Scalars['ID']>,
-  name?: Maybe<Scalars['String']>,
-  businessAreaSlug?: Maybe<Scalars['String']>,
-};
-
 export type CreateTargetPopulationInput = {
   name: Scalars['String'],
   targetingCriteria: TargetingCriteriaObjectType,
@@ -600,12 +589,18 @@ export enum HouseholdStatus {
   Inactive = 'INACTIVE'
 }
 
+export enum ImportDataDataType {
+  Xlsx = 'XLSX',
+  Json = 'JSON'
+}
+
 export type ImportDataNode = Node & {
    __typename?: 'ImportDataNode',
   id: Scalars['ID'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
-  xlsxFile: Scalars['String'],
+  file: Scalars['String'],
+  dataType: ImportDataDataType,
   numberOfHouseholds: Scalars['Int'],
   numberOfIndividuals: Scalars['Int'],
   registrationDataImport?: Maybe<RegistrationDataImportDatahubNode>,
@@ -1160,6 +1155,12 @@ export type KoboAssetObjectEdge = {
   cursor: Scalars['String'],
 };
 
+export type KoboErrorNode = {
+   __typename?: 'KoboErrorNode',
+  header?: Maybe<Scalars['String']>,
+  message?: Maybe<Scalars['String']>,
+};
+
 export type LabelNode = {
    __typename?: 'LabelNode',
   language?: Maybe<Scalars['String']>,
@@ -1218,7 +1219,9 @@ export type Mutations = {
   deleteProgram?: Maybe<DeleteProgram>,
   uploadImportDataXlsxFile?: Maybe<UploadImportDataXlsxFile>,
   deleteRegistrationDataImport?: Maybe<DeleteRegistrationDataImport>,
-  createRegistrationDataImport?: Maybe<CreateRegistrationDataImport>,
+  registrationXlsxImport?: Maybe<RegistrationXlsxImportMutation>,
+  registrationKoboImport?: Maybe<RegistrationKoboImportMutation>,
+  saveKoboImportData?: Maybe<SaveKoboProjectImportDataMutation>,
   approveRegistrationDataImport?: Maybe<ApproveRegistrationDataImportMutation>,
   unapproveRegistrationDataImport?: Maybe<UnapproveRegistrationDataImportMutation>,
   mergeRegistrationDataImport?: Maybe<MergeRegistrationDataImportMutation>,
@@ -1287,8 +1290,19 @@ export type MutationsDeleteRegistrationDataImportArgs = {
 };
 
 
-export type MutationsCreateRegistrationDataImportArgs = {
-  registrationDataImportData: CreateRegistrationDataImportExcelInput
+export type MutationsRegistrationXlsxImportArgs = {
+  registrationDataImportData: RegistrationXlsxImportMutationInput
+};
+
+
+export type MutationsRegistrationKoboImportArgs = {
+  registrationDataImportData: RegistrationKoboImportMutationInput
+};
+
+
+export type MutationsSaveKoboImportDataArgs = {
+  businessAreaSlug: Scalars['String'],
+  uid: Scalars['Upload']
 };
 
 
@@ -1956,6 +1970,34 @@ export enum RegistrationDataImportStatus {
   Merging = 'MERGING',
   Importing = 'IMPORTING'
 }
+
+export type RegistrationKoboImportMutation = {
+   __typename?: 'RegistrationKoboImportMutation',
+  registrationDataImport?: Maybe<RegistrationDataImportNode>,
+};
+
+export type RegistrationKoboImportMutationInput = {
+  uid?: Maybe<Scalars['String']>,
+  name?: Maybe<Scalars['String']>,
+  businessAreaSlug?: Maybe<Scalars['String']>,
+};
+
+export type RegistrationXlsxImportMutation = {
+   __typename?: 'RegistrationXlsxImportMutation',
+  registrationDataImport?: Maybe<RegistrationDataImportNode>,
+};
+
+export type RegistrationXlsxImportMutationInput = {
+  importDataId?: Maybe<Scalars['ID']>,
+  name?: Maybe<Scalars['String']>,
+  businessAreaSlug?: Maybe<Scalars['String']>,
+};
+
+export type SaveKoboProjectImportDataMutation = {
+   __typename?: 'SaveKoboProjectImportDataMutation',
+  importData?: Maybe<ImportDataNode>,
+  errors?: Maybe<Array<Maybe<KoboErrorNode>>>,
+};
 
 export type ServiceProviderNode = Node & {
    __typename?: 'ServiceProviderNode',
@@ -3500,15 +3542,15 @@ export type ApproveRdiMutation = (
   )> }
 );
 
-export type CreateRegistrationDataImportMutationVariables = {
-  registrationDataImportData: CreateRegistrationDataImportExcelInput
+export type CreateRegistrationXlsxImportMutationVariables = {
+  registrationDataImportData: RegistrationXlsxImportMutationInput
 };
 
 
-export type CreateRegistrationDataImportMutation = (
+export type CreateRegistrationXlsxImportMutation = (
   { __typename?: 'Mutations' }
-  & { createRegistrationDataImport: Maybe<(
-    { __typename?: 'CreateRegistrationDataImport' }
+  & { registrationXlsxImport: Maybe<(
+    { __typename?: 'RegistrationXlsxImportMutation' }
     & { registrationDataImport: Maybe<(
       { __typename?: 'RegistrationDataImportNode' }
       & Pick<RegistrationDataImportNode, 'id' | 'name' | 'dataSource' | 'datahubId'>
@@ -6354,9 +6396,9 @@ export function useApproveRdiMutation(baseOptions?: ApolloReactHooks.MutationHoo
 export type ApproveRdiMutationHookResult = ReturnType<typeof useApproveRdiMutation>;
 export type ApproveRdiMutationResult = ApolloReactCommon.MutationResult<ApproveRdiMutation>;
 export type ApproveRdiMutationOptions = ApolloReactCommon.BaseMutationOptions<ApproveRdiMutation, ApproveRdiMutationVariables>;
-export const CreateRegistrationDataImportDocument = gql`
-    mutation CreateRegistrationDataImport($registrationDataImportData: CreateRegistrationDataImportExcelInput!) {
-  createRegistrationDataImport(registrationDataImportData: $registrationDataImportData) {
+export const CreateRegistrationXlsxImportDocument = gql`
+    mutation CreateRegistrationXlsxImport($registrationDataImportData: RegistrationXlsxImportMutationInput!) {
+  registrationXlsxImport(registrationDataImportData: $registrationDataImportData) {
     registrationDataImport {
       id
       name
@@ -6366,48 +6408,48 @@ export const CreateRegistrationDataImportDocument = gql`
   }
 }
     `;
-export type CreateRegistrationDataImportMutationFn = ApolloReactCommon.MutationFunction<CreateRegistrationDataImportMutation, CreateRegistrationDataImportMutationVariables>;
-export type CreateRegistrationDataImportComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<CreateRegistrationDataImportMutation, CreateRegistrationDataImportMutationVariables>, 'mutation'>;
+export type CreateRegistrationXlsxImportMutationFn = ApolloReactCommon.MutationFunction<CreateRegistrationXlsxImportMutation, CreateRegistrationXlsxImportMutationVariables>;
+export type CreateRegistrationXlsxImportComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<CreateRegistrationXlsxImportMutation, CreateRegistrationXlsxImportMutationVariables>, 'mutation'>;
 
-    export const CreateRegistrationDataImportComponent = (props: CreateRegistrationDataImportComponentProps) => (
-      <ApolloReactComponents.Mutation<CreateRegistrationDataImportMutation, CreateRegistrationDataImportMutationVariables> mutation={CreateRegistrationDataImportDocument} {...props} />
+    export const CreateRegistrationXlsxImportComponent = (props: CreateRegistrationXlsxImportComponentProps) => (
+      <ApolloReactComponents.Mutation<CreateRegistrationXlsxImportMutation, CreateRegistrationXlsxImportMutationVariables> mutation={CreateRegistrationXlsxImportDocument} {...props} />
     );
     
-export type CreateRegistrationDataImportProps<TChildProps = {}> = ApolloReactHoc.MutateProps<CreateRegistrationDataImportMutation, CreateRegistrationDataImportMutationVariables> & TChildProps;
-export function withCreateRegistrationDataImport<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+export type CreateRegistrationXlsxImportProps<TChildProps = {}> = ApolloReactHoc.MutateProps<CreateRegistrationXlsxImportMutation, CreateRegistrationXlsxImportMutationVariables> & TChildProps;
+export function withCreateRegistrationXlsxImport<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
   TProps,
-  CreateRegistrationDataImportMutation,
-  CreateRegistrationDataImportMutationVariables,
-  CreateRegistrationDataImportProps<TChildProps>>) {
-    return ApolloReactHoc.withMutation<TProps, CreateRegistrationDataImportMutation, CreateRegistrationDataImportMutationVariables, CreateRegistrationDataImportProps<TChildProps>>(CreateRegistrationDataImportDocument, {
-      alias: 'createRegistrationDataImport',
+  CreateRegistrationXlsxImportMutation,
+  CreateRegistrationXlsxImportMutationVariables,
+  CreateRegistrationXlsxImportProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, CreateRegistrationXlsxImportMutation, CreateRegistrationXlsxImportMutationVariables, CreateRegistrationXlsxImportProps<TChildProps>>(CreateRegistrationXlsxImportDocument, {
+      alias: 'createRegistrationXlsxImport',
       ...operationOptions
     });
 };
 
 /**
- * __useCreateRegistrationDataImportMutation__
+ * __useCreateRegistrationXlsxImportMutation__
  *
- * To run a mutation, you first call `useCreateRegistrationDataImportMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useCreateRegistrationDataImportMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useCreateRegistrationXlsxImportMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateRegistrationXlsxImportMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [createRegistrationDataImportMutation, { data, loading, error }] = useCreateRegistrationDataImportMutation({
+ * const [createRegistrationXlsxImportMutation, { data, loading, error }] = useCreateRegistrationXlsxImportMutation({
  *   variables: {
  *      registrationDataImportData: // value for 'registrationDataImportData'
  *   },
  * });
  */
-export function useCreateRegistrationDataImportMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateRegistrationDataImportMutation, CreateRegistrationDataImportMutationVariables>) {
-        return ApolloReactHooks.useMutation<CreateRegistrationDataImportMutation, CreateRegistrationDataImportMutationVariables>(CreateRegistrationDataImportDocument, baseOptions);
+export function useCreateRegistrationXlsxImportMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateRegistrationXlsxImportMutation, CreateRegistrationXlsxImportMutationVariables>) {
+        return ApolloReactHooks.useMutation<CreateRegistrationXlsxImportMutation, CreateRegistrationXlsxImportMutationVariables>(CreateRegistrationXlsxImportDocument, baseOptions);
       }
-export type CreateRegistrationDataImportMutationHookResult = ReturnType<typeof useCreateRegistrationDataImportMutation>;
-export type CreateRegistrationDataImportMutationResult = ApolloReactCommon.MutationResult<CreateRegistrationDataImportMutation>;
-export type CreateRegistrationDataImportMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateRegistrationDataImportMutation, CreateRegistrationDataImportMutationVariables>;
+export type CreateRegistrationXlsxImportMutationHookResult = ReturnType<typeof useCreateRegistrationXlsxImportMutation>;
+export type CreateRegistrationXlsxImportMutationResult = ApolloReactCommon.MutationResult<CreateRegistrationXlsxImportMutation>;
+export type CreateRegistrationXlsxImportMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateRegistrationXlsxImportMutation, CreateRegistrationXlsxImportMutationVariables>;
 export const ImportedHouseholdDocument = gql`
     query ImportedHousehold($id: ID!) {
   importedHousehold(id: $id) {
@@ -7233,6 +7275,7 @@ export type ResolversTypes = {
   ImportedIndividualMaritalStatus: ImportedIndividualMaritalStatus,
   RegistrationDataImportDatahubNode: ResolverTypeWrapper<RegistrationDataImportDatahubNode>,
   ImportDataNode: ResolverTypeWrapper<ImportDataNode>,
+  ImportDataDataType: ImportDataDataType,
   ImportedHouseholdNodeConnection: ResolverTypeWrapper<ImportedHouseholdNodeConnection>,
   ImportedHouseholdNodeEdge: ResolverTypeWrapper<ImportedHouseholdNodeEdge>,
   ImportedIndividualNodeConnection: ResolverTypeWrapper<ImportedIndividualNodeConnection>,
@@ -7270,8 +7313,12 @@ export type ResolversTypes = {
   UploadImportDataXLSXFile: ResolverTypeWrapper<UploadImportDataXlsxFile>,
   XlsxRowErrorNode: ResolverTypeWrapper<XlsxRowErrorNode>,
   DeleteRegistrationDataImport: ResolverTypeWrapper<DeleteRegistrationDataImport>,
-  CreateRegistrationDataImportExcelInput: CreateRegistrationDataImportExcelInput,
-  CreateRegistrationDataImport: ResolverTypeWrapper<CreateRegistrationDataImport>,
+  RegistrationXlsxImportMutationInput: RegistrationXlsxImportMutationInput,
+  RegistrationXlsxImportMutation: ResolverTypeWrapper<RegistrationXlsxImportMutation>,
+  RegistrationKoboImportMutationInput: RegistrationKoboImportMutationInput,
+  RegistrationKoboImportMutation: ResolverTypeWrapper<RegistrationKoboImportMutation>,
+  SaveKoboProjectImportDataMutation: ResolverTypeWrapper<SaveKoboProjectImportDataMutation>,
+  KoboErrorNode: ResolverTypeWrapper<KoboErrorNode>,
   ApproveRegistrationDataImportMutation: ResolverTypeWrapper<ApproveRegistrationDataImportMutation>,
   UnapproveRegistrationDataImportMutation: ResolverTypeWrapper<UnapproveRegistrationDataImportMutation>,
   MergeRegistrationDataImportMutation: ResolverTypeWrapper<MergeRegistrationDataImportMutation>,
@@ -7378,6 +7425,7 @@ export type ResolversParentTypes = {
   ImportedIndividualMaritalStatus: ImportedIndividualMaritalStatus,
   RegistrationDataImportDatahubNode: RegistrationDataImportDatahubNode,
   ImportDataNode: ImportDataNode,
+  ImportDataDataType: ImportDataDataType,
   ImportedHouseholdNodeConnection: ImportedHouseholdNodeConnection,
   ImportedHouseholdNodeEdge: ImportedHouseholdNodeEdge,
   ImportedIndividualNodeConnection: ImportedIndividualNodeConnection,
@@ -7415,8 +7463,12 @@ export type ResolversParentTypes = {
   UploadImportDataXLSXFile: UploadImportDataXlsxFile,
   XlsxRowErrorNode: XlsxRowErrorNode,
   DeleteRegistrationDataImport: DeleteRegistrationDataImport,
-  CreateRegistrationDataImportExcelInput: CreateRegistrationDataImportExcelInput,
-  CreateRegistrationDataImport: CreateRegistrationDataImport,
+  RegistrationXlsxImportMutationInput: RegistrationXlsxImportMutationInput,
+  RegistrationXlsxImportMutation: RegistrationXlsxImportMutation,
+  RegistrationKoboImportMutationInput: RegistrationKoboImportMutationInput,
+  RegistrationKoboImportMutation: RegistrationKoboImportMutation,
+  SaveKoboProjectImportDataMutation: SaveKoboProjectImportDataMutation,
+  KoboErrorNode: KoboErrorNode,
   ApproveRegistrationDataImportMutation: ApproveRegistrationDataImportMutation,
   UnapproveRegistrationDataImportMutation: UnapproveRegistrationDataImportMutation,
   MergeRegistrationDataImportMutation: MergeRegistrationDataImportMutation,
@@ -7559,10 +7611,6 @@ export type CoreFieldChoiceObjectResolvers<ContextType = any, ParentType extends
 
 export type CreateProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateProgram'] = ResolversParentTypes['CreateProgram']> = {
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
-};
-
-export type CreateRegistrationDataImportResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateRegistrationDataImport'] = ResolversParentTypes['CreateRegistrationDataImport']> = {
-  registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
 };
 
 export type CreateTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateTargetPopulationMutation'] = ResolversParentTypes['CreateTargetPopulationMutation']> = {
@@ -7743,7 +7791,8 @@ export type ImportDataNodeResolvers<ContextType = any, ParentType extends Resolv
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  xlsxFile?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  file?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  dataType?: Resolver<ResolversTypes['ImportDataDataType'], ParentType, ContextType>,
   numberOfHouseholds?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   numberOfIndividuals?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportDatahubNode']>, ParentType, ContextType>,
@@ -7939,6 +7988,11 @@ export type KoboAssetObjectEdgeResolvers<ContextType = any, ParentType extends R
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
 };
 
+export type KoboErrorNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['KoboErrorNode'] = ResolversParentTypes['KoboErrorNode']> = {
+  header?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  message?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
 export type LabelNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['LabelNode'] = ResolversParentTypes['LabelNode']> = {
   language?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   label?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
@@ -7985,7 +8039,9 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   deleteProgram?: Resolver<Maybe<ResolversTypes['DeleteProgram']>, ParentType, ContextType, RequireFields<MutationsDeleteProgramArgs, 'programId'>>,
   uploadImportDataXlsxFile?: Resolver<Maybe<ResolversTypes['UploadImportDataXLSXFile']>, ParentType, ContextType, RequireFields<MutationsUploadImportDataXlsxFileArgs, 'businessAreaSlug' | 'file'>>,
   deleteRegistrationDataImport?: Resolver<Maybe<ResolversTypes['DeleteRegistrationDataImport']>, ParentType, ContextType, RequireFields<MutationsDeleteRegistrationDataImportArgs, 'registrationDataImportId'>>,
-  createRegistrationDataImport?: Resolver<Maybe<ResolversTypes['CreateRegistrationDataImport']>, ParentType, ContextType, RequireFields<MutationsCreateRegistrationDataImportArgs, 'registrationDataImportData'>>,
+  registrationXlsxImport?: Resolver<Maybe<ResolversTypes['RegistrationXlsxImportMutation']>, ParentType, ContextType, RequireFields<MutationsRegistrationXlsxImportArgs, 'registrationDataImportData'>>,
+  registrationKoboImport?: Resolver<Maybe<ResolversTypes['RegistrationKoboImportMutation']>, ParentType, ContextType, RequireFields<MutationsRegistrationKoboImportArgs, 'registrationDataImportData'>>,
+  saveKoboImportData?: Resolver<Maybe<ResolversTypes['SaveKoboProjectImportDataMutation']>, ParentType, ContextType, RequireFields<MutationsSaveKoboImportDataArgs, 'businessAreaSlug' | 'uid'>>,
   approveRegistrationDataImport?: Resolver<Maybe<ResolversTypes['ApproveRegistrationDataImportMutation']>, ParentType, ContextType, RequireFields<MutationsApproveRegistrationDataImportArgs, 'id'>>,
   unapproveRegistrationDataImport?: Resolver<Maybe<ResolversTypes['UnapproveRegistrationDataImportMutation']>, ParentType, ContextType, RequireFields<MutationsUnapproveRegistrationDataImportArgs, 'id'>>,
   mergeRegistrationDataImport?: Resolver<Maybe<ResolversTypes['MergeRegistrationDataImportMutation']>, ParentType, ContextType, RequireFields<MutationsMergeRegistrationDataImportArgs, 'id'>>,
@@ -8185,6 +8241,19 @@ export type RegistrationDataImportNodeConnectionResolvers<ContextType = any, Par
 export type RegistrationDataImportNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['RegistrationDataImportNodeEdge'] = ResolversParentTypes['RegistrationDataImportNodeEdge']> = {
   node?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type RegistrationKoboImportMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['RegistrationKoboImportMutation'] = ResolversParentTypes['RegistrationKoboImportMutation']> = {
+  registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
+};
+
+export type RegistrationXlsxImportMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['RegistrationXlsxImportMutation'] = ResolversParentTypes['RegistrationXlsxImportMutation']> = {
+  registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
+};
+
+export type SaveKoboProjectImportDataMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['SaveKoboProjectImportDataMutation'] = ResolversParentTypes['SaveKoboProjectImportDataMutation']> = {
+  importData?: Resolver<Maybe<ResolversTypes['ImportDataNode']>, ParentType, ContextType>,
+  errors?: Resolver<Maybe<Array<Maybe<ResolversTypes['KoboErrorNode']>>>, ParentType, ContextType>,
 };
 
 export type ServiceProviderNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ServiceProviderNode'] = ResolversParentTypes['ServiceProviderNode']> = {
@@ -8391,7 +8460,6 @@ export type Resolvers<ContextType = any> = {
   CopyTargetPopulationMutationPayload?: CopyTargetPopulationMutationPayloadResolvers<ContextType>,
   CoreFieldChoiceObject?: CoreFieldChoiceObjectResolvers<ContextType>,
   CreateProgram?: CreateProgramResolvers<ContextType>,
-  CreateRegistrationDataImport?: CreateRegistrationDataImportResolvers<ContextType>,
   CreateTargetPopulationMutation?: CreateTargetPopulationMutationResolvers<ContextType>,
   Date?: GraphQLScalarType,
   DateTime?: GraphQLScalarType,
@@ -8432,6 +8500,7 @@ export type Resolvers<ContextType = any> = {
   KoboAssetObject?: KoboAssetObjectResolvers<ContextType>,
   KoboAssetObjectConnection?: KoboAssetObjectConnectionResolvers<ContextType>,
   KoboAssetObjectEdge?: KoboAssetObjectEdgeResolvers<ContextType>,
+  KoboErrorNode?: KoboErrorNodeResolvers<ContextType>,
   LabelNode?: LabelNodeResolvers<ContextType>,
   LogEntryObject?: LogEntryObjectResolvers<ContextType>,
   LogEntryObjectConnection?: LogEntryObjectConnectionResolvers<ContextType>,
@@ -8453,6 +8522,9 @@ export type Resolvers<ContextType = any> = {
   RegistrationDataImportNode?: RegistrationDataImportNodeResolvers<ContextType>,
   RegistrationDataImportNodeConnection?: RegistrationDataImportNodeConnectionResolvers<ContextType>,
   RegistrationDataImportNodeEdge?: RegistrationDataImportNodeEdgeResolvers<ContextType>,
+  RegistrationKoboImportMutation?: RegistrationKoboImportMutationResolvers<ContextType>,
+  RegistrationXlsxImportMutation?: RegistrationXlsxImportMutationResolvers<ContextType>,
+  SaveKoboProjectImportDataMutation?: SaveKoboProjectImportDataMutationResolvers<ContextType>,
   ServiceProviderNode?: ServiceProviderNodeResolvers<ContextType>,
   ServiceProviderNodeConnection?: ServiceProviderNodeConnectionResolvers<ContextType>,
   ServiceProviderNodeEdge?: ServiceProviderNodeEdgeResolvers<ContextType>,

@@ -1,6 +1,9 @@
 from dateutil.parser import parse
 
 
+KOBO_FORM_INDIVIDUALS_COLUMN_NAME = "individual_questions"
+
+
 def reduce_asset(asset: dict, *args, **kwargs) -> dict:
     """
     Takes from asset only values that are needed by our frontend.
@@ -14,7 +17,8 @@ def reduce_asset(asset: dict, *args, **kwargs) -> dict:
         "date_modified": "2020-05-20T10:43:58.781178Z",
         "deployment_active": False,
         "has_deployment": False,
-        "xls_link": "https://kobo.humanitarianresponse.info/api/v2/assets/aY2dvQ64KudGV5UdSvJkB6.xls",
+        "xls_link": "https://kobo.humanitarianresponse.info/
+                     api/v2/assets/aY2dvQ64KudGV5UdSvJkB6.xls",
     }
     """
     download_link = ""
@@ -55,3 +59,15 @@ def reduce_assets_list(
             if asset["has_deployment"] and asset["deployment_active"]
         ]
     return [reduce_asset(asset) for asset in assets]
+
+
+def count_population(results: list):
+    total_individuals_count = 0
+    for result in results:
+        total_individuals_count += len(
+            result[KOBO_FORM_INDIVIDUALS_COLUMN_NAME]
+        )
+
+    total_households_count = len(results)
+
+    return total_households_count, total_individuals_count
