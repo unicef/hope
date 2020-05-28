@@ -26,34 +26,9 @@ class SessionModel(models.Model):
         abstract = True
 
 
-class Household(SessionModel):
-    mis_id = models.UUIDField(primary_key=True,)
-    status = models.CharField(
-        max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default="ACTIVE"
-    )
-    status = models.CharField(
-        max_length=50, choices=(("INACTIVE", "Inactive"), ("ACTIVE", "Active")),
-    )
-    household_size = models.PositiveIntegerField()
-    # head of household document id
-    government_form_number = models.CharField(max_length=255, null=True)
-    # registration household id
-    form_number = models.CharField(max_length=255, null=True)
-    agency_id = models.CharField(max_length=255, null=True)
-    #  individual_id head of household
-    head_first_name = models.CharField(max_length=255)
-    head_last_name = models.CharField(max_length=255)
-    head_id = models.UUIDField(max_length=255)
-    alternative_first_name = models.CharField(max_length=255, null=True)
-    alternative_last_name = models.CharField(max_length=255, null=True)
-    alternative_id = models.UUIDField(null=True)
-    address = models.CharField(max_length=255, null=True)
-    admin1 = models.CharField(max_length=255, null=True)
-    admin2 = models.CharField(max_length=255, null=True)
-    country = CountryField(null=True)
-
-
 class Individual(SessionModel):
+    SEX_MALE = "MALE"
+    SEX_FEMALE = "FEMALE"
     mis_id = models.UUIDField(primary_key=True,)
     household = models.ForeignKey(
         "mis_datahub.Household",
@@ -66,8 +41,8 @@ class Individual(SessionModel):
         null=True,
     )
     SEX_CHOICE = (
-        ("MALE", _("Male")),
-        ("FEMALE", _("Female")),
+        (SEX_MALE, _("Male")),
+        (SEX_FEMALE, _("Female")),
     )
     full_name = models.CharField(max_length=255)
     family_name = models.CharField(max_length=255, null=True)
@@ -84,9 +59,57 @@ class Individual(SessionModel):
         max_length=255, choices=MARITAL_STATUS_CHOICE,
     )
     phone_number = models.CharField(max_length=14, null=True)
+    phone_number_alternative = models.CharField(max_length=14, null=True)
 
     def __str__(self):
         return self.family_name
+
+
+class Household(SessionModel):
+    mis_id = models.UUIDField(primary_key=True,)
+    status = models.CharField(
+        max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default="ACTIVE"
+    )
+    status = models.CharField(
+        max_length=50, choices=(("INACTIVE", "Inactive"), ("ACTIVE", "Active")),
+    )
+    household_size = models.PositiveIntegerField()
+    # head of household document id
+    government_form_number = models.CharField(max_length=255, null=True)
+    # registration household id
+    form_number = models.CharField(max_length=255, null=True)
+    agency_id = models.CharField(max_length=255, null=True)
+    #  individual_id head of household
+    head_full_name = models.CharField(max_length=255)
+    head_family_name = models.CharField(max_length=255, null=True)
+    head_given_name = models.CharField(max_length=255, null=True)
+    head_middle_name = models.CharField(max_length=255, null=True)
+    head_sex = models.CharField(max_length=255, choices=Individual.SEX_CHOICE,)
+    head_date_of_birth = models.DateField()
+    head_estimated_date_of_birth = models.BooleanField()
+    head_phone_number = models.CharField(max_length=14, null=True)
+    head_phone_number_alternative = models.CharField(max_length=14, null=True)
+
+    head_id = models.UUIDField(max_length=255)
+
+    alternative_full_name = models.CharField(max_length=255, null=True)
+    alternative_family_name = models.CharField(max_length=255, null=True)
+    alternative_given_name = models.CharField(max_length=255, null=True)
+    alternative_middle_name = models.CharField(max_length=255, null=True)
+    alternative_sex = models.CharField(
+        max_length=255, choices=Individual.SEX_CHOICE, null=True
+    )
+    alternative_date_of_birth = models.DateField(null=True)
+    alternative_estimated_date_of_birth = models.BooleanField( null=True)
+    alternative_phone_number = models.CharField(max_length=14, null=True)
+    alternative_phone_number_alternative = models.CharField(
+        max_length=14, null=True
+    )
+    alternative_id = models.UUIDField(null=True)
+    address = models.CharField(max_length=255, null=True)
+    admin1 = models.CharField(max_length=255, null=True)
+    admin2 = models.CharField(max_length=255, null=True)
+    country = CountryField(null=True)
 
 
 class TargetPopulation(SessionModel):
