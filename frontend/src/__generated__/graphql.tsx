@@ -3699,7 +3699,7 @@ export type FlexFieldsQuery = (
   { __typename?: 'Query' }
   & { allFieldsAttributes: Maybe<Array<Maybe<(
     { __typename?: 'FieldAttributeNode' }
-    & Pick<FieldAttributeNode, 'type' | 'name'>
+    & Pick<FieldAttributeNode, 'type' | 'name' | 'labelEn'>
   )>>> }
 );
 
@@ -6895,6 +6895,7 @@ export const FlexFieldsDocument = gql`
   allFieldsAttributes(flexField: true) {
     type
     name
+    labelEn
   }
 }
     `;

@@ -1,10 +1,8 @@
 import React, { ReactElement, useState } from 'react';
 import styled from 'styled-components';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import { Table, TableHead, TableRow, TableCell, TableBody } from '@material-ui/core';
-import { useFlexFieldsQuery } from '../../../../__generated__/graphql';
+import { Table, TableRow, TableCell, TableBody } from '@material-ui/core';
 import { headCells } from './HeadCells';
-import { FlexFieldRow } from './TableRow';
 import { EnhancedTableHead } from '../../../../components/table/EnhancedTableHead';
 import { stableSort, getComparator } from '../../../../utils/utils';
 
@@ -38,6 +36,10 @@ const useStyles = makeStyles((theme: Theme) =>
   }),
 );
 
+const StyledCell = styled(TableCell)`
+  width: 70%;
+`;
+
 type Order = 'asc' | 'desc';
 
 export const FlexFieldsTable = ({ fields }): ReactElement => {
@@ -65,9 +67,9 @@ export const FlexFieldsTable = ({ fields }): ReactElement => {
         <TableBody>
           {stableSort(fields, getComparator(order, orderBy)).map((row) => (
             <TableRow key={row.name}>
-              <TableCell component="th" scope="row">
-                {row.name}
-              </TableCell>
+              <StyledCell>
+                {row.labelEn}
+              </StyledCell>
               <TableCell>{row.type}</TableCell>
             </TableRow>
           ))}
