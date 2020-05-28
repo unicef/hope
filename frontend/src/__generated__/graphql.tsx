@@ -3495,12 +3495,12 @@ export type ApproveRdiMutation = (
   )> }
 );
 
-export type RegistrationXlsxImportMutationVariables = {
+export type CreateRegistrationXlsxImportMutationVariables = {
   registrationDataImportData: RegistrationXlsxImportMutationInput
 };
 
 
-export type RegistrationXlsxImportMutation = (
+export type CreateRegistrationXlsxImportMutation = (
   { __typename?: 'Mutations' }
   & { registrationXlsxImport: Maybe<(
     { __typename?: 'RegistrationXlsxImportMutation' }
@@ -6356,8 +6356,8 @@ export function useApproveRdiMutation(baseOptions?: ApolloReactHooks.MutationHoo
 export type ApproveRdiMutationHookResult = ReturnType<typeof useApproveRdiMutation>;
 export type ApproveRdiMutationResult = ApolloReactCommon.MutationResult<ApproveRdiMutation>;
 export type ApproveRdiMutationOptions = ApolloReactCommon.BaseMutationOptions<ApproveRdiMutation, ApproveRdiMutationVariables>;
-export const RegistrationXlsxImportDocument = gql`
-    mutation registrationXlsxImport($registrationDataImportData: RegistrationXlsxImportMutationInput!) {
+export const CreateRegistrationXlsxImportDocument = gql`
+    mutation CreateRegistrationXlsxImport($registrationDataImportData: RegistrationXlsxImportMutationInput!) {
   registrationXlsxImport(registrationDataImportData: $registrationDataImportData) {
     registrationDataImport {
       id
@@ -6368,48 +6368,48 @@ export const RegistrationXlsxImportDocument = gql`
   }
 }
     `;
-export type RegistrationXlsxImportMutationFn = ApolloReactCommon.MutationFunction<RegistrationXlsxImportMutation, RegistrationXlsxImportMutationVariables>;
-export type RegistrationXlsxImportComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<RegistrationXlsxImportMutation, RegistrationXlsxImportMutationVariables>, 'mutation'>;
+export type CreateRegistrationXlsxImportMutationFn = ApolloReactCommon.MutationFunction<CreateRegistrationXlsxImportMutation, CreateRegistrationXlsxImportMutationVariables>;
+export type CreateRegistrationXlsxImportComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<CreateRegistrationXlsxImportMutation, CreateRegistrationXlsxImportMutationVariables>, 'mutation'>;
 
-    export const RegistrationXlsxImportComponent = (props: RegistrationXlsxImportComponentProps) => (
-      <ApolloReactComponents.Mutation<RegistrationXlsxImportMutation, RegistrationXlsxImportMutationVariables> mutation={RegistrationXlsxImportDocument} {...props} />
+    export const CreateRegistrationXlsxImportComponent = (props: CreateRegistrationXlsxImportComponentProps) => (
+      <ApolloReactComponents.Mutation<CreateRegistrationXlsxImportMutation, CreateRegistrationXlsxImportMutationVariables> mutation={CreateRegistrationXlsxImportDocument} {...props} />
     );
     
-export type RegistrationXlsxImportProps<TChildProps = {}> = ApolloReactHoc.MutateProps<RegistrationXlsxImportMutation, RegistrationXlsxImportMutationVariables> & TChildProps;
-export function withRegistrationXlsxImport<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+export type CreateRegistrationXlsxImportProps<TChildProps = {}> = ApolloReactHoc.MutateProps<CreateRegistrationXlsxImportMutation, CreateRegistrationXlsxImportMutationVariables> & TChildProps;
+export function withCreateRegistrationXlsxImport<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
   TProps,
-  RegistrationXlsxImportMutation,
-  RegistrationXlsxImportMutationVariables,
-  RegistrationXlsxImportProps<TChildProps>>) {
-    return ApolloReactHoc.withMutation<TProps, RegistrationXlsxImportMutation, RegistrationXlsxImportMutationVariables, RegistrationXlsxImportProps<TChildProps>>(RegistrationXlsxImportDocument, {
-      alias: 'registrationXlsxImport',
+  CreateRegistrationXlsxImportMutation,
+  CreateRegistrationXlsxImportMutationVariables,
+  CreateRegistrationXlsxImportProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, CreateRegistrationXlsxImportMutation, CreateRegistrationXlsxImportMutationVariables, CreateRegistrationXlsxImportProps<TChildProps>>(CreateRegistrationXlsxImportDocument, {
+      alias: 'createRegistrationXlsxImport',
       ...operationOptions
     });
 };
 
 /**
- * __useRegistrationXlsxImportMutation__
+ * __useCreateRegistrationXlsxImportMutation__
  *
- * To run a mutation, you first call `useRegistrationXlsxImportMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useRegistrationXlsxImportMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useCreateRegistrationXlsxImportMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateRegistrationXlsxImportMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [registrationXlsxImportMutation, { data, loading, error }] = useRegistrationXlsxImportMutation({
+ * const [createRegistrationXlsxImportMutation, { data, loading, error }] = useCreateRegistrationXlsxImportMutation({
  *   variables: {
  *      registrationDataImportData: // value for 'registrationDataImportData'
  *   },
  * });
  */
-export function useRegistrationXlsxImportMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<RegistrationXlsxImportMutation, RegistrationXlsxImportMutationVariables>) {
-        return ApolloReactHooks.useMutation<RegistrationXlsxImportMutation, RegistrationXlsxImportMutationVariables>(RegistrationXlsxImportDocument, baseOptions);
+export function useCreateRegistrationXlsxImportMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateRegistrationXlsxImportMutation, CreateRegistrationXlsxImportMutationVariables>) {
+        return ApolloReactHooks.useMutation<CreateRegistrationXlsxImportMutation, CreateRegistrationXlsxImportMutationVariables>(CreateRegistrationXlsxImportDocument, baseOptions);
       }
-export type RegistrationXlsxImportMutationHookResult = ReturnType<typeof useRegistrationXlsxImportMutation>;
-export type RegistrationXlsxImportMutationResult = ApolloReactCommon.MutationResult<RegistrationXlsxImportMutation>;
-export type RegistrationXlsxImportMutationOptions = ApolloReactCommon.BaseMutationOptions<RegistrationXlsxImportMutation, RegistrationXlsxImportMutationVariables>;
+export type CreateRegistrationXlsxImportMutationHookResult = ReturnType<typeof useCreateRegistrationXlsxImportMutation>;
+export type CreateRegistrationXlsxImportMutationResult = ApolloReactCommon.MutationResult<CreateRegistrationXlsxImportMutation>;
+export type CreateRegistrationXlsxImportMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateRegistrationXlsxImportMutation, CreateRegistrationXlsxImportMutationVariables>;
 export const ImportedHouseholdDocument = gql`
     query ImportedHousehold($id: ID!) {
   importedHousehold(id: $id) {
