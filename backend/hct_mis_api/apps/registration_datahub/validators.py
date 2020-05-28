@@ -638,7 +638,9 @@ class KoboProjectImportDataValidator(ImportDataValidator):
             return field_name
 
     @classmethod
-    def validate_required_fields(cls, submissions: list, *args, **kwargs):
+    def validate_required_fields(cls, *args, **kwargs):
+        submissions = kwargs.get("submissions")
+
         expected_households_core_fields = {
             field["xlsx_field"]
             for field in cls.CORE_FIELDS["households"].values()
