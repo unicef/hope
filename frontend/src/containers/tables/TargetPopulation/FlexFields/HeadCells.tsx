@@ -4,13 +4,13 @@ import { FieldAttributeNode } from '../../../../__generated__/graphql';
 export const headCells: HeadCell<FieldAttributeNode>[] = [
     {
       disablePadding: false,
-      label: 'name',
-      id: 'name',
+      label: 'Name',
+      id: 'labelEn',
       numeric: false,
     },
     {
       disablePadding: false,
-      label: 'type',
+      label: 'Type',
       id: 'type',
       numeric: false,
     },

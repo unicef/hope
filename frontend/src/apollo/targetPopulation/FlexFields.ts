@@ -5,6 +5,7 @@ export const FlexFields = gql`
     allFieldsAttributes(flexField: true) {
       type
       name
+      labelEn
     }
   }
 `;
