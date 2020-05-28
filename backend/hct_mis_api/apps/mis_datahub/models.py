@@ -42,6 +42,7 @@ class Household(SessionModel):
     agency_id = models.CharField(max_length=255, null=True)
     #  individual_id head of household
     focal_point = models.UUIDField()
+    alternative_collector = models.UUIDField(null=True)
     address = models.CharField(max_length=255, null=True)
     admin1 = models.CharField(max_length=255, null=True)
     admin2 = models.CharField(max_length=255, null=True)
