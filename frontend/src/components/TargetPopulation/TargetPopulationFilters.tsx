@@ -1,7 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
-import { TextField, InputAdornment, MenuItem } from '@material-ui/core';
+import { TextField, InputAdornment, MenuItem, FormControl } from '@material-ui/core';
 import { Person, Search, Group } from '@material-ui/icons';
+import Select from '../../shared/Select';
+import InputLabel from '../../shared/InputLabel';
 
 const Container = styled.div`
   display: flex;
@@ -63,6 +65,16 @@ const TextContainer = styled(TextField)`
   }
 `;
 
+const StyledFormControl = styled(FormControl)`
+  width: 232px;
+  color: #5f6368;
+  border-bottom: 0;
+`;
+
+const StartInputAdornment = styled(InputAdornment)`
+  margin-right: 0;
+`;
+
 interface HouseholdFiltersProps {
   //targetPopulations: TargetPopulationNode[],
   onFilterChange;
@@ -89,25 +101,30 @@ export function TargetPopulationFilters({
           ),
         }}
       />
-      <TextContainer
-        select
-        placeholder='Status'
-        variant='outlined'
-        margin='dense'
-        onChange={(e) => handleFilterChange(e, 'status')}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position='start'>
+      
+      <StyledFormControl variant='outlined' margin='dense'>
+        <InputLabel>Status</InputLabel>
+        <Select
+          /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
+          // @ts-ignore
+          onChange={(e) => handleFilterChange(e, 'status')}
+          variant='outlined'
+          label='Programme'
+          InputProps={{
+            startAdornment: (
+            <StartInputAdornment position='start'>
               <Person />
-            </InputAdornment>
-          ),
-        }}
-      >
+            </StartInputAdornment>
+            ),
+          }}
+        >
         <MenuItem value=''>None</MenuItem>
         <MenuItem value='DRAFT'>Open</MenuItem>
         <MenuItem value='APPROVED'>Closed</MenuItem>
         <MenuItem value='FINALIZED'>Sent</MenuItem>
-      </TextContainer>
+        </Select>
+      </StyledFormControl>
+
       <TextContainer
         id='minFilter'
         value={filter.numIndividuals.min}
