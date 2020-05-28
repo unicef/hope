@@ -343,6 +343,7 @@ class Mutations(graphene.ObjectType):
     delete_registration_data_import = DeleteRegistrationDataImport.Field()
     registration_xlsx_import = RegistrationXlsxImportMutation.Field()
     registration_kobo_import = RegistrationKoboImportMutation.Field()
+    save_kobo_import_data = SaveKoboProjectImportDataMutation.Field()
     approve_registration_data_import = (
         ApproveRegistrationDataImportMutation.Field()
     )
