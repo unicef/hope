@@ -27,7 +27,10 @@ import { Field, Form, Formik } from 'formik';
 import get from 'lodash/get';
 import {
   UploadImportDataXlsxFileMutation,
+  useAllKoboProjectsQuery,
+  useCreateRegistrationKoboImportMutation,
   useCreateRegistrationXlsxImportMutation,
+  useSaveKoboImportDataMutation,
   useUploadImportDataXlsxFileMutation,
   XlsxRowErrorNode,
 } from '../../../__generated__/graphql';
@@ -153,6 +156,8 @@ const validationSchema = Yup.object().shape({
 
 export function RegistrationDataImport(): React.ReactElement {
   const [open, setOpen] = useState(false);
+  const [importType, setImportType] = useState();
+  const [koboProject, setKoboProject] = useState();
 
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
@@ -161,10 +166,20 @@ export function RegistrationDataImport(): React.ReactElement {
     { data: uploadData, loading: fileLoading },
   ] = useUploadImportDataXlsxFileMutation();
   const [
-      createRegistrationMutate,
+    createRegistrationXlsxMutate,
     { loading: createLoading },
   ] = useCreateRegistrationXlsxImportMutation();
-  const [importType, setImportType] = useState();
+  const [
+    saveKoboImportDataMutate,
+    { loading: saveKoboLoading, data: koboImportData },
+  ] = useSaveKoboImportDataMutation();
+  const [
+    createRegistrationKoboMutate,
+    { loading: createKoboLoading },
+  ] = useCreateRegistrationKoboImportMutation();
+  const { data: koboProjectsData, error, loading } = useAllKoboProjectsQuery({
+    variables: { businessAreaSlug: businessArea },
+  });
   const { t } = useTranslation();
   const errors: UploadImportDataXlsxFileMutation['uploadImportDataXlsxFile']['errors'] = get(
     uploadData,
@@ -214,6 +229,36 @@ export function RegistrationDataImport(): React.ReactElement {
         <Errors errors={errors as XlsxRowErrorNode[]} />
       </>
     );
+  } else if (importType === 'kobo') {
+    const koboProjects = koboProjectsData?.allKoboProjects?.edges || [];
+    importTypeSpecificContent = (
+      <div>
+        <FormControl variant='filled' margin='dense'>
+          <InputLabel>Import from</InputLabel>
+          <ComboBox
+            value={koboProject}
+            variant='filled'
+            label='Kobo Project'
+            onChange={(e) => {
+              setKoboProject(e.target.value);
+              saveKoboImportDataMutate({
+                variables: {
+                  projectId: e.target.value,
+                  businessAreaSlug: businessArea,
+                },
+              });
+            }}
+            fullWidth
+          >
+            {koboProjects.map((item) => (
+              <MenuItem key={item.node.id} value={item.node.id}>
+                {item.node.name}
+              </MenuItem>
+            ))}
+          </ComboBox>
+        </FormControl>
+      </div>
+    );
   }
 
   return (
@@ -235,18 +280,35 @@ export function RegistrationDataImport(): React.ReactElement {
         <Formik
           validationSchema={validationSchema}
           onSubmit={async (values) => {
-            const { data } = await createRegistrationMutate({
-              variables: {
-                registrationDataImportData: {
-                  importDataId:
-                    uploadData.uploadImportDataXlsxFile.importData.id,
-                  name: values.name,
-                  businessAreaSlug: businessArea,
+            let rdiId = null;
+            if (importType === 'kobo') {
+              const { data } = await createRegistrationKoboMutate({
+                variables: {
+                  registrationDataImportData: {
+                    importDataId:
+                      koboImportData.saveKoboImportData.importData.id,
+                    name: values.name,
+                    businessAreaSlug: businessArea,
+                  },
                 },
-              },
-            });
+              });
+              rdiId = data?.registrationKoboImport?.registrationDataImport?.id;
+            } else if (importType === 'excel') {
+              const { data } = await createRegistrationXlsxMutate({
+                variables: {
+                  registrationDataImportData: {
+                    importDataId:
+                      uploadData.uploadImportDataXlsxFile.importData.id,
+                    name: values.name,
+                    businessAreaSlug: businessArea,
+                  },
+                },
+              });
+              rdiId = data?.registrationXlsxImport?.registrationDataImport?.id;
+            }
+
             showMessage('Registration', {
-              pathname: `/${businessArea}/registration-data-import/${data.registrationXlsxImport.registrationDataImport.id}`,
+              pathname: `/${businessArea}/registration-data-import/${rdiId}`,
               historyMethod: 'push',
             });
           }}
@@ -262,11 +324,10 @@ export function RegistrationDataImport(): React.ReactElement {
                 </DialogTitle>
               </DialogTitleWrapper>
               <DialogContent>
+                to CashAssist?
                 <DialogDescription>
                   Are you sure you want to activate this Programme and push data
-                  to CashAssist?
                 </DialogDescription>
-
                 <FormControl variant='filled' margin='dense'>
                   <InputLabel>Import from</InputLabel>
                   <ComboBox
@@ -310,7 +371,12 @@ export function RegistrationDataImport(): React.ReactElement {
                     type='submit'
                     color='primary'
                     variant='contained'
-                    disabled={!uploadData || createLoading}
+                    disabled={
+                      !uploadData ||
+                      createLoading ||
+                      saveKoboLoading ||
+                      !!koboImportData
+                    }
                     onClick={() => {
                       submitForm();
                     }}
