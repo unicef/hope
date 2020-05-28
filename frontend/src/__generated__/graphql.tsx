@@ -3732,8 +3732,11 @@ export type SaveKoboImportDataMutation = (
     { __typename?: 'SaveKoboProjectImportDataMutation' }
     & { importData: Maybe<(
       { __typename?: 'ImportDataNode' }
-      & Pick<ImportDataNode, 'id'>
-    )> }
+      & Pick<ImportDataNode, 'id' | 'numberOfHouseholds' | 'numberOfIndividuals'>
+    )>, errors: Maybe<Array<Maybe<(
+      { __typename?: 'KoboErrorNode' }
+      & Pick<KoboErrorNode, 'header' | 'message'>
+    )>>> }
   )> }
 );
 
@@ -6888,6 +6891,12 @@ export const SaveKoboImportDataDocument = gql`
   saveKoboImportData(businessAreaSlug: $businessAreaSlug, uid: $projectId) {
     importData {
       id
+      numberOfHouseholds
+      numberOfIndividuals
+    }
+    errors {
+      header
+      message
     }
   }
 }
