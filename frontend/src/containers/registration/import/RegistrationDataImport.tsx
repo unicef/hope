@@ -27,7 +27,7 @@ import { Field, Form, Formik } from 'formik';
 import get from 'lodash/get';
 import {
   UploadImportDataXlsxFileMutation,
-  useCreateRegistrationDataImportMutation,
+  useRegistrationXlsxImportMutation,
   useUploadImportDataXlsxFileMutation,
   XlsxRowErrorNode,
 } from '../../../__generated__/graphql';
@@ -163,7 +163,7 @@ export function RegistrationDataImport(): React.ReactElement {
   const [
     createRegistrationMutate,
     { loading: createLoading },
-  ] = useCreateRegistrationDataImportMutation();
+  ] = useRegistrationXlsxImportMutation();
   const [importType, setImportType] = useState();
   const { t } = useTranslation();
   const errors: UploadImportDataXlsxFileMutation['uploadImportDataXlsxFile']['errors'] = get(

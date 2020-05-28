@@ -166,16 +166,6 @@ input CreateProgramInput {
   businessAreaSlug: String
 }
 
-type CreateRegistrationDataImport {
-  registrationDataImport: RegistrationDataImportNode
-}
-
-input CreateRegistrationDataImportExcelInput {
-  importDataId: ID
-  name: String
-  businessAreaSlug: String
-}
-
 input CreateTargetPopulationInput {
   name: String!
   targetingCriteria: TargetingCriteriaObjectType!
@@ -331,7 +321,9 @@ type HouseholdNode implements Node {
   individuals(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
   targetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, orderBy: String): TargetPopulationNodeConnection!
+  selections: [HouseholdSelection!]!
   totalCashReceived: Decimal
+  selection: HouseholdSelection
 }
 
 type HouseholdNodeConnection {
@@ -355,11 +347,27 @@ enum HouseholdResidenceStatus {
   OTHER
 }
 
+type HouseholdSelection {
+  id: UUID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  household: HouseholdNode!
+  targetPopulation: TargetPopulationNode!
+  vulnerabilityScore: Float
+  final: Boolean!
+}
+
+enum ImportDataDataType {
+  XLSX
+  JSON
+}
+
 type ImportDataNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  xlsxFile: String!
+  file: String!
+  dataType: ImportDataDataType!
   numberOfHouseholds: Int!
   numberOfIndividuals: Int!
   registrationDataImport: RegistrationDataImportDatahubNode
@@ -839,6 +847,34 @@ scalar JSONLazyString
 
 scalar JSONString
 
+type KoboAssetObject {
+  uid: String
+  name: String
+  sector: String
+  country: String
+  assetType: String
+  dateModified: DateTime
+  deploymentActive: Boolean
+  hasDeployment: Boolean
+  xlsLink: String
+}
+
+type KoboAssetObjectConnection {
+  pageInfo: PageInfo!
+  edges: [KoboAssetObjectEdge]!
+  totalCount: Int
+}
+
+type KoboAssetObjectEdge {
+  node: KoboAssetObject
+  cursor: String!
+}
+
+type KoboErrorNode {
+  header: String
+  message: String
+}
+
 type LabelNode {
   language: String
   label: String
@@ -891,7 +927,9 @@ type Mutations {
   deleteProgram(programId: String!): DeleteProgram
   uploadImportDataXlsxFile(businessAreaSlug: String!, file: Upload!): UploadImportDataXLSXFile
   deleteRegistrationDataImport(registrationDataImportId: String!): DeleteRegistrationDataImport
-  createRegistrationDataImport(registrationDataImportData: CreateRegistrationDataImportExcelInput!): CreateRegistrationDataImport
+  registrationXlsxImport(registrationDataImportData: RegistrationXlsxImportMutationInput!): RegistrationXlsxImportMutation
+  registrationKoboImport(registrationDataImportData: RegistrationKoboImportMutationInput!): RegistrationKoboImportMutation
+  saveKoboImportData(businessAreaSlug: String!, uid: Upload!): SaveKoboProjectImportDataMutation
   approveRegistrationDataImport(id: ID!): ApproveRegistrationDataImportMutation
   unapproveRegistrationDataImport(id: ID!): UnapproveRegistrationDataImportMutation
   mergeRegistrationDataImport(id: ID!): MergeRegistrationDataImportMutation
@@ -1045,6 +1083,8 @@ type Query {
   allBusinessAreas(before: String, after: String, first: Int, last: Int, id: UUID): BusinessAreaNodeConnection
   allLogEntries(objectId: String!, before: String, after: String, first: Int, last: Int): LogEntryObjectConnection
   allFieldsAttributes(flexField: Boolean): [FieldAttributeNode]
+  koboProject(uid: String!, businessAreaSlug: String!): KoboAssetObject
+  allKoboProjects(businessAreaSlug: String!, onlyDeployed: Boolean, before: String, after: String, first: Int, last: Int): KoboAssetObjectConnection
   program(id: ID!): ProgramNode
   allPrograms(before: String, after: String, first: Int, last: Int, id: UUID, status: String, businessArea: String): ProgramNodeConnection
   cashPlan(id: ID!): CashPlanNode
@@ -1153,6 +1193,31 @@ enum RegistrationDataImportStatus {
   IMPORTING
 }
 
+type RegistrationKoboImportMutation {
+  registrationDataImport: RegistrationDataImportNode
+}
+
+input RegistrationKoboImportMutationInput {
+  uid: String
+  name: String
+  businessAreaSlug: String
+}
+
+type RegistrationXlsxImportMutation {
+  registrationDataImport: RegistrationDataImportNode
+}
+
+input RegistrationXlsxImportMutationInput {
+  importDataId: ID
+  name: String
+  businessAreaSlug: String
+}
+
+type SaveKoboProjectImportDataMutation {
+  importData: ImportDataNode
+  errors: [KoboErrorNode]
+}
+
 type StatsObjectType {
   childMale: Int
   childFemale: Int
@@ -1184,6 +1249,7 @@ type TargetPopulationNode implements Node {
   finalListTargetingCriteria: TargetingCriteriaNode
   paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
   cashPlans(before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
+  selections: [HouseholdSelection!]!
   totalHouseholds: Int
   totalFamilySize: Int
   finalList(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection
