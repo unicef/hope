@@ -12,7 +12,7 @@ from registration_datahub.models import (
     ImportedHousehold,
     ImportedIndividual,
 )
-from registration_datahub.tasks.rdi_create import RdiCreateTask
+from registration_datahub.tasks.rdi_create import RdiXlsxCreateTask
 
 
 class TestRdiCreateTask(TestCase):
@@ -29,7 +29,7 @@ class TestRdiCreateTask(TestCase):
         ) as excel_file:
             file = File(excel_file)
             cls.import_data = ImportData.objects.create(
-                xlsx_file=file, number_of_households=3, number_of_individuals=6,
+                file=file, number_of_households=3, number_of_individuals=6,
             )
         cls.registration_data_import = RegistrationDataImportDatahubFactory(
             import_data=cls.import_data
@@ -37,7 +37,7 @@ class TestRdiCreateTask(TestCase):
         cls.business_area = BusinessArea.objects.first()
 
     def test_execute(self):
-        task = RdiCreateTask()
+        task = RdiXlsxCreateTask()
         task.execute(
             self.registration_data_import.id,
             self.import_data.id,

@@ -173,16 +173,6 @@ input CreateProgramInput {
   businessAreaSlug: String
 }
 
-type CreateRegistrationDataImport {
-  registrationDataImport: RegistrationDataImportNode
-}
-
-input CreateRegistrationDataImportExcelInput {
-  importDataId: ID
-  name: String
-  businessAreaSlug: String
-}
-
 input CreateTargetPopulationInput {
   name: String!
   targetingCriteria: TargetingCriteriaObjectType!
@@ -380,11 +370,17 @@ enum HouseholdStatus {
   INACTIVE
 }
 
+enum ImportDataDataType {
+  XLSX
+  JSON
+}
+
 type ImportDataNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  xlsxFile: String!
+  file: String!
+  dataType: ImportDataDataType!
   numberOfHouseholds: Int!
   numberOfIndividuals: Int!
   registrationDataImport: RegistrationDataImportDatahubNode
@@ -893,6 +889,11 @@ type KoboAssetObjectEdge {
   cursor: String!
 }
 
+type KoboErrorNode {
+  header: String
+  message: String
+}
+
 type LabelNode {
   language: String
   label: String
@@ -945,7 +946,9 @@ type Mutations {
   deleteProgram(programId: String!): DeleteProgram
   uploadImportDataXlsxFile(businessAreaSlug: String!, file: Upload!): UploadImportDataXLSXFile
   deleteRegistrationDataImport(registrationDataImportId: String!): DeleteRegistrationDataImport
-  createRegistrationDataImport(registrationDataImportData: CreateRegistrationDataImportExcelInput!): CreateRegistrationDataImport
+  registrationXlsxImport(registrationDataImportData: RegistrationXlsxImportMutationInput!): RegistrationXlsxImportMutation
+  registrationKoboImport(registrationDataImportData: RegistrationKoboImportMutationInput!): RegistrationKoboImportMutation
+  saveKoboImportData(businessAreaSlug: String!, uid: Upload!): SaveKoboProjectImportDataMutation
   approveRegistrationDataImport(id: ID!): ApproveRegistrationDataImportMutation
   unapproveRegistrationDataImport(id: ID!): UnapproveRegistrationDataImportMutation
   mergeRegistrationDataImport(id: ID!): MergeRegistrationDataImportMutation
@@ -1205,6 +1208,31 @@ enum RegistrationDataImportStatus {
   MERGED
   MERGING
   IMPORTING
+}
+
+type RegistrationKoboImportMutation {
+  registrationDataImport: RegistrationDataImportNode
+}
+
+input RegistrationKoboImportMutationInput {
+  uid: String
+  name: String
+  businessAreaSlug: String
+}
+
+type RegistrationXlsxImportMutation {
+  registrationDataImport: RegistrationDataImportNode
+}
+
+input RegistrationXlsxImportMutationInput {
+  importDataId: ID
+  name: String
+  businessAreaSlug: String
+}
+
+type SaveKoboProjectImportDataMutation {
+  importData: ImportDataNode
+  errors: [KoboErrorNode]
 }
 
 type ServiceProviderNode implements Node {
