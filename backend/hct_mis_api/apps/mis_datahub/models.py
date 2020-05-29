@@ -136,18 +136,22 @@ class TargetPopulationEntry(SessionModel):
 
 
 class Program(SessionModel):
-
-    program_id = models.UUIDField(primary_key=True,)
-    business_area = models.CharField(max_length=20)
+    STATUS_NOT_STARTED = "NOT_STARTED"
+    STATUS_STARTED = "STARTED"
+    STATUS_COMPLETE = "COMPLETE"
+    SCOPE_FOR_PARTNERS = "FOR_PARTNERS"
+    SCOPE_UNICEF = "UNICEF"
     STATUS_CHOICE = (
-        ("NOT_STARTED", _("NOT_STARTED")),
-        ("STARTED", _("STARTED")),
-        ("COMPLETE", _("COMPLETE")),
+        (STATUS_NOT_STARTED, _("NOT_STARTED")),
+        (STATUS_STARTED, _("STARTED")),
+        (STATUS_COMPLETE, _("COMPLETE")),
     )
     SCOPE_CHOICE = (
-        ("FOR_PARTNERS", _("For partners")),
-        ("UNICEF", _("Unicef")),
+        (SCOPE_FOR_PARTNERS, _("For partners")),
+        (SCOPE_UNICEF, _("Unicef")),
     )
+    mis_id = models.UUIDField(primary_key=True,)
+    business_area = models.CharField(max_length=20)
     program_ca_id = models.CharField(max_length=255)
     program_ca_hash_id = models.CharField(max_length=255)
     programme_name = models.CharField(max_length=255)
