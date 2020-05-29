@@ -16,8 +16,7 @@ from model_utils import Choices
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
 
-from utils.models import TimeStampedUUIDModel
-
+from utils.models import TimeStampedUUIDModel, AbstractSyncable
 
 RESIDENCE_STATUS_CHOICE = (
     ("REFUGEE", _("Refugee")),
@@ -87,7 +86,7 @@ IDENTIFICATION_TYPE_CHOICE = (
 INDIVIDUAL_HOUSEHOLD_STATUS = (("ACTIVE", "Active"), ("INACTIVE", "Inactive"))
 
 
-class Household(TimeStampedUUIDModel):
+class Household(TimeStampedUUIDModel, AbstractSyncable):
 
     status = models.CharField(
         max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default="ACTIVE"
@@ -234,7 +233,7 @@ class IndividualIdentity(models.Model):
         return f"{self.agency} {self.individual} {self.document_number}"
 
 
-class Individual(TimeStampedUUIDModel):
+class Individual(TimeStampedUUIDModel, AbstractSyncable):
     status = models.CharField(
         max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default="ACTIVE"
     )
