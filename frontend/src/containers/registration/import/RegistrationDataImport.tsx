@@ -21,6 +21,8 @@ import {
 import ExpandMoreRoundedIcon from '@material-ui/icons/ExpandMoreRounded';
 import ExpandLessRoundedIcon from '@material-ui/icons/ExpandLessRounded';
 
+import Clipboard from 'react-clipboard.js';
+
 import ExitToAppRoundedIcon from '@material-ui/icons/ExitToAppRounded';
 import { useDropzone } from 'react-dropzone';
 import { Field, Form, Formik } from 'formik';
