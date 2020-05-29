@@ -35,7 +35,7 @@ const DialogDescription = styled.div`
 `;
 
 const ErrorMessage = styled.p`
-  color: ${({theme}) => theme.hctPalette.error};
+  color: ${({theme}) => theme.palette.error.main};
 `;
 
 export function FinalizeTargetPopulation({
