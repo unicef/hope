@@ -1,10 +1,6 @@
-from decimal import Decimal
-
-from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django_countries.fields import CountryField
-from model_utils import Choices
 
 from household.models import (
     RELATIONSHIP_CHOICE,
