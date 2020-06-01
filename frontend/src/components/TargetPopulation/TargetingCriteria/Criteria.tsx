@@ -3,6 +3,8 @@ import styled from 'styled-components';
 import { IconButton } from '@material-ui/core';
 import { Delete, Edit } from '@material-ui/icons';
 import { TargetingCriteriaRuleObjectType } from '../../../__generated__/graphql';
+import GreaterThanEqual from '../../../assets/GreaterThanEqual.svg';
+import LessThanEqual from '../../../assets/LessThanEqual.svg';
 
 const CriteriaElement = styled.div`
   width: auto;
@@ -41,6 +43,12 @@ const ButtonsContainer = styled.div`
   }
 `;
 
+const MathSign = styled.img`
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
+`;
+
 const CriteriaField = ({ field }) => {
   let fieldElement;
   switch (field.comparisionMethod) {
@@ -73,7 +81,7 @@ const CriteriaField = ({ field }) => {
     case 'LESS_THAN':
       fieldElement = (
         <p>
-          {field.fieldAttribute.labelEn || field.fieldName}: {'<'}{' '}
+          {field.fieldAttribute.labelEn || field.fieldName}: <MathSign src={LessThanEqual} alt="less_than"/>
           <span>{field.arguments[0]}</span>
         </p>
       );
@@ -81,7 +89,7 @@ const CriteriaField = ({ field }) => {
     case 'GREATER_THAN':
       fieldElement = (
         <p>
-          {field.fieldAttribute.labelEn || field.fieldName}: {'>'}{' '}
+          {field.fieldAttribute.labelEn || field.fieldName}: <MathSign src={GreaterThanEqual} alt="greater_than"/>
           <span>{field.arguments[0]}</span>
         </p>
       );

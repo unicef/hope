@@ -52,7 +52,7 @@ export function CashPlanDetailsPage(): React.ReactElement {
   return (
     <div>
       <PageHeader
-        title={`Cash Plan #${data.cashPlan.cashAssistId}`}
+        title={`Cash Plan #${data.cashPlan.caId}`}
         breadCrumbs={breadCrumbsItems}
       >
         <Button variant='contained' color='primary'>

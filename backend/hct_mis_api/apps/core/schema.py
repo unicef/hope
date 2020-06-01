@@ -30,7 +30,7 @@ from account.schema import UserObjectType
 from core.core_fields_attributes import FILTERABLE_CORE_FIELDS_ATTRIBUTES
 from core.extended_connection import ExtendedConnection
 from core.kobo.api import KoboAPI
-from core.kobo.utils import reduce_assets_list, reduce_asset
+from core.kobo.common import reduce_assets_list, reduce_asset
 from core.models import (
     AdminArea,
     BusinessArea,
