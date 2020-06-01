@@ -1,5 +1,3 @@
-import os
-
 import requests
 
 from core.models import BusinessArea
@@ -22,11 +20,26 @@ class KoboAPI:
 
         self._get_token(business_area_slug)
 
+    def _handle_paginated_results(self, url):
+        data: dict = self._handle_request(url)
+
+        results: list = data["results"]
+
+        # if there will be more than 30000 results,
+        # we need to make additional queries
+        while data["next"]:
+            data = self._handle_request(data["next"])
+            results.extend(data["results"])
+
+        return results
+
     def _get_url(self, endpoint: str):
         endpoint.strip("/")
         if endpoint != "token":
             endpoint = f"api/v2/{endpoint}"
-        return f"{self.KPI_URL}/{endpoint}?format=json"
+        # According to the Kobo API documentation,
+        # the maximum limit per page is 30000
+        return f"{self.KPI_URL}/{endpoint}?limit=30000&format=json"
 
     def _get_token(self, business_area_slug):
         self._client = requests.session()
@@ -47,17 +60,14 @@ class KoboAPI:
     def get_all_projects_data(self) -> list:
         projects_url = self._get_url("assets")
 
-        data: dict = self._handle_request(projects_url)
-
-        result: list = data["results"]
-
-        while data["next"]:
-            data = self._handle_request(data["next"])
-            result.extend(data["results"])
-
-        return result
+        return self._handle_paginated_results(projects_url)
 
     def get_single_project_data(self, uid: str) -> dict:
         projects_url = self._get_url(f"assets/{uid}")
 
         return self._handle_request(projects_url)
+
+    def get_project_submissions(self, uid: str) -> list:
+        submissions_url = self._get_url(f"assets/{uid}/data")
+
+        return self._handle_paginated_results(submissions_url)
