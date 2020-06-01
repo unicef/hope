@@ -1,3 +1,57 @@
+import faker from 'faker';
+
+const toBooleanField = (value: boolean) => (value ? 'True' : 'False');
+
+Cypress.Commands.add('generateUser', () => {
+  const firstName = faker.name.firstName();
+  const lastName = faker.name.lastName();
+  const email = faker.internet.email();
+  return {
+    firstName,
+    lastName,
+    name: `${firstName} ${lastName}`,
+    username: email,
+    email,
+    password: faker.internet.password(),
+  };
+});
+
+Cypress.Commands.add(
+  'createUser',
+  ({
+    firstName,
+    lastName,
+    username,
+    email,
+    password,
+    isStaff,
+    isSuperuser,
+    isActive,
+  }) => {
+    return cy.task('executeShellPlus', [
+      `u = User(
+        username='${username}',
+        first_name='${firstName}',
+        last_name='${lastName}',
+        email='${email}',
+        is_staff='${toBooleanField(isStaff)}',
+        is_superuser='${toBooleanField(isSuperuser)}',
+        is_active='${toBooleanField(isActive)}'
+      )`,
+      `u.set_password('${password}')`,
+      `u.save()`,
+    ]);
+  },
+);
+
+Cypress.Commands.add('assignBusinessArea', (email) => {
+  return cy.task('executeShellPlus', [
+    `u = User.objects.get(email='${email}')`,
+    `u.business_areas.set([BusinessArea.objects.first().id])`,
+    `u.save()`,
+  ]);
+});
+
 Cypress.Commands.add('login', ({ role }) => {
   const { username, password } = Cypress.env(role);
   const loginUrl = Cypress.env('loginUrl');
@@ -74,6 +128,38 @@ Cypress.Commands.add('loginWithMock', () => {
 
   Object.keys(mockStorage).forEach((key) =>
     localStorage.setItem(key, mockStorage[key]),
+  );
+});
+
+Cypress.Commands.add('setDefaultCookies', () => {
+  Cypress.Cookies.defaults({
+    whitelist: Cypress.env('whitelist').cookies,
+  });
+});
+
+Cypress.Commands.add('clearDefaultCookies', () => {
+  Cypress.Cookies.defaults({
+    whitelist: [],
+  });
+});
+
+Cypress.Commands.add('setDefaultStorage', () => {
+  const { localStorage: mockStorage } = Cypress.env(
+    'authMock',
+  );
+
+  Object.keys(mockStorage).forEach((key) =>
+    localStorage.setItem(key, mockStorage[key]),
+  );
+});
+
+Cypress.Commands.add('clearDefaultStorage', () => {
+  const { localStorage: mockStorage } = Cypress.env(
+    'authMock',
+  );
+
+  Object.keys(mockStorage).forEach((key) =>
+    localStorage.removeItem(key),
   );
 });
 

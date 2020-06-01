@@ -12,7 +12,7 @@ Given('I login to AD as {word}', (role: string) => {
 });
 
 Given('I login once to AD as {word}', () => {
-  // do nothing, perform login procedure in scope of
-  // support/before.ts, so that login would be invoked
-  //  only once before all scenarios for the given feature
+  // do nothing, perform login procedure using before hooks,
+  // so that login would be invoked only once before all scenarios
+  // for the given feature
 });
