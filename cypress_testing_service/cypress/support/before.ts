@@ -1,5 +1,5 @@
 before(() => {
-  cy.clearLocalStorage();
+  cy.clearLocalStorageItems();
   cy.clearCookiesWhitelist();
   cy.clearCookies();
 });

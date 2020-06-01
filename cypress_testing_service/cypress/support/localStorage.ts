@@ -5,9 +5,9 @@ const { clear } = Cypress.LocalStorage;
 // so that specific items wouldn't be cleared between tests.
 // Ref. to https://github.com/cypress-io/cypress/issues/461.
 (function (root: Window) {
-  Cypress.LocalStorage.clear = function (keys) {
+  Cypress.LocalStorage.clear = function (clearKeys) {
     const getFilteredKeys = () => {
-      const entries = Object.keys(root.localStorage || {});
+      const currentKeys = Object.keys(root.localStorage || {});
       const { role } = Cypress.env('currentUser') || {};
       const whitelist = Cypress._.get(
         Cypress.env(role),
@@ -15,15 +15,11 @@ const { clear } = Cypress.LocalStorage;
         [],
       );
 
-      if (!whitelist.length) {
-        return entries;
-      }
-
-      return entries.filter((key) => whitelist.indexOf(key) === -1);
+      return currentKeys.filter((key) => whitelist.indexOf(key) === -1);
     };
 
-    const updatedKeys = (keys || []).length > 0 ? keys : getFilteredKeys();
-
-    return clear.apply(root, [...updatedKeys]);
+    return clear.apply(root, [
+      (clearKeys || []).length > 0 ? clearKeys : getFilteredKeys(),
+    ]);
   };
 })(window);
