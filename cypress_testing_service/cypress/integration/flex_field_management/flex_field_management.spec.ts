@@ -87,7 +87,9 @@ When(
 Then('the dairy_h_f attribute has default value', () => {
   cy.get('table tbody tr').contains('dairy_h_f').click();
   cy.get('#content').contains('Change flexible attribute');
-  cy.get('#content form textarea').contains('Milk and dairy products: yoghurt, cheese');
+  cy.get('#content form textarea').contains(
+    'Milk and dairy products: yoghurt, cheese',
+  );
 });
 
 And(
@@ -100,5 +102,7 @@ And(
 Then('the dairy_h_f attribute has modified value', () => {
   cy.get('table tbody tr').contains('dairy_h_f').click();
   cy.get('#content').contains('Change flexible attribute');
-  cy.get('#content form textarea').contains('Milk and dairy products: yoghurt, cheese, eggs');
+  cy.get('#content form textarea').contains(
+    'Milk and dairy products: yoghurt, cheese, eggs',
+  );
 });
