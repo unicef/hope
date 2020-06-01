@@ -55,18 +55,6 @@ accepts the arguments:
 
 **init** - resets all databases, run migrations on all databases, load business areas and fake data with default values
 
-### Code formatting
-
-#### Backend
-
-for backend we are using **Black** - [https://github.com/psf/black](https://github.com/psf/black) \(don't install it in project, but globally\)
-
-here is instruction how to integrate **Black** with your editor [https://github.com/psf/black\#editor-integration](https://github.com/psf/black#editor-integration)
-
-#### Frontend
-
-for frontend we are using **Prettier**
-
 ### Writing and running tests:
 
 #### **Backend:**
