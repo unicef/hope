@@ -8,7 +8,7 @@ Feature: Programme Management
     as well.
 
     Background:
-        Given I login once to AD as countryAdmin
+        Given I am authenticated as a countryAdmin
 
     Scenario: Create a New Programme
         When User starts creating New Programme

@@ -2,7 +2,7 @@
 Feature: Target Population
 
   Background:
-    Given I login once to AD as countryAdmin
+    Given I am authenticated as a countryAdmin
 
   # Create New Programme Population
   # As a User
