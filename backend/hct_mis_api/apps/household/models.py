@@ -74,20 +74,25 @@ ROLE_CHOICE = (
     ("ALTERNATE", "Alternate collector"),
     ("NO_ROLE", "None"),
 )
+IDENTIFICATION_TYPE_BIRTH_CERTIFICATE = "BIRTH_CERTIFICATE"
+IDENTIFICATION_TYPE_DRIVERS_LICENSE = "DRIVERS_LICENSE"
+IDENTIFICATION_TYPE_NATIONAL_ID = "NATIONAL_ID"
+IDENTIFICATION_TYPE_NATIONAL_PASSPORT = "NATIONAL_PASSPORT"
+IDENTIFICATION_TYPE_ELECTORAL_CARD = "ELECTORAL_CARD"
+IDENTIFICATION_TYPE_OTHER = "OTHER"
 IDENTIFICATION_TYPE_CHOICE = (
-    ("BIRTH_CERTIFICATE", _("Birth Certificate")),
-    ("DRIVERS_LICENSE", _("Driver's License")),
-    ("NATIONAL_ID", _("National ID")),
-    ("NATIONAL_PASSPORT", _("National Passport")),
-    ("ELECTORAL_CARD", _("Electoral Card")),
-    ("OTHER", _("Other")),
+    (IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, _("Birth Certificate")),
+    (IDENTIFICATION_TYPE_DRIVERS_LICENSE, _("Driver's License")),
+    (IDENTIFICATION_TYPE_NATIONAL_ID, _("National ID")),
+    (IDENTIFICATION_TYPE_NATIONAL_PASSPORT, _("National Passport")),
+    (IDENTIFICATION_TYPE_ELECTORAL_CARD, _("Electoral Card")),
+    (IDENTIFICATION_TYPE_OTHER, _("Other")),
 )
 
 INDIVIDUAL_HOUSEHOLD_STATUS = (("ACTIVE", "Active"), ("INACTIVE", "Inactive"))
 
 
 class Household(TimeStampedUUIDModel, AbstractSyncable):
-
     status = models.CharField(
         max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default="ACTIVE"
     )
@@ -148,8 +153,8 @@ class Household(TimeStampedUUIDModel, AbstractSyncable):
     def total_cash_received(self):
         return (
             self.payment_records.filter()
-            .aggregate(Sum("delivered_quantity"))
-            .get("delivered_quantity__sum")
+                .aggregate(Sum("delivered_quantity"))
+                .get("delivered_quantity__sum")
         )
 
     def __str__(self):
@@ -198,7 +203,7 @@ class Document(TimeStampedUUIDModel):
 
 class Agency(models.Model):
     type = models.CharField(max_length=100, unique=True)
-    label = models.CharField(max_length=100,)
+    label = models.CharField(max_length=100, )
 
     def __str__(self):
         return self.label
@@ -211,7 +216,7 @@ class HouseholdIdentity(models.Model):
     household = models.ForeignKey(
         "Household", related_name="identities", on_delete=models.CASCADE
     )
-    document_number = models.CharField(max_length=255,)
+    document_number = models.CharField(max_length=255, )
 
     def __str__(self):
         return f"{self.agency} {self.individual} {self.document_number}"
@@ -224,7 +229,7 @@ class IndividualIdentity(models.Model):
     individual = models.ForeignKey(
         "Individual", related_name="identities", on_delete=models.CASCADE
     )
-    number = models.CharField(max_length=255,)
+    number = models.CharField(max_length=255, )
 
     class Meta:
         unique_together = ("agency", "number")
@@ -243,14 +248,14 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
         max_length=255,
         validators=[MinLengthValidator(3), MaxLengthValidator(255)],
     )
-    given_name = models.CharField(max_length=85, blank=True,)
-    middle_name = models.CharField(max_length=85, blank=True,)
-    family_name = models.CharField(max_length=85, blank=True,)
+    given_name = models.CharField(max_length=85, blank=True, )
+    middle_name = models.CharField(max_length=85, blank=True, )
+    family_name = models.CharField(max_length=85, blank=True, )
     relationship = models.CharField(
         max_length=255, blank=True, choices=RELATIONSHIP_CHOICE,
     )
-    role = models.CharField(max_length=255, blank=True, choices=ROLE_CHOICE,)
-    sex = models.CharField(max_length=255, choices=SEX_CHOICE,)
+    role = models.CharField(max_length=255, blank=True, choices=ROLE_CHOICE, )
+    sex = models.CharField(max_length=255, choices=SEX_CHOICE, )
     birth_date = models.DateField()
     estimated_birth_date = models.BooleanField(default=False)
     marital_status = models.CharField(
@@ -266,19 +271,19 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
         related_name="individuals",
         on_delete=models.CASCADE,
     )
-    disability = models.BooleanField(default=False,)
+    disability = models.BooleanField(default=False, )
     flex_fields = JSONField(default=dict)
 
     @property
     def age(self):
         today = date.today()
         return (
-            today.year
-            - self.birth_date.year
-            - (
-                (today.month, today.day)
-                < (self.birth_date.month, self.birth_date.day)
-            )
+                today.year
+                - self.birth_date.year
+                - (
+                        (today.month, today.day)
+                        < (self.birth_date.month, self.birth_date.day)
+                )
         )
 
     def __str__(self):
