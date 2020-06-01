@@ -52,21 +52,19 @@ Cypress.Commands.add('assignBusinessArea', (email) => {
   ]);
 });
 
-Cypress.Commands.add('login', ({ role }) => {
-  const { username, password } = Cypress.env(role);
-  const loginUrl = Cypress.env('loginUrl');
+Cypress.Commands.add('setUserCookies', ({ role }) => {
+  const { cookies } = Cypress.env(role);
 
-  if (!Cypress.env('useAuthMock')) {
-    cy.log(`Signing in user to AD as ${role}`);
-    cy.loginToAD(username, password, loginUrl);
-    cy.visit(loginUrl);
-  } else {
-    cy.log('Signing in user with mock');
-    cy.loginWithMock();
-    cy.visit('/');
-  }
-
-  cy.wrap({ username }).as('loggedUser');
+  cookies.forEach((cookie) => {
+    cy.setCookie(cookie.name, cookie.value, {
+      domain: cookie.domain,
+      expiry: cookie.expires,
+      httpOnly: cookie.httpOnly,
+      path: cookie.path,
+      secure: cookie.secure,
+      sameSite: cookie.sameSite.toLowerCase() as Cypress.SameSiteStatus,
+    });
+  });
 });
 
 Cypress.Commands.add('loginToAD', (username, password, loginUrl) => {
@@ -87,7 +85,6 @@ Cypress.Commands.add('loginToAD', (username, password, loginUrl) => {
     ({ cookies }: { cookies: any }) => {
       cy.clearCookies();
 
-      const whitelist: string[] = [];
       cookies.forEach((cookie) => {
         cy.setCookie(cookie.name, cookie.value, {
           domain: cookie.domain,
@@ -97,74 +94,38 @@ Cypress.Commands.add('loginToAD', (username, password, loginUrl) => {
           secure: cookie.secure,
           sameSite: cookie.sameSite,
         });
-
-        whitelist.push(cookie.name);
       });
-
-      Cypress.Cookies.defaults({ whitelist });
     },
   );
 });
 
-Cypress.Commands.add('loginWithMock', () => {
-  const { cookies: mockCookies, localStorage: mockStorage } = Cypress.env(
-    'authMock',
-  );
-
-  mockCookies.forEach((cookie) => {
-    cy.setCookie(cookie.name, cookie.value, {
-      domain: cookie.domain,
-      expiry: cookie.expires,
-      httpOnly: cookie.httpOnly,
-      path: cookie.path,
-      secure: cookie.secure,
-      sameSite: cookie.sameSite.toLowerCase() as Cypress.SameSiteStatus,
-    });
-  });
-
+Cypress.Commands.add('setCookiesWhitelist', ({ role }) => {
+  const { whitelist } = Cypress.env(role);
   Cypress.Cookies.defaults({
-    whitelist: Cypress.env('whitelist').cookies,
-  });
-
-  Object.keys(mockStorage).forEach((key) =>
-    localStorage.setItem(key, mockStorage[key]),
-  );
-});
-
-Cypress.Commands.add('setDefaultCookies', () => {
-  Cypress.Cookies.defaults({
-    whitelist: Cypress.env('whitelist').cookies,
+    whitelist: whitelist.cookies,
   });
 });
 
-Cypress.Commands.add('clearDefaultCookies', () => {
+Cypress.Commands.add('clearCookiesWhitelist', () => {
   Cypress.Cookies.defaults({
     whitelist: [],
   });
 });
 
-Cypress.Commands.add('setDefaultStorage', () => {
-  const { localStorage: mockStorage } = Cypress.env(
-    'authMock',
-  );
-
-  Object.keys(mockStorage).forEach((key) =>
-    localStorage.setItem(key, mockStorage[key]),
+Cypress.Commands.add('setDefaultStorage', ({ role }) => {
+  const { localStorage: defaultStorage } = Cypress.env(role);
+  Object.keys(defaultStorage).forEach((key) =>
+    localStorage.setItem(key, defaultStorage[key]),
   );
 });
 
 Cypress.Commands.add('clearDefaultStorage', () => {
-  const { localStorage: mockStorage } = Cypress.env(
-    'authMock',
-  );
-
-  Object.keys(mockStorage).forEach((key) =>
-    localStorage.removeItem(key),
-  );
+  const defaultStorage = Cypress.env('localStorage');
+  Object.keys(defaultStorage).forEach((key) => localStorage.removeItem(key));
 });
 
 Cypress.Commands.add('logout', () => {
-  localStorage.removeItem('AUTHENTICATED');
+  cy.clearLocalStorage();
   cy.clearCookies();
   cy.request('/api/logout');
 });
@@ -196,7 +157,8 @@ Cypress.Commands.add('getBusinessAreaSlug', () => {
 
 Cypress.Commands.add('navigateTo', (newPath) => {
   return cy.getBusinessAreaSlug().then((businessAreaSlug) => {
-    cy.visit('/'.concat(businessAreaSlug, newPath));
+    const path = (newPath.length && newPath[0] === '/') ? newPath.slice(1) : newPath;
+    cy.visit(`${businessAreaSlug}/${path}`);
   });
 });
 
