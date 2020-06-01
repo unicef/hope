@@ -1,10 +1,8 @@
+const role = 'hqAdmin';
+
 before(() => {
   cy.clearCookies();
   cy.clearLocalStorage();
-
-  const role = 'hqAdmin';
-  cy.setCookiesWhitelist({ role });
-  cy.setLocalStorageItems({ role });
 
   cy.generateUser().then((registeredUser) => {
     const { firstName, lastName, username, email, password } = registeredUser;
@@ -32,3 +30,16 @@ before(() => {
   );
 });
 
+beforeEach(() => {
+  const {
+    whitelist: { cookies },
+    localStorage: userStorage,
+  } = Cypress.env(role);
+  cy.log(`cookies, preserving once: ${JSON.stringify(cookies)}`);
+  Cypress.Cookies.preserveOnce(...cookies);
+
+  cy.log(`setting user local storage: ${JSON.stringify(userStorage)}`);
+  Object.keys(userStorage).forEach((key) => {
+    localStorage.setItem(key, userStorage[key]);
+  });
+});
