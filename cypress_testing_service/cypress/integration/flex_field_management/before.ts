@@ -4,7 +4,7 @@ before(() => {
 
   const role = 'hqAdmin';
   cy.setCookiesWhitelist({ role });
-  cy.setDefaultStorage({ role });
+  cy.setLocalStorageItems({ role });
 
   cy.generateUser().then((registeredUser) => {
     const { firstName, lastName, username, email, password } = registeredUser;

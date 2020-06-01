@@ -51,11 +51,21 @@ declare namespace Cypress {
       url: string,
     ): Chainable<Subject>;
 
+    /**
+     * Sets cookies whitelist for specific user role defined in cypress.env.json.
+     * Whitelisted cookies are preserved across tests. To remove persisted cookies,
+     * use clearCookiesWhitelist.
+     */
     setCookiesWhitelist({ role }: ({ role: string })): Chainable<null>;
     clearCookiesWhitelist(): Chainable<null>;
 
-    setDefaultStorage({ role }: ({ role: string })): Chainable<null>;
-    clearDefaultStorage(): Chainable<null>;
+    /**
+     * Sets local storage items for specific user role defined in cypress.env.json.
+     * Items set with setLocalStorageItems won't be cleared until clearLocalStorageItems
+     * is used. Ref. to localStorage.ts for more details.
+     */
+    setLocalStorageItems({ role }: ({ role: string })): Chainable<null>;
+    clearLocalStorageItems(): Chainable<null>;
 
     logout(): Chainable<Subject>;
 
