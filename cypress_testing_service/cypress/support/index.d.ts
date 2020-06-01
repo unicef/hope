@@ -1,6 +1,39 @@
 declare namespace Cypress {
   interface Chainable<Subject> {
     /**
+     * Generate user with fake, almost random data.
+     */
+    generateUser(): Chainable<any>;
+
+    /**
+     * Creates user directly through django admin.
+     */
+    createUser({
+      firstName,
+      lastName,
+      username,
+      email,
+      password,
+      isStaff,
+      isSuperuser,
+      isActive,
+    }: {
+      firstName: string;
+      lastName: string;
+      username: string;
+      email: string;
+      password: string;
+      isStaff?: boolean;
+      isSuperuser?: boolean;
+      isActive?: boolean;
+    }): Chainable<any>;
+
+    /**
+     * Assigns a business area to the user with provided email.
+     */
+    assignBusinessArea(email: string): Chainable<any>;
+
+    /**
      * Allows to login using AD or authMock.
      * The 'role' is not supported currently by authMock.
      * Ref. to cypress.env.json for additional details.
@@ -14,6 +47,12 @@ declare namespace Cypress {
     ): Chainable<Subject>;
 
     loginWithMock(): Chainable<Subject>;
+
+    setDefaultCookies(): Chainable<null>;
+    clearDefaultCookies(): Chainable<null>;
+
+    setDefaultStorage(): Chainable<null>;
+    clearDefaultStorage(): Chainable<null>;
 
     logout(): Chainable<Subject>;
 
