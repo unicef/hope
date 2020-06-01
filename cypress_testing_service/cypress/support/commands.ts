@@ -112,14 +112,14 @@ Cypress.Commands.add('clearCookiesWhitelist', () => {
   });
 });
 
-Cypress.Commands.add('setDefaultStorage', ({ role }) => {
+Cypress.Commands.add('setLocalStorageItems', ({ role }) => {
   const { localStorage: defaultStorage } = Cypress.env(role);
   Object.keys(defaultStorage).forEach((key) =>
     localStorage.setItem(key, defaultStorage[key]),
   );
 });
 
-Cypress.Commands.add('clearDefaultStorage', () => {
+Cypress.Commands.add('clearLocalStorageItems', () => {
   const defaultStorage = Cypress.env('localStorage');
   Object.keys(defaultStorage).forEach((key) => localStorage.removeItem(key));
 });

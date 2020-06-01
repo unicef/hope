@@ -9,5 +9,6 @@
 import 'cypress-file-upload';
 import './commands';
 import './chai';
-import './localStorage';
+// temp. commented due to issues with removing storage items
+// import './localStorage';
 import './before';
