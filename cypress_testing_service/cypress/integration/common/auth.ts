@@ -13,7 +13,7 @@ Given('I login to AD as {word}', (role: string) => {
 
 Given('I am authenticated as a {word}', (role: string) => {
   cy.setUserCookies({ role });
-  cy.setLocalStorageItems({ role });
+  cy.setUserLocalStorage({ role });
 
   cy.visit('/');
   cy.getByTestId('business-area-container').should('be.visible');

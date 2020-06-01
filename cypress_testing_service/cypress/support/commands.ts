@@ -99,29 +99,10 @@ Cypress.Commands.add('loginToAD', (username, password, loginUrl) => {
   );
 });
 
-Cypress.Commands.add('setCookiesWhitelist', ({ role }) => {
-  const { whitelist } = Cypress.env(role);
-  Cypress.Cookies.defaults({
-    whitelist: whitelist.cookies,
-  });
-});
-
-Cypress.Commands.add('clearCookiesWhitelist', () => {
-  Cypress.Cookies.defaults({
-    whitelist: [],
-  });
-});
-
-Cypress.Commands.add('setLocalStorageItems', ({ role }) => {
-  const { localStorage: defaultStorage } = Cypress.env(role);
-  Object.keys(defaultStorage).forEach((key) =>
-    localStorage.setItem(key, defaultStorage[key]),
-  );
-});
-
-Cypress.Commands.add('clearLocalStorageItems', () => {
-  Object.keys(localStorage || {}).forEach((key) =>
-    localStorage.removeItem(key),
+Cypress.Commands.add('setUserLocalStorage', ({ role }) => {
+  const { localStorage: userLocalStorage } = Cypress.env(role);
+  Object.keys(userLocalStorage).forEach((key) =>
+    localStorage.setItem(key, userLocalStorage[key]),
   );
 });
 
