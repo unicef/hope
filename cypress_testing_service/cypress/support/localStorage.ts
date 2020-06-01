@@ -4,19 +4,26 @@ const { clear } = Cypress.LocalStorage;
 // Workaround allowing to whitelist localStorage entries,
 // so that specific items wouldn't be cleared between tests.
 // Ref. to https://github.com/cypress-io/cypress/issues/461.
-Cypress.LocalStorage.clear = (keys) => {
-  const getWhitelistedKeys = () => {
-    const { role } = Cypress.env('currentUser') || {};
-    const whitelist = Cypress._.get(
-      Cypress.env(role),
-      'whitelist.localstorage',
-      [],
-    );
+(function (root: Window) {
+  Cypress.LocalStorage.clear = function (keys) {
+    const getFilteredKeys = () => {
+      const entries = Object.keys(root.localStorage || {});
+      const { role } = Cypress.env('currentUser') || {};
+      const whitelist = Cypress._.get(
+        Cypress.env(role),
+        'whitelist.localstorage',
+        [],
+      );
 
-    return Object.keys(localStorage || {}).filter(
-      (key) => whitelist.indexOf(key) === -1,
-    );
+      if (!whitelist.length) {
+        return entries;
+      }
+
+      return entries.filter((key) => whitelist.indexOf(key) === -1);
+    };
+
+    const updatedKeys = (keys || []).length > 0 ? keys : getFilteredKeys();
+
+    return clear.apply(root, [...updatedKeys]);
   };
-
-  return clear.apply((keys || []).length > 0 ? keys : getWhitelistedKeys());
-};
+})(window);
