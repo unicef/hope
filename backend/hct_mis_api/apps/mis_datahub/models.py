@@ -1,10 +1,6 @@
-from decimal import Decimal
-
-from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django_countries.fields import CountryField
-from model_utils import Choices
 
 from household.models import (
     RELATIONSHIP_CHOICE,
@@ -30,9 +26,6 @@ class Household(SessionModel):
     mis_id = models.UUIDField(primary_key=True,)
     status = models.CharField(
         max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default="ACTIVE"
-    )
-    status = models.CharField(
-        max_length=50, choices=(("INACTIVE", "Inactive"), ("ACTIVE", "Active")),
     )
     household_size = models.PositiveIntegerField()
     # head of household document id
@@ -152,8 +145,8 @@ class Program(SessionModel):
     )
     mis_id = models.UUIDField(primary_key=True,)
     business_area = models.CharField(max_length=20)
-    program_ca_id = models.CharField(max_length=255)
-    program_ca_hash_id = models.CharField(max_length=255)
+    ca_id = models.CharField(max_length=255)
+    ca_hash_id = models.CharField(max_length=255)
     programme_name = models.CharField(max_length=255)
     scope = models.PositiveIntegerField()
     start_date = models.DateTimeField()
