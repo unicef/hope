@@ -3,7 +3,7 @@ Feature: Smoke tests
     issues or bugs exist
 
     Background:
-        Given I login once to AD as countryAdmin
+        Given I am authenticated as a countryAdmin
 
     Scenario: Login and click around without any issues
         When I visit /
