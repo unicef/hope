@@ -10,6 +10,7 @@ import { Close } from '@material-ui/icons';
 import styled from 'styled-components';
 import { TabPanel } from '../../../../components/TabPanel';
 import { FlexFieldTab } from './FlexFieldTab';
+import TargetingDiagramImage from '../../../../assets/TargetingDiagramImage.png';
 
 export interface FinalizeTargetPopulationPropTypes {
   open: boolean;
@@ -39,12 +40,22 @@ const StyledDialogContent = styled(DialogContent)`
   height: 600px;
 `;
 
-const ImagePlaceholder = styled.div`
+const TargetingDiagram = styled.img`
   width: 754px;
   height: 525px;
   margin: 0 auto;
   background-color: #f8f8f8;
-`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+`;
+
+const StyledTabPanel = styled(TabPanel)`
+  && {
+    height: 100%;
+  }
+`;
 
 export function TargetingInfoDialog({
   open,
@@ -80,9 +91,9 @@ export function TargetingInfoDialog({
         </IconButton>
       </DialogTitleWrapper>
       <StyledDialogContent>
-        <TabPanel value={selectedTab} index={0}>
-          <ImagePlaceholder />
-        </TabPanel>
+        <StyledTabPanel value={selectedTab} index={0}>
+          <TargetingDiagram src={TargetingDiagramImage} alt="diagram"/>
+        </StyledTabPanel>
         <TabPanel value={selectedTab} index={1}>
           <FlexFieldTab />
         </TabPanel>
