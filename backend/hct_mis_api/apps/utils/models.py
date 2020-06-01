@@ -52,10 +52,10 @@ class AbstractSession(models.Model):
     SOURCE_MIS = "MIS"
     SOURCE_CA = "CA"
     STATUS_NEW = "NEW"
-    STATUS_READY = "NEW"
-    STATUS_PROCESSING = "NEW"
-    STATUS_COMPLETED = "NEW"
-    STATUS_FAILED = "NEW"
+    STATUS_READY = "READY"
+    STATUS_PROCESSING = "PROCESSING"
+    STATUS_COMPLETED = "COMPLETED"
+    STATUS_FAILED = "FAILED"
 
     source = models.CharField(
         max_length=3,
