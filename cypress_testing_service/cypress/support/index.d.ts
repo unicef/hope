@@ -40,18 +40,21 @@ declare namespace Cypress {
      */
     login({ role }: { role: string }): Chainable<Subject>;
 
+    /**
+     * Sets cookies for specific user role defined in cypress.env.json.
+     */
+    setUserCookies({ role }: { role: string }): Chainable<Subject>;
+
     loginToAD(
       username: string,
       password: string,
       url: string,
     ): Chainable<Subject>;
 
-    loginWithMock(): Chainable<Subject>;
+    setCookiesWhitelist({ role }: ({ role: string })): Chainable<null>;
+    clearCookiesWhitelist(): Chainable<null>;
 
-    setDefaultCookies(): Chainable<null>;
-    clearDefaultCookies(): Chainable<null>;
-
-    setDefaultStorage(): Chainable<null>;
+    setDefaultStorage({ role }: ({ role: string })): Chainable<null>;
     clearDefaultStorage(): Chainable<null>;
 
     logout(): Chainable<Subject>;
