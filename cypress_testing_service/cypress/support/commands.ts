@@ -120,13 +120,13 @@ Cypress.Commands.add('setLocalStorageItems', ({ role }) => {
 });
 
 Cypress.Commands.add('clearLocalStorageItems', () => {
-  const defaultStorage = Cypress.env('localStorage');
-  Object.keys(defaultStorage).forEach((key) => localStorage.removeItem(key));
+  Object.keys(localStorage || {}).forEach((key) =>
+    localStorage.removeItem(key),
+  );
 });
 
 Cypress.Commands.add('logout', () => {
-  cy.clearLocalStorage();
-  cy.clearCookies();
+  localStorage.removeItem('AUTHENTICATED');
   cy.request('/api/logout');
 });
 
@@ -157,7 +157,8 @@ Cypress.Commands.add('getBusinessAreaSlug', () => {
 
 Cypress.Commands.add('navigateTo', (newPath) => {
   return cy.getBusinessAreaSlug().then((businessAreaSlug) => {
-    const path = (newPath.length && newPath[0] === '/') ? newPath.slice(1) : newPath;
+    const path =
+      newPath.length && newPath[0] === '/' ? newPath.slice(1) : newPath;
     cy.visit(`${businessAreaSlug}/${path}`);
   });
 });
