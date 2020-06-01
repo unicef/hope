@@ -31,9 +31,6 @@ class Household(SessionModel):
     status = models.CharField(
         max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default="ACTIVE"
     )
-    status = models.CharField(
-        max_length=50, choices=(("INACTIVE", "Inactive"), ("ACTIVE", "Active")),
-    )
     household_size = models.PositiveIntegerField()
     # head of household document id
     government_form_number = models.CharField(max_length=255, null=True)
