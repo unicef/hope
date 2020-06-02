@@ -38,7 +38,12 @@ class Household(SessionModel):
         "mis_datahub.Individual",
         db_column="focal_point_mis_id",
         on_delete=models.CASCADE,
-        related_name="heading_household",
+        related_name="heading_households",
+    )
+    alternative_collector = models.ForeignKey(
+        "mis_datahub.Individual",
+        on_delete=models.CASCADE,
+        related_name="collector_households",
     )
     address = models.CharField(max_length=255, null=True)
     admin1 = models.CharField(max_length=255, null=True)

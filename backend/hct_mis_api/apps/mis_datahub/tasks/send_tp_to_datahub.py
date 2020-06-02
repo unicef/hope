@@ -1,7 +1,11 @@
 from django.db.models import Q, F
 
 from core.utils import nested_getattr
-from household.models import Individual, IDENTIFICATION_TYPE_NATIONAL_ID
+from household.models import (
+    Individual,
+    IDENTIFICATION_TYPE_NATIONAL_ID,
+    ROLE_ALTERNATE,
+)
 from targeting.models import TargetPopulation, HouseholdSelection
 from mis_datahub import models as dh_mis_models
 
@@ -30,7 +34,7 @@ class SendTPToDatahub:
         "address": "address",
         "admin1": "admin_area.title",
         "admin2": "admin_area.parent.title",
-        "country": "country"
+        "country": "country",
     }
     MAPPING_INDIVIDUAL_DICT = {
         "mis_id": "id",
@@ -68,6 +72,15 @@ class SendTPToDatahub:
         program = target_population.program
         dh_program = self.send_program(program)
         dh_target = self.send_target_population(target_population, dh_program)
+        for household in households:
+            dh_household = self.send_household(household)
+            hoh = household.head_of_household
+            alternative_collector = household.individuals.filter(
+                role=ROLE_ALTERNATE
+            )
+            self.send_individual(hoh, dh_household)
+            if alternative_collector is not None:
+                self.send_individual(alternative_collector, dh_household)
 
     def build_arg_dict(self, model_object, mapping_dict):
         args = {}
@@ -93,22 +106,28 @@ class SendTPToDatahub:
         dh_target.save()
         return dh_target
 
-    def send_individual(self, household):
+    def send_individual(self, individual, dh_household):
         dh_individual_args = self.build_arg_dict(
-            household, SendTPToDatahub.MAPPING_INDIVIDUAL_DICT
+            individual, SendTPToDatahub.MAPPING_INDIVIDUAL_DICT
         )
         dh_individual = dh_mis_models.Individual(**dh_individual_args)
+        dh_individual.household = dh_household
         dh_individual.save()
 
-    def send_households(self, household):
+    def send_household(self, household):
         dh_household_args = self.build_arg_dict(
             household, SendTPToDatahub.MAPPING_HOUSEHOLD_DICT
         )
         dh_household = dh_mis_models.Household(**dh_household_args)
         national_id_document = household.head_of_household.documents.filter(
-            type__type=IDENTIFICATION_TYPE_NATIONAL_ID).first()
+            type__type=IDENTIFICATION_TYPE_NATIONAL_ID
+        ).first()
         if national_id_document is not None:
-            dh_household.government_form_number = national_id_document.document_number
+            dh_household.government_form_number = (
+                national_id_document.document_number
+            )
         households_identity = household.households_identities.first()
         if households_identity is not None:
             dh_household.agency_id = households_identity.document_number
+        dh_household.save()
+        return dh_household
