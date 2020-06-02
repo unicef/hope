@@ -53,6 +53,10 @@ class SendTPToDatahub:
     }
 
     def execute(self, tp_id):
+        households_to_bulk_create = []
+        individuals_to_bulk_create = []
+        tp_entries_to_bulk_create = []
+
         target_population = TargetPopulation.objects.get(id=tp_id)
         target_population_selections = HouseholdSelection.objects.filter(
             target_population__id=tp_id
@@ -61,26 +65,41 @@ class SendTPToDatahub:
             Q(last_sync_at_lte__is_null=True)
             | Q(last_sync_at_lte=F("updated_at"))
         )
-        individuals = Individual.objects.filter(
-            household__id__in=target_population.households.values_list(
-                "id", flat=True
-            )
-        ).filter(
-            Q(last_sync_at_lte__is_null=True)
-            | Q(last_sync_at_lte=F("updated_at"))
-        )
+        # individuals = Individual.objects.filter(
+        #     household__id__in=target_population.households.values_list(
+        #         "id", flat=True
+        #     )
+        # ).filter(
+        #     Q(last_sync_at_lte__is_null=True)
+        #     | Q(last_sync_at_lte=F("updated_at"))
+        # )
         program = target_population.program
         dh_program = self.send_program(program)
+        dh_program.save()
         dh_target = self.send_target_population(target_population, dh_program)
+        dh_target.save()
         for household in households:
             dh_household = self.send_household(household)
+            households_to_bulk_create.append(dh_household)
             hoh = household.head_of_household
+            hoh_dh = self.send_individual(hoh, dh_household)
+            individuals_to_bulk_create.append(hoh_dh)
             alternative_collector = household.individuals.filter(
                 role=ROLE_ALTERNATE
-            )
-            self.send_individual(hoh, dh_household)
+            ).first()
             if alternative_collector is not None:
-                self.send_individual(alternative_collector, dh_household)
+                alternative_collector_dh = self.send_individual(
+                    alternative_collector, dh_household
+                )
+                individuals_to_bulk_create.append(alternative_collector_dh)
+        for selection in target_population_selections:
+            dh_entry = self.send_target_entry(selection)
+            tp_entries_to_bulk_create.append(dh_entry)
+        dh_mis_models.Household.objects.bulk_create(households_to_bulk_create)
+        dh_mis_models.Individual.objects.bulk_create(individuals_to_bulk_create)
+        dh_mis_models.TargetPopulationEntry.objects.bulk_create(
+            tp_entries_to_bulk_create
+        )
 
     def build_arg_dict(self, model_object, mapping_dict):
         args = {}
@@ -93,7 +112,6 @@ class SendTPToDatahub:
             program, SendTPToDatahub.MAPPING_PROGRAM_DICT
         )
         dh_program = dh_mis_models.Program(**dh_program_args)
-        dh_program.save()
         return dh_program
 
     def send_target_population(self, target_population, dh_program):
@@ -103,7 +121,6 @@ class SendTPToDatahub:
 
         dh_target = dh_mis_models.TargetPopulation(**dh_tp_args)
         dh_target.program = dh_program
-        dh_target.save()
         return dh_target
 
     def send_individual(self, individual, dh_household):
@@ -112,7 +129,7 @@ class SendTPToDatahub:
         )
         dh_individual = dh_mis_models.Individual(**dh_individual_args)
         dh_individual.household = dh_household
-        dh_individual.save()
+        return dh_individual
 
     def send_household(self, household):
         dh_household_args = self.build_arg_dict(
@@ -131,3 +148,9 @@ class SendTPToDatahub:
             dh_household.agency_id = households_identity.document_number
         dh_household.save()
         return dh_household
+
+    def send_target_entry(self, target_population_selection):
+        return dh_mis_models.TargetPopulationEntry(
+            target_population=target_population_selection.target_population.id,
+            household=target_population_selection.houshehold.id,
+        )
