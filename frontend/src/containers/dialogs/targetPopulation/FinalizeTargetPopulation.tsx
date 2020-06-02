@@ -34,6 +34,10 @@ const DialogDescription = styled.div`
   color: rgba(0, 0, 0, 0.54);
 `;
 
+const ErrorMessage = styled.p`
+  color: ${({theme}) => theme.palette.error.main};
+`;
+
 export function FinalizeTargetPopulation({
   open,
   setOpen,
@@ -72,6 +76,7 @@ export function FinalizeTargetPopulation({
           Are you sure you want to push {totalHouseholds} households to
           CashAssist? Target population will not be editable further.
         </DialogDescription>
+        {/* {!totalHouseholds && <ErrorMessage>There are not any households selected in this criteria.</ErrorMessage>} */}
       </DialogContent>
       <DialogFooter>
         <DialogActions>
@@ -80,7 +85,7 @@ export function FinalizeTargetPopulation({
             onClick={() => onSubmit(targetPopulationId)}
             color='primary'
             variant='contained'
-            disabled={!loading}
+            disabled={!loading || !totalHouseholds}
           >
             Send to cash assist
           </Button>
