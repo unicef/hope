@@ -59,7 +59,7 @@ class SendTPToDatahub:
 
         target_population = TargetPopulation.objects.get(id=tp_id)
         target_population_selections = HouseholdSelection.objects.filter(
-            target_population__id=tp_id
+            target_population__id=tp_id, final=True
         )
         households = target_population.households.filter(
             Q(last_sync_at_lte__is_null=True)
@@ -153,4 +153,5 @@ class SendTPToDatahub:
         return dh_mis_models.TargetPopulationEntry(
             target_population=target_population_selection.target_population.id,
             household=target_population_selection.houshehold.id,
+            vulnerability_score=target_population_selection.vulnerability_score,
         )
