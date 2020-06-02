@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from dateutil.parser import parse
 
 
@@ -49,6 +51,13 @@ def reduce_asset(asset: dict, *args, **kwargs) -> dict:
     }
 
 
+def get_field_name(field_name: str) -> str:
+    if "/" in field_name:
+        return field_name.split("/")[-1]
+    else:
+        return field_name
+
+
 def reduce_assets_list(
     assets: list, only_deployed: bool = False, *args, **kwarg
 ) -> list:
@@ -61,7 +70,7 @@ def reduce_assets_list(
     return [reduce_asset(asset) for asset in assets]
 
 
-def count_population(results: list):
+def count_population(results: list) -> Tuple[int, int]:
     total_individuals_count = 0
     for result in results:
         total_individuals_count += len(
