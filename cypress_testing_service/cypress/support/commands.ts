@@ -7,14 +7,50 @@ Cypress.Commands.add('generateUser', () => {
   const lastName = faker.name.lastName();
   const email = faker.internet.email();
   return {
+    username: email,
+    password: faker.internet.password(),
+    name: `${firstName} ${lastName}`,
+    email,
     firstName,
     lastName,
-    name: `${firstName} ${lastName}`,
-    username: email,
-    email,
-    password: faker.internet.password(),
+    isStaff: false,
+    isActive: false,
   };
 });
+
+Cypress.Commands.add('visitDjangoAdmin', () => {
+  cy.visit('/api/admin');
+  cy.get('input[name=username]').type(Cypress.env('daUsername'));
+  cy.get('input[name=password]').type(Cypress.env('daPassword'));
+  cy.get('input[type=submit]').click();
+});
+
+Cypress.Commands.add(
+  'addUser',
+  ({ username, password, email, firstName, lastName, permissions }) => {
+    cy.visit('/api/admin/account/user/add');
+    cy.get('input[name=username]').type(username);
+    cy.get('input[name=password1]').type(password);
+    cy.get('input[name=password2]').type(password);
+
+    cy.get('input[name=_save]').click();
+
+    cy.get('input[name=first_name]').type(firstName);
+    cy.get('input[name=last_name]').type(lastName);
+    cy.get('input[name=email]').type(email);
+
+    permissions.forEach((permission) => {
+      cy.get(`#id_${permission}`).click();
+    });
+
+    // TODO: https://tivix.slack.com/archives/CLDL2GH1P/p1591356892023100
+    cy.get('#id_business_areas option').first().click();
+
+    cy.get('input[name=_save]').click();
+
+    cy.visit('/api/admin/logout');
+  },
+);
 
 Cypress.Commands.add(
   'createUser',
@@ -52,7 +88,7 @@ Cypress.Commands.add('assignBusinessArea', (email) => {
   ]);
 });
 
-Cypress.Commands.add('setUserCookies', ({ role }) => {
+Cypress.Commands.add('loadUserCookies', ({ role }) => {
   const { cookies } = Cypress.env(role);
 
   cookies.forEach((cookie) => {
@@ -99,7 +135,7 @@ Cypress.Commands.add('loginToAD', (username, password, loginUrl) => {
   );
 });
 
-Cypress.Commands.add('setUserLocalStorage', ({ role }) => {
+Cypress.Commands.add('loadUserLocalStorage', ({ role }) => {
   const { localStorage: userLocalStorage } = Cypress.env(role);
   Object.keys(userLocalStorage).forEach((key) =>
     localStorage.setItem(key, userLocalStorage[key]),
