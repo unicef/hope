@@ -10,6 +10,7 @@ from openpyxl import load_workbook
 from openpyxl_image_loader import SheetImageLoader
 
 from core.core_fields_attributes import CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY
+from core.kobo.common import KOBO_FORM_INDIVIDUALS_COLUMN_NAME
 from core.utils import (
     serialize_flex_attributes,
     get_combined_attributes,
@@ -24,12 +25,7 @@ from registration_datahub.models import (
 )
 
 
-class UploadXLSXValidator(BaseValidator):
-    WB = None
-    CORE_FIELDS = CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY
-    FLEX_FIELDS = serialize_flex_attributes()
-    ALL_FIELDS = get_combined_attributes()
-
+class ImportDataValidator(BaseValidator):
     @classmethod
     def validate(cls, *args, **kwargs):
         validate_methods = [
@@ -42,6 +38,13 @@ class UploadXLSXValidator(BaseValidator):
             errors_list.extend(errors)
 
         return errors_list
+
+
+class UploadXLSXValidator(ImportDataValidator):
+    WB = None
+    CORE_FIELDS = CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY
+    FLEX_FIELDS = serialize_flex_attributes()
+    ALL_FIELDS = get_combined_attributes()
 
     @classmethod
     def string_validator(cls, value, header, *args, **kwargs):
@@ -621,3 +624,85 @@ class UploadXLSXValidator(BaseValidator):
         individuals_sheet = wb["Individuals"]
         cls.image_loader = SheetImageLoader(individuals_sheet)
         return cls.rows_validator(individuals_sheet)
+
+
+class KoboProjectImportDataValidator(ImportDataValidator):
+    CORE_FIELDS: dict = CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY
+    FLEX_FIELDS: dict = serialize_flex_attributes()
+
+    @classmethod
+    def _get_field_name(cls, field_name: str):
+        if "/" in field_name:
+            return field_name.split("/")[-1]
+        else:
+            return field_name
+
+    @classmethod
+    def validate_required_fields(cls, submissions: list, *args, **kwargs):
+        expected_households_core_fields = {
+            field["xlsx_field"]
+            for field in cls.CORE_FIELDS["households"].values()
+            if field["required"]
+        }
+        expected_households_flex_fields = {
+            field["xlsx_field"]
+            for field in cls.FLEX_FIELDS["households"].values()
+            if field["required"]
+        }
+
+        expected_individuals_core_fields = {
+            field["xlsx_field"]
+            for field in cls.CORE_FIELDS["individuals"].values()
+            if field["required"]
+        }
+        expected_individuals_flex_fields = {
+            field["xlsx_field"]
+            for field in cls.FLEX_FIELDS["individuals"].values()
+            if field["required"]
+        }
+
+        expected_household_fields = expected_households_core_fields.union(
+            expected_households_flex_fields
+        )
+        expected_individuals_fields = expected_individuals_core_fields.union(
+            expected_individuals_flex_fields
+        )
+
+        household_fields_in_submission = []
+        individuals_fields_in_submission = []
+        for household in submissions:
+            household_fields_in_submission.append(
+                {cls._get_field_name(field_name) for field_name in household}
+            )
+            for individual in household[KOBO_FORM_INDIVIDUALS_COLUMN_NAME]:
+                individuals_fields_in_submission.append(
+                    {
+                        cls._get_field_name(field_name)
+                        for field_name in individual
+                    }
+                )
+
+        errors = []
+        for household_fields in household_fields_in_submission:
+            diff = expected_household_fields.difference(household_fields)
+
+            if diff:
+                errors.extend(
+                    [
+                        {"header": col, "message": f"Missing field {col}"}
+                        for col in diff
+                    ]
+                )
+
+        for individual_fields in individuals_fields_in_submission:
+            diff = expected_individuals_fields.difference(individual_fields)
+
+            if diff:
+                errors.extend(
+                    [
+                        {"header": col, "message": f"Missing field {col}"}
+                        for col in diff
+                    ]
+                )
+
+        return errors

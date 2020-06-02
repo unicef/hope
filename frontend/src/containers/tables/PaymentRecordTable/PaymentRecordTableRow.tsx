@@ -43,7 +43,7 @@ export function PaymentRecordTableRow({
       role='checkbox'
       key={paymentRecord.id}
     >
-      <TableCell align='left'>{paymentRecord.cashAssistId}</TableCell>
+      <TableCell align='left'>{paymentRecord.caId}</TableCell>
       <TableCell align='left'>
         <StatusContainer>
           <StatusBox
@@ -52,20 +52,20 @@ export function PaymentRecordTableRow({
           />
         </StatusContainer>
       </TableCell>
-      <TableCell align='left'>{paymentRecord.headOfHousehold}</TableCell>
+      <TableCell align='left'>{paymentRecord.fullName}</TableCell>
       <TableCell align='left'>
         {decodeIdString(paymentRecord.household.id)}
       </TableCell>
-      <TableCell align='left'>{paymentRecord.totalPersonCovered}</TableCell>
+      <TableCell align='left'>{paymentRecord.totalPersonsCovered}</TableCell>
       <TableCell align='right'>
-        {formatCurrency(paymentRecord.entitlement.entitlementQuantity)}
+        {formatCurrency(paymentRecord.entitlementQuantity)}
       </TableCell>
       <TableCell align='right'>
-        {formatCurrency(paymentRecord.entitlement.deliveredQuantity)}
+        {formatCurrency(paymentRecord.deliveredQuantity)}
       </TableCell>
       <TableCell align='right'>
         <Moment format='DD/MM/YYYY'>
-          {paymentRecord.entitlement.deliveryDate}
+          {paymentRecord.deliveryDate}
         </Moment>
       </TableCell>
     </ClickableTableRow>
