@@ -4,19 +4,26 @@ before(() => {
   cy.clearCookies();
   cy.clearLocalStorage();
 
+  cy.visitDjangoAdmin();
   cy.generateUser().then((registeredUser) => {
-    const { firstName, lastName, username, email, password } = registeredUser;
-    cy.createUser({
+    const {
+      username,
+      password,
+      name,
+      email,
       firstName,
       lastName,
+    } = registeredUser;
+    cy.addUser({
       username,
-      email,
       password,
-      isStaff: true,
-      isSuperuser: true,
-      isActive: true,
+      name,
+      email,
+      firstName,
+      lastName,
+      permissions: ['is_staff', 'is_active', 'is_superuser'],
     });
-    cy.assignBusinessArea(username);
+
     cy.wrap(registeredUser).as('registeredUser');
   });
 

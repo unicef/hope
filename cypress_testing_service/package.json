@@ -5,7 +5,8 @@
   "license": "MIT",
   "scripts": {
     "lint": "eslint 'cypress/**/*.{js,ts,tsx}'",
-    "pretty": "prettier --write \"cypress/**/*.{ts,js,jsx,json}\""
+    "pretty": "prettier --write \"cypress/**/*.{ts,js,jsx,json}\"",
+    "setupDjangoAdmin": "docker-compose -f ../docker-compose.yml run backend ./manage.py loaddata hct_mis_api/apps/account/fixtures/superuser.json"
   },
   "devDependencies": {
     "@types/cypress-cucumber-preprocessor": "^1.14.1",

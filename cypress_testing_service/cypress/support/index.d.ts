@@ -1,78 +1,111 @@
 declare namespace Cypress {
+  type Permission = 'is_active' | 'is_staff' | 'is_superuser';
+  interface User {
+    username: string;
+    password: string;
+    name: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    permissions: Permission[];
+  }
+
   interface Chainable<Subject> {
     /**
-     * Generate user with fake, almost random data.
+     * Generate user with fake, random -like data.
      */
-    generateUser(): Chainable<any>;
+    generateUser(): Chainable<User>;
 
     /**
-     * Creates user directly through django admin.
+     * Visits django admin UI.
+     * NOTE:
+     * - 'daUsername' and daPassword env variables need to be set first
      */
-    createUser({
-      firstName,
-      lastName,
-      username,
-      email,
-      password,
-      isStaff,
-      isSuperuser,
-      isActive,
-    }: {
-      firstName: string;
-      lastName: string;
-      username: string;
-      email: string;
-      password: string;
-      isStaff?: boolean;
-      isSuperuser?: boolean;
-      isActive?: boolean;
-    }): Chainable<any>;
+    visitDjangoAdmin(): Chainable<null>;
+
+    /**
+     * Adds a user account through django admin UI.
+     */
+    addUser(user: User): Chainable<null>;
+
+    /**
+     * Creates a user through django admin shell.
+     * NOTE:
+     * - requires access to django admin shell
+     * - recommended to be used only in local environment setup
+     */
+    createUser(user: User): Chainable<null>;
 
     /**
      * Assigns a business area to the user with provided email.
+     * NOTE:
+     * - requires access to django admin shell
+     * - recommended to be used only in local environment setup
      */
-    assignBusinessArea(email: string): Chainable<any>;
+    assignBusinessArea(email: string): Chainable<null>;
 
     /**
-     * Allows to login using AD or authMock.
-     * The 'role' is not supported currently by authMock.
-     * Ref. to cypress.env.json for additional details.
+     * Loads cookies for specific user role defined in cypress.env.json.
      */
-    login({ role }: { role: string }): Chainable<Subject>;
+    loadUserCookies({ role }: { role: string }): Chainable<null>;
 
     /**
-     * Sets cookies for specific user role defined in cypress.env.json.
+     * Loads to Active Directory using pupeteer.
      */
-    setUserCookies({ role }: { role: string }): Chainable<Subject>;
-
     loginToAD(
       username: string,
       password: string,
       url: string,
-    ): Chainable<Subject>;
+    ): Chainable<null>;
 
     /**
-     * Sets local storage items for specific user role defined in cypress.env.json.
+     * Loads local storage items for specific user role defined in cypress.env.json.
      */
-    setUserLocalStorage({ role }: ({ role: string })): Chainable<null>;
+    loadUserLocalStorage({ role }: { role: string }): Chainable<null>;
 
-    logout(): Chainable<Subject>;
+    /**
+     * Logs out the current user.
+     */
+    logout(): Chainable<null>;
 
+    /**
+     * Gets an element using data-cy attribute.
+     */
     getByTestId<E extends Node = HTMLElement>(
       testId: string,
       options?: Partial<Loggable & Timeoutable & Withinable>,
     ): Chainable<JQuery<E>>;
 
+    /**
+     * Reads business area slug from the url.
+     * NOTE:
+     * - assumes url has the format /{businessAreaSlug}/foo/bar
+     */
     getBusinessAreaSlug(): Chainable<string>;
 
-    navigateTo(newPath: string): Chainable<Subject>;
+    /**
+     * Navigates to 'newPath' within current business area.
+     */
+    navigateTo(newPath: string): Chainable<null>;
 
-    pickDayOfTheMonth(day: number, fieldName: string): Chainable<Subject>;
+    /**
+     * Picks day of the month from the UI picker.
+     */
+    pickDayOfTheMonth(day: number, fieldName: string): Chainable<null>;
 
+    /**
+     * Downloads xlsx file data.
+     */
     downloadXlsxData(url: string): Chainable<any>;
 
+    /**
+     * Parses the xlsx file data.
+     */
     parseXlsxData(nameOrIndex?: string | number): Chainable<any>;
 
+    /**
+     * Uploads file using gql api.
+     */
     gqlUploadFile(
       url: string,
       operations: object,
