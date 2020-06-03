@@ -4,7 +4,6 @@ import re
 from django.core.exceptions import ValidationError
 from django.db.models import Q, F
 from django.template.defaultfilters import slugify
-import datetime as dt
 
 
 def decode_id_string(id_string):
@@ -250,6 +249,20 @@ def get_admin_areas_as_choices(admin_level):
             admin_area_type__admin_level=admin_level
         )
     ]
+
+
+def rename_dict_keys(obj, convert_func):
+    if isinstance(obj, dict):
+        new = {}
+        for k, v in obj.items():
+            new[convert_func(k)] = rename_dict_keys(v, convert_func)
+    elif isinstance(obj, list):
+        new = []
+        for v in obj:
+            new.append(rename_dict_keys(v, convert_func))
+    else:
+        return obj
+    return new
 
 
 raise_attribute_error = object()

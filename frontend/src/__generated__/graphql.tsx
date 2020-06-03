@@ -3783,6 +3783,17 @@ export type FinalHouseholdsListByTargetingCriteriaQuery = (
   )> }
 );
 
+export type FlexFieldsQueryVariables = {};
+
+
+export type FlexFieldsQuery = (
+  { __typename?: 'Query' }
+  & { allFieldsAttributes: Maybe<Array<Maybe<(
+    { __typename?: 'FieldAttributeNode' }
+    & Pick<FieldAttributeNode, 'id' | 'type' | 'name' | 'labelEn'>
+  )>>> }
+);
+
 export type GoldenRecordByTargetingCriteriaQueryVariables = {
   targetingCriteria: TargetingCriteriaObjectType,
   first?: Maybe<Scalars['Int']>,
@@ -6963,6 +6974,58 @@ export function useFinalHouseholdsListByTargetingCriteriaLazyQuery(baseOptions?:
 export type FinalHouseholdsListByTargetingCriteriaQueryHookResult = ReturnType<typeof useFinalHouseholdsListByTargetingCriteriaQuery>;
 export type FinalHouseholdsListByTargetingCriteriaLazyQueryHookResult = ReturnType<typeof useFinalHouseholdsListByTargetingCriteriaLazyQuery>;
 export type FinalHouseholdsListByTargetingCriteriaQueryResult = ApolloReactCommon.QueryResult<FinalHouseholdsListByTargetingCriteriaQuery, FinalHouseholdsListByTargetingCriteriaQueryVariables>;
+export const FlexFieldsDocument = gql`
+    query FlexFields {
+  allFieldsAttributes(flexField: true) {
+    id
+    type
+    name
+    labelEn
+  }
+}
+    `;
+export type FlexFieldsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<FlexFieldsQuery, FlexFieldsQueryVariables>, 'query'>;
+
+    export const FlexFieldsComponent = (props: FlexFieldsComponentProps) => (
+      <ApolloReactComponents.Query<FlexFieldsQuery, FlexFieldsQueryVariables> query={FlexFieldsDocument} {...props} />
+    );
+    
+export type FlexFieldsProps<TChildProps = {}> = ApolloReactHoc.DataProps<FlexFieldsQuery, FlexFieldsQueryVariables> & TChildProps;
+export function withFlexFields<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  FlexFieldsQuery,
+  FlexFieldsQueryVariables,
+  FlexFieldsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, FlexFieldsQuery, FlexFieldsQueryVariables, FlexFieldsProps<TChildProps>>(FlexFieldsDocument, {
+      alias: 'flexFields',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useFlexFieldsQuery__
+ *
+ * To run a query within a React component, call `useFlexFieldsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFlexFieldsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFlexFieldsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useFlexFieldsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<FlexFieldsQuery, FlexFieldsQueryVariables>) {
+        return ApolloReactHooks.useQuery<FlexFieldsQuery, FlexFieldsQueryVariables>(FlexFieldsDocument, baseOptions);
+      }
+export function useFlexFieldsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<FlexFieldsQuery, FlexFieldsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<FlexFieldsQuery, FlexFieldsQueryVariables>(FlexFieldsDocument, baseOptions);
+        }
+export type FlexFieldsQueryHookResult = ReturnType<typeof useFlexFieldsQuery>;
+export type FlexFieldsLazyQueryHookResult = ReturnType<typeof useFlexFieldsLazyQuery>;
+export type FlexFieldsQueryResult = ApolloReactCommon.QueryResult<FlexFieldsQuery, FlexFieldsQueryVariables>;
 export const GoldenRecordByTargetingCriteriaDocument = gql`
     query GoldenRecordByTargetingCriteria($targetingCriteria: TargetingCriteriaObjectType!, $first: Int, $after: String, $before: String, $last: Int, $orderBy: String) {
   goldenRecordByTargetingCriteria(targetingCriteria: $targetingCriteria, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy) {
