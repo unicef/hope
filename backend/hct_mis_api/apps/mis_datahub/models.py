@@ -44,6 +44,7 @@ class Household(SessionModel):
         "mis_datahub.Individual",
         on_delete=models.CASCADE,
         related_name="collector_households",
+        null=True
     )
     address = models.CharField(max_length=255, null=True)
     admin1 = models.CharField(max_length=255, null=True)
