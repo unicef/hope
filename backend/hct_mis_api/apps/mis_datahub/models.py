@@ -1,3 +1,5 @@
+import uuid
+
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django_countries.fields import CountryField
@@ -38,7 +40,13 @@ class Household(SessionModel):
         "mis_datahub.Individual",
         db_column="focal_point_mis_id",
         on_delete=models.CASCADE,
-        related_name="heading_household",
+        related_name="heading_households",
+    )
+    alternative_collector = models.ForeignKey(
+        "mis_datahub.Individual",
+        on_delete=models.CASCADE,
+        related_name="collector_households",
+        null=True,
     )
     address = models.CharField(max_length=255, null=True)
     admin1 = models.CharField(max_length=255, null=True)
@@ -129,21 +137,21 @@ class TargetPopulationEntry(SessionModel):
 
 
 class Program(SessionModel):
+    STATUS_NOT_STARTED = "NOT_STARTED"
+    STATUS_STARTED = "STARTED"
+    STATUS_COMPLETE = "COMPLETE"
+    SCOPE_FOR_PARTNERS = "FOR_PARTNERS"
+    SCOPE_UNICEF = "UNICEF"
+    SCOPE_CHOICE = (
+        (SCOPE_FOR_PARTNERS, _("For partners")),
+        (SCOPE_UNICEF, _("Unicef")),
+    )
     mis_id = models.UUIDField(primary_key=True,)
     business_area = models.CharField(max_length=20)
-    STATUS_CHOICE = (
-        ("NOT_STARTED", _("NOT_STARTED")),
-        ("STARTED", _("STARTED")),
-        ("COMPLETE", _("COMPLETE")),
-    )
-    SCOPE_CHOICE = (
-        ("FOR_PARTNERS", _("For partners")),
-        ("UNICEF", _("Unicef")),
-    )
     ca_id = models.CharField(max_length=255)
     ca_hash_id = models.CharField(max_length=255)
     programme_name = models.CharField(max_length=255)
-    scope = models.PositiveIntegerField()
+    scope = models.CharField(choices=SCOPE_CHOICE, max_length=50)
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
     description = models.CharField(max_length=255, null=True)

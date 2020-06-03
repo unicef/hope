@@ -16,8 +16,7 @@ from model_utils import Choices
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
 
-from utils.models import TimeStampedUUIDModel
-
+from utils.models import TimeStampedUUIDModel, AbstractSyncable
 
 RESIDENCE_STATUS_CHOICE = (
     ("REFUGEE", _("Refugee")),
@@ -70,25 +69,33 @@ RELATIONSHIP_CHOICE = (
     ("NEPHEW_NIECE", "Nephew / Niece"),
     ("COUSIN", "Cousin"),
 )
+ROLE_PRIMARY = "PRIMARY"
+ROLE_ALTERNATE = "ALTERNATE"
+ROLE_NO_ROLE = "NO_ROLE"
 ROLE_CHOICE = (
-    ("PRIMARY", "Primary collector"),
-    ("ALTERNATE", "Alternate collector"),
-    ("NO_ROLE", "None"),
+    (ROLE_PRIMARY, "Primary collector"),
+    (ROLE_ALTERNATE, "Alternate collector"),
+    (ROLE_NO_ROLE, "None"),
 )
+IDENTIFICATION_TYPE_BIRTH_CERTIFICATE = "BIRTH_CERTIFICATE"
+IDENTIFICATION_TYPE_DRIVERS_LICENSE = "DRIVERS_LICENSE"
+IDENTIFICATION_TYPE_NATIONAL_ID = "NATIONAL_ID"
+IDENTIFICATION_TYPE_NATIONAL_PASSPORT = "NATIONAL_PASSPORT"
+IDENTIFICATION_TYPE_ELECTORAL_CARD = "ELECTORAL_CARD"
+IDENTIFICATION_TYPE_OTHER = "OTHER"
 IDENTIFICATION_TYPE_CHOICE = (
-    ("BIRTH_CERTIFICATE", _("Birth Certificate")),
-    ("DRIVERS_LICENSE", _("Driver's License")),
-    ("NATIONAL_ID", _("National ID")),
-    ("NATIONAL_PASSPORT", _("National Passport")),
-    ("ELECTORAL_CARD", _("Electoral Card")),
-    ("OTHER", _("Other")),
+    (IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, _("Birth Certificate")),
+    (IDENTIFICATION_TYPE_DRIVERS_LICENSE, _("Driver's License")),
+    (IDENTIFICATION_TYPE_NATIONAL_ID, _("National ID")),
+    (IDENTIFICATION_TYPE_NATIONAL_PASSPORT, _("National Passport")),
+    (IDENTIFICATION_TYPE_ELECTORAL_CARD, _("Electoral Card")),
+    (IDENTIFICATION_TYPE_OTHER, _("Other")),
 )
 
 INDIVIDUAL_HOUSEHOLD_STATUS = (("ACTIVE", "Active"), ("INACTIVE", "Inactive"))
 
 
-class Household(TimeStampedUUIDModel):
-
+class Household(TimeStampedUUIDModel, AbstractSyncable):
     status = models.CharField(
         max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default="ACTIVE"
     )
@@ -234,7 +241,7 @@ class IndividualIdentity(models.Model):
         return f"{self.agency} {self.individual} {self.document_number}"
 
 
-class Individual(TimeStampedUUIDModel):
+class Individual(TimeStampedUUIDModel, AbstractSyncable):
     status = models.CharField(
         max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default="ACTIVE"
     )

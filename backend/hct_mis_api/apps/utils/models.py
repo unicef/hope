@@ -75,3 +75,10 @@ class AbstractSession(models.Model):
 
     class Meta:
         abstract = True
+
+
+class AbstractSyncable(models.Model):
+    last_sync_at = models.DateTimeField(null=True)
+
+    class Meta:
+        abstract = True
