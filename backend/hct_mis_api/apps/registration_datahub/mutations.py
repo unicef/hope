@@ -302,7 +302,11 @@ class SaveKoboProjectImportDataMutation(
 
         submissions = kobo_api.get_project_submissions(uid)
 
-        errors = cls.validate(submissions=submissions)
+        business_area = BusinessArea.objects.get(slug=business_area_slug)
+
+        errors = cls.validate(
+            submissions=submissions, business_area_name=business_area.name
+        )
 
         if errors:
             errors.sort(key=operator.itemgetter("header"))
