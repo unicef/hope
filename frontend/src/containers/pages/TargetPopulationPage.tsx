@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
-import { Button } from '@material-ui/core';
+import { Button, IconButton } from '@material-ui/core';
+import { Info } from '@material-ui/icons';
 import { useDebounce } from '../../hooks/useDebounce';
 import { PageHeader } from '../../components/PageHeader';
 import { TargetPopulationFilters } from '../../components/TargetPopulation/TargetPopulationFilters';
 import { TargetPopulationTable } from '../tables/TargetPopulationTable';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { TargetingInfoDialog } from '../dialogs/targetPopulation/TargetingInfoDialog';
 
 const Container = styled.div`
   && {
@@ -29,6 +31,7 @@ export function TargetPopulationPage(): React.ReactElement {
     name: '',
     status: '',
   });
+  const [isInfoOpen, toggleInfo] = useState(false);
   const debouncedFilter = useDebounce(filter, 500);
 
   const redirectToCreate = (): void => {
@@ -39,13 +42,19 @@ export function TargetPopulationPage(): React.ReactElement {
   return (
     <div>
       <PageHeader title={t('Targeting')}>
-        <Button
-          variant='contained'
-          color='primary'
-          onClick={() => redirectToCreate()}
-        >
-          Create new
-        </Button>
+        <>
+          <IconButton onClick={() => toggleInfo(true)} color="primary" aria-label="Targeting Information">
+            <Info />
+          </IconButton>
+          <TargetingInfoDialog open={isInfoOpen} setOpen={toggleInfo}/>
+          <Button
+            variant='contained'
+            color='primary'
+            onClick={() => redirectToCreate()}
+          >
+            Create new
+          </Button>
+        </>
       </PageHeader>
       <TargetPopulationFilters
         //targetPopulations={targetPopulations as TargetPopulationNode[]}
