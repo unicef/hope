@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.db.models import Q, F
 
 from core.utils import nested_getattr
@@ -57,38 +58,48 @@ class SendTPToDatahubTask:
             status=TargetPopulation.STATUS_FINALIZED, sent_to_datahub=False
         )
         for target_population in target_populations:
-            self.send_target_population(target_population)
+            self.send_tp(target_population)
 
+    @transaction.atomic(using="default")
+    @transaction.atomic(using="cash_assist_datahub_mis")
     def send_tp(self, target_population):
         households_to_bulk_create = []
         individuals_to_bulk_create = []
         tp_entries_to_bulk_create = []
-
+        dh_session = dh_mis_models.Session(
+            source=dh_mis_models.Session.SOURCE_MIS,
+            status=dh_mis_models.Session.STATUS_READY,
+        )
+        dh_session.save()
         target_population_selections = HouseholdSelection.objects.filter(
             target_population__id=target_population.id, final=True
         )
         households = target_population.households.filter(
-            Q(last_sync_at_lte__is_null=True)
-            | Q(last_sync_at_lte=F("updated_at"))
+            Q(last_sync_at__lte__is_null=True)
+            | Q(last_sync_at__lte=F("updated_at"))
         )
         # individuals = Individual.objects.filter(
         #     household__id__in=target_population.households.values_list(
         #         "id", flat=True
         #     )
         # ).filter(
-        #     Q(last_sync_at_lte__is_null=True)
-        #     | Q(last_sync_at_lte=F("updated_at"))
+        #     Q(last_sync_at__lte__is_null=True)
+        #     | Q(last_sync_at__lte=F("updated_at"))
         # )
         program = target_population.program
         dh_program = self.send_program(program)
+        dh_program.session_id = dh_session
         dh_program.save()
         dh_target = self.send_target_population(target_population, dh_program)
+        dh_target.session_id = dh_session
         dh_target.save()
         for household in households:
             dh_household = self.send_household(household)
+            dh_household.session_id = dh_session
             households_to_bulk_create.append(dh_household)
             hoh = household.head_of_household
             hoh_dh = self.send_individual(hoh, dh_household)
+            hoh_dh.session_id = dh_session
             individuals_to_bulk_create.append(hoh_dh)
             alternative_collector = household.individuals.filter(
                 role=ROLE_ALTERNATE
@@ -97,9 +108,11 @@ class SendTPToDatahubTask:
                 alternative_collector_dh = self.send_individual(
                     alternative_collector, dh_household
                 )
+                alternative_collector_dh.session_id = dh_session
                 individuals_to_bulk_create.append(alternative_collector_dh)
         for selection in target_population_selections:
             dh_entry = self.send_target_entry(selection)
+            dh_entry.session_id = dh_session
             tp_entries_to_bulk_create.append(dh_entry)
         dh_mis_models.Household.objects.bulk_create(households_to_bulk_create)
         dh_mis_models.Individual.objects.bulk_create(individuals_to_bulk_create)
@@ -115,14 +128,14 @@ class SendTPToDatahubTask:
 
     def send_program(self, program):
         dh_program_args = self.build_arg_dict(
-            program, SendTPToDatahub.MAPPING_PROGRAM_DICT
+            program, SendTPToDatahubTask.MAPPING_PROGRAM_DICT
         )
         dh_program = dh_mis_models.Program(**dh_program_args)
         return dh_program
 
     def send_target_population(self, target_population, dh_program):
         dh_tp_args = self.build_arg_dict(
-            target_population, SendTPToDatahub.MAPPING_TP_DICT
+            target_population, SendTPToDatahubTask.MAPPING_TP_DICT
         )
 
         dh_target = dh_mis_models.TargetPopulation(**dh_tp_args)
@@ -131,7 +144,7 @@ class SendTPToDatahubTask:
 
     def send_individual(self, individual, dh_household):
         dh_individual_args = self.build_arg_dict(
-            individual, SendTPToDatahub.MAPPING_INDIVIDUAL_DICT
+            individual, SendTPToDatahubTask.MAPPING_INDIVIDUAL_DICT
         )
         dh_individual = dh_mis_models.Individual(**dh_individual_args)
         dh_individual.household = dh_household
@@ -139,7 +152,7 @@ class SendTPToDatahubTask:
 
     def send_household(self, household):
         dh_household_args = self.build_arg_dict(
-            household, SendTPToDatahub.MAPPING_HOUSEHOLD_DICT
+            household, SendTPToDatahubTask.MAPPING_HOUSEHOLD_DICT
         )
         dh_household = dh_mis_models.Household(**dh_household_args)
         national_id_document = household.head_of_household.documents.filter(

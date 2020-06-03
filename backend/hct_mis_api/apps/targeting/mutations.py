@@ -10,6 +10,7 @@ from core.models import BusinessArea
 from core.permissions import is_authenticated
 from core.utils import decode_id_string
 from household.models import Household
+from mis_datahub.tasks.send_tp_to_datahub import SendTPToDatahubTask
 from program.models import Program
 from targeting.models import (
     TargetPopulation,
@@ -250,6 +251,7 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
                 target_population=target_population,
             ).update(final=False)
         target_population.save()
+        SendTPToDatahubTask().execute()
         return cls(target_population=target_population)
 
 
