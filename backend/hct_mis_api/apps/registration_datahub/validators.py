@@ -39,7 +39,7 @@ class ImportDataValidator(BaseValidator):
 
         errors_list = []
         for method in validate_methods:
-            errors = method(cls, *args, **kwargs)
+            errors = method(*args, **kwargs)
             errors_list.extend(errors)
 
         errors_list.sort(key=itemgetter("header"))
