@@ -61,8 +61,6 @@ services:
       - db:/data/postgres
     env_file:
       - .env
-    ports:
-      - "5433:5432"
 
   cash_assist_datahub_db:
     image: mdillon/postgis:9.5-alpine
@@ -70,6 +68,8 @@ services:
       - db_ca:/data/postgres
     env_file:
       - .env
+    ports:
+      - "5433:5432"
 
   registration_datahub_db:
     image: mdillon/postgis:9.5-alpine
