@@ -59,13 +59,13 @@ def get_field_name(field_name: str) -> str:
 
 
 def reduce_assets_list(
-    assets: list, only_deployed: bool = False, *args, **kwarg
+    assets: list, deployed: bool = True, *args, **kwarg
 ) -> list:
-    if only_deployed:
+    if deployed:
         return [
             reduce_asset(asset)
             for asset in assets
-            if asset["has_deployment"] and asset["deployment_active"]
+            if asset["has_deployment"] and asset["deployment__active"]
         ]
     return [reduce_asset(asset) for asset in assets]
 
