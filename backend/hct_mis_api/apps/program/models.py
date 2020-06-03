@@ -56,13 +56,13 @@ class Program(TimeStampedUUIDModel):
         (WASH, _("WASH")),
     )
 
-    FULL = "FULL"
-    PARTIAL = "PARTIAL"
-    NO_INTEGRATION = "NO_INTEGRATION"
+
+    SCOPE_FOR_PARTNERS = "FOR_PARTNERS"
+    SCOPE_UNICEF = "UNICEF"
+
     SCOPE_CHOICE = (
-        (FULL, _("Full")),
-        (PARTIAL, _("Partial")),
-        (NO_INTEGRATION, _("No Integration")),
+        (SCOPE_FOR_PARTNERS, _("For partners")),
+        (SCOPE_UNICEF, _("Unicef")),
     )
 
     name = models.CharField(
