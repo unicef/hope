@@ -1,3 +1,5 @@
+import uuid
+
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django_countries.fields import CountryField
@@ -44,7 +46,7 @@ class Household(SessionModel):
         "mis_datahub.Individual",
         on_delete=models.CASCADE,
         related_name="collector_households",
-        null=True
+        null=True,
     )
     address = models.CharField(max_length=255, null=True)
     admin1 = models.CharField(max_length=255, null=True)
@@ -140,11 +142,6 @@ class Program(SessionModel):
     STATUS_COMPLETE = "COMPLETE"
     SCOPE_FOR_PARTNERS = "FOR_PARTNERS"
     SCOPE_UNICEF = "UNICEF"
-    STATUS_CHOICE = (
-        (STATUS_NOT_STARTED, _("NOT_STARTED")),
-        (STATUS_STARTED, _("STARTED")),
-        (STATUS_COMPLETE, _("COMPLETE")),
-    )
     SCOPE_CHOICE = (
         (SCOPE_FOR_PARTNERS, _("For partners")),
         (SCOPE_UNICEF, _("Unicef")),
@@ -154,7 +151,7 @@ class Program(SessionModel):
     ca_id = models.CharField(max_length=255)
     ca_hash_id = models.CharField(max_length=255)
     programme_name = models.CharField(max_length=255)
-    scope = models.PositiveIntegerField()
+    scope = models.CharField(choices=SCOPE_CHOICE, max_length=50)
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
     description = models.CharField(max_length=255, null=True)

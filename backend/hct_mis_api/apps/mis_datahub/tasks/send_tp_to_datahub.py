@@ -31,7 +31,7 @@ class SendTPToDatahubTask:
         "mis_id": "id",
         "status": "status",
         "household_size": "size",
-        "focal_point": "head_of_household.id",
+        "focal_point_id": "head_of_household.id",
         "address": "address",
         "admin1": "admin_area.title",
         "admin2": "admin_area.parent.title",
@@ -45,8 +45,8 @@ class SendTPToDatahubTask:
         "given_name": "given_name",
         "middle_name": "middle_name",
         "sex": "sex",
-        "date_of_birth": "date_of_birth",
-        "estimated_date_of_birth": "estimated_date_of_birth",
+        "date_of_birth": "birth_date",
+        "estimated_date_of_birth": "estimated_birth_date",
         "relationship": "relationship",
         "role": "role",
         "marital_status": "marital_status",
@@ -75,17 +75,17 @@ class SendTPToDatahubTask:
             target_population__id=target_population.id, final=True
         )
         households = target_population.households.filter(
-            Q(last_sync_at__lte__is_null=True)
-            | Q(last_sync_at__lte=F("updated_at"))
+            Q(last_sync_at__isnull=True) | Q(last_sync_at__lte=F("updated_at"))
         )
         # individuals = Individual.objects.filter(
         #     household__id__in=target_population.households.values_list(
         #         "id", flat=True
         #     )
         # ).filter(
-        #     Q(last_sync_at__lte__is_null=True)
+        #     Q(last_sync_at__isnull=True)
         #     | Q(last_sync_at__lte=F("updated_at"))
         # )
+
         program = target_population.program
         dh_program = self.send_program(program)
         dh_program.session_id = dh_session
@@ -119,6 +119,8 @@ class SendTPToDatahubTask:
         dh_mis_models.TargetPopulationEntry.objects.bulk_create(
             tp_entries_to_bulk_create
         )
+        target_population.sent_to_datahub = True
+        target_population.save()
 
     def build_arg_dict(self, model_object, mapping_dict):
         args = {}
@@ -162,15 +164,14 @@ class SendTPToDatahubTask:
             dh_household.government_form_number = (
                 national_id_document.document_number
             )
-        households_identity = household.households_identities.first()
+        households_identity = household.identities.first()
         if households_identity is not None:
             dh_household.agency_id = households_identity.document_number
-        dh_household.save()
         return dh_household
 
     def send_target_entry(self, target_population_selection):
         return dh_mis_models.TargetPopulationEntry(
-            target_population=target_population_selection.target_population.id,
-            household=target_population_selection.houshehold.id,
+            target_population_id=target_population_selection.target_population.id,
+            household_id=target_population_selection.household.id,
             vulnerability_score=target_population_selection.vulnerability_score,
         )
