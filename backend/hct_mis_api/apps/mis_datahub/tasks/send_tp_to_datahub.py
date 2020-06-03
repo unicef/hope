@@ -10,7 +10,7 @@ from targeting.models import TargetPopulation, HouseholdSelection
 from mis_datahub import models as dh_mis_models
 
 
-class SendTPToDatahub:
+class SendTPToDatahubTask:
     MAPPING_TP_DICT = {
         "mis_id": "id",
         "name": "name",
@@ -52,14 +52,20 @@ class SendTPToDatahub:
         "phone_number": "phone_number",
     }
 
-    def execute(self, tp_id):
+    def execute(self):
+        target_populations = TargetPopulation.objects.filter(
+            status=TargetPopulation.STATUS_FINALIZED, sent_to_datahub=False
+        )
+        for target_population in target_populations:
+            self.send_target_population(target_population)
+
+    def send_tp(self, target_population):
         households_to_bulk_create = []
         individuals_to_bulk_create = []
         tp_entries_to_bulk_create = []
 
-        target_population = TargetPopulation.objects.get(id=tp_id)
         target_population_selections = HouseholdSelection.objects.filter(
-            target_population__id=tp_id, final=True
+            target_population__id=target_population.id, final=True
         )
         households = target_population.households.filter(
             Q(last_sync_at_lte__is_null=True)
