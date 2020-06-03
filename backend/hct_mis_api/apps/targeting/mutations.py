@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
 from core import utils
+from core.airflow_api import AirflowApi
 from core.models import BusinessArea
 from core.permissions import is_authenticated
 from core.utils import decode_id_string
@@ -251,7 +252,9 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
                 target_population=target_population,
             ).update(final=False)
         target_population.save()
-        SendTPToDatahubTask().execute()
+        AirflowApi.start_dag(
+            dag_id="SendTargetPopulation",
+        )
         return cls(target_population=target_population)
 
 
