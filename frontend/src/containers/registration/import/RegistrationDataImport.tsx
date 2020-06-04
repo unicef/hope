@@ -5,24 +5,16 @@ import * as Yup from 'yup';
 import { useTranslation } from 'react-i18next';
 import {
   Button,
-  CardActions,
-  Collapse,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   FormControl,
-  IconButton,
   InputLabel,
   MenuItem,
   Select,
   Typography,
 } from '@material-ui/core';
-import ExpandMoreRoundedIcon from '@material-ui/icons/ExpandMoreRounded';
-import ExpandLessRoundedIcon from '@material-ui/icons/ExpandLessRounded';
-
-import Clipboard from 'react-clipboard.js';
-
 import ExitToAppRoundedIcon from '@material-ui/icons/ExitToAppRounded';
 import { useDropzone } from 'react-dropzone';
 import { Field, Form, Formik } from 'formik';
@@ -42,7 +34,8 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { FormikTextField } from '../../../shared/Formik/FormikTextField';
 import { LoadingComponent } from '../../../components/LoadingComponent';
-import { FormikTagsSelectField } from '../../../shared/Formik/FormikTagsSelectField';
+import { ErrorsKobo } from './errors/KoboErrors';
+import { Errors } from './errors/PlainErrors';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -90,15 +83,6 @@ const StyledDialogFooter = styled(DialogFooter)`
     justify-content: space-between;
   }
 `;
-const Error = styled.div`
-  color: ${({ theme }) => theme.palette.error.dark};
-`;
-const ErrorsContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-`;
 
 function DropzoneField({ onChange, loading }): React.ReactElement {
   const onDrop = useCallback((acceptedFiles) => {
@@ -122,68 +106,6 @@ function DropzoneField({ onChange, loading }): React.ReactElement {
   );
 }
 
-function Errors({
-  errors,
-}: {
-  errors: XlsxRowErrorNode[];
-}): React.ReactElement {
-  const [expanded, setExpanded] = useState(false);
-  if (!errors || !errors.length) {
-    return null;
-  }
-  return (
-    <>
-      <ErrorsContainer>
-        <Error>Errors</Error>
-        <IconButton
-          onClick={() => setExpanded(!expanded)}
-          aria-expanded={expanded}
-          aria-label='show more'
-        >
-          {expanded ? <ExpandLessRoundedIcon /> : <ExpandMoreRoundedIcon />}
-        </IconButton>
-      </ErrorsContainer>
-      <Collapse in={expanded} timeout='auto' unmountOnExit>
-        {errors.map((item) => (
-          <Error>
-            <strong>Row: {item.rowNumber}</strong> {item.message}
-          </Error>
-        ))}
-      </Collapse>
-    </>
-  );
-}
-function ErrorsKobo({
-  errors,
-}: {
-  errors: KoboErrorNode[];
-}): React.ReactElement {
-  const [expanded, setExpanded] = useState(false);
-  if (!errors || !errors.length) {
-    return null;
-  }
-  return (
-    <>
-      <ErrorsContainer>
-        <Error>Errors</Error>
-        <IconButton
-          onClick={() => setExpanded(!expanded)}
-          aria-expanded={expanded}
-          aria-label='show more'
-        >
-          {expanded ? <ExpandLessRoundedIcon /> : <ExpandMoreRoundedIcon />}
-        </IconButton>
-      </ErrorsContainer>
-      <Collapse in={expanded} timeout='auto' unmountOnExit>
-        {errors.map((item) => (
-          <Error>
-            <strong>Field: {item.header}</strong> {item.message}
-          </Error>
-        ))}
-      </Collapse>
-    </>
-  );
-}
 const validationSchema = Yup.object().shape({
   name: Yup.string().required('Name Upload is required'),
 });
@@ -192,7 +114,6 @@ export function RegistrationDataImport(): React.ReactElement {
   const [open, setOpen] = useState(false);
   const [importType, setImportType] = useState();
   const [koboProject, setKoboProject] = useState();
-
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
   const [
