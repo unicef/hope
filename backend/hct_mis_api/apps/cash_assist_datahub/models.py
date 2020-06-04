@@ -13,7 +13,7 @@ class Session(AbstractSession):
 
 
 class SessionModel(models.Model):
-    session_id = models.ForeignKey("Session", on_delete=models.CASCADE)
+    session = models.ForeignKey("Session", on_delete=models.CASCADE)
 
     class Meta:
         abstract = True
@@ -155,11 +155,7 @@ class PaymentRecord(SessionModel):
         validators=[MinValueValidator(Decimal("0.01"))],
     )
     delivery_date = models.DateTimeField()
-    service_provider = models.ForeignKey(
-        "ServiceProvider",
-        on_delete=models.CASCADE,
-        related_name="payment_records",
-    )
+    service_provider = models.UUIDField( )
 
 
 class ServiceProvider(SessionModel):
