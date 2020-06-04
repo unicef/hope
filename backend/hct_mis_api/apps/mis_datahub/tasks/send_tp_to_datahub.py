@@ -6,6 +6,7 @@ from household.models import (
     Individual,
     IDENTIFICATION_TYPE_NATIONAL_ID,
     ROLE_ALTERNATE,
+    ROLE_PRIMARY,
 )
 from targeting.models import TargetPopulation, HouseholdSelection
 from mis_datahub import models as dh_mis_models
@@ -89,31 +90,22 @@ class SendTPToDatahubTask:
 
         program = target_population.program
         dh_program = self.send_program(program)
-        dh_program.session_id = dh_session
+        dh_program.session = dh_session
         dh_program.save()
         dh_target = self.send_target_population(target_population, dh_program)
-        dh_target.session_id = dh_session
+        dh_target.session = dh_session
         dh_target.save()
         for household in households:
-            dh_household = self.send_household(household)
-            dh_household.session_id = dh_session
+            (dh_household, dh_individuals) = self.send_household(
+                household, dh_session
+            )
+            dh_household.session = dh_session
             households_to_bulk_create.append(dh_household)
-            hoh = household.head_of_household
-            hoh_dh = self.send_individual(hoh, dh_household)
-            hoh_dh.session_id = dh_session
-            individuals_to_bulk_create.append(hoh_dh)
-            alternative_collector = household.individuals.filter(
-                role=ROLE_ALTERNATE
-            ).first()
-            if alternative_collector is not None:
-                alternative_collector_dh = self.send_individual(
-                    alternative_collector, dh_household
-                )
-                alternative_collector_dh.session_id = dh_session
-                individuals_to_bulk_create.append(alternative_collector_dh)
+            individuals_to_bulk_create.extend(dh_individuals)
+
         for selection in target_population_selections:
             dh_entry = self.send_target_entry(selection)
-            dh_entry.session_id = dh_session
+            dh_entry.session = dh_session
             tp_entries_to_bulk_create.append(dh_entry)
         dh_mis_models.Household.objects.bulk_create(households_to_bulk_create)
         dh_mis_models.Individual.objects.bulk_create(individuals_to_bulk_create)
@@ -151,24 +143,53 @@ class SendTPToDatahubTask:
         )
         dh_individual = dh_mis_models.Individual(**dh_individual_args)
         dh_individual.household = dh_household
+
+        national_id_document = individual.documents.filter(
+            type__type=IDENTIFICATION_TYPE_NATIONAL_ID
+        ).first()
+        dh_individual.national_id_number = national_id_document.document_number
+        dh_individual.unchr_id = self.get_unhcr_individual_id(individual)
         return dh_individual
 
-    def send_household(self, household):
+    def send_household(self, household, dh_session):
         dh_household_args = self.build_arg_dict(
             household, SendTPToDatahubTask.MAPPING_HOUSEHOLD_DICT
         )
         dh_household = dh_mis_models.Household(**dh_household_args)
-        national_id_document = household.head_of_household.documents.filter(
-            type__type=IDENTIFICATION_TYPE_NATIONAL_ID
-        ).first()
-        if national_id_document is not None:
-            dh_household.government_form_number = (
-                national_id_document.document_number
-            )
         households_identity = household.identities.filter(type="unhcr").first()
         if households_identity is not None:
             dh_household.agency_id = households_identity.document_number
-        return dh_household
+
+        head_of_household = household.head_of_household
+        individuals_to_create = []
+        dh_hoh = self.send_individual(head_of_household, dh_household)
+        dh_hoh.session = dh_session
+        individuals_to_create.append(dh_hoh)
+        primary_collector = household.individuals.filter(
+            role=ROLE_PRIMARY
+        ).first()
+        if (
+            primary_collector is not None
+            and primary_collector.id != head_of_household.id
+        ):
+            dh_primary_collector = self.send_individual(
+                primary_collector, dh_household
+            )
+            dh_primary_collector.session = dh_session
+            individuals_to_create.append(dh_primary_collector)
+        alternative_collector = household.individuals.filter(
+            role=ROLE_ALTERNATE
+        ).first()
+        if (
+            alternative_collector is not None
+            and alternative_collector.id != head_of_household.id
+        ):
+            dh_alternative_collector = self.send_individual(
+                primary_collector, dh_household
+            )
+            dh_alternative_collector.session = dh_session
+            individuals_to_create.append(dh_alternative_collector)
+        return dh_household, individuals_to_create
 
     def send_target_entry(self, target_population_selection):
         return dh_mis_models.TargetPopulationEntry(
@@ -176,3 +197,9 @@ class SendTPToDatahubTask:
             household_id=target_population_selection.household.id,
             vulnerability_score=target_population_selection.vulnerability_score,
         )
+
+    def get_unhcr_individual_id(self, individual):
+        identity = individual.identities.filter(agency__type="unhcr").first()
+        if identity is not None:
+            return identity.number
+        return None

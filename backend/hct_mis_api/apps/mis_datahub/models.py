@@ -31,17 +31,8 @@ class Household(SessionModel):
         max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default="ACTIVE"
     )
     household_size = models.PositiveIntegerField()
-    head_of_household_national_id_number = models.CharField(
-        max_length=255, null=True
-    )
     # registration household id
     form_number = models.CharField(max_length=255, null=True)
-    head_od_household_mis_id = models.UUIDField()
-    primary_collector_mis_id = models.UUIDField(null=True)
-    alternative_collector_mis_id = models.UUIDField(null=True,)
-    head_od_household_unhcr_id = models.CharField(max_length=255, null=True)
-    primary_collector_unhcr_id = models.CharField(max_length=255, null=True)
-    alternative_collector_unhcr_id = models.CharField(max_length=255, null=True)
     address = models.CharField(max_length=255, null=True)
     admin1 = models.CharField(max_length=255, null=True)
     admin2 = models.CharField(max_length=255, null=True)
@@ -60,6 +51,9 @@ class Individual(SessionModel):
     SEX_CHOICE = (
         ("MALE", _("Male")),
         ("FEMALE", _("Female")),
+    )
+    national_id_number = models.CharField(
+        max_length=255, null=True
     )
     full_name = models.CharField(max_length=255)
     family_name = models.CharField(max_length=255, null=True)
