@@ -224,7 +224,7 @@ class FieldAttributeNode(graphene.ObjectType):
 
 
 class KoboAssetObject(graphene.ObjectType):
-    uid = String()
+    id = String()
     name = String()
     sector = String()
     country = String()

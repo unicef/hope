@@ -39,7 +39,7 @@ def reduce_asset(asset: dict, *args, **kwargs) -> dict:
             country = settings["country"].get("label")
 
     return {
-        "uid": asset["uid"],
+        "id": asset["uid"],
         "name": asset["name"],
         "sector": sector,
         "country": country,
