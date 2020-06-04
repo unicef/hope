@@ -19,7 +19,7 @@ class SendTPToDatahubTask:
     }
     MAPPING_PROGRAM_DICT = {
         "mis_id": "id",
-        "programme_name": "name",
+        "name": "name",
         "business_area": "business_area.slug",
         "scope": "scope",
         "start_date": "start_date",
@@ -31,7 +31,7 @@ class SendTPToDatahubTask:
         "mis_id": "id",
         "status": "status",
         "household_size": "size",
-        "focal_point_id": "head_of_household.id",
+        "head_of_household_mis_id": "head_of_household.id",
         "address": "address",
         "admin1": "admin_area.title",
         "admin2": "admin_area.parent.title",
@@ -51,6 +51,7 @@ class SendTPToDatahubTask:
         "role": "role",
         "marital_status": "marital_status",
         "phone_number": "phone_number",
+        "household_mis_id": "household.id",
     }
 
     def execute(self):
@@ -164,7 +165,7 @@ class SendTPToDatahubTask:
             dh_household.government_form_number = (
                 national_id_document.document_number
             )
-        households_identity = household.identities.first()
+        households_identity = household.identities.filter(type="unhcr").first()
         if households_identity is not None:
             dh_household.agency_id = households_identity.document_number
         return dh_household
