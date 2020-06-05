@@ -80,7 +80,7 @@ class RegistrationXlsxImportMutationInput(graphene.InputObjectType):
 
 
 class RegistrationKoboImportMutationInput(graphene.InputObjectType):
-    uid = graphene.String()
+    import_data_id = graphene.String()
     name = graphene.String()
     business_area_slug = graphene.String()
 
@@ -302,7 +302,11 @@ class SaveKoboProjectImportDataMutation(
 
         submissions = kobo_api.get_project_submissions(uid)
 
-        errors = cls.validate(submissions=submissions)
+        business_area = BusinessArea.objects.get(slug=business_area_slug)
+
+        errors = cls.validate(
+            submissions=submissions, business_area_name=business_area.name
+        )
 
         if errors:
             errors.sort(key=operator.itemgetter("header"))
