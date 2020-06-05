@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import {
   Button,
-  Dialog,
-  DialogActions,
   DialogContent,
   DialogTitle,
   Typography,
@@ -13,6 +11,8 @@ import {
   useUnapproveRdiMutation,
 } from '../../../__generated__/graphql';
 import { useSnackbar } from '../../../hooks/useSnackBar';
+import { Dialog } from '../../dialogs/Dialog';
+import { DialogActions } from '../../dialogs/DialogActions';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -53,7 +53,12 @@ export function UnapproveRegistrationDataImportDialog({
   };
   return (
     <span>
-      <Button color='primary' variant='outlined' onClick={() => setOpen(true)}>
+      <Button
+        color='primary'
+        variant='outlined'
+        onClick={() => setOpen(true)}
+        data-cy='button-unapprove'
+      >
         Unapprove
       </Button>
       <Dialog
@@ -83,6 +88,7 @@ export function UnapproveRegistrationDataImportDialog({
               color='primary'
               variant='contained'
               onClick={approve}
+              data-cy='button-unapprove'
             >
               UNAPPROVE
             </Button>

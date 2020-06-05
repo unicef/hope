@@ -57,7 +57,7 @@ interface Props {
   children?: React.ReactElement;
   breadCrumbs?: BreadCrumbsItem[];
   tabs?: React.ReactElement;
-  hasInputComponent?: boolean
+  hasInputComponent?: boolean;
 }
 
 export function PageHeader({
@@ -65,11 +65,11 @@ export function PageHeader({
   children,
   breadCrumbs = null,
   tabs = null,
-  hasInputComponent
+  hasInputComponent,
 }: Props): React.ReactElement {
   const history = useHistory();
   return (
-    <Wrapper>
+    <Wrapper data-cy='page-header-container'>
       <Container>
         {breadCrumbs && breadCrumbs.length !== 0 ? (
           <BackButton
