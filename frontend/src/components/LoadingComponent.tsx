@@ -24,7 +24,7 @@ export function LoadingComponent({
     return null;
   }
   return (
-    <Container absolute={absolute}>
+    <Container absolute={absolute} data-cy='loading-container'>
       <CircularProgress />
     </Container>
   );

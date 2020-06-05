@@ -3,7 +3,6 @@ import styled from 'styled-components';
 import {
   Button,
   Dialog,
-  DialogActions,
   DialogContent,
   DialogTitle,
   Typography,
@@ -19,6 +18,7 @@ import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/AllPrograms';
 import { programCompare } from '../../../utils/utils';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
+import { DialogActions } from '../DialogActions';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -80,15 +80,23 @@ export function ActivateProgram({
     if (!response.errors && response.data.updateProgram) {
       showMessage('Programme activated.', {
         pathname: `/${businessArea}/programs/${response.data.updateProgram.program.id}`,
+        dataCy: 'snackbar-program-activate-success',
       });
       setOpen(false);
     } else {
-      showMessage('Programme activate action failed.');
+      showMessage('Programme activate action failed.', {
+        dataCy: 'snackbar-program-activate-failure',
+      });
     }
   };
   return (
     <span>
-      <Button variant='contained' color='primary' onClick={() => setOpen(true)}>
+      <Button
+        variant='contained'
+        color='primary'
+        onClick={() => setOpen(true)}
+        data-cy='button-activate-program'
+      >
         Activate
       </Button>
       <Dialog
@@ -116,6 +124,7 @@ export function ActivateProgram({
               color='primary'
               variant='contained'
               onClick={activateProgram}
+              data-cy='button-activate-program'
             >
               ACTIVATE
             </Button>
