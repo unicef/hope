@@ -3,7 +3,6 @@ import styled from 'styled-components';
 import {
   Button,
   Dialog,
-  DialogActions,
   DialogContent,
   DialogTitle,
   Typography,
@@ -19,6 +18,7 @@ import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/AllPrograms';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { programCompare } from '../../../utils/utils';
 import { useSnackbar } from '../../../hooks/useSnackBar';
+import { DialogActions } from '../DialogActions';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -80,15 +80,22 @@ export function FinishProgram({
     if (!response.errors && response.data.updateProgram) {
       showMessage('Programme finished.', {
         pathname: `/${businessArea}/programs/${response.data.updateProgram.program.id}`,
+        dataCy: 'snackbar-program-finish-success',
       });
       setOpen(false);
     } else {
-      showMessage('Programme finish action failed.');
+      showMessage('Programme finish action failed.', {
+        dataCy: 'snackbar-program-finish-failure',
+      });
     }
   };
   return (
     <span>
-      <Button color='primary' onClick={() => setOpen(true)}>
+      <Button
+        color='primary'
+        onClick={() => setOpen(true)}
+        data-cy='button-finish-program'
+      >
         FINISH PROGRAM
       </Button>
       <Dialog
@@ -116,6 +123,7 @@ export function FinishProgram({
               color='primary'
               variant='contained'
               onClick={finishProgram}
+              data-cy='button-finish-program'
             >
               FINISH
             </Button>
