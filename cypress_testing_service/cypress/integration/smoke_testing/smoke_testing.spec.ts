@@ -1,4 +1,5 @@
 import { When, Then, Before } from 'cypress-cucumber-preprocessor/steps';
+import '../../support/before';
 
 Before(() => {
   // workaround due to app code issue:

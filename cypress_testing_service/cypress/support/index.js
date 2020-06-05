@@ -9,4 +9,3 @@
 import 'cypress-file-upload';
 import './commands';
 import './chai';
-import './before';

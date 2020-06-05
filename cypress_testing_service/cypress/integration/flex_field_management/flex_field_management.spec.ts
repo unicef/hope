@@ -1,4 +1,5 @@
 import { When, Then, And } from 'cypress-cucumber-preprocessor/steps';
+import '../../support/before';
 
 const importXlsDocument = (type) => {
   const path = 'documents/flexibleAttributes';

@@ -1,5 +1,6 @@
 import { Given, When, Then, Before } from 'cypress-cucumber-preprocessor/steps';
 import { overrideScrollingStrategy } from '../../support/utils';
+import '../../support/before';
 
 Before(() => {
   overrideScrollingStrategy();

@@ -8,6 +8,7 @@ import {
 import { uuid } from 'uuidv4';
 import { api } from '../../support/api';
 import { overrideScrollingStrategy } from '../../support/utils';
+import '../../support/before';
 
 let state: any = {
   createdProgram: {},
