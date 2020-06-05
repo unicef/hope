@@ -14,6 +14,7 @@ export interface HeadCell<T> {
   label: string;
   numeric: boolean;
   weight?: number;
+  dataCy?: string;
 }
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -93,6 +94,7 @@ export function EnhancedTableHead<T>(
             align={headCell.numeric ? 'right' : 'left'}
             padding={headCell.disablePadding ? 'none' : 'default'}
             sortDirection={orderBy === headCell.id ? order : false}
+            data-cy={headCell.dataCy}
           >
             {allowSort ? (
               <TableSortLabelStyled

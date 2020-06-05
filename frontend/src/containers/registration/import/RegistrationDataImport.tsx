@@ -5,8 +5,6 @@ import * as Yup from 'yup';
 import { useTranslation } from 'react-i18next';
 import {
   Button,
-  Dialog,
-  DialogActions,
   DialogContent,
   DialogTitle,
   FormControl,
@@ -36,6 +34,8 @@ import { FormikTextField } from '../../../shared/Formik/FormikTextField';
 import { LoadingComponent } from '../../../components/LoadingComponent';
 import { ErrorsKobo } from './errors/KoboErrors';
 import { Errors } from './errors/PlainErrors';
+import { Dialog } from '../../dialogs/Dialog';
+import { DialogActions } from '../../dialogs/DialogActions';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -99,7 +99,7 @@ function DropzoneField({ onChange, loading }): React.ReactElement {
     <div>
       <DropzoneContainer {...getRootProps()} disabled={loading}>
         <LoadingComponent isLoading={loading} absolute />
-        <input {...getInputProps()} />
+        <input {...getInputProps()} data-cy='rdi-file-input' />
         {acceptedFilename || 'UPLOAD FILE'}
       </DropzoneContainer>
     </div>
@@ -146,11 +146,11 @@ export function RegistrationDataImport(): React.ReactElement {
   if (uploadData?.uploadImportDataXlsxFile?.importData) {
     counters = (
       <>
-        <div>
+        <div data-cy='import-available-households-counter'>
           {uploadData.uploadImportDataXlsxFile.importData.numberOfHouseholds}{' '}
           Households available to Import
         </div>
-        <div>
+        <div data-cy='import-available-individuals-counter'>
           {uploadData.uploadImportDataXlsxFile.importData.numberOfIndividuals}{' '}
           Individuals available to Import
         </div>
@@ -240,6 +240,7 @@ export function RegistrationDataImport(): React.ReactElement {
         color='primary'
         startIcon={<ExitToAppRoundedIcon />}
         onClick={() => setOpen(true)}
+        data-cy='button-import'
       >
         IMPORT
       </Button>
@@ -308,6 +309,12 @@ export function RegistrationDataImport(): React.ReactElement {
                     label=''
                     onChange={(e) => setImportType(e.target.value)}
                     fullWidth
+                    SelectDisplayProps={{
+                      'data-cy': 'select-import-from',
+                    }}
+                    MenuProps={{
+                      'data-cy': 'select-import-from-options',
+                    }}
                   >
                     <MenuItem key='excel' value='excel'>
                       Excel
@@ -328,12 +335,20 @@ export function RegistrationDataImport(): React.ReactElement {
                   component={FormikTextField}
                 />
               </DialogContent>
-              <StyledDialogFooter>
+              <StyledDialogFooter data-cy='dialog-actions-container'>
                 <Button
                   variant='text'
                   color='primary'
                   component='a'
                   href='/api/download-template'
+                  onClick={(event) => {
+                    /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
+                    // @ts-ignore
+                    if (window.Cypress) {
+                      event.preventDefault();
+                    }
+                  }}
+                  data-cy='a-download-template'
                 >
                   DOWNLOAD TEMPLATE
                 </Button>
@@ -352,6 +367,7 @@ export function RegistrationDataImport(): React.ReactElement {
                     onClick={() => {
                       submitForm();
                     }}
+                    data-cy='button-import'
                   >
                     {t('IMPORT')}
                   </Button>
