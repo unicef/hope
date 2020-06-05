@@ -100,7 +100,7 @@ DATABASES = {
     },
     "cash_assist_datahub_mis": {
         "ENGINE": "django.contrib.gis.db.backends.postgis",
-        "OPTIONS": {"options": "-c search_path=mis"},
+        "OPTIONS": {"options": "-c search_path=mis,public"},
         "NAME": os.getenv("POSTGRES_CASHASSIST_DATAHUB_DB"),
         "USER": os.getenv("POSTGRES_CASHASSIST_DATAHUB_USER"),
         "PASSWORD": os.getenv("POSTGRES_CASHASSIST_DATAHUB_PASSWORD"),
@@ -109,7 +109,7 @@ DATABASES = {
     },
     "cash_assist_datahub_ca": {
         "ENGINE": "django.contrib.gis.db.backends.postgis",
-        "OPTIONS": {"options": "-c search_path=ca"},
+        "OPTIONS": {"options": "-c search_path=ca,public"},
         "NAME": os.getenv("POSTGRES_CASHASSIST_DATAHUB_DB"),
         "USER": os.getenv("POSTGRES_CASHASSIST_DATAHUB_USER"),
         "PASSWORD": os.getenv("POSTGRES_CASHASSIST_DATAHUB_PASSWORD"),
@@ -118,7 +118,7 @@ DATABASES = {
     },
     "cash_assist_datahub_erp": {
         "ENGINE": "django.contrib.gis.db.backends.postgis",
-        "OPTIONS": {"options": "-c search_path=erp"},
+        "OPTIONS": {"options": "-c search_path=erp,public"},
         "NAME": os.getenv("POSTGRES_CASHASSIST_DATAHUB_DB"),
         "USER": os.getenv("POSTGRES_CASHASSIST_DATAHUB_USER"),
         "PASSWORD": os.getenv("POSTGRES_CASHASSIST_DATAHUB_PASSWORD"),
