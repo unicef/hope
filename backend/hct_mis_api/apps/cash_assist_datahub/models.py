@@ -32,9 +32,7 @@ class Programme(SessionModel):
 
 
 class CashPlan(SessionModel):
-    DISTRIBUTION_COMPLETED = (
-        "Distribution Completed"
-    )
+    DISTRIBUTION_COMPLETED = "Distribution Completed"
     DISTRIBUTION_COMPLETED_WITH_ERRORS = "Distribution Completed with Errors"
     TRANSACTION_COMPLETED = "Transaction Completed"
     TRANSACTION_COMPLETED_WITH_ERRORS = "Transaction Completed with Errors"
@@ -155,7 +153,7 @@ class PaymentRecord(SessionModel):
         validators=[MinValueValidator(Decimal("0.01"))],
     )
     delivery_date = models.DateTimeField()
-    service_provider = models.UUIDField( )
+    service_provider_ca_id = models.CharField(max_length=255)
 
 
 class ServiceProvider(SessionModel):

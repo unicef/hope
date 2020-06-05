@@ -17,6 +17,7 @@ class SendTPToDatahubTask:
         "mis_id": "id",
         "name": "name",
         "active_households": "final_list_total_households",
+        "program_mis_id": "program.id",
     }
     MAPPING_PROGRAM_DICT = {
         "mis_id": "id",
@@ -32,7 +33,6 @@ class SendTPToDatahubTask:
         "mis_id": "id",
         "status": "status",
         "household_size": "size",
-        "head_of_household_mis_id": "head_of_household.id",
         "address": "address",
         "admin1": "admin_area.title",
         "admin2": "admin_area.parent.title",
@@ -92,7 +92,7 @@ class SendTPToDatahubTask:
         dh_program = self.send_program(program)
         dh_program.session = dh_session
         dh_program.save()
-        dh_target = self.send_target_population(target_population, dh_program)
+        dh_target = self.send_target_population(target_population)
         dh_target.session = dh_session
         dh_target.save()
         for household in households:
@@ -125,16 +125,15 @@ class SendTPToDatahubTask:
         dh_program_args = self.build_arg_dict(
             program, SendTPToDatahubTask.MAPPING_PROGRAM_DICT
         )
+        print(dh_program_args)
         dh_program = dh_mis_models.Program(**dh_program_args)
         return dh_program
 
-    def send_target_population(self, target_population, dh_program):
+    def send_target_population(self, target_population):
         dh_tp_args = self.build_arg_dict(
             target_population, SendTPToDatahubTask.MAPPING_TP_DICT
         )
-
         dh_target = dh_mis_models.TargetPopulation(**dh_tp_args)
-        dh_target.program = dh_program
         return dh_target
 
     def send_individual(self, individual, dh_household):
@@ -147,7 +146,10 @@ class SendTPToDatahubTask:
         national_id_document = individual.documents.filter(
             type__type=IDENTIFICATION_TYPE_NATIONAL_ID
         ).first()
-        dh_individual.national_id_number = national_id_document.document_number
+        if national_id_document:
+            dh_individual.national_id_number = (
+                national_id_document.document_number
+            )
         dh_individual.unchr_id = self.get_unhcr_individual_id(individual)
         return dh_individual
 
@@ -156,7 +158,9 @@ class SendTPToDatahubTask:
             household, SendTPToDatahubTask.MAPPING_HOUSEHOLD_DICT
         )
         dh_household = dh_mis_models.Household(**dh_household_args)
-        households_identity = household.identities.filter(type="unhcr").first()
+        households_identity = household.identities.filter(
+            agency__type="unhcr"
+        ).first()
         if households_identity is not None:
             dh_household.agency_id = households_identity.document_number
 
@@ -192,9 +196,16 @@ class SendTPToDatahubTask:
         return dh_household, individuals_to_create
 
     def send_target_entry(self, target_population_selection):
+        households_identity = target_population_selection.household.identities.filter(
+            agency__type="unhcr"
+        ).first()
+        household_unhcr_id = None
+        if households_identity is not None:
+            household_unhcr_id = households_identity.document_number
         return dh_mis_models.TargetPopulationEntry(
-            target_population_id=target_population_selection.target_population.id,
-            household_id=target_population_selection.household.id,
+            target_population_mis_id=target_population_selection.target_population.id,
+            household_mis_id=target_population_selection.household.id,
+            household_unhcr_id=household_unhcr_id,
             vulnerability_score=target_population_selection.vulnerability_score,
         )
 
