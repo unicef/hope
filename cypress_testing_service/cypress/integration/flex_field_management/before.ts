@@ -1,5 +1,3 @@
-const role = 'hqAdmin';
-
 before(() => {
   cy.clearCookies();
   cy.clearLocalStorage();
@@ -41,7 +39,8 @@ beforeEach(() => {
   const {
     whitelist: { cookies },
     localStorage: userStorage,
-  } = Cypress.env(role);
+  } = Cypress.env('hqAdmin');
+
   cy.log(`cookies, preserving once: ${JSON.stringify(cookies)}`);
   Cypress.Cookies.preserveOnce(...cookies);
 

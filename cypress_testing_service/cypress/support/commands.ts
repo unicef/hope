@@ -13,8 +13,6 @@ Cypress.Commands.add('generateUser', () => {
     email,
     firstName,
     lastName,
-    isStaff: false,
-    isActive: false,
   };
 });
 
@@ -47,7 +45,17 @@ Cypress.Commands.add(
       });
     });
 
-    cy.get('#id_business_areas option').first().click({ force: true });
+    const businessAreasSelector = 'select[name=business_areas]';
+    cy.get(businessAreasSelector)
+      .children()
+      .first()
+      .then(($select) => {
+        const option = $select.last().text();
+        // TODO:
+        // Need to 'force' as select doesn't seem to be working reliably,
+        // investigate if possible to improve this workaround.
+        cy.get(businessAreasSelector).select(option, { force: true });
+      });
 
     cy.get('input[name=_save]').click();
 
@@ -94,7 +102,7 @@ Cypress.Commands.add('assignBusinessArea', (email) => {
 Cypress.Commands.add('loadUserCookies', ({ role }) => {
   const { cookies } = Cypress.env(role);
 
-  cookies.forEach((cookie) => {
+  (cookies || []).forEach((cookie) => {
     cy.setCookie(cookie.name, cookie.value, {
       domain: cookie.domain,
       expiry: cookie.expires,
@@ -140,7 +148,7 @@ Cypress.Commands.add('loginToAD', (username, password, loginUrl) => {
 
 Cypress.Commands.add('loadUserLocalStorage', ({ role }) => {
   const { localStorage: userLocalStorage } = Cypress.env(role);
-  Object.keys(userLocalStorage).forEach((key) =>
+  Object.keys(userLocalStorage || {}).forEach((key) =>
     localStorage.setItem(key, userLocalStorage[key]),
   );
 });

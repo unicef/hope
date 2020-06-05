@@ -7,7 +7,7 @@ declare namespace Cypress {
     email: string;
     firstName: string;
     lastName: string;
-    permissions: Permission[];
+    permissions?: Permission[];
   }
 
   interface Chainable<Subject> {
