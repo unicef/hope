@@ -13,7 +13,7 @@ class Session(AbstractSession):
 
 
 class SessionModel(models.Model):
-    session_id = models.ForeignKey("Session", on_delete=models.CASCADE)
+    session = models.ForeignKey("Session", on_delete=models.CASCADE)
 
     class Meta:
         abstract = True
@@ -32,13 +32,11 @@ class Programme(SessionModel):
 
 
 class CashPlan(SessionModel):
-    DISTRIBUTION_COMPLETED = (
-        "Distribution Completed"
-    )
+    DISTRIBUTION_COMPLETED = "Distribution Completed"
     DISTRIBUTION_COMPLETED_WITH_ERRORS = "Distribution Completed with Errors"
     TRANSACTION_COMPLETED = "Transaction Completed"
     TRANSACTION_COMPLETED_WITH_ERRORS = "Transaction Completed with Errors"
-    business_area = models.CharField(max_length=20)
+    business_area = models.CharField(max_length=20, null=True)
     cash_plan_id = models.CharField(max_length=255)
     cash_plan_hash_id = models.UUIDField(primary_key=True,)
     status = models.CharField(
@@ -55,46 +53,51 @@ class CashPlan(SessionModel):
                 _("Transaction Completed with Errors"),
             ),
         ),
+        null=True,
     )
-    status_date = models.DateTimeField()
-    name = models.CharField(max_length=255)
-    distribution_level = models.CharField(max_length=255)
-    start_date = models.DateTimeField()
-    end_date = models.DateTimeField()
-    dispersion_date = models.DateTimeField()
-    coverage_duration = models.PositiveIntegerField()
-    coverage_unit = models.CharField(max_length=255)
-    comments = models.CharField(max_length=255)
-    program_mis_id = models.UUIDField()
-    delivery_type = models.CharField(max_length=255)
-    assistance_measurement = models.CharField(max_length=255)
-    assistance_through = models.CharField(max_length=255)
-    vision_id = models.CharField(max_length=255)
-    funds_commitment = models.CharField(max_length=255)
-    down_payment = models.CharField(max_length=255)
-    validation_alerts_count = models.IntegerField()
-    total_persons_covered = models.IntegerField()
-    total_persons_covered_revised = models.IntegerField()
-    payment_records_count = models.IntegerField()
+    status_date = models.DateTimeField(null=True)
+    name = models.CharField(max_length=255, null=True)
+    distribution_level = models.CharField(max_length=255, null=True)
+    start_date = models.DateTimeField(null=True)
+    end_date = models.DateTimeField(null=True)
+    dispersion_date = models.DateTimeField(null=True)
+    coverage_duration = models.PositiveIntegerField(null=True)
+    coverage_unit = models.CharField(max_length=255, null=True)
+    comments = models.CharField(max_length=255, null=True)
+    program_mis_id = models.UUIDField(null=True)
+    delivery_type = models.CharField(max_length=255, null=True)
+    assistance_measurement = models.CharField(max_length=255, null=True)
+    assistance_through = models.CharField(max_length=255, null=True)
+    vision_id = models.CharField(max_length=255, null=True)
+    funds_commitment = models.CharField(max_length=255, null=True)
+    down_payment = models.CharField(max_length=255, null=True)
+    validation_alerts_count = models.IntegerField(null=True)
+    total_persons_covered = models.IntegerField(null=True)
+    total_persons_covered_revised = models.IntegerField(null=True)
+    payment_records_count = models.IntegerField(null=True)
     total_entitled_quantity = models.DecimalField(
         decimal_places=2,
         max_digits=12,
         validators=[MinValueValidator(Decimal("0.01"))],
+        null=True,
     )
     total_entitled_quantity_revised = models.DecimalField(
         decimal_places=2,
         max_digits=12,
         validators=[MinValueValidator(Decimal("0.01"))],
+        null=True,
     )
     total_delivered_quantity = models.DecimalField(
         decimal_places=2,
         max_digits=12,
         validators=[MinValueValidator(Decimal("0.01"))],
+        null=True,
     )
     total_undelivered_quantity = models.DecimalField(
         decimal_places=2,
         max_digits=12,
         validators=[MinValueValidator(Decimal("0.01"))],
+        null=True,
     )
 
 
@@ -121,45 +124,48 @@ class PaymentRecord(SessionModel):
         (DELIVERY_TYPE_DEPOSIT_TO_CARD, _("Deposit to Card")),
         (DELIVERY_TYPE_TRANSFER, _("Transfer")),
     )
-    business_area = models.CharField(max_length=20)
-    status = models.CharField(max_length=255, choices=STATUS_CHOICE,)
-    status_date = models.DateTimeField()
+    business_area = models.CharField(max_length=20, null=True)
+    status = models.CharField(max_length=255, choices=STATUS_CHOICE, null=True)
+    status_date = models.DateTimeField(null=True)
     ca_id = models.CharField(max_length=255)
-    ca_hash_id = models.UUIDField(primary_key=True,)
-    registration_ca_id = models.CharField(max_length=255)
-    household_mis_id = models.UUIDField()
+    ca_hash_id = models.UUIDField(primary_key=True)
+    registration_ca_id = models.CharField(max_length=255, null=True)
+    household_mis_id = models.UUIDField(null=True)
     # head of household
-    focal_point_mis_id = models.UUIDField()
-    full_name = models.CharField(max_length=255)
-    total_persons_covered = models.IntegerField()
-    distribution_modality = models.CharField(max_length=255,)
-    target_population_mis_id = models.UUIDField()
-    target_population_cash_assist_id = models.CharField(max_length=255)
-    entitlement_card_number = models.CharField(max_length=255,)
+    head_of_household_mis_id = models.UUIDField(null=True)
+    full_name = models.CharField(max_length=255, null=True)
+    total_persons_covered = models.IntegerField(null=True)
+    distribution_modality = models.CharField(max_length=255, null=True)
+    target_population_mis_id = models.UUIDField(null=True)
+    target_population_cash_assist_id = models.CharField(
+        max_length=255, null=True
+    )
+    entitlement_card_number = models.CharField(max_length=255, null=True)
     entitlement_card_status = models.CharField(
-        choices=STATUS_CHOICE, default=STATUS_PENDING, max_length=20,
+        choices=STATUS_CHOICE, default=STATUS_PENDING, max_length=20, null=True
     )
-    entitlement_card_issue_date = models.DateField()
+    entitlement_card_issue_date = models.DateField(null=True)
     delivery_type = models.CharField(
-        choices=DELIVERY_TYPE_CHOICE, default=DELIVERY_TYPE_CASH, max_length=20,
+        choices=DELIVERY_TYPE_CHOICE,
+        default=DELIVERY_TYPE_CASH,
+        max_length=20,
+        null=True,
     )
-    currency = models.CharField(max_length=4,)
+    currency = models.CharField(max_length=4, null=True)
     entitlement_quantity = models.DecimalField(
         decimal_places=2,
         max_digits=12,
         validators=[MinValueValidator(Decimal("0.01"))],
+        null=True,
     )
     delivered_quantity = models.DecimalField(
         decimal_places=2,
         max_digits=12,
         validators=[MinValueValidator(Decimal("0.01"))],
+        null=True,
     )
-    delivery_date = models.DateTimeField()
-    service_provider = models.ForeignKey(
-        "ServiceProvider",
-        on_delete=models.CASCADE,
-        related_name="payment_records",
-    )
+    delivery_date = models.DateTimeField(null=True)
+    service_provider_ca_id = models.CharField(max_length=255, null=True)
 
 
 class ServiceProvider(SessionModel):

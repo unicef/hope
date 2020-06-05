@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "lib": ["dom","es6"],
+    "types": ["cypress"],
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "*": ["cypress/*", "cypress/@types/*"]
+    }
+  },
+  "include": [
+    "node_modules/cypress",
+    "node_modules/cypress-file-upload",
+    "node_modules/chai-subset",
+    "cypress"
+  ]
+}

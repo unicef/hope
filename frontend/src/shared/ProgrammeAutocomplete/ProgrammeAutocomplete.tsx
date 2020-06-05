@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import { TextField } from '@material-ui/core';
+import { TextField, Paper } from '@material-ui/core';
 import styled from 'styled-components';
 
 const StyledAutocomplete = styled(Autocomplete)`
@@ -54,8 +54,24 @@ export function ProgrammeAutocomplete({
           InputProps={{
             ...params.InputProps,
           }}
+          // https://github.com/mui-org/material-ui/issues/12805
+          // eslint-disable-next-line react/jsx-no-duplicate-props
+          inputProps={{
+            ...params.inputProps,
+            'data-cy': `autocomplete-program-option-${otherProps.index}`
+          }}
         />
       )}
+      data-cy='autocomplete-program'
+      PaperComponent={React.forwardRef((props, ref) => (
+        <Paper
+          {...{
+            ...props,
+            ref,
+          }}
+          data-cy='autocomplete-program-options'
+        />
+      ))}
     />
   );
 }

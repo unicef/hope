@@ -28,7 +28,7 @@ export function Errors({
   }
   return (
     <>
-      <ErrorsContainer>
+      <ErrorsContainer data-cy='errors-container'>
         <Error>Errors</Error>
         <IconButton
           onClick={() => setExpanded(!expanded)}
