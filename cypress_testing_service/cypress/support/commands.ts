@@ -40,11 +40,14 @@ Cypress.Commands.add(
     cy.get('input[name=email]').type(email);
 
     permissions.forEach((permission) => {
-      cy.get(`#id_${permission}`).click();
+      cy.get(`input[name=${permission}]`).then(($checkbox) => {
+        if (!$checkbox.attr('checked')) {
+          $checkbox.click();
+        }
+      });
     });
 
-    // TODO: https://tivix.slack.com/archives/CLDL2GH1P/p1591356892023100
-    cy.get('#id_business_areas option').first().click();
+    cy.get('#id_business_areas option').first().click({ force: true });
 
     cy.get('input[name=_save]').click();
 
