@@ -21,7 +21,7 @@ before(() => {
       email,
       firstName,
       lastName,
-      permissions: ['is_staff', 'is_active', 'is_superuser'],
+      permissions: ['is_active', 'is_staff','is_superuser'],
     });
 
     cy.wrap(registeredUser).as('registeredUser');
