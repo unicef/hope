@@ -80,7 +80,7 @@ class RegistrationXlsxImportMutationInput(graphene.InputObjectType):
 
 
 class RegistrationKoboImportMutationInput(graphene.InputObjectType):
-    uid = graphene.String()
+    import_data_id = graphene.String()
     name = graphene.String()
     business_area_slug = graphene.String()
 
