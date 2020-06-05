@@ -8,7 +8,6 @@ spec:
   ports:
     - protocol: TCP
       port: {{ .Values.backend.port }}
-  type: LoadBalancer
   selector:
       app: backend
 ---
@@ -21,7 +20,6 @@ spec:
   ports:
     - protocol: TCP
       port: {{ .Values.frontend.port }}
-  type: LoadBalancer
   selector:
     app: frontend
 ---
@@ -36,7 +34,7 @@ spec:
       port: {{ .Values.redis.port }}
   selector:
     app: redis
---- 
+---
 {{ if .Values.podDB }}
 {{- range $key, $value :=  .Values.databases }}
 kind: Service
