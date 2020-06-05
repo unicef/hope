@@ -238,7 +238,7 @@ class IndividualIdentity(models.Model):
         unique_together = ("agency", "number")
 
     def __str__(self):
-        return f"{self.agency} {self.individual} {self.document_number}"
+        return f"{self.agency} {self.individual} {self.number}"
 
 
 class Individual(TimeStampedUUIDModel, AbstractSyncable):
