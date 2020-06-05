@@ -143,6 +143,7 @@ export function RegistrationDataImport(): React.ReactElement {
   const koboErrors: SaveKoboImportDataMutation['saveKoboImportData']['errors'] =
     koboImportData?.saveKoboImportData?.errors;
   let counters = null;
+  let disabled = true;
   if (uploadData?.uploadImportDataXlsxFile?.importData) {
     counters = (
       <>
@@ -173,6 +174,7 @@ export function RegistrationDataImport(): React.ReactElement {
   }
   let importTypeSpecificContent = null;
   if (importType === 'excel') {
+    disabled = !uploadData || createLoading;
     importTypeSpecificContent = (
       <>
         <DropzoneField
@@ -201,6 +203,7 @@ export function RegistrationDataImport(): React.ReactElement {
       </>
     );
   } else if (importType === 'kobo') {
+    disabled = saveKoboLoading || !koboImportData;
     const koboProjects = koboProjectsData?.allKoboProjects?.edges || [];
     importTypeSpecificContent = (
       <div>
@@ -343,12 +346,7 @@ export function RegistrationDataImport(): React.ReactElement {
                     type='submit'
                     color='primary'
                     variant='contained'
-                    disabled={
-                      !uploadData ||
-                      createLoading ||
-                      saveKoboLoading ||
-                      !koboImportData
-                    }
+                    disabled={disabled}
                     onClick={() => {
                       submitForm();
                     }}

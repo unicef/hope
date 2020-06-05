@@ -459,6 +459,7 @@ export type HouseholdNode = Node & {
   id: Scalars['ID'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
+  lastSyncAt?: Maybe<Scalars['DateTime']>,
   status: HouseholdStatus,
   consent: Scalars['String'],
   residenceStatus: HouseholdResidenceStatus,
@@ -1055,6 +1056,7 @@ export type IndividualNode = Node & {
   id: Scalars['ID'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
+  lastSyncAt?: Maybe<Scalars['DateTime']>,
   status: IndividualStatus,
   individualId: Scalars['String'],
   photo: Scalars['String'],
@@ -1498,9 +1500,8 @@ export type ProgramNodeEdge = {
 };
 
 export enum ProgramScope {
-  Full = 'FULL',
-  Partial = 'PARTIAL',
-  NoIntegration = 'NO_INTEGRATION'
+  ForPartners = 'FOR_PARTNERS',
+  Unicef = 'UNICEF'
 }
 
 export enum ProgramSector {
@@ -2126,6 +2127,7 @@ export type TargetPopulationNode = Node & {
   program?: Maybe<ProgramNode>,
   candidateListTargetingCriteria?: Maybe<TargetingCriteriaNode>,
   finalListTargetingCriteria?: Maybe<TargetingCriteriaNode>,
+  sentToDatahub: Scalars['Boolean'],
   paymentRecords: PaymentRecordNodeConnection,
   selections: Array<HouseholdSelection>,
   totalHouseholds?: Maybe<Scalars['Int']>,
@@ -3673,7 +3675,7 @@ export type RegistrationMinimalFragment = (
   & Pick<RegistrationDataImportNode, 'id' | 'createdAt' | 'name' | 'status' | 'importDate' | 'dataSource' | 'numberOfHouseholds'>
   & { importedBy: (
     { __typename?: 'UserNode' }
-    & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
+    & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
   ) }
 );
 
@@ -4046,6 +4048,7 @@ export const RegistrationMinimalFragmentDoc = gql`
     id
     firstName
     lastName
+    email
   }
   dataSource
   numberOfHouseholds
@@ -8030,6 +8033,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   status?: Resolver<ResolversTypes['HouseholdStatus'], ParentType, ContextType>,
   consent?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   residenceStatus?: Resolver<ResolversTypes['HouseholdResidenceStatus'], ParentType, ContextType>,
@@ -8228,6 +8232,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   status?: Resolver<ResolversTypes['IndividualStatus'], ParentType, ContextType>,
   individualId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   photo?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
@@ -8645,6 +8650,7 @@ export type TargetPopulationNodeResolvers<ContextType = any, ParentType extends 
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
   candidateListTargetingCriteria?: Resolver<Maybe<ResolversTypes['TargetingCriteriaNode']>, ParentType, ContextType>,
   finalListTargetingCriteria?: Resolver<Maybe<ResolversTypes['TargetingCriteriaNode']>, ParentType, ContextType>,
+  sentToDatahub?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, TargetPopulationNodePaymentRecordsArgs>,
   selections?: Resolver<Array<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
   totalHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
