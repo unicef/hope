@@ -9,6 +9,7 @@ import { uuid } from 'uuidv4';
 import { WorkBook } from 'xlsx';
 import { apiUrl, api } from '../../support/api';
 import { overrideScrollingStrategy } from '../../support/utils';
+import '../../support/before';
 
 Before(() => {
   overrideScrollingStrategy();
