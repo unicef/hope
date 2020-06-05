@@ -12,8 +12,10 @@ Given('I login to AD as {word}', (role: string) => {
 });
 
 Given('I am authenticated as a {word}', (role: string) => {
-  cy.loadUserCookies({ role });
-  cy.loadUserLocalStorage({ role });
+  if (Cypress.env('useFixedCookies')) {
+    cy.loadUserCookies({ role });
+    cy.loadUserLocalStorage({ role });
+  }
 
   cy.visit('/');
   cy.getByTestId('business-area-container').should('be.visible');
