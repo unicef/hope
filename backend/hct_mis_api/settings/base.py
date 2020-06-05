@@ -251,9 +251,6 @@ AUTHENTICATION_BACKENDS = [
     "social_core.backends.azuread_tenant.AzureADTenantOAuth2",
 ]
 
-TEST_RUNNER = os.getenv(
-    "DJANGO_TEST_RUNNER", "django.test.runner.DiscoverRunner"
-)
 NOSE_ARGS = ["--with-timer", "--nocapture", "--nologcapture"]
 
 
@@ -385,7 +382,7 @@ SOCIAL_AUTH_SANITIZE_REDIRECTS = True
 
 LOGIN_URL = "/api/login/azuread-tenant-oauth2"
 
-TEST_RUNNER = "snapshottest.django.TestRunner"
+TEST_RUNNER = "core.mis_test_runner.PostgresTestRunner"
 
 GRAPH_MODELS = {
     "all_applications": True,
