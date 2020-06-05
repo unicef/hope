@@ -26,7 +26,7 @@ class SessionModel(models.Model):
 
 class Household(SessionModel):
     mis_id = models.UUIDField(primary_key=True,)
-    unhcr_id = models.UUIDField()
+    unhcr_id = models.CharField(max_length=255, null=True)
     status = models.CharField(
         max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default="ACTIVE"
     )
@@ -41,7 +41,7 @@ class Household(SessionModel):
 
 class Individual(SessionModel):
     mis_id = models.UUIDField(primary_key=True,)
-    unchr_id = models.UUIDField()
+    unhcr_id = models.CharField(max_length=255, null=True)
     household_mis_id = models.UUIDField()
     status = models.CharField(
         max_length=50,
@@ -52,9 +52,7 @@ class Individual(SessionModel):
         ("MALE", _("Male")),
         ("FEMALE", _("Female")),
     )
-    national_id_number = models.CharField(
-        max_length=255, null=True
-    )
+    national_id_number = models.CharField(max_length=255, null=True)
     full_name = models.CharField(max_length=255)
     family_name = models.CharField(max_length=255, null=True)
     given_name = models.CharField(max_length=255, null=True)
