@@ -18,7 +18,7 @@ class Session(AbstractSession):
 
 
 class SessionModel(models.Model):
-    session_id = models.ForeignKey("Session", on_delete=models.CASCADE)
+    session = models.ForeignKey("Session", on_delete=models.CASCADE)
 
     class Meta:
         abstract = True
@@ -26,28 +26,13 @@ class SessionModel(models.Model):
 
 class Household(SessionModel):
     mis_id = models.UUIDField(primary_key=True,)
+    unhcr_id = models.CharField(max_length=255, null=True)
     status = models.CharField(
         max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default="ACTIVE"
     )
     household_size = models.PositiveIntegerField()
-    # head of household document id
-    government_form_number = models.CharField(max_length=255, null=True)
     # registration household id
     form_number = models.CharField(max_length=255, null=True)
-    agency_id = models.CharField(max_length=255, null=True)
-    #  individual_id head of household
-    focal_point = models.ForeignKey(
-        "mis_datahub.Individual",
-        db_column="focal_point_mis_id",
-        on_delete=models.CASCADE,
-        related_name="heading_households",
-    )
-    alternative_collector = models.ForeignKey(
-        "mis_datahub.Individual",
-        on_delete=models.CASCADE,
-        related_name="collector_households",
-        null=True,
-    )
     address = models.CharField(max_length=255, null=True)
     admin1 = models.CharField(max_length=255, null=True)
     admin2 = models.CharField(max_length=255, null=True)
@@ -56,11 +41,8 @@ class Household(SessionModel):
 
 class Individual(SessionModel):
     mis_id = models.UUIDField(primary_key=True,)
-    household = models.ForeignKey(
-        "mis_datahub.Household",
-        db_column="household_mis_id",
-        on_delete=models.CASCADE,
-    )
+    unhcr_id = models.CharField(max_length=255, null=True)
+    household_mis_id = models.UUIDField()
     status = models.CharField(
         max_length=50,
         choices=(("INACTIVE", "Inactive"), ("ACTIVE", "Active")),
@@ -70,6 +52,7 @@ class Individual(SessionModel):
         ("MALE", _("Male")),
         ("FEMALE", _("Female")),
     )
+    national_id_number = models.CharField(max_length=255, null=True)
     full_name = models.CharField(max_length=255)
     family_name = models.CharField(max_length=255, null=True)
     given_name = models.CharField(max_length=255, null=True)
@@ -97,36 +80,18 @@ class TargetPopulation(SessionModel):
     targeting_criteria = models.TextField()
 
     active_households = models.PositiveIntegerField(default=0)
-    program = models.ForeignKey(
-        "mis_datahub.Program",
-        db_column="program_mis_id",
-        on_delete=models.CASCADE,
-    )
+    program_mis_id = models.UUIDField()
 
     def __str__(self):
         return self.name
 
 
 class TargetPopulationEntry(SessionModel):
-
-    target_population = models.ForeignKey(
-        "mis_datahub.TargetPopulation",
-        on_delete=models.CASCADE,
-        db_column="target_population_mis_id",
-    )
-    household = models.ForeignKey(
-        "mis_datahub.Household",
-        on_delete=models.CASCADE,
-        null=True,
-        db_column="household_mis_id",
-    )
-    individual = models.ForeignKey(
-        "mis_datahub.Individual",
-        on_delete=models.CASCADE,
-        null=True,
-        db_column="individual_mis_id",
-    )
-    ca_household_id = models.CharField(max_length=255)
+    household_unhcr_id = models.CharField(max_length=255, null=True)
+    individual_unhcr_id = models.CharField(max_length=255, null=True)
+    household_mis_id = models.UUIDField(null=True)
+    individual_mis_id = models.UUIDField(null=True)
+    target_population_mis_id = models.UUIDField()
     vulnerability_score = models.DecimalField(
         blank=True,
         null=True,
@@ -150,7 +115,7 @@ class Program(SessionModel):
     business_area = models.CharField(max_length=20)
     ca_id = models.CharField(max_length=255)
     ca_hash_id = models.CharField(max_length=255)
-    programme_name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255)
     scope = models.CharField(choices=SCOPE_CHOICE, max_length=50)
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
