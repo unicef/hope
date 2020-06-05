@@ -867,7 +867,7 @@ scalar JSONLazyString
 scalar JSONString
 
 type KoboAssetObject {
-  uid: String
+  id: String
   name: String
   sector: String
   country: String
@@ -1215,7 +1215,7 @@ type RegistrationKoboImportMutation {
 }
 
 input RegistrationKoboImportMutationInput {
-  uid: String
+  importDataId: String
   name: String
   businessAreaSlug: String
 }

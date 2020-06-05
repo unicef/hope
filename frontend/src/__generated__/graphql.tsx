@@ -1131,7 +1131,7 @@ export enum IndividualStatus {
 
 export type KoboAssetObject = {
    __typename?: 'KoboAssetObject',
-  uid?: Maybe<Scalars['String']>,
+  id?: Maybe<Scalars['String']>,
   name?: Maybe<Scalars['String']>,
   sector?: Maybe<Scalars['String']>,
   country?: Maybe<Scalars['String']>,
@@ -1977,7 +1977,7 @@ export type RegistrationKoboImportMutation = {
 };
 
 export type RegistrationKoboImportMutationInput = {
-  uid?: Maybe<Scalars['String']>,
+  importDataId?: Maybe<Scalars['String']>,
   name?: Maybe<Scalars['String']>,
   businessAreaSlug?: Maybe<Scalars['String']>,
 };
@@ -3493,6 +3493,34 @@ export type AllImportedIndividualsQuery = (
   )> }
 );
 
+export type AllKoboProjectsQueryVariables = {
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  businessAreaSlug: Scalars['String']
+};
+
+
+export type AllKoboProjectsQuery = (
+  { __typename?: 'Query' }
+  & { allKoboProjects: Maybe<(
+    { __typename?: 'KoboAssetObjectConnection' }
+    & Pick<KoboAssetObjectConnection, 'totalCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'startCursor' | 'endCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'KoboAssetObjectEdge' }
+      & Pick<KoboAssetObjectEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'KoboAssetObject' }
+        & Pick<KoboAssetObject, 'name' | 'id'>
+      )> }
+    )>> }
+  )> }
+);
+
 export type AllRegistrationDataImportsQueryVariables = {
   after?: Maybe<Scalars['String']>,
   before?: Maybe<Scalars['String']>,
@@ -3538,6 +3566,22 @@ export type ApproveRdiMutation = (
     & { registrationDataImport: Maybe<(
       { __typename?: 'RegistrationDataImportNode' }
       & RegistrationDetailedFragment
+    )> }
+  )> }
+);
+
+export type CreateRegistrationKoboImportMutationVariables = {
+  registrationDataImportData: RegistrationKoboImportMutationInput
+};
+
+
+export type CreateRegistrationKoboImportMutation = (
+  { __typename?: 'Mutations' }
+  & { registrationKoboImport: Maybe<(
+    { __typename?: 'RegistrationKoboImportMutation' }
+    & { registrationDataImport: Maybe<(
+      { __typename?: 'RegistrationDataImportNode' }
+      & Pick<RegistrationDataImportNode, 'id' | 'name' | 'dataSource' | 'datahubId'>
     )> }
   )> }
 );
@@ -3674,6 +3718,26 @@ export type ImportedIndividualDetailedFragment = (
     & Pick<RegistrationDataImportDatahubNode, 'id' | 'hctId' | 'name'>
   ) }
   & ImportedIndividualMinimalFragment
+);
+
+export type SaveKoboImportDataMutationVariables = {
+  businessAreaSlug: Scalars['String'],
+  projectId: Scalars['Upload']
+};
+
+
+export type SaveKoboImportDataMutation = (
+  { __typename?: 'Mutations' }
+  & { saveKoboImportData: Maybe<(
+    { __typename?: 'SaveKoboProjectImportDataMutation' }
+    & { importData: Maybe<(
+      { __typename?: 'ImportDataNode' }
+      & Pick<ImportDataNode, 'id' | 'numberOfHouseholds' | 'numberOfIndividuals'>
+    )>, errors: Maybe<Array<Maybe<(
+      { __typename?: 'KoboErrorNode' }
+      & Pick<KoboErrorNode, 'header' | 'message'>
+    )>>> }
+  )> }
 );
 
 export type UnapproveRdiMutationVariables = {
@@ -6285,6 +6349,73 @@ export function useAllImportedIndividualsLazyQuery(baseOptions?: ApolloReactHook
 export type AllImportedIndividualsQueryHookResult = ReturnType<typeof useAllImportedIndividualsQuery>;
 export type AllImportedIndividualsLazyQueryHookResult = ReturnType<typeof useAllImportedIndividualsLazyQuery>;
 export type AllImportedIndividualsQueryResult = ApolloReactCommon.QueryResult<AllImportedIndividualsQuery, AllImportedIndividualsQueryVariables>;
+export const AllKoboProjectsDocument = gql`
+    query AllKoboProjects($after: String, $before: String, $first: Int, $last: Int, $businessAreaSlug: String!) {
+  allKoboProjects(after: $after, before: $before, first: $first, last: $last, businessAreaSlug: $businessAreaSlug) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+    totalCount
+    edges {
+      cursor
+      node {
+        name
+        id
+      }
+    }
+  }
+}
+    `;
+export type AllKoboProjectsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllKoboProjectsQuery, AllKoboProjectsQueryVariables>, 'query'> & ({ variables: AllKoboProjectsQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const AllKoboProjectsComponent = (props: AllKoboProjectsComponentProps) => (
+      <ApolloReactComponents.Query<AllKoboProjectsQuery, AllKoboProjectsQueryVariables> query={AllKoboProjectsDocument} {...props} />
+    );
+    
+export type AllKoboProjectsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllKoboProjectsQuery, AllKoboProjectsQueryVariables> & TChildProps;
+export function withAllKoboProjects<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllKoboProjectsQuery,
+  AllKoboProjectsQueryVariables,
+  AllKoboProjectsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllKoboProjectsQuery, AllKoboProjectsQueryVariables, AllKoboProjectsProps<TChildProps>>(AllKoboProjectsDocument, {
+      alias: 'allKoboProjects',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllKoboProjectsQuery__
+ *
+ * To run a query within a React component, call `useAllKoboProjectsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllKoboProjectsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllKoboProjectsQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      businessAreaSlug: // value for 'businessAreaSlug'
+ *   },
+ * });
+ */
+export function useAllKoboProjectsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllKoboProjectsQuery, AllKoboProjectsQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllKoboProjectsQuery, AllKoboProjectsQueryVariables>(AllKoboProjectsDocument, baseOptions);
+      }
+export function useAllKoboProjectsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllKoboProjectsQuery, AllKoboProjectsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllKoboProjectsQuery, AllKoboProjectsQueryVariables>(AllKoboProjectsDocument, baseOptions);
+        }
+export type AllKoboProjectsQueryHookResult = ReturnType<typeof useAllKoboProjectsQuery>;
+export type AllKoboProjectsLazyQueryHookResult = ReturnType<typeof useAllKoboProjectsLazyQuery>;
+export type AllKoboProjectsQueryResult = ApolloReactCommon.QueryResult<AllKoboProjectsQuery, AllKoboProjectsQueryVariables>;
 export const AllRegistrationDataImportsDocument = gql`
     query AllRegistrationDataImports($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name_Icontains: String, $importedBy_Id: UUID, $status: String, $importDate: Date, $businessArea: String) {
   allRegistrationDataImports(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name_Icontains: $name_Icontains, importedBy_Id: $importedBy_Id, status: $status, importDate: $importDate, businessArea: $businessArea) {
@@ -6407,6 +6538,60 @@ export function useApproveRdiMutation(baseOptions?: ApolloReactHooks.MutationHoo
 export type ApproveRdiMutationHookResult = ReturnType<typeof useApproveRdiMutation>;
 export type ApproveRdiMutationResult = ApolloReactCommon.MutationResult<ApproveRdiMutation>;
 export type ApproveRdiMutationOptions = ApolloReactCommon.BaseMutationOptions<ApproveRdiMutation, ApproveRdiMutationVariables>;
+export const CreateRegistrationKoboImportDocument = gql`
+    mutation CreateRegistrationKoboImport($registrationDataImportData: RegistrationKoboImportMutationInput!) {
+  registrationKoboImport(registrationDataImportData: $registrationDataImportData) {
+    registrationDataImport {
+      id
+      name
+      dataSource
+      datahubId
+    }
+  }
+}
+    `;
+export type CreateRegistrationKoboImportMutationFn = ApolloReactCommon.MutationFunction<CreateRegistrationKoboImportMutation, CreateRegistrationKoboImportMutationVariables>;
+export type CreateRegistrationKoboImportComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<CreateRegistrationKoboImportMutation, CreateRegistrationKoboImportMutationVariables>, 'mutation'>;
+
+    export const CreateRegistrationKoboImportComponent = (props: CreateRegistrationKoboImportComponentProps) => (
+      <ApolloReactComponents.Mutation<CreateRegistrationKoboImportMutation, CreateRegistrationKoboImportMutationVariables> mutation={CreateRegistrationKoboImportDocument} {...props} />
+    );
+    
+export type CreateRegistrationKoboImportProps<TChildProps = {}> = ApolloReactHoc.MutateProps<CreateRegistrationKoboImportMutation, CreateRegistrationKoboImportMutationVariables> & TChildProps;
+export function withCreateRegistrationKoboImport<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CreateRegistrationKoboImportMutation,
+  CreateRegistrationKoboImportMutationVariables,
+  CreateRegistrationKoboImportProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, CreateRegistrationKoboImportMutation, CreateRegistrationKoboImportMutationVariables, CreateRegistrationKoboImportProps<TChildProps>>(CreateRegistrationKoboImportDocument, {
+      alias: 'createRegistrationKoboImport',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCreateRegistrationKoboImportMutation__
+ *
+ * To run a mutation, you first call `useCreateRegistrationKoboImportMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateRegistrationKoboImportMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createRegistrationKoboImportMutation, { data, loading, error }] = useCreateRegistrationKoboImportMutation({
+ *   variables: {
+ *      registrationDataImportData: // value for 'registrationDataImportData'
+ *   },
+ * });
+ */
+export function useCreateRegistrationKoboImportMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateRegistrationKoboImportMutation, CreateRegistrationKoboImportMutationVariables>) {
+        return ApolloReactHooks.useMutation<CreateRegistrationKoboImportMutation, CreateRegistrationKoboImportMutationVariables>(CreateRegistrationKoboImportDocument, baseOptions);
+      }
+export type CreateRegistrationKoboImportMutationHookResult = ReturnType<typeof useCreateRegistrationKoboImportMutation>;
+export type CreateRegistrationKoboImportMutationResult = ApolloReactCommon.MutationResult<CreateRegistrationKoboImportMutation>;
+export type CreateRegistrationKoboImportMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateRegistrationKoboImportMutation, CreateRegistrationKoboImportMutationVariables>;
 export const CreateRegistrationXlsxImportDocument = gql`
     mutation CreateRegistrationXlsxImport($registrationDataImportData: RegistrationXlsxImportMutationInput!) {
   registrationXlsxImport(registrationDataImportData: $registrationDataImportData) {
@@ -6712,6 +6897,64 @@ export function useRegistrationDataImportLazyQuery(baseOptions?: ApolloReactHook
 export type RegistrationDataImportQueryHookResult = ReturnType<typeof useRegistrationDataImportQuery>;
 export type RegistrationDataImportLazyQueryHookResult = ReturnType<typeof useRegistrationDataImportLazyQuery>;
 export type RegistrationDataImportQueryResult = ApolloReactCommon.QueryResult<RegistrationDataImportQuery, RegistrationDataImportQueryVariables>;
+export const SaveKoboImportDataDocument = gql`
+    mutation SaveKoboImportData($businessAreaSlug: String!, $projectId: Upload!) {
+  saveKoboImportData(businessAreaSlug: $businessAreaSlug, uid: $projectId) {
+    importData {
+      id
+      numberOfHouseholds
+      numberOfIndividuals
+    }
+    errors {
+      header
+      message
+    }
+  }
+}
+    `;
+export type SaveKoboImportDataMutationFn = ApolloReactCommon.MutationFunction<SaveKoboImportDataMutation, SaveKoboImportDataMutationVariables>;
+export type SaveKoboImportDataComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<SaveKoboImportDataMutation, SaveKoboImportDataMutationVariables>, 'mutation'>;
+
+    export const SaveKoboImportDataComponent = (props: SaveKoboImportDataComponentProps) => (
+      <ApolloReactComponents.Mutation<SaveKoboImportDataMutation, SaveKoboImportDataMutationVariables> mutation={SaveKoboImportDataDocument} {...props} />
+    );
+    
+export type SaveKoboImportDataProps<TChildProps = {}> = ApolloReactHoc.MutateProps<SaveKoboImportDataMutation, SaveKoboImportDataMutationVariables> & TChildProps;
+export function withSaveKoboImportData<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  SaveKoboImportDataMutation,
+  SaveKoboImportDataMutationVariables,
+  SaveKoboImportDataProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, SaveKoboImportDataMutation, SaveKoboImportDataMutationVariables, SaveKoboImportDataProps<TChildProps>>(SaveKoboImportDataDocument, {
+      alias: 'saveKoboImportData',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useSaveKoboImportDataMutation__
+ *
+ * To run a mutation, you first call `useSaveKoboImportDataMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSaveKoboImportDataMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [saveKoboImportDataMutation, { data, loading, error }] = useSaveKoboImportDataMutation({
+ *   variables: {
+ *      businessAreaSlug: // value for 'businessAreaSlug'
+ *      projectId: // value for 'projectId'
+ *   },
+ * });
+ */
+export function useSaveKoboImportDataMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<SaveKoboImportDataMutation, SaveKoboImportDataMutationVariables>) {
+        return ApolloReactHooks.useMutation<SaveKoboImportDataMutation, SaveKoboImportDataMutationVariables>(SaveKoboImportDataDocument, baseOptions);
+      }
+export type SaveKoboImportDataMutationHookResult = ReturnType<typeof useSaveKoboImportDataMutation>;
+export type SaveKoboImportDataMutationResult = ApolloReactCommon.MutationResult<SaveKoboImportDataMutation>;
+export type SaveKoboImportDataMutationOptions = ApolloReactCommon.BaseMutationOptions<SaveKoboImportDataMutation, SaveKoboImportDataMutationVariables>;
 export const UnapproveRdiDocument = gql`
     mutation UnapproveRDI($id: ID!) {
   unapproveRegistrationDataImport(id: $id) {
@@ -8029,7 +8272,7 @@ export interface JsonStringScalarConfig extends GraphQLScalarTypeConfig<Resolver
 }
 
 export type KoboAssetObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['KoboAssetObject'] = ResolversParentTypes['KoboAssetObject']> = {
-  uid?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   sector?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
