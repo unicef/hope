@@ -160,7 +160,9 @@ class Command(BaseCommand):
         self.stdout.write(f"Generating fixtures...")
         if options["flush"]:
             call_command("flush", "--noinput")
-            call_command("flush", "--noinput", database="cash_assist_datahub")
+            call_command("flush", "--noinput", database="cash_assist_datahub_mis")
+            call_command("flush", "--noinput", database="cash_assist_datahub_ca")
+            call_command("flush", "--noinput", database="cash_assist_datahub_erp")
             call_command("flush", "--noinput", database="registration_datahub")
             call_command(
                 "loaddata",
