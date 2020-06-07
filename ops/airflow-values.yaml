@@ -374,8 +374,8 @@ web:
   ## Pod Annotations for the web deployment
   podAnnotations: {}
   ##
-  initialStartupDelay: "60"
-  initialDelaySeconds: "360"
+  initialStartupDelay: 60
+  initialDelaySeconds: 300
   minReadySeconds: 120
   readinessProbe:
     scheme: HTTP
