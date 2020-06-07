@@ -5,3 +5,4 @@ cypress/integration/examples/
 yarn-error.log
 cypress.env.json
 cypress/support/mockAuthCookies.json
+cypress/reports/
