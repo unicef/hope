@@ -98,7 +98,7 @@ services:
     ports:
       - "4200:8080"
     env_file:
-      - .env
+      - ./airflow/config/.env_airflow
     restart: always
     depends_on:
       - airflow_db
@@ -126,7 +126,7 @@ services:
   airflow_scheduler:
     image: ${airflow_image}
     env_file:
-      - .env
+      - ./airflow/config/.env_airflow
     restart: always
     volumes:
       - ./airflow/connectors:/usr/local/airflow/connectors
@@ -143,7 +143,7 @@ services:
   airflow_worker:
     image: ${airflow_image}
     env_file:
-      - .env
+      - ./airflow/config/.env_airflow
     restart: always
     volumes:
       - ./airflow/dags:/usr/local/airflow/dags
