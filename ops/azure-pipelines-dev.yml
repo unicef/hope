@@ -22,11 +22,17 @@ variables:
 
 stages:
   - stage: build_and_push
-    displayName: Build&Push Images
+    displayName: BUILD and PUSH
     jobs:
       - job: build_push_backend
-        displayName: "[Build&Push]BACKEND"
+        displayName: "[BACKEND]"
         steps:
+          - task: CmdLine@2
+            displayName: [CACHE] Pull latest
+            inputs:
+              script: |
+                docker pull $(containerRegistry).azurecr.io/$(backendImageRepository):dev-latest
+
           - task: Docker@2
             displayName: Build&Push
             inputs:
@@ -34,12 +40,13 @@ stages:
               dockerfile: $(backendDockerFilePath)
               repository: $(backendImageRepository)
               containerRegistry: $(containerRegistry)
+              arguments: --cache-from $(containerRegistry).azurecr.io/$(backendImageRepository):dev-latest
               tags: |
                 $(Build.BuildId)
                 dev-latest
 
       - job: build_push_airflow
-        displayName: "[Build&Push]AIRFLOW"
+        displayName: "[AIRFLOW]"
         steps:
           - task: Docker@2
             displayName: Build&Push
@@ -54,7 +61,7 @@ stages:
                 dev-latest
 
       - job: build_push_frontend
-        displayName: "[Build&Push]FRONTEND"
+        displayName: "[FRONTEND]"
         steps:
           - task: Docker@2
             displayName: Build&Push
