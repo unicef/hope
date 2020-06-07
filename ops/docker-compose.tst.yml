@@ -19,6 +19,7 @@ services:
     build:
       context: ./proxy
       dockerfile: ./Dockerfile
+    restart: always
     ports:
       - "8082:80"
     depends_on:
@@ -58,6 +59,7 @@ services:
     links:
       - airflow_webserver
     command: "dev"
+    restart: always
     depends_on:
       - db
       - redis
