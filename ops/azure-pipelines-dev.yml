@@ -139,7 +139,16 @@ stages:
             inputs:
               script: |
                 cd cypress_testing_service
-                cypress run
+                yarn cy:run
+
+          - task: PublishTestResults@2
+            displayName: "Publish Test Result"
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '*.xml'
+              searchFolder: $(System.DefaultWorkingDirectory)/cypress/reports/junit
+              mergeTestResults: true
+              testRunTitle: 'TEST Results'
 
   - stage: deploy
     displayName: DEPLOY
