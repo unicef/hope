@@ -70,6 +70,7 @@ stages:
 
   - stage: test
     displayName: TEST
+    condition: always()
     jobs:
       - job: cypress_e2e
         displayName: "[CYPRESS]"
@@ -105,6 +106,10 @@ stages:
               dockerComposeFile: '**/docker-compose.yml'
               action: 'Run a Docker Compose command'
               dockerComposeCommand: 'up'
+              dockerComposeFileArgs: |
+                airflow_image=uniappsk8sdevacr.azurecr.io/$(airflowImageRepository):$(Build.BuildId)
+                frontend_image=uniappsk8sdevacr.azurecr.io/$(frontendImageRepository):$(Build.BuildId)
+                backend_image=uniappsk8sdevacr.azurecr.io/$(backendImageRepository):$(Build.BuildId)
 
   - stage: deploy
     displayName: DEPLOY
