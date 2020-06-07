@@ -128,7 +128,9 @@ stages:
             inputs:
               script: |
                 echo "WAITING FOR ENV..."
+                docker ps
                 sleep 60
+                docker ps
                 docker exec unicefhct-mis_backend_1 ./manage.py migratealldb
                 docker exec unicefhct-mis_backend_1 ./manage.py loadbusinessareas
                 docker exec unicefhct-mis_backend_1 ./manage.py loadflexfieldsattributes
