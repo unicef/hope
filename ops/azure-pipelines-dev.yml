@@ -137,13 +137,6 @@ stages:
               script: |
                 cd cypress_testing_service
                 yarn cy:run
-                pwd
-                cd cypress
-                cd reports
-                cd junit
-                ls
-                pwd
-                echo "$(Agent.BuildDirectory)/s/cypress_testing_service/cypress/reports/junit"
 
           - task: PublishTestResults@2
             displayName: "Publish Test Result"
@@ -151,7 +144,7 @@ stages:
             inputs:
               testResultsFormat: 'JUnit'
               testResultsFiles: '*.xml'
-              searchFolder: '/home/vsts/work/1/s/cypress_testing_service/cypress/reports/junit'
+              searchFolder: '$(Agent.BuildDirectory)/s/cypress_testing_service/cypress/reports/junit'
               mergeTestResults: true
               failTaskOnFailedTests: true
               testRunTitle: 'TEST Results'
