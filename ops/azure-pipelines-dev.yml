@@ -150,7 +150,7 @@ stages:
             inputs:
               testResultsFormat: 'JUnit'
               testResultsFiles: '*.xml'
-              searchFolder: $(System.DefaultWorkingDirectory)/cypress/reports/junit
+              searchFolder: $(System.DefaultWorkingDirectory)/cypress_testing_service/reports/junit
               mergeTestResults: true
               testRunTitle: 'TEST Results'
 
