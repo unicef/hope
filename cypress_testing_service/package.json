@@ -6,7 +6,8 @@
   "scripts": {
     "lint": "eslint 'cypress/**/*.{js,ts,tsx}'",
     "pretty": "prettier --write \"cypress/**/*.{ts,js,jsx,json}\"",
-    "setupDjangoAdmin": "docker-compose -f ../docker-compose.yml run backend ./manage.py loaddata hct_mis_api/apps/account/fixtures/superuser.json"
+    "setupDjangoAdmin": "docker-compose -f ../docker-compose.yml run backend ./manage.py loaddata hct_mis_api/apps/account/fixtures/superuser.json",
+    "cy:run": "cypress run"
   },
   "devDependencies": {
     "@types/cypress-cucumber-preprocessor": "^1.14.1",
@@ -18,7 +19,9 @@
     "eslint-plugin-cypress": "^2.10.3",
     "eslint-plugin-import": "^2.20.1",
     "eslint-plugin-prettier": "^3.1.3",
-    "prettier": "^2.0.5"
+    "prettier": "^2.0.5",
+    "cypress-multi-reporters": "^1.2.4",
+    "mocha-junit-reporter": "^1.23.3"
   },
   "cypress:open": "cypress open",
   "dependencies": {

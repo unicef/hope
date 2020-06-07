@@ -127,9 +127,8 @@ stages:
             displayName: "Setup testing environment"
             inputs:
               script: |
-                docker ps
+                echo "WAITING FOR ENV..."
                 sleep 60
-                docker ps
                 docker exec unicefhct-mis_backend_1 ./manage.py migratealldb
                 docker exec unicefhct-mis_backend_1 ./manage.py loadbusinessareas
                 docker exec unicefhct-mis_backend_1 ./manage.py loadflexfieldsattributes
