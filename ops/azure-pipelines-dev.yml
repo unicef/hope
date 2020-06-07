@@ -128,10 +128,10 @@ stages:
             displayName: "Setup testing environment"
             inputs:
               script: |
-                docker-compose exec backend ./manage.py migratealldb
-                docker-compose exec backend ./manage.py loadbusinessareas
-                docker-compose exec backend ./manage.py loadflexfieldsattributes
-                docker-compose exec backend ./manage.py generatefixtures --noinput
+                docker exec unicefhct-mis_backend_1 ./manage.py migratealldb
+                docker exec unicefhct-mis_backend_1 ./manage.py loadbusinessareas
+                docker exec unicefhct-mis_backend_1 ./manage.py loadflexfieldsattributes
+                docker exec unicefhct-mis_backend_1 ./manage.py generatefixtures --noinput
 
           - task: CmdLine@2
             displayName: "Run Cypress"
