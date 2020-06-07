@@ -109,7 +109,7 @@ stages:
               azureContainerRegistry: "$(containerRegistry)"
               dockerComposeFile: '**/docker-compose.yml'
               action: 'Run a Docker Compose command'
-              dockerComposeCommand: 'up'
+              dockerComposeCommand: 'up -d'
               dockerComposeFileArgs: |
                 airflow_image=uniappsk8sdevacr.azurecr.io/$(airflowImageRepository):$(Build.BuildId)
                 frontend_image=uniappsk8sdevacr.azurecr.io/$(frontendImageRepository):$(Build.BuildId)
