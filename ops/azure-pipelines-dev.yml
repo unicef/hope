@@ -101,7 +101,6 @@ stages:
                 mv  $(Agent.TempDirectory)/.env-tst .env
                 cp .env airflow/config/.env_airflow
                 cp $(Agent.TempDirectory)/cypress.env.json cypress_testing_service/cypress.env.json
-                ls
 
           - task: DockerCompose@0
             displayName: "Start testing environment"
@@ -119,9 +118,25 @@ stages:
           - task: CmdLine@2
             displayName: "Install Cypress plugins"
             inputs:
-              script:
+              script: |
                 cd cypress_testing_service
                 yarn install
+                cd ..
+
+          - task: CmdLine@2
+            displayName: "Setup testing environment"
+            inputs:
+              script: |
+                docker-compose exec backend ./manage.py migratealldb
+                docker-compose exec backend ./manage.py loadbusinessareas
+                docker-compose exec backend ./manage.py loadflexfieldsattributes
+                docker-compose exec backend ./manage.py generatefixtures --noinput
+
+          - task: CmdLine@2
+            displayName: "Run Cypress"
+            inputs:
+              script: |
+                cd cypress_testing_service
                 cypress run
 
   - stage: deploy
