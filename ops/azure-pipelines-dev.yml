@@ -85,18 +85,20 @@ stages:
               secureFile: '.env-tst'
 
           - task: CmdLine@2
-            displayName: "[ENV] Set Images"
+            displayName: "Setup .env and docker-compose.tst.yml"
             inputs:
               script: |
-                export airflow_image=uniappsk8sdevacr.azurecr.io/$(airflowImageRepository):$(Build.BuildId)
-                export frontend_image=uniappsk8sdevacr.azurecr.io/$(frontendImageRepository):$(Build.BuildId)
-                export backend_image=uniappsk8sdevacr.azurecr.io/$(backendImageRepository):$(Build.BuildId)
                 mv ops/docker-compose.tst.yml docker-compose.yml
                 mv  $(Agent.TempDirectory)/.env-tst .env
+                cp .env airflow/config/.env_airflow
                 ls
 
           - task: DockerCompose@0
             displayName: "Start testing environment"
+            environment:
+              - airflow_image=uniappsk8sdevacr.azurecr.io/$(airflowImageRepository):$(Build.BuildId)
+              - frontend_image=uniappsk8sdevacr.azurecr.io/$(frontendImageRepository):$(Build.BuildId)
+              - backend_image=uniappsk8sdevacr.azurecr.io/$(backendImageRepository):$(Build.BuildId)
             inputs:
               containerregistrytype: 'Azure Container Registry'
               azureContainerRegistry: "$(containerRegistry)"
