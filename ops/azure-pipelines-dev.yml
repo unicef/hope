@@ -120,7 +120,6 @@ stages:
             inputs:
               script: |
                 cd cypress_testing_service
-                docker ps
                 yarn install
                 cd ..
 
@@ -128,6 +127,9 @@ stages:
             displayName: "Setup testing environment"
             inputs:
               script: |
+                docker ps
+                sleep 60
+                docker ps
                 docker exec unicefhct-mis_backend_1 ./manage.py migratealldb
                 docker exec unicefhct-mis_backend_1 ./manage.py loadbusinessareas
                 docker exec unicefhct-mis_backend_1 ./manage.py loadflexfieldsattributes
