@@ -1,0 +1,153 @@
+version: '3.7'
+
+volumes:
+  backend-data:
+  db:
+  db_ca:
+  db_reg:
+  db_airflow:
+  airflow:
+
+services:
+
+  proxy:
+    environment:
+      - DJANGO_APPLICATION_SERVICE_HOST=backend
+      - FRONTEND_HOST=frontend:3000
+    build:
+      context: ./proxy
+      dockerfile: ./Dockerfile
+    ports:
+      - "8082:80"
+    depends_on:
+      - backend
+    volumes:
+      - backend-data:/data
+
+  redis:
+    restart: always
+    image: redis:4.0.11-alpine3.8
+    expose:
+      - "6379"
+
+  frontend:
+    image: ${frontend_image}
+    env_file:
+      - .env
+    ports:
+      - "8088:80"
+      - "3000:3000"
+    volumes:
+      - ./frontend/:/code
+      - /code/node_modules
+    command: sh -c 'npm start'
+
+  backend:
+    image: ${backend_image}
+    env_file:
+      - .env
+    environment:
+      - REDIS_INSTANCE=redis:6379
+    ports:
+      - "8080:8000"
+    volumes:
+      - ./backend:/code/
+      - backend-data:/data
+    # FIXME: I know that links are deprecated
+    links:
+      - airflow_webserver
+    command: "dev"
+    depends_on:
+      - db
+      - redis
+      - cash_assist_datahub_db
+      - registration_datahub_db
+
+  db:
+    image: mdillon/postgis:9.5-alpine
+    volumes:
+      - db:/data/postgres
+    env_file:
+      - .env
+
+  cash_assist_datahub_db:
+    image: mdillon/postgis:9.5-alpine
+    volumes:
+      - db_ca:/data/postgres
+    env_file:
+      - .env
+    ports:
+      - "5433:5432"
+
+  registration_datahub_db:
+    image: mdillon/postgis:9.5-alpine
+    volumes:
+      - db_reg:/data/postgres
+    env_file:
+      - .env
+
+  airflow_db:
+    image: postgres:9.5.15-alpine
+    volumes:
+      - db_airflow:/data/postgres
+    env_file:
+      - ./airflow/config/.env_airflow
+
+  airflow_webserver:
+    image: ${airflow_image}
+    ports:
+      - "4200:8080"
+    env_file:
+      - .env
+    restart: always
+    depends_on:
+      - airflow_db
+      - db
+      - registration_datahub_db
+      - cash_assist_datahub_db
+      - airflow_worker
+      - redis
+    links:
+      - airflow_worker
+    volumes:
+      - ./airflow/connectors:/usr/local/airflow/connectors
+      - ./airflow/dags:/usr/local/airflow/dags
+      - ./backend:/usr/local/airflow/backend
+      - backend-data:/usr/local/airflow/data
+    command: webserver
+    logging:  #NOTE: noisy output silenced
+      driver: "none"
+    healthcheck:
+      test: ["CMD-SHELL", "[ -f /usr/local/airflow/airflow-webserver.pid ]"]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+
+  airflow_scheduler:
+    image: ${airflow_image}
+    env_file:
+      - .env
+    restart: always
+    volumes:
+      - ./airflow/connectors:/usr/local/airflow/connectors
+      - ./airflow/dags:/usr/local/airflow/dags
+      - ./backend:/usr/local/airflow/backend
+      - backend-data:/usr/local/airflow/data
+    command: scheduler
+    logging:  #NOTE: noisy output silenced
+      driver: "none"
+    depends_on:
+      - airflow_webserver
+      - airflow_db
+
+  airflow_worker:
+    image: ${airflow_image}
+    env_file:
+      - .env
+    restart: always
+    volumes:
+      - ./airflow/dags:/usr/local/airflow/dags
+      - ./airflow/connectors:/usr/local/airflow/connectors
+      - ./backend:/usr/local/airflow/backend
+      - backend-data:/usr/local/airflow/data
+    command: worker

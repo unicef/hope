@@ -28,25 +28,12 @@ stages:
         displayName: "[BACKEND]"
         steps:
           - task: Docker@2
-            displayName: Login to ACR
-            inputs:
-              command: login
-              containerRegistry: $(containerRegistry)
-
-          - task: CmdLine@2
-            displayName: "[CACHE] Pull latest"
-            inputs:
-              script: |
-                docker pull $(containerRegistry).azurecr.io/$(backendImageRepository):dev-latest
-
-          - task: Docker@2
             displayName: Build&Push
             inputs:
               command: buildAndPush
               dockerfile: $(backendDockerFilePath)
               repository: $(backendImageRepository)
               containerRegistry: $(containerRegistry)
-              arguments: --cache-from $(containerRegistry).azurecr.io/$(backendImageRepository):dev-latest
               tags: |
                 $(Build.BuildId)
                 dev-latest
@@ -81,16 +68,53 @@ stages:
                 $(Build.BuildId)
                 dev-latest
 
-  - stage: Deploy
-    displayName: Deploy app to K8S cluster.
+  - stage: test
+    displayName: TEST
+    jobs:
+      - job: cypress_e2e
+        displayName: "[CYPRESS]"
+        steps:
+          - task: Docker@2
+            displayName: "[ACR] Login"
+            inputs:
+              command: login
+              containerRegistry: $(containerRegistry)
+
+          - task: DownloadSecureFile@1
+            inputs:
+              secureFile: '.env-tst'
+
+          - task: CmdLine@2
+            displayName: "[ENV] Set Images"
+            inputs:
+              script: |
+                export airflow_image=uniappsk8sdevacr.azurecr.io/$(airflowImageRepository):$(Build.BuildId)
+                export frontend_image=uniappsk8sdevacr.azurecr.io/$(frontendImageRepository):$(Build.BuildId)
+                export backend_image=uniappsk8sdevacr.azurecr.io/$(backendImageRepository):$(Build.BuildId)
+                mv **/ops/docker-compose.tst.yml **/docker-compose.yml
+                mv **/.env-tst **/.env
+                ls
+
+          - task: DockerCompose@0
+            displayName: "Start testing environment"
+            inputs:
+              containerregistrytype: 'Azure Container Registry'
+              azureContainerRegistry: "$(containerRegistry)"
+              dockerComposeFile: '**/docker-compose.yml'
+              action: 'Run a Docker Compose command'
+              dockerComposeCommand: 'up'
+              # arguments: '-d'
+
+  - stage: deploy
+    displayName: DEPLOY
     condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
     jobs:
 
       - job: deploy_hct_mis
-        displayName: Deploy HCT-MIS
+        displayName: "[HCT-MIS]"
         steps:
           - task: HelmDeploy@0
-            displayName: Deploy HCT-MIS
+            displayName: "[HCT-MIS] DEPLOY"
             inputs:
               connectionType: 'Kubernetes Service Connection'
               kubernetesServiceConnection: 'ICTD-HCT-MIS-Demo-uni-apps-K8s-dev-hct-ims-dev-1574767480012'
@@ -143,10 +167,10 @@ stages:
                 databases.postgres-cash-assist-datahub-db.secret.POSTGRES_PASSWORD=$(CASH_ASSIST_REGISTRATION_DATAHUB_POSTGRES_PASSWORD),"
 
       - job: deploy_airflow
-        displayName: Deploy Airflow
+        displayName: "[AIRFLOW]"
         steps:
         - task: HelmDeploy@0
-          displayName: Helm repo update
+          displayName: "[HELM] Update REPO"
           inputs:
             connectionType: 'Kubernetes Service Connection'
             kubernetesServiceConnection: 'ICTD-HCT-MIS-Demo-uni-apps-K8s-dev-hct-ims-dev-1574767480012'
@@ -155,7 +179,7 @@ stages:
             arguments: add stable https://kubernetes-charts.storage.googleapis.com
 
         - task: HelmDeploy@0
-          displayName: Deploy Airflow
+          displayName: "[AIRFLOW] DEPLOY"
           inputs:
             connectionType: 'Kubernetes Service Connection'
             kubernetesServiceConnection: 'ICTD-HCT-MIS-Demo-uni-apps-K8s-dev-hct-ims-dev-1574767480012'
