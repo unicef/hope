@@ -82,7 +82,7 @@ stages:
 
           - task: DownloadSecureFile@1
             inputs:
-              secureFile: '.env-tst'
+              secureFile: ' $(Agent.TempDirectory).env-tst'
 
           - task: CmdLine@2
             displayName: "[ENV] Set Images"
@@ -91,8 +91,8 @@ stages:
                 export airflow_image=uniappsk8sdevacr.azurecr.io/$(airflowImageRepository):$(Build.BuildId)
                 export frontend_image=uniappsk8sdevacr.azurecr.io/$(frontendImageRepository):$(Build.BuildId)
                 export backend_image=uniappsk8sdevacr.azurecr.io/$(backendImageRepository):$(Build.BuildId)
-                mv **/ops/docker-compose.tst.yml **/docker-compose.yml
-                mv **/.env-tst **/.env
+                mv ops/docker-compose.tst.yml docker-compose.yml
+                mv  $(Agent.TempDirectory)/.env-tst .env
                 ls
 
           - task: DockerCompose@0
@@ -103,7 +103,6 @@ stages:
               dockerComposeFile: '**/docker-compose.yml'
               action: 'Run a Docker Compose command'
               dockerComposeCommand: 'up'
-              # arguments: '-d'
 
   - stage: deploy
     displayName: DEPLOY
