@@ -25,7 +25,7 @@ stages:
     displayName: Build&Push Images
     jobs:
       - job: build_push_backend
-        displayName: [build&push]BACKEND
+        displayName: "[Build&Push]BACKEND"
         steps:
           - task: Docker@2
             displayName: Build&Push
@@ -39,7 +39,7 @@ stages:
                 dev-latest
 
       - job: build_push_airflow
-        displayName: [build&push]AIRFLOW
+        displayName: "[Build&Push]AIRFLOW"
         steps:
           - task: Docker@2
             displayName: Build&Push
@@ -54,7 +54,7 @@ stages:
                 dev-latest
 
       - job: build_push_frontend
-        displayName: [build&push]FRONTEND
+        displayName: "[Build&Push]FRONTEND"
         steps:
           - task: Docker@2
             displayName: Build&Push
