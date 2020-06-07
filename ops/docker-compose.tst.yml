@@ -13,8 +13,6 @@ services:
   proxy:
     environment:
       - DJANGO_APPLICATION_SERVICE_HOST=backend
-      - FRONTEND_SERVICE_HOST=frontend
-      - FRONTEND_SERVICE_PORT=80
       - FRONTEND_HOST=frontend:80
     build:
       context: ./proxy
