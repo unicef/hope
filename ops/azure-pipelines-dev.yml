@@ -120,6 +120,7 @@ stages:
             inputs:
               script: |
                 cd cypress_testing_service
+                docker ps
                 yarn install
                 cd ..
 
