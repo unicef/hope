@@ -70,7 +70,6 @@ stages:
 
   - stage: test
     displayName: TEST
-    condition: always()
     jobs:
       - job: cypress_e2e
         displayName: "[CYPRESS]"
@@ -127,10 +126,6 @@ stages:
             displayName: "Setup testing environment"
             inputs:
               script: |
-                echo "WAITING FOR ENV..."
-                docker ps
-                sleep 60
-                docker ps
                 docker exec unicefhct-mis_backend_1 ./manage.py migratealldb
                 docker exec unicefhct-mis_backend_1 ./manage.py loadbusinessareas
                 docker exec unicefhct-mis_backend_1 ./manage.py loadflexfieldsattributes
@@ -140,9 +135,14 @@ stages:
             displayName: "Run Cypress"
             inputs:
               script: |
-                docker ps
                 cd cypress_testing_service
                 yarn cy:run
+                pwd
+                cd cypress
+                cd reports
+                cd junit
+                ls
+                pwd
 
           - task: PublishTestResults@2
             displayName: "Publish Test Result"
@@ -152,6 +152,7 @@ stages:
               testResultsFiles: '*.xml'
               searchFolder: (Agent.BuildDirectory)/s/cypress_testing_service/cypress/reports/junit
               mergeTestResults: true
+              failTaskOnFailedTests: true
               testRunTitle: 'TEST Results'
 
   - stage: deploy
