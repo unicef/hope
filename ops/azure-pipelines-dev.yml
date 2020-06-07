@@ -140,11 +140,13 @@ stages:
             displayName: "Run Cypress"
             inputs:
               script: |
+                docker ps
                 cd cypress_testing_service
                 yarn cy:run
 
           - task: PublishTestResults@2
             displayName: "Publish Test Result"
+            condition: always()
             inputs:
               testResultsFormat: 'JUnit'
               testResultsFiles: '*.xml'
