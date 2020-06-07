@@ -28,7 +28,7 @@ stages:
         displayName: "[BACKEND]"
         steps:
           - task: CmdLine@2
-            displayName: [CACHE] Pull latest
+            displayName: "[CACHE] Pull latest"
             inputs:
               script: |
                 docker pull $(containerRegistry).azurecr.io/$(backendImageRepository):dev-latest
