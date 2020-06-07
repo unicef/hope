@@ -82,7 +82,7 @@ stages:
 
           - task: DownloadSecureFile@1
             inputs:
-              secureFile: ' $(Agent.TempDirectory).env-tst'
+              secureFile: '.env-tst'
 
           - task: CmdLine@2
             displayName: "[ENV] Set Images"
