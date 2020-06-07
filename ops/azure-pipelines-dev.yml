@@ -21,7 +21,7 @@ variables:
   containerRegistry: "uniappsk8sdevacr"
 
 stages:
-  - stage: Build&Push
+  - stage: build_and_push
     displayName: Build&Push Images
     jobs:
       - job: build_push_backend
