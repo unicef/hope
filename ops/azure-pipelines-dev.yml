@@ -21,14 +21,14 @@ variables:
   containerRegistry: "uniappsk8sdevacr"
 
 stages:
-  - stage: Build
-    displayName: Build and push images
+  - stage: Build&Push
+    displayName: Build&Push Images
     jobs:
-      - job: Build
-        displayName: Build
+      - job: build_push_backend
+        displayName: [build&push]BACKEND
         steps:
           - task: Docker@2
-            displayName: Build and push backend image
+            displayName: Build&Push
             inputs:
               command: buildAndPush
               dockerfile: $(backendDockerFilePath)
@@ -36,9 +36,13 @@ stages:
               containerRegistry: $(containerRegistry)
               tags: |
                 $(Build.BuildId)
-          
+                dev-latest
+
+      - job: build_push_airflow
+        displayName: [build&push]AIRFLOW
+        steps:
           - task: Docker@2
-            displayName: Build and push airflow image
+            displayName: Build&Push
             inputs:
               command: buildAndPush
               dockerfile: $(airflowDockerFilePath)
@@ -47,9 +51,13 @@ stages:
               containerRegistry: $(containerRegistry)
               tags: |
                 $(Build.BuildId)
+                dev-latest
 
+      - job: build_push_frontend
+        displayName: [build&push]FRONTEND
+        steps:
           - task: Docker@2
-            displayName: Build and push frontend image
+            displayName: Build&Push
             inputs:
               command: buildAndPush
               dockerfile: $(frontendDockerFilePath)
@@ -58,12 +66,13 @@ stages:
               containerRegistry: $(containerRegistry)
               tags: |
                 $(Build.BuildId)
+                dev-latest
 
   - stage: Deploy
     displayName: Deploy app to K8S cluster.
     condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
     jobs:
-      
+
       - job: deploy_hct_mis
         displayName: Deploy HCT-MIS
         steps:
@@ -143,7 +152,7 @@ stages:
             releaseName: 'hct-mis-airflow'
             valueFile: "**/ops/airflow-values.yaml"
             install: true
-            force: true
+            force: false
             waitForExecution: false
             arguments: "--timeout 600s"
             overrideValues: "
