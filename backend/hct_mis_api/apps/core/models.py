@@ -102,7 +102,7 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
     """
     AdminArea model define place where agents are working.
     The background of the location can be:
-    BussinesAreaa > State > Province > City > District/Point.
+    BussinesArea > State > Province > City > District/Point.
     Either a point or geospatial object.
     related models:
         indicator.Reportable (ForeignKey): "reportable"
