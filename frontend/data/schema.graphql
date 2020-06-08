@@ -294,6 +294,7 @@ type HouseholdNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
+  lastSyncAt: DateTime
   status: HouseholdStatus!
   consent: String!
   residenceStatus: HouseholdResidenceStatus!
@@ -800,6 +801,7 @@ type IndividualNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
+  lastSyncAt: DateTime
   status: IndividualStatus!
   individualId: String!
   photo: String!
@@ -1068,9 +1070,8 @@ type ProgramNodeEdge {
 }
 
 enum ProgramScope {
-  FULL
-  PARTIAL
-  NO_INTEGRATION
+  FOR_PARTNERS
+  UNICEF
 }
 
 enum ProgramSector {
@@ -1289,6 +1290,7 @@ type TargetPopulationNode implements Node {
   program: ProgramNode
   candidateListTargetingCriteria: TargetingCriteriaNode
   finalListTargetingCriteria: TargetingCriteriaNode
+  sentToDatahub: Boolean!
   paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
   selections: [HouseholdSelection!]!
   totalHouseholds: Int
