@@ -61,8 +61,9 @@ export function HomeRouter(): React.ReactElement {
         open={open}
         handleDrawerClose={handleDrawerClose}
         currentLocation={location.pathname}
+        dataCy='side-nav'
       />
-      <MainContent>
+      <MainContent data-cy='main-content'>
         <div className={classes.appBarSpacer} />
         <Switch>
           <Route path='/:businessArea/population/household/:id'>
@@ -122,7 +123,7 @@ export function HomeRouter(): React.ReactElement {
           autoHideDuration={5000}
           onClose={() => snackBar.setShow(false)}
         >
-          <SnackbarContent message={snackBar.message} />
+          <SnackbarContent message={snackBar.message} data-cy={snackBar.dataCy} />
         </Snackbar>
       )}
     </Root>

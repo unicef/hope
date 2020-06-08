@@ -117,6 +117,7 @@ export function CreateTargetPopulation() {
                   color='primary'
                   onClick={submitForm}
                   disabled={!values.name || !values.criterias.length}
+                  data-cy='button-target-population-create'
                 >
                   Save
                 </Button>

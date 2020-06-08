@@ -1,8 +1,6 @@
 import React from 'react';
 import {
   Button,
-  Dialog,
-  DialogActions,
   DialogContent,
   DialogTitle,
   Typography,
@@ -18,6 +16,8 @@ import {
 } from '../../../__generated__/graphql';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { DialogActions } from '../DialogActions';
+import { Dialog } from '../Dialog';
 
 export interface ApproveCandidateListPropTypes {
   open: boolean;
@@ -117,6 +117,7 @@ export function ApproveCandidateList({ open, setOpen, targetPopulationId }) {
                   variant='contained'
                   onClick={submitForm}
                   disabled={!loading || !values.program}
+                  data-cy='button-target-population-close'
                 >
                   Close
                 </Button>

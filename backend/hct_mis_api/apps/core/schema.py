@@ -4,7 +4,7 @@ from collections import Iterable
 import graphene
 from auditlog.models import LogEntry
 from django.contrib.gis.db.models import GeometryField
-from django.contrib.gis.forms import PointField
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Q
 from django.utils.encoding import force_text
@@ -17,15 +17,20 @@ from graphene import (
     relay,
     ConnectionField,
     Connection,
+    Boolean,
 )
 from graphene.types.resolver import dict_or_attr_resolver
 from graphene_django import DjangoObjectType
 from graphene_django.converter import convert_django_field
 from graphene_django.filter import DjangoFilterConnectionField
+from graphql import GraphQLError
+from requests import HTTPError
 
 from account.schema import UserObjectType
-from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES, FILTERABLE_CORE_FIELDS_ATTRIBUTES
+from core.core_fields_attributes import FILTERABLE_CORE_FIELDS_ATTRIBUTES
 from core.extended_connection import ExtendedConnection
+from core.kobo.api import KoboAPI
+from core.kobo.common import reduce_assets_list, reduce_asset
 from core.models import (
     AdminArea,
     BusinessArea,
@@ -161,9 +166,9 @@ class LabelNode(graphene.ObjectType):
     label = graphene.String()
 
 
-def resolve_label(parrent):
+def resolve_label(parent):
     labels = []
-    for k, v in parrent.items():
+    for k, v in parent.items():
         labels.append({"language": k, "label": v})
     return labels
 
@@ -175,20 +180,16 @@ class CoreFieldChoiceObject(graphene.ObjectType):
     admin = String()
     list_name = String()
 
-    def resolve_label_en(parrent, info):
-        return dict_or_attr_resolver("label", None, parrent, info)[
-            "English(EN)"
-        ]
+    def resolve_label_en(parent, info):
+        return dict_or_attr_resolver("label", None, parent, info)["English(EN)"]
 
-    def resolve_value(parrent, info):
-        if isinstance(parrent, FlexibleAttributeChoice):
-            return parrent.name
-        return dict_or_attr_resolver("value", None, parrent, info)
+    def resolve_value(parent, info):
+        if isinstance(parent, FlexibleAttributeChoice):
+            return parent.name
+        return dict_or_attr_resolver("value", None, parent, info)
 
-    def resolve_labels(parrent, info):
-        return resolve_label(
-            dict_or_attr_resolver("label", None, parrent, info)
-        )
+    def resolve_labels(parent, info):
+        return resolve_label(dict_or_attr_resolver("label", None, parent, info))
 
 
 class FieldAttributeNode(graphene.ObjectType):
@@ -203,27 +204,45 @@ class FieldAttributeNode(graphene.ObjectType):
     associated_with = graphene.String()
     is_flex_field = graphene.Boolean()
 
-    def resolve_choices(parrent, info):
+    def resolve_choices(parent, info):
         if isinstance(
-            dict_or_attr_resolver("choices", None, parrent, info), Iterable
+            dict_or_attr_resolver("choices", None, parent, info), Iterable
         ):
-            return parrent["choices"]
-        return parrent.choices.all()
+            return parent["choices"]
+        return parent.choices.all()
 
     def resolve_is_flex_field(self, info):
         if isinstance(self, FlexibleAttribute):
             return True
         return False
 
-    def resolve_labels(parrent, info):
-        return resolve_label(
-            dict_or_attr_resolver("label", None, parrent, info)
-        )
+    def resolve_labels(parent, info):
+        return resolve_label(dict_or_attr_resolver("label", None, parent, info))
 
-    def resolve_label_en(parrent, info):
-        return dict_or_attr_resolver("label", None, parrent, info)[
-            "English(EN)"
-        ]
+    def resolve_label_en(parent, info):
+        return dict_or_attr_resolver("label", None, parent, info)["English(EN)"]
+
+
+class KoboAssetObject(graphene.ObjectType):
+    id = String()
+    name = String()
+    sector = String()
+    country = String()
+    asset_type = String()
+    date_modified = DateTime()
+    deployment_active = Boolean()
+    has_deployment = Boolean()
+    xls_link = String()
+
+
+class KoboAssetObjectConnection(Connection):
+    total_count = graphene.Int()
+
+    def resolve_total_count(self, info, **kwargs):
+        return len(self.iterable)
+
+    class Meta:
+        node = KoboAssetObject
 
 
 class GeoJSON(graphene.Scalar):
@@ -248,6 +267,25 @@ def get_fields_attr_generators(flex_field):
             yield attr
 
 
+def resolve_assets(business_area_slug, uid: str = None, *args, **kwargs):
+    if uid is not None:
+        method = KoboAPI(business_area_slug).get_single_project_data(uid)
+        return_method = reduce_asset
+    else:
+        method = KoboAPI(business_area_slug).get_all_projects_data()
+        return_method = reduce_assets_list
+    try:
+        assets = method
+    except ObjectDoesNotExist:
+        raise GraphQLError("Provided business area does not exist.")
+    except AttributeError as error:
+        raise GraphQLError(str(error))
+
+    return return_method(
+        assets, only_deployed=kwargs.get("only_deployed", False)
+    )
+
+
 class Query(graphene.ObjectType):
     admin_area = relay.Node.Field(AdminAreaNode)
     all_admin_areas = DjangoFilterConnectionField(
@@ -262,10 +300,33 @@ class Query(graphene.ObjectType):
         flex_field=graphene.Boolean(),
         description="All field datatype meta.",
     )
+    kobo_project = graphene.Field(
+        KoboAssetObject,
+        uid=graphene.String(required=True),
+        business_area_slug=graphene.String(required=True),
+        description="Single Kobo project/asset.",
+    )
+    all_kobo_projects = ConnectionField(
+        KoboAssetObjectConnection,
+        business_area_slug=graphene.String(required=True),
+        only_deployed=graphene.Boolean(required=False),
+        description="All Kobo projects/assets.",
+    )
 
     def resolve_all_log_entries(self, info, object_id, **kwargs):
         id = decode_id_string(object_id)
         return LogEntry.objects.filter(~Q(action=0), object_pk=id).all()
 
-    def resolve_all_fields_attributes(parrent, info, flex_field=None):
+    def resolve_all_fields_attributes(parent, info, flex_field=None):
         return get_fields_attr_generators(flex_field)
+
+    def resolve_kobo_project(self, info, uid, business_area_slug, **kwargs):
+        return resolve_assets(business_area_slug=business_area_slug, uid=uid)
+
+    def resolve_all_kobo_projects(
+        self, info, business_area_slug, *args, **kwargs
+    ):
+        return resolve_assets(
+            business_area_slug=business_area_slug,
+            only_deployed=kwargs.get("only_deployed", False),
+        )

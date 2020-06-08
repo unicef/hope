@@ -49,6 +49,9 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
 
     Has N:N association with households.
     """
+    STATUS_DRAFT = "DRAFT"
+    STATUS_APPROVED = "APPROVED"
+    STATUS_FINALIZED= "FINALIZED"
 
     name = models.TextField(unique=True)
     created_by = models.ForeignKey(
@@ -75,9 +78,9 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
         "core.BusinessArea", null=True, on_delete=models.CASCADE
     )
     STATUS_CHOICES = (
-        ("DRAFT", _("Open")),
-        ("APPROVED", _("Closed")),
-        ("FINALIZED", _("Sent")),
+        (STATUS_DRAFT, _("Open")),
+        (STATUS_APPROVED, _("Closed")),
+        (STATUS_FINALIZED, _("Sent")),
     )
 
     status = models.CharField(
@@ -127,6 +130,12 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
         null=True,
         on_delete=models.SET_NULL,
         related_name="target_population_final",
+    )
+    sent_to_datahub = models.BooleanField(
+        default=False,
+        help_text="""
+            Flag set when TP is processed by airflow task
+            """,
     )
 
     @property
@@ -255,6 +264,7 @@ class HouseholdSelection(TimeStampedUUIDModel):
             CashAssist when a sync is run for the associated target population.
             """,
     )
+
 
 
 class TargetingCriteriaQueryingMixin:
