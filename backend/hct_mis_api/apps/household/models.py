@@ -276,6 +276,8 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
     )
     disability = models.BooleanField(default=False,)
     flex_fields = JSONField(default=dict)
+    enrolled_in_nutrition_programme = models.BooleanField(default=False)
+    administration_of_rutf = models.BooleanField(default=False)
 
     @property
     def age(self):
