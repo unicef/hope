@@ -116,6 +116,11 @@ class XlsxRowErrorNode(graphene.ObjectType):
     message = graphene.String()
 
 
+class KoboErrorNode(graphene.ObjectType):
+    header = graphene.String()
+    message = graphene.String()
+
+
 class Query(graphene.ObjectType):
     imported_household = relay.Node.Field(ImportedHouseholdNode)
     all_imported_households = DjangoFilterConnectionField(

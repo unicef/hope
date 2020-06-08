@@ -8,7 +8,7 @@ from django.core.validators import (
     MaxLengthValidator,
 )
 from django.db import models
-from django.db.models import Sum
+from django.db.models import Sum, UUIDField
 from django.db.models.functions import Coalesce
 from django.utils.translation import ugettext_lazy as _
 
@@ -56,13 +56,13 @@ class Program(TimeStampedUUIDModel):
         (WASH, _("WASH")),
     )
 
-    FULL = "FULL"
-    PARTIAL = "PARTIAL"
-    NO_INTEGRATION = "NO_INTEGRATION"
+
+    SCOPE_FOR_PARTNERS = "FOR_PARTNERS"
+    SCOPE_UNICEF = "UNICEF"
+
     SCOPE_CHOICE = (
-        (FULL, _("Full")),
-        (PARTIAL, _("Partial")),
-        (NO_INTEGRATION, _("No Integration")),
+        (SCOPE_FOR_PARTNERS, _("For partners")),
+        (SCOPE_UNICEF, _("Unicef")),
     )
 
     name = models.CharField(
@@ -104,7 +104,7 @@ class Program(TimeStampedUUIDModel):
     @property
     def total_number_of_households(self):
         return self.cash_plans.aggregate(
-            households=Coalesce(Sum("number_of_households"), 0),
+            households=Coalesce(Sum("total_persons_covered"), 0),
         )["households"]
 
     class Meta:
@@ -112,47 +112,58 @@ class Program(TimeStampedUUIDModel):
 
 
 class CashPlan(TimeStampedUUIDModel):
-    NOT_STARTED = "NOT_STARTED"
-    STARTED = "STARTED"
-    COMPLETE = "COMPLETE"
+    DISTRIBUTION_COMPLETED = (
+        "Distribution Completed"
+    )
+    DISTRIBUTION_COMPLETED_WITH_ERRORS = "Distribution Completed with Errors"
+    TRANSACTION_COMPLETED = "Transaction Completed"
+    TRANSACTION_COMPLETED_WITH_ERRORS = "Transaction Completed with Errors"
 
     STATUS_CHOICE = (
-        (NOT_STARTED, _("NOT_STARTED")),
-        (STARTED, _("STARTED")),
-        ("COMPLETE", _("COMPLETE")),
+        (DISTRIBUTION_COMPLETED, _("Distribution Completed")),
+        (
+            DISTRIBUTION_COMPLETED_WITH_ERRORS,
+            _("Distribution Completed with Errors"),
+        ),
+        (TRANSACTION_COMPLETED, _("Transaction Completed")),
+        (
+            TRANSACTION_COMPLETED_WITH_ERRORS,
+            _("Transaction Completed with Errors"),
+        ),
     )
-
-    program = models.ForeignKey(
-        "Program", on_delete=models.CASCADE, related_name="cash_plans",
+    business_area = models.ForeignKey(
+        "core.BusinessArea", on_delete=models.CASCADE
     )
-    name = models.CharField(
-        max_length=255,
-        validators=[MinLengthValidator(3), MaxLengthValidator(255)],
-    )
+    ca_id = models.CharField(max_length=255)
+    ca_hash_id = models.UUIDField(unique=True)
+    status = models.CharField(max_length=255, choices=STATUS_CHOICE,)
+    status_date = models.DateTimeField()
+    name = models.CharField(max_length=255)
+    distribution_level = models.CharField(max_length=255)
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
-    disbursement_date = models.DateTimeField()
-    number_of_households = models.PositiveIntegerField()
-    created_date = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        related_name="cash_plans",
-        null=True,
-    )
+    dispersion_date = models.DateTimeField()
     coverage_duration = models.PositiveIntegerField()
-    coverage_units = models.CharField(max_length=255)
-    target_population = models.ForeignKey(
-        "targeting.TargetPopulation",
-        on_delete=models.CASCADE,
-        related_name="cash_plans",
+    coverage_unit = models.CharField(max_length=255)
+    comments = models.CharField(max_length=255)
+    program = models.ForeignKey(
+        "program.Program", on_delete=models.CASCADE, related_name="cash_plans"
     )
-    cash_assist_id = models.CharField(max_length=255)
-    distribution_modality = models.CharField(max_length=255)
-    fsp = models.CharField(max_length=255)
-    status = models.CharField(max_length=50, choices=STATUS_CHOICE)
-    currency = models.CharField(max_length=255)
+    delivery_type = models.CharField(max_length=255)
+    assistance_measurement = models.CharField(max_length=255)
+    assistance_through = models.CharField(max_length=255)
+    vision_id = models.CharField(max_length=255)
+    funds_commitment = models.CharField(max_length=255)
+    down_payment = models.CharField(max_length=255)
+    validation_alerts_count = models.IntegerField()
+    total_persons_covered = models.IntegerField()
+    total_persons_covered_revised = models.IntegerField()
     total_entitled_quantity = models.DecimalField(
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0.01"))],
+    )
+    total_entitled_quantity_revised = models.DecimalField(
         decimal_places=2,
         max_digits=12,
         validators=[MinValueValidator(Decimal("0.01"))],
@@ -167,11 +178,10 @@ class CashPlan(TimeStampedUUIDModel):
         max_digits=12,
         validators=[MinValueValidator(Decimal("0.01"))],
     )
-    dispersion_date = models.DateField()
-    delivery_type = models.CharField(max_length=255)
-    assistance_through = models.CharField(max_length=255)
-    fc_id = models.CharField(max_length=255)
-    dp_id = models.CharField(max_length=255)
+
+    @property
+    def payment_records_count(self):
+        return self.payment_records.count()
 
 
 auditlog.register(Program)

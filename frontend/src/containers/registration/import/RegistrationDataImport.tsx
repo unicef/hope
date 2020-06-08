@@ -5,29 +5,26 @@ import * as Yup from 'yup';
 import { useTranslation } from 'react-i18next';
 import {
   Button,
-  CardActions,
-  Collapse,
-  Dialog,
-  DialogActions,
   DialogContent,
   DialogTitle,
   FormControl,
-  IconButton,
   InputLabel,
   MenuItem,
   Select,
   Typography,
 } from '@material-ui/core';
-import ExpandMoreRoundedIcon from '@material-ui/icons/ExpandMoreRounded';
-import ExpandLessRoundedIcon from '@material-ui/icons/ExpandLessRounded';
-
 import ExitToAppRoundedIcon from '@material-ui/icons/ExitToAppRounded';
 import { useDropzone } from 'react-dropzone';
 import { Field, Form, Formik } from 'formik';
 import get from 'lodash/get';
 import {
+  KoboErrorNode,
+  SaveKoboImportDataMutation,
   UploadImportDataXlsxFileMutation,
-  useCreateRegistrationDataImportMutation,
+  useAllKoboProjectsQuery,
+  useCreateRegistrationKoboImportMutation,
+  useCreateRegistrationXlsxImportMutation,
+  useSaveKoboImportDataMutation,
   useUploadImportDataXlsxFileMutation,
   XlsxRowErrorNode,
 } from '../../../__generated__/graphql';
@@ -35,7 +32,10 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { FormikTextField } from '../../../shared/Formik/FormikTextField';
 import { LoadingComponent } from '../../../components/LoadingComponent';
-import { FormikTagsSelectField } from '../../../shared/Formik/FormikTagsSelectField';
+import { ErrorsKobo } from './errors/KoboErrors';
+import { Errors } from './errors/PlainErrors';
+import { Dialog } from '../../dialogs/Dialog';
+import { DialogActions } from '../../dialogs/DialogActions';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -83,15 +83,6 @@ const StyledDialogFooter = styled(DialogFooter)`
     justify-content: space-between;
   }
 `;
-const Error = styled.div`
-  color: ${({ theme }) => theme.palette.error.dark};
-`;
-const ErrorsContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-`;
 
 function DropzoneField({ onChange, loading }): React.ReactElement {
   const onDrop = useCallback((acceptedFiles) => {
@@ -108,42 +99,10 @@ function DropzoneField({ onChange, loading }): React.ReactElement {
     <div>
       <DropzoneContainer {...getRootProps()} disabled={loading}>
         <LoadingComponent isLoading={loading} absolute />
-        <input {...getInputProps()} />
+        <input {...getInputProps()} data-cy='rdi-file-input' />
         {acceptedFilename || 'UPLOAD FILE'}
       </DropzoneContainer>
     </div>
-  );
-}
-
-function Errors({
-  errors,
-}: {
-  errors: XlsxRowErrorNode[];
-}): React.ReactElement {
-  const [expanded, setExpanded] = useState(false);
-  if (!errors || !errors.length) {
-    return null;
-  }
-  return (
-    <>
-      <ErrorsContainer>
-        <Error>Errors</Error>
-        <IconButton
-          onClick={() => setExpanded(!expanded)}
-          aria-expanded={expanded}
-          aria-label='show more'
-        >
-          {expanded ? <ExpandLessRoundedIcon /> : <ExpandMoreRoundedIcon />}
-        </IconButton>
-      </ErrorsContainer>
-      <Collapse in={expanded} timeout='auto' unmountOnExit>
-        {errors.map((item) => (
-          <Error>
-            <strong>Row: {item.rowNumber}</strong> {item.message}
-          </Error>
-        ))}
-      </Collapse>
-    </>
   );
 }
 
@@ -153,7 +112,8 @@ const validationSchema = Yup.object().shape({
 
 export function RegistrationDataImport(): React.ReactElement {
   const [open, setOpen] = useState(false);
-
+  const [importType, setImportType] = useState();
+  const [koboProject, setKoboProject] = useState();
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
   const [
@@ -161,25 +121,52 @@ export function RegistrationDataImport(): React.ReactElement {
     { data: uploadData, loading: fileLoading },
   ] = useUploadImportDataXlsxFileMutation();
   const [
-    createRegistrationMutate,
+    createRegistrationXlsxMutate,
     { loading: createLoading },
-  ] = useCreateRegistrationDataImportMutation();
-  const [importType, setImportType] = useState();
+  ] = useCreateRegistrationXlsxImportMutation();
+  const [
+    saveKoboImportDataMutate,
+    { loading: saveKoboLoading, data: koboImportData },
+  ] = useSaveKoboImportDataMutation();
+  const [
+    createRegistrationKoboMutate,
+    { loading: createKoboLoading },
+  ] = useCreateRegistrationKoboImportMutation();
+  const { data: koboProjectsData, error, loading } = useAllKoboProjectsQuery({
+    variables: { businessAreaSlug: businessArea },
+  });
   const { t } = useTranslation();
-  const errors: UploadImportDataXlsxFileMutation['uploadImportDataXlsxFile']['errors'] = get(
+  const xlsxErrors: UploadImportDataXlsxFileMutation['uploadImportDataXlsxFile']['errors'] = get(
     uploadData,
     'uploadImportDataXlsxFile.errors',
   );
+  const koboErrors: SaveKoboImportDataMutation['saveKoboImportData']['errors'] =
+    koboImportData?.saveKoboImportData?.errors;
   let counters = null;
-  if (get(uploadData, 'uploadImportDataXlsxFile.importData')) {
+  let disabled = true;
+  if (uploadData?.uploadImportDataXlsxFile?.importData) {
     counters = (
       <>
-        <div>
+        <div data-cy='import-available-households-counter'>
           {uploadData.uploadImportDataXlsxFile.importData.numberOfHouseholds}{' '}
           Households available to Import
         </div>
-        <div>
+        <div data-cy='import-available-individuals-counter'>
           {uploadData.uploadImportDataXlsxFile.importData.numberOfIndividuals}{' '}
+          Individuals available to Import
+        </div>
+      </>
+    );
+  }
+  if (koboImportData?.saveKoboImportData?.importData) {
+    counters = (
+      <>
+        <div>
+          {koboImportData?.saveKoboImportData?.importData.numberOfHouseholds}{' '}
+          Households available to Import
+        </div>
+        <div>
+          {koboImportData?.saveKoboImportData?.importData.numberOfIndividuals}{' '}
           Individuals available to Import
         </div>
       </>
@@ -187,6 +174,7 @@ export function RegistrationDataImport(): React.ReactElement {
   }
   let importTypeSpecificContent = null;
   if (importType === 'excel') {
+    disabled = !uploadData || createLoading;
     importTypeSpecificContent = (
       <>
         <DropzoneField
@@ -211,8 +199,40 @@ export function RegistrationDataImport(): React.ReactElement {
             });
           }}
         />
-        <Errors errors={errors as XlsxRowErrorNode[]} />
+        <Errors errors={xlsxErrors as XlsxRowErrorNode[]} />
       </>
+    );
+  } else if (importType === 'kobo') {
+    disabled = saveKoboLoading || !koboImportData;
+    const koboProjects = koboProjectsData?.allKoboProjects?.edges || [];
+    importTypeSpecificContent = (
+      <div>
+        <FormControl variant='filled' margin='dense'>
+          <InputLabel>Import from</InputLabel>
+          <ComboBox
+            value={koboProject}
+            variant='filled'
+            label='Kobo Project'
+            onChange={(e) => {
+              setKoboProject(e.target.value);
+              saveKoboImportDataMutate({
+                variables: {
+                  projectId: e.target.value,
+                  businessAreaSlug: businessArea,
+                },
+              });
+            }}
+            fullWidth
+          >
+            {koboProjects.map((item) => (
+              <MenuItem key={item.node.id} value={item.node.id}>
+                {item.node.name}
+              </MenuItem>
+            ))}
+          </ComboBox>
+        </FormControl>
+        <ErrorsKobo errors={koboErrors as KoboErrorNode[]} />
+      </div>
     );
   }
 
@@ -223,6 +243,7 @@ export function RegistrationDataImport(): React.ReactElement {
         color='primary'
         startIcon={<ExitToAppRoundedIcon />}
         onClick={() => setOpen(true)}
+        data-cy='button-import'
       >
         IMPORT
       </Button>
@@ -235,18 +256,35 @@ export function RegistrationDataImport(): React.ReactElement {
         <Formik
           validationSchema={validationSchema}
           onSubmit={async (values) => {
-            const { data } = await createRegistrationMutate({
-              variables: {
-                registrationDataImportData: {
-                  importDataId:
-                    uploadData.uploadImportDataXlsxFile.importData.id,
-                  name: values.name,
-                  businessAreaSlug: businessArea,
+            let rdiId = null;
+            if (importType === 'kobo') {
+              const { data } = await createRegistrationKoboMutate({
+                variables: {
+                  registrationDataImportData: {
+                    importDataId:
+                      koboImportData.saveKoboImportData.importData.id,
+                    name: values.name,
+                    businessAreaSlug: businessArea,
+                  },
                 },
-              },
-            });
+              });
+              rdiId = data?.registrationKoboImport?.registrationDataImport?.id;
+            } else if (importType === 'excel') {
+              const { data } = await createRegistrationXlsxMutate({
+                variables: {
+                  registrationDataImportData: {
+                    importDataId:
+                      uploadData.uploadImportDataXlsxFile.importData.id,
+                    name: values.name,
+                    businessAreaSlug: businessArea,
+                  },
+                },
+              });
+              rdiId = data?.registrationXlsxImport?.registrationDataImport?.id;
+            }
+
             showMessage('Registration', {
-              pathname: `/${businessArea}/registration-data-import/${data.createRegistrationDataImport.registrationDataImport.id}`,
+              pathname: `/${businessArea}/registration-data-import/${rdiId}`,
               historyMethod: 'push',
             });
           }}
@@ -262,11 +300,10 @@ export function RegistrationDataImport(): React.ReactElement {
                 </DialogTitle>
               </DialogTitleWrapper>
               <DialogContent>
+                to CashAssist?
                 <DialogDescription>
                   Are you sure you want to activate this Programme and push data
-                  to CashAssist?
                 </DialogDescription>
-
                 <FormControl variant='filled' margin='dense'>
                   <InputLabel>Import from</InputLabel>
                   <ComboBox
@@ -275,6 +312,12 @@ export function RegistrationDataImport(): React.ReactElement {
                     label=''
                     onChange={(e) => setImportType(e.target.value)}
                     fullWidth
+                    SelectDisplayProps={{
+                      'data-cy': 'select-import-from',
+                    }}
+                    MenuProps={{
+                      'data-cy': 'select-import-from-options',
+                    }}
                   >
                     <MenuItem key='excel' value='excel'>
                       Excel
@@ -295,12 +338,20 @@ export function RegistrationDataImport(): React.ReactElement {
                   component={FormikTextField}
                 />
               </DialogContent>
-              <StyledDialogFooter>
+              <StyledDialogFooter data-cy='dialog-actions-container'>
                 <Button
                   variant='text'
                   color='primary'
                   component='a'
                   href='/api/download-template'
+                  onClick={(event) => {
+                    /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
+                    // @ts-ignore
+                    if (window.Cypress) {
+                      event.preventDefault();
+                    }
+                  }}
+                  data-cy='a-download-template'
                 >
                   DOWNLOAD TEMPLATE
                 </Button>
@@ -310,10 +361,11 @@ export function RegistrationDataImport(): React.ReactElement {
                     type='submit'
                     color='primary'
                     variant='contained'
-                    disabled={!uploadData || createLoading}
+                    disabled={disabled}
                     onClick={() => {
                       submitForm();
                     }}
+                    data-cy='button-import'
                   >
                     {t('IMPORT')}
                   </Button>

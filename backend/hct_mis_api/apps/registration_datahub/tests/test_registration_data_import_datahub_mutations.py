@@ -122,12 +122,12 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
 
         import_data_obj = ImportData.objects.first()
         self.assertIn(
-            "new_reg_data_import", import_data_obj.xlsx_file.name,
+            "new_reg_data_import", import_data_obj.file.name,
         )
 
     def test_registration_data_import_create(self):
         import_data_obj = ImportData.objects.create(
-            xlsx_file=self.valid_file,
+            file=self.valid_file,
             number_of_households=3,
             number_of_individuals=6,
         )

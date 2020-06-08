@@ -7,7 +7,6 @@ import {
   DialogTitle,
   Typography,
   Button,
-  DialogActions,
   IconButton,
 } from '@material-ui/core';
 import { AddCircleOutline, Delete } from '@material-ui/icons';
@@ -19,6 +18,7 @@ import {
   mapCriteriasToInitialValues,
 } from '../../utils/utils';
 import { CriteriaAutocomplete } from '../../components/TargetPopulation/TargetingCriteria/CriteriaAutocomplete';
+import { DialogActions } from '../dialogs/DialogActions'
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -154,9 +154,8 @@ export function TargetCriteriaForm({
   };
 
   const clearField = (arrayHelpers, index) => {
-    return arrayHelpers.replace(index, {
-    });
-  }
+    return arrayHelpers.replace(index, {});
+  };
 
   if (loading) return null;
 
@@ -208,11 +207,14 @@ export function TargetCriteriaForm({
                                 value={each.fieldName || null}
                                 onChange={(e, object) => {
                                   if (object) {
-                                    return chooseFieldType(object, arrayHelpers, index)
+                                    return chooseFieldType(
+                                      object,
+                                      arrayHelpers,
+                                      index,
+                                    );
                                   }
-                                  return clearField(arrayHelpers, index)
-                                }
-                                }
+                                  return clearField(arrayHelpers, index);
+                                }}
                                 component={CriteriaAutocomplete}
                               />
                               {values.filters.length > 1 && (
@@ -223,13 +225,17 @@ export function TargetCriteriaForm({
                                 </IconButton>
                               )}
                             </FlexWrapper>
-                            {each.fieldName && SubField(each, index)}
+                            {each.fieldName && (
+                              <div data-cy='autocomplete-target-criteria-values'>
+                                {SubField(each, index)}
+                              </div>
+                            )}
                             {(values.filters.length === 1 && index === 0) ||
-                              index === values.filters.length - 1 ? null : (
-                                <Divider>
-                                  <DividerLabel>And</DividerLabel>
-                                </Divider>
-                              )}
+                            index === values.filters.length - 1 ? null : (
+                              <Divider>
+                                <DividerLabel>And</DividerLabel>
+                              </Divider>
+                            )}
                           </div>
                         );
                       })}
@@ -253,6 +259,7 @@ export function TargetCriteriaForm({
                     type='submit'
                     color='primary'
                     variant='contained'
+                    data-cy='button-target-population-add-criteria'
                   >
                     Save
                   </Button>

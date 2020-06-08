@@ -17,8 +17,11 @@ from core.utils import (
 from household.const import COUNTRIES_NAME_ALPHA2
 from household.models import IDENTIFICATION_TYPE_CHOICE
 from registration_data.models import RegistrationDataImport
-from registration_datahub.models import ImportData, ImportedAgency, \
-    ImportedIndividualIdentity
+from registration_datahub.models import (
+    ImportData,
+    ImportedAgency,
+    ImportedIndividualIdentity,
+)
 from registration_datahub.models import (
     ImportedDocument,
     ImportedDocumentType,
@@ -30,7 +33,7 @@ from registration_datahub.models import (
 from registration_datahub.models import RegistrationDataImportDatahub
 
 
-class RdiCreateTask:
+class RdiXlsxCreateTask:
     """
     Works on valid XLSX files, parsing them and creating households/individuals
     in the Registration Datahub. Once finished it will update the status of
@@ -234,7 +237,8 @@ class RdiCreateTask:
                 agency=ident_data["agency"],
                 individual=ident_data["individual"],
                 document_number=ident_data["number"],
-            ) for ident_data in self.identities.values()
+            )
+            for ident_data in self.identities.values()
         ]
 
         ImportedIndividualIdentity.objects.bulk_create(idents_to_create)
@@ -395,7 +399,7 @@ class RdiCreateTask:
 
         self.business_area = BusinessArea.objects.get(id=business_area_id)
 
-        wb = openpyxl.load_workbook(import_data.xlsx_file, data_only=True)
+        wb = openpyxl.load_workbook(import_data.file, data_only=True)
 
         # households objects have to be create first
         worksheets = (wb["Households"], wb["Individuals"])
@@ -409,3 +413,17 @@ class RdiCreateTask:
         RegistrationDataImport.objects.filter(
             id=registration_data_import.hct_id
         ).update(status="IN_REVIEW")
+
+
+class RdiKoboCreate:
+    """
+    Imports project data from Kobo via a REST API, parsing them and creating
+    households/individuals in the Registration Datahub. Once finished it will
+    update the status of that registration data import instance.
+    """
+
+    @transaction.atomic()
+    def execute(
+        self, registration_data_import_id, business_area_id, submission_data
+    ):
+        pass

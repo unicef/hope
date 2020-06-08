@@ -9,4 +9,16 @@ class RegistrationKoboImportOperator(DjangoOperator):
     """
 
     def execute(self, context):
-        pass
+        from registration_datahub.tasks.rdi_create import RdiXlsxCreateTask
+
+        dag_run = context["dag_run"]
+        config_vars = dag_run.conf
+
+        task = RdiXlsxCreateTask()
+        task.execute(
+            registration_data_import_id=config_vars.get(
+                "registration_data_import_id"
+            ),
+            submission_data=config_vars.get("submission_data"),
+            business_area_id=config_vars.get("business_area"),
+        )
