@@ -141,6 +141,15 @@ class ImportedIndividual(TimeStampedUUIDModel):
 
 
 class RegistrationDataImportDatahub(TimeStampedUUIDModel):
+    NOT_STARTED = "NOT_STARTED"
+    STARTED = "STARTED"
+    DONE = "DONE"
+    IMPORT_DONE_CHOICES = (
+        (NOT_STARTED, _("Not Started")),
+        (STARTED, _("Started")),
+        (DONE, _("Done")),
+    )
+
     name = models.CharField(max_length=255, blank=True)
     import_date = models.DateTimeField(auto_now_add=True)
     hct_id = models.UUIDField(null=True)
@@ -150,7 +159,9 @@ class RegistrationDataImportDatahub(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
         null=True,
     )
-    import_done = models.BooleanField(default=False)
+    import_done = models.CharField(
+        max_length=15, choices=IMPORT_DONE_CHOICES, default=NOT_STARTED
+    )
 
     def __str__(self):
         return self.name

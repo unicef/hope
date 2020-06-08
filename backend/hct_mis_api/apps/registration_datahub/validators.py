@@ -821,25 +821,20 @@ class KoboProjectImportDataValidator(ImportDataValidator):
 
     @classmethod
     def geopoint_validator(
-        cls, value: list, field: str, *args, **kwargs
+        cls, value: str, field: str, *args, **kwargs
     ) -> Union[str, None]:
-        readable_value = (
-            ", ".join(str(i) for i in value)
-            if isinstance(value, list) and value
-            else str(value)
-        )
-        message = f"Invalid geopoint {readable_value} for field {field}"
+        message = f"Invalid geopoint {value} for field {field}"
 
-        if not value:
+        if not value or not isinstance(value, str):
             return message
 
-        if len(value) == 2 and all([isinstance(i, float) for i in value]):
-            pattern = re.compile(r"^(-?\d+\.\d+?,\s*-?\d+\.\d+?)$")
-            is_valid_geopoint = bool(re.match(pattern, readable_value))
+        geopoint_to_list = value.split(" ")
+        geopoint = " ".join(geopoint_to_list[:2])
 
-            return None if is_valid_geopoint else message
+        pattern = re.compile(r"^(-?\d+\.\d+? \s*-?\d+\.\d+?)$")
+        is_valid_geopoint = bool(re.match(pattern, geopoint))
 
-        return message
+        return None if is_valid_geopoint else message
 
     @classmethod
     def date_validator(
@@ -953,6 +948,7 @@ class KoboProjectImportDataValidator(ImportDataValidator):
         errors = []
         # have fun debugging this ;_;
         for household in reduced_submissions:
+            head_of_hh_counter = 0
             expected_hh_fields = cls.EXPECTED_HOUSEHOLD_FIELDS.copy()
             attachments = household.get("_attachments", [])
             for hh_field, hh_value in household.items():
@@ -963,6 +959,19 @@ class KoboProjectImportDataValidator(ImportDataValidator):
                             cls.EXPECTED_INDIVIDUALS_FIELDS.copy()
                         )
                         for i_field, i_value in individual.items():
+                            if (
+                                i_field == "relationship_i_c"
+                                and i_value.upper() == "HEAD"
+                            ):
+                                head_of_hh_counter += 1
+                                if head_of_hh_counter > 1:
+                                    errors.append(
+                                        {
+                                            "header": "relationship_i_c",
+                                            "message": f"Only one person can "
+                                                       f"be head of household",
+                                        }
+                                    )
                             expected_i_fields.discard(i_field)
                             error = cls._get_field_type_error(
                                 i_field, i_value, attachments
@@ -978,7 +987,7 @@ class KoboProjectImportDataValidator(ImportDataValidator):
                             for field in expected_i_fields
                         ]
                         errors.extend(i_expected_field_errors)
-                elif hh_field in cls.EXPECTED_HOUSEHOLD_FIELDS:
+                else:
                     error = cls._get_field_type_error(
                         hh_field, hh_value, attachments
                     )
