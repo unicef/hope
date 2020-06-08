@@ -118,7 +118,9 @@ class RdiMergeTask:
         except AdminArea.DoesNotExist:
             print("does not exsit")
 
-    @transaction.atomic()
+
+    @transaction.atomic(using='default')
+    @transaction.atomic(using='registration_datahub')
     def execute(self, registration_data_import_id):
         obj_hub = RegistrationDataImportDatahub.objects.get(
             hct_id=registration_data_import_id,

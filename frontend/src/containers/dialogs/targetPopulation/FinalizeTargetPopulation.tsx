@@ -1,8 +1,6 @@
 import React from 'react';
 import {
   Button,
-  Dialog,
-  DialogActions,
   DialogContent,
   DialogTitle,
   Typography,
@@ -11,6 +9,8 @@ import styled from 'styled-components';
 import { useFinalizeTpMutation } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
+import { Dialog } from '../Dialog';
+import { DialogActions } from '../DialogActions';
 
 export interface FinalizeTargetPopulationPropTypes {
   open: boolean;
@@ -32,6 +32,10 @@ const DialogDescription = styled.div`
   margin: 20px 0;
   font-size: 14px;
   color: rgba(0, 0, 0, 0.54);
+`;
+
+const ErrorMessage = styled.p`
+  color: ${({theme}) => theme.palette.error.main};
 `;
 
 export function FinalizeTargetPopulation({
@@ -72,6 +76,7 @@ export function FinalizeTargetPopulation({
           Are you sure you want to push {totalHouseholds} households to
           CashAssist? Target population will not be editable further.
         </DialogDescription>
+        {/* {!totalHouseholds && <ErrorMessage>There are not any households selected in this criteria.</ErrorMessage>} */}
       </DialogContent>
       <DialogFooter>
         <DialogActions>
@@ -80,7 +85,8 @@ export function FinalizeTargetPopulation({
             onClick={() => onSubmit(targetPopulationId)}
             color='primary'
             variant='contained'
-            disabled={!loading}
+            disabled={!loading || !totalHouseholds}
+            data-cy='button-target-population-send-to-cash-assist'
           >
             Send to cash assist
           </Button>

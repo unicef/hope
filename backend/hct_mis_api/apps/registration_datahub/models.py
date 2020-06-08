@@ -9,6 +9,7 @@ from django.core.validators import (
     MaxLengthValidator,
 )
 from django.db import models
+from django.utils.translation import ugettext_lazy as _
 from django_countries.fields import CountryField
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
@@ -156,7 +157,17 @@ class RegistrationDataImportDatahub(TimeStampedUUIDModel):
 
 
 class ImportData(TimeStampedUUIDModel):
-    xlsx_file = models.FileField()
+    XLSX = "XLSX"
+    JSON = "JSON"
+    DATA_TYPE_CHOICES = (
+        (XLSX, _("XLSX File")),
+        (JSON, _("JSON File")),
+    )
+
+    file = models.FileField()
+    data_type = models.CharField(
+        max_length=4, choices=DATA_TYPE_CHOICES, default=XLSX
+    )
     number_of_households = models.PositiveIntegerField()
     number_of_individuals = models.PositiveIntegerField()
 

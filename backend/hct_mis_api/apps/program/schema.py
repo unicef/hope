@@ -51,7 +51,7 @@ class CashPlanFilter(FilterSet):
         fields=(
             "cash_assist_id",
             "status",
-            "number_of_households",
+            "total_persons_covered",
             "currency",
             "total_entitled_quantity",
             "total_delivered_quantity",

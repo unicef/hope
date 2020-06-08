@@ -129,10 +129,9 @@ class Command(BaseCommand):
         for _ in range(cash_plans_amount):
             cash_plan = CashPlanFactory.build(
                 program=program,
-                created_by=user,
-                target_population=target_population,
+                business_area=BusinessArea.objects.first(),
             )
-
+            cash_plan.save()
             for _ in range(payment_record_amount):
                 registration_data_import = RegistrationDataImportFactory(
                     imported_by=user, business_area=BusinessArea.objects.first()
@@ -149,9 +148,6 @@ class Command(BaseCommand):
 
                 household.programs.add(program)
 
-                cash_plan.target_population = target_population
-                cash_plan.save()
-
                 PaymentRecordFactory(
                     cash_plan=cash_plan,
                     household=household,
@@ -164,7 +160,9 @@ class Command(BaseCommand):
         self.stdout.write(f"Generating fixtures...")
         if options["flush"]:
             call_command("flush", "--noinput")
-            call_command("flush", "--noinput", database="cash_assist_datahub")
+            call_command("flush", "--noinput", database="cash_assist_datahub_mis")
+            call_command("flush", "--noinput", database="cash_assist_datahub_ca")
+            call_command("flush", "--noinput", database="cash_assist_datahub_erp")
             call_command("flush", "--noinput", database="registration_datahub")
             call_command(
                 "loaddata",
