@@ -5427,6 +5427,22 @@
             "deprecationReason": null
           },
           {
+            "name": "sentToDatahub",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "paymentRecords",
             "description": null,
             "args": [
@@ -5840,6 +5856,18 @@
                 "name": "DateTime",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "lastSyncAt",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -8364,19 +8392,13 @@
         "interfaces": null,
         "enumValues": [
           {
-            "name": "FULL",
+            "name": "FOR_PARTNERS",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
-            "name": "PARTIAL",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "NO_INTEGRATION",
+            "name": "UNICEF",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -10071,6 +10093,18 @@
                 "name": "DateTime",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "lastSyncAt",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null

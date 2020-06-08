@@ -19,10 +19,12 @@ interface PaymentRecordTableRowProps {
 
 export function RegistrationDataImportTableRow({
   registrationDataImport,
-}: PaymentRecordTableRowProps):React.ReactElement {
+}: PaymentRecordTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
-
+  const name = registrationDataImport.importedBy.firstName
+    ? `${registrationDataImport.importedBy.firstName} ${registrationDataImport.importedBy.lastName}`
+    : registrationDataImport.importedBy.email;
   const handleClick = (): void => {
     const path = `/${businessArea}/registration-data-import/${registrationDataImport.id}`;
     history.push(path);
@@ -49,9 +51,7 @@ export function RegistrationDataImportTableRow({
       <TableCell align='right'>
         {registrationDataImport.numberOfHouseholds}
       </TableCell>
-      <TableCell align='left'>
-        {`${registrationDataImport.importedBy.firstName} ${registrationDataImport.importedBy.lastName}`}
-      </TableCell>
+      <TableCell align='left'>{name}</TableCell>
       <TableCell align='left'>{registrationDataImport.dataSource}</TableCell>
     </ClickableTableRow>
   );
