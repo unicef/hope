@@ -120,8 +120,6 @@ class TestRdiKoboCreateTask(TestCase):
 
         households_count = ImportedHousehold.objects.count()
         individuals_count = ImportedIndividual.objects.count()
-        import ipdb
 
-        ipdb.set_trace()
         self.assertEqual(1, households_count)
         self.assertEqual(2, individuals_count)
