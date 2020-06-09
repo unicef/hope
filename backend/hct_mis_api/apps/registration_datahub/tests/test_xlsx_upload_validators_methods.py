@@ -171,6 +171,7 @@ class TestXLSXValidatorsMethods(TestCase):
         wb_valid = openpyxl.load_workbook(
             f"{self.FILES_DIR_PATH}/new_reg_data_import.xlsx", data_only=True,
         )
+        UploadXLSXValidator.image_loader = SheetImageLoader(wb["Individuals"])
 
         sheets_and_expected_values = (
             (

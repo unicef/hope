@@ -42,7 +42,7 @@ class TestCreateProgram(APITestCase):
                 "description": "my description of program",
                 "frequencyOfPayments": "REGULAR",
                 "sector": "EDUCATION",
-                "scope": "FULL",
+                "scope": "UNICEF",
                 "cashPlus": True,
                 "populationGoal": 150000,
                 "administrativeAreasOfImplementation": "Lorem Ipsum",
