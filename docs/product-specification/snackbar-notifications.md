@@ -2,6 +2,12 @@
 
 ## Registration Data Import
 
+| Action | Success message | Fail message |
+| :--- | :--- | :--- |
+| Approve | Registration Data Import Approved. | Registration Data Import approval action failed. |
+| Unapprove | Registration Data Import Unapproved. | Registration Data Import disapproval action failed. |
+| Merge | Registration Data Import Merging started. | Registration Data Import Merging action failed. |
+
 ## Population
 
 ## Programme Management
