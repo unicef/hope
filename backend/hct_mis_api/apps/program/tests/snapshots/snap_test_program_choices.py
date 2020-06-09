@@ -26,16 +26,12 @@ snapshots['TestProgramChoices::test_program_scope_choices 1'] = {
     'data': {
         'programScopeChoices': [
             {
-                'name': 'Full',
-                'value': 'FULL'
+                'name': 'For partners',
+                'value': 'FOR_PARTNERS'
             },
             {
-                'name': 'Partial',
-                'value': 'PARTIAL'
-            },
-            {
-                'name': 'No Integration',
-                'value': 'NO_INTEGRATION'
+                'name': 'Unicef',
+                'value': 'UNICEF'
             }
         ]
     }
