@@ -3,8 +3,6 @@ from io import BytesIO
 from typing import Union
 
 import openpyxl
-import requests
-from PIL import Image
 from django.contrib.gis.geos import Point
 from django.core.files import File
 from django.core.files.storage import default_storage
@@ -20,7 +18,6 @@ from core.utils import (
     get_combined_attributes,
     serialize_flex_attributes,
     rename_dict_keys,
-    get_admin_areas_as_choices,
 )
 from household.const import COUNTRIES_NAME_ALPHA2
 from household.models import IDENTIFICATION_TYPE_DICT
@@ -55,15 +52,16 @@ class RdiBaseCreateTask:
             return int(value)
 
         if value_type == "SELECT_ONE":
-            if header in ("admin1_h_c", "admin2_h_c", "admin1", "admin2"):
-                admin_level = 1 if header.startswith("admin1") else 2
-                choices_list = get_admin_areas_as_choices(admin_level)
-                choices = [x.get("value") for x in choices_list]
-            else:
-                choices = [
-                    x.get("value")
-                    for x in self.COMBINED_FIELDS[header]["choices"]
-                ]
+            custom_cast_method = self.COMBINED_FIELDS[header].get(
+                "custom_cast_value"
+            )
+
+            if custom_cast_method is not None:
+                return custom_cast_method(input_value=value)
+
+            choices = [
+                x.get("value") for x in self.COMBINED_FIELDS[header]["choices"]
+            ]
             if not isinstance(value, int):
                 upper_value = value.upper()
                 if upper_value in choices:
@@ -98,7 +96,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         if value is None:
             return
 
-        document_data = self.documents.get(f"individual_{row_num}")
+        document_data = self.documents.get(f"individual_{row_num}_{header}")
 
         if header == "other_id_type_i_c":
             if document_data:
@@ -125,7 +123,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             if document_data:
                 document_data["value"] = value
             else:
-                self.documents[f"individual_{row_num}"] = {
+                self.documents[f"individual_{row_num}_{header}"] = {
                     "individual": individual,
                     "name": IDENTIFICATION_TYPE_DICT.get(doc_type),
                     "type": doc_type,
@@ -133,12 +131,12 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 }
 
     def _handle_document_photo_fields(
-        self, cell, row_num, individual, *args, **kwargs
+        self, cell, row_num, individual, header, *args, **kwargs
     ):
         if not self.image_loader.image_in(cell.coordinate):
             return
 
-        document_data = self.documents.get(f"individual_{row_num}")
+        document_data = self.documents.get(f"individual_{row_num}_{header}")
 
         image = self.image_loader.get(cell.coordinate)
         file_name = f"{cell.coordinate}-{timezone.now()}.jpg"
@@ -151,7 +149,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         if document_data:
             document_data["photo"] = file
         else:
-            self.documents[f"individual_{row_num}"] = {
+            self.documents[f"individual_{row_num}_{header}"] = {
                 "individual": individual,
                 "photo": file_name,
             }

@@ -1,8 +1,12 @@
 from functools import reduce
 
-from django_countries.data import COUNTRIES
+from core.countries import Countries
+from core.models import AdminArea
 
-from core.utils import age_to_birth_date_query
+from core.utils import (
+    age_to_birth_date_query,
+    LazyEvalMethodsDict,
+)
 from household.models import (
     RESIDENCE_STATUS_CHOICE,
     RELATIONSHIP_CHOICE,
@@ -79,10 +83,9 @@ CORE_FIELDS_ATTRIBUTES = [
         "required": False,
         "label": {"English(EN)": "Country origin"},
         "hint": "country origin",
-        "choices": [
-            {"label": {"English(EN)": label}, "value": value,}
-            for value, label in COUNTRIES.items()
-        ],
+        "choices": Countries.get_choices(),
+        "custom_validate_choices": Countries.is_valid_country_choice,
+        "custom_cast_value": Countries.get_country_value,
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "country_origin_h_c",
     },
@@ -94,10 +97,9 @@ CORE_FIELDS_ATTRIBUTES = [
         "required": False,
         "label": {"English(EN)": "Country"},
         "hint": "",
-        "choices": [
-            {"label": {"English(EN)": label}, "value": value,}
-            for value, label in COUNTRIES.items()
-        ],
+        "choices": Countries.get_choices(),
+        "custom_validate_choices": Countries.is_valid_country_choice,
+        "custom_cast_value": Countries.get_country_value,
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "country_h_c",
     },
@@ -113,34 +115,38 @@ CORE_FIELDS_ATTRIBUTES = [
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "address_h_c",
     },
-    {
-        "id": "c53ea58b-e7cf-4bf3-82d0-dec41f66ef3a",
-        "type": TYPE_SELECT_ONE,
-        "name": "admin1",
-        "lookup": "admin1",
-        "required": False,
-        "label": {
-            "English(EN)": "Household resides in (Select administrative level 1)"
-        },
-        "hint": "",
-        "choices": [],
-        "associated_with": _HOUSEHOLD,
-        "xlsx_field": "admin1_h_c",
-    },
-    {
-        "id": "e4eb6632-8204-44ed-b39c-fe791ded9246",
-        "type": TYPE_SELECT_ONE,
-        "name": "admin2",
-        "lookup": "admin2",
-        "required": False,
-        "label": {
-            "English(EN)": "Household resides in (Select administrative level 2)"
-        },
-        "hint": "",
-        "choices": [],
-        "associated_with": _HOUSEHOLD,
-        "xlsx_field": "admin2_h_c",
-    },
+    LazyEvalMethodsDict(
+        {
+            "id": "c53ea58b-e7cf-4bf3-82d0-dec41f66ef3a",
+            "type": TYPE_SELECT_ONE,
+            "name": "admin1",
+            "lookup": "admin1",
+            "required": False,
+            "label": {
+                "English(EN)": "Household resides in (Select administrative level 1)"
+            },
+            "hint": "",
+            "choices": lambda: AdminArea.get_admin_areas_as_choices(1),
+            "associated_with": _HOUSEHOLD,
+            "xlsx_field": "admin1_h_c",
+        }
+    ),
+    LazyEvalMethodsDict(
+        {
+            "id": "e4eb6632-8204-44ed-b39c-fe791ded9246",
+            "type": TYPE_SELECT_ONE,
+            "name": "admin2",
+            "lookup": "admin2",
+            "required": False,
+            "label": {
+                "English(EN)": "Household resides in (Select administrative level 2)"
+            },
+            "hint": "",
+            "choices": lambda: AdminArea.get_admin_areas_as_choices(2),
+            "associated_with": _HOUSEHOLD,
+            "xlsx_field": "admin2_h_c",
+        }
+    ),
     {
         "id": "13a9d8b0-f278-47c2-9b1b-b06579b0ab35",
         "type": TYPE_GEOPOINT,

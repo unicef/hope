@@ -591,6 +591,14 @@ class TestKoboSaveValidatorsMethods(TestCase):
 
         expected = [
             {
+                "header": "admin1_h_c",
+                "message": "Invalid choice SO25 for field admin1_h_c",
+            },
+            {
+                "header": "admin2_h_c",
+                "message": "Invalid choice SO2502 for field admin2_h_c",
+            },
+            {
                 "header": "f_0_5_age_group_h_c",
                 "message": "Missing household required field f_0_5_age_group_h_c",
             },
@@ -661,6 +669,10 @@ class TestKoboSaveValidatorsMethods(TestCase):
             {
                 "header": "residence_status_h_c",
                 "message": "Invalid choice host for field residence_status_h_c",
+            },
+            {
+                "header": "size_h_c",
+                "message": "Missing household required field size_h_c",
             },
         ]
 
