@@ -121,7 +121,7 @@ stages:
                 databases.postgres-cash-assist-datahub-db.secret.POSTGRES_DB=$(CASH_ASSIST_DATAHUB_POSTGRES_DB),\
                 databases.postgres-cash-assist-datahub-db.secret.POSTGRES_USER=$(CASH_ASSIST_REGISTRATION_DATAHUB_POSTGRES_USER),\
                 databases.postgres-cash-assist-datahub-db.secret.POSTGRES_PASSWORD=$(CASH_ASSIST_REGISTRATION_DATAHUB_POSTGRES_PASSWORD),"
-      
+
       - job: deploy_airflow
         displayName: Deploy Airflow
         steps:
@@ -147,7 +147,7 @@ stages:
             install: true
             force: true
             waitForExecution: false
-            arguments: "--timeout 600s"
+            arguments: "--timeout 600s --version '6.10.4'"
             overrideValues: "
             airflow.image.repository=uniappsk8sdevacr.azurecr.io/$(airflowImageRepository),\
             airflow.image.tag=$(Build.BuildId),"
