@@ -28,7 +28,6 @@ from registration_datahub.schema import (
     XlsxRowErrorNode,
     KoboErrorNode,
 )
-from registration_datahub.tasks.rdi_create import RdiXlsxCreateTask
 from registration_datahub.validators import (
     UploadXLSXValidator,
     KoboProjectImportDataValidator,
@@ -36,7 +35,7 @@ from registration_datahub.validators import (
 
 
 def create_registration_data_import_objects(
-    registration_data_import_data, user
+    registration_data_import_data, user, data_source
 ):
     import_data_id = decode_id_string(
         registration_data_import_data.pop("import_data_id")
@@ -53,7 +52,7 @@ def create_registration_data_import_objects(
     created_obj_hct = RegistrationDataImport.objects.create(
         status="IMPORTING",
         imported_by=user,
-        data_source="XLS",
+        data_source=data_source,
         number_of_individuals=import_data_obj.number_of_individuals,
         number_of_households=import_data_obj.number_of_households,
         business_area=business_area,
@@ -103,7 +102,7 @@ class RegistrationXlsxImportMutation(BaseValidator, graphene.Mutation):
             import_data_obj,
             business_area,
         ) = create_registration_data_import_objects(
-            registration_data_import_data, info.context.user
+            registration_data_import_data, info.context.user, "XLS"
         )
 
         AirflowApi.start_dag(
@@ -135,7 +134,7 @@ class RegistrationKoboImportMutation(BaseValidator, graphene.Mutation):
             import_data_obj,
             business_area,
         ) = create_registration_data_import_objects(
-            registration_data_import_data, info.context.user
+            registration_data_import_data, info.context.user, "3RD_PARTY"
         )
 
         AirflowApi.start_dag(
