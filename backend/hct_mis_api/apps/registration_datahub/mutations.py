@@ -1,7 +1,7 @@
 import json
 import operator
 import time
-from io import StringIO
+from io import StringIO, BytesIO
 
 import graphene
 import openpyxl
@@ -317,7 +317,9 @@ class SaveKoboProjectImportDataMutation(
         )
 
         import_file_name = f"project-uid-{uid}-{time.time()}.json"
-        file = File(StringIO(json.dumps(submissions)), name=import_file_name)
+        file = File(
+            BytesIO(json.dumps(submissions).encode()), name=import_file_name
+        )
 
         created = ImportData.objects.create(
             file=file,
