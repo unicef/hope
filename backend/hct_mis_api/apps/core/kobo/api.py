@@ -1,4 +1,7 @@
+from io import BytesIO
+
 import requests
+from PIL import Image
 
 from core.models import BusinessArea
 
@@ -71,3 +74,9 @@ class KoboAPI:
         submissions_url = self._get_url(f"assets/{uid}/data")
 
         return self._handle_paginated_results(submissions_url)
+
+    def get_attached_file(self, url: str) -> BytesIO:
+        response = self._client.get(url=url)
+        response.raise_for_status()
+        file = BytesIO(response.content)
+        return file

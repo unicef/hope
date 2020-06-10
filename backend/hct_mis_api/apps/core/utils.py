@@ -1,9 +1,39 @@
 import datetime as dt
 import re
+from collections import MutableMapping
 
 from django.core.exceptions import ValidationError
 from django.db.models import Q, F
 from django.template.defaultfilters import slugify
+
+
+class CaseInsensitiveTuple(tuple):
+    def __contains__(self, key, *args, **kwargs):
+        return key.casefold() in (element.casefold() for element in self)
+
+
+class LazyEvalMethodsDict(MutableMapping):
+    def __init__(self, *args, **kwargs):
+        self._dict = dict(*args, **kwargs)
+
+    def __getitem__(self, k):
+        v = self._dict.__getitem__(k)
+        if callable(v):
+            v = v()
+            self.__setitem__(k, v)
+        return v
+
+    def __setitem__(self, key, value):
+        self._dict[key] = value
+
+    def __delitem__(self, key):
+        return self._dict[key]
+
+    def __iter__(self):
+        return iter(self._dict)
+
+    def __len__(self):
+        return len(self._dict)
 
 
 def decode_id_string(id_string):
@@ -84,14 +114,6 @@ def _slug_strip(value, separator="-"):
             re_sep = re.escape(separator)
         value = re.sub(r"^%s+|%s+$" % (re_sep, re_sep), "", value)
     return value
-
-
-def get_choices_values(choices, header):
-    if header in ("admin1", "admin2"):
-        choices = get_admin_areas_as_choices(header[-1])
-    return tuple(
-        choice[0] if isinstance(choice, tuple) else choice for choice in choices
-    )
 
 
 def serialize_flex_attributes():
@@ -238,17 +260,6 @@ def get_attr_value(name, object, default=None):
 
 def to_choice_object(choices):
     return [{"name": name, "value": value} for value, name in choices]
-
-
-def get_admin_areas_as_choices(admin_level):
-    from core.models import AdminArea
-
-    return [
-        {"label": {"English(EN)": admin_area.title}, "value": admin_area.title,}
-        for admin_area in AdminArea.objects.filter(
-            admin_area_type__admin_level=admin_level
-        )
-    ]
 
 
 def rename_dict_keys(obj, convert_func):
