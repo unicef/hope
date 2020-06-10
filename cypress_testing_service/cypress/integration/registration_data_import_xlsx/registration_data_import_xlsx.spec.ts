@@ -194,7 +194,7 @@ Given('the User has an RDI import in review', () => {
         .then((response) => {
           const {
             data: {
-              createRegistrationDataImport: { registrationDataImport },
+              registrationXlsxImport: { registrationDataImport },
             },
           } = response.body;
           cy.wrap(registrationDataImport).as('registrationDataImport');
