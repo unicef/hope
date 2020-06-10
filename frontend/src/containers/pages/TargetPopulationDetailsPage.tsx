@@ -35,9 +35,10 @@ export function TargetPopulationDetailsPage() {
       aria-label='tabs'
       indicatorColor='primary'
       textColor='primary'
+      data-cy={`target-population-tabs-${selectedTab}`}
     >
       <Tab label='Programme Population' />
-      <Tab label='Target Population' disabled={status === 'DRAFT'} />
+      <Tab label='Target Population' />
     </Tabs>
   );
   return (

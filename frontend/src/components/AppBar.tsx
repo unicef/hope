@@ -80,7 +80,7 @@ export function AppBar({ open, handleDrawerOpen }): React.ReactElement {
         >
           <MenuIcon />
         </IconButton>
-        <BusinessAreaContainer>
+        <BusinessAreaContainer data-cy="business-area-container">
           <BusinessAreaSelect />
         </BusinessAreaContainer>
         <UserProfileMenu meData={meData} />

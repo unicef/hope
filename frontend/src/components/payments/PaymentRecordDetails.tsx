@@ -3,9 +3,10 @@ import styled from 'styled-components';
 import moment from 'moment';
 import { Grid, Paper, Typography } from '@material-ui/core';
 import { StatusBox } from '../StatusBox';
-import {decodeIdString, paymentRecordStatusToColor} from '../../utils/utils';
+import { decodeIdString, paymentRecordStatusToColor } from '../../utils/utils';
 import { LabelizedField } from '../LabelizedField';
 import { PaymentRecordNode } from '../../__generated__/graphql';
+import { Missing } from '../Missing';
 
 const Container = styled.div`
   display: flex;
@@ -120,13 +121,13 @@ export function PaymentRecordDetails({
                 <LabelizedFieldContainer>
                   <LabelizedField
                     label='head of household'
-                    value={paymentRecord.headOfHousehold}
+                    value={paymentRecord.fullName}
                   />
                 </LabelizedFieldContainer>
                 <LabelizedFieldContainer>
                   <LabelizedField
                     label='total person covered'
-                    value={paymentRecord.totalPersonCovered}
+                    value={paymentRecord.totalPersonsCovered}
                   />
                 </LabelizedFieldContainer>
               </HouseholdDataContainer>
@@ -141,61 +142,58 @@ export function PaymentRecordDetails({
                   <Grid item xs={4}>
                     <LabelizedField
                       label='Entitlement quantity'
-                      value={paymentRecord.entitlement.entitlementQuantity}
+                      value={paymentRecord.entitlementQuantity}
                     />
                   </Grid>
                   <Grid item xs={4}>
                     <LabelizedField
                       label='Currency'
-                      value={paymentRecord.entitlement.currency}
+                      value={paymentRecord.currency}
                     />
                   </Grid>
                   <Grid item xs={4}>
                     <LabelizedField
                       label='Delivery type'
-                      value={paymentRecord.entitlement.deliveryType}
+                      value={paymentRecord.deliveryType}
                     />
                   </Grid>
 
                   <Grid item xs={4}>
                     <LabelizedField
                       label='Delivered quantity'
-                      value={paymentRecord.entitlement.deliveredQuantity}
+                      value={paymentRecord.deliveredQuantity}
                     />
                   </Grid>
                   <Grid item xs={4}>
                     <LabelizedField
                       label='Delivery date'
-                      value={moment(
-                        paymentRecord.entitlement.deliveryDate,
-                      ).format('DD MMM YYYY')}
+                      value={moment(paymentRecord.deliveryDate).format(
+                        'DD MMM YYYY',
+                      )}
                     />
                   </Grid>
                   <Grid item xs={4}>
-                    <LabelizedField
-                      label='Transaction Reference ID'
-                      value={paymentRecord.entitlement.transactionReferenceId}
-                    />
+                    <Missing />
                   </Grid>
 
                   <Grid item xs={4}>
                     <LabelizedField
                       label='Entitlement Card Number'
-                      value={paymentRecord.entitlement.entitlementCardNumber}
+                      value={paymentRecord.entitlementCardNumber}
                     />
                   </Grid>
                   <Grid item xs={4}>
                     <LabelizedField
                       label='Entitlement Card Issue Date'
                       value={moment(
-                        paymentRecord.entitlement.entitlementCardIssueDate,
+                        paymentRecord.entitlementCardIssueDate,
                       ).format('DD MMM YYYY')}
                     />
                   </Grid>
                   <Grid item xs={4}>
                     <LabelizedField
                       label='FSP'
-                      value={paymentRecord.entitlement.fsp}
+                      value={paymentRecord.serviceProvider.fullName}
                     />
                   </Grid>
                 </Grid>

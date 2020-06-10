@@ -16,8 +16,7 @@ from model_utils import Choices
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
 
-from utils.models import TimeStampedUUIDModel
-
+from utils.models import TimeStampedUUIDModel, AbstractSyncable
 
 RESIDENCE_STATUS_CHOICE = (
     ("REFUGEE", _("Refugee")),
@@ -70,14 +69,44 @@ RELATIONSHIP_CHOICE = (
     ("NEPHEW_NIECE", "Nephew / Niece"),
     ("COUSIN", "Cousin"),
 )
+ROLE_PRIMARY = "PRIMARY"
+ROLE_ALTERNATE = "ALTERNATE"
+ROLE_NO_ROLE = "NO_ROLE"
 ROLE_CHOICE = (
-    ("PRIMARY", "Primary collector"),
-    ("ALTERNATE", "Alternate collector"),
-    ("NO_ROLE", "None"),
+    (ROLE_PRIMARY, "Primary collector"),
+    (ROLE_ALTERNATE, "Alternate collector"),
+    (ROLE_NO_ROLE, "None"),
 )
+IDENTIFICATION_TYPE_BIRTH_CERTIFICATE = "BIRTH_CERTIFICATE"
+IDENTIFICATION_TYPE_DRIVERS_LICENSE = "DRIVERS_LICENSE"
+IDENTIFICATION_TYPE_NATIONAL_ID = "NATIONAL_ID"
+IDENTIFICATION_TYPE_NATIONAL_PASSPORT = "NATIONAL_PASSPORT"
+IDENTIFICATION_TYPE_ELECTORAL_CARD = "ELECTORAL_CARD"
+IDENTIFICATION_TYPE_OTHER = "OTHER"
+IDENTIFICATION_TYPE_CHOICE = (
+    (IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, _("Birth Certificate")),
+    (IDENTIFICATION_TYPE_DRIVERS_LICENSE, _("Driver's License")),
+    (IDENTIFICATION_TYPE_NATIONAL_ID, _("National ID")),
+    (IDENTIFICATION_TYPE_NATIONAL_PASSPORT, _("National Passport")),
+    (IDENTIFICATION_TYPE_ELECTORAL_CARD, _("Electoral Card")),
+    (IDENTIFICATION_TYPE_OTHER, _("Other")),
+)
+IDENTIFICATION_TYPE_DICT = {
+    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE: "Birth Certificate",
+    IDENTIFICATION_TYPE_DRIVERS_LICENSE: "Driver's License",
+    IDENTIFICATION_TYPE_NATIONAL_ID: "National ID",
+    IDENTIFICATION_TYPE_NATIONAL_PASSPORT: "National Passport",
+    IDENTIFICATION_TYPE_ELECTORAL_CARD: "Electoral Card",
+    IDENTIFICATION_TYPE_OTHER: "Other",
+}
+INDIVIDUAL_HOUSEHOLD_STATUS = (("ACTIVE", "Active"), ("INACTIVE", "Inactive"))
 
 
-class Household(TimeStampedUUIDModel):
+class Household(TimeStampedUUIDModel, AbstractSyncable):
+    status = models.CharField(
+        max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default="ACTIVE"
+    )
+
     consent = ImageField(validators=[validate_image_file_extension])
     residence_status = models.CharField(
         max_length=255, choices=RESIDENCE_STATUS_CHOICE,
@@ -134,8 +163,8 @@ class Household(TimeStampedUUIDModel):
     def total_cash_received(self):
         return (
             self.payment_records.filter()
-            .aggregate(Sum("entitlement__delivered_quantity"))
-            .get("entitlement__delivered_quantity__sum")
+            .aggregate(Sum("delivered_quantity"))
+            .get("delivered_quantity__sum")
         )
 
     def __str__(self):
@@ -152,6 +181,10 @@ class DocumentValidator(TimeStampedUUIDModel):
 class DocumentType(TimeStampedUUIDModel):
     country = CountryField(blank=True)
     label = models.CharField(max_length=100)
+    type = models.CharField(max_length=50, choices=IDENTIFICATION_TYPE_CHOICE)
+
+    class Meta:
+        unique_together = ("country", "type")
 
     def __str__(self):
         return f"{self.label} in {self.country}"
@@ -179,7 +212,7 @@ class Document(TimeStampedUUIDModel):
 
 
 class Agency(models.Model):
-    type = models.CharField(max_length=100,)
+    type = models.CharField(max_length=100, unique=True)
     label = models.CharField(max_length=100,)
 
     def __str__(self):
@@ -212,10 +245,13 @@ class IndividualIdentity(models.Model):
         unique_together = ("agency", "number")
 
     def __str__(self):
-        return f"{self.agency} {self.individual} {self.document_number}"
+        return f"{self.agency} {self.individual} {self.number}"
 
 
-class Individual(TimeStampedUUIDModel):
+class Individual(TimeStampedUUIDModel, AbstractSyncable):
+    status = models.CharField(
+        max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default="ACTIVE"
+    )
     individual_id = models.CharField(max_length=255, blank=True)
     photo = models.ImageField(blank=True)
     full_name = models.CharField(
@@ -247,6 +283,8 @@ class Individual(TimeStampedUUIDModel):
     )
     disability = models.BooleanField(default=False,)
     flex_fields = JSONField(default=dict)
+    enrolled_in_nutrition_programme = models.BooleanField(default=False)
+    administration_of_rutf = models.BooleanField(default=False)
 
     @property
     def age(self):

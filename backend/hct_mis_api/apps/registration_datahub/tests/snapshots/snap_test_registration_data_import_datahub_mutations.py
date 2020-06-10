@@ -52,12 +52,12 @@ snapshots['TestRegistrationDataImportDatahubMutations::test_approve_registration
 
 snapshots['TestRegistrationDataImportDatahubMutations::test_registration_data_import_create 1'] = {
     'data': {
-        'createRegistrationDataImport': {
+        'registrationXlsxImport': {
             'registrationDataImport': {
                 'name': 'New Import of Data 123',
                 'numberOfHouseholds': 3,
                 'numberOfIndividuals': 6,
-                'status': 'IN_REVIEW'
+                'status': 'IMPORTING'
             }
         }
     }
