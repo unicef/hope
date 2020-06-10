@@ -3,7 +3,8 @@ from typing import List, Tuple, Dict
 import openpyxl
 
 from core.core_fields_attributes import CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY
-from core.utils import serialize_flex_attributes, get_admin_areas_as_choices
+from core.models import AdminArea
+from core.utils import serialize_flex_attributes
 
 
 class TemplateFileGenerator:
@@ -29,7 +30,7 @@ class TemplateFileGenerator:
             is_admin_level = field_name in ("admin1_h_c", "admin2_h_c")
             choices = field_value["choices"]
             if is_admin_level:
-                choices = get_admin_areas_as_choices(field_name[-5])
+                choices = AdminArea.get_admin_areas_as_choices(field_name[-5])
             if choices:
                 for choice in field_value["choices"]:
                     row = [field_name, str(choice["label"]["English(EN)"]),

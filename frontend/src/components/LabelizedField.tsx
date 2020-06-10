@@ -18,15 +18,17 @@ export interface Props {
   value?: React.ReactNode;
   children?: React.ReactElement;
   label: string;
+  dataCy?: string;
 }
 
 export function LabelizedField({
   value,
   children,
   label,
+  dataCy,
 }: Props): React.ReactElement {
   return (
-    <div>
+    <div data-cy={dataCy && `labelized-field-container-${dataCy}`}>
       <Label color='textSecondary'>{label}</Label>
       <div>{children || <Value color='textSecondary'>{value}</Value>}</div>
     </div>

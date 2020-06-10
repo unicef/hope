@@ -58,6 +58,7 @@ export function ApprovedTargetPopulationHeaderButtons({
           variant='contained'
           color='primary'
           onClick={() => setOpenFinalize(true)}
+          data-cy='button-target-population-send-to-cash-assist'
         >
           Send to cash assist
         </Button>
@@ -71,7 +72,7 @@ export function ApprovedTargetPopulationHeaderButtons({
         open={openFinalize}
         setOpen={setOpenFinalize}
         targetPopulationId={targetPopulation.id}
-        totalHouseholds={targetPopulation.totalHouseholds}
+        totalHouseholds={targetPopulation.finalListTotalHouseholds}
       />
     </div>
   );

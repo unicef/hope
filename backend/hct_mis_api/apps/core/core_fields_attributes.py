@@ -1,8 +1,12 @@
 from functools import reduce
 
-from django_countries.data import COUNTRIES
+from core.countries import Countries
+from core.models import AdminArea
 
-from core.utils import age_to_birth_date_query
+from core.utils import (
+    age_to_birth_date_query,
+    LazyEvalMethodsDict,
+)
 from household.models import (
     RESIDENCE_STATUS_CHOICE,
     RELATIONSHIP_CHOICE,
@@ -79,10 +83,9 @@ CORE_FIELDS_ATTRIBUTES = [
         "required": False,
         "label": {"English(EN)": "Country origin"},
         "hint": "country origin",
-        "choices": [
-            {"label": {"English(EN)": label}, "value": value,}
-            for value, label in COUNTRIES.items()
-        ],
+        "choices": Countries.get_choices(),
+        "custom_validate_choices": Countries.is_valid_country_choice,
+        "custom_cast_value": Countries.get_country_value,
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "country_origin_h_c",
     },
@@ -94,10 +97,9 @@ CORE_FIELDS_ATTRIBUTES = [
         "required": False,
         "label": {"English(EN)": "Country"},
         "hint": "",
-        "choices": [
-            {"label": {"English(EN)": label}, "value": value,}
-            for value, label in COUNTRIES.items()
-        ],
+        "choices": Countries.get_choices(),
+        "custom_validate_choices": Countries.is_valid_country_choice,
+        "custom_cast_value": Countries.get_country_value,
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "country_h_c",
     },
@@ -113,34 +115,38 @@ CORE_FIELDS_ATTRIBUTES = [
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "address_h_c",
     },
-    {
-        "id": "c53ea58b-e7cf-4bf3-82d0-dec41f66ef3a",
-        "type": TYPE_SELECT_ONE,
-        "name": "admin1",
-        "lookup": "admin1",
-        "required": False,
-        "label": {
-            "English(EN)": "Household resides in (Select administrative level 1)"
-        },
-        "hint": "",
-        "choices": [],
-        "associated_with": _HOUSEHOLD,
-        "xlsx_field": "admin1_h_c",
-    },
-    {
-        "id": "e4eb6632-8204-44ed-b39c-fe791ded9246",
-        "type": TYPE_SELECT_ONE,
-        "name": "admin2",
-        "lookup": "admin2",
-        "required": False,
-        "label": {
-            "English(EN)": "Household resides in (Select administrative level 2)"
-        },
-        "hint": "",
-        "choices": [],
-        "associated_with": _HOUSEHOLD,
-        "xlsx_field": "admin2_h_c",
-    },
+    LazyEvalMethodsDict(
+        {
+            "id": "c53ea58b-e7cf-4bf3-82d0-dec41f66ef3a",
+            "type": TYPE_SELECT_ONE,
+            "name": "admin1",
+            "lookup": "admin1",
+            "required": False,
+            "label": {
+                "English(EN)": "Household resides in (Select administrative level 1)"
+            },
+            "hint": "",
+            "choices": lambda: AdminArea.get_admin_areas_as_choices(1),
+            "associated_with": _HOUSEHOLD,
+            "xlsx_field": "admin1_h_c",
+        }
+    ),
+    LazyEvalMethodsDict(
+        {
+            "id": "e4eb6632-8204-44ed-b39c-fe791ded9246",
+            "type": TYPE_SELECT_ONE,
+            "name": "admin2",
+            "lookup": "admin2",
+            "required": False,
+            "label": {
+                "English(EN)": "Household resides in (Select administrative level 2)"
+            },
+            "hint": "",
+            "choices": lambda: AdminArea.get_admin_areas_as_choices(2),
+            "associated_with": _HOUSEHOLD,
+            "xlsx_field": "admin2_h_c",
+        }
+    ),
     {
         "id": "13a9d8b0-f278-47c2-9b1b-b06579b0ab35",
         "type": TYPE_GEOPOINT,
@@ -182,7 +188,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "type": TYPE_INTEGER,
         "name": "size",
         "lookup": "size",
-        "required": False,
+        "required": True,
         "label": {"English(EN)": "What is the household size?"},
         "hint": "",
         "choices": [],
@@ -476,6 +482,30 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "national_passport_photo_i_c",
+    },
+    {
+        "id": "eff20a18-4336-4273-bbb8-ed0e9a94ebbb",
+        "type": TYPE_STRING,
+        "name": "national_id",
+        "lookup": "national_id",
+        "required": False,
+        "label": {"English(EN)": "National ID number"},
+        "hint": "",
+        "choices": [],
+        "associated_with": _INDIVIDUAL,
+        "xlsx_field": "national_id_i_c",
+    },
+    {
+        "id": "d43304d9-91e4-4317-9356-f7066b898b16",
+        "type": TYPE_IMAGE,
+        "name": "national_id_photo",
+        "lookup": "national_id_photo",
+        "required": False,
+        "label": {"English(EN)": "National ID photo"},
+        "hint": "",
+        "choices": [],
+        "associated_with": _INDIVIDUAL,
+        "xlsx_field": "national_id_photo_i_c",
     },
     {
         "id": "201c91d2-8f89-46c9-ba5a-db7130140402",

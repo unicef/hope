@@ -98,8 +98,27 @@ DATABASES = {
         "HOST": os.getenv("POSTGRES_HOST"),
         "PORT": 5432,
     },
-    "cash_assist_datahub": {
+    "cash_assist_datahub_mis": {
         "ENGINE": "django.contrib.gis.db.backends.postgis",
+        "OPTIONS": {"options": "-c search_path=mis"},
+        "NAME": os.getenv("POSTGRES_CASHASSIST_DATAHUB_DB"),
+        "USER": os.getenv("POSTGRES_CASHASSIST_DATAHUB_USER"),
+        "PASSWORD": os.getenv("POSTGRES_CASHASSIST_DATAHUB_PASSWORD"),
+        "HOST": os.getenv("POSTGRES_CASHASSIST_DATAHUB_HOST"),
+        "PORT": 5432,
+    },
+    "cash_assist_datahub_ca": {
+        "ENGINE": "django.contrib.gis.db.backends.postgis",
+        "OPTIONS": {"options": "-c search_path=ca"},
+        "NAME": os.getenv("POSTGRES_CASHASSIST_DATAHUB_DB"),
+        "USER": os.getenv("POSTGRES_CASHASSIST_DATAHUB_USER"),
+        "PASSWORD": os.getenv("POSTGRES_CASHASSIST_DATAHUB_PASSWORD"),
+        "HOST": os.getenv("POSTGRES_CASHASSIST_DATAHUB_HOST"),
+        "PORT": 5432,
+    },
+    "cash_assist_datahub_erp": {
+        "ENGINE": "django.contrib.gis.db.backends.postgis",
+        "OPTIONS": {"options": "-c search_path=erp"},
         "NAME": os.getenv("POSTGRES_CASHASSIST_DATAHUB_DB"),
         "USER": os.getenv("POSTGRES_CASHASSIST_DATAHUB_USER"),
         "PASSWORD": os.getenv("POSTGRES_CASHASSIST_DATAHUB_PASSWORD"),
@@ -119,7 +138,9 @@ DATABASES = {
 
 # If app is not specified here it will use default db
 DATABASE_APPS_MAPPING = {
-    "cash_assist_datahub": "cash_assist_datahub",
+    "cash_assist_datahub": "cash_assist_datahub_ca",
+    "mis_datahub": "cash_assist_datahub_mis",
+    "erp_datahub": "cash_assist_datahub_erp",
     "registration_datahub": "registration_datahub",
 }
 
@@ -171,12 +192,14 @@ PROJECT_APPS = [
     "program",
     "targeting.apps.TargetingConfig",
     "utils",
-    "cash_assist_datahub",
     "registration_datahub",
     "mptt",
     "django_extensions",
     "auditlog",
     "registration_data",
+    "cash_assist_datahub",
+    "mis_datahub",
+    "erp_datahub"
 ]
 
 DJANGO_APPS = [
@@ -228,9 +251,6 @@ AUTHENTICATION_BACKENDS = [
     "social_core.backends.azuread_tenant.AzureADTenantOAuth2",
 ]
 
-TEST_RUNNER = os.getenv(
-    "DJANGO_TEST_RUNNER", "django.test.runner.DiscoverRunner"
-)
 NOSE_ARGS = ["--with-timer", "--nocapture", "--nologcapture"]
 
 
@@ -362,7 +382,7 @@ SOCIAL_AUTH_SANITIZE_REDIRECTS = True
 
 LOGIN_URL = "/api/login/azuread-tenant-oauth2"
 
-TEST_RUNNER = "snapshottest.django.TestRunner"
+TEST_RUNNER = "core.mis_test_runner.PostgresTestRunner"
 
 GRAPH_MODELS = {
     "all_applications": True,
@@ -370,3 +390,5 @@ GRAPH_MODELS = {
 }
 
 PHONENUMBER_DEFAULT_REGION = "US"
+
+AIRFLOW_HOST = "airflow_webserver"

@@ -21,14 +21,14 @@ variables:
   containerRegistry: "uniappsk8sdevacr"
 
 stages:
-  - stage: Build
-    displayName: Build and push images
+  - stage: build_and_push
+    displayName: BUILD and PUSH
     jobs:
-      - job: Build
-        displayName: Build
+      - job: build_push_backend
+        displayName: "[BACKEND]"
         steps:
           - task: Docker@2
-            displayName: Build and push backend image
+            displayName: Build&Push
             inputs:
               command: buildAndPush
               dockerfile: $(backendDockerFilePath)
@@ -36,9 +36,13 @@ stages:
               containerRegistry: $(containerRegistry)
               tags: |
                 $(Build.BuildId)
-          
+                dev-latest
+
+      - job: build_push_airflow
+        displayName: "[AIRFLOW]"
+        steps:
           - task: Docker@2
-            displayName: Build and push airflow image
+            displayName: Build&Push
             inputs:
               command: buildAndPush
               dockerfile: $(airflowDockerFilePath)
@@ -47,9 +51,13 @@ stages:
               containerRegistry: $(containerRegistry)
               tags: |
                 $(Build.BuildId)
+                dev-latest
 
+      - job: build_push_frontend
+        displayName: "[FRONTEND]"
+        steps:
           - task: Docker@2
-            displayName: Build and push frontend image
+            displayName: Build&Push
             inputs:
               command: buildAndPush
               dockerfile: $(frontendDockerFilePath)
@@ -58,17 +66,99 @@ stages:
               containerRegistry: $(containerRegistry)
               tags: |
                 $(Build.BuildId)
+                dev-latest
 
-  - stage: Deploy
-    displayName: Deploy app to K8S cluster.
+  - stage: test
+    displayName: TEST
+    jobs:
+      - job: cypress_e2e
+        displayName: "[CYPRESS]"
+        variables:
+          airflow_image: uniappsk8sdevacr.azurecr.io/$(airflowImageRepository):$(Build.BuildId)
+          frontend_image: uniappsk8sdevacr.azurecr.io/$(frontendImageRepository):$(Build.BuildId)
+          backend_image: uniappsk8sdevacr.azurecr.io/$(backendImageRepository):$(Build.BuildId)
+        steps:
+          - task: Docker@2
+            displayName: "[ACR] Login"
+            inputs:
+              command: login
+              containerRegistry: $(containerRegistry)
+
+          - task: DownloadSecureFile@1
+            inputs:
+              secureFile: '.env-tst'
+
+          - task: DownloadSecureFile@1
+            inputs:
+              secureFile: 'cypress.env.json'
+
+          - task: CmdLine@2
+            displayName: "Setup .env and docker-compose.tst.yml"
+            inputs:
+              script: |
+                mv ops/docker-compose.tst.yml docker-compose.yml
+                mv  $(Agent.TempDirectory)/.env-tst .env
+                cp .env airflow/config/.env_airflow
+                cp $(Agent.TempDirectory)/cypress.env.json cypress_testing_service/cypress.env.json
+
+          - task: DockerCompose@0
+            displayName: "Start testing environment"
+            inputs:
+              containerregistrytype: 'Azure Container Registry'
+              azureContainerRegistry: "$(containerRegistry)"
+              dockerComposeFile: '**/docker-compose.yml'
+              action: 'Run a Docker Compose command'
+              dockerComposeCommand: 'up -d'
+              dockerComposeFileArgs: |
+                airflow_image=uniappsk8sdevacr.azurecr.io/$(airflowImageRepository):$(Build.BuildId)
+                frontend_image=uniappsk8sdevacr.azurecr.io/$(frontendImageRepository):$(Build.BuildId)
+                backend_image=uniappsk8sdevacr.azurecr.io/$(backendImageRepository):$(Build.BuildId)
+
+          - task: CmdLine@2
+            displayName: "Install Cypress plugins"
+            inputs:
+              script: |
+                cd cypress_testing_service
+                yarn install
+                cd ..
+
+          - task: CmdLine@2
+            displayName: "Setup testing environment"
+            inputs:
+              script: |
+                docker exec unicefhct-mis_backend_1 ./manage.py migratealldb
+                docker exec unicefhct-mis_backend_1 ./manage.py loadbusinessareas
+                docker exec unicefhct-mis_backend_1 ./manage.py loadflexfieldsattributes
+                docker exec unicefhct-mis_backend_1 ./manage.py generatefixtures --noinput
+
+          - task: CmdLine@2
+            displayName: "Run Cypress"
+            inputs:
+              script: |
+                cd cypress_testing_service
+                yarn cy:run
+
+          - task: PublishTestResults@2
+            displayName: "Publish Test Result"
+            condition: always()
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '*.xml'
+              searchFolder: '$(Agent.BuildDirectory)/s/cypress_testing_service/cypress/reports/junit'
+              mergeTestResults: true
+              failTaskOnFailedTests: true
+              testRunTitle: 'TEST Results'
+
+  - stage: deploy
+    displayName: DEPLOY
     condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
     jobs:
-      
+
       - job: deploy_hct_mis
-        displayName: Deploy HCT-MIS
+        displayName: "[HCT-MIS]"
         steps:
           - task: HelmDeploy@0
-            displayName: Deploy HCT-MIS
+            displayName: "[HCT-MIS] DEPLOY"
             inputs:
               connectionType: 'Kubernetes Service Connection'
               kubernetesServiceConnection: 'ICTD-HCT-MIS-Demo-uni-apps-K8s-dev-hct-ims-dev-1574767480012'
@@ -121,10 +211,10 @@ stages:
                 databases.postgres-cash-assist-datahub-db.secret.POSTGRES_PASSWORD=$(CASH_ASSIST_REGISTRATION_DATAHUB_POSTGRES_PASSWORD),"
 
       - job: deploy_airflow
-        displayName: Deploy Airflow
+        displayName: "[AIRFLOW]"
         steps:
         - task: HelmDeploy@0
-          displayName: Helm repo update
+          displayName: "[HELM] Update REPO"
           inputs:
             connectionType: 'Kubernetes Service Connection'
             kubernetesServiceConnection: 'ICTD-HCT-MIS-Demo-uni-apps-K8s-dev-hct-ims-dev-1574767480012'
@@ -133,7 +223,7 @@ stages:
             arguments: add stable https://kubernetes-charts.storage.googleapis.com
 
         - task: HelmDeploy@0
-          displayName: Deploy Airflow
+          displayName: "[AIRFLOW] DEPLOY"
           inputs:
             connectionType: 'Kubernetes Service Connection'
             kubernetesServiceConnection: 'ICTD-HCT-MIS-Demo-uni-apps-K8s-dev-hct-ims-dev-1574767480012'
@@ -143,7 +233,7 @@ stages:
             releaseName: 'hct-mis-airflow'
             valueFile: "**/ops/airflow-values.yaml"
             install: true
-            force: true
+            force: false
             waitForExecution: false
             arguments: "--timeout 600s"
             overrideValues: "

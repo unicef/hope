@@ -18,7 +18,7 @@ spec:
       - name: job-migrations-container
         image: {{ .Values.backend.image }}
         command: ["/bin/sh"]
-        args: ["-c", "python3 /code/manage.py migrate --noinput && python3 manage.py migrate --noinput --database registration_datahub && python3 manage.py migrate --noinput --database cash_assist_datahub"]
+        args: ["-c", "python3 /code/manage.py migratealldb"]
         envFrom:
           - secretRef:
               name: backend-secret
@@ -52,7 +52,7 @@ spec:
       - name: job-static-container
         image: {{ .Values.backend.image }}
         command: ["/bin/sh"]
-        args: ["-c", "python3 /code/manage.py collectstatic --noinput"]  
+        args: ["-c", "python3 /code/manage.py collectstatic --noinput"]
         env:
           - name: STORAGE_AZURE_ACCOUNT_KEY
             valueFrom:

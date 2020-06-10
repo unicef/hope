@@ -11,6 +11,7 @@ export const registrationMinimal = gql`
       id
       firstName
       lastName
+      email
     }
     dataSource
     numberOfHouseholds

@@ -7,6 +7,7 @@ import { MiśTheme } from '../theme';
 import { cashPlanStatusToColor } from '../utils/utils';
 import { LabelizedField } from './LabelizedField';
 import { StatusBox } from './StatusBox';
+import {Missing} from "./Missing";
 
 const Container = styled.div`
   display: flex;
@@ -107,16 +108,13 @@ export function CashPlanDetails({
             />
           </Grid>
           <Grid item xs={4}>
-            <LabelizedField label='fc id' value={cashPlan.fcId} />
+            <LabelizedField label='fc id' value={cashPlan.fundsCommitment} />
           </Grid>
           <Grid item xs={4}>
-            <LabelizedField label='dp id' value={cashPlan.dpId} />
+            <LabelizedField label='dp id' value={cashPlan.downPayment} />
           </Grid>
           <Grid item xs={4}>
-            <LabelizedField
-              label='target population'
-              value={cashPlan.targetPopulation.name}
-            />
+            <Missing/>
           </Grid>
         </Grid>
         <NumberOfHouseHolds>
