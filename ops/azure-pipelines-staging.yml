@@ -126,13 +126,22 @@ stages:
         displayName: Deploy Airflow
         steps:
         - task: HelmDeploy@0
-          displayName: Helm repo update
+          displayName: Helm add repo
           inputs:
             connectionType: 'Kubernetes Service Connection'
             kubernetesServiceConnection: 'ICTD-HCT-MIS-Demo-uni-apps-K8s-dev-hct-ims-dev-1574767480012'
             command: repo
             namespace: 'hct-ims-staging'
             arguments: add stable https://kubernetes-charts.storage.googleapis.com
+
+        - task: HelmDeploy@0
+          displayName: Helm repo update
+          inputs:
+            connectionType: 'Kubernetes Service Connection'
+            kubernetesServiceConnection: 'ICTD-HCT-MIS-Demo-uni-apps-K8s-dev-hct-ims-dev-1574767480012'
+            command: repo
+            namespace: 'hct-ims-staging'
+            arguments: update
 
         - task: HelmDeploy@0
           displayName: Deploy
