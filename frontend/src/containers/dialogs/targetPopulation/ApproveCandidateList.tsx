@@ -1,8 +1,6 @@
 import React from 'react';
 import {
   Button,
-  Dialog,
-  DialogActions,
   DialogContent,
   DialogTitle,
   Typography,
@@ -11,12 +9,15 @@ import styled from 'styled-components';
 import { Field, Formik } from 'formik';
 import * as Yup from 'yup';
 import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
+import { ProgrammeAutocomplete } from '../../../shared/ProgrammeAutocomplete'
 import {
   useAllProgramsQuery,
   useApproveTpMutation,
 } from '../../../__generated__/graphql';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { DialogActions } from '../DialogActions';
+import { Dialog } from '../Dialog';
 
 export interface ApproveCandidateListPropTypes {
   open: boolean;
@@ -74,7 +75,7 @@ export function ApproveCandidateList({ open, setOpen, targetPopulationId }) {
           });
         }}
       >
-        {({ submitForm, values }) => (
+        {({ submitForm, values, setFieldValue }) => (
           <>
             <DialogTitleWrapper>
               <DialogTitle id='scroll-dialog-title'>
@@ -99,7 +100,12 @@ export function ApproveCandidateList({ open, setOpen, targetPopulationId }) {
                 name='program'
                 label='Programme'
                 choices={choices}
-                component={FormikSelectField}
+                onChange={(e, object) => {
+                  if(object) {
+                    setFieldValue('program', object.id)
+                  }
+                }}
+                component={ProgrammeAutocomplete}
               />
             </DialogContent>
             <DialogFooter>
@@ -111,6 +117,7 @@ export function ApproveCandidateList({ open, setOpen, targetPopulationId }) {
                   variant='contained'
                   onClick={submitForm}
                   disabled={!loading || !values.program}
+                  data-cy='button-target-population-close'
                 >
                   Close
                 </Button>

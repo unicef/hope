@@ -1,5 +1,3 @@
-from pprint import pprint
-
 import xlrd
 from django.contrib.admin import AdminSite
 from django.core.exceptions import ValidationError

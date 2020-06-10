@@ -9,6 +9,7 @@ from django.core.validators import (
     MaxLengthValidator,
 )
 from django.db import models
+from django.utils.translation import ugettext_lazy as _
 from django_countries.fields import CountryField
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
@@ -19,13 +20,16 @@ from household.models import (
     MARITAL_STATUS_CHOICE,
     RELATIONSHIP_CHOICE,
     ROLE_CHOICE,
+    IDENTIFICATION_TYPE_CHOICE,
 )
 from utils.models import TimeStampedUUIDModel
 
 
 class ImportedHouseholdIdentity(models.Model):
     agency = models.ForeignKey(
-        "Agency", related_name="households_identities", on_delete=models.CASCADE
+        "ImportedAgency",
+        related_name="households_identities",
+        on_delete=models.CASCADE,
     )
     household = models.ForeignKey(
         "ImportedHousehold", related_name="identities", on_delete=models.CASCADE
@@ -137,6 +141,15 @@ class ImportedIndividual(TimeStampedUUIDModel):
 
 
 class RegistrationDataImportDatahub(TimeStampedUUIDModel):
+    NOT_STARTED = "NOT_STARTED"
+    STARTED = "STARTED"
+    DONE = "DONE"
+    IMPORT_DONE_CHOICES = (
+        (NOT_STARTED, _("Not Started")),
+        (STARTED, _("Started")),
+        (DONE, _("Done")),
+    )
+
     name = models.CharField(max_length=255, blank=True)
     import_date = models.DateTimeField(auto_now_add=True)
     hct_id = models.UUIDField(null=True)
@@ -146,14 +159,26 @@ class RegistrationDataImportDatahub(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
         null=True,
     )
-    import_done = models.BooleanField(default=False)
+    import_done = models.CharField(
+        max_length=15, choices=IMPORT_DONE_CHOICES, default=NOT_STARTED
+    )
 
     def __str__(self):
         return self.name
 
 
 class ImportData(TimeStampedUUIDModel):
-    xlsx_file = models.FileField()
+    XLSX = "XLSX"
+    JSON = "JSON"
+    DATA_TYPE_CHOICES = (
+        (XLSX, _("XLSX File")),
+        (JSON, _("JSON File")),
+    )
+
+    file = models.FileField()
+    data_type = models.CharField(
+        max_length=4, choices=DATA_TYPE_CHOICES, default=XLSX
+    )
     number_of_households = models.PositiveIntegerField()
     number_of_individuals = models.PositiveIntegerField()
 
@@ -170,6 +195,10 @@ class DocumentValidator(TimeStampedUUIDModel):
 class ImportedDocumentType(TimeStampedUUIDModel):
     country = CountryField(blank=True)
     label = models.CharField(max_length=100)
+    type = models.CharField(max_length=50, choices=IDENTIFICATION_TYPE_CHOICE)
+
+    class Meta:
+        unique_together = ("country", "type")
 
     def __str__(self):
         return f"{self.label} in {self.country}"
@@ -194,8 +223,11 @@ class ImportedDocument(TimeStampedUUIDModel):
             if not re.match(validator.regex, self.document_number):
                 raise ValidationError("Document number is not validating")
 
+    class Meta:
+        unique_together = ("type", "document_number")
 
-class Agency(models.Model):
+
+class ImportedAgency(models.Model):
     type = models.CharField(max_length=100,)
     label = models.CharField(max_length=100,)
 
@@ -205,7 +237,7 @@ class Agency(models.Model):
 
 class ImportedIndividualIdentity(models.Model):
     agency = models.ForeignKey(
-        "Agency", related_name="identities", on_delete=models.CASCADE
+        "ImportedAgency", related_name="identities", on_delete=models.CASCADE
     )
     individual = models.ForeignKey(
         "ImportedIndividual",

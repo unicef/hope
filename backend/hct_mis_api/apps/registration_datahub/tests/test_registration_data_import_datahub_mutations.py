@@ -23,8 +23,12 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
     multi_db = True
 
     UPLOAD_REGISTRATION_DATA_IMPORT_DATAHUB = """
-    mutation UploadImportDataXLSXFile($file: Upload!) {
-      uploadImportDataXlsxFile(file: $file) {
+    mutation UploadImportDataXLSXFile(
+      $file: Upload!, $businessAreaSlug: String!
+    ) {
+      uploadImportDataXlsxFile(
+        file: $file, businessAreaSlug: $businessAreaSlug
+      ) {
         importData {
           numberOfHouseholds
           numberOfIndividuals
@@ -39,10 +43,10 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
     """
 
     CREATE_REGISTRATION_DATA_IMPORT = """
-    mutation CreateRegistrationDataImport(
-      $registrationDataImportData: CreateRegistrationDataImportExcelInput!
+    mutation RegistrationXlsxImportMutation(
+      $registrationDataImportData: RegistrationXlsxImportMutationInput!
     ) {
-      createRegistrationDataImport(
+      registrationXlsxImport(
         registrationDataImportData: $registrationDataImportData
       ) {
         registrationDataImport {
@@ -110,17 +114,20 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.UPLOAD_REGISTRATION_DATA_IMPORT_DATAHUB,
             context={"user": self.user},
-            variables={"file": self.valid_file},
+            variables={
+                "file": self.valid_file,
+                "businessAreaSlug": "afghanistan",
+            },
         )
 
         import_data_obj = ImportData.objects.first()
         self.assertIn(
-            "new_reg_data_import", import_data_obj.xlsx_file.name,
+            "new_reg_data_import", import_data_obj.file.name,
         )
 
     def test_registration_data_import_create(self):
         import_data_obj = ImportData.objects.create(
-            xlsx_file=self.valid_file,
+            file=self.valid_file,
             number_of_households=3,
             number_of_individuals=6,
         )

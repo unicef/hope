@@ -39,6 +39,8 @@ export const individualDetailed = gql`
     givenName
     familyName
     estimatedBirthDate
+    enrolledInNutritionProgramme
+    administrationOfRutf
     household {
       id
       address

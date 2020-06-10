@@ -66,12 +66,14 @@ interface Props {
   open: boolean;
   handleDrawerClose: () => void;
   currentLocation: string;
+  dataCy: string;
 }
 
 export function Drawer({
   open,
   handleDrawerClose,
   currentLocation,
+  dataCy,
 }: Props): React.ReactElement {
   const classes = useStyles({});
   return (
@@ -81,6 +83,7 @@ export function Drawer({
         paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
       }}
       open={open}
+      data-cy={dataCy}
     >
       <div className={classes.toolbarHeader}>
         <div className={classes.hctMisLogo}>

@@ -29,7 +29,7 @@ class BaseValidator:
         errors_list = []
         for method in validate_methods:
             try:
-                method(cls, *args, **kwargs)
+                method(*args, **kwargs)
             except ValidationError as e:
                 errors_list.append(e.message)
 
