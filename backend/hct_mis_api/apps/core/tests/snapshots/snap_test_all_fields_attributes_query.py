@@ -14,20 +14,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': '0',
                 'choices': [
                     {
-                        'labelEn': 'Yes',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Yes',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': '1'
-                    },
-                    {
                         'labelEn': 'No',
                         'labels': [
                             {
@@ -40,6 +26,20 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': '0'
+                    },
+                    {
+                        'labelEn': 'Yes',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Yes',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': '1'
                     }
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -63,20 +63,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': '0',
                 'choices': [
                     {
-                        'labelEn': 'Yes',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Yes',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': '1'
-                    },
-                    {
                         'labelEn': 'No',
                         'labels': [
                             {
@@ -89,6 +75,20 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': '0'
+                    },
+                    {
+                        'labelEn': 'Yes',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Yes',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': '1'
                     }
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -112,20 +112,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': '0',
                 'choices': [
                     {
-                        'labelEn': 'Yes',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Yes',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': '1'
-                    },
-                    {
                         'labelEn': 'No',
                         'labels': [
                             {
@@ -138,6 +124,20 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': '0'
+                    },
+                    {
+                        'labelEn': 'Yes',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Yes',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': '1'
                     }
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -161,20 +161,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': '0',
                 'choices': [
                     {
-                        'labelEn': 'Yes',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Yes',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': '1'
-                    },
-                    {
                         'labelEn': 'No',
                         'labels': [
                             {
@@ -187,6 +173,20 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': '0'
+                    },
+                    {
+                        'labelEn': 'Yes',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Yes',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': '1'
                     }
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -238,6 +238,20 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'governent_hospital'
                     },
                     {
+                        'labelEn': 'Other Private',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Other Private',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'other_private'
+                    },
+                    {
                         'labelEn': 'Other Public',
                         'labels': [
                             {
@@ -250,20 +264,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'other_public'
-                    },
-                    {
-                        'labelEn': 'Private Hospital/Clinic',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Private Hospital/Clinic',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'private_hospital'
                     },
                     {
                         'labelEn': 'Pharmacy',
@@ -294,18 +294,18 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'private_doctor'
                     },
                     {
-                        'labelEn': 'Other Private',
+                        'labelEn': 'Private Hospital/Clinic',
                         'labels': [
                             {
                                 'label': '',
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'Other Private',
+                                'label': 'Private Hospital/Clinic',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'other_private'
+                        'value': 'private_hospital'
                     }
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -350,6 +350,34 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': '0',
                 'choices': [
                     {
+                        'labelEn': 'Accommodation is free / other',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Accommodation is free / other',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'free_accomodation'
+                    },
+                    {
+                        'labelEn': 'Informal settlement',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Informal settlement',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'informal settlement'
+                    },
+                    {
                         'labelEn': 'Own the place I live in',
                         'labels': [
                             {
@@ -390,34 +418,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'rent_informal_contract'
-                    },
-                    {
-                        'labelEn': 'Accommodation is free / other',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Accommodation is free / other',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'free_accomodation'
-                    },
-                    {
-                        'labelEn': 'Informal settlement',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Informal settlement',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'informal settlement'
                     }
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -567,20 +567,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'private_vendor_water'
                     },
                     {
-                        'labelEn': 'To buy water from water tank',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'To buy water from water tank',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'water_tank'
-                    },
-                    {
                         'labelEn': 'Collect water from rain water',
                         'labels': [
                             {
@@ -593,6 +579,20 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'rain_water'
+                    },
+                    {
+                        'labelEn': 'To buy water from water tank',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'To buy water from water tank',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'water_tank'
                     },
                     {
                         'labelEn': 'Collect water from a well/source directly',
@@ -630,18 +630,18 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': '0',
                 'choices': [
                     {
-                        'labelEn': 'Yes, it is sufficient for our needs',
+                        'labelEn': 'No, everyday our family struggles because of lack of water',
                         'labels': [
                             {
                                 'label': '',
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'Yes, it is sufficient for our needs',
+                                'label': 'No, everyday our family struggles because of lack of water',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'sufficientwater'
+                        'value': 'insufficientwater'
                     },
                     {
                         'labelEn': 'Yes, somehow It is not always enough, especially in Summer',
@@ -658,18 +658,18 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'partiallysufficientwater'
                     },
                     {
-                        'labelEn': 'No, everyday our family struggles because of lack of water',
+                        'labelEn': 'Yes, it is sufficient for our needs',
                         'labels': [
                             {
                                 'label': '',
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'No, everyday our family struggles because of lack of water',
+                                'label': 'Yes, it is sufficient for our needs',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'insufficientwater'
+                        'value': 'sufficientwater'
                     }
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -693,6 +693,20 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': '0',
                 'choices': [
                     {
+                        'labelEn': 'No facility (open defection)',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'No facility (open defection)',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'no_latrine'
+                    },
+                    {
                         'labelEn': 'No, only my household has access',
                         'labels': [
                             {
@@ -705,20 +719,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'not_shared'
-                    },
-                    {
-                        'labelEn': 'Yes, with one other household',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Yes, with one other household',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'shared_with_two_hh'
                     },
                     {
                         'labelEn': 'Yes, with two or more households',
@@ -735,18 +735,18 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'shared_with_one_hh'
                     },
                     {
-                        'labelEn': 'No facility (open defection)',
+                        'labelEn': 'Yes, with one other household',
                         'labels': [
                             {
                                 'label': '',
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'No facility (open defection)',
+                                'label': 'Yes, with one other household',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'no_latrine'
+                        'value': 'shared_with_two_hh'
                     }
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -1022,18 +1022,74 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': '0',
                 'choices': [
                     {
-                        'labelEn': 'No assistrance received',
+                        'labelEn': 'Cash assistance',
                         'labels': [
                             {
                                 'label': '',
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'No assistrance received',
+                                'label': 'Cash assistance',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'no_assistance'
+                        'value': 'cash_assistance'
+                    },
+                    {
+                        'labelEn': 'Child cash grant',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Child cash grant',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'child_cash_grant'
+                    },
+                    {
+                        'labelEn': 'Child education grant',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Child education grant',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'child_edu_grant'
+                    },
+                    {
+                        'labelEn': "Don't Know",
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': "Don't Know",
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'don’t_know'
+                    },
+                    {
+                        'labelEn': 'Food assistance for children',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Food assistance for children',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'food_for_children'
                     },
                     {
                         'labelEn': 'Food assistance in-kind support',
@@ -1064,60 +1120,88 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'food_vouchers'
                     },
                     {
-                        'labelEn': 'Food assistance for children',
+                        'labelEn': 'Health medical services',
                         'labels': [
                             {
                                 'label': '',
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'Food assistance for children',
+                                'label': 'Health medical services',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'food_for_children'
+                        'value': 'health_services'
                     },
                     {
-                        'labelEn': 'Cash assistance',
+                        'labelEn': 'Informal education',
                         'labels': [
                             {
                                 'label': '',
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'Cash assistance',
+                                'label': 'Informal education',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'cash_assistance'
+                        'value': 'informal_education'
                     },
                     {
-                        'labelEn': 'Child cash grant',
+                        'labelEn': 'Job opportunities',
                         'labels': [
                             {
                                 'label': '',
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'Child cash grant',
+                                'label': 'Job opportunities',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'child_cash_grant'
+                        'value': 'job_opportunities'
                     },
                     {
-                        'labelEn': 'Voucher',
+                        'labelEn': 'No assistrance received',
                         'labels': [
                             {
                                 'label': '',
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'Voucher',
+                                'label': 'No assistrance received',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'voucher'
+                        'value': 'no_assistance'
+                    },
+                    {
+                        'labelEn': 'None of the above',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'None of the above',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'none'
+                    },
+                    {
+                        'labelEn': 'Psychosocial services',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Psychosocial services',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'psychosocial'
                     },
                     {
                         'labelEn': 'School feeding',
@@ -1148,48 +1232,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'school_material'
                     },
                     {
-                        'labelEn': 'Child education grant',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Child education grant',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'child_edu_grant'
-                    },
-                    {
-                        'labelEn': 'Informal education',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Informal education',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'informal_education'
-                    },
-                    {
-                        'labelEn': 'Health medical services',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Health medical services',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'health_services'
-                    },
-                    {
                         'labelEn': 'Training',
                         'labels': [
                             {
@@ -1204,32 +1246,18 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'training'
                     },
                     {
-                        'labelEn': 'Psychosocial services',
+                        'labelEn': 'Voucher',
                         'labels': [
                             {
                                 'label': '',
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'Psychosocial services',
+                                'label': 'Voucher',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'psychosocial'
-                    },
-                    {
-                        'labelEn': 'Job opportunities',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Job opportunities',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'job_opportunities'
+                        'value': 'voucher'
                     },
                     {
                         'labelEn': 'Winterization assistance',
@@ -1244,34 +1272,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'winterization'
-                    },
-                    {
-                        'labelEn': 'None of the above',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'None of the above',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'none'
-                    },
-                    {
-                        'labelEn': "Don't Know",
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': "Don't Know",
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'don’t_know'
                     }
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -1295,46 +1295,32 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': '0',
                 'choices': [
                     {
-                        'labelEn': 'UNICEF',
+                        'labelEn': "Don't know",
                         'labels': [
                             {
                                 'label': '',
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'UNICEF',
+                                'label': "Don't know",
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'unicef'
+                        'value': 'don’t_know'
                     },
                     {
-                        'labelEn': 'UNHCR',
+                        'labelEn': 'Governmental',
                         'labels': [
                             {
                                 'label': '',
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'UNHCR',
+                                'label': 'Governmental',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'unhcr'
-                    },
-                    {
-                        'labelEn': 'WFP',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'WFP',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'wfp'
+                        'value': 'governmental'
                     },
                     {
                         'labelEn': 'NGOs, religious organizations and CBOs',
@@ -1349,6 +1335,20 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'ngos'
+                    },
+                    {
+                        'labelEn': 'Other',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Other',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'other'
                     },
                     {
                         'labelEn': 'Other INGO (non UN related)',
@@ -1379,46 +1379,46 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'relatives_friends'
                     },
                     {
-                        'labelEn': 'Other',
+                        'labelEn': 'UNHCR',
                         'labels': [
                             {
                                 'label': '',
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'Other',
+                                'label': 'UNHCR',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'other'
+                        'value': 'unhcr'
                     },
                     {
-                        'labelEn': "Don't know",
+                        'labelEn': 'UNICEF',
                         'labels': [
                             {
                                 'label': '',
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': "Don't know",
+                                'label': 'UNICEF',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'don’t_know'
+                        'value': 'unicef'
                     },
                     {
-                        'labelEn': 'Governmental',
+                        'labelEn': 'WFP',
                         'labels': [
                             {
                                 'label': '',
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'Governmental',
+                                'label': 'WFP',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'governmental'
+                        'value': 'wfp'
                     }
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -1491,20 +1491,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'drivers_licence'
                     },
                     {
-                        'labelEn': 'UNHCR ID',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'UNHCR ID',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'unhcr_id'
-                    },
-                    {
                         'labelEn': 'National ID',
                         'labels': [
                             {
@@ -1533,6 +1519,20 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'national_passp'
                     },
                     {
+                        'labelEn': 'Not Available',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Not Available',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'not_available'
+                    },
+                    {
                         'labelEn': 'Other',
                         'labels': [
                             {
@@ -1547,18 +1547,18 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'other'
                     },
                     {
-                        'labelEn': 'Not Available',
+                        'labelEn': 'UNHCR ID',
                         'labels': [
                             {
                                 'label': '',
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'Not Available',
+                                'label': 'UNHCR ID',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'not_available'
+                        'value': 'unhcr_id'
                     }
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -1624,18 +1624,18 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': '1',
                 'choices': [
                     {
-                        'labelEn': 'Some difficulty',
+                        'labelEn': 'Cannot do at all',
                         'labels': [
                             {
                                 'label': '',
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'Some difficulty',
+                                'label': 'Cannot do at all',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'some_difficulty'
+                        'value': 'cannot_do'
                     },
                     {
                         'labelEn': 'A lot of difficulty',
@@ -1652,18 +1652,18 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'lot_difficulty'
                     },
                     {
-                        'labelEn': 'Cannot do at all',
+                        'labelEn': 'Some difficulty',
                         'labels': [
                             {
                                 'label': '',
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'Cannot do at all',
+                                'label': 'Some difficulty',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'cannot_do'
+                        'value': 'some_difficulty'
                     }
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -1687,18 +1687,18 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': '1',
                 'choices': [
                     {
-                        'labelEn': 'Some difficulty',
+                        'labelEn': 'Cannot do at all',
                         'labels': [
                             {
                                 'label': '',
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'Some difficulty',
+                                'label': 'Cannot do at all',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'some_difficulty'
+                        'value': 'cannot_do'
                     },
                     {
                         'labelEn': 'A lot of difficulty',
@@ -1715,18 +1715,18 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'lot_difficulty'
                     },
                     {
-                        'labelEn': 'Cannot do at all',
+                        'labelEn': 'Some difficulty',
                         'labels': [
                             {
                                 'label': '',
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'Cannot do at all',
+                                'label': 'Some difficulty',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'cannot_do'
+                        'value': 'some_difficulty'
                     }
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -1750,18 +1750,18 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': '1',
                 'choices': [
                     {
-                        'labelEn': 'Some difficulty',
+                        'labelEn': 'Cannot do at all',
                         'labels': [
                             {
                                 'label': '',
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'Some difficulty',
+                                'label': 'Cannot do at all',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'some_difficulty'
+                        'value': 'cannot_do'
                     },
                     {
                         'labelEn': 'A lot of difficulty',
@@ -1778,18 +1778,18 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'lot_difficulty'
                     },
                     {
-                        'labelEn': 'Cannot do at all',
+                        'labelEn': 'Some difficulty',
                         'labels': [
                             {
                                 'label': '',
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'Cannot do at all',
+                                'label': 'Some difficulty',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'cannot_do'
+                        'value': 'some_difficulty'
                     }
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -1813,18 +1813,18 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': '1',
                 'choices': [
                     {
-                        'labelEn': 'Some difficulty',
+                        'labelEn': 'Cannot do at all',
                         'labels': [
                             {
                                 'label': '',
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'Some difficulty',
+                                'label': 'Cannot do at all',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'some_difficulty'
+                        'value': 'cannot_do'
                     },
                     {
                         'labelEn': 'A lot of difficulty',
@@ -1841,18 +1841,18 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'lot_difficulty'
                     },
                     {
-                        'labelEn': 'Cannot do at all',
+                        'labelEn': 'Some difficulty',
                         'labels': [
                             {
                                 'label': '',
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'Cannot do at all',
+                                'label': 'Some difficulty',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'cannot_do'
+                        'value': 'some_difficulty'
                     }
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -1876,18 +1876,18 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': '1',
                 'choices': [
                     {
-                        'labelEn': 'Some difficulty',
+                        'labelEn': 'Cannot do at all',
                         'labels': [
                             {
                                 'label': '',
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'Some difficulty',
+                                'label': 'Cannot do at all',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'some_difficulty'
+                        'value': 'cannot_do'
                     },
                     {
                         'labelEn': 'A lot of difficulty',
@@ -1904,18 +1904,18 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'lot_difficulty'
                     },
                     {
-                        'labelEn': 'Cannot do at all',
+                        'labelEn': 'Some difficulty',
                         'labels': [
                             {
                                 'label': '',
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'Cannot do at all',
+                                'label': 'Some difficulty',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'cannot_do'
+                        'value': 'some_difficulty'
                     }
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -1939,18 +1939,18 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': '1',
                 'choices': [
                     {
-                        'labelEn': 'Some difficulty',
+                        'labelEn': 'Cannot do at all',
                         'labels': [
                             {
                                 'label': '',
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'Some difficulty',
+                                'label': 'Cannot do at all',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'some_difficulty'
+                        'value': 'cannot_do'
                     },
                     {
                         'labelEn': 'A lot of difficulty',
@@ -1967,18 +1967,18 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'lot_difficulty'
                     },
                     {
-                        'labelEn': 'Cannot do at all',
+                        'labelEn': 'Some difficulty',
                         'labels': [
                             {
                                 'label': '',
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'Cannot do at all',
+                                'label': 'Some difficulty',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'cannot_do'
+                        'value': 'some_difficulty'
                     }
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -2002,18 +2002,18 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': '1',
                 'choices': [
                     {
-                        'labelEn': 'Single',
+                        'labelEn': 'Divorced',
                         'labels': [
                             {
                                 'label': '',
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'Single',
+                                'label': 'Divorced',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'single'
+                        'value': 'divorced'
                     },
                     {
                         'labelEn': 'Married',
@@ -2030,18 +2030,18 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'married'
                     },
                     {
-                        'labelEn': 'Divorced',
+                        'labelEn': 'Single',
                         'labels': [
                             {
                                 'label': '',
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'Divorced',
+                                'label': 'Single',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'divorced'
+                        'value': 'single'
                     },
                     {
                         'labelEn': 'Widowed',
@@ -2100,20 +2100,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': '1',
                 'choices': [
                     {
-                        'labelEn': 'Yes',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Yes',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': '1'
-                    },
-                    {
                         'labelEn': 'No',
                         'labels': [
                             {
@@ -2126,6 +2112,20 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': '0'
+                    },
+                    {
+                        'labelEn': 'Yes',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Yes',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': '1'
                     }
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -2149,20 +2149,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': '1',
                 'choices': [
                     {
-                        'labelEn': 'Yes',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Yes',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': '1'
-                    },
-                    {
                         'labelEn': 'No',
                         'labels': [
                             {
@@ -2175,6 +2161,20 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': '0'
+                    },
+                    {
+                        'labelEn': 'Yes',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Yes',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': '1'
                     }
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -2197,34 +2197,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
             {
                 'associatedWith': '1',
                 'choices': [
-                    {
-                        'labelEn': 'Private',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Private',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'private'
-                    },
-                    {
-                        'labelEn': 'Public',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Public',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'public'
-                    },
                     {
                         'labelEn': 'Informal',
                         'labels': [
@@ -2252,6 +2224,34 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'other'
+                    },
+                    {
+                        'labelEn': 'Private',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Private',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'private'
+                    },
+                    {
+                        'labelEn': 'Public',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Public',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'public'
                     }
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -2334,26 +2334,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': 'Refugee',
-                        'labels': [
-                            {
-                                'label': 'Refugee',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'REFUGEE'
-                    },
-                    {
-                        'labelEn': 'Migrant',
-                        'labels': [
-                            {
-                                'label': 'Migrant',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MIGRANT'
-                    },
-                    {
                         'labelEn': 'Citizen',
                         'labels': [
                             {
@@ -2374,6 +2354,16 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'IDP'
                     },
                     {
+                        'labelEn': 'Migrant',
+                        'labels': [
+                            {
+                                'label': 'Migrant',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MIGRANT'
+                    },
+                    {
                         'labelEn': 'Other',
                         'labels': [
                             {
@@ -2382,6 +2372,16 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'OTHER'
+                    },
+                    {
+                        'labelEn': 'Refugee',
+                        'labels': [
+                            {
+                                'label': 'Refugee',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'REFUGEE'
                     }
                 ],
                 'hint': '',
@@ -2401,56 +2401,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': 'Afghanistan',
-                        'labels': [
-                            {
-                                'label': 'Afghanistan',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'AF'
-                    },
-                    {
-                        'labelEn': 'Åland Islands',
-                        'labels': [
-                            {
-                                'label': 'Åland Islands',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'AX'
-                    },
-                    {
-                        'labelEn': 'Albania',
-                        'labels': [
-                            {
-                                'label': 'Albania',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'AL'
-                    },
-                    {
-                        'labelEn': 'Algeria',
-                        'labels': [
-                            {
-                                'label': 'Algeria',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'DZ'
-                    },
-                    {
-                        'labelEn': 'American Samoa',
-                        'labels': [
-                            {
-                                'label': 'American Samoa',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'AS'
-                    },
-                    {
                         'labelEn': 'Andorra',
                         'labels': [
                             {
@@ -2461,34 +2411,24 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'AD'
                     },
                     {
-                        'labelEn': 'Angola',
+                        'labelEn': 'United Arab Emirates',
                         'labels': [
                             {
-                                'label': 'Angola',
+                                'label': 'United Arab Emirates',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'AO'
+                        'value': 'AE'
                     },
                     {
-                        'labelEn': 'Anguilla',
+                        'labelEn': 'Afghanistan',
                         'labels': [
                             {
-                                'label': 'Anguilla',
+                                'label': 'Afghanistan',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'AI'
-                    },
-                    {
-                        'labelEn': 'Antarctica',
-                        'labels': [
-                            {
-                                'label': 'Antarctica',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'AQ'
+                        'value': 'AF'
                     },
                     {
                         'labelEn': 'Antigua and Barbuda',
@@ -2501,14 +2441,24 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'AG'
                     },
                     {
-                        'labelEn': 'Argentina',
+                        'labelEn': 'Anguilla',
                         'labels': [
                             {
-                                'label': 'Argentina',
+                                'label': 'Anguilla',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'AR'
+                        'value': 'AI'
+                    },
+                    {
+                        'labelEn': 'Albania',
+                        'labels': [
+                            {
+                                'label': 'Albania',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AL'
                     },
                     {
                         'labelEn': 'Armenia',
@@ -2521,24 +2471,54 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'AM'
                     },
                     {
-                        'labelEn': 'Aruba',
+                        'labelEn': 'Netherlands Antilles',
                         'labels': [
                             {
-                                'label': 'Aruba',
+                                'label': 'Netherlands Antilles',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'AW'
+                        'value': 'AN'
                     },
                     {
-                        'labelEn': 'Australia',
+                        'labelEn': 'Angola',
                         'labels': [
                             {
-                                'label': 'Australia',
+                                'label': 'Angola',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'AU'
+                        'value': 'AO'
+                    },
+                    {
+                        'labelEn': 'Antarctica',
+                        'labels': [
+                            {
+                                'label': 'Antarctica',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AQ'
+                    },
+                    {
+                        'labelEn': 'Argentina',
+                        'labels': [
+                            {
+                                'label': 'Argentina',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AR'
+                    },
+                    {
+                        'labelEn': 'American Samoa',
+                        'labels': [
+                            {
+                                'label': 'American Samoa',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AS'
                     },
                     {
                         'labelEn': 'Austria',
@@ -2551,6 +2531,26 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'AT'
                     },
                     {
+                        'labelEn': 'Australia',
+                        'labels': [
+                            {
+                                'label': 'Australia',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AU'
+                    },
+                    {
+                        'labelEn': 'Aruba',
+                        'labels': [
+                            {
+                                'label': 'Aruba',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AW'
+                    },
+                    {
                         'labelEn': 'Azerbaijan',
                         'labels': [
                             {
@@ -2561,34 +2561,14 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'AZ'
                     },
                     {
-                        'labelEn': 'Bahamas',
+                        'labelEn': 'Bosnia and Herzegovina',
                         'labels': [
                             {
-                                'label': 'Bahamas',
+                                'label': 'Bosnia and Herzegovina',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'BS'
-                    },
-                    {
-                        'labelEn': 'Bahrain',
-                        'labels': [
-                            {
-                                'label': 'Bahrain',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'BH'
-                    },
-                    {
-                        'labelEn': 'Bangladesh',
-                        'labels': [
-                            {
-                                'label': 'Bangladesh',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'BD'
+                        'value': 'BA'
                     },
                     {
                         'labelEn': 'Barbados',
@@ -2601,14 +2581,14 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'BB'
                     },
                     {
-                        'labelEn': 'Belarus',
+                        'labelEn': 'Bangladesh',
                         'labels': [
                             {
-                                'label': 'Belarus',
+                                'label': 'Bangladesh',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'BY'
+                        'value': 'BD'
                     },
                     {
                         'labelEn': 'Belgium',
@@ -2621,14 +2601,44 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'BE'
                     },
                     {
-                        'labelEn': 'Belize',
+                        'labelEn': 'Burkina Faso',
                         'labels': [
                             {
-                                'label': 'Belize',
+                                'label': 'Burkina Faso',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'BZ'
+                        'value': 'BF'
+                    },
+                    {
+                        'labelEn': 'Bulgaria',
+                        'labels': [
+                            {
+                                'label': 'Bulgaria',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'BG'
+                    },
+                    {
+                        'labelEn': 'Bahrain',
+                        'labels': [
+                            {
+                                'label': 'Bahrain',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'BH'
+                    },
+                    {
+                        'labelEn': 'Burundi',
+                        'labels': [
+                            {
+                                'label': 'Burundi',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'BI'
                     },
                     {
                         'labelEn': 'Benin',
@@ -2651,64 +2661,24 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'BM'
                     },
                     {
-                        'labelEn': 'Bhutan',
+                        'labelEn': 'Brunei',
                         'labels': [
                             {
-                                'label': 'Bhutan',
+                                'label': 'Brunei',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'BT'
+                        'value': 'BN'
                     },
                     {
-                        'labelEn': 'Bolivia (Plurinational State of)',
+                        'labelEn': 'Bolivia',
                         'labels': [
                             {
-                                'label': 'Bolivia (Plurinational State of)',
+                                'label': 'Bolivia',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'BO'
-                    },
-                    {
-                        'labelEn': 'Bonaire, Sint Eustatius and Saba',
-                        'labels': [
-                            {
-                                'label': 'Bonaire, Sint Eustatius and Saba',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'BQ'
-                    },
-                    {
-                        'labelEn': 'Bosnia and Herzegovina',
-                        'labels': [
-                            {
-                                'label': 'Bosnia and Herzegovina',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'BA'
-                    },
-                    {
-                        'labelEn': 'Botswana',
-                        'labels': [
-                            {
-                                'label': 'Botswana',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'BW'
-                    },
-                    {
-                        'labelEn': 'Bouvet Island',
-                        'labels': [
-                            {
-                                'label': 'Bouvet Island',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'BV'
                     },
                     {
                         'labelEn': 'Brazil',
@@ -2721,84 +2691,64 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'BR'
                     },
                     {
-                        'labelEn': 'British Indian Ocean Territory',
+                        'labelEn': 'Bahamas',
                         'labels': [
                             {
-                                'label': 'British Indian Ocean Territory',
+                                'label': 'Bahamas',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'IO'
+                        'value': 'BS'
                     },
                     {
-                        'labelEn': 'Brunei Darussalam',
+                        'labelEn': 'Bhutan',
                         'labels': [
                             {
-                                'label': 'Brunei Darussalam',
+                                'label': 'Bhutan',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'BN'
+                        'value': 'BT'
                     },
                     {
-                        'labelEn': 'Bulgaria',
+                        'labelEn': 'Bouvet Island',
                         'labels': [
                             {
-                                'label': 'Bulgaria',
+                                'label': 'Bouvet Island',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'BG'
+                        'value': 'BV'
                     },
                     {
-                        'labelEn': 'Burkina Faso',
+                        'labelEn': 'Botswana',
                         'labels': [
                             {
-                                'label': 'Burkina Faso',
+                                'label': 'Botswana',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'BF'
+                        'value': 'BW'
                     },
                     {
-                        'labelEn': 'Burundi',
+                        'labelEn': 'Belarus',
                         'labels': [
                             {
-                                'label': 'Burundi',
+                                'label': 'Belarus',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'BI'
+                        'value': 'BY'
                     },
                     {
-                        'labelEn': 'Cabo Verde',
+                        'labelEn': 'Belize',
                         'labels': [
                             {
-                                'label': 'Cabo Verde',
+                                'label': 'Belize',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'CV'
-                    },
-                    {
-                        'labelEn': 'Cambodia',
-                        'labels': [
-                            {
-                                'label': 'Cambodia',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'KH'
-                    },
-                    {
-                        'labelEn': 'Cameroon',
-                        'labels': [
-                            {
-                                'label': 'Cameroon',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'CM'
+                        'value': 'BZ'
                     },
                     {
                         'labelEn': 'Canada',
@@ -2811,14 +2761,24 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'CA'
                     },
                     {
-                        'labelEn': 'Cayman Islands',
+                        'labelEn': 'Cocos (Keeling) Islands',
                         'labels': [
                             {
-                                'label': 'Cayman Islands',
+                                'label': 'Cocos (Keeling) Islands',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'KY'
+                        'value': 'CC'
+                    },
+                    {
+                        'labelEn': 'The Democratic Republic of the Congo',
+                        'labels': [
+                            {
+                                'label': 'The Democratic Republic of the Congo',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'CD'
                     },
                     {
                         'labelEn': 'Central African Republic',
@@ -2831,86 +2791,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'CF'
                     },
                     {
-                        'labelEn': 'Chad',
-                        'labels': [
-                            {
-                                'label': 'Chad',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'TD'
-                    },
-                    {
-                        'labelEn': 'Chile',
-                        'labels': [
-                            {
-                                'label': 'Chile',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'CL'
-                    },
-                    {
-                        'labelEn': 'China',
-                        'labels': [
-                            {
-                                'label': 'China',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'CN'
-                    },
-                    {
-                        'labelEn': 'Christmas Island',
-                        'labels': [
-                            {
-                                'label': 'Christmas Island',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'CX'
-                    },
-                    {
-                        'labelEn': 'Cocos (Keeling) Islands',
-                        'labels': [
-                            {
-                                'label': 'Cocos (Keeling) Islands',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'CC'
-                    },
-                    {
-                        'labelEn': 'Colombia',
-                        'labels': [
-                            {
-                                'label': 'Colombia',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'CO'
-                    },
-                    {
-                        'labelEn': 'Comoros',
-                        'labels': [
-                            {
-                                'label': 'Comoros',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'KM'
-                    },
-                    {
-                        'labelEn': 'Congo (the Democratic Republic of the)',
-                        'labels': [
-                            {
-                                'label': 'Congo (the Democratic Republic of the)',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'CD'
-                    },
-                    {
                         'labelEn': 'Congo',
                         'labels': [
                             {
@@ -2919,6 +2799,26 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'CG'
+                    },
+                    {
+                        'labelEn': 'Switzerland',
+                        'labels': [
+                            {
+                                'label': 'Switzerland',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'CH'
+                    },
+                    {
+                        'labelEn': 'Ivory Coast',
+                        'labels': [
+                            {
+                                'label': 'Ivory Coast',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'CI'
                     },
                     {
                         'labelEn': 'Cook Islands',
@@ -2931,6 +2831,46 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'CK'
                     },
                     {
+                        'labelEn': 'Chile',
+                        'labels': [
+                            {
+                                'label': 'Chile',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'CL'
+                    },
+                    {
+                        'labelEn': 'Cameroon',
+                        'labels': [
+                            {
+                                'label': 'Cameroon',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'CM'
+                    },
+                    {
+                        'labelEn': 'China',
+                        'labels': [
+                            {
+                                'label': 'China',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'CN'
+                    },
+                    {
+                        'labelEn': 'Colombia',
+                        'labels': [
+                            {
+                                'label': 'Colombia',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'CO'
+                    },
+                    {
                         'labelEn': 'Costa Rica',
                         'labels': [
                             {
@@ -2939,26 +2879,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'CR'
-                    },
-                    {
-                        'labelEn': "Côte d'Ivoire",
-                        'labels': [
-                            {
-                                'label': "Côte d'Ivoire",
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'CI'
-                    },
-                    {
-                        'labelEn': 'Croatia',
-                        'labels': [
-                            {
-                                'label': 'Croatia',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'HR'
                     },
                     {
                         'labelEn': 'Cuba',
@@ -2971,14 +2891,24 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'CU'
                     },
                     {
-                        'labelEn': 'Curaçao',
+                        'labelEn': 'Cape Verde',
                         'labels': [
                             {
-                                'label': 'Curaçao',
+                                'label': 'Cape Verde',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'CW'
+                        'value': 'CV'
+                    },
+                    {
+                        'labelEn': 'Christmas Island',
+                        'labels': [
+                            {
+                                'label': 'Christmas Island',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'CX'
                     },
                     {
                         'labelEn': 'Cyprus',
@@ -2991,24 +2921,24 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'CY'
                     },
                     {
-                        'labelEn': 'Czechia',
+                        'labelEn': 'Czech Republic',
                         'labels': [
                             {
-                                'label': 'Czechia',
+                                'label': 'Czech Republic',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'CZ'
                     },
                     {
-                        'labelEn': 'Denmark',
+                        'labelEn': 'Germany',
                         'labels': [
                             {
-                                'label': 'Denmark',
+                                'label': 'Germany',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'DK'
+                        'value': 'DE'
                     },
                     {
                         'labelEn': 'Djibouti',
@@ -3019,6 +2949,16 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'DJ'
+                    },
+                    {
+                        'labelEn': 'Denmark',
+                        'labels': [
+                            {
+                                'label': 'Denmark',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'DK'
                     },
                     {
                         'labelEn': 'Dominica',
@@ -3041,6 +2981,16 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'DO'
                     },
                     {
+                        'labelEn': 'Algeria',
+                        'labels': [
+                            {
+                                'label': 'Algeria',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'DZ'
+                    },
+                    {
                         'labelEn': 'Ecuador',
                         'labels': [
                             {
@@ -3049,46 +2999,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'EC'
-                    },
-                    {
-                        'labelEn': 'Egypt',
-                        'labels': [
-                            {
-                                'label': 'Egypt',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'EG'
-                    },
-                    {
-                        'labelEn': 'El Salvador',
-                        'labels': [
-                            {
-                                'label': 'El Salvador',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SV'
-                    },
-                    {
-                        'labelEn': 'Equatorial Guinea',
-                        'labels': [
-                            {
-                                'label': 'Equatorial Guinea',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'GQ'
-                    },
-                    {
-                        'labelEn': 'Eritrea',
-                        'labels': [
-                            {
-                                'label': 'Eritrea',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'ER'
                     },
                     {
                         'labelEn': 'Estonia',
@@ -3101,14 +3011,44 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'EE'
                     },
                     {
-                        'labelEn': 'Eswatini',
+                        'labelEn': 'Egypt',
                         'labels': [
                             {
-                                'label': 'Eswatini',
+                                'label': 'Egypt',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'SZ'
+                        'value': 'EG'
+                    },
+                    {
+                        'labelEn': 'Western Sahara',
+                        'labels': [
+                            {
+                                'label': 'Western Sahara',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'EH'
+                    },
+                    {
+                        'labelEn': 'Eritrea',
+                        'labels': [
+                            {
+                                'label': 'Eritrea',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'ER'
+                    },
+                    {
+                        'labelEn': 'Spain',
+                        'labels': [
+                            {
+                                'label': 'Spain',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'ES'
                     },
                     {
                         'labelEn': 'Ethiopia',
@@ -3121,24 +3061,14 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'ET'
                     },
                     {
-                        'labelEn': 'Falkland Islands  [Malvinas]',
+                        'labelEn': 'Finland',
                         'labels': [
                             {
-                                'label': 'Falkland Islands  [Malvinas]',
+                                'label': 'Finland',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'FK'
-                    },
-                    {
-                        'labelEn': 'Faroe Islands',
-                        'labels': [
-                            {
-                                'label': 'Faroe Islands',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'FO'
+                        'value': 'FI'
                     },
                     {
                         'labelEn': 'Fiji',
@@ -3151,14 +3081,34 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'FJ'
                     },
                     {
-                        'labelEn': 'Finland',
+                        'labelEn': 'Falkland Islands (Malvinas)',
                         'labels': [
                             {
-                                'label': 'Finland',
+                                'label': 'Falkland Islands (Malvinas)',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'FI'
+                        'value': 'FK'
+                    },
+                    {
+                        'labelEn': 'Federated States of Micronesia',
+                        'labels': [
+                            {
+                                'label': 'Federated States of Micronesia',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'FM'
+                    },
+                    {
+                        'labelEn': 'Faroe Islands',
+                        'labels': [
+                            {
+                                'label': 'Faroe Islands',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'FO'
                     },
                     {
                         'labelEn': 'France',
@@ -3171,36 +3121,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'FR'
                     },
                     {
-                        'labelEn': 'French Guiana',
-                        'labels': [
-                            {
-                                'label': 'French Guiana',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'GF'
-                    },
-                    {
-                        'labelEn': 'French Polynesia',
-                        'labels': [
-                            {
-                                'label': 'French Polynesia',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'PF'
-                    },
-                    {
-                        'labelEn': 'French Southern Territories',
-                        'labels': [
-                            {
-                                'label': 'French Southern Territories',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'TF'
-                    },
-                    {
                         'labelEn': 'Gabon',
                         'labels': [
                             {
@@ -3211,14 +3131,24 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'GA'
                     },
                     {
-                        'labelEn': 'Gambia',
+                        'labelEn': 'United Kingdom',
                         'labels': [
                             {
-                                'label': 'Gambia',
+                                'label': 'United Kingdom',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'GM'
+                        'value': 'GB'
+                    },
+                    {
+                        'labelEn': 'Grenada',
+                        'labels': [
+                            {
+                                'label': 'Grenada',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'GD'
                     },
                     {
                         'labelEn': 'Georgia',
@@ -3231,14 +3161,24 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'GE'
                     },
                     {
-                        'labelEn': 'Germany',
+                        'labelEn': 'French Guiana',
                         'labels': [
                             {
-                                'label': 'Germany',
+                                'label': 'French Guiana',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'DE'
+                        'value': 'GF'
+                    },
+                    {
+                        'labelEn': 'Guernsey',
+                        'labels': [
+                            {
+                                'label': 'Guernsey',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'GG'
                     },
                     {
                         'labelEn': 'Ghana',
@@ -3261,16 +3201,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'GI'
                     },
                     {
-                        'labelEn': 'Greece',
-                        'labels': [
-                            {
-                                'label': 'Greece',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'GR'
-                    },
-                    {
                         'labelEn': 'Greenland',
                         'labels': [
                             {
@@ -3281,14 +3211,24 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'GL'
                     },
                     {
-                        'labelEn': 'Grenada',
+                        'labelEn': 'Gambia',
                         'labels': [
                             {
-                                'label': 'Grenada',
+                                'label': 'Gambia',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'GD'
+                        'value': 'GM'
+                    },
+                    {
+                        'labelEn': 'Guinea',
+                        'labels': [
+                            {
+                                'label': 'Guinea',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'GN'
                     },
                     {
                         'labelEn': 'Guadeloupe',
@@ -3301,14 +3241,34 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'GP'
                     },
                     {
-                        'labelEn': 'Guam',
+                        'labelEn': 'Equatorial Guinea',
                         'labels': [
                             {
-                                'label': 'Guam',
+                                'label': 'Equatorial Guinea',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'GU'
+                        'value': 'GQ'
+                    },
+                    {
+                        'labelEn': 'Greece',
+                        'labels': [
+                            {
+                                'label': 'Greece',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'GR'
+                    },
+                    {
+                        'labelEn': 'South Georgia and the South Sandwich Islands',
+                        'labels': [
+                            {
+                                'label': 'South Georgia and the South Sandwich Islands',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'GS'
                     },
                     {
                         'labelEn': 'Guatemala',
@@ -3321,24 +3281,14 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'GT'
                     },
                     {
-                        'labelEn': 'Guernsey',
+                        'labelEn': 'Guam',
                         'labels': [
                             {
-                                'label': 'Guernsey',
+                                'label': 'Guam',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'GG'
-                    },
-                    {
-                        'labelEn': 'Guinea',
-                        'labels': [
-                            {
-                                'label': 'Guinea',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'GN'
+                        'value': 'GU'
                     },
                     {
                         'labelEn': 'Guinea-Bissau',
@@ -3361,14 +3311,14 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'GY'
                     },
                     {
-                        'labelEn': 'Haiti',
+                        'labelEn': 'Hong Kong',
                         'labels': [
                             {
-                                'label': 'Haiti',
+                                'label': 'Hong Kong',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'HT'
+                        'value': 'HK'
                     },
                     {
                         'labelEn': 'Heard Island and McDonald Islands',
@@ -3381,16 +3331,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'HM'
                     },
                     {
-                        'labelEn': 'Holy See',
-                        'labels': [
-                            {
-                                'label': 'Holy See',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'VA'
-                    },
-                    {
                         'labelEn': 'Honduras',
                         'labels': [
                             {
@@ -3401,14 +3341,24 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'HN'
                     },
                     {
-                        'labelEn': 'Hong Kong',
+                        'labelEn': 'Croatia',
                         'labels': [
                             {
-                                'label': 'Hong Kong',
+                                'label': 'Croatia',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'HK'
+                        'value': 'HR'
+                    },
+                    {
+                        'labelEn': 'Haiti',
+                        'labels': [
+                            {
+                                'label': 'Haiti',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'HT'
                     },
                     {
                         'labelEn': 'Hungary',
@@ -3421,26 +3371,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'HU'
                     },
                     {
-                        'labelEn': 'Iceland',
-                        'labels': [
-                            {
-                                'label': 'Iceland',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'IS'
-                    },
-                    {
-                        'labelEn': 'India',
-                        'labels': [
-                            {
-                                'label': 'India',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'IN'
-                    },
-                    {
                         'labelEn': 'Indonesia',
                         'labels': [
                             {
@@ -3449,26 +3379,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'ID'
-                    },
-                    {
-                        'labelEn': 'Iran (Islamic Republic of)',
-                        'labels': [
-                            {
-                                'label': 'Iran (Islamic Republic of)',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'IR'
-                    },
-                    {
-                        'labelEn': 'Iraq',
-                        'labels': [
-                            {
-                                'label': 'Iraq',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'IQ'
                     },
                     {
                         'labelEn': 'Ireland',
@@ -3481,6 +3391,16 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'IE'
                     },
                     {
+                        'labelEn': 'Israel',
+                        'labels': [
+                            {
+                                'label': 'Israel',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'IL'
+                    },
+                    {
                         'labelEn': 'Isle of Man',
                         'labels': [
                             {
@@ -3491,14 +3411,54 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'IM'
                     },
                     {
-                        'labelEn': 'Israel',
+                        'labelEn': 'India',
                         'labels': [
                             {
-                                'label': 'Israel',
+                                'label': 'India',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'IL'
+                        'value': 'IN'
+                    },
+                    {
+                        'labelEn': 'British Indian Ocean Territory',
+                        'labels': [
+                            {
+                                'label': 'British Indian Ocean Territory',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'IO'
+                    },
+                    {
+                        'labelEn': 'Iraq',
+                        'labels': [
+                            {
+                                'label': 'Iraq',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'IQ'
+                    },
+                    {
+                        'labelEn': 'Iran, Islamic Republic of',
+                        'labels': [
+                            {
+                                'label': 'Iran, Islamic Republic of',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'IR'
+                    },
+                    {
+                        'labelEn': 'Iceland',
+                        'labels': [
+                            {
+                                'label': 'Iceland',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'IS'
                     },
                     {
                         'labelEn': 'Italy',
@@ -3511,26 +3471,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'IT'
                     },
                     {
-                        'labelEn': 'Jamaica',
-                        'labels': [
-                            {
-                                'label': 'Jamaica',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'JM'
-                    },
-                    {
-                        'labelEn': 'Japan',
-                        'labels': [
-                            {
-                                'label': 'Japan',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'JP'
-                    },
-                    {
                         'labelEn': 'Jersey',
                         'labels': [
                             {
@@ -3539,6 +3479,16 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'JE'
+                    },
+                    {
+                        'labelEn': 'Jamaica',
+                        'labels': [
+                            {
+                                'label': 'Jamaica',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'JM'
                     },
                     {
                         'labelEn': 'Jordan',
@@ -3551,14 +3501,14 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'JO'
                     },
                     {
-                        'labelEn': 'Kazakhstan',
+                        'labelEn': 'Japan',
                         'labels': [
                             {
-                                'label': 'Kazakhstan',
+                                'label': 'Japan',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'KZ'
+                        'value': 'JP'
                     },
                     {
                         'labelEn': 'Kenya',
@@ -3571,6 +3521,26 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'KE'
                     },
                     {
+                        'labelEn': 'Kyrgyzstan',
+                        'labels': [
+                            {
+                                'label': 'Kyrgyzstan',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'KG'
+                    },
+                    {
+                        'labelEn': 'Cambodia',
+                        'labels': [
+                            {
+                                'label': 'Cambodia',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'KH'
+                    },
+                    {
                         'labelEn': 'Kiribati',
                         'labels': [
                             {
@@ -3581,20 +3551,40 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'KI'
                     },
                     {
-                        'labelEn': "Korea (the Democratic People's Republic of)",
+                        'labelEn': 'Comoros',
                         'labels': [
                             {
-                                'label': "Korea (the Democratic People's Republic of)",
+                                'label': 'Comoros',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'KM'
+                    },
+                    {
+                        'labelEn': 'Saint Kitts and Nevis',
+                        'labels': [
+                            {
+                                'label': 'Saint Kitts and Nevis',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'KN'
+                    },
+                    {
+                        'labelEn': "Democratic People's Republic of Korea",
+                        'labels': [
+                            {
+                                'label': "Democratic People's Republic of Korea",
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'KP'
                     },
                     {
-                        'labelEn': 'Korea (the Republic of)',
+                        'labelEn': 'South Korea',
                         'labels': [
                             {
-                                'label': 'Korea (the Republic of)',
+                                'label': 'South Korea',
                                 'language': 'English(EN)'
                             }
                         ],
@@ -3611,14 +3601,24 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'KW'
                     },
                     {
-                        'labelEn': 'Kyrgyzstan',
+                        'labelEn': 'Cayman Islands',
                         'labels': [
                             {
-                                'label': 'Kyrgyzstan',
+                                'label': 'Cayman Islands',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'KG'
+                        'value': 'KY'
+                    },
+                    {
+                        'labelEn': 'Kazakhstan',
+                        'labels': [
+                            {
+                                'label': 'Kazakhstan',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'KZ'
                     },
                     {
                         'labelEn': "Lao People's Democratic Republic",
@@ -3631,16 +3631,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'LA'
                     },
                     {
-                        'labelEn': 'Latvia',
-                        'labels': [
-                            {
-                                'label': 'Latvia',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'LV'
-                    },
-                    {
                         'labelEn': 'Lebanon',
                         'labels': [
                             {
@@ -3651,14 +3641,34 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'LB'
                     },
                     {
-                        'labelEn': 'Lesotho',
+                        'labelEn': 'Saint Lucia',
                         'labels': [
                             {
-                                'label': 'Lesotho',
+                                'label': 'Saint Lucia',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'LS'
+                        'value': 'LC'
+                    },
+                    {
+                        'labelEn': 'Liechtenstein',
+                        'labels': [
+                            {
+                                'label': 'Liechtenstein',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'LI'
+                    },
+                    {
+                        'labelEn': 'Sri Lanka',
+                        'labels': [
+                            {
+                                'label': 'Sri Lanka',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'LK'
                     },
                     {
                         'labelEn': 'Liberia',
@@ -3671,24 +3681,14 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'LR'
                     },
                     {
-                        'labelEn': 'Libya',
+                        'labelEn': 'Lesotho',
                         'labels': [
                             {
-                                'label': 'Libya',
+                                'label': 'Lesotho',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'LY'
-                    },
-                    {
-                        'labelEn': 'Liechtenstein',
-                        'labels': [
-                            {
-                                'label': 'Liechtenstein',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'LI'
+                        'value': 'LS'
                     },
                     {
                         'labelEn': 'Lithuania',
@@ -3711,14 +3711,64 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'LU'
                     },
                     {
-                        'labelEn': 'Macao',
+                        'labelEn': 'Latvia',
                         'labels': [
                             {
-                                'label': 'Macao',
+                                'label': 'Latvia',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'MO'
+                        'value': 'LV'
+                    },
+                    {
+                        'labelEn': 'Libya',
+                        'labels': [
+                            {
+                                'label': 'Libya',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'LY'
+                    },
+                    {
+                        'labelEn': 'Morocco',
+                        'labels': [
+                            {
+                                'label': 'Morocco',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MA'
+                    },
+                    {
+                        'labelEn': 'Monaco',
+                        'labels': [
+                            {
+                                'label': 'Monaco',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MC'
+                    },
+                    {
+                        'labelEn': 'Republic of Moldova',
+                        'labels': [
+                            {
+                                'label': 'Republic of Moldova',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MD'
+                    },
+                    {
+                        'labelEn': 'Montenegro',
+                        'labels': [
+                            {
+                                'label': 'Montenegro',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'ME'
                     },
                     {
                         'labelEn': 'Madagascar',
@@ -3731,34 +3781,24 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'MG'
                     },
                     {
-                        'labelEn': 'Malawi',
+                        'labelEn': 'Marshall Islands',
                         'labels': [
                             {
-                                'label': 'Malawi',
+                                'label': 'Marshall Islands',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'MW'
+                        'value': 'MH'
                     },
                     {
-                        'labelEn': 'Malaysia',
+                        'labelEn': 'Republic of North Macedonia',
                         'labels': [
                             {
-                                'label': 'Malaysia',
+                                'label': 'Republic of North Macedonia',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'MY'
-                    },
-                    {
-                        'labelEn': 'Maldives',
-                        'labels': [
-                            {
-                                'label': 'Maldives',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MV'
+                        'value': 'MK'
                     },
                     {
                         'labelEn': 'Mali',
@@ -3771,24 +3811,44 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'ML'
                     },
                     {
-                        'labelEn': 'Malta',
+                        'labelEn': 'Myanmar',
                         'labels': [
                             {
-                                'label': 'Malta',
+                                'label': 'Myanmar',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'MT'
+                        'value': 'MM'
                     },
                     {
-                        'labelEn': 'Marshall Islands',
+                        'labelEn': 'Mongolia',
                         'labels': [
                             {
-                                'label': 'Marshall Islands',
+                                'label': 'Mongolia',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'MH'
+                        'value': 'MN'
+                    },
+                    {
+                        'labelEn': 'Macao',
+                        'labels': [
+                            {
+                                'label': 'Macao',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MO'
+                    },
+                    {
+                        'labelEn': 'Northern Mariana Islands',
+                        'labels': [
+                            {
+                                'label': 'Northern Mariana Islands',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MP'
                     },
                     {
                         'labelEn': 'Martinique',
@@ -3811,6 +3871,26 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'MR'
                     },
                     {
+                        'labelEn': 'Montserrat',
+                        'labels': [
+                            {
+                                'label': 'Montserrat',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MS'
+                    },
+                    {
+                        'labelEn': 'Malta',
+                        'labels': [
+                            {
+                                'label': 'Malta',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MT'
+                    },
+                    {
                         'labelEn': 'Mauritius',
                         'labels': [
                             {
@@ -3821,14 +3901,24 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'MU'
                     },
                     {
-                        'labelEn': 'Mayotte',
+                        'labelEn': 'Maldives',
                         'labels': [
                             {
-                                'label': 'Mayotte',
+                                'label': 'Maldives',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'YT'
+                        'value': 'MV'
+                    },
+                    {
+                        'labelEn': 'Malawi',
+                        'labels': [
+                            {
+                                'label': 'Malawi',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MW'
                     },
                     {
                         'labelEn': 'Mexico',
@@ -3841,74 +3931,14 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'MX'
                     },
                     {
-                        'labelEn': 'Micronesia (Federated States of)',
+                        'labelEn': 'Malaysia',
                         'labels': [
                             {
-                                'label': 'Micronesia (Federated States of)',
+                                'label': 'Malaysia',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'FM'
-                    },
-                    {
-                        'labelEn': 'Moldova (the Republic of)',
-                        'labels': [
-                            {
-                                'label': 'Moldova (the Republic of)',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MD'
-                    },
-                    {
-                        'labelEn': 'Monaco',
-                        'labels': [
-                            {
-                                'label': 'Monaco',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MC'
-                    },
-                    {
-                        'labelEn': 'Mongolia',
-                        'labels': [
-                            {
-                                'label': 'Mongolia',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MN'
-                    },
-                    {
-                        'labelEn': 'Montenegro',
-                        'labels': [
-                            {
-                                'label': 'Montenegro',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'ME'
-                    },
-                    {
-                        'labelEn': 'Montserrat',
-                        'labels': [
-                            {
-                                'label': 'Montserrat',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MS'
-                    },
-                    {
-                        'labelEn': 'Morocco',
-                        'labels': [
-                            {
-                                'label': 'Morocco',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MA'
+                        'value': 'MY'
                     },
                     {
                         'labelEn': 'Mozambique',
@@ -3921,16 +3951,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'MZ'
                     },
                     {
-                        'labelEn': 'Myanmar',
-                        'labels': [
-                            {
-                                'label': 'Myanmar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MM'
-                    },
-                    {
                         'labelEn': 'Namibia',
                         'labels': [
                             {
@@ -3939,36 +3959,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'NA'
-                    },
-                    {
-                        'labelEn': 'Nauru',
-                        'labels': [
-                            {
-                                'label': 'Nauru',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'NR'
-                    },
-                    {
-                        'labelEn': 'Nepal',
-                        'labels': [
-                            {
-                                'label': 'Nepal',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'NP'
-                    },
-                    {
-                        'labelEn': 'Netherlands',
-                        'labels': [
-                            {
-                                'label': 'Netherlands',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'NL'
                     },
                     {
                         'labelEn': 'New Caledonia',
@@ -3981,26 +3971,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'NC'
                     },
                     {
-                        'labelEn': 'New Zealand',
-                        'labels': [
-                            {
-                                'label': 'New Zealand',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'NZ'
-                    },
-                    {
-                        'labelEn': 'Nicaragua',
-                        'labels': [
-                            {
-                                'label': 'Nicaragua',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'NI'
-                    },
-                    {
                         'labelEn': 'Niger',
                         'labels': [
                             {
@@ -4009,26 +3979,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'NE'
-                    },
-                    {
-                        'labelEn': 'Nigeria',
-                        'labels': [
-                            {
-                                'label': 'Nigeria',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'NG'
-                    },
-                    {
-                        'labelEn': 'Niue',
-                        'labels': [
-                            {
-                                'label': 'Niue',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'NU'
                     },
                     {
                         'labelEn': 'Norfolk Island',
@@ -4041,24 +3991,34 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'NF'
                     },
                     {
-                        'labelEn': 'North Macedonia',
+                        'labelEn': 'Nigeria',
                         'labels': [
                             {
-                                'label': 'North Macedonia',
+                                'label': 'Nigeria',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'MK'
+                        'value': 'NG'
                     },
                     {
-                        'labelEn': 'Northern Mariana Islands',
+                        'labelEn': 'Nicaragua',
                         'labels': [
                             {
-                                'label': 'Northern Mariana Islands',
+                                'label': 'Nicaragua',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'MP'
+                        'value': 'NI'
+                    },
+                    {
+                        'labelEn': 'Netherlands',
+                        'labels': [
+                            {
+                                'label': 'Netherlands',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'NL'
                     },
                     {
                         'labelEn': 'Norway',
@@ -4071,6 +4031,46 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'NO'
                     },
                     {
+                        'labelEn': 'Nepal',
+                        'labels': [
+                            {
+                                'label': 'Nepal',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'NP'
+                    },
+                    {
+                        'labelEn': 'Nauru',
+                        'labels': [
+                            {
+                                'label': 'Nauru',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'NR'
+                    },
+                    {
+                        'labelEn': 'Niue',
+                        'labels': [
+                            {
+                                'label': 'Niue',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'NU'
+                    },
+                    {
+                        'labelEn': 'New Zealand',
+                        'labels': [
+                            {
+                                'label': 'New Zealand',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'NZ'
+                    },
+                    {
                         'labelEn': 'Oman',
                         'labels': [
                             {
@@ -4079,36 +4079,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'OM'
-                    },
-                    {
-                        'labelEn': 'Pakistan',
-                        'labels': [
-                            {
-                                'label': 'Pakistan',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'PK'
-                    },
-                    {
-                        'labelEn': 'Palau',
-                        'labels': [
-                            {
-                                'label': 'Palau',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'PW'
-                    },
-                    {
-                        'labelEn': 'Palestine, State of',
-                        'labels': [
-                            {
-                                'label': 'Palestine, State of',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'PS'
                     },
                     {
                         'labelEn': 'Panama',
@@ -4121,26 +4091,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'PA'
                     },
                     {
-                        'labelEn': 'Papua New Guinea',
-                        'labels': [
-                            {
-                                'label': 'Papua New Guinea',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'PG'
-                    },
-                    {
-                        'labelEn': 'Paraguay',
-                        'labels': [
-                            {
-                                'label': 'Paraguay',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'PY'
-                    },
-                    {
                         'labelEn': 'Peru',
                         'labels': [
                             {
@@ -4149,6 +4099,26 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'PE'
+                    },
+                    {
+                        'labelEn': 'French Polynesia',
+                        'labels': [
+                            {
+                                'label': 'French Polynesia',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'PF'
+                    },
+                    {
+                        'labelEn': 'Papua New Guinea',
+                        'labels': [
+                            {
+                                'label': 'Papua New Guinea',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'PG'
                     },
                     {
                         'labelEn': 'Philippines',
@@ -4161,14 +4131,14 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'PH'
                     },
                     {
-                        'labelEn': 'Pitcairn',
+                        'labelEn': 'Pakistan',
                         'labels': [
                             {
-                                'label': 'Pitcairn',
+                                'label': 'Pakistan',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'PN'
+                        'value': 'PK'
                     },
                     {
                         'labelEn': 'Poland',
@@ -4181,14 +4151,24 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'PL'
                     },
                     {
-                        'labelEn': 'Portugal',
+                        'labelEn': 'Saint Pierre and Miquelon',
                         'labels': [
                             {
-                                'label': 'Portugal',
+                                'label': 'Saint Pierre and Miquelon',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'PT'
+                        'value': 'PM'
+                    },
+                    {
+                        'labelEn': 'Pitcairn',
+                        'labels': [
+                            {
+                                'label': 'Pitcairn',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'PN'
                     },
                     {
                         'labelEn': 'Puerto Rico',
@@ -4199,6 +4179,46 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'PR'
+                    },
+                    {
+                        'labelEn': 'Palestinian Territory, Occupied',
+                        'labels': [
+                            {
+                                'label': 'Palestinian Territory, Occupied',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'PS'
+                    },
+                    {
+                        'labelEn': 'Portugal',
+                        'labels': [
+                            {
+                                'label': 'Portugal',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'PT'
+                    },
+                    {
+                        'labelEn': 'Palau',
+                        'labels': [
+                            {
+                                'label': 'Palau',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'PW'
+                    },
+                    {
+                        'labelEn': 'Paraguay',
+                        'labels': [
+                            {
+                                'label': 'Paraguay',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'PY'
                     },
                     {
                         'labelEn': 'Qatar',
@@ -4231,10 +4251,20 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'RO'
                     },
                     {
-                        'labelEn': 'Russian Federation',
+                        'labelEn': 'Serbia',
                         'labels': [
                             {
-                                'label': 'Russian Federation',
+                                'label': 'Serbia',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'RS'
+                    },
+                    {
+                        'labelEn': 'Russia',
+                        'labels': [
+                            {
+                                'label': 'Russia',
                                 'language': 'English(EN)'
                             }
                         ],
@@ -4251,106 +4281,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'RW'
                     },
                     {
-                        'labelEn': 'Saint Barthélemy',
-                        'labels': [
-                            {
-                                'label': 'Saint Barthélemy',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'BL'
-                    },
-                    {
-                        'labelEn': 'Saint Helena, Ascension and Tristan da Cunha',
-                        'labels': [
-                            {
-                                'label': 'Saint Helena, Ascension and Tristan da Cunha',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SH'
-                    },
-                    {
-                        'labelEn': 'Saint Kitts and Nevis',
-                        'labels': [
-                            {
-                                'label': 'Saint Kitts and Nevis',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'KN'
-                    },
-                    {
-                        'labelEn': 'Saint Lucia',
-                        'labels': [
-                            {
-                                'label': 'Saint Lucia',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'LC'
-                    },
-                    {
-                        'labelEn': 'Saint Martin (French part)',
-                        'labels': [
-                            {
-                                'label': 'Saint Martin (French part)',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MF'
-                    },
-                    {
-                        'labelEn': 'Saint Pierre and Miquelon',
-                        'labels': [
-                            {
-                                'label': 'Saint Pierre and Miquelon',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'PM'
-                    },
-                    {
-                        'labelEn': 'Saint Vincent and the Grenadines',
-                        'labels': [
-                            {
-                                'label': 'Saint Vincent and the Grenadines',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'VC'
-                    },
-                    {
-                        'labelEn': 'Samoa',
-                        'labels': [
-                            {
-                                'label': 'Samoa',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'WS'
-                    },
-                    {
-                        'labelEn': 'San Marino',
-                        'labels': [
-                            {
-                                'label': 'San Marino',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SM'
-                    },
-                    {
-                        'labelEn': 'Sao Tome and Principe',
-                        'labels': [
-                            {
-                                'label': 'Sao Tome and Principe',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'ST'
-                    },
-                    {
                         'labelEn': 'Saudi Arabia',
                         'labels': [
                             {
@@ -4359,86 +4289,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'SA'
-                    },
-                    {
-                        'labelEn': 'Senegal',
-                        'labels': [
-                            {
-                                'label': 'Senegal',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SN'
-                    },
-                    {
-                        'labelEn': 'Serbia',
-                        'labels': [
-                            {
-                                'label': 'Serbia',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'RS'
-                    },
-                    {
-                        'labelEn': 'Seychelles',
-                        'labels': [
-                            {
-                                'label': 'Seychelles',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SC'
-                    },
-                    {
-                        'labelEn': 'Sierra Leone',
-                        'labels': [
-                            {
-                                'label': 'Sierra Leone',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SL'
-                    },
-                    {
-                        'labelEn': 'Singapore',
-                        'labels': [
-                            {
-                                'label': 'Singapore',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SG'
-                    },
-                    {
-                        'labelEn': 'Sint Maarten (Dutch part)',
-                        'labels': [
-                            {
-                                'label': 'Sint Maarten (Dutch part)',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SX'
-                    },
-                    {
-                        'labelEn': 'Slovakia',
-                        'labels': [
-                            {
-                                'label': 'Slovakia',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SK'
-                    },
-                    {
-                        'labelEn': 'Slovenia',
-                        'labels': [
-                            {
-                                'label': 'Slovenia',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SI'
                     },
                     {
                         'labelEn': 'Solomon Islands',
@@ -4451,64 +4301,14 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'SB'
                     },
                     {
-                        'labelEn': 'Somalia',
+                        'labelEn': 'Seychelles',
                         'labels': [
                             {
-                                'label': 'Somalia',
+                                'label': 'Seychelles',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'SO'
-                    },
-                    {
-                        'labelEn': 'South Africa',
-                        'labels': [
-                            {
-                                'label': 'South Africa',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'ZA'
-                    },
-                    {
-                        'labelEn': 'South Georgia and the South Sandwich Islands',
-                        'labels': [
-                            {
-                                'label': 'South Georgia and the South Sandwich Islands',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'GS'
-                    },
-                    {
-                        'labelEn': 'South Sudan',
-                        'labels': [
-                            {
-                                'label': 'South Sudan',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SS'
-                    },
-                    {
-                        'labelEn': 'Spain',
-                        'labels': [
-                            {
-                                'label': 'Spain',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'ES'
-                    },
-                    {
-                        'labelEn': 'Sri Lanka',
-                        'labels': [
-                            {
-                                'label': 'Sri Lanka',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'LK'
+                        'value': 'SC'
                     },
                     {
                         'labelEn': 'Sudan',
@@ -4521,14 +4321,44 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'SD'
                     },
                     {
-                        'labelEn': 'Suriname',
+                        'labelEn': 'Sweden',
                         'labels': [
                             {
-                                'label': 'Suriname',
+                                'label': 'Sweden',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'SR'
+                        'value': 'SE'
+                    },
+                    {
+                        'labelEn': 'Singapore',
+                        'labels': [
+                            {
+                                'label': 'Singapore',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SG'
+                    },
+                    {
+                        'labelEn': 'Saint Helena, Ascension and Tristan da Cunha',
+                        'labels': [
+                            {
+                                'label': 'Saint Helena, Ascension and Tristan da Cunha',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SH'
+                    },
+                    {
+                        'labelEn': 'Slovenia',
+                        'labels': [
+                            {
+                                'label': 'Slovenia',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SI'
                     },
                     {
                         'labelEn': 'Svalbard and Jan Mayen',
@@ -4541,24 +4371,94 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'SJ'
                     },
                     {
-                        'labelEn': 'Sweden',
+                        'labelEn': 'Slovakia',
                         'labels': [
                             {
-                                'label': 'Sweden',
+                                'label': 'Slovakia',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'SE'
+                        'value': 'SK'
                     },
                     {
-                        'labelEn': 'Switzerland',
+                        'labelEn': 'Sierra Leone',
                         'labels': [
                             {
-                                'label': 'Switzerland',
+                                'label': 'Sierra Leone',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'CH'
+                        'value': 'SL'
+                    },
+                    {
+                        'labelEn': 'San Marino',
+                        'labels': [
+                            {
+                                'label': 'San Marino',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SM'
+                    },
+                    {
+                        'labelEn': 'Senegal',
+                        'labels': [
+                            {
+                                'label': 'Senegal',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SN'
+                    },
+                    {
+                        'labelEn': 'Somalia',
+                        'labels': [
+                            {
+                                'label': 'Somalia',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SO'
+                    },
+                    {
+                        'labelEn': 'Suriname',
+                        'labels': [
+                            {
+                                'label': 'Suriname',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SR'
+                    },
+                    {
+                        'labelEn': 'South Sudan',
+                        'labels': [
+                            {
+                                'label': 'South Sudan',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SS'
+                    },
+                    {
+                        'labelEn': 'Sao Tome and Principe',
+                        'labels': [
+                            {
+                                'label': 'Sao Tome and Principe',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'ST'
+                    },
+                    {
+                        'labelEn': 'El Salvador',
+                        'labels': [
+                            {
+                                'label': 'El Salvador',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SV'
                     },
                     {
                         'labelEn': 'Syrian Arab Republic',
@@ -4571,124 +4471,14 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'SY'
                     },
                     {
-                        'labelEn': 'Taiwan (Province of China)',
+                        'labelEn': 'Swaziland',
                         'labels': [
                             {
-                                'label': 'Taiwan (Province of China)',
+                                'label': 'Swaziland',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'TW'
-                    },
-                    {
-                        'labelEn': 'Tajikistan',
-                        'labels': [
-                            {
-                                'label': 'Tajikistan',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'TJ'
-                    },
-                    {
-                        'labelEn': 'Tanzania, the United Republic of',
-                        'labels': [
-                            {
-                                'label': 'Tanzania, the United Republic of',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'TZ'
-                    },
-                    {
-                        'labelEn': 'Thailand',
-                        'labels': [
-                            {
-                                'label': 'Thailand',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'TH'
-                    },
-                    {
-                        'labelEn': 'Timor-Leste',
-                        'labels': [
-                            {
-                                'label': 'Timor-Leste',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'TL'
-                    },
-                    {
-                        'labelEn': 'Togo',
-                        'labels': [
-                            {
-                                'label': 'Togo',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'TG'
-                    },
-                    {
-                        'labelEn': 'Tokelau',
-                        'labels': [
-                            {
-                                'label': 'Tokelau',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'TK'
-                    },
-                    {
-                        'labelEn': 'Tonga',
-                        'labels': [
-                            {
-                                'label': 'Tonga',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'TO'
-                    },
-                    {
-                        'labelEn': 'Trinidad and Tobago',
-                        'labels': [
-                            {
-                                'label': 'Trinidad and Tobago',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'TT'
-                    },
-                    {
-                        'labelEn': 'Tunisia',
-                        'labels': [
-                            {
-                                'label': 'Tunisia',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'TN'
-                    },
-                    {
-                        'labelEn': 'Turkey',
-                        'labels': [
-                            {
-                                'label': 'Turkey',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'TR'
-                    },
-                    {
-                        'labelEn': 'Turkmenistan',
-                        'labels': [
-                            {
-                                'label': 'Turkmenistan',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'TM'
+                        'value': 'SZ'
                     },
                     {
                         'labelEn': 'Turks and Caicos Islands',
@@ -4701,6 +4491,126 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'TC'
                     },
                     {
+                        'labelEn': 'Chad',
+                        'labels': [
+                            {
+                                'label': 'Chad',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'TD'
+                    },
+                    {
+                        'labelEn': 'French Southern Territories',
+                        'labels': [
+                            {
+                                'label': 'French Southern Territories',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'TF'
+                    },
+                    {
+                        'labelEn': 'Togo',
+                        'labels': [
+                            {
+                                'label': 'Togo',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'TG'
+                    },
+                    {
+                        'labelEn': 'Thailand',
+                        'labels': [
+                            {
+                                'label': 'Thailand',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'TH'
+                    },
+                    {
+                        'labelEn': 'Tajikistan',
+                        'labels': [
+                            {
+                                'label': 'Tajikistan',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'TJ'
+                    },
+                    {
+                        'labelEn': 'Tokelau',
+                        'labels': [
+                            {
+                                'label': 'Tokelau',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'TK'
+                    },
+                    {
+                        'labelEn': 'Timor-Leste',
+                        'labels': [
+                            {
+                                'label': 'Timor-Leste',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'TL'
+                    },
+                    {
+                        'labelEn': 'Turkmenistan',
+                        'labels': [
+                            {
+                                'label': 'Turkmenistan',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'TM'
+                    },
+                    {
+                        'labelEn': 'Tunisia',
+                        'labels': [
+                            {
+                                'label': 'Tunisia',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'TN'
+                    },
+                    {
+                        'labelEn': 'Tonga',
+                        'labels': [
+                            {
+                                'label': 'Tonga',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'TO'
+                    },
+                    {
+                        'labelEn': 'Turkey',
+                        'labels': [
+                            {
+                                'label': 'Turkey',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'TR'
+                    },
+                    {
+                        'labelEn': 'Trinidad and Tobago',
+                        'labels': [
+                            {
+                                'label': 'Trinidad and Tobago',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'TT'
+                    },
+                    {
                         'labelEn': 'Tuvalu',
                         'labels': [
                             {
@@ -4711,14 +4621,24 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'TV'
                     },
                     {
-                        'labelEn': 'Uganda',
+                        'labelEn': 'Taiwan',
                         'labels': [
                             {
-                                'label': 'Uganda',
+                                'label': 'Taiwan',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'UG'
+                        'value': 'TW'
+                    },
+                    {
+                        'labelEn': 'Tanzania, United Republic of',
+                        'labels': [
+                            {
+                                'label': 'Tanzania, United Republic of',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'TZ'
                     },
                     {
                         'labelEn': 'Ukraine',
@@ -4731,24 +4651,14 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'UA'
                     },
                     {
-                        'labelEn': 'United Arab Emirates',
+                        'labelEn': 'Uganda',
                         'labels': [
                             {
-                                'label': 'United Arab Emirates',
+                                'label': 'Uganda',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'AE'
-                    },
-                    {
-                        'labelEn': 'United Kingdom of Great Britain and Northern Ireland',
-                        'labels': [
-                            {
-                                'label': 'United Kingdom of Great Britain and Northern Ireland',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'GB'
+                        'value': 'UG'
                     },
                     {
                         'labelEn': 'United States Minor Outlying Islands',
@@ -4761,10 +4671,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'UM'
                     },
                     {
-                        'labelEn': 'United States of America',
+                        'labelEn': 'United States',
                         'labels': [
                             {
-                                'label': 'United States of America',
+                                'label': 'United States',
                                 'language': 'English(EN)'
                             }
                         ],
@@ -4791,6 +4701,66 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'UZ'
                     },
                     {
+                        'labelEn': 'Holy See (Vatican City State)',
+                        'labels': [
+                            {
+                                'label': 'Holy See (Vatican City State)',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'VA'
+                    },
+                    {
+                        'labelEn': 'Saint Vincent and the Grenadines',
+                        'labels': [
+                            {
+                                'label': 'Saint Vincent and the Grenadines',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'VC'
+                    },
+                    {
+                        'labelEn': 'Venezuela',
+                        'labels': [
+                            {
+                                'label': 'Venezuela',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'VE'
+                    },
+                    {
+                        'labelEn': 'Virgin Islands, British',
+                        'labels': [
+                            {
+                                'label': 'Virgin Islands, British',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'VG'
+                    },
+                    {
+                        'labelEn': 'Virgin Islands, U.S.',
+                        'labels': [
+                            {
+                                'label': 'Virgin Islands, U.S.',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'VI'
+                    },
+                    {
+                        'labelEn': 'Vietnam',
+                        'labels': [
+                            {
+                                'label': 'Vietnam',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'VN'
+                    },
+                    {
                         'labelEn': 'Vanuatu',
                         'labels': [
                             {
@@ -4799,46 +4769,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'VU'
-                    },
-                    {
-                        'labelEn': 'Venezuela (Bolivarian Republic of)',
-                        'labels': [
-                            {
-                                'label': 'Venezuela (Bolivarian Republic of)',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'VE'
-                    },
-                    {
-                        'labelEn': 'Viet Nam',
-                        'labels': [
-                            {
-                                'label': 'Viet Nam',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'VN'
-                    },
-                    {
-                        'labelEn': 'Virgin Islands (British)',
-                        'labels': [
-                            {
-                                'label': 'Virgin Islands (British)',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'VG'
-                    },
-                    {
-                        'labelEn': 'Virgin Islands (U.S.)',
-                        'labels': [
-                            {
-                                'label': 'Virgin Islands (U.S.)',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'VI'
                     },
                     {
                         'labelEn': 'Wallis and Futuna',
@@ -4851,14 +4781,14 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'WF'
                     },
                     {
-                        'labelEn': 'Western Sahara',
+                        'labelEn': 'Samoa',
                         'labels': [
                             {
-                                'label': 'Western Sahara',
+                                'label': 'Samoa',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'EH'
+                        'value': 'WS'
                     },
                     {
                         'labelEn': 'Yemen',
@@ -4869,6 +4799,26 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'YE'
+                    },
+                    {
+                        'labelEn': 'Mayotte',
+                        'labels': [
+                            {
+                                'label': 'Mayotte',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'YT'
+                    },
+                    {
+                        'labelEn': 'South Africa',
+                        'labels': [
+                            {
+                                'label': 'South Africa',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'ZA'
                     },
                     {
                         'labelEn': 'Zambia',
@@ -4908,56 +4858,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': 'Afghanistan',
-                        'labels': [
-                            {
-                                'label': 'Afghanistan',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'AF'
-                    },
-                    {
-                        'labelEn': 'Åland Islands',
-                        'labels': [
-                            {
-                                'label': 'Åland Islands',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'AX'
-                    },
-                    {
-                        'labelEn': 'Albania',
-                        'labels': [
-                            {
-                                'label': 'Albania',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'AL'
-                    },
-                    {
-                        'labelEn': 'Algeria',
-                        'labels': [
-                            {
-                                'label': 'Algeria',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'DZ'
-                    },
-                    {
-                        'labelEn': 'American Samoa',
-                        'labels': [
-                            {
-                                'label': 'American Samoa',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'AS'
-                    },
-                    {
                         'labelEn': 'Andorra',
                         'labels': [
                             {
@@ -4968,34 +4868,24 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'AD'
                     },
                     {
-                        'labelEn': 'Angola',
+                        'labelEn': 'United Arab Emirates',
                         'labels': [
                             {
-                                'label': 'Angola',
+                                'label': 'United Arab Emirates',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'AO'
+                        'value': 'AE'
                     },
                     {
-                        'labelEn': 'Anguilla',
+                        'labelEn': 'Afghanistan',
                         'labels': [
                             {
-                                'label': 'Anguilla',
+                                'label': 'Afghanistan',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'AI'
-                    },
-                    {
-                        'labelEn': 'Antarctica',
-                        'labels': [
-                            {
-                                'label': 'Antarctica',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'AQ'
+                        'value': 'AF'
                     },
                     {
                         'labelEn': 'Antigua and Barbuda',
@@ -5008,14 +4898,24 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'AG'
                     },
                     {
-                        'labelEn': 'Argentina',
+                        'labelEn': 'Anguilla',
                         'labels': [
                             {
-                                'label': 'Argentina',
+                                'label': 'Anguilla',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'AR'
+                        'value': 'AI'
+                    },
+                    {
+                        'labelEn': 'Albania',
+                        'labels': [
+                            {
+                                'label': 'Albania',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AL'
                     },
                     {
                         'labelEn': 'Armenia',
@@ -5028,24 +4928,54 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'AM'
                     },
                     {
-                        'labelEn': 'Aruba',
+                        'labelEn': 'Netherlands Antilles',
                         'labels': [
                             {
-                                'label': 'Aruba',
+                                'label': 'Netherlands Antilles',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'AW'
+                        'value': 'AN'
                     },
                     {
-                        'labelEn': 'Australia',
+                        'labelEn': 'Angola',
                         'labels': [
                             {
-                                'label': 'Australia',
+                                'label': 'Angola',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'AU'
+                        'value': 'AO'
+                    },
+                    {
+                        'labelEn': 'Antarctica',
+                        'labels': [
+                            {
+                                'label': 'Antarctica',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AQ'
+                    },
+                    {
+                        'labelEn': 'Argentina',
+                        'labels': [
+                            {
+                                'label': 'Argentina',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AR'
+                    },
+                    {
+                        'labelEn': 'American Samoa',
+                        'labels': [
+                            {
+                                'label': 'American Samoa',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AS'
                     },
                     {
                         'labelEn': 'Austria',
@@ -5058,6 +4988,26 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'AT'
                     },
                     {
+                        'labelEn': 'Australia',
+                        'labels': [
+                            {
+                                'label': 'Australia',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AU'
+                    },
+                    {
+                        'labelEn': 'Aruba',
+                        'labels': [
+                            {
+                                'label': 'Aruba',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AW'
+                    },
+                    {
                         'labelEn': 'Azerbaijan',
                         'labels': [
                             {
@@ -5068,34 +5018,14 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'AZ'
                     },
                     {
-                        'labelEn': 'Bahamas',
+                        'labelEn': 'Bosnia and Herzegovina',
                         'labels': [
                             {
-                                'label': 'Bahamas',
+                                'label': 'Bosnia and Herzegovina',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'BS'
-                    },
-                    {
-                        'labelEn': 'Bahrain',
-                        'labels': [
-                            {
-                                'label': 'Bahrain',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'BH'
-                    },
-                    {
-                        'labelEn': 'Bangladesh',
-                        'labels': [
-                            {
-                                'label': 'Bangladesh',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'BD'
+                        'value': 'BA'
                     },
                     {
                         'labelEn': 'Barbados',
@@ -5108,14 +5038,14 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'BB'
                     },
                     {
-                        'labelEn': 'Belarus',
+                        'labelEn': 'Bangladesh',
                         'labels': [
                             {
-                                'label': 'Belarus',
+                                'label': 'Bangladesh',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'BY'
+                        'value': 'BD'
                     },
                     {
                         'labelEn': 'Belgium',
@@ -5128,14 +5058,44 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'BE'
                     },
                     {
-                        'labelEn': 'Belize',
+                        'labelEn': 'Burkina Faso',
                         'labels': [
                             {
-                                'label': 'Belize',
+                                'label': 'Burkina Faso',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'BZ'
+                        'value': 'BF'
+                    },
+                    {
+                        'labelEn': 'Bulgaria',
+                        'labels': [
+                            {
+                                'label': 'Bulgaria',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'BG'
+                    },
+                    {
+                        'labelEn': 'Bahrain',
+                        'labels': [
+                            {
+                                'label': 'Bahrain',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'BH'
+                    },
+                    {
+                        'labelEn': 'Burundi',
+                        'labels': [
+                            {
+                                'label': 'Burundi',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'BI'
                     },
                     {
                         'labelEn': 'Benin',
@@ -5158,64 +5118,24 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'BM'
                     },
                     {
-                        'labelEn': 'Bhutan',
+                        'labelEn': 'Brunei',
                         'labels': [
                             {
-                                'label': 'Bhutan',
+                                'label': 'Brunei',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'BT'
+                        'value': 'BN'
                     },
                     {
-                        'labelEn': 'Bolivia (Plurinational State of)',
+                        'labelEn': 'Bolivia',
                         'labels': [
                             {
-                                'label': 'Bolivia (Plurinational State of)',
+                                'label': 'Bolivia',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'BO'
-                    },
-                    {
-                        'labelEn': 'Bonaire, Sint Eustatius and Saba',
-                        'labels': [
-                            {
-                                'label': 'Bonaire, Sint Eustatius and Saba',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'BQ'
-                    },
-                    {
-                        'labelEn': 'Bosnia and Herzegovina',
-                        'labels': [
-                            {
-                                'label': 'Bosnia and Herzegovina',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'BA'
-                    },
-                    {
-                        'labelEn': 'Botswana',
-                        'labels': [
-                            {
-                                'label': 'Botswana',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'BW'
-                    },
-                    {
-                        'labelEn': 'Bouvet Island',
-                        'labels': [
-                            {
-                                'label': 'Bouvet Island',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'BV'
                     },
                     {
                         'labelEn': 'Brazil',
@@ -5228,84 +5148,64 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'BR'
                     },
                     {
-                        'labelEn': 'British Indian Ocean Territory',
+                        'labelEn': 'Bahamas',
                         'labels': [
                             {
-                                'label': 'British Indian Ocean Territory',
+                                'label': 'Bahamas',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'IO'
+                        'value': 'BS'
                     },
                     {
-                        'labelEn': 'Brunei Darussalam',
+                        'labelEn': 'Bhutan',
                         'labels': [
                             {
-                                'label': 'Brunei Darussalam',
+                                'label': 'Bhutan',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'BN'
+                        'value': 'BT'
                     },
                     {
-                        'labelEn': 'Bulgaria',
+                        'labelEn': 'Bouvet Island',
                         'labels': [
                             {
-                                'label': 'Bulgaria',
+                                'label': 'Bouvet Island',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'BG'
+                        'value': 'BV'
                     },
                     {
-                        'labelEn': 'Burkina Faso',
+                        'labelEn': 'Botswana',
                         'labels': [
                             {
-                                'label': 'Burkina Faso',
+                                'label': 'Botswana',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'BF'
+                        'value': 'BW'
                     },
                     {
-                        'labelEn': 'Burundi',
+                        'labelEn': 'Belarus',
                         'labels': [
                             {
-                                'label': 'Burundi',
+                                'label': 'Belarus',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'BI'
+                        'value': 'BY'
                     },
                     {
-                        'labelEn': 'Cabo Verde',
+                        'labelEn': 'Belize',
                         'labels': [
                             {
-                                'label': 'Cabo Verde',
+                                'label': 'Belize',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'CV'
-                    },
-                    {
-                        'labelEn': 'Cambodia',
-                        'labels': [
-                            {
-                                'label': 'Cambodia',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'KH'
-                    },
-                    {
-                        'labelEn': 'Cameroon',
-                        'labels': [
-                            {
-                                'label': 'Cameroon',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'CM'
+                        'value': 'BZ'
                     },
                     {
                         'labelEn': 'Canada',
@@ -5318,14 +5218,24 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'CA'
                     },
                     {
-                        'labelEn': 'Cayman Islands',
+                        'labelEn': 'Cocos (Keeling) Islands',
                         'labels': [
                             {
-                                'label': 'Cayman Islands',
+                                'label': 'Cocos (Keeling) Islands',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'KY'
+                        'value': 'CC'
+                    },
+                    {
+                        'labelEn': 'The Democratic Republic of the Congo',
+                        'labels': [
+                            {
+                                'label': 'The Democratic Republic of the Congo',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'CD'
                     },
                     {
                         'labelEn': 'Central African Republic',
@@ -5338,86 +5248,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'CF'
                     },
                     {
-                        'labelEn': 'Chad',
-                        'labels': [
-                            {
-                                'label': 'Chad',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'TD'
-                    },
-                    {
-                        'labelEn': 'Chile',
-                        'labels': [
-                            {
-                                'label': 'Chile',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'CL'
-                    },
-                    {
-                        'labelEn': 'China',
-                        'labels': [
-                            {
-                                'label': 'China',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'CN'
-                    },
-                    {
-                        'labelEn': 'Christmas Island',
-                        'labels': [
-                            {
-                                'label': 'Christmas Island',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'CX'
-                    },
-                    {
-                        'labelEn': 'Cocos (Keeling) Islands',
-                        'labels': [
-                            {
-                                'label': 'Cocos (Keeling) Islands',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'CC'
-                    },
-                    {
-                        'labelEn': 'Colombia',
-                        'labels': [
-                            {
-                                'label': 'Colombia',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'CO'
-                    },
-                    {
-                        'labelEn': 'Comoros',
-                        'labels': [
-                            {
-                                'label': 'Comoros',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'KM'
-                    },
-                    {
-                        'labelEn': 'Congo (the Democratic Republic of the)',
-                        'labels': [
-                            {
-                                'label': 'Congo (the Democratic Republic of the)',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'CD'
-                    },
-                    {
                         'labelEn': 'Congo',
                         'labels': [
                             {
@@ -5426,6 +5256,26 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'CG'
+                    },
+                    {
+                        'labelEn': 'Switzerland',
+                        'labels': [
+                            {
+                                'label': 'Switzerland',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'CH'
+                    },
+                    {
+                        'labelEn': 'Ivory Coast',
+                        'labels': [
+                            {
+                                'label': 'Ivory Coast',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'CI'
                     },
                     {
                         'labelEn': 'Cook Islands',
@@ -5438,6 +5288,46 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'CK'
                     },
                     {
+                        'labelEn': 'Chile',
+                        'labels': [
+                            {
+                                'label': 'Chile',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'CL'
+                    },
+                    {
+                        'labelEn': 'Cameroon',
+                        'labels': [
+                            {
+                                'label': 'Cameroon',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'CM'
+                    },
+                    {
+                        'labelEn': 'China',
+                        'labels': [
+                            {
+                                'label': 'China',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'CN'
+                    },
+                    {
+                        'labelEn': 'Colombia',
+                        'labels': [
+                            {
+                                'label': 'Colombia',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'CO'
+                    },
+                    {
                         'labelEn': 'Costa Rica',
                         'labels': [
                             {
@@ -5446,26 +5336,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'CR'
-                    },
-                    {
-                        'labelEn': "Côte d'Ivoire",
-                        'labels': [
-                            {
-                                'label': "Côte d'Ivoire",
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'CI'
-                    },
-                    {
-                        'labelEn': 'Croatia',
-                        'labels': [
-                            {
-                                'label': 'Croatia',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'HR'
                     },
                     {
                         'labelEn': 'Cuba',
@@ -5478,14 +5348,24 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'CU'
                     },
                     {
-                        'labelEn': 'Curaçao',
+                        'labelEn': 'Cape Verde',
                         'labels': [
                             {
-                                'label': 'Curaçao',
+                                'label': 'Cape Verde',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'CW'
+                        'value': 'CV'
+                    },
+                    {
+                        'labelEn': 'Christmas Island',
+                        'labels': [
+                            {
+                                'label': 'Christmas Island',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'CX'
                     },
                     {
                         'labelEn': 'Cyprus',
@@ -5498,24 +5378,24 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'CY'
                     },
                     {
-                        'labelEn': 'Czechia',
+                        'labelEn': 'Czech Republic',
                         'labels': [
                             {
-                                'label': 'Czechia',
+                                'label': 'Czech Republic',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'CZ'
                     },
                     {
-                        'labelEn': 'Denmark',
+                        'labelEn': 'Germany',
                         'labels': [
                             {
-                                'label': 'Denmark',
+                                'label': 'Germany',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'DK'
+                        'value': 'DE'
                     },
                     {
                         'labelEn': 'Djibouti',
@@ -5526,6 +5406,16 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'DJ'
+                    },
+                    {
+                        'labelEn': 'Denmark',
+                        'labels': [
+                            {
+                                'label': 'Denmark',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'DK'
                     },
                     {
                         'labelEn': 'Dominica',
@@ -5548,6 +5438,16 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'DO'
                     },
                     {
+                        'labelEn': 'Algeria',
+                        'labels': [
+                            {
+                                'label': 'Algeria',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'DZ'
+                    },
+                    {
                         'labelEn': 'Ecuador',
                         'labels': [
                             {
@@ -5556,46 +5456,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'EC'
-                    },
-                    {
-                        'labelEn': 'Egypt',
-                        'labels': [
-                            {
-                                'label': 'Egypt',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'EG'
-                    },
-                    {
-                        'labelEn': 'El Salvador',
-                        'labels': [
-                            {
-                                'label': 'El Salvador',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SV'
-                    },
-                    {
-                        'labelEn': 'Equatorial Guinea',
-                        'labels': [
-                            {
-                                'label': 'Equatorial Guinea',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'GQ'
-                    },
-                    {
-                        'labelEn': 'Eritrea',
-                        'labels': [
-                            {
-                                'label': 'Eritrea',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'ER'
                     },
                     {
                         'labelEn': 'Estonia',
@@ -5608,14 +5468,44 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'EE'
                     },
                     {
-                        'labelEn': 'Eswatini',
+                        'labelEn': 'Egypt',
                         'labels': [
                             {
-                                'label': 'Eswatini',
+                                'label': 'Egypt',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'SZ'
+                        'value': 'EG'
+                    },
+                    {
+                        'labelEn': 'Western Sahara',
+                        'labels': [
+                            {
+                                'label': 'Western Sahara',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'EH'
+                    },
+                    {
+                        'labelEn': 'Eritrea',
+                        'labels': [
+                            {
+                                'label': 'Eritrea',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'ER'
+                    },
+                    {
+                        'labelEn': 'Spain',
+                        'labels': [
+                            {
+                                'label': 'Spain',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'ES'
                     },
                     {
                         'labelEn': 'Ethiopia',
@@ -5628,24 +5518,14 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'ET'
                     },
                     {
-                        'labelEn': 'Falkland Islands  [Malvinas]',
+                        'labelEn': 'Finland',
                         'labels': [
                             {
-                                'label': 'Falkland Islands  [Malvinas]',
+                                'label': 'Finland',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'FK'
-                    },
-                    {
-                        'labelEn': 'Faroe Islands',
-                        'labels': [
-                            {
-                                'label': 'Faroe Islands',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'FO'
+                        'value': 'FI'
                     },
                     {
                         'labelEn': 'Fiji',
@@ -5658,14 +5538,34 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'FJ'
                     },
                     {
-                        'labelEn': 'Finland',
+                        'labelEn': 'Falkland Islands (Malvinas)',
                         'labels': [
                             {
-                                'label': 'Finland',
+                                'label': 'Falkland Islands (Malvinas)',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'FI'
+                        'value': 'FK'
+                    },
+                    {
+                        'labelEn': 'Federated States of Micronesia',
+                        'labels': [
+                            {
+                                'label': 'Federated States of Micronesia',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'FM'
+                    },
+                    {
+                        'labelEn': 'Faroe Islands',
+                        'labels': [
+                            {
+                                'label': 'Faroe Islands',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'FO'
                     },
                     {
                         'labelEn': 'France',
@@ -5678,36 +5578,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'FR'
                     },
                     {
-                        'labelEn': 'French Guiana',
-                        'labels': [
-                            {
-                                'label': 'French Guiana',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'GF'
-                    },
-                    {
-                        'labelEn': 'French Polynesia',
-                        'labels': [
-                            {
-                                'label': 'French Polynesia',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'PF'
-                    },
-                    {
-                        'labelEn': 'French Southern Territories',
-                        'labels': [
-                            {
-                                'label': 'French Southern Territories',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'TF'
-                    },
-                    {
                         'labelEn': 'Gabon',
                         'labels': [
                             {
@@ -5718,14 +5588,24 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'GA'
                     },
                     {
-                        'labelEn': 'Gambia',
+                        'labelEn': 'United Kingdom',
                         'labels': [
                             {
-                                'label': 'Gambia',
+                                'label': 'United Kingdom',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'GM'
+                        'value': 'GB'
+                    },
+                    {
+                        'labelEn': 'Grenada',
+                        'labels': [
+                            {
+                                'label': 'Grenada',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'GD'
                     },
                     {
                         'labelEn': 'Georgia',
@@ -5738,14 +5618,24 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'GE'
                     },
                     {
-                        'labelEn': 'Germany',
+                        'labelEn': 'French Guiana',
                         'labels': [
                             {
-                                'label': 'Germany',
+                                'label': 'French Guiana',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'DE'
+                        'value': 'GF'
+                    },
+                    {
+                        'labelEn': 'Guernsey',
+                        'labels': [
+                            {
+                                'label': 'Guernsey',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'GG'
                     },
                     {
                         'labelEn': 'Ghana',
@@ -5768,16 +5658,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'GI'
                     },
                     {
-                        'labelEn': 'Greece',
-                        'labels': [
-                            {
-                                'label': 'Greece',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'GR'
-                    },
-                    {
                         'labelEn': 'Greenland',
                         'labels': [
                             {
@@ -5788,14 +5668,24 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'GL'
                     },
                     {
-                        'labelEn': 'Grenada',
+                        'labelEn': 'Gambia',
                         'labels': [
                             {
-                                'label': 'Grenada',
+                                'label': 'Gambia',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'GD'
+                        'value': 'GM'
+                    },
+                    {
+                        'labelEn': 'Guinea',
+                        'labels': [
+                            {
+                                'label': 'Guinea',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'GN'
                     },
                     {
                         'labelEn': 'Guadeloupe',
@@ -5808,14 +5698,34 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'GP'
                     },
                     {
-                        'labelEn': 'Guam',
+                        'labelEn': 'Equatorial Guinea',
                         'labels': [
                             {
-                                'label': 'Guam',
+                                'label': 'Equatorial Guinea',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'GU'
+                        'value': 'GQ'
+                    },
+                    {
+                        'labelEn': 'Greece',
+                        'labels': [
+                            {
+                                'label': 'Greece',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'GR'
+                    },
+                    {
+                        'labelEn': 'South Georgia and the South Sandwich Islands',
+                        'labels': [
+                            {
+                                'label': 'South Georgia and the South Sandwich Islands',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'GS'
                     },
                     {
                         'labelEn': 'Guatemala',
@@ -5828,24 +5738,14 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'GT'
                     },
                     {
-                        'labelEn': 'Guernsey',
+                        'labelEn': 'Guam',
                         'labels': [
                             {
-                                'label': 'Guernsey',
+                                'label': 'Guam',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'GG'
-                    },
-                    {
-                        'labelEn': 'Guinea',
-                        'labels': [
-                            {
-                                'label': 'Guinea',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'GN'
+                        'value': 'GU'
                     },
                     {
                         'labelEn': 'Guinea-Bissau',
@@ -5868,14 +5768,14 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'GY'
                     },
                     {
-                        'labelEn': 'Haiti',
+                        'labelEn': 'Hong Kong',
                         'labels': [
                             {
-                                'label': 'Haiti',
+                                'label': 'Hong Kong',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'HT'
+                        'value': 'HK'
                     },
                     {
                         'labelEn': 'Heard Island and McDonald Islands',
@@ -5888,16 +5788,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'HM'
                     },
                     {
-                        'labelEn': 'Holy See',
-                        'labels': [
-                            {
-                                'label': 'Holy See',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'VA'
-                    },
-                    {
                         'labelEn': 'Honduras',
                         'labels': [
                             {
@@ -5908,14 +5798,24 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'HN'
                     },
                     {
-                        'labelEn': 'Hong Kong',
+                        'labelEn': 'Croatia',
                         'labels': [
                             {
-                                'label': 'Hong Kong',
+                                'label': 'Croatia',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'HK'
+                        'value': 'HR'
+                    },
+                    {
+                        'labelEn': 'Haiti',
+                        'labels': [
+                            {
+                                'label': 'Haiti',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'HT'
                     },
                     {
                         'labelEn': 'Hungary',
@@ -5928,26 +5828,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'HU'
                     },
                     {
-                        'labelEn': 'Iceland',
-                        'labels': [
-                            {
-                                'label': 'Iceland',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'IS'
-                    },
-                    {
-                        'labelEn': 'India',
-                        'labels': [
-                            {
-                                'label': 'India',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'IN'
-                    },
-                    {
                         'labelEn': 'Indonesia',
                         'labels': [
                             {
@@ -5956,26 +5836,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'ID'
-                    },
-                    {
-                        'labelEn': 'Iran (Islamic Republic of)',
-                        'labels': [
-                            {
-                                'label': 'Iran (Islamic Republic of)',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'IR'
-                    },
-                    {
-                        'labelEn': 'Iraq',
-                        'labels': [
-                            {
-                                'label': 'Iraq',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'IQ'
                     },
                     {
                         'labelEn': 'Ireland',
@@ -5988,6 +5848,16 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'IE'
                     },
                     {
+                        'labelEn': 'Israel',
+                        'labels': [
+                            {
+                                'label': 'Israel',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'IL'
+                    },
+                    {
                         'labelEn': 'Isle of Man',
                         'labels': [
                             {
@@ -5998,14 +5868,54 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'IM'
                     },
                     {
-                        'labelEn': 'Israel',
+                        'labelEn': 'India',
                         'labels': [
                             {
-                                'label': 'Israel',
+                                'label': 'India',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'IL'
+                        'value': 'IN'
+                    },
+                    {
+                        'labelEn': 'British Indian Ocean Territory',
+                        'labels': [
+                            {
+                                'label': 'British Indian Ocean Territory',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'IO'
+                    },
+                    {
+                        'labelEn': 'Iraq',
+                        'labels': [
+                            {
+                                'label': 'Iraq',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'IQ'
+                    },
+                    {
+                        'labelEn': 'Iran, Islamic Republic of',
+                        'labels': [
+                            {
+                                'label': 'Iran, Islamic Republic of',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'IR'
+                    },
+                    {
+                        'labelEn': 'Iceland',
+                        'labels': [
+                            {
+                                'label': 'Iceland',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'IS'
                     },
                     {
                         'labelEn': 'Italy',
@@ -6018,26 +5928,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'IT'
                     },
                     {
-                        'labelEn': 'Jamaica',
-                        'labels': [
-                            {
-                                'label': 'Jamaica',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'JM'
-                    },
-                    {
-                        'labelEn': 'Japan',
-                        'labels': [
-                            {
-                                'label': 'Japan',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'JP'
-                    },
-                    {
                         'labelEn': 'Jersey',
                         'labels': [
                             {
@@ -6046,6 +5936,16 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'JE'
+                    },
+                    {
+                        'labelEn': 'Jamaica',
+                        'labels': [
+                            {
+                                'label': 'Jamaica',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'JM'
                     },
                     {
                         'labelEn': 'Jordan',
@@ -6058,14 +5958,14 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'JO'
                     },
                     {
-                        'labelEn': 'Kazakhstan',
+                        'labelEn': 'Japan',
                         'labels': [
                             {
-                                'label': 'Kazakhstan',
+                                'label': 'Japan',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'KZ'
+                        'value': 'JP'
                     },
                     {
                         'labelEn': 'Kenya',
@@ -6078,6 +5978,26 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'KE'
                     },
                     {
+                        'labelEn': 'Kyrgyzstan',
+                        'labels': [
+                            {
+                                'label': 'Kyrgyzstan',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'KG'
+                    },
+                    {
+                        'labelEn': 'Cambodia',
+                        'labels': [
+                            {
+                                'label': 'Cambodia',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'KH'
+                    },
+                    {
                         'labelEn': 'Kiribati',
                         'labels': [
                             {
@@ -6088,20 +6008,40 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'KI'
                     },
                     {
-                        'labelEn': "Korea (the Democratic People's Republic of)",
+                        'labelEn': 'Comoros',
                         'labels': [
                             {
-                                'label': "Korea (the Democratic People's Republic of)",
+                                'label': 'Comoros',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'KM'
+                    },
+                    {
+                        'labelEn': 'Saint Kitts and Nevis',
+                        'labels': [
+                            {
+                                'label': 'Saint Kitts and Nevis',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'KN'
+                    },
+                    {
+                        'labelEn': "Democratic People's Republic of Korea",
+                        'labels': [
+                            {
+                                'label': "Democratic People's Republic of Korea",
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'KP'
                     },
                     {
-                        'labelEn': 'Korea (the Republic of)',
+                        'labelEn': 'South Korea',
                         'labels': [
                             {
-                                'label': 'Korea (the Republic of)',
+                                'label': 'South Korea',
                                 'language': 'English(EN)'
                             }
                         ],
@@ -6118,14 +6058,24 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'KW'
                     },
                     {
-                        'labelEn': 'Kyrgyzstan',
+                        'labelEn': 'Cayman Islands',
                         'labels': [
                             {
-                                'label': 'Kyrgyzstan',
+                                'label': 'Cayman Islands',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'KG'
+                        'value': 'KY'
+                    },
+                    {
+                        'labelEn': 'Kazakhstan',
+                        'labels': [
+                            {
+                                'label': 'Kazakhstan',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'KZ'
                     },
                     {
                         'labelEn': "Lao People's Democratic Republic",
@@ -6138,16 +6088,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'LA'
                     },
                     {
-                        'labelEn': 'Latvia',
-                        'labels': [
-                            {
-                                'label': 'Latvia',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'LV'
-                    },
-                    {
                         'labelEn': 'Lebanon',
                         'labels': [
                             {
@@ -6158,14 +6098,34 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'LB'
                     },
                     {
-                        'labelEn': 'Lesotho',
+                        'labelEn': 'Saint Lucia',
                         'labels': [
                             {
-                                'label': 'Lesotho',
+                                'label': 'Saint Lucia',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'LS'
+                        'value': 'LC'
+                    },
+                    {
+                        'labelEn': 'Liechtenstein',
+                        'labels': [
+                            {
+                                'label': 'Liechtenstein',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'LI'
+                    },
+                    {
+                        'labelEn': 'Sri Lanka',
+                        'labels': [
+                            {
+                                'label': 'Sri Lanka',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'LK'
                     },
                     {
                         'labelEn': 'Liberia',
@@ -6178,24 +6138,14 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'LR'
                     },
                     {
-                        'labelEn': 'Libya',
+                        'labelEn': 'Lesotho',
                         'labels': [
                             {
-                                'label': 'Libya',
+                                'label': 'Lesotho',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'LY'
-                    },
-                    {
-                        'labelEn': 'Liechtenstein',
-                        'labels': [
-                            {
-                                'label': 'Liechtenstein',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'LI'
+                        'value': 'LS'
                     },
                     {
                         'labelEn': 'Lithuania',
@@ -6218,14 +6168,64 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'LU'
                     },
                     {
-                        'labelEn': 'Macao',
+                        'labelEn': 'Latvia',
                         'labels': [
                             {
-                                'label': 'Macao',
+                                'label': 'Latvia',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'MO'
+                        'value': 'LV'
+                    },
+                    {
+                        'labelEn': 'Libya',
+                        'labels': [
+                            {
+                                'label': 'Libya',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'LY'
+                    },
+                    {
+                        'labelEn': 'Morocco',
+                        'labels': [
+                            {
+                                'label': 'Morocco',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MA'
+                    },
+                    {
+                        'labelEn': 'Monaco',
+                        'labels': [
+                            {
+                                'label': 'Monaco',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MC'
+                    },
+                    {
+                        'labelEn': 'Republic of Moldova',
+                        'labels': [
+                            {
+                                'label': 'Republic of Moldova',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MD'
+                    },
+                    {
+                        'labelEn': 'Montenegro',
+                        'labels': [
+                            {
+                                'label': 'Montenegro',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'ME'
                     },
                     {
                         'labelEn': 'Madagascar',
@@ -6238,34 +6238,24 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'MG'
                     },
                     {
-                        'labelEn': 'Malawi',
+                        'labelEn': 'Marshall Islands',
                         'labels': [
                             {
-                                'label': 'Malawi',
+                                'label': 'Marshall Islands',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'MW'
+                        'value': 'MH'
                     },
                     {
-                        'labelEn': 'Malaysia',
+                        'labelEn': 'Republic of North Macedonia',
                         'labels': [
                             {
-                                'label': 'Malaysia',
+                                'label': 'Republic of North Macedonia',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'MY'
-                    },
-                    {
-                        'labelEn': 'Maldives',
-                        'labels': [
-                            {
-                                'label': 'Maldives',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MV'
+                        'value': 'MK'
                     },
                     {
                         'labelEn': 'Mali',
@@ -6278,24 +6268,44 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'ML'
                     },
                     {
-                        'labelEn': 'Malta',
+                        'labelEn': 'Myanmar',
                         'labels': [
                             {
-                                'label': 'Malta',
+                                'label': 'Myanmar',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'MT'
+                        'value': 'MM'
                     },
                     {
-                        'labelEn': 'Marshall Islands',
+                        'labelEn': 'Mongolia',
                         'labels': [
                             {
-                                'label': 'Marshall Islands',
+                                'label': 'Mongolia',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'MH'
+                        'value': 'MN'
+                    },
+                    {
+                        'labelEn': 'Macao',
+                        'labels': [
+                            {
+                                'label': 'Macao',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MO'
+                    },
+                    {
+                        'labelEn': 'Northern Mariana Islands',
+                        'labels': [
+                            {
+                                'label': 'Northern Mariana Islands',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MP'
                     },
                     {
                         'labelEn': 'Martinique',
@@ -6318,6 +6328,26 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'MR'
                     },
                     {
+                        'labelEn': 'Montserrat',
+                        'labels': [
+                            {
+                                'label': 'Montserrat',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MS'
+                    },
+                    {
+                        'labelEn': 'Malta',
+                        'labels': [
+                            {
+                                'label': 'Malta',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MT'
+                    },
+                    {
                         'labelEn': 'Mauritius',
                         'labels': [
                             {
@@ -6328,14 +6358,24 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'MU'
                     },
                     {
-                        'labelEn': 'Mayotte',
+                        'labelEn': 'Maldives',
                         'labels': [
                             {
-                                'label': 'Mayotte',
+                                'label': 'Maldives',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'YT'
+                        'value': 'MV'
+                    },
+                    {
+                        'labelEn': 'Malawi',
+                        'labels': [
+                            {
+                                'label': 'Malawi',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MW'
                     },
                     {
                         'labelEn': 'Mexico',
@@ -6348,74 +6388,14 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'MX'
                     },
                     {
-                        'labelEn': 'Micronesia (Federated States of)',
+                        'labelEn': 'Malaysia',
                         'labels': [
                             {
-                                'label': 'Micronesia (Federated States of)',
+                                'label': 'Malaysia',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'FM'
-                    },
-                    {
-                        'labelEn': 'Moldova (the Republic of)',
-                        'labels': [
-                            {
-                                'label': 'Moldova (the Republic of)',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MD'
-                    },
-                    {
-                        'labelEn': 'Monaco',
-                        'labels': [
-                            {
-                                'label': 'Monaco',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MC'
-                    },
-                    {
-                        'labelEn': 'Mongolia',
-                        'labels': [
-                            {
-                                'label': 'Mongolia',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MN'
-                    },
-                    {
-                        'labelEn': 'Montenegro',
-                        'labels': [
-                            {
-                                'label': 'Montenegro',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'ME'
-                    },
-                    {
-                        'labelEn': 'Montserrat',
-                        'labels': [
-                            {
-                                'label': 'Montserrat',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MS'
-                    },
-                    {
-                        'labelEn': 'Morocco',
-                        'labels': [
-                            {
-                                'label': 'Morocco',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MA'
+                        'value': 'MY'
                     },
                     {
                         'labelEn': 'Mozambique',
@@ -6428,16 +6408,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'MZ'
                     },
                     {
-                        'labelEn': 'Myanmar',
-                        'labels': [
-                            {
-                                'label': 'Myanmar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MM'
-                    },
-                    {
                         'labelEn': 'Namibia',
                         'labels': [
                             {
@@ -6446,36 +6416,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'NA'
-                    },
-                    {
-                        'labelEn': 'Nauru',
-                        'labels': [
-                            {
-                                'label': 'Nauru',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'NR'
-                    },
-                    {
-                        'labelEn': 'Nepal',
-                        'labels': [
-                            {
-                                'label': 'Nepal',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'NP'
-                    },
-                    {
-                        'labelEn': 'Netherlands',
-                        'labels': [
-                            {
-                                'label': 'Netherlands',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'NL'
                     },
                     {
                         'labelEn': 'New Caledonia',
@@ -6488,26 +6428,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'NC'
                     },
                     {
-                        'labelEn': 'New Zealand',
-                        'labels': [
-                            {
-                                'label': 'New Zealand',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'NZ'
-                    },
-                    {
-                        'labelEn': 'Nicaragua',
-                        'labels': [
-                            {
-                                'label': 'Nicaragua',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'NI'
-                    },
-                    {
                         'labelEn': 'Niger',
                         'labels': [
                             {
@@ -6516,26 +6436,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'NE'
-                    },
-                    {
-                        'labelEn': 'Nigeria',
-                        'labels': [
-                            {
-                                'label': 'Nigeria',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'NG'
-                    },
-                    {
-                        'labelEn': 'Niue',
-                        'labels': [
-                            {
-                                'label': 'Niue',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'NU'
                     },
                     {
                         'labelEn': 'Norfolk Island',
@@ -6548,24 +6448,34 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'NF'
                     },
                     {
-                        'labelEn': 'North Macedonia',
+                        'labelEn': 'Nigeria',
                         'labels': [
                             {
-                                'label': 'North Macedonia',
+                                'label': 'Nigeria',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'MK'
+                        'value': 'NG'
                     },
                     {
-                        'labelEn': 'Northern Mariana Islands',
+                        'labelEn': 'Nicaragua',
                         'labels': [
                             {
-                                'label': 'Northern Mariana Islands',
+                                'label': 'Nicaragua',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'MP'
+                        'value': 'NI'
+                    },
+                    {
+                        'labelEn': 'Netherlands',
+                        'labels': [
+                            {
+                                'label': 'Netherlands',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'NL'
                     },
                     {
                         'labelEn': 'Norway',
@@ -6578,6 +6488,46 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'NO'
                     },
                     {
+                        'labelEn': 'Nepal',
+                        'labels': [
+                            {
+                                'label': 'Nepal',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'NP'
+                    },
+                    {
+                        'labelEn': 'Nauru',
+                        'labels': [
+                            {
+                                'label': 'Nauru',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'NR'
+                    },
+                    {
+                        'labelEn': 'Niue',
+                        'labels': [
+                            {
+                                'label': 'Niue',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'NU'
+                    },
+                    {
+                        'labelEn': 'New Zealand',
+                        'labels': [
+                            {
+                                'label': 'New Zealand',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'NZ'
+                    },
+                    {
                         'labelEn': 'Oman',
                         'labels': [
                             {
@@ -6586,36 +6536,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'OM'
-                    },
-                    {
-                        'labelEn': 'Pakistan',
-                        'labels': [
-                            {
-                                'label': 'Pakistan',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'PK'
-                    },
-                    {
-                        'labelEn': 'Palau',
-                        'labels': [
-                            {
-                                'label': 'Palau',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'PW'
-                    },
-                    {
-                        'labelEn': 'Palestine, State of',
-                        'labels': [
-                            {
-                                'label': 'Palestine, State of',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'PS'
                     },
                     {
                         'labelEn': 'Panama',
@@ -6628,26 +6548,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'PA'
                     },
                     {
-                        'labelEn': 'Papua New Guinea',
-                        'labels': [
-                            {
-                                'label': 'Papua New Guinea',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'PG'
-                    },
-                    {
-                        'labelEn': 'Paraguay',
-                        'labels': [
-                            {
-                                'label': 'Paraguay',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'PY'
-                    },
-                    {
                         'labelEn': 'Peru',
                         'labels': [
                             {
@@ -6656,6 +6556,26 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'PE'
+                    },
+                    {
+                        'labelEn': 'French Polynesia',
+                        'labels': [
+                            {
+                                'label': 'French Polynesia',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'PF'
+                    },
+                    {
+                        'labelEn': 'Papua New Guinea',
+                        'labels': [
+                            {
+                                'label': 'Papua New Guinea',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'PG'
                     },
                     {
                         'labelEn': 'Philippines',
@@ -6668,14 +6588,14 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'PH'
                     },
                     {
-                        'labelEn': 'Pitcairn',
+                        'labelEn': 'Pakistan',
                         'labels': [
                             {
-                                'label': 'Pitcairn',
+                                'label': 'Pakistan',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'PN'
+                        'value': 'PK'
                     },
                     {
                         'labelEn': 'Poland',
@@ -6688,14 +6608,24 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'PL'
                     },
                     {
-                        'labelEn': 'Portugal',
+                        'labelEn': 'Saint Pierre and Miquelon',
                         'labels': [
                             {
-                                'label': 'Portugal',
+                                'label': 'Saint Pierre and Miquelon',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'PT'
+                        'value': 'PM'
+                    },
+                    {
+                        'labelEn': 'Pitcairn',
+                        'labels': [
+                            {
+                                'label': 'Pitcairn',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'PN'
                     },
                     {
                         'labelEn': 'Puerto Rico',
@@ -6706,6 +6636,46 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'PR'
+                    },
+                    {
+                        'labelEn': 'Palestinian Territory, Occupied',
+                        'labels': [
+                            {
+                                'label': 'Palestinian Territory, Occupied',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'PS'
+                    },
+                    {
+                        'labelEn': 'Portugal',
+                        'labels': [
+                            {
+                                'label': 'Portugal',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'PT'
+                    },
+                    {
+                        'labelEn': 'Palau',
+                        'labels': [
+                            {
+                                'label': 'Palau',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'PW'
+                    },
+                    {
+                        'labelEn': 'Paraguay',
+                        'labels': [
+                            {
+                                'label': 'Paraguay',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'PY'
                     },
                     {
                         'labelEn': 'Qatar',
@@ -6738,10 +6708,20 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'RO'
                     },
                     {
-                        'labelEn': 'Russian Federation',
+                        'labelEn': 'Serbia',
                         'labels': [
                             {
-                                'label': 'Russian Federation',
+                                'label': 'Serbia',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'RS'
+                    },
+                    {
+                        'labelEn': 'Russia',
+                        'labels': [
+                            {
+                                'label': 'Russia',
                                 'language': 'English(EN)'
                             }
                         ],
@@ -6758,106 +6738,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'RW'
                     },
                     {
-                        'labelEn': 'Saint Barthélemy',
-                        'labels': [
-                            {
-                                'label': 'Saint Barthélemy',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'BL'
-                    },
-                    {
-                        'labelEn': 'Saint Helena, Ascension and Tristan da Cunha',
-                        'labels': [
-                            {
-                                'label': 'Saint Helena, Ascension and Tristan da Cunha',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SH'
-                    },
-                    {
-                        'labelEn': 'Saint Kitts and Nevis',
-                        'labels': [
-                            {
-                                'label': 'Saint Kitts and Nevis',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'KN'
-                    },
-                    {
-                        'labelEn': 'Saint Lucia',
-                        'labels': [
-                            {
-                                'label': 'Saint Lucia',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'LC'
-                    },
-                    {
-                        'labelEn': 'Saint Martin (French part)',
-                        'labels': [
-                            {
-                                'label': 'Saint Martin (French part)',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MF'
-                    },
-                    {
-                        'labelEn': 'Saint Pierre and Miquelon',
-                        'labels': [
-                            {
-                                'label': 'Saint Pierre and Miquelon',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'PM'
-                    },
-                    {
-                        'labelEn': 'Saint Vincent and the Grenadines',
-                        'labels': [
-                            {
-                                'label': 'Saint Vincent and the Grenadines',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'VC'
-                    },
-                    {
-                        'labelEn': 'Samoa',
-                        'labels': [
-                            {
-                                'label': 'Samoa',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'WS'
-                    },
-                    {
-                        'labelEn': 'San Marino',
-                        'labels': [
-                            {
-                                'label': 'San Marino',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SM'
-                    },
-                    {
-                        'labelEn': 'Sao Tome and Principe',
-                        'labels': [
-                            {
-                                'label': 'Sao Tome and Principe',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'ST'
-                    },
-                    {
                         'labelEn': 'Saudi Arabia',
                         'labels': [
                             {
@@ -6866,86 +6746,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'SA'
-                    },
-                    {
-                        'labelEn': 'Senegal',
-                        'labels': [
-                            {
-                                'label': 'Senegal',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SN'
-                    },
-                    {
-                        'labelEn': 'Serbia',
-                        'labels': [
-                            {
-                                'label': 'Serbia',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'RS'
-                    },
-                    {
-                        'labelEn': 'Seychelles',
-                        'labels': [
-                            {
-                                'label': 'Seychelles',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SC'
-                    },
-                    {
-                        'labelEn': 'Sierra Leone',
-                        'labels': [
-                            {
-                                'label': 'Sierra Leone',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SL'
-                    },
-                    {
-                        'labelEn': 'Singapore',
-                        'labels': [
-                            {
-                                'label': 'Singapore',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SG'
-                    },
-                    {
-                        'labelEn': 'Sint Maarten (Dutch part)',
-                        'labels': [
-                            {
-                                'label': 'Sint Maarten (Dutch part)',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SX'
-                    },
-                    {
-                        'labelEn': 'Slovakia',
-                        'labels': [
-                            {
-                                'label': 'Slovakia',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SK'
-                    },
-                    {
-                        'labelEn': 'Slovenia',
-                        'labels': [
-                            {
-                                'label': 'Slovenia',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SI'
                     },
                     {
                         'labelEn': 'Solomon Islands',
@@ -6958,64 +6758,14 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'SB'
                     },
                     {
-                        'labelEn': 'Somalia',
+                        'labelEn': 'Seychelles',
                         'labels': [
                             {
-                                'label': 'Somalia',
+                                'label': 'Seychelles',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'SO'
-                    },
-                    {
-                        'labelEn': 'South Africa',
-                        'labels': [
-                            {
-                                'label': 'South Africa',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'ZA'
-                    },
-                    {
-                        'labelEn': 'South Georgia and the South Sandwich Islands',
-                        'labels': [
-                            {
-                                'label': 'South Georgia and the South Sandwich Islands',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'GS'
-                    },
-                    {
-                        'labelEn': 'South Sudan',
-                        'labels': [
-                            {
-                                'label': 'South Sudan',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SS'
-                    },
-                    {
-                        'labelEn': 'Spain',
-                        'labels': [
-                            {
-                                'label': 'Spain',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'ES'
-                    },
-                    {
-                        'labelEn': 'Sri Lanka',
-                        'labels': [
-                            {
-                                'label': 'Sri Lanka',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'LK'
+                        'value': 'SC'
                     },
                     {
                         'labelEn': 'Sudan',
@@ -7028,14 +6778,44 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'SD'
                     },
                     {
-                        'labelEn': 'Suriname',
+                        'labelEn': 'Sweden',
                         'labels': [
                             {
-                                'label': 'Suriname',
+                                'label': 'Sweden',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'SR'
+                        'value': 'SE'
+                    },
+                    {
+                        'labelEn': 'Singapore',
+                        'labels': [
+                            {
+                                'label': 'Singapore',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SG'
+                    },
+                    {
+                        'labelEn': 'Saint Helena, Ascension and Tristan da Cunha',
+                        'labels': [
+                            {
+                                'label': 'Saint Helena, Ascension and Tristan da Cunha',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SH'
+                    },
+                    {
+                        'labelEn': 'Slovenia',
+                        'labels': [
+                            {
+                                'label': 'Slovenia',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SI'
                     },
                     {
                         'labelEn': 'Svalbard and Jan Mayen',
@@ -7048,24 +6828,94 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'SJ'
                     },
                     {
-                        'labelEn': 'Sweden',
+                        'labelEn': 'Slovakia',
                         'labels': [
                             {
-                                'label': 'Sweden',
+                                'label': 'Slovakia',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'SE'
+                        'value': 'SK'
                     },
                     {
-                        'labelEn': 'Switzerland',
+                        'labelEn': 'Sierra Leone',
                         'labels': [
                             {
-                                'label': 'Switzerland',
+                                'label': 'Sierra Leone',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'CH'
+                        'value': 'SL'
+                    },
+                    {
+                        'labelEn': 'San Marino',
+                        'labels': [
+                            {
+                                'label': 'San Marino',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SM'
+                    },
+                    {
+                        'labelEn': 'Senegal',
+                        'labels': [
+                            {
+                                'label': 'Senegal',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SN'
+                    },
+                    {
+                        'labelEn': 'Somalia',
+                        'labels': [
+                            {
+                                'label': 'Somalia',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SO'
+                    },
+                    {
+                        'labelEn': 'Suriname',
+                        'labels': [
+                            {
+                                'label': 'Suriname',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SR'
+                    },
+                    {
+                        'labelEn': 'South Sudan',
+                        'labels': [
+                            {
+                                'label': 'South Sudan',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SS'
+                    },
+                    {
+                        'labelEn': 'Sao Tome and Principe',
+                        'labels': [
+                            {
+                                'label': 'Sao Tome and Principe',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'ST'
+                    },
+                    {
+                        'labelEn': 'El Salvador',
+                        'labels': [
+                            {
+                                'label': 'El Salvador',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SV'
                     },
                     {
                         'labelEn': 'Syrian Arab Republic',
@@ -7078,124 +6928,14 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'SY'
                     },
                     {
-                        'labelEn': 'Taiwan (Province of China)',
+                        'labelEn': 'Swaziland',
                         'labels': [
                             {
-                                'label': 'Taiwan (Province of China)',
+                                'label': 'Swaziland',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'TW'
-                    },
-                    {
-                        'labelEn': 'Tajikistan',
-                        'labels': [
-                            {
-                                'label': 'Tajikistan',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'TJ'
-                    },
-                    {
-                        'labelEn': 'Tanzania, the United Republic of',
-                        'labels': [
-                            {
-                                'label': 'Tanzania, the United Republic of',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'TZ'
-                    },
-                    {
-                        'labelEn': 'Thailand',
-                        'labels': [
-                            {
-                                'label': 'Thailand',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'TH'
-                    },
-                    {
-                        'labelEn': 'Timor-Leste',
-                        'labels': [
-                            {
-                                'label': 'Timor-Leste',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'TL'
-                    },
-                    {
-                        'labelEn': 'Togo',
-                        'labels': [
-                            {
-                                'label': 'Togo',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'TG'
-                    },
-                    {
-                        'labelEn': 'Tokelau',
-                        'labels': [
-                            {
-                                'label': 'Tokelau',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'TK'
-                    },
-                    {
-                        'labelEn': 'Tonga',
-                        'labels': [
-                            {
-                                'label': 'Tonga',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'TO'
-                    },
-                    {
-                        'labelEn': 'Trinidad and Tobago',
-                        'labels': [
-                            {
-                                'label': 'Trinidad and Tobago',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'TT'
-                    },
-                    {
-                        'labelEn': 'Tunisia',
-                        'labels': [
-                            {
-                                'label': 'Tunisia',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'TN'
-                    },
-                    {
-                        'labelEn': 'Turkey',
-                        'labels': [
-                            {
-                                'label': 'Turkey',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'TR'
-                    },
-                    {
-                        'labelEn': 'Turkmenistan',
-                        'labels': [
-                            {
-                                'label': 'Turkmenistan',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'TM'
+                        'value': 'SZ'
                     },
                     {
                         'labelEn': 'Turks and Caicos Islands',
@@ -7208,6 +6948,126 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'TC'
                     },
                     {
+                        'labelEn': 'Chad',
+                        'labels': [
+                            {
+                                'label': 'Chad',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'TD'
+                    },
+                    {
+                        'labelEn': 'French Southern Territories',
+                        'labels': [
+                            {
+                                'label': 'French Southern Territories',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'TF'
+                    },
+                    {
+                        'labelEn': 'Togo',
+                        'labels': [
+                            {
+                                'label': 'Togo',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'TG'
+                    },
+                    {
+                        'labelEn': 'Thailand',
+                        'labels': [
+                            {
+                                'label': 'Thailand',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'TH'
+                    },
+                    {
+                        'labelEn': 'Tajikistan',
+                        'labels': [
+                            {
+                                'label': 'Tajikistan',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'TJ'
+                    },
+                    {
+                        'labelEn': 'Tokelau',
+                        'labels': [
+                            {
+                                'label': 'Tokelau',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'TK'
+                    },
+                    {
+                        'labelEn': 'Timor-Leste',
+                        'labels': [
+                            {
+                                'label': 'Timor-Leste',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'TL'
+                    },
+                    {
+                        'labelEn': 'Turkmenistan',
+                        'labels': [
+                            {
+                                'label': 'Turkmenistan',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'TM'
+                    },
+                    {
+                        'labelEn': 'Tunisia',
+                        'labels': [
+                            {
+                                'label': 'Tunisia',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'TN'
+                    },
+                    {
+                        'labelEn': 'Tonga',
+                        'labels': [
+                            {
+                                'label': 'Tonga',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'TO'
+                    },
+                    {
+                        'labelEn': 'Turkey',
+                        'labels': [
+                            {
+                                'label': 'Turkey',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'TR'
+                    },
+                    {
+                        'labelEn': 'Trinidad and Tobago',
+                        'labels': [
+                            {
+                                'label': 'Trinidad and Tobago',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'TT'
+                    },
+                    {
                         'labelEn': 'Tuvalu',
                         'labels': [
                             {
@@ -7218,14 +7078,24 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'TV'
                     },
                     {
-                        'labelEn': 'Uganda',
+                        'labelEn': 'Taiwan',
                         'labels': [
                             {
-                                'label': 'Uganda',
+                                'label': 'Taiwan',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'UG'
+                        'value': 'TW'
+                    },
+                    {
+                        'labelEn': 'Tanzania, United Republic of',
+                        'labels': [
+                            {
+                                'label': 'Tanzania, United Republic of',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'TZ'
                     },
                     {
                         'labelEn': 'Ukraine',
@@ -7238,24 +7108,14 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'UA'
                     },
                     {
-                        'labelEn': 'United Arab Emirates',
+                        'labelEn': 'Uganda',
                         'labels': [
                             {
-                                'label': 'United Arab Emirates',
+                                'label': 'Uganda',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'AE'
-                    },
-                    {
-                        'labelEn': 'United Kingdom of Great Britain and Northern Ireland',
-                        'labels': [
-                            {
-                                'label': 'United Kingdom of Great Britain and Northern Ireland',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'GB'
+                        'value': 'UG'
                     },
                     {
                         'labelEn': 'United States Minor Outlying Islands',
@@ -7268,10 +7128,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'UM'
                     },
                     {
-                        'labelEn': 'United States of America',
+                        'labelEn': 'United States',
                         'labels': [
                             {
-                                'label': 'United States of America',
+                                'label': 'United States',
                                 'language': 'English(EN)'
                             }
                         ],
@@ -7298,6 +7158,66 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'UZ'
                     },
                     {
+                        'labelEn': 'Holy See (Vatican City State)',
+                        'labels': [
+                            {
+                                'label': 'Holy See (Vatican City State)',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'VA'
+                    },
+                    {
+                        'labelEn': 'Saint Vincent and the Grenadines',
+                        'labels': [
+                            {
+                                'label': 'Saint Vincent and the Grenadines',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'VC'
+                    },
+                    {
+                        'labelEn': 'Venezuela',
+                        'labels': [
+                            {
+                                'label': 'Venezuela',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'VE'
+                    },
+                    {
+                        'labelEn': 'Virgin Islands, British',
+                        'labels': [
+                            {
+                                'label': 'Virgin Islands, British',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'VG'
+                    },
+                    {
+                        'labelEn': 'Virgin Islands, U.S.',
+                        'labels': [
+                            {
+                                'label': 'Virgin Islands, U.S.',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'VI'
+                    },
+                    {
+                        'labelEn': 'Vietnam',
+                        'labels': [
+                            {
+                                'label': 'Vietnam',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'VN'
+                    },
+                    {
                         'labelEn': 'Vanuatu',
                         'labels': [
                             {
@@ -7306,46 +7226,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'VU'
-                    },
-                    {
-                        'labelEn': 'Venezuela (Bolivarian Republic of)',
-                        'labels': [
-                            {
-                                'label': 'Venezuela (Bolivarian Republic of)',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'VE'
-                    },
-                    {
-                        'labelEn': 'Viet Nam',
-                        'labels': [
-                            {
-                                'label': 'Viet Nam',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'VN'
-                    },
-                    {
-                        'labelEn': 'Virgin Islands (British)',
-                        'labels': [
-                            {
-                                'label': 'Virgin Islands (British)',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'VG'
-                    },
-                    {
-                        'labelEn': 'Virgin Islands (U.S.)',
-                        'labels': [
-                            {
-                                'label': 'Virgin Islands (U.S.)',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'VI'
                     },
                     {
                         'labelEn': 'Wallis and Futuna',
@@ -7358,14 +7238,14 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'WF'
                     },
                     {
-                        'labelEn': 'Western Sahara',
+                        'labelEn': 'Samoa',
                         'labels': [
                             {
-                                'label': 'Western Sahara',
+                                'label': 'Samoa',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'EH'
+                        'value': 'WS'
                     },
                     {
                         'labelEn': 'Yemen',
@@ -7376,6 +7256,26 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'YE'
+                    },
+                    {
+                        'labelEn': 'Mayotte',
+                        'labels': [
+                            {
+                                'label': 'Mayotte',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'YT'
+                    },
+                    {
+                        'labelEn': 'South Africa',
+                        'labels': [
+                            {
+                                'label': 'South Africa',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'ZA'
                     },
                     {
                         'labelEn': 'Zambia',
@@ -7493,12 +7393,112 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                     }
                 ],
                 'name': 'size',
-                'required': False,
+                'required': True,
                 'type': 'INTEGER'
             },
             {
                 'associatedWith': 'Individual',
                 'choices': [
+                    {
+                        'labelEn': 'Aunt / Uncle',
+                        'labels': [
+                            {
+                                'label': 'Aunt / Uncle',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AUNT_UNCLE'
+                    },
+                    {
+                        'labelEn': 'Brother / Sister',
+                        'labels': [
+                            {
+                                'label': 'Brother / Sister',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'BROTHER_SISTER'
+                    },
+                    {
+                        'labelEn': 'Cousin',
+                        'labels': [
+                            {
+                                'label': 'Cousin',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'COUSIN'
+                    },
+                    {
+                        'labelEn': 'Daughter-in-law / Son-in-law',
+                        'labels': [
+                            {
+                                'label': 'Daughter-in-law / Son-in-law',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'DAUGHTERINLAW_SONINLAW'
+                    },
+                    {
+                        'labelEn': 'Granddaughter / Grandson',
+                        'labels': [
+                            {
+                                'label': 'Granddaughter / Grandson',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'GRANDDAUGHER_GRANDSON'
+                    },
+                    {
+                        'labelEn': 'Grandmother / Grandfather',
+                        'labels': [
+                            {
+                                'label': 'Grandmother / Grandfather',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'GRANDMOTHER_GRANDFATHER'
+                    },
+                    {
+                        'labelEn': 'Head of household (self)',
+                        'labels': [
+                            {
+                                'label': 'Head of household (self)',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'HEAD'
+                    },
+                    {
+                        'labelEn': 'Mother-in-law / Father-in-law',
+                        'labels': [
+                            {
+                                'label': 'Mother-in-law / Father-in-law',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MOTHERINLAW_FATHERINLAW'
+                    },
+                    {
+                        'labelEn': 'Mother / Father',
+                        'labels': [
+                            {
+                                'label': 'Mother / Father',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MOTHER_FATHER'
+                    },
+                    {
+                        'labelEn': 'Nephew / Niece',
+                        'labels': [
+                            {
+                                'label': 'Nephew / Niece',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'NEPHEW_NIECE'
+                    },
                     {
                         'labelEn': 'Not a Family Member. Can only act as a recipient.',
                         'labels': [
@@ -7510,14 +7510,14 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'NON_BENEFICIARY'
                     },
                     {
-                        'labelEn': 'Head of household (self)',
+                        'labelEn': 'Sister-in-law / Brother-in-law',
                         'labels': [
                             {
-                                'label': 'Head of household (self)',
+                                'label': 'Sister-in-law / Brother-in-law',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'HEAD'
+                        'value': 'SISTERINLAW_BROTHERINLAW'
                     },
                     {
                         'labelEn': 'Son / Daughter',
@@ -7538,106 +7538,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'WIFE_HUSBAND'
-                    },
-                    {
-                        'labelEn': 'Brother / Sister',
-                        'labels': [
-                            {
-                                'label': 'Brother / Sister',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'BROTHER_SISTER'
-                    },
-                    {
-                        'labelEn': 'Mother / Father',
-                        'labels': [
-                            {
-                                'label': 'Mother / Father',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MOTHER_FATHER'
-                    },
-                    {
-                        'labelEn': 'Aunt / Uncle',
-                        'labels': [
-                            {
-                                'label': 'Aunt / Uncle',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'AUNT_UNCLE'
-                    },
-                    {
-                        'labelEn': 'Grandmother / Grandfather',
-                        'labels': [
-                            {
-                                'label': 'Grandmother / Grandfather',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'GRANDMOTHER_GRANDFATHER'
-                    },
-                    {
-                        'labelEn': 'Mother-in-law / Father-in-law',
-                        'labels': [
-                            {
-                                'label': 'Mother-in-law / Father-in-law',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MOTHERINLAW_FATHERINLAW'
-                    },
-                    {
-                        'labelEn': 'Daughter-in-law / Son-in-law',
-                        'labels': [
-                            {
-                                'label': 'Daughter-in-law / Son-in-law',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'DAUGHTERINLAW_SONINLAW'
-                    },
-                    {
-                        'labelEn': 'Sister-in-law / Brother-in-law',
-                        'labels': [
-                            {
-                                'label': 'Sister-in-law / Brother-in-law',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SISTERINLAW_BROTHERINLAW'
-                    },
-                    {
-                        'labelEn': 'Granddaughter / Grandson',
-                        'labels': [
-                            {
-                                'label': 'Granddaughter / Grandson',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'GRANDDAUGHER_GRANDSON'
-                    },
-                    {
-                        'labelEn': 'Nephew / Niece',
-                        'labels': [
-                            {
-                                'label': 'Nephew / Niece',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'NEPHEW_NIECE'
-                    },
-                    {
-                        'labelEn': 'Cousin',
-                        'labels': [
-                            {
-                                'label': 'Cousin',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'COUSIN'
                     }
                 ],
                 'hint': '',
@@ -7657,16 +7557,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Individual',
                 'choices': [
                     {
-                        'labelEn': 'Primary collector',
-                        'labels': [
-                            {
-                                'label': 'Primary collector',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'PRIMARY'
-                    },
-                    {
                         'labelEn': 'Alternate collector',
                         'labels': [
                             {
@@ -7685,6 +7575,16 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'NO_ROLE'
+                    },
+                    {
+                        'labelEn': 'Primary collector',
+                        'labels': [
+                            {
+                                'label': 'Primary collector',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'PRIMARY'
                     }
                 ],
                 'hint': '',
@@ -7772,16 +7672,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Individual',
                 'choices': [
                     {
-                        'labelEn': 'Male',
-                        'labels': [
-                            {
-                                'label': 'Male',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MALE'
-                    },
-                    {
                         'labelEn': 'Female',
                         'labels': [
                             {
@@ -7790,6 +7680,16 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'FEMALE'
+                    },
+                    {
+                        'labelEn': 'Male',
+                        'labels': [
+                            {
+                                'label': 'Male',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MALE'
                     }
                 ],
                 'hint': '',
@@ -7809,14 +7709,14 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Individual',
                 'choices': [
                     {
-                        'labelEn': 'SINGLE',
+                        'labelEn': 'Divorced',
                         'labels': [
                             {
-                                'label': 'SINGLE',
+                                'label': 'Divorced',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'SINGLE'
+                        'value': 'DIVORCED'
                     },
                     {
                         'labelEn': 'Married',
@@ -7829,26 +7729,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'MARRIED'
                     },
                     {
-                        'labelEn': 'Widow',
-                        'labels': [
-                            {
-                                'label': 'Widow',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'WIDOW'
-                    },
-                    {
-                        'labelEn': 'Divorced',
-                        'labels': [
-                            {
-                                'label': 'Divorced',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'DIVORCED'
-                    },
-                    {
                         'labelEn': 'Separated',
                         'labels': [
                             {
@@ -7857,6 +7737,26 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'SEPARATED'
+                    },
+                    {
+                        'labelEn': 'SINGLE',
+                        'labels': [
+                            {
+                                'label': 'SINGLE',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SINGLE'
+                    },
+                    {
+                        'labelEn': 'Widow',
+                        'labels': [
+                            {
+                                'label': 'Widow',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'WIDOW'
                     }
                 ],
                 'hint': '',
