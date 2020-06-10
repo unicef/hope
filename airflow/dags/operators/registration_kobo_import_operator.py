@@ -19,6 +19,6 @@ class RegistrationKoboImportOperator(DjangoOperator):
             registration_data_import_id=config_vars.get(
                 "registration_data_import_id"
             ),
-            submission_data=config_vars.get("submission_data"),
+            import_data_id=config_vars.get("import_data_id"),
             business_area_id=config_vars.get("business_area"),
         )
