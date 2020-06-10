@@ -18,7 +18,6 @@ from core.models import BusinessArea
 from core.utils import (
     serialize_flex_attributes,
     get_combined_attributes,
-    get_admin_areas_as_choices,
     rename_dict_keys,
 )
 from core.validators import BaseValidator
@@ -135,11 +134,7 @@ class UploadXLSXValidator(ImportDataValidator):
         if value is None:
             return True
 
-        if header in ("admin1", "admin2"):
-            choices_list = get_admin_areas_as_choices(header[-1])
-            choices = [x.get("value") for x in choices_list]
-        else:
-            choices = [x.get("value") for x in field["choices"]]
+        choices = [x.get("value") for x in field["choices"]]
 
         choice_type = cls.ALL_FIELDS[header]["type"]
 
@@ -235,36 +230,50 @@ class UploadXLSXValidator(ImportDataValidator):
                     )
 
             if key == "other_id_type_i_c":
+                for name, validation_data in zip(
+                    values["names"], values["validation_data"]
+                ):
+                    value = validation_data["value"]
+                    row_number = validation_data["row_number"]
+                    if not name and value:
+                        invalid_rows.append(
+                            {
+                                "row_number": row_number,
+                                "header": key,
+                                "message": f"Name for other_id_type is "
+                                f"required, when number is "
+                                f"provided: no: {value} in file",
+                            }
+                        )
                 imp_doc_type_obj = ImportedDocumentType.objects.filter(
-                    label=values["name"],
-                    country=kwargs.get("business_area_slug"),
+                    label__in=values["names"],
+                    country=cls.BUSINESS_AREA_CODE,
                     type=values["type"],
                 )
                 doc_type_obj = DocumentType.objects.filter(
-                    label=values["name"],
-                    country=kwargs.get("business_area_slug"),
+                    label__in=values["names"],
+                    country=cls.BUSINESS_AREA_CODE,
                     type=values["type"],
                 )
             else:
                 imp_doc_type_obj = ImportedDocumentType.objects.filter(
-                    country=kwargs.get("business_area_slug"),
-                    type=values["type"],
+                    country=cls.BUSINESS_AREA_CODE, type=values["type"],
                 )
                 doc_type_obj = DocumentType.objects.filter(
-                    country=kwargs.get("business_area_slug"),
-                    type=values["type"],
+                    country=cls.BUSINESS_AREA_CODE, type=values["type"],
                 )
 
             imp_doc_obj = []
             doc_obj = []
             if imp_doc_type_obj:
                 imp_doc_obj = ImportedDocument.objects.filter(
-                    type=imp_doc_type_obj, document_number__in=values["numbers"]
+                    type__in=imp_doc_type_obj,
+                    document_number__in=values["numbers"],
                 )
 
             if doc_type_obj:
                 doc_obj = Document.objects.filter(
-                    type=doc_type_obj, document_number__in=values["numbers"]
+                    type__in=doc_type_obj, document_number__in=values["numbers"]
                 )
 
             for obj in imp_doc_obj:
@@ -435,7 +444,7 @@ class UploadXLSXValidator(ImportDataValidator):
             },
             "other_id_type_i_c": {
                 "type": "OTHER",
-                "name": None,
+                "names": [],
                 "validation_data": [],
                 "numbers": [],
             },
@@ -502,21 +511,23 @@ class UploadXLSXValidator(ImportDataValidator):
 
                 if header.value in documents_numbers:
                     if header.value == "other_id_type_i_c":
-                        documents_numbers["other_id_type_i_c"]["name"] = value
+                        documents_numbers["other_id_type_i_c"]["names"].append(
+                            value
+                        )
                     elif header.value == "other_id_no_i_c":
                         documents_numbers["other_id_type_i_c"][
                             "validation_data"
                         ].append({"row_number": cell.row, "value": value})
                         documents_numbers["other_id_type_i_c"][
                             "numbers"
-                        ].append(value)
+                        ].append(str(value))
                     else:
                         documents_numbers[header.value][
                             "validation_data"
                         ].append({"row_number": cell.row, "value": value})
-                        documents_numbers["other_id_type_i_c"][
-                            "numbers"
-                        ].append(header.value)
+                        documents_numbers[header.value]["numbers"].append(
+                            str(value)
+                        )
 
                 if header.value in identities_numbers:
                     identities_numbers[header.value]["numbers"].append(value)
@@ -538,9 +549,11 @@ class UploadXLSXValidator(ImportDataValidator):
                         }
                     )
 
-        invalid_doc_rows = cls.documents_validator(documents_numbers)
-
-        invalid_ident_rows = cls.identity_validator(identities_numbers)
+        invalid_doc_rows = []
+        invalid_ident_rows = []
+        if sheet.title == "Individuals":
+            invalid_doc_rows = cls.documents_validator(documents_numbers)
+            invalid_ident_rows = cls.identity_validator(identities_numbers)
 
         return [*invalid_rows, *invalid_doc_rows, *invalid_ident_rows]
 
@@ -821,25 +834,20 @@ class KoboProjectImportDataValidator(ImportDataValidator):
 
     @classmethod
     def geopoint_validator(
-        cls, value: list, field: str, *args, **kwargs
+        cls, value: str, field: str, *args, **kwargs
     ) -> Union[str, None]:
-        readable_value = (
-            ", ".join(str(i) for i in value)
-            if isinstance(value, list) and value
-            else str(value)
-        )
-        message = f"Invalid geopoint {readable_value} for field {field}"
+        message = f"Invalid geopoint {value} for field {field}"
 
-        if not value:
+        if not value or not isinstance(value, str):
             return message
 
-        if len(value) == 2 and all([isinstance(i, float) for i in value]):
-            pattern = re.compile(r"^(-?\d+\.\d+?,\s*-?\d+\.\d+?)$")
-            is_valid_geopoint = bool(re.match(pattern, readable_value))
+        geopoint_to_list = value.split(" ")
+        geopoint = " ".join(geopoint_to_list[:2])
 
-            return None if is_valid_geopoint else message
+        pattern = re.compile(r"^(-?\d+\.\d+? \s*-?\d+\.\d+?)$")
+        is_valid_geopoint = bool(re.match(pattern, geopoint))
 
-        return message
+        return None if is_valid_geopoint else message
 
     @classmethod
     def date_validator(
@@ -881,17 +889,19 @@ class KoboProjectImportDataValidator(ImportDataValidator):
         if not value:
             return message
 
-        if field in ("admin1_h_c", "admin2_h_c"):
-            choices_list = get_admin_areas_as_choices(
-                1 if field == "admin1_h_c" else 2
-            )
-            choices = [x.get("value") for x in choices_list]
-        else:
-            choices = [x.get("value") for x in field["choices"]]
+        custom_validate_choices_method = field.get("custom_validate_choices")
+        choices = [x.get("value") for x in field["choices"]]
 
         choice_type = field["type"]
 
         if choice_type == "SELECT_ONE":
+            if custom_validate_choices_method is not None:
+                return (
+                    None
+                    if custom_validate_choices_method(value) is True
+                    else message
+                )
+
             is_in_choices = value in choices
             if is_in_choices is False:
                 # try uppercase version
@@ -901,6 +911,14 @@ class KoboProjectImportDataValidator(ImportDataValidator):
 
         elif choice_type == "SELECT_MANY":
             selected_choices = value.split(",")
+
+            if custom_validate_choices_method is not None:
+                return (
+                    None
+                    if custom_validate_choices_method(value) is True
+                    else message
+                )
+
             for choice in selected_choices:
                 choice = choice.strip()
                 if choice not in choices:
@@ -953,6 +971,7 @@ class KoboProjectImportDataValidator(ImportDataValidator):
         errors = []
         # have fun debugging this ;_;
         for household in reduced_submissions:
+            head_of_hh_counter = 0
             expected_hh_fields = cls.EXPECTED_HOUSEHOLD_FIELDS.copy()
             attachments = household.get("_attachments", [])
             for hh_field, hh_value in household.items():
@@ -963,12 +982,35 @@ class KoboProjectImportDataValidator(ImportDataValidator):
                             cls.EXPECTED_INDIVIDUALS_FIELDS.copy()
                         )
                         for i_field, i_value in individual.items():
+                            if (
+                                i_field == "relationship_i_c"
+                                and i_value.upper() == "HEAD"
+                            ):
+                                head_of_hh_counter += 1
+                                if head_of_hh_counter > 1:
+                                    errors.append(
+                                        {
+                                            "header": "relationship_i_c",
+                                            "message": f"Only one person can "
+                                            f"be head of household",
+                                        }
+                                    )
                             expected_i_fields.discard(i_field)
                             error = cls._get_field_type_error(
                                 i_field, i_value, attachments
                             )
                             if error:
                                 errors.append(error)
+
+                        if head_of_hh_counter == 0:
+                            errors.append(
+                                {
+                                    "header": "relationship_i_c",
+                                    "message": f"At least one person must "
+                                    f"be head of household",
+                                }
+                            )
+
                         i_expected_field_errors = [
                             {
                                 "header": field,
@@ -978,7 +1020,7 @@ class KoboProjectImportDataValidator(ImportDataValidator):
                             for field in expected_i_fields
                         ]
                         errors.extend(i_expected_field_errors)
-                elif hh_field in cls.EXPECTED_HOUSEHOLD_FIELDS:
+                else:
                     error = cls._get_field_type_error(
                         hh_field, hh_value, attachments
                     )
