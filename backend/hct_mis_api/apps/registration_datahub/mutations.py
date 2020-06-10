@@ -139,7 +139,7 @@ class RegistrationKoboImportMutation(BaseValidator, graphene.Mutation):
         )
 
         AirflowApi.start_dag(
-            dag_id="RegistrationKoboImportOperator",
+            dag_id="CreateRegistrationDataImportKobo",
             context={
                 "registration_data_import_id": str(created_obj_datahub.id),
                 "import_data_id": str(import_data_obj.id),

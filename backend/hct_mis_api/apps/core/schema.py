@@ -204,6 +204,9 @@ def _custom_dict_or_attr_resolver(attname, default_value, root, info, **args):
 
 
 class FieldAttributeNode(graphene.ObjectType):
+    class Meta:
+        default_resolver = _custom_dict_or_attr_resolver
+
     id = graphene.String()
     type = graphene.String()
     name = graphene.String()
@@ -214,24 +217,6 @@ class FieldAttributeNode(graphene.ObjectType):
     choices = graphene.List(CoreFieldChoiceObject)
     associated_with = graphene.String()
     is_flex_field = graphene.Boolean()
-
-    def resolve_id(self, info):
-        return self.get("id")
-
-    def resolve_name(self, info):
-        return self.get("name")
-
-    def resolve_type(self, info):
-        return self.get("type")
-
-    def resolve_hint(self, info):
-        return self.get("hint")
-
-    def resolve_required(self, info):
-        return self.get("required")
-
-    def resolve_associated_with(self, info):
-        return self.get("associated_with")
 
     def resolve_choices(parent, info):
         if isinstance(
@@ -247,7 +232,9 @@ class FieldAttributeNode(graphene.ObjectType):
         return False
 
     def resolve_labels(parent, info):
-        return resolve_label(_custom_dict_or_attr_resolver("label", None, parent, info))
+        return resolve_label(
+            _custom_dict_or_attr_resolver("label", None, parent, info)
+        )
 
     def resolve_label_en(parent, info):
         return _custom_dict_or_attr_resolver("label", None, parent, info)[
