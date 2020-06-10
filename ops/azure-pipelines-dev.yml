@@ -222,9 +222,6 @@ stages:
             namespace: 'hct-ims-dev'
             arguments: add stable https://kubernetes-charts.storage.googleapis.com
 
-      - job: deploy_airflow
-        displayName: "[AIRFLOW]"
-        steps:
         - task: HelmDeploy@0
           displayName: "[HELM] Update repo"
           inputs:
