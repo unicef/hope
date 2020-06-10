@@ -28,6 +28,7 @@ from registration_datahub.schema import (
     XlsxRowErrorNode,
     KoboErrorNode,
 )
+from registration_datahub.tasks.rdi_create import RdiXlsxCreateTask
 from registration_datahub.validators import (
     UploadXLSXValidator,
     KoboProjectImportDataValidator,

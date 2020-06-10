@@ -19,7 +19,11 @@ from graphene import (
     Connection,
     Boolean,
 )
-from graphene.types.resolver import dict_or_attr_resolver
+from graphene.types.resolver import (
+    dict_or_attr_resolver,
+    attr_resolver,
+    dict_resolver,
+)
 from graphene_django import DjangoObjectType
 from graphene_django.converter import convert_django_field
 from graphene_django.filter import DjangoFilterConnectionField
@@ -37,7 +41,7 @@ from core.models import (
     FlexibleAttribute,
     FlexibleAttributeChoice,
 )
-from core.utils import decode_id_string
+from core.utils import decode_id_string, LazyEvalMethodsDict
 
 
 class AdminAreaFilter(FilterSet):
@@ -192,6 +196,13 @@ class CoreFieldChoiceObject(graphene.ObjectType):
         return resolve_label(dict_or_attr_resolver("label", None, parent, info))
 
 
+def _custom_dict_or_attr_resolver(attname, default_value, root, info, **args):
+    resolver = attr_resolver
+    if isinstance(root, (dict, LazyEvalMethodsDict)):
+        resolver = dict_resolver
+    return resolver(attname, default_value, root, info, **args)
+
+
 class FieldAttributeNode(graphene.ObjectType):
     id = graphene.String()
     type = graphene.String()
@@ -204,9 +215,28 @@ class FieldAttributeNode(graphene.ObjectType):
     associated_with = graphene.String()
     is_flex_field = graphene.Boolean()
 
+    def resolve_id(self, info):
+        return self.get("id")
+
+    def resolve_name(self, info):
+        return self.get("name")
+
+    def resolve_type(self, info):
+        return self.get("type")
+
+    def resolve_hint(self, info):
+        return self.get("hint")
+
+    def resolve_required(self, info):
+        return self.get("required")
+
+    def resolve_associated_with(self, info):
+        return self.get("associated_with")
+
     def resolve_choices(parent, info):
         if isinstance(
-            dict_or_attr_resolver("choices", None, parent, info), Iterable
+            _custom_dict_or_attr_resolver("choices", None, parent, info),
+            Iterable,
         ):
             return parent["choices"]
         return parent.choices.all()
@@ -217,10 +247,12 @@ class FieldAttributeNode(graphene.ObjectType):
         return False
 
     def resolve_labels(parent, info):
-        return resolve_label(dict_or_attr_resolver("label", None, parent, info))
+        return resolve_label(_custom_dict_or_attr_resolver("label", None, parent, info))
 
     def resolve_label_en(parent, info):
-        return dict_or_attr_resolver("label", None, parent, info)["English(EN)"]
+        return _custom_dict_or_attr_resolver("label", None, parent, info)[
+            "English(EN)"
+        ]
 
 
 class KoboAssetObject(graphene.ObjectType):
