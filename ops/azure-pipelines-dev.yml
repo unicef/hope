@@ -68,86 +68,86 @@ stages:
                 $(Build.BuildId)
                 dev-latest
 
-  - stage: test
-    displayName: TEST
-    jobs:
-      - job: cypress_e2e
-        displayName: "[CYPRESS]"
-        variables:
-          airflow_image: uniappsk8sdevacr.azurecr.io/$(airflowImageRepository):$(Build.BuildId)
-          frontend_image: uniappsk8sdevacr.azurecr.io/$(frontendImageRepository):$(Build.BuildId)
-          backend_image: uniappsk8sdevacr.azurecr.io/$(backendImageRepository):$(Build.BuildId)
-        steps:
-          - task: Docker@2
-            displayName: "[ACR] Login"
-            inputs:
-              command: login
-              containerRegistry: $(containerRegistry)
-
-          - task: DownloadSecureFile@1
-            inputs:
-              secureFile: '.env-tst'
-
-          - task: DownloadSecureFile@1
-            inputs:
-              secureFile: 'cypress.env.json'
-
-          - task: CmdLine@2
-            displayName: "Setup .env and docker-compose.tst.yml"
-            inputs:
-              script: |
-                mv ops/docker-compose.tst.yml docker-compose.yml
-                mv  $(Agent.TempDirectory)/.env-tst .env
-                cp .env airflow/config/.env_airflow
-                cp $(Agent.TempDirectory)/cypress.env.json cypress_testing_service/cypress.env.json
-
-          - task: DockerCompose@0
-            displayName: "Start testing environment"
-            inputs:
-              containerregistrytype: 'Azure Container Registry'
-              azureContainerRegistry: "$(containerRegistry)"
-              dockerComposeFile: '**/docker-compose.yml'
-              action: 'Run a Docker Compose command'
-              dockerComposeCommand: 'up -d'
-              dockerComposeFileArgs: |
-                airflow_image=uniappsk8sdevacr.azurecr.io/$(airflowImageRepository):$(Build.BuildId)
-                frontend_image=uniappsk8sdevacr.azurecr.io/$(frontendImageRepository):$(Build.BuildId)
-                backend_image=uniappsk8sdevacr.azurecr.io/$(backendImageRepository):$(Build.BuildId)
-
-          - task: CmdLine@2
-            displayName: "Install Cypress plugins"
-            inputs:
-              script: |
-                cd cypress_testing_service
-                yarn install
-                cd ..
-
-          - task: CmdLine@2
-            displayName: "Setup testing environment"
-            inputs:
-              script: |
-                docker exec unicefhct-mis_backend_1 ./manage.py migratealldb
-                docker exec unicefhct-mis_backend_1 ./manage.py loadbusinessareas
-                docker exec unicefhct-mis_backend_1 ./manage.py loadflexfieldsattributes
-                docker exec unicefhct-mis_backend_1 ./manage.py generatefixtures --noinput
-
-          - task: CmdLine@2
-            displayName: "Run Cypress"
-            inputs:
-              script: |
-                cd cypress_testing_service
-                yarn cy:run
-
-          - task: PublishTestResults@2
-            displayName: "Publish Test Result"
-            condition: always()
-            inputs:
-              testResultsFormat: 'JUnit'
-              testResultsFiles: '*.xml'
-              searchFolder: '$(Agent.BuildDirectory)/s/cypress_testing_service/cypress/reports/junit'
-              mergeTestResults: true
-              failTaskOnFailedTests: true
-              testRunTitle: 'TEST Results'
+  # - stage: test
+  #   displayName: TEST
+  #   jobs:
+  #     - job: cypress_e2e
+  #       displayName: "[CYPRESS]"
+  #       variables:
+  #         airflow_image: uniappsk8sdevacr.azurecr.io/$(airflowImageRepository):$(Build.BuildId)
+  #         frontend_image: uniappsk8sdevacr.azurecr.io/$(frontendImageRepository):$(Build.BuildId)
+  #         backend_image: uniappsk8sdevacr.azurecr.io/$(backendImageRepository):$(Build.BuildId)
+  #       steps:
+  #         - task: Docker@2
+  #           displayName: "[ACR] Login"
+  #           inputs:
+  #             command: login
+  #             containerRegistry: $(containerRegistry)
+  #
+  #         - task: DownloadSecureFile@1
+  #           inputs:
+  #             secureFile: '.env-tst'
+  #
+  #         - task: DownloadSecureFile@1
+  #           inputs:
+  #             secureFile: 'cypress.env.json'
+  #
+  #         - task: CmdLine@2
+  #           displayName: "Setup .env and docker-compose.tst.yml"
+  #           inputs:
+  #             script: |
+  #               mv ops/docker-compose.tst.yml docker-compose.yml
+  #               mv  $(Agent.TempDirectory)/.env-tst .env
+  #               cp .env airflow/config/.env_airflow
+  #               cp $(Agent.TempDirectory)/cypress.env.json cypress_testing_service/cypress.env.json
+  #
+  #         - task: DockerCompose@0
+  #           displayName: "Start testing environment"
+  #           inputs:
+  #             containerregistrytype: 'Azure Container Registry'
+  #             azureContainerRegistry: "$(containerRegistry)"
+  #             dockerComposeFile: '**/docker-compose.yml'
+  #             action: 'Run a Docker Compose command'
+  #             dockerComposeCommand: 'up -d'
+  #             dockerComposeFileArgs: |
+  #               airflow_image=uniappsk8sdevacr.azurecr.io/$(airflowImageRepository):$(Build.BuildId)
+  #               frontend_image=uniappsk8sdevacr.azurecr.io/$(frontendImageRepository):$(Build.BuildId)
+  #               backend_image=uniappsk8sdevacr.azurecr.io/$(backendImageRepository):$(Build.BuildId)
+  #
+  #         - task: CmdLine@2
+  #           displayName: "Install Cypress plugins"
+  #           inputs:
+  #             script: |
+  #               cd cypress_testing_service
+  #               yarn install
+  #               cd ..
+  #
+  #         - task: CmdLine@2
+  #           displayName: "Setup testing environment"
+  #           inputs:
+  #             script: |
+  #               docker exec unicefhct-mis_backend_1 ./manage.py migratealldb
+  #               docker exec unicefhct-mis_backend_1 ./manage.py loadbusinessareas
+  #               docker exec unicefhct-mis_backend_1 ./manage.py loadflexfieldsattributes
+  #               docker exec unicefhct-mis_backend_1 ./manage.py generatefixtures --noinput
+  #
+  #         - task: CmdLine@2
+  #           displayName: "Run Cypress"
+  #           inputs:
+  #             script: |
+  #               cd cypress_testing_service
+  #               yarn cy:run
+  #
+  #         - task: PublishTestResults@2
+  #           displayName: "Publish Test Result"
+  #           condition: always()
+  #           inputs:
+  #             testResultsFormat: 'JUnit'
+  #             testResultsFiles: '*.xml'
+  #             searchFolder: '$(Agent.BuildDirectory)/s/cypress_testing_service/cypress/reports/junit'
+  #             mergeTestResults: true
+  #             failTaskOnFailedTests: true
+  #             testRunTitle: 'TEST Results'
 
   - stage: deploy
     displayName: DEPLOY
