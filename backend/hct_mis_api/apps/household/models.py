@@ -91,7 +91,14 @@ IDENTIFICATION_TYPE_CHOICE = (
     (IDENTIFICATION_TYPE_ELECTORAL_CARD, _("Electoral Card")),
     (IDENTIFICATION_TYPE_OTHER, _("Other")),
 )
-
+IDENTIFICATION_TYPE_DICT = {
+    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE: "Birth Certificate",
+    IDENTIFICATION_TYPE_DRIVERS_LICENSE: "Driver's License",
+    IDENTIFICATION_TYPE_NATIONAL_ID: "National ID",
+    IDENTIFICATION_TYPE_NATIONAL_PASSPORT: "National Passport",
+    IDENTIFICATION_TYPE_ELECTORAL_CARD: "Electoral Card",
+    IDENTIFICATION_TYPE_OTHER: "Other",
+}
 INDIVIDUAL_HOUSEHOLD_STATUS = (("ACTIVE", "Active"), ("INACTIVE", "Inactive"))
 
 
@@ -276,6 +283,8 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
     )
     disability = models.BooleanField(default=False,)
     flex_fields = JSONField(default=dict)
+    enrolled_in_nutrition_programme = models.BooleanField(default=False)
+    administration_of_rutf = models.BooleanField(default=False)
 
     @property
     def age(self):

@@ -43,10 +43,10 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
     """
 
     CREATE_REGISTRATION_DATA_IMPORT = """
-    mutation CreateRegistrationDataImport(
-      $registrationDataImportData: CreateRegistrationDataImportExcelInput!
+    mutation RegistrationXlsxImportMutation(
+      $registrationDataImportData: RegistrationXlsxImportMutationInput!
     ) {
-      createRegistrationDataImport(
+      registrationXlsxImport(
         registrationDataImportData: $registrationDataImportData
       ) {
         registrationDataImport {

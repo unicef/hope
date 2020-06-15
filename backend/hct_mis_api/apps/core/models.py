@@ -1,12 +1,8 @@
-from decimal import Decimal
-
 import mptt
-import pycountry
 from auditlog.models import AuditlogHistoryField
 from auditlog.registry import auditlog
 from django.contrib.gis.db.models import MultiPolygonField, PointField
 from django.contrib.postgres.fields import JSONField
-from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
@@ -102,7 +98,7 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
     """
     AdminArea model define place where agents are working.
     The background of the location can be:
-    BussinesAreaa > State > Province > City > District/Point.
+    BussinesArea > State > Province > City > District/Point.
     Either a point or geospatial object.
     related models:
         indicator.Reportable (ForeignKey): "reportable"
@@ -150,6 +146,16 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
     @property
     def point_lat_long(self):
         return "Lat: {}, Long: {}".format(self.point.y, self.point.x)
+
+    @classmethod
+    def get_admin_areas_as_choices(cls, admin_level):
+        return [
+            {"label": {"English(EN)": admin_area.title},
+             "value": admin_area.title, }
+            for admin_area in cls.objects.filter(
+                admin_area_type__admin_level=admin_level
+            )
+        ]
 
 
 class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
