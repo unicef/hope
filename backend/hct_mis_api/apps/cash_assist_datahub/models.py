@@ -32,26 +32,31 @@ class Programme(SessionModel):
 
 
 class CashPlan(SessionModel):
-    DISTRIBUTION_COMPLETED = "Distribution Completed"
+    DISTRIBUTION_COMPLETED = (
+        "Distribution Completed"
+    )
     DISTRIBUTION_COMPLETED_WITH_ERRORS = "Distribution Completed with Errors"
     TRANSACTION_COMPLETED = "Transaction Completed"
     TRANSACTION_COMPLETED_WITH_ERRORS = "Transaction Completed with Errors"
+    STATUS_CHOICE = (
+        (DISTRIBUTION_COMPLETED, _("Distribution Completed")),
+        (
+            DISTRIBUTION_COMPLETED_WITH_ERRORS,
+            _("Distribution Completed with Errors"),
+        ),
+        (TRANSACTION_COMPLETED, _("Transaction Completed")),
+        (
+            TRANSACTION_COMPLETED_WITH_ERRORS,
+            _("Transaction Completed with Errors"),
+        ),
+    )
     business_area = models.CharField(max_length=20, null=True)
     cash_plan_id = models.CharField(max_length=255)
     cash_plan_hash_id = models.UUIDField(primary_key=True,)
     status = models.CharField(
         max_length=255,
         choices=(
-            (DISTRIBUTION_COMPLETED, _("Distribution Completed")),
-            (
-                DISTRIBUTION_COMPLETED_WITH_ERRORS,
-                _("Distribution Completed with Errors"),
-            ),
-            (TRANSACTION_COMPLETED, _("Transaction Completed")),
-            (
-                TRANSACTION_COMPLETED_WITH_ERRORS,
-                _("Transaction Completed with Errors"),
-            ),
+            STATUS_CHOICE
         ),
         null=True,
     )
