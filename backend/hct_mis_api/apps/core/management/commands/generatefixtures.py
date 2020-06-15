@@ -31,6 +31,7 @@ from targeting.fixtures import (
     TargetingCriteriaRuleFilterFactory,
     TargetingCriteriaFactory,
 )
+from cash_assist_datahub import fixtures as cash_assist_datahub_fixtures
 
 
 class Command(BaseCommand):
@@ -215,6 +216,10 @@ class Command(BaseCommand):
                     {"registration_data_import": rdi_datahub,},
                     {"registration_data_import": rdi_datahub,},
                 )
+        cash_assist_datahub_fixtures.ServiceProviderFactory.create_batch(10)
+        cash_assist_datahub_fixtures.CashPlanFactory.create_batch(10)
+        cash_assist_datahub_fixtures.PaymentRecordFactory.create_batch(10)
+        cash_assist_datahub_fixtures.ProgrammeFactory.create_batch(10)
 
         self.stdout.write(
             f"Generated fixtures in {(time.time() - start_time)} seconds"
