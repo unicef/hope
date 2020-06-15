@@ -1076,6 +1076,8 @@ export type IndividualNode = Node & {
   registrationDataImport: RegistrationDataImportNode,
   disability: Scalars['Boolean'],
   flexFields?: Maybe<Scalars['FlexFieldsScalar']>,
+  enrolledInNutritionProgramme: Scalars['Boolean'],
+  administrationOfRutf: Scalars['Boolean'],
   headingHousehold?: Maybe<HouseholdNode>,
   documents: DocumentNodeConnection,
 };
@@ -2559,7 +2561,7 @@ export type IndividualMinimalFragment = (
 
 export type IndividualDetailedFragment = (
   { __typename?: 'IndividualNode' }
-  & Pick<IndividualNode, 'givenName' | 'familyName' | 'estimatedBirthDate' | 'flexFields'>
+  & Pick<IndividualNode, 'givenName' | 'familyName' | 'estimatedBirthDate' | 'enrolledInNutritionProgramme' | 'administrationOfRutf' | 'flexFields'>
   & { household: (
     { __typename?: 'HouseholdNode' }
     & Pick<HouseholdNode, 'id' | 'address' | 'countryOrigin'>
@@ -4018,6 +4020,8 @@ export const IndividualDetailedFragmentDoc = gql`
   givenName
   familyName
   estimatedBirthDate
+  enrolledInNutritionProgramme
+  administrationOfRutf
   household {
     id
     address
@@ -8252,6 +8256,8 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   registrationDataImport?: Resolver<ResolversTypes['RegistrationDataImportNode'], ParentType, ContextType>,
   disability?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   flexFields?: Resolver<Maybe<ResolversTypes['FlexFieldsScalar']>, ParentType, ContextType>,
+  enrolledInNutritionProgramme?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  administrationOfRutf?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   headingHousehold?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, IndividualNodeDocumentsArgs>,
 };

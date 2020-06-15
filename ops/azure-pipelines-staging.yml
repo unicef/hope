@@ -121,10 +121,19 @@ stages:
                 databases.postgres-cash-assist-datahub-db.secret.POSTGRES_DB=$(CASH_ASSIST_DATAHUB_POSTGRES_DB),\
                 databases.postgres-cash-assist-datahub-db.secret.POSTGRES_USER=$(CASH_ASSIST_REGISTRATION_DATAHUB_POSTGRES_USER),\
                 databases.postgres-cash-assist-datahub-db.secret.POSTGRES_PASSWORD=$(CASH_ASSIST_REGISTRATION_DATAHUB_POSTGRES_PASSWORD),"
-      
+
       - job: deploy_airflow
         displayName: Deploy Airflow
         steps:
+        - task: HelmDeploy@0
+          displayName: Helm add repo
+          inputs:
+            connectionType: 'Kubernetes Service Connection'
+            kubernetesServiceConnection: 'ICTD-HCT-MIS-Demo-uni-apps-K8s-dev-hct-ims-dev-1574767480012'
+            command: repo
+            namespace: 'hct-ims-staging'
+            arguments: add stable https://kubernetes-charts.storage.googleapis.com
+
         - task: HelmDeploy@0
           displayName: Helm repo update
           inputs:
@@ -132,7 +141,7 @@ stages:
             kubernetesServiceConnection: 'ICTD-HCT-MIS-Demo-uni-apps-K8s-dev-hct-ims-dev-1574767480012'
             command: repo
             namespace: 'hct-ims-staging'
-            arguments: add stable https://kubernetes-charts.storage.googleapis.com
+            arguments: update
 
         - task: HelmDeploy@0
           displayName: Deploy
@@ -147,7 +156,7 @@ stages:
             install: true
             force: true
             waitForExecution: false
-            arguments: "--timeout 600s"
+            arguments: '--timeout 600s --version "6.10.4"'
             overrideValues: "
             airflow.image.repository=uniappsk8sdevacr.azurecr.io/$(airflowImageRepository),\
             airflow.image.tag=$(Build.BuildId),"

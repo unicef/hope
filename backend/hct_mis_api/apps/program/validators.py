@@ -4,7 +4,8 @@ from core.validators import BaseValidator
 
 
 class ProgramValidator(BaseValidator):
-    def validate_status_change(self, *args, **kwargs):
+    @classmethod
+    def validate_status_change(cls, *args, **kwargs):
         status_to_set = kwargs.get("program_data").get("status")
         program = kwargs.get("program")
         current_status = program.status
@@ -23,7 +24,8 @@ class ProgramValidator(BaseValidator):
 
 
 class ProgramDeletionValidator(BaseValidator):
-    def validate_is_deletable(self, program, *args, **kwargs):
+    @classmethod
+    def validate_is_deletable(cls, program, *args, **kwargs):
         if program.status != "DRAFT":
             raise ValidationError("Only Draft Program can be deleted.")
 

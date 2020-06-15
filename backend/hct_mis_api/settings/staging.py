@@ -52,14 +52,17 @@ if os.getenv("POSTGRES_SSL", False):
     DATABASES["cash_assist_datahub_mis"]["OPTIONS"] = {
         "sslmode": "verify-full",
         "sslrootcert": "/code/psql-cert.crt",
+        "options": "-c search_path=mis"
     }
     DATABASES["cash_assist_datahub_ca"]["OPTIONS"] = {
         "sslmode": "verify-full",
         "sslrootcert": "/code/psql-cert.crt",
+        "options": "-c search_path=ca"
     }
     DATABASES["cash_assist_datahub_erp"]["OPTIONS"] = {
         "sslmode": "verify-full",
         "sslrootcert": "/code/psql-cert.crt",
+        "options": "-c search_path=erp"
     }
     DATABASES["registration_datahub"]["OPTIONS"] = {
         "sslmode": "verify-full",

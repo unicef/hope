@@ -821,6 +821,8 @@ type IndividualNode implements Node {
   registrationDataImport: RegistrationDataImportNode!
   disability: Boolean!
   flexFields: FlexFieldsScalar
+  enrolledInNutritionProgramme: Boolean!
+  administrationOfRutf: Boolean!
   headingHousehold: HouseholdNode
   documents(before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
 }
