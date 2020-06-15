@@ -18,7 +18,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
             "_tags": [],
             "health_questions/pregnant_member_h_c": "0",
             "household_questions/f_0_5_disability_h_c": "0",
-            "household_questions/hh_size_h_c": "1",
+            "household_questions/size_h_c": "1",
             "monthly_expenditures_questions/total_expense_h_f": "0",
             "individual_questions": [
                 {
@@ -415,21 +415,16 @@ class TestKoboSaveValidatorsMethods(TestCase):
 
     def test_geopoint_validator(self):
         valid_geolocations = (
-            [33.937574, 67.709401],
-            [1.22521, 29.68428],
-            [17.92176, 68.08068],
-            [34.23929, 76.90595],
-            [75.10735, -116.99551],
+            "33.937574 67.709401 100 100",
+            "1.22521 29.68428",
+            "-75.10735 -116.99551",
         )
         invalid_geolocations = (
-            (["33.937574", "67.709401"], "33.937574, 67.709401"),
-            (["33.937574", 67.709401], "33.937574, 67.709401"),
-            ([75.10735, -116.99551, 15.14], "75.10735, -116.99551, 15.14"),
-            ([11, 12], "11, 12"),
-            (["a", "b"], "a, b"),
-            ([33.123, "a"], "33.123, a"),
-            ([], "[]"),
-            (None, None),
+            "11, 12",
+            "a, b",
+            [33.123, "a"],
+            [],
+            None,
         )
         for valid_option in valid_geolocations:
             self.assertIsNone(
@@ -438,12 +433,12 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 )
             )
 
-        for values_list, str_value in invalid_geolocations:
+        for invalid_option in invalid_geolocations:
             self.assertEqual(
                 KoboProjectImportDataValidator.geopoint_validator(
-                    values_list, "hh_geopoint_h_c",
+                    invalid_option, "hh_geopoint_h_c",
                 ),
-                f"Invalid geopoint {str_value} for field hh_geopoint_h_c",
+                f"Invalid geopoint {invalid_option} for field hh_geopoint_h_c",
             )
 
     def test_date_validator(self):
@@ -550,7 +545,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
             },
             # GEOPOINT
             {
-                "args": ("hh_geopoint_h_c", [12.123, 13.123], attachments),
+                "args": ("hh_geopoint_h_c", "12.123 13.123", attachments),
                 "expected": None,
             },
             {
@@ -595,6 +590,14 @@ class TestKoboSaveValidatorsMethods(TestCase):
         result.sort(key=itemgetter("header"))
 
         expected = [
+            {
+                "header": "admin1_h_c",
+                "message": "Invalid choice SO25 for field admin1_h_c",
+            },
+            {
+                "header": "admin2_h_c",
+                "message": "Invalid choice SO2502 for field admin2_h_c",
+            },
             {
                 "header": "f_0_5_age_group_h_c",
                 "message": "Missing household required field f_0_5_age_group_h_c",
@@ -666,6 +669,10 @@ class TestKoboSaveValidatorsMethods(TestCase):
             {
                 "header": "residence_status_h_c",
                 "message": "Invalid choice host for field residence_status_h_c",
+            },
+            {
+                "header": "size_h_c",
+                "message": "Missing household required field size_h_c",
             },
         ]
 

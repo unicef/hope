@@ -1,4 +1,6 @@
+import json
 from io import BytesIO
+from typing import Union
 
 import openpyxl
 from django.contrib.gis.geos import Point
@@ -9,13 +11,16 @@ from django.utils import timezone
 from django_countries.fields import Country
 from openpyxl_image_loader import SheetImageLoader
 
+from core.kobo.api import KoboAPI
+from core.kobo.common import get_field_name, KOBO_FORM_INDIVIDUALS_COLUMN_NAME
 from core.models import BusinessArea
 from core.utils import (
     get_combined_attributes,
     serialize_flex_attributes,
+    rename_dict_keys,
 )
 from household.const import COUNTRIES_NAME_ALPHA2
-from household.models import IDENTIFICATION_TYPE_CHOICE
+from household.models import IDENTIFICATION_TYPE_DICT
 from registration_data.models import RegistrationDataImport
 from registration_datahub.models import (
     ImportData,
@@ -33,22 +38,9 @@ from registration_datahub.models import (
 from registration_datahub.models import RegistrationDataImportDatahub
 
 
-class RdiXlsxCreateTask:
-    """
-    Works on valid XLSX files, parsing them and creating households/individuals
-    in the Registration Datahub. Once finished it will update the status of
-    that registration data import instance.
-    """
-
+class RdiBaseCreateTask:
     COMBINED_FIELDS = get_combined_attributes()
     FLEX_FIELDS = serialize_flex_attributes()
-
-    image_loader = None
-    business_area = None
-    households = None
-    individuals = None
-    documents = None
-    identities = None
 
     def _cast_value(self, value, header):
         if value in (None, ""):
@@ -60,13 +52,43 @@ class RdiXlsxCreateTask:
             return int(value)
 
         if value_type == "SELECT_ONE":
+            custom_cast_method = self.COMBINED_FIELDS[header].get(
+                "custom_cast_value"
+            )
+
+            if custom_cast_method is not None:
+                return custom_cast_method(input_value=value)
+
             choices = [
                 x.get("value") for x in self.COMBINED_FIELDS[header]["choices"]
             ]
+            if not isinstance(value, int):
+                upper_value = value.upper()
+                if upper_value in choices:
+                    return upper_value
+
             if value not in choices:
-                return int(value)
+                try:
+                    return int(value)
+                except ValueError:
+                    return str(value)
 
         return value
+
+
+class RdiXlsxCreateTask(RdiBaseCreateTask):
+    """
+    Works on valid XLSX files, parsing them and creating households/individuals
+    in the Registration Datahub. Once finished it will update the status of
+    that registration data import instance.
+    """
+
+    image_loader = None
+    business_area = None
+    households = None
+    individuals = None
+    documents = None
+    identities = None
 
     def _handle_document_fields(
         self, value, header, row_num, individual, *args, **kwargs
@@ -74,7 +96,7 @@ class RdiXlsxCreateTask:
         if value is None:
             return
 
-        document_data = self.documents.get(f"individual_{row_num}")
+        document_data = self.documents.get(f"individual_{row_num}_{header}")
 
         if header == "other_id_type_i_c":
             if document_data:
@@ -95,28 +117,26 @@ class RdiXlsxCreateTask:
                     "type": "OTHER",
                 }
         else:
-            readable_name = (
-                header.replace("_no", "").replace("_i_c", "").replace("_", " ")
-            )
-            doc_type = readable_name.split(" ").upper().strip()
+            document_name = header.replace("_no", "").replace("_i_c", "")
+            doc_type = document_name.upper().strip()
 
             if document_data:
                 document_data["value"] = value
             else:
-                self.documents[f"individual_{row_num}"] = {
+                self.documents[f"individual_{row_num}_{header}"] = {
                     "individual": individual,
-                    "name": IDENTIFICATION_TYPE_CHOICE.get(doc_type),
+                    "name": IDENTIFICATION_TYPE_DICT.get(doc_type),
                     "type": doc_type,
                     "value": value,
                 }
 
     def _handle_document_photo_fields(
-        self, cell, row_num, individual, *args, **kwargs
+        self, cell, row_num, individual, header, *args, **kwargs
     ):
         if not self.image_loader.image_in(cell.coordinate):
             return
 
-        document_data = self.documents.get(f"individual_{row_num}")
+        document_data = self.documents.get(f"individual_{row_num}_{header}")
 
         image = self.image_loader.get(cell.coordinate)
         file_name = f"{cell.coordinate}-{timezone.now()}.jpg"
@@ -129,7 +149,7 @@ class RdiXlsxCreateTask:
         if document_data:
             document_data["photo"] = file
         else:
-            self.documents[f"individual_{row_num}"] = {
+            self.documents[f"individual_{row_num}_{header}"] = {
                 "individual": individual,
                 "photo": file_name,
             }
@@ -383,7 +403,8 @@ class RdiXlsxCreateTask:
             self._create_documents()
             self._create_identities()
 
-    @transaction.atomic()
+    @transaction.atomic(using="default")
+    @transaction.atomic(using="registration_datahub")
     def execute(
         self, registration_data_import_id, import_data_id, business_area_id
     ):
@@ -392,9 +413,14 @@ class RdiXlsxCreateTask:
         self.identities = {}
         self.individuals = []
 
-        registration_data_import = RegistrationDataImportDatahub.objects.get(
+        registration_data_import = RegistrationDataImportDatahub.objects.select_for_update().get(
             id=registration_data_import_id,
         )
+        registration_data_import.import_done = (
+            RegistrationDataImportDatahub.STARTED
+        )
+        registration_data_import.save()
+
         import_data = ImportData.objects.get(id=import_data_id)
 
         self.business_area = BusinessArea.objects.get(id=business_area_id)
@@ -407,7 +433,9 @@ class RdiXlsxCreateTask:
             self.image_loader = SheetImageLoader(sheet)
             self._create_objects(sheet, registration_data_import)
 
-        registration_data_import.import_done = True
+        registration_data_import.import_done = (
+            RegistrationDataImportDatahub.DONE
+        )
         registration_data_import.save()
 
         RegistrationDataImport.objects.filter(
@@ -415,15 +443,123 @@ class RdiXlsxCreateTask:
         ).update(status="IN_REVIEW")
 
 
-class RdiKoboCreate:
+class RdiKoboCreateTask(RdiBaseCreateTask):
     """
     Imports project data from Kobo via a REST API, parsing them and creating
     households/individuals in the Registration Datahub. Once finished it will
     update the status of that registration data import instance.
     """
 
-    @transaction.atomic()
-    def execute(
-        self, registration_data_import_id, business_area_id, submission_data
+    reduced_submissions = None
+    business_area = None
+    attachments = None
+
+    def _handle_image_field(self, value):
+        download_url = ""
+        for attachment in self.attachments:
+            current_download_url = attachment.get("download_url", "")
+            if current_download_url.endswith(value):
+                download_url = current_download_url
+
+        if not download_url:
+            return download_url
+
+        api = KoboAPI(self.business_area.slug)
+        image_bytes = api.get_attached_file(download_url)
+        file = File(image_bytes)
+
+        return file
+
+    def _handle_geopoint_field(self, value):
+        geopoint = value.split(" ")
+        x = float(geopoint[0])
+        y = float(geopoint[1])
+        return Point(x=x, y=y, srid=4326)
+
+    def _cast_and_assign(
+        self, value: Union[str, list], field: str, obj: object
     ):
-        pass
+        complex_fields = {
+            "IMAGE": self._handle_image_field,
+            "GEOPOINT": self._handle_geopoint_field,
+        }
+        excluded = ("age",)
+
+        field_data_dict = self.COMBINED_FIELDS.get(field)
+
+        if field_data_dict is None or field in excluded:
+            return
+
+        if field_data_dict["type"] in complex_fields:
+            cast_fn = complex_fields.get(field_data_dict["type"])
+            correct_value = cast_fn(value)
+        else:
+            correct_value = self._cast_value(value, field)
+
+        setattr(obj, field_data_dict["name"], correct_value)
+
+    @transaction.atomic(using="default")
+    @transaction.atomic(using="registration_datahub")
+    def execute(
+        self, registration_data_import_id, import_data_id, business_area_id
+    ):
+        registration_data_import = RegistrationDataImportDatahub.objects.select_for_update().get(
+            id=registration_data_import_id,
+        )
+        registration_data_import.import_done = (
+            RegistrationDataImportDatahub.STARTED
+        )
+        registration_data_import.save()
+
+        import_data = ImportData.objects.get(id=import_data_id)
+
+        self.business_area = BusinessArea.objects.get(id=business_area_id)
+
+        submissions_json = import_data.file.read()
+        submissions = json.loads(submissions_json)
+        self.reduced_submissions = rename_dict_keys(submissions, get_field_name)
+
+        head_of_households_mapping = {}
+        households_to_create = []
+        individuals_to_create = []
+        for household in self.reduced_submissions:
+            household_obj = ImportedHousehold()
+            self.attachments = household.get("_attachments", [])
+            for hh_field, hh_value in household.items():
+                self._cast_and_assign(hh_value, hh_field, household_obj)
+                if hh_field == KOBO_FORM_INDIVIDUALS_COLUMN_NAME:
+                    for individual in hh_value:
+                        individual_obj = ImportedIndividual()
+                        for i_field, i_value in individual.items():
+                            self._cast_and_assign(
+                                i_value, i_field, individual_obj
+                            )
+                        if individual_obj.relationship == "HEAD":
+                            head_of_households_mapping[
+                                household_obj
+                            ] = individual_obj
+
+                        individual_obj.registration_data_import = (
+                            registration_data_import
+                        )
+                        individual_obj.household = household_obj
+                        individuals_to_create.append(individual_obj)
+
+            household_obj.registration_data_import = registration_data_import
+            households_to_create.append(household_obj)
+
+        ImportedHousehold.objects.bulk_create(households_to_create)
+        ImportedIndividual.objects.bulk_create(individuals_to_create)
+
+        households_to_update = []
+        for household, individual in head_of_households_mapping.items():
+            household.head_of_household = individual
+            households_to_update.append(household)
+        ImportedHousehold.objects.bulk_update(
+            households_to_update, ["head_of_household"], 1000,
+        )
+
+        registration_data_import.import_done = (
+            RegistrationDataImportDatahub.DONE
+        )
+        registration_data_import.save()
