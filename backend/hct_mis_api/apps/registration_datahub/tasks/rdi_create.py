@@ -515,11 +515,9 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
 
         self.business_area = BusinessArea.objects.get(id=business_area_id)
 
-        with open(import_data.file.path, "r") as submissions_json:
-            submissions = json.loads(submissions_json.read())
-            self.reduced_submissions = rename_dict_keys(
-                submissions, get_field_name
-            )
+        submissions_json = import_data.file.read()
+        submissions = json.loads(submissions_json)
+        self.reduced_submissions = rename_dict_keys(submissions, get_field_name)
 
         head_of_households_mapping = {}
         households_to_create = []
@@ -556,6 +554,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         households_to_update = []
         for household, individual in head_of_households_mapping.items():
             household.head_of_household = individual
+            households_to_update.append(household)
         ImportedHousehold.objects.bulk_update(
             households_to_update, ["head_of_household"], 1000,
         )
