@@ -3,8 +3,10 @@ import time
 
 from django.core.management import BaseCommand, call_command
 from django.db import transaction
+from django.db.models import Q
 
 from account.fixtures import UserFactory
+from cash_assist_datahub.models import Session, Programme
 from core.fixtures import AdminAreaFactory, AdminAreaTypeFactory
 from core.models import BusinessArea, AdminArea
 from household.fixtures import (
@@ -17,6 +19,7 @@ from household.fixtures import (
 from household.models import DocumentType
 from payment.fixtures import PaymentRecordFactory
 from program.fixtures import CashPlanFactory, ProgramFactory
+from program.models import Program
 from registration_data.fixtures import RegistrationDataImportFactory
 from registration_data.models import RegistrationDataImport
 from registration_datahub.fixtures import (
@@ -129,8 +132,7 @@ class Command(BaseCommand):
         )
         for _ in range(cash_plans_amount):
             cash_plan = CashPlanFactory.build(
-                program=program,
-                business_area=BusinessArea.objects.first(),
+                program=program, business_area=BusinessArea.objects.first(),
             )
             cash_plan.save()
             for _ in range(payment_record_amount):
@@ -161,9 +163,15 @@ class Command(BaseCommand):
         self.stdout.write(f"Generating fixtures...")
         if options["flush"]:
             call_command("flush", "--noinput")
-            call_command("flush", "--noinput", database="cash_assist_datahub_mis")
-            call_command("flush", "--noinput", database="cash_assist_datahub_ca")
-            call_command("flush", "--noinput", database="cash_assist_datahub_erp")
+            call_command(
+                "flush", "--noinput", database="cash_assist_datahub_mis"
+            )
+            call_command(
+                "flush", "--noinput", database="cash_assist_datahub_ca"
+            )
+            call_command(
+                "flush", "--noinput", database="cash_assist_datahub_erp"
+            )
             call_command("flush", "--noinput", database="registration_datahub")
             call_command(
                 "loaddata",
@@ -216,10 +224,24 @@ class Command(BaseCommand):
                     {"registration_data_import": rdi_datahub,},
                     {"registration_data_import": rdi_datahub,},
                 )
-        cash_assist_datahub_fixtures.ServiceProviderFactory.create_batch(10)
-        cash_assist_datahub_fixtures.CashPlanFactory.create_batch(10)
-        cash_assist_datahub_fixtures.PaymentRecordFactory.create_batch(10)
-        cash_assist_datahub_fixtures.ProgrammeFactory.create_batch(10)
+        session = Session(source=Session.SOURCE_CA, status=Session.STATUS_READY)
+        session.save()
+        cash_assist_datahub_fixtures.ServiceProviderFactory.create_batch(
+            10, session=session
+        )
+        cash_assist_datahub_fixtures.CashPlanFactory.create_batch(
+            10, session=session
+        )
+        cash_assist_datahub_fixtures.PaymentRecordFactory.create_batch(
+            10, session=session
+        )
+        for _ in range(10):
+            used_ids = list(Programme.objects.values_list("mis_id", flat=True))
+            mis_id = Program.objects.filter(~Q(id__in=used_ids)).first().id
+            programme = cash_assist_datahub_fixtures.ProgrammeFactory(
+                session=session, mis_id=mis_id
+            )
+            programme.save()
 
         self.stdout.write(
             f"Generated fixtures in {(time.time() - start_time)} seconds"
