@@ -7,9 +7,8 @@ from pytz import utc
 
 from core.models import BusinessArea
 from household.fixtures import HouseholdFactory
-from cash_assist_datahub.models import PaymentRecord, ServiceProvider, CashPlan
+from cash_assist_datahub.models import PaymentRecord, ServiceProvider, CashPlan, Programme
 from household.models import Household
-from mis_datahub.models import Program
 from program import models as program_models
 from targeting.fixtures import TargetPopulationFactory
 from targeting.models import TargetPopulation
@@ -45,18 +44,15 @@ class PaymentRecordFactory(factory.DjangoModelFactory):
     )
     ca_id = factory.Faker("uuid4")
     ca_hash_id = factory.Faker("uuid4")
-    cash_plan = factory.LazyAttribute(
-        lambda o: program_models.CashPlan.objects.order_by("?").first()
-    )
-    household = cash_plan = factory.LazyAttribute(
-        lambda o: Household.objects.order_by("?").first()
+    household_mis_id = factory.LazyAttribute(
+        lambda o: Household.objects.order_by("?").first().id
     )
     total_persons_covered = factory.fuzzy.FuzzyInteger(1, 7)
     distribution_modality = factory.Faker(
         "sentence", nb_words=6, variable_nb_words=True, ext_word_list=None,
     )
-    target_population = factory.LazyAttribute(
-        lambda o: TargetPopulation.objects.order_by("?").first()
+    target_population_mis_id = factory.LazyAttribute(
+        lambda o: TargetPopulation.objects.order_by("?").first().id
     )
     entitlement_card_number = factory.Faker("ssn")
     entitlement_card_status = fuzzy.FuzzyChoice(
@@ -84,10 +80,10 @@ class CashPlanFactory(factory.DjangoModelFactory):
         model = CashPlan
 
     program_mis_id = factory.LazyAttribute(
-        lambda o: Program.objects.order_by("?").first()
+        lambda o: program_models.Program.objects.order_by("?").first().id
     )
-    ca_id = factory.Faker("uuid4")
-    ca_hash_id = factory.Faker("uuid4")
+    cash_plan_id = factory.Faker("uuid4")
+    cash_plan_hash_id = factory.Faker("uuid4")
     status_date = factory.Faker(
         "date_time_this_decade", before_now=False, after_now=True, tzinfo=utc,
     )
@@ -134,9 +130,10 @@ class CashPlanFactory(factory.DjangoModelFactory):
     total_undelivered_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
 
 
-class ProgrammeFactory:
-    mis_id = factory.LazyAttribute(
-        lambda o: Program.objects.order_by("?").first()
-    )
+class ProgrammeFactory(factory.DjangoModelFactory):
+    mis_id=None
     ca_id = factory.Faker("uuid4")
     ca_hash_id = factory.Faker("uuid4")
+
+    class Meta:
+        model = Programme
