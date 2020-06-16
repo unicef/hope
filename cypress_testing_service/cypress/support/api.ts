@@ -175,9 +175,9 @@ const api = {
       operationName: 'CreateRegistrationDataImport',
       query: `
         mutation CreateRegistrationDataImport(
-          $registrationDataImportData: CreateRegistrationDataImportExcelInput!
+          $registrationDataImportData: RegistrationXlsxImportMutationInput!
         ) {
-          createRegistrationDataImport(
+          registrationXlsxImport(
             registrationDataImportData: $registrationDataImportData
           ) {
             registrationDataImport {
