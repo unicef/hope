@@ -1,9 +1,7 @@
 from functools import reduce
-from operator import itemgetter
 
 from core.countries import Countries
 from core.models import AdminArea
-
 from core.utils import (
     age_to_birth_date_query,
     LazyEvalMethodsDict,
