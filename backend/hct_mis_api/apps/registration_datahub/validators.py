@@ -409,8 +409,7 @@ class UploadXLSXValidator(ImportDataValidator):
 
         invalid_rows = []
         current_household_id = None
-        head_of_household_count = 0
-        error_appended_flag = False
+        head_of_household_count = defaultdict(int)
 
         identities_numbers = {
             "unhcr_id_no": {
@@ -468,32 +467,11 @@ class UploadXLSXValidator(ImportDataValidator):
                 if not current_field:
                     continue
 
-                # Validate there is only one head of household per household
-                if (
-                    header.value == "household_id"
-                    and current_household_id != cell.value
-                ):
+                if header.value == "household_id":
                     current_household_id = cell.value
-                    head_of_household_count = 0
-                    error_appended_flag = False
 
                 if header.value == "relationship_i_c" and cell.value == "HEAD":
-                    head_of_household_count += 1
-
-                if head_of_household_count > 1 and not error_appended_flag:
-                    message = (
-                        "Sheet: Individuals, There are multiple head of "
-                        "households for household with "
-                        f"id: {current_household_id}"
-                    )
-                    invalid_rows.append(
-                        {
-                            "row_number": cell.row,
-                            "header": "relationship_i_c",
-                            "message": message,
-                        }
-                    )
-                    error_appended_flag = True
+                    head_of_household_count[current_household_id] += 1
 
                 field_type = current_field["type"]
                 fn = switch_dict.get(field_type)
@@ -557,6 +535,33 @@ class UploadXLSXValidator(ImportDataValidator):
                         }
                     )
 
+        # validate head of household count
+        for household_id, count in head_of_household_count.items():
+            if count == 0:
+                message = (
+                    f"Sheet: Individuals, Household with id: {household_id}, "
+                    "has to have a head of household"
+                )
+                invalid_rows.append(
+                    {
+                        "row_number": 0,
+                        "header": "relationship_i_c",
+                        "message": message,
+                    }
+                )
+            elif count > 1:
+                message = (
+                    "Sheet: Individuals, There are multiple head of "
+                    f"households for household with id: {household_id}"
+                )
+                invalid_rows.append(
+                    {
+                        "row_number": 0,
+                        "header": "relationship_i_c",
+                        "message": message,
+                    }
+                )
+
         invalid_doc_rows = []
         invalid_ident_rows = []
         if sheet.title == "Individuals":
@@ -574,7 +579,7 @@ class UploadXLSXValidator(ImportDataValidator):
                 {
                     "row_number": 1,
                     "header": f"{xlsx_file.name}",
-                    "message": "Only .xlsx files are accepted for import.",
+                    "message": "Only .xlsx files are accepted for import",
                 }
             ]
 
@@ -1082,8 +1087,8 @@ class KoboProjectImportDataValidator(ImportDataValidator):
                                     errors.append(
                                         {
                                             "header": "relationship_i_c",
-                                            "message": f"Only one person can "
-                                            f"be head of household",
+                                            "message": "Only one person can "
+                                            "be a head of household",
                                         }
                                     )
                             expected_i_fields.discard(i_field)
@@ -1101,15 +1106,15 @@ class KoboProjectImportDataValidator(ImportDataValidator):
                             errors.append(
                                 {
                                     "header": "relationship_i_c",
-                                    "message": f"At least one person must "
-                                    f"be head of household",
+                                    "message": "Household has to have a "
+                                               "head of household",
                                 }
                             )
 
                         i_expected_field_errors = [
                             {
                                 "header": field,
-                                "message": f"Missing individual "
+                                "message": "Missing individual "
                                 f"required field {field}",
                             }
                             for field in expected_i_fields
