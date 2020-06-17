@@ -241,6 +241,17 @@ class FieldAttributeNode(graphene.ObjectType):
             "English(EN)"
         ]
 
+    def resolve_associated_with(self, info):
+        resolved = _custom_dict_or_attr_resolver(
+            "associated_with", None, self, info
+        )
+        if resolved == 0:
+            return "Household"
+        elif resolved == 1:
+            return "Individual"
+        else:
+            return resolved
+
 
 class KoboAssetObject(graphene.ObjectType):
     id = String()
@@ -278,12 +289,10 @@ def convert_field_to_geojson(field, registry=None):
 
 
 def get_fields_attr_generators(flex_field):
-    if flex_field != False:
-        for attr in FlexibleAttribute.objects.all():
-            yield attr
-    if flex_field != True:
-        for attr in FILTERABLE_CORE_FIELDS_ATTRIBUTES:
-            yield attr
+    if flex_field is not False:
+        yield from FlexibleAttribute.objects.all()
+    if flex_field is not True:
+        yield from FILTERABLE_CORE_FIELDS_ATTRIBUTES
 
 
 def resolve_assets(business_area_slug, uid: str = None, *args, **kwargs):
