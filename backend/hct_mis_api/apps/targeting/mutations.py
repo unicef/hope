@@ -255,7 +255,6 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
         AirflowApi.start_dag(
             dag_id="SendTargetPopulation",
         )
-        # SendTPToDatahubTask().execute()
         return cls(target_population=target_population)
 
 
