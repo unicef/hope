@@ -28,7 +28,6 @@ class ProgramFactory(factory.DjangoModelFactory):
     description = factory.Faker(
         "sentence", nb_words=10, variable_nb_words=True, ext_word_list=None,
     )
-    program_ca_id = factory.Faker("uuid4")
     locations = factory.SubFactory(AdminAreaFactory)
     budget = factory.fuzzy.FuzzyDecimal(1000000.0, 900000000.0)
     frequency_of_payments = fuzzy.FuzzyChoice(
@@ -57,8 +56,6 @@ class CashPlanFactory(factory.DjangoModelFactory):
         model = CashPlan
 
     program = factory.SubFactory(ProgramFactory)
-    ca_id = factory.Faker("uuid4")
-    ca_hash_id = factory.Faker("uuid4")
     status_date = factory.Faker(
         "date_time_this_decade", before_now=False, after_now=True, tzinfo=utc,
     )
