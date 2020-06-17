@@ -5,6 +5,7 @@ from cash_assist_datahub.models import Session
 from core.models import BusinessArea
 from core.utils import nested_getattr
 from cash_assist_datahub import models as ca_models
+from payment.models import PaymentRecord
 from program.models import CashPlan
 
 
@@ -12,12 +13,12 @@ class PullFromDatahubTask:
 
     MAPPING_CASH_PLAN_DICT = {
         "ca_id": "cash_plan_id",
+        "ca_hash_id": "cash_plan_hash_id",
         "status": "status",
         "total_undelivered_quantity": "total_undelivered_quantity",
         "total_delivered_quantity": "total_delivered_quantity",
         "total_entitled_quantity_revised": "total_entitled_quantity_revised",
         "total_entitled_quantity": "total_entitled_quantity",
-        "payment_records_count": "payment_records_count",
         "total_persons_covered_revised": "total_persons_covered_revised",
         "total_persons_covered": "total_persons_covered",
         "validation_alerts_count": "validation_alerts_count",
@@ -27,7 +28,6 @@ class PullFromDatahubTask:
         "assistance_through": "assistance_through",
         "assistance_measurement": "assistance_measurement",
         "delivery_type": "delivery_type",
-        "program_mis_id": "program_mis_id",
         "comments": "comments",
         "coverage_duration": "coverage_duration",
         "dispersion_date": "dispersion_date",
@@ -46,17 +46,16 @@ class PullFromDatahubTask:
         "entitlement_card_issue_date": "entitlement_card_issue_date",
         "entitlement_card_status": "entitlement_card_status",
         "entitlement_card_number": "entitlement_card_number",
-        "target_population_mis_id": "target_population_id",
+        "target_population_id": "target_population_mis_id",
         "distribution_modality": "distribution_modality",
         "total_persons_covered": "total_persons_covered",
         "full_name": "full_name",
-        "household_mis_id": "household_id",
+        "household_id": "household_mis_id",
         "ca_id": "ca_id",
         "ca_hash_id": "ca_hash_id",
         "status_date": "status_date",
         "status": "status",
     }
-
 
     @transaction.atomic(using="default")
     @transaction.atomic(using="cash_assist_datahub_ca")
@@ -70,17 +69,34 @@ class PullFromDatahubTask:
         for key in mapping_dict:
             args[key] = nested_getattr(model_object, mapping_dict[key], None)
         return args
-    def copy_session(self,session):
+
+    def copy_session(self, session):
         self.copy_cash_plans(session)
         self.copy_payment_records(session)
-    def copy_cash_plans(self,session):
-        cash_plans = ca_models.CashPlan.objects.filter(session=session)
-        for dh_cash_plan in cash_plans:
+
+    def copy_cash_plans(self, session):
+        dh_cash_plans = ca_models.CashPlan.objects.filter(session=session)
+        for dh_cash_plan in dh_cash_plans:
             cash_plan_args = self.build_arg_dict(
                 dh_cash_plan, PullFromDatahubTask.MAPPING_CASH_PLAN_DICT
             )
             cash_plan = CashPlan(**cash_plan_args)
-            cash_plan.business_area = BusinessArea.objects.get(code=dh_cash_plan.business_area)
+            cash_plan.business_area = BusinessArea.objects.get(
+                code=dh_cash_plan.business_area
+            )
+            cash_plan.program_id = dh_cash_plan.program_mis_id
+            yield cash_plan
 
-    def copy_payment_records(self,session):
-        pass
+    def copy_payment_records(self, session):
+        dh_payment_records = ca_models.PaymentRecord.objects.filter(
+            session=session
+        )
+        for dh_payment_record in dh_payment_records:
+            payment_record_args = self.build_arg_dict(
+                dh_payment_record,
+                PullFromDatahubTask.MAPPING_PAYMENT_RECORD_DICT,
+            )
+            payment_record = PaymentRecord(**payment_record_args)
+            payment_record.business_area = BusinessArea.objects.get(
+                code=dh_payment_record.business_area
+            )

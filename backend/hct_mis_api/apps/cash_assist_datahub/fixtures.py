@@ -7,7 +7,12 @@ from pytz import utc
 
 from core.models import BusinessArea
 from household.fixtures import HouseholdFactory
-from cash_assist_datahub.models import PaymentRecord, ServiceProvider, CashPlan, Programme
+from cash_assist_datahub.models import (
+    PaymentRecord,
+    ServiceProvider,
+    CashPlan,
+    Programme,
+)
 from household.models import Household
 from program import models as program_models
 from targeting.fixtures import TargetPopulationFactory
@@ -19,7 +24,7 @@ class ServiceProviderFactory(factory.DjangoModelFactory):
         model = ServiceProvider
 
     business_area = factory.LazyAttribute(
-        lambda o: BusinessArea.objects.first()
+        lambda o: BusinessArea.objects.first().code
     )
     ca_id = factory.Faker("uuid4")
     full_name = factory.Faker("company")
@@ -33,7 +38,7 @@ class PaymentRecordFactory(factory.DjangoModelFactory):
         model = PaymentRecord
 
     business_area = factory.LazyAttribute(
-        lambda o: BusinessArea.objects.first()
+        lambda o: BusinessArea.objects.first().code
     )
     status = fuzzy.FuzzyChoice(
         PaymentRecord.STATUS_CHOICE, getter=lambda c: c[0],
@@ -78,6 +83,10 @@ class PaymentRecordFactory(factory.DjangoModelFactory):
 class CashPlanFactory(factory.DjangoModelFactory):
     class Meta:
         model = CashPlan
+
+    business_area = factory.LazyAttribute(
+        lambda o: BusinessArea.objects.first().code
+    )
 
     program_mis_id = factory.LazyAttribute(
         lambda o: program_models.Program.objects.order_by("?").first().id
@@ -131,7 +140,7 @@ class CashPlanFactory(factory.DjangoModelFactory):
 
 
 class ProgrammeFactory(factory.DjangoModelFactory):
-    mis_id=None
+    mis_id = None
     ca_id = factory.Faker("uuid4")
     ca_hash_id = factory.Faker("uuid4")
 
