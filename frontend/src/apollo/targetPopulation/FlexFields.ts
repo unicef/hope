@@ -7,6 +7,7 @@ export const FlexFields = gql`
       type
       name
       labelEn
+      associatedWith
     }
   }
 `;
