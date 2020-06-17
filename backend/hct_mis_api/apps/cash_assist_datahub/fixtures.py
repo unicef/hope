@@ -76,7 +76,7 @@ class PaymentRecordFactory(factory.DjangoModelFactory):
         "date_time_this_decade", before_now=False, after_now=True, tzinfo=utc,
     )
     service_provider_ca_id = factory.LazyAttribute(
-        lambda o: ServiceProvider.objects.order_by("?").first()
+        lambda o: ServiceProvider.objects.order_by("?").first().id
     )
 
 
