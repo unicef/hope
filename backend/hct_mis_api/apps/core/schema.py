@@ -40,6 +40,7 @@ from core.models import (
     BusinessArea,
     FlexibleAttribute,
     FlexibleAttributeChoice,
+    FlexibleAttributeGroup,
 )
 from core.utils import decode_id_string, LazyEvalMethodsDict
 
@@ -253,6 +254,25 @@ class FieldAttributeNode(graphene.ObjectType):
             return resolved
 
 
+class GroupAttributeNode(DjangoObjectType):
+    label_en = graphene.String()
+
+    class Meta:
+        model = FlexibleAttributeGroup
+        fields = [
+            "id",
+            "name",
+            "label",
+            "flex_attributes",
+            "label_en"
+        ]
+
+    def resolve_label_en(self, info):
+        return _custom_dict_or_attr_resolver("label", None, self, info)[
+            "English(EN)"
+        ]
+
+
 class KoboAssetObject(graphene.ObjectType):
     id = String()
     name = String()
@@ -328,6 +348,10 @@ class Query(graphene.ObjectType):
         flex_field=graphene.Boolean(),
         description="All field datatype meta.",
     )
+    all_groups_with_fields = graphene.List(
+        GroupAttributeNode,
+        description="Get all groups that contains flex fields",
+    )
     kobo_project = graphene.Field(
         KoboAssetObject,
         uid=graphene.String(required=True),
@@ -357,4 +381,9 @@ class Query(graphene.ObjectType):
         return resolve_assets(
             business_area_slug=business_area_slug,
             only_deployed=kwargs.get("only_deployed", False),
+        )
+
+    def resolve_all_groups_with_fields(self, info, **kwargs):
+        return FlexibleAttributeGroup.objects.filter(
+            flex_attributes__isnull=False
         )
