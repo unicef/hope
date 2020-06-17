@@ -56,7 +56,7 @@ export const FlexFieldsTable = ({ fields, selectedOption, searchValue }): ReactE
   const filterTable = () => {
     const filters = {
       labelEn: searchValue,
-      type: selectedOption
+      associatedWith: selectedOption
     };
     return fields.filter(field => {
       if(!searchValue && !selectedOption) {
@@ -91,7 +91,7 @@ export const FlexFieldsTable = ({ fields, selectedOption, searchValue }): ReactE
               <StyledCell>
                 {row.labelEn}
               </StyledCell>
-              <TableCell>{row.type}</TableCell>
+              <TableCell>{row.associatedWith}</TableCell>
             </TableRow>
           ))}
         </TableBody>
