@@ -79,8 +79,8 @@ export function FlexFieldTab() {
   useEffect(() => {
     if (data && !selectOptions.length) {
       const options = data.allFieldsAttributes.reduce(function (accumulator, currentValue) {
-        if (!accumulator.includes(currentValue.type)) {
-          accumulator.push(currentValue.type)
+        if (!accumulator.includes(currentValue.associatedWith)) {
+          accumulator.push(currentValue.associatedWith)
         }
         return accumulator
       }, [])
@@ -119,7 +119,7 @@ export function FlexFieldTab() {
               value={selectedOption}
             >
               <MenuItem value=''>
-                <em>None</em>
+                <em>All</em>
               </MenuItem>
               {selectOptions.map(type => {
                 return <MenuItem key={type} value={type}>{type}</MenuItem>
