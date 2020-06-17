@@ -661,3 +661,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             RegistrationDataImportDatahub.DONE
         )
         registration_data_import.save()
+
+        RegistrationDataImport.objects.filter(
+            id=registration_data_import.hct_id
+        ).update(status="IN_REVIEW")
