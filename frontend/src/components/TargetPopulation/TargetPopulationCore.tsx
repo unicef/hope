@@ -18,16 +18,6 @@ const Label = styled.p`
   color: #b1b1b5;
 `;
 
-//this data is going to be in targetPopulation prop
-const resultsData = {
-  totalNumberOfHouseholds: 125,
-  targetedIndividuals: 254,
-  femaleChildren: 43,
-  maleChildren: 50,
-  femaleAdults: 35,
-  maleAdults: 12,
-};
-
 export function TargetPopulationCore({
   candidateList,
   targetPopulationList = null,

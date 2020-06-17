@@ -1151,6 +1151,12 @@ enum RegistrationDataImportDataSource {
   OTHER
 }
 
+enum RegistrationDataImportDatahubImportDone {
+  NOT_STARTED
+  STARTED
+  DONE
+}
+
 type RegistrationDataImportDatahubNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -1159,7 +1165,7 @@ type RegistrationDataImportDatahubNode implements Node {
   importDate: DateTime!
   hctId: UUID
   importData: ImportDataNode
-  importDone: Boolean!
+  importDone: RegistrationDataImportDatahubImportDone!
   households(before: String, after: String, first: Int, last: Int): ImportedHouseholdNodeConnection!
   individuals(before: String, after: String, first: Int, last: Int): ImportedIndividualNodeConnection!
 }
