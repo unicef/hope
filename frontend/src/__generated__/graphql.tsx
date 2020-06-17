@@ -1867,6 +1867,12 @@ export type QueryAllRegistrationDataImportsArgs = {
   orderBy?: Maybe<Scalars['String']>
 };
 
+export enum RegistrationDataImportDatahubImportDone {
+  NotStarted = 'NOT_STARTED',
+  Started = 'STARTED',
+  Done = 'DONE'
+}
+
 export type RegistrationDataImportDatahubNode = Node & {
    __typename?: 'RegistrationDataImportDatahubNode',
   id: Scalars['ID'],
@@ -1876,7 +1882,7 @@ export type RegistrationDataImportDatahubNode = Node & {
   importDate: Scalars['DateTime'],
   hctId?: Maybe<Scalars['UUID']>,
   importData?: Maybe<ImportDataNode>,
-  importDone: Scalars['Boolean'],
+  importDone: RegistrationDataImportDatahubImportDone,
   households: ImportedHouseholdNodeConnection,
   individuals: ImportedIndividualNodeConnection,
 };
@@ -3858,7 +3864,7 @@ export type FlexFieldsQuery = (
   { __typename?: 'Query' }
   & { allFieldsAttributes: Maybe<Array<Maybe<(
     { __typename?: 'FieldAttributeNode' }
-    & Pick<FieldAttributeNode, 'id' | 'type' | 'name' | 'labelEn'>
+    & Pick<FieldAttributeNode, 'id' | 'type' | 'name' | 'labelEn' | 'associatedWith'>
   )>>> }
 );
 
@@ -7231,6 +7237,7 @@ export const FlexFieldsDocument = gql`
     type
     name
     labelEn
+    associatedWith
   }
 }
     `;
@@ -7589,6 +7596,7 @@ export type ResolversTypes = {
   RegistrationDataImportDatahubNode: ResolverTypeWrapper<RegistrationDataImportDatahubNode>,
   ImportDataNode: ResolverTypeWrapper<ImportDataNode>,
   ImportDataDataType: ImportDataDataType,
+  RegistrationDataImportDatahubImportDone: RegistrationDataImportDatahubImportDone,
   ImportedHouseholdNodeConnection: ResolverTypeWrapper<ImportedHouseholdNodeConnection>,
   ImportedHouseholdNodeEdge: ResolverTypeWrapper<ImportedHouseholdNodeEdge>,
   ImportedIndividualNodeConnection: ResolverTypeWrapper<ImportedIndividualNodeConnection>,
@@ -7739,6 +7747,7 @@ export type ResolversParentTypes = {
   RegistrationDataImportDatahubNode: RegistrationDataImportDatahubNode,
   ImportDataNode: ImportDataNode,
   ImportDataDataType: ImportDataDataType,
+  RegistrationDataImportDatahubImportDone: RegistrationDataImportDatahubImportDone,
   ImportedHouseholdNodeConnection: ImportedHouseholdNodeConnection,
   ImportedHouseholdNodeEdge: ImportedHouseholdNodeEdge,
   ImportedIndividualNodeConnection: ImportedIndividualNodeConnection,
@@ -8514,7 +8523,7 @@ export type RegistrationDataImportDatahubNodeResolvers<ContextType = any, Parent
   importDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   hctId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
   importData?: Resolver<Maybe<ResolversTypes['ImportDataNode']>, ParentType, ContextType>,
-  importDone?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  importDone?: Resolver<ResolversTypes['RegistrationDataImportDatahubImportDone'], ParentType, ContextType>,
   households?: Resolver<ResolversTypes['ImportedHouseholdNodeConnection'], ParentType, ContextType, RegistrationDataImportDatahubNodeHouseholdsArgs>,
   individuals?: Resolver<ResolversTypes['ImportedIndividualNodeConnection'], ParentType, ContextType, RegistrationDataImportDatahubNodeIndividualsArgs>,
 };
