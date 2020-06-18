@@ -1,3 +1,5 @@
+import datetime
+
 from django.db import transaction
 from django.db.models import Q, F
 
@@ -114,6 +116,7 @@ class SendTPToDatahubTask:
         )
         target_population.sent_to_datahub = True
         target_population.save()
+        households.update(last_sync_at=datetime.datetime.now())
 
     def build_arg_dict(self, model_object, mapping_dict):
         args = {}
