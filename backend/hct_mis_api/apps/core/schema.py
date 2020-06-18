@@ -392,6 +392,6 @@ class Query(graphene.ObjectType):
         )
 
     def resolve_all_groups_with_fields(self, info, **kwargs):
-        return FlexibleAttributeGroup.objects.filter(
+        return FlexibleAttributeGroup.objects.distinct().filter(
             flex_attributes__isnull=False
         )
