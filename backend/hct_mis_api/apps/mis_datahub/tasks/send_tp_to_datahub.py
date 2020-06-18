@@ -1,17 +1,15 @@
-import datetime
-
 from django.db import transaction
 from django.db.models import Q, F
+from django.utils import timezone
 
 from core.utils import nested_getattr
 from household.models import (
-    Individual,
     IDENTIFICATION_TYPE_NATIONAL_ID,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
 )
-from targeting.models import TargetPopulation, HouseholdSelection
 from mis_datahub import models as dh_mis_models
+from targeting.models import TargetPopulation, HouseholdSelection
 
 
 class SendTPToDatahubTask:
@@ -116,7 +114,7 @@ class SendTPToDatahubTask:
         )
         target_population.sent_to_datahub = True
         target_population.save()
-        households.update(last_sync_at=datetime.datetime.now())
+        households.update(last_sync_at=timezone.now())
 
     def build_arg_dict(self, model_object, mapping_dict):
         args = {}
