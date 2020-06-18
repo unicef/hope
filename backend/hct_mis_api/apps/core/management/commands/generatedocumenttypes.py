@@ -2,8 +2,15 @@ from django.core.management import BaseCommand
 from django.db import transaction
 from django_countries.data import COUNTRIES
 
-from household.models import DocumentType, IDENTIFICATION_TYPE_CHOICE
-from registration_datahub.models import ImportedDocumentType as RDHDocumentType
+from household.models import (
+    DocumentType,
+    IDENTIFICATION_TYPE_CHOICE,
+    Agency,
+)
+from registration_datahub.models import (
+    ImportedDocumentType as RDHDocumentType,
+    ImportedAgency,
+)
 
 
 class Command(BaseCommand):
@@ -18,7 +25,8 @@ class Command(BaseCommand):
 
     def _generate_document_types_for_all_countries(self):
         identification_type_choice = tuple(
-            (doc_type, label) for doc_type, label in IDENTIFICATION_TYPE_CHOICE
+            (doc_type, label)
+            for doc_type, label in IDENTIFICATION_TYPE_CHOICE
             if doc_type != "OTHER"
         )
         document_types = []
@@ -33,3 +41,11 @@ class Command(BaseCommand):
                 )
         DocumentType.objects.bulk_create(document_types)
         RDHDocumentType.objects.bulk_create(rdh_document_types)
+
+        agencies = {
+            "UNHCR",
+            "WFP",
+        }
+        for agency in agencies:
+            Agency.objects.get_or_create(type=agency, label=agency)
+            ImportedAgency.objects.get_or_create(type=agency, label=agency)
