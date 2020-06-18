@@ -11,7 +11,7 @@ export const headCells: HeadCell<FieldAttributeNode>[] = [
     {
       disablePadding: false,
       label: 'Type',
-      id: 'type',
+      id: 'associatedWith',
       numeric: false,
     },
   ];
