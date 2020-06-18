@@ -67,10 +67,6 @@ const StyledFormControl = styled(FormControl)`
   border-bottom: 0;
 `;
 
-const StartInputAdornment = styled(InputAdornment)`
-  margin-right: 0;
-`;
-
 export function FlexFieldTab() {
   const { data } = useFlexFieldsQuery();
   const [searchValue, setSearchValue] = useState('')
@@ -78,10 +74,10 @@ export function FlexFieldTab() {
   const [selectedOption, setSelectedOption] = useState('');
   useEffect(() => {
     if (data && !selectOptions.length) {
-      const options = data.allFieldsAttributes.reduce(function (accumulator, currentValue) {
-        if (!accumulator.includes(currentValue.associatedWith)) {
-          accumulator.push(currentValue.associatedWith)
-        }
+      const options = data.allGroupsWithFields.reduce(function (accumulator, currentValue) {
+        currentValue.flexAttributes.map(function(each) {
+          return !accumulator.includes(each.associatedWith) ? accumulator.push(each.associatedWith) : null
+        })
         return accumulator
       }, [])
       setSelectOptions(options)
@@ -128,7 +124,7 @@ export function FlexFieldTab() {
           </StyledFormControl>
         }
       </FilterWrapper>
-      <FlexFieldsTable selectedOption={selectedOption} searchValue={searchValue} fields={data.allFieldsAttributes} />
+      <FlexFieldsTable selectedOption={selectedOption} searchValue={searchValue} fields={data.allGroupsWithFields} />
     </>
   )
 }
