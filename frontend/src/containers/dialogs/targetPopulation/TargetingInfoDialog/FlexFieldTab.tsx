@@ -49,12 +49,6 @@ const TextContainer = styled(TextField)`
   }
 `;
 
-const SelectContainer = styled(TextContainer)`
-  && {
-    width: 33%;
-  }
-`;
-
 const FilterWrapper = styled.div`
   padding: 20px;
   display: flex;
