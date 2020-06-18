@@ -73,7 +73,6 @@ export const FlexFieldsTable = ({ fields, selectedOption, searchValue }): ReactE
         flexAttributes: field.flexAttributes.filter(each => {
         //eslint-disable-next-line
         for (const key in filters) {
-          //eslint-disable-next-line
           if (each[key] === undefined || (each[key] !== filters[key] && !each[key].includes(filters[key]))) {
             return false;
           }
