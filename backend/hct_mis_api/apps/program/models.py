@@ -12,11 +12,11 @@ from django.db.models import Sum, UUIDField
 from django.db.models.functions import Coalesce
 from django.utils.translation import ugettext_lazy as _
 
-from utils.models import TimeStampedUUIDModel
+from utils.models import TimeStampedUUIDModel, AbstractSyncable
 from auditlog.registry import auditlog
 
 
-class Program(TimeStampedUUIDModel):
+class Program(TimeStampedUUIDModel, AbstractSyncable):
     DRAFT = "DRAFT"
     ACTIVE = "ACTIVE"
     FINISHED = "FINISHED"
@@ -55,7 +55,6 @@ class Program(TimeStampedUUIDModel):
         (SOCIAL_POLICY, _("Social Policy")),
         (WASH, _("WASH")),
     )
-
 
     SCOPE_FOR_PARTNERS = "FOR_PARTNERS"
     SCOPE_UNICEF = "UNICEF"
@@ -112,9 +111,7 @@ class Program(TimeStampedUUIDModel):
 
 
 class CashPlan(TimeStampedUUIDModel):
-    DISTRIBUTION_COMPLETED = (
-        "Distribution Completed"
-    )
+    DISTRIBUTION_COMPLETED = "Distribution Completed"
     DISTRIBUTION_COMPLETED_WITH_ERRORS = "Distribution Completed with Errors"
     TRANSACTION_COMPLETED = "Transaction Completed"
     TRANSACTION_COMPLETED_WITH_ERRORS = "Transaction Completed with Errors"
