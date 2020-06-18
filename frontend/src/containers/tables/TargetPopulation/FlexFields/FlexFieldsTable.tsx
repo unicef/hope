@@ -83,7 +83,14 @@ export const FlexFieldsTable = ({ fields, selectedOption, searchValue }): ReactE
     })
   };
 
-  const filteredFields = filterTable()
+  const orderResults = () => {
+   return filterTable().map(each => {
+     return {
+       ...each,
+       flexAttributes: stableSort(each.flexAttributes, getComparator(order, orderBy))
+      };
+   })
+  }
 
   return (
     <TableWrapper>
@@ -97,7 +104,7 @@ export const FlexFieldsTable = ({ fields, selectedOption, searchValue }): ReactE
           rowCount={fields.length - 1}
         />
         <TableBody>
-          {stableSort(filteredFields, getComparator(order, orderBy)).map((row) => (
+          {orderResults().map((row) => (
             <>
               <TableRow key={row.id}>
                 <StyledHeaderCell>
