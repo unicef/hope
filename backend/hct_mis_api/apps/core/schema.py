@@ -256,6 +256,11 @@ class FieldAttributeNode(graphene.ObjectType):
 
 class GroupAttributeNode(DjangoObjectType):
     label_en = graphene.String()
+    flex_attributes = graphene.List(
+        FieldAttributeNode,
+        flex_field=graphene.Boolean(),
+        description="All field datatype meta.",
+    )
 
     class Meta:
         model = FlexibleAttributeGroup
@@ -271,6 +276,9 @@ class GroupAttributeNode(DjangoObjectType):
         return _custom_dict_or_attr_resolver("label", None, self, info)[
             "English(EN)"
         ]
+
+    def resolve_flex_attributes(self, info):
+        return self.flex_attributes.all()
 
 
 class KoboAssetObject(graphene.ObjectType):
