@@ -1083,14 +1083,7 @@ class KoboProjectImportDataValidator(ImportDataValidator):
                                 and i_value.upper() == "HEAD"
                             ):
                                 head_of_hh_counter += 1
-                                if head_of_hh_counter > 1:
-                                    errors.append(
-                                        {
-                                            "header": "relationship_i_c",
-                                            "message": "Only one person can "
-                                            "be a head of household",
-                                        }
-                                    )
+
                             expected_i_fields.discard(i_field)
                             error = cls._get_field_type_error(
                                 i_field, i_value, attachments
@@ -1102,15 +1095,6 @@ class KoboProjectImportDataValidator(ImportDataValidator):
                             current_individual_docs_and_identities
                         )
 
-                        if head_of_hh_counter == 0:
-                            errors.append(
-                                {
-                                    "header": "relationship_i_c",
-                                    "message": "Household has to have a "
-                                               "head of household",
-                                }
-                            )
-
                         i_expected_field_errors = [
                             {
                                 "header": field,
@@ -1120,6 +1104,23 @@ class KoboProjectImportDataValidator(ImportDataValidator):
                             for field in expected_i_fields
                         ]
                         errors.extend(i_expected_field_errors)
+
+                    if head_of_hh_counter == 0:
+                        errors.append(
+                            {
+                                "header": "relationship_i_c",
+                                "message": "Household has to have a "
+                                           "head of household",
+                            }
+                        )
+                    if head_of_hh_counter > 1:
+                        errors.append(
+                            {
+                                "header": "relationship_i_c",
+                                "message": "Only one person can "
+                                           "be a head of household",
+                            }
+                        )
                 else:
                     error = cls._get_field_type_error(
                         hh_field, hh_value, attachments
