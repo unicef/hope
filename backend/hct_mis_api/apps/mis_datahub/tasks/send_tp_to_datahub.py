@@ -89,9 +89,15 @@ class SendTPToDatahubTask:
         # )
 
         program = target_population.program
-        dh_program = self.send_program(program)
-        dh_program.session = dh_session
-        dh_program.save()
+        if (
+            program.last_sync_at is None
+            or program.last_sync_at < program.updated_at
+        ):
+            dh_program = self.send_program(program)
+            dh_program.session = dh_session
+            dh_program.save()
+            program.last_sync_at = timezone.now()
+            program.save(update_fields=["last_sync_at"])
         dh_target = self.send_target_population(target_population)
         dh_target.session = dh_session
         dh_target.save()
@@ -126,7 +132,7 @@ class SendTPToDatahubTask:
         dh_program_args = self.build_arg_dict(
             program, SendTPToDatahubTask.MAPPING_PROGRAM_DICT
         )
-        print(dh_program_args)
+
         dh_program = dh_mis_models.Program(**dh_program_args)
         return dh_program
 
