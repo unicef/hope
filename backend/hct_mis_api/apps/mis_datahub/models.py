@@ -8,7 +8,7 @@ from household.models import (
     RELATIONSHIP_CHOICE,
     ROLE_CHOICE,
     MARITAL_STATUS_CHOICE,
-    INDIVIDUAL_HOUSEHOLD_STATUS,
+    INDIVIDUAL_HOUSEHOLD_STATUS, RESIDENCE_STATUS_CHOICE,
 )
 from utils.models import AbstractSession
 
@@ -37,6 +37,10 @@ class Household(SessionModel):
     admin1 = models.CharField(max_length=255, null=True)
     admin2 = models.CharField(max_length=255, null=True)
     country = CountryField(null=True)
+    residence_status = models.CharField(
+        max_length=255, choices=RESIDENCE_STATUS_CHOICE,
+    )
+    registration_date = models.DateField(null=True)
 
     class Meta:
         unique_together = ("session", "mis_id")
