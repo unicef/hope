@@ -1,4 +1,5 @@
 import json
+from collections import defaultdict
 from io import BytesIO
 from typing import Union
 
@@ -231,9 +232,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         for document_data in self.documents.values():
             doc_type, is_created = ImportedDocumentType.objects.get_or_create(
                 country=Country(
-                    COUNTRIES_NAME_ALPHA2.get(
-                        self.business_area.name.capitalize()
-                    )
+                    COUNTRIES_NAME_ALPHA2.get(self.business_area.name.title())
                 ),
                 label=document_data["name"],
                 type=document_data["type"],
@@ -450,6 +449,26 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
     update the status of that registration data import instance.
     """
 
+    DOCS_AND_IDENTITIES_FIELDS = {
+        "birth_certificate_no_i_c",
+        "birth_certificate_photo_i_c",
+        "drivers_license_no_i_c",
+        "drivers_license_photo_i_c",
+        "electoral_card_no_i_c",
+        "electoral_card_photo_i_c",
+        "unhcr_id_no_i_c",
+        "unhcr_id_photo_i_c",
+        "national_id_no_ic",
+        "national_id_photo_ic",
+        "national_passport_i_c",
+        "national_passport_photo_i_c",
+        "scope_id_no_i_c",
+        "scope_id_photo_i_c",
+        "other_id_type_i_c",
+        "other_id_no_i_c",
+        "other_id_photo_i_c",
+    }
+
     reduced_submissions = None
     business_area = None
     attachments = None
@@ -466,7 +485,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
 
         api = KoboAPI(self.business_area.slug)
         image_bytes = api.get_attached_file(download_url)
-        file = File(image_bytes)
+        file = File(image_bytes, name=value)
 
         return file
 
@@ -498,6 +517,58 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
 
         setattr(obj, field_data_dict["name"], correct_value)
 
+    def _handle_documents_and_identities(self, documents_and_identities):
+        identity_fields = {
+            "scope_id",
+            "unhcr_id",
+        }
+
+        documents = []
+        identities = []
+        for documents_dict in documents_and_identities:
+            for document_name, data in documents_dict.items():
+                is_identity = document_name in identity_fields
+
+                if is_identity:
+                    agency = ImportedAgency.objects.get(
+                        type="WFP" if document_name == "scope_id" else "UNHCR"
+                    )
+                    identities.append(
+                        ImportedIndividualIdentity(
+                            agency=agency,
+                            individual=data["individual"],
+                            document_number=data["number"],
+                        )
+                    )
+                else:
+                    type_name = document_name.upper()
+                    label = IDENTIFICATION_TYPE_DICT.get(type_name)
+                    if label is None:
+                        label = data["name"]
+                    (
+                        document_type,
+                        is_created,
+                    ) = ImportedDocumentType.objects.get_or_create(
+                        country=Country(
+                            COUNTRIES_NAME_ALPHA2.get(
+                                self.business_area.name.title()
+                            )
+                        ),
+                        label=label,
+                        type=type_name,
+                    )
+                    file = self._handle_image_field(data.get("photo", ""))
+                    documents.append(
+                        ImportedDocument(
+                            document_number=data["number"],
+                            photo=file,
+                            individual=data["individual"],
+                            type=document_type,
+                        )
+                    )
+        ImportedDocument.objects.bulk_create(documents)
+        ImportedIndividualIdentity.objects.bulk_create(identities)
+
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
     def execute(
@@ -522,6 +593,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         head_of_households_mapping = {}
         households_to_create = []
         individuals_to_create = []
+        documents_and_identities_to_create = []
         for household in self.reduced_submissions:
             household_obj = ImportedHousehold()
             self.attachments = household.get("_attachments", [])
@@ -529,11 +601,31 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                 self._cast_and_assign(hh_value, hh_field, household_obj)
                 if hh_field == KOBO_FORM_INDIVIDUALS_COLUMN_NAME:
                     for individual in hh_value:
+                        current_individual_docs_and_identities = defaultdict(
+                            dict
+                        )
                         individual_obj = ImportedIndividual()
                         for i_field, i_value in individual.items():
-                            self._cast_and_assign(
-                                i_value, i_field, individual_obj
-                            )
+                            if i_field in self.DOCS_AND_IDENTITIES_FIELDS:
+                                key = i_field.replace("_photo_i_c", "").replace(
+                                    "_no_i_c", ""
+                                )
+                                if i_field.endswith("_type_i_c"):
+                                    value_key = "name"
+                                elif i_field.endswith("_photo_i_c"):
+                                    value_key = "photo"
+                                else:
+                                    value_key = "number"
+                                current_individual_docs_and_identities[key][
+                                    value_key
+                                ] = i_value
+                                current_individual_docs_and_identities[key][
+                                    "individual"
+                                ] = individual_obj
+                            else:
+                                self._cast_and_assign(
+                                    i_value, i_field, individual_obj
+                                )
                         if individual_obj.relationship == "HEAD":
                             head_of_households_mapping[
                                 household_obj
@@ -544,12 +636,18 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                         )
                         individual_obj.household = household_obj
                         individuals_to_create.append(individual_obj)
+                        documents_and_identities_to_create.append(
+                            current_individual_docs_and_identities
+                        )
 
             household_obj.registration_data_import = registration_data_import
             households_to_create.append(household_obj)
 
         ImportedHousehold.objects.bulk_create(households_to_create)
         ImportedIndividual.objects.bulk_create(individuals_to_create)
+        self._handle_documents_and_identities(
+            documents_and_identities_to_create
+        )
 
         households_to_update = []
         for household, individual in head_of_households_mapping.items():
@@ -563,3 +661,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             RegistrationDataImportDatahub.DONE
         )
         registration_data_import.save()
+
+        RegistrationDataImport.objects.filter(
+            id=registration_data_import.hct_id
+        ).update(status="IN_REVIEW")
