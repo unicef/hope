@@ -8,7 +8,7 @@ from operators.registration_xlsx_import_operator import (
 dag = DAG(
     "CreateRegistrationDataImportXLSX",
     description="Create Registration Data Import from xlsx file",
-    schedule_interval='@hourly',
+    schedule_interval=None,
     start_date=datetime.now() - timedelta(days=1),
 )
 

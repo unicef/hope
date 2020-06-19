@@ -1,4 +1,5 @@
 import re
+from collections import defaultdict
 from datetime import datetime
 from operator import itemgetter
 from pathlib import Path
@@ -30,6 +31,9 @@ from registration_datahub.models import (
 
 
 class ImportDataValidator(BaseValidator):
+    BUSINESS_AREA_SLUG = None
+    BUSINESS_AREA_CODE = None
+
     @classmethod
     def validate(cls, *args, **kwargs):
         validate_methods = [
@@ -45,14 +49,194 @@ class ImportDataValidator(BaseValidator):
 
         return errors_list
 
+    @classmethod
+    def documents_validator(
+        cls, documents_numbers_dict, is_xlsx=True, *args, **kwargs
+    ):
+        invalid_rows = []
+        message = f"Duplicated document"
+        for key, values in documents_numbers_dict.items():
+
+            if key == "other_id_no_i_c":
+                continue
+
+            document_name = values["type"].replace("_", " ").lower()
+
+            seen = {}
+            dupes = []
+            for data_dict in values["validation_data"]:
+                value = data_dict["value"]
+                row_number = data_dict.get("row_number")
+
+                if not value:
+                    continue
+
+                if value not in seen:
+                    seen[value] = 1
+                else:
+                    if seen[value] == 1:
+                        dupes.append(row_number)
+                    seen[value] += 1
+
+                for number in dupes:
+                    error = {
+                        "header": key,
+                        "message": f"{message}: "
+                        f"{document_name} no: {value}",
+                    }
+                    if is_xlsx is True:
+                        error["row_number"] = number
+
+                    invalid_rows.append(error)
+
+            if key == "other_id_type_i_c":
+                for name, validation_data in zip(
+                    values["names"], values["validation_data"]
+                ):
+                    value = validation_data["value"]
+                    row_number = validation_data.get("row_number")
+                    if not name and value:
+                        error = {
+                            "header": key,
+                            "message": f"Name for other_id_type is "
+                            f"required, when number is "
+                            f"provided: no: {value}",
+                        }
+                        if is_xlsx is True:
+                            error["row_number"] = row_number
+                        invalid_rows.append(error)
+                imp_doc_type_obj = ImportedDocumentType.objects.filter(
+                    label__in=values["names"],
+                    country=cls.BUSINESS_AREA_CODE,
+                    type=values["type"],
+                )
+                doc_type_obj = DocumentType.objects.filter(
+                    label__in=values["names"],
+                    country=cls.BUSINESS_AREA_CODE,
+                    type=values["type"],
+                )
+            else:
+                imp_doc_type_obj = ImportedDocumentType.objects.filter(
+                    country=cls.BUSINESS_AREA_CODE, type=values["type"],
+                )
+                doc_type_obj = DocumentType.objects.filter(
+                    country=cls.BUSINESS_AREA_CODE, type=values["type"],
+                )
+
+            imp_doc_obj = []
+            doc_obj = []
+            if imp_doc_type_obj:
+                imp_doc_obj = ImportedDocument.objects.filter(
+                    type__in=imp_doc_type_obj,
+                    document_number__in=values["numbers"],
+                )
+
+            if doc_type_obj:
+                doc_obj = Document.objects.filter(
+                    type__in=doc_type_obj, document_number__in=values["numbers"]
+                )
+
+            for obj in imp_doc_obj:
+                error = {
+                    "header": key,
+                    "message": f"{message}: "
+                    f"{document_name} no: {obj.document_number}"
+                    f" in RDH Database",
+                }
+                if is_xlsx is True:
+                    error["row_number"] = 0
+                invalid_rows.append(error)
+
+            for obj in doc_obj:
+                error = {
+                    "row_number": 0,
+                    "header": key,
+                    "message": f"{message}: {document_name} "
+                    f"no: {obj.document_number} in HCT Database",
+                }
+                if is_xlsx is True:
+                    error["row_number"] = 0
+                invalid_rows.append(error)
+
+        return invalid_rows
+
+    @classmethod
+    def identity_validator(
+        cls, identities_numbers_dict, is_xlsx=True, *args, **kwargs
+    ):
+        invalid_rows = []
+        message = "Duplicated identity document"
+        for key, values in identities_numbers_dict.items():
+            seen = {}
+            dupes = []
+            for data_dict in values["validation_data"]:
+                value = data_dict["value"]
+                row_number = data_dict.get("row_number")
+
+                if not value:
+                    continue
+
+                if value not in seen:
+                    seen[value] = 1
+                else:
+                    if seen[value] == 1:
+                        dupes.append(row_number)
+                    seen[value] += 1
+
+                for number in dupes:
+                    error = {
+                        "header": key,
+                        "message": f"{message}: "
+                        f"{values['agency']} no: {value}",
+                    }
+                    if is_xlsx is True:
+                        error["row_number"] = number
+                    invalid_rows.append(error)
+
+            imp_ident_obj = []
+            ident_obj = []
+            if imp_ident_obj:
+                imp_ident_obj = ImportedIndividualIdentity.objects.filter(
+                    agency=values["agency"],
+                    document_number__in=values["numbers"],
+                )
+
+            if ident_obj:
+                ident_obj = IndividualIdentity.objects.filter(
+                    agency=values["agency"],
+                    document_number__in=values["numbers"],
+                )
+
+            for obj in imp_ident_obj:
+                error = {
+                    "header": key,
+                    "message": f"{message}: "
+                    f"{values['agency']} no: {obj.document_number}"
+                    f" in RDH Database",
+                }
+                if is_xlsx is True:
+                    error["row_number"] = 0
+                invalid_rows.append(error)
+
+            for obj in ident_obj:
+                error = {
+                    "header": key,
+                    "message": f"{message}: "
+                    f"{values['agency']} no: {obj.document_number}"
+                    f" in HCT Database",
+                }
+                if is_xlsx is True:
+                    error["row_number"] = 0
+                invalid_rows.append(error)
+
+        return invalid_rows
+
 
 class UploadXLSXValidator(ImportDataValidator):
     WB = None
     CORE_FIELDS = CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY
     FLEX_FIELDS = serialize_flex_attributes()
     ALL_FIELDS = get_combined_attributes()
-    BUSINESS_AREA_SLUG = None
-    BUSINESS_AREA_CODE = None
 
     @classmethod
     def string_validator(cls, value, header, *args, **kwargs):
@@ -193,182 +377,6 @@ class UploadXLSXValidator(ImportDataValidator):
         return cls.image_loader.image_in(cell.coordinate)
 
     @classmethod
-    def documents_validator(cls, documents_numbers_dict, *args, **kwargs):
-        invalid_rows = []
-        message = f"Duplicated document"
-        for key, values in documents_numbers_dict.items():
-
-            if key == "other_id_no_i_c":
-                continue
-
-            document_name = values["type"].replace("_", " ").lower()
-
-            seen = {}
-            dupes = []
-            for data_dict in values["validation_data"]:
-                value = data_dict["value"]
-                row_number = data_dict["row_number"]
-
-                if not value:
-                    continue
-
-                if value not in seen:
-                    seen[value] = 1
-                else:
-                    if seen[value] == 1:
-                        dupes.append(row_number)
-                    seen[value] += 1
-
-                for number in dupes:
-                    invalid_rows.append(
-                        {
-                            "row_number": number,
-                            "header": key,
-                            "message": f"{message}: "
-                            f"{document_name} no: {value} in file",
-                        }
-                    )
-
-            if key == "other_id_type_i_c":
-                for name, validation_data in zip(
-                    values["names"], values["validation_data"]
-                ):
-                    value = validation_data["value"]
-                    row_number = validation_data["row_number"]
-                    if not name and value:
-                        invalid_rows.append(
-                            {
-                                "row_number": row_number,
-                                "header": key,
-                                "message": f"Name for other_id_type is "
-                                f"required, when number is "
-                                f"provided: no: {value} in file",
-                            }
-                        )
-                imp_doc_type_obj = ImportedDocumentType.objects.filter(
-                    label__in=values["names"],
-                    country=cls.BUSINESS_AREA_CODE,
-                    type=values["type"],
-                )
-                doc_type_obj = DocumentType.objects.filter(
-                    label__in=values["names"],
-                    country=cls.BUSINESS_AREA_CODE,
-                    type=values["type"],
-                )
-            else:
-                imp_doc_type_obj = ImportedDocumentType.objects.filter(
-                    country=cls.BUSINESS_AREA_CODE, type=values["type"],
-                )
-                doc_type_obj = DocumentType.objects.filter(
-                    country=cls.BUSINESS_AREA_CODE, type=values["type"],
-                )
-
-            imp_doc_obj = []
-            doc_obj = []
-            if imp_doc_type_obj:
-                imp_doc_obj = ImportedDocument.objects.filter(
-                    type__in=imp_doc_type_obj,
-                    document_number__in=values["numbers"],
-                )
-
-            if doc_type_obj:
-                doc_obj = Document.objects.filter(
-                    type__in=doc_type_obj, document_number__in=values["numbers"]
-                )
-
-            for obj in imp_doc_obj:
-                invalid_rows.append(
-                    {
-                        "row_number": 0,
-                        "header": key,
-                        "message": f"{message}: "
-                        f"{document_name} no: {obj.document_number}"
-                        f" in RDH Database",
-                    }
-                )
-
-            for obj in doc_obj:
-                invalid_rows.append(
-                    {
-                        "row_number": 0,
-                        "header": key,
-                        "message": f"{message}: {document_name} "
-                        f"no: {obj.document_number} in HCT Database",
-                    }
-                )
-
-        return invalid_rows
-
-    @classmethod
-    def identity_validator(cls, identities_numbers_dict, *args, **kwargs):
-        invalid_rows = []
-        message = "Duplicated identity document"
-        for key, values in identities_numbers_dict.items():
-            seen = {}
-            dupes = []
-            for data_dict in values["validation_data"]:
-                value = data_dict["value"]
-                row_number = data_dict["row_number"]
-
-                if not value:
-                    continue
-
-                if value not in seen:
-                    seen[value] = 1
-                else:
-                    if seen[value] == 1:
-                        dupes.append(row_number)
-                    seen[value] += 1
-
-                for number in dupes:
-                    invalid_rows.append(
-                        {
-                            "row_number": number,
-                            "header": key,
-                            "message": f"{message}: "
-                            f"{values['agency']} no: {value} in file",
-                        }
-                    )
-
-            imp_ident_obj = []
-            ident_obj = []
-            if imp_ident_obj:
-                imp_ident_obj = ImportedIndividualIdentity.objects.filter(
-                    agency=values["agency"],
-                    document_number__in=values["numbers"],
-                )
-
-            if ident_obj:
-                ident_obj = IndividualIdentity.objects.filter(
-                    agency=values["agency"],
-                    document_number__in=values["numbers"],
-                )
-
-            for obj in imp_ident_obj:
-                invalid_rows.append(
-                    {
-                        "row_number": 0,
-                        "header": key,
-                        "message": f"{message}: "
-                        f"{values['agency']} no: {obj.document_number}"
-                        f" in RDH Database",
-                    }
-                )
-
-            for obj in ident_obj:
-                invalid_rows.append(
-                    {
-                        "row_number": 0,
-                        "header": key,
-                        "message": f"{message}: "
-                        f"{values['agency']} no: {obj.document_number}"
-                        f" in HCT Database",
-                    }
-                )
-
-        return invalid_rows
-
-    @classmethod
     def rows_validator(cls, sheet):
         first_row = sheet[1]
         combined_fields = {
@@ -401,8 +409,7 @@ class UploadXLSXValidator(ImportDataValidator):
 
         invalid_rows = []
         current_household_id = None
-        head_of_household_count = 0
-        error_appended_flag = False
+        head_of_household_count = defaultdict(int)
 
         identities_numbers = {
             "unhcr_id_no": {
@@ -460,32 +467,11 @@ class UploadXLSXValidator(ImportDataValidator):
                 if not current_field:
                     continue
 
-                # Validate there is only one head of household per household
-                if (
-                    header.value == "household_id"
-                    and current_household_id != cell.value
-                ):
+                if header.value == "household_id":
                     current_household_id = cell.value
-                    head_of_household_count = 0
-                    error_appended_flag = False
 
                 if header.value == "relationship_i_c" and cell.value == "HEAD":
-                    head_of_household_count += 1
-
-                if head_of_household_count > 1 and not error_appended_flag:
-                    message = (
-                        "Sheet: Individuals, There are multiple head of "
-                        "households for household with "
-                        f"id: {current_household_id}"
-                    )
-                    invalid_rows.append(
-                        {
-                            "row_number": cell.row,
-                            "header": "relationship_i_c",
-                            "message": message,
-                        }
-                    )
-                    error_appended_flag = True
+                    head_of_household_count[current_household_id] += 1
 
                 field_type = current_field["type"]
                 fn = switch_dict.get(field_type)
@@ -549,6 +535,33 @@ class UploadXLSXValidator(ImportDataValidator):
                         }
                     )
 
+        # validate head of household count
+        for household_id, count in head_of_household_count.items():
+            if count == 0:
+                message = (
+                    f"Sheet: Individuals, Household with id: {household_id}, "
+                    "has to have a head of household"
+                )
+                invalid_rows.append(
+                    {
+                        "row_number": 0,
+                        "header": "relationship_i_c",
+                        "message": message,
+                    }
+                )
+            elif count > 1:
+                message = (
+                    "Sheet: Individuals, There are multiple head of "
+                    f"households for household with id: {household_id}"
+                )
+                invalid_rows.append(
+                    {
+                        "row_number": 0,
+                        "header": "relationship_i_c",
+                        "message": message,
+                    }
+                )
+
         invalid_doc_rows = []
         invalid_ident_rows = []
         if sheet.title == "Individuals":
@@ -566,7 +579,7 @@ class UploadXLSXValidator(ImportDataValidator):
                 {
                     "row_number": 1,
                     "header": f"{xlsx_file.name}",
-                    "message": "Only .xlsx files are accepted for import.",
+                    "message": "Only .xlsx files are accepted for import",
                 }
             ]
 
@@ -669,7 +682,6 @@ class KoboProjectImportDataValidator(ImportDataValidator):
     CORE_FIELDS: dict = CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY
     FLEX_FIELDS: dict = serialize_flex_attributes()
     ALL_FIELDS = get_combined_attributes()
-    BUSINESS_AREA_CODE = None
 
     EXPECTED_HOUSEHOLDS_CORE_FIELDS = {
         field["xlsx_field"]
@@ -963,13 +975,66 @@ class KoboProjectImportDataValidator(ImportDataValidator):
                 }
 
     @classmethod
+    def _docs_and_identities_validator(cls, data_to_validate):
+        pass
+
+    @classmethod
     def validate_fields(cls, submissions: list, business_area_name: str):
         cls.BUSINESS_AREA_CODE = pycountry.countries.get(
             name=business_area_name
         ).alpha_2
         reduced_submissions = rename_dict_keys(submissions, get_field_name)
+        docs_and_identities_to_validate = []
         errors = []
         # have fun debugging this ;_;
+
+        identities_numbers = {
+            "unhcr_id_no": {
+                "agency": "UNHCR",
+                "validation_data": [],
+                "numbers": [],
+            },
+            "scope_id_no": {
+                "agency": "WFP",
+                "validation_data": [],
+                "numbers": [],
+            },
+        }
+        documents_numbers = {
+            "birth_certificate_no_i_c": {
+                "type": "BIRTH_CERTIFICATE",
+                "validation_data": [],
+                "numbers": [],
+            },
+            "drivers_license_no_i_c": {
+                "type": "DRIVERS_LICENSE",
+                "validation_data": [],
+                "numbers": [],
+            },
+            "electoral_card_no_i_c": {
+                "type": "ELECTORAL_CARD",
+                "validation_data": [],
+                "numbers": [],
+            },
+            "national_id_no_ic": {
+                "type": "NATIONAL_ID",
+                "validation_data": [],
+                "numbers": [],
+            },
+            "national_passport_i_c": {
+                "type": "NATIONAL_PASSPORT",
+                "validation_data": [],
+                "numbers": [],
+            },
+            "other_id_type_i_c": {
+                "type": "OTHER",
+                "names": [],
+                "validation_data": [],
+                "numbers": [],
+            },
+            "other_id_no_i_c": None,
+        }
+
         for household in reduced_submissions:
             head_of_hh_counter = 0
             expected_hh_fields = cls.EXPECTED_HOUSEHOLD_FIELDS.copy()
@@ -981,20 +1046,44 @@ class KoboProjectImportDataValidator(ImportDataValidator):
                         expected_i_fields = (
                             cls.EXPECTED_INDIVIDUALS_FIELDS.copy()
                         )
+                        current_individual_docs_and_identities = defaultdict(
+                            dict
+                        )
                         for i_field, i_value in individual.items():
+                            if i_field in documents_numbers:
+                                if i_field == "other_id_type_i_c":
+                                    documents_numbers["other_id_type_i_c"][
+                                        "names"
+                                    ].append(i_value)
+                                elif i_field == "other_id_no_i_c":
+                                    documents_numbers["other_id_type_i_c"][
+                                        "validation_data"
+                                    ].append({"value": i_value})
+                                    documents_numbers["other_id_type_i_c"][
+                                        "numbers"
+                                    ].append(i_value)
+                                else:
+                                    documents_numbers[i_field][
+                                        "validation_data"
+                                    ].append({"value": i_value})
+                                    documents_numbers[i_field][
+                                        "numbers"
+                                    ].append(i_value)
+
+                            if i_field in identities_numbers:
+                                identities_numbers[i_field]["numbers"].append(
+                                    i_value
+                                )
+                                identities_numbers[i_field][
+                                    "validation_data"
+                                ].append({"value": i_value})
+
                             if (
                                 i_field == "relationship_i_c"
                                 and i_value.upper() == "HEAD"
                             ):
                                 head_of_hh_counter += 1
-                                if head_of_hh_counter > 1:
-                                    errors.append(
-                                        {
-                                            "header": "relationship_i_c",
-                                            "message": f"Only one person can "
-                                            f"be head of household",
-                                        }
-                                    )
+
                             expected_i_fields.discard(i_field)
                             error = cls._get_field_type_error(
                                 i_field, i_value, attachments
@@ -1002,24 +1091,36 @@ class KoboProjectImportDataValidator(ImportDataValidator):
                             if error:
                                 errors.append(error)
 
-                        if head_of_hh_counter == 0:
-                            errors.append(
-                                {
-                                    "header": "relationship_i_c",
-                                    "message": f"At least one person must "
-                                    f"be head of household",
-                                }
-                            )
+                        docs_and_identities_to_validate.append(
+                            current_individual_docs_and_identities
+                        )
 
                         i_expected_field_errors = [
                             {
                                 "header": field,
-                                "message": f"Missing individual "
+                                "message": "Missing individual "
                                 f"required field {field}",
                             }
                             for field in expected_i_fields
                         ]
                         errors.extend(i_expected_field_errors)
+
+                    if head_of_hh_counter == 0:
+                        errors.append(
+                            {
+                                "header": "relationship_i_c",
+                                "message": "Household has to have a "
+                                           "head of household",
+                            }
+                        )
+                    if head_of_hh_counter > 1:
+                        errors.append(
+                            {
+                                "header": "relationship_i_c",
+                                "message": "Only one person can "
+                                           "be a head of household",
+                            }
+                        )
                 else:
                     error = cls._get_field_type_error(
                         hh_field, hh_value, attachments
@@ -1035,4 +1136,11 @@ class KoboProjectImportDataValidator(ImportDataValidator):
             ]
             errors.extend(hh_expected_field_errors)
 
-        return errors
+        document_errors = cls.documents_validator(
+            documents_numbers, is_xlsx=False
+        )
+        identitites_errors = cls.identity_validator(
+            identities_numbers, is_xlsx=False
+        )
+
+        return [*errors, *document_errors, *identitites_errors]

@@ -290,6 +290,14 @@ scalar FlexFieldsScalar
 
 scalar GeoJSON
 
+type GroupAttributeNode {
+  id: UUID!
+  name: String!
+  label: JSONString!
+  flexAttributes(flexField: Boolean): [FieldAttributeNode]
+  labelEn: String
+}
+
 type HouseholdNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -1103,6 +1111,7 @@ type Query {
   allBusinessAreas(before: String, after: String, first: Int, last: Int, id: UUID): BusinessAreaNodeConnection
   allLogEntries(objectId: String!, before: String, after: String, first: Int, last: Int): LogEntryObjectConnection
   allFieldsAttributes(flexField: Boolean): [FieldAttributeNode]
+  allGroupsWithFields: [GroupAttributeNode]
   koboProject(uid: String!, businessAreaSlug: String!): KoboAssetObject
   allKoboProjects(businessAreaSlug: String!, onlyDeployed: Boolean, before: String, after: String, first: Int, last: Int): KoboAssetObjectConnection
   program(id: ID!): ProgramNode
@@ -1151,6 +1160,12 @@ enum RegistrationDataImportDataSource {
   OTHER
 }
 
+enum RegistrationDataImportDatahubImportDone {
+  NOT_STARTED
+  STARTED
+  DONE
+}
+
 type RegistrationDataImportDatahubNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -1159,7 +1174,8 @@ type RegistrationDataImportDatahubNode implements Node {
   importDate: DateTime!
   hctId: UUID
   importData: ImportDataNode
-  importDone: Boolean!
+  importDone: RegistrationDataImportDatahubImportDone!
+  businessAreaSlug: String!
   households(before: String, after: String, first: Int, last: Int): ImportedHouseholdNodeConnection!
   individuals(before: String, after: String, first: Int, last: Int): ImportedIndividualNodeConnection!
 }

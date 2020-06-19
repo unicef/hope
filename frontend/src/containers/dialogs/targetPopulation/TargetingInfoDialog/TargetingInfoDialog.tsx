@@ -73,8 +73,8 @@ export function TargetingInfoDialog({
       indicatorColor='primary'
       textColor='primary'
     >
-      <Tab label='Targeting Diagram' />
       <Tab label='Flex Field List' />
+      <Tab label='Targeting Diagram' />
     </Tabs>
   )
   return (
@@ -92,10 +92,10 @@ export function TargetingInfoDialog({
       </DialogTitleWrapper>
       <StyledDialogContent>
         <StyledTabPanel value={selectedTab} index={0}>
-          <TargetingDiagram src={TargetingDiagramImage} alt="diagram"/>
+          <FlexFieldTab />
         </StyledTabPanel>
         <TabPanel value={selectedTab} index={1}>
-          <FlexFieldTab />
+          <TargetingDiagram src={TargetingDiagramImage} alt="diagram" />
         </TabPanel>
       </StyledDialogContent>
     </DialogWrapper>
