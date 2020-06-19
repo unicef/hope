@@ -1,15 +1,15 @@
 from django.db import transaction
 from django.db.models import Q, F
+from django.utils import timezone
 
 from core.utils import nested_getattr
 from household.models import (
-    Individual,
     IDENTIFICATION_TYPE_NATIONAL_ID,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
 )
-from targeting.models import TargetPopulation, HouseholdSelection
 from mis_datahub import models as dh_mis_models
+from targeting.models import TargetPopulation, HouseholdSelection
 
 
 class SendTPToDatahubTask:
@@ -22,7 +22,7 @@ class SendTPToDatahubTask:
     MAPPING_PROGRAM_DICT = {
         "mis_id": "id",
         "name": "name",
-        "business_area": "business_area.slug",
+        "business_area": "business_area.code",
         "scope": "scope",
         "start_date": "start_date",
         "end_date": "end_date",
@@ -36,7 +36,8 @@ class SendTPToDatahubTask:
         "address": "address",
         "admin1": "admin_area.title",
         "admin2": "admin_area.parent.title",
-        "country": "country",
+        "residence_status": "residence_status",
+        "registration_date": "registration_date",
     }
     MAPPING_INDIVIDUAL_DICT = {
         "mis_id": "id",
@@ -89,9 +90,15 @@ class SendTPToDatahubTask:
         # )
 
         program = target_population.program
-        dh_program = self.send_program(program)
-        dh_program.session = dh_session
-        dh_program.save()
+        if (
+            program.last_sync_at is None
+            or program.last_sync_at < program.updated_at
+        ):
+            dh_program = self.send_program(program)
+            dh_program.session = dh_session
+            dh_program.save()
+            program.last_sync_at = timezone.now()
+            program.save(update_fields=["last_sync_at"])
         dh_target = self.send_target_population(target_population)
         dh_target.session = dh_session
         dh_target.save()
@@ -114,6 +121,7 @@ class SendTPToDatahubTask:
         )
         target_population.sent_to_datahub = True
         target_population.save()
+        households.update(last_sync_at=timezone.now())
 
     def build_arg_dict(self, model_object, mapping_dict):
         args = {}
@@ -125,7 +133,7 @@ class SendTPToDatahubTask:
         dh_program_args = self.build_arg_dict(
             program, SendTPToDatahubTask.MAPPING_PROGRAM_DICT
         )
-        print(dh_program_args)
+
         dh_program = dh_mis_models.Program(**dh_program_args)
         return dh_program
 
@@ -158,6 +166,7 @@ class SendTPToDatahubTask:
             household, SendTPToDatahubTask.MAPPING_HOUSEHOLD_DICT
         )
         dh_household = dh_mis_models.Household(**dh_household_args)
+        dh_household.country = household.country.alpha3
         households_identity = household.identities.filter(
             agency__type="unhcr"
         ).first()

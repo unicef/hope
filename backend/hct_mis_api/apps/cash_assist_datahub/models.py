@@ -20,15 +20,21 @@ class SessionModel(models.Model):
 
 
 class TargetPopulation(SessionModel):
-    mis_id = models.UUIDField(unique=True)
-    ca_id = models.CharField(max_length=255, primary_key=True,)
-    ca_hash_id = models.UUIDField(unique=True)
+    mis_id = models.UUIDField()
+    ca_id = models.CharField(max_length=255,)
+    ca_hash_id = models.UUIDField( )
+
+    class Meta:
+        unique_together = ("session", "mis_id")
 
 
 class Programme(SessionModel):
-    mis_id = models.UUIDField(unique=True,)
-    ca_id = models.CharField(max_length=255, primary_key=True)
-    ca_hash_id = models.CharField(max_length=255, unique=True)
+    mis_id = models.UUIDField()
+    ca_id = models.CharField(max_length=255,)
+    ca_hash_id = models.CharField(max_length=255,)
+
+    class Meta:
+        unique_together = ("session", "mis_id")
 
 
 class CashPlan(SessionModel):
@@ -52,7 +58,7 @@ class CashPlan(SessionModel):
     )
     business_area = models.CharField(max_length=20, null=True)
     cash_plan_id = models.CharField(max_length=255)
-    cash_plan_hash_id = models.UUIDField(primary_key=True,)
+    cash_plan_hash_id = models.UUIDField()
     status = models.CharField(
         max_length=255,
         choices=(
@@ -105,6 +111,9 @@ class CashPlan(SessionModel):
         null=True,
     )
 
+    class Meta:
+        unique_together = ("session", "cash_plan_id")
+
 
 class PaymentRecord(SessionModel):
     STATUS_SUCCESS = "SUCCESS"
@@ -133,7 +142,7 @@ class PaymentRecord(SessionModel):
     status = models.CharField(max_length=255, choices=STATUS_CHOICE, null=True)
     status_date = models.DateTimeField(null=True)
     ca_id = models.CharField(max_length=255)
-    ca_hash_id = models.UUIDField(primary_key=True)
+    ca_hash_id = models.UUIDField()
     registration_ca_id = models.CharField(max_length=255, null=True)
     household_mis_id = models.UUIDField(null=True)
     # head of household
@@ -172,11 +181,17 @@ class PaymentRecord(SessionModel):
     delivery_date = models.DateTimeField(null=True)
     service_provider_ca_id = models.CharField(max_length=255, null=True)
 
+    class Meta:
+        unique_together = ("session", "ca_id")
+
 
 class ServiceProvider(SessionModel):
     business_area = models.CharField(max_length=20)
-    ca_id = models.CharField(max_length=255, primary_key=True)
+    ca_id = models.CharField(max_length=255)
     full_name = models.CharField(max_length=255)
     short_name = models.CharField(max_length=4)
     country = models.CharField(max_length=3,)
     vision_id = models.CharField(max_length=255)
+
+    class Meta:
+        unique_together = ("session", "ca_id")
