@@ -198,7 +198,7 @@ class SendTPToDatahubTask:
             and alternative_collector.id != head_of_household.id
         ):
             dh_alternative_collector = self.send_individual(
-                primary_collector, dh_household
+                alternative_collector, dh_household
             )
             dh_alternative_collector.session = dh_session
             individuals_to_create.append(dh_alternative_collector)
