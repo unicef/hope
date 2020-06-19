@@ -22,7 +22,7 @@ class SendTPToDatahubTask:
     MAPPING_PROGRAM_DICT = {
         "mis_id": "id",
         "name": "name",
-        "business_area": "business_area.slug",
+        "business_area": "business_area.code",
         "scope": "scope",
         "start_date": "start_date",
         "end_date": "end_date",
@@ -36,7 +36,8 @@ class SendTPToDatahubTask:
         "address": "address",
         "admin1": "admin_area.title",
         "admin2": "admin_area.parent.title",
-        "country": "country",
+        "residence_status": "residence_status",
+        "registration_date": "registration_date",
     }
     MAPPING_INDIVIDUAL_DICT = {
         "mis_id": "id",
@@ -165,6 +166,7 @@ class SendTPToDatahubTask:
             household, SendTPToDatahubTask.MAPPING_HOUSEHOLD_DICT
         )
         dh_household = dh_mis_models.Household(**dh_household_args)
+        dh_household.country = household.country.alpha3
         households_identity = household.identities.filter(
             agency__type="unhcr"
         ).first()

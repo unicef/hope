@@ -238,8 +238,8 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
         user = info.context.user
         target_population = kwargs.get("model_object")
         target_population.status = "FINALIZED"
-        target_population.approved_by = user
-        target_population.approved_at = timezone.now()
+        target_population.finalized_by = user
+        target_population.finalized_at = timezone.now()
         if target_population.final_list_targeting_criteria:
             """Gets all households from candidate list which 
             don't meet final_list_targeting_criteria and set them (HouseholdSelection m2m model)
