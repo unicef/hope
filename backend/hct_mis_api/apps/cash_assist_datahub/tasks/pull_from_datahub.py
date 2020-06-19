@@ -80,17 +80,19 @@ class PullFromDatahubTask:
         return args
 
     def copy_session(self, session):
-        ServiceProvider.objects.bulk_create(
-            self.copy_service_providers(session)
-        )
+        session.status = session.STATUS_PROCESSING
+        session.save()
+        self.copy_service_providers(session)
         Program.objects.bulk_update(
             self.copy_programs_ids(session), ["ca_id", "ca_hash_id"]
         )
         TargetPopulation.objects.bulk_update(
             self.copy_target_population_ids(session), ["ca_id", "ca_hash_id"]
         )
-        CashPlan.objects.bulk_create(self.copy_cash_plans(session))
-        PaymentRecord.objects.bulk_create(self.copy_payment_records(session))
+        self.copy_cash_plans(session)
+        self.copy_payment_records(session)
+        session.status = session.STATUS_COMPLETED
+        session.save()
 
     def copy_cash_plans(self, session):
         dh_cash_plans = ca_models.CashPlan.objects.filter(session=session)
@@ -98,11 +100,12 @@ class PullFromDatahubTask:
             cash_plan_args = self.build_arg_dict(
                 dh_cash_plan, PullFromDatahubTask.MAPPING_CASH_PLAN_DICT
             )
-            cash_plan = CashPlan(**cash_plan_args)
-            cash_plan.business_area = BusinessArea.objects.get(
+            cash_plan_args["business_area"] = BusinessArea.objects.get(
                 code=dh_cash_plan.business_area
             )
-            yield cash_plan
+            (cash_plan, created,) = CashPlan.objects.update_or_create(
+                ca_id=dh_cash_plan.cash_plan_id, defaults=cash_plan_args
+            )
 
     def copy_payment_records(self, session):
         dh_payment_records = ca_models.PaymentRecord.objects.filter(
@@ -113,14 +116,19 @@ class PullFromDatahubTask:
                 dh_payment_record,
                 PullFromDatahubTask.MAPPING_PAYMENT_RECORD_DICT,
             )
-            payment_record = PaymentRecord(**payment_record_args)
-            payment_record.business_area = BusinessArea.objects.get(
+
+            payment_record_args["business_area"] = BusinessArea.objects.get(
                 code=dh_payment_record.business_area
             )
-            payment_record.service_provider = ServiceProvider.objects.get(
+            print(dh_payment_record.service_provider_ca_id)
+            payment_record_args[
+                "service_provider"
+            ] = ServiceProvider.objects.get(
                 ca_id=dh_payment_record.service_provider_ca_id
             )
-            yield payment_record
+            (payment_record, created,) = PaymentRecord.objects.update_or_create(
+                ca_id=dh_payment_record.ca_id, defaults=payment_record_args
+            )
 
     def copy_service_providers(self, session):
         dh_service_providers = ca_models.ServiceProvider.objects.filter(
@@ -131,11 +139,16 @@ class PullFromDatahubTask:
                 dh_service_provider,
                 PullFromDatahubTask.MAPPING_SERVICE_PROVIDER_DICT,
             )
-            service_provider = ServiceProvider(**service_provider_args)
-            service_provider.business_area = BusinessArea.objects.get(
+            service_provider_args["business_area"] = BusinessArea.objects.get(
                 code=dh_service_provider.business_area
             )
-            yield service_provider
+            (
+                service_provider,
+                created,
+            ) = ServiceProvider.objects.update_or_create(
+                ca_id=dh_service_provider.ca_id, defaults=service_provider_args
+            )
+            print(service_provider)
 
     def copy_programs_ids(self, session):
         dh_programs = ca_models.Programme.objects.filter(session=session)
