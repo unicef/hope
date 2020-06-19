@@ -454,6 +454,20 @@ export type FinalizeTargetPopulationMutation = {
 
 
 
+export type GroupAttributeNode = {
+   __typename?: 'GroupAttributeNode',
+  id: Scalars['UUID'],
+  name: Scalars['String'],
+  label: Scalars['JSONString'],
+  flexAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
+  labelEn?: Maybe<Scalars['String']>,
+};
+
+
+export type GroupAttributeNodeFlexAttributesArgs = {
+  flexField?: Maybe<Scalars['Boolean']>
+};
+
 export type HouseholdNode = Node & {
    __typename?: 'HouseholdNode',
   id: Scalars['ID'],
@@ -1534,6 +1548,7 @@ export type Query = {
   allBusinessAreas?: Maybe<BusinessAreaNodeConnection>,
   allLogEntries?: Maybe<LogEntryObjectConnection>,
   allFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
+  allGroupsWithFields?: Maybe<Array<Maybe<GroupAttributeNode>>>,
   koboProject?: Maybe<KoboAssetObject>,
   allKoboProjects?: Maybe<KoboAssetObjectConnection>,
   program?: Maybe<ProgramNode>,
@@ -1867,6 +1882,12 @@ export type QueryAllRegistrationDataImportsArgs = {
   orderBy?: Maybe<Scalars['String']>
 };
 
+export enum RegistrationDataImportDatahubImportDone {
+  NotStarted = 'NOT_STARTED',
+  Started = 'STARTED',
+  Done = 'DONE'
+}
+
 export type RegistrationDataImportDatahubNode = Node & {
    __typename?: 'RegistrationDataImportDatahubNode',
   id: Scalars['ID'],
@@ -1876,7 +1897,8 @@ export type RegistrationDataImportDatahubNode = Node & {
   importDate: Scalars['DateTime'],
   hctId?: Maybe<Scalars['UUID']>,
   importData?: Maybe<ImportDataNode>,
-  importDone: Scalars['Boolean'],
+  importDone: RegistrationDataImportDatahubImportDone,
+  businessAreaSlug: Scalars['String'],
   households: ImportedHouseholdNodeConnection,
   individuals: ImportedIndividualNodeConnection,
 };
@@ -3856,9 +3878,13 @@ export type FlexFieldsQueryVariables = {};
 
 export type FlexFieldsQuery = (
   { __typename?: 'Query' }
-  & { allFieldsAttributes: Maybe<Array<Maybe<(
-    { __typename?: 'FieldAttributeNode' }
-    & Pick<FieldAttributeNode, 'id' | 'type' | 'name' | 'labelEn'>
+  & { allGroupsWithFields: Maybe<Array<Maybe<(
+    { __typename?: 'GroupAttributeNode' }
+    & Pick<GroupAttributeNode, 'name' | 'labelEn'>
+    & { flexAttributes: Maybe<Array<Maybe<(
+      { __typename?: 'FieldAttributeNode' }
+      & Pick<FieldAttributeNode, 'id' | 'labelEn' | 'associatedWith'>
+    )>>> }
   )>>> }
 );
 
@@ -7226,11 +7252,14 @@ export type FinalHouseholdsListByTargetingCriteriaLazyQueryHookResult = ReturnTy
 export type FinalHouseholdsListByTargetingCriteriaQueryResult = ApolloReactCommon.QueryResult<FinalHouseholdsListByTargetingCriteriaQuery, FinalHouseholdsListByTargetingCriteriaQueryVariables>;
 export const FlexFieldsDocument = gql`
     query FlexFields {
-  allFieldsAttributes(flexField: true) {
-    id
-    type
+  allGroupsWithFields {
     name
     labelEn
+    flexAttributes {
+      id
+      labelEn
+      associatedWith
+    }
   }
 }
     `;
@@ -7574,6 +7603,8 @@ export type ResolversTypes = {
   PaymentRecordEntitlementCardStatus: PaymentRecordEntitlementCardStatus,
   PaymentRecordDeliveryType: PaymentRecordDeliveryType,
   ChoiceObject: ResolverTypeWrapper<ChoiceObject>,
+  GroupAttributeNode: ResolverTypeWrapper<GroupAttributeNode>,
+  JSONString: ResolverTypeWrapper<Scalars['JSONString']>,
   KoboAssetObject: ResolverTypeWrapper<KoboAssetObject>,
   KoboAssetObjectConnection: ResolverTypeWrapper<KoboAssetObjectConnection>,
   KoboAssetObjectEdge: ResolverTypeWrapper<KoboAssetObjectEdge>,
@@ -7589,11 +7620,11 @@ export type ResolversTypes = {
   RegistrationDataImportDatahubNode: ResolverTypeWrapper<RegistrationDataImportDatahubNode>,
   ImportDataNode: ResolverTypeWrapper<ImportDataNode>,
   ImportDataDataType: ImportDataDataType,
+  RegistrationDataImportDatahubImportDone: RegistrationDataImportDatahubImportDone,
   ImportedHouseholdNodeConnection: ResolverTypeWrapper<ImportedHouseholdNodeConnection>,
   ImportedHouseholdNodeEdge: ResolverTypeWrapper<ImportedHouseholdNodeEdge>,
   ImportedIndividualNodeConnection: ResolverTypeWrapper<ImportedIndividualNodeConnection>,
   ImportedIndividualNodeEdge: ResolverTypeWrapper<ImportedIndividualNodeEdge>,
-  JSONString: ResolverTypeWrapper<Scalars['JSONString']>,
   ImportedDocumentNodeConnection: ResolverTypeWrapper<ImportedDocumentNodeConnection>,
   ImportedDocumentNodeEdge: ResolverTypeWrapper<ImportedDocumentNodeEdge>,
   ImportedDocumentNode: ResolverTypeWrapper<ImportedDocumentNode>,
@@ -7724,6 +7755,8 @@ export type ResolversParentTypes = {
   PaymentRecordEntitlementCardStatus: PaymentRecordEntitlementCardStatus,
   PaymentRecordDeliveryType: PaymentRecordDeliveryType,
   ChoiceObject: ChoiceObject,
+  GroupAttributeNode: GroupAttributeNode,
+  JSONString: Scalars['JSONString'],
   KoboAssetObject: KoboAssetObject,
   KoboAssetObjectConnection: KoboAssetObjectConnection,
   KoboAssetObjectEdge: KoboAssetObjectEdge,
@@ -7739,11 +7772,11 @@ export type ResolversParentTypes = {
   RegistrationDataImportDatahubNode: RegistrationDataImportDatahubNode,
   ImportDataNode: ImportDataNode,
   ImportDataDataType: ImportDataDataType,
+  RegistrationDataImportDatahubImportDone: RegistrationDataImportDatahubImportDone,
   ImportedHouseholdNodeConnection: ImportedHouseholdNodeConnection,
   ImportedHouseholdNodeEdge: ImportedHouseholdNodeEdge,
   ImportedIndividualNodeConnection: ImportedIndividualNodeConnection,
   ImportedIndividualNodeEdge: ImportedIndividualNodeEdge,
-  JSONString: Scalars['JSONString'],
   ImportedDocumentNodeConnection: ImportedDocumentNodeConnection,
   ImportedDocumentNodeEdge: ImportedDocumentNodeEdge,
   ImportedDocumentNode: ImportedDocumentNode,
@@ -8032,6 +8065,14 @@ export interface FlexFieldsScalarScalarConfig extends GraphQLScalarTypeConfig<Re
 export interface GeoJsonScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['GeoJSON'], any> {
   name: 'GeoJSON'
 }
+
+export type GroupAttributeNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['GroupAttributeNode'] = ResolversParentTypes['GroupAttributeNode']> = {
+  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  label?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
+  flexAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType, GroupAttributeNodeFlexAttributesArgs>,
+  labelEn?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
 
 export type HouseholdNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['HouseholdNode'] = ResolversParentTypes['HouseholdNode']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
@@ -8465,6 +8506,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allBusinessAreas?: Resolver<Maybe<ResolversTypes['BusinessAreaNodeConnection']>, ParentType, ContextType, QueryAllBusinessAreasArgs>,
   allLogEntries?: Resolver<Maybe<ResolversTypes['LogEntryObjectConnection']>, ParentType, ContextType, RequireFields<QueryAllLogEntriesArgs, 'objectId'>>,
   allFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType, QueryAllFieldsAttributesArgs>,
+  allGroupsWithFields?: Resolver<Maybe<Array<Maybe<ResolversTypes['GroupAttributeNode']>>>, ParentType, ContextType>,
   koboProject?: Resolver<Maybe<ResolversTypes['KoboAssetObject']>, ParentType, ContextType, RequireFields<QueryKoboProjectArgs, 'uid' | 'businessAreaSlug'>>,
   allKoboProjects?: Resolver<Maybe<ResolversTypes['KoboAssetObjectConnection']>, ParentType, ContextType, RequireFields<QueryAllKoboProjectsArgs, 'businessAreaSlug'>>,
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType, RequireFields<QueryProgramArgs, 'id'>>,
@@ -8514,7 +8556,8 @@ export type RegistrationDataImportDatahubNodeResolvers<ContextType = any, Parent
   importDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   hctId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
   importData?: Resolver<Maybe<ResolversTypes['ImportDataNode']>, ParentType, ContextType>,
-  importDone?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  importDone?: Resolver<ResolversTypes['RegistrationDataImportDatahubImportDone'], ParentType, ContextType>,
+  businessAreaSlug?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   households?: Resolver<ResolversTypes['ImportedHouseholdNodeConnection'], ParentType, ContextType, RegistrationDataImportDatahubNodeHouseholdsArgs>,
   individuals?: Resolver<ResolversTypes['ImportedIndividualNodeConnection'], ParentType, ContextType, RegistrationDataImportDatahubNodeIndividualsArgs>,
 };
@@ -8795,6 +8838,7 @@ export type Resolvers<ContextType = any> = {
   FinalizeTargetPopulationMutation?: FinalizeTargetPopulationMutationResolvers<ContextType>,
   FlexFieldsScalar?: GraphQLScalarType,
   GeoJSON?: GraphQLScalarType,
+  GroupAttributeNode?: GroupAttributeNodeResolvers<ContextType>,
   HouseholdNode?: HouseholdNodeResolvers<ContextType>,
   HouseholdNodeConnection?: HouseholdNodeConnectionResolvers<ContextType>,
   HouseholdNodeEdge?: HouseholdNodeEdgeResolvers<ContextType>,
