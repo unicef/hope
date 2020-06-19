@@ -38,7 +38,7 @@ class Household(SessionModel):
     admin2 = models.CharField(max_length=255, null=True)
     country = CountryField(null=True)
     residence_status = models.CharField(
-        max_length=255, choices=RESIDENCE_STATUS_CHOICE,
+        max_length=255, choices=RESIDENCE_STATUS_CHOICE, null=True
     )
     registration_date = models.DateField(null=True)
 
