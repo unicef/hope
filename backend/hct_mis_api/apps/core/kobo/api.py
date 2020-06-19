@@ -1,7 +1,7 @@
+import os
 from io import BytesIO
 
 import requests
-from PIL import Image
 
 from core.models import BusinessArea
 
@@ -15,7 +15,9 @@ class TokenInvalid(Exception):
 
 
 class KoboAPI:
-    KPI_URL = "https://kobo.humanitarianresponse.info"
+    KPI_URL = os.getenv(
+        "KOBO_API_URL", "https://kobo.humanitarianresponse.info"
+    )
 
     def __init__(self, business_area_slug, kpi_url: str = None):
         if kpi_url:
