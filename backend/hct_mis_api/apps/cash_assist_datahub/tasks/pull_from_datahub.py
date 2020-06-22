@@ -74,10 +74,10 @@ class PullFromDatahubTask:
             self.copy_session(session)
 
     def build_arg_dict(self, model_object, mapping_dict):
-        args = {}
-        for key in mapping_dict:
-            args[key] = nested_getattr(model_object, mapping_dict[key], None)
-        return args
+        return {
+            key: nested_getattr(model_object, mapping_dict[key])
+            for key in mapping_dict
+        }
 
     def copy_session(self, session):
         session.status = session.STATUS_PROCESSING
