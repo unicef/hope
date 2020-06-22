@@ -34,6 +34,7 @@ class PaymentRecord(TimeStampedUUIDModel):
         "program.CashPlan",
         on_delete=models.CASCADE,
         related_name="payment_records",
+        null=True
     )
     household = models.ForeignKey(
         "household.Household",

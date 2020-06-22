@@ -120,7 +120,6 @@ class PullFromDatahubTask:
             payment_record_args["business_area"] = BusinessArea.objects.get(
                 code=dh_payment_record.business_area
             )
-            print(dh_payment_record.service_provider_ca_id)
             payment_record_args[
                 "service_provider"
             ] = ServiceProvider.objects.get(
@@ -148,7 +147,6 @@ class PullFromDatahubTask:
             ) = ServiceProvider.objects.update_or_create(
                 ca_id=dh_service_provider.ca_id, defaults=service_provider_args
             )
-            print(service_provider)
 
     def copy_programs_ids(self, session):
         dh_programs = ca_models.Programme.objects.filter(session=session)
