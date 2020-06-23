@@ -210,8 +210,8 @@ export type CashPlanNode = Node & {
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
   businessArea: BusinessAreaNode,
-  caId: Scalars['String'],
-  caHashId: Scalars['UUID'],
+  caId?: Maybe<Scalars['String']>,
+  caHashId?: Maybe<Scalars['UUID']>,
   status: CashPlanStatus,
   statusDate: Scalars['DateTime'],
   name: Scalars['String'],
@@ -311,7 +311,6 @@ export type CreateProgramInput = {
   startDate?: Maybe<Scalars['Date']>,
   endDate?: Maybe<Scalars['Date']>,
   description?: Maybe<Scalars['String']>,
-  programCaId?: Maybe<Scalars['String']>,
   budget?: Maybe<Scalars['Decimal']>,
   frequencyOfPayments?: Maybe<Scalars['String']>,
   sector?: Maybe<Scalars['String']>,
@@ -1369,9 +1368,9 @@ export type PaymentRecordNode = Node & {
   businessArea: BusinessAreaNode,
   status: PaymentRecordStatus,
   statusDate: Scalars['DateTime'],
-  caId: Scalars['String'],
-  caHashId: Scalars['UUID'],
-  cashPlan: CashPlanNode,
+  caId?: Maybe<Scalars['String']>,
+  caHashId?: Maybe<Scalars['UUID']>,
+  cashPlan?: Maybe<CashPlanNode>,
   household: HouseholdNode,
   fullName: Scalars['String'],
   totalPersonsCovered: Scalars['Int'],
@@ -1419,12 +1418,14 @@ export type ProgramNode = Node & {
   id: Scalars['ID'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
+  lastSyncAt?: Maybe<Scalars['DateTime']>,
   name: Scalars['String'],
   status: ProgramStatus,
   startDate: Scalars['Date'],
   endDate: Scalars['Date'],
   description: Scalars['String'],
-  programCaId: Scalars['String'],
+  caId?: Maybe<Scalars['String']>,
+  caHashId?: Maybe<Scalars['String']>,
   adminAreas: AdminAreaNodeConnection,
   businessArea: BusinessAreaNode,
   budget?: Maybe<Scalars['Decimal']>,
@@ -1935,9 +1936,7 @@ export type RegistrationDataImportDatahubNodeEdge = {
 
 export enum RegistrationDataImportDataSource {
   Xls = 'XLS',
-  A_3RdParty = 'A_3RD_PARTY',
-  Xml = 'XML',
-  Other = 'OTHER'
+  Kobo = 'KOBO'
 }
 
 export type RegistrationDataImportNode = Node & {
@@ -2135,6 +2134,8 @@ export type TargetPopulationNode = Node & {
   updatedAt: Scalars['DateTime'],
   isRemoved: Scalars['Boolean'],
   name: Scalars['String'],
+  caId?: Maybe<Scalars['String']>,
+  caHashId?: Maybe<Scalars['String']>,
   createdBy?: Maybe<UserNode>,
   approvedAt?: Maybe<Scalars['DateTime']>,
   approvedBy?: Maybe<UserNode>,
@@ -2229,7 +2230,6 @@ export type UpdateProgramInput = {
   startDate?: Maybe<Scalars['Date']>,
   endDate?: Maybe<Scalars['Date']>,
   description?: Maybe<Scalars['String']>,
-  programCaId?: Maybe<Scalars['String']>,
   budget?: Maybe<Scalars['Decimal']>,
   frequencyOfPayments?: Maybe<Scalars['String']>,
   sector?: Maybe<Scalars['String']>,
@@ -2541,14 +2541,14 @@ export type HouseholdDetailedFragment = (
       & { node: Maybe<(
         { __typename?: 'PaymentRecordNode' }
         & Pick<PaymentRecordNode, 'id' | 'fullName'>
-        & { cashPlan: (
+        & { cashPlan: Maybe<(
           { __typename?: 'CashPlanNode' }
           & Pick<CashPlanNode, 'id' | 'totalPersonsCovered' | 'totalDeliveredQuantity' | 'assistanceMeasurement'>
           & { program: (
             { __typename?: 'ProgramNode' }
             & Pick<ProgramNode, 'id' | 'name'>
           ) }
-        ) }
+        )> }
       )> }
     )>> }
   ) }
@@ -2697,7 +2697,7 @@ export type CreateProgramMutation = (
     { __typename?: 'CreateProgram' }
     & { program: Maybe<(
       { __typename?: 'ProgramNode' }
-      & Pick<ProgramNode, 'id' | 'name' | 'status' | 'startDate' | 'endDate' | 'programCaId' | 'budget' | 'description' | 'frequencyOfPayments' | 'sector' | 'scope' | 'cashPlus' | 'populationGoal'>
+      & Pick<ProgramNode, 'id' | 'name' | 'status' | 'startDate' | 'endDate' | 'caId' | 'budget' | 'description' | 'frequencyOfPayments' | 'sector' | 'scope' | 'cashPlus' | 'populationGoal'>
     )> }
   )> }
 );
@@ -2855,7 +2855,7 @@ export type UpdateProgramMutation = (
     { __typename?: 'UpdateProgram' }
     & { program: Maybe<(
       { __typename?: 'ProgramNode' }
-      & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'programCaId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'administrativeAreasOfImplementation'>
+      & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'administrativeAreasOfImplementation'>
     )> }
   )> }
 );
@@ -3143,14 +3143,14 @@ export type AllPaymentRecordsQuery = (
         & { household: (
           { __typename?: 'HouseholdNode' }
           & Pick<HouseholdNode, 'id' | 'size'>
-        ), cashPlan: (
+        ), cashPlan: Maybe<(
           { __typename?: 'CashPlanNode' }
           & Pick<CashPlanNode, 'id'>
           & { program: (
             { __typename?: 'ProgramNode' }
             & Pick<ProgramNode, 'id' | 'name'>
           ) }
-        ) }
+        )> }
       )> }
     )>> }
   )> }
@@ -3173,7 +3173,7 @@ export type AllProgramsQuery = (
       { __typename?: 'ProgramNodeEdge' }
       & { node: Maybe<(
         { __typename?: 'ProgramNode' }
-        & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'programCaId' | 'description' | 'budget' | 'frequencyOfPayments' | 'populationGoal' | 'sector' | 'totalNumberOfHouseholds'>
+        & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'populationGoal' | 'sector' | 'totalNumberOfHouseholds'>
       )> }
     )>> }
   )> }
@@ -3230,7 +3230,7 @@ export type AllUsersQuery = (
       { __typename?: 'UserNodeEdge' }
       & { node: Maybe<(
         { __typename?: 'UserNode' }
-        & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
+        & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
       )> }
     )>> }
   )> }
@@ -3336,14 +3336,14 @@ export type PaymentRecordQuery = (
     ), targetPopulation: (
       { __typename?: 'TargetPopulationNode' }
       & Pick<TargetPopulationNode, 'id' | 'name'>
-    ), cashPlan: (
+    ), cashPlan: Maybe<(
       { __typename?: 'CashPlanNode' }
       & Pick<CashPlanNode, 'id' | 'caId'>
       & { program: (
         { __typename?: 'ProgramNode' }
         & Pick<ProgramNode, 'id' | 'name'>
       ) }
-    ), serviceProvider: (
+    )>, serviceProvider: (
       { __typename?: 'ServiceProviderNode' }
       & Pick<ServiceProviderNode, 'id' | 'fullName' | 'shortName'>
     ) }
@@ -3359,7 +3359,7 @@ export type ProgramQuery = (
   { __typename?: 'Query' }
   & { program: Maybe<(
     { __typename?: 'ProgramNode' }
-    & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'programCaId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'administrativeAreasOfImplementation'>
+    & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'administrativeAreasOfImplementation'>
   )> }
 );
 
@@ -4296,7 +4296,7 @@ export const CreateProgramDocument = gql`
       status
       startDate
       endDate
-      programCaId
+      caId
       budget
       description
       frequencyOfPayments
@@ -4704,7 +4704,7 @@ export const UpdateProgramDocument = gql`
       startDate
       endDate
       status
-      programCaId
+      caId
       description
       budget
       frequencyOfPayments
@@ -5419,7 +5419,7 @@ export const AllProgramsDocument = gql`
         startDate
         endDate
         status
-        programCaId
+        caId
         description
         budget
         frequencyOfPayments
@@ -5565,6 +5565,7 @@ export const AllUsersDocument = gql`
         id
         firstName
         lastName
+        email
       }
     }
   }
@@ -5995,7 +5996,7 @@ export const ProgramDocument = gql`
     startDate
     endDate
     status
-    programCaId
+    caId
     description
     budget
     frequencyOfPayments
@@ -7896,8 +7897,8 @@ export type CashPlanNodeResolvers<ContextType = any, ParentType extends Resolver
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   businessArea?: Resolver<ResolversTypes['BusinessAreaNode'], ParentType, ContextType>,
-  caId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  caHashId?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
+  caId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  caHashId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
   status?: Resolver<ResolversTypes['CashPlanStatus'], ParentType, ContextType>,
   statusDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
@@ -8424,9 +8425,9 @@ export type PaymentRecordNodeResolvers<ContextType = any, ParentType extends Res
   businessArea?: Resolver<ResolversTypes['BusinessAreaNode'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['PaymentRecordStatus'], ParentType, ContextType>,
   statusDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  caId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  caHashId?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
-  cashPlan?: Resolver<ResolversTypes['CashPlanNode'], ParentType, ContextType>,
+  caId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  caHashId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
+  cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
   household?: Resolver<ResolversTypes['HouseholdNode'], ParentType, ContextType>,
   fullName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   totalPersonsCovered?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
@@ -8460,12 +8461,14 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['ProgramStatus'], ParentType, ContextType>,
   startDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   endDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   description?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  programCaId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  caId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  caHashId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   adminAreas?: Resolver<ResolversTypes['AdminAreaNodeConnection'], ParentType, ContextType, ProgramNodeAdminAreasArgs>,
   businessArea?: Resolver<ResolversTypes['BusinessAreaNode'], ParentType, ContextType>,
   budget?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
@@ -8683,6 +8686,8 @@ export type TargetPopulationNodeResolvers<ContextType = any, ParentType extends 
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  caId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  caHashId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   approvedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   approvedBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
