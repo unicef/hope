@@ -25,7 +25,7 @@ export function FinishedProgramDetailsPageHeaderButtons({
           variant='contained'
           color='primary'
           component='a'
-          href={`/cashassist/${program.programCaId}`}
+          href={`/cashassist/${program.caId}`}
           startIcon={<OpenInNewRoundedIcon />}
         >
           OPEN IN CASHSSIST

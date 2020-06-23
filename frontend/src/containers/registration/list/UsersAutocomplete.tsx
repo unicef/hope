@@ -54,7 +54,10 @@ export function UsersAutocomplete({
         if (!option.node) {
           return '';
         }
-        return `${option.node.firstName} ${option.node.lastName}`;
+          const name = option.node.firstName
+              ? `${option.node.firstName} ${option.node.lastName}`
+              : option.node.email;
+        return name;
       }}
       options={get(data, 'allUsers.edges', [])}
       loading={loading}
