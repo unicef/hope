@@ -192,9 +192,9 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
     def final_stats(self):
         if self.status == "Draft":
             return None
-        elif self.status == "APPROVED":
-            households_ids = Household.objects.filter(
-                self.candidate_list_targeting_criteria.get_query()
+        elif self.status == TargetPopulation.STATUS_APPROVED:
+            households_ids = self.households.filter(
+                self.final_list_targeting_criteria.get_query()
             ).values_list("id")
         else:
             households_ids = self.final_list.values_list("id")
