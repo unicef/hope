@@ -23,7 +23,9 @@ class UsersFilter(FilterSet):
     def filter_by_full_name(self, qs, name, value):
         for term in value.split():
             qs = qs.filter(
-                Q(first_name__icontains=term) | Q(last_name__icontains=term)
+                Q(first_name__icontains=term)
+                | Q(last_name__icontains=term)
+                | Q(email__icontains=term)
             )
         return qs
 
