@@ -54,6 +54,8 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
     STATUS_FINALIZED= "FINALIZED"
 
     name = models.TextField(unique=True)
+    ca_id = models.CharField(max_length=255,null=True)
+    ca_hash_id = models.CharField(max_length=255,null=True)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
