@@ -19,6 +19,7 @@ export const TargetPopulation = gql`
       program {
         id
         name
+        status
       }
       createdBy {
         firstName
@@ -76,13 +77,13 @@ export const TargetPopulation = gql`
           }
         }
       }
-      candidateStats{
+      candidateStats {
         childMale
         childFemale
         adultMale
         adultFemale
       }
-      finalStats{
+      finalStats {
         childMale
         childFemale
         adultMale

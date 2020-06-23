@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { Button } from '@material-ui/core';
+import { Button, Tooltip } from '@material-ui/core';
 import { FileCopy, EditRounded } from '@material-ui/icons';
 import { TargetPopulationNode } from '../../../__generated__/graphql';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
@@ -34,6 +34,10 @@ export function ApprovedTargetPopulationHeaderButtons({
 }: ApprovedTargetPopulationHeaderButtonsPropTypes): React.ReactElement {
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openFinalize, setOpenFinalize] = useState(false);
+  console.log(
+    'targetPopulation.program.status',
+    targetPopulation.program.status,
+  );
   return (
     <div>
       <IconContainer>
@@ -54,14 +58,25 @@ export function ApprovedTargetPopulationHeaderButtons({
         </ButtonContainer>
       )}
       <ButtonContainer>
-        <Button
-          variant='contained'
-          color='primary'
-          onClick={() => setOpenFinalize(true)}
-          data-cy='button-target-population-send-to-cash-assist'
+        <Tooltip
+          title={
+            targetPopulation.program.status !== 'ACTIVE'
+              ? 'Assigned programme is not ACTIVE'
+              : 'Send to cash assist'
+          }
         >
-          Send to cash assist
-        </Button>
+          <span>
+            <Button
+              variant='contained'
+              color='primary'
+              disabled={targetPopulation.program.status !== 'ACTIVE'}
+              onClick={() => setOpenFinalize(true)}
+              data-cy='button-target-population-send-to-cash-assist'
+            >
+              Send to cash assist
+            </Button>
+          </span>
+        </Tooltip>
       </ButtonContainer>
       <DuplicateTargetPopulation
         open={openDuplicate}
