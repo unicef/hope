@@ -75,7 +75,8 @@ class Program(TimeStampedUUIDModel, AbstractSyncable):
         max_length=255,
         validators=[MinLengthValidator(3), MaxLengthValidator(255)],
     )
-    program_ca_id = models.CharField(max_length=255)
+    ca_id = models.CharField(max_length=255, null=True)
+    ca_hash_id = models.CharField(max_length=255, null=True)
     admin_areas = models.ManyToManyField(
         "core.AdminArea", related_name="programs", blank=True,
     )
@@ -131,8 +132,8 @@ class CashPlan(TimeStampedUUIDModel):
     business_area = models.ForeignKey(
         "core.BusinessArea", on_delete=models.CASCADE
     )
-    ca_id = models.CharField(max_length=255)
-    ca_hash_id = models.UUIDField(unique=True)
+    ca_id = models.CharField(max_length=255, null=True)
+    ca_hash_id = models.UUIDField(unique=True, null=True)
     status = models.CharField(max_length=255, choices=STATUS_CHOICE,)
     status_date = models.DateTimeField()
     name = models.CharField(max_length=255)

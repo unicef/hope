@@ -37,8 +37,8 @@ class PaymentRecordFactory(factory.DjangoModelFactory):
     status_date = factory.Faker(
         "date_time_this_decade", before_now=False, after_now=True, tzinfo=utc,
     )
-    ca_id = factory.Faker("uuid4")
-    ca_hash_id = factory.Faker("uuid4")
+    # ca_id = factory.Faker("uuid4")
+    # ca_hash_id = factory.Faker("uuid4")
     cash_plan = factory.SubFactory(CashPlanFactory)
     household = factory.SubFactory(HouseholdFactory)
     total_persons_covered = factory.fuzzy.FuzzyInteger(1, 7)
