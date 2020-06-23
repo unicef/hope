@@ -97,13 +97,16 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         if value is None:
             return
 
-        document_data = self.documents.get(f"individual_{row_num}_{header}")
+        if header.startswith("other_id"):
+            document_data = self.documents.get(f"individual_{row_num}_other")
+        else:
+            document_data = self.documents.get(f"individual_{row_num}_{header}")
 
         if header == "other_id_type_i_c":
             if document_data:
                 document_data["name"] = value
             else:
-                self.documents[f"individual_{row_num}"] = {
+                self.documents[f"individual_{row_num}_other"] = {
                     "individual": individual,
                     "name": value,
                     "type": "OTHER",
@@ -112,7 +115,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             if document_data:
                 document_data["value"] = value
             else:
-                self.documents[f"individual_{row_num}"] = {
+                self.documents[f"individual_{row_num}_other"] = {
                     "individual": individual,
                     "value": value,
                     "type": "OTHER",
@@ -137,22 +140,24 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         if not self.image_loader.image_in(cell.coordinate):
             return
 
-        document_data = self.documents.get(f"individual_{row_num}_{header}")
+        if header.startswith("other_id"):
+            document_data = self.documents.get(f"individual_{row_num}_other")
+        else:
+            document_data = self.documents.get(f"individual_{row_num}_{header}")
 
-        image = self.image_loader.get(cell.coordinate)
-        file_name = f"{cell.coordinate}-{timezone.now()}.jpg"
-        file_io = BytesIO()
-
-        image.save(file_io, image.format)
-
-        file = File(file_io, name=file_name)
+        file = self._handle_image_field(cell)
 
         if document_data:
             document_data["photo"] = file
         else:
-            self.documents[f"individual_{row_num}_{header}"] = {
+            suffix = (
+                "other"
+                if header.startswith("other_id")
+                else header.replace("photo", "no")
+            )
+            self.documents[f"individual_{row_num}_{suffix}"] = {
                 "individual": individual,
-                "photo": file_name,
+                "photo": file.name,
             }
 
     def _handle_image_field(self, cell, is_flex_field=False, *args, **kwargs):
