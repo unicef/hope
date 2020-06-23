@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.admin import AdminSite
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -23,7 +24,9 @@ class TestFlexibles(TestCase):
         self.admin = FlexibleAttributeAdmin(FlexibleAttribute, site)
 
     def load_xls(self, name):
-        with open(f"hct_mis_api/apps/core/tests/test_files/{name}", "rb",) as f:
+        with open(
+            f"{settings.PROJECT_ROOT}/apps/core/tests/test_files/{name}", "rb",
+        ) as f:
             file_upload = SimpleUploadedFile(
                 "xls_file", f.read(), content_type="text/html"
             )
