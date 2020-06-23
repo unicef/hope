@@ -209,9 +209,9 @@ def age_to_birth_date_range_query(field_name, age_min, age_max):
     this_year = dt.date.today().year
     if age_min == age_max and age_min is not None:
         return Q(**{f"{field_name}__year": this_year - age_min})
-    if age_min:
+    if age_min is not None:
         query_dict[f"{field_name}__year__lte"] = this_year - age_min
-    if age_max:
+    if age_max is not None:
         query_dict[f"{field_name}__year__gte"] = this_year - age_max
     return Q(**query_dict)
 
