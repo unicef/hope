@@ -9,7 +9,9 @@ The goal of Iteration Six is to integrate finalize the plans and begin developme
 ## **Architectural design / Project Management Deliverables**
 
 * Sign-off the functional/technical specifications and flows for Registration Data Import deduplication process to be implemented in later Iterations.
-* Sign-off the functional/technical specifications & designs for Payment Verification and Grievances & Feedback Section to be implemented in later Iterations.
+* Sign-off the functional/technical specifications & designs for Grievances & Feedback Section to be implemented in later Iterations.
+* Sign-off the functional/technical specification & designs for User Management Section to be implemented in later Iterations.
+* Start discussion of Reports and Dashboard modules.
 * Interface with core Kobo team on technical / testing details.
 * Maintain Project Roadmap / Timeline.
 * Participate in briefing and workshop remotely or in-person as required by UNICEF
@@ -20,9 +22,15 @@ The goal of Iteration Six is to integrate finalize the plans and begin developme
   * List of Cash Plans Screen
   * Cash Plan Details + Start Verification Process
     * Full List Verification
-    * Random Sampling Verification
+      * XLSX import
+    * Random Sampling Verification \(SRS\)
+      * XLSX import
   * Verification Details
-  * 
+  * Data model changes \(Verification ID ?\)
+* Grievances & Feedback \(standalone module\)
+  * Frontend flow of creating a new ticket
+  * Grievance list view
+  * Feedback list view
 
 
 
