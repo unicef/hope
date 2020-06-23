@@ -16,20 +16,15 @@ The goal of Iteration Six is to integrate finalize the plans and begin developme
 
 ## **Technical Deliverables**
 
-* Complete development of any further Core Fields changes from Iteration 4 that were not fully finalized.
-* Show flex fields that are in the system to the user aka Catalogue.
-* Kobo setup within Azure:
-  * Deliver a **helm chart** for Kobo that can be deployed on Azure environments of HOPE \(dev/staging/uat/prod\).
-  * Leverage the Kobo service setup via this helm package then, to interface with the HOPE system.
-  * Nice to have \(out of scope if no time remaining\):
-    * Work to make the helm chart be publicly available / maintained then by the open-source community or the Kobo team.
-    * Helm chart tested and working in an AWS environment as well.
-* Frontend and backend HOPE **integration with Kobo** to import data \(extension of XLS based registration data import\).
-* Finalize and implement the CashAssist Datahub schema.
-* Airflow based integration to **pull and push data from CashAssist Datahub**. This includes things like: programs, target population \(and included households/individuals as necessary\), cash plans, payment records etc.
-  * Out of scope: 
-    * Integrating CashAssist with the Datahub is not Tivix responsibility and will be done by the CashAssist team with help from UNICEF ICTD team.
-* E2E testing / QA support to UNICEF QA team
+* Complete Version one of Payment Verification
+  * List of Cash Plans Screen
+  * Cash Plan Details + Start Verification Process
+    * Full List Verification
+    * Random Sampling Verification
+  * Verification Details
+  * 
+
+
 
 ## **UX / UI Design Deliverables**
 
