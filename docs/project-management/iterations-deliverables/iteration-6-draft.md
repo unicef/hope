@@ -13,7 +13,7 @@ The goal of Iteration Six is to integrate finalize the plans and begin developme
   * Grievances & Feedback Section \(pending items\)
   * User Management Section
 * Start discussion of Reports and Dashboard modules.
-* Interface with core Kobo team on technical / testing details.
+* Interface with core Kobo team on technical / testing details on any pending items like uploads being on blob storage.
 * Maintain Project Roadmap / Timeline.
 * Participate in briefing and workshop remotely or in-person as required by UNICEF
 * **RapidPro**
@@ -29,7 +29,7 @@ The goal of Iteration Six is to integrate finalize the plans and begin developme
       * XLSX import
   * Verification Details
   * Data model changes \(Verification ID ?\)
-* Grievances & Feedback \(standalone module\)
+* Grievances & Feedback \(except for data change/dedupe handling\)
   * Frontend flow of creating \(editing?\) a new ticket
   * Ticket list view
   * Ticket details
@@ -40,4 +40,10 @@ The goal of Iteration Six is to integrate finalize the plans and begin developme
 * Design final clickable prototype of Payment Verification and Grievances/Feedback Tab
 * Continued refinement of mockups.
 * Demo / webinar for peer review with country offices \(if feasible\).
+
+## **UNICEF Deliverables**
+
+* Working in-country RapidPro setup.
+
+
 
