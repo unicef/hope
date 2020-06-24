@@ -8,9 +8,10 @@ The goal of Iteration Six is to integrate finalize the plans and begin developme
 
 ## **Architectural design / Project Management Deliverables**
 
-* Sign-off the functional/technical specifications and flows for Registration Data Import deduplication process to be implemented in later Iterations.
-* Sign-off the functional/technical specifications & designs for Grievances & Feedback Section to be implemented in later Iterations.
-* Sign-off the functional/technical specification & designs for User Management Section to be implemented in later Iterations.
+* Sign-off the functional/technical specifications and flows for features to be implemented in later Iterations:
+  * Registration Data Import deduplication process
+  * Grievances & Feedback Section \(pending items\)
+  * User Management Section
 * Start discussion of Reports and Dashboard modules.
 * Interface with core Kobo team on technical / testing details.
 * Maintain Project Roadmap / Timeline.
@@ -29,11 +30,9 @@ The goal of Iteration Six is to integrate finalize the plans and begin developme
   * Verification Details
   * Data model changes \(Verification ID ?\)
 * Grievances & Feedback \(standalone module\)
-  * Frontend flow of creating a new ticket
-  * Grievance list view
-  * Feedback list view
-
-
+  * Frontend flow of creating \(editing?\) a new ticket
+  * Ticket list view
+  * Ticket details
 
 ## **UX / UI Design Deliverables**
 
