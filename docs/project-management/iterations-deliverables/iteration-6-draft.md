@@ -15,11 +15,12 @@ The goal of Iteration Six is to integrate finalize the plans and begin developme
 * Interface with core Kobo team on technical / testing details.
 * Maintain Project Roadmap / Timeline.
 * Participate in briefing and workshop remotely or in-person as required by UNICEF
+* **RapidPro**
 
 ## **Technical Deliverables**
 
-* Complete Version one of Payment Verification
-  * List of Cash Plans Screen
+* Complete development of the Payment Verification Module according to the signed off requirements from Iteration 5:
+  * Search, Filter, and Table List view of Cash Plans in new Module.
   * Cash Plan Details + Start Verification Process
     * Full List Verification
       * XLSX import
