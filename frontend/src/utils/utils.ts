@@ -5,6 +5,7 @@ import {
   ChoiceObject,
   ProgramStatus,
 } from '../__generated__/graphql';
+import { TARGETING_STATES } from './constants';
 
 const Gender = new Map([
   ['MALE', 'Male'],
@@ -290,16 +291,7 @@ export function mapCriteriasToInitialValues(criteria) {
 }
 
 export function targetPopulationStatusMapping(status): string {
-  switch (status) {
-    case 'DRAFT':
-      return 'Open';
-    case 'APPROVED':
-      return 'Closed';
-    case 'FINALIZED':
-      return 'Sent';
-    default:
-      return status;
-  }
+  return TARGETING_STATES[status]
 }
 
 export function stableSort(array, comparator) {
