@@ -4,6 +4,7 @@ import { TextField, InputAdornment, MenuItem, FormControl } from '@material-ui/c
 import { Person, Search, Group } from '@material-ui/icons';
 import Select from '../../shared/Select';
 import InputLabel from '../../shared/InputLabel';
+import { TARGETING_STATES } from '../../utils/constants';
 
 const Container = styled.div`
   display: flex;
@@ -101,7 +102,7 @@ export function TargetPopulationFilters({
           ),
         }}
       />
-      
+
       <StyledFormControl variant='outlined' margin='dense'>
         <InputLabel>Status</InputLabel>
         <Select
@@ -118,10 +119,10 @@ export function TargetPopulationFilters({
             ),
           }}
         >
-        <MenuItem value=''>None</MenuItem>
-        <MenuItem value='DRAFT'>Open</MenuItem>
-        <MenuItem value='APPROVED'>Closed</MenuItem>
-        <MenuItem value='FINALIZED'>Sent</MenuItem>
+        <MenuItem value=''>{TARGETING_STATES.none}</MenuItem>
+        <MenuItem value='DRAFT'>{TARGETING_STATES.draft}</MenuItem>
+        <MenuItem value='APPROVED'>{TARGETING_STATES.approved}</MenuItem>
+        <MenuItem value='FINALIZED'>{TARGETING_STATES.finalized}</MenuItem>
         </Select>
       </StyledFormControl>
 
