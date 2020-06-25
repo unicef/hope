@@ -40,7 +40,7 @@ export const TargetPopulationTable = ({
         defaultOrderBy='createdAt'
         defaultOrderDirection='desc'
         initialVariables={initialVariables}
-        renderRow={(row) => <TargetPopulationTableRow targetPopulation={row} />}
+        renderRow={(row) => <TargetPopulationTableRow key={row.id} targetPopulation={row} />}
       />
     </TableWrapper>
   );
