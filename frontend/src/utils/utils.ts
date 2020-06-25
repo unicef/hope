@@ -291,16 +291,7 @@ export function mapCriteriasToInitialValues(criteria) {
 }
 
 export function targetPopulationStatusMapping(status): string {
-  switch (status) {
-    case 'DRAFT':
-      return TARGETING_STATES.draft;
-    case 'APPROVED':
-      return TARGETING_STATES.approved;
-    case 'FINALIZED':
-      return TARGETING_STATES.finalized;
-    default:
-      return status;
-  }
+  return TARGETING_STATES[status]
 }
 
 export function stableSort(array, comparator) {
