@@ -119,10 +119,10 @@ export function TargetPopulationFilters({
             ),
           }}
         >
-        <MenuItem value=''>{TARGETING_STATES.none}</MenuItem>
-        <MenuItem value='DRAFT'>{TARGETING_STATES.draft}</MenuItem>
-        <MenuItem value='APPROVED'>{TARGETING_STATES.approved}</MenuItem>
-        <MenuItem value='FINALIZED'>{TARGETING_STATES.finalized}</MenuItem>
+        <MenuItem value=''>{TARGETING_STATES.NONE}</MenuItem>
+        <MenuItem value='DRAFT'>{TARGETING_STATES.DRAFT}</MenuItem>
+        <MenuItem value='APPROVED'>{TARGETING_STATES.APPROVED}</MenuItem>
+        <MenuItem value='FINALIZED'>{TARGETING_STATES.FINALIZED}</MenuItem>
         </Select>
       </StyledFormControl>
 
