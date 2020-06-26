@@ -1,8 +1,6 @@
 # Iteration 6 \(DRAFT\)
 
-**Iteration 6: KoBo Helm Chart / Kubernetes Deliverables**
-
-The goal of Iteration Six is to integrate finalize the plans and begin development of the Payment Verification, Deduplication, and User Management.
+The goal of Iteration Six is to implement Payment Verification, Deduplication, and User Management.
 
 **Expected start/end date:** July 6 - September 11, 2020 \(10 weeks\)
 
@@ -47,7 +45,12 @@ The goal of Iteration Six is to integrate finalize the plans and begin developme
 
 ## **UNICEF Deliverables**
 
-* Working in-country RapidPro setup.
+* Working in-country **RapidPro** setup for all HCT MIS environments.
+* Leading work to get **Elastic Search** in all HCT MIS environments.
+
+## **Out of Scope**
+
+* Implementation of roles and permission checks and logic in various modules \(to be done in a future iteration\)
 
 
 
