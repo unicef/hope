@@ -112,7 +112,7 @@ const validationSchema = Yup.object().shape({
 
 export function RegistrationDataImport(): React.ReactElement {
   const [open, setOpen] = useState(false);
-  const [importType, setImportType] = useState();
+  const [importType, setImportType] = useState('');
   const [koboProject, setKoboProject] = useState();
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
@@ -248,6 +248,7 @@ export function RegistrationDataImport(): React.ReactElement {
         IMPORT
       </Button>
       <Dialog
+        id="rdi-dialog"
         open={open}
         onClose={() => setOpen(false)}
         scroll='paper'
@@ -294,9 +295,7 @@ export function RegistrationDataImport(): React.ReactElement {
             <Form>
               <DialogTitleWrapper>
                 <DialogTitle id='scroll-dialog-title'>
-                  <Typography variant='h6'>
-                    {t('Select File to Import')}
-                  </Typography>
+                  {t('Select File to Import')}
                 </DialogTitle>
               </DialogTitleWrapper>
               <DialogContent>
@@ -340,6 +339,7 @@ export function RegistrationDataImport(): React.ReactElement {
               </DialogContent>
               <StyledDialogFooter data-cy='dialog-actions-container'>
                 <Button
+                  id="download-template"
                   variant='text'
                   color='primary'
                   component='a'
