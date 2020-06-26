@@ -29,10 +29,14 @@ The goal of Iteration Six is to integrate finalize the plans and begin developme
       * XLSX import
   * Verification Details
   * Data model changes \(Verification ID ?\)
-* Grievances & Feedback \(except for data change/dedupe handling\)
-  * Frontend flow of creating \(editing?\) a new ticket
-  * Ticket list view
-  * Ticket details
+* User Management
+  * Not implementing Roles & Permissions
+* Deduplication
+  * 
+* ~~Grievances & Feedback \(except for data change/dedupe handling\)~~
+  * ~~Frontend flow of creating \(editing?\) a new ticket~~
+  * ~~Ticket list view~~
+  * ~~Ticket details~~
 
 ## **UX / UI Design Deliverables**
 
