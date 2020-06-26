@@ -18,7 +18,7 @@ The goal of Iteration Six is to implement Payment Verification, Deduplication, a
 
 ## **Technical Deliverables**
 
-* Complete development of the Payment Verification Module according to the signed off requirements from Iteration 5:
+* Complete development of the **Payment Verification** Module according to the signed off requirements from Iteration 5:
   * Search, Filter, and Table List view of Cash Plans in new Module.
   * Cash Plan Details + Start Verification Process
     * Full List Verification
@@ -27,14 +27,16 @@ The goal of Iteration Six is to implement Payment Verification, Deduplication, a
       * XLSX import
   * Verification Details
   * Data model changes \(Verification ID ?\)
-* User Management
+* **User Management**
+  * UI for adding/managing users
+    * HQ interface? Can we auto-allow based on AD groups?
+  * Teams?
   * Not implementing Roles & Permissions
-* Deduplication
-  * 
-* ~~Grievances & Feedback \(except for data change/dedupe handling\)~~
-  * ~~Frontend flow of creating \(editing?\) a new ticket~~
-  * ~~Ticket list view~~
-  * ~~Ticket details~~
+* **Deduplication**
+  * Within a batch/import \(RDI instance\)
+  * Pre-merge duplication against the golden record
+  * Flagging of batch/import records and golden records based on **sanctions list**
+  * Creation of grievance tickets based on above \(no UI\).
 
 ## **UX / UI Design Deliverables**
 
@@ -45,12 +47,13 @@ The goal of Iteration Six is to implement Payment Verification, Deduplication, a
 
 ## **UNICEF Deliverables**
 
+Following are the deliverables that UNICEF teams will have to work on and provide in a timeline manner during the iteration:
+
 * Working in-country **RapidPro** setup for all HCT MIS environments.
 * Leading work to get **Elastic Search** in all HCT MIS environments.
 
 ## **Out of Scope**
 
 * Implementation of roles and permission checks and logic in various modules \(to be done in a future iteration\)
-
-
+* UI for grievance tickets or management \(future iteration\)
 
