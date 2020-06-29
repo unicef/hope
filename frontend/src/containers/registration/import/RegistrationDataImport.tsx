@@ -97,7 +97,7 @@ function DropzoneField({ onChange, loading }): React.ReactElement {
     acceptedFiles.length > 0 ? acceptedFiles[0].name : null;
   return (
     <div>
-      <DropzoneContainer {...getRootProps()} disabled={loading}>
+      <DropzoneContainer id="dropzone" {...getRootProps()} disabled={loading}>
         <LoadingComponent isLoading={loading} absolute />
         <input {...getInputProps()} data-cy='rdi-file-input' />
         {acceptedFilename || 'UPLOAD FILE'}
@@ -306,6 +306,7 @@ export function RegistrationDataImport(): React.ReactElement {
                 <FormControl variant='filled' margin='dense'>
                   <InputLabel>Import from</InputLabel>
                   <ComboBox
+                    id="type-combo-box"
                     value={importType}
                     variant='filled'
                     label=''
