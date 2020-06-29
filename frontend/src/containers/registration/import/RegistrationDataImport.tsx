@@ -207,7 +207,7 @@ export function RegistrationDataImport(): React.ReactElement {
     const koboProjects = koboProjectsData?.allKoboProjects?.edges || [];
     importTypeSpecificContent = (
       <div>
-        <FormControl variant='filled' margin='dense'>
+        <FormControl id="import-from-select" variant='filled' margin='dense'>
           <InputLabel>Import from</InputLabel>
           <ComboBox
             value={koboProject}

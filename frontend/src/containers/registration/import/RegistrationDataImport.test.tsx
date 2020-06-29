@@ -55,4 +55,18 @@ describe('RDI', () => {
     }));
     wait(() => expect(container).toContainElement(getByTestId('dropzone')))
   })
+
+  test('Import from kobo shows import from field', () => {
+    const { container, getByTestId } = render(
+      <MockedWrapper children={<RegistrationDataImport />} />
+    )
+    const button = container.querySelector('button');
+    wait(() => fireEvent.click(button))
+    wait(() => expect(container).toContainElement(getByTestId('rdi-dialog')))
+    const comboBox = container.querySelector('#type-combo-box')
+    wait(() => fireEvent.change(comboBox, {
+      target: {value: 'excel'}
+    }));
+    wait(() => expect(container).toContainElement(getByTestId('import-from-select')))
+  })
 })
