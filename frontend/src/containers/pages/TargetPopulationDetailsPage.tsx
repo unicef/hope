@@ -38,7 +38,7 @@ export function TargetPopulationDetailsPage() {
       data-cy={`target-population-tabs-${selectedTab}`}
     >
       <Tab label='Programme Population' />
-      <Tab label='Target Population' />
+      <Tab label='Target Population' disabled={status === 'DRAFT'}/>
     </Tabs>
   );
   return (

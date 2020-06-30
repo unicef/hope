@@ -15,9 +15,7 @@ class RegistrationDataImport(TimeStampedUUIDModel):
     )
     DATA_SOURCE_CHOICE = (
         ("XLS", "Excel"),
-        ("3RD_PARTY", "3rd party"),
-        ("XML", "XML"),
-        ("OTHER", "Other"),
+        ("KOBO", "KoBo"),
     )
     name = models.CharField(max_length=255, unique=True)
     status = models.CharField(

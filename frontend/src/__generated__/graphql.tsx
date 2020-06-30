@@ -210,8 +210,8 @@ export type CashPlanNode = Node & {
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
   businessArea: BusinessAreaNode,
-  caId: Scalars['String'],
-  caHashId: Scalars['UUID'],
+  caId?: Maybe<Scalars['String']>,
+  caHashId?: Maybe<Scalars['UUID']>,
   status: CashPlanStatus,
   statusDate: Scalars['DateTime'],
   name: Scalars['String'],
@@ -311,7 +311,6 @@ export type CreateProgramInput = {
   startDate?: Maybe<Scalars['Date']>,
   endDate?: Maybe<Scalars['Date']>,
   description?: Maybe<Scalars['String']>,
-  programCaId?: Maybe<Scalars['String']>,
   budget?: Maybe<Scalars['Decimal']>,
   frequencyOfPayments?: Maybe<Scalars['String']>,
   sector?: Maybe<Scalars['String']>,
@@ -453,6 +452,20 @@ export type FinalizeTargetPopulationMutation = {
 };
 
 
+
+export type GroupAttributeNode = {
+   __typename?: 'GroupAttributeNode',
+  id: Scalars['UUID'],
+  name: Scalars['String'],
+  label: Scalars['JSONString'],
+  flexAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
+  labelEn?: Maybe<Scalars['String']>,
+};
+
+
+export type GroupAttributeNodeFlexAttributesArgs = {
+  flexField?: Maybe<Scalars['Boolean']>
+};
 
 export type HouseholdNode = Node & {
    __typename?: 'HouseholdNode',
@@ -1355,9 +1368,9 @@ export type PaymentRecordNode = Node & {
   businessArea: BusinessAreaNode,
   status: PaymentRecordStatus,
   statusDate: Scalars['DateTime'],
-  caId: Scalars['String'],
-  caHashId: Scalars['UUID'],
-  cashPlan: CashPlanNode,
+  caId?: Maybe<Scalars['String']>,
+  caHashId?: Maybe<Scalars['UUID']>,
+  cashPlan?: Maybe<CashPlanNode>,
   household: HouseholdNode,
   fullName: Scalars['String'],
   totalPersonsCovered: Scalars['Int'],
@@ -1405,12 +1418,14 @@ export type ProgramNode = Node & {
   id: Scalars['ID'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
+  lastSyncAt?: Maybe<Scalars['DateTime']>,
   name: Scalars['String'],
   status: ProgramStatus,
   startDate: Scalars['Date'],
   endDate: Scalars['Date'],
   description: Scalars['String'],
-  programCaId: Scalars['String'],
+  caId?: Maybe<Scalars['String']>,
+  caHashId?: Maybe<Scalars['String']>,
   adminAreas: AdminAreaNodeConnection,
   businessArea: BusinessAreaNode,
   budget?: Maybe<Scalars['Decimal']>,
@@ -1534,6 +1549,7 @@ export type Query = {
   allBusinessAreas?: Maybe<BusinessAreaNodeConnection>,
   allLogEntries?: Maybe<LogEntryObjectConnection>,
   allFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
+  allGroupsWithFields?: Maybe<Array<Maybe<GroupAttributeNode>>>,
   koboProject?: Maybe<KoboAssetObject>,
   allKoboProjects?: Maybe<KoboAssetObjectConnection>,
   program?: Maybe<ProgramNode>,
@@ -1867,6 +1883,12 @@ export type QueryAllRegistrationDataImportsArgs = {
   orderBy?: Maybe<Scalars['String']>
 };
 
+export enum RegistrationDataImportDatahubImportDone {
+  NotStarted = 'NOT_STARTED',
+  Started = 'STARTED',
+  Done = 'DONE'
+}
+
 export type RegistrationDataImportDatahubNode = Node & {
    __typename?: 'RegistrationDataImportDatahubNode',
   id: Scalars['ID'],
@@ -1876,7 +1898,8 @@ export type RegistrationDataImportDatahubNode = Node & {
   importDate: Scalars['DateTime'],
   hctId?: Maybe<Scalars['UUID']>,
   importData?: Maybe<ImportDataNode>,
-  importDone: Scalars['Boolean'],
+  importDone: RegistrationDataImportDatahubImportDone,
+  businessAreaSlug: Scalars['String'],
   households: ImportedHouseholdNodeConnection,
   individuals: ImportedIndividualNodeConnection,
 };
@@ -1913,9 +1936,7 @@ export type RegistrationDataImportDatahubNodeEdge = {
 
 export enum RegistrationDataImportDataSource {
   Xls = 'XLS',
-  A_3RdParty = 'A_3RD_PARTY',
-  Xml = 'XML',
-  Other = 'OTHER'
+  Kobo = 'KOBO'
 }
 
 export type RegistrationDataImportNode = Node & {
@@ -2113,6 +2134,8 @@ export type TargetPopulationNode = Node & {
   updatedAt: Scalars['DateTime'],
   isRemoved: Scalars['Boolean'],
   name: Scalars['String'],
+  caId?: Maybe<Scalars['String']>,
+  caHashId?: Maybe<Scalars['String']>,
   createdBy?: Maybe<UserNode>,
   approvedAt?: Maybe<Scalars['DateTime']>,
   approvedBy?: Maybe<UserNode>,
@@ -2207,7 +2230,6 @@ export type UpdateProgramInput = {
   startDate?: Maybe<Scalars['Date']>,
   endDate?: Maybe<Scalars['Date']>,
   description?: Maybe<Scalars['String']>,
-  programCaId?: Maybe<Scalars['String']>,
   budget?: Maybe<Scalars['Decimal']>,
   frequencyOfPayments?: Maybe<Scalars['String']>,
   sector?: Maybe<Scalars['String']>,
@@ -2519,14 +2541,14 @@ export type HouseholdDetailedFragment = (
       & { node: Maybe<(
         { __typename?: 'PaymentRecordNode' }
         & Pick<PaymentRecordNode, 'id' | 'fullName'>
-        & { cashPlan: (
+        & { cashPlan: Maybe<(
           { __typename?: 'CashPlanNode' }
           & Pick<CashPlanNode, 'id' | 'totalPersonsCovered' | 'totalDeliveredQuantity' | 'assistanceMeasurement'>
           & { program: (
             { __typename?: 'ProgramNode' }
             & Pick<ProgramNode, 'id' | 'name'>
           ) }
-        ) }
+        )> }
       )> }
     )>> }
   ) }
@@ -2675,7 +2697,7 @@ export type CreateProgramMutation = (
     { __typename?: 'CreateProgram' }
     & { program: Maybe<(
       { __typename?: 'ProgramNode' }
-      & Pick<ProgramNode, 'id' | 'name' | 'status' | 'startDate' | 'endDate' | 'programCaId' | 'budget' | 'description' | 'frequencyOfPayments' | 'sector' | 'scope' | 'cashPlus' | 'populationGoal'>
+      & Pick<ProgramNode, 'id' | 'name' | 'status' | 'startDate' | 'endDate' | 'caId' | 'budget' | 'description' | 'frequencyOfPayments' | 'sector' | 'scope' | 'cashPlus' | 'populationGoal'>
     )> }
   )> }
 );
@@ -2833,7 +2855,7 @@ export type UpdateProgramMutation = (
     { __typename?: 'UpdateProgram' }
     & { program: Maybe<(
       { __typename?: 'ProgramNode' }
-      & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'programCaId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'administrativeAreasOfImplementation'>
+      & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'administrativeAreasOfImplementation'>
     )> }
   )> }
 );
@@ -3121,14 +3143,14 @@ export type AllPaymentRecordsQuery = (
         & { household: (
           { __typename?: 'HouseholdNode' }
           & Pick<HouseholdNode, 'id' | 'size'>
-        ), cashPlan: (
+        ), cashPlan: Maybe<(
           { __typename?: 'CashPlanNode' }
           & Pick<CashPlanNode, 'id'>
           & { program: (
             { __typename?: 'ProgramNode' }
             & Pick<ProgramNode, 'id' | 'name'>
           ) }
-        ) }
+        )> }
       )> }
     )>> }
   )> }
@@ -3151,7 +3173,7 @@ export type AllProgramsQuery = (
       { __typename?: 'ProgramNodeEdge' }
       & { node: Maybe<(
         { __typename?: 'ProgramNode' }
-        & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'programCaId' | 'description' | 'budget' | 'frequencyOfPayments' | 'populationGoal' | 'sector' | 'totalNumberOfHouseholds'>
+        & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'populationGoal' | 'sector' | 'totalNumberOfHouseholds'>
       )> }
     )>> }
   )> }
@@ -3208,7 +3230,7 @@ export type AllUsersQuery = (
       { __typename?: 'UserNodeEdge' }
       & { node: Maybe<(
         { __typename?: 'UserNode' }
-        & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
+        & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
       )> }
     )>> }
   )> }
@@ -3314,14 +3336,14 @@ export type PaymentRecordQuery = (
     ), targetPopulation: (
       { __typename?: 'TargetPopulationNode' }
       & Pick<TargetPopulationNode, 'id' | 'name'>
-    ), cashPlan: (
+    ), cashPlan: Maybe<(
       { __typename?: 'CashPlanNode' }
       & Pick<CashPlanNode, 'id' | 'caId'>
       & { program: (
         { __typename?: 'ProgramNode' }
         & Pick<ProgramNode, 'id' | 'name'>
       ) }
-    ), serviceProvider: (
+    )>, serviceProvider: (
       { __typename?: 'ServiceProviderNode' }
       & Pick<ServiceProviderNode, 'id' | 'fullName' | 'shortName'>
     ) }
@@ -3337,7 +3359,7 @@ export type ProgramQuery = (
   { __typename?: 'Query' }
   & { program: Maybe<(
     { __typename?: 'ProgramNode' }
-    & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'programCaId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'administrativeAreasOfImplementation'>
+    & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'administrativeAreasOfImplementation'>
   )> }
 );
 
@@ -3376,7 +3398,7 @@ export type TargetPopulationQuery = (
       & Pick<UserNode, 'firstName' | 'lastName'>
     )>, program: Maybe<(
       { __typename?: 'ProgramNode' }
-      & Pick<ProgramNode, 'id' | 'name'>
+      & Pick<ProgramNode, 'id' | 'name' | 'status'>
     )>, createdBy: Maybe<(
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'firstName' | 'lastName'>
@@ -3856,9 +3878,13 @@ export type FlexFieldsQueryVariables = {};
 
 export type FlexFieldsQuery = (
   { __typename?: 'Query' }
-  & { allFieldsAttributes: Maybe<Array<Maybe<(
-    { __typename?: 'FieldAttributeNode' }
-    & Pick<FieldAttributeNode, 'id' | 'type' | 'name' | 'labelEn'>
+  & { allGroupsWithFields: Maybe<Array<Maybe<(
+    { __typename?: 'GroupAttributeNode' }
+    & Pick<GroupAttributeNode, 'name' | 'labelEn'>
+    & { flexAttributes: Maybe<Array<Maybe<(
+      { __typename?: 'FieldAttributeNode' }
+      & Pick<FieldAttributeNode, 'id' | 'labelEn' | 'associatedWith'>
+    )>>> }
   )>>> }
 );
 
@@ -4270,7 +4296,7 @@ export const CreateProgramDocument = gql`
       status
       startDate
       endDate
-      programCaId
+      caId
       budget
       description
       frequencyOfPayments
@@ -4678,7 +4704,7 @@ export const UpdateProgramDocument = gql`
       startDate
       endDate
       status
-      programCaId
+      caId
       description
       budget
       frequencyOfPayments
@@ -5393,7 +5419,7 @@ export const AllProgramsDocument = gql`
         startDate
         endDate
         status
-        programCaId
+        caId
         description
         budget
         frequencyOfPayments
@@ -5539,6 +5565,7 @@ export const AllUsersDocument = gql`
         id
         firstName
         lastName
+        email
       }
     }
   }
@@ -5969,7 +5996,7 @@ export const ProgramDocument = gql`
     startDate
     endDate
     status
-    programCaId
+    caId
     description
     budget
     frequencyOfPayments
@@ -6106,6 +6133,7 @@ export const TargetPopulationDocument = gql`
     program {
       id
       name
+      status
     }
     createdBy {
       firstName
@@ -7226,11 +7254,14 @@ export type FinalHouseholdsListByTargetingCriteriaLazyQueryHookResult = ReturnTy
 export type FinalHouseholdsListByTargetingCriteriaQueryResult = ApolloReactCommon.QueryResult<FinalHouseholdsListByTargetingCriteriaQuery, FinalHouseholdsListByTargetingCriteriaQueryVariables>;
 export const FlexFieldsDocument = gql`
     query FlexFields {
-  allFieldsAttributes(flexField: true) {
-    id
-    type
+  allGroupsWithFields {
     name
     labelEn
+    flexAttributes {
+      id
+      labelEn
+      associatedWith
+    }
   }
 }
     `;
@@ -7574,6 +7605,8 @@ export type ResolversTypes = {
   PaymentRecordEntitlementCardStatus: PaymentRecordEntitlementCardStatus,
   PaymentRecordDeliveryType: PaymentRecordDeliveryType,
   ChoiceObject: ResolverTypeWrapper<ChoiceObject>,
+  GroupAttributeNode: ResolverTypeWrapper<GroupAttributeNode>,
+  JSONString: ResolverTypeWrapper<Scalars['JSONString']>,
   KoboAssetObject: ResolverTypeWrapper<KoboAssetObject>,
   KoboAssetObjectConnection: ResolverTypeWrapper<KoboAssetObjectConnection>,
   KoboAssetObjectEdge: ResolverTypeWrapper<KoboAssetObjectEdge>,
@@ -7589,11 +7622,11 @@ export type ResolversTypes = {
   RegistrationDataImportDatahubNode: ResolverTypeWrapper<RegistrationDataImportDatahubNode>,
   ImportDataNode: ResolverTypeWrapper<ImportDataNode>,
   ImportDataDataType: ImportDataDataType,
+  RegistrationDataImportDatahubImportDone: RegistrationDataImportDatahubImportDone,
   ImportedHouseholdNodeConnection: ResolverTypeWrapper<ImportedHouseholdNodeConnection>,
   ImportedHouseholdNodeEdge: ResolverTypeWrapper<ImportedHouseholdNodeEdge>,
   ImportedIndividualNodeConnection: ResolverTypeWrapper<ImportedIndividualNodeConnection>,
   ImportedIndividualNodeEdge: ResolverTypeWrapper<ImportedIndividualNodeEdge>,
-  JSONString: ResolverTypeWrapper<Scalars['JSONString']>,
   ImportedDocumentNodeConnection: ResolverTypeWrapper<ImportedDocumentNodeConnection>,
   ImportedDocumentNodeEdge: ResolverTypeWrapper<ImportedDocumentNodeEdge>,
   ImportedDocumentNode: ResolverTypeWrapper<ImportedDocumentNode>,
@@ -7724,6 +7757,8 @@ export type ResolversParentTypes = {
   PaymentRecordEntitlementCardStatus: PaymentRecordEntitlementCardStatus,
   PaymentRecordDeliveryType: PaymentRecordDeliveryType,
   ChoiceObject: ChoiceObject,
+  GroupAttributeNode: GroupAttributeNode,
+  JSONString: Scalars['JSONString'],
   KoboAssetObject: KoboAssetObject,
   KoboAssetObjectConnection: KoboAssetObjectConnection,
   KoboAssetObjectEdge: KoboAssetObjectEdge,
@@ -7739,11 +7774,11 @@ export type ResolversParentTypes = {
   RegistrationDataImportDatahubNode: RegistrationDataImportDatahubNode,
   ImportDataNode: ImportDataNode,
   ImportDataDataType: ImportDataDataType,
+  RegistrationDataImportDatahubImportDone: RegistrationDataImportDatahubImportDone,
   ImportedHouseholdNodeConnection: ImportedHouseholdNodeConnection,
   ImportedHouseholdNodeEdge: ImportedHouseholdNodeEdge,
   ImportedIndividualNodeConnection: ImportedIndividualNodeConnection,
   ImportedIndividualNodeEdge: ImportedIndividualNodeEdge,
-  JSONString: Scalars['JSONString'],
   ImportedDocumentNodeConnection: ImportedDocumentNodeConnection,
   ImportedDocumentNodeEdge: ImportedDocumentNodeEdge,
   ImportedDocumentNode: ImportedDocumentNode,
@@ -7863,8 +7898,8 @@ export type CashPlanNodeResolvers<ContextType = any, ParentType extends Resolver
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   businessArea?: Resolver<ResolversTypes['BusinessAreaNode'], ParentType, ContextType>,
-  caId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  caHashId?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
+  caId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  caHashId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
   status?: Resolver<ResolversTypes['CashPlanStatus'], ParentType, ContextType>,
   statusDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
@@ -8032,6 +8067,14 @@ export interface FlexFieldsScalarScalarConfig extends GraphQLScalarTypeConfig<Re
 export interface GeoJsonScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['GeoJSON'], any> {
   name: 'GeoJSON'
 }
+
+export type GroupAttributeNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['GroupAttributeNode'] = ResolversParentTypes['GroupAttributeNode']> = {
+  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  label?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
+  flexAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType, GroupAttributeNodeFlexAttributesArgs>,
+  labelEn?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
 
 export type HouseholdNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['HouseholdNode'] = ResolversParentTypes['HouseholdNode']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
@@ -8383,9 +8426,9 @@ export type PaymentRecordNodeResolvers<ContextType = any, ParentType extends Res
   businessArea?: Resolver<ResolversTypes['BusinessAreaNode'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['PaymentRecordStatus'], ParentType, ContextType>,
   statusDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  caId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  caHashId?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
-  cashPlan?: Resolver<ResolversTypes['CashPlanNode'], ParentType, ContextType>,
+  caId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  caHashId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
+  cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
   household?: Resolver<ResolversTypes['HouseholdNode'], ParentType, ContextType>,
   fullName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   totalPersonsCovered?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
@@ -8419,12 +8462,14 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['ProgramStatus'], ParentType, ContextType>,
   startDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   endDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   description?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  programCaId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  caId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  caHashId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   adminAreas?: Resolver<ResolversTypes['AdminAreaNodeConnection'], ParentType, ContextType, ProgramNodeAdminAreasArgs>,
   businessArea?: Resolver<ResolversTypes['BusinessAreaNode'], ParentType, ContextType>,
   budget?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
@@ -8465,6 +8510,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allBusinessAreas?: Resolver<Maybe<ResolversTypes['BusinessAreaNodeConnection']>, ParentType, ContextType, QueryAllBusinessAreasArgs>,
   allLogEntries?: Resolver<Maybe<ResolversTypes['LogEntryObjectConnection']>, ParentType, ContextType, RequireFields<QueryAllLogEntriesArgs, 'objectId'>>,
   allFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType, QueryAllFieldsAttributesArgs>,
+  allGroupsWithFields?: Resolver<Maybe<Array<Maybe<ResolversTypes['GroupAttributeNode']>>>, ParentType, ContextType>,
   koboProject?: Resolver<Maybe<ResolversTypes['KoboAssetObject']>, ParentType, ContextType, RequireFields<QueryKoboProjectArgs, 'uid' | 'businessAreaSlug'>>,
   allKoboProjects?: Resolver<Maybe<ResolversTypes['KoboAssetObjectConnection']>, ParentType, ContextType, RequireFields<QueryAllKoboProjectsArgs, 'businessAreaSlug'>>,
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType, RequireFields<QueryProgramArgs, 'id'>>,
@@ -8514,7 +8560,8 @@ export type RegistrationDataImportDatahubNodeResolvers<ContextType = any, Parent
   importDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   hctId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
   importData?: Resolver<Maybe<ResolversTypes['ImportDataNode']>, ParentType, ContextType>,
-  importDone?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  importDone?: Resolver<ResolversTypes['RegistrationDataImportDatahubImportDone'], ParentType, ContextType>,
+  businessAreaSlug?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   households?: Resolver<ResolversTypes['ImportedHouseholdNodeConnection'], ParentType, ContextType, RegistrationDataImportDatahubNodeHouseholdsArgs>,
   individuals?: Resolver<ResolversTypes['ImportedIndividualNodeConnection'], ParentType, ContextType, RegistrationDataImportDatahubNodeIndividualsArgs>,
 };
@@ -8640,6 +8687,8 @@ export type TargetPopulationNodeResolvers<ContextType = any, ParentType extends 
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  caId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  caHashId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   approvedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   approvedBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
@@ -8795,6 +8844,7 @@ export type Resolvers<ContextType = any> = {
   FinalizeTargetPopulationMutation?: FinalizeTargetPopulationMutationResolvers<ContextType>,
   FlexFieldsScalar?: GraphQLScalarType,
   GeoJSON?: GraphQLScalarType,
+  GroupAttributeNode?: GroupAttributeNodeResolvers<ContextType>,
   HouseholdNode?: HouseholdNodeResolvers<ContextType>,
   HouseholdNodeConnection?: HouseholdNodeConnectionResolvers<ContextType>,
   HouseholdNodeEdge?: HouseholdNodeEdgeResolvers<ContextType>,

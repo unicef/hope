@@ -20,15 +20,21 @@ class SessionModel(models.Model):
 
 
 class TargetPopulation(SessionModel):
-    mis_id = models.UUIDField(unique=True)
-    ca_id = models.CharField(max_length=255, primary_key=True,)
-    ca_hash_id = models.UUIDField(unique=True)
+    mis_id = models.UUIDField()
+    ca_id = models.CharField(max_length=255,)
+    ca_hash_id = models.UUIDField()
+
+    class Meta:
+        unique_together = ("session", "mis_id")
 
 
 class Programme(SessionModel):
-    mis_id = models.UUIDField(unique=True,)
-    ca_id = models.CharField(max_length=255, primary_key=True)
-    ca_hash_id = models.CharField(max_length=255, unique=True)
+    mis_id = models.UUIDField()
+    ca_id = models.CharField(max_length=255,)
+    ca_hash_id = models.CharField(max_length=255,)
+
+    class Meta:
+        unique_together = ("session", "mis_id")
 
 
 class CashPlan(SessionModel):
@@ -36,24 +42,23 @@ class CashPlan(SessionModel):
     DISTRIBUTION_COMPLETED_WITH_ERRORS = "Distribution Completed with Errors"
     TRANSACTION_COMPLETED = "Transaction Completed"
     TRANSACTION_COMPLETED_WITH_ERRORS = "Transaction Completed with Errors"
+    STATUS_CHOICE = (
+        (DISTRIBUTION_COMPLETED, _("Distribution Completed")),
+        (
+            DISTRIBUTION_COMPLETED_WITH_ERRORS,
+            _("Distribution Completed with Errors"),
+        ),
+        (TRANSACTION_COMPLETED, _("Transaction Completed")),
+        (
+            TRANSACTION_COMPLETED_WITH_ERRORS,
+            _("Transaction Completed with Errors"),
+        ),
+    )
     business_area = models.CharField(max_length=20, null=True)
     cash_plan_id = models.CharField(max_length=255)
-    cash_plan_hash_id = models.UUIDField(primary_key=True,)
+    cash_plan_hash_id = models.UUIDField()
     status = models.CharField(
-        max_length=255,
-        choices=(
-            (DISTRIBUTION_COMPLETED, _("Distribution Completed")),
-            (
-                DISTRIBUTION_COMPLETED_WITH_ERRORS,
-                _("Distribution Completed with Errors"),
-            ),
-            (TRANSACTION_COMPLETED, _("Transaction Completed")),
-            (
-                TRANSACTION_COMPLETED_WITH_ERRORS,
-                _("Transaction Completed with Errors"),
-            ),
-        ),
-        null=True,
+        max_length=255, null=True,
     )
     status_date = models.DateTimeField(null=True)
     name = models.CharField(max_length=255, null=True)
@@ -100,6 +105,9 @@ class CashPlan(SessionModel):
         null=True,
     )
 
+    class Meta:
+        unique_together = ("session", "cash_plan_id")
+
 
 class PaymentRecord(SessionModel):
     STATUS_SUCCESS = "SUCCESS"
@@ -110,11 +118,6 @@ class PaymentRecord(SessionModel):
     DELIVERY_TYPE_CASH = "CASH"
     DELIVERY_TYPE_DEPOSIT_TO_CARD = "DEPOSIT_TO_CARD"
     DELIVERY_TYPE_TRANSFER = "TRANSFER"
-    STATUS_CHOICE = (
-        (STATUS_SUCCESS, _("Sucess")),
-        (STATUS_PENDING, _("Pending")),
-        (STATUS_ERROR, _("Error")),
-    )
     ENTITLEMENT_CARD_STATUS_CHOICE = Choices(
         (ENTITLEMENT_CARD_STATUS_ACTIVE, _("Active")),
         (ENTITLEMENT_CARD_STATUS_INACTIVE, _("Inactive")),
@@ -125,10 +128,10 @@ class PaymentRecord(SessionModel):
         (DELIVERY_TYPE_TRANSFER, _("Transfer")),
     )
     business_area = models.CharField(max_length=20, null=True)
-    status = models.CharField(max_length=255, choices=STATUS_CHOICE, null=True)
+    status = models.CharField(max_length=255, null=True)
     status_date = models.DateTimeField(null=True)
     ca_id = models.CharField(max_length=255)
-    ca_hash_id = models.UUIDField(primary_key=True)
+    ca_hash_id = models.UUIDField()
     registration_ca_id = models.CharField(max_length=255, null=True)
     household_mis_id = models.UUIDField(null=True)
     # head of household
@@ -141,8 +144,7 @@ class PaymentRecord(SessionModel):
         max_length=255, null=True
     )
     entitlement_card_number = models.CharField(max_length=255, null=True)
-    entitlement_card_status = models.CharField(
-        choices=STATUS_CHOICE, default=STATUS_PENDING, max_length=20, null=True
+    entitlement_card_status = models.CharField( max_length=20, null=True
     )
     entitlement_card_issue_date = models.DateField(null=True)
     delivery_type = models.CharField(
@@ -167,11 +169,17 @@ class PaymentRecord(SessionModel):
     delivery_date = models.DateTimeField(null=True)
     service_provider_ca_id = models.CharField(max_length=255, null=True)
 
+    class Meta:
+        unique_together = ("session", "ca_id")
+
 
 class ServiceProvider(SessionModel):
     business_area = models.CharField(max_length=20)
-    ca_id = models.CharField(max_length=255, primary_key=True)
+    ca_id = models.CharField(max_length=255)
     full_name = models.CharField(max_length=255)
     short_name = models.CharField(max_length=4)
     country = models.CharField(max_length=3,)
     vision_id = models.CharField(max_length=255)
+
+    class Meta:
+        unique_together = ("session", "ca_id")

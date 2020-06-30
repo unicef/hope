@@ -49,12 +49,6 @@ const TextContainer = styled(TextField)`
   }
 `;
 
-const SelectContainer = styled(TextContainer)`
-  && {
-    width: 33%;
-  }
-`;
-
 const FilterWrapper = styled.div`
   padding: 20px;
   display: flex;
@@ -67,10 +61,6 @@ const StyledFormControl = styled(FormControl)`
   border-bottom: 0;
 `;
 
-const StartInputAdornment = styled(InputAdornment)`
-  margin-right: 0;
-`;
-
 export function FlexFieldTab() {
   const { data } = useFlexFieldsQuery();
   const [searchValue, setSearchValue] = useState('')
@@ -78,10 +68,10 @@ export function FlexFieldTab() {
   const [selectedOption, setSelectedOption] = useState('');
   useEffect(() => {
     if (data && !selectOptions.length) {
-      const options = data.allFieldsAttributes.reduce(function (accumulator, currentValue) {
-        if (!accumulator.includes(currentValue.type)) {
-          accumulator.push(currentValue.type)
-        }
+      const options = data.allGroupsWithFields.reduce(function (accumulator, currentValue) {
+        currentValue.flexAttributes.map(function(each) {
+          return !accumulator.includes(each.associatedWith) ? accumulator.push(each.associatedWith) : null
+        })
         return accumulator
       }, [])
       setSelectOptions(options)
@@ -119,7 +109,7 @@ export function FlexFieldTab() {
               value={selectedOption}
             >
               <MenuItem value=''>
-                <em>None</em>
+                <em>All</em>
               </MenuItem>
               {selectOptions.map(type => {
                 return <MenuItem key={type} value={type}>{type}</MenuItem>
@@ -128,7 +118,7 @@ export function FlexFieldTab() {
           </StyledFormControl>
         }
       </FilterWrapper>
-      <FlexFieldsTable selectedOption={selectedOption} searchValue={searchValue} fields={data.allFieldsAttributes} />
+      <FlexFieldsTable selectedOption={selectedOption} searchValue={searchValue} fields={data.allGroupsWithFields} />
     </>
   )
 }
