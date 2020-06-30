@@ -238,8 +238,8 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
         user = info.context.user
         target_population = kwargs.get("model_object")
         target_population.status = "FINALIZED"
-        target_population.approved_by = user
-        target_population.approved_at = timezone.now()
+        target_population.finalized_by = user
+        target_population.finalized_at = timezone.now()
         if target_population.final_list_targeting_criteria:
             """Gets all households from candidate list which 
             don't meet final_list_targeting_criteria and set them (HouseholdSelection m2m model)
@@ -252,10 +252,9 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
                 target_population=target_population,
             ).update(final=False)
         target_population.save()
-        # AirflowApi.start_dag(
-        #     dag_id="SendTargetPopulation",
-        # )
-        SendTPToDatahubTask().execute()
+        AirflowApi.start_dag(
+            dag_id="SendTargetPopulation",
+        )
         return cls(target_population=target_population)
 
 
@@ -279,6 +278,7 @@ class CopyTargetPopulationMutation(
         target_population_copy = TargetPopulation(
             name=name,
             created_by=user,
+            business_area=target_population.business_area,
             status="DRAFT",
             candidate_list_total_households=target_population.candidate_list_total_households,
             candidate_list_total_individuals=target_population.candidate_list_total_individuals,

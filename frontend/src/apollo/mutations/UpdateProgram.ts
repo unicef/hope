@@ -9,7 +9,7 @@ export const UPDATE_PROGRAM_MUTATION = gql`
         startDate
         endDate
         status
-        programCaId
+        caId
         description
         budget
         frequencyOfPayments

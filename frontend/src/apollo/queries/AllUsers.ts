@@ -14,6 +14,7 @@ export const ALL_PROGRAMS_QUERY = gql`
           id
           firstName
           lastName
+          email
         }
       }
     }

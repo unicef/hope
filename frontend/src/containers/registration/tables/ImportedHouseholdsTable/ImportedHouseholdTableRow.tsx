@@ -14,11 +14,10 @@ interface PaymentRecordTableRowProps {
 export function ImportedHouseholdTableRow({
   household,
 }: PaymentRecordTableRowProps): React.ReactElement {
-  const history = useHistory();
   const businessArea = useBusinessArea();
 
   const handleClick = (): void => {
-    const path = `/${businessArea}/population/household/${household.id}`;
+    const path = `/${businessArea}/registration-data-import/household/${household.id}`;
     const win = window.open(path, '_blank');
     if (win != null) {
       win.focus();

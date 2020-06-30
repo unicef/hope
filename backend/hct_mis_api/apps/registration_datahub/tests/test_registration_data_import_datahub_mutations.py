@@ -2,6 +2,7 @@ import io
 import unittest
 
 from PIL import Image
+from django.conf import settings
 from django.core.files.uploadedfile import (
     InMemoryUploadedFile,
     SimpleUploadedFile,
@@ -105,7 +106,7 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
             charset=None,
         )
 
-        xlsx_valid_file_path = "hct_mis_api/apps/registration_datahub/tests/test_file/new_reg_data_import.xlsx"
+        xlsx_valid_file_path = f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/new_reg_data_import.xlsx"
 
         with open(xlsx_valid_file_path, "rb") as file:
             self.valid_file = SimpleUploadedFile(file.name, file.read())

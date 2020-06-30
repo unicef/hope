@@ -43,6 +43,10 @@ class FinalizeTargetPopulationValidator:
             raise ValidationError(
                 "Only Target Population with status APPROVED can be finalized"
             )
+        if target_population.program.status != "ACTIVE":
+            raise ValidationError(
+                "Only Target Population assigned to program with status ACTIVE can be send"
+            )
 
 
 class TargetingCriteriaRuleFilterInputValidator:
