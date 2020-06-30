@@ -9,6 +9,8 @@ import { PageHeader } from '../../components/PageHeader';
 import { LabelizedField } from '../../components/LabelizedField';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
+import { NewPaymentVerificationDialog } from '../../components/payments/NewPaymentVerificationDialog';
+import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
 
 const Container = styled.div`
   display: flex;
@@ -38,6 +40,22 @@ const BorderLeftBox = styled.div`
   height: 100%;
 `;
 
+const BottomTitle = styled.div`
+  color: rgba(0, 0, 0, 0.38);
+  font-size: 24px;
+  line-height: 28px;
+  text-align: center;
+  padding: 70px;
+`;
+
+const TableWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  padding: 20px;
+  padding-bottom: 0;
+`;
+
 // interface PaymentVerificationDetailsProps {
 //   registration: 'registr';
 // }
@@ -58,14 +76,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
       title='Cash Plan (there should be ID)'
       breadCrumbs={breadCrumbsItems}
     >
-      <Button
-        color='primary'
-        variant='contained'
-        onClick={() => alert('Open dialog')}
-        data-cy='button-new-plan'
-      >
-        NEW VERIFICATION PLAN
-      </Button>
+      <NewPaymentVerificationDialog />
     </PageHeader>
   );
 
@@ -152,6 +163,14 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
           </Grid>
         </Grid>
       </Container>
+      <BottomTitle>
+        To see more details please create Verification Plan
+      </BottomTitle>
+
+      <TableWrapper>
+        <UniversalActivityLogTable objectId='some id' />
+      </TableWrapper>
     </>
+    //connect it later
   );
 }
