@@ -47,16 +47,16 @@ export const menuItems = [
     ],
   },
   {
-    name: 'Targeting',
-    href: '/target-population',
-    selectedRegexp: /^\/target-population.*$/,
-    icon: <ListAltRounded />,
-  },
-  {
     name: 'Programme Management',
     href: '/programs',
     selectedRegexp: /^\/programs.*$/,
     icon: <FlashOnRounded />,
+  },
+  {
+    name: 'Targeting',
+    href: '/target-population',
+    selectedRegexp: /^\/target-population.*$/,
+    icon: <ListAltRounded />,
   },
   {
     name: 'Payment Verification',

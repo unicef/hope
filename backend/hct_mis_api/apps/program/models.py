@@ -12,11 +12,11 @@ from django.db.models import Sum, UUIDField
 from django.db.models.functions import Coalesce
 from django.utils.translation import ugettext_lazy as _
 
-from utils.models import TimeStampedUUIDModel
+from utils.models import TimeStampedUUIDModel, AbstractSyncable
 from auditlog.registry import auditlog
 
 
-class Program(TimeStampedUUIDModel):
+class Program(TimeStampedUUIDModel, AbstractSyncable):
     DRAFT = "DRAFT"
     ACTIVE = "ACTIVE"
     FINISHED = "FINISHED"
@@ -56,7 +56,6 @@ class Program(TimeStampedUUIDModel):
         (WASH, _("WASH")),
     )
 
-
     SCOPE_FOR_PARTNERS = "FOR_PARTNERS"
     SCOPE_UNICEF = "UNICEF"
 
@@ -76,7 +75,8 @@ class Program(TimeStampedUUIDModel):
         max_length=255,
         validators=[MinLengthValidator(3), MaxLengthValidator(255)],
     )
-    program_ca_id = models.CharField(max_length=255)
+    ca_id = models.CharField(max_length=255, null=True)
+    ca_hash_id = models.CharField(max_length=255, null=True)
     admin_areas = models.ManyToManyField(
         "core.AdminArea", related_name="programs", blank=True,
     )
@@ -112,9 +112,7 @@ class Program(TimeStampedUUIDModel):
 
 
 class CashPlan(TimeStampedUUIDModel):
-    DISTRIBUTION_COMPLETED = (
-        "Distribution Completed"
-    )
+    DISTRIBUTION_COMPLETED = "Distribution Completed"
     DISTRIBUTION_COMPLETED_WITH_ERRORS = "Distribution Completed with Errors"
     TRANSACTION_COMPLETED = "Transaction Completed"
     TRANSACTION_COMPLETED_WITH_ERRORS = "Transaction Completed with Errors"
@@ -134,8 +132,8 @@ class CashPlan(TimeStampedUUIDModel):
     business_area = models.ForeignKey(
         "core.BusinessArea", on_delete=models.CASCADE
     )
-    ca_id = models.CharField(max_length=255)
-    ca_hash_id = models.UUIDField(unique=True)
+    ca_id = models.CharField(max_length=255, null=True)
+    ca_hash_id = models.UUIDField(unique=True, null=True)
     status = models.CharField(max_length=255, choices=STATUS_CHOICE,)
     status_date = models.DateTimeField()
     name = models.CharField(max_length=255)

@@ -28,12 +28,13 @@ class PaymentRecord(TimeStampedUUIDModel):
     )
     status = models.CharField(max_length=255, choices=STATUS_CHOICE,)
     status_date = models.DateTimeField()
-    ca_id = models.CharField(max_length=255)
-    ca_hash_id = models.UUIDField(unique=True,)
+    ca_id = models.CharField(max_length=255, null=True)
+    ca_hash_id = models.UUIDField(unique=True, null=True)
     cash_plan = models.ForeignKey(
         "program.CashPlan",
         on_delete=models.CASCADE,
         related_name="payment_records",
+        null=True
     )
     household = models.ForeignKey(
         "household.Household",

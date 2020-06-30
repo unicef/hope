@@ -47,7 +47,9 @@ def create_registration_data_import_objects(
     )
 
     created_obj_datahub = RegistrationDataImportDatahub.objects.create(
-        import_data=import_data_obj, **registration_data_import_data,
+        business_area_slug=business_area.slug,
+        import_data=import_data_obj,
+        **registration_data_import_data,
     )
     created_obj_hct = RegistrationDataImport.objects.create(
         status="IMPORTING",
@@ -134,7 +136,7 @@ class RegistrationKoboImportMutation(BaseValidator, graphene.Mutation):
             import_data_obj,
             business_area,
         ) = create_registration_data_import_objects(
-            registration_data_import_data, info.context.user, "3RD_PARTY"
+            registration_data_import_data, info.context.user, "KOBO"
         )
 
         AirflowApi.start_dag(

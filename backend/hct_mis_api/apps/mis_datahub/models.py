@@ -8,7 +8,7 @@ from household.models import (
     RELATIONSHIP_CHOICE,
     ROLE_CHOICE,
     MARITAL_STATUS_CHOICE,
-    INDIVIDUAL_HOUSEHOLD_STATUS,
+    INDIVIDUAL_HOUSEHOLD_STATUS, RESIDENCE_STATUS_CHOICE,
 )
 from utils.models import AbstractSession
 
@@ -25,7 +25,7 @@ class SessionModel(models.Model):
 
 
 class Household(SessionModel):
-    mis_id = models.UUIDField(primary_key=True,)
+    mis_id = models.UUIDField()
     unhcr_id = models.CharField(max_length=255, null=True)
     status = models.CharField(
         max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default="ACTIVE"
@@ -36,11 +36,18 @@ class Household(SessionModel):
     address = models.CharField(max_length=255, null=True)
     admin1 = models.CharField(max_length=255, null=True)
     admin2 = models.CharField(max_length=255, null=True)
-    country = CountryField(null=True)
+    country = models.CharField(null=True,max_length=3)
+    residence_status = models.CharField(
+        max_length=255, choices=RESIDENCE_STATUS_CHOICE, null=True
+    )
+    registration_date = models.DateField(null=True)
+
+    class Meta:
+        unique_together = ("session", "mis_id")
 
 
 class Individual(SessionModel):
-    mis_id = models.UUIDField(primary_key=True,)
+    mis_id = models.UUIDField()
     unhcr_id = models.CharField(max_length=255, null=True)
     household_mis_id = models.UUIDField()
     status = models.CharField(
@@ -69,18 +76,24 @@ class Individual(SessionModel):
     )
     phone_number = models.CharField(max_length=14, null=True)
 
+    class Meta:
+        unique_together = ("session", "mis_id")
+
     def __str__(self):
         return self.family_name
 
 
 class TargetPopulation(SessionModel):
-    mis_id = models.UUIDField(primary_key=True,)
+    mis_id = models.UUIDField()
     name = models.CharField(max_length=255)
     population_type = models.CharField(default="HOUSEHOLD", max_length=20)
     targeting_criteria = models.TextField()
 
     active_households = models.PositiveIntegerField(default=0)
     program_mis_id = models.UUIDField()
+
+    class Meta:
+        unique_together = ("session", "mis_id")
 
     def __str__(self):
         return self.name
@@ -100,6 +113,13 @@ class TargetPopulationEntry(SessionModel):
         help_text="Written by a tool such as Corticon.",
     )
 
+    class Meta:
+        unique_together = (
+            "session",
+            "household_mis_id",
+            "target_population_mis_id",
+        )
+
 
 class Program(SessionModel):
     STATUS_NOT_STARTED = "NOT_STARTED"
@@ -111,7 +131,7 @@ class Program(SessionModel):
         (SCOPE_FOR_PARTNERS, _("For partners")),
         (SCOPE_UNICEF, _("Unicef")),
     )
-    mis_id = models.UUIDField(primary_key=True,)
+    mis_id = models.UUIDField()
     business_area = models.CharField(max_length=20)
     ca_id = models.CharField(max_length=255)
     ca_hash_id = models.CharField(max_length=255)
@@ -120,3 +140,5 @@ class Program(SessionModel):
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
     description = models.CharField(max_length=255, null=True)
+    class Meta:
+        unique_together = ("session", "mis_id")
