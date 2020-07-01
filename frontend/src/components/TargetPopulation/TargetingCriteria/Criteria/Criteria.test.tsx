@@ -109,6 +109,12 @@ describe('Criteria', () => {
     )
     wait(() => expect(container).toContainElement(container.querySelector('.less-than')))
   })
+  test('Return criteria element for GREATER_THAN', () => {
+    const { container } = render(
+      <CriteriaField field={GreaterThanCriteria}/>
+    )
+    wait(() => expect(container).toContainElement(container.querySelector('.greater-than')))
+  })
   test('Return criteria element for CONTAINS', () => {
     const { container } = render(
       <CriteriaField field={ContainsCriteria}/>
