@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Button, Grid, Typography } from '@material-ui/core';
 import { Doughnut } from 'react-chartjs-2';
@@ -64,6 +64,8 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
 
+  const [isActive, setIsActive] = useState(true);
+
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: 'Payment Verification',
@@ -76,7 +78,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
       title='Cash Plan (there should be ID)'
       breadCrumbs={breadCrumbsItems}
     >
-      <NewPaymentVerificationDialog />
+      {!isActive && <NewPaymentVerificationDialog />}
     </PageHeader>
   );
 
@@ -87,7 +89,9 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
         <Grid container>
           <Grid item xs={9}>
             <Title>
-              <Typography variant='h6'>Details</Typography>
+              <Typography variant='h6'>
+                {isActive ? 'Cash Plan ' : ''}Details
+              </Typography>
             </Title>
             <Grid container>
               <Grid item xs={4}>
@@ -150,8 +154,8 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                         datasets: [
                           {
                             data: [90, 10],
-                            backgroundColor: ['#74C304', '#DADADA'],
-                            hoverBackgroundColor: ['#74C304', '#DADADA'],
+                            backgroundColor: ['#00509F', '#FFAA1F'],
+                            hoverBackgroundColor: ['#00509F', '#FFAA1F'],
                           },
                         ],
                       }}
@@ -163,9 +167,99 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
           </Grid>
         </Grid>
       </Container>
-      <BottomTitle>
-        To see more details please create Verification Plan
-      </BottomTitle>
+      {isActive && (
+        <Container>
+          <Title>
+            <Typography variant='h6'>Verification Plan Details</Typography>
+          </Title>
+          <Grid container>
+            <Grid item xs={9}>
+              <Grid container>
+                <Grid item xs={4}>
+                  <LabelizedField label='STATUS'>
+                    <p>S</p>
+                  </LabelizedField>
+                </Grid>
+                <Grid item xs={4}>
+                  <LabelizedField label='SAMPLE SIZE'>
+                    <p>S</p>
+                  </LabelizedField>
+                </Grid>
+                <Grid item xs={4}>
+                  <LabelizedField label='RECEIVED'>
+                    <p>S</p>
+                  </LabelizedField>
+                </Grid>
+                <Grid item xs={4}>
+                  <LabelizedField label='VERIFICATION METHOD'>
+                    <p>S</p>
+                  </LabelizedField>
+                </Grid>
+                <Grid item xs={4}>
+                  <LabelizedField label='RESPONDED'>
+                    <p>S</p>
+                  </LabelizedField>
+                </Grid>
+                <Grid item xs={4}>
+                  <LabelizedField label='NOT RECEIVED'>
+                    <p>S</p>
+                  </LabelizedField>
+                </Grid>
+                <Grid item xs={4}>
+                  <LabelizedField label='SAMPLING'>
+                    <p>S</p>
+                  </LabelizedField>
+                </Grid>
+              </Grid>
+            </Grid>
+            <Grid item xs={3}>
+              <Grid container>
+                <Grid item xs={6}>
+                  <Grid container direction='column'>
+                    <LabelizedField label='RECEIVED CORRECT AMOUNT'>
+                      <p>90%</p>
+                    </LabelizedField>
+                    <LabelizedField label='RECEIVED WRONG AMOUNT'>
+                      <p>10%</p>
+                    </LabelizedField>
+                  </Grid>
+                </Grid>
+                <Grid item xs={6}>
+                  <ChartContainer>
+                    <Doughnut
+                      width={100}
+                      height={100}
+                      options={{
+                        maintainAspectRatio: false,
+                        cutoutPercentage: 65,
+                        legend: {
+                          display: false,
+                        },
+                      }}
+                      data={{
+                        labels: ['CORRECT', 'WRONG'],
+                        datasets: [
+                          {
+                            data: [90, 10],
+                            backgroundColor: ['#74C304', '#DADADA'],
+                            hoverBackgroundColor: ['#74C304', '#DADADA'],
+                          },
+                        ],
+                      }}
+                    />
+                  </ChartContainer>
+                </Grid>
+              </Grid>
+            </Grid>
+          </Grid>
+        </Container>
+      )}
+
+      {!isActive && (
+        <BottomTitle>
+          To see more details please create Verification Plan
+        </BottomTitle>
+      )}
 
       <TableWrapper>
         <UniversalActivityLogTable objectId='some id' />
