@@ -2,9 +2,9 @@ import React from 'react';
 import styled from 'styled-components';
 import { IconButton } from '@material-ui/core';
 import { Delete, Edit } from '@material-ui/icons';
-import { TargetingCriteriaRuleObjectType } from '../../../__generated__/graphql';
-import GreaterThanEqual from '../../../assets/GreaterThanEqual.svg';
-import LessThanEqual from '../../../assets/LessThanEqual.svg';
+import { TargetingCriteriaRuleObjectType } from '../../../../__generated__/graphql';
+import GreaterThanEqual from '../../../../assets/GreaterThanEqual.svg';
+import LessThanEqual from '../../../../assets/LessThanEqual.svg';
 
 const CriteriaElement = styled.div`
   width: auto;
@@ -49,12 +49,12 @@ const MathSign = styled.img`
   vertical-align: middle;
 `;
 
-const CriteriaField = ({ field }) => {
+export  const CriteriaField = ({ field }) => {
   let fieldElement;
   switch (field.comparisionMethod) {
     case 'NOT_EQUALS':
       fieldElement = (
-        <p>
+        <p id="not-equals">
           {field.fieldAttribute.labelEn || field.fieldName}:{' '}
           <span>{field.arguments[0]}</span>
         </p>
@@ -62,7 +62,7 @@ const CriteriaField = ({ field }) => {
       break;
     case 'RANGE':
       fieldElement = (
-        <p>
+        <p className="equals">
           {field.fieldAttribute.labelEn || field.fieldName}:{' '}
           <span>
             {field.arguments[0]} - {field.arguments[1]}
@@ -72,7 +72,7 @@ const CriteriaField = ({ field }) => {
       break;
     case 'EQUALS':
       fieldElement = (
-        <p>
+        <p className="equals">
           {field.fieldAttribute.labelEn || field.fieldName}:{' '}
           <span>{field.fieldAttribute.choices.length ? field.fieldAttribute.choices.find(each => each.value === field.arguments[0]).labelEn : field.arguments[0]}</span>
         </p>
@@ -80,7 +80,7 @@ const CriteriaField = ({ field }) => {
       break;
     case 'LESS_THAN':
       fieldElement = (
-        <p>
+        <p className="less-than">
           {field.fieldAttribute.labelEn || field.fieldName}: <MathSign src={LessThanEqual} alt="less_than"/>
           <span>{field.arguments[0]}</span>
         </p>
@@ -88,7 +88,7 @@ const CriteriaField = ({ field }) => {
       break;
     case 'GREATER_THAN':
       fieldElement = (
-        <p>
+        <p className="greater-than">
           {field.fieldAttribute.labelEn || field.fieldName}: <MathSign src={GreaterThanEqual} alt="greater_than"/>
           <span>{field.arguments[0]}</span>
         </p>
@@ -97,7 +97,7 @@ const CriteriaField = ({ field }) => {
     case 'CONTAINS':
       fieldElement = (
         field.arguments.length > 1 ?
-          <p>
+          <p className="contains">
             {field.fieldAttribute.labelEn || field.fieldName}:{' '}
             {field.arguments.map((argument, index) => {
               return <><span>{field.fieldAttribute.choices.length ? field.fieldAttribute.choices.find(each => each.value === argument).labelEn : field.arguments[0]}</span>{index !== field.arguments.length - 1 && ', '}</>
