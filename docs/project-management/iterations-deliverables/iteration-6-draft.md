@@ -18,25 +18,27 @@ The goal of Iteration Six is to implement Payment Verification, Deduplication, a
 
 ## **Technical Deliverables**
 
-* Complete development of the **Payment Verification** Module according to the signed off requirements from Iteration 5:
-  * Search, Filter, and Table List view of Cash Plans in new Module.
-  * Cash Plan Details + Start Verification Process
-    * Full List Verification
-      * XLSX import
-    * Random Sampling Verification \(SRS\)
-      * XLSX import
-  * Verification Details
-  * Data model changes \(Verification ID ?\)
-* **User Management**
-  * UI for adding/managing users
-    * HQ interface? Can we auto-allow based on AD groups?
-  * Teams?
-  * Not implementing Roles & Permissions
-* **Deduplication**
+* Complete development of the **Payment Verification Module** according to the signed off requirements from Iteration 5:
+  * Search & Filter a Table List view of Verifications for Cash Plans.
+  * Cash Plan Payment Verification Details to display verification process details.
+  * Verification Planning, allowing users to choose between verifying a full list vs a Random Sample and the following methods to collect verification:
+    * RapridPro
+    * XLSX export/import
+    * Manual Entry
+  * Verification Details screen showing the progress details of a Verification Plan.
+  * Manual Verification entry form accessed through the individual Payment Record selected for verification.
+  * Data model changes to accommodate the handling of Verification ID
+  * Changes to Population &gt; Household &gt; Payment Record Details to show verification.
+* Complete the development of the **User Management Module** according to the signed off spec from Iteration 5
+  * * UI for adding/managing users
+    * Not implementing Roles & Permissions
+* Complete the development of the **Registration Data Import Module** to accommodate for **Deduplication** according to the signed off spec from Iteration 5
   * Within a batch/import \(RDI instance\)
   * Pre-merge duplication against the golden record
-  * Flagging of batch/import records and golden records based on **sanctions list**
-  * Creation of grievance tickets based on above \(no UI\).
+  * Creation of grievance tickets based on above \(no UI for the ticket in this iteration\).
+  * Complete the development of the **Sanctions List Check** functionality according to signed off spec from Iteration 5
+    * Flagging of batch/import records against the sanctions list.
+  * Flagging of Golden Records against the sanctions list.
 
 ## **UX / UI Design Deliverables**
 
