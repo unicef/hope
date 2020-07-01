@@ -30,6 +30,52 @@ from registration_datahub.models import (
 )
 
 
+class XLSXValidator(BaseValidator):
+    @classmethod
+    def validate(cls, *args, **kwargs):
+        validate_methods = [
+            getattr(cls, m) for m in dir(cls) if m.startswith("validate_")
+        ]
+
+        errors_list = []
+        for method in validate_methods:
+            errors = method(*args, **kwargs)
+            errors_list.extend(errors)
+
+        errors_list.sort(key=itemgetter("header"))
+
+        return errors_list
+
+    @classmethod
+    def validate_file_extension(cls, *args, **kwargs):
+        xlsx_file = kwargs.get("file")
+        file_suffix = Path(xlsx_file.name).suffix
+        if file_suffix != ".xlsx":
+            return [
+                {
+                    "row_number": 1,
+                    "header": f"{xlsx_file.name}",
+                    "message": "Only .xlsx files are accepted for import",
+                }
+            ]
+
+        # Checking only extensions is not enough,
+        # loading workbook to check if it is in fact true .xlsx file
+        try:
+            wb = load_workbook(xlsx_file, data_only=True)
+            cls.WB = wb
+        except BadZipfile:
+            return [
+                {
+                    "row_number": 1,
+                    "header": f"{xlsx_file.name}",
+                    "message": "Invalid .xlsx file",
+                }
+            ]
+
+        return []
+
+
 class ImportDataValidator(BaseValidator):
     BUSINESS_AREA_SLUG = None
     BUSINESS_AREA_CODE = None
@@ -232,7 +278,7 @@ class ImportDataValidator(BaseValidator):
         return invalid_rows
 
 
-class UploadXLSXValidator(ImportDataValidator):
+class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
     WB = None
     CORE_FIELDS = CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY
     FLEX_FIELDS = serialize_flex_attributes()
