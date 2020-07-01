@@ -83,22 +83,6 @@ class CheckAgainstSanctionListTask:
         if not result.exists():
             return
 
-        formatted_result = "\n".join(
-            [
-                f"{num + 1}. {i.first_name} {i.second_name} {i.third_name}"
-                f"{' dob: ' if i.third_name else 'dob: '}"
-                f"{i.date_of_birth if i.date_of_birth else i.year_of_birth}"
-                for num, i in enumerate(result)
-            ]
-        )
-
-        message = f"""
-        Found {result.count()} matching results.
-        
-        Results:
-        {formatted_result}
-        """
-
         send_mail(
             "Sanction List Check",
             render_to_string(
