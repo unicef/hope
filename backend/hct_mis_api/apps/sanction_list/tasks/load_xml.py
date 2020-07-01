@@ -47,10 +47,10 @@ class LoadSanctionListXMLTask:
             "state_province": "INDIVIDUAL_ADDRESS/STATE_PROVINCE",
             "address_note": "INDIVIDUAL_ADDRESS/NOTE",
             "date_of_birth": "INDIVIDUAL_DATE_OF_BIRTH/DATE",
-            "year_of_birth": "INDIVIDUAL_DATE_OF_BIRTH/YEAR",
+            "year_of_birth": self._get_first_year_of_birth,
+            "second_year_of_birth": self._get_second_year_of_birth,
             "country_of_birth": self._get_country_of_birth,
             "designation": self._get_designation,
-            "exact_date": self._get_exact_date,
         }
 
     @staticmethod
@@ -72,12 +72,31 @@ class LoadSanctionListXMLTask:
         return ""
 
     @staticmethod
-    def _get_exact_date(individual_tag: ET.Element) -> Union[bool, None]:
-        exact_date_tag_name = "INDIVIDUAL_DATE_OF_BIRTH/TYPE_OF_DATE"
-        exact_date = individual_tag.find(exact_date_tag_name)
-        if isinstance(exact_date, ET.Element):
-            return True if exact_date == "EXACT" else False
-        return True
+    def _get_year_of_birth(
+        individual_tag: ET.Element, is_from: bool
+    ) -> Union[int, None]:
+        only_year_path = "INDIVIDUAL_DATE_OF_BIRTH/YEAR"
+        if is_from is True:
+            second_year_path = "INDIVIDUAL_DATE_OF_BIRTH/FROM_YEAR"
+        else:
+            second_year_path = "INDIVIDUAL_DATE_OF_BIRTH/TO_YEAR"
+        only_year_tag = individual_tag.find(only_year_path)
+        second_year_tag = individual_tag.find(second_year_path)
+        if isinstance(only_year_tag, ET.Element):
+            return only_year_tag.text
+        elif isinstance(second_year_tag, ET.Element):
+            return second_year_tag.text
+        return
+
+    def _get_first_year_of_birth(
+        self, individual_tag: ET.Element
+    ) -> Union[int, None]:
+        return self._get_year_of_birth(individual_tag, True)
+
+    def _get_second_year_of_birth(
+        self, individual_tag: ET.Element
+    ) -> Union[int, None]:
+        return self._get_year_of_birth(individual_tag, False)
 
     @staticmethod
     def _get_country_field(
@@ -326,7 +345,12 @@ class LoadSanctionListXMLTask:
             year, month, day, *time = value.split("-")
             return date(year=int(year), month=int(month), day=int(day))
 
-        return field.to_python(value)
+        correct_value = field.to_python(value)
+
+        if isinstance(correct_value, str):
+            correct_value = correct_value.strip()
+
+        return correct_value
 
     def execute(self):
         if self.file_path is not None:
