@@ -36,8 +36,8 @@ The goal of Iteration Six is to implement Payment Verification, Deduplication, a
   * Within a batch/import \(RDI instance\)
   * Pre-merge duplication against the golden record
   * Creation of grievance tickets based on above \(no UI for the ticket in this iteration\).
-  * Complete the development of the **Sanctions List Check** functionality according to signed off spec from Iteration 5
-    * Flagging of batch/import records against the sanctions list.
+* Complete the development of the **Sanctions List Check** functionality according to signed off spec from Iteration 5
+  * Flagging of batch/import records against the sanctions list.
   * Flagging of Golden Records against the sanctions list.
 
 ## **UX / UI Design Deliverables**
