@@ -1,8 +1,8 @@
 from datetime import datetime
 
-from django.core.mail import send_mail
-from django.db.models import Q
 from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
+from django.db.models import Q
 from django.template.loader import render_to_string
 from openpyxl import load_workbook
 
@@ -83,12 +83,17 @@ class CheckAgainstSanctionListTask:
         if not result.exists():
             return
 
-        send_mail(
-            "Sanction List Check",
-            render_to_string(
-                "sanction_list/check_results.html",
-                {"results": result, "results_count": result.count()},
-            ),
-            settings.EMAIL_HOST_USER,
-            [uploaded_file.associated_email],
+        context = {"results": result, "results_count": result.count()}
+        text_body = render_to_string("sanction_list/check_results.txt", context)
+        html_body = render_to_string(
+            "sanction_list/check_results.html", context
         )
+
+        msg = EmailMultiAlternatives(
+            subject="Sanction List Check",
+            from_email=settings.EMAIL_HOST_USER,
+            to=[uploaded_file.associated_email],
+            body=text_body,
+        )
+        msg.attach_alternative(html_body, "text/html")
+        msg.send()
