@@ -7,17 +7,13 @@ import { Button, Typography, Box } from '@material-ui/core';
 import { useDropzone } from 'react-dropzone';
 import { Form, Formik } from 'formik';
 import get from 'lodash/get';
-import {
-  UploadImportDataXlsxFileMutation,
-  useCreateRegistrationXlsxImportMutation,
-  useUploadImportDataXlsxFileMutation,
-  XlsxRowErrorNode,
-} from '../../__generated__/graphql';
 
+import { useCheckAgainstSanctionListMutation } from '../../__generated__/graphql';
 import { Errors } from '../registration/import/errors/PlainErrors';
 import { LoadingComponent } from '../../components/LoadingComponent';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { selectFields } from '../../utils/utils';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -78,31 +74,31 @@ function DropzoneField({ onChange, loading }): React.ReactElement {
   );
 }
 
-const validationSchema = Yup.object().shape({
-  name: Yup.string().required('Name Upload is required'),
-});
-
 export function SanctionList(): React.ReactElement {
   const { showMessage } = useSnackbar();
-  const businessArea = useBusinessArea();
+  const [fileToImport, setFileToImport] = useState(null);
   const [
-    uploadMutate,
+    checkAgainstSanctionMutate,
     { data: uploadData, loading: fileLoading },
-  ] = useUploadImportDataXlsxFileMutation();
-  const [
-    createRegistrationXlsxMutate,
-    { loading: createLoading },
-  ] = useCreateRegistrationXlsxImportMutation();
+  ] = useCheckAgainstSanctionListMutation();
 
   const { t } = useTranslation();
-  const xlsxErrors: UploadImportDataXlsxFileMutation['uploadImportDataXlsxFile']['errors'] = get(
-    uploadData,
-    'uploadImportDataXlsxFile.errors',
-  );
-  let disabled = null;
+
+  const handleImport = async (): Promise<void> => {
+    console.log(fileToImport);
+    const response = await checkAgainstSanctionMutate({
+      variables: {
+        file: fileToImport,
+      },
+    });
+    if (response.data && !response.errors) {
+      showMessage('Your import was successful!');
+    } else {
+      showMessage('Import failed.');
+    }
+  };
 
   let importFile = null;
-  disabled = !uploadData || createLoading;
   importFile = (
     <>
       <DropzoneField
@@ -115,71 +111,35 @@ export function SanctionList(): React.ReactElement {
           const fileSizeMB = file.size / (1024 * 1024);
           if (fileSizeMB > 200) {
             showMessage(
-              `File size is to big. It should be under 200MB, File size is ${fileSizeMB}MB`,
+              `File size is too big. It should be under 200MB, File size is ${fileSizeMB}MB`,
             );
             return;
           }
-          uploadMutate({
-            variables: {
-              file,
-              businessAreaSlug: businessArea,
-            },
-          });
+          setFileToImport(file);
         }}
       />
-      <Errors errors={xlsxErrors as XlsxRowErrorNode[]} />
     </>
   );
 
   return (
     <>
-      <Formik
-        validationSchema={validationSchema}
-        onSubmit={async (values) => {
-          try {
-            let rdiId = null;
-            const { data } = await createRegistrationXlsxMutate({
-              variables: {
-                registrationDataImportData: {
-                  importDataId:
-                    uploadData.uploadImportDataXlsxFile.importData.id,
-                  businessAreaSlug: businessArea,
-                },
-              },
-            });
-            rdiId = data?.registrationXlsxImport?.registrationDataImport?.id;
+      <DialogTitleWrapper>
+        <Typography variant='h6'>{t('Select File to Import')}</Typography>
+      </DialogTitleWrapper>
+      {importFile}
 
-            showMessage('The import was successful');
-          } catch (error) {
-            showMessage('Something went wrong.');
-          }
-        }}
-        initialValues={{ name: '' }}
-      >
-        {({ submitForm }) => (
-          <Form>
-            <DialogTitleWrapper>
-              <Typography variant='h6'>{t('Select File to Import')}</Typography>
-            </DialogTitleWrapper>
-            {importFile}
-
-            <Box display='flex' justifyContent='center' p={3}>
-              <Button
-                type='submit'
-                color='primary'
-                variant='contained'
-                disabled={disabled}
-                onClick={() => {
-                  submitForm();
-                }}
-                data-cy='button-import'
-              >
-                {t('IMPORT')}
-              </Button>
-            </Box>
-          </Form>
-        )}
-      </Formik>
+      <Box display='flex' justifyContent='center' p={3}>
+        <Button
+          type='submit'
+          color='primary'
+          variant='contained'
+          disabled={!fileToImport}
+          onClick={() => handleImport()}
+          data-cy='button-import'
+        >
+          {t('IMPORT')}
+        </Button>
+      </Box>
     </>
   );
 }
