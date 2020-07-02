@@ -85,7 +85,6 @@ export function SanctionList(): React.ReactElement {
   const { t } = useTranslation();
 
   const handleImport = async (): Promise<void> => {
-    console.log(fileToImport);
     const response = await checkAgainstSanctionMutate({
       variables: {
         file: fileToImport,
