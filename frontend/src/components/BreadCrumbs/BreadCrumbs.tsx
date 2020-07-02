@@ -23,7 +23,7 @@ interface BreadCrumbsElementProps {
   last: boolean;
 }
 
-function BreadCrumbsElement({
+export function BreadCrumbsElement({
   title,
   to,
   last = false,

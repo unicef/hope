@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, getByTestId } from '@testing-library/react';
+import { render, wait } from '@testing-library/react';
 import { LoadingComponent } from './LoadingComponent';
 
 describe('LoadingComponent', () => {
@@ -15,6 +15,7 @@ describe('LoadingComponent', () => {
         <LoadingComponent isLoading={false} absolute />
       </div>
     )
-    expect(container).toBeInTheDocument();
+    const loader = document.querySelector("[data-testid=loading-container]");
+    wait(() => expect(container).toContain(loader));
   })
 })
