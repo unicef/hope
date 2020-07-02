@@ -1,8 +1,11 @@
 import React from 'react';
-import { render, wait } from '@testing-library/react';
-import { CriteriaField } from './Criteria';
+import { render, wait, fireEvent } from '@testing-library/react';
+import { ThemeProvider } from '@material-ui/core';
+import { ThemeProvider as StyledThemeProvider } from 'styled-components';
+import { Criteria } from './Criteria';
+import { theme } from '../../../../theme';
 
-const EqualsCriteria = {
+const EqualsCriteria:any = [{
   arguments: ["OTHER"],
   comparisionMethod: "EQUALS",
   isFlexField: false,
@@ -16,109 +19,43 @@ const EqualsCriteria = {
       labelEn: "Other",
     }]
   }
-}
-
-const RangeCriteria = {
-  arguments: [20,54],
-  comparisionMethod: "RANGE",
-  isFlexField: false,
-  fieldName: 'age',
-  fieldAttribute: {
-    labelEn: 'Residence Status',
-    name: 'residence_status',
-    type: 'INTEGER',
-    choices: []
-  }
-}
-
-const NotEqualsCriteria = {
-  arguments: [20],
-  comparisionMethod: "NOT_EQUALS",
-  isFlexField: false,
-  fieldName: 'age',
-  fieldAttribute: {
-    labelEn: 'Not equals',
-    name: 'residence_status',
-    type: 'INTEGER',
-    choices: []
-  }
-}
-
-const LessThanCriteria = {
-  arguments: [20],
-  comparisionMethod: "LESS_THEN",
-  isFlexField: false,
-  fieldName: 'age',
-  fieldAttribute: {
-    labelEn: 'Less Then',
-    name: 'residence_status',
-    type: 'INTEGER',
-    choices: []
-  }
-}
-
-const GreaterThanCriteria = {
-  arguments: [20],
-  comparisionMethod: "GREATER_THAN",
-  isFlexField: false,
-  fieldName: 'age',
-  fieldAttribute: {
-    labelEn: 'Greater Than',
-    name: 'residence_status',
-    type: 'INTEGER',
-    choices: []
-  }
-}
-
-const ContainsCriteria = {
-  arguments: [20],
-  comparisionMethod: "CONTAINS",
-  isFlexField: false,
-  fieldName: 'age',
-  fieldAttribute: {
-    labelEn: 'Contains',
-    name: 'residence_status',
-    type: 'INTEGER',
-    choices: []
-  }
-}
+}]
 
 
-describe('Criteria', () => {
-  test('Return criteria element for NOT_EQUALS', () => {
+describe('Criteria card', () => {
+  test('Renders criteria without errors', () => {
     const { container } = render(
-      <CriteriaField field={NotEqualsCriteria}/>
+      <ThemeProvider theme={theme}>
+        <StyledThemeProvider theme={theme}>
+          <Criteria rules={EqualsCriteria} isEdit={false} canRemove={false} />
+        </StyledThemeProvider>
+      </ThemeProvider>
     )
-    wait(() => expect(container).toContainElement(container.querySelector('.not-equals')))
   })
-  test('Returns criteria element for EQUALS', () => {
+  test('Triggers remove function for criteria in edit state', () => {
+    const removeFunction = jest.fn();
     const { container } = render(
-      <CriteriaField field={EqualsCriteria}/>
+      <ThemeProvider theme={theme}>
+        <StyledThemeProvider theme={theme}>
+          <Criteria rules={EqualsCriteria} removeFunction={removeFunction} isEdit={false} canRemove={false} />
+        </StyledThemeProvider>
+      </ThemeProvider>
     )
-    wait(() => expect(container).toContainElement(container.querySelector('.equals')))
+    const removeButton = document.querySelector("[data-testid='remove-button']")
+    wait(() => fireEvent.click(removeButton))
+    wait(() => expect(removeFunction).toBeCalled())
   })
-  test('Return criteria element for RANGE', () => {
+  test('Triggers edit function for criteria in edit state', () => {
+    const editFunction = jest.fn();
     const { container } = render(
-      <CriteriaField field={RangeCriteria}/>
+      <ThemeProvider theme={theme}>
+        <StyledThemeProvider theme={theme}>
+          <Criteria rules={EqualsCriteria} editFunction={editFunction} isEdit={false} canRemove={false} />
+        </StyledThemeProvider>
+      </ThemeProvider>
     )
-    wait(() => expect(container).toContainElement(container.querySelector('.range')))
-  })
-  test('Return criteria element for LESS_THAN', () => {
-    const { container } = render(
-      <CriteriaField field={LessThanCriteria}/>
-    )
-    wait(() => expect(container).toContainElement(container.querySelector('.less-than')))
-  })
-  test('Return criteria element for GREATER_THAN', () => {
-    const { container } = render(
-      <CriteriaField field={GreaterThanCriteria}/>
-    )
-    wait(() => expect(container).toContainElement(container.querySelector('.greater-than')))
-  })
-  test('Return criteria element for CONTAINS', () => {
-    const { container } = render(
-      <CriteriaField field={ContainsCriteria}/>
-    )
-    wait(() => expect(container).toContainElement(container.querySelector('.contains')))
+    const removeButton = document.querySelector("[data-testid='edit-button']")
+    wait(() => fireEvent.click(removeButton))
+    wait(() => expect(editFunction).toBeCalled())
   })
 })
