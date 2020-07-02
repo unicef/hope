@@ -120,6 +120,12 @@ class Household(TimeStampedUUIDModel, AbstractSyncable):
     admin_area = models.ForeignKey(
         "core.AdminArea", null=True, on_delete=models.SET_NULL
     )
+    
+    representatives = m2m(through=Individual,
+        help_text="""This is only used to track collector (primary or secondary) of a household.
+            They may still be a HOH of this household or any other household.
+            Through model will contain the role (ROLE_CHOICE) they are connected with on.""")
+
     geopoint = PointField(blank=True, null=True)
     female_age_group_0_5_count = models.PositiveIntegerField(default=0)
     female_age_group_6_11_count = models.PositiveIntegerField(default=0)
@@ -261,9 +267,6 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
     given_name = models.CharField(max_length=85, blank=True,)
     middle_name = models.CharField(max_length=85, blank=True,)
     family_name = models.CharField(max_length=85, blank=True,)
-    relationship = models.CharField(
-        max_length=255, blank=True, choices=RELATIONSHIP_CHOICE,
-    )
     role = models.CharField(max_length=255, blank=True, choices=ROLE_CHOICE,)
     sex = models.CharField(max_length=255, choices=SEX_CHOICE,)
     birth_date = models.DateField()
@@ -273,8 +276,18 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
     )
     phone_no = PhoneNumberField(blank=True)
     phone_no_alternative = PhoneNumberField(blank=True)
+    relationship = models.CharField(
+        max_length=255, blank=True, choices=RELATIONSHIP_CHOICE,
+        help_text="""This represents the MEMBER relationship. can be blank
+            as well if household is null!"""
+    )
     household = models.ForeignKey(
         "Household", related_name="individuals", on_delete=models.CASCADE,
+        null=True, blank=True,
+        help_text="""This represents the household this person is a MEMBER,
+            and if null then relationship is NON_BENEFICIARY and that
+            simply means they are a representative of one or more households
+            and not a member of one."""
     )
     registration_data_import = models.ForeignKey(
         "registration_data.RegistrationDataImport",
