@@ -37,7 +37,7 @@ describe('Criteria card', () => {
     const { container } = render(
       <ThemeProvider theme={theme}>
         <StyledThemeProvider theme={theme}>
-          <Criteria rules={EqualsCriteria} removeFunction={removeFunction} isEdit={false} canRemove={false} />
+          <Criteria rules={EqualsCriteria} removeFunction={removeFunction} isEdit={true} canRemove={true} />
         </StyledThemeProvider>
       </ThemeProvider>
     )
@@ -50,7 +50,7 @@ describe('Criteria card', () => {
     const { container } = render(
       <ThemeProvider theme={theme}>
         <StyledThemeProvider theme={theme}>
-          <Criteria rules={EqualsCriteria} editFunction={editFunction} isEdit={false} canRemove={false} />
+          <Criteria rules={EqualsCriteria} editFunction={editFunction} isEdit={true} canRemove={true} />
         </StyledThemeProvider>
       </ThemeProvider>
     )
