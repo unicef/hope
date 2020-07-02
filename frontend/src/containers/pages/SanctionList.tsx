@@ -1,29 +1,16 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
-import * as Yup from 'yup';
 import { useTranslation } from 'react-i18next';
 import { Button, Typography, Box } from '@material-ui/core';
 import { useDropzone } from 'react-dropzone';
-import { Form, Formik } from 'formik';
-import get from 'lodash/get';
 
 import { useCheckAgainstSanctionListMutation } from '../../__generated__/graphql';
-import { Errors } from '../registration/import/errors/PlainErrors';
 import { LoadingComponent } from '../../components/LoadingComponent';
 import { useSnackbar } from '../../hooks/useSnackBar';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { selectFields } from '../../utils/utils';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-`;
-
-const DialogFooter = styled.div`
-  padding: 12px 16px;
-  margin: 0;
-  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  text-align: right;
 `;
 
 const DropzoneContainer = styled.div`
@@ -42,14 +29,6 @@ const DropzoneContainer = styled.div`
   cursor: pointer;
 
   ${({ disabled }) => (disabled ? 'filter: grayscale(100%);' : '')}
-`;
-
-const StyledDialogFooter = styled(DialogFooter)`
-  && {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-  }
 `;
 
 function DropzoneField({ onChange, loading }): React.ReactElement {
