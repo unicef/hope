@@ -21,6 +21,8 @@ from household.models import (
     RELATIONSHIP_CHOICE,
     ROLE_CHOICE,
     IDENTIFICATION_TYPE_CHOICE,
+    WORK_STATUS_CHOICE,
+    NOT_PROVIDED,
 )
 from utils.models import TimeStampedUUIDModel
 
@@ -122,6 +124,12 @@ class ImportedIndividual(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
     )
     disability = models.BooleanField(default=False)
+    work_status = models.CharField(
+        max_length=20,
+        choices=WORK_STATUS_CHOICE,
+        blank=True,
+        default=NOT_PROVIDED,
+    )
     flex_fields = JSONField(default=dict)
 
     @property
