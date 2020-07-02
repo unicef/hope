@@ -125,6 +125,11 @@ enum CashPlanStatus {
   TRANSACTION_COMPLETED_WITH_ERRORS
 }
 
+type CheckAgainstSanctionListMutation {
+  ok: Boolean
+  errors: [XlsxRowErrorNode]
+}
+
 type ChoiceObject {
   name: String
   value: String
@@ -963,6 +968,7 @@ type Mutations {
   approveRegistrationDataImport(id: ID!): ApproveRegistrationDataImportMutation
   unapproveRegistrationDataImport(id: ID!): UnapproveRegistrationDataImportMutation
   mergeRegistrationDataImport(id: ID!): MergeRegistrationDataImportMutation
+  checkAgainstSanctionList(file: Upload!): CheckAgainstSanctionListMutation
 }
 
 interface Node {
