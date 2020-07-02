@@ -1,4 +1,4 @@
-# Iteration 6 \(DRAFT\)
+# Iteration 6
 
 The goal of Iteration Six is to implement Payment Verification, Deduplication, and User Management.
 
@@ -59,3 +59,10 @@ Following are the deliverables that UNICEF teams will have to work on and provid
 * Implementation of roles and permission checks and logic in various modules \(to be done in a future iteration\)
 * UI for grievance tickets or management \(future iteration\)
 
+## Change Request - July 2nd 2020
+
+Data Model Change:
+
+* Change Data model to allow for Many to Many Individuals to Households
+* If we find a duplicate that belongs to two households - because we have the many 2 many - but based on their ROLE - we can allow for the duplicate.
+* 
