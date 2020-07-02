@@ -34,6 +34,7 @@ export function StatusBox({
       status={status}
       statusToColor={statusToColor}
       data-cy='status-container'
+      data-testid='status-container'
     >
       {statusNameMapping
         ? statusNameMapping(status.replace(underscoreRemoveRegex, ' '))
