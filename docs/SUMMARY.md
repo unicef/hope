@@ -99,7 +99,7 @@
   * [Iteration 4](project-management/iterations-deliverables/iteration-4/README.md)
     * [Change Request](project-management/iterations-deliverables/iteration-4/change-request.md)
   * [Iteration 5](project-management/iterations-deliverables/iteration-5.md)
-  * [Iteration 6 \(DRAFT\)](project-management/iterations-deliverables/iteration-6-draft.md)
+  * [Iteration 6](project-management/iterations-deliverables/iteration-6-draft.md)
 * [Sprint Cadence](project-management/sprint-cadence.md)
 * [CO / User testing](project-management/co-user-testing.md)
 * [Definition of Ready/Done](project-management/definition-of-ready-and-done.md)
