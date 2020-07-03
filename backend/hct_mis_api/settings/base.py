@@ -199,7 +199,8 @@ PROJECT_APPS = [
     "registration_data",
     "cash_assist_datahub",
     "mis_datahub",
-    "erp_datahub"
+    "erp_datahub",
+    "sanction_list",
 ]
 
 DJANGO_APPS = [

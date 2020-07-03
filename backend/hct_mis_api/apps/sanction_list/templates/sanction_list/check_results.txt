@@ -1,0 +1,5 @@
+Found {{ results_count }} matching results.
+{% for individual in results %}
+{{ forloop.counter }}. {{ individual.first_name }} {{ individual.second_name }}  {{ individual.third_name }}
+Date of birth: {% firstof individual.date_of_birth individual.year_of_birth "Not provided" %}
+{% endfor %}

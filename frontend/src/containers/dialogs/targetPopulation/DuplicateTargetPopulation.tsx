@@ -80,7 +80,7 @@ export function DuplicateTargetPopulation({
               historyMethod: 'push',
             });
           }, (error) => {
-            return showMessage('Name already exist');
+            return showMessage('Name already exists');
           })
 
         }}

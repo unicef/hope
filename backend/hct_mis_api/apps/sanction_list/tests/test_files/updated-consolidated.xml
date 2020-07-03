@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONSOLIDATED_LIST xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:noNamespaceSchemaLocation="https://www.un.org/sc/resources/sc-sanctions.xsd"
+                   dateGenerated="2020-06-25T19:26:15.767-04:00">
+    <INDIVIDUALS>
+        <INDIVIDUAL>
+            <DATAID>6908555</DATAID>
+            <VERSIONNUM>1</VERSIONNUM>
+            <FIRST_NAME>RI</FIRST_NAME>
+            <SECOND_NAME>WON HO</SECOND_NAME>
+            <THIRD_NAME>TEST</THIRD_NAME>
+            <UN_LIST_TYPE>DPRK</UN_LIST_TYPE>
+            <REFERENCE_NUMBER>KPi.033</REFERENCE_NUMBER>
+            <LISTED_ON>2020-11-30</LISTED_ON>
+            <COMMENTS1>Ri Won Ho is a DPRK Ministry of State Security Official
+                stationed in Syria supporting KOMID.
+            </COMMENTS1>
+            <DESIGNATION>
+                <VALUE>DPRK Ministry of State Security Official</VALUE>
+            </DESIGNATION>
+            <NATIONALITY>
+                <VALUE>Democratic People's Republic of Korea</VALUE>
+            </NATIONALITY>
+            <LIST_TYPE>
+                <VALUE>UN List</VALUE>
+            </LIST_TYPE>
+            <LAST_DAY_UPDATED>
+                <VALUE/>
+            </LAST_DAY_UPDATED>
+            <INDIVIDUAL_ALIAS>
+                <QUALITY/>
+                <ALIAS_NAME>TEST ALIAST NAME</ALIAS_NAME>
+            </INDIVIDUAL_ALIAS>
+            <INDIVIDUAL_ADDRESS>
+                <COUNTRY/>
+            </INDIVIDUAL_ADDRESS>
+            <INDIVIDUAL_DATE_OF_BIRTH>
+                <TYPE_OF_DATE>EXACT</TYPE_OF_DATE>
+                <DATE>1964-07-17</DATE>
+            </INDIVIDUAL_DATE_OF_BIRTH>
+            <INDIVIDUAL_PLACE_OF_BIRTH/>
+            <INDIVIDUAL_DOCUMENT>
+                <TYPE_OF_DOCUMENT>Passport</TYPE_OF_DOCUMENT>
+                <NUMBER>381310014</NUMBER>
+            </INDIVIDUAL_DOCUMENT>
+            <INDIVIDUAL_DOCUMENT>
+                <TYPE_OF_DOCUMENT>Test Doc Type</TYPE_OF_DOCUMENT>
+                <NUMBER>1233214321</NUMBER>
+            </INDIVIDUAL_DOCUMENT>
+            <SORT_KEY/>
+            <SORT_KEY_LAST_MOD/>
+        </INDIVIDUAL>
+        <INDIVIDUAL>
+            <DATAID>6908571</DATAID>
+            <VERSIONNUM>1</VERSIONNUM>
+            <FIRST_NAME>CHO</FIRST_NAME>
+            <SECOND_NAME>CHUN RYONG</SECOND_NAME>
+            <THIRD_NAME/>
+            <UN_LIST_TYPE>DPRK</UN_LIST_TYPE>
+            <REFERENCE_NUMBER>KPi.038</REFERENCE_NUMBER>
+            <LISTED_ON>2016-11-30</LISTED_ON>
+            <COMMENTS1/>
+            <DESIGNATION>
+                <VALUE>Chairman of the Second Economic Committee (SEC)</VALUE>
+            </DESIGNATION>
+            <NATIONALITY>
+                <VALUE>Democratic People's Republic of Korea</VALUE>
+            </NATIONALITY>
+            <LIST_TYPE>
+                <VALUE>UN List</VALUE>
+            </LIST_TYPE>
+            <LAST_DAY_UPDATED>
+                <VALUE/>
+            </LAST_DAY_UPDATED>
+            <INDIVIDUAL_ALIAS>
+                <QUALITY>Good</QUALITY>
+                <ALIAS_NAME>Jo Chun Ryong</ALIAS_NAME>
+            </INDIVIDUAL_ALIAS>
+            <INDIVIDUAL_ADDRESS>
+                <COUNTRY/>
+            </INDIVIDUAL_ADDRESS>
+            <INDIVIDUAL_DATE_OF_BIRTH>
+                <TYPE_OF_DATE>EXACT</TYPE_OF_DATE>
+                <DATE>1960-04-04</DATE>
+            </INDIVIDUAL_DATE_OF_BIRTH>
+            <INDIVIDUAL_PLACE_OF_BIRTH/>
+            <INDIVIDUAL_DOCUMENT/>
+            <SORT_KEY/>
+            <SORT_KEY_LAST_MOD/>
+        </INDIVIDUAL>
+    </INDIVIDUALS>
+</CONSOLIDATED_LIST>
