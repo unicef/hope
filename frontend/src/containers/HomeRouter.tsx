@@ -25,8 +25,9 @@ import { RegistrationDataImportDetailsPage } from './registration/details/Regist
 import { RegistrationHouseholdDetailsPage } from './registration/details/households/RegistrationHouseholdDetailsPage';
 import { RegistrationIndividualDetailsPage } from './registration/details/individual/RegistrationIndividualDetailsPage';
 import { PaymentVerificationPage } from './pages/PaymentVerificationPage';
-import {PaymentVerificationDetailsPage} from './pages/PaymentVerificationDetailsPage'
+import { PaymentVerificationDetailsPage } from './pages/PaymentVerificationDetailsPage';
 
+import { SanctionList } from './pages/SanctionList';
 
 const Root = styled.div`
   display: flex;
@@ -120,7 +121,9 @@ export function HomeRouter(): React.ReactElement {
           <Route path='/:businessArea/registration-data-import'>
             <RegistrationDataImportPage />
           </Route>
-
+          <Route path='/:businessArea/sanction-list'>
+            <SanctionList />
+          </Route>
           <Route path='/'>
             <DashboardPage />
           </Route>
@@ -132,7 +135,10 @@ export function HomeRouter(): React.ReactElement {
           autoHideDuration={5000}
           onClose={() => snackBar.setShow(false)}
         >
-          <SnackbarContent message={snackBar.message} data-cy={snackBar.dataCy} />
+          <SnackbarContent
+            message={snackBar.message}
+            data-cy={snackBar.dataCy}
+          />
         </Snackbar>
       )}
     </Root>
