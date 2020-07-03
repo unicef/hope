@@ -2,15 +2,26 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
-import { Button, Box, Paper } from '@material-ui/core';
+import {
+  Button,
+  Box,
+  Paper,
+  SnackbarContent,
+  Snackbar,
+} from '@material-ui/core';
 import { useCheckAgainstSanctionListMutation } from '../../__generated__/graphql';
-import { useSnackbar } from '../../hooks/useSnackBar';
 import { DropzoneField } from '../../components/DropzoneField';
 import { PageHeader } from '../../components/PageHeader';
 
 export function SanctionList(): React.ReactElement {
-  const { showMessage } = useSnackbar();
+  const [snackbarShow, setSnackbarShow] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
   const [fileToImport, setFileToImport] = useState(null);
+
+  const showMessage = (message): void => {
+    setSnackbarMessage(message);
+    setSnackbarShow(true);
+  };
   const [
     checkAgainstSanctionMutate,
     { data: uploadData, loading: fileLoading },
@@ -103,6 +114,15 @@ export function SanctionList(): React.ReactElement {
             </ButtonsContainer>
           </Box>
         </Paper>
+        {snackbarShow && (
+          <Snackbar
+            open={snackbarShow}
+            autoHideDuration={5000}
+            onClose={() => setSnackbarShow(false)}
+          >
+            <SnackbarContent message={snackbarMessage} data-cy='snackBar' />
+          </Snackbar>
+        )}
       </Box>
     </>
   );
