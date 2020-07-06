@@ -49,7 +49,7 @@ export const FormikMultiSelectField = ({
   field,
   form,
   label,
-  options,
+  choices,
   ...otherProps
 }): React.ReactElement => {
   const classes = useStyles();
@@ -76,7 +76,7 @@ export const FormikMultiSelectField = ({
             {selected.map((value) => (
               <Chip
                 key={value}
-                label={options.find((el) => el.value === value).name || ''}
+                label={choices.find((el) => el.value === value).name || ''}
                 className={classes.chip}
               />
             ))}
@@ -85,13 +85,13 @@ export const FormikMultiSelectField = ({
         MenuProps={MenuProps}
         {...otherProps}
       >
-        {options.map((option) => (
+        {choices.map((choice) => (
           <MenuItem
-            key={option.value}
-            value={option.value}
-            style={getStyles(option.value, selectedValues, theme)}
+            key={choice.value}
+            value={choice.value}
+            style={getStyles(choice.value, selectedValues, theme)}
           >
-            {option.name}
+            {choice.name}
           </MenuItem>
         ))}
       </Select>
