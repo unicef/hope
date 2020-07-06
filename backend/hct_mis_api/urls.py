@@ -9,6 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 from graphene_file_upload.django import FileUploadGraphQLView
 
 import registration_datahub.views
+import sanction_list.views
 from core.views import (
     homepage,
     schema,
@@ -19,7 +20,7 @@ from core.views import (
 
 
 urlpatterns = [
-    path("api/admin/", admin.site.urls ),
+    path("api/admin/", admin.site.urls),
     path("api/admin/call-command", call_command_view),
     path("", homepage),
     path("_health", homepage),
@@ -32,6 +33,10 @@ urlpatterns = [
     path("api/logout", logout_view),
     path("api/sentry-debug/", trigger_error),
     path("api/download-template", registration_datahub.views.download_template),
+    path(
+        "api/download-sanction-template",
+        sanction_list.views.download_sanction_template,
+    ),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 urlpatterns += staticfiles_urlpatterns()
