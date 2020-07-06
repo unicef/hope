@@ -34,7 +34,7 @@ class PaymentRecord(TimeStampedUUIDModel):
         "program.CashPlan",
         on_delete=models.CASCADE,
         related_name="payment_records",
-        null=True
+        null=True,
     )
     household = models.ForeignKey(
         "household.Household",
@@ -86,3 +86,62 @@ class ServiceProvider(TimeStampedUUIDModel):
     short_name = models.CharField(max_length=4)
     country = models.CharField(max_length=3)
     vision_id = models.CharField(max_length=255)
+
+
+class CashPlanPaymentVerification(TimeStampedUUIDModel):
+    STATUS_DRAFT = "DRAFT"
+    STATUS_ACTIVE = "ACTIVE"
+    STATUS_FINISHED = "FINISHED"
+    SAMPLING_FULL_LIST = "FULL_LIST"
+    SAMPLING_RANDOM = "RANDOM"
+    VERIFICATION_METHOD_RAPIDPRO = "RAPIDPRO"
+    VERIFICATION_METHOD_XLSX = "XLSX"
+    VERIFICATION_METHOD_MANUAL = "MANUAL"
+    STATUS_CHOICES = (
+        (STATUS_DRAFT, "Draft"),
+        (STATUS_ACTIVE, "Active"),
+        (STATUS_FINISHED, "Finished"),
+    )
+    SAMPLING_CHOICES = (
+        (SAMPLING_FULL_LIST, "Full list"),
+        (SAMPLING_RANDOM, "Draft"),
+    )
+    VERIFICATION_METHOD_CHOICES = (
+        (VERIFICATION_METHOD_RAPIDPRO, "RAPIDPRO"),
+        (VERIFICATION_METHOD_XLSX, "XLSX"),
+        (VERIFICATION_METHOD_MANUAL, "MANUAL"),
+    )
+    status = models.CharField(
+        max_length=50, choices=STATUS_CHOICES, default="DRAFT"
+    )
+    cash_plan = models.ForeignKey("program.CashPlan")
+    sampling = models.CharField(max_length=50, choices=SAMPLING_CHOICES)
+    verification_method = models.CharField(
+        max_length=50, choices=VERIFICATION_METHOD_CHOICES
+    )
+    sample_size = models.PositiveIntegerField(null=True)
+    responded_count = models.PositiveIntegerField(null=True)
+    received_count = models.PositiveIntegerField(null=True)
+    not_received_count = models.PositiveIntegerField(null=True)
+    received_with_problems_count = models.PositiveIntegerField(null=True)
+
+
+class PaymentVerification(TimeStampedUUIDModel):
+    STATUS_PENDING = "PENDING"
+    STATUS_RECEIVED= "RECEIVED"
+    STATUS_NOT_RECEIVED = "NOT_RECEIVED"
+    STATUS_RECEIVED_WITH_ISSUES= "RECEIVED_WITH_ISSUES"
+    STATUS_CHOICES = (
+        (STATUS_PENDING, "PENDING"),
+        (STATUS_RECEIVED, "RECEIVED"),
+        (STATUS_NOT_RECEIVED, "NOT RECEIVED"),
+        (STATUS_RECEIVED_WITH_ISSUES, "RECEIVED WITH ISSUES"),
+    )
+    cash_plan_payment_verification = models.ForeignKey(
+        "CashPlanPaymentVerification"
+    )
+    payment_record = models.ForeignKey("PaymentRecord")
+    status = models.CharField(
+        max_length=50, choices=STATUS_CHOICES, default="DRAFT"
+    )
+    status_date = models.DateField(null=True)
