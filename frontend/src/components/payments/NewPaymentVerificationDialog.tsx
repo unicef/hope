@@ -19,6 +19,7 @@ import { TabPanel } from '../TabPanel';
 import { FormikSliderField } from '../../shared/Formik/FormikSliderField';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 import { FormikMultiSelectField } from '../../shared/Formik/FormikMultiSelectField/FormikMultiSelectField';
+import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -115,6 +116,7 @@ export function NewPaymentVerificationDialog(): React.ReactElement {
     age: true,
     sex: false,
     filterAdminAreas: [],
+    verificationChannel: null,
   };
 
   return (
@@ -167,7 +169,27 @@ export function NewPaymentVerificationDialog(): React.ReactElement {
                   </StyledTabs>
                 </TabsContainer>
                 <TabPanel value={selectedTab} index={0}>
-                  <div>full list here</div>
+                  <Box pt={3}>
+                    <Box
+                      pb={3}
+                      pt={3}
+                      fontSize={16}
+                      fontWeight='fontWeightBold'
+                    >
+                      Sample size: 500 out of 500 (100%)
+                    </Box>
+                    <Field
+                      name='verificationChannel'
+                      label='Verification Channel'
+                      style={{ flexDirection: 'row' }}
+                      choices={[
+                        { value: 'RAPIDPRO', name: 'RAPIDPRO' },
+                        { value: 'XLSX', name: 'XLSX' },
+                        { value: 'MANUAL', name: 'MANUAL' },
+                      ]}
+                      component={FormikRadioGroup}
+                    />
+                  </Box>
                 </TabPanel>
                 <TabPanel value={selectedTab} index={1}>
                   <Box pt={3}>
@@ -204,9 +226,28 @@ export function NewPaymentVerificationDialog(): React.ReactElement {
                     </Box>
                     <Field
                       name='filterAdminAreas'
-                      options={options}
+                      choices={options}
                       label='Filter Out Admin Areas'
                       component={FormikMultiSelectField}
+                    />
+                    <Box
+                      pb={3}
+                      pt={3}
+                      fontSize={16}
+                      fontWeight='fontWeightBold'
+                    >
+                      Sample size: 435 out of 500 ({(435 / 500) * 100}%)
+                    </Box>
+                    <Field
+                      name='verificationChannel'
+                      label='Verification Channel'
+                      style={{ flexDirection: 'row' }}
+                      choices={[
+                        { value: 'RAPIDPRO', name: 'RAPIDPRO' },
+                        { value: 'XLSX', name: 'XLSX' },
+                        { value: 'MANUAL', name: 'MANUAL' },
+                      ]}
+                      component={FormikRadioGroup}
                     />
                   </Box>
                 </TabPanel>
