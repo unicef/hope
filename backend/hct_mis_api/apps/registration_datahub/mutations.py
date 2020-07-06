@@ -52,7 +52,7 @@ def create_registration_data_import_objects(
         **registration_data_import_data,
     )
     created_obj_hct = RegistrationDataImport.objects.create(
-        status="IMPORTING",
+        status=RegistrationDataImport.IMPORTING,
         imported_by=user,
         data_source=data_source,
         number_of_individuals=import_data_obj.number_of_individuals,
@@ -176,7 +176,7 @@ class MergeRegistrationDataImportMutation(BaseValidator, graphene.Mutation):
             dag_id="MergeRegistrationImportData",
             context={"registration_data_import_id": decode_id,},
         )
-        obj_hct.status = "MERGING"
+        obj_hct.status = RegistrationDataImport.MERGING
         obj_hct.save()
         return MergeRegistrationDataImportMutation(obj_hct)
 
@@ -190,7 +190,7 @@ class ApproveRegistrationDataImportMutation(BaseValidator, graphene.Mutation):
     @classmethod
     def validate_object_status(cls, *args, **kwargs):
         status = kwargs.get("status")
-        if status != "IN_REVIEW":
+        if status != RegistrationDataImport.IN_REVIEW:
             raise ValidationError(
                 "Only In Review Registration Data Import can be Approved"
             )
@@ -234,7 +234,7 @@ class UnapproveRegistrationDataImportMutation(BaseValidator, graphene.Mutation):
             id=decode_id,
         )
         cls.validate(status=obj.status)
-        obj.status = "IN_REVIEW"
+        obj.status = RegistrationDataImport.IN_REVIEW
         obj.save()
         return ApproveRegistrationDataImportMutation(obj)
 
