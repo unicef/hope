@@ -11,6 +11,7 @@ import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
 import { NewPaymentVerificationDialog } from '../../components/payments/NewPaymentVerificationDialog';
 import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
+import { EditNewPaymentVerificationDialog } from '../../components/payments/EditNewPaymentVerificationDialog';
 
 const Container = styled.div`
   display: flex;
@@ -65,6 +66,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
   const businessArea = useBusinessArea();
 
   const [isActive, setIsActive] = useState(false);
+  const [isCreated, setIsCreated] = useState(true);
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -78,7 +80,10 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
       title='Cash Plan (there should be ID)'
       breadCrumbs={breadCrumbsItems}
     >
-      {!isActive && <NewPaymentVerificationDialog />}
+      <div>
+        {/* {!isActive && <NewPaymentVerificationDialog />} */}
+        {isCreated && <EditNewPaymentVerificationDialog />}
+      </div>
     </PageHeader>
   );
 
@@ -167,7 +172,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
           </Grid>
         </Grid>
       </Container>
-      {isActive && (
+      {isCreated && (
         <Container>
           <Title>
             <Typography variant='h6'>Verification Plan Details</Typography>
