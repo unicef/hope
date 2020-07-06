@@ -13,6 +13,7 @@ from cash_assist_datahub.models import (
     CashPlan,
     Programme,
 )
+from payment import models as payment_models
 from household.models import Household
 from program import models as program_models
 from targeting.fixtures import TargetPopulationFactory
@@ -41,7 +42,7 @@ class PaymentRecordFactory(factory.DjangoModelFactory):
         lambda o: BusinessArea.objects.first().code
     )
     status = fuzzy.FuzzyChoice(
-        PaymentRecord.STATUS_CHOICE, getter=lambda c: c[0],
+        payment_models.PaymentRecord.STATUS_CHOICE , getter=lambda c: c[0],
     )
     full_name = factory.Faker("name")
     status_date = factory.Faker(
