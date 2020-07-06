@@ -64,7 +64,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
 
-  const [isActive, setIsActive] = useState(true);
+  const [isActive, setIsActive] = useState(false);
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
