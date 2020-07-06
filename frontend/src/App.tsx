@@ -13,6 +13,7 @@ import { ProfilePage } from './containers/pages/ProfilePage';
 import { client } from './apollo/client';
 import { LoginPage } from './containers/pages/LoginPage';
 import { DefaultRoute } from './containers/DefaultRoute';
+import { SanctionList } from './containers/pages/SanctionList';
 
 export const App: React.FC = () => {
   return (
@@ -25,6 +26,9 @@ export const App: React.FC = () => {
               <Switch>
                 <Route path='/login'>
                   <LoginPage />
+                </Route>
+                <Route path='/sanction-list'>
+                  <SanctionList />
                 </Route>
                 <Route path='/accounts/profile/'>
                   <ProfilePage />
