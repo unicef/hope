@@ -560,7 +560,7 @@ class TestRdiKoboCreateTask(TestCase):
                     "individual_questions/full_name_i_c": "Jan Kowalski",
                     "individual_questions/more_information/birth_certificate_photo_i_c": "test-11_53_20.png",
                     "individual_questions/relationship_i_c": "head",
-                    "individual_questions/individual_vulnerabilities/work_status_i_c": "1",
+                    "individual_questions/individual_vulnerabilities/work_status_i_c": "YES",
                     "individual_questions/more_information/drivers_license_no_i_c": "ASD12367432Q",
                     "individual_questions/sex_i_c": "male",
                     "individual_questions/individual_vulnerabilities/disability_i_c": "not disabled",
