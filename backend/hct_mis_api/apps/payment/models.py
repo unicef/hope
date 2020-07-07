@@ -114,7 +114,7 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel):
     status = models.CharField(
         max_length=50, choices=STATUS_CHOICES, default="DRAFT"
     )
-    cash_plan = models.ForeignKey("program.CashPlan")
+    cash_plan = models.ForeignKey("program.CashPlan", on_delete=models.CASCADE)
     sampling = models.CharField(max_length=50, choices=SAMPLING_CHOICES)
     verification_method = models.CharField(
         max_length=50, choices=VERIFICATION_METHOD_CHOICES
@@ -128,9 +128,9 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel):
 
 class PaymentVerification(TimeStampedUUIDModel):
     STATUS_PENDING = "PENDING"
-    STATUS_RECEIVED= "RECEIVED"
+    STATUS_RECEIVED = "RECEIVED"
     STATUS_NOT_RECEIVED = "NOT_RECEIVED"
-    STATUS_RECEIVED_WITH_ISSUES= "RECEIVED_WITH_ISSUES"
+    STATUS_RECEIVED_WITH_ISSUES = "RECEIVED_WITH_ISSUES"
     STATUS_CHOICES = (
         (STATUS_PENDING, "PENDING"),
         (STATUS_RECEIVED, "RECEIVED"),
@@ -138,9 +138,11 @@ class PaymentVerification(TimeStampedUUIDModel):
         (STATUS_RECEIVED_WITH_ISSUES, "RECEIVED WITH ISSUES"),
     )
     cash_plan_payment_verification = models.ForeignKey(
-        "CashPlanPaymentVerification"
+        "CashPlanPaymentVerification", on_delete=models.CASCADE
     )
-    payment_record = models.ForeignKey("PaymentRecord")
+    payment_record = models.ForeignKey(
+        "PaymentRecord", on_delete=models.CASCADE
+    )
     status = models.CharField(
         max_length=50, choices=STATUS_CHOICES, default="DRAFT"
     )
