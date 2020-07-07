@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { Button, Grid, Typography } from '@material-ui/core';
+import { Button, Grid, Typography, Box } from '@material-ui/core';
 import { Doughnut } from 'react-chartjs-2';
 
 import { MiśTheme } from '../../theme';
@@ -12,6 +12,9 @@ import { BreadCrumbsItem } from '../../components/BreadCrumbs';
 import { NewPaymentVerificationDialog } from '../../components/payments/NewPaymentVerificationDialog';
 import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
 import { EditNewPaymentVerificationDialog } from '../../components/payments/EditNewPaymentVerificationDialog';
+import { ActivateVerificationPlan } from '../../components/payments/ActivateVerificationPlan';
+import { FinishVerificationPlan } from '../../components/payments/FinishVerificationPlan';
+import { DiscardVerificationPlan } from '../../components/payments/DiscardVerificationPlan';
 
 const Container = styled.div`
   display: flex;
@@ -80,10 +83,15 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
       title='Cash Plan (there should be ID)'
       breadCrumbs={breadCrumbsItems}
     >
-      <div>
-        {/* {!isActive && <NewPaymentVerificationDialog />} */}
-        {isCreated && <EditNewPaymentVerificationDialog />}
-      </div>
+      <>
+        {!isActive && <NewPaymentVerificationDialog />}
+        <Box display='flex'>
+          {isCreated && <EditNewPaymentVerificationDialog />}
+          <ActivateVerificationPlan />
+        </Box>
+        <FinishVerificationPlan />
+        <DiscardVerificationPlan />
+      </>
     </PageHeader>
   );
 
