@@ -20,7 +20,7 @@ class IndividualDocument(Document):
     )
 
     class Index:
-        name = "importedindividuals"
+        name = "individuals"
         settings = {"number_of_shards": 1, "number_of_replicas": 0}
 
     class Django:
