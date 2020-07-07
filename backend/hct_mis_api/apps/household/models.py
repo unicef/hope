@@ -69,6 +69,14 @@ RELATIONSHIP_CHOICE = (
     ("NEPHEW_NIECE", "Nephew / Niece"),
     ("COUSIN", "Cousin"),
 )
+YES = "YES"
+NO = "NO"
+NOT_PROVIDED = "NOT_PROVIDED"
+WORK_STATUS_CHOICE = (
+    (YES, _("Yes")),
+    (NO, _("No")),
+    (NOT_PROVIDED, _("Not provided")),
+)
 ROLE_PRIMARY = "PRIMARY"
 ROLE_ALTERNATE = "ALTERNATE"
 ROLE_NO_ROLE = "NO_ROLE"
@@ -317,6 +325,9 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
         on_delete=models.CASCADE,
     )
     disability = models.BooleanField(default=False,)
+    work_status = models.CharField(
+        max_length=20, choices=WORK_STATUS_CHOICE, blank=True, default=NOT_PROVIDED
+    )
     flex_fields = JSONField(default=dict)
     enrolled_in_nutrition_programme = models.BooleanField(default=False)
     administration_of_rutf = models.BooleanField(default=False)
