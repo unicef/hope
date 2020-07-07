@@ -175,7 +175,10 @@ services:
     command: worker
 
   elasticsearch:
-    image: elasticsearch:7.8.0
+    image: unicef/hct-elasticsearch
+    build:
+      context: .
+      dockerfile: es.Dockerfile
     environment:
       - node.name=es01
       - cluster.name=es-docker-cluster
