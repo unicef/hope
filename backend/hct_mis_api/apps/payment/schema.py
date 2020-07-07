@@ -48,6 +48,9 @@ class ServiceProviderNode(DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
+class CashPlanPaymentVerificationNode(DjangoObjectType):
+    
+
 
 class Query(graphene.ObjectType):
     payment_record = relay.Node.Field(PaymentRecordNode)
