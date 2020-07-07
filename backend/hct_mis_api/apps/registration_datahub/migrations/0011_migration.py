@@ -6,12 +6,12 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('household', '0008_migration'),
+        ('registration_datahub', '0010_migration'),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='individual',
+            model_name='importedindividual',
             name='work_status',
             field=models.CharField(blank=True, choices=[('YES', 'Yes'), ('NO', 'No'), ('NOT_PROVIDED', 'Not provided')], default='NOT_PROVIDED', max_length=20),
         ),

@@ -24,7 +24,6 @@ import { CreateTargetPopulation } from './pages/CreateTargetPopulation';
 import { RegistrationDataImportDetailsPage } from './registration/details/RegistrationDataImportDetailsPage';
 import { RegistrationHouseholdDetailsPage } from './registration/details/households/RegistrationHouseholdDetailsPage';
 import { RegistrationIndividualDetailsPage } from './registration/details/individual/RegistrationIndividualDetailsPage';
-import { SanctionList } from './pages/SanctionList';
 
 const Root = styled.div`
   display: flex;
@@ -111,9 +110,6 @@ export function HomeRouter(): React.ReactElement {
           </Route>
           <Route path='/:businessArea/registration-data-import'>
             <RegistrationDataImportPage />
-          </Route>
-          <Route path='/:businessArea/sanction-list'>
-            <SanctionList />
           </Route>
           <Route path='/'>
             <DashboardPage />
