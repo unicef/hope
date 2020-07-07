@@ -59,14 +59,14 @@ export function FinishVerificationPlan(): React.ReactElement {
         <DialogContent>
           <DialogContainer>
             <Box p={5}>
-              <p>
+              <div>
                 Only 43% of the beneficiaries have responded to this payment
-                verification. Are you sure that you want to finish?
-              </p>
-              <br />
-              <p>
+                verification.
+              </div>
+              <div>Are you sure that you want to finish?</div>
+              <div>
                 Closing this verification will generate 43 grievance tickets.
-              </p>
+              </div>
             </Box>
           </DialogContainer>
         </DialogContent>
