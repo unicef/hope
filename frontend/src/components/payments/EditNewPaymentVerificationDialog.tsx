@@ -131,66 +131,17 @@ export function EditNewPaymentVerificationDialog(): React.ReactElement {
     >
       {({ submitForm, values }) => (
         <Form>
-          <Box display='flex'>
-            <Box p={2}>
-              <Button
-                color='primary'
-                variant='outlined'
-                startIcon={<EditRounded />}
-                onClick={() => setOpen(true)}
-                data-cy='button-edit-plan'
-              >
-                EDIT PLAN
-              </Button>
-            </Box>
-            <Box p={2}>
-              <Button
-                color='primary'
-                variant='contained'
-                onClick={() => setActivateDialogOpen(true)}
-                data-cy='button-edit-plan'
-              >
-                ACTIVATE
-              </Button>
-            </Box>
+          <Box p={2}>
+            <Button
+              color='primary'
+              variant='outlined'
+              startIcon={<EditRounded />}
+              onClick={() => setOpen(true)}
+              data-cy='button-edit-plan'
+            >
+              EDIT PLAN
+            </Button>
           </Box>
-          <Dialog
-            open={activateDialogOpen}
-            onClose={() => setOpen(false)}
-            scroll='paper'
-            aria-labelledby='form-dialog-title'
-          >
-            <DialogTitleWrapper>
-              <DialogTitle id='scroll-dialog-title'>
-                Activate Verification Plan
-              </DialogTitle>
-            </DialogTitleWrapper>
-            <DialogContent>
-              <DialogContainer>
-                <Box p={5}>
-                  Are you sure you want to activate the Verification Plan for
-                  this Cash Plan?
-                </Box>
-              </DialogContainer>
-            </DialogContent>
-            <DialogFooter>
-              <DialogActions>
-                <Button onClick={() => setActivateDialogOpen(false)}>
-                  CANCEL
-                </Button>
-                <Button
-                  startIcon={<CheckRoundedIcon />}
-                  type='submit'
-                  color='primary'
-                  variant='contained'
-                  onClick={() => console.log('activate')}
-                  data-cy='button-submit'
-                >
-                  ACTIVATE
-                </Button>
-              </DialogActions>
-            </DialogFooter>
-          </Dialog>
           <Dialog
             open={open}
             onClose={() => setOpen(false)}
@@ -199,7 +150,7 @@ export function EditNewPaymentVerificationDialog(): React.ReactElement {
           >
             <DialogTitleWrapper>
               <DialogTitle id='scroll-dialog-title'>
-                Create Verification Plan
+                Edit Verification Plan
               </DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
