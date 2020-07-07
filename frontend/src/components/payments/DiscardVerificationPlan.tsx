@@ -5,6 +5,8 @@ import styled from 'styled-components';
 import ClearIcon from '@material-ui/icons/Clear';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
+import { ErrorButtonContained } from '../ErrorButtonContained';
+import { ErrorButton } from '../ErrorButton';
 
 export function DiscardVerificationPlan(): React.ReactElement {
   const [finishDialogOpen, setFinishDialogOpen] = useState(false);
@@ -36,14 +38,13 @@ export function DiscardVerificationPlan(): React.ReactElement {
   return (
     <>
       <Box p={2}>
-        <Button
-          color='secondary'
+        <ErrorButton
           startIcon={<ClearIcon />}
           onClick={() => setFinishDialogOpen(true)}
           data-cy='button-discard-plan'
         >
           DISCARD
-        </Button>
+        </ErrorButton>
       </Box>
       <Dialog
         open={finishDialogOpen}
@@ -70,15 +71,13 @@ export function DiscardVerificationPlan(): React.ReactElement {
         <DialogFooter>
           <DialogActions>
             <Button onClick={() => setFinishDialogOpen(false)}>CANCEL</Button>
-            <Button
+            <ErrorButtonContained
               type='submit'
-              color='secondary'
-              variant='contained'
               onClick={() => console.log('discard')}
               data-cy='button-submit'
             >
               DISCARD
-            </Button>
+            </ErrorButtonContained>
           </DialogActions>
         </DialogFooter>
       </Dialog>
