@@ -135,7 +135,7 @@ class Household(TimeStampedUUIDModel, AbstractSyncable):
         help_text="""This is only used to track collector (primary or secondary) of a household.
             They may still be a HOH of this household or any other household.
             Through model will contain the role (ROLE_CHOICE) they are connected with on.""",
-        related_name="represented_households"
+        related_name="represented_households",
     )
 
     geopoint = PointField(blank=True, null=True)
@@ -279,6 +279,9 @@ class IndividualRoleInHousehold(TimeStampedUUIDModel, AbstractSyncable):
     )
     role = models.CharField(max_length=255, blank=True, choices=ROLE_CHOICE,)
 
+    class Meta:
+        unique_together = ("role", "household")
+
 
 class Individual(TimeStampedUUIDModel, AbstractSyncable):
     status = models.CharField(
@@ -326,7 +329,10 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
     )
     disability = models.BooleanField(default=False,)
     work_status = models.CharField(
-        max_length=20, choices=WORK_STATUS_CHOICE, blank=True, default=NOT_PROVIDED
+        max_length=20,
+        choices=WORK_STATUS_CHOICE,
+        blank=True,
+        default=NOT_PROVIDED,
     )
     flex_fields = JSONField(default=dict)
     enrolled_in_nutrition_programme = models.BooleanField(default=False)
