@@ -196,6 +196,14 @@ class HouseholdNode(DjangoObjectType):
         selection = parent.selections.first()
         return selection
 
+    def resolve_individuals(parent, info):
+        individuals_ids = list(parent.individuals.values_list("id", flat=True))
+        collectors_ids = list(
+            parent.representatives.values_list("id", flat=True)
+        )
+        ids = list(set(individuals_ids + collectors_ids))
+        return Individual.objects.filter(id__in=ids)
+
     class Meta:
         model = Household
         filter_fields = []
