@@ -1,17 +1,22 @@
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
 
+from core.es_analyzers import phonetic_analyzer
 from .models import Individual
 
 
 @registry.register_document
 class IndividualDocument(Document):
+    given_name = fields.TextField(analyzer=phonetic_analyzer)
+    middle_name = fields.TextField(analyzer=phonetic_analyzer)
+    family_name = fields.TextField(analyzer=phonetic_analyzer)
+    full_name = fields.TextField(analyzer=phonetic_analyzer)
     phone_no = fields.TextField("phone_no.__str__")
     phone_no_alternative = fields.TextField("phone_no_alternative.__str__")
     household = fields.ObjectField(
         properties={
             "size": fields.IntegerField(),
-            "address": fields.TextField(),
+            "address": fields.TextField(analyzer=phonetic_analyzer),
             "created_at": fields.DateField(),
             "updated_at": fields.DateField(),
             "country_origin": fields.TextField(attr="country_origin.__str__"),
@@ -27,10 +32,6 @@ class IndividualDocument(Document):
         model = Individual
 
         fields = [
-            "full_name",
-            "given_name",
-            "middle_name",
-            "family_name",
             "relationship",
             "role",
             "sex",
