@@ -1,5 +1,5 @@
 import graphene
-from django.db.models import Sum, Q
+from django.db.models import Sum, Q, Prefetch
 from django_filters import (
     FilterSet,
     OrderingFilter,
@@ -24,6 +24,7 @@ from household.models import (
     ROLE_CHOICE,
     MARITAL_STATUS_CHOICE,
     SEX_CHOICE,
+    IndividualRoleInHousehold, ROLE_NO_ROLE,
 )
 from targeting.models import HouseholdSelection
 
@@ -202,7 +203,14 @@ class HouseholdNode(DjangoObjectType):
             parent.representatives.values_list("id", flat=True)
         )
         ids = list(set(individuals_ids + collectors_ids))
-        return Individual.objects.filter(id__in=ids)
+        return Individual.objects.filter(id__in=ids).prefetch_related(
+            Prefetch(
+                "households_and_roles",
+                queryset=IndividualRoleInHousehold.objects.filter(
+                    household=parent.id
+                ),
+            )
+        )
 
     class Meta:
         model = Household
@@ -211,11 +219,22 @@ class HouseholdNode(DjangoObjectType):
         connection_class = ExtendedHouseHoldConnection
 
 
+class IndividualRoleInHouseholdNode(DjangoObjectType):
+    class Meta:
+        model = IndividualRoleInHousehold
+
+
 class IndividualNode(DjangoObjectType):
     estimated_birth_date = graphene.Boolean(required=False)
     role = graphene.String()
     flex_fields = FlexFieldsScalar()
+    role = graphene.String()
 
+    def resolve_role(parent,info):
+        role = parent.households_and_roles.first()
+        if role is not None:
+            return role.role;
+        return ROLE_NO_ROLE
     class Meta:
         model = Individual
         filter_fields = []
