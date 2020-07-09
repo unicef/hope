@@ -46,20 +46,27 @@ The goal of Iteration Six is to implement Payment Verification, Deduplication, a
 
   Design final clickable prototype of Payment Verification and Grievances/Feedback Tab
 
-* Continued refinement of mockups.
-* Demo / webinar for peer review with country offices \(if feasible\).
+* Continued general upkeep of mockups to represent what is decided/built.
+* Demo for peer review with country offices \(as/if required\).
 
-## **UNICEF Deliverables**
+## **UNICEF Dependencies**
 
-Following are the deliverables that UNICEF teams will have to work on and provide in a timeline manner during the iteration:
+‌ Following are the dependencies Tivix team has on UNICEF teams in order to deliver on time.
 
-* Working in-country **RapidPro** setup for all HCT MIS environments.
-* Leading work to get **Elastic Search** in all HCT MIS environments.
+* UNICEF team to provide working in-country RapidPro setup for all HCT MIS environments.
+* UNICEF team to lead efforts to get Elasticsearch in all HCT MIS environments.
+
+## \*\*\*\*
 
 ## **Out of Scope**
 
+The following items are deemed out of scope:
+
 * Implementation of roles and permission checks and logic in various modules \(to be done in a future iteration\)
 * UI for grievance tickets or management \(future iteration\)
+* Deduplication algorithms using biometrics or data hashing methods \(to be handled post-MVP\)
+* Support for multiple verification methods for one cash plan \(to be handled post-MVP/not clear if ever needed\).
+* Support for searching duplicates in neighboring business areas \(to be handled post-MVP\).
 
 ## Change Request - July 2nd 2020
 
