@@ -43,9 +43,7 @@ The goal of Iteration Six is to implement Payment Verification, Deduplication, a
 ## **UX / UI Design Deliverables**
 
 * Design tweaks to some design deliverables from iteration 5 \(including new items like user management screens for iteration 6 development to happen or feedback & grievances for which some things like data change category are being still specified in detail\)
-
-  Design final clickable prototype of Payment Verification and Grievances/Feedback Tab
-
+* Design final clickable prototype of Payment Verification and Grievances/Feedback Tab
 * Continued general upkeep of mockups to represent what is decided/built.
 * Demo for peer review with country offices \(as/if required\).
 
