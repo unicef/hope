@@ -42,8 +42,10 @@ The goal of Iteration Six is to implement Payment Verification, Deduplication, a
 
 ## **UX / UI Design Deliverables**
 
-* Design final clickable prototype of Registration Data Import Enhancements \(Deduplication\)
-* Design final clickable prototype of Payment Verification and Grievances/Feedback Tab
+* Design tweaks to some design deliverables from iteration 5 \(including new items like user management screens for iteration 6 development to happen or feedback & grievances for which some things like data change category are being still specified in detail\)
+
+  Design final clickable prototype of Payment Verification and Grievances/Feedback Tab
+
 * Continued refinement of mockups.
 * Demo / webinar for peer review with country offices \(if feasible\).
 
@@ -65,4 +67,19 @@ Data Model Change:
 
 * Change Data model to allow for Many to Many Individuals to Households
 * If we find a duplicate that belongs to two households - because we have the many 2 many - but based on their ROLE - we can allow for the duplicate.
-* 
+* Three factors:
+  * Membership
+  * Role
+  * Collector Type
+
+OPTION 1  
+representatives = m2m\(through=individuals\)
+
+Make household nullable to allow for Collector object.
+
+
+
+
+
+
+
