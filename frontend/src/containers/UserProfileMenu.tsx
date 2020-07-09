@@ -45,6 +45,7 @@ export function UserProfileMenu({
   };
   const handleLogout = (event: React.MouseEvent<EventTarget>): void => {
     window.location.assign('/api/logout');
+    localStorage.removeItem('AUTHENTICATED');
     handleClose(event);
   };
   function handleListKeyDown(event: React.KeyboardEvent): void {
