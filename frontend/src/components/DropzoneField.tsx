@@ -42,7 +42,6 @@ export function DropzoneField({
       <DropzoneContainer {...getRootProps()} disabled={loading}>
         <LoadingComponent isLoading={loading} absolute />
         <input {...getInputProps()} data-cy='rdi-file-input' />
-        {/* {acceptedFilename || 'UPLOAD FILE'} */}
         {dontShowFilename || !acceptedFilename
           ? 'UPLOAD FILE'
           : acceptedFilename}
