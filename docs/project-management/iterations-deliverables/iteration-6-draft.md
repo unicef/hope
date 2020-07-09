@@ -82,6 +82,10 @@ representatives = m2m\(through=individuals\)
 
 Make household nullable to allow for Collector object.
 
+## Change Request - July 8th 2020
+
+\[link to ticket\]
+
 
 
 
