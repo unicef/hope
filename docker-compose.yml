@@ -178,7 +178,7 @@ services:
     image: unicef/hct-elasticsearch
     build:
       context: .
-      dockerfile: es.Dockerfile
+      dockerfile: es/Dockerfile
     environment:
       - node.name=es01
       - cluster.name=es-docker-cluster
