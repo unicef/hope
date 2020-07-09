@@ -14,7 +14,7 @@ The goal of Iteration Six is to implement Payment Verification, Deduplication, a
 * Interface with core Kobo team on technical / testing details on any pending items like uploads being on blob storage.
 * Maintain Project Roadmap / Timeline.
 * Participate in briefing and workshop remotely or in-person as required by UNICEF
-* **RapidPro**
+* RapidPro API conversations w/ UNICEF as necessary.
 
 ## **Technical Deliverables**
 
