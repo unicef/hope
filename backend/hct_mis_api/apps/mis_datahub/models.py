@@ -8,7 +8,8 @@ from household.models import (
     RELATIONSHIP_CHOICE,
     ROLE_CHOICE,
     MARITAL_STATUS_CHOICE,
-    INDIVIDUAL_HOUSEHOLD_STATUS, RESIDENCE_STATUS_CHOICE,
+    INDIVIDUAL_HOUSEHOLD_STATUS,
+    RESIDENCE_STATUS_CHOICE,
 )
 from utils.models import AbstractSession
 
@@ -36,7 +37,7 @@ class Household(SessionModel):
     address = models.CharField(max_length=255, null=True)
     admin1 = models.CharField(max_length=255, null=True)
     admin2 = models.CharField(max_length=255, null=True)
-    country = models.CharField(null=True,max_length=3)
+    country = models.CharField(null=True, max_length=3)
     residence_status = models.CharField(
         max_length=255, choices=RESIDENCE_STATUS_CHOICE, null=True
     )
@@ -49,7 +50,7 @@ class Household(SessionModel):
 class Individual(SessionModel):
     mis_id = models.UUIDField()
     unhcr_id = models.CharField(max_length=255, null=True)
-    household_mis_id = models.UUIDField()
+    household_mis_id = models.UUIDField(null=True)
     status = models.CharField(
         max_length=50,
         choices=(("INACTIVE", "Inactive"), ("ACTIVE", "Active")),
@@ -70,7 +71,6 @@ class Individual(SessionModel):
     relationship = models.CharField(
         max_length=255, null=True, choices=RELATIONSHIP_CHOICE,
     )
-    role = models.CharField(max_length=255, null=True, choices=ROLE_CHOICE,)
     marital_status = models.CharField(
         max_length=255, choices=MARITAL_STATUS_CHOICE,
     )
@@ -97,6 +97,15 @@ class TargetPopulation(SessionModel):
 
     def __str__(self):
         return self.name
+
+
+class IndividualRoleInHousehold(SessionModel):
+    individual_mis_id = models.UUIDField()
+    household_mis_id = models.UUIDField()
+    role = models.CharField(max_length=255, blank=True, choices=ROLE_CHOICE,)
+
+    class Meta:
+        unique_together = ("role", "household_mis_id", "session")
 
 
 class TargetPopulationEntry(SessionModel):
@@ -140,5 +149,6 @@ class Program(SessionModel):
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
     description = models.CharField(max_length=255, null=True)
+
     class Meta:
         unique_together = ("session", "mis_id")
