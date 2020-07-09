@@ -22,7 +22,11 @@ const DropzoneContainer = styled.div`
   ${({ disabled }) => (disabled ? 'filter: grayscale(100%);' : '')}
 `;
 
-export function DropzoneField({ onChange, loading }): React.ReactElement {
+export function DropzoneField({
+  onChange,
+  loading,
+  dontShowFilename,
+}): React.ReactElement {
   const onDrop = useCallback((acceptedFiles) => {
     onChange(acceptedFiles);
   }, []);
@@ -38,7 +42,10 @@ export function DropzoneField({ onChange, loading }): React.ReactElement {
       <DropzoneContainer {...getRootProps()} disabled={loading}>
         <LoadingComponent isLoading={loading} absolute />
         <input {...getInputProps()} data-cy='rdi-file-input' />
-        {acceptedFilename || 'UPLOAD FILE'}
+        {/* {acceptedFilename || 'UPLOAD FILE'} */}
+        {dontShowFilename || !acceptedFilename
+          ? 'UPLOAD FILE'
+          : acceptedFilename}
       </DropzoneContainer>
     </Box>
   );
