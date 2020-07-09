@@ -199,7 +199,8 @@ PROJECT_APPS = [
     "registration_data",
     "cash_assist_datahub",
     "mis_datahub",
-    "erp_datahub"
+    "erp_datahub",
+    "sanction_list",
 ]
 
 DJANGO_APPS = [
@@ -222,6 +223,7 @@ OTHER_APPS = [
     "graphene_django",
     "social_django",
     "corsheaders",
+    "django_elasticsearch_dsl",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
@@ -392,3 +394,10 @@ GRAPH_MODELS = {
 PHONENUMBER_DEFAULT_REGION = "US"
 
 AIRFLOW_HOST = "airflow_webserver"
+
+# ELASTICSEARCH SETTINGS
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts': 'elasticsearch:9200'
+    },
+}

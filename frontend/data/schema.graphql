@@ -77,8 +77,8 @@ type CashPlanNode implements Node {
   createdAt: DateTime!
   updatedAt: DateTime!
   businessArea: BusinessAreaNode!
-  caId: String!
-  caHashId: UUID!
+  caId: String
+  caHashId: UUID
   status: CashPlanStatus!
   statusDate: DateTime!
   name: String!
@@ -125,6 +125,11 @@ enum CashPlanStatus {
   TRANSACTION_COMPLETED_WITH_ERRORS
 }
 
+type CheckAgainstSanctionListMutation {
+  ok: Boolean
+  errors: [XlsxRowErrorNode]
+}
+
 type ChoiceObject {
   name: String
   value: String
@@ -162,7 +167,6 @@ input CreateProgramInput {
   startDate: Date
   endDate: Date
   description: String
-  programCaId: String
   budget: Decimal
   frequencyOfPayments: String
   sector: String
@@ -964,6 +968,7 @@ type Mutations {
   approveRegistrationDataImport(id: ID!): ApproveRegistrationDataImportMutation
   unapproveRegistrationDataImport(id: ID!): UnapproveRegistrationDataImportMutation
   mergeRegistrationDataImport(id: ID!): MergeRegistrationDataImportMutation
+  checkAgainstSanctionList(file: Upload!): CheckAgainstSanctionListMutation
 }
 
 interface Node {
@@ -995,9 +1000,9 @@ type PaymentRecordNode implements Node {
   businessArea: BusinessAreaNode!
   status: PaymentRecordStatus!
   statusDate: DateTime!
-  caId: String!
-  caHashId: UUID!
-  cashPlan: CashPlanNode!
+  caId: String
+  caHashId: UUID
+  cashPlan: CashPlanNode
   household: HouseholdNode!
   fullName: String!
   totalPersonsCovered: Int!
@@ -1042,12 +1047,14 @@ type ProgramNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
+  lastSyncAt: DateTime
   name: String!
   status: ProgramStatus!
   startDate: Date!
   endDate: Date!
   description: String!
-  programCaId: String!
+  caId: String
+  caHashId: String
   adminAreas(before: String, after: String, first: Int, last: Int, title: String): AdminAreaNodeConnection!
   businessArea: BusinessAreaNode!
   budget: Decimal
@@ -1155,9 +1162,7 @@ type Query {
 
 enum RegistrationDataImportDataSource {
   XLS
-  A_3RD_PARTY
-  XML
-  OTHER
+  KOBO
 }
 
 enum RegistrationDataImportDatahubImportDone {
@@ -1292,6 +1297,8 @@ type TargetPopulationNode implements Node {
   updatedAt: DateTime!
   isRemoved: Boolean!
   name: String!
+  caId: String
+  caHashId: String
   createdBy: UserNode
   approvedAt: DateTime
   approvedBy: UserNode
@@ -1412,7 +1419,6 @@ input UpdateProgramInput {
   startDate: Date
   endDate: Date
   description: String
-  programCaId: String
   budget: Decimal
   frequencyOfPayments: String
   sector: String

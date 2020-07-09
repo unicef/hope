@@ -19,7 +19,7 @@ ALLOWED_HOSTS = [
 ]
 
 # other
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 # CACHE
 CACHES = {

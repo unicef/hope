@@ -111,7 +111,6 @@ export function HomeRouter(): React.ReactElement {
           <Route path='/:businessArea/registration-data-import'>
             <RegistrationDataImportPage />
           </Route>
-
           <Route path='/'>
             <DashboardPage />
           </Route>
@@ -123,7 +122,10 @@ export function HomeRouter(): React.ReactElement {
           autoHideDuration={5000}
           onClose={() => snackBar.setShow(false)}
         >
-          <SnackbarContent message={snackBar.message} data-cy={snackBar.dataCy} />
+          <SnackbarContent
+            message={snackBar.message}
+            data-cy={snackBar.dataCy}
+          />
         </Snackbar>
       )}
     </Root>
