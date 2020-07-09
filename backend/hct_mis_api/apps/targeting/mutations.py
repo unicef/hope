@@ -278,6 +278,7 @@ class CopyTargetPopulationMutation(
         target_population_copy = TargetPopulation(
             name=name,
             created_by=user,
+            business_area=target_population.business_area,
             status="DRAFT",
             candidate_list_total_households=target_population.candidate_list_total_households,
             candidate_list_total_individuals=target_population.candidate_list_total_individuals,

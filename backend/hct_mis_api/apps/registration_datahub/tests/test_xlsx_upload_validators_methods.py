@@ -2,13 +2,16 @@ import operator
 from unittest import TestCase, mock
 
 import openpyxl
+from django.conf import settings
 from openpyxl_image_loader import SheetImageLoader
 
 from registration_datahub.validators import UploadXLSXValidator
 
 
 class TestXLSXValidatorsMethods(TestCase):
-    FILES_DIR_PATH = "hct_mis_api/apps/registration_datahub/tests/test_file"
+    FILES_DIR_PATH = (
+        f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file"
+    )
 
     def test_geolocation_validator(self):
         # test correct values:

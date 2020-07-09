@@ -13,6 +13,8 @@ import { ProfilePage } from './containers/pages/ProfilePage';
 import { client } from './apollo/client';
 import { LoginPage } from './containers/pages/LoginPage';
 import { DefaultRoute } from './containers/DefaultRoute';
+import { SanctionList } from './containers/pages/SanctionList';
+import { ProtectedRoute } from './components/ProtectedRoute';
 
 export const App: React.FC = () => {
   return (
@@ -26,6 +28,11 @@ export const App: React.FC = () => {
                 <Route path='/login'>
                   <LoginPage />
                 </Route>
+                <ProtectedRoute
+                  path='/sanction-list'
+                  component={SanctionList}
+                  location={window.location}
+                />
                 <Route path='/accounts/profile/'>
                   <ProfilePage />
                 </Route>

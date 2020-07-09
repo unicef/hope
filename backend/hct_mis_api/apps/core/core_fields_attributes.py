@@ -12,6 +12,7 @@ from household.models import (
     ROLE_CHOICE,
     SEX_CHOICE,
     MARITAL_STATUS_CHOICE,
+    WORK_STATUS_CHOICE,
 )
 
 TYPE_ID = "ID"
@@ -810,6 +811,21 @@ HOUSEHOLD_ID_FIELDS = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "household_id",
+    },
+    {
+        "id": "dca6748f-7831-4fa1-b5c8-e708a456656b",
+        "type": TYPE_SELECT_ONE,
+        "name": "work_status",
+        "lookup": "work_status",
+        "required": False,
+        "label": {"English(EN)": "Does the individual work?"},
+        "hint": "",
+        "choices": [
+            {"label": {"English(EN)": label}, "value": value}
+            for value, label in WORK_STATUS_CHOICE
+        ],
+        "associated_with": _INDIVIDUAL,
+        "xlsx_field": "work_status_i_c",
     },
 ]
 

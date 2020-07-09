@@ -18,7 +18,6 @@ class CreateProgramInput(graphene.InputObjectType):
     start_date = graphene.Date()
     end_date = graphene.Date()
     description = graphene.String()
-    program_ca_id = graphene.String()
     budget = graphene.Decimal()
     frequency_of_payments = graphene.String()
     sector = graphene.String()
@@ -36,7 +35,6 @@ class UpdateProgramInput(graphene.InputObjectType):
     start_date = graphene.Date()
     end_date = graphene.Date()
     description = graphene.String()
-    program_ca_id = graphene.String()
     budget = graphene.Decimal()
     frequency_of_payments = graphene.String()
     sector = graphene.String()
@@ -71,7 +69,7 @@ class CreateProgram(CommonValidator, graphene.Mutation):
         return CreateProgram(program)
 
 
-class UpdateProgram( ProgramValidator, graphene.Mutation):
+class UpdateProgram(ProgramValidator, graphene.Mutation):
     program = graphene.Field(ProgramNode)
 
     class Arguments:
