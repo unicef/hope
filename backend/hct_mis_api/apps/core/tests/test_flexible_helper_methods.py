@@ -1,4 +1,5 @@
 import xlrd
+from django.conf import settings
 from django.contrib.admin import AdminSite
 from django.core.exceptions import ValidationError
 from django.test import TestCase
@@ -13,7 +14,7 @@ class TestFlexibleHelperMethods(TestCase):
         site = AdminSite()
         self.admin = FlexibleAttributeAdmin(FlexibleAttribute, site)
         wb = xlrd.open_workbook(
-            "hct_mis_api/apps/core/tests/test_files/flex_init.xls",
+            f"{settings.PROJECT_ROOT}/apps/core/tests/test_files/flex_init.xls",
         )
 
         self.survey_sheet = wb.sheet_by_name("survey")

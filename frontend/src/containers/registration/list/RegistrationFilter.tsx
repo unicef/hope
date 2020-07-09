@@ -101,6 +101,7 @@ export function RegistrationFilters({
       <StyledFormControl variant='outlined' margin='dense'>
         <InputLabel>Status</InputLabel>
         <Select
+          // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
           value={filter.status || ''}
           variant='outlined'
           label='Status'

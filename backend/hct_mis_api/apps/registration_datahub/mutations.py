@@ -136,7 +136,7 @@ class RegistrationKoboImportMutation(BaseValidator, graphene.Mutation):
             import_data_obj,
             business_area,
         ) = create_registration_data_import_objects(
-            registration_data_import_data, info.context.user, "3RD_PARTY"
+            registration_data_import_data, info.context.user, "KOBO"
         )
 
         AirflowApi.start_dag(

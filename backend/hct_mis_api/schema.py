@@ -8,6 +8,7 @@ import program.schema
 import registration_data.schema
 import registration_datahub.schema
 import registration_datahub.mutations
+import sanction_list.mutations
 import targeting.schema
 import targeting.mutations
 from graphene_django.debug import DjangoDebug
@@ -28,6 +29,7 @@ class Query(
 
 
 class Mutations(
+    sanction_list.mutations.Mutations,
     registration_datahub.mutations.Mutations,
     program.mutations.Mutations,
     targeting.mutations.Mutations,

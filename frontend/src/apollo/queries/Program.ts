@@ -8,7 +8,7 @@ export const PROGRAM_QUERY = gql`
       startDate
       endDate
       status
-      programCaId
+      caId
       description
       budget
       frequencyOfPayments
