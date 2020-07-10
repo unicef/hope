@@ -396,8 +396,4 @@ PHONENUMBER_DEFAULT_REGION = "US"
 AIRFLOW_HOST = "airflow_webserver"
 
 # ELASTICSEARCH SETTINGS
-ELASTICSEARCH_DSL = {
-    'default': {
-        'hosts': 'elasticsearch:9200'
-    },
-}
+ELASTICSEARCH_DSL_AUTOSYNC = False
