@@ -16,7 +16,6 @@ airflow:
   #   readOnly: true
   #   subPath: file.yaml
 
-
   ##
   ## Extra environment variables to mount in the web, scheduler, and worker pods:
   extraEnv:
@@ -118,6 +117,11 @@ airflow:
         secretKeyRef:
           name: backend-secret
           key: POSTGRES_CASHASSIST_DATAHUB_PASSWORD
+    - name: EMAIL_HOST
+      valueFrom:
+        secretKeyRef:
+          name: backend-secret
+          key: EMAIL_HOST
     - name: STORAGE_AZURE_ACCOUNT_KEY
       valueFrom:
         secretKeyRef:
@@ -225,17 +229,18 @@ airflow:
   ## This should be a json string with your variables in it
   ## Examples:
   ##   variables: '{ "environment": "dev" }'
-  variables: '{}'
+  variables: "{}"
 
   ## Add airflow ppols
   ## This should be a json string with your pools in it
   ## Examples:
   ##   pools: '{ "example": { "description": "This is an example of a pool", "slots": 2 } }'
-  pools: '{}'
+  pools: "{}"
 
   ##
   ## Annotations for the Scheduler, Worker and Web pods
-  podAnnotations: {}
+  podAnnotations:
+    {}
     ## Example:
     ## iam.amazonaws.com/role: airflow-Role
 
@@ -275,15 +280,14 @@ airflow:
   ## Run initdb when the scheduler starts.
   initdb: true
 
-
 scheduler:
   resources: {}
-    # limits:
-    #   cpu: "1000m"
-    #   memory: "1Gi"
-    # requests:
-    #   cpu: "500m"
-    #   memory: "512Mi"
+  # limits:
+  #   cpu: "1000m"
+  #   memory: "1Gi"
+  # requests:
+  #   cpu: "500m"
+  #   memory: "512Mi"
   ##
   ## Labels for the scheduler deployment
   labels: {}
@@ -311,7 +315,8 @@ flower:
   ## Set AIRFLOW__CELERY__FLOWER_URL_PREFIX
   ## Prefix should match Ingress configuration ingress.flower.path
   urlPrefix: ""
-  resources: {}
+  resources:
+    {}
     # limits:
     #   cpu: "100m"
     #   memory: "128Mi"
@@ -354,7 +359,8 @@ web:
   ## Set AIRFLOW__WEBSERVER__BASE_URL
   ## Path should match Ingress configuration
   baseUrl: "http://localhost:8080"
-  resources: {}
+  resources:
+    {}
     # limits:
     #   cpu: "300m"
     #   memory: "1Gi"
@@ -390,7 +396,6 @@ web:
     successThreshold: 1
     failureThreshold: 5
 
-
   ## Support Node, affinity and tolerations for web pod assignment
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
@@ -418,18 +423,19 @@ workers:
     enabled: false
     maxReplicas: 2
     metrics: {}
-#    - type: Resource
-#      resource:
-#        name: memory
-#        target:
-#          type: Utilization
-#          averageUtilization: 80
+  #    - type: Resource
+  #      resource:
+  #        name: memory
+  #        target:
+  #          type: Utilization
+  #          averageUtilization: 80
   ##
   ## Gracefull termination period
   terminationPeriod: 30
   ##
   ## Custom resource configuration
-  resources: {}
+  resources:
+    {}
     # limits:
     #   cpu: "1"
     #   memory: "2G"
@@ -447,7 +453,8 @@ workers:
   annotations: {}
   ##
   ## Annotations for the Worker pods
-  podAnnotations: {}
+  podAnnotations:
+    {}
     ## Example:
     ## iam.amazonaws.com/role: airflow-Role
   ##
@@ -506,7 +513,8 @@ ingress:
     ## Annotations for the webserver
     ## Airflow webserver handles relative path completely, just let your load balancer give the HTTP
     ## header like the requested URL (no special configuration neeed)
-    annotations: {}
+    annotations:
+      {}
       ##
       ## Example for Traefik:
       # traefik.frontend.rule.type: PathPrefix
@@ -582,7 +590,8 @@ ingress:
     ##              }
     ##            }
     ## ==== IF YOU HAVE FLOWER > JANUARY 2018, NO MORE NEED TO STRIP THE PREFIX ====================
-    annotations: {}
+    annotations:
+      {}
       ##
       ## NOTE: it is important here to have your reverse proxy strip the path/rewrite the URL
       ## Example for Traefik:
@@ -595,7 +604,6 @@ ingress:
       ## If enabled, set "secretName" to the secret containing the TLS private key and certificate
       ## Example:
       ## secretName: example-com-crt
-
 
 ##
 ## Storage configuration for DAGs
@@ -740,7 +748,6 @@ serviceAccount:
   name:
   annotations: {}
 
-
 ##
 ## Configuration values for the postgresql dependency.
 ## ref: https://github.com/kubernetes/charts/blob/master/stable/postgresql/README.md
@@ -789,7 +796,6 @@ postgresql:
     accessModes:
       - ReadWriteOnce
 
-
 ## Configuration values for the Redis dependency.
 ## ref: https://github.com/kubernetes/charts/blob/master/stable/redis/README.md
 redis:
@@ -818,9 +824,9 @@ redis:
     ##
     ## Image configuration
     # image:
-      ##
-      ## docker registry secret names (list)
-      # pullSecrets: nil
+    ##
+    ## docker registry secret names (list)
+    # pullSecrets: nil
     ##
     ## Configure persistance
     persistence:
@@ -833,7 +839,7 @@ redis:
       ##
       ## Access mode:
       accessModes:
-      - ReadWriteOnce
+        - ReadWriteOnce
   ##
   ## Disable cluster management by default.
   cluster:
@@ -851,7 +857,6 @@ serviceMonitor:
 
 # Enable this if you're using https://github.com/coreos/prometheus-operator
 prometheusRule:
-
   enabled: false
   ## Namespace in which the prometheus rule is created
   # namespace: monitoring
