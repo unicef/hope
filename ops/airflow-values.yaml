@@ -117,16 +117,16 @@ airflow:
         secretKeyRef:
           name: backend-secret
           key: POSTGRES_CASHASSIST_DATAHUB_PASSWORD
-    - name: EMAIL_HOST
-      valueFrom:
-        secretKeyRef:
-          name: backend-secret
-          key: EMAIL_HOST
     - name: STORAGE_AZURE_ACCOUNT_KEY
       valueFrom:
         secretKeyRef:
           name: hct-dev-storage-key
           key: password
+    - name: EMAIL_HOST
+      valueFrom:
+        secretKeyRef:
+          name: backend-secret
+          key: EMAIL_HOST
     - name: STORAGE_AZURE_ACCOUNT_NAME
       value: "hctmisdev"
 
