@@ -1,5 +1,24 @@
+Date: {{ today_date }}
+File name: {{ file_name }}
+
 Found {{ results_count }} matching results.
 {% for individual in results %}
-{{ forloop.counter }}. {{ individual.first_name }} {{ individual.second_name }}  {{ individual.third_name }}
-Date of birth: {% firstof individual.date_of_birth individual.year_of_birth "Not provided" %}
+    {{ forloop.counter }}. {{ individual.first_name }} {{ individual.second_name }}  {{ individual.third_name }}
+    {% if individual.date_of_birth %}
+        Date of birth: {{ individual.date_of_birth }}
+    {% elif individual.year_of_birth == individual.second_year_of_birth %}
+        Year of birth: {{ individual.year_of_birth }}
+    {% elif individual.year_of_birth != individual.second_year_of_birth %}
+        Year of birth between: {{ individual.year_of_birth }} - {{ individual.second_year_of_birth }}
+    {% else %}
+        Date of birth: Not Provided
+    {% endif %}
+    Row number: {{ individual.row_number }}
 {% endfor %}
+
+This is an automated message. Results should be used ONLY to flag POTENTIAL matches to records in the UN Sanctions List.
+POTENTIAL matches must be verified by the requesting entity and/or relevant authorities,
+possibly including investigations conducted to confirm the identity is, in fact, positive match
+UNICEF and the contracted entities supporting this application take no liability for partial matches,
+false positives or other misinterpretations resulting from vague data sources
+For any issues or questions, please contact dfam-cashassistance@unicef.org
