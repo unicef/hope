@@ -17,7 +17,10 @@ from household.fixtures import (
     create_household,
 )
 from household.models import DocumentType
-from payment.fixtures import PaymentRecordFactory
+from payment.fixtures import (
+    PaymentRecordFactory,
+    CashPlanPaymentVerificationFactory, PaymentVerificationFactory,
+)
 from program.fixtures import CashPlanFactory, ProgramFactory
 from program.models import Program
 from registration_data.fixtures import RegistrationDataImportFactory
@@ -157,6 +160,8 @@ class Command(BaseCommand):
                     target_population=target_population,
                 )
                 EntitlementCardFactory(household=household)
+        CashPlanPaymentVerificationFactory.create_batch(10)
+        PaymentVerificationFactory.create_batch(100)
 
     @transaction.atomic
     def handle(self, *args, **options):
@@ -235,6 +240,7 @@ class Command(BaseCommand):
         cash_assist_datahub_fixtures.PaymentRecordFactory.create_batch(
             10, session=session
         )
+
         for _ in range(10):
             used_ids = list(Programme.objects.values_list("mis_id", flat=True))
             mis_id = Program.objects.filter(~Q(id__in=used_ids)).first().id
