@@ -4,8 +4,14 @@ from pytz import utc
 
 from core.models import BusinessArea
 from household.fixtures import HouseholdFactory
-from payment.models import PaymentRecord, ServiceProvider
+from payment.models import (
+    PaymentRecord,
+    ServiceProvider,
+    CashPlanPaymentVerification,
+    PaymentVerification,
+)
 from program.fixtures import CashPlanFactory
+from program.models import CashPlan
 from targeting.fixtures import TargetPopulationFactory
 
 
@@ -63,3 +69,45 @@ class PaymentRecordFactory(factory.DjangoModelFactory):
         "date_time_this_decade", before_now=False, after_now=True, tzinfo=utc,
     )
     service_provider = factory.SubFactory(ServiceProviderFactory)
+
+
+class CashPlanPaymentVerificationFactory(factory.DjangoModelFactory):
+    status = fuzzy.FuzzyChoice(
+        CashPlanPaymentVerification.STATUS_CHOICES, getter=lambda c: c[0],
+    )
+    sampling = fuzzy.FuzzyChoice(
+        CashPlanPaymentVerification.SAMPLING_CHOICES, getter=lambda c: c[0],
+    )
+    verification_method = fuzzy.FuzzyChoice(
+        CashPlanPaymentVerification.VERIFICATION_METHOD_CHOICES,
+        getter=lambda c: c[0],
+    )
+    cash_plan = factory.Iterator(CashPlan.objects.all())
+    sample_size = fuzzy.FuzzyInteger(0, 100)
+    responded_count = fuzzy.FuzzyInteger(20, 90)
+    received_count = fuzzy.FuzzyInteger(30, 70)
+    not_received_count = fuzzy.FuzzyInteger(0, 10)
+    received_with_problems_count = fuzzy.FuzzyInteger(0, 10)
+
+    class Meta:
+        model = CashPlanPaymentVerification
+
+
+class PaymentVerificationFactory(factory.DjangoModelFactory):
+    cash_plan_payment_verification = factory.Iterator(
+        CashPlanPaymentVerification.objects.all()
+    )
+    payment_record = factory.LazyAttribute(
+        lambda o: PaymentRecord.objects.filter(
+                cash_plan=o.cash_plan_payment_verification.cash_plan
+            ).order_by("?").first()
+    )
+    status = fuzzy.FuzzyChoice(
+        PaymentVerification.STATUS_CHOICES, getter=lambda c: c[0],
+    )
+    status_date = factory.Faker(
+        "date_this_year", before_today=True, after_today=False
+    )
+
+    class Meta:
+        model = PaymentVerification

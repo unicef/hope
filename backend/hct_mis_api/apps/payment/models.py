@@ -114,7 +114,11 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel):
     status = models.CharField(
         max_length=50, choices=STATUS_CHOICES, default="DRAFT"
     )
-    cash_plan = models.ForeignKey("program.CashPlan", on_delete=models.CASCADE)
+    cash_plan = models.ForeignKey(
+        "program.CashPlan",
+        on_delete=models.CASCADE,
+        related_name="verifications",
+    )
     sampling = models.CharField(max_length=50, choices=SAMPLING_CHOICES)
     verification_method = models.CharField(
         max_length=50, choices=VERIFICATION_METHOD_CHOICES
@@ -138,10 +142,12 @@ class PaymentVerification(TimeStampedUUIDModel):
         (STATUS_RECEIVED_WITH_ISSUES, "RECEIVED WITH ISSUES"),
     )
     cash_plan_payment_verification = models.ForeignKey(
-        "CashPlanPaymentVerification", on_delete=models.CASCADE
+        "CashPlanPaymentVerification",
+        on_delete=models.CASCADE,
+        related_name="payment_record_verifications",
     )
     payment_record = models.ForeignKey(
-        "PaymentRecord", on_delete=models.CASCADE
+        "PaymentRecord", on_delete=models.CASCADE, related_name="verifications"
     )
     status = models.CharField(
         max_length=50, choices=STATUS_CHOICES, default="DRAFT"

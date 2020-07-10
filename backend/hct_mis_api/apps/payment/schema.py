@@ -6,7 +6,11 @@ from graphene_django.filter import DjangoFilterConnectionField
 
 from core.schema import ChoiceObject
 from core.extended_connection import ExtendedConnection
-from payment.models import PaymentRecord, ServiceProvider
+from payment.models import (
+    PaymentRecord,
+    ServiceProvider,
+    CashPlanPaymentVerification, PaymentVerification,
+)
 
 
 class PaymentRecordFilter(FilterSet):
@@ -48,8 +52,17 @@ class ServiceProviderNode(DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
+
 class CashPlanPaymentVerificationNode(DjangoObjectType):
-    
+    class Meta:
+        model = CashPlanPaymentVerification
+
+
+class PaymentVerificationNode(DjangoObjectType):
+    class Meta:
+        model = PaymentVerification
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
 
 
 class Query(graphene.ObjectType):
