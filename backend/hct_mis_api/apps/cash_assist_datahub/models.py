@@ -177,7 +177,7 @@ class ServiceProvider(SessionModel):
     business_area = models.CharField(max_length=20)
     ca_id = models.CharField(max_length=255)
     full_name = models.CharField(max_length=255)
-    short_name = models.CharField(max_length=4)
+    short_name = models.CharField(max_length=100)
     country = models.CharField(max_length=3,)
     vision_id = models.CharField(max_length=255)
 
