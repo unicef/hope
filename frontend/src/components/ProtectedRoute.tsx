@@ -1,5 +1,5 @@
 import React from 'react';
-import { Redirect, Route } from 'react-router-dom';
+import { Redirect, Route, useLocation } from 'react-router-dom';
 import { isAuthenticated } from '../utils/utils';
 
 export function ProtectedRoute({
@@ -7,6 +7,8 @@ export function ProtectedRoute({
   ...rest
 }): React.ReactElement {
   const authenticated = isAuthenticated();
+  const location = useLocation();
+
   return (
     <Route
       {...rest}
@@ -15,12 +17,7 @@ export function ProtectedRoute({
           return <Component {...props} />;
         }
         return (
-          <Redirect
-            to={{
-              pathname: '/login',
-              state: { from: props.location },
-            }}
-          />
+          <Redirect to={`/login?next=${location.pathname}${location.search}`} />
         );
       }}
     />
