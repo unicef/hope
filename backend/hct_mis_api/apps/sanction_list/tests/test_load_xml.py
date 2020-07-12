@@ -39,7 +39,6 @@ class TestLoadXML(TestCase):
 
         updated_individual = active_individuals.get(reference_number="KPi.033")
         self.assertEqual(updated_individual.third_name, "TEST")
-        self.assertEqual(updated_individual.alias_name, "TEST ALIAST NAME")
         self.assertEqual(
             updated_individual.listed_on, datetime(year=2020, month=11, day=30)
         )
