@@ -87,7 +87,7 @@ export function Drawer({
     >
       <div className={classes.toolbarHeader}>
         <div className={classes.hctMisLogo}>
-          <div>HCT-MIS</div>
+          <div>HOPE</div>
           <div>PORTAL</div>
         </div>
         <IconButton
