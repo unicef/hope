@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+queimport React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PageHeader } from '../../../components/PageHeader';
 import { RegistrationDataImport } from '../import/RegistrationDataImport';
