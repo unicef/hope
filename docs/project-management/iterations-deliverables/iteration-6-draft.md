@@ -14,7 +14,7 @@ The goal of Iteration Six is to implement Payment Verification, Deduplication, a
 * Interface with core Kobo team on technical / testing details on any pending items like uploads being on blob storage.
 * Maintain Project Roadmap / Timeline.
 * Participate in briefing and workshop remotely or in-person as required by UNICEF
-* **RapidPro**
+* RapidPro API conversations w/ UNICEF as necessary.
 
 ## **Technical Deliverables**
 
@@ -42,22 +42,29 @@ The goal of Iteration Six is to implement Payment Verification, Deduplication, a
 
 ## **UX / UI Design Deliverables**
 
-* Design final clickable prototype of Registration Data Import Enhancements \(Deduplication\)
+* Design tweaks to some design deliverables from iteration 5 \(including new items like user management screens for iteration 6 development to happen or feedback & grievances for which some things like data change category are being still specified in detail\)
 * Design final clickable prototype of Payment Verification and Grievances/Feedback Tab
-* Continued refinement of mockups.
-* Demo / webinar for peer review with country offices \(if feasible\).
+* Continued general upkeep of mockups to represent what is decided/built.
+* Demo for peer review with country offices \(as/if required\).
 
-## **UNICEF Deliverables**
+## **UNICEF Dependencies**
 
-Following are the deliverables that UNICEF teams will have to work on and provide in a timeline manner during the iteration:
+‌ Following are the dependencies Tivix team has on UNICEF teams in order to deliver on time.
 
-* Working in-country **RapidPro** setup for all HCT MIS environments.
-* Leading work to get **Elastic Search** in all HCT MIS environments.
+* UNICEF team to provide working in-country RapidPro setup for all HCT MIS environments.
+* UNICEF team to lead efforts to get Elasticsearch in all HCT MIS environments.
+
+## \*\*\*\*
 
 ## **Out of Scope**
 
+The following items are deemed out of scope:
+
 * Implementation of roles and permission checks and logic in various modules \(to be done in a future iteration\)
 * UI for grievance tickets or management \(future iteration\)
+* Deduplication algorithms using biometrics or data hashing methods \(to be handled post-MVP\)
+* Support for multiple verification methods for one cash plan \(to be handled post-MVP/not clear if ever needed\).
+* Support for searching duplicates in neighboring business areas \(to be handled post-MVP\).
 
 ## Change Request - July 2nd 2020
 
@@ -65,4 +72,23 @@ Data Model Change:
 
 * Change Data model to allow for Many to Many Individuals to Households
 * If we find a duplicate that belongs to two households - because we have the many 2 many - but based on their ROLE - we can allow for the duplicate.
-* 
+* Three factors:
+  * Membership
+  * Role
+  * Collector Type
+
+OPTION 1  
+representatives = m2m\(through=individuals\)
+
+Make household nullable to allow for Collector object.
+
+## Change Request - July 8th 2020
+
+\*\*\*\*[**link to ticket**](https://unicef.visualstudio.com/ICTD-HCT-MIS/_sprints/backlog/Software%20Engineering/ICTD-HCT-MIS/Iteration%206/Sprint%201%20%28i.6%29?workitem=64344)\*\*\*\*
+
+
+
+
+
+
+
