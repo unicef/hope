@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import { Button, Typography } from '@material-ui/core';
 import styled from 'styled-components';
 import { LOGIN_URL } from '../../config';
@@ -55,6 +56,10 @@ const LoginButton = styled(Button)`
 `;
 
 export function LoginPage(): React.ReactElement {
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const next = params.get('next');
+
   return (
     <Container>
       <LoginBox>
@@ -66,7 +71,11 @@ export function LoginPage(): React.ReactElement {
             variant='contained'
             size='large'
             component='a'
-            href={LOGIN_URL}
+            href={
+              next
+                ? `${LOGIN_URL}?next=/accounts/profile%3Fnext%3D${next}`
+                : LOGIN_URL
+            }
           >
             Sign in
           </LoginButton>

@@ -83,6 +83,6 @@ class ServiceProvider(TimeStampedUUIDModel):
     )
     ca_id = models.CharField(max_length=255, unique=True)
     full_name = models.CharField(max_length=255)
-    short_name = models.CharField(max_length=4)
+    short_name = models.CharField(max_length=100)
     country = models.CharField(max_length=3)
     vision_id = models.CharField(max_length=255)
