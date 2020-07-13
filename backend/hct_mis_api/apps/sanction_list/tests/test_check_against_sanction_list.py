@@ -1,3 +1,4 @@
+import unittest
 from io import BytesIO
 from pathlib import Path
 
@@ -13,6 +14,7 @@ from sanction_list.tasks.check_against_sanction_list import (
 from sanction_list.tasks.load_xml import LoadSanctionListXMLTask
 
 
+@unittest.skip("needs refactor")
 class TestCheckAgainstSanctionList(TestCase):
     TEST_FILES_PATH = (
         f"{settings.PROJECT_ROOT}/apps/sanction_list/tests/test_files"
