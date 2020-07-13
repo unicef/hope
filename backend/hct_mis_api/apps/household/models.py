@@ -109,6 +109,15 @@ IDENTIFICATION_TYPE_DICT = {
 }
 INDIVIDUAL_HOUSEHOLD_STATUS = (("ACTIVE", "Active"), ("INACTIVE", "Inactive"))
 
+class SerialField(models.IntegerField):
+    def db_type(self, connection):
+        return 'Serial'
+
+
+
+
+
+
 
 class Household(TimeStampedUUIDModel, AbstractSyncable):
     status = models.CharField(
@@ -166,6 +175,8 @@ class Household(TimeStampedUUIDModel, AbstractSyncable):
         related_name="heading_household",
         on_delete=models.CASCADE,
     )
+    unicef_id = models.CharField(max_length=250, blank=True)
+    unicef_id_index = SerialField()
 
     @property
     def total_cash_received(self):
@@ -291,11 +302,16 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
     )
     disability = models.BooleanField(default=False,)
     work_status = models.CharField(
-        max_length=20, choices=WORK_STATUS_CHOICE, blank=True, default=NOT_PROVIDED
+        max_length=20,
+        choices=WORK_STATUS_CHOICE,
+        blank=True,
+        default=NOT_PROVIDED,
     )
     flex_fields = JSONField(default=dict)
     enrolled_in_nutrition_programme = models.BooleanField(default=False)
     administration_of_rutf = models.BooleanField(default=False)
+    unicef_id = models.CharField(max_length=250, blank=True)
+    unicef_id_index = SerialField()
 
     @property
     def age(self):
