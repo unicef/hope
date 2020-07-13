@@ -7,6 +7,7 @@ volumes:
   db_reg:
   db_airflow:
   airflow:
+  data_es:
 
 services:
   proxy:
@@ -173,4 +174,22 @@ services:
       - backend-data:/usr/local/airflow/data
     command: worker
 
-
+  elasticsearch:
+    image: unicef/hct-elasticsearch
+    build:
+      context: .
+      dockerfile: es/Dockerfile
+    environment:
+      - node.name=es01
+      - cluster.name=es-docker-cluster
+      - cluster.initial_master_nodes=es01
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - data_es:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200

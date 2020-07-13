@@ -40,6 +40,7 @@ export function SanctionList(): React.ReactElement {
     } else {
       showMessage('Import failed.');
     }
+    setFileToImport(null);
   };
 
   const ButtonsContainer = styled.div`
@@ -51,6 +52,7 @@ export function SanctionList(): React.ReactElement {
     <>
       <DropzoneField
         loading={fileLoading}
+        dontShowFilename={!fileToImport}
         onChange={(files) => {
           if (files.length === 0) {
             return;
@@ -71,7 +73,9 @@ export function SanctionList(): React.ReactElement {
 
   return (
     <>
-      <PageHeader title={t('Select File to Import')} />
+      <PageHeader
+        title={t('Select File to Import to Check Against Sanctions List')}
+      />
       <Box
         display='flex'
         justifyContent='center'

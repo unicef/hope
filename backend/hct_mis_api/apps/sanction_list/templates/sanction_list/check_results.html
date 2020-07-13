@@ -2,17 +2,36 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Sanction List Check</title>
 </head>
 <body>
+    <p>Date: {{ today_date }}</p>
+    <p>File name: {{ file_name }}</p>
     <p>Found {{ results_count }} matching results.</p>
     <ol>
         {% for individual in results %}
         <li>
             <div>{{ individual.first_name }} {{ individual.second_name }}  {{ individual.third_name }}</div>
-            <div>Date of birth: {% firstof individual.date_of_birth individual.year_of_birth "Not provided" %}</div>
+            {% if individual.date_of_birth %}
+                <div>Date of birth: {{ individual.date_of_birth }}</div>
+            {% elif individual.year_of_birth == individual.second_year_of_birth %}
+                <div>Year of birth: {{ individual.year_of_birth }}</div>
+            {% elif individual.year_of_birth != individual.second_year_of_birth %}
+                <div>Year of birth between: {{ individual.year_of_birth }} - {{ individual.second_year_of_birth }}</div>
+            {% else %}
+                <div>Date of birth: Not Provided</div>
+            {% endif %}
+            <div>Row number: {{ individual.row_number }}</div>
         </li>
         {% endfor %}
     </ol>
+    <p>
+        This is an automated message. Results should be used ONLY to flag POTENTIAL matches to records in the UN Sanctions List.
+        POTENTIAL matches must be verified by the requesting entity and/or relevant authorities,
+        possibly including investigations conducted to confirm the identity is, in fact, positive match
+        UNICEF and the contracted entities supporting this application take no liability for partial matches,
+        false positives or other misinterpretations resulting from vague data sources
+        For any issues or questions, please contact <a href="mailto:dfam-cashassistance@unicef.org">dfam-cashassistance@unicef.org</a>
+    </p>
 </body>
 </html>
