@@ -200,6 +200,8 @@ stages:
                 backend.secret.POSTGRES_CASHASSIST_DATAHUB_DB=$(CASH_ASSIST_DATAHUB_POSTGRES_DB),\
                 backend.secret.POSTGRES_CASHASSIST_DATAHUB_USER=$(CASH_ASSIST_REGISTRATION_DATAHUB_POSTGRES_USER),\
                 backend.secret.POSTGRES_CASHASSIST_DATAHUB_PASSWORD=$(CASH_ASSIST_REGISTRATION_DATAHUB_POSTGRES_PASSWORD),\
+                backend.secret.KOBO_API_URL=$(KOBO_API_URL),\
+                backend.secret.EMAIL_HOST=$(EMAIL_HOST),\
                 databases.backend-db.secret.POSTGRES_DB=$(POSTGRES_DB),\
                 databases.backend-db.secret.POSTGRES_USER=$(POSTGRES_USER),\
                 databases.backend-db.secret.POSTGRES_PASSWORD=$(POSTGRES_PASSWORD),\

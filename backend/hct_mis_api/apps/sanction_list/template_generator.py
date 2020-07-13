@@ -7,6 +7,7 @@ class TemplateFileGenerator:
         "FIRST NAME",
         "SECOND NAME",
         "THIRD NAME",
+        "FOURTH NAME",
         "DATE OF BIRTH",
     )
 
