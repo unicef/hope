@@ -156,7 +156,7 @@ class TestXLSXValidatorsMethods(TestCase):
         result = UploadXLSXValidator.rows_validator(wb["Individuals"])
         expected = [
             {
-                "row_number": 7,
+                "row_number": 0,
                 "header": "relationship_i_c",
                 "message": "Sheet: Individuals, There are multiple head of "
                 "households for household with id: 3",
@@ -529,13 +529,13 @@ class TestXLSXValidatorsMethods(TestCase):
                 [
                     {
                         "row_number": 1,
-                        "message": "Only .xlsx files are accepted for import.",
+                        "message": "Only .xlsx files are accepted for import",
                     }
                 ],
             ),
             (
                 f"{self.FILES_DIR_PATH}/" f"not_excel_file.xlsx",
-                [{"row_number": 1, "message": "Invalid .xlsx file",}],
+                [{"row_number": 1, "message": "Invalid .xlsx file"}],
             ),
         )
 

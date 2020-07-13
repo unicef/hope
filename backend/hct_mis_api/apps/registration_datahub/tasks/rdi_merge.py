@@ -189,5 +189,5 @@ class RdiMergeTask:
         Individual.objects.bulk_create(individuals_to_add)
         Household.objects.bulk_create(households_to_add)
 
-        obj_hct.status = "MERGED"
+        obj_hct.status = RegistrationDataImport.MERGED
         obj_hct.save()

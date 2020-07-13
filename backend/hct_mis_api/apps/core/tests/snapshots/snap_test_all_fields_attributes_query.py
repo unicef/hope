@@ -11,7 +11,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
     'data': {
         'allFieldsAttributes': [
             {
-                'associatedWith': '0',
+                'associatedWith': 'Household',
                 'choices': [
                     {
                         'labelEn': 'No',
@@ -60,7 +60,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'SELECT_ONE'
             },
             {
-                'associatedWith': '0',
+                'associatedWith': 'Household',
                 'choices': [
                     {
                         'labelEn': 'No',
@@ -109,7 +109,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'SELECT_ONE'
             },
             {
-                'associatedWith': '0',
+                'associatedWith': 'Household',
                 'choices': [
                     {
                         'labelEn': 'No',
@@ -158,7 +158,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'SELECT_ONE'
             },
             {
-                'associatedWith': '0',
+                'associatedWith': 'Household',
                 'choices': [
                     {
                         'labelEn': 'No',
@@ -207,7 +207,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'SELECT_ONE'
             },
             {
-                'associatedWith': '0',
+                'associatedWith': 'Household',
                 'choices': [
                     {
                         'labelEn': 'Government Hospital',
@@ -326,7 +326,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'SELECT_MANY'
             },
             {
-                'associatedWith': '0',
+                'associatedWith': 'Household',
                 'choices': [
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -347,7 +347,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'STRING'
             },
             {
-                'associatedWith': '0',
+                'associatedWith': 'Household',
                 'choices': [
                     {
                         'labelEn': 'Accommodation is free / other',
@@ -438,7 +438,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'SELECT_ONE'
             },
             {
-                'associatedWith': '0',
+                'associatedWith': 'Household',
                 'choices': [
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -459,7 +459,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'INTEGER'
             },
             {
-                'associatedWith': '0',
+                'associatedWith': 'Household',
                 'choices': [
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -480,7 +480,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'INTEGER'
             },
             {
-                'associatedWith': '0',
+                'associatedWith': 'Household',
                 'choices': [
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -501,7 +501,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'INTEGER'
             },
             {
-                'associatedWith': '0',
+                'associatedWith': 'Household',
                 'choices': [
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -522,7 +522,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'INTEGER'
             },
             {
-                'associatedWith': '0',
+                'associatedWith': 'Household',
                 'choices': [
                     {
                         'labelEn': 'Buy bottled water',
@@ -627,7 +627,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'SELECT_ONE'
             },
             {
-                'associatedWith': '0',
+                'associatedWith': 'Household',
                 'choices': [
                     {
                         'labelEn': 'No, everyday our family struggles because of lack of water',
@@ -690,7 +690,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'SELECT_ONE'
             },
             {
-                'associatedWith': '0',
+                'associatedWith': 'Household',
                 'choices': [
                     {
                         'labelEn': 'No facility (open defection)',
@@ -767,7 +767,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'SELECT_ONE'
             },
             {
-                'associatedWith': '0',
+                'associatedWith': 'Household',
                 'choices': [
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -788,7 +788,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'INTEGER'
             },
             {
-                'associatedWith': '0',
+                'associatedWith': 'Household',
                 'choices': [
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -809,7 +809,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'STRING'
             },
             {
-                'associatedWith': '0',
+                'associatedWith': 'Household',
                 'choices': [
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -830,7 +830,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'INTEGER'
             },
             {
-                'associatedWith': '0',
+                'associatedWith': 'Household',
                 'choices': [
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -851,7 +851,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'INTEGER'
             },
             {
-                'associatedWith': '0',
+                'associatedWith': 'Household',
                 'choices': [
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -872,7 +872,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'INTEGER'
             },
             {
-                'associatedWith': '0',
+                'associatedWith': 'Household',
                 'choices': [
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -893,7 +893,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'INTEGER'
             },
             {
-                'associatedWith': '0',
+                'associatedWith': 'Household',
                 'choices': [
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -914,7 +914,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'INTEGER'
             },
             {
-                'associatedWith': '0',
+                'associatedWith': 'Household',
                 'choices': [
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -935,7 +935,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'INTEGER'
             },
             {
-                'associatedWith': '0',
+                'associatedWith': 'Household',
                 'choices': [
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -956,7 +956,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'INTEGER'
             },
             {
-                'associatedWith': '0',
+                'associatedWith': 'Household',
                 'choices': [
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -977,7 +977,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'INTEGER'
             },
             {
-                'associatedWith': '0',
+                'associatedWith': 'Household',
                 'choices': [
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -998,7 +998,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'INTEGER'
             },
             {
-                'associatedWith': '0',
+                'associatedWith': 'Household',
                 'choices': [
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -1019,7 +1019,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'INTEGER'
             },
             {
-                'associatedWith': '0',
+                'associatedWith': 'Household',
                 'choices': [
                     {
                         'labelEn': 'Cash assistance',
@@ -1292,7 +1292,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'SELECT_MANY'
             },
             {
-                'associatedWith': '0',
+                'associatedWith': 'Household',
                 'choices': [
                     {
                         'labelEn': "Don't know",
@@ -1439,7 +1439,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'SELECT_MANY'
             },
             {
-                'associatedWith': '1',
+                'associatedWith': 'Individual',
                 'choices': [
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -1460,7 +1460,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'IMAGE'
             },
             {
-                'associatedWith': '1',
+                'associatedWith': 'Individual',
                 'choices': [
                     {
                         'labelEn': 'Birth Certificate',
@@ -1579,7 +1579,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'SELECT_ONE'
             },
             {
-                'associatedWith': '1',
+                'associatedWith': 'Individual',
                 'choices': [
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -1600,7 +1600,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'STRING'
             },
             {
-                'associatedWith': '1',
+                'associatedWith': 'Individual',
                 'choices': [
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -1621,7 +1621,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'STRING'
             },
             {
-                'associatedWith': '1',
+                'associatedWith': 'Individual',
                 'choices': [
                     {
                         'labelEn': 'Cannot do at all',
@@ -1684,7 +1684,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'SELECT_ONE'
             },
             {
-                'associatedWith': '1',
+                'associatedWith': 'Individual',
                 'choices': [
                     {
                         'labelEn': 'Cannot do at all',
@@ -1747,7 +1747,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'SELECT_ONE'
             },
             {
-                'associatedWith': '1',
+                'associatedWith': 'Individual',
                 'choices': [
                     {
                         'labelEn': 'Cannot do at all',
@@ -1810,7 +1810,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'SELECT_ONE'
             },
             {
-                'associatedWith': '1',
+                'associatedWith': 'Individual',
                 'choices': [
                     {
                         'labelEn': 'Cannot do at all',
@@ -1873,7 +1873,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'SELECT_ONE'
             },
             {
-                'associatedWith': '1',
+                'associatedWith': 'Individual',
                 'choices': [
                     {
                         'labelEn': 'Cannot do at all',
@@ -1936,7 +1936,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'SELECT_ONE'
             },
             {
-                'associatedWith': '1',
+                'associatedWith': 'Individual',
                 'choices': [
                     {
                         'labelEn': 'Cannot do at all',
@@ -1999,7 +1999,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'SELECT_ONE'
             },
             {
-                'associatedWith': '1',
+                'associatedWith': 'Individual',
                 'choices': [
                     {
                         'labelEn': 'Divorced',
@@ -2076,7 +2076,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'SELECT_ONE'
             },
             {
-                'associatedWith': '1',
+                'associatedWith': 'Individual',
                 'choices': [
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -2097,7 +2097,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'INTEGER'
             },
             {
-                'associatedWith': '1',
+                'associatedWith': 'Individual',
                 'choices': [
                     {
                         'labelEn': 'No',
@@ -2146,7 +2146,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'SELECT_ONE'
             },
             {
-                'associatedWith': '1',
+                'associatedWith': 'Individual',
                 'choices': [
                     {
                         'labelEn': 'No',
@@ -2195,7 +2195,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'SELECT_ONE'
             },
             {
-                'associatedWith': '1',
+                'associatedWith': 'Individual',
                 'choices': [
                     {
                         'labelEn': 'Informal',
@@ -2272,7 +2272,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'SELECT_ONE'
             },
             {
-                'associatedWith': '1',
+                'associatedWith': 'Individual',
                 'choices': [
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -2293,7 +2293,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'INTEGER'
             },
             {
-                'associatedWith': '1',
+                'associatedWith': 'Individual',
                 'choices': [
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
@@ -3445,6 +3445,16 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'labels': [
                             {
                                 'label': 'Iran, Islamic Republic of',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'IR'
+                    },
+                    {
+                        'labelEn': 'Iran (Islamic Republic of',
+                        'labels': [
+                            {
+                                'label': 'Iran (Islamic Republic of',
                                 'language': 'English(EN)'
                             }
                         ],
@@ -5902,6 +5912,16 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'labels': [
                             {
                                 'label': 'Iran, Islamic Republic of',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'IR'
+                    },
+                    {
+                        'labelEn': 'Iran (Islamic Republic of',
+                        'labels': [
+                            {
+                                'label': 'Iran (Islamic Republic of',
                                 'language': 'English(EN)'
                             }
                         ],
