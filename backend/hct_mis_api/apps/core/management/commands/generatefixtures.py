@@ -160,7 +160,7 @@ class Command(BaseCommand):
                     target_population=target_population,
                 )
                 EntitlementCardFactory(household=household)
-        CashPlanPaymentVerificationFactory.create_batch(10)
+        CashPlanPaymentVerificationFactory.create_batch(1)
         PaymentVerificationFactory.create_batch(100)
 
     @transaction.atomic
