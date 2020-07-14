@@ -14,7 +14,9 @@ description: Change request for Iteration 4 Deliverables
 
 > In order to push the necessary data to appropriate fields into the datahub depends on if the business area has data sharing agreement with UNHCR or not. Some rules below have been set, the logic is described in length below.
 
-### Primary Collector \(Man2 Many\) 
+
+
+### Primary Collector \(Many2Many\) 
 
 **July 2nd 2020**
 
@@ -27,7 +29,7 @@ description: Change request for Iteration 4 Deliverables
   * Role
   * Collector Type
 
-OPTION 1  
+  
 representatives = m2m\(through=individuals\)
 
 Make household nullable to allow for Collector object.
