@@ -1,9 +1,10 @@
-from datetime import datetime
+from datetime import datetime, date
+from itertools import permutations
 
+import dateutil.parser
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
-from django.forms import model_to_dict
 from django.template.loader import render_to_string
 from openpyxl import load_workbook, Workbook
 from openpyxl.utils import get_column_letter
@@ -13,130 +14,77 @@ from sanction_list.models import UploadedXLSXFile, SanctionListIndividual
 
 
 class CheckAgainstSanctionListTask:
-    @staticmethod
-    def _get_row(data, row_num_mapping):
-        for row_num, values in row_num_mapping.items():
-            has_matching_names = (
-                values["first_name"]["value"].lower()
-                == data["first_name"].lower()
-                and values["second_name"]["value"].lower()
-                == data["second_name"].lower()
-                and values["third_name"]["value"].lower()
-                == data["third_name"].lower()
-            )
-            has_matching_dob = (
-                values["date_of_birth"]["value"] is not None
-                and values["date_of_birth"]["value"] == data["date_of_birth"]
-            )
-            if has_matching_names and has_matching_dob:
-                return row_num
-
-            has_matching_years = False
-            all_values_exist = all(
-                [
-                    data["year_of_birth"],
-                    data["second_year_of_birth"],
-                    values["year_of_birth"]["value"],
-                ]
-            )
-            if all_values_exist:
-                has_matching_years = (
-                    data["year_of_birth"]
-                    <= values["year_of_birth"]["value"]
-                    <= data["second_year_of_birth"]
-                )
-            if has_matching_names and has_matching_years:
-                return row_num
-
     def execute(self, uploaded_file_id, original_file_name):
         today = datetime.now()
         uploaded_file = UploadedXLSXFile.objects.get(id=uploaded_file_id)
         wb = load_workbook(uploaded_file.file, data_only=True)
         sheet = wb.worksheets[0]
         headers = {cell.value: cell.column for cell in sheet[1] if cell.value}
-        filter_query = Q()
-        row_num_mapping = {}
+        results_dict = {}
 
-        for index, row in enumerate(sheet.iter_rows(min_row=2)):
+        for row in sheet.iter_rows(min_row=2):
             if not any([cell.value for cell in row]):
                 continue
 
             filter_values = {
-                "first_name": {
-                    "value": "",
-                    "lookup_expr": "first_name__iexact",
-                },
-                "second_name": {
-                    "value": "",
-                    "lookup_expr": "second_name__iexact",
-                },
-                "third_name": {
-                    "value": "",
-                    "lookup_expr": "third_name__iexact",
-                },
-                "date_of_birth": {
-                    "value": None,
-                    "lookup_expr": "date_of_birth",
-                },
-                "year_of_birth": {
-                    "value": None,
-                    "lookup_expr": "year_of_birth__lte",
-                },
-                "second_year_of_birth": {
-                    "value": None,
-                    "lookup_expr": "second_year_of_birth__gte",
-                },
+                "first_name": "",
+                "second_name": "",
+                "third_name": "",
+                "fourth_name": "",
+                "date_of_birth": "",
             }
 
+            row_number = 1
             for cell, header in zip(row, headers.keys()):
                 value = cell.value
+                row_number = cell.row
                 header_as_key = header.replace(" ", "_").lower().strip()
                 if header_as_key == "date_of_birth":
-                    if isinstance(value, (int, float, str)):
-                        value = int(value)
-                        if value:
-                            filter_values["year_of_birth"]["value"] = value
-                            filter_values["second_year_of_birth"][
-                                "value"
-                            ] = value
-                            continue
-
-                    elif isinstance(value, datetime):
-                        value = value.date()
+                    if not isinstance(value, (datetime, date)):
+                        try:
+                            value = dateutil.parser.parse(value)
+                        except Exception:
+                            pass
                 if value:
-                    filter_values[header_as_key]["value"] = value
+                    filter_values[header_as_key] = value
 
-            row_num_mapping[index] = {**filter_values}
-            query = Q(
-                **{
-                    data_dict["lookup_expr"]: data_dict["value"]
-                    for data_dict in filter_values.values()
-                    if data_dict["value"]
-                }
+            dob = filter_values.pop("date_of_birth", "")
+            names = [n.capitalize() for n in filter_values.values() if n]
+            if len(names) < 2:
+                continue
+
+            name_permutations = permutations(names)
+            full_name_permutations = [
+                " ".join(permutation).title()
+                for permutation in name_permutations
+            ]
+
+            if isinstance(dob, datetime):
+                dob_query = (
+                    Q(dates_of_birth__date=dob.date())
+                    | Q(dates_of_birth__date__year=dob.year)
+                    # to return something when full_name matches but dob not
+                    | Q(full_name__isnull=False)
+                )
+            else:
+                dob_query = Q(full_name__isnull=False)
+
+            name_query = Q(full_name__in=full_name_permutations) | (
+                Q(full_name__icontains=names[0])
+                & Q(full_name__icontains=names[1])
             )
 
-            filter_query |= query
+            qs = SanctionListIndividual.objects.filter(
+                name_query & dob_query
+            ).first()
 
-        raw_result = SanctionListIndividual.objects.order_by(
-            "first_name"
-        ).filter(filter_query)
+            if qs:
+                results_dict[row_number] = qs
 
-        if not raw_result.exists():
-            return
-
-        result = [
-            {
-                **model_to_dict(individual),
-                "row_number": self._get_row(
-                    model_to_dict(individual), row_num_mapping
-                ),
-            }
-            for individual in raw_result
-        ]
-
+        # MAIL SENDING
         context = {
-            "results": result,
-            "results_count": len(result),
+            "results": results_dict,
+            "results_count": len(results_dict),
             "file_name": original_file_name,
             "today_date": datetime.now(),
         }
@@ -162,23 +110,20 @@ class CheckAgainstSanctionListTask:
         )
         attachment_ws.append(header_row_names)
 
-        for individual in result:
-            year_of_birth = ""
-            if individual["year_of_birth"]:
-                year_of_birth = (
-                    individual["year_of_birth"]
-                    if individual["year_of_birth"]
-                    == individual["second_year_of_birth"]
-                    else f"{individual['year_of_birth']} - "
-                    f"{individual['second_year_of_birth']}"
-                )
+        for row_number, individual in results_dict.items():
             attachment_ws.append(
                 (
-                    individual["first_name"],
-                    individual["second_name"],
-                    individual["third_name"],
-                    individual["date_of_birth"] or year_of_birth,
-                    individual["row_number"],
+                    individual.first_name,
+                    individual.second_name,
+                    individual.third_name,
+                    individual.fourth_name,
+                    ", ".join(
+                        d.strftime("%Y-%m-%d")
+                        for d in individual.dates_of_birth.values_list(
+                            "date", flat=True
+                        )
+                    ),
+                    row_number,
                 )
             )
         for i in range(1, len(header_row_names) + 1):

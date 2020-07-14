@@ -127,6 +127,11 @@ airflow:
         secretKeyRef:
           name: backend-secret
           key: EMAIL_HOST
+    - name: KOBO_API_URL
+      valueFrom:
+        secretKeyRef:
+          name: backend-secret
+          key: KOBO_API_URL
     - name: STORAGE_AZURE_ACCOUNT_NAME
       value: "hctmisdev"
 
