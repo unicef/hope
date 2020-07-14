@@ -52,7 +52,7 @@ def create_registration_data_import_objects(
         **registration_data_import_data,
     )
     created_obj_hct = RegistrationDataImport.objects.create(
-        status="IMPORTING",
+        status=RegistrationDataImport.IMPORTING,
         imported_by=user,
         data_source=data_source,
         number_of_individuals=import_data_obj.number_of_individuals,
@@ -160,9 +160,9 @@ class MergeRegistrationDataImportMutation(BaseValidator, graphene.Mutation):
     @classmethod
     def validate_object_status(cls, *args, **kwargs):
         status = kwargs.get("status")
-        if status != "APPROVED":
+        if status != RegistrationDataImport.IN_REVIEW:
             raise ValidationError(
-                "Only Approved Registration Data Import "
+                "Only In Review Registration Data Import "
                 "can be merged into Population"
             )
 
@@ -176,67 +176,9 @@ class MergeRegistrationDataImportMutation(BaseValidator, graphene.Mutation):
             dag_id="MergeRegistrationImportData",
             context={"registration_data_import_id": decode_id,},
         )
-        obj_hct.status = "MERGING"
+        obj_hct.status = RegistrationDataImport.MERGING
         obj_hct.save()
         return MergeRegistrationDataImportMutation(obj_hct)
-
-
-class ApproveRegistrationDataImportMutation(BaseValidator, graphene.Mutation):
-    registration_data_import = graphene.Field(RegistrationDataImportNode)
-
-    class Arguments:
-        id = graphene.ID(required=True)
-
-    @classmethod
-    def validate_object_status(cls, *args, **kwargs):
-        status = kwargs.get("status")
-        if status != "IN_REVIEW":
-            raise ValidationError(
-                "Only In Review Registration Data Import can be Approved"
-            )
-
-    @classmethod
-    @is_authenticated
-    @transaction.atomic
-    def mutate(cls, root, info, id):
-        decode_id = decode_id_string(id)
-
-        obj = RegistrationDataImport.objects.select_for_update().get(
-            id=decode_id,
-        )
-        cls.validate(status=obj.status)
-        obj.status = "APPROVED"
-        obj.save()
-        return ApproveRegistrationDataImportMutation(obj)
-
-
-class UnapproveRegistrationDataImportMutation(BaseValidator, graphene.Mutation):
-    registration_data_import = graphene.Field(RegistrationDataImportNode)
-
-    class Arguments:
-        id = graphene.ID(required=True)
-
-    @classmethod
-    def validate_object_status(cls, *args, **kwargs):
-        status = kwargs.get("status")
-        if status != "APPROVED":
-            raise ValidationError(
-                "Only Approved Registration Data Import can be Unapproved"
-            )
-
-    @classmethod
-    @is_authenticated
-    @transaction.atomic
-    def mutate(cls, root, info, id):
-        decode_id = decode_id_string(id)
-
-        obj = RegistrationDataImport.objects.select_for_update().get(
-            id=decode_id,
-        )
-        cls.validate(status=obj.status)
-        obj.status = "IN_REVIEW"
-        obj.save()
-        return ApproveRegistrationDataImportMutation(obj)
 
 
 class UploadImportDataXLSXFile(
@@ -352,10 +294,4 @@ class Mutations(graphene.ObjectType):
     registration_xlsx_import = RegistrationXlsxImportMutation.Field()
     registration_kobo_import = RegistrationKoboImportMutation.Field()
     save_kobo_import_data = SaveKoboProjectImportDataMutation.Field()
-    approve_registration_data_import = (
-        ApproveRegistrationDataImportMutation.Field()
-    )
-    unapprove_registration_data_import = (
-        UnapproveRegistrationDataImportMutation.Field()
-    )
     merge_registration_data_import = MergeRegistrationDataImportMutation.Field()
