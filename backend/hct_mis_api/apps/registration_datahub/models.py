@@ -83,7 +83,8 @@ class ImportedHousehold(TimeStampedUUIDModel):
         related_name="households",
         on_delete=models.CASCADE,
     )
-    registration_date = models.DateField(null=True, auto_now_add=True)
+    first_registration_date = models.DateField()
+    last_registration_date = models.DateField()
     returnee = models.BooleanField(default=False)
     flex_fields = JSONField(default=dict)
 
@@ -130,6 +131,8 @@ class ImportedIndividual(TimeStampedUUIDModel):
         blank=True,
         default=NOT_PROVIDED,
     )
+    first_registration_date = models.DateField()
+    last_registration_date = models.DateField()
     flex_fields = JSONField(default=dict)
 
     @property
