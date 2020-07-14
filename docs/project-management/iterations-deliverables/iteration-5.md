@@ -42,5 +42,20 @@ The goal of Iteration Five is to integrate KoBo Form / Projects and project data
 
 ### Sanctions List
 
+* Quick upload screen w/ authentication and validation.
+* Changes requested towards last few 
+
+### Cypress / UAT / QA
+
+200+ hours of development/engineering/training/spec of Cypress User Testing that were not implemented. 
+
+
+
+### Cash Assist Changes to DataHub
+
+* Continued throughout Iteration 5 and into Iteration 6
+
+
+
 
 
