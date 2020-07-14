@@ -160,7 +160,8 @@ class Household(TimeStampedUUIDModel, AbstractSyncable):
     )
     returnee = models.BooleanField(default=False, null=True)
     flex_fields = JSONField(default=dict)
-    registration_date = models.DateField(null=True)
+    first_registration_date = models.DateField()
+    last_registration_date = models.DateField()
     head_of_household = models.OneToOneField(
         "Individual",
         related_name="heading_household",
@@ -293,6 +294,8 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
     work_status = models.CharField(
         max_length=20, choices=WORK_STATUS_CHOICE, blank=True, default=NOT_PROVIDED
     )
+    first_registration_date = models.DateField()
+    last_registration_date = models.DateField()
     flex_fields = JSONField(default=dict)
     enrolled_in_nutrition_programme = models.BooleanField(default=False)
     administration_of_rutf = models.BooleanField(default=False)
