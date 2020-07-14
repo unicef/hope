@@ -40,7 +40,7 @@ Make household nullable to allow for Collector object.
 
 ### Cypress / UAT / QA
 
-200+ hours of development/engineering/training/spec of Cypress User Testing that were decided in final \(2\) weeks of Iteration. 
+* 200+ hours of development/engineering/training/spec of Cypress User Testing that were decided in final \(2\) weeks of Iteration. 
 
 ### Cash Assist Changes to DataHub
 
