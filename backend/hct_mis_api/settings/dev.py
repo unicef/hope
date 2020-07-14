@@ -32,3 +32,10 @@ except ImportError:
     pass
 
 AIRFLOW_HOST = "airflow_webserver"
+
+# ELASTICSEARCH SETTINGS
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts': 'elasticsearch:9200'
+    },
+}

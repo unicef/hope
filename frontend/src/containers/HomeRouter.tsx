@@ -49,9 +49,10 @@ export function HomeRouter(): React.ReactElement {
   const handleDrawerClose = (): void => {
     setOpen(false);
   };
-
   if (!authenticated) {
-    return <Redirect to='/login' />;
+    return (
+      <Redirect to={`/login?next=${location.pathname}${location.search}`} />
+    );
   }
   return (
     <Root>

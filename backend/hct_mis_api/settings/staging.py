@@ -75,3 +75,10 @@ sentry_sdk.init(
 )
 
 AIRFLOW_HOST = "hct-mis-airflow-web"
+
+# ELASTICSEARCH SETTINGS
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts': 'https://elasticsearch.unicef.io/'
+    },
+}
