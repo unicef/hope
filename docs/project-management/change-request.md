@@ -6,13 +6,17 @@ description: Change request for Iteration 4 Deliverables
 
 ## Iteration 6
 
-### July 8th 2020
+### **UNHCR Data Sharing Agreement**
+
+**July 8th 2020**
 
 \*\*\*\*[**link to ticket**](https://unicef.visualstudio.com/ICTD-HCT-MIS/_sprints/backlog/Software%20Engineering/ICTD-HCT-MIS/Iteration%206/Sprint%201%20%28i.6%29?workitem=64344)\*\*\*\*
 
 > In order to push the necessary data to appropriate fields into the datahub depends on if the business area has data sharing agreement with UNHCR or not. Some rules below have been set, the logic is described in length below.
 
-### July 2nd 2020
+### Primary Collector \(Man2 Many\) 
+
+**July 2nd 2020**
 
 **Data Model Change**
 
