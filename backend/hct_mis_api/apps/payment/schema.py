@@ -6,10 +6,12 @@ from graphene_django.filter import DjangoFilterConnectionField
 
 from core.schema import ChoiceObject
 from core.extended_connection import ExtendedConnection
+from core.utils import to_choice_object
 from payment.models import (
     PaymentRecord,
     ServiceProvider,
-    CashPlanPaymentVerification, PaymentVerification,
+    CashPlanPaymentVerification,
+    PaymentVerification,
 )
 
 
@@ -71,9 +73,36 @@ class Query(graphene.ObjectType):
         PaymentRecordNode, filterset_class=PaymentRecordFilter,
     )
     payment_record_status_choices = graphene.List(ChoiceObject)
+    payment_record_entitlement_card_status_choices = graphene.List(ChoiceObject)
+    payment_record_delivery_type_choices = graphene.List(ChoiceObject)
+    cash_plan_verification_status_choices = graphene.List(ChoiceObject)
+    cash_plan_verification_sampling_choices = graphene.List(ChoiceObject)
+    cash_plan_verification_verification_method_choices = graphene.List(
+        ChoiceObject
+    )
+    payment_verification_status_choices = graphene.List(ChoiceObject)
 
     def resolve_payment_record_status_choices(self, info, **kwargs):
-        return [
-            {"name": name, "value": value}
-            for value, name in PaymentRecord.STATUS_CHOICE
-        ]
+        return to_choice_object(PaymentRecord.STATUS_CHOICE)
+
+    def resolve_payment_record_status_choices(self, info, **kwargs):
+        return to_choice_object(PaymentRecord.ENTITLEMENT_CARD_STATUS_CHOICE)
+
+    def resolve_payment_record_delivery_type_choices(self, info, **kwargs):
+        return to_choice_object(PaymentRecord.DELIVERY_TYPE_CHOICE)
+
+    def resolve_cash_plan_verification_status_choices(self, info, **kwargs):
+        return to_choice_object(CashPlanPaymentVerification.STATUS_CHOICES)
+
+    def resolve_cash_plan_verification_sampling_choices(self, info, **kwargs):
+        return to_choice_object(CashPlanPaymentVerification.SAMPLING_CHOICES)
+
+    def resolve_cash_plan_verification_verification_method_choices(
+        self, info, **kwargs
+    ):
+        return to_choice_object(
+            CashPlanPaymentVerification.VERIFICATION_METHOD_CHOICES
+        )
+
+    def resolve_payment_verification_status_choices(self, info, **kwargs):
+        return to_choice_object(PaymentVerification.STATUS_CHOICES)
