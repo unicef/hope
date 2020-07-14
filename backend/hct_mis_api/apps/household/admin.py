@@ -38,3 +38,4 @@ class IndividualAdmin(admin.ModelAdmin):
         "relationship",
         "birth_date",
     )
+

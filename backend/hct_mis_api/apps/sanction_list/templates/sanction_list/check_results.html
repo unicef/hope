@@ -9,19 +9,18 @@
     <p>File name: {{ file_name }}</p>
     <p>Found {{ results_count }} matching results.</p>
     <ol>
-        {% for individual in results %}
+        {% for row_number, individual in results.items %}
         <li>
-            <div>{{ individual.first_name }} {{ individual.second_name }}  {{ individual.third_name }}</div>
-            {% if individual.date_of_birth %}
-                <div>Date of birth: {{ individual.date_of_birth }}</div>
-            {% elif individual.year_of_birth == individual.second_year_of_birth %}
-                <div>Year of birth: {{ individual.year_of_birth }}</div>
-            {% elif individual.year_of_birth != individual.second_year_of_birth %}
-                <div>Year of birth between: {{ individual.year_of_birth }} - {{ individual.second_year_of_birth }}</div>
-            {% else %}
-                <div>Date of birth: Not Provided</div>
+            <div>{{ individual.first_name }} {{ individual.second_name }}  {{ individual.third_name }} {{ individual.fourth_name }}</div>
+            {% if individual.dates_of_birth.all %}
+                <div>Possible dates of birth:</div>
+                <ol>
+                    {% for dob in individual.dates_of_birth.all %}
+                        <li>{{ dob.date }}</li>
+                    {% endfor %}
+                </ol>
             {% endif %}
-            <div>Row number: {{ individual.row_number }}</div>
+            <div>Row number in original file: {{ row_number }}</div>
         </li>
         {% endfor %}
     </ol>
