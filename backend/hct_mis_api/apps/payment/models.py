@@ -3,6 +3,8 @@ from decimal import Decimal
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import Sum, UUIDField
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 
@@ -89,7 +91,7 @@ class ServiceProvider(TimeStampedUUIDModel):
 
 
 class CashPlanPaymentVerification(TimeStampedUUIDModel):
-    STATUS_DRAFT = "DRAFT"
+    STATUS_PENDING = "PENDING"
     STATUS_ACTIVE = "ACTIVE"
     STATUS_FINISHED = "FINISHED"
     SAMPLING_FULL_LIST = "FULL_LIST"
@@ -98,7 +100,7 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel):
     VERIFICATION_METHOD_XLSX = "XLSX"
     VERIFICATION_METHOD_MANUAL = "MANUAL"
     STATUS_CHOICES = (
-        (STATUS_DRAFT, "Draft"),
+        (STATUS_PENDING, "Pending"),
         (STATUS_ACTIVE, "Active"),
         (STATUS_FINISHED, "Finished"),
     )
@@ -112,7 +114,7 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel):
         (VERIFICATION_METHOD_MANUAL, "MANUAL"),
     )
     status = models.CharField(
-        max_length=50, choices=STATUS_CHOICES, default="DRAFT"
+        max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING
     )
     cash_plan = models.ForeignKey(
         "program.CashPlan",
@@ -128,6 +130,16 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel):
     received_count = models.PositiveIntegerField(null=True)
     not_received_count = models.PositiveIntegerField(null=True)
     received_with_problems_count = models.PositiveIntegerField(null=True)
+
+
+@receiver(
+    post_save,
+    sender=CashPlanPaymentVerification,
+    dispatch_uid="update_verification_status_in_cash_plan",
+)
+def update_verification_status_in_cash_plan(sender, instance, **kwargs):
+    instance.cash_plan.verification_status = instance.status
+    instance.cash_plan.save()
 
 
 class PaymentVerification(TimeStampedUUIDModel):
