@@ -63,7 +63,7 @@ export function LoginPage(): React.ReactElement {
   return (
     <Container>
       <LoginBox>
-        <Title>HCT-MIS Portal</Title>
+        <Title>HOPE Portal</Title>
         <SubTitle>Login via Active Directory</SubTitle>
         <Separator />
         <LoginButtonContainer>

@@ -286,11 +286,6 @@ LOGGING = {
             "class": "logging.StreamHandler",
             "formatter": "standard",
         },
-        "mail_admins": {
-            "level": "ERROR",
-            "class": "django.utils.log.AdminEmailHandler",
-            "include_html": True,
-        },
     },
     "loggers": {
         "": {"handlers": ["default"], "level": "INFO", "propagate": True},
@@ -300,7 +295,7 @@ LOGGING = {
             "propagate": True,
         },
         "django.request": {
-            "handlers": ["mail_admins", "default"],
+            "handlers": ["default"],
             "level": "ERROR",
             "propagate": False,
         },

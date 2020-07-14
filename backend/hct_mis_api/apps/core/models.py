@@ -37,7 +37,8 @@ class BusinessArea(TimeStampedUUIDModel):
     region_code = models.CharField(max_length=8)
     region_name = models.CharField(max_length=8)
     kobo_token = models.CharField(max_length=255, null=True, blank=True)
-
+    rapid_pro_host = models.URLField(null=True)
+    rapid_pro_api_key = models.CharField(max_length=32, null=True)
     slug = models.CharField(max_length=250, unique=True, db_index=True,)
 
     def save(self, *args, **kwargs):
@@ -150,8 +151,10 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
     @classmethod
     def get_admin_areas_as_choices(cls, admin_level):
         return [
-            {"label": {"English(EN)": admin_area.title},
-             "value": admin_area.title, }
+            {
+                "label": {"English(EN)": admin_area.title},
+                "value": admin_area.title,
+            }
             for admin_area in cls.objects.filter(
                 admin_area_type__admin_level=admin_level
             )

@@ -48,11 +48,6 @@ const DialogFooter = styled.div`
   text-align: right;
 `;
 
-const DialogDescription = styled.div`
-  margin: 20px 0;
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.54);
-`;
 const ComboBox = styled(Select)`
   & {
     min-width: 200px;
@@ -294,16 +289,10 @@ export function RegistrationDataImport(): React.ReactElement {
             <Form>
               <DialogTitleWrapper>
                 <DialogTitle id='scroll-dialog-title'>
-                  <Typography variant='h6'>
-                    {t('Select File to Import')}
-                  </Typography>
+                  {t('Select File to Import')}
                 </DialogTitle>
               </DialogTitleWrapper>
               <DialogContent>
-                to CashAssist?
-                <DialogDescription>
-                  Are you sure you want to activate this Programme and push data
-                </DialogDescription>
                 <FormControl variant='filled' margin='dense'>
                   <InputLabel>Import from</InputLabel>
                   <ComboBox

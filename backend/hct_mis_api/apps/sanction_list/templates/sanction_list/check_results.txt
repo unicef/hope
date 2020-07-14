@@ -2,18 +2,15 @@ Date: {{ today_date }}
 File name: {{ file_name }}
 
 Found {{ results_count }} matching results.
-{% for individual in results %}
-    {{ forloop.counter }}. {{ individual.first_name }} {{ individual.second_name }}  {{ individual.third_name }}
-    {% if individual.date_of_birth %}
-        Date of birth: {{ individual.date_of_birth }}
-    {% elif individual.year_of_birth == individual.second_year_of_birth %}
-        Year of birth: {{ individual.year_of_birth }}
-    {% elif individual.year_of_birth != individual.second_year_of_birth %}
-        Year of birth between: {{ individual.year_of_birth }} - {{ individual.second_year_of_birth }}
-    {% else %}
-        Date of birth: Not Provided
+{% for row_number, individual in results.items %}
+    {{ individual.first_name }} {{ individual.second_name }}  {{ individual.third_name }} {{ individual.fourth_name }}
+    {% if individual.dates_of_birth.all %}
+        Possible dates of birth:
+        {% for dob in individual.dates_of_birth.all %}
+            <li>{{ dob.date }}</li>
+        {% endfor %}
     {% endif %}
-    Row number: {{ individual.row_number }}
+    Row number in original file: {{ row_number }}
 {% endfor %}
 
 This is an automated message. Results should be used ONLY to flag POTENTIAL matches to records in the UN Sanctions List.
