@@ -29,6 +29,15 @@ export const AllCashPlans = gql`
         node {
           id
           caId
+          verificationStatus
+          assistanceThrough
+          deliveryType
+          startDate
+          endDate
+          program {
+            id
+            name
+          }
           totalPersonsCovered
           dispersionDate
           assistanceMeasurement
@@ -36,6 +45,7 @@ export const AllCashPlans = gql`
           totalEntitledQuantity
           totalDeliveredQuantity
           totalUndeliveredQuantity
+          assistanceMeasurement
         }
       }
     }
