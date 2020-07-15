@@ -156,7 +156,7 @@ export function TargetPopulationFilters({
         value={filter.numIndividuals.max}
         variant='outlined'
         margin='dense'
-        placeholder='Individual Size'
+        placeholder='Household Size'
         onChange={(e) =>
           onFilterChange({
             ...filter,
