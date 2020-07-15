@@ -370,7 +370,8 @@ type HouseholdNode implements Node {
   programs(before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
   returnee: Boolean!
   flexFields: FlexFieldsScalar
-  registrationDate: Date
+  firstRegistrationDate: Date!
+  lastRegistrationDate: Date!
   headOfHousehold: IndividualNode!
   individuals(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
@@ -757,7 +758,8 @@ type ImportedHouseholdNode implements Node {
   maleAdultsDisabledCount: Int!
   headOfHousehold: ImportedIndividualNode
   registrationDataImport: RegistrationDataImportDatahubNode!
-  registrationDate: Date
+  firstRegistrationDate: Date!
+  lastRegistrationDate: Date!
   returnee: Boolean!
   flexFields: JSONString!
   individuals(before: String, after: String, first: Int, last: Int): ImportedIndividualNodeConnection!
@@ -813,6 +815,8 @@ type ImportedIndividualNode implements Node {
   registrationDataImport: RegistrationDataImportDatahubNode!
   disability: Boolean!
   workStatus: ImportedIndividualWorkStatus
+  firstRegistrationDate: Date!
+  lastRegistrationDate: Date!
   flexFields: JSONString!
   importedhousehold: ImportedHouseholdNode
   documents(before: String, after: String, first: Int, last: Int): ImportedDocumentNodeConnection!
@@ -873,6 +877,8 @@ type IndividualNode implements Node {
   registrationDataImport: RegistrationDataImportNode!
   disability: Boolean!
   workStatus: IndividualWorkStatus
+  firstRegistrationDate: Date!
+  lastRegistrationDate: Date!
   flexFields: FlexFieldsScalar
   enrolledInNutritionProgramme: Boolean!
   administrationOfRutf: Boolean!

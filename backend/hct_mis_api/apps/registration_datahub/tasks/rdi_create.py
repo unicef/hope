@@ -392,6 +392,10 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                         )
                     obj_to_create.flex_fields[header] = value
 
+            obj_to_create.last_registration_date = (
+                obj_to_create.first_registration_date
+            )
+
             if sheet_title == "households":
                 self.households[household_id] = obj_to_create
             else:
@@ -636,6 +640,9 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                                 household_obj
                             ] = individual_obj
 
+                        individual_obj.last_registration_date = (
+                            individual_obj.first_registration_date
+                        )
                         individual_obj.registration_data_import = (
                             registration_data_import
                         )
@@ -645,6 +652,9 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                             current_individual_docs_and_identities
                         )
 
+            household_obj.last_registration_date = (
+                household_obj.first_registration_date
+            )
             household_obj.registration_data_import = registration_data_import
             households_to_create.append(household_obj)
 
