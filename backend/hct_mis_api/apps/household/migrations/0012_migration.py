@@ -3,16 +3,6 @@
 from django.db import migrations
 
 
-def add_unicef_ids_for_old_households(apps, schema_editor):
-    Household = apps.get_model("household", "Household")
-    households = Household.objects.filter(unicef_id='')
-    for household in households:
-        household.unicef_id = (
-            f"HH-{household.country}-{household.unicef_id_index}"
-        )
-    Household.objects.bulk_update(households, ("unicef_id",))
-
-
 def reverse(apps, schema_editor):
     pass
 
@@ -24,19 +14,43 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunSQL(
+            "ALTER TABLE household_household ADD unicef_id_index SERIAL"
+        ),
+        migrations.RunSQL(
+            "ALTER TABLE household_individual ADD unicef_id_index SERIAL"
+        ),
+        migrations.RunSQL(
             """
         CREATE OR REPLACE FUNCTION create_hh_unicef_id() RETURNS trigger
             LANGUAGE plpgsql
             AS $$
         begin
-          NEW.unicef_id := format('HH-%s-%s',NEW.country , NEW.unicef_id_index);
+          NEW.unicef_id := format('HH-%s-%s',NEW.country,LPAD(format('%s',NEW.unicef_id_index),8,'0'));
           return NEW;
         end
         $$;
 
         CREATE TRIGGER create_hh_unicef_id BEFORE INSERT ON household_household FOR EACH ROW EXECUTE PROCEDURE create_hh_unicef_id();
         """,
-            "",
         ),
-        migrations.RunPython(add_unicef_ids_for_old_households, reverse),
+        migrations.RunSQL(
+            """
+        CREATE OR REPLACE FUNCTION create_ii_unicef_id() RETURNS trigger
+            LANGUAGE plpgsql
+            AS $$
+        begin
+          NEW.unicef_id := format('IND-%s-%s',TO_CHAR(NEW.first_registration_date, 'yy'), LPAD(format('%s',NEW.unicef_id_index),8,'0'));
+          return NEW;
+        end
+        $$;
+
+        CREATE TRIGGER create_ii_unicef_id BEFORE INSERT ON household_individual FOR EACH ROW EXECUTE PROCEDURE create_ii_unicef_id();
+        """,
+        ),
+        migrations.RunSQL(
+            "UPDATE household_household SET unicef_id = format('HH-%s-%s',country ,LPAD(format('%s',unicef_id_index),8,'0'))"
+        ),
+        migrations.RunSQL(
+            "UPDATE household_individual SET unicef_id = format('IND-%s-%s',TO_CHAR(first_registration_date, 'yy'), LPAD(format('%s',unicef_id_index),8,'0'))"
+        ),
     ]
