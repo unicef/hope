@@ -2,7 +2,7 @@ import { gql } from 'apollo-boost';
 
 export const AllCashPlans = gql`
   query AllCashPlans(
-    $program: ID!
+    $program: ID
     $after: String
     $before: String
     $first: Int
