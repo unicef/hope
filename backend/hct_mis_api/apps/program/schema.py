@@ -52,7 +52,10 @@ class CashPlanFilter(FilterSet):
             "assistance_through",
             "delivery_type",
             "start_date",
-            "end_date"
+            "end_date",
+            "total_delivered_quantity",
+            "total_entitled_quantity_revised",
+            "total_entitled_quantity"
         )
         model = CashPlan
 
