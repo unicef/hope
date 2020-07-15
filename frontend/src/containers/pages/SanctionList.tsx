@@ -9,7 +9,7 @@ import {
   SnackbarContent,
   Snackbar,
 } from '@material-ui/core';
-import { useCheckAgainstSanctionListMutation } from '../../__generated__/graphql';
+import { useCheckAgainstSanctionListUploadMutation } from '../../__generated__/graphql';
 import { DropzoneField } from '../../components/DropzoneField';
 import { PageHeader } from '../../components/PageHeader';
 
@@ -25,7 +25,7 @@ export function SanctionList(): React.ReactElement {
   const [
     checkAgainstSanctionMutate,
     { data: uploadData, loading: fileLoading },
-  ] = useCheckAgainstSanctionListMutation();
+  ] = useCheckAgainstSanctionListUploadMutation();
 
   const { t } = useTranslation();
 
