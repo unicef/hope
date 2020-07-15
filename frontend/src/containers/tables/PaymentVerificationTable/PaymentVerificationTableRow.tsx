@@ -1,11 +1,21 @@
 import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
 import { useHistory } from 'react-router-dom';
+import styled from 'styled-components';
+import Moment from 'react-moment';
 import { CashPlanNode } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
-import { decodeIdString } from '../../../utils/utils';
+import {
+  decodeIdString,
+  formatCurrency,
+  paymentVerificationStatusToColor,
+} from '../../../utils/utils';
+import { StatusBox } from '../../../components/StatusBox';
 
+const StatusContainer = styled.div`
+  width: 120px;
+`;
 interface PaymentVerificationTableRowProps {
   plan: CashPlanNode;
 }
@@ -13,28 +23,37 @@ interface PaymentVerificationTableRowProps {
 export function PaymentVerificationTableRow({ plan }) {
   const history = useHistory();
   const businessArea = useBusinessArea();
-  console.log(plan)
-  // const handleClick = (): void => {
-  //   const path = `/${businessArea}/population/household/${household.id}`;
-  //   // const win = window.open(path, '_blank');
-  //   // if (win != null) {
-  //   //   win.focus();
-  //   // }
-  // };
+
+  const handleClick = (): void => {
+    const path = `/${businessArea}/payment-verification/${plan.id}`;
+    history.push(path);
+  };
   return (
     <ClickableTableRow
       hover
-      // onClick={handleClick}
+      onClick={handleClick}
       role='checkbox'
-      // key={household.id}
+      key={plan.id}
     >
-      <TableCell align='left'>Cash plan id</TableCell>
-      <TableCell align='left'>verification status</TableCell>
-      <TableCell align='left'>fsp</TableCell>
-      <TableCell align='left'>modality</TableCell>
-      <TableCell align='left'>cash amount</TableCell>
-      <TableCell align='left'>timeframe</TableCell>
-      <TableCell align='left'>programme</TableCell>
+      <TableCell align='left'>{decodeIdString(plan.id)}</TableCell>
+      <TableCell align='left'>
+        <StatusContainer>
+          <StatusBox
+            status={plan.verificationStatus}
+            statusToColor={paymentVerificationStatusToColor}
+          />
+        </StatusContainer>
+      </TableCell>
+      <TableCell align='left'>{plan.assistanceThrough}</TableCell>
+      <TableCell align='left'>{plan.deliveryType}</TableCell>
+      <TableCell align='left'>
+        {formatCurrency(plan.totalDeliveredQuantity)}
+      </TableCell>
+      <TableCell align='left'>
+        <Moment format='DD/MM/YYYY'>{plan.startDate}</Moment>-
+        <Moment format='DD/MM/YYYY'>{plan.endDate}</Moment>
+      </TableCell>
+      <TableCell align='left'>{plan.program.name}</TableCell>
     </ClickableTableRow>
   );
 }

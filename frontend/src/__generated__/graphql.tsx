@@ -3104,7 +3104,7 @@ export type AllBusinessAreasQuery = (
 );
 
 export type AllCashPlansQueryVariables = {
-  program: Scalars['ID'],
+  program?: Maybe<Scalars['ID']>,
   after?: Maybe<Scalars['String']>,
   before?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -3126,7 +3126,11 @@ export type AllCashPlansQuery = (
       & Pick<CashPlanNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'CashPlanNode' }
-        & Pick<CashPlanNode, 'id' | 'caId' | 'totalPersonsCovered' | 'dispersionDate' | 'assistanceMeasurement' | 'status' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity'>
+        & Pick<CashPlanNode, 'id' | 'caId' | 'verificationStatus' | 'assistanceThrough' | 'deliveryType' | 'startDate' | 'endDate' | 'totalPersonsCovered' | 'dispersionDate' | 'assistanceMeasurement' | 'status' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity'>
+        & { program: (
+          { __typename?: 'ProgramNode' }
+          & Pick<ProgramNode, 'id' | 'name'>
+        ) }
       )> }
     )>> }
   )> }
@@ -5161,7 +5165,7 @@ export type AllBusinessAreasQueryHookResult = ReturnType<typeof useAllBusinessAr
 export type AllBusinessAreasLazyQueryHookResult = ReturnType<typeof useAllBusinessAreasLazyQuery>;
 export type AllBusinessAreasQueryResult = ApolloReactCommon.QueryResult<AllBusinessAreasQuery, AllBusinessAreasQueryVariables>;
 export const AllCashPlansDocument = gql`
-    query AllCashPlans($program: ID!, $after: String, $before: String, $first: Int, $last: Int, $orderBy: String) {
+    query AllCashPlans($program: ID, $after: String, $before: String, $first: Int, $last: Int, $orderBy: String) {
   allCashPlans(program: $program, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy) {
     pageInfo {
       hasNextPage
@@ -5175,6 +5179,15 @@ export const AllCashPlansDocument = gql`
       node {
         id
         caId
+        verificationStatus
+        assistanceThrough
+        deliveryType
+        startDate
+        endDate
+        program {
+          id
+          name
+        }
         totalPersonsCovered
         dispersionDate
         assistanceMeasurement
@@ -5182,12 +5195,13 @@ export const AllCashPlansDocument = gql`
         totalEntitledQuantity
         totalDeliveredQuantity
         totalUndeliveredQuantity
+        assistanceMeasurement
       }
     }
   }
 }
     `;
-export type AllCashPlansComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllCashPlansQuery, AllCashPlansQueryVariables>, 'query'> & ({ variables: AllCashPlansQueryVariables; skip?: boolean; } | { skip: boolean; });
+export type AllCashPlansComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllCashPlansQuery, AllCashPlansQueryVariables>, 'query'>;
 
     export const AllCashPlansComponent = (props: AllCashPlansComponentProps) => (
       <ApolloReactComponents.Query<AllCashPlansQuery, AllCashPlansQueryVariables> query={AllCashPlansDocument} {...props} />
