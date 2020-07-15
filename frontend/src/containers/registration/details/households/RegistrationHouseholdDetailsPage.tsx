@@ -60,7 +60,7 @@ export function RegistrationHouseholdDetailsPage(): React.ReactElement {
         />
         <RegistrationDetails
           hctId={importedHousehold.registrationDataImport.hctId}
-          registrationDate={moment(importedHousehold.registrationDate).format(
+          registrationDate={moment(importedHousehold.firstRegistrationDate).format(
             'DD MMM YYYY',
           )}
         />
