@@ -6,27 +6,28 @@ import { PaymentVerificationTableRow } from './PaymentVerificationTableRow';
 import {
   AllCashPlansQueryVariables,
   CashPlanNode,
-  ProgramNode,
   useAllCashPlansQuery,
 } from '../../../__generated__/graphql';
 
 interface PaymentVerificationTableProps {
-  program: ProgramNode;
+  filter;
 }
 export function PaymentVerificationTable({
-  program,
+  filter,
 }: PaymentVerificationTableProps): ReactElement {
-  // const initialVariables = {
-  //   program: program.id,
-  // };
-
+  const initialVariables: AllCashPlansQueryVariables = {
+    program: filter.program,
+    search: filter.search,
+    assistanceThrough: filter.assistanceThrough,
+    deliveryType: filter.deliveryType,
+  };
   return (
     <UniversalTable<CashPlanNode, AllCashPlansQueryVariables>
       title='List Of Cash Plans'
       headCells={headCells}
       query={useAllCashPlansQuery}
       queriedObjectName='allCashPlans'
-      initialVariables={null}
+      initialVariables={initialVariables}
       renderRow={(row) => (
         <PaymentVerificationTableRow key={row.id} plan={row} />
       )}
