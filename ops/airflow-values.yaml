@@ -363,7 +363,7 @@ web:
   ##
   ## Set AIRFLOW__WEBSERVER__BASE_URL
   ## Path should match Ingress configuration
-  baseUrl: "http://localhost:8080"
+  baseUrl: "http://dev-af.unitst.org"
   resources:
     {}
     # limits:
@@ -386,18 +386,20 @@ web:
   podAnnotations: {}
   ##
   initialStartupDelay: 60
-  initialDelaySeconds: 300
-  minReadySeconds: 120
+  initialDelaySeconds: 60
+  minReadySeconds: 30
   readinessProbe:
+    enabled: false
     scheme: HTTP
     periodSeconds: 60
-    timeoutSeconds: 1
+    timeoutSeconds: 20
     successThreshold: 1
     failureThreshold: 5
   livenessProbe:
+    enabled: false
     scheme: HTTP
     periodSeconds: 60
-    timeoutSeconds: 1
+    timeoutSeconds: 30
     successThreshold: 1
     failureThreshold: 5
 
@@ -510,7 +512,7 @@ ingress:
     ##  - Healthcheck is at 'http://mycompany.com/airflow/health'
     ##  - api is at 'http://mycompany.com/airflow/api'
     ## NOTE: do NOT keep trailing slash. For root configuration, set and empty string
-    path: "/"
+    path: ""
     ##
     ## Ingress hostname for the webserver
     host: "dev-af.unitst.org"
@@ -519,7 +521,10 @@ ingress:
     ## Airflow webserver handles relative path completely, just let your load balancer give the HTTP
     ## header like the requested URL (no special configuration neeed)
     annotations:
-      {}
+      {
+        kubernetes.io/ingress.class: "azure/application-gateway",
+        appgw.ingress.kubernetes.io/ssl-redirect: "true",
+      }
       ##
       ## Example for Traefik:
       # traefik.frontend.rule.type: PathPrefix
@@ -533,7 +538,7 @@ ingress:
       enabled: true
       ## If enabled, set "secretName" to the secret containing the TLS private key and certificate
       ## Example:
-      secretName: aks-unitst-tls
+      secretName: "aks-unitst-tls"
     precedingPaths:
       ## Different http paths to add to the ingress before the default path
       ## Example:
@@ -559,7 +564,7 @@ ingress:
     ## request to have been be at the root.
     ## That's why we need a reverse proxy/load balancer that is able to strip the path
     ## NOTE: do NOT keep trailing slash. For root configuration, set and empty string
-    path: ""
+    path: "/airflow/flower"
     ##
     ## Configure the liveness path. Keep to "/" for Flower >= jan 2018.
     ## For previous version, enter the same path than in the 'path' key
@@ -567,7 +572,7 @@ ingress:
     livenessPath: /
     ##
     ## hostname for flower
-    host: ""
+    host: "dev-af.unitst.org"
     ##
     ## Annotation for the Flower endpoint
     ##
