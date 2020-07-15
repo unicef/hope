@@ -495,7 +495,7 @@ ingress:
   ## enable ingress
   ## Note: If you want to change url prefix for web ui or flower even if you do not use ingress,
   ## you can change web.baseUrl and flower.urlPrefix
-  enabled: false
+  enabled: true
   ##
   ## Configure the Ingress webserver endpoint
   web:
@@ -510,10 +510,10 @@ ingress:
     ##  - Healthcheck is at 'http://mycompany.com/airflow/health'
     ##  - api is at 'http://mycompany.com/airflow/api'
     ## NOTE: do NOT keep trailing slash. For root configuration, set and empty string
-    path: ""
+    path: "/"
     ##
     ## Ingress hostname for the webserver
-    host: ""
+    host: "dev-af.unitst.org"
     ##
     ## Annotations for the webserver
     ## Airflow webserver handles relative path completely, just let your load balancer give the HTTP
@@ -530,10 +530,10 @@ ingress:
     livenessPath:
     tls:
       ## Set to "true" to enable TLS termination at the ingress
-      enabled: false
+      enabled: true
       ## If enabled, set "secretName" to the secret containing the TLS private key and certificate
       ## Example:
-      ## secretName: example-com-crt
+      secretName: aks-unitst-tls
     precedingPaths:
       ## Different http paths to add to the ingress before the default path
       ## Example:
