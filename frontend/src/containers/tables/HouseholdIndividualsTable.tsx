@@ -18,6 +18,7 @@ import {
   paymentRecordStatusToColor,
   sexToCapitalize,
 } from '../../utils/utils';
+import Moment from 'react-moment';
 
 const headCells: HeadCell<IndividualNode>[] = [
   {
@@ -137,7 +138,7 @@ export function HouseholdIndividualsTable({
             <TableCell align='left'>
               {relationshipChoicesDict[row.relationship]}
             </TableCell>
-            <TableCell align='left'>{row.birthDate || '-'}</TableCell>
+            <TableCell align='left'>{<Moment format='DD/MM/YYYY'>{row.birthDate}</Moment> || '-'}</TableCell>
             <TableCell align='left'>{sexToCapitalize(row.sex)}</TableCell>
           </ClickableTableRow>
         );

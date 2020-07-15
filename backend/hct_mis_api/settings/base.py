@@ -89,6 +89,10 @@ ENV = os.getenv("ENV")
 if not ENV:
     raise Exception("Environment variable ENV is required!")
 
+# prefix all non-production emails
+if ENV != "prod":
+    EMAIL_SUBJECT_PREFIX = '{}'.format(ENV)
+
 DATABASES = {
     "default": {
         "ENGINE": "django.contrib.gis.db.backends.postgis",
@@ -286,11 +290,6 @@ LOGGING = {
             "class": "logging.StreamHandler",
             "formatter": "standard",
         },
-        "mail_admins": {
-            "level": "ERROR",
-            "class": "django.utils.log.AdminEmailHandler",
-            "include_html": True,
-        },
     },
     "loggers": {
         "": {"handlers": ["default"], "level": "INFO", "propagate": True},
@@ -300,7 +299,7 @@ LOGGING = {
             "propagate": True,
         },
         "django.request": {
-            "handlers": ["mail_admins", "default"],
+            "handlers": ["default"],
             "level": "ERROR",
             "propagate": False,
         },
@@ -396,8 +395,4 @@ PHONENUMBER_DEFAULT_REGION = "US"
 AIRFLOW_HOST = "airflow_webserver"
 
 # ELASTICSEARCH SETTINGS
-ELASTICSEARCH_DSL = {
-    'default': {
-        'hosts': 'elasticsearch:9200'
-    },
-}
+ELASTICSEARCH_DSL_AUTOSYNC = False

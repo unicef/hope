@@ -108,15 +108,15 @@ IDENTIFICATION_TYPE_DICT = {
     IDENTIFICATION_TYPE_OTHER: "Other",
 }
 INDIVIDUAL_HOUSEHOLD_STATUS = (("ACTIVE", "Active"), ("INACTIVE", "Inactive"))
+models.AutoField
+
 
 class SerialField(models.IntegerField):
     def db_type(self, connection):
-        return 'Serial'
+        return "Serial"
 
-
-
-
-
+    def validate(self, value, model_instance):
+        pass
 
 
 class Household(TimeStampedUUIDModel, AbstractSyncable):
@@ -169,7 +169,8 @@ class Household(TimeStampedUUIDModel, AbstractSyncable):
     )
     returnee = models.BooleanField(default=False, null=True)
     flex_fields = JSONField(default=dict)
-    registration_date = models.DateField(null=True)
+    first_registration_date = models.DateField()
+    last_registration_date = models.DateField()
     head_of_household = models.OneToOneField(
         "Individual",
         related_name="heading_household",
@@ -307,6 +308,8 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
         blank=True,
         default=NOT_PROVIDED,
     )
+    first_registration_date = models.DateField()
+    last_registration_date = models.DateField()
     flex_fields = JSONField(default=dict)
     enrolled_in_nutrition_programme = models.BooleanField(default=False)
     administration_of_rutf = models.BooleanField(default=False)
