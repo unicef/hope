@@ -35,7 +35,7 @@ export function ImportedHouseholdTableRow({
       <TableCell align='right'>{household.size}</TableCell>
       <TableCell align='left'>{household.admin1}</TableCell>
       <TableCell align='left'>
-        {moment(household.registrationDate).format('DD MMM YYYY')}
+        {moment(household.firstRegistrationDate).format('DD MMM YYYY')}
       </TableCell>
     </ClickableTableRow>
   );
