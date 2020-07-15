@@ -1,17 +1,21 @@
 import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { PageHeader } from '../../components/PageHeader';
-import { HouseholdFilters } from '../../components/population/HouseholdFilter';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { HouseholdTable } from '../tables/HouseholdTable';
 import {
+  AllCashPlansQueryVariables,
+  CashPlanNode,
   ProgramNode,
   useAllProgramsQuery,
-  useHouseholdChoiceDataQuery,
+  useAllCashPlansQuery,
+  useProgramQuery,
+  useProgrammeChoiceDataQuery,
 } from '../../__generated__/graphql';
 import { useDebounce } from '../../hooks/useDebounce';
 import { PaymentVerificationTable } from '../tables/PaymentVerificationTable';
 import { PaymentFilters } from '../tables/PaymentVerificationTable/PaymentFilters';
+import { LoadingComponent } from '../../components/LoadingComponent';
 
 const Container = styled.div`
   display: flex;
@@ -20,40 +24,33 @@ const Container = styled.div`
 `;
 
 export function PaymentVerificationPage(): React.ReactElement {
-  const [filter, setFilter] = useState({
-    householdSize: { min: undefined, max: undefined },
-  });
-  const debouncedFilter = useDebounce(filter, 500);
-  const businessArea = useBusinessArea();
-  const { data, loading } = useAllProgramsQuery({
-    variables: { businessArea },
+  const { id } = useParams();
+  const { data, loading } = useProgramQuery({
+    variables: { id },
   });
   const {
-    data: choicesData,
+    data: choices,
     loading: choicesLoading,
-  } = useHouseholdChoiceDataQuery({
-    variables: { businessArea },
-  });
-  if (loading || choicesLoading) return null;
-
-  const { allPrograms } = data;
-  const programs = allPrograms.edges.map((edge) => edge.node);
+  } = useProgrammeChoiceDataQuery();
+  // if (loading || choicesLoading) {
+  //   return <LoadingComponent />;
+  // }
+  // if (!data || !choices) {
+  //   return null;
+  // }
+  // const program = data.program as ProgramNode;
 
   return (
     <div>
       <PageHeader title='Payment Verification' />
-      <PaymentFilters
+      {/* <PaymentFilters
         programs={programs as ProgramNode[]}
         filter={filter}
         onFilterChange={setFilter}
         choicesData={choicesData}
-      />
+      /> */}
       <Container data-cy='page-details-container'>
-        {/* <PaymentVerificationTable
-          filter={debouncedFilter}
-          // businessArea={businessArea}
-          // choicesData={choicesData}
-        /> */}
+        <PaymentVerificationTable program={null} />
       </Container>
     </div>
   );

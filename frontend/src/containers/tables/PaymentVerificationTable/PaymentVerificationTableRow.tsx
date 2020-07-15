@@ -1,19 +1,19 @@
 import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
 import { useHistory } from 'react-router-dom';
-import { HouseholdNode } from '../../../__generated__/graphql';
+import { CashPlanNode } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
 import { decodeIdString } from '../../../utils/utils';
 
 interface PaymentVerificationTableRowProps {
-  plan: HouseholdNode;
+  plan: CashPlanNode;
 }
 
 export function PaymentVerificationTableRow({ plan }) {
   const history = useHistory();
   const businessArea = useBusinessArea();
-
+  console.log(plan)
   // const handleClick = (): void => {
   //   const path = `/${businessArea}/population/household/${household.id}`;
   //   // const win = window.open(path, '_blank');
