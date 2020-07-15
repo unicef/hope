@@ -77,7 +77,7 @@ class SendTPToDatahubTask:
         target_population_selections = HouseholdSelection.objects.filter(
             target_population__id=target_population.id, final=True
         )
-        households = target_population.households.filter(
+        households = target_population.final_list.filter(
             Q(last_sync_at__isnull=True) | Q(last_sync_at__lte=F("updated_at"))
         )
         # individuals = Individual.objects.filter(
