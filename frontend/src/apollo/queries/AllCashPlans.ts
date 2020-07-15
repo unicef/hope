@@ -8,6 +8,9 @@ export const AllCashPlans = gql`
     $first: Int
     $last: Int
     $orderBy: String
+    $search: String
+    $assistanceThrough: String
+    $deliveryType: String
   ) {
     allCashPlans(
       program: $program
@@ -16,6 +19,9 @@ export const AllCashPlans = gql`
       first: $first
       last: $last
       orderBy: $orderBy
+      search: $search
+      assistanceThrough: $assistanceThrough
+      deliveryType: $deliveryType
     ) {
       pageInfo {
         hasNextPage
