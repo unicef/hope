@@ -51,6 +51,8 @@ class CashPlanFilter(FilterSet):
             "verification_status",
             "assistance_through",
             "delivery_type",
+            "start_date",
+            "end_date"
         )
         model = CashPlan
 
