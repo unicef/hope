@@ -22,13 +22,15 @@ If you lack access to any links below, please contact [**Brandin Lewis**](introd
 
 ### Technical / product related
 
-* \*\*\*\*[**Github** **Repo**](https://github.com/unicef/hct-mis) 
+* \*\*\*\*[**Github Repo**](https://github.com/unicef/hct-mis) ****
 * \*\*\*\*[**Develop Environment**](https://dev-hct.unitst.org/)\*\*\*\*
-* \*\*\*\*[**Staging Environment**](https://stg-hct.unitst.org/) 
+  * **Kobo:** [https://kf-hope.unitst.org](https://kf-hope.unitst.org)
+* \*\*\*\*[**Staging Environment**](https://stg-hct.unitst.org/) ****
+  * **Kobo:** 
 * _**UAT Environment**_
-* _**Production** **Environment**_
+* _**Production Environment**_
 * \*\*\*\*[**Azure DevOps**](https://unicef.visualstudio.com/ICTD-HCT%20IMS)\*\*\*\*
-  * _Clubhouse \(deprecated / do not use\):_ [_https://app.clubhouse.io/hct-mis/projects_](https://app.clubhouse.io/hct-mis/projects)\_\_
+  * _**Clubhouse \(deprecated / do not use\):**_ [_**https://app.clubhouse.io/hct-mis/projects**_](https://app.clubhouse.io/hct-mis/projects)_\*\*\*\*_
 
 
 
