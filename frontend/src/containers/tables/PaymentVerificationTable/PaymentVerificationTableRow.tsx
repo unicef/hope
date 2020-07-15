@@ -46,7 +46,7 @@ export function PaymentVerificationTableRow({ plan }) {
       </TableCell>
       <TableCell align='left'>{plan.assistanceThrough}</TableCell>
       <TableCell align='left'>{plan.deliveryType}</TableCell>
-      <TableCell align='left'>
+      <TableCell align='right'>
         {formatCurrency(plan.totalDeliveredQuantity)}
       </TableCell>
       <TableCell align='left'>
