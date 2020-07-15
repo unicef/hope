@@ -550,7 +550,8 @@ export type HouseholdNode = Node & {
   programs: ProgramNodeConnection,
   returnee: Scalars['Boolean'],
   flexFields?: Maybe<Scalars['FlexFieldsScalar']>,
-  registrationDate?: Maybe<Scalars['Date']>,
+  firstRegistrationDate: Scalars['Date'],
+  lastRegistrationDate: Scalars['Date'],
   headOfHousehold: IndividualNode,
   individuals: IndividualNodeConnection,
   paymentRecords: PaymentRecordNodeConnection,
@@ -1005,7 +1006,8 @@ export type ImportedHouseholdNode = Node & {
   maleAdultsDisabledCount: Scalars['Int'],
   headOfHousehold?: Maybe<ImportedIndividualNode>,
   registrationDataImport: RegistrationDataImportDatahubNode,
-  registrationDate?: Maybe<Scalars['Date']>,
+  firstRegistrationDate: Scalars['Date'],
+  lastRegistrationDate: Scalars['Date'],
   returnee: Scalars['Boolean'],
   flexFields: Scalars['JSONString'],
   individuals: ImportedIndividualNodeConnection,
@@ -1072,6 +1074,8 @@ export type ImportedIndividualNode = Node & {
   registrationDataImport: RegistrationDataImportDatahubNode,
   disability: Scalars['Boolean'],
   workStatus?: Maybe<ImportedIndividualWorkStatus>,
+  firstRegistrationDate: Scalars['Date'],
+  lastRegistrationDate: Scalars['Date'],
   flexFields: Scalars['JSONString'],
   importedhousehold?: Maybe<ImportedHouseholdNode>,
   documents: ImportedDocumentNodeConnection,
@@ -1143,6 +1147,8 @@ export type IndividualNode = Node & {
   registrationDataImport: RegistrationDataImportNode,
   disability: Scalars['Boolean'],
   workStatus?: Maybe<IndividualWorkStatus>,
+  firstRegistrationDate: Scalars['Date'],
+  lastRegistrationDate: Scalars['Date'],
   flexFields?: Maybe<Scalars['FlexFieldsScalar']>,
   enrolledInNutritionProgramme: Scalars['Boolean'],
   administrationOfRutf: Scalars['Boolean'],
@@ -2598,7 +2604,7 @@ export type XlsxRowErrorNode = {
 
 export type HouseholdMinimalFragment = (
   { __typename?: 'HouseholdNode' }
-  & Pick<HouseholdNode, 'id' | 'createdAt' | 'residenceStatus' | 'size' | 'totalCashReceived' | 'registrationDate' | 'address'>
+  & Pick<HouseholdNode, 'id' | 'createdAt' | 'residenceStatus' | 'size' | 'totalCashReceived' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'address'>
   & { headOfHousehold: (
     { __typename?: 'IndividualNode' }
     & Pick<IndividualNode, 'id' | 'fullName'>
@@ -3830,7 +3836,7 @@ export type RegistrationDetailedFragment = (
 
 export type ImportedHouseholdMinimalFragment = (
   { __typename?: 'ImportedHouseholdNode' }
-  & Pick<ImportedHouseholdNode, 'id' | 'size' | 'admin1' | 'admin2' | 'registrationDate'>
+  & Pick<ImportedHouseholdNode, 'id' | 'size' | 'admin1' | 'admin2' | 'firstRegistrationDate' | 'lastRegistrationDate'>
   & { headOfHousehold: Maybe<(
     { __typename?: 'ImportedIndividualNode' }
     & Pick<ImportedIndividualNode, 'id' | 'fullName'>
@@ -4053,7 +4059,8 @@ export const HouseholdMinimalFragmentDoc = gql`
   residenceStatus
   size
   totalCashReceived
-  registrationDate
+  firstRegistrationDate
+  lastRegistrationDate
   headOfHousehold {
     id
     fullName
@@ -4203,7 +4210,8 @@ export const ImportedHouseholdMinimalFragmentDoc = gql`
   size
   admin1
   admin2
-  registrationDate
+  firstRegistrationDate
+  lastRegistrationDate
 }
     `;
 export const ImportedHouseholdDetailedFragmentDoc = gql`
@@ -8268,7 +8276,8 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   programs?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, HouseholdNodeProgramsArgs>,
   returnee?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   flexFields?: Resolver<Maybe<ResolversTypes['FlexFieldsScalar']>, ParentType, ContextType>,
-  registrationDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
+  firstRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
+  lastRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   headOfHousehold?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, HouseholdNodeIndividualsArgs>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, HouseholdNodePaymentRecordsArgs>,
@@ -8376,7 +8385,8 @@ export type ImportedHouseholdNodeResolvers<ContextType = any, ParentType extends
   maleAdultsDisabledCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   headOfHousehold?: Resolver<Maybe<ResolversTypes['ImportedIndividualNode']>, ParentType, ContextType>,
   registrationDataImport?: Resolver<ResolversTypes['RegistrationDataImportDatahubNode'], ParentType, ContextType>,
-  registrationDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
+  firstRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
+  lastRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   returnee?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   flexFields?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   individuals?: Resolver<ResolversTypes['ImportedIndividualNodeConnection'], ParentType, ContextType, ImportedHouseholdNodeIndividualsArgs>,
@@ -8416,6 +8426,8 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   registrationDataImport?: Resolver<ResolversTypes['RegistrationDataImportDatahubNode'], ParentType, ContextType>,
   disability?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   workStatus?: Resolver<Maybe<ResolversTypes['ImportedIndividualWorkStatus']>, ParentType, ContextType>,
+  firstRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
+  lastRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   flexFields?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   importedhousehold?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['ImportedDocumentNodeConnection'], ParentType, ContextType, ImportedIndividualNodeDocumentsArgs>,
@@ -8457,6 +8469,8 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   registrationDataImport?: Resolver<ResolversTypes['RegistrationDataImportNode'], ParentType, ContextType>,
   disability?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   workStatus?: Resolver<Maybe<ResolversTypes['IndividualWorkStatus']>, ParentType, ContextType>,
+  firstRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
+  lastRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   flexFields?: Resolver<Maybe<ResolversTypes['FlexFieldsScalar']>, ParentType, ContextType>,
   enrolledInNutritionProgramme?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   administrationOfRutf?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
