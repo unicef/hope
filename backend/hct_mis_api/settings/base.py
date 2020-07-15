@@ -89,6 +89,10 @@ ENV = os.getenv("ENV")
 if not ENV:
     raise Exception("Environment variable ENV is required!")
 
+# prefix all non-production emails
+if ENV != "prod":
+    EMAIL_SUBJECT_PREFIX = '{}'.format(ENV)
+
 DATABASES = {
     "default": {
         "ENGINE": "django.contrib.gis.db.backends.postgis",

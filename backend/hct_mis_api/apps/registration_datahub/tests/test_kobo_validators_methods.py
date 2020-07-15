@@ -17,6 +17,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
             "_bamboo_dataset_id": "",
             "_tags": [],
             "health_questions/pregnant_member_h_c": "0",
+            "household_questions/first_registration_date_h_c": "2020-07-18",
             "household_questions/f_0_5_disability_h_c": "0",
             "household_questions/size_h_c": "1",
             "monthly_expenditures_questions/total_expense_h_f": "0",
@@ -24,6 +25,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 {
                     "individual_questions/role_i_c": "primary",
                     "individual_questions/age": "40",
+                    "individual_questions/first_registration_date_i_c": "2020-07-18",
                     "individual_questions/more_information/marital_status_i_c": "married",
                     "individual_questions/individual_index": "1",
                     "individual_questions/birth_date_i_c": "1980-07-18",
@@ -635,6 +637,22 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 "message": "Missing household required field f_pregnant_h_c",
             },
             {
+                "header": "first_registration_date_h_c",
+                "message": "Missing household required field first_registration_date_h_c",
+            },
+            {
+                "header": "first_registration_date_i_c",
+                "message": "Missing individual required field first_registration_date_i_c",
+            },
+            {
+                "header": "first_registration_date_i_c",
+                "message": "Missing individual required field first_registration_date_i_c",
+            },
+            {
+                "header": "first_registration_date_i_c",
+                "message": "Missing individual required field first_registration_date_i_c",
+            },
+            {
                 "header": "m_0_5_age_group_h_c",
                 "message": "Missing household required field m_0_5_age_group_h_c",
             },
@@ -673,6 +691,18 @@ class TestKoboSaveValidatorsMethods(TestCase):
             {
                 "header": "size_h_c",
                 "message": "Missing household required field size_h_c",
+            },
+            {
+                "header": "work_status_i_c",
+                "message": "Invalid choice 0 for field work_status_i_c",
+            },
+            {
+                "header": "work_status_i_c",
+                "message": "Invalid choice 0 for field work_status_i_c",
+            },
+            {
+                "header": "work_status_i_c",
+                "message": "Invalid choice 0 for field work_status_i_c",
             },
         ]
 
