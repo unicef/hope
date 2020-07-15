@@ -35,7 +35,7 @@ export const headCells: HeadCell<CashPlanNode>[] = [
   {
     disablePadding: false,
     label: 'Timeframe',
-    id: 'timeframe',
+    id: 'startDate',
     numeric: false,
   },
   {
