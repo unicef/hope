@@ -6,12 +6,15 @@ from utils.models import TimeStampedUUIDModel
 
 
 class RegistrationDataImport(TimeStampedUUIDModel):
+    IMPORTING = "IMPORTING"
+    IN_REVIEW = "IN_REVIEW"
+    MERGING = "MERGING"
+    MERGED = "MERGED"
     STATUS_CHOICE = (
-        ("IN_REVIEW", _("In Review")),
-        ("APPROVED", _("Approved")),
-        ("MERGED", _("Merged")),
-        ("MERGING", _("Merging")),
-        ("IMPORTING", _("Importing")),
+        (IN_REVIEW, _("In Review")),
+        (MERGED, _("Merged")),
+        (MERGING, _("Merging")),
+        (IMPORTING, _("Importing")),
     )
     DATA_SOURCE_CHOICE = (
         ("XLS", "Excel"),
@@ -19,7 +22,7 @@ class RegistrationDataImport(TimeStampedUUIDModel):
     )
     name = models.CharField(max_length=255, unique=True)
     status = models.CharField(
-        max_length=255, choices=STATUS_CHOICE, default="IN_REVIEW",
+        max_length=255, choices=STATUS_CHOICE, default=IN_REVIEW,
     )
     import_date = models.DateTimeField(auto_now_add=True)
     imported_by = models.ForeignKey(
