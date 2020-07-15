@@ -7,8 +7,6 @@ import {
 import { PageHeader } from '../../../components/PageHeader';
 import { BreadCrumbsItem } from '../../../components/BreadCrumbs';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { ApproveRegistrationDataImportDialog } from './ApproveRegistrationDataImportDialog';
-import { UnapproveRegistrationDataImportDialog } from './UnapproveRegistrationDataImportDialog';
 import { MergeRegistrationDataImportDialog } from './MergeRegistrationDataImportDialog';
 
 export interface RegistrationDataImportDetailsPageHeaderPropTypes {
@@ -27,13 +25,7 @@ export function RegistrationDataImportDetailsPageHeader({
   switch (registration.status) {
     case RegistrationDataImportStatus.InReview:
       buttons = (
-        <ApproveRegistrationDataImportDialog registration={registration} />
-      );
-      break;
-    case RegistrationDataImportStatus.Approved:
-      buttons = (
         <div>
-          <UnapproveRegistrationDataImportDialog registration={registration} />
           <MergeButtonContainer>
             <MergeRegistrationDataImportDialog registration={registration} />
           </MergeButtonContainer>
