@@ -69,7 +69,10 @@ class HouseholdFactory(factory.DjangoModelFactory):
     registration_data_import = factory.SubFactory(
         RegistrationDataImportFactory,
     )
-    registration_date = factory.Faker(
+    first_registration_date = factory.Faker(
+        "date_this_year", before_today=True, after_today=False
+    )
+    last_registration_date = factory.Faker(
         "date_this_year", before_today=True, after_today=False
     )
     flex_fields = factory.LazyAttribute(flex_field_households)
@@ -111,6 +114,12 @@ class IndividualFactory(factory.DjangoModelFactory):
     registration_data_import = factory.SubFactory(RegistrationDataImportFactory)
     disability = factory.fuzzy.FuzzyChoice([True, False])
     flex_fields = factory.LazyAttribute(flex_field_individual)
+    first_registration_date = factory.Faker(
+        "date_this_year", before_today=True, after_today=False
+    )
+    last_registration_date = factory.Faker(
+        "date_this_year", before_today=True, after_today=False
+    )
 
 
 class EntitlementCardFactory(factory.DjangoModelFactory):
