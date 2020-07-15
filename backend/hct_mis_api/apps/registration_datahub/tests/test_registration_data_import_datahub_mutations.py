@@ -1,5 +1,4 @@
 import io
-import unittest
 
 from PIL import Image
 from django.conf import settings
@@ -11,12 +10,6 @@ from django.core.management import call_command
 
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
-from registration_data.fixtures import RegistrationDataImportFactory
-from registration_datahub.fixtures import (
-    ImportedIndividualFactory,
-    ImportedHouseholdFactory,
-    RegistrationDataImportDatahubFactory,
-)
 from registration_datahub.models import ImportData
 
 
