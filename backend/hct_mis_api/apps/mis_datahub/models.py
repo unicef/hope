@@ -3,6 +3,7 @@ import uuid
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django_countries.fields import CountryField
+from model_utils import Choices
 
 from household.models import (
     RELATIONSHIP_CHOICE,
@@ -27,6 +28,7 @@ class SessionModel(models.Model):
 class Household(SessionModel):
     mis_id = models.UUIDField()
     unhcr_id = models.CharField(max_length=255, null=True)
+    unicef_id = models.CharField(max_length=255, null=True)
     status = models.CharField(
         max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default="ACTIVE"
     )
@@ -49,6 +51,7 @@ class Household(SessionModel):
 class Individual(SessionModel):
     mis_id = models.UUIDField()
     unhcr_id = models.CharField(max_length=255, null=True)
+    unicef_id = models.CharField(max_length=255, null=True)
     household_mis_id = models.UUIDField()
     status = models.CharField(
         max_length=50,
@@ -142,3 +145,37 @@ class Program(SessionModel):
     description = models.CharField(max_length=255, null=True)
     class Meta:
         unique_together = ("session", "mis_id")
+
+
+class Document(SessionModel):
+    STATUS_CHOICE = Choices(
+        ("VALID", _("Valid")),
+        ("COLLECTED", _("Collected")),
+        ("LOST", _("Lost")),
+        ("UNKNOWN", _("Unknown")),
+        ("CANCELED", _("Canceled")),
+        ("EXPIRED", _("Expired")),
+        ("HOLD", _("Hold")),
+        ("DAMAGED", _("Damaged"))
+    )
+    mis_id = models.UUIDField()
+    number = models.CharField(max_length=255, null=True)
+    status = models.CharField(choices=STATUS_CHOICE, null=True)
+    # document_type =
+    date_of_expiry = models.DateField()
+    photo = models.ImageField(blank=True)
+    individual_mis_id = models.UUIDField(null=True)
+
+    # type = models.ForeignKey(
+    #     "DocumentType", related_name="documents", on_delete=models.CASCADE
+    # )
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+
+        for validator in self.type.validators:
+            if not re.match(validator.regex, self.document_number):
+                raise ValidationError("Document number is not validating")
+
+    class Meta:
+        unique_together = ("type", "document_number")

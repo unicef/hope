@@ -40,6 +40,7 @@ class BusinessArea(TimeStampedUUIDModel):
     rapid_pro_host = models.URLField(null=True)
     rapid_pro_api_key = models.CharField(max_length=32, null=True)
     slug = models.CharField(max_length=250, unique=True, db_index=True,)
+    has_data_sharing_agreement = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         unique_slugify(self, self.name, slug_field_name="slug")
