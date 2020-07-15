@@ -106,7 +106,7 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel):
     )
     SAMPLING_CHOICES = (
         (SAMPLING_FULL_LIST, "Full list"),
-        (SAMPLING_RANDOM, "Draft"),
+        (SAMPLING_RANDOM, "Random sampling"),
     )
     VERIFICATION_METHOD_CHOICES = (
         (VERIFICATION_METHOD_RAPIDPRO, "RAPIDPRO"),
