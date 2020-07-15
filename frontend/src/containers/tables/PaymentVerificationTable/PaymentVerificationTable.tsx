@@ -1,46 +1,35 @@
 import React, { ReactElement } from 'react';
 import styled from 'styled-components';
 import { UniversalTable } from '../UniversalTable';
-import { headCells } from './PaymentVerificationHeadCells'
+import { headCells } from './PaymentVerificationHeadCells';
 import { PaymentVerificationTableRow } from './PaymentVerificationTableRow';
+import {
+  AllCashPlansQueryVariables,
+  CashPlanNode,
+  ProgramNode,
+  useAllCashPlansQuery,
+} from '../../../__generated__/graphql';
 
-const TableWrapper = styled.div`
-  padding: 20px;
-`;
-
-interface PaymentVerificationProps {
-  id?: string;
-  query?;
-  queryObjectName?;
-  variables?;
-  filter;
+interface PaymentVerificationTableProps {
+  program: ProgramNode;
 }
+export function PaymentVerificationTable({
+  program,
+}: PaymentVerificationTableProps): ReactElement {
+  // const initialVariables = {
+  //   program: program.id,
+  // };
 
-export const PaymentVerificationTable = ({
-  id,
-  query,
-  queryObjectName,
-  variables,
-  filter
-}: PaymentVerificationProps): ReactElement => {
-  const initialVariables = {
-    ...(id && { targetPopulation: id }),
-    ...variables,
-    name: filter.name
-  };
   return (
-    <TableWrapper>
-      <UniversalTable
-        title='List of Cash Plans'
-        headCells={headCells}
-        rowsPerPageOptions={[10, 15, 20]}
-        query={query}
-        queriedObjectName={queryObjectName}
-        initialVariables={initialVariables}
-        renderRow={(row) => (
-          <PaymentVerificationTableRow plan={row} />
-        )}
-      />
-    </TableWrapper>
+    <UniversalTable<CashPlanNode, AllCashPlansQueryVariables>
+      title='List Of Cash Plans'
+      headCells={headCells}
+      query={useAllCashPlansQuery}
+      queriedObjectName='allCashPlans'
+      initialVariables={null}
+      renderRow={(row) => (
+        <PaymentVerificationTableRow key={row.id} plan={row} />
+      )}
+    />
   );
-};
+}
