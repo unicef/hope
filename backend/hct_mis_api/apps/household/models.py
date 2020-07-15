@@ -3,6 +3,7 @@ from datetime import date
 
 from django.contrib.gis.db.models import PointField
 from django.contrib.postgres.fields import JSONField
+from django.core import exceptions
 from django.core.validators import (
     validate_image_file_extension,
     MinLengthValidator,
@@ -108,15 +109,6 @@ IDENTIFICATION_TYPE_DICT = {
     IDENTIFICATION_TYPE_OTHER: "Other",
 }
 INDIVIDUAL_HOUSEHOLD_STATUS = (("ACTIVE", "Active"), ("INACTIVE", "Inactive"))
-models.AutoField
-
-
-class SerialField(models.IntegerField):
-    def db_type(self, connection):
-        return "Serial"
-
-    def validate(self, value, model_instance):
-        pass
 
 
 class Household(TimeStampedUUIDModel, AbstractSyncable):
@@ -177,7 +169,6 @@ class Household(TimeStampedUUIDModel, AbstractSyncable):
         on_delete=models.CASCADE,
     )
     unicef_id = models.CharField(max_length=250, blank=True)
-    unicef_id_index = SerialField()
 
     @property
     def total_cash_received(self):
@@ -314,7 +305,6 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
     enrolled_in_nutrition_programme = models.BooleanField(default=False)
     administration_of_rutf = models.BooleanField(default=False)
     unicef_id = models.CharField(max_length=250, blank=True)
-    unicef_id_index = SerialField()
 
     @property
     def age(self):
