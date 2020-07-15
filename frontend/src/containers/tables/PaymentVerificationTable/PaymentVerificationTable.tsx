@@ -20,6 +20,7 @@ export function PaymentVerificationTable({
     search: filter.search,
     assistanceThrough: filter.assistanceThrough,
     deliveryType: filter.deliveryType,
+    verificationStatus: filter.verificationStatus,
   };
   return (
     <UniversalTable<CashPlanNode, AllCashPlansQueryVariables>
