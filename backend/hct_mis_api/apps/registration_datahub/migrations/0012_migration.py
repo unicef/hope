@@ -7,36 +7,36 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('household', '0009_migration'),
+        ('registration_datahub', '0011_migration'),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='household',
+            model_name='importedhousehold',
             name='registration_date',
         ),
         migrations.AddField(
-            model_name='household',
+            model_name='importedhousehold',
             name='first_registration_date',
-            field=models.DateField(default=datetime.datetime(2020, 7, 14, 13, 42, 33, 98340)),
+            field=models.DateField(default=datetime.datetime(2020, 7, 14, 13, 43, 3, 630869)),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='household',
+            model_name='importedhousehold',
             name='last_registration_date',
-            field=models.DateField(default=datetime.datetime(2020, 7, 14, 13, 42, 42, 836944)),
+            field=models.DateField(default=datetime.datetime(2020, 7, 14, 13, 43, 10, 2224)),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='individual',
+            model_name='importedindividual',
             name='first_registration_date',
-            field=models.DateField(default=datetime.datetime(2020, 7, 14, 13, 42, 49, 586301)),
+            field=models.DateField(default=datetime.datetime(2020, 7, 14, 13, 43, 16, 947)),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='individual',
+            model_name='importedindividual',
             name='last_registration_date',
-            field=models.DateField(default=datetime.datetime(2020, 7, 14, 13, 42, 54, 763979)),
+            field=models.DateField(default=datetime.datetime(2020, 7, 14, 13, 43, 21, 163324)),
             preserve_default=False,
         ),
     ]
