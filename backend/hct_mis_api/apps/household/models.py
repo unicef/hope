@@ -175,6 +175,10 @@ class Household(TimeStampedUUIDModel, AbstractSyncable):
             .get("delivered_quantity__sum")
         )
 
+    @property
+    def business_area(self):
+        return self.admin_area.admin.admin_area_type.business_area
+
     def __str__(self):
         return f"Household ID: {self.id}"
 

@@ -31,16 +31,18 @@ class SendTPToDatahubTask:
 
     MAPPING_HOUSEHOLD_DICT = {
         "mis_id": "id",
+        "unicef_id": "unicef_id",
         "status": "status",
         "household_size": "size",
         "address": "address",
         "admin1": "admin_area.title",
         "admin2": "admin_area.parent.title",
         "residence_status": "residence_status",
-        "registration_date": "registration_date",
+        "registration_date": "registration_date"
     }
     MAPPING_INDIVIDUAL_DICT = {
         "mis_id": "id",
+        "unicef_id": "unicef_id",
         "status": "status",
         "full_name": "full_name",
         "family_name": "family_name",
@@ -53,7 +55,7 @@ class SendTPToDatahubTask:
         "role": "role",
         "marital_status": "marital_status",
         "phone_number": "phone_number",
-        "household_mis_id": "household.id",
+        "household_mis_id": "household.id"
     }
 
     def execute(self):
@@ -102,7 +104,13 @@ class SendTPToDatahubTask:
         dh_target = self.send_target_population(target_population)
         dh_target.session = dh_session
         dh_target.save()
+
         for household in households:
+            # if data sharing is true and unhcr id is set then don't push household
+            # https://unicef.visualstudio.com/ICTD-HCT-MIS/_workitems/edit/64344
+            if target_population.business_area.has_data_sharing_agreement and self.get_unhcr_household_id(household):
+                continue
+
             (dh_household, dh_individuals) = self.send_household(
                 household, dh_session
             )
@@ -167,54 +175,60 @@ class SendTPToDatahubTask:
         )
         dh_household = dh_mis_models.Household(**dh_household_args)
         dh_household.country = household.country.alpha3
-        households_identity = household.identities.filter(
-            agency__type="unhcr"
-        ).first()
-        if households_identity is not None:
-            dh_household.agency_id = households_identity.document_number
+        dh_household.unhcr_id = self.get_unhcr_household_id(household)
 
-        head_of_household = household.head_of_household
         individuals_to_create = []
-        dh_hoh = self.send_individual(head_of_household, dh_household)
-        dh_hoh.session = dh_session
-        individuals_to_create.append(dh_hoh)
+        head_of_household = household.head_of_household
+        if self.should_send_individual(head_of_household):
+            dh_hoh = self.send_individual(head_of_household, dh_household)
+            dh_hoh.session = dh_session
+            individuals_to_create.append(dh_hoh)
+
         primary_collector = household.individuals.filter(
             role=ROLE_PRIMARY
         ).first()
         if (
             primary_collector is not None
             and primary_collector.id != head_of_household.id
+            and self.should_send_individual(primary_collector)
         ):
             dh_primary_collector = self.send_individual(
                 primary_collector, dh_household
             )
             dh_primary_collector.session = dh_session
             individuals_to_create.append(dh_primary_collector)
+
         alternative_collector = household.individuals.filter(
             role=ROLE_ALTERNATE
         ).first()
         if (
             alternative_collector is not None
             and alternative_collector.id != head_of_household.id
+            and self.should_send_individual(alternative_collector)
         ):
             dh_alternative_collector = self.send_individual(
                 alternative_collector, dh_household
             )
             dh_alternative_collector.session = dh_session
             individuals_to_create.append(dh_alternative_collector)
+
         return dh_household, individuals_to_create
 
+    def should_send_individual(self, individual):
+        """Returns False when data sharing is true and unhcr id is set
+        https://unicef.visualstudio.com/ICTD-HCT-MIS/_workitems/edit/64344"""
+        if individual.household.business_area.has_data_sharing_agreement and \
+            self.get_unhcr_individual_id(individual):
+            return False
+        return True
+
     def send_target_entry(self, target_population_selection):
-        households_identity = target_population_selection.household.identities.filter(
-            agency__type="unhcr"
-        ).first()
-        household_unhcr_id = None
-        if households_identity is not None:
-            household_unhcr_id = households_identity.document_number
+        household_unhcr_id = self.get_unhcr_household_id(target_population_selection.household)
+        has_data_sharing_agreement = target_population_selection.target_population.business_area.has_data_sharing_agreement
         return dh_mis_models.TargetPopulationEntry(
             target_population_mis_id=target_population_selection.target_population.id,
             household_mis_id=target_population_selection.household.id,
-            household_unhcr_id=household_unhcr_id,
+            household_unhcr_id=household_unhcr_id if has_data_sharing_agreement else None,
             vulnerability_score=target_population_selection.vulnerability_score,
         )
 
@@ -223,3 +237,10 @@ class SendTPToDatahubTask:
         if identity is not None:
             return identity.number
         return None
+
+    def get_unhcr_household_id(self, household):
+        identity = household.identities.filter(agency__type="unhcr").first()
+        household_unhcr_id = None
+        if identity is not None:
+            household_unhcr_id = identity.document_number
+        return household_unhcr_id
