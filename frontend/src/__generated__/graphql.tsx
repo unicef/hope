@@ -3132,7 +3132,9 @@ export type AllCashPlansQueryVariables = {
   search?: Maybe<Scalars['String']>,
   assistanceThrough?: Maybe<Scalars['String']>,
   deliveryType?: Maybe<Scalars['String']>,
-  verificationStatus?: Maybe<Scalars['String']>
+  verificationStatus?: Maybe<Scalars['String']>,
+  startDate?: Maybe<Scalars['DateTime']>,
+  endDate?: Maybe<Scalars['DateTime']>
 };
 
 
@@ -5240,8 +5242,8 @@ export type AllBusinessAreasQueryHookResult = ReturnType<typeof useAllBusinessAr
 export type AllBusinessAreasLazyQueryHookResult = ReturnType<typeof useAllBusinessAreasLazyQuery>;
 export type AllBusinessAreasQueryResult = ApolloReactCommon.QueryResult<AllBusinessAreasQuery, AllBusinessAreasQueryVariables>;
 export const AllCashPlansDocument = gql`
-    query AllCashPlans($program: ID, $after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $search: String, $assistanceThrough: String, $deliveryType: String, $verificationStatus: String) {
-  allCashPlans(program: $program, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, search: $search, assistanceThrough: $assistanceThrough, deliveryType: $deliveryType, verificationStatus: $verificationStatus) {
+    query AllCashPlans($program: ID, $after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $search: String, $assistanceThrough: String, $deliveryType: String, $verificationStatus: String, $startDate: DateTime, $endDate: DateTime) {
+  allCashPlans(program: $program, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, search: $search, assistanceThrough: $assistanceThrough, deliveryType: $deliveryType, verificationStatus: $verificationStatus, startDate: $startDate, endDate: $endDate) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -5316,6 +5318,8 @@ export function withAllCashPlans<TProps, TChildProps = {}>(operationOptions?: Ap
  *      assistanceThrough: // value for 'assistanceThrough'
  *      deliveryType: // value for 'deliveryType'
  *      verificationStatus: // value for 'verificationStatus'
+ *      startDate: // value for 'startDate'
+ *      endDate: // value for 'endDate'
  *   },
  * });
  */
