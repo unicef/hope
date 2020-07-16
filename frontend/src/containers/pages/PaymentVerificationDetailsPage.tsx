@@ -17,8 +17,12 @@ import { FinishVerificationPlan } from '../../components/payments/FinishVerifica
 import { DiscardVerificationPlan } from '../../components/payments/DiscardVerificationPlan';
 import { useCashPlanQuery } from '../../__generated__/graphql';
 import { LoadingComponent } from '../../components/LoadingComponent';
-import { decodeIdString } from '../../utils/utils';
+import {
+  decodeIdString,
+  paymentVerificationStatusToColor,
+} from '../../utils/utils';
 import Moment from 'react-moment';
+import { StatusBox } from '../../components/StatusBox';
 
 const Container = styled.div`
   display: flex;
@@ -63,7 +67,9 @@ const TableWrapper = styled.div`
   padding: 20px;
   padding-bottom: 0;
 `;
-
+const StatusContainer = styled.div`
+  width: 120px;
+`;
 // interface PaymentVerificationDetailsProps {
 //   registration: 'registr';
 // }
@@ -72,8 +78,6 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const { id } = useParams();
-  const [isActive, setIsActive] = useState(false);
-  const [isCreated, setIsCreated] = useState(true);
   const { data, loading } = useCashPlanQuery({
     variables: { id },
   });
@@ -84,8 +88,8 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
     return null;
   }
 
-
- const {cashPlan} = data
+  const { cashPlan } = data;
+  const verificationPlan = cashPlan.verifications;
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: 'Payment Verification',
@@ -99,9 +103,9 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
       breadCrumbs={breadCrumbsItems}
     >
       <>
-        {!isActive && <NewPaymentVerificationDialog />}
+        {!verificationPlan && <NewPaymentVerificationDialog />}
         <Box display='flex'>
-          {isCreated && <EditNewPaymentVerificationDialog />}
+          {verificationPlan && <EditNewPaymentVerificationDialog />}
           <ActivateVerificationPlan />
         </Box>
         <FinishVerificationPlan />
@@ -117,9 +121,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
         <Grid container>
           <Grid item xs={9}>
             <Title>
-              <Typography variant='h6'>
-                {isActive ? 'Cash Plan ' : ''}Details
-              </Typography>
+              <Typography variant='h6'>Cash Plan Details</Typography>
             </Title>
             <Grid container>
               <Grid item xs={4}>
@@ -139,12 +141,16 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
               </Grid>
               <Grid item xs={4}>
                 <LabelizedField label='START DATE'>
-                  <p><Moment format='DD/MM/YYYY'>{cashPlan.startDate}</Moment></p>
+                  <p>
+                    <Moment format='DD/MM/YYYY'>{cashPlan.startDate}</Moment>
+                  </p>
                 </LabelizedField>
               </Grid>
               <Grid item xs={4}>
                 <LabelizedField label='END DATE'>
-                <p><Moment format='DD/MM/YYYY'>{cashPlan.endDate}</Moment></p>
+                  <p>
+                    <Moment format='DD/MM/YYYY'>{cashPlan.endDate}</Moment>
+                  </p>
                 </LabelizedField>
               </Grid>
             </Grid>
@@ -152,7 +158,9 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
           <Grid item xs={3}>
             <BorderLeftBox>
               <Title>
-                <Typography variant='h6'>Bank reconciliation</Typography>
+                <Typography variant='h6'>
+                  Bank reconciliation (PLACEHOLDER)
+                </Typography>
               </Title>
               <Grid container>
                 <Grid item xs={6}>
@@ -195,7 +203,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
           </Grid>
         </Grid>
       </Container>
-      {isCreated && (
+      {verificationPlan.length ? (
         <Container>
           <Title>
             <Typography variant='h6'>Verification Plan Details</Typography>
@@ -205,37 +213,42 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
               <Grid container>
                 <Grid item xs={4}>
                   <LabelizedField label='STATUS'>
-                    <p>S</p>
+                    <StatusContainer>
+                      <StatusBox
+                        status={verificationPlan[0].status}
+                        statusToColor={paymentVerificationStatusToColor}
+                      />
+                    </StatusContainer>
                   </LabelizedField>
                 </Grid>
                 <Grid item xs={4}>
                   <LabelizedField label='SAMPLE SIZE'>
-                    <p>S</p>
+                    <p>{verificationPlan[0].sampleSize}</p>
                   </LabelizedField>
                 </Grid>
                 <Grid item xs={4}>
                   <LabelizedField label='RECEIVED'>
-                    <p>S</p>
+                    <p>{verificationPlan[0].receivedCount}</p>
                   </LabelizedField>
                 </Grid>
                 <Grid item xs={4}>
                   <LabelizedField label='VERIFICATION METHOD'>
-                    <p>S</p>
+                    <p>{verificationPlan[0].verificationMethod}</p>
                   </LabelizedField>
                 </Grid>
                 <Grid item xs={4}>
                   <LabelizedField label='RESPONDED'>
-                    <p>S</p>
+                    <p>{verificationPlan[0].respondedCount}</p>
                   </LabelizedField>
                 </Grid>
                 <Grid item xs={4}>
                   <LabelizedField label='NOT RECEIVED'>
-                    <p>S</p>
+                    <p>{verificationPlan[0].notReceivedCount}</p>
                   </LabelizedField>
                 </Grid>
                 <Grid item xs={4}>
                   <LabelizedField label='SAMPLING'>
-                    <p>S</p>
+                    <p>{verificationPlan[0].sampling}</p>
                   </LabelizedField>
                 </Grid>
               </Grid>
@@ -245,10 +258,10 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                 <Grid item xs={6}>
                   <Grid container direction='column'>
                     <LabelizedField label='RECEIVED CORRECT AMOUNT'>
-                      <p>90%</p>
+                      <p>{verificationPlan[0].receivedCount}</p>
                     </LabelizedField>
                     <LabelizedField label='RECEIVED WRONG AMOUNT'>
-                      <p>10%</p>
+                      <p>{verificationPlan[0].receivedWithProblemsCount}</p>
                     </LabelizedField>
                   </Grid>
                 </Grid>
@@ -268,7 +281,10 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                         labels: ['CORRECT', 'WRONG'],
                         datasets: [
                           {
-                            data: [90, 10],
+                            data: [
+                              verificationPlan[0].receivedCount,
+                              verificationPlan[0].receivedWithProblemsCount,
+                            ],
                             backgroundColor: ['#74C304', '#DADADA'],
                             hoverBackgroundColor: ['#74C304', '#DADADA'],
                           },
@@ -281,14 +297,12 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
             </Grid>
           </Grid>
         </Container>
-      )}
-
-      {!isActive && (
+      ) : null}
+      {!verificationPlan.length && (
         <BottomTitle>
           To see more details please create Verification Plan
         </BottomTitle>
       )}
-
       <TableWrapper>
         <UniversalActivityLogTable objectId='some id' />
       </TableWrapper>

@@ -3395,8 +3395,11 @@ export type CashPlanQuery = (
   { __typename?: 'Query' }
   & { cashPlan: Maybe<(
     { __typename?: 'CashPlanNode' }
-    & Pick<CashPlanNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'deliveryType' | 'fundsCommitment' | 'downPayment' | 'dispersionDate' | 'assistanceThrough' | 'caId'>
-    & { program: (
+    & Pick<CashPlanNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'deliveryType' | 'fundsCommitment' | 'downPayment' | 'dispersionDate' | 'assistanceThrough' | 'caId' | 'verificationStatus'>
+    & { verifications: Array<(
+      { __typename?: 'CashPlanPaymentVerificationNode' }
+      & Pick<CashPlanPaymentVerificationNode, 'status' | 'sampleSize' | 'receivedCount' | 'notReceivedCount' | 'respondedCount' | 'verificationMethod' | 'sampling' | 'receivedWithProblemsCount'>
+    )>, program: (
       { __typename?: 'ProgramNode' }
       & Pick<ProgramNode, 'id' | 'name'>
     ), paymentRecords: (
@@ -5869,6 +5872,18 @@ export const CashPlanDocument = gql`
     assistanceThrough
     caId
     dispersionDate
+    verificationStatus
+    verifications {
+      status
+      sampleSize
+      receivedCount
+      notReceivedCount
+      respondedCount
+      verificationMethod
+      sampling
+      receivedCount
+      receivedWithProblemsCount
+    }
     program {
       id
       name
