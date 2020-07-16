@@ -103,13 +103,21 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
       breadCrumbs={breadCrumbsItems}
     >
       <>
-        {!verificationPlan && <NewPaymentVerificationDialog />}
-        <Box display='flex'>
-          {verificationPlan && <EditNewPaymentVerificationDialog />}
-          <ActivateVerificationPlan />
-        </Box>
-        <FinishVerificationPlan />
-        <DiscardVerificationPlan />
+        {cashPlan.verificationStatus === 'PENDING' &&
+          verificationPlan.length === 0 && <NewPaymentVerificationDialog />}
+        {cashPlan.verificationStatus === 'PENDING' &&
+          verificationPlan.length !== 0 && (
+            <Box display='flex'>
+              <EditNewPaymentVerificationDialog /> <ActivateVerificationPlan />
+            </Box>
+          )}
+        {cashPlan.verificationStatus === 'ACTIVE' &&
+          verificationPlan.length !== 0 && (
+            <Box display='flex'>
+              <FinishVerificationPlan />
+              <DiscardVerificationPlan />
+            </Box>
+          )}
       </>
     </PageHeader>
   );
