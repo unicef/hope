@@ -12,8 +12,10 @@ import Select from '../../../shared/Select';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import {
   ProgramNode,
-  useCashPlanVerificationStatusChoicesQuery,
+  usePaymentVerificationStatusChoicesQuery,
 } from '../../../__generated__/graphql';
+
+// import { AdminAreasAutocomplete } from './AdminAreaAutocomplete';
 
 const Container = styled.div`
   display: flex;
@@ -33,6 +35,15 @@ const Container = styled.div`
   }
 `;
 
+const TextContainer = styled(TextField)`
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number']::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+  }
+  input[type='number'] {
+    -moz-appearance: textfield;
+  }
+`;
 const StyledFormControl = styled(FormControl)`
   width: 232px;
   color: #5f6368;
@@ -64,11 +75,12 @@ export function PaymentFilters({
     onFilterChange({ ...filter, [name]: e.target.value });
   const {
     data: statusChoicesData,
-  } = useCashPlanVerificationStatusChoicesQuery();
+  } = usePaymentVerificationStatusChoicesQuery();
   if (!statusChoicesData) {
     return null;
   }
 
+  console.log(statusChoicesData);
   return (
     <Container>
       <Grid container spacing={3}>
@@ -132,6 +144,7 @@ export function PaymentFilters({
           />
         </Grid>
         <Grid item>
+          {/* NEED TO ADD FILTERS ON THE BACKEND */}
           <KeyboardDatePicker
             variant='inline'
             disableToolbar
@@ -206,7 +219,7 @@ export function PaymentFilters({
               <MenuItem value=''>
                 <em>None</em>
               </MenuItem>
-              {statusChoicesData.cashPlanVerificationStatusChoices.map(
+              {statusChoicesData.paymentVerificationStatusChoices.map(
                 (item) => {
                   return (
                     <MenuItem key={item.value} value={item.value}>

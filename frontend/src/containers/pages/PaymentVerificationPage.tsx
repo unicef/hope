@@ -24,7 +24,6 @@ export function PaymentVerificationPage(): React.ReactElement {
     program: '',
     assistanceThrough: '',
     deliveryType: '',
-    verificationStatus: '',
   });
   const debouncedFilter = useDebounce(filter, 500);
   const { data, loading } = useAllProgramsQuery({
