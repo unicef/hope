@@ -1211,7 +1211,7 @@ type Query {
   program(id: ID!): ProgramNode
   allPrograms(before: String, after: String, first: Int, last: Int, id: UUID, status: String, businessArea: String): ProgramNodeConnection
   cashPlan(id: ID!): CashPlanNode
-  allCashPlans(before: String, after: String, first: Int, last: Int, program: ID, verificationStatus: String, assistanceThrough: String, deliveryType: String, startDate: DateTime, endDate: DateTime, search: String, orderBy: String): CashPlanNodeConnection
+  allCashPlans(before: String, after: String, first: Int, last: Int, program: ID, verificationStatus: String, assistanceThrough: String, assistanceThrough_Icontains: String, deliveryType: String, startDate: DateTime, startDate_Lte: DateTime, startDate_Gte: DateTime, endDate: DateTime, endDate_Lte: DateTime, endDate_Gte: DateTime, search: String, orderBy: String): CashPlanNodeConnection
   programStatusChoices: [ChoiceObject]
   programFrequencyOfPaymentsChoices: [ChoiceObject]
   programSectorChoices: [ChoiceObject]

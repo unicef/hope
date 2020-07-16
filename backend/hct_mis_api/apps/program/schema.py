@@ -49,7 +49,7 @@ class CashPlanFilter(FilterSet):
         fields = {
             "program": ["exact"],
             "verification_status": ["exact"],
-            "assistance_through": ["exact"],
+            "assistance_through": ["exact", "icontains"],
             "delivery_type": ["exact"],
             "start_date": ["exact", "lte", "gte"],
             "end_date": ["exact", "lte", "gte"],
