@@ -1800,7 +1800,14 @@ export type QueryAllCashPlansArgs = {
   program?: Maybe<Scalars['ID']>,
   verificationStatus?: Maybe<Scalars['String']>,
   assistanceThrough?: Maybe<Scalars['String']>,
+  assistanceThrough_Icontains?: Maybe<Scalars['String']>,
   deliveryType?: Maybe<Scalars['String']>,
+  startDate?: Maybe<Scalars['DateTime']>,
+  startDate_Lte?: Maybe<Scalars['DateTime']>,
+  startDate_Gte?: Maybe<Scalars['DateTime']>,
+  endDate?: Maybe<Scalars['DateTime']>,
+  endDate_Lte?: Maybe<Scalars['DateTime']>,
+  endDate_Gte?: Maybe<Scalars['DateTime']>,
   search?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
@@ -3065,6 +3072,17 @@ export type UpdateTpMutation = (
   )> }
 );
 
+export type CashPlanVerificationStatusChoicesQueryVariables = {};
+
+
+export type CashPlanVerificationStatusChoicesQuery = (
+  { __typename?: 'Query' }
+  & { cashPlanVerificationStatusChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>> }
+);
+
 export type AllAdminAreasQueryVariables = {
   title?: Maybe<Scalars['String']>,
   businessArea?: Maybe<Scalars['String']>,
@@ -3110,12 +3128,18 @@ export type AllBusinessAreasQuery = (
 );
 
 export type AllCashPlansQueryVariables = {
-  program: Scalars['ID'],
+  program?: Maybe<Scalars['ID']>,
   after?: Maybe<Scalars['String']>,
   before?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  orderBy?: Maybe<Scalars['String']>
+  orderBy?: Maybe<Scalars['String']>,
+  search?: Maybe<Scalars['String']>,
+  assistanceThrough?: Maybe<Scalars['String']>,
+  deliveryType?: Maybe<Scalars['String']>,
+  verificationStatus?: Maybe<Scalars['String']>,
+  startDateGte?: Maybe<Scalars['DateTime']>,
+  endDateLte?: Maybe<Scalars['DateTime']>
 };
 
 
@@ -3132,7 +3156,11 @@ export type AllCashPlansQuery = (
       & Pick<CashPlanNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'CashPlanNode' }
-        & Pick<CashPlanNode, 'id' | 'caId' | 'totalPersonsCovered' | 'dispersionDate' | 'assistanceMeasurement' | 'status' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity'>
+        & Pick<CashPlanNode, 'id' | 'caId' | 'verificationStatus' | 'assistanceThrough' | 'deliveryType' | 'startDate' | 'endDate' | 'totalPersonsCovered' | 'dispersionDate' | 'assistanceMeasurement' | 'status' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity'>
+        & { program: (
+          { __typename?: 'ProgramNode' }
+          & Pick<ProgramNode, 'id' | 'name'>
+        ) }
       )> }
     )>> }
   )> }
@@ -3367,8 +3395,11 @@ export type CashPlanQuery = (
   { __typename?: 'Query' }
   & { cashPlan: Maybe<(
     { __typename?: 'CashPlanNode' }
-    & Pick<CashPlanNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'deliveryType' | 'fundsCommitment' | 'downPayment' | 'dispersionDate' | 'assistanceThrough' | 'caId'>
-    & { program: (
+    & Pick<CashPlanNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'deliveryType' | 'fundsCommitment' | 'downPayment' | 'dispersionDate' | 'assistanceThrough' | 'caId' | 'verificationStatus'>
+    & { verifications: Array<(
+      { __typename?: 'CashPlanPaymentVerificationNode' }
+      & Pick<CashPlanPaymentVerificationNode, 'status' | 'sampleSize' | 'receivedCount' | 'notReceivedCount' | 'respondedCount' | 'verificationMethod' | 'sampling' | 'receivedWithProblemsCount'>
+    )>, program: (
       { __typename?: 'ProgramNode' }
       & Pick<ProgramNode, 'id' | 'name'>
     ), paymentRecords: (
@@ -5044,6 +5075,56 @@ export function useUpdateTpMutation(baseOptions?: ApolloReactHooks.MutationHookO
 export type UpdateTpMutationHookResult = ReturnType<typeof useUpdateTpMutation>;
 export type UpdateTpMutationResult = ApolloReactCommon.MutationResult<UpdateTpMutation>;
 export type UpdateTpMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdateTpMutation, UpdateTpMutationVariables>;
+export const CashPlanVerificationStatusChoicesDocument = gql`
+    query cashPlanVerificationStatusChoices {
+  cashPlanVerificationStatusChoices {
+    name
+    value
+  }
+}
+    `;
+export type CashPlanVerificationStatusChoicesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<CashPlanVerificationStatusChoicesQuery, CashPlanVerificationStatusChoicesQueryVariables>, 'query'>;
+
+    export const CashPlanVerificationStatusChoicesComponent = (props: CashPlanVerificationStatusChoicesComponentProps) => (
+      <ApolloReactComponents.Query<CashPlanVerificationStatusChoicesQuery, CashPlanVerificationStatusChoicesQueryVariables> query={CashPlanVerificationStatusChoicesDocument} {...props} />
+    );
+    
+export type CashPlanVerificationStatusChoicesProps<TChildProps = {}> = ApolloReactHoc.DataProps<CashPlanVerificationStatusChoicesQuery, CashPlanVerificationStatusChoicesQueryVariables> & TChildProps;
+export function withCashPlanVerificationStatusChoices<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CashPlanVerificationStatusChoicesQuery,
+  CashPlanVerificationStatusChoicesQueryVariables,
+  CashPlanVerificationStatusChoicesProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, CashPlanVerificationStatusChoicesQuery, CashPlanVerificationStatusChoicesQueryVariables, CashPlanVerificationStatusChoicesProps<TChildProps>>(CashPlanVerificationStatusChoicesDocument, {
+      alias: 'cashPlanVerificationStatusChoices',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCashPlanVerificationStatusChoicesQuery__
+ *
+ * To run a query within a React component, call `useCashPlanVerificationStatusChoicesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCashPlanVerificationStatusChoicesQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCashPlanVerificationStatusChoicesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useCashPlanVerificationStatusChoicesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<CashPlanVerificationStatusChoicesQuery, CashPlanVerificationStatusChoicesQueryVariables>) {
+        return ApolloReactHooks.useQuery<CashPlanVerificationStatusChoicesQuery, CashPlanVerificationStatusChoicesQueryVariables>(CashPlanVerificationStatusChoicesDocument, baseOptions);
+      }
+export function useCashPlanVerificationStatusChoicesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<CashPlanVerificationStatusChoicesQuery, CashPlanVerificationStatusChoicesQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<CashPlanVerificationStatusChoicesQuery, CashPlanVerificationStatusChoicesQueryVariables>(CashPlanVerificationStatusChoicesDocument, baseOptions);
+        }
+export type CashPlanVerificationStatusChoicesQueryHookResult = ReturnType<typeof useCashPlanVerificationStatusChoicesQuery>;
+export type CashPlanVerificationStatusChoicesLazyQueryHookResult = ReturnType<typeof useCashPlanVerificationStatusChoicesLazyQuery>;
+export type CashPlanVerificationStatusChoicesQueryResult = ApolloReactCommon.QueryResult<CashPlanVerificationStatusChoicesQuery, CashPlanVerificationStatusChoicesQueryVariables>;
 export const AllAdminAreasDocument = gql`
     query AllAdminAreas($title: String, $businessArea: String, $first: Int) {
   allAdminAreas(title_Icontains: $title, businessArea: $businessArea, first: $first) {
@@ -5169,8 +5250,8 @@ export type AllBusinessAreasQueryHookResult = ReturnType<typeof useAllBusinessAr
 export type AllBusinessAreasLazyQueryHookResult = ReturnType<typeof useAllBusinessAreasLazyQuery>;
 export type AllBusinessAreasQueryResult = ApolloReactCommon.QueryResult<AllBusinessAreasQuery, AllBusinessAreasQueryVariables>;
 export const AllCashPlansDocument = gql`
-    query AllCashPlans($program: ID!, $after: String, $before: String, $first: Int, $last: Int, $orderBy: String) {
-  allCashPlans(program: $program, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy) {
+    query AllCashPlans($program: ID, $after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $search: String, $assistanceThrough: String, $deliveryType: String, $verificationStatus: String, $startDateGte: DateTime, $endDateLte: DateTime) {
+  allCashPlans(program: $program, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, search: $search, assistanceThrough_Icontains: $assistanceThrough, deliveryType: $deliveryType, verificationStatus: $verificationStatus, startDate_Gte: $startDateGte, endDate_Lte: $endDateLte) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -5183,6 +5264,15 @@ export const AllCashPlansDocument = gql`
       node {
         id
         caId
+        verificationStatus
+        assistanceThrough
+        deliveryType
+        startDate
+        endDate
+        program {
+          id
+          name
+        }
         totalPersonsCovered
         dispersionDate
         assistanceMeasurement
@@ -5190,12 +5280,13 @@ export const AllCashPlansDocument = gql`
         totalEntitledQuantity
         totalDeliveredQuantity
         totalUndeliveredQuantity
+        assistanceMeasurement
       }
     }
   }
 }
     `;
-export type AllCashPlansComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllCashPlansQuery, AllCashPlansQueryVariables>, 'query'> & ({ variables: AllCashPlansQueryVariables; skip?: boolean; } | { skip: boolean; });
+export type AllCashPlansComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllCashPlansQuery, AllCashPlansQueryVariables>, 'query'>;
 
     export const AllCashPlansComponent = (props: AllCashPlansComponentProps) => (
       <ApolloReactComponents.Query<AllCashPlansQuery, AllCashPlansQueryVariables> query={AllCashPlansDocument} {...props} />
@@ -5231,6 +5322,12 @@ export function withAllCashPlans<TProps, TChildProps = {}>(operationOptions?: Ap
  *      first: // value for 'first'
  *      last: // value for 'last'
  *      orderBy: // value for 'orderBy'
+ *      search: // value for 'search'
+ *      assistanceThrough: // value for 'assistanceThrough'
+ *      deliveryType: // value for 'deliveryType'
+ *      verificationStatus: // value for 'verificationStatus'
+ *      startDateGte: // value for 'startDateGte'
+ *      endDateLte: // value for 'endDateLte'
  *   },
  * });
  */
@@ -5775,6 +5872,18 @@ export const CashPlanDocument = gql`
     assistanceThrough
     caId
     dispersionDate
+    verificationStatus
+    verifications {
+      status
+      sampleSize
+      receivedCount
+      notReceivedCount
+      respondedCount
+      verificationMethod
+      sampling
+      receivedCount
+      receivedWithProblemsCount
+    }
     program {
       id
       name
