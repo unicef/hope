@@ -87,6 +87,8 @@ export function paymentVerificationStatusToColor(
       return theme.hctPalette.green;
     case 'PENDING':
       return theme.hctPalette.oragne;
+    case 'FINISHED':
+      return theme.hctPalette.gray;
     default:
       return theme.palette.error.main;
   }

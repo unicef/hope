@@ -15,6 +15,18 @@ export const CashPlan = gql`
       assistanceThrough
       caId
       dispersionDate
+      verificationStatus
+      verifications {
+        status
+        sampleSize
+        receivedCount
+        notReceivedCount
+        respondedCount
+        verificationMethod
+        sampling
+        receivedCount
+        receivedWithProblemsCount
+      }
       program {
         id
         name
