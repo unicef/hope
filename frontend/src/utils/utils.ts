@@ -78,6 +78,21 @@ export function paymentRecordStatusToColor(
       return theme.palette.error.main;
   }
 }
+export function paymentVerificationStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  switch (status) {
+    case 'ACTIVE':
+      return theme.hctPalette.green;
+    case 'PENDING':
+      return theme.hctPalette.oragne;
+    case 'FINISHED':
+      return theme.hctPalette.gray;
+    default:
+      return theme.palette.error.main;
+  }
+}
 
 export function registrationDataImportStatusToColor(
   theme: typeof themeObj,
@@ -240,58 +255,58 @@ export function formatCriteriaFilters({ filters }) {
 }
 
 export function mapCriteriasToInitialValues(criteria) {
-    const mappedFilters = [];
-    if(criteria.filters) {
-      criteria.filters.map(each => {
-        switch(each.comparisionMethod) {
-          case 'RANGE':
-            return mappedFilters.push({
-              ...each,
-              value: {
-                from: each.arguments[0],
-                to: each.arguments[1],
-              }
-            })
-          case 'LESS_THAN':
-            return mappedFilters.push({
-              ...each,
-              value: {
-                from: '',
-                to: each.arguments[0],
-              }
-            })
-          case 'GREATER_THAN':
-            return mappedFilters.push({
-              ...each,
-              value: {
-                from: each.arguments[0],
-                to: '',
-              }
-            })
-          case 'EQUALS':
-            return mappedFilters.push({
-              ...each,
-              value: each.arguments[0]
-            })
-          case 'CONTAINS':
-            return mappedFilters.push({
-              ...each,
-              value: each.arguments
-            })
-          default:
-            return mappedFilters.push({
-              ...each
-            })
-        }
-      })
-    } else {
-      mappedFilters.push({fieldName: ''})
-    }
-    return mappedFilters;
+  const mappedFilters = [];
+  if (criteria.filters) {
+    criteria.filters.map((each) => {
+      switch (each.comparisionMethod) {
+        case 'RANGE':
+          return mappedFilters.push({
+            ...each,
+            value: {
+              from: each.arguments[0],
+              to: each.arguments[1],
+            },
+          });
+        case 'LESS_THAN':
+          return mappedFilters.push({
+            ...each,
+            value: {
+              from: '',
+              to: each.arguments[0],
+            },
+          });
+        case 'GREATER_THAN':
+          return mappedFilters.push({
+            ...each,
+            value: {
+              from: each.arguments[0],
+              to: '',
+            },
+          });
+        case 'EQUALS':
+          return mappedFilters.push({
+            ...each,
+            value: each.arguments[0],
+          });
+        case 'CONTAINS':
+          return mappedFilters.push({
+            ...each,
+            value: each.arguments,
+          });
+        default:
+          return mappedFilters.push({
+            ...each,
+          });
+      }
+    });
+  } else {
+    mappedFilters.push({ fieldName: '' });
+  }
+  return mappedFilters;
 }
 
 export function targetPopulationStatusMapping(status): string {
-  return TARGETING_STATES[status]
+  return TARGETING_STATES[status];
 }
 
 export function stableSort(array, comparator) {
