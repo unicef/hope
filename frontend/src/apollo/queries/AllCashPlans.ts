@@ -12,8 +12,8 @@ export const AllCashPlans = gql`
     $assistanceThrough: String
     $deliveryType: String
     $verificationStatus: String
-    $startDate: DateTime
-    $endDate: DateTime
+    $startDateGte: DateTime
+    $endDateLte: DateTime
   ) {
     allCashPlans(
       program: $program
@@ -23,11 +23,11 @@ export const AllCashPlans = gql`
       last: $last
       orderBy: $orderBy
       search: $search
-      assistanceThrough: $assistanceThrough
+      assistanceThrough_Icontains: $assistanceThrough
       deliveryType: $deliveryType
       verificationStatus: $verificationStatus
-      startDate: $startDate
-      endDate: $endDate
+      startDate_Gte: $startDateGte
+      endDate_Lte: $endDateLte
     ) {
       pageInfo {
         hasNextPage
