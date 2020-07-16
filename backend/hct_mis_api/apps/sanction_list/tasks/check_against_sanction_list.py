@@ -142,7 +142,7 @@ class CheckAgainstSanctionListTask:
             subject=subject,
             from_email=settings.EMAIL_HOST_USER,
             to=[uploaded_file.associated_email],
-            cc=["dfam-cashassistance@unicef.org"],
+            cc=[settings.SANCTION_LIST_CC_MAIL],
             body=text_body,
         )
         msg.attach(
