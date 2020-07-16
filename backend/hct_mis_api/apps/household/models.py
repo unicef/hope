@@ -3,6 +3,7 @@ from datetime import date
 
 from django.contrib.gis.db.models import PointField
 from django.contrib.postgres.fields import JSONField
+from django.core import exceptions
 from django.core.validators import (
     validate_image_file_extension,
     MinLengthValidator,
@@ -167,6 +168,7 @@ class Household(TimeStampedUUIDModel, AbstractSyncable):
         related_name="heading_household",
         on_delete=models.CASCADE,
     )
+    unicef_id = models.CharField(max_length=250, blank=True)
 
     @property
     def total_cash_received(self):
@@ -292,13 +294,17 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
     )
     disability = models.BooleanField(default=False,)
     work_status = models.CharField(
-        max_length=20, choices=WORK_STATUS_CHOICE, blank=True, default=NOT_PROVIDED
+        max_length=20,
+        choices=WORK_STATUS_CHOICE,
+        blank=True,
+        default=NOT_PROVIDED,
     )
     first_registration_date = models.DateField()
     last_registration_date = models.DateField()
     flex_fields = JSONField(default=dict)
     enrolled_in_nutrition_programme = models.BooleanField(default=False)
     administration_of_rutf = models.BooleanField(default=False)
+    unicef_id = models.CharField(max_length=250, blank=True)
 
     @property
     def age(self):
