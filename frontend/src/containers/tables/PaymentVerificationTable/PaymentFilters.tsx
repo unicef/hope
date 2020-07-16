@@ -14,6 +14,7 @@ import {
   ProgramNode,
   useCashPlanVerificationStatusChoicesQuery,
 } from '../../../__generated__/graphql';
+import moment from 'moment';
 
 // import { AdminAreasAutocomplete } from './AdminAreaAutocomplete';
 
@@ -143,7 +144,6 @@ export function PaymentFilters({
           />
         </Grid>
         <Grid item>
-          {/* NEED TO ADD FILTERS ON THE BACKEND */}
           <KeyboardDatePicker
             variant='inline'
             disableToolbar
@@ -151,7 +151,7 @@ export function PaymentFilters({
             margin='dense'
             label='Start Date'
             autoOk
-            onChange={(date) => onFilterChange({ ...filter, startDate: date })}
+            onChange={(date) => onFilterChange({ ...filter, startDate: moment(date).toISOString() })}
             value={filter.startDate || null}
             format='DD/MM/YYYY'
             InputAdornmentProps={{ position: 'end' }}
@@ -165,7 +165,7 @@ export function PaymentFilters({
             margin='dense'
             label='End Date'
             autoOk
-            onChange={(date) => onFilterChange({ ...filter, endDate: date })}
+            onChange={(date) => onFilterChange({ ...filter, endDate: moment(date).toISOString() })}
             value={filter.endDate || null}
             format='DD/MM/YYYY'
             InputAdornmentProps={{ position: 'end' }}
