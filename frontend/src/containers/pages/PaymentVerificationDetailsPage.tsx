@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Button, Grid, Typography, Box } from '@material-ui/core';
 import { Doughnut } from 'react-chartjs-2';
-
+import { useParams } from 'react-router-dom';
 import { MiśTheme } from '../../theme';
 import { useTranslation } from 'react-i18next';
 import { PageHeader } from '../../components/PageHeader';
@@ -15,6 +15,10 @@ import { EditNewPaymentVerificationDialog } from '../../components/payments/Edit
 import { ActivateVerificationPlan } from '../../components/payments/ActivateVerificationPlan';
 import { FinishVerificationPlan } from '../../components/payments/FinishVerificationPlan';
 import { DiscardVerificationPlan } from '../../components/payments/DiscardVerificationPlan';
+import { useCashPlanQuery } from '../../__generated__/graphql';
+import { LoadingComponent } from '../../components/LoadingComponent';
+import { decodeIdString } from '../../utils/utils';
+import Moment from 'react-moment';
 
 const Container = styled.div`
   display: flex;
@@ -67,10 +71,21 @@ const TableWrapper = styled.div`
 export function PaymentVerificationDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
-
+  const { id } = useParams();
   const [isActive, setIsActive] = useState(false);
   const [isCreated, setIsCreated] = useState(true);
+  const { data, loading } = useCashPlanQuery({
+    variables: { id },
+  });
+  if (loading) {
+    return <LoadingComponent />;
+  }
+  if (!data) {
+    return null;
+  }
 
+
+ const {cashPlan} = data
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: 'Payment Verification',
@@ -109,27 +124,27 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
             <Grid container>
               <Grid item xs={4}>
                 <LabelizedField label='PROGRAMME NAME'>
-                  <p>name</p>
+                  <p>{cashPlan.program.name}</p>
                 </LabelizedField>
               </Grid>
               <Grid item xs={4}>
                 <LabelizedField label='PROGRAMME ID'>
-                  <p>id</p>
+                  <p>{decodeIdString(cashPlan.program.id)}</p>
                 </LabelizedField>
               </Grid>
               <Grid item xs={4}>
                 <LabelizedField label='PAYMENT RECORDS'>
-                  <p>number of records</p>
+                  <p>{cashPlan.paymentRecords.totalCount}</p>
                 </LabelizedField>
               </Grid>
               <Grid item xs={4}>
                 <LabelizedField label='START DATE'>
-                  <p>some date</p>
+                  <p><Moment format='DD/MM/YYYY'>{cashPlan.startDate}</Moment></p>
                 </LabelizedField>
               </Grid>
               <Grid item xs={4}>
                 <LabelizedField label='END DATE'>
-                  <p>some other date</p>
+                <p><Moment format='DD/MM/YYYY'>{cashPlan.endDate}</Moment></p>
                 </LabelizedField>
               </Grid>
             </Grid>
