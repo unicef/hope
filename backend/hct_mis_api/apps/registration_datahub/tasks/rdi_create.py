@@ -238,7 +238,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             doc_type, is_created = ImportedDocumentType.objects.get_or_create(
                 country=Country(
                     COUNTRIES_NAME_ALPHA2.get(self.business_area.name.title())
-                ),
+                ).alpha3,
                 label=document_data["name"],
                 type=document_data["type"],
             )
@@ -561,7 +561,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                         country=Country(
                             COUNTRIES_NAME_ALPHA2.get(
                                 self.business_area.name.title()
-                            )
+                            ).alpha3
                         ),
                         label=label,
                         type=type_name,

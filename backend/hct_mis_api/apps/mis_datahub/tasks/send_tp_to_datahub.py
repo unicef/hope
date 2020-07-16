@@ -166,7 +166,7 @@ class SendTPToDatahubTask:
             household, SendTPToDatahubTask.MAPPING_HOUSEHOLD_DICT
         )
         dh_household = dh_mis_models.Household(**dh_household_args)
-        dh_household.country = household.country.alpha3
+        dh_household.country = household.country
         households_identity = household.identities.filter(
             agency__type="unhcr"
         ).first()

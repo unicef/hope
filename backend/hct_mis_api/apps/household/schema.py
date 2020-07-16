@@ -1,5 +1,6 @@
 import graphene
 from django.db.models import Sum, Q
+from django_countries.fields import Country
 from django_filters import (
     FilterSet,
     OrderingFilter,
@@ -121,7 +122,7 @@ class DocumentTypeNode(DjangoObjectType):
     country = graphene.String(description="Country name")
 
     def resolve_country(parrent, info):
-        return parrent.country.name
+        return Country(parrent.country).name
 
     class Meta:
         model = DocumentType
@@ -187,10 +188,10 @@ class HouseholdNode(DjangoObjectType):
     selection = graphene.Field(HouseholdSelection)
 
     def resolve_country(parrent, info):
-        return parrent.country.name
+        return Country(parrent.country).name
 
     def resolve_country_origin(parrent, info):
-        return parrent.country_origin.name
+        return Country(parrent.country_origin).name
 
     def resolve_selection(parent, info):
         selection = parent.selections.first()

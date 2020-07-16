@@ -47,10 +47,10 @@ class ImportedHousehold(TimeStampedUUIDModel):
     residence_status = models.CharField(
         max_length=255, choices=RESIDENCE_STATUS_CHOICE,
     )
-    country_origin = CountryField()
+    country_origin = models.CharField(max_length=3)
     size = models.PositiveIntegerField()
     address = models.CharField(max_length=255, blank=True, default="")
-    country = CountryField(blank=True, default="")
+    country = models.CharField(max_length=3, blank=True, default="")
     admin1 = models.CharField(max_length=255, blank=True, default="")
     admin2 = models.CharField(max_length=255, blank=True, default="")
     geopoint = PointField(null=True, default=None)
@@ -205,7 +205,7 @@ class DocumentValidator(TimeStampedUUIDModel):
 
 
 class ImportedDocumentType(TimeStampedUUIDModel):
-    country = CountryField(blank=True)
+    country = models.CharField(blank=True, max_length=3)
     label = models.CharField(max_length=100)
     type = models.CharField(max_length=50, choices=IDENTIFICATION_TYPE_CHOICE)
 

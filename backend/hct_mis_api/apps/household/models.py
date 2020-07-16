@@ -120,8 +120,8 @@ class Household(TimeStampedUUIDModel, AbstractSyncable):
     residence_status = models.CharField(
         max_length=255, choices=RESIDENCE_STATUS_CHOICE,
     )
-    country_origin = CountryField(blank=True)
-    country = CountryField(blank=True)
+    country_origin = models.CharField(blank=True, max_length=3)
+    country = models.CharField(blank=True, max_length=3)
 
     size = models.PositiveIntegerField()
     address = models.CharField(max_length=255, blank=True)
@@ -190,7 +190,7 @@ class DocumentValidator(TimeStampedUUIDModel):
 
 
 class DocumentType(TimeStampedUUIDModel):
-    country = CountryField(blank=True)
+    country = models.CharField(blank=True, max_length=3)
     label = models.CharField(max_length=100)
     type = models.CharField(max_length=50, choices=IDENTIFICATION_TYPE_CHOICE)
 

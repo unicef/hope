@@ -1,4 +1,5 @@
 import graphene
+from django_countries.fields import Country
 from django_filters import (
     FilterSet,
     OrderingFilter,
@@ -58,10 +59,10 @@ class ImportedHouseholdNode(DjangoObjectType):
     country = graphene.String(description="Country name")
 
     def resolve_country(parrent, info):
-        return parrent.country.name
+        return Country(parrent.country).name
 
     def resolve_country_origin(parrent, info):
-        return parrent.country_origin.name
+        return Country(parrent.country_origin).name
 
     class Meta:
         model = ImportedHousehold

@@ -62,8 +62,8 @@ class HouseholdFactory(factory.DjangoModelFactory):
     residence_status = factory.fuzzy.FuzzyChoice(
         RESIDENCE_STATUS_CHOICE, getter=lambda c: c[0],
     )
-    country_origin = factory.Faker("country_code")
-    country = factory.Faker("country_code")
+    country_origin = factory.Faker("country_code", representation="alpha-3")
+    country = factory.Faker("country_code", representation="alpha-3")
     size = factory.fuzzy.FuzzyInteger(3, 8)
     address = factory.Faker("address")
     registration_data_import = factory.SubFactory(

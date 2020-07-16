@@ -1,6 +1,7 @@
 from django.core.management import BaseCommand
 from django.db import transaction
 from django_countries.data import COUNTRIES
+from django_countries.fields import Country
 
 from household.models import (
     DocumentType,
@@ -34,10 +35,10 @@ class Command(BaseCommand):
         for alpha2 in COUNTRIES:
             for doc_type, label in identification_type_choice:
                 document_types.append(
-                    DocumentType(country=alpha2, label=label, type=doc_type)
+                    DocumentType(country=Country(alpha2).alpha3, label=label, type=doc_type)
                 )
                 rdh_document_types.append(
-                    RDHDocumentType(country=alpha2, label=label, type=doc_type)
+                    RDHDocumentType(country=Country(alpha2).alpha3, label=label, type=doc_type)
                 )
         DocumentType.objects.bulk_create(document_types)
         RDHDocumentType.objects.bulk_create(rdh_document_types)
