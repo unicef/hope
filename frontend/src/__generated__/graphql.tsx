@@ -1801,6 +1801,8 @@ export type QueryAllCashPlansArgs = {
   verificationStatus?: Maybe<Scalars['String']>,
   assistanceThrough?: Maybe<Scalars['String']>,
   deliveryType?: Maybe<Scalars['String']>,
+  startDate?: Maybe<Scalars['DateTime']>,
+  endDate?: Maybe<Scalars['DateTime']>,
   search?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
@@ -3065,12 +3067,12 @@ export type UpdateTpMutation = (
   )> }
 );
 
-export type PaymentVerificationStatusChoicesQueryVariables = {};
+export type CashPlanVerificationStatusChoicesQueryVariables = {};
 
 
-export type PaymentVerificationStatusChoicesQuery = (
+export type CashPlanVerificationStatusChoicesQuery = (
   { __typename?: 'Query' }
-  & { paymentVerificationStatusChoices: Maybe<Array<Maybe<(
+  & { cashPlanVerificationStatusChoices: Maybe<Array<Maybe<(
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
   )>>> }
@@ -3129,7 +3131,8 @@ export type AllCashPlansQueryVariables = {
   orderBy?: Maybe<Scalars['String']>,
   search?: Maybe<Scalars['String']>,
   assistanceThrough?: Maybe<Scalars['String']>,
-  deliveryType?: Maybe<Scalars['String']>
+  deliveryType?: Maybe<Scalars['String']>,
+  verificationStatus?: Maybe<Scalars['String']>
 };
 
 
@@ -5062,56 +5065,56 @@ export function useUpdateTpMutation(baseOptions?: ApolloReactHooks.MutationHookO
 export type UpdateTpMutationHookResult = ReturnType<typeof useUpdateTpMutation>;
 export type UpdateTpMutationResult = ApolloReactCommon.MutationResult<UpdateTpMutation>;
 export type UpdateTpMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdateTpMutation, UpdateTpMutationVariables>;
-export const PaymentVerificationStatusChoicesDocument = gql`
-    query paymentVerificationStatusChoices {
-  paymentVerificationStatusChoices {
+export const CashPlanVerificationStatusChoicesDocument = gql`
+    query cashPlanVerificationStatusChoices {
+  cashPlanVerificationStatusChoices {
     name
     value
   }
 }
     `;
-export type PaymentVerificationStatusChoicesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<PaymentVerificationStatusChoicesQuery, PaymentVerificationStatusChoicesQueryVariables>, 'query'>;
+export type CashPlanVerificationStatusChoicesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<CashPlanVerificationStatusChoicesQuery, CashPlanVerificationStatusChoicesQueryVariables>, 'query'>;
 
-    export const PaymentVerificationStatusChoicesComponent = (props: PaymentVerificationStatusChoicesComponentProps) => (
-      <ApolloReactComponents.Query<PaymentVerificationStatusChoicesQuery, PaymentVerificationStatusChoicesQueryVariables> query={PaymentVerificationStatusChoicesDocument} {...props} />
+    export const CashPlanVerificationStatusChoicesComponent = (props: CashPlanVerificationStatusChoicesComponentProps) => (
+      <ApolloReactComponents.Query<CashPlanVerificationStatusChoicesQuery, CashPlanVerificationStatusChoicesQueryVariables> query={CashPlanVerificationStatusChoicesDocument} {...props} />
     );
     
-export type PaymentVerificationStatusChoicesProps<TChildProps = {}> = ApolloReactHoc.DataProps<PaymentVerificationStatusChoicesQuery, PaymentVerificationStatusChoicesQueryVariables> & TChildProps;
-export function withPaymentVerificationStatusChoices<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+export type CashPlanVerificationStatusChoicesProps<TChildProps = {}> = ApolloReactHoc.DataProps<CashPlanVerificationStatusChoicesQuery, CashPlanVerificationStatusChoicesQueryVariables> & TChildProps;
+export function withCashPlanVerificationStatusChoices<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
   TProps,
-  PaymentVerificationStatusChoicesQuery,
-  PaymentVerificationStatusChoicesQueryVariables,
-  PaymentVerificationStatusChoicesProps<TChildProps>>) {
-    return ApolloReactHoc.withQuery<TProps, PaymentVerificationStatusChoicesQuery, PaymentVerificationStatusChoicesQueryVariables, PaymentVerificationStatusChoicesProps<TChildProps>>(PaymentVerificationStatusChoicesDocument, {
-      alias: 'paymentVerificationStatusChoices',
+  CashPlanVerificationStatusChoicesQuery,
+  CashPlanVerificationStatusChoicesQueryVariables,
+  CashPlanVerificationStatusChoicesProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, CashPlanVerificationStatusChoicesQuery, CashPlanVerificationStatusChoicesQueryVariables, CashPlanVerificationStatusChoicesProps<TChildProps>>(CashPlanVerificationStatusChoicesDocument, {
+      alias: 'cashPlanVerificationStatusChoices',
       ...operationOptions
     });
 };
 
 /**
- * __usePaymentVerificationStatusChoicesQuery__
+ * __useCashPlanVerificationStatusChoicesQuery__
  *
- * To run a query within a React component, call `usePaymentVerificationStatusChoicesQuery` and pass it any options that fit your needs.
- * When your component renders, `usePaymentVerificationStatusChoicesQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * To run a query within a React component, call `useCashPlanVerificationStatusChoicesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCashPlanVerificationStatusChoicesQuery` returns an object from Apollo Client that contains loading, error, and data properties 
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = usePaymentVerificationStatusChoicesQuery({
+ * const { data, loading, error } = useCashPlanVerificationStatusChoicesQuery({
  *   variables: {
  *   },
  * });
  */
-export function usePaymentVerificationStatusChoicesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<PaymentVerificationStatusChoicesQuery, PaymentVerificationStatusChoicesQueryVariables>) {
-        return ApolloReactHooks.useQuery<PaymentVerificationStatusChoicesQuery, PaymentVerificationStatusChoicesQueryVariables>(PaymentVerificationStatusChoicesDocument, baseOptions);
+export function useCashPlanVerificationStatusChoicesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<CashPlanVerificationStatusChoicesQuery, CashPlanVerificationStatusChoicesQueryVariables>) {
+        return ApolloReactHooks.useQuery<CashPlanVerificationStatusChoicesQuery, CashPlanVerificationStatusChoicesQueryVariables>(CashPlanVerificationStatusChoicesDocument, baseOptions);
       }
-export function usePaymentVerificationStatusChoicesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<PaymentVerificationStatusChoicesQuery, PaymentVerificationStatusChoicesQueryVariables>) {
-          return ApolloReactHooks.useLazyQuery<PaymentVerificationStatusChoicesQuery, PaymentVerificationStatusChoicesQueryVariables>(PaymentVerificationStatusChoicesDocument, baseOptions);
+export function useCashPlanVerificationStatusChoicesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<CashPlanVerificationStatusChoicesQuery, CashPlanVerificationStatusChoicesQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<CashPlanVerificationStatusChoicesQuery, CashPlanVerificationStatusChoicesQueryVariables>(CashPlanVerificationStatusChoicesDocument, baseOptions);
         }
-export type PaymentVerificationStatusChoicesQueryHookResult = ReturnType<typeof usePaymentVerificationStatusChoicesQuery>;
-export type PaymentVerificationStatusChoicesLazyQueryHookResult = ReturnType<typeof usePaymentVerificationStatusChoicesLazyQuery>;
-export type PaymentVerificationStatusChoicesQueryResult = ApolloReactCommon.QueryResult<PaymentVerificationStatusChoicesQuery, PaymentVerificationStatusChoicesQueryVariables>;
+export type CashPlanVerificationStatusChoicesQueryHookResult = ReturnType<typeof useCashPlanVerificationStatusChoicesQuery>;
+export type CashPlanVerificationStatusChoicesLazyQueryHookResult = ReturnType<typeof useCashPlanVerificationStatusChoicesLazyQuery>;
+export type CashPlanVerificationStatusChoicesQueryResult = ApolloReactCommon.QueryResult<CashPlanVerificationStatusChoicesQuery, CashPlanVerificationStatusChoicesQueryVariables>;
 export const AllAdminAreasDocument = gql`
     query AllAdminAreas($title: String, $businessArea: String, $first: Int) {
   allAdminAreas(title_Icontains: $title, businessArea: $businessArea, first: $first) {
@@ -5237,8 +5240,8 @@ export type AllBusinessAreasQueryHookResult = ReturnType<typeof useAllBusinessAr
 export type AllBusinessAreasLazyQueryHookResult = ReturnType<typeof useAllBusinessAreasLazyQuery>;
 export type AllBusinessAreasQueryResult = ApolloReactCommon.QueryResult<AllBusinessAreasQuery, AllBusinessAreasQueryVariables>;
 export const AllCashPlansDocument = gql`
-    query AllCashPlans($program: ID, $after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $search: String, $assistanceThrough: String, $deliveryType: String) {
-  allCashPlans(program: $program, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, search: $search, assistanceThrough: $assistanceThrough, deliveryType: $deliveryType) {
+    query AllCashPlans($program: ID, $after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $search: String, $assistanceThrough: String, $deliveryType: String, $verificationStatus: String) {
+  allCashPlans(program: $program, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, search: $search, assistanceThrough: $assistanceThrough, deliveryType: $deliveryType, verificationStatus: $verificationStatus) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -5312,6 +5315,7 @@ export function withAllCashPlans<TProps, TChildProps = {}>(operationOptions?: Ap
  *      search: // value for 'search'
  *      assistanceThrough: // value for 'assistanceThrough'
  *      deliveryType: // value for 'deliveryType'
+ *      verificationStatus: // value for 'verificationStatus'
  *   },
  * });
  */
