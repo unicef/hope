@@ -11,7 +11,6 @@ export const AllCashPlans = gql`
     $search: String
     $assistanceThrough: String
     $deliveryType: String
-    $verificationStatus: String
   ) {
     allCashPlans(
       program: $program
@@ -23,7 +22,6 @@ export const AllCashPlans = gql`
       search: $search
       assistanceThrough: $assistanceThrough
       deliveryType: $deliveryType
-      verificationStatus: $verificationStatus
     ) {
       pageInfo {
         hasNextPage

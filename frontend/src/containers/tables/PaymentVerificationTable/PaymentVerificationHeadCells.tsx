@@ -17,19 +17,19 @@ export const headCells: HeadCell<CashPlanNode>[] = [
   {
     disablePadding: false,
     label: 'FSP',
-    id: 'assistanceThrough',
+    id: 'fsp',
     numeric: false,
   },
   {
     disablePadding: false,
     label: 'Modality',
-    id: 'deliveryType',
+    id: 'modality',
     numeric: false,
   },
   {
     disablePadding: false,
     label: 'Cash Amount',
-    id: 'totalDeliveredQuantity',
+    id: 'cashAmount',
     numeric: true,
   },
   {
