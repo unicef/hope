@@ -46,14 +46,14 @@ class CashPlanFilter(FilterSet):
     search = CharFilter(method="search_filter")
 
     class Meta:
-        fields = (
-            "program",
-            "verification_status",
-            "assistance_through",
-            "delivery_type",
-            "start_date",
-            "end_date"
-        )
+        fields = {
+            "program": ["exact"],
+            "verification_status": ["exact"],
+            "assistance_through": ["exact"],
+            "delivery_type": ["exact"],
+            "start_date": ["exact", "lte", "gte"],
+            "end_date": ["exact", "lte", "gte"],
+        }
         model = CashPlan
 
     order_by = OrderingFilter(
