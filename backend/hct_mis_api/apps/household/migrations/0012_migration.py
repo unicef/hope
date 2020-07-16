@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
             LANGUAGE plpgsql
             AS $$
         begin
-          NEW.unicef_id := format('HH-%s-%s',NEW.country,LPAD(format('%s',NEW.unicef_id_index),8,'0'));
+          NEW.unicef_id := format('HH-%s-%s',NEW.country, trim(replace(to_char(NEW.unicef_id_index,'0000,0000'),',','.')));
           return NEW;
         end
         $$;
@@ -38,8 +38,8 @@ class Migration(migrations.Migration):
         CREATE OR REPLACE FUNCTION create_ii_unicef_id() RETURNS trigger
             LANGUAGE plpgsql
             AS $$
-        begin
-          NEW.unicef_id := format('IND-%s-%s',TO_CHAR(NEW.first_registration_date, 'yy'), LPAD(format('%s',NEW.unicef_id_index),8,'0'));
+        begin 
+          NEW.unicef_id := format('IND-%s-%s',TO_CHAR(NEW.first_registration_date, 'yy'), trim(replace(to_char(NEW.unicef_id_index,'0000,0000'),',','.')));
           return NEW;
         end
         $$;
@@ -48,9 +48,9 @@ class Migration(migrations.Migration):
         """,
         ),
         migrations.RunSQL(
-            "UPDATE household_household SET unicef_id = format('HH-%s-%s',country ,LPAD(format('%s',unicef_id_index),8,'0'))"
+            "UPDATE household_household SET unicef_id = format('HH-%s-%s',country ,trim(replace(to_char(unicef_id_index,'0000,0000'),',','.')))"
         ),
         migrations.RunSQL(
-            "UPDATE household_individual SET unicef_id = format('IND-%s-%s',TO_CHAR(first_registration_date, 'yy'), LPAD(format('%s',unicef_id_index),8,'0'))"
+            "UPDATE household_individual SET unicef_id = format('IND-%s-%s',TO_CHAR(first_registration_date, 'yy'), trim(replace(to_char(unicef_id_index,'0000,0000'),',','.')))"
         ),
     ]
