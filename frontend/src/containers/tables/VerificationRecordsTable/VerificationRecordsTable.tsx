@@ -25,9 +25,7 @@ export function VerificationRecordsTable({ id }): ReactElement {
       query={useAllPaymentVerificationsQuery}
       queriedObjectName='allPaymentVerifications'
       initialVariables={initialVariables}
-      renderRow={(row) => (
-        <VerificationRecordsTableRow record={row} key={row.node.id} />
-      )}
+      renderRow={(row) => <VerificationRecordsTableRow record={row} />}
     />
   );
 }
