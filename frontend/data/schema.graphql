@@ -103,7 +103,7 @@ type CashPlanNode implements Node {
   totalUndeliveredQuantity: Float!
   verificationStatus: String!
   paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
-  verifications: [CashPlanPaymentVerificationNode!]!
+  verifications(before: String, after: String, first: Int, last: Int): CashPlanPaymentVerificationNodeConnection!
 }
 
 type CashPlanNodeConnection {
@@ -118,8 +118,8 @@ type CashPlanNodeEdge {
   cursor: String!
 }
 
-type CashPlanPaymentVerificationNode {
-  id: UUID!
+type CashPlanPaymentVerificationNode implements Node {
+  id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
   status: CashPlanPaymentVerificationStatus!
@@ -132,6 +132,18 @@ type CashPlanPaymentVerificationNode {
   notReceivedCount: Int
   receivedWithProblemsCount: Int
   paymentRecordVerifications(before: String, after: String, first: Int, last: Int): PaymentVerificationNodeConnection!
+}
+
+type CashPlanPaymentVerificationNodeConnection {
+  pageInfo: PageInfo!
+  edges: [CashPlanPaymentVerificationNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type CashPlanPaymentVerificationNodeEdge {
+  node: CashPlanPaymentVerificationNode
+  cursor: String!
 }
 
 enum CashPlanPaymentVerificationSampling {
@@ -1098,6 +1110,7 @@ type PaymentVerificationNode implements Node {
   paymentRecord: PaymentRecordNode!
   status: PaymentVerificationStatus!
   statusDate: Date
+  receivedAmount: Float
 }
 
 type PaymentVerificationNodeConnection {
@@ -1193,6 +1206,7 @@ enum ProgramStatus {
 type Query {
   paymentRecord(id: ID!): PaymentRecordNode
   allPaymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID, orderBy: String): PaymentRecordNodeConnection
+  allPaymentVerifications(before: String, after: String, first: Int, last: Int, cashPlanPaymentVerification: ID, orderBy: String): PaymentVerificationNodeConnection
   paymentRecordStatusChoices: [ChoiceObject]
   paymentRecordEntitlementCardStatusChoices: [ChoiceObject]
   paymentRecordDeliveryTypeChoices: [ChoiceObject]
