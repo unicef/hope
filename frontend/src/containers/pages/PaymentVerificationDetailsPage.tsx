@@ -3,8 +3,8 @@ import styled from 'styled-components';
 import { Button, Grid, Typography, Box } from '@material-ui/core';
 import { Doughnut } from 'react-chartjs-2';
 import { useParams } from 'react-router-dom';
-import { MiśTheme } from '../../theme';
 import { useTranslation } from 'react-i18next';
+import Moment from 'react-moment';
 import { PageHeader } from '../../components/PageHeader';
 import { LabelizedField } from '../../components/LabelizedField';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
@@ -21,7 +21,6 @@ import {
   decodeIdString,
   paymentVerificationStatusToColor,
 } from '../../utils/utils';
-import Moment from 'react-moment';
 import { StatusBox } from '../../components/StatusBox';
 import { VerificationRecordsTable } from '../tables/VerificationRecordsTable';
 
@@ -90,7 +89,11 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
   }
 
   const { cashPlan } = data;
-  const verificationPlan = cashPlan.verifications;
+  console.log('🦄', cashPlan);
+  const verificationPlan = cashPlan.verifications.edges.length
+    ? cashPlan.verifications.edges[0].node
+    : null;
+  console.log(verificationPlan);
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: 'Payment Verification',
@@ -105,15 +108,20 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
     >
       <>
         {cashPlan.verificationStatus === 'PENDING' &&
-          verificationPlan.length === 0 && <NewPaymentVerificationDialog />}
+          cashPlan.verifications &&
+          cashPlan.verifications.edges.length === 0 && (
+            <NewPaymentVerificationDialog />
+          )}
         {cashPlan.verificationStatus === 'PENDING' &&
-          verificationPlan.length !== 0 && (
+          cashPlan.verifications &&
+          cashPlan.verifications.edges.length !== 0 && (
             <Box display='flex'>
               <EditNewPaymentVerificationDialog /> <ActivateVerificationPlan />
             </Box>
           )}
         {cashPlan.verificationStatus === 'ACTIVE' &&
-          verificationPlan.length !== 0 && (
+          cashPlan.verifications &&
+          cashPlan.verifications.edges.length !== 0 && (
             <Box display='flex'>
               <FinishVerificationPlan />
               <DiscardVerificationPlan />
@@ -212,7 +220,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
           </Grid>
         </Grid>
       </Container>
-      {verificationPlan.length ? (
+      {cashPlan.verifications && cashPlan.verifications.edges.length ? (
         <Container>
           <Title>
             <Typography variant='h6'>Verification Plan Details</Typography>
@@ -224,7 +232,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                   <LabelizedField label='STATUS'>
                     <StatusContainer>
                       <StatusBox
-                        status={verificationPlan[0].status}
+                        status={verificationPlan.status}
                         statusToColor={paymentVerificationStatusToColor}
                       />
                     </StatusContainer>
@@ -232,32 +240,32 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                 </Grid>
                 <Grid item xs={4}>
                   <LabelizedField label='SAMPLE SIZE'>
-                    <p>{verificationPlan[0].sampleSize}</p>
+                    <p>{verificationPlan.sampleSize}</p>
                   </LabelizedField>
                 </Grid>
                 <Grid item xs={4}>
                   <LabelizedField label='RECEIVED'>
-                    <p>{verificationPlan[0].receivedCount}</p>
+                    <p>{verificationPlan.receivedCount}</p>
                   </LabelizedField>
                 </Grid>
                 <Grid item xs={4}>
                   <LabelizedField label='VERIFICATION METHOD'>
-                    <p>{verificationPlan[0].verificationMethod}</p>
+                    <p>{verificationPlan.verificationMethod}</p>
                   </LabelizedField>
                 </Grid>
                 <Grid item xs={4}>
                   <LabelizedField label='RESPONDED'>
-                    <p>{verificationPlan[0].respondedCount}</p>
+                    <p>{verificationPlan.respondedCount}</p>
                   </LabelizedField>
                 </Grid>
                 <Grid item xs={4}>
                   <LabelizedField label='NOT RECEIVED'>
-                    <p>{verificationPlan[0].notReceivedCount}</p>
+                    <p>{verificationPlan.notReceivedCount}</p>
                   </LabelizedField>
                 </Grid>
                 <Grid item xs={4}>
                   <LabelizedField label='SAMPLING'>
-                    <p>{verificationPlan[0].sampling}</p>
+                    <p>{verificationPlan.sampling}</p>
                   </LabelizedField>
                 </Grid>
               </Grid>
@@ -267,10 +275,10 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                 <Grid item xs={6}>
                   <Grid container direction='column'>
                     <LabelizedField label='RECEIVED CORRECT AMOUNT'>
-                      <p>{verificationPlan[0].receivedCount}</p>
+                      <p>{verificationPlan.receivedCount}</p>
                     </LabelizedField>
                     <LabelizedField label='RECEIVED WRONG AMOUNT'>
-                      <p>{verificationPlan[0].receivedWithProblemsCount}</p>
+                      <p>{verificationPlan.receivedWithProblemsCount}</p>
                     </LabelizedField>
                   </Grid>
                 </Grid>
@@ -291,8 +299,8 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                         datasets: [
                           {
                             data: [
-                              verificationPlan[0].receivedCount,
-                              verificationPlan[0].receivedWithProblemsCount,
+                              verificationPlan.receivedCount,
+                              verificationPlan.receivedWithProblemsCount,
                             ],
                             backgroundColor: ['#74C304', '#DADADA'],
                             hoverBackgroundColor: ['#74C304', '#DADADA'],
@@ -308,9 +316,11 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
         </Container>
       ) : null}
       <Container>
-        {verificationPlan.length && <VerificationRecordsTable />}
+        {cashPlan.verifications && cashPlan.verifications.edges.length && (
+          <VerificationRecordsTable id={verificationPlan.id} />
+        )}
       </Container>
-      {!verificationPlan.length && (
+      {!cashPlan.verifications && cashPlan.verifications.edges.length && (
         <BottomTitle>
           To see more details please create Verification Plan
         </BottomTitle>

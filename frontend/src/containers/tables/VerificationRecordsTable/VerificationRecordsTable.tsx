@@ -1,32 +1,33 @@
 import React, { ReactElement } from 'react';
-import { useParams } from 'react-router-dom';
-import styled from 'styled-components';
+import {
+  useAllPaymentVerificationsQuery,
+  PaymentVerificationNodeEdge,
+  AllPaymentVerificationsQueryVariables,
+} from '../../../__generated__/graphql';
 import { UniversalTable } from '../UniversalTable';
 import { headCells } from './VerificationRecordsHeadCells';
 import { VerificationRecordsTableRow } from './VerificationRecordsTableRow';
-import {
-  useCashPlanQuery,
-  CashPlanNode,
-  CashPlanQueryVariables,
-} from '../../../__generated__/graphql';
 
 // interface VerificationRecordsTableProps {
 //   filter;
 // }
-export function VerificationRecordsTable(): ReactElement {
-  const { id } = useParams();
-
-  const initialVariables: CashPlanQueryVariables = {
-    id,
+export function VerificationRecordsTable({ id }): ReactElement {
+  const initialVariables: AllPaymentVerificationsQueryVariables = {
+    cashPlanPaymentVerification: id,
   };
   return (
-    <UniversalTable<CashPlanNode, CashPlanQueryVariables>
-      title='List Of Cash Plans'
+    <UniversalTable<
+      PaymentVerificationNodeEdge,
+      AllPaymentVerificationsQueryVariables
+    >
+      title='Verification Records'
       headCells={headCells}
-      query={useCashPlanQuery}
-      queriedObjectName='cashPlan.'
+      query={useAllPaymentVerificationsQuery}
+      queriedObjectName='allPaymentVerifications'
       initialVariables={initialVariables}
-      renderRow={(row) => <VerificationRecordsTableRow key={row.id} />}
+      renderRow={(row) => (
+        <VerificationRecordsTableRow record={row} key={row.node.id} />
+      )}
     />
   );
 }
