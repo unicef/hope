@@ -1,13 +1,12 @@
 import React, { ReactElement } from 'react';
-import styled from 'styled-components';
-import { UniversalTable } from '../UniversalTable';
-import { headCells } from './PaymentVerificationHeadCells';
-import { PaymentVerificationTableRow } from './PaymentVerificationTableRow';
 import {
   AllCashPlansQueryVariables,
   CashPlanNode,
   useAllCashPlansQuery,
 } from '../../../__generated__/graphql';
+import { UniversalTable } from '../UniversalTable';
+import { headCells } from './PaymentVerificationHeadCells';
+import { PaymentVerificationTableRow } from './PaymentVerificationTableRow';
 
 interface PaymentVerificationTableProps {
   filter;
@@ -22,7 +21,7 @@ export function PaymentVerificationTable({
     deliveryType: filter.deliveryType,
     verificationStatus: filter.verificationStatus,
     startDateGte: filter.startDate,
-    endDateLte: filter.endDate
+    endDateLte: filter.endDate,
   };
   return (
     <UniversalTable<CashPlanNode, AllCashPlansQueryVariables>
