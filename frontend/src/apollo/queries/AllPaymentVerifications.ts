@@ -27,6 +27,7 @@ export const AllPaymentVerifications = gql`
       edges {
         cursor
         node {
+          id
           paymentRecord {
             id
             deliveredQuantity

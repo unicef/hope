@@ -36,24 +36,24 @@ export function VerificationRecordsTableRow({ record }) {
       key={record.id}
     >
       <TableCell align='left'>{decodeIdString(record.id)}</TableCell>
-      {/* <TableCell align='left'>
+      <TableCell align='left'>
         <StatusContainer>
           <StatusBox
-            status={plan.verificationStatus}
+            status={record.status}
             statusToColor={paymentVerificationStatusToColor}
           />
         </StatusContainer>
       </TableCell>
-      <TableCell align='left'>{plan.assistanceThrough}</TableCell>
-      <TableCell align='left'>{plan.deliveryType}</TableCell>
-      <TableCell align='right'>
-        {formatCurrency(plan.totalDeliveredQuantity)}
-      </TableCell>
       <TableCell align='left'>
-        <Moment format='DD/MM/YYYY'>{plan.startDate}</Moment>-
-        <Moment format='DD/MM/YYYY'>{plan.endDate}</Moment>
+        {record.paymentRecord.household.headOfHousehold.fullName}
       </TableCell>
-      <TableCell align='left'>{plan.program.name}</TableCell> */}
+      <TableCell align='left'>{record.paymentRecord.household.id}</TableCell>
+      <TableCell align='right'>
+        {formatCurrency(record.paymentRecord.deliveredQuantity)}
+      </TableCell>
+      <TableCell align='right'>
+        {formatCurrency(record.receivedAmount)}
+      </TableCell>
     </ClickableTableRow>
   );
 }

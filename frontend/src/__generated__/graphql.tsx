@@ -3363,7 +3363,7 @@ export type AllPaymentVerificationsQuery = (
       & Pick<PaymentVerificationNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'PaymentVerificationNode' }
-        & Pick<PaymentVerificationNode, 'status' | 'receivedAmount'>
+        & Pick<PaymentVerificationNode, 'id' | 'status' | 'receivedAmount'>
         & { paymentRecord: (
           { __typename?: 'PaymentRecordNode' }
           & Pick<PaymentRecordNode, 'id' | 'deliveredQuantity'>
@@ -5739,6 +5739,7 @@ export const AllPaymentVerificationsDocument = gql`
     edges {
       cursor
       node {
+        id
         paymentRecord {
           id
           deliveredQuantity
