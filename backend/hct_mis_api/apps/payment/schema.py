@@ -1,12 +1,15 @@
 import graphene
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.db.models import Q
+from django.shortcuts import get_object_or_404
 from django_filters import FilterSet, OrderingFilter
 from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphene_file_upload.scalars import Upload
 
+from core.filters import filter_age
 from core.permissions import is_authenticated
 from core.schema import ChoiceObject
 from core.extended_connection import ExtendedConnection
@@ -17,6 +20,7 @@ from payment.models import (
     CashPlanPaymentVerification,
     PaymentVerification,
 )
+from program.models import CashPlan
 from program.schema import CashPlanNode
 
 
@@ -50,6 +54,7 @@ class ManualArguments(graphene.InputObjectType):
 
 
 class CreatePaymentVerificationInput(graphene.InputObjectType):
+    cash_plan_id = graphene.ID(required=True)
     sampling = graphene.String(required=True)
     verification_channel = graphene.String(required=True)
     full_list_arguments = FullListArguments()
@@ -120,6 +125,60 @@ class CreatePaymentVerificationMutation(graphene.Mutation):
             },
         )
 
+    @classmethod
+    def get_records_queryset(cls, input):
+        arg = lambda name: input.get(name)
+        cash_plan_id = arg("cash_plan_id")
+        cash_plan = get_object_or_404(CashPlan, id=cash_plan_id)
+        sampling = arg("sampling")
+        excluded_admin_areas = []
+        sex = None
+        age = None
+        payment_records = cash_plan.payment_records
+        if sampling == CashPlanPaymentVerification.SAMPLING_FULL_LIST:
+            excluded_admin_areas = arg("full_list_arguments").get(
+                "excluded_admin_areas", []
+            )
+        elif sampling == CashPlanPaymentVerification.SAMPLING_RANDOM:
+            random_sampling_arguments = arg("random_sampling_arguments")
+            confidence_interval = random_sampling_arguments.get(
+                "confidence_interval"
+            )
+            margin_of_error = random_sampling_arguments.get("margin_of_error")
+            sex = random_sampling_arguments.get("sex")
+            age = random_sampling_arguments.get("random_sampling_arguments")
+
+        payment_records = payment_records.filter(
+            ~(Q(household__admin_area__title__in=excluded_admin_areas))
+        )
+        if sex is not None:
+            payment_records = payment_records.filter(
+                household__head_of_household__sex=sex
+            )
+        if age is not None:
+            payment_records = filter_age(
+                "household__head_of_household__birth_date",
+                payment_records,
+                age.get(min),
+                age.get("max"),
+            )
+        payment_records_sample_count = payment_records.count()
+        if sampling == CashPlanPaymentVerification.SAMPLING_RANDOM:
+            payment_records_sample_count = CreatePaymentVerificationMutation.get_number_of_samples(
+                payment_records_sample_count,
+                confidence_interval,
+                margin_of_error,
+            )
+            payment_records = payment_records.order_by("?")[
+                :payment_records_sample_count
+            ]
+        return payment_records
+
+    @classmethod
+    def get_number_of_samples(
+        cls, cash_plan, confidence_interval, margin_of_error
+    ):
+        return 1
 
 
 class PaymentRecordFilter(FilterSet):
