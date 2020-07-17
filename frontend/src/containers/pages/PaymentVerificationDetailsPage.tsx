@@ -23,6 +23,7 @@ import {
 } from '../../utils/utils';
 import Moment from 'react-moment';
 import { StatusBox } from '../../components/StatusBox';
+import { VerificationRecordsTable } from '../tables/VerificationRecordsTable';
 
 const Container = styled.div`
   display: flex;
@@ -99,7 +100,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
 
   const toolbar = (
     <PageHeader
-      title='Cash Plan (there should be ID)'
+      title={`Cash Plan ${decodeIdString(cashPlan.id)}`}
       breadCrumbs={breadCrumbsItems}
     >
       <>
@@ -306,6 +307,9 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
           </Grid>
         </Container>
       ) : null}
+      <Container>
+        {verificationPlan.length && <VerificationRecordsTable />}
+      </Container>
       {!verificationPlan.length && (
         <BottomTitle>
           To see more details please create Verification Plan
