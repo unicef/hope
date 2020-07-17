@@ -38,7 +38,24 @@ class PaymentRecordFilter(FilterSet):
             "entitlement__delivery_date",
         )
     )
+class PaymentVerificationFilter(FilterSet):
+    class Meta:
+        fields = (
+            "cash_plan_payment_verification",
+        )
+        model = PaymentVerification
 
+    order_by = OrderingFilter(
+        fields=(
+            "payment_record",
+            "status",
+            "payment_record__household__head_of_household__full_name",
+            "payment_record__household__head_of_household__family_name",
+            "payment_record__household",
+            "payment_record__household__unicef_id",
+            "received_amount"
+        )
+    )
 
 class PaymentRecordNode(DjangoObjectType):
     class Meta:
@@ -58,6 +75,8 @@ class ServiceProviderNode(DjangoObjectType):
 class CashPlanPaymentVerificationNode(DjangoObjectType):
     class Meta:
         model = CashPlanPaymentVerification
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
 
 
 class PaymentVerificationNode(DjangoObjectType):
@@ -71,6 +90,9 @@ class Query(graphene.ObjectType):
     payment_record = relay.Node.Field(PaymentRecordNode)
     all_payment_records = DjangoFilterConnectionField(
         PaymentRecordNode, filterset_class=PaymentRecordFilter,
+    )
+    all_payment_verifications = DjangoFilterConnectionField(
+        PaymentVerificationNode, filterset_class=PaymentVerificationFilter,
     )
     payment_record_status_choices = graphene.List(ChoiceObject)
     payment_record_entitlement_card_status_choices = graphene.List(ChoiceObject)
