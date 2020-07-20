@@ -1,3 +1,5 @@
+from math import ceil
+
 import graphene
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -176,8 +178,21 @@ class CreatePaymentVerificationMutation(graphene.Mutation):
 
     @classmethod
     def get_number_of_samples(
-        cls, cash_plan, confidence_interval, margin_of_error
+        cls, payment_records_sample_count, confidence_interval, margin_of_error
     ):
+        variable = 0.5
+        z_score = 1.95  # to calculate
+        theoretical_sample = (
+            (z_score ** 2) * variable * (1 - variable) / margin_of_error ** 2
+        )
+        actual_sample = ceil(
+            (
+                payment_records_sample_count
+                * theoretical_sample
+                / (theoretical_sample + payment_records_sample_count)
+            )
+            * 1.5
+        )
         return 1
 
 
