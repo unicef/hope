@@ -24,7 +24,7 @@ from payment.models import (
 )
 from program.models import CashPlan
 from program.schema import CashPlanNode
-
+from scipy.special import ndtri
 
 class FullListArguments(graphene.InputObjectType):
     excluded_admin_areas = graphene.List(graphene.String)
@@ -36,8 +36,8 @@ class AgeInput(graphene.InputObjectType):
 
 
 class RandomSamplingArguments(graphene.InputObjectType):
-    confidence_interval = graphene.Int(required=True)
-    margin_of_error = graphene.Int(required=True)
+    confidence_interval = graphene.Float(required=True)
+    margin_of_error = graphene.Float(required=True)
     excluded_admin_areas = graphene.List(graphene.String)
     age = AgeInput()
     sex = graphene.String()
@@ -181,7 +181,7 @@ class CreatePaymentVerificationMutation(graphene.Mutation):
         cls, payment_records_sample_count, confidence_interval, margin_of_error
     ):
         variable = 0.5
-        z_score = 1.95  # to calculate
+        z_score = ndtri(confidence_interval+(1-confidence_interval)/2)
         theoretical_sample = (
             (z_score ** 2) * variable * (1 - variable) / margin_of_error ** 2
         )
@@ -193,7 +193,7 @@ class CreatePaymentVerificationMutation(graphene.Mutation):
             )
             * 1.5
         )
-        return 1
+        return actual_sample
 
 
 class PaymentRecordFilter(FilterSet):
