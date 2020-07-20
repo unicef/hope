@@ -2,8 +2,8 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import {
-  PaymentRecordNode,
-  usePaymentRecordQuery,
+  PaymentVerificationNode,
+  usePaymentRecordVerificationQuery,
 } from '../../__generated__/graphql';
 import { PageHeader } from '../../components/PageHeader';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
@@ -31,20 +31,21 @@ const Container = styled.div`
 
 export function VerificationRecordDetailsPage(): React.ReactElement {
   const { id } = useParams();
-  const { data, loading } = usePaymentRecordQuery({
+  const { data, loading, error } = usePaymentRecordVerificationQuery({
     variables: { id },
   });
+  console.log('veri record details', data, loading, error);
   const businessArea = useBusinessArea();
 
-  // if (loading) {
-  //   return <LoadingComponent />;
-  // }
+  if (loading) {
+    return <LoadingComponent />;
+  }
 
-  // if (!data) {
-  //   return null;
-  // }
+  if (!data) {
+    return null;
+  }
 
-  // const paymentRecord = data.paymentRecord as PaymentRecordNode;
+  const paymentVerification = data.paymentRecordVerification as PaymentVerificationNode;
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: 'Payment Verification',
@@ -62,7 +63,7 @@ export function VerificationRecordDetailsPage(): React.ReactElement {
   return (
     <div>
       {toolbar}
-      <VerificationRecordDetails />
+      <VerificationRecordDetails paymentVerification={paymentVerification} />
     </div>
   );
 }
