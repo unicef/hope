@@ -4,7 +4,6 @@ from django.utils import timezone
 
 from core.utils import nested_getattr
 from household.models import (
-    IDENTIFICATION_TYPE_NATIONAL_ID,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
 )
@@ -38,7 +37,7 @@ class SendTPToDatahubTask:
         "admin1": "admin_area.title",
         "admin2": "admin_area.parent.title",
         "residence_status": "residence_status",
-        "registration_date": "registration_date"
+        "registration_date": "registration_date",
     }
     MAPPING_INDIVIDUAL_DICT = {
         "mis_id": "id",
@@ -55,7 +54,14 @@ class SendTPToDatahubTask:
         "role": "role",
         "marital_status": "marital_status",
         "phone_number": "phone_number",
-        "household_mis_id": "household.id"
+        "household_mis_id": "household.id",
+    }
+    MAPPING_DOCUMENT_DICT = {
+        "mis_id": "id",
+        "number": "document_number",
+        "individual_mis_id": "individual.id",
+        "type": "type.type",
+        "country": "type.country",
     }
 
     def execute(self):
@@ -70,6 +76,7 @@ class SendTPToDatahubTask:
     def send_tp(self, target_population):
         households_to_bulk_create = []
         individuals_to_bulk_create = []
+        documents_to_bulk_create = []
         tp_entries_to_bulk_create = []
         dh_session = dh_mis_models.Session(
             source=dh_mis_models.Session.SOURCE_MIS,
@@ -108,15 +115,20 @@ class SendTPToDatahubTask:
         for household in households:
             # if data sharing is true and unhcr id is set then don't push household
             # https://unicef.visualstudio.com/ICTD-HCT-MIS/_workitems/edit/64344
-            if target_population.business_area.has_data_sharing_agreement and self.get_unhcr_household_id(household):
+            has_data_sharing_agreement = (
+                target_population.business_area.has_data_sharing_agreement
+            )
+            unhcr_id = self.get_unhcr_household_id(household)
+            if has_data_sharing_agreement and unhcr_id:
                 continue
 
-            (dh_household, dh_individuals) = self.send_household(
+            (dh_household, dh_individuals, dh_documents) = self.send_household(
                 household, dh_session
             )
             dh_household.session = dh_session
             households_to_bulk_create.append(dh_household)
             individuals_to_bulk_create.extend(dh_individuals)
+            documents_to_bulk_create.extend(dh_documents)
 
         for selection in target_population_selections:
             dh_entry = self.send_target_entry(selection)
@@ -124,6 +136,7 @@ class SendTPToDatahubTask:
             tp_entries_to_bulk_create.append(dh_entry)
         dh_mis_models.Household.objects.bulk_create(households_to_bulk_create)
         dh_mis_models.Individual.objects.bulk_create(individuals_to_bulk_create)
+        dh_mis_models.Document.objects.bulk_create(documents_to_bulk_create)
         dh_mis_models.TargetPopulationEntry.objects.bulk_create(
             tp_entries_to_bulk_create
         )
@@ -152,22 +165,24 @@ class SendTPToDatahubTask:
         dh_target = dh_mis_models.TargetPopulation(**dh_tp_args)
         return dh_target
 
-    def send_individual(self, individual, dh_household):
+    def send_individual(self, individual, dh_household, dh_session):
         dh_individual_args = self.build_arg_dict(
             individual, SendTPToDatahubTask.MAPPING_INDIVIDUAL_DICT
         )
         dh_individual = dh_mis_models.Individual(**dh_individual_args)
         dh_individual.household = dh_household
 
-        national_id_document = individual.documents.filter(
-            type__type=IDENTIFICATION_TYPE_NATIONAL_ID
-        ).first()
-        if national_id_document:
-            dh_individual.national_id_number = (
-                national_id_document.document_number
+        dh_documents = []
+        for document in individual.documents.all():
+            dh_document_args = self.build_arg_dict(
+                document, SendTPToDatahubTask.MAPPING_DOCUMENT_DICT
             )
+            dh_document = dh_mis_models.Document(**dh_document_args)
+            dh_document.session = dh_session
+            dh_documents.append(dh_document)
+
         dh_individual.unchr_id = self.get_unhcr_individual_id(individual)
-        return dh_individual
+        return dh_individual, dh_documents
 
     def send_household(self, household, dh_session):
         dh_household_args = self.build_arg_dict(
@@ -178,11 +193,15 @@ class SendTPToDatahubTask:
         dh_household.unhcr_id = self.get_unhcr_household_id(household)
 
         individuals_to_create = []
+        documents_to_create = []
         head_of_household = household.head_of_household
         if self.should_send_individual(head_of_household):
-            dh_hoh = self.send_individual(head_of_household, dh_household)
+            dh_hoh, dh_hoh_documents = self.send_individual(
+                head_of_household, dh_household, dh_session
+            )
             dh_hoh.session = dh_session
             individuals_to_create.append(dh_hoh)
+            documents_to_create.extend(dh_hoh_documents)
 
         primary_collector = household.individuals.filter(
             role=ROLE_PRIMARY
@@ -192,11 +211,15 @@ class SendTPToDatahubTask:
             and primary_collector.id != head_of_household.id
             and self.should_send_individual(primary_collector)
         ):
-            dh_primary_collector = self.send_individual(
-                primary_collector, dh_household
+            (
+                dh_primary_collector,
+                dh_primary_collector_documents,
+            ) = self.send_individual(
+                primary_collector, dh_household, dh_session
             )
             dh_primary_collector.session = dh_session
             individuals_to_create.append(dh_primary_collector)
+            documents_to_create.extend(dh_primary_collector_documents)
 
         alternative_collector = household.individuals.filter(
             role=ROLE_ALTERNATE
@@ -206,29 +229,38 @@ class SendTPToDatahubTask:
             and alternative_collector.id != head_of_household.id
             and self.should_send_individual(alternative_collector)
         ):
-            dh_alternative_collector = self.send_individual(
-                alternative_collector, dh_household
+            (
+                dh_alternative_collector,
+                dh_alternative_collector_documents,
+            ) = self.send_individual(
+                alternative_collector, dh_household, dh_session
             )
             dh_alternative_collector.session = dh_session
             individuals_to_create.append(dh_alternative_collector)
+            documents_to_create.extend(dh_alternative_collector_documents)
 
-        return dh_household, individuals_to_create
+        return (
+            dh_household,
+            individuals_to_create,
+            documents_to_create,
+        )
 
     def should_send_individual(self, individual):
         """Returns False when data sharing is true and unhcr id is set
         https://unicef.visualstudio.com/ICTD-HCT-MIS/_workitems/edit/64344"""
-        if individual.household.business_area.has_data_sharing_agreement and \
-            self.get_unhcr_individual_id(individual):
-            return False
-        return True
+        return (
+            individual.household.business_area.has_data_sharing_agreement
+            and self.get_unhcr_individual_id(individual)
+        )
 
     def send_target_entry(self, target_population_selection):
-        household_unhcr_id = self.get_unhcr_household_id(target_population_selection.household)
-        has_data_sharing_agreement = target_population_selection.target_population.business_area.has_data_sharing_agreement
+        household_unhcr_id = self.get_unhcr_household_id(
+            target_population_selection.household
+        )
         return dh_mis_models.TargetPopulationEntry(
             target_population_mis_id=target_population_selection.target_population.id,
             household_mis_id=target_population_selection.household.id,
-            household_unhcr_id=household_unhcr_id if has_data_sharing_agreement else None,
+            household_unhcr_id=household_unhcr_id,
             vulnerability_score=target_population_selection.vulnerability_score,
         )
 
