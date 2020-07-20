@@ -91,7 +91,7 @@ if not ENV:
 
 # prefix all non-production emails
 if ENV != "prod":
-    EMAIL_SUBJECT_PREFIX = '{}'.format(ENV)
+    EMAIL_SUBJECT_PREFIX = "{}".format(ENV)
 
 DATABASES = {
     "default": {
@@ -393,6 +393,10 @@ GRAPH_MODELS = {
 PHONENUMBER_DEFAULT_REGION = "US"
 
 AIRFLOW_HOST = "airflow_webserver"
+
+SANCTION_LIST_CC_MAIL = os.getenv(
+    "SANCTION_LIST_CC_MAIL", "dfam-cashassistance@unicef.org"
+)
 
 # ELASTICSEARCH SETTINGS
 ELASTICSEARCH_DSL_AUTOSYNC = False

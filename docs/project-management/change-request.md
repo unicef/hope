@@ -6,6 +6,27 @@ description: Change request for Iteration 4 Deliverables
 
 ## Iteration 6
 
+### **Target Population Updates**
+
+**July 8th, 2020**
+
+Stefano said that this is their decision from today**'**s night. So here some bullets:
+
+* TP have to have a type field \(individual/household\)
+* TP type has to be sent to DataHub
+* If TP type is individual, we remove households without individuals from results
+* TP type is not editable, after the initial set
+* When TP type is set to individual all individual are send to Datahub
+* We show individual based filters \(Age, Sex\) only when TP type is set to individual
+
+**Expected Delivery Date:**
+
+TBD
+
+**Notes:**
+
+**------------------------------------------------**
+
 ### **UNHCR Data Sharing Agreement**
 
 **July 8th 2020**
@@ -14,7 +35,7 @@ description: Change request for Iteration 4 Deliverables
 
 > In order to push the necessary data to appropriate fields into the datahub depends on if the business area has data sharing agreement with UNHCR or not. Some rules below have been set, the logic is described in length below.
 
-
+**------------------------------------------------**
 
 ### Primary Collector \(Many2Many\) 
 
@@ -40,15 +61,27 @@ Make household nullable to allow for Collector object.
 
 * Upload Sanctions List Document check screen w/ authentication and validation.
 
+**------------------------------------------------**
+
 ### Cypress / UAT / QA
 
 * 200+ hours of development/engineering/training/spec of Cypress User Testing that were decided in final \(2\) weeks of Iteration. 
+
+**------------------------------------------------**
 
 ### Cash Assist Changes to DataHub
 
 * Continued throughout Iteration 5 and into Iteration 6
 
+
+
 ## Iteration 4
+
+### 
+
+### Target Population Updates
+
+**Date: ....**
 
 ### Overview:
 
