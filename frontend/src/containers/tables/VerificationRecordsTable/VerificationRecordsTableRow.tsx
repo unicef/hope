@@ -9,7 +9,7 @@ import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
 import {
   decodeIdString,
   formatCurrency,
-  paymentVerificationStatusToColor,
+  verificationRecordsStatusToColor,
 } from '../../../utils/utils';
 import { StatusBox } from '../../../components/StatusBox';
 
@@ -17,7 +17,7 @@ const StatusContainer = styled.div`
   width: 120px;
 `;
 interface VerificationRecordsTableRowProps {
-  plan: PaymentVerificationNodeEdge;
+  record: PaymentVerificationNodeEdge;
 }
 
 export function VerificationRecordsTableRow({ record }) {
@@ -25,7 +25,7 @@ export function VerificationRecordsTableRow({ record }) {
   const businessArea = useBusinessArea();
   console.log('🐥', record);
   const handleClick = (): void => {
-    const path = `/${businessArea}/payment-verification/${record.id}`;
+    const path = `/${businessArea}/verification-records/${record.id}`;
     history.push(path);
   };
   return (
@@ -40,7 +40,7 @@ export function VerificationRecordsTableRow({ record }) {
         <StatusContainer>
           <StatusBox
             status={record.status}
-            statusToColor={paymentVerificationStatusToColor}
+            statusToColor={verificationRecordsStatusToColor}
           />
         </StatusContainer>
       </TableCell>

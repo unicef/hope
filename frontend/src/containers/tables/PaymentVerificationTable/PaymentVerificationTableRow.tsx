@@ -20,7 +20,9 @@ interface PaymentVerificationTableRowProps {
   plan: CashPlanNode;
 }
 
-export function PaymentVerificationTableRow({ plan }) {
+export function PaymentVerificationTableRow({
+  plan,
+}: PaymentVerificationTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
 

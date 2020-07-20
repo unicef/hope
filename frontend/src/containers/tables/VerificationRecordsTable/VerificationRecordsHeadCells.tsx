@@ -17,7 +17,7 @@ export const headCells: HeadCell<PaymentVerificationNodeEdge>[] = [
   {
     disablePadding: false,
     label: 'Head of Household',
-    id: 'paymentRecord.household.headOfHousehold.fullName',
+    id: 'head_of_household',
     numeric: false,
   },
   {

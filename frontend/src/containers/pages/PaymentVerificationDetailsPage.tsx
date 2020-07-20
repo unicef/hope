@@ -23,6 +23,7 @@ import {
 } from '../../utils/utils';
 import { StatusBox } from '../../components/StatusBox';
 import { VerificationRecordsTable } from '../tables/VerificationRecordsTable';
+import { Missing } from '../../components/Missing';
 
 const Container = styled.div`
   display: flex;
@@ -89,11 +90,9 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
   }
 
   const { cashPlan } = data;
-  console.log('🦄', cashPlan);
   const verificationPlan = cashPlan.verifications.edges.length
     ? cashPlan.verifications.edges[0].node
     : null;
-  console.log(verificationPlan);
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: 'Payment Verification',
@@ -176,7 +175,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
             <BorderLeftBox>
               <Title>
                 <Typography variant='h6'>
-                  Bank reconciliation (PLACEHOLDER)
+                  Bank reconciliation <Missing />
                 </Typography>
               </Title>
               <Grid container>
