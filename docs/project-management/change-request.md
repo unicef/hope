@@ -19,6 +19,12 @@ Stefano said that this is their decision from today**'**s night. So here some bu
 * When TP type is set to individual all individual are send to Datahub
 * We show individual based filters \(Age, Sex\) only when TP type is set to individual
 
+**Proposed Tivix Solution:**
+
+1. Add field for Household / Individual flag when creating a Programme.
+2. When closing a Target Population, and a user selects a Programme with an individual flag, warn the user - send collectors plus targeted individual details.
+3. Send flag to Cash Assist.
+
 **Expected Delivery Date:**
 
 TBD
