@@ -8,31 +8,25 @@ description: Change request for Iteration 4 Deliverables
 
 ### **Target Population Updates**
 
-**July 8th, 2020**
+\*\*\*\*[**See Related Document**](https://docs.google.com/document/d/1WBLRN_DPK29KqWDrZ0eHuJUpiby3VW4EE6uipENlFmQ/edit?usp=sharing)\*\*\*\*
 
-Stefano said that this is their decision from today**'**s night. So here some bullets:
+#### **Overview / Motivation**
 
-* TP have to have a type field \(individual/household\)
-* TP type has to be sent to DataHub
-* If TP type is individual, we remove households without individuals from results
-* TP type is not editable, after the initial set
-* When TP type is set to individual all individual are send to Datahub
-* We show individual based filters \(Age, Sex\) only when TP type is set to individual
+* Many times there is no reliable individual level data available for households in certain programs.
+* Hence UNICEF needs the ability to restrict visibility in data where it is not necessary in Cash Assist and communicate what level of data is available for a program so entitlements etc. can be best calculated in CA.
 
-**Proposed Tivix Solution:**
+#### **Solution**
 
-1. Add field for Household / Individual flag when creating a Programme.
-2. When closing a Target Population, and a user selects a Programme with an individual flag, warn the user - send collectors plus targeted individual details.
-3. **Add flag to the staging \(High Priority\)**
-   1. Add Boolean on Programme. 
-4. **UI changes \(Low Priority\)**
-5. Send flag to Cash Assist.
+1. **Add a flag to the staging \(High Priority\)**
+   * Add field \(Boolean, send\_individual\) for Household / Individual flag when creating a Programme.
+   * Send flag from HOPE Programme / TP to Cash Assist.
+2. **UI changes \(Low Priority\)**
+   * When closing a Target Population, and a user selects a Programme with an individual flag, warn the user when send\_individual == False and they are targeting based on individual params anywhere in the TP 
+   * send collectors plus targeted individual details to Cash Assist
 
-**Expected Delivery Date:**
+#### **Expected Delivery Date**
 
-TBD
-
-**Notes:**
+Staging Model + light UI changes \(50%\) to be done within 4 weeks.
 
 **------------------------------------------------**
 
