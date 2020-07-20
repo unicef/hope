@@ -47,7 +47,9 @@ export function VerificationRecordsTableRow({ record }) {
       <TableCell align='left'>
         {record.paymentRecord.household.headOfHousehold.fullName}
       </TableCell>
-      <TableCell align='left'>{record.paymentRecord.household.id}</TableCell>
+      <TableCell align='left'>
+        {decodeIdString(record.paymentRecord.household.id)}
+      </TableCell>
       <TableCell align='right'>
         {formatCurrency(record.paymentRecord.deliveredQuantity)}
       </TableCell>

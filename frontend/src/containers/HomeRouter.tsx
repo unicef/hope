@@ -106,7 +106,7 @@ export function HomeRouter(): React.ReactElement {
           <Route path='/:businessArea/programs/:id'>
             <ProgramDetailsPage />
           </Route>
-          <Route path='/:businessArea/payment_records/:id'>
+          <Route path='/:businessArea/payment-records/:id'>
             <PaymentRecordDetailsPage />
           </Route>
           <Route path='/:businessArea/programs'>

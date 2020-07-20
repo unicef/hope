@@ -1667,6 +1667,7 @@ export enum ProgramStatus {
 export type Query = {
    __typename?: 'Query',
   paymentRecord?: Maybe<PaymentRecordNode>,
+  paymentRecordVerification?: Maybe<PaymentVerificationNode>,
   allPaymentRecords?: Maybe<PaymentRecordNodeConnection>,
   allPaymentVerifications?: Maybe<PaymentVerificationNodeConnection>,
   paymentRecordStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
@@ -1725,6 +1726,11 @@ export type Query = {
 
 
 export type QueryPaymentRecordArgs = {
+  id: Scalars['ID']
+};
+
+
+export type QueryPaymentRecordVerificationArgs = {
   id: Scalars['ID']
 };
 
@@ -3580,6 +3586,40 @@ export type PaymentRecordQuery = (
     )>, serviceProvider: (
       { __typename?: 'ServiceProviderNode' }
       & Pick<ServiceProviderNode, 'id' | 'fullName' | 'shortName'>
+    ) }
+  )> }
+);
+
+export type PaymentRecordVerificationQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type PaymentRecordVerificationQuery = (
+  { __typename?: 'Query' }
+  & { paymentRecordVerification: Maybe<(
+    { __typename?: 'PaymentVerificationNode' }
+    & Pick<PaymentVerificationNode, 'id' | 'status' | 'statusDate'>
+    & { paymentRecord: (
+      { __typename?: 'PaymentRecordNode' }
+      & Pick<PaymentRecordNode, 'id' | 'status' | 'statusDate' | 'caId' | 'fullName' | 'distributionModality' | 'totalPersonsCovered' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'entitlementCardIssueDate' | 'entitlementCardNumber'>
+      & { household: (
+        { __typename?: 'HouseholdNode' }
+        & Pick<HouseholdNode, 'id' | 'size'>
+      ), targetPopulation: (
+        { __typename?: 'TargetPopulationNode' }
+        & Pick<TargetPopulationNode, 'id' | 'name'>
+      ), cashPlan: Maybe<(
+        { __typename?: 'CashPlanNode' }
+        & Pick<CashPlanNode, 'id' | 'caId'>
+        & { program: (
+          { __typename?: 'ProgramNode' }
+          & Pick<ProgramNode, 'id' | 'name'>
+        ) }
+      )>, serviceProvider: (
+        { __typename?: 'ServiceProviderNode' }
+        & Pick<ServiceProviderNode, 'id' | 'fullName' | 'shortName'>
+      ) }
     ) }
   )> }
 );
@@ -6407,6 +6447,95 @@ export function usePaymentRecordLazyQuery(baseOptions?: ApolloReactHooks.LazyQue
 export type PaymentRecordQueryHookResult = ReturnType<typeof usePaymentRecordQuery>;
 export type PaymentRecordLazyQueryHookResult = ReturnType<typeof usePaymentRecordLazyQuery>;
 export type PaymentRecordQueryResult = ApolloReactCommon.QueryResult<PaymentRecordQuery, PaymentRecordQueryVariables>;
+export const PaymentRecordVerificationDocument = gql`
+    query PaymentRecordVerification($id: ID!) {
+  paymentRecordVerification(id: $id) {
+    id
+    status
+    statusDate
+    paymentRecord {
+      id
+      status
+      statusDate
+      caId
+      household {
+        id
+        size
+      }
+      fullName
+      distributionModality
+      totalPersonsCovered
+      targetPopulation {
+        id
+        name
+      }
+      cashPlan {
+        id
+        caId
+        program {
+          id
+          name
+        }
+      }
+      currency
+      entitlementQuantity
+      deliveredQuantity
+      deliveryDate
+      deliveryDate
+      entitlementCardIssueDate
+      entitlementCardNumber
+      serviceProvider {
+        id
+        fullName
+        shortName
+      }
+    }
+  }
+}
+    `;
+export type PaymentRecordVerificationComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<PaymentRecordVerificationQuery, PaymentRecordVerificationQueryVariables>, 'query'> & ({ variables: PaymentRecordVerificationQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const PaymentRecordVerificationComponent = (props: PaymentRecordVerificationComponentProps) => (
+      <ApolloReactComponents.Query<PaymentRecordVerificationQuery, PaymentRecordVerificationQueryVariables> query={PaymentRecordVerificationDocument} {...props} />
+    );
+    
+export type PaymentRecordVerificationProps<TChildProps = {}> = ApolloReactHoc.DataProps<PaymentRecordVerificationQuery, PaymentRecordVerificationQueryVariables> & TChildProps;
+export function withPaymentRecordVerification<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  PaymentRecordVerificationQuery,
+  PaymentRecordVerificationQueryVariables,
+  PaymentRecordVerificationProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, PaymentRecordVerificationQuery, PaymentRecordVerificationQueryVariables, PaymentRecordVerificationProps<TChildProps>>(PaymentRecordVerificationDocument, {
+      alias: 'paymentRecordVerification',
+      ...operationOptions
+    });
+};
+
+/**
+ * __usePaymentRecordVerificationQuery__
+ *
+ * To run a query within a React component, call `usePaymentRecordVerificationQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePaymentRecordVerificationQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePaymentRecordVerificationQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function usePaymentRecordVerificationQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<PaymentRecordVerificationQuery, PaymentRecordVerificationQueryVariables>) {
+        return ApolloReactHooks.useQuery<PaymentRecordVerificationQuery, PaymentRecordVerificationQueryVariables>(PaymentRecordVerificationDocument, baseOptions);
+      }
+export function usePaymentRecordVerificationLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<PaymentRecordVerificationQuery, PaymentRecordVerificationQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<PaymentRecordVerificationQuery, PaymentRecordVerificationQueryVariables>(PaymentRecordVerificationDocument, baseOptions);
+        }
+export type PaymentRecordVerificationQueryHookResult = ReturnType<typeof usePaymentRecordVerificationQuery>;
+export type PaymentRecordVerificationLazyQueryHookResult = ReturnType<typeof usePaymentRecordVerificationLazyQuery>;
+export type PaymentRecordVerificationQueryResult = ApolloReactCommon.QueryResult<PaymentRecordVerificationQuery, PaymentRecordVerificationQueryVariables>;
 export const ProgramDocument = gql`
     query Program($id: ID!) {
   program(id: $id) {
@@ -8906,6 +9035,7 @@ export type ProgramNodeEdgeResolvers<ContextType = any, ParentType extends Resol
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType, RequireFields<QueryPaymentRecordArgs, 'id'>>,
+  paymentRecordVerification?: Resolver<Maybe<ResolversTypes['PaymentVerificationNode']>, ParentType, ContextType, RequireFields<QueryPaymentRecordVerificationArgs, 'id'>>,
   allPaymentRecords?: Resolver<Maybe<ResolversTypes['PaymentRecordNodeConnection']>, ParentType, ContextType, QueryAllPaymentRecordsArgs>,
   allPaymentVerifications?: Resolver<Maybe<ResolversTypes['PaymentVerificationNodeConnection']>, ParentType, ContextType, QueryAllPaymentVerificationsArgs>,
   paymentRecordStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
