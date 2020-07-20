@@ -12,7 +12,6 @@ from registration_datahub.models import (
     RegistrationDataImportDatahub,
     ImportedHousehold,
     ImportedIndividual,
-    ImportData,
 )
 
 
@@ -45,7 +44,10 @@ class ImportedHouseholdFactory(factory.DjangoModelFactory):
     registration_data_import = factory.SubFactory(
         RegistrationDataImportDatahubFactory,
     )
-    registration_date = factory.Faker(
+    first_registration_date = factory.Faker(
+        "date_this_year", before_today=True, after_today=False
+    )
+    last_registration_date = factory.Faker(
         "date_this_year", before_today=True, after_today=False
     )
     admin1 = ""
@@ -97,6 +99,13 @@ class ImportedIndividualFactory(factory.DjangoModelFactory):
     )
     disability = factory.fuzzy.FuzzyChoice((True, False))
     household = factory.SubFactory(ImportedHouseholdFactory)
+    first_registration_date = factory.Faker(
+        "date_this_year", before_today=True, after_today=False
+    )
+    last_registration_date = factory.Faker(
+        "date_this_year", before_today=True, after_today=False
+    )
+
 
 def create_imported_household(household_args=None, individual_args=None):
     if household_args is None:

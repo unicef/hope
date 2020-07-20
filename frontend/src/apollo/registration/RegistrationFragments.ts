@@ -35,7 +35,8 @@ export const importedHouseholdMinimal = gql`
     size
     admin1
     admin2
-    registrationDate
+    firstRegistrationDate
+    lastRegistrationDate
   }
 `;
 export const importedHouseholdDetailed = gql`

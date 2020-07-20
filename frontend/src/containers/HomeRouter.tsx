@@ -24,6 +24,8 @@ import { CreateTargetPopulation } from './pages/CreateTargetPopulation';
 import { RegistrationDataImportDetailsPage } from './registration/details/RegistrationDataImportDetailsPage';
 import { RegistrationHouseholdDetailsPage } from './registration/details/households/RegistrationHouseholdDetailsPage';
 import { RegistrationIndividualDetailsPage } from './registration/details/individual/RegistrationIndividualDetailsPage';
+import { PaymentVerificationPage } from './pages/PaymentVerificationPage';
+import { PaymentVerificationDetailsPage } from './pages/PaymentVerificationDetailsPage';
 
 const Root = styled.div`
   display: flex;
@@ -84,6 +86,12 @@ export function HomeRouter(): React.ReactElement {
           </Route>
           <Route path='/:businessArea/target-population/:id'>
             <TargetPopulationDetailsPage />
+          </Route>
+          <Route exact path='/:businessArea/payment-verification'>
+            <PaymentVerificationPage />
+          </Route>
+          <Route path='/:businessArea/payment-verification/:id'>
+            <PaymentVerificationDetailsPage />
           </Route>
           <Route path='/:businessArea/population/household'>
             <PopulationHouseholdPage />

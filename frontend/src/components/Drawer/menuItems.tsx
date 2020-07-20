@@ -60,8 +60,8 @@ export const menuItems = [
   },
   {
     name: 'Payment Verification',
-    href: '/#',
-    selectedRegexp: /^\/test.*$/,
+    href: '/payment-verification',
+    selectedRegexp: /^\/payment-verification*$/,
     icon: <AttachMoney />,
   },
   {
