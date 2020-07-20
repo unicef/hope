@@ -23,7 +23,10 @@ Stefano said that this is their decision from today**'**s night. So here some bu
 
 1. Add field for Household / Individual flag when creating a Programme.
 2. When closing a Target Population, and a user selects a Programme with an individual flag, warn the user - send collectors plus targeted individual details.
-3. Send flag to Cash Assist.
+3. **Add flag to the staging \(High Priority\)**
+   1. Add Boolean on Programme. 
+4. **UI changes \(Low Priority\)**
+5. Send flag to Cash Assist.
 
 **Expected Delivery Date:**
 
