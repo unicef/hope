@@ -3,7 +3,6 @@ from datetime import date
 
 from django.contrib.gis.db.models import PointField
 from django.contrib.postgres.fields import JSONField
-from django.core import exceptions
 from django.core.validators import (
     validate_image_file_extension,
     MinLengthValidator,
@@ -180,7 +179,7 @@ class Household(TimeStampedUUIDModel, AbstractSyncable):
 
     @property
     def business_area(self):
-        return self.admin_area.admin.admin_area_type.business_area
+        return self.admin_area.admin_area_type.business_area
 
     def __str__(self):
         return f"Household ID: {self.id}"
@@ -327,14 +326,17 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
 
 
 class EntitlementCard(TimeStampedUUIDModel):
+    ACTIVE = "ACTIVE"
+    ERRONEOUS = "ERRONEOUS"
+    CLOSED = "CLOSED"
     STATUS_CHOICE = Choices(
-        ("ACTIVE", _("Active")),
-        ("ERRONEOUS", _("Erroneous")),
-        ("CLOSED", _("Closed")),
+        (ACTIVE, _("Active")),
+        (ERRONEOUS, _("Erroneous")),
+        (CLOSED, _("Closed")),
     )
     card_number = models.CharField(max_length=255)
     status = models.CharField(
-        choices=STATUS_CHOICE, default=STATUS_CHOICE.ACTIVE, max_length=10,
+        choices=STATUS_CHOICE, default=ACTIVE, max_length=10,
     )
     card_type = models.CharField(max_length=255)
     current_card_size = models.CharField(max_length=255)
