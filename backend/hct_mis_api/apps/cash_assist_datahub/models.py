@@ -168,7 +168,8 @@ class PaymentRecord(SessionModel):
     )
     delivery_date = models.DateTimeField(null=True)
     service_provider_ca_id = models.CharField(max_length=255, null=True)
-
+    transaction_reference_id = models.CharField(max_length=255, null=True)
+    vision_id = models.CharField(max_length=255, null=True)
     class Meta:
         unique_together = ("session", "ca_id")
 
