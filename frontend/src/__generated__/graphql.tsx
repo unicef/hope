@@ -3606,6 +3606,10 @@ export type PaymentRecordVerificationQuery = (
       & { household: (
         { __typename?: 'HouseholdNode' }
         & Pick<HouseholdNode, 'id' | 'size'>
+        & { headOfHousehold: (
+          { __typename?: 'IndividualNode' }
+          & Pick<IndividualNode, 'id' | 'phoneNo' | 'phoneNoAlternative'>
+        ) }
       ), targetPopulation: (
         { __typename?: 'TargetPopulationNode' }
         & Pick<TargetPopulationNode, 'id' | 'name'>
@@ -6462,6 +6466,11 @@ export const PaymentRecordVerificationDocument = gql`
       household {
         id
         size
+        headOfHousehold {
+          id
+          phoneNo
+          phoneNoAlternative
+        }
       }
       fullName
       distributionModality
