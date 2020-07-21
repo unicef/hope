@@ -2,7 +2,6 @@ import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import Moment from 'react-moment';
 import { PaymentVerificationNodeEdge } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
@@ -14,7 +13,8 @@ import {
 import { StatusBox } from '../../../components/StatusBox';
 
 const StatusContainer = styled.div`
-  width: 120px;
+  min-width: 120px;
+  max-width: 200px;
 `;
 interface VerificationRecordsTableRowProps {
   record: PaymentVerificationNodeEdge;
@@ -23,7 +23,6 @@ interface VerificationRecordsTableRowProps {
 export function VerificationRecordsTableRow({ record }) {
   const history = useHistory();
   const businessArea = useBusinessArea();
-  console.log('🐥', record);
   const handleClick = (): void => {
     const path = `/${businessArea}/verification-records/${record.id}`;
     history.push(path);
