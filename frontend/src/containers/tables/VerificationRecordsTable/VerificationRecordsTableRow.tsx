@@ -2,14 +2,13 @@ import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import Moment from 'react-moment';
-import { CashPlanNode } from '../../../__generated__/graphql';
+import { PaymentVerificationNodeEdge } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
 import {
   decodeIdString,
   formatCurrency,
-  paymentVerificationStatusToColor,
+  verificationRecordsStatusToColor,
 } from '../../../utils/utils';
 import { StatusBox } from '../../../components/StatusBox';
 
@@ -17,18 +16,15 @@ const StatusContainer = styled.div`
   min-width: 120px;
   max-width: 200px;
 `;
-interface PaymentVerificationTableRowProps {
-  plan: CashPlanNode;
+interface VerificationRecordsTableRowProps {
+  record: PaymentVerificationNodeEdge;
 }
 
-export function PaymentVerificationTableRow({
-  plan,
-}: PaymentVerificationTableRowProps): React.ReactElement {
+export function VerificationRecordsTableRow({ record }) {
   const history = useHistory();
   const businessArea = useBusinessArea();
-
   const handleClick = (): void => {
-    const path = `/${businessArea}/payment-verification/${plan.id}`;
+    const path = `/${businessArea}/verification-records/${record.id}`;
     history.push(path);
   };
   return (
@@ -36,27 +32,31 @@ export function PaymentVerificationTableRow({
       hover
       onClick={handleClick}
       role='checkbox'
-      key={plan.id}
+      key={record.id}
     >
-      <TableCell align='left'>{decodeIdString(plan.id)}</TableCell>
+      <TableCell align='left'>
+        {decodeIdString(record.paymentRecord.id)}
+      </TableCell>
       <TableCell align='left'>
         <StatusContainer>
           <StatusBox
-            status={plan.verificationStatus}
-            statusToColor={paymentVerificationStatusToColor}
+            status={record.status}
+            statusToColor={verificationRecordsStatusToColor}
           />
         </StatusContainer>
       </TableCell>
-      <TableCell align='left'>{plan.assistanceThrough}</TableCell>
-      <TableCell align='left'>{plan.deliveryType}</TableCell>
-      <TableCell align='right'>
-        {formatCurrency(plan.totalDeliveredQuantity)}
+      <TableCell align='left'>
+        {record.paymentRecord.household.headOfHousehold.fullName}
       </TableCell>
       <TableCell align='left'>
-        <Moment format='DD/MM/YYYY'>{plan.startDate}</Moment>-
-        <Moment format='DD/MM/YYYY'>{plan.endDate}</Moment>
+        {decodeIdString(record.paymentRecord.household.id)}
       </TableCell>
-      <TableCell align='left'>{plan.program.name}</TableCell>
+      <TableCell align='right'>
+        {formatCurrency(record.paymentRecord.deliveredQuantity)}
+      </TableCell>
+      <TableCell align='right'>
+        {formatCurrency(record.receivedAmount)}
+      </TableCell>
     </ClickableTableRow>
   );
 }

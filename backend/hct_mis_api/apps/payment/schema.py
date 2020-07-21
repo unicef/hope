@@ -40,6 +40,27 @@ class PaymentRecordFilter(FilterSet):
     )
 
 
+class PaymentVerificationFilter(FilterSet):
+    class Meta:
+        fields = (
+            "cash_plan_payment_verification",
+        )
+        model = PaymentVerification
+
+    order_by = OrderingFilter(
+        fields=(
+            "payment_record",
+            "status",
+            "payment_record__household__head_of_household__full_name",
+            "payment_record__household__head_of_household__family_name",
+            "payment_record__household",
+            "payment_record__household__unicef_id",
+            "payment_record__delivered_quantity",
+            "received_amount"
+        )
+    )
+
+
 class PaymentRecordNode(DjangoObjectType):
     class Meta:
         model = PaymentRecord
@@ -58,6 +79,8 @@ class ServiceProviderNode(DjangoObjectType):
 class CashPlanPaymentVerificationNode(DjangoObjectType):
     class Meta:
         model = CashPlanPaymentVerification
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
 
 
 class PaymentVerificationNode(DjangoObjectType):
@@ -69,8 +92,12 @@ class PaymentVerificationNode(DjangoObjectType):
 
 class Query(graphene.ObjectType):
     payment_record = relay.Node.Field(PaymentRecordNode)
+    payment_record_verification = relay.Node.Field(PaymentVerificationNode)
     all_payment_records = DjangoFilterConnectionField(
         PaymentRecordNode, filterset_class=PaymentRecordFilter,
+    )
+    all_payment_verifications = DjangoFilterConnectionField(
+        PaymentVerificationNode, filterset_class=PaymentVerificationFilter,
     )
     payment_record_status_choices = graphene.List(ChoiceObject)
     payment_record_entitlement_card_status_choices = graphene.List(ChoiceObject)
