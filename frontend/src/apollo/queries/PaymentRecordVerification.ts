@@ -15,6 +15,11 @@ export const PAYMENT_RECORD_VERIFICATION_QUERY = gql`
         household {
           id
           size
+          headOfHousehold {
+            id
+            phoneNo
+            phoneNoAlternative
+          }
         }
         fullName
         distributionModality
