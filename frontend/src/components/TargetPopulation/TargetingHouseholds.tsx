@@ -4,9 +4,16 @@ import { useCandidateHouseholdsListByTargetingCriteriaQuery } from '../../__gene
 import { SentTargetPopulationTable } from '../../containers/tables/TargetPopulation/SentTargeting';
 import { ApprovedTargetPopulationTable } from '../../containers/tables/TargetPopulation/ApprovedTargeting';
 
-export function TargetingHouseholds({ status, id, selectedTab, candidateListTotalHouseholds, finalListTotalHouseholds }) {
+export function TargetingHouseholds({
+  status,
+  id,
+  selectedTab,
+  candidateListTotalHouseholds,
+  finalListTotalHouseholds,
+}) {
   let table;
-  const hasSameResults = candidateListTotalHouseholds === finalListTotalHouseholds;
+  const hasSameResults =
+    candidateListTotalHouseholds === finalListTotalHouseholds;
   switch (status) {
     case 'DRAFT':
       table = (
@@ -19,11 +26,24 @@ export function TargetingHouseholds({ status, id, selectedTab, candidateListTota
       break;
     case 'APPROVED':
       table = (
-        <ApprovedTargetPopulationTable id={id} selectedTab={selectedTab} hasSameResults={hasSameResults}/>
-      )
+        <ApprovedTargetPopulationTable
+          id={id}
+          selectedTab={selectedTab}
+          hasSameResults={hasSameResults}
+        />
+      );
       break;
     case 'FINALIZED':
-      table = <SentTargetPopulationTable id={id} selectedTab={selectedTab} />;
+      table =
+        selectedTab === 0 ? (
+          <ApprovedTargetPopulationTable
+            id={id}
+            selectedTab={selectedTab}
+            hasSameResults={hasSameResults}
+          />
+        ) : (
+          <SentTargetPopulationTable id={id} selectedTab={selectedTab} />
+        );
       break;
     default:
       table = (

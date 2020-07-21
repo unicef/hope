@@ -55,14 +55,14 @@ class FundsCommitment(SessionModel):
     )
     vendor_id = models.CharField(max_length=10, null=True)
     posting_date = models.DateField(null=True)
-    vision_approval = models.DateField(null=True)
+    vision_approval = models.CharField(max_length=1, null=True)
 
 
 class DownPayment(SessionModel):
     business_area = models.CharField(max_length=4)
-    down_payment_number = models.CharField(max_length=10, primary_key=True)
+    down_payment_reference = models.CharField(max_length=19, primary_key=True)
     document_type = models.CharField(max_length=10)
-    consumer_fc_number = models.CharField(max_length=10)
+    consumed_fc_number = models.CharField(max_length=10)
     total_down_payment_amount_local = models.DecimalField(
         decimal_places=2,
         max_digits=13,
