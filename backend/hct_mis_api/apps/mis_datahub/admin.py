@@ -1,4 +1,3 @@
-# Register your models here.
 from django.contrib import admin
 
 from mis_datahub.models import (
@@ -6,7 +5,7 @@ from mis_datahub.models import (
     Individual,
     Session,
     TargetPopulation,
-    Program,
+    Program, Document,
 )
 
 
@@ -32,4 +31,9 @@ class SessionAdmin(admin.ModelAdmin):
 
 @admin.register(Program)
 class ProgramAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(Document)
+class DocumentAdmin(admin.ModelAdmin):
     pass

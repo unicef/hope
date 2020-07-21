@@ -1,14 +1,15 @@
-import uuid
+import re
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from django_countries.fields import CountryField
 
 from household.models import (
     RELATIONSHIP_CHOICE,
     ROLE_CHOICE,
     MARITAL_STATUS_CHOICE,
-    INDIVIDUAL_HOUSEHOLD_STATUS, RESIDENCE_STATUS_CHOICE,
+    INDIVIDUAL_HOUSEHOLD_STATUS,
+    RESIDENCE_STATUS_CHOICE,
+    IDENTIFICATION_TYPE_CHOICE,
 )
 from utils.models import AbstractSession
 
@@ -27,6 +28,7 @@ class SessionModel(models.Model):
 class Household(SessionModel):
     mis_id = models.UUIDField()
     unhcr_id = models.CharField(max_length=255, null=True)
+    unicef_id = models.CharField(max_length=255, null=True)
     status = models.CharField(
         max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default="ACTIVE"
     )
@@ -36,7 +38,7 @@ class Household(SessionModel):
     address = models.CharField(max_length=255, null=True)
     admin1 = models.CharField(max_length=255, null=True)
     admin2 = models.CharField(max_length=255, null=True)
-    country = models.CharField(null=True,max_length=3)
+    country = models.CharField(null=True, max_length=3)
     residence_status = models.CharField(
         max_length=255, choices=RESIDENCE_STATUS_CHOICE, null=True
     )
@@ -47,18 +49,21 @@ class Household(SessionModel):
 
 
 class Individual(SessionModel):
+    INACTIVE = "INACTIVE"
+    ACTIVE = "ACTIVE"
+    STATUS_CHOICE = ((INACTIVE, "Inactive"), (ACTIVE, "Active"))
+    MALE = "MALE"
+    FEMALE = "FEMALE"
+    SEX_CHOICE = (
+        (MALE, _("Male")),
+        (FEMALE, _("Female")),
+    )
+
     mis_id = models.UUIDField()
     unhcr_id = models.CharField(max_length=255, null=True)
+    unicef_id = models.CharField(max_length=255, null=True)
     household_mis_id = models.UUIDField()
-    status = models.CharField(
-        max_length=50,
-        choices=(("INACTIVE", "Inactive"), ("ACTIVE", "Active")),
-        null=True,
-    )
-    SEX_CHOICE = (
-        ("MALE", _("Male")),
-        ("FEMALE", _("Female")),
-    )
+    status = models.CharField(max_length=50, choices=STATUS_CHOICE, null=True,)
     national_id_number = models.CharField(max_length=255, null=True)
     full_name = models.CharField(max_length=255)
     family_name = models.CharField(max_length=255, null=True)
@@ -140,5 +145,40 @@ class Program(SessionModel):
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
     description = models.CharField(max_length=255, null=True)
+
     class Meta:
         unique_together = ("session", "mis_id")
+
+
+class Document(SessionModel):
+    # VALID = "VALID"
+    # COLLECTED = "COLLECTED"
+    # LOST = "LOST"
+    # UNKNOWN = "UNKNOWN"
+    # CANCELED = "CANCELED"
+    # EXPIRED = "EXPIRED"
+    # HOLD = "HOLD"
+    # DAMAGED = "DAMAGED"
+    # STATUS_CHOICE = Choices(
+    #     (VALID, _("Valid")),
+    #     (COLLECTED, _("Collected")),
+    #     (LOST, _("Lost")),
+    #     (UNKNOWN, _("Unknown")),
+    #     (CANCELED, _("Canceled")),
+    #     (EXPIRED, _("Expired")),
+    #     (HOLD, _("Hold")),
+    #     (DAMAGED, _("Damaged")),
+    # )
+
+    # status = models.CharField(choices=STATUS_CHOICE, null=True)
+    # date_of_expiry = models.DateField(null=True)
+    # photo = models.ImageField(blank=True)
+
+    mis_id = models.UUIDField()
+    number = models.CharField(max_length=255, null=True)
+    individual_mis_id = models.UUIDField(null=True)
+    type = models.CharField(max_length=50, choices=IDENTIFICATION_TYPE_CHOICE)
+    country = models.CharField(null=True, max_length=3)
+
+    class Meta:
+        unique_together = ("type", "country", "number")
