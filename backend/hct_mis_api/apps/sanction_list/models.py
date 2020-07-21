@@ -38,7 +38,7 @@ class SanctionListIndividual(TimeStampedUUIDModel):
     data_id = models.PositiveIntegerField()
     version_num = models.PositiveIntegerField()
     first_name = models.CharField(max_length=85)
-    second_name = models.CharField(max_length=85)
+    second_name = models.CharField(max_length=85, blank=True, default="")
     third_name = models.CharField(max_length=85, blank=True, default="")
     fourth_name = models.CharField(max_length=85, blank=True, default="")
     full_name = models.CharField(max_length=255)

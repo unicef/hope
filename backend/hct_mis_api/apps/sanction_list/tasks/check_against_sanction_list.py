@@ -49,9 +49,9 @@ class CheckAgainstSanctionListTask:
                     filter_values[header_as_key] = value
 
             dob = filter_values.pop("date_of_birth", "")
-            names = [n.capitalize() for n in filter_values.values() if n]
-            if len(names) < 2:
-                continue
+            names = [
+                str(n).capitalize().strip() for n in filter_values.values() if n
+            ]
 
             name_permutations = permutations(names)
             full_name_permutations = [
@@ -64,15 +64,22 @@ class CheckAgainstSanctionListTask:
                     Q(dates_of_birth__date=dob.date())
                     | Q(dates_of_birth__date__year=dob.year)
                     # to return something when full_name matches but dob not
-                    | Q(full_name__isnull=False)
+                    | Q(first_name__isnull=False)
                 )
             else:
                 dob_query = Q(full_name__isnull=False)
 
-            name_query = Q(full_name__in=full_name_permutations) | (
-                Q(full_name__icontains=names[0])
-                & Q(full_name__icontains=names[1])
-            )
+            if len(names) == 0:
+                continue
+            elif len(names) == 1:
+                name_query = Q(full_name__in=full_name_permutations) | Q(
+                    first_name__iexact=names[0]
+                )
+            else:
+                name_query = Q(full_name__in=full_name_permutations) | (
+                    Q(full_name__icontains=names[0])
+                    & Q(full_name__icontains=names[1])
+                )
 
             qs = SanctionListIndividual.objects.filter(
                 name_query & dob_query
@@ -105,6 +112,7 @@ class CheckAgainstSanctionListTask:
             "FIRST NAME",
             "SECOND NAME",
             "THIRD NAME",
+            "FOURTH NAME",
             "DATE OF BIRTH",
             "ORIGINAL FILE ROW NUMBER",
         )
@@ -134,6 +142,7 @@ class CheckAgainstSanctionListTask:
             subject=subject,
             from_email=settings.EMAIL_HOST_USER,
             to=[uploaded_file.associated_email],
+            cc=[settings.SANCTION_LIST_CC_MAIL],
             body=text_body,
         )
         msg.attach(
