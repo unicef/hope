@@ -5,12 +5,14 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from graphene_file_upload.scalars import Upload
 from scipy.special import ndtri
 
 from core.filters import filter_age
 from core.permissions import is_authenticated
-from payment.models import CashPlanPaymentVerification
+from core.utils import decode_id_string
+from payment.models import CashPlanPaymentVerification, PaymentVerification
 from program.models import CashPlan
 from program.schema import CashPlanNode
 
@@ -64,7 +66,7 @@ class CreatePaymentVerificationMutation(graphene.Mutation):
 
     @staticmethod
     def verify_required_arguments(input, field_name, options):
-        for key, value in options:
+        for key, value in options.items():
             if key != input.get(field_name):
                 continue
             for required in value.get("required"):
@@ -116,15 +118,54 @@ class CreatePaymentVerificationMutation(graphene.Mutation):
             },
         )
 
-    @classmethod
-    def get_records_queryset(cls, input):
-        arg = lambda name: input.get(name)
-        cash_plan_id = arg("cash_plan_id")
+        cash_plan_id = decode_id_string(arg("cash_plan_id"))
         cash_plan = get_object_or_404(CashPlan, id=cash_plan_id)
+        verification_channel = arg("verification_channel")
+        if cash_plan.verifications.count() > 0:
+            raise ValidationError(
+                "Verification plan for this Cash Plan already exists"
+            )
+        (
+            payment_records,
+            confidence_interval,
+            margin_of_error,
+            payment_records_sample_count,
+            sampling,
+        ) = cls.process_sampling(cash_plan, input)
+        cash_plan_verification = CashPlanPaymentVerification(
+            cash_plan=cash_plan,
+            confidence_interval=confidence_interval,
+            margin_of_error=margin_of_error,
+            sample_size=payment_records_sample_count,
+            sampling=sampling,
+            verification_method=verification_channel,
+        )
+        payment_record_verifications_to_create = []
+        for payment_record in payment_records:
+            payment_record_verification = PaymentVerification(
+                status_date=timezone.now(),
+                cash_plan_payment_verification=cash_plan_verification,
+                payment_record=payment_record,
+            )
+            payment_record_verifications_to_create.append(
+                payment_record_verification
+            )
+        cash_plan_verification.save()
+        PaymentVerification.objects.bulk_create(
+            payment_record_verifications_to_create
+        )
+        cash_plan.refresh_from_db()
+        return cls(cash_plan=cash_plan)
+
+    @classmethod
+    def process_sampling(cls, cash_plan, input):
+        arg = lambda name: input.get(name)
         sampling = arg("sampling")
         excluded_admin_areas = []
         sex = None
         age = None
+        confidence_interval = None
+        margin_of_error = None
         payment_records = cash_plan.payment_records
         if sampling == CashPlanPaymentVerification.SAMPLING_FULL_LIST:
             excluded_admin_areas = arg("full_list_arguments").get(
@@ -163,7 +204,13 @@ class CreatePaymentVerificationMutation(graphene.Mutation):
             payment_records = payment_records.order_by("?")[
                 :payment_records_sample_count
             ]
-        return payment_records
+        return (
+            payment_records,
+            confidence_interval,
+            margin_of_error,
+            payment_records_sample_count,
+            sampling,
+        )
 
     @classmethod
     def get_number_of_samples(
@@ -186,4 +233,6 @@ class CreatePaymentVerificationMutation(graphene.Mutation):
 
 
 class Mutations(graphene.ObjectType):
-    create_cash_plan_payment_verification = CreatePaymentVerificationMutation.Field()
+    create_cash_plan_payment_verification = (
+        CreatePaymentVerificationMutation.Field()
+    )
