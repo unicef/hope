@@ -69,7 +69,8 @@ const TableWrapper = styled.div`
   padding-bottom: 0;
 `;
 const StatusContainer = styled.div`
-  width: 120px;
+  min-width: 120px;
+  max-width: 200px;
 `;
 // interface PaymentVerificationDetailsProps {
 //   registration: 'registr';
