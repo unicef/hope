@@ -57,9 +57,7 @@ class CashPlan(SessionModel):
     business_area = models.CharField(max_length=20, null=True)
     cash_plan_id = models.CharField(max_length=255)
     cash_plan_hash_id = models.UUIDField()
-    status = models.CharField(
-        max_length=255, null=True,
-    )
+    status = models.CharField(max_length=255, null=True,)
     status_date = models.DateTimeField(null=True)
     name = models.CharField(max_length=255, null=True)
     distribution_level = models.CharField(max_length=255, null=True)
@@ -144,8 +142,7 @@ class PaymentRecord(SessionModel):
         max_length=255, null=True
     )
     entitlement_card_number = models.CharField(max_length=255, null=True)
-    entitlement_card_status = models.CharField( max_length=20, null=True
-    )
+    entitlement_card_status = models.CharField(max_length=20, null=True)
     entitlement_card_issue_date = models.DateField(null=True)
     delivery_type = models.CharField(
         choices=DELIVERY_TYPE_CHOICE,
@@ -168,6 +165,8 @@ class PaymentRecord(SessionModel):
     )
     delivery_date = models.DateTimeField(null=True)
     service_provider_ca_id = models.CharField(max_length=255, null=True)
+    transaction_reference_id = models.CharField(max_length=255, null=True)
+    vision_id = models.CharField(max_length=255, null=True)
 
     class Meta:
         unique_together = ("session", "ca_id")
@@ -177,7 +176,7 @@ class ServiceProvider(SessionModel):
     business_area = models.CharField(max_length=20)
     ca_id = models.CharField(max_length=255)
     full_name = models.CharField(max_length=255)
-    short_name = models.CharField(max_length=4)
+    short_name = models.CharField(max_length=100)
     country = models.CharField(max_length=3,)
     vision_id = models.CharField(max_length=255)
 

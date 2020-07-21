@@ -89,6 +89,10 @@ ENV = os.getenv("ENV")
 if not ENV:
     raise Exception("Environment variable ENV is required!")
 
+# prefix all non-production emails
+if ENV != "prod":
+    EMAIL_SUBJECT_PREFIX = "{}".format(ENV)
+
 DATABASES = {
     "default": {
         "ENGINE": "django.contrib.gis.db.backends.postgis",
@@ -223,6 +227,7 @@ OTHER_APPS = [
     "graphene_django",
     "social_django",
     "corsheaders",
+    "django_elasticsearch_dsl",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
@@ -285,11 +290,6 @@ LOGGING = {
             "class": "logging.StreamHandler",
             "formatter": "standard",
         },
-        "mail_admins": {
-            "level": "ERROR",
-            "class": "django.utils.log.AdminEmailHandler",
-            "include_html": True,
-        },
     },
     "loggers": {
         "": {"handlers": ["default"], "level": "INFO", "propagate": True},
@@ -299,7 +299,7 @@ LOGGING = {
             "propagate": True,
         },
         "django.request": {
-            "handlers": ["mail_admins", "default"],
+            "handlers": ["default"],
             "level": "ERROR",
             "propagate": False,
         },
@@ -393,3 +393,10 @@ GRAPH_MODELS = {
 PHONENUMBER_DEFAULT_REGION = "US"
 
 AIRFLOW_HOST = "airflow_webserver"
+
+SANCTION_LIST_CC_MAIL = os.getenv(
+    "SANCTION_LIST_CC_MAIL", "dfam-cashassistance@unicef.org"
+)
+
+# ELASTICSEARCH SETTINGS
+ELASTICSEARCH_DSL_AUTOSYNC = False

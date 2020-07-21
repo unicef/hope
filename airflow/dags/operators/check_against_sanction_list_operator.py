@@ -11,4 +11,7 @@ class CheckAgainstSanctionListOperator(DjangoOperator):
         config_vars = dag_run.conf
 
         task = CheckAgainstSanctionListTask()
-        task.execute(uploaded_file_id=config_vars.get("uploaded_file_id"))
+        task.execute(
+            uploaded_file_id=config_vars.get("uploaded_file_id"),
+            original_file_name=config_vars.get("original_file_name"),
+        )

@@ -24,6 +24,9 @@ import { CreateTargetPopulation } from './pages/CreateTargetPopulation';
 import { RegistrationDataImportDetailsPage } from './registration/details/RegistrationDataImportDetailsPage';
 import { RegistrationHouseholdDetailsPage } from './registration/details/households/RegistrationHouseholdDetailsPage';
 import { RegistrationIndividualDetailsPage } from './registration/details/individual/RegistrationIndividualDetailsPage';
+import { PaymentVerificationPage } from './pages/PaymentVerificationPage';
+import { PaymentVerificationDetailsPage } from './pages/PaymentVerificationDetailsPage';
+import { VerificationRecordDetailsPage } from './pages/VerificationRecordDetailsPage';
 
 const Root = styled.div`
   display: flex;
@@ -49,9 +52,10 @@ export function HomeRouter(): React.ReactElement {
   const handleDrawerClose = (): void => {
     setOpen(false);
   };
-
   if (!authenticated) {
-    return <Redirect to='/login' />;
+    return (
+      <Redirect to={`/login?next=${location.pathname}${location.search}`} />
+    );
   }
   return (
     <Root>
@@ -84,6 +88,15 @@ export function HomeRouter(): React.ReactElement {
           <Route path='/:businessArea/target-population/:id'>
             <TargetPopulationDetailsPage />
           </Route>
+          <Route exact path='/:businessArea/payment-verification'>
+            <PaymentVerificationPage />
+          </Route>
+          <Route path='/:businessArea/verification-records/:id'>
+            <VerificationRecordDetailsPage />
+          </Route>
+          <Route path='/:businessArea/payment-verification/:id'>
+            <PaymentVerificationDetailsPage />
+          </Route>
           <Route path='/:businessArea/population/household'>
             <PopulationHouseholdPage />
           </Route>
@@ -93,7 +106,7 @@ export function HomeRouter(): React.ReactElement {
           <Route path='/:businessArea/programs/:id'>
             <ProgramDetailsPage />
           </Route>
-          <Route path='/:businessArea/payment_records/:id'>
+          <Route path='/:businessArea/payment-records/:id'>
             <PaymentRecordDetailsPage />
           </Route>
           <Route path='/:businessArea/programs'>

@@ -16,7 +16,6 @@ airflow:
   #   readOnly: true
   #   subPath: file.yaml
 
-
   ##
   ## Extra environment variables to mount in the web, scheduler, and worker pods:
   extraEnv:
@@ -123,6 +122,16 @@ airflow:
         secretKeyRef:
           name: hct-dev-storage-key
           key: password
+    - name: EMAIL_HOST
+      valueFrom:
+        secretKeyRef:
+          name: backend-secret
+          key: EMAIL_HOST
+    - name: KOBO_API_URL
+      valueFrom:
+        secretKeyRef:
+          name: backend-secret
+          key: KOBO_API_URL
     - name: STORAGE_AZURE_ACCOUNT_NAME
       value: "hctmisdev"
 
@@ -225,17 +234,18 @@ airflow:
   ## This should be a json string with your variables in it
   ## Examples:
   ##   variables: '{ "environment": "dev" }'
-  variables: '{}'
+  variables: "{}"
 
   ## Add airflow ppols
   ## This should be a json string with your pools in it
   ## Examples:
   ##   pools: '{ "example": { "description": "This is an example of a pool", "slots": 2 } }'
-  pools: '{}'
+  pools: "{}"
 
   ##
   ## Annotations for the Scheduler, Worker and Web pods
-  podAnnotations: {}
+  podAnnotations:
+    {}
     ## Example:
     ## iam.amazonaws.com/role: airflow-Role
 
@@ -275,15 +285,14 @@ airflow:
   ## Run initdb when the scheduler starts.
   initdb: true
 
-
 scheduler:
   resources: {}
-    # limits:
-    #   cpu: "1000m"
-    #   memory: "1Gi"
-    # requests:
-    #   cpu: "500m"
-    #   memory: "512Mi"
+  # limits:
+  #   cpu: "1000m"
+  #   memory: "1Gi"
+  # requests:
+  #   cpu: "500m"
+  #   memory: "512Mi"
   ##
   ## Labels for the scheduler deployment
   labels: {}
@@ -311,7 +320,8 @@ flower:
   ## Set AIRFLOW__CELERY__FLOWER_URL_PREFIX
   ## Prefix should match Ingress configuration ingress.flower.path
   urlPrefix: ""
-  resources: {}
+  resources:
+    {}
     # limits:
     #   cpu: "100m"
     #   memory: "128Mi"
@@ -353,8 +363,9 @@ web:
   ##
   ## Set AIRFLOW__WEBSERVER__BASE_URL
   ## Path should match Ingress configuration
-  baseUrl: "http://localhost:8080"
-  resources: {}
+  baseUrl: "http://dev-af.unitst.org"
+  resources:
+    {}
     # limits:
     #   cpu: "300m"
     #   memory: "1Gi"
@@ -375,21 +386,22 @@ web:
   podAnnotations: {}
   ##
   initialStartupDelay: 60
-  initialDelaySeconds: 300
-  minReadySeconds: 120
+  initialDelaySeconds: 60
+  minReadySeconds: 30
   readinessProbe:
+    enabled: false
     scheme: HTTP
     periodSeconds: 60
-    timeoutSeconds: 1
+    timeoutSeconds: 20
     successThreshold: 1
     failureThreshold: 5
   livenessProbe:
+    enabled: false
     scheme: HTTP
     periodSeconds: 60
-    timeoutSeconds: 1
+    timeoutSeconds: 30
     successThreshold: 1
     failureThreshold: 5
-
 
   ## Support Node, affinity and tolerations for web pod assignment
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
@@ -418,18 +430,19 @@ workers:
     enabled: false
     maxReplicas: 2
     metrics: {}
-#    - type: Resource
-#      resource:
-#        name: memory
-#        target:
-#          type: Utilization
-#          averageUtilization: 80
+  #    - type: Resource
+  #      resource:
+  #        name: memory
+  #        target:
+  #          type: Utilization
+  #          averageUtilization: 80
   ##
   ## Gracefull termination period
   terminationPeriod: 30
   ##
   ## Custom resource configuration
-  resources: {}
+  resources:
+    {}
     # limits:
     #   cpu: "1"
     #   memory: "2G"
@@ -447,7 +460,8 @@ workers:
   annotations: {}
   ##
   ## Annotations for the Worker pods
-  podAnnotations: {}
+  podAnnotations:
+    {}
     ## Example:
     ## iam.amazonaws.com/role: airflow-Role
   ##
@@ -483,7 +497,7 @@ ingress:
   ## enable ingress
   ## Note: If you want to change url prefix for web ui or flower even if you do not use ingress,
   ## you can change web.baseUrl and flower.urlPrefix
-  enabled: false
+  enabled: true
   ##
   ## Configure the Ingress webserver endpoint
   web:
@@ -501,12 +515,16 @@ ingress:
     path: ""
     ##
     ## Ingress hostname for the webserver
-    host: ""
+    host: "dev-af.unitst.org"
     ##
     ## Annotations for the webserver
     ## Airflow webserver handles relative path completely, just let your load balancer give the HTTP
     ## header like the requested URL (no special configuration neeed)
-    annotations: {}
+    annotations:
+      {
+        kubernetes.io/ingress.class: "azure/application-gateway",
+        appgw.ingress.kubernetes.io/ssl-redirect: "true",
+      }
       ##
       ## Example for Traefik:
       # traefik.frontend.rule.type: PathPrefix
@@ -517,10 +535,10 @@ ingress:
     livenessPath:
     tls:
       ## Set to "true" to enable TLS termination at the ingress
-      enabled: false
+      enabled: true
       ## If enabled, set "secretName" to the secret containing the TLS private key and certificate
       ## Example:
-      ## secretName: example-com-crt
+      secretName: "aks-unitst-tls"
     precedingPaths:
       ## Different http paths to add to the ingress before the default path
       ## Example:
@@ -546,7 +564,7 @@ ingress:
     ## request to have been be at the root.
     ## That's why we need a reverse proxy/load balancer that is able to strip the path
     ## NOTE: do NOT keep trailing slash. For root configuration, set and empty string
-    path: ""
+    path: "/airflow/flower"
     ##
     ## Configure the liveness path. Keep to "/" for Flower >= jan 2018.
     ## For previous version, enter the same path than in the 'path' key
@@ -554,7 +572,7 @@ ingress:
     livenessPath: /
     ##
     ## hostname for flower
-    host: ""
+    host: "dev-af.unitst.org"
     ##
     ## Annotation for the Flower endpoint
     ##
@@ -582,7 +600,8 @@ ingress:
     ##              }
     ##            }
     ## ==== IF YOU HAVE FLOWER > JANUARY 2018, NO MORE NEED TO STRIP THE PREFIX ====================
-    annotations: {}
+    annotations:
+      {}
       ##
       ## NOTE: it is important here to have your reverse proxy strip the path/rewrite the URL
       ## Example for Traefik:
@@ -595,7 +614,6 @@ ingress:
       ## If enabled, set "secretName" to the secret containing the TLS private key and certificate
       ## Example:
       ## secretName: example-com-crt
-
 
 ##
 ## Storage configuration for DAGs
@@ -740,7 +758,6 @@ serviceAccount:
   name:
   annotations: {}
 
-
 ##
 ## Configuration values for the postgresql dependency.
 ## ref: https://github.com/kubernetes/charts/blob/master/stable/postgresql/README.md
@@ -789,7 +806,6 @@ postgresql:
     accessModes:
       - ReadWriteOnce
 
-
 ## Configuration values for the Redis dependency.
 ## ref: https://github.com/kubernetes/charts/blob/master/stable/redis/README.md
 redis:
@@ -818,9 +834,9 @@ redis:
     ##
     ## Image configuration
     # image:
-      ##
-      ## docker registry secret names (list)
-      # pullSecrets: nil
+    ##
+    ## docker registry secret names (list)
+    # pullSecrets: nil
     ##
     ## Configure persistance
     persistence:
@@ -833,7 +849,7 @@ redis:
       ##
       ## Access mode:
       accessModes:
-      - ReadWriteOnce
+        - ReadWriteOnce
   ##
   ## Disable cluster management by default.
   cluster:
@@ -851,7 +867,6 @@ serviceMonitor:
 
 # Enable this if you're using https://github.com/coreos/prometheus-operator
 prometheusRule:
-
   enabled: false
   ## Namespace in which the prometheus rule is created
   # namespace: monitoring

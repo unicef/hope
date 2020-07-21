@@ -1,5 +1,4 @@
 import io
-import unittest
 
 from PIL import Image
 from django.conf import settings
@@ -11,12 +10,6 @@ from django.core.management import call_command
 
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
-from registration_data.fixtures import RegistrationDataImportFactory
-from registration_datahub.fixtures import (
-    ImportedIndividualFactory,
-    ImportedHouseholdFactory,
-    RegistrationDataImportDatahubFactory,
-)
 from registration_datahub.models import ImportData
 
 
@@ -144,98 +137,5 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
                     "name": "New Import of Data 123",
                     "businessAreaSlug": "afghanistan",
                 }
-            },
-        )
-
-    def test_approve_registration_data_import(self):
-        registration_data_import_obj = RegistrationDataImportFactory(
-            status="IN_REVIEW",
-        )
-
-        self.snapshot_graphql_request(
-            request_string=self.APPROVE_REGISTRATION_DATA_IMPORT,
-            context={"user": self.user},
-            variables={
-                "id": self.id_to_base64(
-                    registration_data_import_obj.id, "RegistrationDataImport",
-                )
-            },
-        )
-
-    def test_approve_registration_data_import_wrong_initial_status(self):
-        registration_data_import_obj = RegistrationDataImportFactory(
-            status="APPROVED",
-        )
-
-        self.snapshot_graphql_request(
-            request_string=self.APPROVE_REGISTRATION_DATA_IMPORT,
-            context={"user": self.user},
-            variables={
-                "id": self.id_to_base64(
-                    registration_data_import_obj.id, "RegistrationDataImport",
-                )
-            },
-        )
-
-    def test_unapprove_registration_data_import_wrong_initial_status(self):
-        registration_data_import_obj = RegistrationDataImportFactory(
-            status="MERGED",
-        )
-
-        self.snapshot_graphql_request(
-            request_string=self.UNAPPROVE_REGISTRATION_DATA_IMPORT,
-            context={"user": self.user},
-            variables={
-                "id": self.id_to_base64(
-                    registration_data_import_obj.id, "RegistrationDataImport",
-                )
-            },
-        )
-
-    def test_unapprove_registration_data_import(self):
-        registration_data_import_obj = RegistrationDataImportFactory(
-            status="APPROVED",
-        )
-
-        self.snapshot_graphql_request(
-            request_string=self.UNAPPROVE_REGISTRATION_DATA_IMPORT,
-            context={"user": self.user},
-            variables={
-                "id": self.id_to_base64(
-                    registration_data_import_obj.id, "RegistrationDataImport",
-                )
-            },
-        )
-
-    @unittest.skip("Work in progress")
-    def test_merge_registration_data_import(self):
-        obj_hct = RegistrationDataImportFactory.build(
-            name="Lorem Ipsum", status="APPROVED", imported_by=self.user,
-        )
-        obj_datahub = RegistrationDataImportDatahubFactory.build(
-            name="Lorem Ipsum", hct_id=obj_hct.id,
-        )
-
-        obj_hct.datahub_id = obj_datahub.id
-        obj_hct.save()
-        obj_datahub.save()
-
-        for _ in range(350):
-            imported_household = ImportedHouseholdFactory(
-                registration_data_import=obj_datahub,
-            )
-            individuals = ImportedIndividualFactory.create_batch(
-                imported_household.family_size,
-                registration_data_import=obj_datahub,
-            )
-            imported_household.head_of_household = individuals[0]
-            imported_household.representative = individuals[0]
-            imported_household.save()
-
-        self.snapshot_graphql_request(
-            request_string=self.MERGE_REGISTRATION_DATA_IMPORT,
-            context={"user": self.user},
-            variables={
-                "id": self.id_to_base64(obj_hct.id, "RegistrationDataImport",)
             },
         )
