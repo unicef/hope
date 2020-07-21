@@ -42,6 +42,12 @@
             "name": "CashPlanNode"
           },
           {
+            "name": "CashPlanPaymentVerificationNode"
+          },
+          {
+            "name": "PaymentVerificationNode"
+          },
+          {
             "name": "RegistrationDataImportNode"
           },
           {

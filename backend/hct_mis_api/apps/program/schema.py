@@ -1,5 +1,5 @@
 import graphene
-from django.db.models import Case, When, Value, IntegerField
+from django.db.models import Case, When, Value, IntegerField, Q
 from graphene import relay, ConnectionField
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
@@ -43,22 +43,42 @@ class ProgramNode(DjangoObjectType):
 
 
 class CashPlanFilter(FilterSet):
+    search = CharFilter(method="search_filter")
+
     class Meta:
-        fields = ("program",)
+        fields = {
+            "program": ["exact"],
+            "verification_status": ["exact"],
+            "assistance_through": ["exact", "icontains"],
+            "delivery_type": ["exact"],
+            "start_date": ["exact", "lte", "gte"],
+            "end_date": ["exact", "lte", "gte"],
+        }
         model = CashPlan
 
     order_by = OrderingFilter(
         fields=(
-            "cash_assist_id",
+            "ca_id",
             "status",
+            "verification_status",
             "total_persons_covered",
-            "currency",
-            "total_entitled_quantity",
-            "total_delivered_quantity",
-            "total_undelivered_quantity",
-            "dispersion_date",
+            "assistance_measurement",
+            "assistance_through",
+            "delivery_type",
+            "start_date",
+            "end_date",
+            "program__name",
+            "id",
         )
     )
+
+    def search_filter(self, qs, name, value):
+        values = value.split(" ")
+        q_obj = Q()
+        for value in values:
+            q_obj |= Q(id__icontains=value)
+            q_obj |= Q(ca_id__icontains=value)
+        return qs.filter(q_obj)
 
 
 class CashPlanNode(DjangoObjectType):

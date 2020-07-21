@@ -1,5 +1,5 @@
 import json
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 
 from django.forms import Field, IntegerField
 from django_filters import Filter, OrderingFilter
@@ -43,30 +43,34 @@ class AgeRangeFilter(Filter):
 
     def filter(self, qs, values):
         if values:
-            min_value = values.get("min")
-            max_value = values.get("max")
+            min_value = values.get("min")  # 10
+            max_value = values.get("max")  # 20
             current = datetime.now().date()
             if min_value is not None and max_value is not None:
                 self.lookup_expr = "range"
-                min_date = date(
-                    current.year - min_value, current.month, current.day,
-                )
+                # year +1 , day-1
                 max_date = date(
+                    current.year - min_value + 1, current.month, current.day,
+                )
+                max_date = max_date - timedelta(days=1)
+                min_date = date(
                     current.year - max_value, current.month, current.day,
                 )
-                values = (max_date, min_date)
+                values = (min_date, max_date)
             elif min_value is not None and max_value is None:
                 self.lookup_expr = "lte"
-                min_date = date(
-                    current.year - min_value, current.month, current.day,
+                # year +1 , day-1
+                max_date = date(
+                    current.year - min_value + 1, current.month, current.day,
                 )
-                values = min_date
+                max_date = max_date - timedelta(days=1)
+                values = max_date
             elif min_value is None and max_value is not None:
                 self.lookup_expr = "gte"
-                max_date = date(
+                min_date = date(
                     current.year - max_value, current.month, current.day,
                 )
-                values = max_date
+                values = min_date
 
         return super().filter(qs, values)
 
