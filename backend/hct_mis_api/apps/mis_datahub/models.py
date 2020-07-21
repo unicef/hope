@@ -180,12 +180,5 @@ class Document(SessionModel):
     type = models.CharField(max_length=50, choices=IDENTIFICATION_TYPE_CHOICE)
     country = models.CharField(null=True, max_length=3)
 
-    def clean(self):
-        from django.core.exceptions import ValidationError
-
-        for validator in self.type.validators:
-            if not re.match(validator.regex, self.document_number):
-                raise ValidationError("Document number is not validating")
-
     class Meta:
-        unique_together = ("type", "number")
+        unique_together = ("type", "country", "number")
