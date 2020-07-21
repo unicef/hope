@@ -3599,10 +3599,10 @@ export type PaymentRecordVerificationQuery = (
   { __typename?: 'Query' }
   & { paymentRecordVerification: Maybe<(
     { __typename?: 'PaymentVerificationNode' }
-    & Pick<PaymentVerificationNode, 'id' | 'status' | 'statusDate'>
+    & Pick<PaymentVerificationNode, 'id' | 'status' | 'statusDate' | 'receivedAmount'>
     & { paymentRecord: (
       { __typename?: 'PaymentRecordNode' }
-      & Pick<PaymentRecordNode, 'id' | 'status' | 'statusDate' | 'caId' | 'fullName' | 'distributionModality' | 'totalPersonsCovered' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'entitlementCardIssueDate' | 'entitlementCardNumber'>
+      & Pick<PaymentRecordNode, 'id' | 'status' | 'statusDate' | 'caId' | 'fullName' | 'distributionModality' | 'totalPersonsCovered' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'deliveryType' | 'entitlementCardIssueDate' | 'entitlementCardNumber'>
       & { household: (
         { __typename?: 'HouseholdNode' }
         & Pick<HouseholdNode, 'id' | 'size'>
@@ -6453,6 +6453,7 @@ export const PaymentRecordVerificationDocument = gql`
     id
     status
     statusDate
+    receivedAmount
     paymentRecord {
       id
       status
@@ -6482,6 +6483,7 @@ export const PaymentRecordVerificationDocument = gql`
       deliveredQuantity
       deliveryDate
       deliveryDate
+      deliveryType
       entitlementCardIssueDate
       entitlementCardNumber
       serviceProvider {
