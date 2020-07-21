@@ -10,6 +10,7 @@ import { BreadCrumbsItem } from '../../components/BreadCrumbs';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { LoadingComponent } from '../../components/LoadingComponent';
 import { VerificationRecordDetails } from '../../components/payments/VerificationRecordDetails';
+import { decodeIdString } from '../../utils/utils';
 
 const Container = styled.div`
   display: flex;
@@ -31,12 +32,10 @@ const Container = styled.div`
 
 export function VerificationRecordDetailsPage(): React.ReactElement {
   const { id } = useParams();
-  const { data, loading, error } = usePaymentRecordVerificationQuery({
+  const { data, loading } = usePaymentRecordVerificationQuery({
     variables: { id },
   });
-  console.log('veri record details', data, loading, error);
   const businessArea = useBusinessArea();
-
   if (loading) {
     return <LoadingComponent />;
   }
@@ -52,13 +51,18 @@ export function VerificationRecordDetailsPage(): React.ReactElement {
       to: `/${businessArea}/payment-verification/`,
     },
     {
-      title: 'Cash Plan ID here',
-      to: `/${businessArea}/payment-verification/`,
+      title: `Cash Plan ${decodeIdString(
+        paymentVerification.paymentRecord.cashPlan.id,
+      )}`,
+      to: `/${businessArea}/payment-verification/${paymentVerification.paymentRecord.cashPlan.id}`,
     },
   ];
 
   const toolbar = (
-    <PageHeader title='Payment ID id here' breadCrumbs={breadCrumbsItems} />
+    <PageHeader
+      title={`Payment ID ${decodeIdString(paymentVerification.id)}`}
+      breadCrumbs={breadCrumbsItems}
+    />
   );
   return (
     <div>

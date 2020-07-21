@@ -6,6 +6,7 @@ export const PAYMENT_RECORD_VERIFICATION_QUERY = gql`
       id
       status
       statusDate
+      receivedAmount
       paymentRecord {
         id
         status
@@ -35,6 +36,7 @@ export const PAYMENT_RECORD_VERIFICATION_QUERY = gql`
         deliveredQuantity
         deliveryDate
         deliveryDate
+        deliveryType
         entitlementCardIssueDate
         entitlementCardNumber
         serviceProvider {
