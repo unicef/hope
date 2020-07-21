@@ -26,6 +26,7 @@ import { RegistrationHouseholdDetailsPage } from './registration/details/househo
 import { RegistrationIndividualDetailsPage } from './registration/details/individual/RegistrationIndividualDetailsPage';
 import { PaymentVerificationPage } from './pages/PaymentVerificationPage';
 import { PaymentVerificationDetailsPage } from './pages/PaymentVerificationDetailsPage';
+import { VerificationRecordDetailsPage } from './pages/VerificationRecordDetailsPage';
 
 const Root = styled.div`
   display: flex;
@@ -90,6 +91,9 @@ export function HomeRouter(): React.ReactElement {
           <Route exact path='/:businessArea/payment-verification'>
             <PaymentVerificationPage />
           </Route>
+          <Route path='/:businessArea/verification-records/:id'>
+            <VerificationRecordDetailsPage />
+          </Route>
           <Route path='/:businessArea/payment-verification/:id'>
             <PaymentVerificationDetailsPage />
           </Route>
@@ -102,7 +106,7 @@ export function HomeRouter(): React.ReactElement {
           <Route path='/:businessArea/programs/:id'>
             <ProgramDetailsPage />
           </Route>
-          <Route path='/:businessArea/payment_records/:id'>
+          <Route path='/:businessArea/payment-records/:id'>
             <PaymentRecordDetailsPage />
           </Route>
           <Route path='/:businessArea/programs'>

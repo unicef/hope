@@ -1,8 +1,6 @@
 import React, { ReactElement } from 'react';
 import styled from 'styled-components';
-import {
-  useGoldenRecordByTargetingCriteriaQuery,
-} from '../../../../__generated__/graphql';
+import { useGoldenRecordByTargetingCriteriaQuery } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './HeadCells';
 import { TargetPopulationHouseholdTableRow } from './TableRow';
@@ -24,7 +22,7 @@ export const CreateTable = ({
 }: TargetPopulationHouseholdProps): ReactElement => {
   const initialVariables = {
     ...(id && { targetPopulation: id }),
-    ...variables
+    ...variables,
   };
   return (
     <TableWrapper>
@@ -33,7 +31,7 @@ export const CreateTable = ({
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}
         query={useGoldenRecordByTargetingCriteriaQuery}
-        queriedObjectName='goldenRecordByTargetingCriteria'
+        queriedObjectName='allPaymentVerifications'
         initialVariables={initialVariables}
         renderRow={(row) => (
           <TargetPopulationHouseholdTableRow household={row} />

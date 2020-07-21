@@ -94,6 +94,23 @@ export function paymentVerificationStatusToColor(
   }
 }
 
+export function verificationRecordsStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  switch (status) {
+    case 'PENDING':
+      return theme.hctPalette.gray;
+    case 'RECEIVED':
+      return theme.hctPalette.green;
+    case 'NOT_RECEIVED':
+      return theme.palette.error.main;
+    case 'RECEIVED_WITH_ISSUES':
+      return theme.hctPalette.oragne;
+    default:
+      return theme.palette.error.main;
+  }
+}
 export function registrationDataImportStatusToColor(
   theme: typeof themeObj,
   status: string,
