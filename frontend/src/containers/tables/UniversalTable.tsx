@@ -60,14 +60,12 @@ export function UniversalTable<T, K>({
   if (!data) {
     return <EmptyTable />;
   }
-
   let correctTitle = title;
   if (getTitle) {
     correctTitle = getTitle(data);
   }
   const { edges } = data[queriedObjectName];
   const typedEdges = edges.map((edge) => edge.node as T);
-  console.log('edges', edges);
 
   return (
     <TableComponent<T>

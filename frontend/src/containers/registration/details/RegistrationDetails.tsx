@@ -27,7 +27,8 @@ const OverviewContainer = styled.div`
 `;
 
 const StatusContainer = styled.div`
-  width: 120px;
+  min-width: 120px;
+  max-width: 200px;
 `;
 
 const BigValueContainer = styled.div`

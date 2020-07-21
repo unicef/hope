@@ -14,7 +14,8 @@ import {
 } from '../../../utils/utils';
 
 const StatusContainer = styled.div`
-  width: 120px;
+  min-width: 120px;
+  max-width: 200px;
 `;
 
 interface PaymentRecordTableRowProps {
@@ -64,9 +65,7 @@ export function PaymentRecordTableRow({
         {formatCurrency(paymentRecord.deliveredQuantity)}
       </TableCell>
       <TableCell align='right'>
-        <Moment format='DD/MM/YYYY'>
-          {paymentRecord.deliveryDate}
-        </Moment>
+        <Moment format='DD/MM/YYYY'>{paymentRecord.deliveryDate}</Moment>
       </TableCell>
     </ClickableTableRow>
   );

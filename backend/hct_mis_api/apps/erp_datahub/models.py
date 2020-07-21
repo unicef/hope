@@ -55,7 +55,7 @@ class FundsCommitment(SessionModel):
     )
     vendor_id = models.CharField(max_length=10, null=True)
     posting_date = models.DateField(null=True)
-    vision_approval = models.DateField(null=True)
+    vision_approval = models.CharField(max_length=1, null=True)
 
 
 class DownPayment(SessionModel):
