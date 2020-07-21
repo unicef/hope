@@ -13,7 +13,6 @@ import { Field, Form, Formik } from 'formik';
 import moment from 'moment';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
-import { FormikSwitchField } from '../../shared/Formik/FormikSwitchField';
 import {
   ProgramNode,
   useProgrammeChoiceDataQuery,
@@ -22,6 +21,7 @@ import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
 import { FormikDateField } from '../../shared/Formik/FormikDateField';
 import { selectFields } from '../../utils/utils';
 import { DialogActions } from '../dialogs/DialogActions';
+import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -57,6 +57,9 @@ const DateField = styled.div`
 
 const DialogContainer = styled.div`
   position: absolute;
+`;
+const FullWidth = styled.div`
+  width: 100%;
 `;
 
 const validationSchema = Yup.object().shape({
@@ -171,17 +174,15 @@ export function ProgramForm({
                     variant='filled'
                     component={FormikTextField}
                   />
-
-                  <MediumLabel>
-                    <Field
-                      name='scope'
-                      label='CashAssist Scope'
-                      fullWidth
-                      required
-                      choices={data.programScopeChoices}
-                      component={FormikSelectField}
-                    />
-                  </MediumLabel>
+                  <Field
+                    name='scope'
+                    label='CashAssist Scope'
+                    fullWidth
+                    variant='filled'
+                    required
+                    choices={data.programScopeChoices}
+                    component={FormikSelectField}
+                  />
                   <DateFields>
                     <DateField>
                       <Field
@@ -220,17 +221,15 @@ export function ProgramForm({
                     variant='filled'
                     component={FormikTextField}
                   />
-                  <MediumLabel>
-                    <Field
-                      name='budget'
-                      label='Budget'
-                      type='number'
-                      fullWidth
-                      precision={2}
-                      variant='filled'
-                      component={FormikTextField}
-                    />
-                  </MediumLabel>
+                  <Field
+                    name='budget'
+                    label='Budget'
+                    type='number'
+                    fullWidth
+                    precision={2}
+                    variant='filled'
+                    component={FormikTextField}
+                  />
                   <Field
                     name='frequencyOfPayments'
                     label='Frequency of Payment'
@@ -245,35 +244,47 @@ export function ProgramForm({
                     variant='filled'
                     component={FormikTextField}
                   />
-                  <MediumLabel>
-                    <Field
-                      name='populationGoal'
-                      label='Population goal'
-                      type='number'
-                      fullWidth
-                      variant='filled'
-                      component={FormikTextField}
-                    />
-                  </MediumLabel>
-                  <MediumLabel>
-                    <Field
-                      name='sector'
-                      label='Sector'
-                      fullWidth
-                      required
-                      choices={data.programSectorChoices}
-                      component={FormikSelectField}
-                    />
-                  </MediumLabel>
-                  <MediumLabel>
+                  <Field
+                    name='populationGoal'
+                    label='Population goal'
+                    type='number'
+                    fullWidth
+                    variant='filled'
+                    component={FormikTextField}
+                  />
+                  <Field
+                    name='sector'
+                    label='Sector'
+                    fullWidth
+                    required
+                    variant='filled'
+                    choices={data.programSectorChoices}
+                    component={FormikSelectField}
+                  />
+                  <FullWidth>
                     <Field
                       name='cashPlus'
                       label='Cash+'
+                      fullWidth
                       color='primary'
-                      component={FormikSwitchField}
+                      component={FormikCheckboxField}
                     />
-                  </MediumLabel>
+                  </FullWidth>
+                  <FullWidth>
+                    <Field
+                      name='sendIndividualsData'
+                      label="Send Individuals' data to CashAssist"
+                      fullWidth
+                      color='primary'
+                      component={FormikCheckboxField}
+                    />
+                  </FullWidth>
                 </Form>
+                <DialogDescription>
+                  This programme will use Individuals’ data for entitlement
+                  calculation. Hope has the data on all Individuals within the
+                  targeted households and will send this to CashAssist.
+                </DialogDescription>
               </DialogContent>
               <DialogFooter>
                 <DialogActions>{renderSubmit(submitForm)}</DialogActions>
