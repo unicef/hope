@@ -60,7 +60,6 @@ export function UniversalTable<T, K>({
   if (!data) {
     return <EmptyTable />;
   }
-
   let correctTitle = title;
   if (getTitle) {
     correctTitle = getTitle(data);

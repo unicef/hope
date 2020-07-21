@@ -18,6 +18,7 @@ import {
   paymentRecordStatusToColor,
   sexToCapitalize,
 } from '../../utils/utils';
+import Moment from 'react-moment';
 
 const headCells: HeadCell<IndividualNode>[] = [
   {
@@ -64,7 +65,8 @@ const headCells: HeadCell<IndividualNode>[] = [
   },
 ];
 const StatusContainer = styled.div`
-  width: 120px;
+  min-width: 120px;
+  max-width: 200px;
 `;
 
 interface HouseholdIndividualsTableProps {
@@ -88,9 +90,7 @@ export function HouseholdIndividualsTable({
   const relationshipChoicesDict = choicesToDict(
     choicesData.relationshipChoices,
   );
-  const roleChoicesDict = choicesToDict(
-      choicesData.roleChoices,
-  );
+  const roleChoicesDict = choicesToDict(choicesData.roleChoices);
   const allIndividuals = household.individuals.edges.map((edge) => edge.node);
   if (orderBy) {
     if (orderDirection === 'asc') {
@@ -131,13 +131,13 @@ export function HouseholdIndividualsTable({
                 />
               </StatusContainer>
             </TableCell>
-            <TableCell align='left'>
-              {roleChoicesDict[row.role]}
-            </TableCell>
+            <TableCell align='left'>{roleChoicesDict[row.role]}</TableCell>
             <TableCell align='left'>
               {relationshipChoicesDict[row.relationship]}
             </TableCell>
-            <TableCell align='left'>{row.birthDate || '-'}</TableCell>
+            <TableCell align='left'>
+              {<Moment format='DD/MM/YYYY'>{row.birthDate}</Moment> || '-'}
+            </TableCell>
             <TableCell align='left'>{sexToCapitalize(row.sex)}</TableCell>
           </ClickableTableRow>
         );

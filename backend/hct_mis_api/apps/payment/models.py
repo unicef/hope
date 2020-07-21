@@ -3,6 +3,8 @@ from decimal import Decimal
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import Sum, UUIDField
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 
@@ -34,7 +36,7 @@ class PaymentRecord(TimeStampedUUIDModel):
         "program.CashPlan",
         on_delete=models.CASCADE,
         related_name="payment_records",
-        null=True
+        null=True,
     )
     household = models.ForeignKey(
         "household.Household",
@@ -75,6 +77,8 @@ class PaymentRecord(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
         related_name="payment_records",
     )
+    transaction_reference_id = models.CharField(max_length=255, null=True)
+    vision_id = models.CharField(max_length=255, null=True)
 
 
 class ServiceProvider(TimeStampedUUIDModel):
@@ -86,3 +90,86 @@ class ServiceProvider(TimeStampedUUIDModel):
     short_name = models.CharField(max_length=100)
     country = models.CharField(max_length=3)
     vision_id = models.CharField(max_length=255)
+
+
+class CashPlanPaymentVerification(TimeStampedUUIDModel):
+    STATUS_PENDING = "PENDING"
+    STATUS_ACTIVE = "ACTIVE"
+    STATUS_FINISHED = "FINISHED"
+    SAMPLING_FULL_LIST = "FULL_LIST"
+    SAMPLING_RANDOM = "RANDOM"
+    VERIFICATION_METHOD_RAPIDPRO = "RAPIDPRO"
+    VERIFICATION_METHOD_XLSX = "XLSX"
+    VERIFICATION_METHOD_MANUAL = "MANUAL"
+    STATUS_CHOICES = (
+        (STATUS_PENDING, "Pending"),
+        (STATUS_ACTIVE, "Active"),
+        (STATUS_FINISHED, "Finished"),
+    )
+    SAMPLING_CHOICES = (
+        (SAMPLING_FULL_LIST, "Full list"),
+        (SAMPLING_RANDOM, "Draft"),
+    )
+    VERIFICATION_METHOD_CHOICES = (
+        (VERIFICATION_METHOD_RAPIDPRO, "RAPIDPRO"),
+        (VERIFICATION_METHOD_XLSX, "XLSX"),
+        (VERIFICATION_METHOD_MANUAL, "MANUAL"),
+    )
+    status = models.CharField(
+        max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING
+    )
+    cash_plan = models.ForeignKey(
+        "program.CashPlan",
+        on_delete=models.CASCADE,
+        related_name="verifications",
+    )
+    sampling = models.CharField(max_length=50, choices=SAMPLING_CHOICES)
+    verification_method = models.CharField(
+        max_length=50, choices=VERIFICATION_METHOD_CHOICES
+    )
+    sample_size = models.PositiveIntegerField(null=True)
+    responded_count = models.PositiveIntegerField(null=True)
+    received_count = models.PositiveIntegerField(null=True)
+    not_received_count = models.PositiveIntegerField(null=True)
+    received_with_problems_count = models.PositiveIntegerField(null=True)
+
+
+@receiver(
+    post_save,
+    sender=CashPlanPaymentVerification,
+    dispatch_uid="update_verification_status_in_cash_plan",
+)
+def update_verification_status_in_cash_plan(sender, instance, **kwargs):
+    instance.cash_plan.verification_status = instance.status
+    instance.cash_plan.save()
+
+
+class PaymentVerification(TimeStampedUUIDModel):
+    STATUS_PENDING = "PENDING"
+    STATUS_RECEIVED = "RECEIVED"
+    STATUS_NOT_RECEIVED = "NOT_RECEIVED"
+    STATUS_RECEIVED_WITH_ISSUES = "RECEIVED_WITH_ISSUES"
+    STATUS_CHOICES = (
+        (STATUS_PENDING, "PENDING"),
+        (STATUS_RECEIVED, "RECEIVED"),
+        (STATUS_NOT_RECEIVED, "NOT RECEIVED"),
+        (STATUS_RECEIVED_WITH_ISSUES, "RECEIVED WITH ISSUES"),
+    )
+    cash_plan_payment_verification = models.ForeignKey(
+        "CashPlanPaymentVerification",
+        on_delete=models.CASCADE,
+        related_name="payment_record_verifications",
+    )
+    payment_record = models.ForeignKey(
+        "PaymentRecord", on_delete=models.CASCADE, related_name="verifications"
+    )
+    status = models.CharField(
+        max_length=50, choices=STATUS_CHOICES, default="DRAFT"
+    )
+    status_date = models.DateField(null=True)
+    received_amount = models.DecimalField(
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0.01"))],
+        null=True,
+    )
