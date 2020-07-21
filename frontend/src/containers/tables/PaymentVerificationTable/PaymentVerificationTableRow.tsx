@@ -14,7 +14,8 @@ import {
 import { StatusBox } from '../../../components/StatusBox';
 
 const StatusContainer = styled.div`
-  width: 120px;
+  min-width: 120px;
+  max-width: 200px;
 `;
 interface PaymentVerificationTableRowProps {
   plan: CashPlanNode;
