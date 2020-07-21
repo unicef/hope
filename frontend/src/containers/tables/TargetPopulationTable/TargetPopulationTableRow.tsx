@@ -7,10 +7,14 @@ import { TargetPopulationNode } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
 import { StatusBox } from '../../../components/StatusBox';
-import { targetPopulationStatusToColor, targetPopulationStatusMapping } from '../../../utils/utils';
+import {
+  targetPopulationStatusToColor,
+  targetPopulationStatusMapping,
+} from '../../../utils/utils';
 
 const StatusContainer = styled.div`
-  width: 120px;
+  min-width: 120px;
+  max-width: 200px;
 `;
 
 interface TargetPopulationTableRowProps {
@@ -42,8 +46,12 @@ export function TargetPopulationTableRow({ targetPopulation }) {
           />
         </StatusContainer>
       </TableCell>
-      <TableCell align='left'>{targetPopulation.candidateListTotalHouseholds}</TableCell>
-      <TableCell align='left'>{targetPopulation.finalListTotalHouseholds}</TableCell>
+      <TableCell align='left'>
+        {targetPopulation.candidateListTotalHouseholds}
+      </TableCell>
+      <TableCell align='left'>
+        {targetPopulation.finalListTotalHouseholds}
+      </TableCell>
       <TableCell align='left'>
         <Moment format='MM/DD/YYYY'>{targetPopulation.createdAt}</Moment>
       </TableCell>

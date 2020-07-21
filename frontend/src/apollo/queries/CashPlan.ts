@@ -17,15 +17,20 @@ export const CashPlan = gql`
       dispersionDate
       verificationStatus
       verifications {
-        status
-        sampleSize
-        receivedCount
-        notReceivedCount
-        respondedCount
-        verificationMethod
-        sampling
-        receivedCount
-        receivedWithProblemsCount
+        edges {
+          node {
+            id
+            status
+            sampleSize
+            receivedCount
+            notReceivedCount
+            respondedCount
+            verificationMethod
+            sampling
+            receivedCount
+            receivedWithProblemsCount
+          }
+        }
       }
       program {
         id
