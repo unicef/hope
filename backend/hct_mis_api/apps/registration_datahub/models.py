@@ -235,9 +235,6 @@ class ImportedDocument(TimeStampedUUIDModel):
             if not re.match(validator.regex, self.document_number):
                 raise ValidationError("Document number is not validating")
 
-    class Meta:
-        unique_together = ("type", "document_number")
-
 
 class ImportedAgency(models.Model):
     type = models.CharField(max_length=100,)
