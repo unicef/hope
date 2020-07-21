@@ -60,7 +60,9 @@ export function VerificationRecordDetailsPage(): React.ReactElement {
 
   const toolbar = (
     <PageHeader
-      title={`Payment ID ${decodeIdString(paymentVerification.id)}`}
+      title={`Payment ID ${decodeIdString(
+        paymentVerification.paymentRecord.id,
+      )}`}
       breadCrumbs={breadCrumbsItems}
     />
   );

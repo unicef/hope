@@ -34,7 +34,9 @@ export function VerificationRecordsTableRow({ record }) {
       role='checkbox'
       key={record.id}
     >
-      <TableCell align='left'>{decodeIdString(record.id)}</TableCell>
+      <TableCell align='left'>
+        {decodeIdString(record.paymentRecord.id)}
+      </TableCell>
       <TableCell align='left'>
         <StatusContainer>
           <StatusBox

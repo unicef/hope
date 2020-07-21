@@ -155,14 +155,22 @@ export function VerificationRecordDetails({
             />
           </Grid>
           <Grid item xs={3}>
-            <LabelizedField label='PHONE NUMBER'>
-              <Missing />
-            </LabelizedField>
+            <LabelizedField
+              label='PHONE NUMBER'
+              value={
+                paymentVerification.paymentRecord.household.headOfHousehold
+                  .phoneNo
+              }
+            />
           </Grid>
           <Grid item xs={3}>
-            <LabelizedField label='ALT. PHONE NUMBER'>
-              <Missing />
-            </LabelizedField>
+            <LabelizedField
+              label='ALT. PHONE NUMBER'
+              value={
+                paymentVerification.paymentRecord.household.headOfHousehold
+                  .phoneNoAlternative
+              }
+            />
           </Grid>
         </Grid>
       </Overview>
