@@ -170,12 +170,14 @@ class Household(TimeStampedUUIDModel, AbstractSyncable):
     )
     returnee = models.BooleanField(default=False, null=True)
     flex_fields = JSONField(default=dict)
-    registration_date = models.DateField(null=True)
+    first_registration_date = models.DateField()
+    last_registration_date = models.DateField()
     head_of_household = models.OneToOneField(
         "Individual",
         related_name="heading_household",
         on_delete=models.CASCADE,
     )
+    unicef_id = models.CharField(max_length=250, blank=True)
 
     @property
     def total_cash_received(self):
@@ -184,6 +186,10 @@ class Household(TimeStampedUUIDModel, AbstractSyncable):
             .aggregate(Sum("delivered_quantity"))
             .get("delivered_quantity__sum")
         )
+
+    @property
+    def business_area(self):
+        return self.admin_area.admin_area_type.business_area
 
     def __str__(self):
         return f"Household ID: {self.id}"
@@ -333,9 +339,12 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
         blank=True,
         default=NOT_PROVIDED,
     )
+    first_registration_date = models.DateField()
+    last_registration_date = models.DateField()
     flex_fields = JSONField(default=dict)
     enrolled_in_nutrition_programme = models.BooleanField(default=False)
     administration_of_rutf = models.BooleanField(default=False)
+    unicef_id = models.CharField(max_length=250, blank=True)
 
     @property
     def age(self):
@@ -354,14 +363,17 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
 
 
 class EntitlementCard(TimeStampedUUIDModel):
+    ACTIVE = "ACTIVE"
+    ERRONEOUS = "ERRONEOUS"
+    CLOSED = "CLOSED"
     STATUS_CHOICE = Choices(
-        ("ACTIVE", _("Active")),
-        ("ERRONEOUS", _("Erroneous")),
-        ("CLOSED", _("Closed")),
+        (ACTIVE, _("Active")),
+        (ERRONEOUS, _("Erroneous")),
+        (CLOSED, _("Closed")),
     )
     card_number = models.CharField(max_length=255)
     status = models.CharField(
-        choices=STATUS_CHOICE, default=STATUS_CHOICE.ACTIVE, max_length=10,
+        choices=STATUS_CHOICE, default=ACTIVE, max_length=10,
     )
     card_type = models.CharField(max_length=255)
     current_card_size = models.CharField(max_length=255)

@@ -30,7 +30,8 @@ const OverviewContainer = styled.div`
 `;
 
 const StatusContainer = styled.div`
-  width: 120px;
+  min-width: 120px;
+  max-width: 200px;
 `;
 
 const NumberOfHouseHolds = styled.div`

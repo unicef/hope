@@ -176,6 +176,9 @@ class CashPlan(TimeStampedUUIDModel):
         max_digits=12,
         validators=[MinValueValidator(Decimal("0.01"))],
     )
+    verification_status = models.CharField(
+        max_length=200, default="PENDING"
+    )
 
     @property
     def payment_records_count(self):

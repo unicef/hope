@@ -4,6 +4,7 @@ import {
   FormLabel,
   Radio,
   RadioGroup,
+  Typography,
 } from '@material-ui/core';
 import styled from 'styled-components';
 
@@ -34,7 +35,7 @@ export const FormikRadioGroup = ({
     <>
       <StyledFormControl {...otherProps} component='fieldset'>
         <FormLabelContainer>
-          <FormLabel component='legend'>{otherProps.label}</FormLabel>
+          <Typography variant='caption'>{otherProps.label}</Typography>
         </FormLabelContainer>
         <RadioGroup
           {...field}
