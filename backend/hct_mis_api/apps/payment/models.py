@@ -77,6 +77,8 @@ class PaymentRecord(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
         related_name="payment_records",
     )
+    transaction_reference_id = models.CharField(max_length=255, null=True)
+    vision_id = models.CharField(max_length=255, null=True)
 
 
 class ServiceProvider(TimeStampedUUIDModel):
