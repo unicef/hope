@@ -103,12 +103,12 @@ Below represents approximately strategy we hope to follow. We may or may not use
 
 The following are the code branches and their CI / CD usage.
 
-| Branch | Auto-deployed? | Cloud environment |
-| :--- | :--- | :--- |
-| develop | yes | [https://dev-hct.unitst.org/](https://dev-hct.unitst.org/afghanistan/) |
-| staging | yes | [https://staging-hct.unitst.org/](https://staging-hct.unitst.org/) |
-| master | no | ? |
-| feature/\* or bug/\* | no | n/a |
+| Branch | Auto-deployed? | Cloud environment | Airflow UI |
+| :--- | :--- | :--- | :--- |
+| develop | yes | [https://dev-hct.unitst.org/](https://dev-hct.unitst.org/afghanistan/) | [https://dev-af.unitst.org](%20%20%20https://dev-af.unitst.org) |
+| staging | yes | https://staging-hct.unitst.org/ | [https://stg-af.unitst.org](https://stg-af.unitst.org) |
+| master | no | ? |  |
+| feature/\* or bug/\* | no | n/a |  |
 
 In the future hotfix branches might be made as well which merge directly to master potentially. A UAT environment that mirrors the stability of production \(master branch\) might be necessary as well. If strictly following an agile methodology, it may or may not be necessary, but a UAT env mirroring production might be helpful for production focused hot fix testing.
 

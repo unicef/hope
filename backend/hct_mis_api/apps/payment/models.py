@@ -168,3 +168,9 @@ class PaymentVerification(TimeStampedUUIDModel):
         max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING
     )
     status_date = models.DateField(null=True)
+    received_amount = models.DecimalField(
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0.01"))],
+        null=True,
+    )

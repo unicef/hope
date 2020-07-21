@@ -23,7 +23,7 @@ export function PaymentRecordDetailsPage(): React.ReactElement {
     variables: { id },
   });
   const businessArea = useBusinessArea();
-
+  console.log(data);
   if (loading) {
     return <LoadingComponent />;
   }
