@@ -18,6 +18,7 @@ from household.models import (
 TYPE_ID = "ID"
 TYPE_INTEGER = "INTEGER"
 TYPE_STRING = "STRING"
+TYPE_LIST_OF_IDS = "LIST_OF_IDS"
 TYPE_BOOL = "BOOL"
 TYPE_DATE = "DATE"
 TYPE_IMAGE = "IMAGE"
@@ -852,6 +853,33 @@ HOUSEHOLD_ID_FIELDS = [
         "xlsx_field": "work_status_i_c",
     },
 ]
+
+COLLECTORS_FIELDS = {
+    "primary_collector_id": {
+        "type": TYPE_LIST_OF_IDS,
+        "name": "primary_collector_id",
+        "required": True,
+        "label": {
+            "English(EN)": "List of primary collectors ids, "
+            "separated by a semicolon"
+        },
+        "choices": [],
+        "associated_with": _INDIVIDUAL,
+        "xlsx_field": "primary_collector_id",
+    },
+    "alternate_collector_id": {
+        "type": TYPE_LIST_OF_IDS,
+        "name": "alternate_collector_id",
+        "required": True,
+        "label": {
+            "English(EN)": "List of alternate collectors ids, "
+            "separated by a semicolon"
+        },
+        "choices": [],
+        "associated_with": _INDIVIDUAL,
+        "xlsx_field": "alternate_collector_id",
+    },
+}
 
 
 def _reduce_core_field_attr(old, new):

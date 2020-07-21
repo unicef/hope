@@ -1,5 +1,5 @@
 import re
-from collections import defaultdict
+from collections import defaultdict, Counter
 from datetime import datetime
 from operator import itemgetter
 from pathlib import Path
@@ -13,7 +13,10 @@ from dateutil import parser
 from openpyxl import load_workbook
 from openpyxl_image_loader import SheetImageLoader
 
-from core.core_fields_attributes import CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY
+from core.core_fields_attributes import (
+    CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY,
+    COLLECTORS_FIELDS,
+)
 from core.kobo.common import KOBO_FORM_INDIVIDUALS_COLUMN_NAME, get_field_name
 from core.models import BusinessArea
 from core.utils import (
@@ -22,12 +25,8 @@ from core.utils import (
     rename_dict_keys,
 )
 from core.validators import BaseValidator
-from household.models import Document, DocumentType, IndividualIdentity
-from registration_datahub.models import (
-    ImportedDocument,
-    ImportedDocumentType,
-    ImportedIndividualIdentity,
-)
+from household.models import IndividualIdentity
+from registration_datahub.models import ImportedIndividualIdentity
 
 
 class XLSXValidator(BaseValidator):
@@ -100,41 +99,7 @@ class ImportDataValidator(BaseValidator):
         cls, documents_numbers_dict, is_xlsx=True, *args, **kwargs
     ):
         invalid_rows = []
-        message = f"Duplicated document"
         for key, values in documents_numbers_dict.items():
-
-            if key == "other_id_no_i_c":
-                continue
-
-            document_name = values["type"].replace("_", " ").lower()
-
-            seen = {}
-            dupes = []
-            for data_dict in values["validation_data"]:
-                value = data_dict["value"]
-                row_number = data_dict.get("row_number")
-
-                if not value:
-                    continue
-
-                if value not in seen:
-                    seen[value] = 1
-                else:
-                    if seen[value] == 1:
-                        dupes.append(row_number)
-                    seen[value] += 1
-
-                for number in dupes:
-                    error = {
-                        "header": key,
-                        "message": f"{message}: "
-                        f"{document_name} no: {value}",
-                    }
-                    if is_xlsx is True:
-                        error["row_number"] = number
-
-                    invalid_rows.append(error)
-
             if key == "other_id_type_i_c":
                 for name, validation_data in zip(
                     values["names"], values["validation_data"]
@@ -151,58 +116,6 @@ class ImportDataValidator(BaseValidator):
                         if is_xlsx is True:
                             error["row_number"] = row_number
                         invalid_rows.append(error)
-                imp_doc_type_obj = ImportedDocumentType.objects.filter(
-                    label__in=values["names"],
-                    country=cls.BUSINESS_AREA_CODE,
-                    type=values["type"],
-                )
-                doc_type_obj = DocumentType.objects.filter(
-                    label__in=values["names"],
-                    country=cls.BUSINESS_AREA_CODE,
-                    type=values["type"],
-                )
-            else:
-                imp_doc_type_obj = ImportedDocumentType.objects.filter(
-                    country=cls.BUSINESS_AREA_CODE, type=values["type"],
-                )
-                doc_type_obj = DocumentType.objects.filter(
-                    country=cls.BUSINESS_AREA_CODE, type=values["type"],
-                )
-
-            imp_doc_obj = []
-            doc_obj = []
-            if imp_doc_type_obj:
-                imp_doc_obj = ImportedDocument.objects.filter(
-                    type__in=imp_doc_type_obj,
-                    document_number__in=values["numbers"],
-                )
-
-            if doc_type_obj:
-                doc_obj = Document.objects.filter(
-                    type__in=doc_type_obj, document_number__in=values["numbers"]
-                )
-
-            for obj in imp_doc_obj:
-                error = {
-                    "header": key,
-                    "message": f"{message}: "
-                    f"{document_name} no: {obj.document_number}"
-                    f" in RDH Database",
-                }
-                if is_xlsx is True:
-                    error["row_number"] = 0
-                invalid_rows.append(error)
-
-            for obj in doc_obj:
-                error = {
-                    "row_number": 0,
-                    "header": key,
-                    "message": f"{message}: {document_name} "
-                    f"no: {obj.document_number} in HCT Database",
-                }
-                if is_xlsx is True:
-                    error["row_number"] = 0
-                invalid_rows.append(error)
 
         return invalid_rows
 
@@ -445,14 +358,6 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
             "IMAGE": cls.image_validator,
         }
 
-        # create set of household ids to validate
-        # individual is matched with any household
-        household_ids = (
-            {cell.value for cell in sheet["A"]}
-            if sheet.title == "Individuals"
-            else None
-        )
-
         invalid_rows = []
         current_household_id = None
         head_of_household_count = defaultdict(int)
@@ -567,20 +472,6 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
                         {"row_number": cell.row, "value": value}
                     )
 
-                is_not_matched_with_household = (
-                    household_ids and header.value == "household_id"
-                ) and value not in household_ids
-
-                if is_not_matched_with_household:
-                    message = "Individual is not matched with any household"
-                    invalid_rows.append(
-                        {
-                            "row_number": cell.row,
-                            "header": header.value,
-                            "message": message,
-                        }
-                    )
-
         # validate head of household count
         for household_id, count in head_of_household_count.items():
             if count == 0:
@@ -654,7 +545,13 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
             wb = cls.WB
 
         errors = []
-        for name, fields in cls.CORE_FIELDS.items():
+        core_fields = {**cls.CORE_FIELDS}
+        core_fields["individuals"] = {
+            **core_fields["individuals"],
+            **COLLECTORS_FIELDS,
+        }
+
+        for name, fields in core_fields.items():
             sheet = wb[name.capitalize()]
             first_row = sheet[1]
 
@@ -722,6 +619,111 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
         ).alpha_2
 
         return cls.rows_validator(individuals_sheet)
+
+    @staticmethod
+    def collector_column_validator(header, data_dict, household_ids):
+        is_primary_collector = header == "primary_collector_id"
+        errors = []
+        collectors_ids = []
+        for row, cell in data_dict.items():
+            if not cell.value:
+                continue
+            value = str(cell.value)
+            list_of_ids = set(value.strip(";").replace(" ", "").split(";"))
+            contains_correct_ids = list_of_ids.issubset(household_ids)
+            if not contains_correct_ids:
+                errors.append(
+                    {
+                        "row_number": row,
+                        "header": header,
+                        "message": "One or more ids are not attached "
+                        "to any household in the file.",
+                    }
+                )
+            collectors_ids.extend(list_of_ids)
+
+        collectors_ids_set = set(collectors_ids)
+
+        household_ids_without_collectors = household_ids.difference(
+            collectors_ids_set
+        )
+        errors.extend(
+            {
+                "row_number": 1,
+                "header": header,
+                "message": f"Household with id: {hh_id} "
+                f"does not have "
+                f"{'primary' if is_primary_collector else 'alternate'} "
+                f"collector",
+            }
+            for hh_id in household_ids_without_collectors
+        )
+
+        ids_counter = Counter(collectors_ids)
+        erroneous_collectors_ids = [
+            item for item, count in ids_counter.items() if count > 1
+        ]
+        message = (
+            "Household must contain only one "
+            "primary and one alternate collector"
+        )
+        errors.extend(
+            {
+                "row_number": 1,
+                "header": header,
+                "message": f"{message}, erroneous id: {hh_id}",
+            }
+            for hh_id in erroneous_collectors_ids
+        )
+        return errors
+
+    @classmethod
+    def validate_collectors(cls, *args, **kwargs):
+        if cls.WB is None:
+            xlsx_file = kwargs.get("file")
+            wb = openpyxl.load_workbook(xlsx_file, data_only=True)
+        else:
+            wb = cls.WB
+
+        errors = []
+
+        individuals_sheet = wb["Individuals"]
+        households_sheet = wb["Households"]
+        first_row = individuals_sheet[1]
+        household_ids = {
+            str(cell.value) for cell in households_sheet["A"][2:] if cell.value
+        }
+
+        primary_collectors_data = {}
+        alternate_collectors_data = {}
+        for cell in first_row:
+            if cell.value == "primary_collector_id":
+                primary_collectors_data = {
+                    c.row: c
+                    for c in individuals_sheet[cell.column_letter][2:]
+                    if c.value
+                }
+            elif cell.value == "alternate_collector_id":
+                alternate_collectors_data = {
+                    c.row: c
+                    for c in individuals_sheet[cell.column_letter][2:]
+                    if c.value
+                }
+
+        errors.extend(
+            cls.collector_column_validator(
+                "primary_collector_id", primary_collectors_data, household_ids
+            )
+        )
+        errors.extend(
+            cls.collector_column_validator(
+                "alternate_collector_id",
+                alternate_collectors_data,
+                household_ids,
+            )
+        )
+
+        return errors
 
 
 class KoboProjectImportDataValidator(ImportDataValidator):
@@ -1156,7 +1158,7 @@ class KoboProjectImportDataValidator(ImportDataValidator):
                             {
                                 "header": "relationship_i_c",
                                 "message": "Household has to have a "
-                                           "head of household",
+                                "head of household",
                             }
                         )
                     if head_of_hh_counter > 1:
@@ -1164,7 +1166,7 @@ class KoboProjectImportDataValidator(ImportDataValidator):
                             {
                                 "header": "relationship_i_c",
                                 "message": "Only one person can "
-                                           "be a head of household",
+                                "be a head of household",
                             }
                         )
                 else:
