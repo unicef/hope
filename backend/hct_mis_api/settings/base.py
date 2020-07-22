@@ -400,3 +400,5 @@ SANCTION_LIST_CC_MAIL = os.getenv(
 
 # ELASTICSEARCH SETTINGS
 ELASTICSEARCH_DSL_AUTOSYNC = False
+
+RAPID_PRO_URL = os.getenv("RAPID_PRO_URL", "https://rapidpro.io")
