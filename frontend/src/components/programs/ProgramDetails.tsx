@@ -10,6 +10,7 @@ import {
   ProgramNode,
 } from '../../__generated__/graphql';
 import { MiśTheme } from '../../theme';
+import { Missing } from '../Missing';
 
 const Container = styled.div`
   display: flex;
@@ -139,6 +140,11 @@ export function ProgramDetails({
               label='CASH+'
               value={program.cashPlus ? 'Yes' : 'No'}
             />
+          </Grid>
+          <Grid item xs={4}>
+            <LabelizedField label='Send Individuals Data to CashAssist'>
+              <Missing />
+            </LabelizedField>
           </Grid>
         </Grid>
         <NumberOfHouseHolds>
