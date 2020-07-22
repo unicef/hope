@@ -100,6 +100,11 @@ class Program(TimeStampedUUIDModel, AbstractSyncable):
         validators=[MinLengthValidator(3), MaxLengthValidator(255)],
     )
     history = AuditlogHistoryField(pk_indexable=False)
+    individual_data_needed = models.BooleanField(default=False,
+        help_text="""
+        This boolean decides whether the target population sync will send
+        all individuals of a household thats part of the population or only
+        the relevant ones (collectors etc.)""")
 
     @property
     def total_number_of_households(self):
