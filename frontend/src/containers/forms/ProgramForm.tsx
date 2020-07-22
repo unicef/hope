@@ -115,6 +115,7 @@ export function ProgramForm({
     frequencyOfPayments: 'REGULAR',
     sector: '',
     cashPlus: false,
+    sendIndividualsData: false,
   };
 
   if (program) {
@@ -265,7 +266,6 @@ export function ProgramForm({
                     <Field
                       name='cashPlus'
                       label='Cash+'
-                      fullWidth
                       color='primary'
                       component={FormikCheckboxField}
                     />
@@ -274,7 +274,7 @@ export function ProgramForm({
                     <Field
                       name='sendIndividualsData'
                       label="Send Individuals' data to CashAssist"
-                      fullWidth
+                      disabled={program && program.status === 'ACTIVE'}
                       color='primary'
                       component={FormikCheckboxField}
                     />
