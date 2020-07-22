@@ -115,7 +115,7 @@ export function ProgramForm({
     frequencyOfPayments: 'REGULAR',
     sector: '',
     cashPlus: false,
-    sendIndividualsData: false,
+    individualDataNeeded: false,
   };
 
   if (program) {
@@ -272,7 +272,7 @@ export function ProgramForm({
                   </FullWidth>
                   <FullWidth>
                     <Field
-                      name='sendIndividualsData'
+                      name='individualDataNeeded'
                       label="Send Individuals' data to CashAssist"
                       disabled={program && program.status === 'ACTIVE'}
                       color='primary'
