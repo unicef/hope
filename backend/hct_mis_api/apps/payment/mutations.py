@@ -12,7 +12,9 @@ from scipy.special import ndtri
 from core.filters import filter_age
 from core.permissions import is_authenticated
 from core.utils import decode_id_string
+from household.models import Individual
 from payment.models import CashPlanPaymentVerification, PaymentVerification
+from payment.rapid_pro.api import RapidProAPI
 from program.models import CashPlan
 from program.schema import CashPlanNode
 
@@ -50,11 +52,12 @@ class CreatePaymentVerificationInput(graphene.InputObjectType):
     cash_plan_id = graphene.ID(required=True)
     sampling = graphene.String(required=True)
     verification_channel = graphene.String(required=True)
+    business_area_slug = graphene.String(required=True)
     full_list_arguments = FullListArguments()
     random_sampling_arguments = RandomSamplingArguments()
     rapid_pro_arguments = RapidProArguments()
     xlsx_arguments = XlsxArguments()
-    manual_arguments = ManualArguments
+    # manual_arguments = ManualArguments()
 
 
 class CreatePaymentVerificationMutation(graphene.Mutation):
@@ -155,6 +158,7 @@ class CreatePaymentVerificationMutation(graphene.Mutation):
             payment_record_verifications_to_create
         )
         cash_plan.refresh_from_db()
+        cls.process_verification_method(cash_plan_verification, input)
         return cls(cash_plan=cash_plan)
 
     @classmethod
@@ -230,6 +234,29 @@ class CreatePaymentVerificationMutation(graphene.Mutation):
             * 1.5
         )
         return actual_sample
+
+    @classmethod
+    def process_verification_method(cls, cash_plan_payment_verification, input):
+        verification_method = cash_plan_payment_verification.verification_method
+        if (
+            verification_method
+            == CashPlanPaymentVerification.VERIFICATION_METHOD_RAPIDPRO
+        ):
+            cls.process_rapid_pro_method(cash_plan_payment_verification, input)
+
+    @classmethod
+    def process_rapid_pro_method(cls, cash_plan_payment_verification, input):
+        rapid_pro_arguments = input["rapid_pro_arguments"]
+        flow_id = rapid_pro_arguments["flow_id"]
+        business_area_slug = input["business_area_slug"]
+        api = RapidProAPI(business_area_slug)
+        phone_numbers = list(
+            Individual.objects.filter(
+                heading_household__payment_records__verifications__cash_plan_payment_verification=cash_plan_payment_verification.id
+            ).values_list("phone_no", flat=True)
+        )
+        flow_start_info = api.start_flow(flow_id, phone_numbers)
+        print(flow_start_info)
 
 
 class Mutations(graphene.ObjectType):

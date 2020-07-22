@@ -13,6 +13,7 @@ from payment.models import (
     CashPlanPaymentVerification,
     PaymentVerification,
 )
+from payment.rapid_pro.api import RapidProAPI
 
 
 class PaymentRecordFilter(FilterSet):
@@ -42,9 +43,7 @@ class PaymentRecordFilter(FilterSet):
 
 class PaymentVerificationFilter(FilterSet):
     class Meta:
-        fields = (
-            "cash_plan_payment_verification",
-        )
+        fields = ("cash_plan_payment_verification",)
         model = PaymentVerification
 
     order_by = OrderingFilter(
@@ -56,9 +55,40 @@ class PaymentVerificationFilter(FilterSet):
             "payment_record__household",
             "payment_record__household__unicef_id",
             "payment_record__delivered_quantity",
-            "received_amount"
+            "received_amount",
         )
     )
+
+
+class RapidProFlowResult(graphene.ObjectType):
+    key = graphene.String()
+    name = graphene.String()
+    categories = graphene.List(graphene.String)
+    node_uuids = graphene.List(graphene.String)
+
+
+class RapidProFlowRun(graphene.ObjectType):
+    active = graphene.Int()
+    completed = graphene.Int()
+    interrupted = graphene.Int()
+    expired = graphene.Int()
+
+
+class RapidProFlow(graphene.ObjectType):
+    id = graphene.String()
+    name = graphene.String()
+    type = graphene.String()
+    archived = graphene.Boolean()
+    labels = graphene.List(graphene.String)
+    expires = graphene.Int()
+    runs = graphene.List(RapidProFlowRun)
+    results = graphene.List(RapidProFlowResult)
+    # parent_refs
+    created_on = graphene.DateTime()
+    modified_on = graphene.DateTime()
+
+    def resolve_id(parent, info):
+        return parent["uuid"]
 
 
 class PaymentRecordNode(DjangoObjectType):
@@ -109,10 +139,20 @@ class Query(graphene.ObjectType):
     )
     payment_verification_status_choices = graphene.List(ChoiceObject)
 
+    all_rapid_pro_flows = graphene.List(
+        RapidProFlow, business_area_slug=graphene.String(required=True),
+    )
+
+    def resolve_all_rapid_pro_flows(self, info, business_area_slug, **kwargs):
+        api = RapidProAPI(business_area_slug)
+        return api.get_flows()
+
     def resolve_payment_record_status_choices(self, info, **kwargs):
         return to_choice_object(PaymentRecord.STATUS_CHOICE)
 
-    def resolve_payment_record_status_choices(self, info, **kwargs):
+    def resolve_payment_record_entitlement_card_status_choices(
+        self, info, **kwargs
+    ):
         return to_choice_object(PaymentRecord.ENTITLEMENT_CARD_STATUS_CHOICE)
 
     def resolve_payment_record_delivery_type_choices(self, info, **kwargs):
