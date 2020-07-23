@@ -10,7 +10,7 @@ from django.contrib.postgres.validators import (
 )
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
@@ -261,7 +261,7 @@ class HouseholdSelection(TimeStampedUUIDModel):
     final = models.BooleanField(
         default=True,
         help_text="""
-            When set to True, this means the household has been selected from 
+            When set to True, this means the household has been selected from
             the candidate list. Only these households will be sent to
             CashAssist when a sync is run for the associated target population.
             """,
@@ -280,6 +280,15 @@ class TargetingCriteriaQueryingMixin:
         rules = self.rules if isinstance(self.rules, list) else self.rules.all()
         for rule in rules:
             query |= rule.get_query()
+
+        # If this is the final targeting criteria (DRAFT check is nice to
+        # have since should not be associated if in DRAFT) and program needs
+        # individual data, then exclude households that do not have any
+        # individuals in them.
+        if self.target_population_final and self.target_population_final.status != "DRAFT" and \
+            self.target_population_final.program.individual_data_needed:
+            query = query.annotate(individuals_count=Count(
+                'individuals')).filter(individuals_count__gt=0)
         return query
 
 
