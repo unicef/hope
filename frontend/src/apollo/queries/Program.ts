@@ -18,6 +18,7 @@ export const PROGRAM_QUERY = gql`
       sector
       totalNumberOfHouseholds
       administrativeAreasOfImplementation
+      individualDataNeeded
     }
   }
 `;
