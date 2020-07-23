@@ -9,7 +9,6 @@ from core.utils import (
 from household.models import (
     RESIDENCE_STATUS_CHOICE,
     RELATIONSHIP_CHOICE,
-    ROLE_CHOICE,
     SEX_CHOICE,
     MARITAL_STATUS_CHOICE,
     WORK_STATUS_CHOICE,
@@ -210,21 +209,6 @@ CORE_FIELDS_ATTRIBUTES = [
         ],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "relationship_i_c",
-    },
-    {
-        "id": "f72eea9e-aaca-4085-93ff-9d194143d354",
-        "type": TYPE_SELECT_ONE,
-        "name": "role",
-        "lookup": "role",
-        "required": False,
-        "label": {"English(EN)": "Role"},
-        "hint": "",
-        "choices": [
-            {"label": {"English(EN)": label}, "value": value,}
-            for value, label in ROLE_CHOICE
-        ],
-        "associated_with": _INDIVIDUAL,
-        "xlsx_field": "role_i_c",
     },
     {
         "id": "36ab3421-6e7a-40d1-b816-ea5cbdcc0b6a",
@@ -866,6 +850,7 @@ COLLECTORS_FIELDS = {
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "primary_collector_id",
+        "custom_cast_value": Countries.get_country_value,
     },
     "alternate_collector_id": {
         "type": TYPE_LIST_OF_IDS,
@@ -878,6 +863,7 @@ COLLECTORS_FIELDS = {
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "alternate_collector_id",
+        "custom_cast_value": Countries.get_country_value,
     },
 }
 
