@@ -26,6 +26,7 @@ class CreateProgramInput(graphene.InputObjectType):
     population_goal = graphene.Int()
     administrative_areas_of_implementation = graphene.String()
     business_area_slug = graphene.String()
+    individual_data_needed = graphene.Boolean()
 
 
 class UpdateProgramInput(graphene.InputObjectType):
@@ -43,6 +44,7 @@ class UpdateProgramInput(graphene.InputObjectType):
     population_goal = graphene.Int()
     administrative_areas_of_implementation = graphene.String()
     business_area_slug = graphene.String()
+    individual_data_needed = graphene.Boolean()
 
 
 class CreateProgram(CommonValidator, graphene.Mutation):

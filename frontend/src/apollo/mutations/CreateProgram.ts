@@ -17,6 +17,7 @@ export const CREATE_PROGRAM_MUTATION = gql`
         scope
         cashPlus
         populationGoal
+        individualDataNeeded
       }
     }
   }
