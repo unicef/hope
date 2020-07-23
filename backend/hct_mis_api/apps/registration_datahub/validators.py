@@ -27,6 +27,7 @@ from core.utils import (
 from core.validators import BaseValidator
 from household.models import IndividualIdentity
 from registration_datahub.models import ImportedIndividualIdentity
+from registration_datahub.tasks.utils import collectors_str_ids_to_list
 
 
 class XLSXValidator(BaseValidator):
@@ -628,8 +629,7 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
         for row, cell in data_dict.items():
             if not cell.value:
                 continue
-            value = str(cell.value)
-            list_of_ids = set(value.strip(";").replace(" ", "").split(";"))
+            list_of_ids = set(collectors_str_ids_to_list(cell.value))
             contains_correct_ids = list_of_ids.issubset(household_ids)
             if not contains_correct_ids:
                 errors.append(
@@ -644,27 +644,26 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
 
         collectors_ids_set = set(collectors_ids)
 
-        household_ids_without_collectors = household_ids.difference(
-            collectors_ids_set
-        )
-        errors.extend(
-            {
-                "row_number": 1,
-                "header": header,
-                "message": f"Household with id: {hh_id} "
-                f"does not have "
-                f"{'primary' if is_primary_collector else 'alternate'} "
-                f"collector",
-            }
-            for hh_id in household_ids_without_collectors
-        )
+        if is_primary_collector:
+            household_ids_without_collectors = household_ids.difference(
+                collectors_ids_set
+            )
+            errors.extend(
+                {
+                    "row_number": 1,
+                    "header": header,
+                    "message": f"Household with id: {hh_id} "
+                    f"does not have primary collector"
+                }
+                for hh_id in household_ids_without_collectors
+            )
 
         ids_counter = Counter(collectors_ids)
         erroneous_collectors_ids = [
             item for item, count in ids_counter.items() if count > 1
         ]
         message = (
-            "Household must contain only one "
+            "Household can contain only one "
             "primary and one alternate collector"
         )
         errors.extend(
