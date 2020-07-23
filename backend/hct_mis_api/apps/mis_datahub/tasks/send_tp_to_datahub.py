@@ -183,6 +183,8 @@ class SendTPToDatahubTask:
             dh_documents.append(dh_document)
 
         dh_individual.unchr_id = self.get_unhcr_individual_id(individual)
+        individual.last_synced_at = timezone.now()
+        individual.save(update_fields=["last_sync_at"])
         return dh_individual, dh_documents
 
     def send_household(self, household, program, dh_session):
@@ -263,10 +265,16 @@ class SendTPToDatahubTask:
     def should_send_individual(self, individual):
         """Returns False when data sharing is true and unhcr id is set
         https://unicef.visualstudio.com/ICTD-HCT-MIS/_workitems/edit/64344"""
-        return (
+        is_synced = (
+            individual.last_sync_at is None
+            or individual.last_sync_at > individual.updated_at
+        )
+        is_allowed_to_share = (
             individual.household.business_area.has_data_sharing_agreement
             and self.get_unhcr_individual_id(individual)
         )
+
+        return is_synced and is_allowed_to_share
 
     def send_target_entry(self, target_population_selection):
         household_unhcr_id = self.get_unhcr_household_id(
