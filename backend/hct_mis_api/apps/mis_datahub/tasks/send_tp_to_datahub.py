@@ -196,9 +196,18 @@ class SendTPToDatahubTask:
         individuals_to_create = []
         documents_to_create = []
         if program.individual_data_needed:
-            # send all individuals and their documents always
-            individuals_to_create = list(household.individuals.all())
-            # documents_to_create = .... TODO ....
+            individuals = household.individuals.all()
+            for individual in individuals:
+                if self.should_send_individual(individual):
+                    (
+                        dh_individual,
+                        dh_individual_documents,
+                    ) = self.send_individual(
+                        individual, dh_household, dh_session
+                    )
+                    dh_individual.session = dh_session
+                    individuals_to_create.append(dh_individual)
+                    documents_to_create.extend(dh_individual_documents)
         else:
             head_of_household = household.head_of_household
             if self.should_send_individual(head_of_household):
