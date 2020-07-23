@@ -49,6 +49,7 @@ type BusinessAreaNode implements Node {
   rapidProHost: String
   rapidProApiKey: String
   slug: String!
+  hasDataSharingAgreement: Boolean!
   userSet(before: String, after: String, first: Int, last: Int): UserNodeConnection!
   paymentrecordSet(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
   serviceproviderSet(before: String, after: String, first: Int, last: Int): ServiceProviderNodeConnection!
@@ -220,6 +221,7 @@ input CreateProgramInput {
   populationGoal: Int
   administrativeAreasOfImplementation: String
   businessAreaSlug: String
+  individualDataNeeded: Boolean
 }
 
 input CreateTargetPopulationInput {
@@ -385,6 +387,7 @@ type HouseholdNode implements Node {
   firstRegistrationDate: Date!
   lastRegistrationDate: Date!
   headOfHousehold: IndividualNode!
+  unicefId: String!
   individuals(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
   targetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, orderBy: String): TargetPopulationNodeConnection!
@@ -894,6 +897,7 @@ type IndividualNode implements Node {
   flexFields: FlexFieldsScalar
   enrolledInNutritionProgramme: Boolean!
   administrationOfRutf: Boolean!
+  unicefId: String!
   headingHousehold: HouseholdNode
   documents(before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
 }
@@ -1081,6 +1085,8 @@ type PaymentRecordNode implements Node {
   deliveredQuantity: Float!
   deliveryDate: DateTime!
   serviceProvider: ServiceProviderNode!
+  transactionReferenceId: String
+  visionId: String
   verifications(before: String, after: String, first: Int, last: Int): PaymentVerificationNodeConnection!
 }
 
@@ -1158,6 +1164,7 @@ type ProgramNode implements Node {
   cashPlus: Boolean!
   populationGoal: Int!
   administrativeAreasOfImplementation: String!
+  individualDataNeeded: Boolean
   households(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   cashPlans(before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
   targetpopulationSet(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, orderBy: String): TargetPopulationNodeConnection!
@@ -1524,6 +1531,7 @@ input UpdateProgramInput {
   populationGoal: Int
   administrativeAreasOfImplementation: String
   businessAreaSlug: String
+  individualDataNeeded: Boolean
 }
 
 input UpdateTargetPopulationInput {

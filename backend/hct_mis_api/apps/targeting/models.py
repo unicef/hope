@@ -49,13 +49,14 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
 
     Has N:N association with households.
     """
+
     STATUS_DRAFT = "DRAFT"
     STATUS_APPROVED = "APPROVED"
-    STATUS_FINALIZED= "FINALIZED"
+    STATUS_FINALIZED = "FINALIZED"
 
     name = models.TextField(unique=True)
-    ca_id = models.CharField(max_length=255,null=True)
-    ca_hash_id = models.CharField(max_length=255,null=True)
+    ca_id = models.CharField(max_length=255, null=True)
+    ca_hash_id = models.CharField(max_length=255, null=True)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -268,7 +269,6 @@ class HouseholdSelection(TimeStampedUUIDModel):
     )
 
 
-
 class TargetingCriteriaQueryingMixin:
     def __init__(self, rules=None):
         if rules is None:
@@ -280,15 +280,6 @@ class TargetingCriteriaQueryingMixin:
         rules = self.rules if isinstance(self.rules, list) else self.rules.all()
         for rule in rules:
             query |= rule.get_query()
-
-        # If this is the final targeting criteria (DRAFT check is nice to
-        # have since should not be associated if in DRAFT) and program needs
-        # individual data, then exclude households that do not have any
-        # individuals in them.
-        if self.target_population_final and self.target_population_final.status != "DRAFT" and \
-            self.target_population_final.program.individual_data_needed:
-            query = query.annotate(individuals_count=Count(
-                'individuals')).filter(individuals_count__gt=0)
         return query
 
 
@@ -299,7 +290,16 @@ class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingMixin):
     list).
     """
 
-    pass
+    def get_query(self):
+        query = super().get_query()
+        if (
+            self.target_population_final
+            and self.target_population_final.status != "DRAFT"
+            and self.target_population_final.program.individual_data_needed
+        ):
+            query = query.filter(size__gt=0)
+
+        return query
 
 
 class TargetingCriteriaRuleQueryingMixin:

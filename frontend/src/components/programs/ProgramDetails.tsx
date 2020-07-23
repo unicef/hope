@@ -142,9 +142,10 @@ export function ProgramDetails({
             />
           </Grid>
           <Grid item xs={4}>
-            <LabelizedField label="Does this programme uses individuals’ data for targeting or entitlement calculation?">
-              <Missing />
-            </LabelizedField>
+            <LabelizedField
+                label="Does this programme uses individuals’ data for targeting or entitlement calculation?"
+                value={program.individualDataNeeded ? 'Yes' : 'No'}
+            />
           </Grid>
         </Grid>
         <NumberOfHouseHolds>
