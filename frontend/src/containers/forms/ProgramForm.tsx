@@ -273,7 +273,7 @@ export function ProgramForm({
                   <FullWidth>
                     <Field
                       name='individualDataNeeded'
-                      label="Send Individuals' data to CashAssist"
+                      label="Will this programme use individuals’ data for targeting or entitlement calculation? Setting this flag can reduce the number of households filtered in the target population."
                       disabled={program && program.status === 'ACTIVE'}
                       color='primary'
                       component={FormikCheckboxField}

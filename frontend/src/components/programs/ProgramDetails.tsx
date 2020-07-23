@@ -142,7 +142,7 @@ export function ProgramDetails({
             />
           </Grid>
           <Grid item xs={4}>
-            <LabelizedField label='Send Individuals Data to CashAssist'>
+            <LabelizedField label="Does this programme uses individuals’ data for targeting or entitlement calculation?">
               <Missing />
             </LabelizedField>
           </Grid>
