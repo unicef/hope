@@ -10,6 +10,7 @@ import {
   ProgramNode,
 } from '../../__generated__/graphql';
 import { MiśTheme } from '../../theme';
+import { Missing } from '../Missing';
 
 const Container = styled.div`
   display: flex;
@@ -138,6 +139,12 @@ export function ProgramDetails({
             <LabelizedField
               label='CASH+'
               value={program.cashPlus ? 'Yes' : 'No'}
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <LabelizedField
+                label="Does this programme uses individuals’ data for targeting or entitlement calculation?"
+                value={program.individualDataNeeded ? 'Yes' : 'No'}
             />
           </Grid>
         </Grid>

@@ -10,7 +10,7 @@ from django.contrib.postgres.validators import (
 )
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
@@ -49,13 +49,14 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
 
     Has N:N association with households.
     """
+
     STATUS_DRAFT = "DRAFT"
     STATUS_APPROVED = "APPROVED"
-    STATUS_FINALIZED= "FINALIZED"
+    STATUS_FINALIZED = "FINALIZED"
 
     name = models.TextField(unique=True)
-    ca_id = models.CharField(max_length=255,null=True)
-    ca_hash_id = models.CharField(max_length=255,null=True)
+    ca_id = models.CharField(max_length=255, null=True)
+    ca_hash_id = models.CharField(max_length=255, null=True)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -261,12 +262,11 @@ class HouseholdSelection(TimeStampedUUIDModel):
     final = models.BooleanField(
         default=True,
         help_text="""
-            When set to True, this means the household has been selected from 
+            When set to True, this means the household has been selected from
             the candidate list. Only these households will be sent to
             CashAssist when a sync is run for the associated target population.
             """,
     )
-
 
 
 class TargetingCriteriaQueryingMixin:
@@ -290,7 +290,18 @@ class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingMixin):
     list).
     """
 
-    pass
+    def get_query(self):
+        query = super().get_query()
+        try:
+            if (
+                self.target_population_final
+                and self.target_population_final.status != "DRAFT"
+                and self.target_population_final.program.individual_data_needed
+            ):
+                query = query.filter(size__gt=0)
+        except TargetPopulation.DoesNotExist:
+            pass
+        return query
 
 
 class TargetingCriteriaRuleQueryingMixin:

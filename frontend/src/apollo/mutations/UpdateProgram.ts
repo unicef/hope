@@ -19,6 +19,7 @@ export const UPDATE_PROGRAM_MUTATION = gql`
         sector
         totalNumberOfHouseholds
         administrativeAreasOfImplementation
+        individualDataNeeded
       }
     }
   }

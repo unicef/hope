@@ -1,14 +1,12 @@
-from datetime import timedelta, datetime
+from datetime import timedelta
 from random import randint
 
 import factory
 from factory import fuzzy
 from pytz import utc
 
-from account.fixtures import UserFactory
 from core.fixtures import AdminAreaFactory
 from program.models import Program, CashPlan
-from targeting.fixtures import TargetPopulationFactory
 
 
 class ProgramFactory(factory.DjangoModelFactory):
@@ -40,6 +38,7 @@ class ProgramFactory(factory.DjangoModelFactory):
     administrative_areas_of_implementation = factory.Faker(
         "sentence", nb_words=3, variable_nb_words=True, ext_word_list=None,
     )
+    individual_data_needed = fuzzy.FuzzyChoice((True, False))
 
     @factory.post_generation
     def locations(self, create, extracted, **kwargs):
@@ -95,6 +94,8 @@ class CashPlanFactory(factory.DjangoModelFactory):
     total_persons_covered_revised = factory.fuzzy.FuzzyInteger(1, 4)
 
     total_entitled_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
-    total_entitled_quantity_revised = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
+    total_entitled_quantity_revised = factory.fuzzy.FuzzyDecimal(
+        20000.0, 90000000.0
+    )
     total_delivered_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
     total_undelivered_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
