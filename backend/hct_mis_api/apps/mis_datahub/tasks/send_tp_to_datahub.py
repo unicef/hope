@@ -26,6 +26,7 @@ class SendTPToDatahubTask:
         "start_date": "start_date",
         "end_date": "end_date",
         "description": "description",
+        "individual_data_needed": "individual_data_needed",
     }
 
     MAPPING_HOUSEHOLD_DICT = {
@@ -122,7 +123,7 @@ class SendTPToDatahubTask:
                 continue
 
             (dh_household, dh_individuals, dh_documents) = self.send_household(
-                household, dh_session
+                household, program, dh_session
             )
             dh_household.session = dh_session
             households_to_bulk_create.append(dh_household)
@@ -194,7 +195,7 @@ class SendTPToDatahubTask:
         dh_individual.session = dh_session
         return dh_individual, dh_documents
 
-    def send_household(self, household, dh_session):
+    def send_household(self, household, program, dh_session):
         dh_household_args = self.build_arg_dict(
             household, SendTPToDatahubTask.MAPPING_HOUSEHOLD_DICT
         )
@@ -209,29 +210,43 @@ class SendTPToDatahubTask:
         ids = list(set([head_of_household.id, ] + collectors_ids))
         individuals_to_create = []
         documents_to_create = []
-        individuals = (
-            Individual.objects.filter(id__in=ids)
+        if program.individual_data_needed:
+            individuals = household.individuals.all()
+            for individual in individuals:
+                if self.should_send_individual(individual):
+                    (
+                        dh_individual,
+                        dh_individual_documents,
+                    ) = self.send_individual(
+                        individual, dh_household, dh_session
+                    )
+                    dh_individual.session = dh_session
+                    individuals_to_create.append(dh_individual)
+                    documents_to_create.extend(dh_individual_documents)
+        else:
+            individuals = (
+                Individual.objects.filter(id__in=ids)
                 .filter(
-                Q(last_sync_at__isnull=True)
-                | Q(last_sync_at__lte=F("updated_at"))
-            )
+                    Q(last_sync_at__isnull=True)
+                    | Q(last_sync_at__lte=F("updated_at"))
+                )
                 .prefetch_related(
-                Prefetch(
-                    "households_and_roles",
-                    queryset=IndividualRoleInHousehold.objects.filter(
-                        household=household.id
-                    ),
+                    Prefetch(
+                        "households_and_roles",
+                        queryset=IndividualRoleInHousehold.objects.filter(
+                            household=household.id
+                        ),
+                    )
                 )
             )
-        )
-        for individual in individuals:
-            if self.should_send_individual(individual):
-                dh_individual, dh_individual_documents = self.send_individual(
-                    head_of_household, dh_household, dh_session
-                )
-                dh_individual.session = dh_session
-                individuals_to_create.append(dh_individual)
-                documents_to_create.extend(dh_individual_documents)
+            for individual in individuals:
+                if self.should_send_individual(individual):
+                    dh_individual, dh_individual_documents = self.send_individual(
+                        head_of_household, dh_household, dh_session
+                    )
+                    dh_individual.session = dh_session
+                    individuals_to_create.append(dh_individual)
+                    documents_to_create.extend(dh_individual_documents)
         individuals.update(last_sync_at=timezone.now())
         return (
             dh_household,
@@ -242,10 +257,16 @@ class SendTPToDatahubTask:
     def should_send_individual(self, individual):
         """Returns False when data sharing is true and unhcr id is set
         https://unicef.visualstudio.com/ICTD-HCT-MIS/_workitems/edit/64344"""
-        return (
+        is_synced = (
+            individual.last_sync_at is None
+            or individual.last_sync_at > individual.updated_at
+        )
+        is_allowed_to_share = (
             individual.household.business_area.has_data_sharing_agreement
             and self.get_unhcr_individual_id(individual)
         )
+
+        return is_synced and is_allowed_to_share
 
     def send_target_entry(self, target_population_selection):
         household_unhcr_id = self.get_unhcr_household_id(
