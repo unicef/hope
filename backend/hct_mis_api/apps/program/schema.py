@@ -26,6 +26,7 @@ class ProgramNode(DjangoObjectType):
     total_undelivered_quantity = graphene.Decimal()
     total_number_of_households = graphene.Int()
     history = ConnectionField(LogEntryObjectConnection)
+    individual_data_needed = graphene.Boolean()
 
     class Meta:
         model = Program

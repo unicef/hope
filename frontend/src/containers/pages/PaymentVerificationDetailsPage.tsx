@@ -316,9 +316,9 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
         </Container>
       ) : null}
       <Container>
-        {cashPlan.verifications && cashPlan.verifications.edges.length && (
+        {cashPlan.verifications && cashPlan.verifications.edges.length ? (
           <VerificationRecordsTable id={verificationPlan.id} />
-        )}
+        ) : null}
       </Container>
       {!cashPlan.verifications && cashPlan.verifications.edges.length && (
         <BottomTitle>
