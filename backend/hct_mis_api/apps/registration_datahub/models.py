@@ -105,7 +105,6 @@ class ImportedIndividual(TimeStampedUUIDModel):
     relationship = models.CharField(
         max_length=255, blank=True, choices=RELATIONSHIP_CHOICE, default="",
     )
-    role = models.CharField(max_length=255, blank=True, choices=ROLE_CHOICE,)
     sex = models.CharField(max_length=255, choices=SEX_CHOICE,)
     birth_date = models.DateField()
     estimated_birth_date = models.BooleanField(default=False)
@@ -149,6 +148,23 @@ class ImportedIndividual(TimeStampedUUIDModel):
 
     def __str__(self):
         return self.full_name
+
+
+class ImportedIndividualRoleInHousehold(TimeStampedUUIDModel):
+    individual = models.ForeignKey(
+        "ImportedIndividual",
+        on_delete=models.CASCADE,
+        related_name="households_and_roles",
+    )
+    household = models.ForeignKey(
+        "ImportedHousehold",
+        on_delete=models.CASCADE,
+        related_name="individuals_and_roles",
+    )
+    role = models.CharField(max_length=255, blank=True, choices=ROLE_CHOICE,)
+
+    class Meta:
+        unique_together = ("role", "household")
 
 
 class RegistrationDataImportDatahub(TimeStampedUUIDModel):

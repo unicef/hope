@@ -270,6 +270,7 @@ class IndividualIdentity(models.Model):
     def __str__(self):
         return f"{self.agency} {self.individual} {self.number}"
 
+
 class IndividualRoleInHousehold(TimeStampedUUIDModel, AbstractSyncable):
     individual = models.ForeignKey(
         "household.Individual",

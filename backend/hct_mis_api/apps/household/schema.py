@@ -24,7 +24,8 @@ from household.models import (
     ROLE_CHOICE,
     MARITAL_STATUS_CHOICE,
     SEX_CHOICE,
-    IndividualRoleInHousehold, ROLE_NO_ROLE,
+    IndividualRoleInHousehold,
+    ROLE_NO_ROLE,
 )
 from targeting.models import HouseholdSelection
 
@@ -228,13 +229,13 @@ class IndividualNode(DjangoObjectType):
     estimated_birth_date = graphene.Boolean(required=False)
     role = graphene.String()
     flex_fields = FlexFieldsScalar()
-    role = graphene.String()
 
-    def resolve_role(parent,info):
+    def resolve_role(parent, info):
         role = parent.households_and_roles.first()
         if role is not None:
-            return role.role;
+            return role.role
         return ROLE_NO_ROLE
+
     class Meta:
         model = Individual
         filter_fields = []
