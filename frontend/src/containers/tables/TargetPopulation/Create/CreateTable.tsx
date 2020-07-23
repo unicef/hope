@@ -31,7 +31,7 @@ export const CreateTable = ({
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}
         query={useGoldenRecordByTargetingCriteriaQuery}
-        queriedObjectName='allPaymentVerifications'
+        queriedObjectName='goldenRecordByTargetingCriteria'
         initialVariables={initialVariables}
         renderRow={(row) => (
           <TargetPopulationHouseholdTableRow household={row} />
