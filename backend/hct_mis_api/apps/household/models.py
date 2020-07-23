@@ -189,6 +189,8 @@ class Household(TimeStampedUUIDModel, AbstractSyncable):
 
     @property
     def business_area(self):
+        if self.admin_area is None:
+            return None
         return self.admin_area.admin_area_type.business_area
 
     def __str__(self):
