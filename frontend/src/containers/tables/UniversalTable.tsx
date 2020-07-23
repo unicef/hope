@@ -55,7 +55,6 @@ export function UniversalTable<T, K>({
     }
   }, [initialVariables]);
   if (error) {
-    console.log("dupsko")
     console.error(error);
   }
   if (!data) {

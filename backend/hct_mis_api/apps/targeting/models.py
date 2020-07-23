@@ -292,13 +292,15 @@ class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingMixin):
 
     def get_query(self):
         query = super().get_query()
-        if (
-            self.target_population_final
-            and self.target_population_final.status != "DRAFT"
-            and self.target_population_final.program.individual_data_needed
-        ):
-            query = query.filter(size__gt=0)
-
+        try:
+            if (
+                self.target_population_final
+                and self.target_population_final.status != "DRAFT"
+                and self.target_population_final.program.individual_data_needed
+            ):
+                query = query.filter(size__gt=0)
+        except TargetPopulation.DoesNotExist:
+            pass
         return query
 
 
