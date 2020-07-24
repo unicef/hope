@@ -51,7 +51,12 @@ const DialogContainer = styled.div`
   width: 700px;
 `;
 
-export function NewPaymentVerificationDialog(): React.ReactElement {
+export interface Props {
+  cashPlanId: string;
+}
+export function NewPaymentVerificationDialog({
+  cashPlanId,
+}: Props): React.ReactElement {
   const [open, setOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
   const { showMessage } = useSnackbar();
@@ -70,11 +75,10 @@ export function NewPaymentVerificationDialog(): React.ReactElement {
     const { errors } = await mutate({
       variables: {
         input: {
-          cashPlanId:
-            'Q2FzaFBsYW5Ob2RlOmFlYmJhMzE5LTkzMmItNGI3MC04OThjLWRmOGIyMTM3ODU4Yw==',
+          cashPlanId,
           sampling: 'FULL',
           fullListArguments: {
-            excludedAdminAreas: [],
+            excludedAdminAreas: values.excludedAdminAreas,
           },
           verificationChannel: 'RAPIDPRO',
           rapidProArguments: {
@@ -84,6 +88,7 @@ export function NewPaymentVerificationDialog(): React.ReactElement {
         },
       },
     });
+    console.log(errors);
 
     if (errors) {
       showMessage('Error while submitting');
@@ -105,7 +110,7 @@ export function NewPaymentVerificationDialog(): React.ReactElement {
     admin: false,
     age: true,
     sex: false,
-    filterAdminAreas: [],
+    excludedAdminAreas: [],
     verificationChannel: null,
   };
 
@@ -152,7 +157,7 @@ export function NewPaymentVerificationDialog(): React.ReactElement {
                 </TabsContainer>
                 <TabPanel value={selectedTab} index={0}>
                   <Field
-                    name='filterAdminAreas'
+                    name='excludedAdminAreas'
                     choices={mappedAdminAreas}
                     variant='filled'
                     label='Filter Out Admin Areas'
@@ -247,7 +252,6 @@ export function NewPaymentVerificationDialog(): React.ReactElement {
               <DialogActions>
                 <Button onClick={() => setOpen(false)}>CANCEL</Button>
                 <Button
-                  startIcon={<CheckRoundedIcon />}
                   type='submit'
                   color='primary'
                   variant='contained'
