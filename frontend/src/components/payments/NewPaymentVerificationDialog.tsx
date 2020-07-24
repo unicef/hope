@@ -19,8 +19,14 @@ import { TabPanel } from '../TabPanel';
 import { FormikSliderField } from '../../shared/Formik/FormikSliderField';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
-import { useCreateCashPlanPaymentVerificationMutation } from '../../__generated__/graphql';
+import {
+  useCreateCashPlanPaymentVerificationMutation,
+  AllAdminAreasQuery,
+  useAllAdminAreasQuery,
+} from '../../__generated__/graphql';
 import { FormikMultiSelectField } from '../../shared/Formik/FormikMultiSelectField';
+import { AdminAreasAutocomplete } from '../population/AdminAreaAutocomplete';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -50,6 +56,15 @@ export function NewPaymentVerificationDialog(): React.ReactElement {
   const [selectedTab, setSelectedTab] = useState(0);
   const { showMessage } = useSnackbar();
   const [mutate] = useCreateCashPlanPaymentVerificationMutation();
+  const businessArea = useBusinessArea();
+
+  const { data, loading } = useAllAdminAreasQuery({
+    variables: {
+      first: 100,
+      // title: debouncedInputText,
+      businessArea,
+    },
+  });
 
   const submit = async (values): Promise<void> => {
     const { errors } = await mutate({
@@ -77,49 +92,13 @@ export function NewPaymentVerificationDialog(): React.ReactElement {
     showMessage('New verification plan created.');
   };
 
-  const options = [
-    {
-      value: 1,
-      name: 'Oliver Hansen',
-    },
-    {
-      value: 2,
-      name: 'Van Henry',
-    },
-    {
-      value: 3,
-      name: 'April Tucker',
-    },
-    {
-      value: 4,
-      name: 'John James',
-    },
-    {
-      value: 5,
-      name: 'Jimmy Choo',
-    },
-    {
-      value: 6,
-      name: 'John Polasky',
-    },
-    {
-      value: 7,
-      name: 'Chris Cross',
-    },
-    {
-      value: 8,
-      name: 'Arthur Schwartz',
-    },
-    {
-      value: 9,
-      name: 'Bridget Hansen',
-    },
-    {
-      value: 10,
-      name: 'CJ Will',
-    },
-  ];
-
+  const mappedAdminAreas =
+    data && data.allAdminAreas.edges.length
+      ? data.allAdminAreas.edges.map((el) => ({
+          value: el.node.id,
+          name: el.node.title,
+        }))
+      : [];
   const initialValues = {
     confidenceInterval: 8,
     marginOfError: 24,
@@ -174,7 +153,7 @@ export function NewPaymentVerificationDialog(): React.ReactElement {
                 <TabPanel value={selectedTab} index={0}>
                   <Field
                     name='filterAdminAreas'
-                    choices={options}
+                    choices={mappedAdminAreas}
                     variant='filled'
                     label='Filter Out Admin Areas'
                     component={FormikMultiSelectField}
@@ -236,7 +215,7 @@ export function NewPaymentVerificationDialog(): React.ReactElement {
                     </Box>
                     <Field
                       name='filterAdminAreas'
-                      choices={options}
+                      choices={mappedAdminAreas}
                       variant='filled'
                       label='Filter Out Admin Areas'
                       component={FormikMultiSelectField}
