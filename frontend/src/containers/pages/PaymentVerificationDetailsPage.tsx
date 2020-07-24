@@ -110,7 +110,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
         {cashPlan.verificationStatus === 'PENDING' &&
           cashPlan.verifications &&
           cashPlan.verifications.edges.length === 0 && (
-            <NewPaymentVerificationDialog />
+            <NewPaymentVerificationDialog cashPlanId={cashPlan.id} />
           )}
         {cashPlan.verificationStatus === 'PENDING' &&
           cashPlan.verifications &&
