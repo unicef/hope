@@ -18,8 +18,9 @@ import { DialogActions } from '../../containers/dialogs/DialogActions';
 import { TabPanel } from '../TabPanel';
 import { FormikSliderField } from '../../shared/Formik/FormikSliderField';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
-import { FormikMultiSelectField } from '../../shared/Formik/FormikMultiSelectField/FormikMultiSelectField';
 import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
+import { useCreateCashPlanPaymentVerificationMutation } from '../../__generated__/graphql';
+import { FormikMultiSelectField } from '../../shared/Formik/FormikMultiSelectField';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -30,12 +31,6 @@ const DialogFooter = styled.div`
   margin: 0;
   border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
   text-align: right;
-`;
-
-const DialogDescription = styled.div`
-  margin: 20px 0;
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.54);
 `;
 
 const StyledTabs = styled(Tabs)`
@@ -53,18 +48,34 @@ const DialogContainer = styled.div`
 export function NewPaymentVerificationDialog(): React.ReactElement {
   const [open, setOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
-
   const { showMessage } = useSnackbar();
+  const [mutate] = useCreateCashPlanPaymentVerificationMutation();
 
-  // const submit = async (): Promise<void> => {
-  //   // const { errors } = await mutate();
-  //   const errors = [];
-  //   if (errors) {
-  //     showMessage('Error while submitting');
-  //     return;
-  //   }
-  //   showMessage('New verification plan created.');
-  // };
+  const submit = async (values): Promise<void> => {
+    const { errors } = await mutate({
+      variables: {
+        input: {
+          cashPlanId:
+            'Q2FzaFBsYW5Ob2RlOmFlYmJhMzE5LTkzMmItNGI3MC04OThjLWRmOGIyMTM3ODU4Yw==',
+          sampling: 'FULL',
+          fullListArguments: {
+            excludedAdminAreas: [],
+          },
+          verificationChannel: 'RAPIDPRO',
+          rapidProArguments: {
+            flowId: '1',
+          },
+          businessAreaSlug: 'afghanistan',
+        },
+      },
+    });
+
+    if (errors) {
+      showMessage('Error while submitting');
+      return;
+    }
+    showMessage('New verification plan created.');
+  };
 
   const options = [
     {
@@ -120,12 +131,7 @@ export function NewPaymentVerificationDialog(): React.ReactElement {
   };
 
   return (
-    <Formik
-      initialValues={initialValues}
-      onSubmit={(values) => {
-        console.log(values);
-      }}
-    >
+    <Formik initialValues={initialValues} onSubmit={submit}>
       {({ submitForm, values }) => (
         <Form>
           <Button
@@ -166,6 +172,13 @@ export function NewPaymentVerificationDialog(): React.ReactElement {
                   </StyledTabs>
                 </TabsContainer>
                 <TabPanel value={selectedTab} index={0}>
+                  <Field
+                    name='filterAdminAreas'
+                    choices={options}
+                    variant='filled'
+                    label='Filter Out Admin Areas'
+                    component={FormikMultiSelectField}
+                  />
                   <Box pt={3}>
                     <Box
                       pb={3}
@@ -224,6 +237,7 @@ export function NewPaymentVerificationDialog(): React.ReactElement {
                     <Field
                       name='filterAdminAreas'
                       choices={options}
+                      variant='filled'
                       label='Filter Out Admin Areas'
                       component={FormikMultiSelectField}
                     />

@@ -83,6 +83,11 @@ export type AdminAreaNodeEdge = {
   cursor: Scalars['String'],
 };
 
+export type AgeInput = {
+  min?: Maybe<Scalars['Int']>,
+  max?: Maybe<Scalars['Int']>,
+};
+
 export type ApproveTargetPopulationMutation = {
    __typename?: 'ApproveTargetPopulationMutation',
   targetPopulation?: Maybe<TargetPopulationNode>,
@@ -285,6 +290,9 @@ export type CashPlanPaymentVerificationNode = Node & {
   receivedCount?: Maybe<Scalars['Int']>,
   notReceivedCount?: Maybe<Scalars['Int']>,
   receivedWithProblemsCount?: Maybe<Scalars['Int']>,
+  confidenceInterval?: Maybe<Scalars['Float']>,
+  marginOfError?: Maybe<Scalars['Float']>,
+  rapidProFlowId: Scalars['String'],
   paymentRecordVerifications: PaymentVerificationNodeConnection,
 };
 
@@ -369,6 +377,22 @@ export type CoreFieldChoiceObject = {
   value?: Maybe<Scalars['String']>,
   admin?: Maybe<Scalars['String']>,
   listName?: Maybe<Scalars['String']>,
+};
+
+export type CreatePaymentVerificationInput = {
+  cashPlanId: Scalars['ID'],
+  sampling: Scalars['String'],
+  verificationChannel: Scalars['String'],
+  businessAreaSlug: Scalars['String'],
+  fullListArguments?: Maybe<FullListArguments>,
+  randomSamplingArguments?: Maybe<RandomSamplingArguments>,
+  rapidProArguments?: Maybe<RapidProArguments>,
+  xlsxArguments?: Maybe<XlsxArguments>,
+};
+
+export type CreatePaymentVerificationMutation = {
+   __typename?: 'CreatePaymentVerificationMutation',
+  cashPlan?: Maybe<CashPlanNode>,
 };
 
 export type CreateProgram = {
@@ -522,6 +546,10 @@ export type FinalizeTargetPopulationMutation = {
   targetPopulation?: Maybe<TargetPopulationNode>,
 };
 
+
+export type FullListArguments = {
+  excludedAdminAreas?: Maybe<Array<Maybe<Scalars['String']>>>,
+};
 
 
 export type GroupAttributeNode = {
@@ -1317,6 +1345,7 @@ export type MergeRegistrationDataImportMutation = {
 
 export type Mutations = {
    __typename?: 'Mutations',
+  createCashPlanPaymentVerification?: Maybe<CreatePaymentVerificationMutation>,
   createTargetPopulation?: Maybe<CreateTargetPopulationMutation>,
   updateTargetPopulation?: Maybe<UpdateTargetPopulationMutation>,
   copyTargetPopulation?: Maybe<CopyTargetPopulationMutationPayload>,
@@ -1334,6 +1363,11 @@ export type Mutations = {
   saveKoboImportData?: Maybe<SaveKoboProjectImportDataMutation>,
   mergeRegistrationDataImport?: Maybe<MergeRegistrationDataImportMutation>,
   checkAgainstSanctionList?: Maybe<CheckAgainstSanctionListMutation>,
+};
+
+
+export type MutationsCreateCashPlanPaymentVerificationArgs = {
+  input: CreatePaymentVerificationInput
 };
 
 
@@ -1684,6 +1718,7 @@ export type Query = {
   cashPlanVerificationSamplingChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   cashPlanVerificationVerificationMethodChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   paymentVerificationStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  allRapidProFlows?: Maybe<Array<Maybe<RapidProFlow>>>,
   adminArea?: Maybe<AdminAreaNode>,
   allAdminAreas?: Maybe<AdminAreaNodeConnection>,
   allBusinessAreas?: Maybe<BusinessAreaNodeConnection>,
@@ -1760,6 +1795,11 @@ export type QueryAllPaymentVerificationsArgs = {
   last?: Maybe<Scalars['Int']>,
   cashPlanPaymentVerification?: Maybe<Scalars['ID']>,
   orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type QueryAllRapidProFlowsArgs = {
+  businessAreaSlug: Scalars['String']
 };
 
 
@@ -2047,6 +2087,48 @@ export type QueryAllRegistrationDataImportsArgs = {
   name_Icontains?: Maybe<Scalars['String']>,
   businessArea?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
+};
+
+export type RandomSamplingArguments = {
+  confidenceInterval: Scalars['Float'],
+  marginOfError: Scalars['Float'],
+  excludedAdminAreas?: Maybe<Array<Maybe<Scalars['String']>>>,
+  age?: Maybe<AgeInput>,
+  sex?: Maybe<Scalars['String']>,
+};
+
+export type RapidProArguments = {
+  flowId: Scalars['String'],
+};
+
+export type RapidProFlow = {
+   __typename?: 'RapidProFlow',
+  id?: Maybe<Scalars['String']>,
+  name?: Maybe<Scalars['String']>,
+  type?: Maybe<Scalars['String']>,
+  archived?: Maybe<Scalars['Boolean']>,
+  labels?: Maybe<Array<Maybe<Scalars['String']>>>,
+  expires?: Maybe<Scalars['Int']>,
+  runs?: Maybe<Array<Maybe<RapidProFlowRun>>>,
+  results?: Maybe<Array<Maybe<RapidProFlowResult>>>,
+  createdOn?: Maybe<Scalars['DateTime']>,
+  modifiedOn?: Maybe<Scalars['DateTime']>,
+};
+
+export type RapidProFlowResult = {
+   __typename?: 'RapidProFlowResult',
+  key?: Maybe<Scalars['String']>,
+  name?: Maybe<Scalars['String']>,
+  categories?: Maybe<Array<Maybe<Scalars['String']>>>,
+  nodeUuids?: Maybe<Array<Maybe<Scalars['String']>>>,
+};
+
+export type RapidProFlowRun = {
+   __typename?: 'RapidProFlowRun',
+  active?: Maybe<Scalars['Int']>,
+  completed?: Maybe<Scalars['Int']>,
+  interrupted?: Maybe<Scalars['Int']>,
+  expired?: Maybe<Scalars['Int']>,
 };
 
 export enum RegistrationDataImportDatahubImportDone {
@@ -2650,6 +2732,10 @@ export type UserObjectTypeRegistrationDataImportsArgs = {
 };
 
 
+export type XlsxArguments = {
+  file: Scalars['Upload'],
+};
+
 export type XlsxRowErrorNode = {
    __typename?: 'XlsxRowErrorNode',
   rowNumber?: Maybe<Scalars['Int']>,
@@ -2860,6 +2946,22 @@ export type CheckAgainstSanctionListUploadMutation = (
       { __typename?: 'XlsxRowErrorNode' }
       & Pick<XlsxRowErrorNode, 'header' | 'message' | 'rowNumber'>
     )>>> }
+  )> }
+);
+
+export type CreateCashPlanPaymentVerificationMutationVariables = {
+  input: CreatePaymentVerificationInput
+};
+
+
+export type CreateCashPlanPaymentVerificationMutation = (
+  { __typename?: 'Mutations' }
+  & { createCashPlanPaymentVerification: Maybe<(
+    { __typename?: 'CreatePaymentVerificationMutation' }
+    & { cashPlan: Maybe<(
+      { __typename?: 'CashPlanNode' }
+      & Pick<CashPlanNode, 'id'>
+    )> }
   )> }
 );
 
@@ -4596,6 +4698,57 @@ export function useCheckAgainstSanctionListUploadMutation(baseOptions?: ApolloRe
 export type CheckAgainstSanctionListUploadMutationHookResult = ReturnType<typeof useCheckAgainstSanctionListUploadMutation>;
 export type CheckAgainstSanctionListUploadMutationResult = ApolloReactCommon.MutationResult<CheckAgainstSanctionListUploadMutation>;
 export type CheckAgainstSanctionListUploadMutationOptions = ApolloReactCommon.BaseMutationOptions<CheckAgainstSanctionListUploadMutation, CheckAgainstSanctionListUploadMutationVariables>;
+export const CreateCashPlanPaymentVerificationDocument = gql`
+    mutation createCashPlanPaymentVerification($input: CreatePaymentVerificationInput!) {
+  createCashPlanPaymentVerification(input: $input) {
+    cashPlan {
+      id
+    }
+  }
+}
+    `;
+export type CreateCashPlanPaymentVerificationMutationFn = ApolloReactCommon.MutationFunction<CreateCashPlanPaymentVerificationMutation, CreateCashPlanPaymentVerificationMutationVariables>;
+export type CreateCashPlanPaymentVerificationComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<CreateCashPlanPaymentVerificationMutation, CreateCashPlanPaymentVerificationMutationVariables>, 'mutation'>;
+
+    export const CreateCashPlanPaymentVerificationComponent = (props: CreateCashPlanPaymentVerificationComponentProps) => (
+      <ApolloReactComponents.Mutation<CreateCashPlanPaymentVerificationMutation, CreateCashPlanPaymentVerificationMutationVariables> mutation={CreateCashPlanPaymentVerificationDocument} {...props} />
+    );
+    
+export type CreateCashPlanPaymentVerificationProps<TChildProps = {}> = ApolloReactHoc.MutateProps<CreateCashPlanPaymentVerificationMutation, CreateCashPlanPaymentVerificationMutationVariables> & TChildProps;
+export function withCreateCashPlanPaymentVerification<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CreateCashPlanPaymentVerificationMutation,
+  CreateCashPlanPaymentVerificationMutationVariables,
+  CreateCashPlanPaymentVerificationProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, CreateCashPlanPaymentVerificationMutation, CreateCashPlanPaymentVerificationMutationVariables, CreateCashPlanPaymentVerificationProps<TChildProps>>(CreateCashPlanPaymentVerificationDocument, {
+      alias: 'createCashPlanPaymentVerification',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCreateCashPlanPaymentVerificationMutation__
+ *
+ * To run a mutation, you first call `useCreateCashPlanPaymentVerificationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateCashPlanPaymentVerificationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createCashPlanPaymentVerificationMutation, { data, loading, error }] = useCreateCashPlanPaymentVerificationMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateCashPlanPaymentVerificationMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateCashPlanPaymentVerificationMutation, CreateCashPlanPaymentVerificationMutationVariables>) {
+        return ApolloReactHooks.useMutation<CreateCashPlanPaymentVerificationMutation, CreateCashPlanPaymentVerificationMutationVariables>(CreateCashPlanPaymentVerificationDocument, baseOptions);
+      }
+export type CreateCashPlanPaymentVerificationMutationHookResult = ReturnType<typeof useCreateCashPlanPaymentVerificationMutation>;
+export type CreateCashPlanPaymentVerificationMutationResult = ApolloReactCommon.MutationResult<CreateCashPlanPaymentVerificationMutation>;
+export type CreateCashPlanPaymentVerificationMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateCashPlanPaymentVerificationMutation, CreateCashPlanPaymentVerificationMutationVariables>;
 export const CreateProgramDocument = gql`
     mutation CreateProgram($programData: CreateProgramInput!) {
   createProgram(programData: $programData) {
@@ -8084,6 +8237,9 @@ export type ResolversTypes = {
   PaymentRecordEntitlementCardStatus: PaymentRecordEntitlementCardStatus,
   PaymentRecordDeliveryType: PaymentRecordDeliveryType,
   ChoiceObject: ResolverTypeWrapper<ChoiceObject>,
+  RapidProFlow: ResolverTypeWrapper<RapidProFlow>,
+  RapidProFlowRun: ResolverTypeWrapper<RapidProFlowRun>,
+  RapidProFlowResult: ResolverTypeWrapper<RapidProFlowResult>,
   GroupAttributeNode: ResolverTypeWrapper<GroupAttributeNode>,
   JSONString: ResolverTypeWrapper<Scalars['JSONString']>,
   KoboAssetObject: ResolverTypeWrapper<KoboAssetObject>,
@@ -8118,6 +8274,14 @@ export type ResolversTypes = {
   DjangoDebug: ResolverTypeWrapper<DjangoDebug>,
   DjangoDebugSQL: ResolverTypeWrapper<DjangoDebugSql>,
   Mutations: ResolverTypeWrapper<{}>,
+  CreatePaymentVerificationInput: CreatePaymentVerificationInput,
+  FullListArguments: FullListArguments,
+  RandomSamplingArguments: RandomSamplingArguments,
+  AgeInput: AgeInput,
+  RapidProArguments: RapidProArguments,
+  XlsxArguments: XlsxArguments,
+  Upload: ResolverTypeWrapper<Scalars['Upload']>,
+  CreatePaymentVerificationMutation: ResolverTypeWrapper<CreatePaymentVerificationMutation>,
   CreateTargetPopulationInput: CreateTargetPopulationInput,
   CreateTargetPopulationMutation: ResolverTypeWrapper<CreateTargetPopulationMutation>,
   UpdateTargetPopulationInput: UpdateTargetPopulationInput,
@@ -8135,7 +8299,6 @@ export type ResolversTypes = {
   UpdateProgramInput: UpdateProgramInput,
   UpdateProgram: ResolverTypeWrapper<UpdateProgram>,
   DeleteProgram: ResolverTypeWrapper<DeleteProgram>,
-  Upload: ResolverTypeWrapper<Scalars['Upload']>,
   UploadImportDataXLSXFile: ResolverTypeWrapper<UploadImportDataXlsxFile>,
   XlsxRowErrorNode: ResolverTypeWrapper<XlsxRowErrorNode>,
   DeleteRegistrationDataImport: ResolverTypeWrapper<DeleteRegistrationDataImport>,
@@ -8247,6 +8410,9 @@ export type ResolversParentTypes = {
   PaymentRecordEntitlementCardStatus: PaymentRecordEntitlementCardStatus,
   PaymentRecordDeliveryType: PaymentRecordDeliveryType,
   ChoiceObject: ChoiceObject,
+  RapidProFlow: RapidProFlow,
+  RapidProFlowRun: RapidProFlowRun,
+  RapidProFlowResult: RapidProFlowResult,
   GroupAttributeNode: GroupAttributeNode,
   JSONString: Scalars['JSONString'],
   KoboAssetObject: KoboAssetObject,
@@ -8281,6 +8447,14 @@ export type ResolversParentTypes = {
   DjangoDebug: DjangoDebug,
   DjangoDebugSQL: DjangoDebugSql,
   Mutations: {},
+  CreatePaymentVerificationInput: CreatePaymentVerificationInput,
+  FullListArguments: FullListArguments,
+  RandomSamplingArguments: RandomSamplingArguments,
+  AgeInput: AgeInput,
+  RapidProArguments: RapidProArguments,
+  XlsxArguments: XlsxArguments,
+  Upload: Scalars['Upload'],
+  CreatePaymentVerificationMutation: CreatePaymentVerificationMutation,
   CreateTargetPopulationInput: CreateTargetPopulationInput,
   CreateTargetPopulationMutation: CreateTargetPopulationMutation,
   UpdateTargetPopulationInput: UpdateTargetPopulationInput,
@@ -8298,7 +8472,6 @@ export type ResolversParentTypes = {
   UpdateProgramInput: UpdateProgramInput,
   UpdateProgram: UpdateProgram,
   DeleteProgram: DeleteProgram,
-  Upload: Scalars['Upload'],
   UploadImportDataXLSXFile: UploadImportDataXlsxFile,
   XlsxRowErrorNode: XlsxRowErrorNode,
   DeleteRegistrationDataImport: DeleteRegistrationDataImport,
@@ -8443,6 +8616,9 @@ export type CashPlanPaymentVerificationNodeResolvers<ContextType = any, ParentTy
   receivedCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   notReceivedCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   receivedWithProblemsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  confidenceInterval?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  marginOfError?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  rapidProFlowId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   paymentRecordVerifications?: Resolver<ResolversTypes['PaymentVerificationNodeConnection'], ParentType, ContextType, CashPlanPaymentVerificationNodePaymentRecordVerificationsArgs>,
 };
 
@@ -8479,6 +8655,10 @@ export type CoreFieldChoiceObjectResolvers<ContextType = any, ParentType extends
   value?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   admin?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   listName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
+export type CreatePaymentVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreatePaymentVerificationMutation'] = ResolversParentTypes['CreatePaymentVerificationMutation']> = {
+  cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
 };
 
 export type CreateProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateProgram'] = ResolversParentTypes['CreateProgram']> = {
@@ -8921,6 +9101,7 @@ export type MergeRegistrationDataImportMutationResolvers<ContextType = any, Pare
 };
 
 export type MutationsResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutations'] = ResolversParentTypes['Mutations']> = {
+  createCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['CreatePaymentVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsCreateCashPlanPaymentVerificationArgs, 'input'>>,
   createTargetPopulation?: Resolver<Maybe<ResolversTypes['CreateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsCreateTargetPopulationArgs, 'input'>>,
   updateTargetPopulation?: Resolver<Maybe<ResolversTypes['UpdateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateTargetPopulationArgs, 'input'>>,
   copyTargetPopulation?: Resolver<Maybe<ResolversTypes['CopyTargetPopulationMutationPayload']>, ParentType, ContextType, RequireFields<MutationsCopyTargetPopulationArgs, 'input'>>,
@@ -9073,6 +9254,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   cashPlanVerificationSamplingChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   cashPlanVerificationVerificationMethodChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   paymentVerificationStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  allRapidProFlows?: Resolver<Maybe<Array<Maybe<ResolversTypes['RapidProFlow']>>>, ParentType, ContextType, RequireFields<QueryAllRapidProFlowsArgs, 'businessAreaSlug'>>,
   adminArea?: Resolver<Maybe<ResolversTypes['AdminAreaNode']>, ParentType, ContextType, RequireFields<QueryAdminAreaArgs, 'id'>>,
   allAdminAreas?: Resolver<Maybe<ResolversTypes['AdminAreaNodeConnection']>, ParentType, ContextType, QueryAllAdminAreasArgs>,
   allBusinessAreas?: Resolver<Maybe<ResolversTypes['BusinessAreaNodeConnection']>, ParentType, ContextType, QueryAllBusinessAreasArgs>,
@@ -9118,6 +9300,33 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allRegistrationDataImports?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNodeConnection']>, ParentType, ContextType, QueryAllRegistrationDataImportsArgs>,
   registrationDataStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   _debug?: Resolver<Maybe<ResolversTypes['DjangoDebug']>, ParentType, ContextType>,
+};
+
+export type RapidProFlowResolvers<ContextType = any, ParentType extends ResolversParentTypes['RapidProFlow'] = ResolversParentTypes['RapidProFlow']> = {
+  id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  archived?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  labels?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
+  expires?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  runs?: Resolver<Maybe<Array<Maybe<ResolversTypes['RapidProFlowRun']>>>, ParentType, ContextType>,
+  results?: Resolver<Maybe<Array<Maybe<ResolversTypes['RapidProFlowResult']>>>, ParentType, ContextType>,
+  createdOn?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  modifiedOn?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+};
+
+export type RapidProFlowResultResolvers<ContextType = any, ParentType extends ResolversParentTypes['RapidProFlowResult'] = ResolversParentTypes['RapidProFlowResult']> = {
+  key?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  categories?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
+  nodeUuids?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
+};
+
+export type RapidProFlowRunResolvers<ContextType = any, ParentType extends ResolversParentTypes['RapidProFlowRun'] = ResolversParentTypes['RapidProFlowRun']> = {
+  active?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  completed?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  interrupted?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  expired?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 
 export type RegistrationDataImportDatahubNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['RegistrationDataImportDatahubNode'] = ResolversParentTypes['RegistrationDataImportDatahubNode']> = {
@@ -9393,6 +9602,7 @@ export type Resolvers<ContextType = any> = {
   ChoiceObject?: ChoiceObjectResolvers<ContextType>,
   CopyTargetPopulationMutationPayload?: CopyTargetPopulationMutationPayloadResolvers<ContextType>,
   CoreFieldChoiceObject?: CoreFieldChoiceObjectResolvers<ContextType>,
+  CreatePaymentVerificationMutation?: CreatePaymentVerificationMutationResolvers<ContextType>,
   CreateProgram?: CreateProgramResolvers<ContextType>,
   CreateTargetPopulationMutation?: CreateTargetPopulationMutationResolvers<ContextType>,
   Date?: GraphQLScalarType,
@@ -9454,6 +9664,9 @@ export type Resolvers<ContextType = any> = {
   ProgramNodeConnection?: ProgramNodeConnectionResolvers<ContextType>,
   ProgramNodeEdge?: ProgramNodeEdgeResolvers<ContextType>,
   Query?: QueryResolvers<ContextType>,
+  RapidProFlow?: RapidProFlowResolvers<ContextType>,
+  RapidProFlowResult?: RapidProFlowResultResolvers<ContextType>,
+  RapidProFlowRun?: RapidProFlowRunResolvers<ContextType>,
   RegistrationDataImportDatahubNode?: RegistrationDataImportDatahubNodeResolvers<ContextType>,
   RegistrationDataImportDatahubNodeConnection?: RegistrationDataImportDatahubNodeConnectionResolvers<ContextType>,
   RegistrationDataImportDatahubNodeEdge?: RegistrationDataImportDatahubNodeEdgeResolvers<ContextType>,
