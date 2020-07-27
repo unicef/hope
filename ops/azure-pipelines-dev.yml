@@ -237,7 +237,7 @@ stages:
                 frontend.image=uniappsk8sdevacr.azurecr.io/$(frontendImageRepository):$(Build.BuildId),\
                 namespace=ictd-hope-dev,\
                 env=DEV,\
-                domain=$(DOMAIN),\
+                domain='dev-hope.unitst.org',\
                 backend.secret.env=DEV,\
                 revision=\"$(Build.BuildId)\",\
                 backend.image=uniappsk8sdevacr.azurecr.io/$(backendImageRepository):$(Build.BuildId),\
