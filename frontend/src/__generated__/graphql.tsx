@@ -3412,7 +3412,7 @@ export type AllProgramsQuery = (
       { __typename?: 'ProgramNodeEdge' }
       & { node: Maybe<(
         { __typename?: 'ProgramNode' }
-        & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'populationGoal' | 'sector' | 'totalNumberOfHouseholds'>
+        & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'populationGoal' | 'sector' | 'totalNumberOfHouseholds' | 'individualDataNeeded'>
       )> }
     )>> }
   )> }
@@ -5882,6 +5882,7 @@ export const AllProgramsDocument = gql`
         populationGoal
         sector
         totalNumberOfHouseholds
+        individualDataNeeded
       }
     }
   }
