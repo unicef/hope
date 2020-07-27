@@ -186,7 +186,6 @@ class Document(SessionModel):
     number = models.CharField(max_length=255, null=True)
     individual_mis_id = models.UUIDField(null=True)
     type = models.CharField(max_length=50, choices=IDENTIFICATION_TYPE_CHOICE)
-    country = models.CharField(null=True, max_length=3)
 
     class Meta:
-        unique_together = ("type", "country", "number")
+        unique_together = ("type", "number")
