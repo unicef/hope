@@ -158,29 +158,30 @@ class Program(SessionModel):
 
 
 class Document(SessionModel):
-    # VALID = "VALID"
-    # COLLECTED = "COLLECTED"
-    # LOST = "LOST"
-    # UNKNOWN = "UNKNOWN"
-    # CANCELED = "CANCELED"
-    # EXPIRED = "EXPIRED"
-    # HOLD = "HOLD"
-    # DAMAGED = "DAMAGED"
-    # STATUS_CHOICE = Choices(
-    #     (VALID, _("Valid")),
-    #     (COLLECTED, _("Collected")),
-    #     (LOST, _("Lost")),
-    #     (UNKNOWN, _("Unknown")),
-    #     (CANCELED, _("Canceled")),
-    #     (EXPIRED, _("Expired")),
-    #     (HOLD, _("Hold")),
-    #     (DAMAGED, _("Damaged")),
-    # )
+    VALID = "VALID"
+    COLLECTED = "COLLECTED"
+    LOST = "LOST"
+    UNKNOWN = "UNKNOWN"
+    CANCELED = "CANCELED"
+    EXPIRED = "EXPIRED"
+    HOLD = "HOLD"
+    DAMAGED = "DAMAGED"
+    STATUS_CHOICE = (
+        (VALID, _("Valid")),
+        (COLLECTED, _("Collected")),
+        (LOST, _("Lost")),
+        (UNKNOWN, _("Unknown")),
+        (CANCELED, _("Canceled")),
+        (EXPIRED, _("Expired")),
+        (HOLD, _("Hold")),
+        (DAMAGED, _("Damaged")),
+    )
 
-    # status = models.CharField(choices=STATUS_CHOICE, null=True)
-    # date_of_expiry = models.DateField(null=True)
-    # photo = models.ImageField(blank=True)
-
+    status = models.CharField(
+        choices=STATUS_CHOICE, null=True, max_length=30, default=None
+    )
+    date_of_expiry = models.DateField(null=True, default=None)
+    photo = models.ImageField(blank=True, default="")
     mis_id = models.UUIDField()
     number = models.CharField(max_length=255, null=True)
     individual_mis_id = models.UUIDField(null=True)
