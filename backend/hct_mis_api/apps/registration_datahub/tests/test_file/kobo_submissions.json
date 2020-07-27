@@ -32,7 +32,8 @@
                 "individual_questions/family_name_i_c": "Testowski",
                 "individual_questions/individual_vulnerabilities/disability_i_c": "not disabled",
                 "individual_questions/more_information/birth_certificate_no_i_c": "123123123",
-                "individual_questions/birth_date_i_c": "1960-08-11"
+                "individual_questions/birth_date_i_c": "1960-08-11",
+                "individual_questions/is_only_collector": "NO"
             },
             {
                 "individual_questions/role_i_c": "alternate",
@@ -52,7 +53,8 @@
                 "individual_questions/more_information/id_type_i_c": "birth_certificate",
                 "individual_questions/individual_vulnerabilities/disability_i_c": "not disabled",
                 "individual_questions/more_information/birth_certificate_no_i_c": "444111123",
-                "individual_questions/birth_date_i_c": "1988-03-23"
+                "individual_questions/birth_date_i_c": "1988-03-23",
+                "individual_questions/is_only_collector": "NO"
             }
         ],
         "wash_questions/score_bed": "5",

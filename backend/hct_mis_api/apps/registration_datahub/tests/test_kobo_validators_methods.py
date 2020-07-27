@@ -33,6 +33,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
                     "individual_questions/sex_i_c": "male",
                     "individual_questions/individual_vulnerabilities/disability_i_c": "not disabled",
                     "individual_questions/full_name_i_c": "Test Testowy",
+                    "individual_questions/is_only_collector": "NO",
                 }
             ],
             "wash_questions/score_bed": "5",
@@ -593,6 +594,14 @@ class TestKoboSaveValidatorsMethods(TestCase):
 
         expected = [
             {
+                "header": "admin1_h_c",
+                "message": "Invalid choice SO25 for field admin1_h_c",
+            },
+            {
+                "header": "admin2_h_c",
+                "message": "Invalid choice SO2502 for field admin2_h_c",
+            },
+            {
                 "header": "f_0_5_age_group_h_c",
                 "message": "Missing household required field f_0_5_age_group_h_c",
             },
@@ -645,6 +654,18 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 "message": "Missing individual required field first_registration_date_i_c",
             },
             {
+                "header": "is_only_collector",
+                "message": "Missing individual required field is_only_collector",
+            },
+            {
+                "header": "is_only_collector",
+                "message": "Missing individual required field is_only_collector",
+            },
+            {
+                "header": "is_only_collector",
+                "message": "Missing individual required field is_only_collector",
+            },
+            {
                 "header": "m_0_5_age_group_h_c",
                 "message": "Missing household required field m_0_5_age_group_h_c",
             },
@@ -679,6 +700,10 @@ class TestKoboSaveValidatorsMethods(TestCase):
             {
                 "header": "residence_status_h_c",
                 "message": "Invalid choice host for field residence_status_h_c",
+            },
+            {
+                "header": "role_i_c",
+                "message": "Only one person can be a primary collector",
             },
             {
                 "header": "size_h_c",

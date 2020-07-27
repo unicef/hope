@@ -1094,8 +1094,8 @@ class KoboProjectImportDataValidator(ImportDataValidator):
                 if hh_field == KOBO_FORM_INDIVIDUALS_COLUMN_NAME:
                     for individual in hh_value:
                         expected_i_fields = {
-                            **cls.EXPECTED_INDIVIDUALS_FIELDS,
-                            **KOBO_COLLECTOR_FIELD,
+                            *cls.EXPECTED_INDIVIDUALS_FIELDS,
+                            *KOBO_COLLECTOR_FIELD.keys(),
                         }
                         current_individual_docs_and_identities = defaultdict(
                             dict
@@ -1135,9 +1135,10 @@ class KoboProjectImportDataValidator(ImportDataValidator):
                             ):
                                 head_of_hh_counter += 1
                             if i_field == "role_i_c":
-                                if i_value == ROLE_PRIMARY:
+                                role = i_value.upper()
+                                if role == ROLE_PRIMARY:
                                     primary_collector_counter += 1
-                                elif i_value == ROLE_ALTERNATE:
+                                elif role == ROLE_ALTERNATE:
                                     alternate_collector_counter += 1
 
                             expected_i_fields.discard(i_field)
@@ -1182,7 +1183,7 @@ class KoboProjectImportDataValidator(ImportDataValidator):
                             {
                                 "header": "role_i_c",
                                 "message": "Household must have a "
-                                           "primary collector",
+                                "primary collector",
                             }
                         )
                     if primary_collector_counter > 1:
@@ -1190,7 +1191,7 @@ class KoboProjectImportDataValidator(ImportDataValidator):
                             {
                                 "header": "role_i_c",
                                 "message": "Only one person can "
-                                           "be a primary collector",
+                                "be a primary collector",
                             }
                         )
                     if alternate_collector_counter > 1:
@@ -1198,7 +1199,7 @@ class KoboProjectImportDataValidator(ImportDataValidator):
                             {
                                 "header": "role_i_c",
                                 "message": "Only one person can "
-                                           "be a alternate collector",
+                                "be a alternate collector",
                             }
                         )
                 else:
@@ -1219,8 +1220,8 @@ class KoboProjectImportDataValidator(ImportDataValidator):
         document_errors = cls.documents_validator(
             documents_numbers, is_xlsx=False
         )
-        identitites_errors = cls.identity_validator(
+        identities_errors = cls.identity_validator(
             identities_numbers, is_xlsx=False
         )
 
-        return [*errors, *document_errors, *identitites_errors]
+        return [*errors, *document_errors, *identities_errors]
