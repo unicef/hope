@@ -213,7 +213,7 @@ stages:
                 databases.postgres-cash-assist-datahub-db.secret.POSTGRES_USER=$(CASH_ASSIST_REGISTRATION_DATAHUB_POSTGRES_USER),\
                 databases.postgres-cash-assist-datahub-db.secret.POSTGRES_PASSWORD=$(CASH_ASSIST_REGISTRATION_DATAHUB_POSTGRES_PASSWORD),"
 
-- job: deploy_hct_mis
+      - job: deploy_hct_mis_new
         displayName: "[HCT-MIS] NEW"
         steps:
           - task: HelmDeploy@0
