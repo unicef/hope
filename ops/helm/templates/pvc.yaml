@@ -6,7 +6,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: "{{ $value.claimName }}"
 spec:
-  storageClassName: "{{ .Values.storageClassName }}"
+  storageClassName: "{{ $.Values.storageClassName }}"
   accessModes:
   - ReadWriteOnce
   resources:
