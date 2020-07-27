@@ -227,7 +227,7 @@ stages:
               chartPath: '**/ops/helm'
               releaseName: 'hct-mis'
               install: true
-              force: true
+              force: false
               waitForExecution: false
               arguments: "--timeout 600s"
               overrideValues: "
