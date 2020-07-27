@@ -9,7 +9,7 @@ import styled from 'styled-components';
 import { Field, Formik } from 'formik';
 import * as Yup from 'yup';
 import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
-import { ProgrammeAutocomplete } from '../../../shared/ProgrammeAutocomplete'
+import { ProgrammeAutocomplete } from '../../../shared/ProgrammeAutocomplete';
 import {
   useAllProgramsQuery,
   useApproveTpMutation,
@@ -42,11 +42,15 @@ const DialogDescription = styled.div`
 `;
 
 const validationSchema = Yup.object().shape({
-  program: Yup.string().required('Programme is required'),
+  program: Yup.object().shape({
+    id: Yup.string().required('Programme is required'),
+  }),
 });
 
 export function ApproveCandidateList({ open, setOpen, targetPopulationId }) {
-  const { data: programs } = useAllProgramsQuery({variables: { status: 'ACTIVE' }});
+  const { data: programs } = useAllProgramsQuery({
+    variables: { status: 'ACTIVE' },
+  });
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
   const [mutate, loading] = useApproveTpMutation();
@@ -63,10 +67,10 @@ export function ApproveCandidateList({ open, setOpen, targetPopulationId }) {
     >
       <Formik
         validationSchema={validationSchema}
-        initialValues={{ program: '' }}
+        initialValues={{ program: null }}
         onSubmit={(values) => {
           mutate({
-            variables: { id: targetPopulationId, programId: values.program },
+            variables: { id: targetPopulationId, programId: values.program.id },
           }).then(() => {
             setOpen(false);
             showMessage('Programme Population Approved', {
@@ -90,19 +94,29 @@ export function ApproveCandidateList({ open, setOpen, targetPopulationId }) {
                 permanently frozen.
               </DialogDescription>
               <DialogDescription>
-                Note: You may duplicate tthe Programme Population target criteria at any time.
+                Note: You may duplicate the Programme Population target criteria
+                at any time.
               </DialogDescription>
               <DialogDescription>
                 Please select a Programme you would like to associate this
                 Programme Population with:
               </DialogDescription>
+              {values.program && values.program.individualDataNeeded ? (
+                <DialogDescription>
+                  <strong>
+                    Warning: You can only select a programme that is compatible
+                    with your filtering criteria
+                  </strong>
+                </DialogDescription>
+              ) : null}
+
               <Field
                 name='program'
                 label='Programme'
                 choices={choices}
                 onChange={(e, object) => {
-                  if(object) {
-                    setFieldValue('program', object.id)
+                  if (object) {
+                    setFieldValue('program', object);
                   }
                 }}
                 component={ProgrammeAutocomplete}
@@ -112,11 +126,15 @@ export function ApproveCandidateList({ open, setOpen, targetPopulationId }) {
               <DialogActions>
                 <Button onClick={() => setOpen(false)}>CANCEL</Button>
                 <Button
-                  type="submit"
+                  type='submit'
                   color='primary'
                   variant='contained'
                   onClick={submitForm}
-                  disabled={!loading || !values.program}
+                  disabled={
+                    !loading ||
+                    !values.program ||
+                    values.program.individualDataNeeded
+                  }
                   data-cy='button-target-population-close'
                 >
                   Close
