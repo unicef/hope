@@ -53,24 +53,42 @@ DISABILITY_CHOICE = (
         ),
     ),
 )
+NON_BENEFICIARY = "NON_BENEFICIARY"
+HEAD = "HEAD"
+SON_DAUGHTER = "SON_DAUGHTER"
+WIFE_HUSBAND = "WIFE_HUSBAND"
+BROTHER_SISTER = "BROTHER_SISTER"
+MOTHER_FATHER = "MOTHER_FATHER"
+AUNT_UNCLE = "AUNT_UNCLE"
+GRANDMOTHER_GRANDFATHER = "GRANDMOTHER_GRANDFATHER"
+MOTHERINLAW_FATHERINLAW = "MOTHERINLAW_FATHERINLAW"
+DAUGHTERINLAW_SONINLAW = "DAUGHTERINLAW_SONINLAW"
+SISTERINLAW_BROTHERINLAW = "SISTERINLAW_BROTHERINLAW"
+GRANDDAUGHER_GRANDSON = "GRANDDAUGHER_GRANDSON"
+NEPHEW_NIECE = "NEPHEW_NIECE"
+COUSIN = "COUSIN"
 RELATIONSHIP_CHOICE = (
-    ("NON_BENEFICIARY", "Not a Family Member. Can only act as a recipient.",),
-    ("HEAD", "Head of household (self)"),
-    ("SON_DAUGHTER", "Son / Daughter"),
-    ("WIFE_HUSBAND", "Wife / Husband"),
-    ("BROTHER_SISTER", "Brother / Sister"),
-    ("MOTHER_FATHER", "Mother / Father"),
-    ("AUNT_UNCLE", "Aunt / Uncle"),
-    ("GRANDMOTHER_GRANDFATHER", "Grandmother / Grandfather"),
-    ("MOTHERINLAW_FATHERINLAW", "Mother-in-law / Father-in-law"),
-    ("DAUGHTERINLAW_SONINLAW", "Daughter-in-law / Son-in-law"),
-    ("SISTERINLAW_BROTHERINLAW", "Sister-in-law / Brother-in-law"),
-    ("GRANDDAUGHER_GRANDSON", "Granddaughter / Grandson"),
-    ("NEPHEW_NIECE", "Nephew / Niece"),
-    ("COUSIN", "Cousin"),
+    (NON_BENEFICIARY, "Not a Family Member. Can only act as a recipient.",),
+    (HEAD, "Head of household (self)"),
+    (SON_DAUGHTER, "Son / Daughter"),
+    (WIFE_HUSBAND, "Wife / Husband"),
+    (BROTHER_SISTER, "Brother / Sister"),
+    (MOTHER_FATHER, "Mother / Father"),
+    (AUNT_UNCLE, "Aunt / Uncle"),
+    (GRANDMOTHER_GRANDFATHER, "Grandmother / Grandfather"),
+    (MOTHERINLAW_FATHERINLAW, "Mother-in-law / Father-in-law"),
+    (DAUGHTERINLAW_SONINLAW, "Daughter-in-law / Son-in-law"),
+    (SISTERINLAW_BROTHERINLAW, "Sister-in-law / Brother-in-law"),
+    (GRANDDAUGHER_GRANDSON, "Granddaughter / Grandson"),
+    (NEPHEW_NIECE, "Nephew / Niece"),
+    (COUSIN, "Cousin"),
 )
 YES = "YES"
 NO = "NO"
+YES_NO_CHOICE = (
+    (YES, _("Yes")),
+    (NO, _("No")),
+)
 NOT_PROVIDED = "NOT_PROVIDED"
 WORK_STATUS_CHOICE = (
     (YES, _("Yes")),

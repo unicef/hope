@@ -16,6 +16,7 @@ from openpyxl_image_loader import SheetImageLoader
 from core.core_fields_attributes import (
     CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY,
     COLLECTORS_FIELDS,
+    KOBO_COLLECTOR_FIELD,
 )
 from core.kobo.common import KOBO_FORM_INDIVIDUALS_COLUMN_NAME, get_field_name
 from core.models import BusinessArea
@@ -25,7 +26,7 @@ from core.utils import (
     rename_dict_keys,
 )
 from core.validators import BaseValidator
-from household.models import IndividualIdentity
+from household.models import IndividualIdentity, ROLE_PRIMARY, ROLE_ALTERNATE
 from registration_datahub.models import ImportedIndividualIdentity
 from registration_datahub.tasks.utils import collectors_str_ids_to_list
 
@@ -653,7 +654,7 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
                     "row_number": 1,
                     "header": header,
                     "message": f"Household with id: {hh_id} "
-                    f"does not have primary collector"
+                    f"does not have primary collector",
                 }
                 for hh_id in household_ids_without_collectors
             )
@@ -1084,15 +1085,18 @@ class KoboProjectImportDataValidator(ImportDataValidator):
 
         for household in reduced_submissions:
             head_of_hh_counter = 0
+            primary_collector_counter = 0
+            alternate_collector_counter = 0
             expected_hh_fields = cls.EXPECTED_HOUSEHOLD_FIELDS.copy()
             attachments = household.get("_attachments", [])
             for hh_field, hh_value in household.items():
                 expected_hh_fields.discard(hh_field)
                 if hh_field == KOBO_FORM_INDIVIDUALS_COLUMN_NAME:
                     for individual in hh_value:
-                        expected_i_fields = (
-                            cls.EXPECTED_INDIVIDUALS_FIELDS.copy()
-                        )
+                        expected_i_fields = {
+                            **cls.EXPECTED_INDIVIDUALS_FIELDS,
+                            **KOBO_COLLECTOR_FIELD,
+                        }
                         current_individual_docs_and_identities = defaultdict(
                             dict
                         )
@@ -1130,6 +1134,11 @@ class KoboProjectImportDataValidator(ImportDataValidator):
                                 and i_value.upper() == "HEAD"
                             ):
                                 head_of_hh_counter += 1
+                            if i_field == "role_i_c":
+                                if i_value == ROLE_PRIMARY:
+                                    primary_collector_counter += 1
+                                elif i_value == ROLE_ALTERNATE:
+                                    alternate_collector_counter += 1
 
                             expected_i_fields.discard(i_field)
                             error = cls._get_field_type_error(
@@ -1166,6 +1175,30 @@ class KoboProjectImportDataValidator(ImportDataValidator):
                                 "header": "relationship_i_c",
                                 "message": "Only one person can "
                                 "be a head of household",
+                            }
+                        )
+                    if primary_collector_counter == 0:
+                        errors.append(
+                            {
+                                "header": "role_i_c",
+                                "message": "Household must have a "
+                                           "primary collector",
+                            }
+                        )
+                    if primary_collector_counter > 1:
+                        errors.append(
+                            {
+                                "header": "role_i_c",
+                                "message": "Only one person can "
+                                           "be a primary collector",
+                            }
+                        )
+                    if alternate_collector_counter > 1:
+                        errors.append(
+                            {
+                                "header": "role_i_c",
+                                "message": "Only one person can "
+                                           "be a alternate collector",
                             }
                         )
                 else:
