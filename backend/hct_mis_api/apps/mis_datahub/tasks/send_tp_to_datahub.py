@@ -61,7 +61,6 @@ class SendTPToDatahubTask:
         "number": "document_number",
         "individual_mis_id": "individual.id",
         "type": "type.type",
-        "country": "type.country",
     }
 
     def execute(self):
