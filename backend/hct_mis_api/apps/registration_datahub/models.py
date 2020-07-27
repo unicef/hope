@@ -146,6 +146,23 @@ class ImportedIndividual(TimeStampedUUIDModel):
             )
         )
 
+    @property
+    def get_hash_key(self):
+        from hashlib import md5
+
+        fields = (
+            "given_name",
+            "middle_name",
+            "family_name",
+            "sex",
+            "birth_date",
+            "phone_no",
+            "phone_no_alternative",
+        )
+        values = [str(getattr(self, field)) for field in fields]
+
+        return md5(";".join(values).encode()).digest()
+
     def __str__(self):
         return self.full_name
 

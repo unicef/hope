@@ -12,6 +12,8 @@ from household.models import (
     SEX_CHOICE,
     MARITAL_STATUS_CHOICE,
     WORK_STATUS_CHOICE,
+    YES_NO_CHOICE,
+    ROLE_CHOICE,
 )
 
 TYPE_ID = "ID"
@@ -864,6 +866,37 @@ COLLECTORS_FIELDS = {
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "alternate_collector_id",
         "custom_cast_value": Countries.get_country_value,
+    },
+}
+
+KOBO_COLLECTOR_FIELD = {
+    "is_only_collector": {
+        "type": TYPE_SELECT_ONE,
+        "name": "is_only_collector",
+        "required": True,
+        "label": {
+            "English(EN)": "Is only a collector, not a part of household"
+        },
+        "choices": [
+            {"label": {"English(EN)": label}, "value": value,}
+            for value, label in YES_NO_CHOICE
+        ],
+        "associated_with": _INDIVIDUAL,
+        "xlsx_field": "is_only_collector",
+    },
+    "role_i_c": {
+        "type": TYPE_SELECT_ONE,
+        "name": "role",
+        "lookup": "role",
+        "required": True,
+        "label": {"English(EN)": "Role"},
+        "hint": "",
+        "choices": [
+            {"label": {"English(EN)": label}, "value": value,}
+            for value, label in ROLE_CHOICE
+        ],
+        "associated_with": _INDIVIDUAL,
+        "xlsx_field": "role_i_c",
     },
 }
 
