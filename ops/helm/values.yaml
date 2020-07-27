@@ -49,6 +49,7 @@ redis:
 
 
 databases:
+  storageClassName: "default"
   postgres-cash-assist-datahub-db:
     image: mdillon/postgis:10-alpine
     port: 5432
