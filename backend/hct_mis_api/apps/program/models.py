@@ -1,19 +1,18 @@
 from decimal import Decimal
 
 from auditlog.models import AuditlogHistoryField
-from django.conf import settings
+from auditlog.registry import auditlog
 from django.core.validators import (
     MinValueValidator,
     MinLengthValidator,
     MaxLengthValidator,
 )
 from django.db import models
-from django.db.models import Sum, UUIDField
+from django.db.models import Sum
 from django.db.models.functions import Coalesce
 from django.utils.translation import ugettext_lazy as _
 
 from utils.models import TimeStampedUUIDModel, AbstractSyncable
-from auditlog.registry import auditlog
 
 
 class Program(TimeStampedUUIDModel, AbstractSyncable):
@@ -100,6 +99,13 @@ class Program(TimeStampedUUIDModel, AbstractSyncable):
         validators=[MinLengthValidator(3), MaxLengthValidator(255)],
     )
     history = AuditlogHistoryField(pk_indexable=False)
+    individual_data_needed = models.BooleanField(
+        default=False,
+        help_text="""
+        This boolean decides whether the target population sync will send
+        all individuals of a household thats part of the population or only
+        the relevant ones (collectors etc.)""",
+    )
 
     @property
     def total_number_of_households(self):
@@ -176,9 +182,7 @@ class CashPlan(TimeStampedUUIDModel):
         max_digits=12,
         validators=[MinValueValidator(Decimal("0.01"))],
     )
-    verification_status = models.CharField(
-        max_length=200, default="PENDING"
-    )
+    verification_status = models.CharField(max_length=200, default="PENDING")
 
     @property
     def payment_records_count(self):

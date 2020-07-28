@@ -5,7 +5,9 @@ from mis_datahub.models import (
     Individual,
     Session,
     TargetPopulation,
-    Program, Document,
+    Program,
+    IndividualRoleInHousehold,
+    Document,
 )
 
 
@@ -16,6 +18,11 @@ class HouseholdAdmin(admin.ModelAdmin):
 
 @admin.register(Individual)
 class IndividualAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(IndividualRoleInHousehold)
+class IndividualRoleInHouseholdAdmin(admin.ModelAdmin):
     pass
 
 

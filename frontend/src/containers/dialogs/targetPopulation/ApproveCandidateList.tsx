@@ -4,12 +4,13 @@ import {
   DialogContent,
   DialogTitle,
   Typography,
+  makeStyles,
 } from '@material-ui/core';
 import styled from 'styled-components';
+import WarningIcon from '@material-ui/icons/Warning';
 import { Field, Formik } from 'formik';
 import * as Yup from 'yup';
-import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
-import { ProgrammeAutocomplete } from '../../../shared/ProgrammeAutocomplete'
+import { ProgrammeAutocomplete } from '../../../shared/ProgrammeAutocomplete';
 import {
   useAllProgramsQuery,
   useApproveTpMutation,
@@ -18,6 +19,7 @@ import { useSnackbar } from '../../../hooks/useSnackBar';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { DialogActions } from '../DialogActions';
 import { Dialog } from '../Dialog';
+import { MiśTheme } from '../../../theme';
 
 export interface ApproveCandidateListPropTypes {
   open: boolean;
@@ -41,15 +43,29 @@ const DialogDescription = styled.div`
   color: rgba(0, 0, 0, 0.54);
 `;
 
+const Box = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
 const validationSchema = Yup.object().shape({
-  program: Yup.string().required('Programme is required'),
+  program: Yup.object().shape({
+    id: Yup.string().required('Programme is required'),
+  }),
 });
 
+const useStyles = makeStyles((theme: MiśTheme) => ({
+  warning: { color: theme.hctPalette.oragne, marginRight: '10px' },
+}));
+
 export function ApproveCandidateList({ open, setOpen, targetPopulationId }) {
-  const { data: programs } = useAllProgramsQuery({variables: { status: 'ACTIVE' }});
+  const { data: programs } = useAllProgramsQuery({
+    variables: { status: 'ACTIVE' },
+  });
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
   const [mutate, loading] = useApproveTpMutation();
+  const classes = useStyles();
   if (!programs) return null;
   const choices = programs.allPrograms.edges.map((program) => {
     return { ...program.node, value: program.node.id };
@@ -63,10 +79,10 @@ export function ApproveCandidateList({ open, setOpen, targetPopulationId }) {
     >
       <Formik
         validationSchema={validationSchema}
-        initialValues={{ program: '' }}
+        initialValues={{ program: null }}
         onSubmit={(values) => {
           mutate({
-            variables: { id: targetPopulationId, programId: values.program },
+            variables: { id: targetPopulationId, programId: values.program.id },
           }).then(() => {
             setOpen(false);
             showMessage('Programme Population Approved', {
@@ -84,25 +100,38 @@ export function ApproveCandidateList({ open, setOpen, targetPopulationId }) {
             </DialogTitleWrapper>
             <DialogContent>
               <DialogDescription>
-                Are you sure you want to approve the targeting criteria for this
-                Programme Population? Once a Programme Population is{' '}
-                <strong>Approved</strong> the targeting criteria will be
-                permanently frozen.
+                After you close this Programme Population, the selected criteria
+                will no longer accept new results from the Population. Only the
+                Target Population can be editable.
               </DialogDescription>
               <DialogDescription>
-                Note: You may duplicate tthe Programme Population target criteria at any time.
+                Note: You may duplicate the Programme Population target criteria
+                at any time.
               </DialogDescription>
               <DialogDescription>
-                Please select a Programme you would like to associate this
-                Programme Population with:
+                Please select a Programme that this list will be associated
+                with.
+              </DialogDescription>
+              <DialogDescription>
+                <Box>
+                  <WarningIcon className={classes.warning} />
+                  You can only select a programme that is compatible with your
+                  filtering criteria
+                </Box>
               </DialogDescription>
               <Field
                 name='program'
-                label='Programme'
+                label='Select a Programme'
                 choices={choices}
+                getOptionDisabled={(option) => {
+                  if (option.individualDataNeeded) {
+                    return true;
+                  }
+                  return false;
+                }}
                 onChange={(e, object) => {
-                  if(object) {
-                    setFieldValue('program', object.id)
+                  if (object) {
+                    setFieldValue('program', object);
                   }
                 }}
                 component={ProgrammeAutocomplete}
@@ -112,11 +141,15 @@ export function ApproveCandidateList({ open, setOpen, targetPopulationId }) {
               <DialogActions>
                 <Button onClick={() => setOpen(false)}>CANCEL</Button>
                 <Button
-                  type="submit"
+                  type='submit'
                   color='primary'
                   variant='contained'
                   onClick={submitForm}
-                  disabled={!loading || !values.program}
+                  disabled={
+                    !loading ||
+                    !values.program ||
+                    values.program.individualDataNeeded
+                  }
                   data-cy='button-target-population-close'
                 >
                   Close

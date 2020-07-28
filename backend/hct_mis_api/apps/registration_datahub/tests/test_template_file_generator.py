@@ -93,9 +93,16 @@ class TestTemplateFileGenerator(TestCase):
         self.assertEqual(expected_households_rows, households_rows)
 
         expected_individuals_rows = (
-            ("test2", "test_i_f",),
+            (
+                "test2",
+                "primary_collector_id",
+                "alternate_collector_id",
+                "test_i_f",
+            ),
             (
                 "My Test Label 2 - STRING",
+                "List of primary collectors ids, separated by a semicolon - LIST_OF_IDS - required",
+                "List of alternate collectors ids, separated by a semicolon - LIST_OF_IDS - required",
                 "Flex Test Label 2 - STRING - required",
             ),
         )

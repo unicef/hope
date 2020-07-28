@@ -37,11 +37,13 @@ export function IndividualsListTableRow({
       <TableCell align='left'>{decodeIdString(individual.id)}</TableCell>
       <TableCell align='left'>{individual.fullName}</TableCell>
       <TableCell align='left'>
-        {decodeIdString(individual.household.id)}
+        {individual.household ? decodeIdString(individual.household.id) : ''}
       </TableCell>
       <TableCell align='right'>{age}</TableCell>
       <TableCell align='left'>{sexToCapitalize(individual.sex)}</TableCell>
-      <TableCell align='left'>{individual.household.adminArea?.title}</TableCell>
+      <TableCell align='left'>
+        {individual.household?.adminArea?.title}
+      </TableCell>
     </ClickableTableRow>
   );
 }
