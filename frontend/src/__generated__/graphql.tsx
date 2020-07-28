@@ -103,6 +103,7 @@ export type BusinessAreaNode = Node & {
   rapidProHost?: Maybe<Scalars['String']>,
   rapidProApiKey?: Maybe<Scalars['String']>,
   slug: Scalars['String'],
+  hasDataSharingAgreement: Scalars['Boolean'],
   userSet: UserNodeConnection,
   paymentrecordSet: PaymentRecordNodeConnection,
   serviceproviderSet: ServiceProviderNodeConnection,
@@ -388,6 +389,7 @@ export type CreateProgramInput = {
   populationGoal?: Maybe<Scalars['Int']>,
   administrativeAreasOfImplementation?: Maybe<Scalars['String']>,
   businessAreaSlug?: Maybe<Scalars['String']>,
+  individualDataNeeded?: Maybe<Scalars['Boolean']>,
 };
 
 export type CreateTargetPopulationInput = {
@@ -575,6 +577,7 @@ export type HouseholdNode = Node & {
   firstRegistrationDate: Scalars['Date'],
   lastRegistrationDate: Scalars['Date'],
   headOfHousehold: IndividualNode,
+  unicefId: Scalars['String'],
   individuals: IndividualNodeConnection,
   paymentRecords: PaymentRecordNodeConnection,
   targetPopulations: TargetPopulationNodeConnection,
@@ -1174,6 +1177,7 @@ export type IndividualNode = Node & {
   flexFields?: Maybe<Scalars['FlexFieldsScalar']>,
   enrolledInNutritionProgramme: Scalars['Boolean'],
   administrationOfRutf: Scalars['Boolean'],
+  unicefId: Scalars['String'],
   headingHousehold?: Maybe<HouseholdNode>,
   documents: DocumentNodeConnection,
 };
@@ -1469,6 +1473,8 @@ export type PaymentRecordNode = Node & {
   deliveredQuantity: Scalars['Float'],
   deliveryDate: Scalars['DateTime'],
   serviceProvider: ServiceProviderNode,
+  transactionReferenceId?: Maybe<Scalars['String']>,
+  visionId?: Maybe<Scalars['String']>,
   verifications: PaymentVerificationNodeConnection,
 };
 
@@ -1560,6 +1566,7 @@ export type ProgramNode = Node & {
   cashPlus: Scalars['Boolean'],
   populationGoal: Scalars['Int'],
   administrativeAreasOfImplementation: Scalars['String'],
+  individualDataNeeded?: Maybe<Scalars['Boolean']>,
   households: HouseholdNodeConnection,
   cashPlans: CashPlanNodeConnection,
   targetpopulationSet: TargetPopulationNodeConnection,
@@ -2391,6 +2398,7 @@ export type UpdateProgramInput = {
   populationGoal?: Maybe<Scalars['Int']>,
   administrativeAreasOfImplementation?: Maybe<Scalars['String']>,
   businessAreaSlug?: Maybe<Scalars['String']>,
+  individualDataNeeded?: Maybe<Scalars['Boolean']>,
 };
 
 export type UpdateTargetPopulationInput = {
@@ -2866,7 +2874,7 @@ export type CreateProgramMutation = (
     { __typename?: 'CreateProgram' }
     & { program: Maybe<(
       { __typename?: 'ProgramNode' }
-      & Pick<ProgramNode, 'id' | 'name' | 'status' | 'startDate' | 'endDate' | 'caId' | 'budget' | 'description' | 'frequencyOfPayments' | 'sector' | 'scope' | 'cashPlus' | 'populationGoal'>
+      & Pick<ProgramNode, 'id' | 'name' | 'status' | 'startDate' | 'endDate' | 'caId' | 'budget' | 'description' | 'frequencyOfPayments' | 'sector' | 'scope' | 'cashPlus' | 'populationGoal' | 'individualDataNeeded'>
     )> }
   )> }
 );
@@ -3024,7 +3032,7 @@ export type UpdateProgramMutation = (
     { __typename?: 'UpdateProgram' }
     & { program: Maybe<(
       { __typename?: 'ProgramNode' }
-      & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'administrativeAreasOfImplementation'>
+      & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'administrativeAreasOfImplementation' | 'individualDataNeeded'>
     )> }
   )> }
 );
@@ -3404,7 +3412,7 @@ export type AllProgramsQuery = (
       { __typename?: 'ProgramNodeEdge' }
       & { node: Maybe<(
         { __typename?: 'ProgramNode' }
-        & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'populationGoal' | 'sector' | 'totalNumberOfHouseholds'>
+        & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'populationGoal' | 'sector' | 'totalNumberOfHouseholds' | 'individualDataNeeded'>
       )> }
     )>> }
   )> }
@@ -3637,7 +3645,7 @@ export type ProgramQuery = (
   { __typename?: 'Query' }
   & { program: Maybe<(
     { __typename?: 'ProgramNode' }
-    & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'administrativeAreasOfImplementation'>
+    & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'administrativeAreasOfImplementation' | 'individualDataNeeded'>
   )> }
 );
 
@@ -4605,6 +4613,7 @@ export const CreateProgramDocument = gql`
       scope
       cashPlus
       populationGoal
+      individualDataNeeded
     }
   }
 }
@@ -5015,6 +5024,7 @@ export const UpdateProgramDocument = gql`
       sector
       totalNumberOfHouseholds
       administrativeAreasOfImplementation
+      individualDataNeeded
     }
   }
 }
@@ -5872,6 +5882,7 @@ export const AllProgramsDocument = gql`
         populationGoal
         sector
         totalNumberOfHouseholds
+        individualDataNeeded
       }
     }
   }
@@ -6565,6 +6576,7 @@ export const ProgramDocument = gql`
     sector
     totalNumberOfHouseholds
     administrativeAreasOfImplementation
+    individualDataNeeded
   }
 }
     `;
@@ -7984,10 +7996,10 @@ export type ResolversTypes = {
   DateTime: ResolverTypeWrapper<Scalars['DateTime']>,
   BusinessAreaNode: ResolverTypeWrapper<BusinessAreaNode>,
   String: ResolverTypeWrapper<Scalars['String']>,
+  Boolean: ResolverTypeWrapper<Scalars['Boolean']>,
   Int: ResolverTypeWrapper<Scalars['Int']>,
   UserNodeConnection: ResolverTypeWrapper<UserNodeConnection>,
   PageInfo: ResolverTypeWrapper<PageInfo>,
-  Boolean: ResolverTypeWrapper<Scalars['Boolean']>,
   UserNodeEdge: ResolverTypeWrapper<UserNodeEdge>,
   UserNode: ResolverTypeWrapper<UserNode>,
   UUID: ResolverTypeWrapper<Scalars['UUID']>,
@@ -8147,10 +8159,10 @@ export type ResolversParentTypes = {
   DateTime: Scalars['DateTime'],
   BusinessAreaNode: BusinessAreaNode,
   String: Scalars['String'],
+  Boolean: Scalars['Boolean'],
   Int: Scalars['Int'],
   UserNodeConnection: UserNodeConnection,
   PageInfo: PageInfo,
-  Boolean: Scalars['Boolean'],
   UserNodeEdge: UserNodeEdge,
   UserNode: UserNode,
   UUID: Scalars['UUID'],
@@ -8349,6 +8361,7 @@ export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends Reso
   rapidProHost?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   rapidProApiKey?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   slug?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  hasDataSharingAgreement?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   userSet?: Resolver<ResolversTypes['UserNodeConnection'], ParentType, ContextType, BusinessAreaNodeUserSetArgs>,
   paymentrecordSet?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, BusinessAreaNodePaymentrecordSetArgs>,
   serviceproviderSet?: Resolver<ResolversTypes['ServiceProviderNodeConnection'], ParentType, ContextType, BusinessAreaNodeServiceproviderSetArgs>,
@@ -8626,6 +8639,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   firstRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   lastRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   headOfHousehold?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
+  unicefId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, HouseholdNodeIndividualsArgs>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, HouseholdNodePaymentRecordsArgs>,
   targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, HouseholdNodeTargetPopulationsArgs>,
@@ -8821,6 +8835,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   flexFields?: Resolver<Maybe<ResolversTypes['FlexFieldsScalar']>, ParentType, ContextType>,
   enrolledInNutritionProgramme?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   administrationOfRutf?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  unicefId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   headingHousehold?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, IndividualNodeDocumentsArgs>,
 };
@@ -8963,6 +8978,8 @@ export type PaymentRecordNodeResolvers<ContextType = any, ParentType extends Res
   deliveredQuantity?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   deliveryDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   serviceProvider?: Resolver<ResolversTypes['ServiceProviderNode'], ParentType, ContextType>,
+  transactionReferenceId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  visionId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   verifications?: Resolver<ResolversTypes['PaymentVerificationNodeConnection'], ParentType, ContextType, PaymentRecordNodeVerificationsArgs>,
 };
 
@@ -9022,6 +9039,7 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   cashPlus?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   populationGoal?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   administrativeAreasOfImplementation?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  individualDataNeeded?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, ProgramNodeHouseholdsArgs>,
   cashPlans?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, ProgramNodeCashPlansArgs>,
   targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, ProgramNodeTargetpopulationSetArgs>,

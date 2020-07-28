@@ -1,5 +1,3 @@
-import re
-
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
@@ -75,7 +73,6 @@ class Individual(SessionModel):
     relationship = models.CharField(
         max_length=255, null=True, choices=RELATIONSHIP_CHOICE,
     )
-    role = models.CharField(max_length=255, null=True, choices=ROLE_CHOICE,)
     marital_status = models.CharField(
         max_length=255, choices=MARITAL_STATUS_CHOICE,
     )
@@ -102,6 +99,15 @@ class TargetPopulation(SessionModel):
 
     def __str__(self):
         return self.name
+
+
+class IndividualRoleInHousehold(SessionModel):
+    individual_mis_id = models.UUIDField()
+    household_mis_id = models.UUIDField()
+    role = models.CharField(max_length=255, blank=True, choices=ROLE_CHOICE,)
+
+    class Meta:
+        unique_together = ("role", "household_mis_id", "session")
 
 
 class TargetPopulationEntry(SessionModel):
@@ -145,40 +151,41 @@ class Program(SessionModel):
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
     description = models.CharField(max_length=255, null=True)
+    individual_data_needed = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ("session", "mis_id")
 
 
 class Document(SessionModel):
-    # VALID = "VALID"
-    # COLLECTED = "COLLECTED"
-    # LOST = "LOST"
-    # UNKNOWN = "UNKNOWN"
-    # CANCELED = "CANCELED"
-    # EXPIRED = "EXPIRED"
-    # HOLD = "HOLD"
-    # DAMAGED = "DAMAGED"
-    # STATUS_CHOICE = Choices(
-    #     (VALID, _("Valid")),
-    #     (COLLECTED, _("Collected")),
-    #     (LOST, _("Lost")),
-    #     (UNKNOWN, _("Unknown")),
-    #     (CANCELED, _("Canceled")),
-    #     (EXPIRED, _("Expired")),
-    #     (HOLD, _("Hold")),
-    #     (DAMAGED, _("Damaged")),
-    # )
+    VALID = "VALID"
+    COLLECTED = "COLLECTED"
+    LOST = "LOST"
+    UNKNOWN = "UNKNOWN"
+    CANCELED = "CANCELED"
+    EXPIRED = "EXPIRED"
+    HOLD = "HOLD"
+    DAMAGED = "DAMAGED"
+    STATUS_CHOICE = (
+        (VALID, _("Valid")),
+        (COLLECTED, _("Collected")),
+        (LOST, _("Lost")),
+        (UNKNOWN, _("Unknown")),
+        (CANCELED, _("Canceled")),
+        (EXPIRED, _("Expired")),
+        (HOLD, _("Hold")),
+        (DAMAGED, _("Damaged")),
+    )
 
-    # status = models.CharField(choices=STATUS_CHOICE, null=True)
-    # date_of_expiry = models.DateField(null=True)
-    # photo = models.ImageField(blank=True)
-
+    status = models.CharField(
+        choices=STATUS_CHOICE, null=True, max_length=30, default=None
+    )
+    date_of_expiry = models.DateField(null=True, default=None)
+    photo = models.ImageField(blank=True, default="")
     mis_id = models.UUIDField()
     number = models.CharField(max_length=255, null=True)
     individual_mis_id = models.UUIDField(null=True)
     type = models.CharField(max_length=50, choices=IDENTIFICATION_TYPE_CHOICE)
-    country = models.CharField(null=True, max_length=3)
 
     class Meta:
-        unique_together = ("type", "country", "number")
+        unique_together = ("type", "number")
