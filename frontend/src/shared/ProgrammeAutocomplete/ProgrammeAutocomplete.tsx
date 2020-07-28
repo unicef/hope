@@ -5,7 +5,7 @@ import styled from 'styled-components';
 
 const StyledAutocomplete = styled(Autocomplete)`
   width: 100%;
-`
+`;
 interface Option {
   labelEn: string;
 }
@@ -32,18 +32,18 @@ export function ProgrammeAutocomplete({
       options={otherProps.choices}
       value={newValue}
       onChange={(e, object) => {
-        if(object) {
-          setNewValue(object)
-          otherProps.onChange(e, object)
+        if (object) {
+          setNewValue(object);
+          otherProps.onChange(e, object);
         }
       }}
       getOptionLabel={(option) => {
-          if(option) {
-            return option.name
-          }
-          return '';
+        if (option) {
+          return option.name;
         }
-      }
+        return '';
+      }}
+      getOptionDisabled={otherProps.getOptionDisabled}
       renderInput={(params) => (
         <TextField
           {...params}
@@ -58,7 +58,7 @@ export function ProgrammeAutocomplete({
           // eslint-disable-next-line react/jsx-no-duplicate-props
           inputProps={{
             ...params.inputProps,
-            'data-cy': `autocomplete-program-option-${otherProps.index}`
+            'data-cy': `autocomplete-program-option-${otherProps.index}`,
           }}
         />
       )}
