@@ -60,9 +60,7 @@ export function HouseholdDetails({
           <Grid item xs={4}>
             <LabelizedField label='Household Size'>
               <div>
-                {houseHold.individuals && houseHold.individuals.totalCount
-                  ? houseHold.individuals.totalCount
-                  : 0}
+                {houseHold.size}
               </div>
             </LabelizedField>
           </Grid>
