@@ -8,10 +8,8 @@ import {
 } from '@material-ui/core';
 import styled from 'styled-components';
 import WarningIcon from '@material-ui/icons/Warning';
-import SearchIcon from '@material-ui/icons/Search';
 import { Field, Formik } from 'formik';
 import * as Yup from 'yup';
-import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
 import { ProgrammeAutocomplete } from '../../../shared/ProgrammeAutocomplete';
 import {
   useAllProgramsQuery,
