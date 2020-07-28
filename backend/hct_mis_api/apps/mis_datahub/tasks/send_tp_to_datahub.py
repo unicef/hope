@@ -181,15 +181,15 @@ class SendTPToDatahubTask:
             dh_documents.append(dh_document)
 
         dh_individual.unchr_id = self.get_unhcr_individual_id(individual)
-        role = individual.households_and_roles.first()
-        if role is not None:
-            irl = dh_mis_models.IndividualRoleInHousehold(
-                role=role.role,
-                household_mis_id=dh_household.mis_id,
-                individual_mis_id=individual.id,
-            )
-            irl.session = dh_session
-            irl.save()
+        roles = individual.households_and_roles.all()
+        if roles.exists():
+            for role in roles:
+                dh_mis_models.IndividualRoleInHousehold.objects.get_or_create(
+                    role=role.role,
+                    household_mis_id=dh_household.mis_id,
+                    individual_mis_id=individual.id,
+                    session=dh_session,
+                )
 
         dh_individual.session = dh_session
         return dh_individual, dh_documents
@@ -206,7 +206,7 @@ class SendTPToDatahubTask:
         collectors_ids = list(
             household.representatives.values_list("id", flat=True)
         )
-        ids = list(set([head_of_household.id, ] + collectors_ids))
+        ids = {head_of_household.id, *collectors_ids}
         individuals_to_create = []
         documents_to_create = []
         if program.individual_data_needed:
@@ -240,13 +240,17 @@ class SendTPToDatahubTask:
             )
             for individual in individuals:
                 if self.should_send_individual(individual):
-                    dh_individual, dh_individual_documents = self.send_individual(
-                        head_of_household, dh_household, dh_session
+                    (
+                        dh_individual,
+                        dh_individual_documents,
+                    ) = self.send_individual(
+                        individual, dh_household, dh_session
                     )
                     dh_individual.session = dh_session
                     individuals_to_create.append(dh_individual)
                     documents_to_create.extend(dh_individual_documents)
         individuals.update(last_sync_at=timezone.now())
+
         return (
             dh_household,
             individuals_to_create,
@@ -262,7 +266,7 @@ class SendTPToDatahubTask:
         )
         is_allowed_to_share = (
             individual.household.business_area.has_data_sharing_agreement
-            and self.get_unhcr_individual_id(individual)
+            and self.get_unhcr_individual_id(individual) is not None
         )
 
         return is_synced and is_allowed_to_share
