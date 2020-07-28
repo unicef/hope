@@ -10,6 +10,7 @@ from graphene_django.filter import DjangoFilterConnectionField
 
 from core.extended_connection import ExtendedConnection
 from core.utils import decode_id_string
+from household.models import ROLE_NO_ROLE
 from registration_datahub.models import (
     ImportedHousehold,
     ImportedIndividual,
@@ -74,6 +75,12 @@ class ImportedIndividualNode(DjangoObjectType):
     estimated_birth_date = graphene.Boolean(required=False)
     role = graphene.String()
     relationship = graphene.String()
+
+    def resolve_role(parent, info):
+        role = parent.households_and_roles.first()
+        if role is not None:
+            return role.role
+        return ROLE_NO_ROLE
 
     class Meta:
         model = ImportedIndividual
