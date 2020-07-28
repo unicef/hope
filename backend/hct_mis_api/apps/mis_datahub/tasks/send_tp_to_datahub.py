@@ -1,11 +1,11 @@
 from django.db import transaction
-from django.db.models import Q, F
+from django.db.models import Q, F, Prefetch
 from django.utils import timezone
 
 from core.utils import nested_getattr
 from household.models import (
-    ROLE_ALTERNATE,
-    ROLE_PRIMARY,
+    Individual,
+    IndividualRoleInHousehold,
 )
 from mis_datahub import models as dh_mis_models
 from targeting.models import TargetPopulation, HouseholdSelection
@@ -26,6 +26,7 @@ class SendTPToDatahubTask:
         "start_date": "start_date",
         "end_date": "end_date",
         "description": "description",
+        "individual_data_needed": "individual_data_needed",
     }
 
     MAPPING_HOUSEHOLD_DICT = {
@@ -51,7 +52,6 @@ class SendTPToDatahubTask:
         "date_of_birth": "birth_date",
         "estimated_date_of_birth": "estimated_birth_date",
         "relationship": "relationship",
-        "role": "role",
         "marital_status": "marital_status",
         "phone_number": "phone_number",
         "household_mis_id": "household.id",
@@ -61,7 +61,6 @@ class SendTPToDatahubTask:
         "number": "document_number",
         "individual_mis_id": "individual.id",
         "type": "type.type",
-        "country": "type.country",
     }
 
     def execute(self):
@@ -123,7 +122,7 @@ class SendTPToDatahubTask:
                 continue
 
             (dh_household, dh_individuals, dh_documents) = self.send_household(
-                household, dh_session
+                household, program, dh_session
             )
             dh_household.session = dh_session
             households_to_bulk_create.append(dh_household)
@@ -182,9 +181,20 @@ class SendTPToDatahubTask:
             dh_documents.append(dh_document)
 
         dh_individual.unchr_id = self.get_unhcr_individual_id(individual)
+        roles = individual.households_and_roles.all()
+        if roles.exists():
+            for role in roles:
+                dh_mis_models.IndividualRoleInHousehold.objects.get_or_create(
+                    role=role.role,
+                    household_mis_id=dh_household.mis_id,
+                    individual_mis_id=individual.id,
+                    session=dh_session,
+                )
+
+        dh_individual.session = dh_session
         return dh_individual, dh_documents
 
-    def send_household(self, household, dh_session):
+    def send_household(self, household, program, dh_session):
         dh_household_args = self.build_arg_dict(
             household, SendTPToDatahubTask.MAPPING_HOUSEHOLD_DICT
         )
@@ -192,52 +202,54 @@ class SendTPToDatahubTask:
         dh_household.country = household.country.alpha3
         dh_household.unhcr_id = self.get_unhcr_household_id(household)
 
+        head_of_household = household.head_of_household
+        collectors_ids = list(
+            household.representatives.values_list("id", flat=True)
+        )
+        ids = {head_of_household.id, *collectors_ids}
         individuals_to_create = []
         documents_to_create = []
-        head_of_household = household.head_of_household
-        if self.should_send_individual(head_of_household):
-            dh_hoh, dh_hoh_documents = self.send_individual(
-                head_of_household, dh_household, dh_session
+        if program.individual_data_needed:
+            individuals = household.individuals.all()
+            for individual in individuals:
+                if self.should_send_individual(individual):
+                    (
+                        dh_individual,
+                        dh_individual_documents,
+                    ) = self.send_individual(
+                        individual, dh_household, dh_session
+                    )
+                    dh_individual.session = dh_session
+                    individuals_to_create.append(dh_individual)
+                    documents_to_create.extend(dh_individual_documents)
+        else:
+            individuals = (
+                Individual.objects.filter(id__in=ids)
+                .filter(
+                    Q(last_sync_at__isnull=True)
+                    | Q(last_sync_at__lte=F("updated_at"))
+                )
+                .prefetch_related(
+                    Prefetch(
+                        "households_and_roles",
+                        queryset=IndividualRoleInHousehold.objects.filter(
+                            household=household.id
+                        ),
+                    )
+                )
             )
-            dh_hoh.session = dh_session
-            individuals_to_create.append(dh_hoh)
-            documents_to_create.extend(dh_hoh_documents)
-
-        primary_collector = household.individuals.filter(
-            role=ROLE_PRIMARY
-        ).first()
-        if (
-            primary_collector is not None
-            and primary_collector.id != head_of_household.id
-            and self.should_send_individual(primary_collector)
-        ):
-            (
-                dh_primary_collector,
-                dh_primary_collector_documents,
-            ) = self.send_individual(
-                primary_collector, dh_household, dh_session
-            )
-            dh_primary_collector.session = dh_session
-            individuals_to_create.append(dh_primary_collector)
-            documents_to_create.extend(dh_primary_collector_documents)
-
-        alternative_collector = household.individuals.filter(
-            role=ROLE_ALTERNATE
-        ).first()
-        if (
-            alternative_collector is not None
-            and alternative_collector.id != head_of_household.id
-            and self.should_send_individual(alternative_collector)
-        ):
-            (
-                dh_alternative_collector,
-                dh_alternative_collector_documents,
-            ) = self.send_individual(
-                alternative_collector, dh_household, dh_session
-            )
-            dh_alternative_collector.session = dh_session
-            individuals_to_create.append(dh_alternative_collector)
-            documents_to_create.extend(dh_alternative_collector_documents)
+            for individual in individuals:
+                if self.should_send_individual(individual):
+                    (
+                        dh_individual,
+                        dh_individual_documents,
+                    ) = self.send_individual(
+                        individual, dh_household, dh_session
+                    )
+                    dh_individual.session = dh_session
+                    individuals_to_create.append(dh_individual)
+                    documents_to_create.extend(dh_individual_documents)
+        individuals.update(last_sync_at=timezone.now())
 
         return (
             dh_household,
@@ -248,10 +260,16 @@ class SendTPToDatahubTask:
     def should_send_individual(self, individual):
         """Returns False when data sharing is true and unhcr id is set
         https://unicef.visualstudio.com/ICTD-HCT-MIS/_workitems/edit/64344"""
-        return (
-            individual.household.business_area.has_data_sharing_agreement
-            and self.get_unhcr_individual_id(individual)
+        is_synced = (
+            individual.last_sync_at is None
+            or individual.last_sync_at > individual.updated_at
         )
+        is_allowed_to_share = (
+            individual.household.business_area.has_data_sharing_agreement
+            and self.get_unhcr_individual_id(individual) is not None
+        )
+
+        return is_synced and is_allowed_to_share
 
     def send_target_entry(self, target_population_selection):
         household_unhcr_id = self.get_unhcr_household_id(
