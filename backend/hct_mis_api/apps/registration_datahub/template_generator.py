@@ -2,7 +2,8 @@ from typing import List, Tuple, Dict
 
 import openpyxl
 
-from core.core_fields_attributes import CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY
+from core.core_fields_attributes import CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY, \
+    COLLECTORS_FIELDS
 from core.models import AdminArea
 from core.utils import serialize_flex_attributes
 
@@ -79,6 +80,7 @@ class TemplateFileGenerator:
             **CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY[
                 individuals_sheet_title.lower()
             ],
+            **COLLECTORS_FIELDS,
             **flex_fields[individuals_sheet_title.lower()],
         }
 
