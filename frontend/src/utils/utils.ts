@@ -51,6 +51,19 @@ export function programStatusToColor(
       return theme.hctPalette.oragne;
   }
 }
+export function populationStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  switch (status) {
+    case 'ACTIVE':
+      return theme.hctPalette.green;
+    case 'INACTIVE':
+      return theme.hctPalette.gray;
+    default:
+      return theme.hctPalette.oragne;
+  }
+}
 
 export function cashPlanStatusToColor(
   theme: typeof themeObj,

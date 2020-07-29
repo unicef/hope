@@ -19,6 +19,7 @@ import { HouseholdIndividualsTable } from '../tables/HouseholdIndividualsTable';
 import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
 import { decodeIdString } from '../../utils/utils';
 import { PaymentRecordHouseholdTable } from '../tables/PaymentRecordHouseholdTable';
+import Moment from 'react-moment';
 
 const Container = styled.div`
   padding: 20px;
@@ -89,7 +90,9 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
           openInNewTab
           household={household as HouseholdNode}
         />
-        <HouseholdVulnerabilities household={household as HouseholdDetailedFragment}/>
+        <HouseholdVulnerabilities
+          household={household as HouseholdDetailedFragment}
+        />
         <Overview>
           <Title>
             <Typography variant='h6'>Registration Details</Typography>
@@ -97,17 +100,21 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
           <Grid container spacing={6}>
             <Grid item xs={3}>
               <LabelizedField label='Source'>
-                <div>-</div>
+                <div>{household.registrationDataImport.dataSource}</div>
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
               <LabelizedField label='Import name'>
-                <div>-</div>
+                <div>{household.registrationDataImport.name}</div>
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
               <LabelizedField label='Registered Date'>
-                <div>-</div>
+                <div>
+                  <Moment format='DD/MM/YYYY'>
+                    {household.registrationDataImport.importDate}
+                  </Moment>
+                </div>
               </LabelizedField>
             </Grid>
           </Grid>
@@ -131,7 +138,7 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
             </Grid>
             <Grid item xs={3}>
               <LabelizedField label='User name'>
-                <div>-</div>
+                <div> {household.registrationDataImport.importedBy.email}</div>
               </LabelizedField>
             </Grid>
           </Grid>
