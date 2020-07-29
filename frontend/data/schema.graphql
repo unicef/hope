@@ -362,6 +362,7 @@ type HouseholdNode implements Node {
   size: Int!
   address: String!
   adminArea: AdminAreaNode
+  representatives(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   geopoint: GeoJSON
   femaleAgeGroup05Count: Int!
   femaleAgeGroup611Count: Int!
@@ -388,6 +389,7 @@ type HouseholdNode implements Node {
   lastRegistrationDate: Date!
   headOfHousehold: IndividualNode!
   unicefId: String!
+  individualsAndRoles: [IndividualRoleInHouseholdNode!]!
   individuals(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
   targetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, orderBy: String): TargetPopulationNodeConnection!
@@ -819,7 +821,6 @@ type ImportedIndividualNode implements Node {
   middleName: String!
   familyName: String!
   relationship: String
-  role: String
   sex: ImportedIndividualSex!
   birthDate: Date!
   estimatedBirthDate: Boolean
@@ -835,6 +836,7 @@ type ImportedIndividualNode implements Node {
   flexFields: JSONString!
   importedhousehold: ImportedHouseholdNode
   documents(before: String, after: String, first: Int, last: Int): ImportedDocumentNodeConnection!
+  role: String
 }
 
 type ImportedIndividualNodeConnection {
@@ -880,15 +882,14 @@ type IndividualNode implements Node {
   givenName: String!
   middleName: String!
   familyName: String!
-  relationship: IndividualRelationship
-  role: String
   sex: IndividualSex!
   birthDate: Date!
   estimatedBirthDate: Boolean
   maritalStatus: IndividualMaritalStatus!
   phoneNo: String!
   phoneNoAlternative: String!
-  household: HouseholdNode!
+  relationship: IndividualRelationship
+  household: HouseholdNode
   registrationDataImport: RegistrationDataImportNode!
   disability: Boolean!
   workStatus: IndividualWorkStatus
@@ -898,8 +899,11 @@ type IndividualNode implements Node {
   enrolledInNutritionProgramme: Boolean!
   administrationOfRutf: Boolean!
   unicefId: String!
+  representedHouseholds(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   headingHousehold: HouseholdNode
   documents(before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
+  householdsAndRoles: [IndividualRoleInHouseholdNode!]!
+  role: String
 }
 
 type IndividualNodeConnection {
@@ -929,6 +933,22 @@ enum IndividualRelationship {
   GRANDDAUGHER_GRANDSON
   NEPHEW_NIECE
   COUSIN
+}
+
+type IndividualRoleInHouseholdNode {
+  id: UUID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  lastSyncAt: DateTime
+  individual: IndividualNode!
+  household: HouseholdNode!
+  role: IndividualRoleInHouseholdRole
+}
+
+enum IndividualRoleInHouseholdRole {
+  PRIMARY
+  ALTERNATE
+  NO_ROLE
 }
 
 enum IndividualSex {
