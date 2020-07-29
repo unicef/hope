@@ -18,7 +18,7 @@ export function FinishedProgramDetailsPageHeaderButtons({
   return (
     <div>
       <ButtonContainer>
-        <ReactivateProgram program={program}/>
+        <ReactivateProgram program={program} />
       </ButtonContainer>
       <ButtonContainer>
         <Button
@@ -28,7 +28,7 @@ export function FinishedProgramDetailsPageHeaderButtons({
           href={`/cashassist/${program.caId}`}
           startIcon={<OpenInNewRoundedIcon />}
         >
-          OPEN IN CASHSSIST
+          Open in CashAssist
         </Button>
       </ButtonContainer>
     </div>
