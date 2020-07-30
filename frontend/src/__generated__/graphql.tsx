@@ -3498,7 +3498,11 @@ export type AllTargetPopulationsQuery = (
 
 export type AllUsersQueryVariables = {
   fullName?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
 };
 
 
@@ -3506,14 +3510,16 @@ export type AllUsersQuery = (
   { __typename?: 'Query' }
   & { allUsers: Maybe<(
     { __typename?: 'UserNodeConnection' }
+    & Pick<UserNodeConnection, 'totalCount' | 'edgeCount'>
     & { pageInfo: (
       { __typename?: 'PageInfo' }
       & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'endCursor' | 'startCursor'>
     ), edges: Array<Maybe<(
       { __typename?: 'UserNodeEdge' }
+      & Pick<UserNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'UserNode' }
-        & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
+        & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'username' | 'email' | 'isActive'>
       )> }
     )>> }
   )> }
@@ -6069,8 +6075,8 @@ export type AllTargetPopulationsQueryHookResult = ReturnType<typeof useAllTarget
 export type AllTargetPopulationsLazyQueryHookResult = ReturnType<typeof useAllTargetPopulationsLazyQuery>;
 export type AllTargetPopulationsQueryResult = ApolloReactCommon.QueryResult<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>;
 export const AllUsersDocument = gql`
-    query AllUsers($fullName: String, $first: Int) {
-  allUsers(fullName: $fullName, first: $first) {
+    query AllUsers($fullName: String, $first: Int, $last: Int, $after: String, $before: String, $orderBy: String) {
+  allUsers(fullName: $fullName, first: $first, last: $last, after: $after, before: $before, orderBy: $orderBy) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -6082,9 +6088,14 @@ export const AllUsersDocument = gql`
         id
         firstName
         lastName
+        username
         email
+        isActive
       }
+      cursor
     }
+    totalCount
+    edgeCount
   }
 }
     `;
@@ -6120,6 +6131,10 @@ export function withAllUsers<TProps, TChildProps = {}>(operationOptions?: Apollo
  *   variables: {
  *      fullName: // value for 'fullName'
  *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      orderBy: // value for 'orderBy'
  *   },
  * });
  */
