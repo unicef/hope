@@ -31,7 +31,7 @@ export const ALL_USERS_QUERY = gql`
           username
           email
           isActive
-          lastlogin
+          lastLogin
         }
         cursor
       }
