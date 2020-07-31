@@ -3519,7 +3519,7 @@ export type AllUsersQuery = (
       & Pick<UserNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'UserNode' }
-        & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'username' | 'email' | 'isActive'>
+        & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'username' | 'email' | 'isActive' | 'lastLogin'>
       )> }
     )>> }
   )> }
@@ -6091,6 +6091,7 @@ export const AllUsersDocument = gql`
         username
         email
         isActive
+        lastLogin
       }
       cursor
     }
