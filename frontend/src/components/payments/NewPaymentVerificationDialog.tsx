@@ -21,12 +21,13 @@ import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
 import {
   useCreateCashPlanPaymentVerificationMutation,
-  AllAdminAreasQuery,
+  useAllRapidProFlowsQuery,
   useAllAdminAreasQuery,
 } from '../../__generated__/graphql';
 import { FormikMultiSelectField } from '../../shared/Formik/FormikMultiSelectField';
 import { AdminAreasAutocomplete } from '../population/AdminAreaAutocomplete';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -63,7 +64,12 @@ export function NewPaymentVerificationDialog({
   const [mutate] = useCreateCashPlanPaymentVerificationMutation();
   const businessArea = useBusinessArea();
 
-  const { data, loading } = useAllAdminAreasQuery({
+  const { data: rapidProFlows } = useAllRapidProFlowsQuery({
+    variables: {
+      businessAreaSlug: businessArea,
+    },
+  });
+  const { data } = useAllAdminAreasQuery({
     variables: {
       first: 100,
       // title: debouncedInputText,
@@ -76,15 +82,15 @@ export function NewPaymentVerificationDialog({
       variables: {
         input: {
           cashPlanId,
-          sampling: 'FULL',
+          sampling: selectedTab === 0 ? 'FULL' : 'RANDOM',
           fullListArguments: {
             excludedAdminAreas: values.excludedAdminAreas,
           },
-          verificationChannel: 'RAPIDPRO',
+          verificationChannel: values.verificationChannel,
           rapidProArguments: {
-            flowId: '1',
+            flowId: values.rapidProFlow,
           },
-          businessAreaSlug: 'afghanistan',
+          businessAreaSlug: businessArea,
         },
       },
     });
@@ -105,13 +111,14 @@ export function NewPaymentVerificationDialog({
         }))
       : [];
   const initialValues = {
-    confidenceInterval: 8,
-    marginOfError: 24,
+    confidenceInterval: 0,
+    marginOfError: 0,
     admin: false,
     age: true,
     sex: false,
     excludedAdminAreas: [],
     verificationChannel: null,
+    rapidProFlow: '',
   };
 
   return (
@@ -183,6 +190,15 @@ export function NewPaymentVerificationDialog({
                       ]}
                       component={FormikRadioGroup}
                     />
+                    {values.verificationChannel === 'RAPIDPRO' && (
+                      <Field
+                        name='rapidProFlow'
+                        label='RapidPro Flow'
+                        style={{ width: '90%' }}
+                        choices={rapidProFlows.allRapidProFlows}
+                        component={FormikSelectField}
+                      />
+                    )}
                   </Box>
                 </TabPanel>
                 <TabPanel value={selectedTab} index={1}>
