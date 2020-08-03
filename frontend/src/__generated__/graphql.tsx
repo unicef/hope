@@ -3520,6 +3520,19 @@ export type AllProgramsQuery = (
   )> }
 );
 
+export type AllRapidProFlowsQueryVariables = {
+  businessAreaSlug: Scalars['String']
+};
+
+
+export type AllRapidProFlowsQuery = (
+  { __typename?: 'Query' }
+  & { allRapidProFlows: Maybe<Array<Maybe<(
+    { __typename?: 'RapidProFlow' }
+    & Pick<RapidProFlow, 'id' | 'name'>
+  )>>> }
+);
+
 export type AllTargetPopulationsQueryVariables = {
   after?: Maybe<Scalars['String']>,
   before?: Maybe<Scalars['String']>,
@@ -6085,6 +6098,57 @@ export function useAllProgramsLazyQuery(baseOptions?: ApolloReactHooks.LazyQuery
 export type AllProgramsQueryHookResult = ReturnType<typeof useAllProgramsQuery>;
 export type AllProgramsLazyQueryHookResult = ReturnType<typeof useAllProgramsLazyQuery>;
 export type AllProgramsQueryResult = ApolloReactCommon.QueryResult<AllProgramsQuery, AllProgramsQueryVariables>;
+export const AllRapidProFlowsDocument = gql`
+    query AllRapidProFlows($businessAreaSlug: String!) {
+  allRapidProFlows(businessAreaSlug: $businessAreaSlug) {
+    id
+    name
+  }
+}
+    `;
+export type AllRapidProFlowsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllRapidProFlowsQuery, AllRapidProFlowsQueryVariables>, 'query'> & ({ variables: AllRapidProFlowsQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const AllRapidProFlowsComponent = (props: AllRapidProFlowsComponentProps) => (
+      <ApolloReactComponents.Query<AllRapidProFlowsQuery, AllRapidProFlowsQueryVariables> query={AllRapidProFlowsDocument} {...props} />
+    );
+    
+export type AllRapidProFlowsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllRapidProFlowsQuery, AllRapidProFlowsQueryVariables> & TChildProps;
+export function withAllRapidProFlows<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllRapidProFlowsQuery,
+  AllRapidProFlowsQueryVariables,
+  AllRapidProFlowsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllRapidProFlowsQuery, AllRapidProFlowsQueryVariables, AllRapidProFlowsProps<TChildProps>>(AllRapidProFlowsDocument, {
+      alias: 'allRapidProFlows',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllRapidProFlowsQuery__
+ *
+ * To run a query within a React component, call `useAllRapidProFlowsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllRapidProFlowsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllRapidProFlowsQuery({
+ *   variables: {
+ *      businessAreaSlug: // value for 'businessAreaSlug'
+ *   },
+ * });
+ */
+export function useAllRapidProFlowsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllRapidProFlowsQuery, AllRapidProFlowsQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllRapidProFlowsQuery, AllRapidProFlowsQueryVariables>(AllRapidProFlowsDocument, baseOptions);
+      }
+export function useAllRapidProFlowsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllRapidProFlowsQuery, AllRapidProFlowsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllRapidProFlowsQuery, AllRapidProFlowsQueryVariables>(AllRapidProFlowsDocument, baseOptions);
+        }
+export type AllRapidProFlowsQueryHookResult = ReturnType<typeof useAllRapidProFlowsQuery>;
+export type AllRapidProFlowsLazyQueryHookResult = ReturnType<typeof useAllRapidProFlowsLazyQuery>;
+export type AllRapidProFlowsQueryResult = ApolloReactCommon.QueryResult<AllRapidProFlowsQuery, AllRapidProFlowsQueryVariables>;
 export const AllTargetPopulationsDocument = gql`
     query AllTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String, $candidateListTotalHouseholdsMin: Int, $candidateListTotalHouseholdsMax: Int, $businessArea: String) {
   allTargetPopulation(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name: $name, status: $status, candidateListTotalHouseholdsMin: $candidateListTotalHouseholdsMin, candidateListTotalHouseholdsMax: $candidateListTotalHouseholdsMax, businessArea: $businessArea) {
