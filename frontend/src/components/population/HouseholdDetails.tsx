@@ -5,7 +5,7 @@ import { LabelizedField } from '../LabelizedField';
 import { HouseholdNode } from '../../__generated__/graphql';
 import { formatCurrency } from '../../utils/utils';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
-import {MiśTheme} from "../../theme";
+import { MiśTheme } from '../../theme';
 
 const Container = styled.div`
   display: flex;
@@ -59,14 +59,12 @@ export function HouseholdDetails({
         <Grid container spacing={6}>
           <Grid item xs={4}>
             <LabelizedField label='Household Size'>
-              <div>
-                {houseHold.size}
-              </div>
+              <div>{houseHold.size}</div>
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>
-            <LabelizedField label='Location'>
-              <div>{houseHold.adminArea?.title||"-"}</div>
+            <LabelizedField label='Country'>
+              <div>{houseHold.country || '-'}</div>
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>
