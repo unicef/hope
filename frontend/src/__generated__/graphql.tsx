@@ -2711,7 +2711,7 @@ export type HouseholdMinimalFragment = (
 
 export type HouseholdDetailedFragment = (
   { __typename?: 'HouseholdNode' }
-  & Pick<HouseholdNode, 'countryOrigin' | 'flexFields'>
+  & Pick<HouseholdNode, 'countryOrigin' | 'country' | 'flexFields'>
   & { individuals: (
     { __typename?: 'IndividualNodeConnection' }
     & Pick<IndividualNodeConnection, 'totalCount'>
@@ -4040,7 +4040,7 @@ export type ImportedHouseholdMinimalFragment = (
 
 export type ImportedHouseholdDetailedFragment = (
   { __typename?: 'ImportedHouseholdNode' }
-  & Pick<ImportedHouseholdNode, 'residenceStatus' | 'countryOrigin'>
+  & Pick<ImportedHouseholdNode, 'residenceStatus' | 'country' | 'countryOrigin'>
   & { registrationDataImport: (
     { __typename?: 'RegistrationDataImportDatahubNode' }
     & Pick<RegistrationDataImportDatahubNode, 'id' | 'hctId' | 'name'>
@@ -4309,6 +4309,7 @@ export const HouseholdDetailedFragmentDoc = gql`
     fragment householdDetailed on HouseholdNode {
   ...householdMinimal
   countryOrigin
+  country
   individuals {
     totalCount
     edges {
@@ -4429,6 +4430,7 @@ export const ImportedHouseholdDetailedFragmentDoc = gql`
     fragment importedHouseholdDetailed on ImportedHouseholdNode {
   ...importedHouseholdMinimal
   residenceStatus
+  country
   countryOrigin
   registrationDataImport {
     id
