@@ -96,7 +96,7 @@ export function FinishProgram({
         onClick={() => setOpen(true)}
         data-cy='button-finish-program'
       >
-        FINISH PROGRAM
+        Finish Programme
       </Button>
       <Dialog
         open={open}
