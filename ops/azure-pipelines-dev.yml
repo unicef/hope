@@ -238,6 +238,7 @@ stages:
                 namespace=ictd-hope-dev,\
                 env=DEV,\
                 domain='dev-hope.unitst.org',\
+                PVC=true,\
                 backend.secret.env=DEV,\
                 revision=\"$(Build.BuildId)\",\
                 backend.image=uniappsk8sdevacr.azurecr.io/$(backendImageRepository):$(Build.BuildId),\

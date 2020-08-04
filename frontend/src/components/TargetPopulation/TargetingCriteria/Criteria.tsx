@@ -16,9 +16,9 @@ const CriteriaElement = styled.div`
   background-color: ${(props) =>
     props.alternative ? 'transparent' : '#f7faff'};
   padding: ${({ theme }) => theme.spacing(1)}px
-    ${({ theme, alternative }) => alternative ? theme.spacing(1) : theme.spacing(17)}px
-    ${({ theme }) => theme.spacing(1)}px
-    ${({ theme }) => theme.spacing(4)}px;
+    ${({ theme, alternative }) =>
+      alternative ? theme.spacing(1) : theme.spacing(17)}px
+    ${({ theme }) => theme.spacing(1)}px ${({ theme }) => theme.spacing(4)}px;
   margin: ${({ theme }) => theme.spacing(2)}px 0;
   p {
     margin: ${({ theme }) => theme.spacing(2)}px 0;
@@ -50,6 +50,7 @@ const MathSign = styled.img`
 `;
 
 const CriteriaField = ({ field }) => {
+  console.log(field);
   let fieldElement;
   switch (field.comparisionMethod) {
     case 'NOT_EQUALS':
@@ -74,14 +75,21 @@ const CriteriaField = ({ field }) => {
       fieldElement = (
         <p>
           {field.fieldAttribute.labelEn || field.fieldName}:{' '}
-          <span>{field.fieldAttribute.choices.length ? field.fieldAttribute.choices.find(each => each.value === field.arguments[0]).labelEn : field.arguments[0]}</span>
+          <span>
+            {field.fieldAttribute.choices.length
+              ? field.fieldAttribute.choices.find(
+                  (each) => each.value === field.arguments[0],
+                ).labelEn
+              : field.arguments[0]}
+          </span>
         </p>
       );
       break;
     case 'LESS_THAN':
       fieldElement = (
         <p>
-          {field.fieldAttribute.labelEn || field.fieldName}: <MathSign src={LessThanEqual} alt="less_than"/>
+          {field.fieldAttribute.labelEn || field.fieldName}:{' '}
+          <MathSign src={LessThanEqual} alt='less_than' />
           <span>{field.arguments[0]}</span>
         </p>
       );
@@ -89,26 +97,38 @@ const CriteriaField = ({ field }) => {
     case 'GREATER_THAN':
       fieldElement = (
         <p>
-          {field.fieldAttribute.labelEn || field.fieldName}: <MathSign src={GreaterThanEqual} alt="greater_than"/>
+          {field.fieldAttribute.labelEn || field.fieldName}:{' '}
+          <MathSign src={GreaterThanEqual} alt='greater_than' />
           <span>{field.arguments[0]}</span>
         </p>
       );
       break;
     case 'CONTAINS':
-      fieldElement = (
-        field.arguments.length > 1 ?
+      fieldElement =
+        field.arguments.length > 1 ? (
           <p>
             {field.fieldAttribute.labelEn || field.fieldName}:{' '}
             {field.arguments.map((argument, index) => {
-              return <><span>{field.fieldAttribute.choices.length ? field.fieldAttribute.choices.find(each => each.value === argument).labelEn : field.arguments[0]}</span>{index !== field.arguments.length - 1 && ', '}</>
-            }
-            )}
-          </p> :
+              return (
+                <>
+                  <span>
+                    {field.fieldAttribute.choices.length
+                      ? field.fieldAttribute.choices.find(
+                          (each) => each.value === argument,
+                        ).labelEn
+                      : field.arguments[0]}
+                  </span>
+                  {index !== field.arguments.length - 1 && ', '}
+                </>
+              );
+            })}
+          </p>
+        ) : (
           <p>
             {field.fieldAttribute.labelEn || field.fieldName}:{' '}
             <span>{field.arguments[0]}</span>
           </p>
-      );
+        );
       break;
     default:
       fieldElement = (

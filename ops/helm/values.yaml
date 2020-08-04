@@ -3,6 +3,7 @@ namespace: staging
 env:
 domain: 
 podDB: false
+PVC: false
 storageClassName: "default"
 
 backend:
