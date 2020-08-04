@@ -29,6 +29,7 @@ export const householdDetailed = gql`
   fragment householdDetailed on HouseholdNode {
     ...householdMinimal
     countryOrigin
+    country
     individuals {
       totalCount
       edges {
