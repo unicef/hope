@@ -112,15 +112,6 @@ class SendTPToDatahubTask:
         dh_target.save()
 
         for household in households:
-            # if data sharing is true and unhcr id is set then don't push household
-            # https://unicef.visualstudio.com/ICTD-HCT-MIS/_workitems/edit/64344
-            has_data_sharing_agreement = (
-                target_population.business_area.has_data_sharing_agreement
-            )
-            unhcr_id = self.get_unhcr_household_id(household)
-            if has_data_sharing_agreement and unhcr_id:
-                continue
-
             (dh_household, dh_individuals, dh_documents) = self.send_household(
                 household, program, dh_session
             )
@@ -258,17 +249,13 @@ class SendTPToDatahubTask:
         )
 
     def should_send_individual(self, individual):
-        """Returns False when data sharing is true and unhcr id is set
-        https://unicef.visualstudio.com/ICTD-HCT-MIS/_workitems/edit/64344"""
         is_synced = (
             individual.last_sync_at is None
             or individual.last_sync_at > individual.updated_at
         )
         is_allowed_to_share = (
             individual.household.business_area.has_data_sharing_agreement
-            and self.get_unhcr_individual_id(individual) is not None
         )
-
         return is_synced and is_allowed_to_share
 
     def send_target_entry(self, target_population_selection):
