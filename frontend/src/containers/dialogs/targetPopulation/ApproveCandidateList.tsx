@@ -148,7 +148,7 @@ export function ApproveCandidateList({ open, setOpen, targetPopulationId }) {
                   disabled={
                     !loading ||
                     !values.program ||
-                    values.program.individualDataNeeded
+                    !values.program.individualDataNeeded
                   }
                   data-cy='button-target-population-close'
                 >
