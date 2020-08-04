@@ -3,7 +3,11 @@ from django.contrib import admin
 from registration_datahub.models import (
     RegistrationDataImportDatahub,
     ImportedIndividual,
-    ImportedHousehold, ImportedDocumentType, ImportedDocument, ImportData,
+    ImportedHousehold,
+    ImportedDocumentType,
+    ImportedDocument,
+    ImportData,
+    ImportedIndividualRoleInHousehold,
 )
 
 
@@ -35,3 +39,8 @@ class ImportedDocumentAdmin(admin.ModelAdmin):
 @admin.register(ImportedDocumentType)
 class ImportedDocumentTypeAdmin(admin.ModelAdmin):
     list_display = ("label", "country")
+
+
+@admin.register(ImportedIndividualRoleInHousehold)
+class ImportedIndividualRoleInHouseholdAdmin(admin.ModelAdmin):
+    pass

@@ -33,7 +33,6 @@ class ImportedIndividualDocument(Document):
 
         fields = [
             "relationship",
-            "role",
             "sex",
             "birth_date",
             "created_at",

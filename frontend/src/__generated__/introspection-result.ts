@@ -48,10 +48,10 @@
             "name": "PaymentVerificationNode"
           },
           {
-            "name": "RegistrationDataImportNode"
+            "name": "IndividualNode"
           },
           {
-            "name": "IndividualNode"
+            "name": "RegistrationDataImportNode"
           },
           {
             "name": "DocumentNode"
