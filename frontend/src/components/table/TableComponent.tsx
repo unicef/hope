@@ -10,6 +10,8 @@ import Paper from '@material-ui/core/Paper';
 import { LoadingComponent } from '../LoadingComponent';
 import { EnhancedTableToolbar } from './EnhancedTableToolbar';
 import { EnhancedTableHead, HeadCell } from './EnhancedTableHead';
+import FindInPageIcon from '@material-ui/icons/FindInPage';
+import { Box } from '@material-ui/core';
 
 export type Order = 'asc' | 'desc';
 
@@ -24,6 +26,23 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     table: {
       minWidth: 750,
+    },
+    empty: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexDirection: 'column',
+      color: 'rgba(0, 0, 0, 0.38)',
+      fontSize: '24px',
+      lineHeight: '28px',
+      textAlign: 'center',
+      padding: '70px',
+    },
+    smallerText: {
+      fontSize: '16px',
+    },
+    icon: {
+      fontSize: '50px',
     },
     visuallyHidden: {
       border: 0,
@@ -90,6 +109,21 @@ export function TableComponent<T>({
       <TableRow style={{ height: 53 * emptyRows, minHeight: 53 }}>
         <TableCell colSpan={headCells.length}>
           <LoadingComponent />
+        </TableCell>
+      </TableRow>
+    );
+  } else if (!data.length) {
+    body = (
+      <TableRow style={{ height: 53 * emptyRows, minHeight: 53 }}>
+        <TableCell colSpan={headCells.length}>
+          <div className={classes.empty}>
+            <FindInPageIcon className={classes.icon} fontSize='inherit' />
+            <Box mt={2}>No results</Box>
+            <Box className={classes.smallerText} mt={2}>
+              Try adjusting your search or your filters to find what you&apos;re
+              looking for.
+            </Box>
+          </div>
         </TableCell>
       </TableRow>
     );

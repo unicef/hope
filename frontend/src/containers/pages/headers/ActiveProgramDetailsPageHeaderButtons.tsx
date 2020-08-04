@@ -30,7 +30,7 @@ export function ActiveProgramDetailsPageHeaderButtons({
           color='primary'
           startIcon={<OpenInNewRoundedIcon />}
         >
-          OPEN IN CASHSSIST
+          Open in CashAssist
         </Button>
       </ButtonContainer>
     </div>

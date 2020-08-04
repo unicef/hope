@@ -15,7 +15,7 @@ import { StatusBox } from '../../components/StatusBox';
 import {
   choicesToDict,
   decodeIdString,
-  paymentRecordStatusToColor,
+  populationStatusToColor,
   sexToCapitalize,
 } from '../../utils/utils';
 import Moment from 'react-moment';
@@ -126,8 +126,8 @@ export function HouseholdIndividualsTable({
             <TableCell align='left'>
               <StatusContainer>
                 <StatusBox
-                  status='no data'
-                  statusToColor={paymentRecordStatusToColor}
+                  status={row.status}
+                  statusToColor={populationStatusToColor}
                 />
               </StatusContainer>
             </TableCell>
