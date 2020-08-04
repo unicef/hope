@@ -44,6 +44,7 @@ export const importedHouseholdDetailed = gql`
     ...importedHouseholdMinimal
 
     residenceStatus
+    country
     countryOrigin
     registrationDataImport {
       id

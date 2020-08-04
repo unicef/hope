@@ -28,7 +28,7 @@ export const headCells: HeadCell<PaymentVerificationNodeEdge>[] = [
   },
   {
     disablePadding: false,
-    label: 'Delivered Amount',
+    label: 'Delivered Quantity',
     id: 'payment_record__delivered_quantity',
     numeric: true,
   },
