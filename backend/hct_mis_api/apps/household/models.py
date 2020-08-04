@@ -9,7 +9,7 @@ from django.core.validators import (
     MaxLengthValidator,
 )
 from django.db import models
-from django.db.models import Sum, Prefetch
+from django.db.models import Sum
 from django.utils.translation import ugettext_lazy as _
 from django_countries.fields import CountryField
 from model_utils import Choices
@@ -304,6 +304,9 @@ class IndividualRoleInHousehold(TimeStampedUUIDModel, AbstractSyncable):
 
     class Meta:
         unique_together = ("role", "household")
+
+    def __str__(self):
+        return f"{self.individual.full_name} - {self.role}"
 
 
 class Individual(TimeStampedUUIDModel, AbstractSyncable):
