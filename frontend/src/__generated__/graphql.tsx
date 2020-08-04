@@ -20,8 +20,8 @@ export type Scalars = {
   Date: any,
   Decimal: any,
   JSONLazyString: any,
-  GeoJSON: any,
   FlexFieldsScalar: any,
+  GeoJSON: any,
   Arg: any,
   JSONString: any,
   Upload: any,
@@ -580,6 +580,7 @@ export type HouseholdNode = Node & {
   size: Scalars['Int'],
   address: Scalars['String'],
   adminArea?: Maybe<AdminAreaNode>,
+  representatives: IndividualNodeConnection,
   geopoint?: Maybe<Scalars['GeoJSON']>,
   femaleAgeGroup05Count: Scalars['Int'],
   femaleAgeGroup611Count: Scalars['Int'],
@@ -606,12 +607,21 @@ export type HouseholdNode = Node & {
   lastRegistrationDate: Scalars['Date'],
   headOfHousehold: IndividualNode,
   unicefId: Scalars['String'],
+  individualsAndRoles: Array<IndividualRoleInHouseholdNode>,
   individuals: IndividualNodeConnection,
   paymentRecords: PaymentRecordNodeConnection,
   targetPopulations: TargetPopulationNodeConnection,
   selections: Array<HouseholdSelection>,
   totalCashReceived?: Maybe<Scalars['Decimal']>,
   selection?: Maybe<HouseholdSelection>,
+};
+
+
+export type HouseholdNodeRepresentativesArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -1116,7 +1126,6 @@ export type ImportedIndividualNode = Node & {
   middleName: Scalars['String'],
   familyName: Scalars['String'],
   relationship?: Maybe<Scalars['String']>,
-  role?: Maybe<Scalars['String']>,
   sex: ImportedIndividualSex,
   birthDate: Scalars['Date'],
   estimatedBirthDate?: Maybe<Scalars['Boolean']>,
@@ -1132,6 +1141,7 @@ export type ImportedIndividualNode = Node & {
   flexFields: Scalars['JSONString'],
   importedhousehold?: Maybe<ImportedHouseholdNode>,
   documents: ImportedDocumentNodeConnection,
+  role?: Maybe<Scalars['String']>,
 };
 
 
@@ -1188,15 +1198,14 @@ export type IndividualNode = Node & {
   givenName: Scalars['String'],
   middleName: Scalars['String'],
   familyName: Scalars['String'],
-  relationship?: Maybe<IndividualRelationship>,
-  role?: Maybe<Scalars['String']>,
   sex: IndividualSex,
   birthDate: Scalars['Date'],
   estimatedBirthDate?: Maybe<Scalars['Boolean']>,
   maritalStatus: IndividualMaritalStatus,
   phoneNo: Scalars['String'],
   phoneNoAlternative: Scalars['String'],
-  household: HouseholdNode,
+  relationship?: Maybe<IndividualRelationship>,
+  household?: Maybe<HouseholdNode>,
   registrationDataImport: RegistrationDataImportNode,
   disability: Scalars['Boolean'],
   workStatus?: Maybe<IndividualWorkStatus>,
@@ -1206,8 +1215,19 @@ export type IndividualNode = Node & {
   enrolledInNutritionProgramme: Scalars['Boolean'],
   administrationOfRutf: Scalars['Boolean'],
   unicefId: Scalars['String'],
+  representedHouseholds: HouseholdNodeConnection,
   headingHousehold?: Maybe<HouseholdNode>,
   documents: DocumentNodeConnection,
+  householdsAndRoles: Array<IndividualRoleInHouseholdNode>,
+  role?: Maybe<Scalars['String']>,
+};
+
+
+export type IndividualNodeRepresentedHouseholdsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -1247,6 +1267,23 @@ export enum IndividualRelationship {
   GranddaugherGrandson = 'GRANDDAUGHER_GRANDSON',
   NephewNiece = 'NEPHEW_NIECE',
   Cousin = 'COUSIN'
+}
+
+export type IndividualRoleInHouseholdNode = {
+   __typename?: 'IndividualRoleInHouseholdNode',
+  id: Scalars['UUID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  lastSyncAt?: Maybe<Scalars['DateTime']>,
+  individual: IndividualNode,
+  household: HouseholdNode,
+  role?: Maybe<IndividualRoleInHouseholdRole>,
+};
+
+export enum IndividualRoleInHouseholdRole {
+  Primary = 'PRIMARY',
+  Alternate = 'ALTERNATE',
+  NoRole = 'NO_ROLE'
 }
 
 export enum IndividualSex {
@@ -2745,7 +2782,7 @@ export type XlsxRowErrorNode = {
 
 export type HouseholdMinimalFragment = (
   { __typename?: 'HouseholdNode' }
-  & Pick<HouseholdNode, 'id' | 'createdAt' | 'residenceStatus' | 'size' | 'totalCashReceived' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'address'>
+  & Pick<HouseholdNode, 'id' | 'createdAt' | 'residenceStatus' | 'size' | 'totalCashReceived' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'status' | 'address'>
   & { headOfHousehold: (
     { __typename?: 'IndividualNode' }
     & Pick<IndividualNode, 'id' | 'fullName'>
@@ -2781,6 +2818,13 @@ export type HouseholdDetailedFragment = (
         & Pick<ProgramNode, 'name'>
       )> }
     )>> }
+  ), registrationDataImport: (
+    { __typename?: 'RegistrationDataImportNode' }
+    & Pick<RegistrationDataImportNode, 'name' | 'dataSource' | 'importDate'>
+    & { importedBy: (
+      { __typename?: 'UserNode' }
+      & Pick<UserNode, 'firstName' | 'lastName' | 'email' | 'username'>
+    ) }
   ), paymentRecords: (
     { __typename?: 'PaymentRecordNodeConnection' }
     & { edges: Array<Maybe<(
@@ -2804,7 +2848,7 @@ export type HouseholdDetailedFragment = (
 
 export type IndividualMinimalFragment = (
   { __typename?: 'IndividualNode' }
-  & Pick<IndividualNode, 'id' | 'createdAt' | 'updatedAt' | 'fullName' | 'sex' | 'birthDate' | 'maritalStatus' | 'phoneNo' | 'role'>
+  & Pick<IndividualNode, 'id' | 'createdAt' | 'updatedAt' | 'fullName' | 'sex' | 'birthDate' | 'maritalStatus' | 'phoneNo' | 'role' | 'status'>
   & { documents: (
     { __typename?: 'DocumentNodeConnection' }
     & { edges: Array<Maybe<(
@@ -2818,27 +2862,27 @@ export type IndividualMinimalFragment = (
         ) }
       )> }
     )>> }
-  ), household: (
+  ), household: Maybe<(
     { __typename?: 'HouseholdNode' }
-    & Pick<HouseholdNode, 'id'>
+    & Pick<HouseholdNode, 'id' | 'status'>
     & { adminArea: Maybe<(
       { __typename?: 'AdminAreaNode' }
       & Pick<AdminAreaNode, 'id' | 'title'>
     )> }
-  ) }
+  )> }
 );
 
 export type IndividualDetailedFragment = (
   { __typename?: 'IndividualNode' }
-  & Pick<IndividualNode, 'givenName' | 'familyName' | 'estimatedBirthDate' | 'enrolledInNutritionProgramme' | 'administrationOfRutf' | 'flexFields'>
-  & { household: (
+  & Pick<IndividualNode, 'givenName' | 'familyName' | 'estimatedBirthDate' | 'status' | 'enrolledInNutritionProgramme' | 'administrationOfRutf' | 'flexFields'>
+  & { household: Maybe<(
     { __typename?: 'HouseholdNode' }
-    & Pick<HouseholdNode, 'id' | 'address' | 'countryOrigin'>
+    & Pick<HouseholdNode, 'status' | 'id' | 'address' | 'countryOrigin'>
     & { adminArea: Maybe<(
       { __typename?: 'AdminAreaNode' }
       & Pick<AdminAreaNode, 'id' | 'title' | 'level'>
     )> }
-  ), headingHousehold: Maybe<(
+  )>, headingHousehold: Maybe<(
     { __typename?: 'HouseholdNode' }
     & Pick<HouseholdNode, 'id'>
     & { headOfHousehold: (
@@ -3569,7 +3613,11 @@ export type AllTargetPopulationsQuery = (
 
 export type AllUsersQueryVariables = {
   fullName?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
 };
 
 
@@ -3577,14 +3625,16 @@ export type AllUsersQuery = (
   { __typename?: 'Query' }
   & { allUsers: Maybe<(
     { __typename?: 'UserNodeConnection' }
+    & Pick<UserNodeConnection, 'totalCount' | 'edgeCount'>
     & { pageInfo: (
       { __typename?: 'PageInfo' }
       & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'endCursor' | 'startCursor'>
     ), edges: Array<Maybe<(
       { __typename?: 'UserNodeEdge' }
+      & Pick<UserNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'UserNode' }
-        & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
+        & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'username' | 'email' | 'isActive' | 'lastLogin'>
       )> }
     )>> }
   )> }
@@ -4321,6 +4371,7 @@ export const HouseholdMinimalFragmentDoc = gql`
   totalCashReceived
   firstRegistrationDate
   lastRegistrationDate
+  status
   headOfHousehold {
     id
     fullName
@@ -4346,6 +4397,7 @@ export const IndividualMinimalFragmentDoc = gql`
   maritalStatus
   phoneNo
   role
+  status
   documents {
     edges {
       node {
@@ -4360,6 +4412,7 @@ export const IndividualMinimalFragmentDoc = gql`
   }
   household {
     id
+    status
     adminArea {
       id
       title
@@ -4386,6 +4439,17 @@ export const HouseholdDetailedFragmentDoc = gql`
       node {
         name
       }
+    }
+  }
+  registrationDataImport {
+    name
+    dataSource
+    importDate
+    importedBy {
+      firstName
+      lastName
+      email
+      username
     }
   }
   paymentRecords {
@@ -4416,9 +4480,11 @@ export const IndividualDetailedFragmentDoc = gql`
   givenName
   familyName
   estimatedBirthDate
+  status
   enrolledInNutritionProgramme
   administrationOfRutf
   household {
+    status
     id
     address
     countryOrigin
@@ -6226,8 +6292,8 @@ export type AllTargetPopulationsQueryHookResult = ReturnType<typeof useAllTarget
 export type AllTargetPopulationsLazyQueryHookResult = ReturnType<typeof useAllTargetPopulationsLazyQuery>;
 export type AllTargetPopulationsQueryResult = ApolloReactCommon.QueryResult<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>;
 export const AllUsersDocument = gql`
-    query AllUsers($fullName: String, $first: Int) {
-  allUsers(fullName: $fullName, first: $first) {
+    query AllUsers($fullName: String, $first: Int, $last: Int, $after: String, $before: String, $orderBy: String) {
+  allUsers(fullName: $fullName, first: $first, last: $last, after: $after, before: $before, orderBy: $orderBy) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -6239,9 +6305,15 @@ export const AllUsersDocument = gql`
         id
         firstName
         lastName
+        username
         email
+        isActive
+        lastLogin
       }
+      cursor
     }
+    totalCount
+    edgeCount
   }
 }
     `;
@@ -6277,6 +6349,10 @@ export function withAllUsers<TProps, TChildProps = {}>(operationOptions?: Apollo
  *   variables: {
  *      fullName: // value for 'fullName'
  *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      orderBy: // value for 'orderBy'
  *   },
  * });
  */
@@ -8265,17 +8341,16 @@ export type ResolversTypes = {
   LogEntryObject: ResolverTypeWrapper<LogEntryObject>,
   LogEntryAction: LogEntryAction,
   JSONLazyString: ResolverTypeWrapper<Scalars['JSONLazyString']>,
-  GeoJSON: ResolverTypeWrapper<Scalars['GeoJSON']>,
-  RegistrationDataImportNode: ResolverTypeWrapper<RegistrationDataImportNode>,
-  RegistrationDataImportStatus: RegistrationDataImportStatus,
-  RegistrationDataImportDataSource: RegistrationDataImportDataSource,
   IndividualNodeConnection: ResolverTypeWrapper<IndividualNodeConnection>,
   IndividualNodeEdge: ResolverTypeWrapper<IndividualNodeEdge>,
   IndividualNode: ResolverTypeWrapper<IndividualNode>,
   IndividualStatus: IndividualStatus,
-  IndividualRelationship: IndividualRelationship,
   IndividualSex: IndividualSex,
   IndividualMaritalStatus: IndividualMaritalStatus,
+  IndividualRelationship: IndividualRelationship,
+  RegistrationDataImportNode: ResolverTypeWrapper<RegistrationDataImportNode>,
+  RegistrationDataImportStatus: RegistrationDataImportStatus,
+  RegistrationDataImportDataSource: RegistrationDataImportDataSource,
   IndividualWorkStatus: IndividualWorkStatus,
   FlexFieldsScalar: ResolverTypeWrapper<Scalars['FlexFieldsScalar']>,
   DocumentNodeConnection: ResolverTypeWrapper<DocumentNodeConnection>,
@@ -8283,6 +8358,9 @@ export type ResolversTypes = {
   DocumentNode: ResolverTypeWrapper<DocumentNode>,
   DocumentTypeNode: ResolverTypeWrapper<DocumentTypeNode>,
   DocumentTypeType: DocumentTypeType,
+  IndividualRoleInHouseholdNode: ResolverTypeWrapper<IndividualRoleInHouseholdNode>,
+  IndividualRoleInHouseholdRole: IndividualRoleInHouseholdRole,
+  GeoJSON: ResolverTypeWrapper<Scalars['GeoJSON']>,
   HouseholdSelection: ResolverTypeWrapper<HouseholdSelection>,
   TargetingCriteriaNode: ResolverTypeWrapper<TargetingCriteriaNode>,
   TargetingCriteriaRuleNode: ResolverTypeWrapper<TargetingCriteriaRuleNode>,
@@ -8438,17 +8516,16 @@ export type ResolversParentTypes = {
   LogEntryObject: LogEntryObject,
   LogEntryAction: LogEntryAction,
   JSONLazyString: Scalars['JSONLazyString'],
-  GeoJSON: Scalars['GeoJSON'],
-  RegistrationDataImportNode: RegistrationDataImportNode,
-  RegistrationDataImportStatus: RegistrationDataImportStatus,
-  RegistrationDataImportDataSource: RegistrationDataImportDataSource,
   IndividualNodeConnection: IndividualNodeConnection,
   IndividualNodeEdge: IndividualNodeEdge,
   IndividualNode: IndividualNode,
   IndividualStatus: IndividualStatus,
-  IndividualRelationship: IndividualRelationship,
   IndividualSex: IndividualSex,
   IndividualMaritalStatus: IndividualMaritalStatus,
+  IndividualRelationship: IndividualRelationship,
+  RegistrationDataImportNode: RegistrationDataImportNode,
+  RegistrationDataImportStatus: RegistrationDataImportStatus,
+  RegistrationDataImportDataSource: RegistrationDataImportDataSource,
   IndividualWorkStatus: IndividualWorkStatus,
   FlexFieldsScalar: Scalars['FlexFieldsScalar'],
   DocumentNodeConnection: DocumentNodeConnection,
@@ -8456,6 +8533,9 @@ export type ResolversParentTypes = {
   DocumentNode: DocumentNode,
   DocumentTypeNode: DocumentTypeNode,
   DocumentTypeType: DocumentTypeType,
+  IndividualRoleInHouseholdNode: IndividualRoleInHouseholdNode,
+  IndividualRoleInHouseholdRole: IndividualRoleInHouseholdRole,
+  GeoJSON: Scalars['GeoJSON'],
   HouseholdSelection: HouseholdSelection,
   TargetingCriteriaNode: TargetingCriteriaNode,
   TargetingCriteriaRuleNode: TargetingCriteriaRuleNode,
@@ -8858,6 +8938,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   size?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   address?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   adminArea?: Resolver<Maybe<ResolversTypes['AdminAreaNode']>, ParentType, ContextType>,
+  representatives?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, HouseholdNodeRepresentativesArgs>,
   geopoint?: Resolver<Maybe<ResolversTypes['GeoJSON']>, ParentType, ContextType>,
   femaleAgeGroup05Count?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   femaleAgeGroup611Count?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
@@ -8884,6 +8965,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   lastRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   headOfHousehold?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   unicefId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  individualsAndRoles?: Resolver<Array<ResolversTypes['IndividualRoleInHouseholdNode']>, ParentType, ContextType>,
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, HouseholdNodeIndividualsArgs>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, HouseholdNodePaymentRecordsArgs>,
   targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, HouseholdNodeTargetPopulationsArgs>,
@@ -9020,7 +9102,6 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   middleName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   familyName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   relationship?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  role?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   sex?: Resolver<ResolversTypes['ImportedIndividualSex'], ParentType, ContextType>,
   birthDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   estimatedBirthDate?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
@@ -9036,6 +9117,7 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   flexFields?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   importedhousehold?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['ImportedDocumentNodeConnection'], ParentType, ContextType, ImportedIndividualNodeDocumentsArgs>,
+  role?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type ImportedIndividualNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedIndividualNodeConnection'] = ResolversParentTypes['ImportedIndividualNodeConnection']> = {
@@ -9062,15 +9144,14 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   givenName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   middleName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   familyName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  relationship?: Resolver<Maybe<ResolversTypes['IndividualRelationship']>, ParentType, ContextType>,
-  role?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   sex?: Resolver<ResolversTypes['IndividualSex'], ParentType, ContextType>,
   birthDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   estimatedBirthDate?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   maritalStatus?: Resolver<ResolversTypes['IndividualMaritalStatus'], ParentType, ContextType>,
   phoneNo?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   phoneNoAlternative?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  household?: Resolver<ResolversTypes['HouseholdNode'], ParentType, ContextType>,
+  relationship?: Resolver<Maybe<ResolversTypes['IndividualRelationship']>, ParentType, ContextType>,
+  household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   registrationDataImport?: Resolver<ResolversTypes['RegistrationDataImportNode'], ParentType, ContextType>,
   disability?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   workStatus?: Resolver<Maybe<ResolversTypes['IndividualWorkStatus']>, ParentType, ContextType>,
@@ -9080,8 +9161,11 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   enrolledInNutritionProgramme?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   administrationOfRutf?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   unicefId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  representedHouseholds?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, IndividualNodeRepresentedHouseholdsArgs>,
   headingHousehold?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, IndividualNodeDocumentsArgs>,
+  householdsAndRoles?: Resolver<Array<ResolversTypes['IndividualRoleInHouseholdNode']>, ParentType, ContextType>,
+  role?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type IndividualNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualNodeConnection'] = ResolversParentTypes['IndividualNodeConnection']> = {
@@ -9094,6 +9178,16 @@ export type IndividualNodeConnectionResolvers<ContextType = any, ParentType exte
 export type IndividualNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualNodeEdge'] = ResolversParentTypes['IndividualNodeEdge']> = {
   node?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type IndividualRoleInHouseholdNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualRoleInHouseholdNode'] = ResolversParentTypes['IndividualRoleInHouseholdNode']> = {
+  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  individual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
+  household?: Resolver<ResolversTypes['HouseholdNode'], ParentType, ContextType>,
+  role?: Resolver<Maybe<ResolversTypes['IndividualRoleInHouseholdRole']>, ParentType, ContextType>,
 };
 
 export interface JsonLazyStringScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['JSONLazyString'], any> {
@@ -9187,7 +9281,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'PaymentRecordNode' | 'BusinessAreaNode' | 'UserNode' | 'TargetPopulationNode' | 'HouseholdNode' | 'AdminAreaNode' | 'ProgramNode' | 'CashPlanNode' | 'CashPlanPaymentVerificationNode' | 'PaymentVerificationNode' | 'RegistrationDataImportNode' | 'IndividualNode' | 'DocumentNode' | 'ServiceProviderNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'ImportedDocumentNode', ParentType, ContextType>,
+  __resolveType: TypeResolveFn<'PaymentRecordNode' | 'BusinessAreaNode' | 'UserNode' | 'TargetPopulationNode' | 'HouseholdNode' | 'AdminAreaNode' | 'ProgramNode' | 'CashPlanNode' | 'CashPlanPaymentVerificationNode' | 'PaymentVerificationNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'DocumentNode' | 'ServiceProviderNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'ImportedDocumentNode', ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
 };
 
@@ -9705,6 +9799,7 @@ export type Resolvers<ContextType = any> = {
   IndividualNode?: IndividualNodeResolvers<ContextType>,
   IndividualNodeConnection?: IndividualNodeConnectionResolvers<ContextType>,
   IndividualNodeEdge?: IndividualNodeEdgeResolvers<ContextType>,
+  IndividualRoleInHouseholdNode?: IndividualRoleInHouseholdNodeResolvers<ContextType>,
   JSONLazyString?: GraphQLScalarType,
   JSONString?: GraphQLScalarType,
   KoboAssetObject?: KoboAssetObjectResolvers<ContextType>,

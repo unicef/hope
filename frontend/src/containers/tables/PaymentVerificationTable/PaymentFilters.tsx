@@ -151,7 +151,12 @@ export function PaymentFilters({
             margin='dense'
             label='Start Date'
             autoOk
-            onChange={(date) => onFilterChange({ ...filter, startDate: moment(date).toISOString() })}
+            onChange={(date) =>
+              onFilterChange({
+                ...filter,
+                startDate: moment(date).toISOString(),
+              })
+            }
             value={filter.startDate || null}
             format='DD/MM/YYYY'
             InputAdornmentProps={{ position: 'end' }}
@@ -165,7 +170,9 @@ export function PaymentFilters({
             margin='dense'
             label='End Date'
             autoOk
-            onChange={(date) => onFilterChange({ ...filter, endDate: moment(date).toISOString() })}
+            onChange={(date) =>
+              onFilterChange({ ...filter, endDate: moment(date).toISOString() })
+            }
             value={filter.endDate || null}
             format='DD/MM/YYYY'
             InputAdornmentProps={{ position: 'end' }}

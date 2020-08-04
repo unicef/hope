@@ -9,7 +9,7 @@ from django.core.validators import (
     MaxLengthValidator,
 )
 from django.db import models
-from django.db.models import Sum
+from django.db.models import Sum, Prefetch
 from django.utils.translation import ugettext_lazy as _
 from django_countries.fields import CountryField
 from model_utils import Choices
@@ -53,24 +53,42 @@ DISABILITY_CHOICE = (
         ),
     ),
 )
+NON_BENEFICIARY = "NON_BENEFICIARY"
+HEAD = "HEAD"
+SON_DAUGHTER = "SON_DAUGHTER"
+WIFE_HUSBAND = "WIFE_HUSBAND"
+BROTHER_SISTER = "BROTHER_SISTER"
+MOTHER_FATHER = "MOTHER_FATHER"
+AUNT_UNCLE = "AUNT_UNCLE"
+GRANDMOTHER_GRANDFATHER = "GRANDMOTHER_GRANDFATHER"
+MOTHERINLAW_FATHERINLAW = "MOTHERINLAW_FATHERINLAW"
+DAUGHTERINLAW_SONINLAW = "DAUGHTERINLAW_SONINLAW"
+SISTERINLAW_BROTHERINLAW = "SISTERINLAW_BROTHERINLAW"
+GRANDDAUGHER_GRANDSON = "GRANDDAUGHER_GRANDSON"
+NEPHEW_NIECE = "NEPHEW_NIECE"
+COUSIN = "COUSIN"
 RELATIONSHIP_CHOICE = (
-    ("NON_BENEFICIARY", "Not a Family Member. Can only act as a recipient.",),
-    ("HEAD", "Head of household (self)"),
-    ("SON_DAUGHTER", "Son / Daughter"),
-    ("WIFE_HUSBAND", "Wife / Husband"),
-    ("BROTHER_SISTER", "Brother / Sister"),
-    ("MOTHER_FATHER", "Mother / Father"),
-    ("AUNT_UNCLE", "Aunt / Uncle"),
-    ("GRANDMOTHER_GRANDFATHER", "Grandmother / Grandfather"),
-    ("MOTHERINLAW_FATHERINLAW", "Mother-in-law / Father-in-law"),
-    ("DAUGHTERINLAW_SONINLAW", "Daughter-in-law / Son-in-law"),
-    ("SISTERINLAW_BROTHERINLAW", "Sister-in-law / Brother-in-law"),
-    ("GRANDDAUGHER_GRANDSON", "Granddaughter / Grandson"),
-    ("NEPHEW_NIECE", "Nephew / Niece"),
-    ("COUSIN", "Cousin"),
+    (NON_BENEFICIARY, "Not a Family Member. Can only act as a recipient.",),
+    (HEAD, "Head of household (self)"),
+    (SON_DAUGHTER, "Son / Daughter"),
+    (WIFE_HUSBAND, "Wife / Husband"),
+    (BROTHER_SISTER, "Brother / Sister"),
+    (MOTHER_FATHER, "Mother / Father"),
+    (AUNT_UNCLE, "Aunt / Uncle"),
+    (GRANDMOTHER_GRANDFATHER, "Grandmother / Grandfather"),
+    (MOTHERINLAW_FATHERINLAW, "Mother-in-law / Father-in-law"),
+    (DAUGHTERINLAW_SONINLAW, "Daughter-in-law / Son-in-law"),
+    (SISTERINLAW_BROTHERINLAW, "Sister-in-law / Brother-in-law"),
+    (GRANDDAUGHER_GRANDSON, "Granddaughter / Grandson"),
+    (NEPHEW_NIECE, "Nephew / Niece"),
+    (COUSIN, "Cousin"),
 )
 YES = "YES"
 NO = "NO"
+YES_NO_CHOICE = (
+    (YES, _("Yes")),
+    (NO, _("No")),
+)
 NOT_PROVIDED = "NOT_PROVIDED"
 WORK_STATUS_CHOICE = (
     (YES, _("Yes")),
@@ -128,6 +146,16 @@ class Household(TimeStampedUUIDModel, AbstractSyncable):
     admin_area = models.ForeignKey(
         "core.AdminArea", null=True, on_delete=models.SET_NULL
     )
+
+    representatives = models.ManyToManyField(
+        to="household.Individual",
+        through="household.IndividualRoleInHousehold",
+        help_text="""This is only used to track collector (primary or secondary) of a household.
+            They may still be a HOH of this household or any other household.
+            Through model will contain the role (ROLE_CHOICE) they are connected with on.""",
+        related_name="represented_households",
+    )
+
     geopoint = PointField(blank=True, null=True)
     female_age_group_0_5_count = models.PositiveIntegerField(default=0)
     female_age_group_6_11_count = models.PositiveIntegerField(default=0)
@@ -223,9 +251,6 @@ class Document(TimeStampedUUIDModel):
             if not re.match(validator.regex, self.document_number):
                 raise ValidationError("Document number is not validating")
 
-    class Meta:
-        unique_together = ("type", "document_number")
-
 
 class Agency(models.Model):
     type = models.CharField(max_length=100, unique=True)
@@ -264,6 +289,23 @@ class IndividualIdentity(models.Model):
         return f"{self.agency} {self.individual} {self.number}"
 
 
+class IndividualRoleInHousehold(TimeStampedUUIDModel, AbstractSyncable):
+    individual = models.ForeignKey(
+        "household.Individual",
+        on_delete=models.CASCADE,
+        related_name="households_and_roles",
+    )
+    household = models.ForeignKey(
+        "household.Household",
+        on_delete=models.CASCADE,
+        related_name="individuals_and_roles",
+    )
+    role = models.CharField(max_length=255, blank=True, choices=ROLE_CHOICE,)
+
+    class Meta:
+        unique_together = ("role", "household")
+
+
 class Individual(TimeStampedUUIDModel, AbstractSyncable):
     status = models.CharField(
         max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default="ACTIVE"
@@ -277,10 +319,6 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
     given_name = models.CharField(max_length=85, blank=True,)
     middle_name = models.CharField(max_length=85, blank=True,)
     family_name = models.CharField(max_length=85, blank=True,)
-    relationship = models.CharField(
-        max_length=255, blank=True, choices=RELATIONSHIP_CHOICE,
-    )
-    role = models.CharField(max_length=255, blank=True, choices=ROLE_CHOICE,)
     sex = models.CharField(max_length=255, choices=SEX_CHOICE,)
     birth_date = models.DateField()
     estimated_birth_date = models.BooleanField(default=False)
@@ -289,8 +327,23 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
     )
     phone_no = PhoneNumberField(blank=True)
     phone_no_alternative = PhoneNumberField(blank=True)
+    relationship = models.CharField(
+        max_length=255,
+        blank=True,
+        choices=RELATIONSHIP_CHOICE,
+        help_text="""This represents the MEMBER relationship. can be blank
+            as well if household is null!""",
+    )
     household = models.ForeignKey(
-        "Household", related_name="individuals", on_delete=models.CASCADE,
+        "Household",
+        related_name="individuals",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        help_text="""This represents the household this person is a MEMBER,
+            and if null then relationship is NON_BENEFICIARY and that
+            simply means they are a representative of one or more households
+            and not a member of one.""",
     )
     registration_data_import = models.ForeignKey(
         "registration_data.RegistrationDataImport",
