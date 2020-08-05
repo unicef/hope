@@ -25,7 +25,6 @@ import {
   useAllAdminAreasQuery,
 } from '../../__generated__/graphql';
 import { FormikMultiSelectField } from '../../shared/Formik/FormikMultiSelectField';
-import { AdminAreasAutocomplete } from '../population/AdminAreaAutocomplete';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 
@@ -89,6 +88,13 @@ export function NewPaymentVerificationDialog({
           verificationChannel: values.verificationChannel,
           rapidProArguments: {
             flowId: values.rapidProFlow,
+          },
+          randomSamplingArguments: {
+            confidenceInterval: values.confidenceInterval,
+            marginOfError: values.marginOfError,
+            excludedAdminAreas: values.excludedAdminAreas,
+            age: values.age,
+            sex: values.sex,
           },
           businessAreaSlug: businessArea,
         },
