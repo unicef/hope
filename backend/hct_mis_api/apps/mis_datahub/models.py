@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import QuerySet
 from django.utils.translation import ugettext_lazy as _
 
 from household.models import (
@@ -10,6 +11,30 @@ from household.models import (
     IDENTIFICATION_TYPE_CHOICE,
 )
 from utils.models import AbstractSession
+
+
+class SoftDeletableQuerySetMixin:
+    def delete(self):
+        self.update(active=False)
+
+
+class SoftDeletableQuerySet(SoftDeletableQuerySetMixin, QuerySet):
+    pass
+
+
+class SoftDeletableManagerMixin:
+    _queryset_class = SoftDeletableQuerySet
+
+    def get_queryset(self):
+        kwargs = {'model': self.model, 'using': self._db}
+        if hasattr(self, '_hints'):
+            kwargs['hints'] = self._hints
+
+        return self._queryset_class(**kwargs).filter(active=True)
+
+
+class SoftDeletableManager(SoftDeletableManagerMixin, models.Manager):
+    pass
 
 
 class Session(AbstractSession):
@@ -105,6 +130,10 @@ class IndividualRoleInHousehold(SessionModel):
     individual_mis_id = models.UUIDField()
     household_mis_id = models.UUIDField()
     role = models.CharField(max_length=255, blank=True, choices=ROLE_CHOICE,)
+    active = models.BooleanField(default=True)
+
+    objects = SoftDeletableManager()
+    all_objects = models.Manager()
 
     class Meta:
         unique_together = ("role", "household_mis_id", "session")
