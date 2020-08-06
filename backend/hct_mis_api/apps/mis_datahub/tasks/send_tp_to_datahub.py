@@ -203,7 +203,7 @@ class SendTPToDatahubTask:
         if program.individual_data_needed:
             individuals = household.individuals.all()
             for individual in individuals:
-                if self.should_send_individual(individual):
+                if self.should_send_individual(individual, household):
                     (
                         dh_individual,
                         dh_individual_documents,
@@ -248,13 +248,13 @@ class SendTPToDatahubTask:
             documents_to_create,
         )
 
-    def should_send_individual(self, individual):
+    def should_send_individual(self, individual, household):
         is_synced = (
             individual.last_sync_at is None
             or individual.last_sync_at > individual.updated_at
         )
         is_allowed_to_share = (
-            individual.household.business_area.has_data_sharing_agreement
+            household.business_area.has_data_sharing_agreement
         )
         return is_synced and is_allowed_to_share
 
