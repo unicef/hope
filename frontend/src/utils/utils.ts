@@ -51,6 +51,25 @@ export function programStatusToColor(
       return theme.hctPalette.oragne;
   }
 }
+export function maritalStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  switch (status) {
+    case 'SINGLE':
+      return theme.hctPalette.green;
+    case 'MARRIED':
+      return theme.hctPalette.oragne;
+    case 'WIDOW':
+      return theme.hctPalette.gray;
+    case 'DIVORCED':
+      return theme.hctPalette.gray;
+    case 'SEPARATED':
+      return theme.hctPalette.gray;
+    default:
+      return theme.hctPalette.gray;
+  }
+}
 export function populationStatusToColor(
   theme: typeof themeObj,
   status: string,
