@@ -100,6 +100,16 @@ export function HouseholdDetails({
               </div>
             </LabelizedField>
           </Grid>
+          <Grid item xs={4}>
+            <LabelizedField label='Admin 1'>
+              <div>{houseHold.address || '-'}</div>
+            </LabelizedField>
+          </Grid>
+          <Grid item xs={4}>
+            <LabelizedField label='Admin 2'>
+              <div>{houseHold.adminArea?.title || '-'}</div>
+            </LabelizedField>
+          </Grid>
         </Grid>
       </Overview>
     </Container>
