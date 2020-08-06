@@ -77,29 +77,40 @@ export function NewPaymentVerificationDialog({
   });
 
   const submit = async (values): Promise<void> => {
+    console.log(values);
     const { errors } = await mutate({
       variables: {
         input: {
           cashPlanId,
           sampling: selectedTab === 0 ? 'FULL' : 'RANDOM',
-          fullListArguments: {
-            excludedAdminAreas: values.excludedAdminAreas,
-          },
+          fullListArguments:
+            selectedTab === 0
+              ? {
+                  excludedAdminAreas: values.excludedAdminAreas,
+                }
+              : null,
           verificationChannel: values.verificationChannel,
-          rapidProArguments: {
-            flowId: values.rapidProFlow,
-          },
-          randomSamplingArguments: {
-            confidenceInterval: values.confidenceInterval,
-            marginOfError: values.marginOfError,
-            excludedAdminAreas: values.excludedAdminAreas,
-            age: values.age,
-            sex: values.sex,
-          },
+          rapidProArguments:
+            values.verificationChannel === 'RAPIDPRO'
+              ? {
+                  flowId: values.rapidProFlow,
+                }
+              : null,
+          randomSamplingArguments:
+            selectedTab === 1
+              ? {
+                  confidenceInterval: values.confidenceInterval,
+                  marginOfError: values.marginOfError,
+                  excludedAdminAreas: values.excludedAdminAreas,
+                  age: values.age,
+                  sex: values.sex,
+                }
+              : null,
           businessAreaSlug: businessArea,
         },
       },
     });
+    setOpen(false);
     console.log(errors);
 
     if (errors) {
@@ -266,6 +277,15 @@ export function NewPaymentVerificationDialog({
                       ]}
                       component={FormikRadioGroup}
                     />
+                    {values.verificationChannel === 'RAPIDPRO' && (
+                      <Field
+                        name='rapidProFlow'
+                        label='RapidPro Flow'
+                        style={{ width: '90%' }}
+                        choices={rapidProFlows.allRapidProFlows}
+                        component={FormikSelectField}
+                      />
+                    )}
                   </Box>
                 </TabPanel>
               </DialogContainer>
