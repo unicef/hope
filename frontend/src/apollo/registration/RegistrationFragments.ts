@@ -72,6 +72,7 @@ export const importedIndividualDetailed = gql`
     familyName
     middleName
     estimatedBirthDate
+    maritalStatus
 
     household {
       id
