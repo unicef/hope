@@ -9,15 +9,14 @@ import {
   Tab,
   Typography,
   Box,
+  Grid,
 } from '@material-ui/core';
-import CheckRoundedIcon from '@material-ui/icons/CheckRounded';
 
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
 import { TabPanel } from '../TabPanel';
 import { FormikSliderField } from '../../shared/Formik/FormikSliderField';
-import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
 import {
   useCreateCashPlanPaymentVerificationMutation,
@@ -27,6 +26,7 @@ import {
 import { FormikMultiSelectField } from '../../shared/Formik/FormikMultiSelectField';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
+import { FormikTextField } from '../../shared/Formik/FormikTextField';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -99,11 +99,11 @@ export function NewPaymentVerificationDialog({
           randomSamplingArguments:
             selectedTab === 1
               ? {
-                  confidenceInterval: values.confidenceInterval,
-                  marginOfError: values.marginOfError,
+                  confidenceInterval: values.confidenceInterval * 0.01,
+                  marginOfError: values.marginOfError * 0.01,
                   excludedAdminAreas: values.excludedAdminAreas,
-                  age: values.age,
-                  sex: values.sex,
+                  age: { min: values.filterAgeMin, max: values.filterAgeMax },
+                  sex: values.filterSex,
                 }
               : null,
           businessAreaSlug: businessArea,
@@ -130,9 +130,9 @@ export function NewPaymentVerificationDialog({
   const initialValues = {
     confidenceInterval: 0,
     marginOfError: 0,
-    admin: false,
-    age: true,
-    sex: false,
+    filterAgeMin: null,
+    filterAgeMax: null,
+    filterSex: null,
     excludedAdminAreas: [],
     verificationChannel: null,
     rapidProFlow: '',
@@ -224,40 +224,57 @@ export function NewPaymentVerificationDialog({
                       name='confidenceInterval'
                       label='Confidence Interval'
                       component={FormikSliderField}
+                      suffix='%'
                     />
                     <Field
                       name='marginOfError'
                       label='Margin of Error'
                       component={FormikSliderField}
+                      suffix='%'
                     />
                     <Typography variant='caption'>Cluster Filters</Typography>
-                    <Box display='flex'>
+                    <Box flexDirection='column' display='flex'>
                       <Field
-                        name='admin'
-                        label='Admin'
-                        color='primary'
-                        component={FormikCheckboxField}
+                        name='excludedAdminAreas'
+                        choices={mappedAdminAreas}
+                        variant='filled'
+                        label='Filter Out Admin Areas'
+                        component={FormikMultiSelectField}
                       />
-                      <Field
-                        name='age'
-                        label='Age'
-                        color='primary'
-                        component={FormikCheckboxField}
-                      />
-                      <Field
-                        name='sex'
-                        label='Sex'
-                        color='primary'
-                        component={FormikCheckboxField}
-                      />
+                      <Grid container>
+                        <Grid item xs={4}>
+                          <Field
+                            name='filterAgeMin'
+                            label='Age Min'
+                            type='number'
+                            color='primary'
+                            component={FormikTextField}
+                          />
+                        </Grid>
+                        <Grid item xs={4}>
+                          <Field
+                            name='filterAgeMax'
+                            label='Age Max'
+                            type='number'
+                            color='primary'
+                            component={FormikTextField}
+                          />
+                        </Grid>
+                        <Grid item xs={5}>
+                          <Field
+                            name='filterSex'
+                            label='Sex'
+                            color='primary'
+                            choices={[
+                              { value: 'FEMALE', name: 'Female' },
+                              { value: 'MALE', name: 'Male' },
+                            ]}
+                            component={FormikSelectField}
+                          />
+                        </Grid>
+                      </Grid>
                     </Box>
-                    <Field
-                      name='filterAdminAreas'
-                      choices={mappedAdminAreas}
-                      variant='filled'
-                      label='Filter Out Admin Areas'
-                      component={FormikMultiSelectField}
-                    />
+
                     <Box
                       pb={3}
                       pt={3}
