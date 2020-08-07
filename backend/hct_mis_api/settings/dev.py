@@ -38,4 +38,7 @@ ELASTICSEARCH_DSL = {
     'default': {
         'hosts': 'elasticsearch:9200'
     },
+    'test': {
+        'hosts': 'elasticsearch_test:9200'
+    },
 }

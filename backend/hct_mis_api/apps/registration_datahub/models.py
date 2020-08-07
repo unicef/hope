@@ -132,6 +132,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
     )
     first_registration_date = models.DateField()
     last_registration_date = models.DateField()
+    possible_duplicate_flag = models.BooleanField(default=False)
     flex_fields = JSONField(default=dict)
 
     @property
