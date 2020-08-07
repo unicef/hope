@@ -6,58 +6,21 @@ from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from graphene_file_upload.scalars import Upload
 from scipy.special import ndtri
 
 from core.filters import filter_age
 from core.permissions import is_authenticated
 from core.utils import decode_id_string
 from household.models import Individual
+from payment.inputs import CreatePaymentVerificationInput
 from payment.models import CashPlanPaymentVerification, PaymentVerification
 from payment.rapid_pro.api import RapidProAPI
+from payment.utils import get_number_of_samples
 from program.models import CashPlan
 from program.schema import CashPlanNode
 
 
-class FullListArguments(graphene.InputObjectType):
-    excluded_admin_areas = graphene.List(graphene.String)
 
-
-class AgeInput(graphene.InputObjectType):
-    min = graphene.Int()
-    max = graphene.Int()
-
-
-class RandomSamplingArguments(graphene.InputObjectType):
-    confidence_interval = graphene.Float(required=True)
-    margin_of_error = graphene.Float(required=True)
-    excluded_admin_areas = graphene.List(graphene.String)
-    age = AgeInput()
-    sex = graphene.String()
-
-
-class RapidProArguments(graphene.InputObjectType):
-    flow_id = graphene.String(required=True)
-
-
-class XlsxArguments(graphene.InputObjectType):
-    file = Upload(required=True)
-
-
-class ManualArguments(graphene.InputObjectType):
-    pass
-
-
-class CreatePaymentVerificationInput(graphene.InputObjectType):
-    cash_plan_id = graphene.ID(required=True)
-    sampling = graphene.String(required=True)
-    verification_channel = graphene.String(required=True)
-    business_area_slug = graphene.String(required=True)
-    full_list_arguments = FullListArguments()
-    random_sampling_arguments = RandomSamplingArguments()
-    rapid_pro_arguments = RapidProArguments()
-    xlsx_arguments = XlsxArguments()
-    # manual_arguments = ManualArguments()
 
 
 class CreatePaymentVerificationMutation(graphene.Mutation):
@@ -200,7 +163,7 @@ class CreatePaymentVerificationMutation(graphene.Mutation):
             )
         payment_records_sample_count = payment_records.count()
         if sampling == CashPlanPaymentVerification.SAMPLING_RANDOM:
-            payment_records_sample_count = CreatePaymentVerificationMutation.get_number_of_samples(
+            payment_records_sample_count = get_number_of_samples(
                 payment_records_sample_count,
                 confidence_interval,
                 margin_of_error,
@@ -216,24 +179,6 @@ class CreatePaymentVerificationMutation(graphene.Mutation):
             sampling,
         )
 
-    @classmethod
-    def get_number_of_samples(
-        cls, payment_records_sample_count, confidence_interval, margin_of_error
-    ):
-        variable = 0.5
-        z_score = ndtri(confidence_interval + (1 - confidence_interval) / 2)
-        theoretical_sample = (
-            (z_score ** 2) * variable * (1 - variable) / margin_of_error ** 2
-        )
-        actual_sample = ceil(
-            (
-                payment_records_sample_count
-                * theoretical_sample
-                / (theoretical_sample + payment_records_sample_count)
-            )
-            * 1.5
-        )
-        return actual_sample
 
     @classmethod
     def process_verification_method(cls, cash_plan_payment_verification, input):
