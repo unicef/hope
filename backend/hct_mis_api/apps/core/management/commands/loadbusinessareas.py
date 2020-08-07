@@ -7,6 +7,7 @@ from core.models import BusinessArea
 
 logger = logging.getLogger(__name__)
 
+
 class Command(BaseCommand):
     help = "load_business_areas"
 
@@ -49,6 +50,7 @@ class Command(BaseCommand):
                 ).text,
                 region_code=business_area_tag.find("REGION_CODE").text,
                 region_name=business_area_tag.find("REGION_NAME").text,
+                has_data_sharing_agreement=True,
             )
             business_area.save()
         logger.debug(f"Imported business areas from {file}")
