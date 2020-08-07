@@ -79,6 +79,9 @@ class HouseholdFactory(factory.DjangoModelFactory):
         "date_this_year", before_today=True, after_today=False
     )
     flex_fields = factory.LazyAttribute(flex_field_households)
+    business_area = factory.LazyAttribute(
+        lambda o: o.registration_data_import.business_area
+    )
 
 
 class DocumentFactory(factory.DjangoModelFactory):
