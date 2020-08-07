@@ -171,14 +171,13 @@ class SendTPToDatahubTask:
 
         dh_individual.unchr_id = self.get_unhcr_individual_id(individual)
         roles = individual.households_and_roles.all()
-        if roles.exists():
-            for role in roles:
-                dh_mis_models.IndividualRoleInHousehold.objects.get_or_create(
-                    role=role.role,
-                    household_mis_id=dh_household.mis_id,
-                    individual_mis_id=individual.id,
-                    session=dh_session,
-                )
+        for role in roles:
+            dh_mis_models.IndividualRoleInHousehold.objects.get_or_create(
+                role=role.role,
+                household_mis_id=role.household.id,
+                individual_mis_id=role.individual.id,
+                session=dh_session,
+            )
 
         dh_individual.session = dh_session
         return dh_individual
