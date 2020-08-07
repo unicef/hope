@@ -4055,7 +4055,7 @@ export type ImportedIndividualMinimalFragment = (
 
 export type ImportedIndividualDetailedFragment = (
   { __typename?: 'ImportedIndividualNode' }
-  & Pick<ImportedIndividualNode, 'givenName' | 'familyName' | 'middleName' | 'estimatedBirthDate' | 'phoneNo' | 'phoneNoAlternative'>
+  & Pick<ImportedIndividualNode, 'givenName' | 'familyName' | 'middleName' | 'estimatedBirthDate' | 'maritalStatus' | 'phoneNo' | 'phoneNoAlternative'>
   & { household: (
     { __typename?: 'ImportedHouseholdNode' }
     & Pick<ImportedHouseholdNode, 'id' | 'admin1' | 'admin2' | 'address'>
@@ -4456,6 +4456,7 @@ export const ImportedIndividualDetailedFragmentDoc = gql`
   familyName
   middleName
   estimatedBirthDate
+  maritalStatus
   household {
     id
     admin1
