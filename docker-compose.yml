@@ -8,6 +8,7 @@ volumes:
   db_airflow:
   airflow:
   data_es:
+  data_es_test:
 
 services:
   proxy:
@@ -193,3 +194,23 @@ services:
       - data_es:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
+
+  elasticsearch_test:
+    image: unicef/hct-elasticsearch-test
+    build:
+      context: .
+      dockerfile: es/Dockerfile
+    environment:
+      - node.name=es02
+      - cluster.name=es-docker-cluster-test
+      - cluster.initial_master_nodes=es02
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - data_es_test:/usr/share/elasticsearch/data
+    ports:
+      - 9201:9200

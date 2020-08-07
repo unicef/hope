@@ -1,14 +1,16 @@
 import base64
 
 from django.contrib.auth.models import AnonymousUser
-from django.test import RequestFactory
+from django.core.management import call_command
+from django.test import RequestFactory, TestCase
+from elasticsearch_dsl import connections
 from graphene.test import Client
-from snapshottest.django import TestCase
+from snapshottest.django import TestCase as SnapshotTestTestCase
 
 from hct_mis_api.schema import schema
 
 
-class APITestCase(TestCase):
+class APITestCase(SnapshotTestTestCase):
     def setUp(self):
         super().setUp()
         self.client = Client(schema)
@@ -45,3 +47,16 @@ class APITestCase(TestCase):
         if isinstance(files, dict):
             for name, file in files.items():
                 context.FILES[name] = file
+
+
+class BaseElasticSearchTestCase(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        connections.create_connection(
+            hosts=["elasticsearch_test:9200"], timeout=20
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        call_command("search_index", "--delete", "-f")
+        super().tearDownClass()

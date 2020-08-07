@@ -26,9 +26,11 @@ RESIDENCE_STATUS_CHOICE = (
     ("OTHER", _("Other")),
 )
 # INDIVIDUALS
+MALE = "MALE"
+FEMALE = "FEMALE"
 SEX_CHOICE = (
-    ("MALE", _("Male")),
-    ("FEMALE", _("Female")),
+    (MALE, _("Male")),
+    (FEMALE, _("Female")),
 )
 MARITAL_STATUS_CHOICE = (
     ("SINGLE", _("SINGLE")),
