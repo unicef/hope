@@ -230,7 +230,7 @@ class SendTPToDatahubTask:
                 )
             )
             for individual in individuals:
-                if self.should_send_individual(individual):
+                if self.should_send_individual(individual, household):
                     (
                         dh_individual,
                         dh_individual_documents,
