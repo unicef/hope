@@ -9,9 +9,11 @@ import {
   decodeIdString,
   getAgeFromDob,
   sexToCapitalize,
+  maritalStatusToColor,
 } from '../../utils/utils';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { Missing } from '../Missing';
+import { StatusBox } from '../StatusBox';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px
@@ -26,6 +28,10 @@ const Title = styled.div`
 const ContentLink = styled.div`
   text-decoration: underline;
   cursor: pointer;
+`;
+const StatusContainer = styled.div`
+  min-width: 120px;
+  max-width: 200px;
 `;
 
 interface IndividualBioDataProps {
@@ -72,6 +78,24 @@ export function IndividualsBioData({
         <Grid item xs={4}>
           <LabelizedField label='Family Name'>
             <div>{individual.familyName}</div>
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={4}>
+          <LabelizedField label='Marital Status'>
+            <StatusContainer>
+              <StatusBox
+                status={individual.maritalStatus}
+                statusToColor={maritalStatusToColor}
+              />
+            </StatusContainer>
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={4}>
+          <LabelizedField label='Pregnant'>
+            <div>
+              <Missing />
+              {/* <div>{individual.pregnant ? 'YES' : 'NO' || '-'}</div> */}
+            </div>
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
