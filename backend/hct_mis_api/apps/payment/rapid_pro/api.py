@@ -53,10 +53,14 @@ class RapidProAPI:
         urns = [f"tel:{x}" for x in phone_numbers]
         data = {"flow_uuid": flow_uuid, "urns": urns}
         print(data)
+        # TODO TEST sending smses
         # self._handle_post_request(
         #     RapidProAPI.FLOW_STARTS_ENDPOINT,
         #     data,
         # )
+
+    def get_flow_runs(self, flow_run_id):
+        pass
 
     def create_group(self, name):
         print(name)
