@@ -7,16 +7,22 @@ from .models import ImportedIndividual
 
 @registry.register_document
 class ImportedIndividualDocument(Document):
-    given_name = fields.TextField(analyzer=phonetic_analyzer)
-    middle_name = fields.TextField(analyzer=phonetic_analyzer)
-    family_name = fields.TextField(analyzer=phonetic_analyzer)
-    full_name = fields.TextField(analyzer=phonetic_analyzer)
+    id = fields.TextField()
+    # given_name = fields.TextField(analyzer=phonetic_analyzer)
+    # middle_name = fields.TextField(analyzer=phonetic_analyzer)
+    # family_name = fields.TextField(analyzer=phonetic_analyzer)
+    # full_name = fields.TextField(analyzer=phonetic_analyzer)
+    given_name = fields.TextField()
+    middle_name = fields.TextField()
+    family_name = fields.TextField()
+    full_name = fields.TextField()
+    birth_date = fields.TextField()
     phone_no = fields.TextField("phone_no.__str__")
     phone_no_alternative = fields.TextField("phone_no_alternative.__str__")
     household = fields.ObjectField(
         properties={
             "size": fields.IntegerField(),
-            "address": fields.TextField(analyzer=phonetic_analyzer),
+            "address": fields.TextField(),
             "created_at": fields.DateField(),
             "updated_at": fields.DateField(),
             "country_origin": fields.TextField(attr="country_origin.__str__"),
@@ -34,7 +40,6 @@ class ImportedIndividualDocument(Document):
         fields = [
             "relationship",
             "sex",
-            "birth_date",
             "created_at",
             "updated_at",
         ]
