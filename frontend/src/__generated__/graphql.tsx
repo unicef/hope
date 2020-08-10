@@ -552,6 +552,20 @@ export type FullListArguments = {
 };
 
 
+export type GetCashplanVerificationSampleSizeInput = {
+  cashPlanId: Scalars['ID'],
+  sampling: Scalars['String'],
+  businessAreaSlug: Scalars['String'],
+  fullListArguments?: Maybe<FullListArguments>,
+  randomSamplingArguments?: Maybe<RandomSamplingArguments>,
+};
+
+export type GetCashplanVerificationSampleSizeObject = {
+   __typename?: 'GetCashplanVerificationSampleSizeObject',
+  paymentRecordCount?: Maybe<Scalars['Int']>,
+  sampleSize?: Maybe<Scalars['Int']>,
+};
+
 export type GroupAttributeNode = {
    __typename?: 'GroupAttributeNode',
   id: Scalars['UUID'],
@@ -1756,6 +1770,7 @@ export type Query = {
   cashPlanVerificationVerificationMethodChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   paymentVerificationStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   allRapidProFlows?: Maybe<Array<Maybe<RapidProFlow>>>,
+  sampleSize?: Maybe<GetCashplanVerificationSampleSizeObject>,
   adminArea?: Maybe<AdminAreaNode>,
   allAdminAreas?: Maybe<AdminAreaNodeConnection>,
   allBusinessAreas?: Maybe<BusinessAreaNodeConnection>,
@@ -1837,6 +1852,11 @@ export type QueryAllPaymentVerificationsArgs = {
 
 export type QueryAllRapidProFlowsArgs = {
   businessAreaSlug: Scalars['String']
+};
+
+
+export type QuerySampleSizeArgs = {
+  input?: Maybe<GetCashplanVerificationSampleSizeInput>
 };
 
 
@@ -3832,6 +3852,19 @@ export type ProgrammeChoiceDataQuery = (
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
   )>>> }
+);
+
+export type SampleSizeQueryVariables = {
+  input: GetCashplanVerificationSampleSizeInput
+};
+
+
+export type SampleSizeQuery = (
+  { __typename?: 'Query' }
+  & { sampleSize: Maybe<(
+    { __typename?: 'GetCashplanVerificationSampleSizeObject' }
+    & Pick<GetCashplanVerificationSampleSizeObject, 'paymentRecordCount' | 'sampleSize'>
+  )> }
 );
 
 export type TargetPopulationQueryVariables = {
@@ -6978,6 +7011,57 @@ export function useProgrammeChoiceDataLazyQuery(baseOptions?: ApolloReactHooks.L
 export type ProgrammeChoiceDataQueryHookResult = ReturnType<typeof useProgrammeChoiceDataQuery>;
 export type ProgrammeChoiceDataLazyQueryHookResult = ReturnType<typeof useProgrammeChoiceDataLazyQuery>;
 export type ProgrammeChoiceDataQueryResult = ApolloReactCommon.QueryResult<ProgrammeChoiceDataQuery, ProgrammeChoiceDataQueryVariables>;
+export const SampleSizeDocument = gql`
+    query SampleSize($input: GetCashplanVerificationSampleSizeInput!) {
+  sampleSize(input: $input) {
+    paymentRecordCount
+    sampleSize
+  }
+}
+    `;
+export type SampleSizeComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<SampleSizeQuery, SampleSizeQueryVariables>, 'query'> & ({ variables: SampleSizeQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const SampleSizeComponent = (props: SampleSizeComponentProps) => (
+      <ApolloReactComponents.Query<SampleSizeQuery, SampleSizeQueryVariables> query={SampleSizeDocument} {...props} />
+    );
+    
+export type SampleSizeProps<TChildProps = {}> = ApolloReactHoc.DataProps<SampleSizeQuery, SampleSizeQueryVariables> & TChildProps;
+export function withSampleSize<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  SampleSizeQuery,
+  SampleSizeQueryVariables,
+  SampleSizeProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, SampleSizeQuery, SampleSizeQueryVariables, SampleSizeProps<TChildProps>>(SampleSizeDocument, {
+      alias: 'sampleSize',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useSampleSizeQuery__
+ *
+ * To run a query within a React component, call `useSampleSizeQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSampleSizeQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSampleSizeQuery({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useSampleSizeQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<SampleSizeQuery, SampleSizeQueryVariables>) {
+        return ApolloReactHooks.useQuery<SampleSizeQuery, SampleSizeQueryVariables>(SampleSizeDocument, baseOptions);
+      }
+export function useSampleSizeLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<SampleSizeQuery, SampleSizeQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<SampleSizeQuery, SampleSizeQueryVariables>(SampleSizeDocument, baseOptions);
+        }
+export type SampleSizeQueryHookResult = ReturnType<typeof useSampleSizeQuery>;
+export type SampleSizeLazyQueryHookResult = ReturnType<typeof useSampleSizeLazyQuery>;
+export type SampleSizeQueryResult = ApolloReactCommon.QueryResult<SampleSizeQuery, SampleSizeQueryVariables>;
 export const TargetPopulationDocument = gql`
     query targetPopulation($id: ID!) {
   targetPopulation(id: $id) {
@@ -8383,6 +8467,11 @@ export type ResolversTypes = {
   RapidProFlow: ResolverTypeWrapper<RapidProFlow>,
   RapidProFlowRun: ResolverTypeWrapper<RapidProFlowRun>,
   RapidProFlowResult: ResolverTypeWrapper<RapidProFlowResult>,
+  GetCashplanVerificationSampleSizeInput: GetCashplanVerificationSampleSizeInput,
+  FullListArguments: FullListArguments,
+  RandomSamplingArguments: RandomSamplingArguments,
+  AgeInput: AgeInput,
+  GetCashplanVerificationSampleSizeObject: ResolverTypeWrapper<GetCashplanVerificationSampleSizeObject>,
   GroupAttributeNode: ResolverTypeWrapper<GroupAttributeNode>,
   JSONString: ResolverTypeWrapper<Scalars['JSONString']>,
   KoboAssetObject: ResolverTypeWrapper<KoboAssetObject>,
@@ -8418,9 +8507,6 @@ export type ResolversTypes = {
   DjangoDebugSQL: ResolverTypeWrapper<DjangoDebugSql>,
   Mutations: ResolverTypeWrapper<{}>,
   CreatePaymentVerificationInput: CreatePaymentVerificationInput,
-  FullListArguments: FullListArguments,
-  RandomSamplingArguments: RandomSamplingArguments,
-  AgeInput: AgeInput,
   RapidProArguments: RapidProArguments,
   XlsxArguments: XlsxArguments,
   Upload: ResolverTypeWrapper<Scalars['Upload']>,
@@ -8558,6 +8644,11 @@ export type ResolversParentTypes = {
   RapidProFlow: RapidProFlow,
   RapidProFlowRun: RapidProFlowRun,
   RapidProFlowResult: RapidProFlowResult,
+  GetCashplanVerificationSampleSizeInput: GetCashplanVerificationSampleSizeInput,
+  FullListArguments: FullListArguments,
+  RandomSamplingArguments: RandomSamplingArguments,
+  AgeInput: AgeInput,
+  GetCashplanVerificationSampleSizeObject: GetCashplanVerificationSampleSizeObject,
   GroupAttributeNode: GroupAttributeNode,
   JSONString: Scalars['JSONString'],
   KoboAssetObject: KoboAssetObject,
@@ -8593,9 +8684,6 @@ export type ResolversParentTypes = {
   DjangoDebugSQL: DjangoDebugSql,
   Mutations: {},
   CreatePaymentVerificationInput: CreatePaymentVerificationInput,
-  FullListArguments: FullListArguments,
-  RandomSamplingArguments: RandomSamplingArguments,
-  AgeInput: AgeInput,
   RapidProArguments: RapidProArguments,
   XlsxArguments: XlsxArguments,
   Upload: Scalars['Upload'],
@@ -8916,6 +9004,11 @@ export interface FlexFieldsScalarScalarConfig extends GraphQLScalarTypeConfig<Re
 export interface GeoJsonScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['GeoJSON'], any> {
   name: 'GeoJSON'
 }
+
+export type GetCashplanVerificationSampleSizeObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['GetCashplanVerificationSampleSizeObject'] = ResolversParentTypes['GetCashplanVerificationSampleSizeObject']> = {
+  paymentRecordCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  sampleSize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
 
 export type GroupAttributeNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['GroupAttributeNode'] = ResolversParentTypes['GroupAttributeNode']> = {
   id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
@@ -9414,6 +9507,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   cashPlanVerificationVerificationMethodChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   paymentVerificationStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   allRapidProFlows?: Resolver<Maybe<Array<Maybe<ResolversTypes['RapidProFlow']>>>, ParentType, ContextType, RequireFields<QueryAllRapidProFlowsArgs, 'businessAreaSlug'>>,
+  sampleSize?: Resolver<Maybe<ResolversTypes['GetCashplanVerificationSampleSizeObject']>, ParentType, ContextType, QuerySampleSizeArgs>,
   adminArea?: Resolver<Maybe<ResolversTypes['AdminAreaNode']>, ParentType, ContextType, RequireFields<QueryAdminAreaArgs, 'id'>>,
   allAdminAreas?: Resolver<Maybe<ResolversTypes['AdminAreaNodeConnection']>, ParentType, ContextType, QueryAllAdminAreasArgs>,
   allBusinessAreas?: Resolver<Maybe<ResolversTypes['BusinessAreaNodeConnection']>, ParentType, ContextType, QueryAllBusinessAreasArgs>,
@@ -9780,6 +9874,7 @@ export type Resolvers<ContextType = any> = {
   FinalizeTargetPopulationMutation?: FinalizeTargetPopulationMutationResolvers<ContextType>,
   FlexFieldsScalar?: GraphQLScalarType,
   GeoJSON?: GraphQLScalarType,
+  GetCashplanVerificationSampleSizeObject?: GetCashplanVerificationSampleSizeObjectResolvers<ContextType>,
   GroupAttributeNode?: GroupAttributeNodeResolvers<ContextType>,
   HouseholdNode?: HouseholdNodeResolvers<ContextType>,
   HouseholdNodeConnection?: HouseholdNodeConnectionResolvers<ContextType>,
