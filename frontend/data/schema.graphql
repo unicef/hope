@@ -368,6 +368,19 @@ input FullListArguments {
 
 scalar GeoJSON
 
+input GetCashplanVerificationSampleSizeInput {
+  cashPlanId: ID!
+  sampling: String!
+  businessAreaSlug: String!
+  fullListArguments: FullListArguments
+  randomSamplingArguments: RandomSamplingArguments
+}
+
+type GetCashplanVerificationSampleSizeObject {
+  paymentRecordCount: Int
+  sampleSize: Int
+}
+
 type GroupAttributeNode {
   id: UUID!
   name: String!
@@ -1271,6 +1284,7 @@ type Query {
   cashPlanVerificationVerificationMethodChoices: [ChoiceObject]
   paymentVerificationStatusChoices: [ChoiceObject]
   allRapidProFlows(businessAreaSlug: String!): [RapidProFlow]
+  sampleSize(input: GetCashplanVerificationSampleSizeInput): GetCashplanVerificationSampleSizeObject
   adminArea(id: ID!): AdminAreaNode
   allAdminAreas(before: String, after: String, first: Int, last: Int, title: String, title_Icontains: String, businessArea: String): AdminAreaNodeConnection
   allBusinessAreas(before: String, after: String, first: Int, last: Int, id: UUID): BusinessAreaNodeConnection
