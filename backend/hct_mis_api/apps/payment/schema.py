@@ -158,7 +158,7 @@ class Query(graphene.ObjectType):
         input=GetCashplanVerificationSampleSizeInput(),
     )
 
-    def resolve_sample_size(self, info, **kwargs):
+    def resolve_sample_size(self, info, input, **kwargs):
         arg = lambda name: input.get(name)
         cash_plan_id = decode_id_string(arg("cash_plan_id"))
         cash_plan = get_object_or_404(CashPlan, id=cash_plan_id)
