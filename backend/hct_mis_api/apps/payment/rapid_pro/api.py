@@ -12,6 +12,7 @@ class TokenNotProvided(Exception):
 
 class RapidProAPI:
     FLOWS_ENDPOINT = "/flows.json"
+    FLOW_RUNS_ENDPOINT = "/runs.json"
     GROUPS_ENDPOINT = "/groups.json"
     CONTACTS_ENDPOINT = "/contacts.json"
     FLOW_STARTS_ENDPOINT = "/flow_starts.json"
@@ -50,17 +51,20 @@ class RapidProAPI:
         return flows["results"]
 
     def start_flow(self, flow_uuid, phone_numbers):
-        urns = [f"tel:{x}" for x in phone_numbers]
-        data = {"flow_uuid": flow_uuid, "urns": urns}
+        urns = [f"telegram:{x}" for x in phone_numbers]
+        # urns = ["telegram:1079068080"]
+        data = {"flow": flow_uuid, "urns": urns, "restart_participants": True}
         print(data)
-        # TODO TEST sending smses
-        # self._handle_post_request(
-        #     RapidProAPI.FLOW_STARTS_ENDPOINT,
-        #     data,
-        # )
 
-    def get_flow_runs(self, flow_run_id):
-        pass
+        response = self._handle_post_request(
+            RapidProAPI.FLOW_STARTS_ENDPOINT, data,
+        )
+        print(response)
+        return response
+
+    def get_flow_runs(self, start_uuid):
+        flows = self._handle_get_request(f"{RapidProAPI.FLOW_RUNS_ENDPOINT}?start={start_uuid}")
+        return flows["results"]
 
     def create_group(self, name):
         print(name)
