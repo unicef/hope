@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Formik, Form, Field } from 'formik';
 import styled from 'styled-components';
 import {
@@ -22,11 +22,13 @@ import {
   useCreateCashPlanPaymentVerificationMutation,
   useAllRapidProFlowsQuery,
   useAllAdminAreasQuery,
+  useSampleSizeQuery,
 } from '../../__generated__/graphql';
 import { FormikMultiSelectField } from '../../shared/Formik/FormikMultiSelectField';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
+import { FormikEffect } from '../FormikEffect';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -51,6 +53,17 @@ const DialogContainer = styled.div`
   width: 700px;
 `;
 
+const initialValues = {
+  confidenceInterval: 0,
+  marginOfError: 0,
+  filterAgeMin: '',
+  filterAgeMax: '',
+  filterSex: '',
+  excludedAdminAreas: [],
+  verificationChannel: '',
+  rapidProFlow: '',
+};
+
 export interface Props {
   cashPlanId: string;
 }
@@ -62,6 +75,7 @@ export function NewPaymentVerificationDialog({
   const { showMessage } = useSnackbar();
   const [mutate] = useCreateCashPlanPaymentVerificationMutation();
   const businessArea = useBusinessArea();
+  const [formValues, setFormValues] = useState(initialValues);
 
   const { data: rapidProFlows } = useAllRapidProFlowsQuery({
     variables: {
@@ -71,10 +85,45 @@ export function NewPaymentVerificationDialog({
   const { data } = useAllAdminAreasQuery({
     variables: {
       first: 100,
-      // title: debouncedInputText,
       businessArea,
     },
   });
+
+  const { data: sampleSizesData, refetch } = useSampleSizeQuery({
+    variables: {
+      input: {
+        cashPlanId,
+        sampling: selectedTab === 0 ? 'FULL' : 'RANDOM',
+        businessAreaSlug: businessArea,
+        fullListArguments:
+          selectedTab === 0
+            ? {
+                excludedAdminAreas: formValues.excludedAdminAreas,
+              }
+            : null,
+        randomSamplingArguments:
+          selectedTab === 1
+            ? {
+                confidenceInterval: formValues.confidenceInterval * 0.01,
+                marginOfError: formValues.marginOfError * 0.01,
+                excludedAdminAreas: formValues.excludedAdminAreas,
+                age: {
+                  min: Number(formValues.filterAgeMin),
+                  max: Number(formValues.filterAgeMax),
+                },
+                sex: formValues.filterSex,
+              }
+            : null,
+      },
+    },
+  });
+
+  useEffect(() => {
+    if (formValues) {
+      refetch();
+      console.log('sampleSizesData');
+    }
+  }, [refetch, formValues]);
 
   const submit = async (values): Promise<void> => {
     console.log(values);
@@ -127,21 +176,15 @@ export function NewPaymentVerificationDialog({
           name: el.node.title,
         }))
       : [];
-  const initialValues = {
-    confidenceInterval: 0,
-    marginOfError: 0,
-    filterAgeMin: null,
-    filterAgeMax: null,
-    filterSex: null,
-    excludedAdminAreas: [],
-    verificationChannel: null,
-    rapidProFlow: '',
-  };
 
+  const handleFormChange = (values) => {
+    setFormValues(values);
+  };
   return (
     <Formik initialValues={initialValues} onSubmit={submit}>
       {({ submitForm, values }) => (
         <Form>
+          <FormikEffect values={values} onChange={handleFormChange(values)} />
           <Button
             color='primary'
             variant='contained'
