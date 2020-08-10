@@ -54,12 +54,14 @@ const DialogContainer = styled.div`
 `;
 
 const initialValues = {
-  confidenceInterval: 0,
-  marginOfError: 0,
-  filterAgeMin: '',
-  filterAgeMax: '',
+  confidenceInterval: 1,
+  marginOfError: 1,
+  filterAgeMin: 0,
+  filterAgeMax: 0,
   filterSex: '',
-  excludedAdminAreas: [],
+  excludedAdminAreasFull: [],
+  excludedAdminAreasRandom: [],
+
   verificationChannel: '',
   rapidProFlow: '',
 };
@@ -98,7 +100,7 @@ export function NewPaymentVerificationDialog({
         fullListArguments:
           selectedTab === 0
             ? {
-                excludedAdminAreas: formValues.excludedAdminAreas,
+                excludedAdminAreas: formValues.excludedAdminAreasFull,
               }
             : null,
         randomSamplingArguments:
@@ -106,10 +108,10 @@ export function NewPaymentVerificationDialog({
             ? {
                 confidenceInterval: formValues.confidenceInterval * 0.01,
                 marginOfError: formValues.marginOfError * 0.01,
-                excludedAdminAreas: formValues.excludedAdminAreas,
+                excludedAdminAreas: formValues.excludedAdminAreasRandom,
                 age: {
-                  min: Number(formValues.filterAgeMin),
-                  max: Number(formValues.filterAgeMax),
+                  min: formValues.filterAgeMin || 0,
+                  max: formValues.filterAgeMax || 0,
                 },
                 sex: formValues.filterSex,
               }
@@ -121,12 +123,10 @@ export function NewPaymentVerificationDialog({
   useEffect(() => {
     if (formValues) {
       refetch();
-      console.log('sampleSizesData');
     }
-  }, [refetch, formValues]);
+  }, [refetch, formValues, sampleSizesData]);
 
   const submit = async (values): Promise<void> => {
-    console.log(values);
     const { errors } = await mutate({
       variables: {
         input: {
@@ -135,7 +135,7 @@ export function NewPaymentVerificationDialog({
           fullListArguments:
             selectedTab === 0
               ? {
-                  excludedAdminAreas: values.excludedAdminAreas,
+                  excludedAdminAreas: values.excludedAdminAreasFull,
                 }
               : null,
           verificationChannel: values.verificationChannel,
@@ -150,7 +150,7 @@ export function NewPaymentVerificationDialog({
               ? {
                   confidenceInterval: values.confidenceInterval * 0.01,
                   marginOfError: values.marginOfError * 0.01,
-                  excludedAdminAreas: values.excludedAdminAreas,
+                  excludedAdminAreas: values.excludedAdminAreasRandom,
                   age: { min: values.filterAgeMin, max: values.filterAgeMax },
                   sex: values.filterSex,
                 }
@@ -182,7 +182,7 @@ export function NewPaymentVerificationDialog({
   };
   return (
     <Formik initialValues={initialValues} onSubmit={submit}>
-      {({ submitForm, values }) => (
+      {({ submitForm, values, setValues }) => (
         <Form>
           <FormikEffect values={values} onChange={handleFormChange(values)} />
           <Button
@@ -212,7 +212,11 @@ export function NewPaymentVerificationDialog({
                     onChange={(
                       event: React.ChangeEvent<{}>,
                       newValue: number,
-                    ) => setSelectedTab(newValue)}
+                    ) => {
+                      setValues(initialValues);
+                      setFormValues(initialValues);
+                      setSelectedTab(newValue);
+                    }}
                     indicatorColor='primary'
                     textColor='primary'
                     variant='fullWidth'
@@ -224,7 +228,7 @@ export function NewPaymentVerificationDialog({
                 </TabsContainer>
                 <TabPanel value={selectedTab} index={0}>
                   <Field
-                    name='excludedAdminAreas'
+                    name='excludedAdminAreasFull'
                     choices={mappedAdminAreas}
                     variant='filled'
                     label='Filter Out Admin Areas'
@@ -237,7 +241,12 @@ export function NewPaymentVerificationDialog({
                       fontSize={16}
                       fontWeight='fontWeightBold'
                     >
-                      Sample size: 500 out of 500 (100%)
+                      Sample size: {sampleSizesData?.sampleSize?.sampleSize} out
+                      of {sampleSizesData?.sampleSize?.paymentRecordCount} (
+                      {(sampleSizesData?.sampleSize?.sampleSize /
+                        sampleSizesData?.sampleSize?.paymentRecordCount) *
+                        100}
+                      %)
                     </Box>
                     <Field
                       name='verificationChannel'
@@ -266,19 +275,23 @@ export function NewPaymentVerificationDialog({
                     <Field
                       name='confidenceInterval'
                       label='Confidence Interval'
+                      min={1}
+                      max={10}
                       component={FormikSliderField}
                       suffix='%'
                     />
                     <Field
                       name='marginOfError'
                       label='Margin of Error'
+                      min={1}
+                      max={10}
                       component={FormikSliderField}
                       suffix='%'
                     />
                     <Typography variant='caption'>Cluster Filters</Typography>
                     <Box flexDirection='column' display='flex'>
                       <Field
-                        name='excludedAdminAreas'
+                        name='excludedAdminAreasRandom'
                         choices={mappedAdminAreas}
                         variant='filled'
                         label='Filter Out Admin Areas'
@@ -324,7 +337,12 @@ export function NewPaymentVerificationDialog({
                       fontSize={16}
                       fontWeight='fontWeightBold'
                     >
-                      Sample size: 435 out of 500 ({(435 / 500) * 100}%)
+                      Sample size: {sampleSizesData?.sampleSize?.sampleSize} out
+                      of {sampleSizesData?.sampleSize?.paymentRecordCount} (
+                      {(sampleSizesData?.sampleSize?.sampleSize /
+                        sampleSizesData?.sampleSize?.paymentRecordCount) *
+                        100}
+                      %)
                     </Box>
                     <Field
                       name='verificationChannel'
