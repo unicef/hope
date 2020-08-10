@@ -14,6 +14,8 @@ export const FormikSliderField = ({
   field,
   form,
   suffix,
+  min,
+  max,
   ...otherProps
 }): React.ReactElement => {
   const classes = useStyles();
@@ -29,6 +31,8 @@ export const FormikSliderField = ({
         <Grid item xs>
           <Slider
             {...otherProps}
+            min={min}
+            max={max}
             value={typeof field.value === 'number' ? field.value : 0}
             onChange={handleSliderChange}
             aria-labelledby='input-slider'
