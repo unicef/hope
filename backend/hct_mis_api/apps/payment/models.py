@@ -135,6 +135,7 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel):
     confidence_interval = models.FloatField(null=True)
     margin_of_error = models.FloatField(null=True)
     rapid_pro_flow_id = models.CharField(max_length=255, blank=True)
+    rapid_pro_flow_start_uuid = models.CharField(max_length=255, blank=True)
 
 
 @receiver(

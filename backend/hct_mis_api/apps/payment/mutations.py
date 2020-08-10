@@ -20,9 +20,6 @@ from program.models import CashPlan
 from program.schema import CashPlanNode
 
 
-
-
-
 class CreatePaymentVerificationMutation(graphene.Mutation):
 
     cash_plan = graphene.Field(CashPlanNode)
@@ -116,6 +113,9 @@ class CreatePaymentVerificationMutation(graphene.Mutation):
             payment_record_verifications_to_create.append(
                 payment_record_verification
             )
+        cash_plan_verification.status = (
+            CashPlanPaymentVerification.STATUS_ACTIVE
+        )
         cash_plan_verification.save()
         PaymentVerification.objects.bulk_create(
             payment_record_verifications_to_create
@@ -179,7 +179,6 @@ class CreatePaymentVerificationMutation(graphene.Mutation):
             sampling,
         )
 
-
     @classmethod
     def process_verification_method(cls, cash_plan_payment_verification, input):
         verification_method = cash_plan_payment_verification.verification_method
@@ -193,6 +192,7 @@ class CreatePaymentVerificationMutation(graphene.Mutation):
     def process_rapid_pro_method(cls, cash_plan_payment_verification, input):
         rapid_pro_arguments = input["rapid_pro_arguments"]
         flow_id = rapid_pro_arguments["flow_id"]
+        cash_plan_payment_verification.rapid_pro_flow_id = flow_id
         business_area_slug = input["business_area_slug"]
         api = RapidProAPI(business_area_slug)
         phone_numbers = list(
@@ -201,7 +201,10 @@ class CreatePaymentVerificationMutation(graphene.Mutation):
             ).values_list("phone_no", flat=True)
         )
         flow_start_info = api.start_flow(flow_id, phone_numbers)
-        print(flow_start_info)
+        cash_plan_payment_verification.rapid_pro_flow_start_uuid = flow_start_info.get(
+            "uuid"
+        )
+        cash_plan_payment_verification.save()
 
 
 class Mutations(graphene.ObjectType):
