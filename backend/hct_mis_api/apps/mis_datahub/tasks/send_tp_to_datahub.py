@@ -110,10 +110,11 @@ class SendTPToDatahubTask:
         dh_target = self.send_target_population(target_population)
         dh_target.session = dh_session
         dh_target.save()
+        household_ids = households.values_list("id", flat=True)
 
         for household in households:
             dh_household, dh_individuals = self.send_household(
-                household, program, dh_session
+                household, program, dh_session, household_ids,
             )
             dh_household.session = dh_session
             households_to_bulk_create.append(dh_household)
@@ -154,7 +155,9 @@ class SendTPToDatahubTask:
         dh_target = dh_mis_models.TargetPopulation(**dh_tp_args)
         return dh_target
 
-    def send_individual(self, individual, dh_household, dh_session):
+    def send_individual(
+        self, individual, dh_household, dh_session, household_ids
+    ):
         dh_individual_args = self.build_arg_dict(
             individual, SendTPToDatahubTask.MAPPING_INDIVIDUAL_DICT
         )
@@ -170,20 +173,21 @@ class SendTPToDatahubTask:
             )
 
         dh_individual.unchr_id = self.get_unhcr_individual_id(individual)
-        roles = individual.households_and_roles.all()
-        if roles.exists():
-            for role in roles:
-                dh_mis_models.IndividualRoleInHousehold.objects.get_or_create(
-                    role=role.role,
-                    household_mis_id=dh_household.mis_id,
-                    individual_mis_id=individual.id,
-                    session=dh_session,
-                )
+        roles = individual.households_and_roles.filter(
+            household__id__in=household_ids
+        )
+        for role in roles:
+            dh_mis_models.IndividualRoleInHousehold.objects.get_or_create(
+                role=role.role,
+                household_mis_id=role.household.id,
+                individual_mis_id=role.individual.id,
+                session=dh_session,
+            )
 
         dh_individual.session = dh_session
         return dh_individual
 
-    def send_household(self, household, program, dh_session):
+    def send_household(self, household, program, dh_session, household_ids):
         dh_household_args = self.build_arg_dict(
             household, SendTPToDatahubTask.MAPPING_HOUSEHOLD_DICT
         )
@@ -202,7 +206,7 @@ class SendTPToDatahubTask:
             for individual in individuals:
                 if self.should_send_individual(individual, household):
                     dh_individual = self.send_individual(
-                        individual, dh_household, dh_session
+                        individual, dh_household, dh_session, household_ids,
                     )
                     dh_individual.session = dh_session
                     individuals_to_create.append(dh_individual)
@@ -225,7 +229,7 @@ class SendTPToDatahubTask:
             for individual in individuals:
                 if self.should_send_individual(individual, household):
                     dh_individual = self.send_individual(
-                        individual, dh_household, dh_session
+                        individual, dh_household, dh_session, household_ids,
                     )
                     dh_individual.session = dh_session
                     individuals_to_create.append(dh_individual)
