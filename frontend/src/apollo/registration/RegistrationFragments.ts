@@ -73,7 +73,18 @@ export const importedIndividualDetailed = gql`
     middleName
     estimatedBirthDate
     maritalStatus
-
+    documents {
+      edges {
+        node {
+          type {
+            label
+          }
+          documentNumber
+        }
+      }
+    }
+    role
+    relationship
     household {
       id
       admin1
