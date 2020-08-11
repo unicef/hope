@@ -208,7 +208,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             return
 
         agency = ImportedAgency.objects.get(
-            type="WFP" if header == "scope_id_no" else "UNHCR"
+            type="WFP" if header == "scope_id_no_i_c" else "UNHCR"
         )
 
         identities_data = self.identities.get(f"individual_{row_num}")
@@ -217,7 +217,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             identities_data["number"] = value
             identities_data["agency"] = agency
 
-        self.documents[f"individual_{row_num}"] = {
+        self.identities[f"individual_{row_num}"] = {
             "individual": individual,
             "number": value,
             "agency": agency,
@@ -229,7 +229,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         if not self.image_loader.image_in(cell.coordinate):
             return
 
-        identity_data = self.documents.get(f"individual_{row_num}")
+        identity_data = self.identities.get(f"individual_{row_num}")
 
         image = self.image_loader.get(cell.coordinate)
         file_name = f"{cell.coordinate}-{timezone.now()}.jpg"
@@ -382,9 +382,12 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 if header == "household_id":
                     household_id = str(cell.value)
                     if sheet_title == "individuals":
-                        obj_to_create.household_id = self.households.get(
-                            household_id
-                        ).pk
+                        current_household = self.households.get(household_id)
+                        obj_to_create.household_id = (
+                            current_household.pk
+                            if current_household is not None
+                            else None
+                        )
 
                 if header in complex_fields[sheet_title]:
                     fn = complex_fields[sheet_title].get(header)
