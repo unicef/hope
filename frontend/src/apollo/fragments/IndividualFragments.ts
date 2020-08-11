@@ -27,7 +27,7 @@ export const individualMinimal = gql`
     household {
       id
       status
-      adminArea{
+      adminArea {
         id
         title
       }
@@ -42,6 +42,16 @@ export const individualDetailed = gql`
     familyName
     estimatedBirthDate
     status
+    documents {
+      edges {
+        node {
+          type {
+            label
+          }
+          documentNumber
+        }
+      }
+    }
     enrolledInNutritionProgramme
     administrationOfRutf
     household {
@@ -55,6 +65,8 @@ export const individualDetailed = gql`
         level
       }
     }
+    role
+    relationship
     headingHousehold {
       id
       headOfHousehold {
