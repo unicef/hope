@@ -85,7 +85,7 @@ class Individual(SessionModel):
     mis_id = models.UUIDField()
     unhcr_id = models.CharField(max_length=255, null=True)
     unicef_id = models.CharField(max_length=255, null=True)
-    household_mis_id = models.UUIDField()
+    household_mis_id = models.UUIDField(null=True)
     status = models.CharField(max_length=50, choices=STATUS_CHOICE, null=True,)
     national_id_number = models.CharField(max_length=255, null=True)
     full_name = models.CharField(max_length=255)
@@ -215,6 +215,3 @@ class Document(SessionModel):
     number = models.CharField(max_length=255, null=True)
     individual_mis_id = models.UUIDField(null=True)
     type = models.CharField(max_length=50, choices=IDENTIFICATION_TYPE_CHOICE)
-
-    class Meta:
-        unique_together = ("type", "number")

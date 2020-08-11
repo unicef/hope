@@ -32,7 +32,7 @@ from targeting.models import HouseholdSelection
 
 class HouseholdFilter(FilterSet):
     business_area = CharFilter(
-        field_name="registration_data_import__business_area__slug"
+        field_name="business_area__slug"
     )
     size = IntegerRangeFilter(field_name="size")
     search = CharFilter(method="search_filter")
@@ -40,7 +40,7 @@ class HouseholdFilter(FilterSet):
     class Meta:
         model = Household
         fields = {
-            "business_area": ["exact", "icontains"],
+            "business_area": ["exact"],
             "country_origin": ["exact", "icontains"],
             "address": ["exact", "icontains"],
             "head_of_household__full_name": ["exact", "icontains"],

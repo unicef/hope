@@ -196,6 +196,9 @@ class Household(TimeStampedUUIDModel, AbstractSyncable):
         on_delete=models.CASCADE,
     )
     unicef_id = models.CharField(max_length=250, blank=True)
+    business_area = models.ForeignKey(
+        "core.BusinessArea", on_delete=models.CASCADE
+    )
 
     @property
     def total_cash_received(self):
@@ -204,12 +207,6 @@ class Household(TimeStampedUUIDModel, AbstractSyncable):
             .aggregate(Sum("delivered_quantity"))
             .get("delivered_quantity__sum")
         )
-
-    @property
-    def business_area(self):
-        if self.admin_area is None:
-            return None
-        return self.admin_area.admin_area_type.business_area
 
     def __str__(self):
         return f"Household ID: {self.id}"
