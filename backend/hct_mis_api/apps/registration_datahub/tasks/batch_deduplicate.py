@@ -1,5 +1,4 @@
 from django.forms import model_to_dict
-from elasticsearch_dsl.query import MoreLikeThis, Fuzzy
 
 from registration_datahub.documents import ImportedIndividualDocument
 from registration_datahub.models import (
@@ -14,13 +13,15 @@ class BatchDeduplicate:
     #  to get similar objects
     # 3. Check scoring and make actions based on the score
 
+    # this should be a constant that can be set in django admin
+    MIN_SCORE = 0.5
+
     def __init__(
         self, registration_data_import_datahub: RegistrationDataImportDatahub
     ):
         self.registration_data_import_datahub = registration_data_import_datahub
 
     def deduplicate(self):
-        import ipdb; ipdb.set_trace()
         individuals = ImportedIndividual.objects.filter(
             registration_data_import=self.registration_data_import_datahub
         )
@@ -43,40 +44,41 @@ class BatchDeduplicate:
                     "phone_no_alternative"
                 ].raw_input
 
-            query_fields = {
-                field_name: {
-                    "value": field_value,
-                    "fuzziness": "10",
-                    "max_expansions": 50,
-                    "prefix_length": 0,
-                    "transpositions": True,
+            query_fields = [
+                {
+                    "fuzzy": {
+                        field_name: {
+                            "value": field_value,
+                            "fuzziness": "10",
+                            "transpositions": True,
+                        }
+                    }
                 }
                 for field_name, field_value in fields.items()
+            ]
+
+            query_dict = {
+                "min_score": self.MIN_SCORE,
+                "query": {
+                    "bool": {
+                        "must": [{"dis_max": {"queries": query_fields}}],
+                        "must_not": [
+                            {
+                                "match": {
+                                    "id": {
+                                        "query": individual.id
+                                    }
+                                }
+                            }
+                        ],
+                    }
+                }
             }
 
-            individual_doc = (
-                ImportedIndividualDocument.search()
-                .query("match", id=individual.id)
-                .execute()[0]
-            )
-            # query = ImportedIndividualDocument.search().query(
-            #     MoreLikeThis(
-            #         like=[
-            #             {
-            #                 "_id": individual_doc.meta.id,
-            #                 "_index": individual_doc.meta.index,
-            #             }
-            #         ],
-            #         fields=fields_names,
-            #         minimum_should_match="75%",
-            #     ),
-            # )
+            # hit with a score equal or above 1.0 is a duplicate
+            query = ImportedIndividualDocument.search().from_dict(query_dict)
 
-            query = ImportedIndividualDocument.search().query(
-                Fuzzy(**query_fields)
-            )
-
-            result = query.execute()
+            results = query.execute()
             import ipdb
 
             ipdb.set_trace()
