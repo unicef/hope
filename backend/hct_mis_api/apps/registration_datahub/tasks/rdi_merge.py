@@ -90,12 +90,14 @@ class RdiMergeTask:
 
     def _prepare_households(self, imported_households, obj_hct):
         households_dict = {}
+        business_area = obj_hct.business_area
         for imported_household in imported_households:
             household = Household(
                 **model_to_dict(
                     imported_household, fields=self.HOUSEHOLD_FIELDS
                 ),
                 registration_data_import=obj_hct,
+                business_area=business_area,
             )
             self.merge_admin_area(imported_household, household)
             households_dict[imported_household.id] = household

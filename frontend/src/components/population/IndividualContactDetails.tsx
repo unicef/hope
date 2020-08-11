@@ -39,21 +39,6 @@ export function IndividualContactDetails({
             <div>{phoneNoAlternative || '-'}</div>
           </LabelizedField>
         </Grid>
-        <Grid item xs={4}>
-          <LabelizedField label='Address'>
-            <div>{household.address || '-'}</div>
-          </LabelizedField>
-        </Grid>
-        <Grid item xs={4}>
-          <LabelizedField label='Location Level'>
-            <div>{household.adminArea?.level || '-'}</div>
-          </LabelizedField>
-        </Grid>
-        <Grid item xs={4}>
-          <LabelizedField label='Location Name'>
-            <div>{household.adminArea?.title || '-'}</div>
-          </LabelizedField>
-        </Grid>
       </Grid>
     </Overview>
   );
