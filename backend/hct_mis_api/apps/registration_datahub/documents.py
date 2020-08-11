@@ -8,13 +8,9 @@ from .models import ImportedIndividual
 @registry.register_document
 class ImportedIndividualDocument(Document):
     id = fields.TextField()
-    # given_name = fields.TextField(analyzer=phonetic_analyzer)
-    # middle_name = fields.TextField(analyzer=phonetic_analyzer)
-    # family_name = fields.TextField(analyzer=phonetic_analyzer)
-    # full_name = fields.TextField(analyzer=phonetic_analyzer)
-    given_name = fields.TextField()
-    middle_name = fields.TextField()
-    family_name = fields.TextField()
+    given_name = fields.TextField(analyzer=phonetic_analyzer)
+    middle_name = fields.TextField(analyzer=phonetic_analyzer)
+    family_name = fields.TextField(analyzer=phonetic_analyzer)
     full_name = fields.TextField()
     birth_date = fields.TextField()
     phone_no = fields.TextField("phone_no.__str__")
