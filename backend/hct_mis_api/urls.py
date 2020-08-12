@@ -8,7 +8,7 @@ from django.urls import path, include
 from django.views.decorators.csrf import csrf_exempt
 from graphene_file_upload.django import FileUploadGraphQLView
 
-import payment
+import payment.views
 import registration_datahub.views
 import sanction_list.views
 from core.views import (
