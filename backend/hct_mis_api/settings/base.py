@@ -6,6 +6,7 @@ import sys
 ####
 # Change per project
 ####
+from django.forms import SelectMultiple
 from django.utils.text import slugify
 
 PROJECT_NAME = "hct_mis_api"
@@ -228,6 +229,7 @@ OTHER_APPS = [
     "social_django",
     "corsheaders",
     "django_elasticsearch_dsl",
+    "constance",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
@@ -400,3 +402,58 @@ SANCTION_LIST_CC_MAIL = os.getenv(
 
 # ELASTICSEARCH SETTINGS
 ELASTICSEARCH_DSL_AUTOSYNC = False
+
+# DJANGO CONSTANCE settings
+CONSTANCE_REDIS_CONNECTION = f"redis://{REDIS_INSTANCE}/0"
+
+CONSTANCE_ADDITIONAL_FIELDS = {
+    "deduplication_fields_select": [
+        "django.forms.fields.ChoiceField",
+        {
+            "widget": "django.forms.SelectMultiple",
+            "choices": (
+                ("given_name", "Given name"),
+                ("full_name", "Full name"),
+                ("middle_name", "Middle name"),
+                ("family_name", "Family name"),
+                ("phone_no", "Phone number"),
+                ("phone_no_alternative", "Alternative phone number"),
+                ("relationship", "Relationship"),
+                ("sex", "Sex"),
+                ("birth_date", "Birth date"),
+                ("household__size", "Household size"),
+                ("household__address", "Household address"),
+                ("household__country_origin", "Household country origin"),
+                ("household__country", "Household country"),
+            ),
+        },
+    ],
+}
+
+CONSTANCE_CONFIG = {
+    "DEDUPLICATION_MIN_SCORE": (
+        0.6,
+        "Results below the minimum score will not be taken into account",
+    ),
+    "DEDUPLICATION_FIELDS": (
+        (
+            "given_name",
+            "full_name",
+            "middle_name",
+            "family_name",
+            "phone_no",
+            "phone_no_alternative",
+            "relationship",
+            "sex",
+            "birth_date",
+            "household__size",
+            "household__address",
+            "household__country_origin",
+            "household__country",
+        ),
+        "Choose fields that will be used for deduplication",
+        "deduplication_fields_select",
+    ),
+}
+
+CONSTANCE_DBS = ("default",)
