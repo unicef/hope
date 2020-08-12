@@ -7,7 +7,7 @@ from registration_datahub.fixtures import (
     ImportedHouseholdFactory,
     ImportedIndividualFactory,
 )
-from registration_datahub.models import ImportData
+from registration_datahub.models import ImportData, ImportedIndividual
 from registration_datahub.tasks.batch_deduplicate import BatchDeduplicate
 
 
@@ -150,3 +150,15 @@ class TestBatchDeduplicate(BaseElasticSearchTestCase):
             registration_data_import_datahub=self.registration_data_import_datahub
         )
         task.deduplicate()
+        possible_duplicates = ImportedIndividual.objects.filter(
+            possible_duplicate_flag=True
+        )
+        self.assertEqual(possible_duplicates.count(), 2)
+        possible_duplicates.get(full_name="Test Testowski")
+        possible_duplicates.get(full_name="Test Example")
+
+        existing_count = ImportedIndividual.objects.filter(
+            full_name="Tessta Testowski"
+        ).count()
+
+        self.assertEqual(existing_count, 1)

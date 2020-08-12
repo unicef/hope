@@ -15,6 +15,7 @@ pygraphviz==1.5
 git+https://github.com/Tivix/django-auditlog.git@master#egg=django-auditlog
 elasticsearch-dsl>=7.0.0,<8.0.0
 django-elasticsearch-dsl==7.1.4
+django-constance[redis]==2.7.0
 
 # Tests and Fixtures
 factory-boy==2.12.0
