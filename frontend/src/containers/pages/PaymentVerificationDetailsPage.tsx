@@ -24,6 +24,8 @@ import {
 import { StatusBox } from '../../components/StatusBox';
 import { VerificationRecordsTable } from '../tables/VerificationRecordsTable';
 import { Missing } from '../../components/Missing';
+import { useDebounce } from '../../hooks/useDebounce';
+import { VerificationRecordsFilters } from '../tables/VerificationRecordsTable/VerificationRecordsFilters';
 
 const Container = styled.div`
   display: flex;
@@ -79,6 +81,10 @@ const StatusContainer = styled.div`
 export function PaymentVerificationDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
+  const [filter, setFilter] = useState({
+    search: null,
+  });
+  const debouncedFilter = useDebounce(filter, 500);
   const { id } = useParams();
   const { data, loading } = useCashPlanQuery({
     variables: { id },
@@ -315,11 +321,22 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
           </Grid>
         </Container>
       ) : null}
-      <Container>
-        {cashPlan.verifications && cashPlan.verifications.edges.length ? (
-          <VerificationRecordsTable id={verificationPlan.id} />
-        ) : null}
-      </Container>
+      {cashPlan.verifications && cashPlan.verifications.edges.length ? (
+        <>
+          <Container>
+            <VerificationRecordsFilters
+              filter={filter}
+              onFilterChange={setFilter}
+            />
+          </Container>
+          <Container>
+            <VerificationRecordsTable
+              filter={debouncedFilter}
+              id={verificationPlan.id}
+            />
+          </Container>
+        </>
+      ) : null}
       {!cashPlan.verifications && cashPlan.verifications.edges.length && (
         <BottomTitle>
           To see more details please create Verification Plan

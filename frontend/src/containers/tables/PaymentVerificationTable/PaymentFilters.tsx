@@ -84,7 +84,7 @@ export function PaymentFilters({
   return (
     <Container>
       <Grid container spacing={3}>
-        <Grid item>
+        <Grid item xs={3}>
           <SearchTextField
             label='Search'
             variant='outlined'
@@ -99,7 +99,7 @@ export function PaymentFilters({
             }}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <StyledFormControl variant='outlined' margin='dense'>
             <InputLabel>Programme</InputLabel>
             <Select
@@ -128,7 +128,7 @@ export function PaymentFilters({
             </Select>
           </StyledFormControl>
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <SearchTextField
             label='FSP'
             variant='outlined'
@@ -143,7 +143,7 @@ export function PaymentFilters({
             }}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <KeyboardDatePicker
             variant='inline'
             disableToolbar
@@ -162,7 +162,7 @@ export function PaymentFilters({
             InputAdornmentProps={{ position: 'end' }}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <KeyboardDatePicker
             variant='inline'
             disableToolbar
@@ -178,7 +178,7 @@ export function PaymentFilters({
             InputAdornmentProps={{ position: 'end' }}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <StyledFormControl variant='outlined' margin='dense'>
             <InputLabel>Modality</InputLabel>
             <Select
@@ -211,7 +211,7 @@ export function PaymentFilters({
             </Select>
           </StyledFormControl>
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <StyledFormControl variant='outlined' margin='dense'>
             <InputLabel>Status</InputLabel>
             <Select
