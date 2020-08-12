@@ -7,11 +7,13 @@ import {
   decodeIdString,
   getAgeFromDob,
   sexToCapitalize,
+  maritalStatusToColor,
 } from '../../../../utils/utils';
 import { ImportedIndividualDetailedFragment } from '../../../../__generated__/graphql';
 import { LabelizedField } from '../../../../components/LabelizedField';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { Missing } from '../../../../components/Missing';
+import { StatusBox } from '../../../../components/StatusBox';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px
@@ -26,6 +28,10 @@ const Title = styled.div`
 const ContentLink = styled.div`
   text-decoration: underline;
   cursor: pointer;
+`;
+const StatusContainer = styled.div`
+  min-width: 120px;
+  max-width: 200px;
 `;
 
 interface RegistrationIndividualBioDataProps {
@@ -48,79 +54,93 @@ export function RegistrationIndividualsBioData({
       `/${businessArea}/registration-data-import/household/${individual.household.id}`,
     );
   };
+
+  const mappedIndividualDocuments = individual.documents?.edges?.map((edge) => (
+    <Grid item xs={3}>
+      <LabelizedField label={edge.node.type.label}>
+        <div>{edge.node.documentNumber}</div>
+      </LabelizedField>
+    </Grid>
+  ));
+
   return (
     <Overview>
       <Title>
         <Typography variant='h6'>Bio Data</Typography>
       </Title>
       <Grid container spacing={6}>
-        <Grid item xs={4}>
+        <Grid item xs={3}>
           <LabelizedField label='Full Name'>
             <div>{individual.fullName}</div>
           </LabelizedField>
         </Grid>
-        <Grid item xs={4}>
+        <Grid item xs={3}>
           <LabelizedField label='Given Name'>
             <div>{individual.givenName}</div>
           </LabelizedField>
         </Grid>
-        <Grid item xs={4}>
+        <Grid item xs={3}>
           <LabelizedField label='Middle Name'>
-            <div>{individual.middleName}</div>
+            <div>{individual.middleName || '-'}</div>
           </LabelizedField>
         </Grid>
-        <Grid item xs={4}>
+        <Grid item xs={3}>
           <LabelizedField label='Family Name'>
             <div>{individual.familyName}</div>
           </LabelizedField>
         </Grid>
-        <Grid item xs={4}>
+        <Grid item xs={3}>
           <LabelizedField label='Sex'>
             <div>{sexToCapitalize(individual.sex)}</div>
           </LabelizedField>
         </Grid>
-        <Grid item xs={4}>
+        <Grid item xs={3}>
           <LabelizedField label='Age'>
             <div>{age}</div>
           </LabelizedField>
         </Grid>
-        <Grid item xs={4}>
+        <Grid item xs={3}>
           <LabelizedField label='Date of Birth'>
             <Moment format='DD/MM/YYYY'>{birthDate}</Moment>
           </LabelizedField>
         </Grid>
-        <Grid item xs={4}>
+        <Grid item xs={3}>
           <LabelizedField label='Estimated Date of Birth'>
-            <div>{individual.estimatedBirthDate ? 'YES' : 'NO'}</div>
+            <div>
+              {individual.estimatedBirthDate
+                ? individual.estimatedBirthDate
+                : 'No'}
+            </div>
           </LabelizedField>
         </Grid>
-        <Grid item xs={4}>
-          <LabelizedField label='ID Type'>
-            <>
-              Multiple id document allowed
-              <Missing />
-            </>
-          </LabelizedField>
-        </Grid>
-        <Grid item xs={4}>
-          <LabelizedField label='ID Number'>
-            <>
-              Multiple id document allowed
-              <Missing />
-            </>
-          </LabelizedField>
-        </Grid>
-        <Grid item xs={4}>
+        <Grid item xs={3}>
           <LabelizedField label='Household ID'>
             <ContentLink onClick={() => openHousehold()}>
               {decodeIdString(individual.household.id)}
             </ContentLink>
           </LabelizedField>
         </Grid>
-        <Grid item xs={4}>
-          <LabelizedField label='Special Privileges'>
+        <Grid item xs={3}>
+          <LabelizedField label='Role'>
+            <div>{individual.role}</div>
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label='Relationship to HOH'>
+            <div>{individual.relationship}</div>
+          </LabelizedField>
+        </Grid>
+        {mappedIndividualDocuments}
+        <Grid item xs={3}>
+          <LabelizedField label='Marital Status'>
+            <div>{individual.maritalStatus}</div>
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label='Pregnant'>
             <div>
               <Missing />
+              {/* <div>{individual.pregnant ? 'YES' : 'NO' || '-'}</div> */}
             </div>
           </LabelizedField>
         </Grid>
