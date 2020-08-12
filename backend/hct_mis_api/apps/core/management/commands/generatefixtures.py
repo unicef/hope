@@ -6,12 +6,11 @@ from django.db import transaction
 from django.db.models import Q
 
 from account.fixtures import UserFactory
+from cash_assist_datahub import fixtures as cash_assist_datahub_fixtures
 from cash_assist_datahub.models import Session, Programme
 from core.fixtures import AdminAreaFactory, AdminAreaTypeFactory
 from core.models import BusinessArea, AdminArea
 from household.fixtures import (
-    HouseholdFactory,
-    IndividualFactory,
     EntitlementCardFactory,
     DocumentFactory,
     create_household,
@@ -19,7 +18,8 @@ from household.fixtures import (
 from household.models import DocumentType
 from payment.fixtures import (
     PaymentRecordFactory,
-    CashPlanPaymentVerificationFactory, PaymentVerificationFactory,
+    CashPlanPaymentVerificationFactory,
+    PaymentVerificationFactory,
 )
 from program.fixtures import CashPlanFactory, ProgramFactory
 from program.models import Program
@@ -27,8 +27,6 @@ from registration_data.fixtures import RegistrationDataImportFactory
 from registration_data.models import RegistrationDataImport
 from registration_datahub.fixtures import (
     RegistrationDataImportDatahubFactory,
-    ImportedIndividualFactory,
-    ImportedHouseholdFactory,
     create_imported_household,
 )
 from targeting.fixtures import (
@@ -37,7 +35,6 @@ from targeting.fixtures import (
     TargetingCriteriaRuleFilterFactory,
     TargetingCriteriaFactory,
 )
-from cash_assist_datahub import fixtures as cash_assist_datahub_fixtures
 
 
 class Command(BaseCommand):
@@ -145,9 +142,10 @@ class Command(BaseCommand):
                 household, individuals = create_household(
                     {
                         "registration_data_import": registration_data_import,
+                        "business_area": BusinessArea.objects.first(),
                         "admin_area": AdminArea.objects.order_by("?").first(),
                     },
-                    {"registration_data_import": registration_data_import,},
+                    {"registration_data_import": registration_data_import},
                 )
                 for individual in individuals:
                     DocumentFactory(individual=individual)
