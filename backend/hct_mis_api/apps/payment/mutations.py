@@ -1,11 +1,13 @@
 from math import ceil
 
 import graphene
+import openpyxl
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from graphene_file_upload.scalars import Upload
 from scipy.special import ndtri
 
 from core.filters import filter_age
@@ -18,6 +20,7 @@ from payment.rapid_pro.api import RapidProAPI
 from payment.utils import get_number_of_samples
 from program.models import CashPlan
 from program.schema import CashPlanNode
+from registration_datahub.schema import XlsxRowErrorNode
 
 
 class CreatePaymentVerificationMutation(graphene.Mutation):
@@ -206,6 +209,43 @@ class CreatePaymentVerificationMutation(graphene.Mutation):
         )
         cash_plan_payment_verification.save()
 
+
+# class(
+#      graphene.Mutation,
+# ):
+#     cash_plan = graphene.Field(CashPlanNode)
+#     errors = graphene.List(XlsxRowErrorNode)
+#
+#     class Arguments:
+#         file = Upload(required=True)
+#         cash_plan_verification_id = graphene.GlobalID(required=True)
+#
+#     @classmethod
+#     @is_authenticated
+#     def mutate(cls, root, info, file, business_area_slug):
+#
+#         wb = openpyxl.load_workbook(file)
+#
+#         ws_verifications = wb.active
+#         # Could just return max_row if openpyxl won't count empty rows too
+#         for row in ws_verifications.iter_rows(min_row=1):
+#             if not any([cell.value for cell in row]):
+#                 continue
+#             number_of_households += 1
+#
+#         for row in ind_sheet.iter_rows(min_row=3):
+#
+#             if not any([cell.value for cell in row]):
+#                 continue
+#             number_of_individuals += 1
+#
+#         created = ImportData.objects.create(
+#             file=file,
+#             number_of_households=number_of_households,
+#             number_of_individuals=number_of_individuals,
+#         )
+#
+#         return UploadImportDataXLSXFile(created, [])
 
 class Mutations(graphene.ObjectType):
     create_cash_plan_payment_verification = (

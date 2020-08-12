@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from openpyxl.writer.excel import save_virtual_workbook
 
-from payment.xlsx.XslxVerificationService import XslxVerificationService
+from payment.xlsx.XlsxVerificationExportService import XlsxVerificationExportService
 from payment.models import CashPlanPaymentVerification
 
 
@@ -16,7 +16,7 @@ def download_cash_plan_payment_verification(request, verification_id):
     filename = "payment_verification.xlsx"
     response = HttpResponse(content_type=mimetype)
     response["Content-Disposition"] = f"attachment; filename={filename}"
-    service = XslxVerificationService(
+    service = XlsxVerificationExportService(
         get_object_or_404(CashPlanPaymentVerification, id=verification_id)
     )
     response.write(
