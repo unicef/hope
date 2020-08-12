@@ -77,7 +77,7 @@ class RdiBaseCreateTask:
             choices = [
                 x.get("value") for x in self.COMBINED_FIELDS[header]["choices"]
             ]
-            if not isinstance(value, int):
+            if isinstance(value, str):
                 upper_value = value.upper()
                 if upper_value in choices:
                     return upper_value
@@ -380,13 +380,13 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                     continue
 
                 if header == "household_id":
-                    household_id = str(cell.value)
+                    temp_value = cell.value
+                    if isinstance(temp_value, float) and temp_value.is_integer():
+                        temp_value = int(temp_value)
+                    household_id = str(temp_value)
                     if sheet_title == "individuals":
-                        current_household = self.households.get(household_id)
-                        obj_to_create.household_id = (
-                            current_household.pk
-                            if current_household is not None
-                            else None
+                        obj_to_create.household = self.households.get(
+                            household_id
                         )
 
                 if header in complex_fields[sheet_title]:
@@ -417,8 +417,9 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
                     if header == "relationship_i_c" and value == HEAD:
                         household = self.households.get(household_id)
-                        household.head_of_household = obj_to_create
-                        households_to_update.append(household)
+                        if household is not None:
+                            household.head_of_household = obj_to_create
+                            households_to_update.append(household)
 
                     setattr(
                         obj_to_create, combined_fields[header]["name"], value,
