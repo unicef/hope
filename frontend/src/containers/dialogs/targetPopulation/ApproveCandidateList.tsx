@@ -10,6 +10,7 @@ import styled from 'styled-components';
 import WarningIcon from '@material-ui/icons/Warning';
 import { Field, Formik } from 'formik';
 import * as Yup from 'yup';
+import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
 import { ProgrammeAutocomplete } from '../../../shared/ProgrammeAutocomplete';
 import {
   useAllProgramsQuery,
@@ -119,6 +120,15 @@ export function ApproveCandidateList({ open, setOpen, targetPopulationId }) {
                   filtering criteria
                 </Box>
               </DialogDescription>
+              {values.program && values.program.individualDataNeeded ? (
+                <DialogDescription>
+                  <strong>
+                    Warning: You can only select a programme that is compatible
+                    with your filtering criteria
+                  </strong>
+                </DialogDescription>
+              ) : null}
+
               <Field
                 name='program'
                 label='Select a Programme'
