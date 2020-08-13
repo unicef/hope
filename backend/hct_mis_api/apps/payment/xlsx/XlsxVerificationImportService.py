@@ -42,7 +42,9 @@ class XlsxVerificationImportService:
     def open_workbook(self) -> openpyxl.Workbook:
         wb = openpyxl.load_workbook(self.file)
         self.wb = wb
-        self.ws_verifications = wb.active
+        self.ws_verifications = wb[
+            XlsxVerificationExportService.VERIFICATION_SHEET
+        ]
         return wb
 
     def validate(self):
@@ -63,9 +65,20 @@ class XlsxVerificationImportService:
         )
 
     def _check_version(self):
-        if self.wb.properties.version != XlsxVerificationExportService.VERSION:
+        ws_meta = self.wb[XlsxVerificationExportService.META_SHEET]
+        version_cell_name = ws_meta[
+            XlsxVerificationExportService.VERSION_CELL_NAME_COORDINATES
+        ].value
+        version = ws_meta[
+            XlsxVerificationExportService.VERSION_CELL_COORDINATES
+        ].value
+
+        if (
+            version_cell_name != XlsxVerificationExportService.VERSION_CELL_NAME
+            or version != XlsxVerificationExportService.VERSION
+        ):
             raise ValidationError(
-                f"Unsupported file version ({self.wb.properties.version}). Only version: {XlsxVerificationExportService.VERSION} is supported"
+                f"Unsupported file version ({version}). Only version: {XlsxVerificationExportService.VERSION} is supported"
             )
 
     def _validate_headers(self):
