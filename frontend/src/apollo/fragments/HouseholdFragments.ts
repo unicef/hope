@@ -9,6 +9,7 @@ export const householdMinimal = gql`
     totalCashReceived
     firstRegistrationDate
     lastRegistrationDate
+    status
     headOfHousehold {
       id
       fullName
@@ -28,6 +29,7 @@ export const householdDetailed = gql`
   fragment householdDetailed on HouseholdNode {
     ...householdMinimal
     countryOrigin
+    country
     individuals {
       totalCount
       edges {
@@ -43,6 +45,17 @@ export const householdDetailed = gql`
         node {
           name
         }
+      }
+    }
+    registrationDataImport {
+      name
+      dataSource
+      importDate
+      importedBy {
+        firstName
+        lastName
+        email
+        username
       }
     }
     paymentRecords {

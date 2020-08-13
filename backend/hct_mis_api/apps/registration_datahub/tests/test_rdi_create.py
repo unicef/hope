@@ -114,6 +114,13 @@ class TestRdiCreateTask(TestCase):
         household_obj_data = model_to_dict(
             household, ("residence_status", "country", "flex_fields")
         )
+
+        roles = household.individuals_and_roles.all()
+        self.assertEqual(roles.count(), 1)
+        role = roles.first()
+        self.assertEqual(role.role, "PRIMARY")
+        self.assertEqual(role.individual.full_name, "Some Full Name")
+
         self.assertEqual(household_obj_data, household_data)
 
     def test_handle_document_fields(self):
@@ -334,6 +341,15 @@ class TestRdiKoboCreateTask(TestCase):
             file=file, number_of_households=1, number_of_individuals=2,
         )
 
+        content = Path(
+            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests"
+            "/test_file/kobo_submissions_collectors.json"
+        ).read_bytes()
+        file = File(BytesIO(content), name="kobo_submissions_collectors.json")
+        cls.import_data_collectors = ImportData.objects.create(
+            file=file, number_of_households=2, number_of_individuals=5,
+        )
+
         cls.business_area = BusinessArea.objects.first()
         cls.business_area.kobo_token = "1234ABC"
         cls.business_area.save()
@@ -401,6 +417,53 @@ class TestRdiKoboCreateTask(TestCase):
         "registration_datahub.tasks.rdi_create.KoboAPI.get_attached_file",
         _return_test_image,
     )
+    def test_execute_multiple_collectors(self):
+        task = RdiKoboCreateTask()
+        task.execute(
+            self.registration_data_import.id,
+            self.import_data_collectors.id,
+            self.business_area.id,
+        )
+        households = ImportedHousehold.objects.all()
+        individuals = ImportedIndividual.objects.all()
+
+        self.assertEqual(households.count(), 2)
+        self.assertEqual(individuals.count(), 4)
+
+        documents = ImportedDocument.objects.values_list(
+            "individual__full_name", flat=True
+        )
+        self.assertEqual(
+            sorted(list(documents)),
+            [
+                "Tesa Testowski",
+                "Test Testowski",
+                "Zbyszek Zbyszkowski",
+                "abc efg",
+            ],
+        )
+
+        first_household = households.get(size=3)
+        second_household = households.get(size=1)
+
+        first_household_collectors = first_household.individuals_and_roles.values_list(
+            "individual__full_name", "role"
+        )
+        self.assertEqual(
+            list(first_household_collectors),
+            [("Tesa Testowski", "ALTERNATE"), ("Test Testowski", "PRIMARY")],
+        )
+        second_household_collectors = second_household.individuals_and_roles.values_list(
+            "individual__full_name", "role"
+        )
+        self.assertEqual(
+            list(second_household_collectors), [("Test Testowski", "PRIMARY")],
+        )
+
+    @mock.patch(
+        "registration_datahub.tasks.rdi_create.KoboAPI.get_attached_file",
+        _return_test_image,
+    )
     def test_handle_image_field(self):
         task = RdiKoboCreateTask()
         task.business_area = self.business_area
@@ -457,6 +520,7 @@ class TestRdiKoboCreateTask(TestCase):
             }
         ]
         individual = ImportedIndividualFactory()
+        individuals_dict = {individual.get_hash_key: individual}
         documents_and_identities = [
             {
                 "birth_certificate": {
@@ -473,7 +537,9 @@ class TestRdiKoboCreateTask(TestCase):
                 }
             },
         ]
-        task._handle_documents_and_identities(documents_and_identities)
+        task._handle_documents_and_identities(
+            documents_and_identities, individuals_dict
+        )
 
         result = list(
             ImportedDocument.objects.values("document_number", "individual_id")
