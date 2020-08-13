@@ -115,6 +115,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
     phone_no_alternative = PhoneNumberField(blank=True, default="")
     household = models.ForeignKey(
         "ImportedHousehold",
+        null=True,
         related_name="individuals",
         on_delete=models.CASCADE,
     )

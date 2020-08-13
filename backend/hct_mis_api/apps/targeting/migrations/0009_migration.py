@@ -13,6 +13,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='householdselection',
             name='final',
-            field=models.BooleanField(default=True, help_text='\n            When set to True, this means the household has been selected from\n            the candidate list. Only these households will be sent to\n            CashAssist when a sync is run for the associated target population.\n            '),
+            field=models.BooleanField(
+                default=True, help_text='\n            When set to True, this means the household has been selected from\n            the candidate list. Only these households will be sent to\n            CashAssist when a sync is run for the associated target population.\n            '),
         ),
     ]
