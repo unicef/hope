@@ -7,7 +7,7 @@ import {
 import { UniversalTable } from '../UniversalTable';
 import { headCells } from './VerificationRecordsHeadCells';
 import { VerificationRecordsTableRow } from './VerificationRecordsTableRow';
-import { Button, Box } from '@material-ui/core';
+import { Button, Box, makeStyles } from '@material-ui/core';
 import { GetApp, Publish } from '@material-ui/icons';
 
 export function VerificationRecordsTable({ id, filter }): ReactElement {
@@ -15,14 +15,29 @@ export function VerificationRecordsTable({ id, filter }): ReactElement {
     cashPlanPaymentVerification: id,
   };
 
+  const useStyles = makeStyles(() => ({
+    link: {
+      textDecoration: 'none',
+      '&:hover': {
+        textDecoration: 'none',
+        cursor: 'pointer',
+      },
+    },
+  }));
+
+  const classes = useStyles();
+
   const exportButton = (
     <Box mr={3}>
-      <a href={`api/download_cash_plan_payment_verification/${id}`}>
+      <a
+        download
+        className={classes.link}
+        href={`/api/download-cash-plan-payment-verification/${id}`}
+      >
         <Button
           startIcon={<GetApp />}
           color='primary'
           variant='outlined'
-          onClick={() => console.log('EXPORT')}
           data-cy='button-submit'
         >
           EXPORT
