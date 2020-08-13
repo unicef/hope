@@ -102,6 +102,7 @@ export function RegistrationFilters({
         <InputLabel>Status</InputLabel>
         <Select
           // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+          // @ts-ignore
           value={filter.status || ''}
           variant='outlined'
           label='Status'
