@@ -293,6 +293,7 @@ export type CashPlanPaymentVerificationNode = Node & {
   confidenceInterval?: Maybe<Scalars['Float']>,
   marginOfError?: Maybe<Scalars['Float']>,
   rapidProFlowId: Scalars['String'],
+  rapidProFlowStartUuid: Scalars['String'],
   paymentRecordVerifications: PaymentVerificationNodeConnection,
 };
 
@@ -1191,6 +1192,12 @@ export enum ImportedIndividualWorkStatus {
   NotProvided = 'NOT_PROVIDED'
 }
 
+export type ImportXlsxCashPlanVerification = {
+   __typename?: 'ImportXlsxCashPlanVerification',
+  cashPlan?: Maybe<CashPlanNode>,
+  errors?: Maybe<Array<Maybe<XlsxErrorNode>>>,
+};
+
 export enum IndividualMaritalStatus {
   Single = 'SINGLE',
   Married = 'MARRIED',
@@ -1397,6 +1404,7 @@ export type MergeRegistrationDataImportMutation = {
 export type Mutations = {
    __typename?: 'Mutations',
   createCashPlanPaymentVerification?: Maybe<CreatePaymentVerificationMutation>,
+  importXlsxCashPlanVerification?: Maybe<ImportXlsxCashPlanVerification>,
   createTargetPopulation?: Maybe<CreateTargetPopulationMutation>,
   updateTargetPopulation?: Maybe<UpdateTargetPopulationMutation>,
   copyTargetPopulation?: Maybe<CopyTargetPopulationMutationPayload>,
@@ -1419,6 +1427,12 @@ export type Mutations = {
 
 export type MutationsCreateCashPlanPaymentVerificationArgs = {
   input: CreatePaymentVerificationInput
+};
+
+
+export type MutationsImportXlsxCashPlanVerificationArgs = {
+  cashPlanVerificationId: Scalars['ID'],
+  file: Scalars['Upload']
 };
 
 
@@ -2793,6 +2807,13 @@ export type XlsxArguments = {
   file: Scalars['Upload'],
 };
 
+export type XlsxErrorNode = {
+   __typename?: 'XlsxErrorNode',
+  sheet?: Maybe<Scalars['String']>,
+  coordinates?: Maybe<Scalars['String']>,
+  message?: Maybe<Scalars['String']>,
+};
+
 export type XlsxRowErrorNode = {
    __typename?: 'XlsxRowErrorNode',
   rowNumber?: Maybe<Scalars['Int']>,
@@ -3184,6 +3205,26 @@ export type FinalizeTpMutation = (
         & Pick<StatsObjectType, 'childMale' | 'childFemale' | 'adultMale' | 'adultFemale'>
       )> }
     )> }
+  )> }
+);
+
+export type ImportXlsxCashPlanVerificationMutationVariables = {
+  cashPlanVerificationId: Scalars['ID'],
+  file: Scalars['Upload']
+};
+
+
+export type ImportXlsxCashPlanVerificationMutation = (
+  { __typename?: 'Mutations' }
+  & { importXlsxCashPlanVerification: Maybe<(
+    { __typename?: 'ImportXlsxCashPlanVerification' }
+    & { cashPlan: Maybe<(
+      { __typename?: 'CashPlanNode' }
+      & Pick<CashPlanNode, 'id'>
+    )>, errors: Maybe<Array<Maybe<(
+      { __typename?: 'XlsxErrorNode' }
+      & Pick<XlsxErrorNode, 'sheet' | 'coordinates' | 'message'>
+    )>>> }
   )> }
 );
 
@@ -5270,6 +5311,63 @@ export function useFinalizeTpMutation(baseOptions?: ApolloReactHooks.MutationHoo
 export type FinalizeTpMutationHookResult = ReturnType<typeof useFinalizeTpMutation>;
 export type FinalizeTpMutationResult = ApolloReactCommon.MutationResult<FinalizeTpMutation>;
 export type FinalizeTpMutationOptions = ApolloReactCommon.BaseMutationOptions<FinalizeTpMutation, FinalizeTpMutationVariables>;
+export const ImportXlsxCashPlanVerificationDocument = gql`
+    mutation importXlsxCashPlanVerification($cashPlanVerificationId: ID!, $file: Upload!) {
+  importXlsxCashPlanVerification(cashPlanVerificationId: $cashPlanVerificationId, file: $file) {
+    cashPlan {
+      id
+    }
+    errors {
+      sheet
+      coordinates
+      message
+    }
+  }
+}
+    `;
+export type ImportXlsxCashPlanVerificationMutationFn = ApolloReactCommon.MutationFunction<ImportXlsxCashPlanVerificationMutation, ImportXlsxCashPlanVerificationMutationVariables>;
+export type ImportXlsxCashPlanVerificationComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ImportXlsxCashPlanVerificationMutation, ImportXlsxCashPlanVerificationMutationVariables>, 'mutation'>;
+
+    export const ImportXlsxCashPlanVerificationComponent = (props: ImportXlsxCashPlanVerificationComponentProps) => (
+      <ApolloReactComponents.Mutation<ImportXlsxCashPlanVerificationMutation, ImportXlsxCashPlanVerificationMutationVariables> mutation={ImportXlsxCashPlanVerificationDocument} {...props} />
+    );
+    
+export type ImportXlsxCashPlanVerificationProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ImportXlsxCashPlanVerificationMutation, ImportXlsxCashPlanVerificationMutationVariables> & TChildProps;
+export function withImportXlsxCashPlanVerification<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ImportXlsxCashPlanVerificationMutation,
+  ImportXlsxCashPlanVerificationMutationVariables,
+  ImportXlsxCashPlanVerificationProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, ImportXlsxCashPlanVerificationMutation, ImportXlsxCashPlanVerificationMutationVariables, ImportXlsxCashPlanVerificationProps<TChildProps>>(ImportXlsxCashPlanVerificationDocument, {
+      alias: 'importXlsxCashPlanVerification',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useImportXlsxCashPlanVerificationMutation__
+ *
+ * To run a mutation, you first call `useImportXlsxCashPlanVerificationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useImportXlsxCashPlanVerificationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [importXlsxCashPlanVerificationMutation, { data, loading, error }] = useImportXlsxCashPlanVerificationMutation({
+ *   variables: {
+ *      cashPlanVerificationId: // value for 'cashPlanVerificationId'
+ *      file: // value for 'file'
+ *   },
+ * });
+ */
+export function useImportXlsxCashPlanVerificationMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ImportXlsxCashPlanVerificationMutation, ImportXlsxCashPlanVerificationMutationVariables>) {
+        return ApolloReactHooks.useMutation<ImportXlsxCashPlanVerificationMutation, ImportXlsxCashPlanVerificationMutationVariables>(ImportXlsxCashPlanVerificationDocument, baseOptions);
+      }
+export type ImportXlsxCashPlanVerificationMutationHookResult = ReturnType<typeof useImportXlsxCashPlanVerificationMutation>;
+export type ImportXlsxCashPlanVerificationMutationResult = ApolloReactCommon.MutationResult<ImportXlsxCashPlanVerificationMutation>;
+export type ImportXlsxCashPlanVerificationMutationOptions = ApolloReactCommon.BaseMutationOptions<ImportXlsxCashPlanVerificationMutation, ImportXlsxCashPlanVerificationMutationVariables>;
 export const UpdateProgramDocument = gql`
     mutation UpdateProgram($programData: UpdateProgramInput!) {
   updateProgram(programData: $programData) {
@@ -8511,6 +8609,8 @@ export type ResolversTypes = {
   XlsxArguments: XlsxArguments,
   Upload: ResolverTypeWrapper<Scalars['Upload']>,
   CreatePaymentVerificationMutation: ResolverTypeWrapper<CreatePaymentVerificationMutation>,
+  ImportXlsxCashPlanVerification: ResolverTypeWrapper<ImportXlsxCashPlanVerification>,
+  XlsxErrorNode: ResolverTypeWrapper<XlsxErrorNode>,
   CreateTargetPopulationInput: CreateTargetPopulationInput,
   CreateTargetPopulationMutation: ResolverTypeWrapper<CreateTargetPopulationMutation>,
   UpdateTargetPopulationInput: UpdateTargetPopulationInput,
@@ -8688,6 +8788,8 @@ export type ResolversParentTypes = {
   XlsxArguments: XlsxArguments,
   Upload: Scalars['Upload'],
   CreatePaymentVerificationMutation: CreatePaymentVerificationMutation,
+  ImportXlsxCashPlanVerification: ImportXlsxCashPlanVerification,
+  XlsxErrorNode: XlsxErrorNode,
   CreateTargetPopulationInput: CreateTargetPopulationInput,
   CreateTargetPopulationMutation: CreateTargetPopulationMutation,
   UpdateTargetPopulationInput: UpdateTargetPopulationInput,
@@ -8852,6 +8954,7 @@ export type CashPlanPaymentVerificationNodeResolvers<ContextType = any, ParentTy
   confidenceInterval?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   marginOfError?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   rapidProFlowId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  rapidProFlowStartUuid?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   paymentRecordVerifications?: Resolver<ResolversTypes['PaymentVerificationNodeConnection'], ParentType, ContextType, CashPlanPaymentVerificationNodePaymentRecordVerificationsArgs>,
 };
 
@@ -9225,6 +9328,11 @@ export type ImportedIndividualNodeEdgeResolvers<ContextType = any, ParentType ex
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
 };
 
+export type ImportXlsxCashPlanVerificationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportXlsxCashPlanVerification'] = ResolversParentTypes['ImportXlsxCashPlanVerification']> = {
+  cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
+  errors?: Resolver<Maybe<Array<Maybe<ResolversTypes['XlsxErrorNode']>>>, ParentType, ContextType>,
+};
+
 export type IndividualNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualNode'] = ResolversParentTypes['IndividualNode']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
@@ -9354,6 +9462,7 @@ export type MergeRegistrationDataImportMutationResolvers<ContextType = any, Pare
 
 export type MutationsResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutations'] = ResolversParentTypes['Mutations']> = {
   createCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['CreatePaymentVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsCreateCashPlanPaymentVerificationArgs, 'input'>>,
+  importXlsxCashPlanVerification?: Resolver<Maybe<ResolversTypes['ImportXlsxCashPlanVerification']>, ParentType, ContextType, RequireFields<MutationsImportXlsxCashPlanVerificationArgs, 'cashPlanVerificationId' | 'file'>>,
   createTargetPopulation?: Resolver<Maybe<ResolversTypes['CreateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsCreateTargetPopulationArgs, 'input'>>,
   updateTargetPopulation?: Resolver<Maybe<ResolversTypes['UpdateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateTargetPopulationArgs, 'input'>>,
   copyTargetPopulation?: Resolver<Maybe<ResolversTypes['CopyTargetPopulationMutationPayload']>, ParentType, ContextType, RequireFields<MutationsCopyTargetPopulationArgs, 'input'>>,
@@ -9830,6 +9939,12 @@ export interface UuidScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes
   name: 'UUID'
 }
 
+export type XlsxErrorNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['XlsxErrorNode'] = ResolversParentTypes['XlsxErrorNode']> = {
+  sheet?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  coordinates?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  message?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
 export type XlsxRowErrorNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['XlsxRowErrorNode'] = ResolversParentTypes['XlsxRowErrorNode']> = {
   rowNumber?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   header?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
@@ -9891,6 +10006,7 @@ export type Resolvers<ContextType = any> = {
   ImportedIndividualNode?: ImportedIndividualNodeResolvers<ContextType>,
   ImportedIndividualNodeConnection?: ImportedIndividualNodeConnectionResolvers<ContextType>,
   ImportedIndividualNodeEdge?: ImportedIndividualNodeEdgeResolvers<ContextType>,
+  ImportXlsxCashPlanVerification?: ImportXlsxCashPlanVerificationResolvers<ContextType>,
   IndividualNode?: IndividualNodeResolvers<ContextType>,
   IndividualNodeConnection?: IndividualNodeConnectionResolvers<ContextType>,
   IndividualNodeEdge?: IndividualNodeEdgeResolvers<ContextType>,
@@ -9951,6 +10067,7 @@ export type Resolvers<ContextType = any> = {
   UserNodeEdge?: UserNodeEdgeResolvers<ContextType>,
   UserObjectType?: UserObjectTypeResolvers<ContextType>,
   UUID?: GraphQLScalarType,
+  XlsxErrorNode?: XlsxErrorNodeResolvers<ContextType>,
   XlsxRowErrorNode?: XlsxRowErrorNodeResolvers<ContextType>,
 };
 
