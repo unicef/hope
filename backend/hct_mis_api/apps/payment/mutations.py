@@ -77,11 +77,11 @@ class CreatePaymentVerificationMutation(graphene.Mutation):
                     "not_allowed": ["xlsx_arguments", "manual_arguments"],
                 },
                 CashPlanPaymentVerification.VERIFICATION_METHOD_XLSX: {
-                    "required": ["xlsx_arguments"],
+                    "required": [],
                     "not_allowed": ["rapid_pro_arguments", "manual_arguments"],
                 },
                 CashPlanPaymentVerification.VERIFICATION_METHOD_MANUAL: {
-                    "required": ["manual_arguments"],
+                    "required": [],
                     "not_allowed": ["rapid_pro_arguments", "xlsx_arguments"],
                 },
             },
@@ -119,9 +119,6 @@ class CreatePaymentVerificationMutation(graphene.Mutation):
             payment_record_verifications_to_create.append(
                 payment_record_verification
             )
-        cash_plan_verification.status = (
-            CashPlanPaymentVerification.STATUS_ACTIVE
-        )
         cash_plan_verification.save()
         PaymentVerification.objects.bulk_create(
             payment_record_verifications_to_create
@@ -206,11 +203,95 @@ class CreatePaymentVerificationMutation(graphene.Mutation):
                 heading_household__payment_records__verifications__cash_plan_payment_verification=cash_plan_payment_verification.id
             ).values_list("phone_no", flat=True)
         )
-        flow_start_info = api.start_flow(flow_id, phone_numbers)
-        cash_plan_payment_verification.rapid_pro_flow_start_uuid = flow_start_info.get(
-            "uuid"
-        )
+        # TODO Uncomment when correct phone numbers in user
+        # flow_start_info = api.start_flow(flow_id, phone_numbers)
+        # cash_plan_payment_verification.rapid_pro_flow_start_uuid = flow_start_info.get(
+        #     "uuid"
+        # )
         cash_plan_payment_verification.save()
+
+
+class ActivateCashPlanVerificationMutation(graphene.Mutation):
+
+    cash_plan = graphene.Field(CashPlanNode)
+
+    class Arguments:
+        cash_plan_verification_id = graphene.ID(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root, info, cash_plan_verification_id, **kwargs):
+        id = decode_id_string(cash_plan_verification_id)
+        cashplan_payment_verification = get_object_or_404(
+            CashPlanPaymentVerification, id=id
+        )
+        if (
+            cashplan_payment_verification.status
+            != CashPlanPaymentVerification.STATUS_PENDING
+        ):
+            raise ValidationError("You can activate only PENDING verification")
+        cashplan_payment_verification.status = (
+            CashPlanPaymentVerification.STATUS_ACTIVE
+        )
+        cashplan_payment_verification.save()
+        return ActivateCashPlanVerificationMutation(
+            cashplan_payment_verification.cash_plan
+        )
+
+
+class FinishCashPlanVerificationMutation(graphene.Mutation):
+
+    cash_plan = graphene.Field(CashPlanNode)
+
+    class Arguments:
+        cash_plan_verification_id = graphene.ID(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root, info, cash_plan_verification_id, **kwargs):
+        id = decode_id_string(cash_plan_verification_id)
+        cashplan_payment_verification = get_object_or_404(
+            CashPlanPaymentVerification, id=id
+        )
+        if (
+            cashplan_payment_verification.status
+            != CashPlanPaymentVerification.STATUS_ACTIVE
+        ):
+            raise ValidationError("You can finish only ACTIVE verification")
+        cashplan_payment_verification.status = (
+            CashPlanPaymentVerification.STATUS_FINISHED
+        )
+        cashplan_payment_verification.save()
+        return ActivateCashPlanVerificationMutation(
+            cashplan_payment_verification.cash_plan
+        )
+
+
+class DiscardCashPlanVerificationMutation(graphene.Mutation):
+
+    cash_plan = graphene.Field(CashPlanNode)
+
+    class Arguments:
+        cash_plan_verification_id = graphene.ID(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root, info, cash_plan_verification_id, **kwargs):
+        id = decode_id_string(cash_plan_verification_id)
+        cashplan_payment_verification = get_object_or_404(
+            CashPlanPaymentVerification, id=id
+        )
+        if (
+            cashplan_payment_verification.status
+            != CashPlanPaymentVerification.STATUS_ACTIVE
+        ):
+            raise ValidationError("You can discard only ACTIVE verification")
+        cash_plan = cashplan_payment_verification.cash_plan
+        cashplan_payment_verification.delete()
+        return DiscardCashPlanVerificationMutation(cash_plan)
 
 
 class XlsxErrorNode(graphene.ObjectType):
@@ -243,6 +324,20 @@ class ImportXlsxCashPlanVerification(graphene.Mutation,):
         cashplan_payment_verification = get_object_or_404(
             CashPlanPaymentVerification, id=id
         )
+        if (
+            cashplan_payment_verification.status
+            != CashPlanPaymentVerification.STATUS_ACTIVE
+        ):
+            raise ValidationError(
+                "You can only import verification for active CashPlan verification"
+            )
+        if (
+            cashplan_payment_verification.verification_method
+            != CashPlanPaymentVerification.VERIFICATION_METHOD_XLSX
+        ):
+            raise ValidationError(
+                "You can only import verification when XLSX channel is selected"
+            )
         import_service = XlsxVerificationImportService(
             cashplan_payment_verification, file
         )
@@ -261,3 +356,12 @@ class Mutations(graphene.ObjectType):
         CreatePaymentVerificationMutation.Field()
     )
     import_xlsx_cash_plan_verification = ImportXlsxCashPlanVerification.Field()
+    activate_cash_plan_payment_verification = (
+        ActivateCashPlanVerificationMutation.Field()
+    )
+    finish_cash_plan_payment_verification = (
+        FinishCashPlanVerificationMutation.Field()
+    )
+    discard_cash_plan_payment_verification = (
+        DiscardCashPlanVerificationMutation.Field()
+    )
