@@ -14,17 +14,20 @@ export function VerificationRecordsTable({ id, filter }): ReactElement {
   const initialVariables: AllPaymentVerificationsQueryVariables = {
     cashPlanPaymentVerification: id,
   };
+
   const exportButton = (
     <Box mr={3}>
-      <Button
-        startIcon={<GetApp />}
-        color='primary'
-        variant='outlined'
-        onClick={() => console.log('EXPORT')}
-        data-cy='button-submit'
-      >
-        EXPORT
-      </Button>
+      <a href={`api/download_cash_plan_payment_verification/${id}`}>
+        <Button
+          startIcon={<GetApp />}
+          color='primary'
+          variant='outlined'
+          onClick={() => console.log('EXPORT')}
+          data-cy='button-submit'
+        >
+          EXPORT
+        </Button>
+      </a>
     </Box>
   );
 
