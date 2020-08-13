@@ -78,6 +78,7 @@ interface TableComponentProps<T> {
   loading?: boolean;
   allowSort?: boolean;
   isOnPaper?: boolean;
+  actions?: Array<React.ReactElement>;
 }
 
 export function TableComponent<T>({
@@ -97,6 +98,7 @@ export function TableComponent<T>({
   loading,
   allowSort,
   isOnPaper = true,
+  actions,
 }: TableComponentProps<T>): React.ReactElement {
   const classes = useStyles({});
 
@@ -144,7 +146,13 @@ export function TableComponent<T>({
   const table = (
     <>
       <TableContainer>
-        {title ? <EnhancedTableToolbar title={title} /> : null}
+        <Box display='flex' justifyContent='space-between'>
+          {title ? <EnhancedTableToolbar title={title} /> : null}
+          <Box p={5} display='flex'>
+            {actions || null}
+          </Box>
+        </Box>
+
         <Table
           className={classes.table}
           aria-labelledby='tableTitle'
