@@ -118,6 +118,15 @@ class ImportDataValidator(BaseValidator):
                         if is_xlsx is True:
                             error["row_number"] = row_number
                         invalid_rows.append(error)
+                    if name and not value:
+                        error = {
+                            "header": key,
+                            "message": "Number for other_id_no_i_c is "
+                            "required, when name is provided"
+                        }
+                        if is_xlsx is True:
+                            error["row_number"] = row_number
+                        invalid_rows.append(error)
 
         return invalid_rows
 
