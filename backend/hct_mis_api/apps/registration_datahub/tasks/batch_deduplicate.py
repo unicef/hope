@@ -22,7 +22,7 @@ class BatchDeduplicate:
         to_remove = []
         to_mark_as_possible_duplicate = []
         for individual in individuals:
-            fields_names = config.DEDUPLICATION_FIELDS
+            fields_names = config.DEDUPLICATION_BATCH_FIELDS
             fields = model_to_dict(individual, fields=fields_names)
             if not isinstance(fields["phone_no"], str):
                 fields["phone_no"] = fields["phone_no"].raw_input
@@ -46,7 +46,7 @@ class BatchDeduplicate:
             ]
 
             query_dict = {
-                "min_score": config.DEDUPLICATION_MIN_SCORE,
+                "min_score": config.DEDUPLICATION_BATCH_MIN_SCORE,
                 "query": {
                     "bool": {
                         "must": [{"dis_max": {"queries": query_fields}}],
@@ -57,12 +57,11 @@ class BatchDeduplicate:
                 },
             }
 
-            # hit with a score equal or above 1.0 is a duplicate
             query = ImportedIndividualDocument.search().from_dict(query_dict)
             results = query.execute()
             for individual_hit in results:
                 score = individual_hit.meta.score
-                if score >= 1:
+                if score >= config.DEDUPLICATION_BATCH_DUPLICATE_SCORE:
                     to_remove.append(individual_hit.id)
                 else:
                     to_mark_as_possible_duplicate.append(individual_hit.id)

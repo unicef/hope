@@ -51,6 +51,7 @@ from registration_datahub.models import (
     ImportedIndividual,
 )
 from registration_datahub.models import RegistrationDataImportDatahub
+from registration_datahub.tasks.batch_deduplicate import BatchDeduplicate
 from registration_datahub.tasks.utils import collectors_str_ids_to_list
 
 
@@ -382,7 +383,10 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
                 if header == "household_id":
                     temp_value = cell.value
-                    if isinstance(temp_value, float) and temp_value.is_integer():
+                    if (
+                        isinstance(temp_value, float)
+                        and temp_value.is_integer()
+                    ):
                         temp_value = int(temp_value)
                     household_id = str(temp_value)
                     if sheet_title == "individuals":
@@ -506,6 +510,11 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             "--models",
             "registration_datahub.ImportedIndividual",
         )
+
+        task = BatchDeduplicate(
+            registration_data_import_datahub=registration_data_import
+        )
+        task.deduplicate()
 
 
 class RdiKoboCreateTask(RdiBaseCreateTask):
@@ -806,3 +815,8 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             "--models",
             "registration_datahub.ImportedIndividual",
         )
+
+        task = BatchDeduplicate(
+            registration_data_import_datahub=registration_data_import
+        )
+        task.deduplicate()
