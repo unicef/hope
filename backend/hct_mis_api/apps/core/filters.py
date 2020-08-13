@@ -38,6 +38,30 @@ class IntegerRangeFilter(Filter):
         return super().filter(qs, values)
 
 
+def filter_age(field_name, qs, min, max):
+    current = datetime.now().date()
+    lookup_expr = "range"
+    values = None
+    if min is not None and max is not None:
+        lookup_expr = "range"
+        # year +1 , day-1
+        max_date = date(current.year - min + 1, current.month, current.day,)
+        max_date = max_date - timedelta(days=1)
+        min_date = date(current.year - max, current.month, current.day,)
+        values = (min_date, max_date)
+    elif min is not None and max is None:
+        lookup_expr = "lte"
+        # year +1 , day-1
+        max_date = date(current.year - min + 1, current.month, current.day,)
+        max_date = max_date - timedelta(days=1)
+        values = max_date
+    elif min is None and max is not None:
+        lookup_expr = "gte"
+        min_date = date(current.year - max, current.month, current.day,)
+        values = min_date
+    return qs.filter(**{f"{field_name}__{lookup_expr}": values})
+
+
 class AgeRangeFilter(Filter):
     field_class = RangeField
 
