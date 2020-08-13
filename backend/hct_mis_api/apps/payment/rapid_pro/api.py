@@ -51,7 +51,7 @@ class RapidProAPI:
         return flows["results"]
 
     def start_flow(self, flow_uuid, phone_numbers):
-        urns = [f"telegram:{x}" for x in phone_numbers]
+        urns = [f"tel:{x}" for x in phone_numbers]
         # urns = ["telegram:1079068080"]
         data = {"flow": flow_uuid, "urns": urns, "restart_participants": True}
         print(data)

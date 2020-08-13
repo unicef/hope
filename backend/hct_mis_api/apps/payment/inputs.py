@@ -23,9 +23,6 @@ class RapidProArguments(graphene.InputObjectType):
     flow_id = graphene.String(required=True)
 
 
-class XlsxArguments(graphene.InputObjectType):
-    file = Upload(required=True)
-
 
 class ManualArguments(graphene.InputObjectType):
     pass
@@ -39,8 +36,6 @@ class CreatePaymentVerificationInput(graphene.InputObjectType):
     full_list_arguments = FullListArguments()
     random_sampling_arguments = RandomSamplingArguments()
     rapid_pro_arguments = RapidProArguments()
-    xlsx_arguments = XlsxArguments()
-    # manual_arguments = ManualArguments()
 
 class GetCashplanVerificationSampleSizeInput(graphene.InputObjectType):
     cash_plan_id = graphene.ID(required=True)
