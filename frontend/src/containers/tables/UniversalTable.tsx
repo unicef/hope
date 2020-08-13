@@ -16,6 +16,7 @@ interface UniversalTableProps<T, K> {
   isOnPaper?: boolean;
   defaultOrderBy?: string;
   defaultOrderDirection?: string;
+  actions?: Array<ReactElement>;
 }
 export function UniversalTable<T, K>({
   rowsPerPageOptions = [5, 10, 15],
@@ -29,6 +30,7 @@ export function UniversalTable<T, K>({
   isOnPaper,
   defaultOrderBy,
   defaultOrderDirection,
+  actions,
 }: UniversalTableProps<T, K>): ReactElement {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(rowsPerPageOptions[0]);
@@ -70,6 +72,7 @@ export function UniversalTable<T, K>({
   return (
     <TableComponent<T>
       title={correctTitle}
+      actions={actions}
       data={typedEdges}
       loading={loading}
       renderRow={renderRow}

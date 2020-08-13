@@ -8,6 +8,7 @@ from household.models import (
     HEAD,
     IndividualIdentity,
     IndividualRoleInHousehold,
+    Agency,
 )
 from household.models import Household
 from household.models import Individual
@@ -15,7 +16,6 @@ from registration_data.models import RegistrationDataImport
 from registration_datahub.models import (
     RegistrationDataImportDatahub,
     ImportedHousehold,
-    ImportedAgency,
     ImportedIndividualRoleInHousehold,
     ImportedIndividual,
 )
@@ -109,9 +109,9 @@ class RdiMergeTask:
     ):
         documents_to_create = []
         for imported_document in imported_individual.documents.all():
-            document_type = DocumentType.objects.get(
+            document_type, _ = DocumentType.objects.get_or_create(
                 country=imported_document.type.country,
-                label=imported_document.type.label,
+                type=imported_document.type.type,
             )
             document = Document(
                 document_number=imported_document.document_number,
@@ -121,13 +121,13 @@ class RdiMergeTask:
             documents_to_create.append(document)
         identities_to_create = []
         for imported_identity in imported_individual.identities.all():
-            agency, _ = ImportedAgency.objects.get_or_create(
+            agency, _ = Agency.objects.get_or_create(
                 type=imported_identity.agency.type,
                 label=imported_identity.agency.label,
             )
             identity = IndividualIdentity(
                 agency=agency,
-                number=imported_identity.number,
+                number=imported_identity.document_number,
                 individual=individual,
             )
             identities_to_create.append(identity)

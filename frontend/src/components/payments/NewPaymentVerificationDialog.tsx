@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Formik, Form, Field } from 'formik';
 import styled from 'styled-components';
 import {
@@ -9,17 +9,26 @@ import {
   Tab,
   Typography,
   Box,
+  Grid,
 } from '@material-ui/core';
-import CheckRoundedIcon from '@material-ui/icons/CheckRounded';
 
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
 import { TabPanel } from '../TabPanel';
 import { FormikSliderField } from '../../shared/Formik/FormikSliderField';
-import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
-import { FormikMultiSelectField } from '../../shared/Formik/FormikMultiSelectField/FormikMultiSelectField';
 import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
+import {
+  useCreateCashPlanPaymentVerificationMutation,
+  useAllRapidProFlowsQuery,
+  useAllAdminAreasQuery,
+  useSampleSizeQuery,
+} from '../../__generated__/graphql';
+import { FormikMultiSelectField } from '../../shared/Formik/FormikMultiSelectField';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
+import { FormikTextField } from '../../shared/Formik/FormikTextField';
+import { FormikEffect } from '../FormikEffect';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -30,12 +39,6 @@ const DialogFooter = styled.div`
   margin: 0;
   border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
   text-align: right;
-`;
-
-const DialogDescription = styled.div`
-  margin: 20px 0;
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.54);
 `;
 
 const StyledTabs = styled(Tabs)`
@@ -50,84 +53,138 @@ const DialogContainer = styled.div`
   width: 700px;
 `;
 
-export function NewPaymentVerificationDialog(): React.ReactElement {
+const initialValues = {
+  confidenceInterval: 1,
+  marginOfError: 1,
+  filterAgeMin: 0,
+  filterAgeMax: 0,
+  filterSex: '',
+  excludedAdminAreasFull: [],
+  excludedAdminAreasRandom: [],
+
+  verificationChannel: '',
+  rapidProFlow: '',
+};
+
+export interface Props {
+  cashPlanId: string;
+}
+export function NewPaymentVerificationDialog({
+  cashPlanId,
+}: Props): React.ReactElement {
   const [open, setOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
-
   const { showMessage } = useSnackbar();
+  const [mutate] = useCreateCashPlanPaymentVerificationMutation();
+  const businessArea = useBusinessArea();
+  const [formValues, setFormValues] = useState(initialValues);
 
-  // const submit = async (): Promise<void> => {
-  //   // const { errors } = await mutate();
-  //   const errors = [];
-  //   if (errors) {
-  //     showMessage('Error while submitting');
-  //     return;
-  //   }
-  //   showMessage('New verification plan created.');
-  // };
+  const { data: rapidProFlows } = useAllRapidProFlowsQuery({
+    variables: {
+      businessAreaSlug: businessArea,
+    },
+  });
+  const { data } = useAllAdminAreasQuery({
+    variables: {
+      first: 100,
+      businessArea,
+    },
+  });
 
-  const options = [
-    {
-      value: 1,
-      name: 'Oliver Hansen',
+  const { data: sampleSizesData, refetch } = useSampleSizeQuery({
+    variables: {
+      input: {
+        cashPlanId,
+        sampling: selectedTab === 0 ? 'FULL' : 'RANDOM',
+        businessAreaSlug: businessArea,
+        fullListArguments:
+          selectedTab === 0
+            ? {
+                excludedAdminAreas: formValues.excludedAdminAreasFull,
+              }
+            : null,
+        randomSamplingArguments:
+          selectedTab === 1
+            ? {
+                confidenceInterval: formValues.confidenceInterval * 0.01,
+                marginOfError: formValues.marginOfError * 0.01,
+                excludedAdminAreas: formValues.excludedAdminAreasRandom,
+                age: {
+                  min: formValues.filterAgeMin || 0,
+                  max: formValues.filterAgeMax || 0,
+                },
+                sex: formValues.filterSex,
+              }
+            : null,
+      },
     },
-    {
-      value: 2,
-      name: 'Van Henry',
-    },
-    {
-      value: 3,
-      name: 'April Tucker',
-    },
-    {
-      value: 4,
-      name: 'John James',
-    },
-    {
-      value: 5,
-      name: 'Jimmy Choo',
-    },
-    {
-      value: 6,
-      name: 'John Polasky',
-    },
-    {
-      value: 7,
-      name: 'Chris Cross',
-    },
-    {
-      value: 8,
-      name: 'Arthur Schwartz',
-    },
-    {
-      value: 9,
-      name: 'Bridget Hansen',
-    },
-    {
-      value: 10,
-      name: 'CJ Will',
-    },
-  ];
+  });
 
-  const initialValues = {
-    confidenceInterval: 8,
-    marginOfError: 24,
-    admin: false,
-    age: true,
-    sex: false,
-    filterAdminAreas: [],
-    verificationChannel: null,
+  useEffect(() => {
+    if (formValues) {
+      refetch();
+    }
+  }, [refetch, formValues, sampleSizesData]);
+
+  const submit = async (values): Promise<void> => {
+    const { errors } = await mutate({
+      variables: {
+        input: {
+          cashPlanId,
+          sampling: selectedTab === 0 ? 'FULL' : 'RANDOM',
+          fullListArguments:
+            selectedTab === 0
+              ? {
+                  excludedAdminAreas: values.excludedAdminAreasFull,
+                }
+              : null,
+          verificationChannel: values.verificationChannel,
+          rapidProArguments:
+            values.verificationChannel === 'RAPIDPRO'
+              ? {
+                  flowId: values.rapidProFlow,
+                }
+              : null,
+          randomSamplingArguments:
+            selectedTab === 1
+              ? {
+                  confidenceInterval: values.confidenceInterval * 0.01,
+                  marginOfError: values.marginOfError * 0.01,
+                  excludedAdminAreas: values.excludedAdminAreasRandom,
+                  age: { min: values.filterAgeMin, max: values.filterAgeMax },
+                  sex: values.filterSex,
+                }
+              : null,
+          businessAreaSlug: businessArea,
+        },
+      },
+    });
+    setOpen(false);
+    console.log(errors);
+
+    if (errors) {
+      showMessage('Error while submitting');
+      return;
+    }
+    showMessage('New verification plan created.');
   };
 
+  const mappedAdminAreas =
+    data && data.allAdminAreas.edges.length
+      ? data.allAdminAreas.edges.map((el) => ({
+          value: el.node.id,
+          name: el.node.title,
+        }))
+      : [];
+
+  const handleFormChange = (values) => {
+    setFormValues(values);
+  };
   return (
-    <Formik
-      initialValues={initialValues}
-      onSubmit={(values) => {
-        console.log(values);
-      }}
-    >
-      {({ submitForm, values }) => (
+    <Formik initialValues={initialValues} onSubmit={submit}>
+      {({ submitForm, values, setValues }) => (
         <Form>
+          <FormikEffect values={values} onChange={handleFormChange(values)} />
           <Button
             color='primary'
             variant='contained'
@@ -155,7 +212,11 @@ export function NewPaymentVerificationDialog(): React.ReactElement {
                     onChange={(
                       event: React.ChangeEvent<{}>,
                       newValue: number,
-                    ) => setSelectedTab(newValue)}
+                    ) => {
+                      setValues(initialValues);
+                      setFormValues(initialValues);
+                      setSelectedTab(newValue);
+                    }}
                     indicatorColor='primary'
                     textColor='primary'
                     variant='fullWidth'
@@ -166,6 +227,13 @@ export function NewPaymentVerificationDialog(): React.ReactElement {
                   </StyledTabs>
                 </TabsContainer>
                 <TabPanel value={selectedTab} index={0}>
+                  <Field
+                    name='excludedAdminAreasFull'
+                    choices={mappedAdminAreas}
+                    variant='filled'
+                    label='Filter Out Admin Areas'
+                    component={FormikMultiSelectField}
+                  />
                   <Box pt={3}>
                     <Box
                       pb={3}
@@ -173,7 +241,12 @@ export function NewPaymentVerificationDialog(): React.ReactElement {
                       fontSize={16}
                       fontWeight='fontWeightBold'
                     >
-                      Sample size: 500 out of 500 (100%)
+                      Sample size: {sampleSizesData?.sampleSize?.sampleSize} out
+                      of {sampleSizesData?.sampleSize?.paymentRecordCount} (
+                      {(sampleSizesData?.sampleSize?.sampleSize /
+                        sampleSizesData?.sampleSize?.paymentRecordCount) *
+                        100}
+                      %)
                     </Box>
                     <Field
                       name='verificationChannel'
@@ -186,6 +259,15 @@ export function NewPaymentVerificationDialog(): React.ReactElement {
                       ]}
                       component={FormikRadioGroup}
                     />
+                    {values.verificationChannel === 'RAPIDPRO' && (
+                      <Field
+                        name='rapidProFlow'
+                        label='RapidPro Flow'
+                        style={{ width: '90%' }}
+                        choices={rapidProFlows.allRapidProFlows}
+                        component={FormikSelectField}
+                      />
+                    )}
                   </Box>
                 </TabPanel>
                 <TabPanel value={selectedTab} index={1}>
@@ -193,47 +275,74 @@ export function NewPaymentVerificationDialog(): React.ReactElement {
                     <Field
                       name='confidenceInterval'
                       label='Confidence Interval'
+                      min={1}
+                      max={10}
                       component={FormikSliderField}
+                      suffix='%'
                     />
                     <Field
                       name='marginOfError'
                       label='Margin of Error'
+                      min={1}
+                      max={10}
                       component={FormikSliderField}
+                      suffix='%'
                     />
                     <Typography variant='caption'>Cluster Filters</Typography>
-                    <Box display='flex'>
+                    <Box flexDirection='column' display='flex'>
                       <Field
-                        name='admin'
-                        label='Admin'
-                        color='primary'
-                        component={FormikCheckboxField}
+                        name='excludedAdminAreasRandom'
+                        choices={mappedAdminAreas}
+                        variant='filled'
+                        label='Filter Out Admin Areas'
+                        component={FormikMultiSelectField}
                       />
-                      <Field
-                        name='age'
-                        label='Age'
-                        color='primary'
-                        component={FormikCheckboxField}
-                      />
-                      <Field
-                        name='sex'
-                        label='Sex'
-                        color='primary'
-                        component={FormikCheckboxField}
-                      />
+                      <Grid container>
+                        <Grid item xs={4}>
+                          <Field
+                            name='filterAgeMin'
+                            label='Age Min'
+                            type='number'
+                            color='primary'
+                            component={FormikTextField}
+                          />
+                        </Grid>
+                        <Grid item xs={4}>
+                          <Field
+                            name='filterAgeMax'
+                            label='Age Max'
+                            type='number'
+                            color='primary'
+                            component={FormikTextField}
+                          />
+                        </Grid>
+                        <Grid item xs={5}>
+                          <Field
+                            name='filterSex'
+                            label='Sex'
+                            color='primary'
+                            choices={[
+                              { value: 'FEMALE', name: 'Female' },
+                              { value: 'MALE', name: 'Male' },
+                            ]}
+                            component={FormikSelectField}
+                          />
+                        </Grid>
+                      </Grid>
                     </Box>
-                    <Field
-                      name='filterAdminAreas'
-                      choices={options}
-                      label='Filter Out Admin Areas'
-                      component={FormikMultiSelectField}
-                    />
+
                     <Box
                       pb={3}
                       pt={3}
                       fontSize={16}
                       fontWeight='fontWeightBold'
                     >
-                      Sample size: 435 out of 500 ({(435 / 500) * 100}%)
+                      Sample size: {sampleSizesData?.sampleSize?.sampleSize} out
+                      of {sampleSizesData?.sampleSize?.paymentRecordCount} (
+                      {(sampleSizesData?.sampleSize?.sampleSize /
+                        sampleSizesData?.sampleSize?.paymentRecordCount) *
+                        100}
+                      %)
                     </Box>
                     <Field
                       name='verificationChannel'
@@ -246,6 +355,15 @@ export function NewPaymentVerificationDialog(): React.ReactElement {
                       ]}
                       component={FormikRadioGroup}
                     />
+                    {values.verificationChannel === 'RAPIDPRO' && (
+                      <Field
+                        name='rapidProFlow'
+                        label='RapidPro Flow'
+                        style={{ width: '90%' }}
+                        choices={rapidProFlows.allRapidProFlows}
+                        component={FormikSelectField}
+                      />
+                    )}
                   </Box>
                 </TabPanel>
               </DialogContainer>
@@ -254,7 +372,6 @@ export function NewPaymentVerificationDialog(): React.ReactElement {
               <DialogActions>
                 <Button onClick={() => setOpen(false)}>CANCEL</Button>
                 <Button
-                  startIcon={<CheckRoundedIcon />}
                   type='submit'
                   color='primary'
                   variant='contained'
