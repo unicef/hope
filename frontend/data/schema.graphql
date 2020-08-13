@@ -30,6 +30,11 @@ type AdminAreaNodeEdge {
   cursor: String!
 }
 
+input AgeInput {
+  min: Int
+  max: Int
+}
+
 type ApproveTargetPopulationMutation {
   targetPopulation: TargetPopulationNode
 }
@@ -51,6 +56,7 @@ type BusinessAreaNode implements Node {
   slug: String!
   hasDataSharingAgreement: Boolean!
   userSet(before: String, after: String, first: Int, last: Int): UserNodeConnection!
+  householdSet(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   paymentrecordSet(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
   serviceproviderSet(before: String, after: String, first: Int, last: Int): ServiceProviderNodeConnection!
   programSet(before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
@@ -132,6 +138,10 @@ type CashPlanPaymentVerificationNode implements Node {
   receivedCount: Int
   notReceivedCount: Int
   receivedWithProblemsCount: Int
+  confidenceInterval: Float
+  marginOfError: Float
+  rapidProFlowId: String!
+  rapidProFlowStartUuid: String!
   paymentRecordVerifications(before: String, after: String, first: Int, last: Int): PaymentVerificationNodeConnection!
 }
 
@@ -202,6 +212,21 @@ type CoreFieldChoiceObject {
   value: String
   admin: String
   listName: String
+}
+
+input CreatePaymentVerificationInput {
+  cashPlanId: ID!
+  sampling: String!
+  verificationChannel: String!
+  businessAreaSlug: String!
+  fullListArguments: FullListArguments
+  randomSamplingArguments: RandomSamplingArguments
+  rapidProArguments: RapidProArguments
+  xlsxArguments: XlsxArguments
+}
+
+type CreatePaymentVerificationMutation {
+  cashPlan: CashPlanNode
 }
 
 type CreateProgram {
@@ -339,7 +364,24 @@ type FinalizeTargetPopulationMutation {
 
 scalar FlexFieldsScalar
 
+input FullListArguments {
+  excludedAdminAreas: [String]
+}
+
 scalar GeoJSON
+
+input GetCashplanVerificationSampleSizeInput {
+  cashPlanId: ID!
+  sampling: String!
+  businessAreaSlug: String!
+  fullListArguments: FullListArguments
+  randomSamplingArguments: RandomSamplingArguments
+}
+
+type GetCashplanVerificationSampleSizeObject {
+  paymentRecordCount: Int
+  sampleSize: Int
+}
 
 type GroupAttributeNode {
   id: UUID!
@@ -389,6 +431,7 @@ type HouseholdNode implements Node {
   lastRegistrationDate: Date!
   headOfHousehold: IndividualNode!
   unicefId: String!
+  businessArea: BusinessAreaNode!
   individualsAndRoles: [IndividualRoleInHouseholdNode!]!
   individuals(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
@@ -448,6 +491,11 @@ type ImportDataNode implements Node {
   numberOfHouseholds: Int!
   numberOfIndividuals: Int!
   registrationDataImport: RegistrationDataImportDatahubNode
+}
+
+type ImportXlsxCashPlanVerification {
+  cashPlan: CashPlanNode
+  errors: [XlsxErrorNode]
 }
 
 type ImportedDocumentNode implements Node {
@@ -1039,6 +1087,8 @@ type MergeRegistrationDataImportMutation {
 }
 
 type Mutations {
+  createCashPlanPaymentVerification(input: CreatePaymentVerificationInput!): CreatePaymentVerificationMutation
+  importXlsxCashPlanVerification(cashPlanVerificationId: ID!, file: Upload!): ImportXlsxCashPlanVerification
   createTargetPopulation(input: CreateTargetPopulationInput!): CreateTargetPopulationMutation
   updateTargetPopulation(input: UpdateTargetPopulationInput!): UpdateTargetPopulationMutation
   copyTargetPopulation(input: CopyTargetPopulationMutationInput!): CopyTargetPopulationMutationPayload
@@ -1242,6 +1292,8 @@ type Query {
   cashPlanVerificationSamplingChoices: [ChoiceObject]
   cashPlanVerificationVerificationMethodChoices: [ChoiceObject]
   paymentVerificationStatusChoices: [ChoiceObject]
+  allRapidProFlows(businessAreaSlug: String!): [RapidProFlow]
+  sampleSize(input: GetCashplanVerificationSampleSizeInput): GetCashplanVerificationSampleSizeObject
   adminArea(id: ID!): AdminAreaNode
   allAdminAreas(before: String, after: String, first: Int, last: Int, title: String, title_Icontains: String, businessArea: String): AdminAreaNodeConnection
   allBusinessAreas(before: String, after: String, first: Int, last: Int, id: UUID): BusinessAreaNodeConnection
@@ -1287,6 +1339,45 @@ type Query {
   allRegistrationDataImports(before: String, after: String, first: Int, last: Int, importedBy_Id: UUID, importDate: Date, status: String, name: String, name_Icontains: String, businessArea: String, orderBy: String): RegistrationDataImportNodeConnection
   registrationDataStatusChoices: [ChoiceObject]
   _debug: DjangoDebug
+}
+
+input RandomSamplingArguments {
+  confidenceInterval: Float!
+  marginOfError: Float!
+  excludedAdminAreas: [String]
+  age: AgeInput
+  sex: String
+}
+
+input RapidProArguments {
+  flowId: String!
+}
+
+type RapidProFlow {
+  id: String
+  name: String
+  type: String
+  archived: Boolean
+  labels: [String]
+  expires: Int
+  runs: [RapidProFlowRun]
+  results: [RapidProFlowResult]
+  createdOn: DateTime
+  modifiedOn: DateTime
+}
+
+type RapidProFlowResult {
+  key: String
+  name: String
+  categories: [String]
+  nodeUuids: [String]
+}
+
+type RapidProFlowRun {
+  active: Int
+  completed: Int
+  interrupted: Int
+  expired: Int
 }
 
 enum RegistrationDataImportDataSource {
@@ -1617,6 +1708,16 @@ type UserObjectType {
   approvedTargetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, orderBy: String): TargetPopulationNodeConnection!
   finalizedTargetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, orderBy: String): TargetPopulationNodeConnection!
   registrationDataImports(before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
+}
+
+input XlsxArguments {
+  file: Upload!
+}
+
+type XlsxErrorNode {
+  sheet: String
+  coordinates: String
+  message: String
 }
 
 type XlsxRowErrorNode {

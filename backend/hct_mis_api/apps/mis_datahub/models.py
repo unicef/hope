@@ -105,6 +105,7 @@ class IndividualRoleInHousehold(SessionModel):
     individual_mis_id = models.UUIDField()
     household_mis_id = models.UUIDField()
     role = models.CharField(max_length=255, blank=True, choices=ROLE_CHOICE,)
+    active = models.BooleanField(default=True)
 
     class Meta:
         unique_together = ("role", "household_mis_id", "session")
