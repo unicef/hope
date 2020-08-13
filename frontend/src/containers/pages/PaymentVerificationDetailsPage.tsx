@@ -97,9 +97,10 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
   }
 
   const { cashPlan } = data;
-  const verificationPlan = cashPlan.verifications.edges.length
-    ? cashPlan.verifications.edges[0].node
-    : null;
+  const verificationPlan =
+    cashPlan && cashPlan.verifications && cashPlan.verifications.edges.length
+      ? cashPlan.verifications.edges[0].node
+      : null;
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: 'Payment Verification',
