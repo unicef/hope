@@ -16,6 +16,11 @@ class XlsxVerificationExportService:
         "delivered_amount",
         "received_amount",
     )
+    VERIFICATION_SHEET = "Payment Verifications"
+    META_SHEET = "Meta"
+    VERSION_CELL_NAME_COORDINATES = "A1"
+    VERSION_CELL_COORDINATES = "B1"
+    VERSION_CELL_NAME = "FILE_TEMPLATE_VERSION"
     VERSION = "1.0"
 
     def __init__(self, cashplan_payment_verification):
@@ -27,13 +32,19 @@ class XlsxVerificationExportService:
     def _create_workbook(self) -> openpyxl.Workbook:
         wb = openpyxl.Workbook()
         ws_verifications = wb.active
-        ws_verifications.title = "Payment Verifications"
+        ws_verifications.title = XlsxVerificationExportService.VERIFICATION_SHEET
         self.wb = wb
         self.ws_verifications = ws_verifications
+        self.ws_meta = wb.create_sheet(XlsxVerificationExportService.META_SHEET)
         return wb
 
     def _add_version(self):
-        self.wb.properties.version = XlsxVerificationExportService.VERSION
+        self.ws_meta[
+            XlsxVerificationExportService.VERSION_CELL_NAME_COORDINATES
+        ] = XlsxVerificationExportService.VERSION_CELL_NAME
+        self.ws_meta[
+            XlsxVerificationExportService.VERSION_CELL_COORDINATES
+        ] = XlsxVerificationExportService.VERSION
 
     def _add_headers(self):
         headers_row = XlsxVerificationExportService.HEADERS
@@ -75,7 +86,7 @@ class XlsxVerificationExportService:
         self._add_headers()
         self._add_payment_record_verifications()
         self._add_data_validation()
-        self._adjust_column_width_from_col(self.ws_verifications,0,1,5)
+        self._adjust_column_width_from_col(self.ws_verifications, 0, 1, 5)
         return self.wb
 
     def generate_file(self, filename):
