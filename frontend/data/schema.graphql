@@ -140,6 +140,7 @@ type CashPlanPaymentVerificationNode implements Node {
   confidenceInterval: Float
   marginOfError: Float
   rapidProFlowId: String!
+  rapidProFlowStartUuid: String!
   paymentRecordVerifications(before: String, after: String, first: Int, last: Int): PaymentVerificationNodeConnection!
 }
 
@@ -488,6 +489,11 @@ type ImportDataNode implements Node {
   numberOfHouseholds: Int!
   numberOfIndividuals: Int!
   registrationDataImport: RegistrationDataImportDatahubNode
+}
+
+type ImportXlsxCashPlanVerification {
+  cashPlan: CashPlanNode
+  errors: [XlsxErrorNode]
 }
 
 type ImportedDocumentNode implements Node {
@@ -1080,6 +1086,7 @@ type MergeRegistrationDataImportMutation {
 
 type Mutations {
   createCashPlanPaymentVerification(input: CreatePaymentVerificationInput!): CreatePaymentVerificationMutation
+  importXlsxCashPlanVerification(cashPlanVerificationId: ID!, file: Upload!): ImportXlsxCashPlanVerification
   createTargetPopulation(input: CreateTargetPopulationInput!): CreateTargetPopulationMutation
   updateTargetPopulation(input: UpdateTargetPopulationInput!): UpdateTargetPopulationMutation
   copyTargetPopulation(input: CopyTargetPopulationMutationInput!): CopyTargetPopulationMutationPayload
@@ -1703,6 +1710,12 @@ type UserObjectType {
 
 input XlsxArguments {
   file: Upload!
+}
+
+type XlsxErrorNode {
+  sheet: String
+  coordinates: String
+  message: String
 }
 
 type XlsxRowErrorNode {
