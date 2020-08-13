@@ -16,6 +16,9 @@ from household.models import (
     RELATIONSHIP_CHOICE,
     DocumentType,
     Document,
+    IndividualRoleInHousehold,
+    ROLE_PRIMARY,
+    ROLE_ALTERNATE,
 )
 from registration_data.fixtures import RegistrationDataImportFactory
 
@@ -76,6 +79,9 @@ class HouseholdFactory(factory.DjangoModelFactory):
         "date_this_year", before_today=True, after_today=False
     )
     flex_fields = factory.LazyAttribute(flex_field_households)
+    business_area = factory.LazyAttribute(
+        lambda o: o.registration_data_import.business_area
+    )
 
 
 class DocumentFactory(factory.DjangoModelFactory):
@@ -108,7 +114,7 @@ class IndividualFactory(factory.DjangoModelFactory):
     phone_no = factory.Faker("phone_number")
     phone_no_alternative = ""
     relationship = factory.fuzzy.FuzzyChoice(
-        [value for value, label in RELATIONSHIP_CHOICE if value != "HEAD"]
+        [value for value, label in RELATIONSHIP_CHOICE[1:] if value != "HEAD"]
     )
     household = factory.SubFactory(HouseholdFactory)
     registration_data_import = factory.SubFactory(RegistrationDataImportFactory)
@@ -152,4 +158,15 @@ def create_household(household_args=None, individual_args=None):
     household.registration_data_import.imported_by.save()
     household.registration_data_import.save()
     household.save()
+    primary_collector, alternate_collector = IndividualFactory.create_batch(
+        2, household=None, relationship="NON_BENEFICIARY"
+    )
+    primary_collector_irh = IndividualRoleInHousehold(
+        individual=primary_collector, household=household, role=ROLE_PRIMARY
+    )
+    primary_collector_irh.save()
+    alternate_collector_irh = IndividualRoleInHousehold(
+        individual=alternate_collector, household=household, role=ROLE_ALTERNATE
+    )
+    alternate_collector_irh.save()
     return household, individuals

@@ -1,0 +1,19 @@
+{{ if .Values.podDB }}
+{{ if .Values.PVC }}
+{{- range $key, $value :=  .Values.databases }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: "{{ $value.claimName }}"
+spec:
+  storageClassName: "{{ $.Values.storageClassName }}"
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+{{- end }}
+{{ end }}
+{{ end }}

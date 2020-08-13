@@ -1,5 +1,5 @@
 import graphene
-from django.db.models import Sum, Q
+from django.db.models import Sum, Q, Prefetch
 from django_filters import (
     FilterSet,
     OrderingFilter,
@@ -24,13 +24,15 @@ from household.models import (
     ROLE_CHOICE,
     MARITAL_STATUS_CHOICE,
     SEX_CHOICE,
+    IndividualRoleInHousehold,
+    ROLE_NO_ROLE,
 )
 from targeting.models import HouseholdSelection
 
 
 class HouseholdFilter(FilterSet):
     business_area = CharFilter(
-        field_name="registration_data_import__business_area__slug"
+        field_name="business_area__slug"
     )
     size = IntegerRangeFilter(field_name="size")
     search = CharFilter(method="search_filter")
@@ -38,7 +40,7 @@ class HouseholdFilter(FilterSet):
     class Meta:
         model = Household
         fields = {
-            "business_area": ["exact", "icontains"],
+            "business_area": ["exact"],
             "country_origin": ["exact", "icontains"],
             "address": ["exact", "icontains"],
             "head_of_household__full_name": ["exact", "icontains"],
@@ -196,6 +198,21 @@ class HouseholdNode(DjangoObjectType):
         selection = parent.selections.first()
         return selection
 
+    def resolve_individuals(parent, info):
+        individuals_ids = list(parent.individuals.values_list("id", flat=True))
+        collectors_ids = list(
+            parent.representatives.values_list("id", flat=True)
+        )
+        ids = list(set(individuals_ids + collectors_ids))
+        return Individual.objects.filter(id__in=ids).prefetch_related(
+            Prefetch(
+                "households_and_roles",
+                queryset=IndividualRoleInHousehold.objects.filter(
+                    household=parent.id
+                ),
+            )
+        )
+
     class Meta:
         model = Household
         filter_fields = []
@@ -203,10 +220,21 @@ class HouseholdNode(DjangoObjectType):
         connection_class = ExtendedHouseHoldConnection
 
 
+class IndividualRoleInHouseholdNode(DjangoObjectType):
+    class Meta:
+        model = IndividualRoleInHousehold
+
+
 class IndividualNode(DjangoObjectType):
     estimated_birth_date = graphene.Boolean(required=False)
     role = graphene.String()
     flex_fields = FlexFieldsScalar()
+
+    def resolve_role(parent, info):
+        role = parent.households_and_roles.first()
+        if role is not None:
+            return role.role
+        return ROLE_NO_ROLE
 
     class Meta:
         model = Individual

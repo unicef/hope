@@ -5,7 +5,7 @@ from household.models import (
     Individual,
     DocumentType,
     Document,
-    Agency,
+    Agency, IndividualRoleInHousehold,
 )
 
 
@@ -39,3 +39,7 @@ class IndividualAdmin(admin.ModelAdmin):
         "birth_date",
     )
 
+
+@admin.register(IndividualRoleInHousehold)
+class IndividualRoleInHouseholdAdmin(admin.ModelAdmin):
+    pass

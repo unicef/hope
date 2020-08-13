@@ -5,6 +5,7 @@ import { useCreateProgramMutation } from '../../../__generated__/graphql';
 import { ProgramForm } from '../../forms/ProgramForm';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
+import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/AllPrograms';
 
 export function CreateProgram(): ReactElement {
   const [open, setOpen] = useState(false);
@@ -22,6 +23,7 @@ export function CreateProgram(): ReactElement {
           businessAreaSlug: businessArea,
         },
       },
+      refetchQueries: () => [{ query: ALL_PROGRAMS_QUERY }],
     });
     if (!response.errors && response.data.createProgram) {
       showMessage('Programme created.', {

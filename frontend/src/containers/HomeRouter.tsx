@@ -27,6 +27,8 @@ import { RegistrationIndividualDetailsPage } from './registration/details/indivi
 import { PaymentVerificationPage } from './pages/PaymentVerificationPage';
 import { PaymentVerificationDetailsPage } from './pages/PaymentVerificationDetailsPage';
 import { VerificationRecordDetailsPage } from './pages/VerificationRecordDetailsPage';
+import { UsersList } from './pages/UsersList';
+// import { UsersList } from './pages/UsersList';
 
 const Root = styled.div`
   display: flex;
@@ -123,6 +125,9 @@ export function HomeRouter(): React.ReactElement {
           </Route>
           <Route path='/:businessArea/registration-data-import'>
             <RegistrationDataImportPage />
+          </Route>
+          <Route path='/:businessArea/users-list'>
+            <UsersList />
           </Route>
           <Route path='/'>
             <DashboardPage />

@@ -105,7 +105,6 @@ class ImportedIndividual(TimeStampedUUIDModel):
     relationship = models.CharField(
         max_length=255, blank=True, choices=RELATIONSHIP_CHOICE, default="",
     )
-    role = models.CharField(max_length=255, blank=True, choices=ROLE_CHOICE,)
     sex = models.CharField(max_length=255, choices=SEX_CHOICE,)
     birth_date = models.DateField()
     estimated_birth_date = models.BooleanField(default=False)
@@ -116,6 +115,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
     phone_no_alternative = PhoneNumberField(blank=True, default="")
     household = models.ForeignKey(
         "ImportedHousehold",
+        null=True,
         related_name="individuals",
         on_delete=models.CASCADE,
     )
@@ -147,8 +147,42 @@ class ImportedIndividual(TimeStampedUUIDModel):
             )
         )
 
+    @property
+    def get_hash_key(self):
+        from hashlib import md5
+
+        fields = (
+            "given_name",
+            "middle_name",
+            "family_name",
+            "sex",
+            "birth_date",
+            "phone_no",
+            "phone_no_alternative",
+        )
+        values = [str(getattr(self, field)) for field in fields]
+
+        return md5(";".join(values).encode()).digest()
+
     def __str__(self):
         return self.full_name
+
+
+class ImportedIndividualRoleInHousehold(TimeStampedUUIDModel):
+    individual = models.ForeignKey(
+        "ImportedIndividual",
+        on_delete=models.CASCADE,
+        related_name="households_and_roles",
+    )
+    household = models.ForeignKey(
+        "ImportedHousehold",
+        on_delete=models.CASCADE,
+        related_name="individuals_and_roles",
+    )
+    role = models.CharField(max_length=255, blank=True, choices=ROLE_CHOICE,)
+
+    class Meta:
+        unique_together = ("role", "household")
 
 
 class RegistrationDataImportDatahub(TimeStampedUUIDModel):
@@ -234,9 +268,6 @@ class ImportedDocument(TimeStampedUUIDModel):
         for validator in self.type.validators:
             if not re.match(validator.regex, self.document_number):
                 raise ValidationError("Document number is not validating")
-
-    class Meta:
-        unique_together = ("type", "document_number")
 
 
 class ImportedAgency(models.Model):
