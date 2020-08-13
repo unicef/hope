@@ -54,10 +54,8 @@ export const FormikMultiSelectField = ({
 }): React.ReactElement => {
   const classes = useStyles();
   const theme = useTheme();
-  const [selectedValues, setSelectedValues] = React.useState([]);
 
   const handleChange = (event) => {
-    setSelectedValues(event.target.value);
     form.setFieldValue(field.name, event.target.value);
   };
 
@@ -68,7 +66,7 @@ export const FormikMultiSelectField = ({
         labelId='mutiple-chip-label'
         id='mutiple-chip'
         multiple
-        value={selectedValues}
+        value={field.value}
         onChange={handleChange}
         input={<Input id='select-multiple-chip' />}
         renderValue={(selected: string[]) => (
@@ -89,7 +87,7 @@ export const FormikMultiSelectField = ({
           <MenuItem
             key={choice.value}
             value={choice.value}
-            style={getStyles(choice.value, selectedValues, theme)}
+            style={getStyles(choice.value, field.value, theme)}
           >
             {choice.name}
           </MenuItem>
