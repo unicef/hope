@@ -108,7 +108,7 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel):
     )
     SAMPLING_CHOICES = (
         (SAMPLING_FULL_LIST, "Full list"),
-        (SAMPLING_RANDOM, "Draft"),
+        (SAMPLING_RANDOM, "Random sampling"),
     )
     VERIFICATION_METHOD_CHOICES = (
         (VERIFICATION_METHOD_RAPIDPRO, "RAPIDPRO"),
@@ -132,6 +132,10 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel):
     received_count = models.PositiveIntegerField(null=True)
     not_received_count = models.PositiveIntegerField(null=True)
     received_with_problems_count = models.PositiveIntegerField(null=True)
+    confidence_interval = models.FloatField(null=True)
+    margin_of_error = models.FloatField(null=True)
+    rapid_pro_flow_id = models.CharField(max_length=255, blank=True)
+    rapid_pro_flow_start_uuid = models.CharField(max_length=255, blank=True)
 
 
 @receiver(
@@ -164,7 +168,7 @@ class PaymentVerification(TimeStampedUUIDModel):
         "PaymentRecord", on_delete=models.CASCADE, related_name="verifications"
     )
     status = models.CharField(
-        max_length=50, choices=STATUS_CHOICES, default="DRAFT"
+        max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING
     )
     status_date = models.DateField(null=True)
     received_amount = models.DecimalField(

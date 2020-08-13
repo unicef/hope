@@ -55,6 +55,12 @@ LOGGING = {
     },
 }
 
+# ELASTICSEARCH SETTINGS
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts': 'elasticsearch:9200'
+    },
+}
 
 try:
     from .local import *  # noqa: ignore=F403
