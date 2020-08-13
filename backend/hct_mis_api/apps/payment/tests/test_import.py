@@ -52,9 +52,7 @@ class TestTargetPopulationQuery(APITestCase):
             program=program, business_area=BusinessArea.objects.first(),
         )
         cash_plan.save()
-        cash_plan_payment_verification = (
-            CashPlanPaymentVerificationFactory()
-        )
+        cash_plan_payment_verification = CashPlanPaymentVerificationFactory()
         for _ in range(payment_record_amount):
             registration_data_import = RegistrationDataImportFactory(
                 imported_by=user, business_area=BusinessArea.objects.first()
@@ -74,7 +72,6 @@ class TestTargetPopulationQuery(APITestCase):
                 household=household,
                 target_population=target_population,
             )
-
 
             PaymentVerificationFactory(
                 cash_plan_payment_verification=cash_plan_payment_verification,
@@ -142,7 +139,9 @@ class TestTargetPopulationQuery(APITestCase):
             TestTargetPopulationQuery.verification
         )
         wb = export_service.generate_workbook()
-        wb.properties.version = "-1"
+        wb[XlsxVerificationExportService.META_SHEET][
+            XlsxVerificationExportService.VERSION_CELL_COORDINATES
+        ] = "-1"
         file = io.BytesIO(save_virtual_workbook(wb))
         import_service = XlsxVerificationImportService(
             TestTargetPopulationQuery.verification, file

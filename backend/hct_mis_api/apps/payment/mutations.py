@@ -18,6 +18,9 @@ from payment.inputs import CreatePaymentVerificationInput
 from payment.models import CashPlanPaymentVerification, PaymentVerification
 from payment.rapid_pro.api import RapidProAPI
 from payment.utils import get_number_of_samples
+from payment.xlsx.XlsxVerificationImportService import (
+    XlsxVerificationImportService,
+)
 from program.models import CashPlan
 from program.schema import CashPlanNode
 from registration_datahub.schema import XlsxRowErrorNode
@@ -210,44 +213,51 @@ class CreatePaymentVerificationMutation(graphene.Mutation):
         cash_plan_payment_verification.save()
 
 
-# class(
-#      graphene.Mutation,
-# ):
-#     cash_plan = graphene.Field(CashPlanNode)
-#     errors = graphene.List(XlsxRowErrorNode)
-#
-#     class Arguments:
-#         file = Upload(required=True)
-#         cash_plan_verification_id = graphene.GlobalID(required=True)
-#
-#     @classmethod
-#     @is_authenticated
-#     def mutate(cls, root, info, file, business_area_slug):
-#
-#         wb = openpyxl.load_workbook(file)
-#
-#         ws_verifications = wb.active
-#         # Could just return max_row if openpyxl won't count empty rows too
-#         for row in ws_verifications.iter_rows(min_row=1):
-#             if not any([cell.value for cell in row]):
-#                 continue
-#             number_of_households += 1
-#
-#         for row in ind_sheet.iter_rows(min_row=3):
-#
-#             if not any([cell.value for cell in row]):
-#                 continue
-#             number_of_individuals += 1
-#
-#         created = ImportData.objects.create(
-#             file=file,
-#             number_of_households=number_of_households,
-#             number_of_individuals=number_of_individuals,
-#         )
-#
-#         return UploadImportDataXLSXFile(created, [])
+class XlsxErrorNode(graphene.ObjectType):
+    sheet = graphene.String()
+    coordinates = graphene.String()
+    message = graphene.String()
+
+    def resolve_sheet(parent, info):
+        return parent[0]
+
+    def resolve_coordinates(parent, info):
+        return parent[1]
+
+    def resolve_message(parent, info):
+        return parent[2]
+
+
+class ImportXlsxCashPlanVerification(graphene.Mutation,):
+    cash_plan = graphene.Field(CashPlanNode)
+    errors = graphene.List(XlsxErrorNode)
+
+    class Arguments:
+        file = Upload(required=True)
+        cash_plan_verification_id = graphene.ID(required=True)
+
+    @classmethod
+    @is_authenticated
+    def mutate(cls, root, info, file, cash_plan_verification_id):
+        id = decode_id_string(cash_plan_verification_id)
+        cashplan_payment_verification = get_object_or_404(
+            CashPlanPaymentVerification, id=id
+        )
+        import_service = XlsxVerificationImportService(
+            cashplan_payment_verification, file
+        )
+        import_service.open_workbook()
+        import_service.validate()
+        if len(import_service.errors):
+            return ImportXlsxCashPlanVerification(None, import_service.errors)
+        import_service.import_verifications()
+        return ImportXlsxCashPlanVerification(
+            cashplan_payment_verification.cash_plan, import_service.errors
+        )
+
 
 class Mutations(graphene.ObjectType):
     create_cash_plan_payment_verification = (
         CreatePaymentVerificationMutation.Field()
     )
+    import_xlsx_cash_plan_verification = ImportXlsxCashPlanVerification.Field()
