@@ -178,8 +178,8 @@ services:
   elasticsearch:
     image: unicef/hct-elasticsearch
     build:
-      context: .
-      dockerfile: es/Dockerfile
+      context: elasticsearch
+      dockerfile: Dockerfile
     environment:
       - node.name=es01
       - cluster.name=es-docker-cluster
@@ -198,8 +198,8 @@ services:
   elasticsearch_test:
     image: unicef/hct-elasticsearch-test
     build:
-      context: .
-      dockerfile: es/Dockerfile
+      context: elasticsearch
+      dockerfile: Dockerfile
     environment:
       - node.name=es02
       - cluster.name=es-docker-cluster-test

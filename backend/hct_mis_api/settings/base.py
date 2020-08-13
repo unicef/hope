@@ -423,21 +423,25 @@ CONSTANCE_ADDITIONAL_FIELDS = {
                 ("relationship", "Relationship"),
                 ("sex", "Sex"),
                 ("birth_date", "Birth date"),
-                ("household__size", "Household size"),
-                ("household__address", "Household address"),
-                ("household__country_origin", "Household country origin"),
-                ("household__country", "Household country"),
+                # ("household__size", "Household size"),
+                # ("household__address", "Household address"),
+                # ("household__country_origin", "Household country origin"),
+                # ("household__country", "Household country"),
             ),
         },
     ],
 }
 
 CONSTANCE_CONFIG = {
-    "DEDUPLICATION_MIN_SCORE": (
+    "DEDUPLICATION_BATCH_MIN_SCORE": (
         0.6,
         "Results below the minimum score will not be taken into account",
     ),
-    "DEDUPLICATION_FIELDS": (
+    "DEDUPLICATION_BATCH_DUPLICATE_SCORE": (
+        1.0,
+        "Results equal or above this score are considered duplicates",
+    ),
+    "DEDUPLICATION_BATCH_FIELDS": (
         (
             "given_name",
             "full_name",
@@ -448,10 +452,10 @@ CONSTANCE_CONFIG = {
             "relationship",
             "sex",
             "birth_date",
-            "household__size",
-            "household__address",
-            "household__country_origin",
-            "household__country",
+            # "household__size",
+            # "household__address",
+            # "household__country_origin",
+            # "household__country",
         ),
         "Choose fields that will be used for deduplication",
         "deduplication_fields_select",
