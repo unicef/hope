@@ -172,7 +172,7 @@ class SendTPToDatahubTask:
                 **dh_document_args, session=dh_session,
             )
 
-        dh_individual.unchr_id = self.get_unhcr_individual_id(individual)
+        dh_individual.unhcr_id = self.get_unhcr_individual_id(individual)
         roles = individual.households_and_roles.filter(
             household__id__in=household_ids
         )
@@ -257,13 +257,13 @@ class SendTPToDatahubTask:
         )
 
     def get_unhcr_individual_id(self, individual):
-        identity = individual.identities.filter(agency__type="unhcr").first()
+        identity = individual.identities.filter(agency__type="UNHCR").first()
         if identity is not None:
             return identity.number
         return None
 
     def get_unhcr_household_id(self, household):
-        identity = household.identities.filter(agency__type="unhcr").first()
+        identity = household.identities.filter(agency__type="UNHCR").first()
         household_unhcr_id = None
         if identity is not None:
             household_unhcr_id = identity.document_number

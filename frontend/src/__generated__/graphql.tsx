@@ -27,6 +27,11 @@ export type Scalars = {
   Upload: any,
 };
 
+export type ActivateCashPlanVerificationMutation = {
+   __typename?: 'ActivateCashPlanVerificationMutation',
+  cashPlan?: Maybe<CashPlanNode>,
+};
+
 export type AdminAreaNode = Node & {
    __typename?: 'AdminAreaNode',
   id: Scalars['ID'],
@@ -397,7 +402,6 @@ export type CreatePaymentVerificationInput = {
   fullListArguments?: Maybe<FullListArguments>,
   randomSamplingArguments?: Maybe<RandomSamplingArguments>,
   rapidProArguments?: Maybe<RapidProArguments>,
-  xlsxArguments?: Maybe<XlsxArguments>,
 };
 
 export type CreatePaymentVerificationMutation = {
@@ -459,6 +463,11 @@ export type DeleteTargetPopulationMutationPayload = {
    __typename?: 'DeleteTargetPopulationMutationPayload',
   ok?: Maybe<Scalars['Boolean']>,
   clientMutationId?: Maybe<Scalars['String']>,
+};
+
+export type DiscardCashPlanVerificationMutation = {
+   __typename?: 'DiscardCashPlanVerificationMutation',
+  cashPlan?: Maybe<CashPlanNode>,
 };
 
 export type DjangoDebug = {
@@ -554,6 +563,11 @@ export type FieldAttributeNode = {
 export type FinalizeTargetPopulationMutation = {
    __typename?: 'FinalizeTargetPopulationMutation',
   targetPopulation?: Maybe<TargetPopulationNode>,
+};
+
+export type FinishCashPlanVerificationMutation = {
+   __typename?: 'FinishCashPlanVerificationMutation',
+  cashPlan?: Maybe<CashPlanNode>,
 };
 
 
@@ -1131,6 +1145,14 @@ export enum ImportedHouseholdResidenceStatus {
   Other = 'OTHER'
 }
 
+export type ImportedIndividualIdentityNode = {
+   __typename?: 'ImportedIndividualIdentityNode',
+  id: Scalars['ID'],
+  individual: ImportedIndividualNode,
+  documentNumber: Scalars['String'],
+  type?: Maybe<Scalars['String']>,
+};
+
 export enum ImportedIndividualMaritalStatus {
   Single = 'SINGLE',
   Married = 'MARRIED',
@@ -1157,7 +1179,7 @@ export type ImportedIndividualNode = Node & {
   maritalStatus: ImportedIndividualMaritalStatus,
   phoneNo: Scalars['String'],
   phoneNoAlternative: Scalars['String'],
-  household: ImportedHouseholdNode,
+  household?: Maybe<ImportedHouseholdNode>,
   registrationDataImport: RegistrationDataImportDatahubNode,
   disability: Scalars['Boolean'],
   workStatus?: Maybe<ImportedIndividualWorkStatus>,
@@ -1166,6 +1188,7 @@ export type ImportedIndividualNode = Node & {
   flexFields: Scalars['JSONString'],
   importedhousehold?: Maybe<ImportedHouseholdNode>,
   documents: ImportedDocumentNodeConnection,
+  identities: Array<ImportedIndividualIdentityNode>,
   role?: Maybe<Scalars['String']>,
 };
 
@@ -1206,6 +1229,14 @@ export type ImportXlsxCashPlanVerification = {
    __typename?: 'ImportXlsxCashPlanVerification',
   cashPlan?: Maybe<CashPlanNode>,
   errors?: Maybe<Array<Maybe<XlsxErrorNode>>>,
+};
+
+export type IndividualIdentityNode = {
+   __typename?: 'IndividualIdentityNode',
+  id: Scalars['ID'],
+  individual: IndividualNode,
+  number: Scalars['String'],
+  type?: Maybe<Scalars['String']>,
 };
 
 export enum IndividualMaritalStatus {
@@ -1249,6 +1280,7 @@ export type IndividualNode = Node & {
   representedHouseholds: HouseholdNodeConnection,
   headingHousehold?: Maybe<HouseholdNode>,
   documents: DocumentNodeConnection,
+  identities: Array<IndividualIdentityNode>,
   householdsAndRoles: Array<IndividualRoleInHouseholdNode>,
   role?: Maybe<Scalars['String']>,
 };
@@ -1415,6 +1447,9 @@ export type Mutations = {
    __typename?: 'Mutations',
   createCashPlanPaymentVerification?: Maybe<CreatePaymentVerificationMutation>,
   importXlsxCashPlanVerification?: Maybe<ImportXlsxCashPlanVerification>,
+  activateCashPlanPaymentVerification?: Maybe<ActivateCashPlanVerificationMutation>,
+  finishCashPlanPaymentVerification?: Maybe<FinishCashPlanVerificationMutation>,
+  discardCashPlanPaymentVerification?: Maybe<DiscardCashPlanVerificationMutation>,
   createTargetPopulation?: Maybe<CreateTargetPopulationMutation>,
   updateTargetPopulation?: Maybe<UpdateTargetPopulationMutation>,
   copyTargetPopulation?: Maybe<CopyTargetPopulationMutationPayload>,
@@ -1443,6 +1478,21 @@ export type MutationsCreateCashPlanPaymentVerificationArgs = {
 export type MutationsImportXlsxCashPlanVerificationArgs = {
   cashPlanVerificationId: Scalars['ID'],
   file: Scalars['Upload']
+};
+
+
+export type MutationsActivateCashPlanPaymentVerificationArgs = {
+  cashPlanVerificationId: Scalars['ID']
+};
+
+
+export type MutationsFinishCashPlanPaymentVerificationArgs = {
+  cashPlanVerificationId: Scalars['ID']
+};
+
+
+export type MutationsDiscardCashPlanPaymentVerificationArgs = {
+  cashPlanVerificationId: Scalars['ID']
 };
 
 
@@ -2813,10 +2863,6 @@ export type UserObjectTypeRegistrationDataImportsArgs = {
 };
 
 
-export type XlsxArguments = {
-  file: Scalars['Upload'],
-};
-
 export type XlsxErrorNode = {
    __typename?: 'XlsxErrorNode',
   sheet?: Maybe<Scalars['String']>,
@@ -2939,7 +2985,10 @@ export type IndividualDetailedFragment = (
         ) }
       )> }
     )>> }
-  ), household: Maybe<(
+  ), identities: Array<(
+    { __typename?: 'IndividualIdentityNode' }
+    & Pick<IndividualIdentityNode, 'number' | 'type'>
+  )>, household: Maybe<(
     { __typename?: 'HouseholdNode' }
     & Pick<HouseholdNode, 'status' | 'id' | 'address' | 'countryOrigin'>
     & { adminArea: Maybe<(
@@ -4281,10 +4330,13 @@ export type ImportedIndividualDetailedFragment = (
         ) }
       )> }
     )>> }
-  ), household: (
+  ), identities: Array<(
+    { __typename?: 'ImportedIndividualIdentityNode' }
+    & Pick<ImportedIndividualIdentityNode, 'documentNumber' | 'type'>
+  )>, household: Maybe<(
     { __typename?: 'ImportedHouseholdNode' }
     & Pick<ImportedHouseholdNode, 'id' | 'admin1' | 'admin2' | 'address'>
-  ), registrationDataImport: (
+  )>, registrationDataImport: (
     { __typename?: 'RegistrationDataImportDatahubNode' }
     & Pick<RegistrationDataImportDatahubNode, 'id' | 'hctId' | 'name'>
   ) }
@@ -4604,6 +4656,10 @@ export const IndividualDetailedFragmentDoc = gql`
   }
   enrolledInNutritionProgramme
   administrationOfRutf
+  identities {
+    number
+    type
+  }
   household {
     status
     id
@@ -4703,6 +4759,10 @@ export const ImportedIndividualDetailedFragmentDoc = gql`
         documentNumber
       }
     }
+  }
+  identities {
+    documentNumber
+    type
   }
   role
   relationship
@@ -8603,6 +8663,7 @@ export type ResolversTypes = {
   DocumentNode: ResolverTypeWrapper<DocumentNode>,
   DocumentTypeNode: ResolverTypeWrapper<DocumentTypeNode>,
   DocumentTypeType: DocumentTypeType,
+  IndividualIdentityNode: ResolverTypeWrapper<IndividualIdentityNode>,
   IndividualRoleInHouseholdNode: ResolverTypeWrapper<IndividualRoleInHouseholdNode>,
   IndividualRoleInHouseholdRole: IndividualRoleInHouseholdRole,
   GeoJSON: ResolverTypeWrapper<Scalars['GeoJSON']>,
@@ -8662,6 +8723,7 @@ export type ResolversTypes = {
   ImportedDocumentTypeNode: ResolverTypeWrapper<ImportedDocumentTypeNode>,
   ImportedDocumentTypeCountry: ImportedDocumentTypeCountry,
   ImportedDocumentTypeType: ImportedDocumentTypeType,
+  ImportedIndividualIdentityNode: ResolverTypeWrapper<ImportedIndividualIdentityNode>,
   RegistrationDataImportDatahubNodeConnection: ResolverTypeWrapper<RegistrationDataImportDatahubNodeConnection>,
   RegistrationDataImportDatahubNodeEdge: ResolverTypeWrapper<RegistrationDataImportDatahubNodeEdge>,
   DjangoDebug: ResolverTypeWrapper<DjangoDebug>,
@@ -8669,11 +8731,13 @@ export type ResolversTypes = {
   Mutations: ResolverTypeWrapper<{}>,
   CreatePaymentVerificationInput: CreatePaymentVerificationInput,
   RapidProArguments: RapidProArguments,
-  XlsxArguments: XlsxArguments,
-  Upload: ResolverTypeWrapper<Scalars['Upload']>,
   CreatePaymentVerificationMutation: ResolverTypeWrapper<CreatePaymentVerificationMutation>,
+  Upload: ResolverTypeWrapper<Scalars['Upload']>,
   ImportXlsxCashPlanVerification: ResolverTypeWrapper<ImportXlsxCashPlanVerification>,
   XlsxErrorNode: ResolverTypeWrapper<XlsxErrorNode>,
+  ActivateCashPlanVerificationMutation: ResolverTypeWrapper<ActivateCashPlanVerificationMutation>,
+  FinishCashPlanVerificationMutation: ResolverTypeWrapper<FinishCashPlanVerificationMutation>,
+  DiscardCashPlanVerificationMutation: ResolverTypeWrapper<DiscardCashPlanVerificationMutation>,
   CreateTargetPopulationInput: CreateTargetPopulationInput,
   CreateTargetPopulationMutation: ResolverTypeWrapper<CreateTargetPopulationMutation>,
   UpdateTargetPopulationInput: UpdateTargetPopulationInput,
@@ -8782,6 +8846,7 @@ export type ResolversParentTypes = {
   DocumentNode: DocumentNode,
   DocumentTypeNode: DocumentTypeNode,
   DocumentTypeType: DocumentTypeType,
+  IndividualIdentityNode: IndividualIdentityNode,
   IndividualRoleInHouseholdNode: IndividualRoleInHouseholdNode,
   IndividualRoleInHouseholdRole: IndividualRoleInHouseholdRole,
   GeoJSON: Scalars['GeoJSON'],
@@ -8841,6 +8906,7 @@ export type ResolversParentTypes = {
   ImportedDocumentTypeNode: ImportedDocumentTypeNode,
   ImportedDocumentTypeCountry: ImportedDocumentTypeCountry,
   ImportedDocumentTypeType: ImportedDocumentTypeType,
+  ImportedIndividualIdentityNode: ImportedIndividualIdentityNode,
   RegistrationDataImportDatahubNodeConnection: RegistrationDataImportDatahubNodeConnection,
   RegistrationDataImportDatahubNodeEdge: RegistrationDataImportDatahubNodeEdge,
   DjangoDebug: DjangoDebug,
@@ -8848,11 +8914,13 @@ export type ResolversParentTypes = {
   Mutations: {},
   CreatePaymentVerificationInput: CreatePaymentVerificationInput,
   RapidProArguments: RapidProArguments,
-  XlsxArguments: XlsxArguments,
-  Upload: Scalars['Upload'],
   CreatePaymentVerificationMutation: CreatePaymentVerificationMutation,
+  Upload: Scalars['Upload'],
   ImportXlsxCashPlanVerification: ImportXlsxCashPlanVerification,
   XlsxErrorNode: XlsxErrorNode,
+  ActivateCashPlanVerificationMutation: ActivateCashPlanVerificationMutation,
+  FinishCashPlanVerificationMutation: FinishCashPlanVerificationMutation,
+  DiscardCashPlanVerificationMutation: DiscardCashPlanVerificationMutation,
   CreateTargetPopulationInput: CreateTargetPopulationInput,
   CreateTargetPopulationMutation: CreateTargetPopulationMutation,
   UpdateTargetPopulationInput: UpdateTargetPopulationInput,
@@ -8881,6 +8949,10 @@ export type ResolversParentTypes = {
   KoboErrorNode: KoboErrorNode,
   MergeRegistrationDataImportMutation: MergeRegistrationDataImportMutation,
   CheckAgainstSanctionListMutation: CheckAgainstSanctionListMutation,
+};
+
+export type ActivateCashPlanVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ActivateCashPlanVerificationMutation'] = ResolversParentTypes['ActivateCashPlanVerificationMutation']> = {
+  cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
 };
 
 export type AdminAreaNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['AdminAreaNode'] = ResolversParentTypes['AdminAreaNode']> = {
@@ -9094,6 +9166,10 @@ export type DeleteTargetPopulationMutationPayloadResolvers<ContextType = any, Pa
   clientMutationId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
+export type DiscardCashPlanVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['DiscardCashPlanVerificationMutation'] = ResolversParentTypes['DiscardCashPlanVerificationMutation']> = {
+  cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
+};
+
 export type DjangoDebugResolvers<ContextType = any, ParentType extends ResolversParentTypes['DjangoDebug'] = ResolversParentTypes['DjangoDebug']> = {
   sql?: Resolver<Maybe<Array<Maybe<ResolversTypes['DjangoDebugSQL']>>>, ParentType, ContextType>,
 };
@@ -9162,6 +9238,10 @@ export type FieldAttributeNodeResolvers<ContextType = any, ParentType extends Re
 
 export type FinalizeTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinalizeTargetPopulationMutation'] = ResolversParentTypes['FinalizeTargetPopulationMutation']> = {
   targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
+};
+
+export type FinishCashPlanVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinishCashPlanVerificationMutation'] = ResolversParentTypes['FinishCashPlanVerificationMutation']> = {
+  cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
 };
 
 export interface FlexFieldsScalarScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['FlexFieldsScalar'], any> {
@@ -9352,6 +9432,13 @@ export type ImportedHouseholdNodeEdgeResolvers<ContextType = any, ParentType ext
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
 };
 
+export type ImportedIndividualIdentityNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedIndividualIdentityNode'] = ResolversParentTypes['ImportedIndividualIdentityNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  individual?: Resolver<ResolversTypes['ImportedIndividualNode'], ParentType, ContextType>,
+  documentNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
 export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedIndividualNode'] = ResolversParentTypes['ImportedIndividualNode']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
@@ -9369,7 +9456,7 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   maritalStatus?: Resolver<ResolversTypes['ImportedIndividualMaritalStatus'], ParentType, ContextType>,
   phoneNo?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   phoneNoAlternative?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  household?: Resolver<ResolversTypes['ImportedHouseholdNode'], ParentType, ContextType>,
+  household?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType>,
   registrationDataImport?: Resolver<ResolversTypes['RegistrationDataImportDatahubNode'], ParentType, ContextType>,
   disability?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   workStatus?: Resolver<Maybe<ResolversTypes['ImportedIndividualWorkStatus']>, ParentType, ContextType>,
@@ -9378,6 +9465,7 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   flexFields?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   importedhousehold?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['ImportedDocumentNodeConnection'], ParentType, ContextType, ImportedIndividualNodeDocumentsArgs>,
+  identities?: Resolver<Array<ResolversTypes['ImportedIndividualIdentityNode']>, ParentType, ContextType>,
   role?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
@@ -9396,6 +9484,13 @@ export type ImportedIndividualNodeEdgeResolvers<ContextType = any, ParentType ex
 export type ImportXlsxCashPlanVerificationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportXlsxCashPlanVerification'] = ResolversParentTypes['ImportXlsxCashPlanVerification']> = {
   cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
   errors?: Resolver<Maybe<Array<Maybe<ResolversTypes['XlsxErrorNode']>>>, ParentType, ContextType>,
+};
+
+export type IndividualIdentityNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualIdentityNode'] = ResolversParentTypes['IndividualIdentityNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  individual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
+  number?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type IndividualNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualNode'] = ResolversParentTypes['IndividualNode']> = {
@@ -9430,6 +9525,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   representedHouseholds?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, IndividualNodeRepresentedHouseholdsArgs>,
   headingHousehold?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, IndividualNodeDocumentsArgs>,
+  identities?: Resolver<Array<ResolversTypes['IndividualIdentityNode']>, ParentType, ContextType>,
   householdsAndRoles?: Resolver<Array<ResolversTypes['IndividualRoleInHouseholdNode']>, ParentType, ContextType>,
   role?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
@@ -9528,6 +9624,9 @@ export type MergeRegistrationDataImportMutationResolvers<ContextType = any, Pare
 export type MutationsResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutations'] = ResolversParentTypes['Mutations']> = {
   createCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['CreatePaymentVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsCreateCashPlanPaymentVerificationArgs, 'input'>>,
   importXlsxCashPlanVerification?: Resolver<Maybe<ResolversTypes['ImportXlsxCashPlanVerification']>, ParentType, ContextType, RequireFields<MutationsImportXlsxCashPlanVerificationArgs, 'cashPlanVerificationId' | 'file'>>,
+  activateCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['ActivateCashPlanVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsActivateCashPlanPaymentVerificationArgs, 'cashPlanVerificationId'>>,
+  finishCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['FinishCashPlanVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsFinishCashPlanPaymentVerificationArgs, 'cashPlanVerificationId'>>,
+  discardCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['DiscardCashPlanVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsDiscardCashPlanPaymentVerificationArgs, 'cashPlanVerificationId'>>,
   createTargetPopulation?: Resolver<Maybe<ResolversTypes['CreateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsCreateTargetPopulationArgs, 'input'>>,
   updateTargetPopulation?: Resolver<Maybe<ResolversTypes['UpdateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateTargetPopulationArgs, 'input'>>,
   copyTargetPopulation?: Resolver<Maybe<ResolversTypes['CopyTargetPopulationMutationPayload']>, ParentType, ContextType, RequireFields<MutationsCopyTargetPopulationArgs, 'input'>>,
@@ -10017,6 +10116,7 @@ export type XlsxRowErrorNodeResolvers<ContextType = any, ParentType extends Reso
 };
 
 export type Resolvers<ContextType = any> = {
+  ActivateCashPlanVerificationMutation?: ActivateCashPlanVerificationMutationResolvers<ContextType>,
   AdminAreaNode?: AdminAreaNodeResolvers<ContextType>,
   AdminAreaNodeConnection?: AdminAreaNodeConnectionResolvers<ContextType>,
   AdminAreaNodeEdge?: AdminAreaNodeEdgeResolvers<ContextType>,
@@ -10044,6 +10144,7 @@ export type Resolvers<ContextType = any> = {
   DeleteProgram?: DeleteProgramResolvers<ContextType>,
   DeleteRegistrationDataImport?: DeleteRegistrationDataImportResolvers<ContextType>,
   DeleteTargetPopulationMutationPayload?: DeleteTargetPopulationMutationPayloadResolvers<ContextType>,
+  DiscardCashPlanVerificationMutation?: DiscardCashPlanVerificationMutationResolvers<ContextType>,
   DjangoDebug?: DjangoDebugResolvers<ContextType>,
   DjangoDebugSQL?: DjangoDebugSqlResolvers<ContextType>,
   DocumentNode?: DocumentNodeResolvers<ContextType>,
@@ -10052,6 +10153,7 @@ export type Resolvers<ContextType = any> = {
   DocumentTypeNode?: DocumentTypeNodeResolvers<ContextType>,
   FieldAttributeNode?: FieldAttributeNodeResolvers<ContextType>,
   FinalizeTargetPopulationMutation?: FinalizeTargetPopulationMutationResolvers<ContextType>,
+  FinishCashPlanVerificationMutation?: FinishCashPlanVerificationMutationResolvers<ContextType>,
   FlexFieldsScalar?: GraphQLScalarType,
   GeoJSON?: GraphQLScalarType,
   GetCashplanVerificationSampleSizeObject?: GetCashplanVerificationSampleSizeObjectResolvers<ContextType>,
@@ -10068,10 +10170,12 @@ export type Resolvers<ContextType = any> = {
   ImportedHouseholdNode?: ImportedHouseholdNodeResolvers<ContextType>,
   ImportedHouseholdNodeConnection?: ImportedHouseholdNodeConnectionResolvers<ContextType>,
   ImportedHouseholdNodeEdge?: ImportedHouseholdNodeEdgeResolvers<ContextType>,
+  ImportedIndividualIdentityNode?: ImportedIndividualIdentityNodeResolvers<ContextType>,
   ImportedIndividualNode?: ImportedIndividualNodeResolvers<ContextType>,
   ImportedIndividualNodeConnection?: ImportedIndividualNodeConnectionResolvers<ContextType>,
   ImportedIndividualNodeEdge?: ImportedIndividualNodeEdgeResolvers<ContextType>,
   ImportXlsxCashPlanVerification?: ImportXlsxCashPlanVerificationResolvers<ContextType>,
+  IndividualIdentityNode?: IndividualIdentityNodeResolvers<ContextType>,
   IndividualNode?: IndividualNodeResolvers<ContextType>,
   IndividualNodeConnection?: IndividualNodeConnectionResolvers<ContextType>,
   IndividualNodeEdge?: IndividualNodeEdgeResolvers<ContextType>,
