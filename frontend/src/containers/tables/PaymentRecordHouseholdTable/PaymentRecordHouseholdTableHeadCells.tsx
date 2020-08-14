@@ -28,13 +28,13 @@ export const headCells: HeadCell<PaymentRecordNode>[] = [
   },
   {
     disablePadding: false,
-    label: 'Entitlement',
+    label: 'Entitlement Quantity',
     id: 'entitlement__entitlement_quantity',
     numeric: true,
   },
   {
     disablePadding: false,
-    label: 'Delivered Amount',
+    label: 'Delivered Quantity',
     id: 'entitlement__delivered_quantity',
     numeric: true,
   },

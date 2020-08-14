@@ -202,7 +202,7 @@ class UploadImportDataXLSXFile(
 
         wb = openpyxl.load_workbook(file)
 
-        hh_sheet = wb["HousehUploadImportDataXLSXFileolds"]
+        hh_sheet = wb["Households"]
         ind_sheet = wb["Individuals"]
 
         number_of_households = 0

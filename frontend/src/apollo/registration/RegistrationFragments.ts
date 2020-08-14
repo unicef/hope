@@ -44,6 +44,7 @@ export const importedHouseholdDetailed = gql`
     ...importedHouseholdMinimal
 
     residenceStatus
+    country
     countryOrigin
     registrationDataImport {
       id
@@ -71,7 +72,19 @@ export const importedIndividualDetailed = gql`
     familyName
     middleName
     estimatedBirthDate
-
+    maritalStatus
+    documents {
+      edges {
+        node {
+          type {
+            label
+          }
+          documentNumber
+        }
+      }
+    }
+    role
+    relationship
     household {
       id
       admin1
