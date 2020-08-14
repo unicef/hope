@@ -3,6 +3,10 @@ schema {
   mutation: Mutations
 }
 
+type ActivateCashPlanVerificationMutation {
+  cashPlan: CashPlanNode
+}
+
 type AdminAreaNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -56,7 +60,6 @@ type BusinessAreaNode implements Node {
   slug: String!
   hasDataSharingAgreement: Boolean!
   userSet(before: String, after: String, first: Int, last: Int): UserNodeConnection!
-  householdSet(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   paymentrecordSet(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
   serviceproviderSet(before: String, after: String, first: Int, last: Int): ServiceProviderNodeConnection!
   programSet(before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
@@ -222,7 +225,6 @@ input CreatePaymentVerificationInput {
   fullListArguments: FullListArguments
   randomSamplingArguments: RandomSamplingArguments
   rapidProArguments: RapidProArguments
-  xlsxArguments: XlsxArguments
 }
 
 type CreatePaymentVerificationMutation {
@@ -281,6 +283,10 @@ input DeleteTargetPopulationMutationInput {
 type DeleteTargetPopulationMutationPayload {
   ok: Boolean
   clientMutationId: String
+}
+
+type DiscardCashPlanVerificationMutation {
+  cashPlan: CashPlanNode
 }
 
 type DjangoDebug {
@@ -362,6 +368,10 @@ type FinalizeTargetPopulationMutation {
   targetPopulation: TargetPopulationNode
 }
 
+type FinishCashPlanVerificationMutation {
+  cashPlan: CashPlanNode
+}
+
 scalar FlexFieldsScalar
 
 input FullListArguments {
@@ -431,7 +441,6 @@ type HouseholdNode implements Node {
   lastRegistrationDate: Date!
   headOfHousehold: IndividualNode!
   unicefId: String!
-  businessArea: BusinessAreaNode!
   individualsAndRoles: [IndividualRoleInHouseholdNode!]!
   individuals(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
@@ -1089,6 +1098,9 @@ type MergeRegistrationDataImportMutation {
 type Mutations {
   createCashPlanPaymentVerification(input: CreatePaymentVerificationInput!): CreatePaymentVerificationMutation
   importXlsxCashPlanVerification(cashPlanVerificationId: ID!, file: Upload!): ImportXlsxCashPlanVerification
+  activateCashPlanPaymentVerification(cashPlanVerificationId: ID!): ActivateCashPlanVerificationMutation
+  finishCashPlanPaymentVerification(cashPlanVerificationId: ID!): FinishCashPlanVerificationMutation
+  discardCashPlanPaymentVerification(cashPlanVerificationId: ID!): DiscardCashPlanVerificationMutation
   createTargetPopulation(input: CreateTargetPopulationInput!): CreateTargetPopulationMutation
   updateTargetPopulation(input: UpdateTargetPopulationInput!): UpdateTargetPopulationMutation
   copyTargetPopulation(input: CopyTargetPopulationMutationInput!): CopyTargetPopulationMutationPayload
@@ -1708,10 +1720,6 @@ type UserObjectType {
   approvedTargetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, orderBy: String): TargetPopulationNodeConnection!
   finalizedTargetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, orderBy: String): TargetPopulationNodeConnection!
   registrationDataImports(before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
-}
-
-input XlsxArguments {
-  file: Upload!
 }
 
 type XlsxErrorNode {

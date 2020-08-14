@@ -42,7 +42,9 @@ export function VerificationRecordsTable({ id, filter }): ReactElement {
         },
       });
     } catch (e) {
-      showMessage('Your XLSX import has failed');
+      console.log('🦀', e.message);
+      console.log(e.graphQLErrors.map((x) => x.message));
+      e.graphQLErrors.map((x) => console.log(x.message));
       return;
     }
     showMessage('Your XLSX import has been successful');
