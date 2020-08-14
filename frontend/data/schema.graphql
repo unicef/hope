@@ -56,6 +56,7 @@ type BusinessAreaNode implements Node {
   slug: String!
   hasDataSharingAgreement: Boolean!
   userSet(before: String, after: String, first: Int, last: Int): UserNodeConnection!
+  householdSet(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   paymentrecordSet(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
   serviceproviderSet(before: String, after: String, first: Int, last: Int): ServiceProviderNodeConnection!
   programSet(before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
@@ -430,6 +431,7 @@ type HouseholdNode implements Node {
   lastRegistrationDate: Date!
   headOfHousehold: IndividualNode!
   unicefId: String!
+  businessArea: BusinessAreaNode!
   individualsAndRoles: [IndividualRoleInHouseholdNode!]!
   individuals(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
