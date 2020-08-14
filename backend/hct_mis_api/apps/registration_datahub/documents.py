@@ -25,6 +25,9 @@ class ImportedIndividualDocument(Document):
             "country": fields.TextField(attr="country.__str__"),
         }
     )
+    registration_data_import_id = fields.TextField(
+        "registration_data_import.id.__str__"
+    )
 
     class Index:
         name = "importedindividuals"
