@@ -1,3 +1,4 @@
+from decimal import Decimal
 from math import ceil
 
 import graphene
@@ -17,6 +18,7 @@ from household.models import Individual
 from payment.inputs import CreatePaymentVerificationInput
 from payment.models import CashPlanPaymentVerification, PaymentVerification
 from payment.rapid_pro.api import RapidProAPI
+from payment.schema import PaymentVerificationNode
 from payment.utils import get_number_of_samples
 from payment.xlsx.XlsxVerificationImportService import (
     XlsxVerificationImportService,
@@ -294,6 +296,91 @@ class DiscardCashPlanVerificationMutation(graphene.Mutation):
         return DiscardCashPlanVerificationMutation(cash_plan)
 
 
+class UpdatePaymentVerificationStatusAndReceivedAmount(graphene.Mutation):
+
+    payment_verification = graphene.Field(PaymentVerificationNode)
+
+    class Arguments:
+        payment_verification_id = graphene.ID(required=True)
+        received_amount = graphene.Decimal(required=True)
+        status = graphene.Argument(
+            graphene.Enum(
+                "PaymentVerificationStatusForUpdate",
+                [(x[0], x[0]) for x in PaymentVerification.STATUS_CHOICES],
+            )
+        )
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(
+        cls,
+        root,
+        info,
+        payment_verification_id,
+        received_amount,
+        status,
+        **kwargs,
+    ):
+        payment_verification = get_object_or_404(
+            PaymentVerification, id=decode_id_string(payment_verification_id)
+        )
+        if (
+            payment_verification.cash_plan_payment_verification.verification_method
+            != CashPlanPaymentVerification.VERIFICATION_METHOD_MANUAL
+        ):
+            raise ValidationError(
+                f"You can only update status of payment verification for MANUAL verification method"
+            )
+        if (
+            payment_verification.cash_plan_payment_verification.status
+            != CashPlanPaymentVerification.STATUS_ACTIVE
+        ):
+            raise ValidationError(
+                f"You can only update status of payment verification for {CashPlanPaymentVerification.STATUS_ACTIVE} cash plan verification"
+            )
+        delivered_amount = (
+            payment_verification.payment_record.delivered_quantity
+        )
+        if (
+            status == PaymentVerification.STATUS_PENDING
+            and received_amount is not None
+        ):
+            raise ValidationError(
+                f"Wrong status {PaymentVerification.STATUS_PENDING} when received_amount ({received_amount}) is not empty",
+            )
+        elif (
+            status == PaymentVerification.STATUS_NOT_RECEIVED
+            and received_amount is not None
+            and received_amount != Decimal(0)
+        ):
+            raise ValidationError(
+                f"Wrong status {PaymentVerification.STATUS_NOT_RECEIVED} when received_amount ({received_amount}) is not 0 or empty",
+            )
+        elif status == PaymentVerification.STATUS_RECEIVED_WITH_ISSUES and (
+            received_amount is None or received_amount == Decimal(0)
+        ):
+            raise ValidationError(
+                f"Wrong status {PaymentVerification.STATUS_RECEIVED_WITH_ISSUES} when received_amount ({received_amount}) is 0 or empty",
+            )
+        elif (
+            status == PaymentVerification.STATUS_RECEIVED
+            and received_amount != delivered_amount
+        ):
+            received_amount_text = (
+                "None" if received_amount is None else received_amount
+            )
+            raise ValidationError(
+                f"Wrong status {PaymentVerification.STATUS_RECEIVED} when received_amount ({received_amount_text}) ≠ delivered_amount ({delivered_amount})"
+            )
+        payment_verification.status = status
+        payment_verification.received_amount = received_amount
+        payment_verification.save()
+        return UpdatePaymentVerificationStatusAndReceivedAmount(
+            payment_verification
+        )
+
+
 class XlsxErrorNode(graphene.ObjectType):
     sheet = graphene.String()
     coordinates = graphene.String()
@@ -364,4 +451,7 @@ class Mutations(graphene.ObjectType):
     )
     discard_cash_plan_payment_verification = (
         DiscardCashPlanVerificationMutation.Field()
+    )
+    update_payment_verification_status_and_received_amount = (
+        UpdatePaymentVerificationStatusAndReceivedAmount.Field()
     )
