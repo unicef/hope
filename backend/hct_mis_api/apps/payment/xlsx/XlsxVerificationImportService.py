@@ -1,8 +1,7 @@
 from decimal import Decimal
-from typing import List, Tuple, Dict
 
 import openpyxl
-from django.core.exceptions import ValidationError
+from graphql import GraphQLError
 
 from payment.models import PaymentVerification
 from payment.xlsx.XlsxVerificationExportService import (
@@ -60,9 +59,9 @@ class XlsxVerificationImportService:
 
     def import_verifications(self):
         if len(self.errors):
-            raise ValidationError("You can't import verifications with errors.")
+            raise GraphQLError("You can't import verifications with errors.")
         if not self.was_validation_run:
-            raise ValidationError("Run validation before import.")
+            raise GraphQLError("Run validation before import.")
         for row in self.ws_verifications.iter_rows(min_row=2):
             self._import_row(row)
         PaymentVerification.objects.bulk_update(
@@ -82,7 +81,7 @@ class XlsxVerificationImportService:
             version_cell_name != XlsxVerificationExportService.VERSION_CELL_NAME
             or version != XlsxVerificationExportService.VERSION
         ):
-            raise ValidationError(
+            raise GraphQLError(
                 f"Unsupported file version ({version}). Only version: {XlsxVerificationExportService.VERSION} is supported"
             )
 
