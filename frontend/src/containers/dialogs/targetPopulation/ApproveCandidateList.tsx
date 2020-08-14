@@ -134,10 +134,10 @@ export function ApproveCandidateList({ open, setOpen, targetPopulationId }) {
                 label='Select a Programme'
                 choices={choices}
                 getOptionDisabled={(option) => {
-                  if (option.individualDataNeeded) {
-                    return true;
+                  if (option.status === 'ACTIVE') {
+                    return false;
                   }
-                  return false;
+                  return true;
                 }}
                 onChange={(e, object) => {
                   if (object) {
@@ -158,7 +158,7 @@ export function ApproveCandidateList({ open, setOpen, targetPopulationId }) {
                   disabled={
                     !loading ||
                     !values.program ||
-                    values.program.individualDataNeeded
+                    values.program.status !== 'ACTIVE'
                   }
                   data-cy='button-target-population-close'
                 >

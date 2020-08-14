@@ -9,7 +9,7 @@ from django.core.validators import (
     MaxLengthValidator,
 )
 from django.db import models
-from django.db.models import Sum, Prefetch
+from django.db.models import Sum
 from django.utils.translation import ugettext_lazy as _
 from django_countries.fields import CountryField
 from model_utils import Choices
@@ -196,6 +196,9 @@ class Household(TimeStampedUUIDModel, AbstractSyncable):
         on_delete=models.CASCADE,
     )
     unicef_id = models.CharField(max_length=250, blank=True)
+    business_area = models.ForeignKey(
+        "core.BusinessArea", on_delete=models.CASCADE
+    )
 
     @property
     def total_cash_received(self):
@@ -204,12 +207,6 @@ class Household(TimeStampedUUIDModel, AbstractSyncable):
             .aggregate(Sum("delivered_quantity"))
             .get("delivered_quantity__sum")
         )
-
-    @property
-    def business_area(self):
-        if self.admin_area is None:
-            return None
-        return self.admin_area.admin_area_type.business_area
 
     def __str__(self):
         return f"Household ID: {self.id}"
@@ -282,9 +279,6 @@ class IndividualIdentity(models.Model):
     )
     number = models.CharField(max_length=255,)
 
-    class Meta:
-        unique_together = ("agency", "number")
-
     def __str__(self):
         return f"{self.agency} {self.individual} {self.number}"
 
@@ -304,6 +298,9 @@ class IndividualRoleInHousehold(TimeStampedUUIDModel, AbstractSyncable):
 
     class Meta:
         unique_together = ("role", "household")
+
+    def __str__(self):
+        return f"{self.individual.full_name} - {self.role}"
 
 
 class Individual(TimeStampedUUIDModel, AbstractSyncable):

@@ -110,6 +110,7 @@ export type BusinessAreaNode = Node & {
   slug: Scalars['String'],
   hasDataSharingAgreement: Scalars['Boolean'],
   userSet: UserNodeConnection,
+  householdSet: HouseholdNodeConnection,
   paymentrecordSet: PaymentRecordNodeConnection,
   serviceproviderSet: ServiceProviderNodeConnection,
   programSet: ProgramNodeConnection,
@@ -120,6 +121,14 @@ export type BusinessAreaNode = Node & {
 
 
 export type BusinessAreaNodeUserSetArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type BusinessAreaNodeHouseholdSetArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -622,6 +631,7 @@ export type HouseholdNode = Node & {
   lastRegistrationDate: Scalars['Date'],
   headOfHousehold: IndividualNode,
   unicefId: Scalars['String'],
+  businessArea: BusinessAreaNode,
   individualsAndRoles: Array<IndividualRoleInHouseholdNode>,
   individuals: IndividualNodeConnection,
   paymentRecords: PaymentRecordNodeConnection,
@@ -2838,7 +2848,7 @@ export type HouseholdMinimalFragment = (
 
 export type HouseholdDetailedFragment = (
   { __typename?: 'HouseholdNode' }
-  & Pick<HouseholdNode, 'countryOrigin' | 'flexFields'>
+  & Pick<HouseholdNode, 'countryOrigin' | 'country' | 'flexFields'>
   & { individuals: (
     { __typename?: 'IndividualNodeConnection' }
     & Pick<IndividualNodeConnection, 'totalCount'>
@@ -2915,8 +2925,21 @@ export type IndividualMinimalFragment = (
 
 export type IndividualDetailedFragment = (
   { __typename?: 'IndividualNode' }
-  & Pick<IndividualNode, 'givenName' | 'familyName' | 'estimatedBirthDate' | 'status' | 'enrolledInNutritionProgramme' | 'administrationOfRutf' | 'flexFields'>
-  & { household: Maybe<(
+  & Pick<IndividualNode, 'givenName' | 'familyName' | 'estimatedBirthDate' | 'status' | 'enrolledInNutritionProgramme' | 'administrationOfRutf' | 'role' | 'relationship' | 'flexFields'>
+  & { documents: (
+    { __typename?: 'DocumentNodeConnection' }
+    & { edges: Array<Maybe<(
+      { __typename?: 'DocumentNodeEdge' }
+      & { node: Maybe<(
+        { __typename?: 'DocumentNode' }
+        & Pick<DocumentNode, 'documentNumber'>
+        & { type: (
+          { __typename?: 'DocumentTypeNode' }
+          & Pick<DocumentTypeNode, 'label'>
+        ) }
+      )> }
+    )>> }
+  ), household: Maybe<(
     { __typename?: 'HouseholdNode' }
     & Pick<HouseholdNode, 'status' | 'id' | 'address' | 'countryOrigin'>
     & { adminArea: Maybe<(
@@ -4229,7 +4252,7 @@ export type ImportedHouseholdMinimalFragment = (
 
 export type ImportedHouseholdDetailedFragment = (
   { __typename?: 'ImportedHouseholdNode' }
-  & Pick<ImportedHouseholdNode, 'residenceStatus' | 'countryOrigin'>
+  & Pick<ImportedHouseholdNode, 'residenceStatus' | 'country' | 'countryOrigin'>
   & { registrationDataImport: (
     { __typename?: 'RegistrationDataImportDatahubNode' }
     & Pick<RegistrationDataImportDatahubNode, 'id' | 'hctId' | 'name'>
@@ -4244,8 +4267,21 @@ export type ImportedIndividualMinimalFragment = (
 
 export type ImportedIndividualDetailedFragment = (
   { __typename?: 'ImportedIndividualNode' }
-  & Pick<ImportedIndividualNode, 'givenName' | 'familyName' | 'middleName' | 'estimatedBirthDate' | 'phoneNo' | 'phoneNoAlternative'>
-  & { household: (
+  & Pick<ImportedIndividualNode, 'givenName' | 'familyName' | 'middleName' | 'estimatedBirthDate' | 'maritalStatus' | 'role' | 'relationship' | 'phoneNo' | 'phoneNoAlternative'>
+  & { documents: (
+    { __typename?: 'ImportedDocumentNodeConnection' }
+    & { edges: Array<Maybe<(
+      { __typename?: 'ImportedDocumentNodeEdge' }
+      & { node: Maybe<(
+        { __typename?: 'ImportedDocumentNode' }
+        & Pick<ImportedDocumentNode, 'documentNumber'>
+        & { type: (
+          { __typename?: 'ImportedDocumentTypeNode' }
+          & Pick<ImportedDocumentTypeNode, 'label'>
+        ) }
+      )> }
+    )>> }
+  ), household: (
     { __typename?: 'ImportedHouseholdNode' }
     & Pick<ImportedHouseholdNode, 'id' | 'admin1' | 'admin2' | 'address'>
   ), registrationDataImport: (
@@ -4498,6 +4534,7 @@ export const HouseholdDetailedFragmentDoc = gql`
     fragment householdDetailed on HouseholdNode {
   ...householdMinimal
   countryOrigin
+  country
   individuals {
     totalCount
     edges {
@@ -4555,6 +4592,16 @@ export const IndividualDetailedFragmentDoc = gql`
   familyName
   estimatedBirthDate
   status
+  documents {
+    edges {
+      node {
+        type {
+          label
+        }
+        documentNumber
+      }
+    }
+  }
   enrolledInNutritionProgramme
   administrationOfRutf
   household {
@@ -4568,6 +4615,8 @@ export const IndividualDetailedFragmentDoc = gql`
       level
     }
   }
+  role
+  relationship
   headingHousehold {
     id
     headOfHousehold {
@@ -4618,6 +4667,7 @@ export const ImportedHouseholdDetailedFragmentDoc = gql`
     fragment importedHouseholdDetailed on ImportedHouseholdNode {
   ...importedHouseholdMinimal
   residenceStatus
+  country
   countryOrigin
   registrationDataImport {
     id
@@ -4643,6 +4693,19 @@ export const ImportedIndividualDetailedFragmentDoc = gql`
   familyName
   middleName
   estimatedBirthDate
+  maritalStatus
+  documents {
+    edges {
+      node {
+        type {
+          label
+        }
+        documentNumber
+      }
+    }
+  }
+  role
+  relationship
   household {
     id
     admin1
@@ -8870,6 +8933,7 @@ export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends Reso
   slug?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   hasDataSharingAgreement?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   userSet?: Resolver<ResolversTypes['UserNodeConnection'], ParentType, ContextType, BusinessAreaNodeUserSetArgs>,
+  householdSet?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, BusinessAreaNodeHouseholdSetArgs>,
   paymentrecordSet?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, BusinessAreaNodePaymentrecordSetArgs>,
   serviceproviderSet?: Resolver<ResolversTypes['ServiceProviderNodeConnection'], ParentType, ContextType, BusinessAreaNodeServiceproviderSetArgs>,
   programSet?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, BusinessAreaNodeProgramSetArgs>,
@@ -9161,6 +9225,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   lastRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   headOfHousehold?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   unicefId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  businessArea?: Resolver<ResolversTypes['BusinessAreaNode'], ParentType, ContextType>,
   individualsAndRoles?: Resolver<Array<ResolversTypes['IndividualRoleInHouseholdNode']>, ParentType, ContextType>,
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, HouseholdNodeIndividualsArgs>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, HouseholdNodePaymentRecordsArgs>,
