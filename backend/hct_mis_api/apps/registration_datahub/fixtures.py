@@ -3,6 +3,7 @@ from django.contrib.gis.geos import Point
 from pytz import utc
 
 from household.const import NATIONALITIES
+from household.fixtures import IndividualFactory
 from household.models import (
     RESIDENCE_STATUS_CHOICE,
     SEX_CHOICE,
@@ -119,6 +120,25 @@ def create_imported_household(household_args=None, individual_args=None):
     )
     individuals[0].relationship = "HEAD"
     individuals[0].save()
+    household.head_of_household = individuals[0]
+    household.save()
+    return household, individuals
+
+
+def create_imported_household_and_individuals(
+        household_data=None, individuals_data=None
+):
+    if household_data is None:
+        household_data = {}
+    if individuals_data is None:
+        individuals_data = {}
+    household = ImportedHouseholdFactory.build(
+        **household_data, size=len(individuals_data)
+    )
+    individuals = [
+        ImportedIndividualFactory(household=household, **individual_data)
+        for individual_data in individuals_data
+    ]
     household.head_of_household = individuals[0]
     household.save()
     return household, individuals

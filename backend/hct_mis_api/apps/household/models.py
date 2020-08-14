@@ -128,6 +128,14 @@ IDENTIFICATION_TYPE_DICT = {
     IDENTIFICATION_TYPE_OTHER: "Other",
 }
 INDIVIDUAL_HOUSEHOLD_STATUS = (("ACTIVE", "Active"), ("INACTIVE", "Inactive"))
+UNIQUE = "UNIQUE"
+DUPLICATE = "DUPLICATE"
+NEEDS_ADJUDICATION = "NEEDS_ADJUDICATION"
+DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE = (
+    (UNIQUE, "Unique"),
+    (DUPLICATE, "Duplicate"),
+    (NEEDS_ADJUDICATION, "Needs Adjudication"),
+)
 
 
 class Household(TimeStampedUUIDModel, AbstractSyncable):
@@ -362,6 +370,9 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
     enrolled_in_nutrition_programme = models.BooleanField(default=False)
     administration_of_rutf = models.BooleanField(default=False)
     unicef_id = models.CharField(max_length=250, blank=True)
+    deduplication_status = models.CharField(
+        max_length=50, default=UNIQUE
+    )
 
     @property
     def age(self):
