@@ -23,8 +23,17 @@ from household.models import (
     IDENTIFICATION_TYPE_CHOICE,
     WORK_STATUS_CHOICE,
     NOT_PROVIDED,
+    UNIQUE,
 )
 from utils.models import TimeStampedUUIDModel
+
+
+DUPLICATE_IN_BATCH = "DUPLICATE_IN_BATCH"
+UNIQUE_IN_BATCH = "UNIQUE_IN_BATCH"
+DEDUPLICATION_BATCH_STATUS_CHOICE = (
+    (DUPLICATE_IN_BATCH, "Duplicate in batch"),
+    (UNIQUE_IN_BATCH, "Unique in batch"),
+)
 
 
 class ImportedHouseholdIdentity(models.Model):
@@ -133,7 +142,12 @@ class ImportedIndividual(TimeStampedUUIDModel):
     )
     first_registration_date = models.DateField()
     last_registration_date = models.DateField()
-    possible_duplicate_flag = models.BooleanField(default=False)
+    deduplication_batch_status = models.CharField(
+        max_length=50, default=UNIQUE_IN_BATCH
+    )
+    deduplication_golden_record_status = models.CharField(
+        max_length=50, default=UNIQUE
+    )
     flex_fields = JSONField(default=dict)
 
     @property
