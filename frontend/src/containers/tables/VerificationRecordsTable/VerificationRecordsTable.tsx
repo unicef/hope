@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import React, { ReactElement, useState } from 'react';
 import {
   useAllPaymentVerificationsQuery,
   PaymentVerificationNodeEdge,
@@ -15,7 +15,6 @@ import { useSnackbar } from '../../../hooks/useSnackBar';
 
 export function VerificationRecordsTable({ id, filter }): ReactElement {
   const { showMessage } = useSnackbar();
-
   const initialVariables: AllPaymentVerificationsQueryVariables = {
     cashPlanPaymentVerification: id,
   };
@@ -35,18 +34,20 @@ export function VerificationRecordsTable({ id, filter }): ReactElement {
   const [mutate] = useImportXlsxCashPlanVerificationMutation();
 
   const onFileUploadHandler = async (file): Promise<void> => {
-    const { errors } = await mutate({
-      variables: {
-        cashPlanVerificationId: id,
-        file,
-      },
-    });
-    if (errors) {
-      showMessage('Error while importing XLSX file');
+    try {
+      await mutate({
+        variables: {
+          cashPlanVerificationId: id,
+          file,
+        },
+      });
+    } catch (e) {
+      showMessage('Your XLSX import has failed');
       return;
     }
-    showMessage('Your XLSX file import was successful');
+    showMessage('Your XLSX import has been successful');
   };
+
   const exportButton = (
     <Box mr={3}>
       <a
