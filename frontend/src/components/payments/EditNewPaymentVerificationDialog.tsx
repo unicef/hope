@@ -50,8 +50,12 @@ const TabsContainer = styled.div`
 const DialogContainer = styled.div`
   width: 700px;
 `;
-
-export function EditNewPaymentVerificationDialog(): React.ReactElement {
+export interface Props {
+  cashPlanVerificationId: string;
+}
+export function EditNewPaymentVerificationDialog({
+  cashPlanVerificationId,
+}: Props): React.ReactElement {
   const [open, setOpen] = useState(false);
   const [activateDialogOpen, setActivateDialogOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
