@@ -12,6 +12,8 @@ class DeduplicateTask:
     @staticmethod
     def _prepare_fields(individual, fields_names):
         fields = model_to_dict(individual, fields=fields_names)
+        if "hash_key" in fields_names:
+            fields["hash_key"] = individual.get_hash_key
         if not isinstance(fields["phone_no"], str):
             fields["phone_no"] = fields["phone_no"].raw_input
         if not isinstance(fields["phone_no_alternative"], str):
@@ -26,32 +28,41 @@ class DeduplicateTask:
         query_fields = []
         for field_name, field_value in fields.items():
             field_name_as_key = field_name.replace("__", ".")
-            if field_name == "full_name":
-                fuzzy_query = {
-                    "match": {
-                        field_name_as_key: {
-                            "query": field_value,
-                        }
-                    }
+            if field_name == "hash_key":
+                single_query = {
+                    "match": {field_name_as_key: {"query": field_value}}
                 }
+            elif field_name == "birth_date":
+                single_query = {
+                    "match": {field_name_as_key: {"query": str(field_value)}}
+                }
+            # elif field_name == "full_name":
+            #     single_query = {
+            #         "match": {
+            #             field_name_as_key: {
+            #                 "query": str(field_value),
+            #                 "boost": 2,
+            #             }
+            #         }
+            #     }
             else:
-                fuzzy_query = {
+                single_query = {
                     "fuzzy": {
                         field_name_as_key: {
                             "value": field_value,
-                            "fuzziness": "10",
+                            "fuzziness": "AUTO",
                             "transpositions": True,
                         }
                     }
                 }
 
-            query_fields.append(fuzzy_query)
+            query_fields.append(single_query)
 
         query_dict = {
             "min_score": min_score,
             "query": {
                 "bool": {
-                    "must": [{"dis_max": {"queries": query_fields}},],
+                    "must": [{"dis_max": {"queries": query_fields}}],
                     "must_not": [{"match": {"id": {"query": individual.id}}}],
                 }
             },
@@ -115,13 +126,14 @@ class DeduplicateTask:
             "relationship",
             "sex",
             "birth_date",
+            "hash_key",
         )
         fields = cls._prepare_fields(individual, fields_names)
 
         query_dict = cls._prepare_query_dict(
             individual,
             fields,
-            config.DEDUPLICATION_BATCH_MIN_SCORE,
+            0,
             only_in_rdi,
         )
 
@@ -144,6 +156,7 @@ class DeduplicateTask:
             "relationship",
             "sex",
             "birth_date",
+            "hash_key",
         )
         fields = cls._prepare_fields(individual, fields_names)
 
