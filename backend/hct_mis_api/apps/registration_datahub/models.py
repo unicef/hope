@@ -164,7 +164,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
 
     @property
     def get_hash_key(self):
-        from hashlib import md5
+        from hashlib import sha256
 
         fields = (
             "given_name",
@@ -177,7 +177,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
         )
         values = [str(getattr(self, field)) for field in fields]
 
-        return md5(";".join(values).encode()).digest()
+        return sha256(";".join(values).encode()).hexdigest()
 
     def __str__(self):
         return self.full_name

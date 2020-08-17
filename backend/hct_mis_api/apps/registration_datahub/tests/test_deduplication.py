@@ -73,6 +73,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
                     "phone_no_alternative": "",
                     "relationship": HEAD,
                     "sex": MALE,
+                    "birth_date": "1955-09-04",
                 },
                 {
                     "registration_data_import": cls.registration_data_import_datahub,
@@ -84,6 +85,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
                     "phone_no_alternative": "",
                     "relationship": WIFE_HUSBAND,
                     "sex": FEMALE,
+                    "birth_date": "1957-10-10",
                 },
                 {
                     "registration_data_import": cls.registration_data_import_datahub,
@@ -95,6 +97,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
                     "phone_no_alternative": "",
                     "relationship": SON_DAUGHTER,
                     "sex": MALE,
+                    "birth_date": "1996-12-12",
                 },
                 {
                     "registration_data_import": cls.registration_data_import_datahub,
@@ -106,6 +109,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
                     "phone_no_alternative": "",
                     "relationship": SON_DAUGHTER,
                     "sex": FEMALE,
+                    "birth_date": "1997-07-07",
                 },
                 {
                     "registration_data_import": cls.registration_data_import_datahub,
@@ -117,17 +121,19 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
                     "phone_no_alternative": "",
                     "relationship": HEAD,
                     "sex": MALE,
+                    "birth_date": "1955-09-04",
                 },
                 {
                     "registration_data_import": cls.registration_data_import_datahub,
                     "given_name": "Test",
                     "full_name": "Test Example",
                     "middle_name": "",
-                    "family_name": "Test Example",
+                    "family_name": "Example",
                     "phone_no": "432-125-765",
                     "phone_no_alternative": "",
                     "relationship": SON_DAUGHTER,
                     "sex": MALE,
+                    "birth_date": "1997-08-08",
                 },
                 {
                     "registration_data_import": cls.registration_data_import_datahub,
@@ -139,6 +145,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
                     "phone_no_alternative": "",
                     "relationship": SON_DAUGHTER,
                     "sex": FEMALE,
+                    "birth_date": "1997-07-07",
                 },
             ],
         )
@@ -159,17 +166,19 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
                     "phone_no_alternative": "",
                     "relationship": HEAD,
                     "sex": MALE,
+                    "birth_date": "1955-09-04",
                 },
                 {
                     "registration_data_import": registration_data_import_second,
                     "given_name": "Test",
                     "full_name": "Test Example",
                     "middle_name": "",
-                    "family_name": "Test Example",
+                    "family_name": "Example",
                     "phone_no": "432-125-765",
                     "phone_no_alternative": "",
                     "relationship": SON_DAUGHTER,
                     "sex": MALE,
+                    "birth_date": "1997-08-08",
                 },
                 {
                     "registration_data_import": registration_data_import_second,
@@ -181,6 +190,19 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
                     "phone_no_alternative": "",
                     "relationship": SON_DAUGHTER,
                     "sex": FEMALE,
+                    "birth_date": "1997-07-07",
+                },
+                {
+                    "registration_data_import": registration_data_import_second,
+                    "given_name": "Tescik",
+                    "full_name": "Tescik Testowski",
+                    "middle_name": "",
+                    "family_name": "Testowski",
+                    "phone_no": "666-777-888",
+                    "phone_no_alternative": "",
+                    "relationship": SON_DAUGHTER,
+                    "sex": MALE,
+                    "birth_date": "1996-12-12",
                 },
             ],
         )
@@ -192,21 +214,21 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
         task.deduplicate_imported_individuals(
             self.registration_data_import_datahub
         )
-        duplicate_in_batch = ImportedIndividual.objects.filter(
-            deduplication_batch_status=DUPLICATE_IN_BATCH
-        )
-        unique_in_batch = ImportedIndividual.objects.filter(
-            deduplication_batch_status=UNIQUE_IN_BATCH
-        )
+        duplicate_in_batch = ImportedIndividual.objects.order_by(
+            "full_name"
+        ).filter(deduplication_batch_status=DUPLICATE_IN_BATCH)
+        unique_in_batch = ImportedIndividual.objects.order_by(
+            "full_name"
+        ).filter(deduplication_batch_status=UNIQUE_IN_BATCH)
 
         self.assertEqual(duplicate_in_batch.count(), 4)
         self.assertEqual(unique_in_batch.count(), 3)
 
         expected_duplicates = (
-            "Test Testowski",
-            "Test Testowski",
             "Tessta Testowski",
             "Tessta Testowski",
+            "Test Testowski",
+            "Test Testowski",
         )
         expected_uniques = (
             "Tesa Testowski",
@@ -222,33 +244,45 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
             expected_uniques,
         )
 
-        duplicate_in_golden_record = ImportedIndividual.objects.filter(
-            deduplication_golden_record_status=DUPLICATE
+        duplicate_in_golden_record = ImportedIndividual.objects.order_by(
+            "full_name"
+        ).filter(deduplication_golden_record_status=DUPLICATE)
+        needs_adjudication_in_golden_record = ImportedIndividual.objects.order_by(
+            "full_name"
+        ).filter(
+            deduplication_golden_record_status=NEEDS_ADJUDICATION
         )
-        unique_in_golden_record = ImportedIndividual.objects.filter(
-            deduplication_golden_record_status=UNIQUE
-        )
+        unique_in_golden_record = ImportedIndividual.objects.order_by(
+            "full_name"
+        ).filter(deduplication_golden_record_status=UNIQUE)
 
-        self.assertEqual(duplicate_in_golden_record.count(), 3)
-        self.assertEqual(unique_in_golden_record.count(), 4)
+        self.assertEqual(duplicate_in_golden_record.count(), 5)
+        self.assertEqual(unique_in_golden_record.count(), 1)
+        self.assertEqual(needs_adjudication_in_golden_record.count(), 1)
 
         expected_duplicates_gr = (
+            "Tessta Testowski",
+            "Tessta Testowski",
             "Test Example",
-            "Tessta Testowski",
-            "Tessta Testowski",
-        )
-        expected_uniques_gr = (
-            "Tesa Testowski",
-            "Tescik Testowski",
             "Test Testowski",
             "Test Testowski",
         )
+        expected_needs_adjudication_gr = ("Tescik Testowski",)
+        expected_uniques_gr = ("Tesa Testowski",)
 
         self.assertEqual(
             tuple(
                 duplicate_in_golden_record.values_list("full_name", flat=True)
             ),
             expected_duplicates_gr,
+        )
+        self.assertEqual(
+            tuple(
+                needs_adjudication_in_golden_record.values_list(
+                    "full_name", flat=True
+                )
+            ),
+            expected_needs_adjudication_gr,
         )
         self.assertEqual(
             tuple(unique_in_golden_record.values_list("full_name", flat=True)),
@@ -288,6 +322,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "phone_no_alternative": "",
                     "relationship": HEAD,
                     "sex": MALE,
+                    "birth_date": "1955-09-07",
                 },
                 {
                     "registration_data_import": cls.registration_data_import,
@@ -299,6 +334,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "phone_no_alternative": "",
                     "relationship": WIFE_HUSBAND,
                     "sex": FEMALE,
+                    "birth_date": "1955-09-05",
                 },
                 {
                     "registration_data_import": cls.registration_data_import,
@@ -310,6 +346,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "phone_no_alternative": "",
                     "relationship": SON_DAUGHTER,
                     "sex": MALE,
+                    "birth_date": "1985-08-12",
                 },
                 {
                     "registration_data_import": cls.registration_data_import,
@@ -321,6 +358,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "phone_no_alternative": "",
                     "relationship": SON_DAUGHTER,
                     "sex": FEMALE,
+                    "birth_date": "1989-09-10",
                 },
             ],
         )
@@ -340,6 +378,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "phone_no_alternative": "",
                     "relationship": HEAD,
                     "sex": MALE,
+                    "birth_date": "1955-09-07",
                 },
                 {
                     "registration_data_import": registration_data_import_second,
@@ -351,6 +390,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "phone_no_alternative": "",
                     "relationship": SON_DAUGHTER,
                     "sex": MALE,
+                    "birth_date": "1999-10-10",
                 },
                 {
                     "registration_data_import": registration_data_import_second,
@@ -362,6 +402,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "phone_no_alternative": "",
                     "relationship": SON_DAUGHTER,
                     "sex": FEMALE,
+                    "birth_date": "1989-09-10",
                 },
             ],
         )
@@ -373,7 +414,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         needs_adjudication = Individual.objects.filter(
             deduplication_status=NEEDS_ADJUDICATION
         )
-        self.assertEqual(needs_adjudication.count(), 1)
-
         duplicate = Individual.objects.filter(deduplication_status=DUPLICATE)
-        self.assertEqual(duplicate.count(), 1)
+
+        self.assertEqual(needs_adjudication.count(), 0)
+        self.assertEqual(duplicate.count(), 2)

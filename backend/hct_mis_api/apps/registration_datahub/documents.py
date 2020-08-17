@@ -12,9 +12,10 @@ class ImportedIndividualDocument(Document):
     middle_name = fields.TextField(analyzer=phonetic_analyzer)
     family_name = fields.TextField(analyzer=phonetic_analyzer)
     full_name = fields.TextField()
-    birth_date = fields.TextField()
-    phone_no = fields.TextField("phone_no.__str__")
-    phone_no_alternative = fields.TextField("phone_no_alternative.__str__")
+    birth_date = fields.DateField()
+    phone_no = fields.KeywordField("phone_no.__str__")
+    phone_no_alternative = fields.KeywordField("phone_no_alternative.__str__")
+    hash_key = fields.KeywordField(boost=3.0)
     household = fields.ObjectField(
         properties={
             "size": fields.IntegerField(),
@@ -28,6 +29,9 @@ class ImportedIndividualDocument(Document):
     registration_data_import_id = fields.TextField(
         "registration_data_import.id.__str__"
     )
+
+    def prepare_hash_key(self, instance):
+        return instance.get_hash_key
 
     class Index:
         name = "importedindividuals"
