@@ -13,7 +13,11 @@ import { GetApp, Publish } from '@material-ui/icons';
 import { UploadButton } from '../../../components/UploadButton';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 
-export function VerificationRecordsTable({ id, filter }): ReactElement {
+export function VerificationRecordsTable({
+  id,
+  verificationMethod,
+  filter,
+}): ReactElement {
   const { showMessage } = useSnackbar();
   const initialVariables: AllPaymentVerificationsQueryVariables = {
     cashPlanPaymentVerification: id,
@@ -48,38 +52,40 @@ export function VerificationRecordsTable({ id, filter }): ReactElement {
     showMessage('Your XLSX import has been successful');
   };
 
-  const exportButton = (
-    <Box mr={3}>
-      <a
-        download
-        className={classes.link}
-        href={`/api/download-cash-plan-payment-verification/${id}`}
-      >
-        <Button
-          startIcon={<GetApp />}
+  const exportButton =
+    verificationMethod === 'XLSX' ? (
+      <Box mr={3}>
+        <a
+          download
+          className={classes.link}
+          href={`/api/download-cash-plan-payment-verification/${id}`}
+        >
+          <Button
+            startIcon={<GetApp />}
+            color='primary'
+            variant='outlined'
+            data-cy='button-export'
+          >
+            EXPORT
+          </Button>
+        </a>
+      </Box>
+    ) : null;
+
+  const importButton =
+    verificationMethod === 'XLSX' ? (
+      <Box>
+        <UploadButton
+          startIcon={<Publish />}
           color='primary'
           variant='outlined'
-          data-cy='button-submit'
+          handleChange={onFileUploadHandler}
+          data-cy='button-import'
         >
-          EXPORT
-        </Button>
-      </a>
-    </Box>
-  );
-
-  const importButton = (
-    <Box>
-      <UploadButton
-        startIcon={<Publish />}
-        color='primary'
-        variant='outlined'
-        handleChange={onFileUploadHandler}
-        data-cy='button-submit'
-      >
-        IMPORT
-      </UploadButton>
-    </Box>
-  );
+          IMPORT
+        </UploadButton>
+      </Box>
+    ) : null;
 
   return (
     <UniversalTable<
