@@ -433,60 +433,18 @@ CONSTANCE_ADDITIONAL_FIELDS = {
 }
 
 CONSTANCE_CONFIG = {
-    "DEDUPLICATION_BATCH_MIN_SCORE": (
-        1,
-        "Results below the minimum score will not be taken into account",
-    ),
     "DEDUPLICATION_BATCH_DUPLICATE_SCORE": (
-        1.32,
+        3,
         "Results equal or above this score are considered duplicates",
     ),
-    # "DEDUPLICATION_BATCH_FIELDS": (
-    #     (
-    #         "given_name",
-    #         "full_name",
-    #         "middle_name",
-    #         "family_name",
-    #         "phone_no",
-    #         "phone_no_alternative",
-    #         "relationship",
-    #         "sex",
-    #         "birth_date",
-    #         "household__size",
-    #         "household__address",
-    #         "household__country_origin",
-    #         "household__country",
-    #     ),
-    #     "Choose fields that will be used for deduplication",
-    #     "deduplication_fields_select",
-    # ),
     "DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE": (
-        1,
+        1.2,
         "Results below the minimum score will not be taken into account",
     ),
     "DEDUPLICATION_GOLDEN_RECORD_DUPLICATE_SCORE": (
-        1.32,
+        3,
         "Results equal or above this score are considered duplicates",
     ),
-    # "DEDUPLICATION_GOLDEN_RECORD_FIELDS": (
-    #     (
-    #         "given_name",
-    #         "full_name",
-    #         "middle_name",
-    #         "family_name",
-    #         "phone_no",
-    #         "phone_no_alternative",
-    #         "relationship",
-    #         "sex",
-    #         "birth_date",
-    #         "household__size",
-    #         "household__address",
-    #         "household__country_origin",
-    #         "household__country",
-    #     ),
-    #     "Choose fields that will be used for deduplication",
-    #     "deduplication_fields_select",
-    # ),
 }
 
 CONSTANCE_DBS = ("default",)

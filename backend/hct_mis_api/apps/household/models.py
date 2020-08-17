@@ -386,6 +386,23 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
             )
         )
 
+    @property
+    def get_hash_key(self):
+        from hashlib import sha256
+
+        fields = (
+            "given_name",
+            "middle_name",
+            "family_name",
+            "sex",
+            "birth_date",
+            "phone_no",
+            "phone_no_alternative",
+        )
+        values = [str(getattr(self, field)) for field in fields]
+
+        return sha256(";".join(values).encode()).hexdigest()
+
     def __str__(self):
         return self.full_name
 
