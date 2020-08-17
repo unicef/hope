@@ -1,14 +1,12 @@
-from math import ceil
+from decimal import Decimal
 
 import graphene
-import openpyxl
-from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from graphene_file_upload.scalars import Upload
-from scipy.special import ndtri
+from graphql import GraphQLError
 
 from core.filters import filter_age
 from core.permissions import is_authenticated
@@ -17,13 +15,13 @@ from household.models import Individual
 from payment.inputs import CreatePaymentVerificationInput
 from payment.models import CashPlanPaymentVerification, PaymentVerification
 from payment.rapid_pro.api import RapidProAPI
+from payment.schema import PaymentVerificationNode
 from payment.utils import get_number_of_samples
 from payment.xlsx.XlsxVerificationImportService import (
     XlsxVerificationImportService,
 )
 from program.models import CashPlan
 from program.schema import CashPlanNode
-from registration_datahub.schema import XlsxRowErrorNode
 
 
 class CreatePaymentVerificationMutation(graphene.Mutation):
@@ -40,12 +38,12 @@ class CreatePaymentVerificationMutation(graphene.Mutation):
                 continue
             for required in value.get("required"):
                 if input.get(required) is None:
-                    raise ValidationError(
+                    raise GraphQLError(
                         f"You have to provide {required} in {key}"
                     )
             for not_allowed in value.get("not_allowed"):
                 if input.get(not_allowed) is not None:
-                    raise ValidationError(
+                    raise GraphQLError(
                         f"You can't provide {not_allowed} in {key}"
                     )
 
@@ -91,7 +89,7 @@ class CreatePaymentVerificationMutation(graphene.Mutation):
         cash_plan = get_object_or_404(CashPlan, id=cash_plan_id)
         verification_channel = arg("verification_channel")
         if cash_plan.verifications.count() > 0:
-            raise ValidationError(
+            raise GraphQLError(
                 "Verification plan for this Cash Plan already exists"
             )
         (
@@ -230,7 +228,7 @@ class ActivateCashPlanVerificationMutation(graphene.Mutation):
             cashplan_payment_verification.status
             != CashPlanPaymentVerification.STATUS_PENDING
         ):
-            raise ValidationError("You can activate only PENDING verification")
+            raise GraphQLError("You can activate only PENDING verification")
         cashplan_payment_verification.status = (
             CashPlanPaymentVerification.STATUS_ACTIVE
         )
@@ -259,7 +257,7 @@ class FinishCashPlanVerificationMutation(graphene.Mutation):
             cashplan_payment_verification.status
             != CashPlanPaymentVerification.STATUS_ACTIVE
         ):
-            raise ValidationError("You can finish only ACTIVE verification")
+            raise GraphQLError("You can finish only ACTIVE verification")
         cashplan_payment_verification.status = (
             CashPlanPaymentVerification.STATUS_FINISHED
         )
@@ -288,10 +286,95 @@ class DiscardCashPlanVerificationMutation(graphene.Mutation):
             cashplan_payment_verification.status
             != CashPlanPaymentVerification.STATUS_ACTIVE
         ):
-            raise ValidationError("You can discard only ACTIVE verification")
+            raise GraphQLError("You can discard only ACTIVE verification")
         cash_plan = cashplan_payment_verification.cash_plan
         cashplan_payment_verification.delete()
         return DiscardCashPlanVerificationMutation(cash_plan)
+
+
+class UpdatePaymentVerificationStatusAndReceivedAmount(graphene.Mutation):
+
+    payment_verification = graphene.Field(PaymentVerificationNode)
+
+    class Arguments:
+        payment_verification_id = graphene.ID(required=True)
+        received_amount = graphene.Decimal(required=True)
+        status = graphene.Argument(
+            graphene.Enum(
+                "PaymentVerificationStatusForUpdate",
+                [(x[0], x[0]) for x in PaymentVerification.STATUS_CHOICES],
+            )
+        )
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(
+        cls,
+        root,
+        info,
+        payment_verification_id,
+        received_amount,
+        status,
+        **kwargs,
+    ):
+        payment_verification = get_object_or_404(
+            PaymentVerification, id=decode_id_string(payment_verification_id)
+        )
+        if (
+            payment_verification.cash_plan_payment_verification.verification_method
+            != CashPlanPaymentVerification.VERIFICATION_METHOD_MANUAL
+        ):
+            raise GraphQLError(
+                f"You can only update status of payment verification for MANUAL verification method"
+            )
+        if (
+            payment_verification.cash_plan_payment_verification.status
+            != CashPlanPaymentVerification.STATUS_ACTIVE
+        ):
+            raise GraphQLError(
+                f"You can only update status of payment verification for {CashPlanPaymentVerification.STATUS_ACTIVE} cash plan verification"
+            )
+        delivered_amount = (
+            payment_verification.payment_record.delivered_quantity
+        )
+        if (
+            status == PaymentVerification.STATUS_PENDING
+            and received_amount is not None
+        ):
+            raise GraphQLError(
+                f"Wrong status {PaymentVerification.STATUS_PENDING} when received_amount ({received_amount}) is not empty",
+            )
+        elif (
+            status == PaymentVerification.STATUS_NOT_RECEIVED
+            and received_amount is not None
+            and received_amount != Decimal(0)
+        ):
+            raise GraphQLError(
+                f"Wrong status {PaymentVerification.STATUS_NOT_RECEIVED} when received_amount ({received_amount}) is not 0 or empty",
+            )
+        elif status == PaymentVerification.STATUS_RECEIVED_WITH_ISSUES and (
+            received_amount is None or received_amount == Decimal(0)
+        ):
+            raise GraphQLError(
+                f"Wrong status {PaymentVerification.STATUS_RECEIVED_WITH_ISSUES} when received_amount ({received_amount}) is 0 or empty",
+            )
+        elif (
+            status == PaymentVerification.STATUS_RECEIVED
+            and received_amount != delivered_amount
+        ):
+            received_amount_text = (
+                "None" if received_amount is None else received_amount
+            )
+            raise GraphQLError(
+                f"Wrong status {PaymentVerification.STATUS_RECEIVED} when received_amount ({received_amount_text}) ≠ delivered_amount ({delivered_amount})"
+            )
+        payment_verification.status = status
+        payment_verification.received_amount = received_amount
+        payment_verification.save()
+        return UpdatePaymentVerificationStatusAndReceivedAmount(
+            payment_verification
+        )
 
 
 class XlsxErrorNode(graphene.ObjectType):
@@ -328,14 +411,14 @@ class ImportXlsxCashPlanVerification(graphene.Mutation,):
             cashplan_payment_verification.status
             != CashPlanPaymentVerification.STATUS_ACTIVE
         ):
-            raise ValidationError(
+            raise GraphQLError(
                 "You can only import verification for active CashPlan verification"
             )
         if (
             cashplan_payment_verification.verification_method
             != CashPlanPaymentVerification.VERIFICATION_METHOD_XLSX
         ):
-            raise ValidationError(
+            raise GraphQLError(
                 "You can only import verification when XLSX channel is selected"
             )
         import_service = XlsxVerificationImportService(
@@ -364,4 +447,7 @@ class Mutations(graphene.ObjectType):
     )
     discard_cash_plan_payment_verification = (
         DiscardCashPlanVerificationMutation.Field()
+    )
+    update_payment_verification_status_and_received_amount = (
+        UpdatePaymentVerificationStatusAndReceivedAmount.Field()
     )
