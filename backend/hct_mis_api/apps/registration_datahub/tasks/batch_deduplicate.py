@@ -105,11 +105,18 @@ class DeduplicateTask:
                     individual.id
                 )
 
+        results_data = [
+            {"hit_id": r.id, "full_name": r.full_name, "score": r.meta.score}
+            for r in results
+            if document == IndividualDocument or r.meta.score >= duplicate_score
+        ]
+
         return (
             duplicates,
             possible_duplicates,
             original_individuals_ids_duplicates,
             original_individuals_ids_possible_duplicates,
+            results_data,
         )
 
     @classmethod
@@ -131,10 +138,7 @@ class DeduplicateTask:
         fields = cls._prepare_fields(individual, fields_names)
 
         query_dict = cls._prepare_query_dict(
-            individual,
-            fields,
-            0,
-            only_in_rdi,
+            individual, fields, 0, only_in_rdi,
         )
 
         return cls._get_duplicates_tuple(
@@ -183,13 +187,19 @@ class DeduplicateTask:
         all_possible_duplicates = []
         all_original_individuals_ids_duplicates = []
         all_original_individuals_ids_possible_duplicates = []
+        to_bulk_update_results = []
         for individual in individuals:
             (
                 duplicates,
                 possible_duplicates,
                 original_individuals_ids_duplicates,
                 original_individuals_ids_possible_duplicates,
+                results_data,
             ) = cls.deduplicate_single_individual(individual)
+
+            individual.deduplication_results = results_data
+            to_bulk_update_results.append(individual)
+
             all_duplicates.extend(duplicates)
             all_possible_duplicates.extend(possible_duplicates)
             all_original_individuals_ids_duplicates.extend(
@@ -204,6 +214,7 @@ class DeduplicateTask:
             all_possible_duplicates,
             all_original_individuals_ids_duplicates,
             all_original_individuals_ids_possible_duplicates,
+            to_bulk_update_results,
         )
 
     @classmethod
@@ -213,17 +224,26 @@ class DeduplicateTask:
             all_possible_duplicates,
             all_original_individuals_ids_duplicates,
             all_original_individuals_ids_possible_duplicates,
+            to_bulk_update_results,
         ) = cls._get_duplicated_individuals(registration_data_import)
-        cls._mark_individuals(all_duplicates, all_possible_duplicates)
+        cls._mark_individuals(
+            all_duplicates, all_possible_duplicates, to_bulk_update_results
+        )
 
     @staticmethod
-    def _mark_individuals(all_duplicates, all_possible_duplicates):
+    def _mark_individuals(
+        all_duplicates, all_possible_duplicates, to_bulk_update_results
+    ):
         Individual.objects.filter(id__in=all_possible_duplicates).update(
             deduplication_status=NEEDS_ADJUDICATION
         )
 
         Individual.objects.filter(id__in=all_duplicates).update(
             deduplication_status=DUPLICATE
+        )
+
+        Individual.objects.bulk_update(
+            to_bulk_update_results, ["deduplication_results",],
         )
 
     @classmethod
@@ -236,13 +256,19 @@ class DeduplicateTask:
         all_possible_duplicates = []
         all_original_individuals_ids_duplicates = []
         all_original_individuals_ids_possible_duplicates = []
+        to_bulk_update_results = []
         for imported_individual in imported_individuals:
             (
                 imported_individuals_duplicates,
                 imported_individuals_possible_duplicates,
-                *rest,
+                _,
+                _,
+                results_data_imported,
             ) = cls.deduplicate_single_imported_individual(
                 imported_individual, only_in_rdi=True
+            )
+            imported_individual.deduplication_batch_results = (
+                results_data_imported
             )
 
             (
@@ -250,7 +276,12 @@ class DeduplicateTask:
                 _,
                 original_individuals_ids_duplicates,
                 original_individuals_ids_possible_duplicates,
+                results_data,
             ) = cls.deduplicate_single_individual(imported_individual)
+
+            imported_individual.deduplication_golden_record_results = (
+                results_data
+            )
 
             all_duplicates.extend(imported_individuals_duplicates)
             all_possible_duplicates.extend(
@@ -262,6 +293,7 @@ class DeduplicateTask:
             all_original_individuals_ids_possible_duplicates.extend(
                 original_individuals_ids_possible_duplicates
             )
+            to_bulk_update_results.append(imported_individual)
 
         # BATCH
         ImportedIndividual.objects.filter(id__in=all_duplicates).update(
@@ -276,3 +308,11 @@ class DeduplicateTask:
         ImportedIndividual.objects.filter(
             id__in=all_original_individuals_ids_possible_duplicates
         ).update(deduplication_golden_record_status=NEEDS_ADJUDICATION)
+
+        ImportedIndividual.objects.bulk_update(
+            to_bulk_update_results,
+            [
+                "deduplication_batch_results",
+                "deduplication_golden_record_results",
+            ],
+        )
