@@ -29,7 +29,7 @@ from registration_data.fixtures import RegistrationDataImportFactory
 from targeting.fixtures import TargetingCriteriaFactory, TargetPopulationFactory
 
 
-class TestTargetPopulationQuery(APITestCase):
+class TestXlsxVerificationImport(APITestCase):
     verification = None
 
     @classmethod
