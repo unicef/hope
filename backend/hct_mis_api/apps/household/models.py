@@ -373,6 +373,7 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
     deduplication_status = models.CharField(
         max_length=50, default=UNIQUE
     )
+    deduplication_results = JSONField(default=dict)
 
     @property
     def age(self):

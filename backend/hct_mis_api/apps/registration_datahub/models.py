@@ -148,6 +148,8 @@ class ImportedIndividual(TimeStampedUUIDModel):
     deduplication_golden_record_status = models.CharField(
         max_length=50, default=UNIQUE
     )
+    deduplication_batch_results = JSONField(default=dict)
+    deduplication_golden_record_results = JSONField(default=dict)
     flex_fields = JSONField(default=dict)
 
     @property
