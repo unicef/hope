@@ -8,6 +8,7 @@ from registration_datahub.models import (
     ImportedDocument,
     ImportData,
     ImportedIndividualRoleInHousehold,
+    ImportedIndividualIdentity,
 )
 
 
@@ -18,6 +19,11 @@ class RegistrationDataImportDatahubAdmin(admin.ModelAdmin):
 
 @admin.register(ImportedIndividual)
 class ImportedIndividualAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(ImportedIndividualIdentity)
+class ImportedIndividualIdentityAdmin(admin.ModelAdmin):
     pass
 
 

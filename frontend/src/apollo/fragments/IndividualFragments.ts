@@ -24,6 +24,7 @@ export const individualMinimal = gql`
         }
       }
     }
+
     household {
       id
       status
@@ -54,6 +55,10 @@ export const individualDetailed = gql`
     }
     enrolledInNutritionProgramme
     administrationOfRutf
+    identities {
+      number
+      type
+    }
     household {
       status
       id
