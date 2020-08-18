@@ -29,6 +29,7 @@ import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { FormikEffect } from '../FormikEffect';
+import { CashPlan } from '../../apollo/queries/CashPlan';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -69,7 +70,7 @@ const initialValues = {
 export interface Props {
   cashPlanId: string;
 }
-export function NewPaymentVerificationDialog({
+export function CreateVerificationPlan({
   cashPlanId,
 }: Props): React.ReactElement {
   const [open, setOpen] = useState(false);
@@ -95,7 +96,7 @@ export function NewPaymentVerificationDialog({
     variables: {
       input: {
         cashPlanId,
-        sampling: selectedTab === 0 ? 'FULL' : 'RANDOM',
+        sampling: selectedTab === 0 ? 'FULL_LIST' : 'RANDOM',
         businessAreaSlug: businessArea,
         fullListArguments:
           selectedTab === 0
@@ -131,7 +132,7 @@ export function NewPaymentVerificationDialog({
       variables: {
         input: {
           cashPlanId,
-          sampling: selectedTab === 0 ? 'FULL' : 'RANDOM',
+          sampling: selectedTab === 0 ? 'FULL_LIST' : 'RANDOM',
           fullListArguments:
             selectedTab === 0
               ? {
@@ -158,6 +159,9 @@ export function NewPaymentVerificationDialog({
           businessAreaSlug: businessArea,
         },
       },
+      refetchQueries: () => [
+        { query: CashPlan, variables: { id: cashPlanId } },
+      ],
     });
     setOpen(false);
     console.log(errors);
@@ -264,7 +268,9 @@ export function NewPaymentVerificationDialog({
                         name='rapidProFlow'
                         label='RapidPro Flow'
                         style={{ width: '90%' }}
-                        choices={rapidProFlows.allRapidProFlows}
+                        choices={
+                          rapidProFlows ? rapidProFlows.allRapidProFlows : []
+                        }
                         component={FormikSelectField}
                       />
                     )}
@@ -360,7 +366,9 @@ export function NewPaymentVerificationDialog({
                         name='rapidProFlow'
                         label='RapidPro Flow'
                         style={{ width: '90%' }}
-                        choices={rapidProFlows.allRapidProFlows}
+                        choices={
+                          rapidProFlows ? rapidProFlows.allRapidProFlows : []
+                        }
                         component={FormikSelectField}
                       />
                     )}
