@@ -33,8 +33,10 @@ class RapidProAPI:
         self.url = settings.RAPID_PRO_URL
         self._client.headers.update({"Authorization": f"Token {token}"})
 
-    def _handle_get_request(self, url) -> dict:
-        response = self._client.get(url=f"{self._get_url()}{url}")
+    def _handle_get_request(self, url, is_absolute_url=False) -> dict:
+        if not is_absolute_url:
+            url = f"{self._get_url()}{url}"
+        response = self._client.get(url)
         response.raise_for_status()
         return response.json()
 
@@ -63,8 +65,21 @@ class RapidProAPI:
         return response
 
     def get_flow_runs(self, start_uuid):
-        flows = self._handle_get_request(f"{RapidProAPI.FLOW_RUNS_ENDPOINT}?start={start_uuid}")
-        return flows["results"]
+        return self._get_paginated_results(
+            f"{RapidProAPI.FLOW_RUNS_ENDPOINT}?start={start_uuid}"
+        )
+
+    def _get_paginated_results(self, url) -> list:
+        next_url = f"{self._get_url()}{url}"
+        results: list = []
+        while next_url:
+            data = self._handle_get_request(next_url, is_absolute_url=True)
+            next_url = data["next"]
+            results.extend(data["results"])
+        return results
+
+    def _get_with_status_received(self):
+        variable_received_name = ""
 
     def create_group(self, name):
         print(name)
