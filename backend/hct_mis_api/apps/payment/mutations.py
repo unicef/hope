@@ -194,18 +194,7 @@ class CreatePaymentVerificationMutation(graphene.Mutation):
         rapid_pro_arguments = input["rapid_pro_arguments"]
         flow_id = rapid_pro_arguments["flow_id"]
         cash_plan_payment_verification.rapid_pro_flow_id = flow_id
-        business_area_slug = input["business_area_slug"]
-        api = RapidProAPI(business_area_slug)
-        phone_numbers = list(
-            Individual.objects.filter(
-                heading_household__payment_records__verifications__cash_plan_payment_verification=cash_plan_payment_verification.id
-            ).values_list("phone_no", flat=True)
-        )
-        # TODO Uncomment when correct phone numbers in user
-        # flow_start_info = api.start_flow(flow_id, phone_numbers)
-        # cash_plan_payment_verification.rapid_pro_flow_start_uuid = flow_start_info.get(
-        #     "uuid"
-        # )
+
         cash_plan_payment_verification.save()
 
 
@@ -233,9 +222,29 @@ class ActivateCashPlanVerificationMutation(graphene.Mutation):
             CashPlanPaymentVerification.STATUS_ACTIVE
         )
         cashplan_payment_verification.save()
+        if (
+            cashplan_payment_verification.verification_method
+            == CashPlanPaymentVerification.VERIFICATION_METHOD_RAPIDPRO
+        ):
+            cls.activate_rapidpro(cashplan_payment_verification)
         return ActivateCashPlanVerificationMutation(
             cashplan_payment_verification.cash_plan
         )
+
+    @classmethod
+    def activate_rapidpro(cls, cashplan_payment_verification):
+        business_area_slug = input["business_area_slug"]
+        api = RapidProAPI(business_area_slug)
+        phone_numbers = list(
+            Individual.objects.filter(
+                heading_household__payment_records__verifications__cash_plan_payment_verification=cash_plan_payment_verification.id
+            ).values_list("phone_no", flat=True)
+        )
+        # TODO Uncomment when correct phone numbers in user
+        # flow_start_info = api.start_flow(flow_id, phone_numbers)
+        # cash_plan_payment_verification.rapid_pro_flow_start_uuid = flow_start_info.get(
+        #     "uuid"
+        # )
 
 
 class FinishCashPlanVerificationMutation(graphene.Mutation):
