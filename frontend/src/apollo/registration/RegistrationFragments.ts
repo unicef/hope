@@ -83,6 +83,10 @@ export const importedIndividualDetailed = gql`
         }
       }
     }
+    identities{
+      documentNumber
+      type
+    }
     role
     relationship
     household {
