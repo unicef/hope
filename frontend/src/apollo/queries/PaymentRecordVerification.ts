@@ -35,6 +35,15 @@ export const PAYMENT_RECORD_VERIFICATION_QUERY = gql`
             id
             name
           }
+          verifications {
+            edges {
+              node {
+                id
+                status
+                verificationMethod
+              }
+            }
+          }
         }
         currency
         entitlementQuantity

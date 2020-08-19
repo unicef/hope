@@ -115,6 +115,7 @@ export type BusinessAreaNode = Node & {
   slug: Scalars['String'],
   hasDataSharingAgreement: Scalars['Boolean'],
   userSet: UserNodeConnection,
+  householdSet: HouseholdNodeConnection,
   paymentrecordSet: PaymentRecordNodeConnection,
   serviceproviderSet: ServiceProviderNodeConnection,
   programSet: ProgramNodeConnection,
@@ -125,6 +126,14 @@ export type BusinessAreaNode = Node & {
 
 
 export type BusinessAreaNodeUserSetArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type BusinessAreaNodeHouseholdSetArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -636,6 +645,7 @@ export type HouseholdNode = Node & {
   lastRegistrationDate: Scalars['Date'],
   headOfHousehold: IndividualNode,
   unicefId: Scalars['String'],
+  businessArea: BusinessAreaNode,
   individualsAndRoles: Array<IndividualRoleInHouseholdNode>,
   individuals: IndividualNodeConnection,
   paymentRecords: PaymentRecordNodeConnection,
@@ -1440,6 +1450,7 @@ export type Mutations = {
   activateCashPlanPaymentVerification?: Maybe<ActivateCashPlanVerificationMutation>,
   finishCashPlanPaymentVerification?: Maybe<FinishCashPlanVerificationMutation>,
   discardCashPlanPaymentVerification?: Maybe<DiscardCashPlanVerificationMutation>,
+  updatePaymentVerificationStatusAndReceivedAmount?: Maybe<UpdatePaymentVerificationStatusAndReceivedAmount>,
   createTargetPopulation?: Maybe<CreateTargetPopulationMutation>,
   updateTargetPopulation?: Maybe<UpdateTargetPopulationMutation>,
   copyTargetPopulation?: Maybe<CopyTargetPopulationMutationPayload>,
@@ -1483,6 +1494,13 @@ export type MutationsFinishCashPlanPaymentVerificationArgs = {
 
 export type MutationsDiscardCashPlanPaymentVerificationArgs = {
   cashPlanVerificationId: Scalars['ID']
+};
+
+
+export type MutationsUpdatePaymentVerificationStatusAndReceivedAmountArgs = {
+  paymentVerificationId: Scalars['ID'],
+  receivedAmount: Scalars['Decimal'],
+  status?: Maybe<PaymentVerificationStatusForUpdate>
 };
 
 
@@ -1682,6 +1700,13 @@ export type PaymentVerificationNodeEdge = {
 };
 
 export enum PaymentVerificationStatus {
+  Pending = 'PENDING',
+  Received = 'RECEIVED',
+  NotReceived = 'NOT_RECEIVED',
+  ReceivedWithIssues = 'RECEIVED_WITH_ISSUES'
+}
+
+export enum PaymentVerificationStatusForUpdate {
   Pending = 'PENDING',
   Received = 'RECEIVED',
   NotReceived = 'NOT_RECEIVED',
@@ -2581,6 +2606,11 @@ export type UnapproveTargetPopulationMutation = {
   targetPopulation?: Maybe<TargetPopulationNode>,
 };
 
+export type UpdatePaymentVerificationStatusAndReceivedAmount = {
+   __typename?: 'UpdatePaymentVerificationStatusAndReceivedAmount',
+  paymentVerification?: Maybe<PaymentVerificationNode>,
+};
+
 export type UpdateProgram = {
    __typename?: 'UpdateProgram',
   program?: Maybe<ProgramNode>,
@@ -3338,6 +3368,24 @@ export type ImportXlsxCashPlanVerificationMutation = (
   )> }
 );
 
+export type UpdatePaymentVerificationStatusAndReceivedAmountMutationVariables = {
+  paymentVerificationId: Scalars['ID'],
+  receivedAmount: Scalars['Decimal'],
+  status?: Maybe<PaymentVerificationStatusForUpdate>
+};
+
+
+export type UpdatePaymentVerificationStatusAndReceivedAmountMutation = (
+  { __typename?: 'Mutations' }
+  & { updatePaymentVerificationStatusAndReceivedAmount: Maybe<(
+    { __typename?: 'UpdatePaymentVerificationStatusAndReceivedAmount' }
+    & { paymentVerification: Maybe<(
+      { __typename?: 'PaymentVerificationNode' }
+      & Pick<PaymentVerificationNode, 'id' | 'status' | 'receivedAmount'>
+    )> }
+  )> }
+);
+
 export type UpdateProgramMutationVariables = {
   programData: UpdateProgramInput
 };
@@ -3963,6 +4011,15 @@ export type PaymentRecordVerificationQuery = (
         & { program: (
           { __typename?: 'ProgramNode' }
           & Pick<ProgramNode, 'id' | 'name'>
+        ), verifications: (
+          { __typename?: 'CashPlanPaymentVerificationNodeConnection' }
+          & { edges: Array<Maybe<(
+            { __typename?: 'CashPlanPaymentVerificationNodeEdge' }
+            & { node: Maybe<(
+              { __typename?: 'CashPlanPaymentVerificationNode' }
+              & Pick<CashPlanPaymentVerificationNode, 'id' | 'status' | 'verificationMethod'>
+            )> }
+          )>> }
         ) }
       )>, serviceProvider: (
         { __typename?: 'ServiceProviderNode' }
@@ -5688,6 +5745,61 @@ export function useImportXlsxCashPlanVerificationMutation(baseOptions?: ApolloRe
 export type ImportXlsxCashPlanVerificationMutationHookResult = ReturnType<typeof useImportXlsxCashPlanVerificationMutation>;
 export type ImportXlsxCashPlanVerificationMutationResult = ApolloReactCommon.MutationResult<ImportXlsxCashPlanVerificationMutation>;
 export type ImportXlsxCashPlanVerificationMutationOptions = ApolloReactCommon.BaseMutationOptions<ImportXlsxCashPlanVerificationMutation, ImportXlsxCashPlanVerificationMutationVariables>;
+export const UpdatePaymentVerificationStatusAndReceivedAmountDocument = gql`
+    mutation updatePaymentVerificationStatusAndReceivedAmount($paymentVerificationId: ID!, $receivedAmount: Decimal!, $status: PaymentVerificationStatusForUpdate) {
+  updatePaymentVerificationStatusAndReceivedAmount(paymentVerificationId: $paymentVerificationId, receivedAmount: $receivedAmount, status: $status) {
+    paymentVerification {
+      id
+      status
+      receivedAmount
+    }
+  }
+}
+    `;
+export type UpdatePaymentVerificationStatusAndReceivedAmountMutationFn = ApolloReactCommon.MutationFunction<UpdatePaymentVerificationStatusAndReceivedAmountMutation, UpdatePaymentVerificationStatusAndReceivedAmountMutationVariables>;
+export type UpdatePaymentVerificationStatusAndReceivedAmountComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<UpdatePaymentVerificationStatusAndReceivedAmountMutation, UpdatePaymentVerificationStatusAndReceivedAmountMutationVariables>, 'mutation'>;
+
+    export const UpdatePaymentVerificationStatusAndReceivedAmountComponent = (props: UpdatePaymentVerificationStatusAndReceivedAmountComponentProps) => (
+      <ApolloReactComponents.Mutation<UpdatePaymentVerificationStatusAndReceivedAmountMutation, UpdatePaymentVerificationStatusAndReceivedAmountMutationVariables> mutation={UpdatePaymentVerificationStatusAndReceivedAmountDocument} {...props} />
+    );
+    
+export type UpdatePaymentVerificationStatusAndReceivedAmountProps<TChildProps = {}> = ApolloReactHoc.MutateProps<UpdatePaymentVerificationStatusAndReceivedAmountMutation, UpdatePaymentVerificationStatusAndReceivedAmountMutationVariables> & TChildProps;
+export function withUpdatePaymentVerificationStatusAndReceivedAmount<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  UpdatePaymentVerificationStatusAndReceivedAmountMutation,
+  UpdatePaymentVerificationStatusAndReceivedAmountMutationVariables,
+  UpdatePaymentVerificationStatusAndReceivedAmountProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, UpdatePaymentVerificationStatusAndReceivedAmountMutation, UpdatePaymentVerificationStatusAndReceivedAmountMutationVariables, UpdatePaymentVerificationStatusAndReceivedAmountProps<TChildProps>>(UpdatePaymentVerificationStatusAndReceivedAmountDocument, {
+      alias: 'updatePaymentVerificationStatusAndReceivedAmount',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useUpdatePaymentVerificationStatusAndReceivedAmountMutation__
+ *
+ * To run a mutation, you first call `useUpdatePaymentVerificationStatusAndReceivedAmountMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdatePaymentVerificationStatusAndReceivedAmountMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updatePaymentVerificationStatusAndReceivedAmountMutation, { data, loading, error }] = useUpdatePaymentVerificationStatusAndReceivedAmountMutation({
+ *   variables: {
+ *      paymentVerificationId: // value for 'paymentVerificationId'
+ *      receivedAmount: // value for 'receivedAmount'
+ *      status: // value for 'status'
+ *   },
+ * });
+ */
+export function useUpdatePaymentVerificationStatusAndReceivedAmountMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdatePaymentVerificationStatusAndReceivedAmountMutation, UpdatePaymentVerificationStatusAndReceivedAmountMutationVariables>) {
+        return ApolloReactHooks.useMutation<UpdatePaymentVerificationStatusAndReceivedAmountMutation, UpdatePaymentVerificationStatusAndReceivedAmountMutationVariables>(UpdatePaymentVerificationStatusAndReceivedAmountDocument, baseOptions);
+      }
+export type UpdatePaymentVerificationStatusAndReceivedAmountMutationHookResult = ReturnType<typeof useUpdatePaymentVerificationStatusAndReceivedAmountMutation>;
+export type UpdatePaymentVerificationStatusAndReceivedAmountMutationResult = ApolloReactCommon.MutationResult<UpdatePaymentVerificationStatusAndReceivedAmountMutation>;
+export type UpdatePaymentVerificationStatusAndReceivedAmountMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdatePaymentVerificationStatusAndReceivedAmountMutation, UpdatePaymentVerificationStatusAndReceivedAmountMutationVariables>;
 export const UpdateProgramDocument = gql`
     mutation UpdateProgram($programData: UpdateProgramInput!) {
   updateProgram(programData: $programData) {
@@ -7240,6 +7352,15 @@ export const PaymentRecordVerificationDocument = gql`
         program {
           id
           name
+        }
+        verifications {
+          edges {
+            node {
+              id
+              status
+              verificationMethod
+            }
+          }
         }
       }
       currency
@@ -8935,6 +9056,8 @@ export type ResolversTypes = {
   ActivateCashPlanVerificationMutation: ResolverTypeWrapper<ActivateCashPlanVerificationMutation>,
   FinishCashPlanVerificationMutation: ResolverTypeWrapper<FinishCashPlanVerificationMutation>,
   DiscardCashPlanVerificationMutation: ResolverTypeWrapper<DiscardCashPlanVerificationMutation>,
+  PaymentVerificationStatusForUpdate: PaymentVerificationStatusForUpdate,
+  UpdatePaymentVerificationStatusAndReceivedAmount: ResolverTypeWrapper<UpdatePaymentVerificationStatusAndReceivedAmount>,
   CreateTargetPopulationInput: CreateTargetPopulationInput,
   CreateTargetPopulationMutation: ResolverTypeWrapper<CreateTargetPopulationMutation>,
   UpdateTargetPopulationInput: UpdateTargetPopulationInput,
@@ -9118,6 +9241,8 @@ export type ResolversParentTypes = {
   ActivateCashPlanVerificationMutation: ActivateCashPlanVerificationMutation,
   FinishCashPlanVerificationMutation: FinishCashPlanVerificationMutation,
   DiscardCashPlanVerificationMutation: DiscardCashPlanVerificationMutation,
+  PaymentVerificationStatusForUpdate: PaymentVerificationStatusForUpdate,
+  UpdatePaymentVerificationStatusAndReceivedAmount: UpdatePaymentVerificationStatusAndReceivedAmount,
   CreateTargetPopulationInput: CreateTargetPopulationInput,
   CreateTargetPopulationMutation: CreateTargetPopulationMutation,
   UpdateTargetPopulationInput: UpdateTargetPopulationInput,
@@ -9202,6 +9327,7 @@ export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends Reso
   slug?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   hasDataSharingAgreement?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   userSet?: Resolver<ResolversTypes['UserNodeConnection'], ParentType, ContextType, BusinessAreaNodeUserSetArgs>,
+  householdSet?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, BusinessAreaNodeHouseholdSetArgs>,
   paymentrecordSet?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, BusinessAreaNodePaymentrecordSetArgs>,
   serviceproviderSet?: Resolver<ResolversTypes['ServiceProviderNodeConnection'], ParentType, ContextType, BusinessAreaNodeServiceproviderSetArgs>,
   programSet?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, BusinessAreaNodeProgramSetArgs>,
@@ -9501,6 +9627,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   lastRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   headOfHousehold?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   unicefId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  businessArea?: Resolver<ResolversTypes['BusinessAreaNode'], ParentType, ContextType>,
   individualsAndRoles?: Resolver<Array<ResolversTypes['IndividualRoleInHouseholdNode']>, ParentType, ContextType>,
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, HouseholdNodeIndividualsArgs>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, HouseholdNodePaymentRecordsArgs>,
@@ -9822,6 +9949,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   activateCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['ActivateCashPlanVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsActivateCashPlanPaymentVerificationArgs, 'cashPlanVerificationId'>>,
   finishCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['FinishCashPlanVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsFinishCashPlanPaymentVerificationArgs, 'cashPlanVerificationId'>>,
   discardCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['DiscardCashPlanVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsDiscardCashPlanPaymentVerificationArgs, 'cashPlanVerificationId'>>,
+  updatePaymentVerificationStatusAndReceivedAmount?: Resolver<Maybe<ResolversTypes['UpdatePaymentVerificationStatusAndReceivedAmount']>, ParentType, ContextType, RequireFields<MutationsUpdatePaymentVerificationStatusAndReceivedAmountArgs, 'paymentVerificationId' | 'receivedAmount'>>,
   createTargetPopulation?: Resolver<Maybe<ResolversTypes['CreateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsCreateTargetPopulationArgs, 'input'>>,
   updateTargetPopulation?: Resolver<Maybe<ResolversTypes['UpdateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateTargetPopulationArgs, 'input'>>,
   copyTargetPopulation?: Resolver<Maybe<ResolversTypes['CopyTargetPopulationMutationPayload']>, ParentType, ContextType, RequireFields<MutationsCopyTargetPopulationArgs, 'input'>>,
@@ -10229,6 +10357,10 @@ export type UnapproveTargetPopulationMutationResolvers<ContextType = any, Parent
   targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
 };
 
+export type UpdatePaymentVerificationStatusAndReceivedAmountResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdatePaymentVerificationStatusAndReceivedAmount'] = ResolversParentTypes['UpdatePaymentVerificationStatusAndReceivedAmount']> = {
+  paymentVerification?: Resolver<Maybe<ResolversTypes['PaymentVerificationNode']>, ParentType, ContextType>,
+};
+
 export type UpdateProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdateProgram'] = ResolversParentTypes['UpdateProgram']> = {
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
 };
@@ -10422,6 +10554,7 @@ export type Resolvers<ContextType = any> = {
   TargetPopulationNodeConnection?: TargetPopulationNodeConnectionResolvers<ContextType>,
   TargetPopulationNodeEdge?: TargetPopulationNodeEdgeResolvers<ContextType>,
   UnapproveTargetPopulationMutation?: UnapproveTargetPopulationMutationResolvers<ContextType>,
+  UpdatePaymentVerificationStatusAndReceivedAmount?: UpdatePaymentVerificationStatusAndReceivedAmountResolvers<ContextType>,
   UpdateProgram?: UpdateProgramResolvers<ContextType>,
   UpdateTargetPopulationMutation?: UpdateTargetPopulationMutationResolvers<ContextType>,
   Upload?: GraphQLScalarType,
