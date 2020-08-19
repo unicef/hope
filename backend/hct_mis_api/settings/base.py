@@ -315,7 +315,7 @@ LOGGING = {
 
 GIT_VERSION = os.getenv("GIT_VERSION", "UNKNOWN")
 
-REDIS_INSTANCE = os.getenv("REDIS_INSTANCE")
+REDIS_INSTANCE = os.getenv("REDIS_INSTANCE", "redis")
 
 if REDIS_INSTANCE:
     CACHES = {
@@ -434,15 +434,15 @@ CONSTANCE_ADDITIONAL_FIELDS = {
 
 CONSTANCE_CONFIG = {
     "DEDUPLICATION_BATCH_DUPLICATE_SCORE": (
-        3,
+        44.0,
         "Results equal or above this score are considered duplicates",
     ),
     "DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE": (
-        1.2,
+        10.0,
         "Results below the minimum score will not be taken into account",
     ),
     "DEDUPLICATION_GOLDEN_RECORD_DUPLICATE_SCORE": (
-        3,
+        26.0,
         "Results equal or above this score are considered duplicates",
     ),
 }

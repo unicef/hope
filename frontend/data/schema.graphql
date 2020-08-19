@@ -899,6 +899,10 @@ type ImportedIndividualNode implements Node {
   workStatus: ImportedIndividualWorkStatus
   firstRegistrationDate: Date!
   lastRegistrationDate: Date!
+  deduplicationBatchStatus: String!
+  deduplicationGoldenRecordStatus: String!
+  deduplicationBatchResults: JSONString!
+  deduplicationGoldenRecordResults: JSONString!
   flexFields: JSONString!
   importedhousehold: ImportedHouseholdNode
   documents(before: String, after: String, first: Int, last: Int): ImportedDocumentNodeConnection!
@@ -973,6 +977,8 @@ type IndividualNode implements Node {
   enrolledInNutritionProgramme: Boolean!
   administrationOfRutf: Boolean!
   unicefId: String!
+  deduplicationStatus: String!
+  deduplicationResults: JSONString!
   representedHouseholds(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   headingHousehold: HouseholdNode
   documents(before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
@@ -1373,6 +1379,8 @@ type Query {
   importedIndividual(id: ID!): ImportedIndividualNode
   allImportedIndividuals(before: String, after: String, first: Int, last: Int, household: ID, rdiId: String, orderBy: String): ImportedIndividualNodeConnection
   importData(id: ID!): ImportDataNode
+  deduplicationBatchStatusChoices: [ChoiceObject]
+  deduplicationGoldenRecordStatusChoices: [ChoiceObject]
   registrationDataImport(id: ID!): RegistrationDataImportNode
   allRegistrationDataImports(before: String, after: String, first: Int, last: Int, importedBy_Id: UUID, importDate: Date, status: String, name: String, name_Icontains: String, businessArea: String, orderBy: String): RegistrationDataImportNodeConnection
   registrationDataStatusChoices: [ChoiceObject]

@@ -28,6 +28,7 @@ from household.models import (
     ROLE_NO_ROLE,
     IndividualIdentity,
 )
+from registration_datahub.schema import DeduplicationResultNode
 from targeting.models import HouseholdSelection
 
 
@@ -238,6 +239,7 @@ class IndividualNode(DjangoObjectType):
     estimated_birth_date = graphene.Boolean(required=False)
     role = graphene.String()
     flex_fields = FlexFieldsScalar()
+    deduplication_results = graphene.List(DeduplicationResultNode)
 
     def resolve_role(parent, info):
         role = parent.households_and_roles.first()
