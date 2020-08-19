@@ -62,6 +62,13 @@ export function RegistrationIndividualsBioData({
       </LabelizedField>
     </Grid>
   ));
+  const mappedIdentities = individual.identities?.map((item) => (
+      <Grid item xs={3}>
+        <LabelizedField label={`${item.type} ID`}>
+          <div>{item.documentNumber}</div>
+        </LabelizedField>
+      </Grid>
+  ));
 
   return (
     <Overview>
@@ -131,6 +138,7 @@ export function RegistrationIndividualsBioData({
           </LabelizedField>
         </Grid>
         {mappedIndividualDocuments}
+        {mappedIdentities}
         <Grid item xs={3}>
           <LabelizedField label='Marital Status'>
             <div>{individual.maritalStatus}</div>

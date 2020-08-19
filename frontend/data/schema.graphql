@@ -861,6 +861,13 @@ enum ImportedHouseholdResidenceStatus {
   OTHER
 }
 
+type ImportedIndividualIdentityNode {
+  id: ID!
+  individual: ImportedIndividualNode!
+  documentNumber: String!
+  type: String
+}
+
 enum ImportedIndividualMaritalStatus {
   SINGLE
   MARRIED
@@ -895,6 +902,7 @@ type ImportedIndividualNode implements Node {
   flexFields: JSONString!
   importedhousehold: ImportedHouseholdNode
   documents(before: String, after: String, first: Int, last: Int): ImportedDocumentNodeConnection!
+  identities: [ImportedIndividualIdentityNode!]!
   role: String
 }
 
@@ -919,6 +927,13 @@ enum ImportedIndividualWorkStatus {
   YES
   NO
   NOT_PROVIDED
+}
+
+type IndividualIdentityNode {
+  id: ID!
+  individual: IndividualNode!
+  number: String!
+  type: String
 }
 
 enum IndividualMaritalStatus {
@@ -961,6 +976,7 @@ type IndividualNode implements Node {
   representedHouseholds(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   headingHousehold: HouseholdNode
   documents(before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
+  identities: [IndividualIdentityNode!]!
   householdsAndRoles: [IndividualRoleInHouseholdNode!]!
   role: String
 }
