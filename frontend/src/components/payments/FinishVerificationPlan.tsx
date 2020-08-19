@@ -5,19 +5,36 @@ import styled from 'styled-components';
 
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
+import { useSnackbar } from '../../hooks/useSnackBar';
+import { useFinishCashPlanPaymentVerificationMutation } from '../../__generated__/graphql';
+import { CashPlan } from '../../apollo/queries/CashPlan';
+import { Missing } from '../Missing';
 
-export function FinishVerificationPlan(): React.ReactElement {
+export interface Props {
+  cashPlanVerificationId: string;
+  cashPlanId: string;
+}
+export function FinishVerificationPlan({
+  cashPlanVerificationId,
+  cashPlanId,
+}: Props): React.ReactElement {
   const [finishDialogOpen, setFinishDialogOpen] = useState(false);
+  const { showMessage } = useSnackbar();
+  const [mutate] = useFinishCashPlanPaymentVerificationMutation();
 
-  // const submit = async (): Promise<void> => {
-  //   // const { errors } = await mutate();
-  //   const errors = [];
-  //   if (errors) {
-  //     showMessage('Error while submitting');
-  //     return;
-  //   }
-  //   showMessage('New verification plan created.');
-  // };
+  const finish = async (): Promise<void> => {
+    const { errors } = await mutate({
+      variables: { cashPlanVerificationId },
+      refetchQueries: () => [
+        { query: CashPlan, variables: { id: cashPlanId } },
+      ],
+    });
+    if (errors) {
+      showMessage('Error while submitting');
+      return;
+    }
+    showMessage('Verification plan has been finished');
+  };
   const DialogTitleWrapper = styled.div`
     border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
   `;
@@ -60,12 +77,13 @@ export function FinishVerificationPlan(): React.ReactElement {
           <DialogContainer>
             <Box p={5}>
               <div>
-                Only 43% of the beneficiaries have responded to this payment
-                verification.
+                Only <Missing /> of the beneficiaries have responded to this
+                payment verification.
               </div>
               <div>Are you sure that you want to finish?</div>
               <div>
-                Closing this verification will generate 43 grievance tickets.
+                Closing this verification will generate <Missing /> grievance
+                tickets.
               </div>
             </Box>
           </DialogContainer>
@@ -74,11 +92,10 @@ export function FinishVerificationPlan(): React.ReactElement {
           <DialogActions>
             <Button onClick={() => setFinishDialogOpen(false)}>CANCEL</Button>
             <Button
-              startIcon={<CheckRoundedIcon />}
               type='submit'
               color='primary'
               variant='contained'
-              onClick={() => console.log('activate')}
+              onClick={() => finish()}
               data-cy='button-submit'
             >
               FINISH

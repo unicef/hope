@@ -7,19 +7,36 @@ import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
 import { ErrorButtonContained } from '../ErrorButtonContained';
 import { ErrorButton } from '../ErrorButton';
+import { useSnackbar } from '../../hooks/useSnackBar';
+import { useDiscardCashPlanPaymentVerificationMutation } from '../../__generated__/graphql';
+import { CashPlan } from '../../apollo/queries/CashPlan';
 
-export function DiscardVerificationPlan(): React.ReactElement {
+export interface Props {
+  cashPlanVerificationId: string;
+  cashPlanId: string;
+}
+export function DiscardVerificationPlan({
+  cashPlanVerificationId,
+  cashPlanId,
+}: Props): React.ReactElement {
   const [finishDialogOpen, setFinishDialogOpen] = useState(false);
+  const { showMessage } = useSnackbar();
+  const [mutate] = useDiscardCashPlanPaymentVerificationMutation();
 
-  // const submit = async (): Promise<void> => {
-  //   // const { errors } = await mutate();
-  //   const errors = [];
-  //   if (errors) {
-  //     showMessage('Error while submitting');
-  //     return;
-  //   }
-  //   showMessage('New verification plan created.');
-  // };
+  const discard = async (): Promise<void> => {
+    const { errors } = await mutate({
+      variables: { cashPlanVerificationId },
+      refetchQueries: () => [
+        { query: CashPlan, variables: { id: cashPlanId } },
+      ],
+    });
+    if (errors) {
+      showMessage('Error while submitting');
+      return;
+    }
+    showMessage('Verification plan has been discarded.');
+  };
+
   const DialogTitleWrapper = styled.div`
     border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
   `;
@@ -73,7 +90,7 @@ export function DiscardVerificationPlan(): React.ReactElement {
             <Button onClick={() => setFinishDialogOpen(false)}>CANCEL</Button>
             <ErrorButtonContained
               type='submit'
-              onClick={() => console.log('discard')}
+              onClick={() => discard()}
               data-cy='button-submit'
             >
               DISCARD

@@ -3,6 +3,10 @@ schema {
   mutation: Mutations
 }
 
+type ActivateCashPlanVerificationMutation {
+  cashPlan: CashPlanNode
+}
+
 type AdminAreaNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -222,7 +226,6 @@ input CreatePaymentVerificationInput {
   fullListArguments: FullListArguments
   randomSamplingArguments: RandomSamplingArguments
   rapidProArguments: RapidProArguments
-  xlsxArguments: XlsxArguments
 }
 
 type CreatePaymentVerificationMutation {
@@ -281,6 +284,10 @@ input DeleteTargetPopulationMutationInput {
 type DeleteTargetPopulationMutationPayload {
   ok: Boolean
   clientMutationId: String
+}
+
+type DiscardCashPlanVerificationMutation {
+  cashPlan: CashPlanNode
 }
 
 type DjangoDebug {
@@ -360,6 +367,10 @@ type FieldAttributeNode {
 
 type FinalizeTargetPopulationMutation {
   targetPopulation: TargetPopulationNode
+}
+
+type FinishCashPlanVerificationMutation {
+  cashPlan: CashPlanNode
 }
 
 scalar FlexFieldsScalar
@@ -850,6 +861,13 @@ enum ImportedHouseholdResidenceStatus {
   OTHER
 }
 
+type ImportedIndividualIdentityNode {
+  id: ID!
+  individual: ImportedIndividualNode!
+  documentNumber: String!
+  type: String
+}
+
 enum ImportedIndividualMaritalStatus {
   SINGLE
   MARRIED
@@ -875,7 +893,7 @@ type ImportedIndividualNode implements Node {
   maritalStatus: ImportedIndividualMaritalStatus!
   phoneNo: String!
   phoneNoAlternative: String!
-  household: ImportedHouseholdNode!
+  household: ImportedHouseholdNode
   registrationDataImport: RegistrationDataImportDatahubNode!
   disability: Boolean!
   workStatus: ImportedIndividualWorkStatus
@@ -884,6 +902,7 @@ type ImportedIndividualNode implements Node {
   flexFields: JSONString!
   importedhousehold: ImportedHouseholdNode
   documents(before: String, after: String, first: Int, last: Int): ImportedDocumentNodeConnection!
+  identities: [ImportedIndividualIdentityNode!]!
   role: String
 }
 
@@ -908,6 +927,13 @@ enum ImportedIndividualWorkStatus {
   YES
   NO
   NOT_PROVIDED
+}
+
+type IndividualIdentityNode {
+  id: ID!
+  individual: IndividualNode!
+  number: String!
+  type: String
 }
 
 enum IndividualMaritalStatus {
@@ -950,6 +976,7 @@ type IndividualNode implements Node {
   representedHouseholds(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   headingHousehold: HouseholdNode
   documents(before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
+  identities: [IndividualIdentityNode!]!
   householdsAndRoles: [IndividualRoleInHouseholdNode!]!
   role: String
 }
@@ -1089,6 +1116,10 @@ type MergeRegistrationDataImportMutation {
 type Mutations {
   createCashPlanPaymentVerification(input: CreatePaymentVerificationInput!): CreatePaymentVerificationMutation
   importXlsxCashPlanVerification(cashPlanVerificationId: ID!, file: Upload!): ImportXlsxCashPlanVerification
+  activateCashPlanPaymentVerification(cashPlanVerificationId: ID!): ActivateCashPlanVerificationMutation
+  finishCashPlanPaymentVerification(cashPlanVerificationId: ID!): FinishCashPlanVerificationMutation
+  discardCashPlanPaymentVerification(cashPlanVerificationId: ID!): DiscardCashPlanVerificationMutation
+  updatePaymentVerificationStatusAndReceivedAmount(paymentVerificationId: ID!, receivedAmount: Decimal!, status: PaymentVerificationStatusForUpdate): UpdatePaymentVerificationStatusAndReceivedAmount
   createTargetPopulation(input: CreateTargetPopulationInput!): CreateTargetPopulationMutation
   updateTargetPopulation(input: UpdateTargetPopulationInput!): UpdateTargetPopulationMutation
   copyTargetPopulation(input: CopyTargetPopulationMutationInput!): CopyTargetPopulationMutationPayload
@@ -1202,6 +1233,13 @@ type PaymentVerificationNodeEdge {
 }
 
 enum PaymentVerificationStatus {
+  PENDING
+  RECEIVED
+  NOT_RECEIVED
+  RECEIVED_WITH_ISSUES
+}
+
+enum PaymentVerificationStatusForUpdate {
   PENDING
   RECEIVED
   NOT_RECEIVED
@@ -1623,6 +1661,10 @@ type UnapproveTargetPopulationMutation {
   targetPopulation: TargetPopulationNode
 }
 
+type UpdatePaymentVerificationStatusAndReceivedAmount {
+  paymentVerification: PaymentVerificationNode
+}
+
 type UpdateProgram {
   program: ProgramNode
 }
@@ -1708,10 +1750,6 @@ type UserObjectType {
   approvedTargetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, orderBy: String): TargetPopulationNodeConnection!
   finalizedTargetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, orderBy: String): TargetPopulationNodeConnection!
   registrationDataImports(before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
-}
-
-input XlsxArguments {
-  file: Upload!
 }
 
 type XlsxErrorNode {
