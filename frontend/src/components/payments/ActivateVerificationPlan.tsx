@@ -6,22 +6,34 @@ import styled from 'styled-components';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
+import { useActivateCashPlanPaymentVerificationMutation } from '../../__generated__/graphql';
+import { CashPlan } from '../../apollo/queries/CashPlan';
 
-export function ActivateVerificationPlan(): React.ReactElement {
+export interface Props {
+  cashPlanVerificationId: string;
+  cashPlanId: string;
+}
+export function ActivateVerificationPlan({
+  cashPlanVerificationId,
+  cashPlanId,
+}: Props): React.ReactElement {
   const [activateDialogOpen, setActivateDialogOpen] = useState(false);
-  const [selectedTab, setSelectedTab] = useState(0);
 
   const { showMessage } = useSnackbar();
-
-  // const submit = async (): Promise<void> => {
-  //   // const { errors } = await mutate();
-  //   const errors = [];
-  //   if (errors) {
-  //     showMessage('Error while submitting');
-  //     return;
-  //   }
-  //   showMessage('New verification plan created.');
-  // };
+  const [mutate] = useActivateCashPlanPaymentVerificationMutation();
+  const activate = async (): Promise<void> => {
+    const { errors } = await mutate({
+      variables: { cashPlanVerificationId },
+      refetchQueries: () => [
+        { query: CashPlan, variables: { id: cashPlanId } },
+      ],
+    });
+    if (errors) {
+      showMessage('Error while submitting');
+      return;
+    }
+    showMessage('Verification plan has been activated.');
+  };
   const DialogTitleWrapper = styled.div`
     border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
   `;
@@ -72,11 +84,10 @@ export function ActivateVerificationPlan(): React.ReactElement {
           <DialogActions>
             <Button onClick={() => setActivateDialogOpen(false)}>CANCEL</Button>
             <Button
-              startIcon={<CheckRoundedIcon />}
               type='submit'
               color='primary'
               variant='contained'
-              onClick={() => console.log('activate')}
+              onClick={() => activate()}
               data-cy='button-submit'
             >
               ACTIVATE
