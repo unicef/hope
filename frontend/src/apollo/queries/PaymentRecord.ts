@@ -33,7 +33,7 @@ export const PAYMENT_RECORD_QUERY = gql`
       deliveryDate
       entitlementCardIssueDate
       entitlementCardNumber
-      serviceProvider{
+      serviceProvider {
         id
         fullName
         shortName

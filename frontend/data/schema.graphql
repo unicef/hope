@@ -60,6 +60,7 @@ type BusinessAreaNode implements Node {
   slug: String!
   hasDataSharingAgreement: Boolean!
   userSet(before: String, after: String, first: Int, last: Int): UserNodeConnection!
+  householdSet(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   paymentrecordSet(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
   serviceproviderSet(before: String, after: String, first: Int, last: Int): ServiceProviderNodeConnection!
   programSet(before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
@@ -441,6 +442,7 @@ type HouseholdNode implements Node {
   lastRegistrationDate: Date!
   headOfHousehold: IndividualNode!
   unicefId: String!
+  businessArea: BusinessAreaNode!
   individualsAndRoles: [IndividualRoleInHouseholdNode!]!
   individuals(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
@@ -1117,6 +1119,7 @@ type Mutations {
   activateCashPlanPaymentVerification(cashPlanVerificationId: ID!): ActivateCashPlanVerificationMutation
   finishCashPlanPaymentVerification(cashPlanVerificationId: ID!): FinishCashPlanVerificationMutation
   discardCashPlanPaymentVerification(cashPlanVerificationId: ID!): DiscardCashPlanVerificationMutation
+  updatePaymentVerificationStatusAndReceivedAmount(paymentVerificationId: ID!, receivedAmount: Decimal!, status: PaymentVerificationStatusForUpdate): UpdatePaymentVerificationStatusAndReceivedAmount
   createTargetPopulation(input: CreateTargetPopulationInput!): CreateTargetPopulationMutation
   updateTargetPopulation(input: UpdateTargetPopulationInput!): UpdateTargetPopulationMutation
   copyTargetPopulation(input: CopyTargetPopulationMutationInput!): CopyTargetPopulationMutationPayload
@@ -1230,6 +1233,13 @@ type PaymentVerificationNodeEdge {
 }
 
 enum PaymentVerificationStatus {
+  PENDING
+  RECEIVED
+  NOT_RECEIVED
+  RECEIVED_WITH_ISSUES
+}
+
+enum PaymentVerificationStatusForUpdate {
   PENDING
   RECEIVED
   NOT_RECEIVED
@@ -1649,6 +1659,10 @@ scalar UUID
 
 type UnapproveTargetPopulationMutation {
   targetPopulation: TargetPopulationNode
+}
+
+type UpdatePaymentVerificationStatusAndReceivedAmount {
+  paymentVerification: PaymentVerificationNode
 }
 
 type UpdateProgram {
