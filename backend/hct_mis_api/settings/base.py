@@ -434,15 +434,15 @@ CONSTANCE_ADDITIONAL_FIELDS = {
 
 CONSTANCE_CONFIG = {
     "DEDUPLICATION_BATCH_DUPLICATE_SCORE": (
-        44.0,
+        10.0,
         "Results equal or above this score are considered duplicates",
     ),
     "DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE": (
-        10.0,
+        7.0,
         "Results below the minimum score will not be taken into account",
     ),
     "DEDUPLICATION_GOLDEN_RECORD_DUPLICATE_SCORE": (
-        26.0,
+        20.0,
         "Results equal or above this score are considered duplicates",
     ),
 }
