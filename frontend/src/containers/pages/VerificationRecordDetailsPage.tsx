@@ -11,6 +11,7 @@ import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { LoadingComponent } from '../../components/LoadingComponent';
 import { VerificationRecordDetails } from '../../components/payments/VerificationRecordDetails';
 import { decodeIdString } from '../../utils/utils';
+import { VerifyManual } from '../../components/payments/VerifyManual';
 
 const Container = styled.div`
   display: flex;
@@ -45,6 +46,8 @@ export function VerificationRecordDetailsPage(): React.ReactElement {
   }
 
   const paymentVerification = data.paymentRecordVerification as PaymentVerificationNode;
+  const verification =
+    paymentVerification.paymentRecord?.cashPlan?.verifications?.edges[0].node;
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: 'Payment Verification',
@@ -64,7 +67,11 @@ export function VerificationRecordDetailsPage(): React.ReactElement {
         paymentVerification.paymentRecord.id,
       )}`}
       breadCrumbs={breadCrumbsItems}
-    />
+    >
+      {verification.verificationMethod === 'MANUAL' ? (
+        <VerifyManual paymentVerificationId={paymentVerification.id} />
+      ) : null}
+    </PageHeader>
   );
   return (
     <div>
