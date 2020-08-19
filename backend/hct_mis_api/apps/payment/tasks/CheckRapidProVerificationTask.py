@@ -66,4 +66,5 @@ class CheckRapidProVerificationTask:
         else:
             status = PaymentVerification.STATUS_NOT_RECEIVED
         payment_record_verification.status = status
+        payment_record_verification.received_amount = received_amount
         return payment_record_verification
