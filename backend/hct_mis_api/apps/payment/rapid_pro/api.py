@@ -71,8 +71,7 @@ class RapidProAPI:
 
     def get_mapped_flow_runs(self,start_uuid):
         results = self.get_flow_runs()
-        results = [x for x in results if x.get("start").get("uuid") == start_uuid]
-        mapped_results = self._map_to_internal_structure(results)
+        mapped_results = [self._map_to_internal_structure(x) for x in results if x.get("start").get("uuid") == start_uuid]
         return mapped_results
 
     def _get_paginated_results(self, url) -> list:
