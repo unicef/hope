@@ -7,7 +7,7 @@ from .models import ImportedIndividual
 
 @registry.register_document
 class ImportedIndividualDocument(Document):
-    id = fields.TextField()
+    id = fields.TextField(boost=0)
     given_name = fields.TextField(analyzer=phonetic_analyzer)
     middle_name = fields.TextField(analyzer=phonetic_analyzer)
     family_name = fields.TextField(analyzer=phonetic_analyzer)
@@ -27,7 +27,8 @@ class ImportedIndividualDocument(Document):
         }
     )
     registration_data_import_id = fields.TextField(
-        "registration_data_import.id.__str__"
+        "registration_data_import.id.__str__",
+        boost=0,
     )
 
     def prepare_hash_key(self, instance):
