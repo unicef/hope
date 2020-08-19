@@ -36,15 +36,6 @@ class DeduplicateTask:
                 single_query = {
                     "match": {field_name_as_key: {"query": str(field_value)}}
                 }
-            # elif field_name == "full_name":
-            #     single_query = {
-            #         "match": {
-            #             field_name_as_key: {
-            #                 "query": str(field_value),
-            #                 "boost": 2,
-            #             }
-            #         }
-            #     }
             else:
                 single_query = {
                     "fuzzy": {
@@ -96,7 +87,12 @@ class DeduplicateTask:
 
         for individual_hit in results:
             score = individual_hit.meta.score
-            if score >= duplicate_score:
+            # individual is mark as duplicate if have score above defined
+            # in settings or if sha256 hashes for both individuals are the same
+            if (
+                score >= duplicate_score
+                or individual.get_hash_key == individual_hit.hash_key
+            ):
                 duplicates.append(individual_hit.id)
                 original_individuals_ids_duplicates.append(individual.id)
             else:
