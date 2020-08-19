@@ -52,7 +52,7 @@ export function VerifyManual({
         variables: {
           paymentVerificationId,
           status: values.status,
-          receivedAmount: values.receivedAmount,
+          receivedAmount: parseFloat(values.receivedAmount).toFixed(2),
         },
       });
     } catch (e) {
