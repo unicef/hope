@@ -14,5 +14,13 @@ export const HouseholdChoiceData = gql`
       name
       value
     }
+    deduplicationBatchStatusChoices {
+      name
+      value
+    }
+    deduplicationGoldenRecordStatusChoices {
+      name
+      value
+    }
   }
 `;

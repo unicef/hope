@@ -1,3 +1,4 @@
+from constance.test import override_config
 from django.core.management import call_command
 
 from core.base_test_case import BaseElasticSearchTestCase
@@ -28,6 +29,11 @@ from registration_datahub.models import (
 from registration_datahub.tasks.batch_deduplicate import DeduplicateTask
 
 
+@override_config(
+    DEDUPLICATION_BATCH_DUPLICATE_SCORE=3,
+    DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE=1.2,
+    DEDUPLICATION_GOLDEN_RECORD_DUPLICATE_SCORE=3,
+)
 class TestBatchDeduplication(BaseElasticSearchTestCase):
     multi_db = True
 
@@ -290,6 +296,10 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
         )
 
 
+@override_config(
+    DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE=1.2,
+    DEDUPLICATION_GOLDEN_RECORD_DUPLICATE_SCORE=3,
+)
 class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
     multi_db = True
 

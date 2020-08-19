@@ -62,6 +62,8 @@ export const importedIndividualMinimal = gql`
     sex
     role
     relationship
+    deduplicationBatchStatus
+    deduplicationGoldenRecordStatus
   }
 `;
 

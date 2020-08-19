@@ -21,9 +21,9 @@ export type Scalars = {
   Decimal: any,
   JSONLazyString: any,
   FlexFieldsScalar: any,
+  JSONString: any,
   GeoJSON: any,
   Arg: any,
-  JSONString: any,
   Upload: any,
 };
 
@@ -1185,6 +1185,10 @@ export type ImportedIndividualNode = Node & {
   workStatus?: Maybe<ImportedIndividualWorkStatus>,
   firstRegistrationDate: Scalars['Date'],
   lastRegistrationDate: Scalars['Date'],
+  deduplicationBatchStatus: Scalars['String'],
+  deduplicationGoldenRecordStatus: Scalars['String'],
+  deduplicationBatchResults: Scalars['JSONString'],
+  deduplicationGoldenRecordResults: Scalars['JSONString'],
   flexFields: Scalars['JSONString'],
   importedhousehold?: Maybe<ImportedHouseholdNode>,
   documents: ImportedDocumentNodeConnection,
@@ -1277,6 +1281,8 @@ export type IndividualNode = Node & {
   enrolledInNutritionProgramme: Scalars['Boolean'],
   administrationOfRutf: Scalars['Boolean'],
   unicefId: Scalars['String'],
+  deduplicationStatus: Scalars['String'],
+  deduplicationResults: Scalars['JSONString'],
   representedHouseholds: HouseholdNodeConnection,
   headingHousehold?: Maybe<HouseholdNode>,
   documents: DocumentNodeConnection,
@@ -1901,6 +1907,8 @@ export type Query = {
   importedIndividual?: Maybe<ImportedIndividualNode>,
   allImportedIndividuals?: Maybe<ImportedIndividualNodeConnection>,
   importData?: Maybe<ImportDataNode>,
+  deduplicationBatchStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  deduplicationGoldenRecordStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   registrationDataImport?: Maybe<RegistrationDataImportNode>,
   allRegistrationDataImports?: Maybe<RegistrationDataImportNodeConnection>,
   registrationDataStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
@@ -3915,6 +3923,12 @@ export type HouseholdChoiceDataQuery = (
   )>>>, roleChoices: Maybe<Array<Maybe<(
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, deduplicationBatchStatusChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, deduplicationGoldenRecordStatusChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
   )>>> }
 );
 
@@ -4406,7 +4420,7 @@ export type ImportedHouseholdDetailedFragment = (
 
 export type ImportedIndividualMinimalFragment = (
   { __typename?: 'ImportedIndividualNode' }
-  & Pick<ImportedIndividualNode, 'id' | 'fullName' | 'birthDate' | 'sex' | 'role' | 'relationship'>
+  & Pick<ImportedIndividualNode, 'id' | 'fullName' | 'birthDate' | 'sex' | 'role' | 'relationship' | 'deduplicationBatchStatus' | 'deduplicationGoldenRecordStatus'>
 );
 
 export type ImportedIndividualDetailedFragment = (
@@ -4835,6 +4849,8 @@ export const ImportedIndividualMinimalFragmentDoc = gql`
   sex
   role
   relationship
+  deduplicationBatchStatus
+  deduplicationGoldenRecordStatus
 }
     `;
 export const ImportedIndividualDetailedFragmentDoc = gql`
@@ -7078,6 +7094,14 @@ export const HouseholdChoiceDataDocument = gql`
     name
     value
   }
+  deduplicationBatchStatusChoices {
+    name
+    value
+  }
+  deduplicationGoldenRecordStatusChoices {
+    name
+    value
+  }
 }
     `;
 export type HouseholdChoiceDataComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<HouseholdChoiceDataQuery, HouseholdChoiceDataQueryVariables>, 'query'>;
@@ -8976,6 +9000,7 @@ export type ResolversTypes = {
   RegistrationDataImportDataSource: RegistrationDataImportDataSource,
   IndividualWorkStatus: IndividualWorkStatus,
   FlexFieldsScalar: ResolverTypeWrapper<Scalars['FlexFieldsScalar']>,
+  JSONString: ResolverTypeWrapper<Scalars['JSONString']>,
   DocumentNodeConnection: ResolverTypeWrapper<DocumentNodeConnection>,
   DocumentNodeEdge: ResolverTypeWrapper<DocumentNodeEdge>,
   DocumentNode: ResolverTypeWrapper<DocumentNode>,
@@ -9013,7 +9038,6 @@ export type ResolversTypes = {
   AgeInput: AgeInput,
   GetCashplanVerificationSampleSizeObject: ResolverTypeWrapper<GetCashplanVerificationSampleSizeObject>,
   GroupAttributeNode: ResolverTypeWrapper<GroupAttributeNode>,
-  JSONString: ResolverTypeWrapper<Scalars['JSONString']>,
   KoboAssetObject: ResolverTypeWrapper<KoboAssetObject>,
   KoboAssetObjectConnection: ResolverTypeWrapper<KoboAssetObjectConnection>,
   KoboAssetObjectEdge: ResolverTypeWrapper<KoboAssetObjectEdge>,
@@ -9161,6 +9185,7 @@ export type ResolversParentTypes = {
   RegistrationDataImportDataSource: RegistrationDataImportDataSource,
   IndividualWorkStatus: IndividualWorkStatus,
   FlexFieldsScalar: Scalars['FlexFieldsScalar'],
+  JSONString: Scalars['JSONString'],
   DocumentNodeConnection: DocumentNodeConnection,
   DocumentNodeEdge: DocumentNodeEdge,
   DocumentNode: DocumentNode,
@@ -9198,7 +9223,6 @@ export type ResolversParentTypes = {
   AgeInput: AgeInput,
   GetCashplanVerificationSampleSizeObject: GetCashplanVerificationSampleSizeObject,
   GroupAttributeNode: GroupAttributeNode,
-  JSONString: Scalars['JSONString'],
   KoboAssetObject: KoboAssetObject,
   KoboAssetObjectConnection: KoboAssetObjectConnection,
   KoboAssetObjectEdge: KoboAssetObjectEdge,
@@ -9784,6 +9808,10 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   workStatus?: Resolver<Maybe<ResolversTypes['ImportedIndividualWorkStatus']>, ParentType, ContextType>,
   firstRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   lastRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
+  deduplicationBatchStatus?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  deduplicationGoldenRecordStatus?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  deduplicationBatchResults?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
+  deduplicationGoldenRecordResults?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   flexFields?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   importedhousehold?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['ImportedDocumentNodeConnection'], ParentType, ContextType, ImportedIndividualNodeDocumentsArgs>,
@@ -9844,6 +9872,8 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   enrolledInNutritionProgramme?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   administrationOfRutf?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   unicefId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  deduplicationStatus?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  deduplicationResults?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   representedHouseholds?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, IndividualNodeRepresentedHouseholdsArgs>,
   headingHousehold?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, IndividualNodeDocumentsArgs>,
@@ -10145,6 +10175,8 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   importedIndividual?: Resolver<Maybe<ResolversTypes['ImportedIndividualNode']>, ParentType, ContextType, RequireFields<QueryImportedIndividualArgs, 'id'>>,
   allImportedIndividuals?: Resolver<Maybe<ResolversTypes['ImportedIndividualNodeConnection']>, ParentType, ContextType, QueryAllImportedIndividualsArgs>,
   importData?: Resolver<Maybe<ResolversTypes['ImportDataNode']>, ParentType, ContextType, RequireFields<QueryImportDataArgs, 'id'>>,
+  deduplicationBatchStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  deduplicationGoldenRecordStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType, RequireFields<QueryRegistrationDataImportArgs, 'id'>>,
   allRegistrationDataImports?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNodeConnection']>, ParentType, ContextType, QueryAllRegistrationDataImportsArgs>,
   registrationDataStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,

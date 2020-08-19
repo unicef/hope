@@ -51,7 +51,7 @@ from registration_datahub.models import (
     ImportedIndividual,
 )
 from registration_datahub.models import RegistrationDataImportDatahub
-from registration_datahub.tasks.batch_deduplicate import BatchDeduplicate
+from registration_datahub.tasks.batch_deduplicate import DeduplicateTask
 from registration_datahub.tasks.utils import collectors_str_ids_to_list
 
 
@@ -511,10 +511,9 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             "registration_datahub.ImportedIndividual",
         )
 
-        task = BatchDeduplicate(
+        DeduplicateTask.deduplicate_imported_individuals(
             registration_data_import_datahub=registration_data_import
         )
-        task.deduplicate()
 
 
 class RdiKoboCreateTask(RdiBaseCreateTask):
@@ -816,7 +815,6 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             "registration_datahub.ImportedIndividual",
         )
 
-        task = BatchDeduplicate(
+        DeduplicateTask.deduplicate_imported_individuals(
             registration_data_import_datahub=registration_data_import
         )
-        task.deduplicate()

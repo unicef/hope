@@ -38,4 +38,16 @@ export const headCells: HeadCell<ImportedIndividualMinimalFragment>[] = [
     id: 'sex',
     numeric: false,
   },
+  {
+    disablePadding: false,
+    label: 'Deduplication Batch Status',
+    id: 'deduplicationBatchStatus',
+    numeric: false,
+  },
+  {
+    disablePadding: false,
+    label: 'Deduplication Golden Record Status',
+    id: 'deduplicationGoldenRecordStatus',
+    numeric: false,
+  },
 ];
