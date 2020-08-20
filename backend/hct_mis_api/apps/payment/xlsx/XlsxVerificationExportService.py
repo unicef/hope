@@ -8,18 +8,26 @@ from payment.models import PaymentVerification
 class XlsxVerificationExportService:
     HEADERS = (
         "payment_record_id",
+        "payment_record_ca_id",
         "received",
         "head_of_household",
         "household_id",
+        "household_unicef_id",
         "delivered_amount",
         "received_amount",
     )
+    PAYMENT_RECORD_ID_COLUMN_INDEX = 0
+    PAYMENT_RECORD_ID_LETTER = "A"
+    RECEIVED_COLUMN_INDEX = 2
+    RECEIVED_COLUMN_LETTER = "C"
+    RECEIVED_AMOUNT_COLUMN_INDEX = 7
+    RECEIVED_AMOUNT_COLUMN_LETTER = "H"
     VERIFICATION_SHEET = "Payment Verifications"
     META_SHEET = "Meta"
     VERSION_CELL_NAME_COORDINATES = "A1"
     VERSION_CELL_COORDINATES = "B1"
     VERSION_CELL_NAME = "FILE_TEMPLATE_VERSION"
-    VERSION = "1.1"
+    VERSION = "1.2"
     TRUE_FALSE_MAPPING = {True: "YES", False: "NO"}
 
     def __init__(self, cashplan_payment_verification):
@@ -57,9 +65,11 @@ class XlsxVerificationExportService:
 
         payment_record_verification_row = (
             str(payment_record_verification.payment_record_id),
+            str(payment_record_verification.payment_record.ca_id),
             self._to_received_column(payment_record_verification),
             str(payment_record_verification.payment_record.household.head_of_household.full_name),
             str(payment_record_verification.payment_record.household_id),
+            str(payment_record_verification.payment_record.household.unicef_id),
             payment_record_verification.payment_record.delivered_quantity,
             payment_record_verification.received_amount,
         )
