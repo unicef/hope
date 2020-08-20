@@ -11,7 +11,7 @@ class IndividualDocument(Document):
     given_name = fields.TextField(analyzer=phonetic_analyzer)
     middle_name = fields.TextField(analyzer=phonetic_analyzer)
     family_name = fields.TextField(analyzer=phonetic_analyzer)
-    full_name = fields.TextField()
+    full_name = fields.TextField(boost=2.0)
     birth_date = fields.DateField()
     phone_no = fields.KeywordField("phone_no.__str__")
     phone_no_alternative = fields.KeywordField("phone_no_alternative.__str__")
