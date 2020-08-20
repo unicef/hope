@@ -227,7 +227,7 @@ class EditPaymentVerificationMutation(graphene.Mutation):
                 },
             },
         )
-        cash_plan_payment_verification_id = arg("cash_plan_payment_verification_id")
+        cash_plan_payment_verification_id = decode_id_string(arg("cash_plan_payment_verification_id"))
 
         cash_plan_verification = get_object_or_404(CashPlanPaymentVerification, id=cash_plan_payment_verification_id)
         if cash_plan_verification.status != CashPlanPaymentVerification.STATUS_PENDING:
@@ -241,12 +241,13 @@ class EditPaymentVerificationMutation(graphene.Mutation):
             payment_records_sample_count,
             sampling,
         ) = cls.process_sampling(cash_plan, input)
+
         cash_plan_verification.confidence_interval = confidence_interval
         cash_plan_verification.margin_of_error = margin_of_error
         cash_plan_verification.sample_size = payment_records_sample_count
         cash_plan_verification.sampling = sampling
         cash_plan_verification.verification_method = verification_channel
-
+        cash_plan_verification.payment_record_verifications.all().delete()
         payment_record_verifications_to_create = []
         for payment_record in payment_records:
             payment_record_verification = PaymentVerification(
@@ -498,6 +499,7 @@ class ImportXlsxCashPlanVerification(graphene.Mutation,):
 
 class Mutations(graphene.ObjectType):
     create_cash_plan_payment_verification = CreatePaymentVerificationMutation.Field()
+    edit_cash_plan_payment_verification = EditPaymentVerificationMutation.Field()
     import_xlsx_cash_plan_verification = ImportXlsxCashPlanVerification.Field()
     activate_cash_plan_payment_verification = ActivateCashPlanVerificationMutation.Field()
     finish_cash_plan_payment_verification = FinishCashPlanVerificationMutation.Field()
