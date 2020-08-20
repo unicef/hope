@@ -139,6 +139,8 @@ class XlsxVerificationImportService:
             return
         received_amount = row[5].value
         if received_amount is not None:
+            if not isinstance(received_amount, float) and not isinstance(received_amount, int):
+                return
             received_amount = Decimal(format(round(received_amount, 2), ".2f"))
         received_cell = row[1]
         received = received_cell.value
