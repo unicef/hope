@@ -134,9 +134,7 @@ class GetCashplanVerificationSampleSizeObject(graphene.ObjectType):
 class Query(graphene.ObjectType):
     payment_record = relay.Node.Field(PaymentRecordNode)
     payment_record_verification = relay.Node.Field(PaymentVerificationNode)
-    all_payment_records = DjangoFilterConnectionField(
-        PaymentRecordNode, filterset_class=PaymentRecordFilter,
-    )
+    all_payment_records = DjangoFilterConnectionField(PaymentRecordNode, filterset_class=PaymentRecordFilter,)
     all_payment_verifications = DjangoFilterConnectionField(
         PaymentVerificationNode, filterset_class=PaymentVerificationFilter,
     )
@@ -145,17 +143,12 @@ class Query(graphene.ObjectType):
     payment_record_delivery_type_choices = graphene.List(ChoiceObject)
     cash_plan_verification_status_choices = graphene.List(ChoiceObject)
     cash_plan_verification_sampling_choices = graphene.List(ChoiceObject)
-    cash_plan_verification_verification_method_choices = graphene.List(
-        ChoiceObject
-    )
+    cash_plan_verification_verification_method_choices = graphene.List(ChoiceObject)
     payment_verification_status_choices = graphene.List(ChoiceObject)
 
-    all_rapid_pro_flows = graphene.List(
-        RapidProFlow, business_area_slug=graphene.String(required=True),
-    )
+    all_rapid_pro_flows = graphene.List(RapidProFlow, business_area_slug=graphene.String(required=True),)
     sample_size = graphene.Field(
-        GetCashplanVerificationSampleSizeObject,
-        input=GetCashplanVerificationSampleSizeInput(),
+        GetCashplanVerificationSampleSizeObject, input=GetCashplanVerificationSampleSizeInput(),
     )
 
     def resolve_sample_size(self, info, input, **kwargs):
@@ -170,38 +163,25 @@ class Query(graphene.ObjectType):
         margin_of_error = None
         payment_records = cash_plan.payment_records
         if sampling == CashPlanPaymentVerification.SAMPLING_FULL_LIST:
-            excluded_admin_areas = arg("full_list_arguments").get(
-                "excluded_admin_areas", []
-            )
+            excluded_admin_areas = arg("full_list_arguments").get("excluded_admin_areas", [])
         elif sampling == CashPlanPaymentVerification.SAMPLING_RANDOM:
             random_sampling_arguments = arg("random_sampling_arguments")
-            confidence_interval = random_sampling_arguments.get(
-                "confidence_interval"
-            )
+            confidence_interval = random_sampling_arguments.get("confidence_interval")
             margin_of_error = random_sampling_arguments.get("margin_of_error")
             sex = random_sampling_arguments.get("sex")
             age = random_sampling_arguments.get("random_sampling_arguments")
 
-        payment_records = payment_records.filter(
-            ~(Q(household__admin_area__title__in=excluded_admin_areas))
-        )
+        payment_records = payment_records.filter(~(Q(household__admin_area__title__in=excluded_admin_areas)))
         if sex is not None:
-            payment_records = payment_records.filter(
-                household__head_of_household__sex=sex
-            )
+            payment_records = payment_records.filter(household__head_of_household__sex=sex)
         if age is not None:
             payment_records = filter_age(
-                "household__head_of_household__birth_date",
-                payment_records,
-                age.get(min),
-                age.get("max"),
+                "household__head_of_household__birth_date", payment_records, age.get(min), age.get("max"),
             )
         payment_records_sample_count = payment_records.count()
         if sampling == CashPlanPaymentVerification.SAMPLING_RANDOM:
             payment_records_sample_count = get_number_of_samples(
-                payment_records_sample_count,
-                confidence_interval,
-                margin_of_error,
+                payment_records_sample_count, confidence_interval, margin_of_error,
             )
         return {
             "payment_record_count": cash_plan.payment_records.count(),
@@ -215,9 +195,7 @@ class Query(graphene.ObjectType):
     def resolve_payment_record_status_choices(self, info, **kwargs):
         return to_choice_object(PaymentRecord.STATUS_CHOICE)
 
-    def resolve_payment_record_entitlement_card_status_choices(
-        self, info, **kwargs
-    ):
+    def resolve_payment_record_entitlement_card_status_choices(self, info, **kwargs):
         return to_choice_object(PaymentRecord.ENTITLEMENT_CARD_STATUS_CHOICE)
 
     def resolve_payment_record_delivery_type_choices(self, info, **kwargs):
@@ -229,12 +207,8 @@ class Query(graphene.ObjectType):
     def resolve_cash_plan_verification_sampling_choices(self, info, **kwargs):
         return to_choice_object(CashPlanPaymentVerification.SAMPLING_CHOICES)
 
-    def resolve_cash_plan_verification_verification_method_choices(
-        self, info, **kwargs
-    ):
-        return to_choice_object(
-            CashPlanPaymentVerification.VERIFICATION_METHOD_CHOICES
-        )
+    def resolve_cash_plan_verification_verification_method_choices(self, info, **kwargs):
+        return to_choice_object(CashPlanPaymentVerification.VERIFICATION_METHOD_CHOICES)
 
     def resolve_payment_verification_status_choices(self, info, **kwargs):
         return to_choice_object(PaymentVerification.STATUS_CHOICES)

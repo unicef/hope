@@ -42,9 +42,7 @@ class ImageLoaderMock:
         return True
 
     def get(self, *args, **kwargs):
-        content = Path(
-            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.png"
-        ).read_bytes()
+        content = Path(f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.png").read_bytes()
         file = File(BytesIO(content), name="image.png")
         return Image.open(file)
 
@@ -63,24 +61,17 @@ class TestRdiCreateTask(TestCase):
         call_command("loadbusinessareas")
 
         content = Path(
-            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests"
-            "/test_file/new_reg_data_import.xlsx"
+            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests" "/test_file/new_reg_data_import.xlsx"
         ).read_bytes()
         file = File(BytesIO(content), name="new_reg_data_import.xlsx")
-        cls.import_data = ImportData.objects.create(
-            file=file, number_of_households=3, number_of_individuals=6,
-        )
-        cls.registration_data_import = RegistrationDataImportDatahubFactory(
-            import_data=cls.import_data
-        )
+        cls.import_data = ImportData.objects.create(file=file, number_of_households=3, number_of_individuals=6,)
+        cls.registration_data_import = RegistrationDataImportDatahubFactory(import_data=cls.import_data)
         cls.business_area = BusinessArea.objects.first()
 
     def test_execute(self):
         task = RdiXlsxCreateTask()
         task.execute(
-            self.registration_data_import.id,
-            self.import_data.id,
-            self.business_area.id,
+            self.registration_data_import.id, self.import_data.id, self.business_area.id,
         )
 
         households_count = ImportedHousehold.objects.count()
@@ -99,9 +90,7 @@ class TestRdiCreateTask(TestCase):
             "birth_date": date(1963, 2, 3),
             "marital_status": "MARRIED",
         }
-        matching_individuals = ImportedIndividual.objects.filter(
-            **individual_data
-        )
+        matching_individuals = ImportedIndividual.objects.filter(**individual_data)
 
         self.assertEqual(matching_individuals.count(), 1)
 
@@ -111,9 +100,7 @@ class TestRdiCreateTask(TestCase):
             "flex_fields": {"unaccompanied_child_h_f": 1},
         }
         household = matching_individuals.first().household
-        household_obj_data = model_to_dict(
-            household, ("residence_status", "country", "flex_fields")
-        )
+        household_obj_data = model_to_dict(household, ("residence_status", "country", "flex_fields"))
 
         roles = household.individuals_and_roles.all()
         self.assertEqual(roles.count(), 1)
@@ -167,11 +154,7 @@ class TestRdiCreateTask(TestCase):
                 "type": "BIRTH_CERTIFICATE",
                 "value": value,
             },
-            "individual_14_other": {
-                "individual": individual,
-                "name": name,
-                "type": "OTHER",
-            },
+            "individual_14_other": {"individual": individual, "name": name, "type": "OTHER",},
         }
         self.assertEqual(task.documents, expected)
         # other_id_no_i_c
@@ -186,22 +169,15 @@ class TestRdiCreateTask(TestCase):
                 "type": "BIRTH_CERTIFICATE",
                 "value": value,
             },
-            "individual_14_other": {
-                "individual": individual,
-                "name": name,
-                "type": "OTHER",
-                "value": number,
-            },
+            "individual_14_other": {"individual": individual, "name": name, "type": "OTHER", "value": number,},
         }
         self.assertEqual(task.documents, expected)
 
     @mock.patch(
-        "registration_datahub.tasks.rdi_create.SheetImageLoader",
-        ImageLoaderMock,
+        "registration_datahub.tasks.rdi_create.SheetImageLoader", ImageLoaderMock,
     )
     @mock.patch(
-        "registration_datahub.tasks.rdi_create.timezone.now",
-        lambda: "2020-06-22 12:00",
+        "registration_datahub.tasks.rdi_create.timezone.now", lambda: "2020-06-22 12:00",
     )
     def test_handle_document_photo_fields(self):
         task = RdiXlsxCreateTask()
@@ -214,10 +190,7 @@ class TestRdiCreateTask(TestCase):
             cell, 14, individual, "birth_certificate_photo_i_c",
         )
         expected = {
-            "individual_14_birth_certificate_no_i_c": {
-                "individual": individual,
-                "photo": f"12-2020-06-22 12:00.jpg",
-            }
+            "individual_14_birth_certificate_no_i_c": {"individual": individual, "photo": f"12-2020-06-22 12:00.jpg",}
         }
         self.assertEqual(task.documents, expected)
 
@@ -256,9 +229,7 @@ class TestRdiCreateTask(TestCase):
     def test_create_documents(self):
         task = RdiXlsxCreateTask()
         individual = ImportedIndividualFactory()
-        content = Path(
-            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.png"
-        ).read_bytes()
+        content = Path(f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.png").read_bytes()
         image = File(BytesIO(content), name="image.png")
         task.business_area = self.business_area
         doc_type = ImportedDocumentType.objects.create(
@@ -275,14 +246,10 @@ class TestRdiCreateTask(TestCase):
         }
         task._create_documents()
 
-        documents = ImportedDocument.objects.values(
-            "document_number", "type_id"
-        )
+        documents = ImportedDocument.objects.values("document_number", "type_id")
         self.assertEqual(documents.count(), 1)
 
-        expected = [
-            {"document_number": "CD1247246Q12W", "type_id": doc_type.id,}
-        ]
+        expected = [{"document_number": "CD1247246Q12W", "type_id": doc_type.id,}]
         self.assertEqual(list(documents), expected)
 
         document = ImportedDocument.objects.first()
@@ -323,9 +290,7 @@ class TestRdiKoboCreateTask(TestCase):
     @staticmethod
     def _return_test_image(*args, **kwargs):
         return BytesIO(
-            Path(
-                f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.png"
-            ).read_bytes()
+            Path(f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.png").read_bytes()
         )
 
     @classmethod
@@ -333,17 +298,13 @@ class TestRdiKoboCreateTask(TestCase):
         call_command("loadbusinessareas")
 
         content = Path(
-            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests"
-            "/test_file/kobo_submissions.json"
+            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests" "/test_file/kobo_submissions.json"
         ).read_bytes()
         file = File(BytesIO(content), name="kobo_submissions.json")
-        cls.import_data = ImportData.objects.create(
-            file=file, number_of_households=1, number_of_individuals=2,
-        )
+        cls.import_data = ImportData.objects.create(file=file, number_of_households=1, number_of_individuals=2,)
 
         content = Path(
-            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests"
-            "/test_file/kobo_submissions_collectors.json"
+            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests" "/test_file/kobo_submissions_collectors.json"
         ).read_bytes()
         file = File(BytesIO(content), name="kobo_submissions_collectors.json")
         cls.import_data_collectors = ImportData.objects.create(
@@ -354,34 +315,21 @@ class TestRdiKoboCreateTask(TestCase):
         cls.business_area.kobo_token = "1234ABC"
         cls.business_area.save()
 
-        admin1_type = AdminAreaType.objects.create(
-            name="Bakool", admin_level=1, business_area=cls.business_area
-        )
-        admin1 = AdminArea.objects.create(
-            title="SO25", admin_area_type=admin1_type
-        )
+        admin1_type = AdminAreaType.objects.create(name="Bakool", admin_level=1, business_area=cls.business_area)
+        admin1 = AdminArea.objects.create(title="SO25", admin_area_type=admin1_type)
 
-        admin2_type = AdminAreaType.objects.create(
-            name="Ceel Barde", admin_level=2, business_area=cls.business_area
-        )
-        AdminArea.objects.create(
-            title="SO2502", parent=admin1, admin_area_type=admin2_type
-        )
+        admin2_type = AdminAreaType.objects.create(name="Ceel Barde", admin_level=2, business_area=cls.business_area)
+        AdminArea.objects.create(title="SO2502", parent=admin1, admin_area_type=admin2_type)
 
-        cls.registration_data_import = RegistrationDataImportDatahubFactory(
-            import_data=cls.import_data
-        )
+        cls.registration_data_import = RegistrationDataImportDatahubFactory(import_data=cls.import_data)
 
     @mock.patch(
-        "registration_datahub.tasks.rdi_create.KoboAPI.get_attached_file",
-        _return_test_image,
+        "registration_datahub.tasks.rdi_create.KoboAPI.get_attached_file", _return_test_image,
     )
     def test_execute(self):
         task = RdiKoboCreateTask()
         task.execute(
-            self.registration_data_import.id,
-            self.import_data.id,
-            self.business_area.id,
+            self.registration_data_import.id, self.import_data.id, self.business_area.id,
         )
 
         households = ImportedHousehold.objects.all()
@@ -392,10 +340,7 @@ class TestRdiKoboCreateTask(TestCase):
 
         individual = individuals.get(full_name="Test Testowski")
 
-        individuals_obj_data = model_to_dict(
-            individual,
-            ("country", "sex", "age", "marital_status", "relationship"),
-        )
+        individuals_obj_data = model_to_dict(individual, ("country", "sex", "age", "marital_status", "relationship"),)
         expected = {
             "relationship": "HEAD",
             "sex": "MALE",
@@ -403,9 +348,7 @@ class TestRdiKoboCreateTask(TestCase):
         }
         self.assertEqual(individuals_obj_data, expected)
 
-        household_obj_data = model_to_dict(
-            individual.household, ("residence_status", "country", "flex_fields")
-        )
+        household_obj_data = model_to_dict(individual.household, ("residence_status", "country", "flex_fields"))
         expected = {
             "residence_status": "REFUGEE",
             "country": Country(code="AF"),
@@ -414,15 +357,12 @@ class TestRdiKoboCreateTask(TestCase):
         self.assertEqual(household_obj_data, expected)
 
     @mock.patch(
-        "registration_datahub.tasks.rdi_create.KoboAPI.get_attached_file",
-        _return_test_image,
+        "registration_datahub.tasks.rdi_create.KoboAPI.get_attached_file", _return_test_image,
     )
     def test_execute_multiple_collectors(self):
         task = RdiKoboCreateTask()
         task.execute(
-            self.registration_data_import.id,
-            self.import_data_collectors.id,
-            self.business_area.id,
+            self.registration_data_import.id, self.import_data_collectors.id, self.business_area.id,
         )
         households = ImportedHousehold.objects.all()
         individuals = ImportedIndividual.objects.all()
@@ -430,28 +370,17 @@ class TestRdiKoboCreateTask(TestCase):
         self.assertEqual(households.count(), 2)
         self.assertEqual(individuals.count(), 4)
 
-        documents = ImportedDocument.objects.values_list(
-            "individual__full_name", flat=True
-        )
+        documents = ImportedDocument.objects.values_list("individual__full_name", flat=True)
         self.assertEqual(
-            sorted(list(documents)),
-            [
-                "Tesa Testowski",
-                "Test Testowski",
-                "Zbyszek Zbyszkowski",
-                "abc efg",
-            ],
+            sorted(list(documents)), ["Tesa Testowski", "Test Testowski", "Zbyszek Zbyszkowski", "abc efg",],
         )
 
         first_household = households.get(size=3)
         second_household = households.get(size=1)
 
-        first_household_collectors = first_household.individuals_and_roles.values_list(
-            "individual__full_name", "role"
-        )
+        first_household_collectors = first_household.individuals_and_roles.values_list("individual__full_name", "role")
         self.assertEqual(
-            list(first_household_collectors),
-            [("Tesa Testowski", "ALTERNATE"), ("Test Testowski", "PRIMARY")],
+            list(first_household_collectors), [("Tesa Testowski", "ALTERNATE"), ("Test Testowski", "PRIMARY")],
         )
         second_household_collectors = second_household.individuals_and_roles.values_list(
             "individual__full_name", "role"
@@ -461,8 +390,7 @@ class TestRdiKoboCreateTask(TestCase):
         )
 
     @mock.patch(
-        "registration_datahub.tasks.rdi_create.KoboAPI.get_attached_file",
-        _return_test_image,
+        "registration_datahub.tasks.rdi_create.KoboAPI.get_attached_file", _return_test_image,
     )
     def test_handle_image_field(self):
         task = RdiKoboCreateTask()
@@ -500,8 +428,7 @@ class TestRdiKoboCreateTask(TestCase):
         pass
 
     @mock.patch(
-        "registration_datahub.tasks.rdi_create.KoboAPI.get_attached_file",
-        _return_test_image,
+        "registration_datahub.tasks.rdi_create.KoboAPI.get_attached_file", _return_test_image,
     )
     def test_handle_documents_and_identities(self):
         task = RdiKoboCreateTask()
@@ -537,13 +464,9 @@ class TestRdiKoboCreateTask(TestCase):
                 }
             },
         ]
-        task._handle_documents_and_identities(
-            documents_and_identities, individuals_dict
-        )
+        task._handle_documents_and_identities(documents_and_identities, individuals_dict)
 
-        result = list(
-            ImportedDocument.objects.values("document_number", "individual_id")
-        )
+        result = list(ImportedDocument.objects.values("document_number", "individual_id"))
         expected = [
             {"document_number": "123123123", "individual_id": individual.id,},
             {"document_number": "444111123", "individual_id": individual.id,},
@@ -554,39 +477,28 @@ class TestRdiKoboCreateTask(TestCase):
         self.assertIsInstance(photo, ImageFieldFile)
         self.assertTrue(photo.name.startswith("signature-14_59_24"))
 
-        birth_certificate = ImportedDocument.objects.get(
-            document_number=123123123
-        ).type.type
-        national_passport = ImportedDocument.objects.get(
-            document_number=444111123
-        ).type.type
+        birth_certificate = ImportedDocument.objects.get(document_number=123123123).type.type
+        national_passport = ImportedDocument.objects.get(document_number=444111123).type.type
 
         self.assertEqual(birth_certificate, "BIRTH_CERTIFICATE")
         self.assertEqual(national_passport, "NATIONAL_PASSPORT")
 
     @mock.patch(
-        "registration_datahub.tasks.rdi_create.KoboAPI.get_attached_file",
-        _return_test_image,
+        "registration_datahub.tasks.rdi_create.KoboAPI.get_attached_file", _return_test_image,
     )
     @unittest.skip("Remove this and run manually only!")
     def test_performance(self):
         self._generate_huge_file()
         content = Path(
-            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests"
-            "/test_file/big_json.json"
+            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests" "/test_file/big_json.json"
         ).read_bytes()
         file = File(BytesIO(content), name="big_json.json")
-        import_data = ImportData.objects.create(
-            file=file, number_of_households=1, number_of_individuals=2,
-        )
-        registration_data_import = RegistrationDataImportDatahubFactory(
-            import_data=import_data
-        )
+        import_data = ImportData.objects.create(file=file, number_of_households=1, number_of_individuals=2,)
+        registration_data_import = RegistrationDataImportDatahubFactory(import_data=import_data)
 
         start = time.process_time()
         errors = KoboProjectImportDataValidator.validate_fields(
-            json.loads(import_data.file.read().decode()),
-            self.business_area.name,
+            json.loads(import_data.file.read().decode()), self.business_area.name,
         )
         self.assertEqual(errors, [])
 
@@ -597,9 +509,7 @@ class TestRdiKoboCreateTask(TestCase):
         end = time.process_time() - start
         execution_time = f"{end:.2f} seconds"
         print(execution_time)
-        os.remove(
-            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/big_json.json"
-        )
+        os.remove(f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/big_json.json")
 
     def _generate_huge_file(self):
         base_form = {
@@ -721,15 +631,9 @@ class TestRdiKoboCreateTask(TestCase):
             for x in range(4):
                 individual = {
                     **copy["individual_questions"][0],
-                    "individual_questions/more_information/drivers_license_no_i_c": secrets.token_hex(
-                        15
-                    ),
-                    "individual_questions/more_information/birth_certificate_no_i_c": secrets.token_hex(
-                        15
-                    ),
-                    "individual_questions/relationship_i_c": "head"
-                    if x == 0
-                    else "NON_BENEFICIARY",
+                    "individual_questions/more_information/drivers_license_no_i_c": secrets.token_hex(15),
+                    "individual_questions/more_information/birth_certificate_no_i_c": secrets.token_hex(15),
+                    "individual_questions/relationship_i_c": "head" if x == 0 else "NON_BENEFICIARY",
                 }
                 new_individuals.append(individual)
 
@@ -738,7 +642,6 @@ class TestRdiKoboCreateTask(TestCase):
             result.append(copy)
 
         with open(
-            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/big_json.json",
-            "w+",
+            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/big_json.json", "w+",
         ) as json_file:
             json_file.write(json.dumps(result))

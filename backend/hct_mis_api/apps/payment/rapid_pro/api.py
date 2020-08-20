@@ -33,8 +33,10 @@ class RapidProAPI:
         self.url = settings.RAPID_PRO_URL
         self._client.headers.update({"Authorization": f"Token {token}"})
 
-    def _handle_get_request(self, url) -> dict:
-        response = self._client.get(url=f"{self._get_url()}{url}")
+    def _handle_get_request(self, url, is_absolute_url=False) -> dict:
+        if not is_absolute_url:
+            url = f"{self._get_url()}{url}"
+        response = self._client.get(url)
         response.raise_for_status()
         return response.json()
 
@@ -56,34 +58,60 @@ class RapidProAPI:
         data = {"flow": flow_uuid, "urns": urns, "restart_participants": True}
         print(data)
 
-        response = self._handle_post_request(
-            RapidProAPI.FLOW_STARTS_ENDPOINT, data,
-        )
+        response = self._handle_post_request(RapidProAPI.FLOW_STARTS_ENDPOINT, data,)
         print(response)
         return response
 
-    def get_flow_runs(self, start_uuid):
-        flows = self._handle_get_request(f"{RapidProAPI.FLOW_RUNS_ENDPOINT}?start={start_uuid}")
-        return flows["results"]
+    def get_flow_runs(self):
+        return self._get_paginated_results(f"{RapidProAPI.FLOW_RUNS_ENDPOINT}?responded=true")
+
+    def get_mapped_flow_runs(self, start_uuid):
+        results = self.get_flow_runs()
+        mapped_results = [
+            self._map_to_internal_structure(x) for x in results if x.get("start").get("uuid") == start_uuid
+        ]
+        return mapped_results
+
+    def _get_paginated_results(self, url) -> list:
+        next_url = f"{self._get_url()}{url}"
+        results: list = []
+        while next_url:
+            data = self._handle_get_request(next_url, is_absolute_url=True)
+            next_url = data["next"]
+            results.extend(data["results"])
+        return results
+
+    def _map_to_internal_structure(self, run):
+        variable_received_name = "cash_received_text"
+        variable_received_positive_string = "YES"
+        variable_amount_name = "cash_received_amount"
+        phone_number = run.get("contact").get("urn").split(":")[1]
+        values = run.get("values")
+        received = None
+        received_amount = None
+        if not values:
+            return {"phone_number": phone_number, "received": None, "received_amount": None}
+        received_variable = values.get(variable_received_name)
+        if received_variable is not None:
+            received = received_variable.get("value").upper() == variable_received_positive_string
+        received_amount_variable = values.get(variable_amount_name)
+        if received_variable is not None:
+            received_amount = received_amount_variable.get("value")
+        return {"phone_number": phone_number, "received": received, "received_amount": received_amount}
 
     def create_group(self, name):
         print(name)
-        group = self._handle_post_request(
-            RapidProAPI.GROUPS_ENDPOINT, {"name": name}
-        )
+        group = self._handle_post_request(RapidProAPI.GROUPS_ENDPOINT, {"name": name})
         return group
 
     def create_contact(self, name, tel, group_uuid):
         print({"name": name, "groups": [group_uuid], "urns": [f"tel:{tel}"]})
         contact = self._handle_post_request(
-            RapidProAPI.CONTACTS_ENDPOINT,
-            {"name": name, "groups": [group_uuid], "urns": [f"tel:{tel}"]},
+            RapidProAPI.CONTACTS_ENDPOINT, {"name": name, "groups": [group_uuid], "urns": [f"tel:{tel}"]},
         )
         return contact
 
-    def create_contacts_and_groups_for_verification(
-        self, cash_plan_verification
-    ):
+    def create_contacts_and_groups_for_verification(self, cash_plan_verification):
         individuals = Individual.objects.filter(
             heading_household__payment_records__verifications__cash_plan_payment_verification=cash_plan_verification.id
         )

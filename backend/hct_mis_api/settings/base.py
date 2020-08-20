@@ -52,9 +52,7 @@ ALLOWED_EXTENSIONS = (
 )
 UPLOADS_DIR_NAME = "uploads"
 MEDIA_URL = f"/api/{UPLOADS_DIR_NAME}/"
-MEDIA_ROOT = os.getenv(
-    "HCT_MIS_UPLOADS_PATH", os.path.join(DATA_VOLUME, UPLOADS_DIR_NAME)
-)
+MEDIA_ROOT = os.getenv("HCT_MIS_UPLOADS_PATH", os.path.join(DATA_VOLUME, UPLOADS_DIR_NAME))
 
 FILE_UPLOAD_MAX_MEMORY_SIZE = 25 * 1024 * 1024  # 25mb
 DATA_UPLOAD_MAX_MEMORY_SIZE = 50 * 1024 * 1024
@@ -75,9 +73,7 @@ IS_DEV = False
 IS_STAGING = False
 IS_PROD = False
 
-DEFAULT_FROM_EMAIL = os.getenv(
-    "DEFAULT_FROM_EMAIL", "HCT-MIS Stage <noreply@hct-mis.org>"
-)
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "HCT-MIS Stage <noreply@hct-mis.org>")
 EMAIL_HOST = os.getenv("EMAIL_HOST")
 EMAIL_PORT = os.getenv("EMAIL_PORT")
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
@@ -233,19 +229,10 @@ OTHER_APPS = [
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-        "OPTIONS": {"min_length": 12,},
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator", "OPTIONS": {"min_length": 12,},},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",},
 ]
 
 PASSWORD_RESET_TIMEOUT_DAYS = 31
@@ -264,9 +251,7 @@ NOSE_ARGS = ["--with-timer", "--nocapture", "--nologcapture"]
 def extend_list_avoid_repeats(list_to_extend, extend_with):
     """Extends the first list with the elements in the second one, making sure its elements are not already there in the
     original list."""
-    list_to_extend.extend(
-        filter(lambda x: not list_to_extend.count(x), extend_with)
-    )
+    list_to_extend.extend(filter(lambda x: not list_to_extend.count(x), extend_with))
 
 
 LOG_LEVEL = "DEBUG" if DEBUG and "test" not in sys.argv else "INFO"
@@ -274,35 +259,17 @@ LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
-        "standard": {
-            "format": "%(asctime)s [%(levelname)s] %(name)s line %(lineno)d: %(message)s"
-        },
+        "standard": {"format": "%(asctime)s [%(levelname)s] %(name)s line %(lineno)d: %(message)s"},
         "verbose": {
             "format": "[%(asctime)s][%(levelname)s][%(name)s] %(filename)s.%(funcName)s:%(lineno)d %(message)s",
         },
     },
-    "filters": {
-        "require_debug_false": {"()": "django.utils.log.RequireDebugFalse"}
-    },
-    "handlers": {
-        "default": {
-            "level": LOG_LEVEL,
-            "class": "logging.StreamHandler",
-            "formatter": "standard",
-        },
-    },
+    "filters": {"require_debug_false": {"()": "django.utils.log.RequireDebugFalse"}},
+    "handlers": {"default": {"level": LOG_LEVEL, "class": "logging.StreamHandler", "formatter": "standard",},},
     "loggers": {
         "": {"handlers": ["default"], "level": "INFO", "propagate": True},
-        "console": {
-            "handlers": ["default"],
-            "level": "DEBUG",
-            "propagate": True,
-        },
-        "django.request": {
-            "handlers": ["default"],
-            "level": "ERROR",
-            "propagate": False,
-        },
+        "console": {"handlers": ["default"], "level": "DEBUG", "propagate": True,},
+        "django.request": {"handlers": ["default"], "level": "ERROR", "propagate": False,},
         "django.security.DisallowedHost": {
             # Skip "SuspiciousOperation: Invalid HTTP_HOST" e-mails.
             "handlers": ["default"],
@@ -326,12 +293,7 @@ if REDIS_INSTANCE:
     }
     DJANGO_REDIS_IGNORE_EXCEPTIONS = not DEBUG
 else:
-    CACHES = {
-        "default": {
-            "BACKEND": "common.cache_backends.DummyRedisCache",
-            "LOCATION": "hct_mis",
-        }
-    }
+    CACHES = {"default": {"BACKEND": "common.cache_backends.DummyRedisCache", "LOCATION": "hct_mis",}}
 
 SESSION_COOKIE_HTTPONLY = True
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
@@ -394,9 +356,7 @@ PHONENUMBER_DEFAULT_REGION = "US"
 
 AIRFLOW_HOST = "airflow_webserver"
 
-SANCTION_LIST_CC_MAIL = os.getenv(
-    "SANCTION_LIST_CC_MAIL", "dfam-cashassistance@unicef.org"
-)
+SANCTION_LIST_CC_MAIL = os.getenv("SANCTION_LIST_CC_MAIL", "dfam-cashassistance@unicef.org")
 
 # ELASTICSEARCH SETTINGS
 ELASTICSEARCH_DSL_AUTOSYNC = False

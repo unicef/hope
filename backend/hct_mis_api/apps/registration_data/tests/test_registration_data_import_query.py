@@ -63,24 +63,16 @@ class TestRegistrationDataImportQuery(APITestCase):
             },
         ]
 
-        self.data = [
-            RegistrationDataImportFactory(**item)
-            for item in self.to_create
-        ]
+        self.data = [RegistrationDataImportFactory(**item) for item in self.to_create]
 
     def test_registration_data_import_datahub_query_all(self):
         self.snapshot_graphql_request(
-            request_string=self.ALL_REGISTRATION_DATA_IMPORT_DATAHUB_QUERY,
-            context={"user": self.user},
+            request_string=self.ALL_REGISTRATION_DATA_IMPORT_DATAHUB_QUERY, context={"user": self.user},
         )
 
     def test_registration_data_import_datahub_query_single(self):
         self.snapshot_graphql_request(
             request_string=self.REGISTRATION_DATA_IMPORT_DATAHUB_QUERY,
             context={"user": self.user},
-            variables={
-                "id": self.id_to_base64(
-                    self.data[0].id, "RegistrationDataImport",
-                )
-            },
+            variables={"id": self.id_to_base64(self.data[0].id, "RegistrationDataImport",)},
         )

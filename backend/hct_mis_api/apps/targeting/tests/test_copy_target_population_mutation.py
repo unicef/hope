@@ -59,34 +59,20 @@ class TestCopyTargetPopulationMutation(APITestCase):
     def setUpTestData(cls):
         cls.user = UserFactory.create()
 
-        (household, individuals) = create_household(
-            {"size": 1, "residence_status": "CITIZEN",},
-        )
+        (household, individuals) = create_household({"size": 1, "residence_status": "CITIZEN",},)
         cls.household = household
-        tp = TargetPopulation(
-            name="Original Target Population", status="APPROVED"
-        )
+        tp = TargetPopulation(name="Original Target Population", status="APPROVED")
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {
-                "field_name": "size",
-                "arguments": [1],
-                "comparision_method": "EQUALS",
-            }
+            {"field_name": "size", "arguments": [1], "comparision_method": "EQUALS",}
         )
         tp.final_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {
-                "field_name": "size",
-                "arguments": [2],
-                "comparision_method": "EQUALS",
-            }
+            {"field_name": "size", "arguments": [2], "comparision_method": "EQUALS",}
         )
         tp.save()
         tp.households.add(cls.household)
         cls.target_population = tp
-        cls.empty_target_population_1 = TargetPopulation(
-            name="emptyTargetPopulation1", status="APPROVED"
-        )
+        cls.empty_target_population_1 = TargetPopulation(name="emptyTargetPopulation1", status="APPROVED")
         cls.empty_target_population_1.save()
 
     @staticmethod
@@ -95,9 +81,7 @@ class TestCopyTargetPopulationMutation(APITestCase):
         targeting_criteria.save()
         rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)
         rule.save()
-        rule_filter = TargetingCriteriaRuleFilter(
-            **rule_filter, targeting_criteria_rule=rule
-        )
+        rule_filter = TargetingCriteriaRuleFilter(**rule_filter, targeting_criteria_rule=rule)
         rule_filter.save()
         return targeting_criteria
 
@@ -108,9 +92,7 @@ class TestCopyTargetPopulationMutation(APITestCase):
             variables={
                 "input": {
                     "targetPopulationData": {
-                        "id": self.id_to_base64(
-                            self.target_population.id, "TargetPopulation"
-                        ),
+                        "id": self.id_to_base64(self.target_population.id, "TargetPopulation"),
                         "name": "Test New Copy Name",
                     }
                 }
@@ -123,9 +105,7 @@ class TestCopyTargetPopulationMutation(APITestCase):
             variables={
                 "input": {
                     "targetPopulationData": {
-                        "id": self.id_to_base64(
-                            self.target_population.id, "TargetPopulation"
-                        ),
+                        "id": self.id_to_base64(self.target_population.id, "TargetPopulation"),
                         "name": "Test New Copy Name 1",
                     }
                 }
@@ -133,25 +113,15 @@ class TestCopyTargetPopulationMutation(APITestCase):
             context=self.generate_context(**{"user": self.user}),
         )
         target_population_copy = TargetPopulation.objects.get(
-            id=decode_id_string(
-                graphql_request["data"]["copyTargetPopulation"][
-                    "targetPopulation"
-                ]["id"]
-            )
+            id=decode_id_string(graphql_request["data"]["copyTargetPopulation"]["targetPopulation"]["id"])
         )
-        self.assertNotEqual(
-            target_population_copy.id, self.target_population.id
-        )
+        self.assertNotEqual(target_population_copy.id, self.target_population.id)
         self.assertNotEqual(
             target_population_copy.candidate_list_targeting_criteria.id,
             self.target_population.candidate_list_targeting_criteria.id,
         )
-        rule_copy = (
-            target_population_copy.candidate_list_targeting_criteria.rules.first()
-        )
-        rule = (
-            self.target_population.candidate_list_targeting_criteria.rules.first()
-        )
+        rule_copy = target_population_copy.candidate_list_targeting_criteria.rules.first()
+        rule = self.target_population.candidate_list_targeting_criteria.rules.first()
         self.assertNotEqual(
             rule_copy.id, rule.id,
         )
@@ -168,10 +138,7 @@ class TestCopyTargetPopulationMutation(APITestCase):
             variables={
                 "input": {
                     "targetPopulationData": {
-                        "id": self.id_to_base64(
-                            self.empty_target_population_1.id,
-                            "TargetPopulation",
-                        ),
+                        "id": self.id_to_base64(self.empty_target_population_1.id, "TargetPopulation",),
                         "name": "test_copy_empty_target_1",
                     }
                 }

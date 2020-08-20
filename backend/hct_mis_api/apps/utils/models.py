@@ -57,10 +57,7 @@ class AbstractSession(models.Model):
     STATUS_COMPLETED = "COMPLETED"
     STATUS_FAILED = "FAILED"
 
-    source = models.CharField(
-        max_length=3,
-        choices=((SOURCE_MIS, "HCT-MIS"), (SOURCE_CA, "Cash Assist")),
-    )
+    source = models.CharField(max_length=3, choices=((SOURCE_MIS, "HCT-MIS"), (SOURCE_CA, "Cash Assist")),)
     status = models.CharField(
         max_length=11,
         choices=(

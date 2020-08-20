@@ -24,109 +24,59 @@ class TestChangeProgramStatus(APITestCase):
         self.user = UserFactory.create()
 
         business_area = BusinessArea.objects.first()
-        state_area_type = AdminAreaTypeFactory(
-            name="State", business_area=business_area, admin_level=1
-        )
+        state_area_type = AdminAreaTypeFactory(name="State", business_area=business_area, admin_level=1)
         self.admin_area = AdminAreaFactory(admin_area_type=state_area_type)
 
     def test_draft_to_active(self):
-        program = ProgramFactory.create(
-            status="DRAFT",
-            business_area=BusinessArea.objects.order_by("?").first(),
-        )
+        program = ProgramFactory.create(status="DRAFT", business_area=BusinessArea.objects.order_by("?").first(),)
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
             context={"user": self.user},
-            variables={
-                "programData": {
-                    "id": self.id_to_base64(program.id, "Program"),
-                    "status": "ACTIVE",
-                }
-            },
+            variables={"programData": {"id": self.id_to_base64(program.id, "Program"), "status": "ACTIVE",}},
         )
 
     def test_active_to_finished(self):
-        program = ProgramFactory.create(
-            status="ACTIVE",
-            business_area=BusinessArea.objects.order_by("?").first(),
-        )
+        program = ProgramFactory.create(status="ACTIVE", business_area=BusinessArea.objects.order_by("?").first(),)
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
             context={"user": self.user},
-            variables={
-                "programData": {
-                    "id": self.id_to_base64(program.id, "Program"),
-                    "status": "FINISHED",
-                }
-            },
+            variables={"programData": {"id": self.id_to_base64(program.id, "Program"), "status": "FINISHED",}},
         )
 
     def test_finished_to_active(self):
-        program = ProgramFactory.create(
-            status="FINISHED",
-            business_area=BusinessArea.objects.order_by("?").first(),
-        )
+        program = ProgramFactory.create(status="FINISHED", business_area=BusinessArea.objects.order_by("?").first(),)
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
             context={"user": self.user},
-            variables={
-                "programData": {
-                    "id": self.id_to_base64(program.id, "Program"),
-                    "status": "ACTIVE",
-                }
-            },
+            variables={"programData": {"id": self.id_to_base64(program.id, "Program"), "status": "ACTIVE",}},
         )
 
     def test_draft_to_finished(self):
-        program = ProgramFactory.create(
-            status="DRAFT",
-            business_area=BusinessArea.objects.order_by("?").first(),
-        )
+        program = ProgramFactory.create(status="DRAFT", business_area=BusinessArea.objects.order_by("?").first(),)
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
             context={"user": self.user},
-            variables={
-                "programData": {
-                    "id": self.id_to_base64(program.id, "Program"),
-                    "status": "FINISHED",
-                }
-            },
+            variables={"programData": {"id": self.id_to_base64(program.id, "Program"), "status": "FINISHED",}},
         )
 
     def test_active_to_draft(self):
-        program = ProgramFactory.create(
-            status="ACTIVE",
-            business_area=BusinessArea.objects.order_by("?").first(),
-        )
+        program = ProgramFactory.create(status="ACTIVE", business_area=BusinessArea.objects.order_by("?").first(),)
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
             context={"user": self.user},
-            variables={
-                "programData": {
-                    "id": self.id_to_base64(program.id, "Program"),
-                    "status": "DRAFT",
-                }
-            },
+            variables={"programData": {"id": self.id_to_base64(program.id, "Program"), "status": "DRAFT",}},
         )
 
     def test_finished_to_draft(self):
-        program = ProgramFactory.create(
-            status="FINISHED",
-            business_area=BusinessArea.objects.order_by("?").first(),
-        )
+        program = ProgramFactory.create(status="FINISHED", business_area=BusinessArea.objects.order_by("?").first(),)
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
             context={"user": self.user},
-            variables={
-                "programData": {
-                    "id": self.id_to_base64(program.id, "Program"),
-                    "status": "DRAFT",
-                }
-            },
+            variables={"programData": {"id": self.id_to_base64(program.id, "Program"), "status": "DRAFT",}},
         )

@@ -6,9 +6,7 @@ class AirflowApi:
     _BASE_URL = f"http://{settings.AIRFLOW_HOST}:8080/api/experimental"
 
     @classmethod
-    def start_dag(
-        cls, dag_id: str, context: dict = None, headers: dict = None
-    ) -> requests.Response:
+    def start_dag(cls, dag_id: str, context: dict = None, headers: dict = None) -> requests.Response:
         default_headers = {
             "Cache-Control": "no-cache",
             "Content-Type": "application/json",

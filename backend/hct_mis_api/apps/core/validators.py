@@ -21,9 +21,7 @@ class BaseValidator:
             excluded_validators = []
 
         validate_methods = [
-            getattr(cls, m)
-            for m in dir(cls)
-            if m.startswith("validate_") and m not in excluded_validators
+            getattr(cls, m) for m in dir(cls) if m.startswith("validate_") and m not in excluded_validators
         ]
 
         errors_list = []
@@ -40,10 +38,8 @@ class BaseValidator:
 class CommonValidator(BaseValidator):
     @classmethod
     def validate_start_end_date(cls, *args, **kwargs):
-        start_date = kwargs.get('start_date')
-        end_date = kwargs.get('end_date')
+        start_date = kwargs.get("start_date")
+        end_date = kwargs.get("end_date")
         if start_date and end_date:
             if start_date > end_date:
-                raise ValidationError(
-                    "Start date cannot be greater than the end date."
-                )
+                raise ValidationError("Start date cannot be greater than the end date.")
