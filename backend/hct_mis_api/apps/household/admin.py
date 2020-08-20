@@ -7,6 +7,7 @@ from household.models import (
     Document,
     Agency,
     IndividualRoleInHousehold,
+    IndividualIdentity,
 )
 
 
@@ -43,4 +44,9 @@ class IndividualAdmin(admin.ModelAdmin):
 
 @admin.register(IndividualRoleInHousehold)
 class IndividualRoleInHouseholdAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(IndividualIdentity)
+class IndividualIdentityAdmin(admin.ModelAdmin):
     pass

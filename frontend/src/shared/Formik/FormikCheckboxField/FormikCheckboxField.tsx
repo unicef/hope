@@ -16,6 +16,7 @@ export const Check = ({
       control={
         <Checkbox
           {...otherProps}
+          color='primary'
           checked={field.value}
           onChange={handleChange}
         />

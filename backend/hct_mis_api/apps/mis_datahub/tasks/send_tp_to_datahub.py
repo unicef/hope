@@ -77,8 +77,12 @@ class SendTPToDatahubTask:
         individuals_to_bulk_create = []
         documents_to_bulk_create = []
         tp_entries_to_bulk_create = []
+
+        program = target_population.program
         dh_session = dh_mis_models.Session(
-            source=dh_mis_models.Session.SOURCE_MIS, status=dh_mis_models.Session.STATUS_READY,
+            source=dh_mis_models.Session.SOURCE_MIS,
+            status=dh_mis_models.Session.STATUS_READY,
+            business_area=program.business_area.code,
         )
         dh_session.save()
         target_population_selections = HouseholdSelection.objects.filter(
@@ -96,7 +100,6 @@ class SendTPToDatahubTask:
         #     | Q(last_sync_at__lte=F("updated_at"))
         # )
 
-        program = target_population.program
         if program.last_sync_at is None or program.last_sync_at < program.updated_at:
             dh_program = self.send_program(program)
             dh_program.session = dh_session
@@ -152,7 +155,7 @@ class SendTPToDatahubTask:
             dh_document_args = self.build_arg_dict(document, SendTPToDatahubTask.MAPPING_DOCUMENT_DICT)
             dh_document, _ = dh_mis_models.Document.objects.get_or_create(**dh_document_args, session=dh_session,)
 
-        dh_individual.unchr_id = self.get_unhcr_individual_id(individual)
+        dh_individual.unhcr_id = self.get_unhcr_individual_id(individual)
         roles = individual.households_and_roles.filter(household__id__in=household_ids)
         for role in roles:
             dh_mis_models.IndividualRoleInHousehold.objects.get_or_create(
@@ -217,13 +220,13 @@ class SendTPToDatahubTask:
         )
 
     def get_unhcr_individual_id(self, individual):
-        identity = individual.identities.filter(agency__type="unhcr").first()
+        identity = individual.identities.filter(agency__type="UNHCR").first()
         if identity is not None:
             return identity.number
         return None
 
     def get_unhcr_household_id(self, household):
-        identity = household.identities.filter(agency__type="unhcr").first()
+        identity = household.identities.filter(agency__type="UNHCR").first()
         household_unhcr_id = None
         if identity is not None:
             household_unhcr_id = identity.document_number
