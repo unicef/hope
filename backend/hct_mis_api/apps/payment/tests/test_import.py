@@ -3,6 +3,7 @@ import uuid
 
 from django.core.exceptions import ValidationError
 from django.core.management import call_command
+from graphql import GraphQLError
 from openpyxl.writer.excel import save_virtual_workbook
 
 from account.fixtures import UserFactory
@@ -84,12 +85,12 @@ class TestXlsxVerificationImport(APITestCase):
 
     def test_validation_valid_not_changed_file(self):
         export_service = XlsxVerificationExportService(
-            TestTargetPopulationQuery.verification
+            TestXlsxVerificationImport.verification
         )
         wb = export_service.generate_workbook()
         file = io.BytesIO(save_virtual_workbook(wb))
         import_service = XlsxVerificationImportService(
-            TestTargetPopulationQuery.verification, file
+            TestXlsxVerificationImport.verification, file
         )
         import_service.open_workbook()
         import_service.validate()
@@ -98,13 +99,13 @@ class TestXlsxVerificationImport(APITestCase):
 
     def test_validation_valid_status_changed(self):
         export_service = XlsxVerificationExportService(
-            TestTargetPopulationQuery.verification
+            TestXlsxVerificationImport.verification
         )
         wb = export_service.generate_workbook()
         wb.active["B2"] = PaymentVerification.STATUS_NOT_RECEIVED
         file = io.BytesIO(save_virtual_workbook(wb))
         import_service = XlsxVerificationImportService(
-            TestTargetPopulationQuery.verification, file
+            TestXlsxVerificationImport.verification, file
         )
         import_service.open_workbook()
         import_service.validate()
@@ -112,13 +113,13 @@ class TestXlsxVerificationImport(APITestCase):
 
     def test_validation_invalid_status_changed(self):
         export_service = XlsxVerificationExportService(
-            TestTargetPopulationQuery.verification
+            TestXlsxVerificationImport.verification
         )
         wb = export_service.generate_workbook()
         wb.active["B2"] = "NOT_CORRECT_STATUS"
         file = io.BytesIO(save_virtual_workbook(wb))
         import_service = XlsxVerificationImportService(
-            TestTargetPopulationQuery.verification, file
+            TestXlsxVerificationImport.verification, file
         )
         import_service.open_workbook()
         import_service.validate()
@@ -136,7 +137,7 @@ class TestXlsxVerificationImport(APITestCase):
 
     def test_validation_invalid_version(self):
         export_service = XlsxVerificationExportService(
-            TestTargetPopulationQuery.verification
+            TestXlsxVerificationImport.verification
         )
         wb = export_service.generate_workbook()
         wb[XlsxVerificationExportService.META_SHEET][
@@ -144,25 +145,25 @@ class TestXlsxVerificationImport(APITestCase):
         ] = "-1"
         file = io.BytesIO(save_virtual_workbook(wb))
         import_service = XlsxVerificationImportService(
-            TestTargetPopulationQuery.verification, file
+            TestXlsxVerificationImport.verification, file
         )
         import_service.open_workbook()
         self.assertRaisesMessage(
-            ValidationError,
+            GraphQLError,
             f"Unsupported file version (-1). Only version: {XlsxVerificationExportService.VERSION} is supported",
             import_service.validate,
         )
 
     def test_validation_payment_record_id(self):
         export_service = XlsxVerificationExportService(
-            TestTargetPopulationQuery.verification
+            TestXlsxVerificationImport.verification
         )
         wb = export_service.generate_workbook()
         wrong_uuid = str(uuid.uuid4())
         wb.active["A2"] = wrong_uuid
         file = io.BytesIO(save_virtual_workbook(wb))
         import_service = XlsxVerificationImportService(
-            TestTargetPopulationQuery.verification, file
+            TestXlsxVerificationImport.verification, file
         )
         import_service.open_workbook()
         import_service.validate()
@@ -179,13 +180,13 @@ class TestXlsxVerificationImport(APITestCase):
 
     def test_validation_wrong_type(self):
         export_service = XlsxVerificationExportService(
-            TestTargetPopulationQuery.verification
+            TestXlsxVerificationImport.verification
         )
         wb = export_service.generate_workbook()
         wb.active["C3"] = 2
         file = io.BytesIO(save_virtual_workbook(wb))
         import_service = XlsxVerificationImportService(
-            TestTargetPopulationQuery.verification, file
+            TestXlsxVerificationImport.verification, file
         )
         import_service.open_workbook()
         import_service.validate()
@@ -202,7 +203,7 @@ class TestXlsxVerificationImport(APITestCase):
 
     def test_validation_invalid_status_received_without_received_amount(self):
         export_service = XlsxVerificationExportService(
-            TestTargetPopulationQuery.verification
+            TestXlsxVerificationImport.verification
         )
         wb = export_service.generate_workbook()
         payment_record_id = wb.active["A2"].value
@@ -215,7 +216,7 @@ class TestXlsxVerificationImport(APITestCase):
         wb.active["B2"] = PaymentVerification.STATUS_RECEIVED
         file = io.BytesIO(save_virtual_workbook(wb))
         import_service = XlsxVerificationImportService(
-            TestTargetPopulationQuery.verification, file
+            TestXlsxVerificationImport.verification, file
         )
         import_service.open_workbook()
         import_service.validate()
@@ -239,7 +240,7 @@ class TestXlsxVerificationImport(APITestCase):
 
     def test_validation_invalid_status_not_received_with_received_amount(self):
         export_service = XlsxVerificationExportService(
-            TestTargetPopulationQuery.verification
+            TestXlsxVerificationImport.verification
         )
         wb = export_service.generate_workbook()
         payment_record_id = wb.active["A2"].value
@@ -253,7 +254,7 @@ class TestXlsxVerificationImport(APITestCase):
         wb.active["F2"] = 10
         file = io.BytesIO(save_virtual_workbook(wb))
         import_service = XlsxVerificationImportService(
-            TestTargetPopulationQuery.verification, file
+            TestXlsxVerificationImport.verification, file
         )
         import_service.open_workbook()
         import_service.validate()
@@ -282,7 +283,7 @@ class TestXlsxVerificationImport(APITestCase):
         self,
     ):
         export_service = XlsxVerificationExportService(
-            TestTargetPopulationQuery.verification
+            TestXlsxVerificationImport.verification
         )
         wb = export_service.generate_workbook()
         payment_record_id = wb.active["A2"].value
@@ -296,7 +297,7 @@ class TestXlsxVerificationImport(APITestCase):
         wb.active["F2"] = 0
         file = io.BytesIO(save_virtual_workbook(wb))
         import_service = XlsxVerificationImportService(
-            TestTargetPopulationQuery.verification, file
+            TestXlsxVerificationImport.verification, file
         )
         import_service.open_workbook()
         import_service.validate()
@@ -323,7 +324,7 @@ class TestXlsxVerificationImport(APITestCase):
 
     def test_validation_valid_status_received(self):
         export_service = XlsxVerificationExportService(
-            TestTargetPopulationQuery.verification
+            TestXlsxVerificationImport.verification
         )
         wb = export_service.generate_workbook()
         payment_record_id = wb.active["A2"].value
@@ -337,7 +338,7 @@ class TestXlsxVerificationImport(APITestCase):
         wb.active["F2"] = payment_verification.payment_record.delivered_quantity
         file = io.BytesIO(save_virtual_workbook(wb))
         import_service = XlsxVerificationImportService(
-            TestTargetPopulationQuery.verification, file
+            TestXlsxVerificationImport.verification, file
         )
         import_service.open_workbook()
         import_service.validate()
@@ -347,7 +348,7 @@ class TestXlsxVerificationImport(APITestCase):
 
     def test_validation_valid_status_not_received(self):
         export_service = XlsxVerificationExportService(
-            TestTargetPopulationQuery.verification
+            TestXlsxVerificationImport.verification
         )
         wb = export_service.generate_workbook()
         payment_record_id = wb.active["A2"].value
@@ -361,7 +362,7 @@ class TestXlsxVerificationImport(APITestCase):
         wb.active["F2"] = 0
         file = io.BytesIO(save_virtual_workbook(wb))
         import_service = XlsxVerificationImportService(
-            TestTargetPopulationQuery.verification, file
+            TestXlsxVerificationImport.verification, file
         )
         import_service.open_workbook()
         import_service.validate()
@@ -371,7 +372,7 @@ class TestXlsxVerificationImport(APITestCase):
 
     def test_validation_valid_status_received_with_issues(self):
         export_service = XlsxVerificationExportService(
-            TestTargetPopulationQuery.verification
+            TestXlsxVerificationImport.verification
         )
         wb = export_service.generate_workbook()
         payment_record_id = wb.active["A2"].value
@@ -385,7 +386,7 @@ class TestXlsxVerificationImport(APITestCase):
         wb.active["F2"] = 1
         file = io.BytesIO(save_virtual_workbook(wb))
         import_service = XlsxVerificationImportService(
-            TestTargetPopulationQuery.verification, file
+            TestXlsxVerificationImport.verification, file
         )
         import_service.open_workbook()
         import_service.validate()
@@ -395,12 +396,12 @@ class TestXlsxVerificationImport(APITestCase):
 
     def test_import_valid_not_changed_file(self):
         export_service = XlsxVerificationExportService(
-            TestTargetPopulationQuery.verification
+            TestXlsxVerificationImport.verification
         )
         wb = export_service.generate_workbook()
         file = io.BytesIO(save_virtual_workbook(wb))
         import_service = XlsxVerificationImportService(
-            TestTargetPopulationQuery.verification, file
+            TestXlsxVerificationImport.verification, file
         )
         import_service.open_workbook()
         import_service.validate()
@@ -409,7 +410,7 @@ class TestXlsxVerificationImport(APITestCase):
 
     def test_import_valid_status_changed(self):
         export_service = XlsxVerificationExportService(
-            TestTargetPopulationQuery.verification
+            TestXlsxVerificationImport.verification
         )
         wb = export_service.generate_workbook()
         payment_record_id = wb.active["A2"].value
@@ -422,7 +423,7 @@ class TestXlsxVerificationImport(APITestCase):
         wb.active["B2"] = PaymentVerification.STATUS_NOT_RECEIVED
         file = io.BytesIO(save_virtual_workbook(wb))
         import_service = XlsxVerificationImportService(
-            TestTargetPopulationQuery.verification, file
+            TestXlsxVerificationImport.verification, file
         )
         import_service.open_workbook()
         import_service.validate()
