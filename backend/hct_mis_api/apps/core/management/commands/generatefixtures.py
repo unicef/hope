@@ -247,6 +247,8 @@ class Command(BaseCommand):
             )
             programme.save()
 
+        call_command("search_index", "--rebuild", "-f")
+
         self.stdout.write(
             f"Generated fixtures in {(time.time() - start_time)} seconds"
         )
