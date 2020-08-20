@@ -236,7 +236,7 @@ class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingMixin):
                 and self.target_population_final.status != "DRAFT"
                 and self.target_population_final.program.individual_data_needed
             ):
-                query = query.filter(size__gt=0)
+                query &= Q(size__gt=0)
         except TargetPopulation.DoesNotExist:
             pass
         return query

@@ -13,7 +13,13 @@ from utils.models import AbstractSession
 
 
 class Session(AbstractSession):
-    pass
+    business_area = models.CharField(
+        max_length=20,
+        help_text="""Same as the business area set on program, but
+            this is set as the same value, and all other
+            models this way can get easy access to the business area
+            via the session.""",
+    )
 
 
 class SessionModel(models.Model):
@@ -132,7 +138,9 @@ class Program(SessionModel):
         (SCOPE_UNICEF, _("Unicef")),
     )
     mis_id = models.UUIDField()
-    business_area = models.CharField(max_length=20)
+    business_area = models.CharField(
+        max_length=20
+    )  # TODO: potentially remove in future since base model has it already
     ca_id = models.CharField(max_length=255)
     ca_hash_id = models.CharField(max_length=255)
     name = models.CharField(max_length=255)

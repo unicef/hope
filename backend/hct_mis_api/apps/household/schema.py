@@ -10,8 +10,8 @@ from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
-from core.filters import AgeRangeFilter, IntegerRangeFilter
 from core.extended_connection import ExtendedConnection
+from core.filters import AgeRangeFilter, IntegerRangeFilter
 from core.schema import ChoiceObject
 from core.utils import to_choice_object
 from household.models import (
@@ -26,6 +26,7 @@ from household.models import (
     SEX_CHOICE,
     IndividualRoleInHousehold,
     ROLE_NO_ROLE,
+    IndividualIdentity,
 )
 from targeting.models import HouseholdSelection
 
@@ -116,6 +117,16 @@ class DocumentTypeNode(DjangoObjectType):
 
     class Meta:
         model = DocumentType
+
+
+class IndividualIdentityNode(DjangoObjectType):
+    type = graphene.String(description="Agency type")
+
+    def resolve_type(parrent, info):
+        return parrent.agency.type
+
+    class Meta:
+        model = IndividualIdentity
 
 
 class DocumentNode(DjangoObjectType):

@@ -18,6 +18,7 @@ from registration_datahub.models import (
     ImportData,
     ImportedDocumentType,
     ImportedDocument,
+    ImportedIndividualIdentity,
 )
 
 
@@ -109,6 +110,16 @@ class ImportedDocumentNode(DjangoObjectType):
         filter_fields = []
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
+
+
+class ImportedIndividualIdentityNode(DjangoObjectType):
+    type = graphene.String(description="Agency type")
+
+    def resolve_type(parrent, info):
+        return parrent.agency.type
+
+    class Meta:
+        model = ImportedIndividualIdentity
 
 
 class XlsxRowErrorNode(graphene.ObjectType):
