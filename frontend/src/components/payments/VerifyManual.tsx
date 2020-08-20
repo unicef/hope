@@ -56,11 +56,8 @@ export function VerifyManual({
         },
       });
     } catch (e) {
-      setError(e);
-    }
-
-    if (error?.graphQLErrors?.length) {
-      error.graphQLErrors.map((x) => showMessage(x.message));
+      e.graphQLErrors.map((x) => showMessage(x.message));
+      return;
     }
     if (!error) {
       setVerifyManualDialogOpen(false);
