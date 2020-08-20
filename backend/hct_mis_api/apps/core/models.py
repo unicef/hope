@@ -63,18 +63,11 @@ class AdminAreaType(TimeStampedUUIDModel):
     """
 
     name = models.CharField(max_length=64, unique=True, verbose_name=_("Name"))
-    display_name = models.CharField(
-        max_length=64, blank=True, null=True, verbose_name=_("Display Name")
-    )
-    admin_level = models.PositiveSmallIntegerField(
-        verbose_name=_("Admin Level")
-    )
+    display_name = models.CharField(max_length=64, blank=True, null=True, verbose_name=_("Display Name"))
+    admin_level = models.PositiveSmallIntegerField(verbose_name=_("Admin Level"))
 
     business_area = models.ForeignKey(
-        "BusinessArea",
-        on_delete=models.SET_NULL,
-        related_name="admin_area_types",
-        null=True,
+        "BusinessArea", on_delete=models.SET_NULL, related_name="admin_area_types", null=True,
     )
 
     class Meta:
@@ -88,12 +81,7 @@ class AdminAreaType(TimeStampedUUIDModel):
 
 class AdminAreaManager(TreeManager):
     def get_queryset(self):
-        return (
-            super(AdminAreaManager, self)
-            .get_queryset()
-            .order_by("title")
-            .select_related("admin_area_type")
-        )
+        return super(AdminAreaManager, self).get_queryset().order_by("title").select_related("admin_area_type")
 
 
 class AdminArea(MPTTModel, TimeStampedUUIDModel):
@@ -125,9 +113,7 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
         on_delete=models.CASCADE,
     )
 
-    admin_area_type = models.ForeignKey(
-        "AdminAreaType", on_delete=models.CASCADE, related_name="locations"
-    )
+    admin_area_type = models.ForeignKey("AdminAreaType", on_delete=models.CASCADE, related_name="locations")
 
     geom = MultiPolygonField(null=True, blank=True)
     point = PointField(null=True, blank=True)
@@ -137,13 +123,7 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
 
     @property
     def geo_point(self):
-        return (
-            self.point
-            if self.point
-            else self.geom.point_on_surface
-            if self.geom
-            else ""
-        )
+        return self.point if self.point else self.geom.point_on_surface if self.geom else ""
 
     @property
     def point_lat_long(self):
@@ -152,13 +132,8 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
     @classmethod
     def get_admin_areas_as_choices(cls, admin_level):
         return [
-            {
-                "label": {"English(EN)": admin_area.title},
-                "value": admin_area.title,
-            }
-            for admin_area in cls.objects.filter(
-                admin_area_type__admin_level=admin_level
-            )
+            {"label": {"English(EN)": admin_area.title}, "value": admin_area.title,}
+            for admin_area in cls.objects.filter(admin_area_type__admin_level=admin_level)
         ]
 
 
@@ -184,10 +159,7 @@ class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
     label = JSONField(default=dict)
     hint = JSONField(default=dict)
     group = models.ForeignKey(
-        "core.FlexibleAttributeGroup",
-        on_delete=models.CASCADE,
-        related_name="flex_attributes",
-        null=True,
+        "core.FlexibleAttributeGroup", on_delete=models.CASCADE, related_name="flex_attributes", null=True,
     )
     associated_with = models.SmallIntegerField(choices=ASSOCIATED_WITH_CHOICES)
     history = AuditlogHistoryField(pk_indexable=False)
@@ -223,9 +195,7 @@ class FlexibleAttributeChoice(SoftDeletableModel, TimeStampedUUIDModel):
     list_name = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
     label = JSONField(default=dict)
-    flex_attributes = models.ManyToManyField(
-        "core.FlexibleAttribute", related_name="choices"
-    )
+    flex_attributes = models.ManyToManyField("core.FlexibleAttribute", related_name="choices")
     history = AuditlogHistoryField(pk_indexable=False)
 
     def __str__(self):

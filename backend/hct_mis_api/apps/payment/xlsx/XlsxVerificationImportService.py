@@ -5,9 +5,7 @@ from graphql import GraphQLError
 
 from payment.models import PaymentVerification
 from payment.utils import from_received_yes_no_to_status, float_to_decimal
-from payment.xlsx.XlsxVerificationExportService import (
-    XlsxVerificationExportService,
-)
+from payment.xlsx.XlsxVerificationExportService import XlsxVerificationExportService
 
 
 class XlsxVerificationImportService:
@@ -17,25 +15,19 @@ class XlsxVerificationImportService:
     def __init__(self, cashplan_payment_verification, file):
         self.file = file
         self.cashplan_payment_verification = cashplan_payment_verification
-        self.payment_record_verifications = (
-            cashplan_payment_verification.payment_record_verifications.all()
-        )
+        self.payment_record_verifications = cashplan_payment_verification.payment_record_verifications.all()
         self.current_row = 0
         self.errors = []
         self.cashplan_payment_verification = cashplan_payment_verification
         self.payment_record_verifications = self.cashplan_payment_verification.payment_record_verifications.all().prefetch_related(
             "payment_record"
         )
-        self.payment_record_ids = [
-            str(x.payment_record_id) for x in self.payment_record_verifications
-        ]
+        self.payment_record_ids = [str(x.payment_record_id) for x in self.payment_record_verifications]
         self.payment_record_verifications_dict = {
-            str(x.payment_record_id): x
-            for x in self.payment_record_verifications
+            str(x.payment_record_id): x for x in self.payment_record_verifications
         }
         self.payment_records_dict = {
-            str(x.payment_record_id): x.payment_record
-            for x in self.payment_record_verifications
+            str(x.payment_record_id): x.payment_record for x in self.payment_record_verifications
         }
         self.payment_verifications_to_save = []
         self.was_validation_run = False
@@ -43,9 +35,7 @@ class XlsxVerificationImportService:
     def open_workbook(self) -> openpyxl.Workbook:
         wb = openpyxl.load_workbook(self.file)
         self.wb = wb
-        self.ws_verifications = wb[
-            XlsxVerificationExportService.VERIFICATION_SHEET
-        ]
+        self.ws_verifications = wb[XlsxVerificationExportService.VERIFICATION_SHEET]
         return wb
 
     def validate(self):
@@ -61,18 +51,12 @@ class XlsxVerificationImportService:
             raise GraphQLError("Run validation before import.")
         for row in self.ws_verifications.iter_rows(min_row=2):
             self._import_row(row)
-        PaymentVerification.objects.bulk_update(
-            self.payment_verifications_to_save, ("status", "received_amount")
-        )
+        PaymentVerification.objects.bulk_update(self.payment_verifications_to_save, ("status", "received_amount"))
 
     def _check_version(self):
         ws_meta = self.wb[XlsxVerificationExportService.META_SHEET]
-        version_cell_name = ws_meta[
-            XlsxVerificationExportService.VERSION_CELL_NAME_COORDINATES
-        ].value
-        version = ws_meta[
-            XlsxVerificationExportService.VERSION_CELL_COORDINATES
-        ].value
+        version_cell_name = ws_meta[XlsxVerificationExportService.VERSION_CELL_NAME_COORDINATES].value
+        version = ws_meta[XlsxVerificationExportService.VERSION_CELL_COORDINATES].value
 
         if (
             version_cell_name != XlsxVerificationExportService.VERSION_CELL_NAME
@@ -96,13 +80,7 @@ class XlsxVerificationImportService:
         column = 0
         for header in headers_row:
             if column >= len(accepted_headers):
-                self.errors.append(
-                    (
-                        "Payment Verifications",
-                        header.coordinate,
-                        f"Unexpected header {header.value}",
-                    )
-                )
+                self.errors.append(("Payment Verifications", header.coordinate, f"Unexpected header {header.value}",))
             elif header.value != accepted_headers[column]:
                 self.errors.append(
                     (
@@ -119,10 +97,7 @@ class XlsxVerificationImportService:
             if cell.value is None:
                 column += 1
                 continue
-            if (
-                cell.data_type
-                != XlsxVerificationImportService.COLUMNS_TYPES[column]
-            ):
+            if cell.data_type != XlsxVerificationImportService.COLUMNS_TYPES[column]:
                 self.errors.append(
                     (
                         "Payment Verifications",
@@ -183,11 +158,7 @@ class XlsxVerificationImportService:
                     f"If received_amount is 0, you should set received to NO",
                 )
             )
-        elif (
-            received_amount is not None
-            and received_amount != 0
-            and received != "YES"
-        ):
+        elif received_amount is not None and received_amount != 0 and received != "YES":
             self.errors.append(
                 (
                     "Payment Verifications",
@@ -208,15 +179,11 @@ class XlsxVerificationImportService:
         payment_record_id = row[0].value
         received = row[1].value
         received_amount = row[5].value
-        payment_verification = self.payment_record_verifications_dict[
-            payment_record_id
-        ]
+        payment_verification = self.payment_record_verifications_dict[payment_record_id]
         payment_record = self.payment_records_dict.get(payment_record_id)
         delivered_amount = payment_record.delivered_quantity
 
-        payment_verification.status = from_received_yes_no_to_status(
-            received, received_amount, delivered_amount
-        )
+        payment_verification.status = from_received_yes_no_to_status(received, received_amount, delivered_amount)
         if received_amount is not None and received_amount != "":
             payment_verification.received_amount = float_to_decimal(received_amount)
         self.payment_verifications_to_save.append(payment_verification)

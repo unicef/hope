@@ -71,8 +71,7 @@ class Command(BaseCommand):
             action="store",
             nargs="?",
             type=int,
-            help="Creates provided amount of payment records assigned to "
-            "household and cash plan.",
+            help="Creates provided amount of payment records assigned to " "household and cash plan.",
         )
         parser.add_argument(
             "--flush",
@@ -86,19 +85,13 @@ class Command(BaseCommand):
         )
 
         parser.add_argument(
-            "--noinput",
-            action="store_true",
-            help="Suppresses all user prompts.",
+            "--noinput", action="store_true", help="Suppresses all user prompts.",
         )
 
     def _generate_admin_areas(self):
         business_area = BusinessArea.objects.first()
-        state_area_type = AdminAreaTypeFactory(
-            name="State", business_area=business_area, admin_level=1
-        )
-        province_area_type = AdminAreaTypeFactory(
-            name="Province", business_area=business_area, admin_level=2
-        )
+        state_area_type = AdminAreaTypeFactory(name="State", business_area=business_area, admin_level=1)
+        province_area_type = AdminAreaTypeFactory(name="Province", business_area=business_area, admin_level=2)
         AdminAreaFactory.create_batch(
             6, admin_area_type=state_area_type,
         )
@@ -116,14 +109,10 @@ class Command(BaseCommand):
         program = ProgramFactory(business_area=BusinessArea.objects.first())
         program.admin_areas.set(AdminArea.objects.order_by("?")[:3])
         targeting_criteria = TargetingCriteriaFactory()
-        rules = TargetingCriteriaRuleFactory.create_batch(
-            random.randint(1, 3), targeting_criteria=targeting_criteria
-        )
+        rules = TargetingCriteriaRuleFactory.create_batch(random.randint(1, 3), targeting_criteria=targeting_criteria)
 
         for rule in rules:
-            TargetingCriteriaRuleFilterFactory.create_batch(
-                random.randint(1, 5), targeting_criteria_rule=rule
-            )
+            TargetingCriteriaRuleFilterFactory.create_batch(random.randint(1, 5), targeting_criteria_rule=rule)
 
         target_population = TargetPopulationFactory(
             created_by=user,
@@ -131,9 +120,7 @@ class Command(BaseCommand):
             business_area=BusinessArea.objects.first(),
         )
         for _ in range(cash_plans_amount):
-            cash_plan = CashPlanFactory.build(
-                program=program, business_area=BusinessArea.objects.first(),
-            )
+            cash_plan = CashPlanFactory.build(program=program, business_area=BusinessArea.objects.first(),)
             cash_plan.save()
             for _ in range(payment_record_amount):
                 registration_data_import = RegistrationDataImportFactory(
@@ -153,9 +140,7 @@ class Command(BaseCommand):
                 household.programs.add(program)
 
                 PaymentRecordFactory(
-                    cash_plan=cash_plan,
-                    household=household,
-                    target_population=target_population,
+                    cash_plan=cash_plan, household=household, target_population=target_population,
                 )
                 EntitlementCardFactory(household=household)
         CashPlanPaymentVerificationFactory.create_batch(1)
@@ -166,20 +151,12 @@ class Command(BaseCommand):
         self.stdout.write(f"Generating fixtures...")
         if options["flush"]:
             call_command("flush", "--noinput")
-            call_command(
-                "flush", "--noinput", database="cash_assist_datahub_mis"
-            )
-            call_command(
-                "flush", "--noinput", database="cash_assist_datahub_ca"
-            )
-            call_command(
-                "flush", "--noinput", database="cash_assist_datahub_erp"
-            )
+            call_command("flush", "--noinput", database="cash_assist_datahub_mis")
+            call_command("flush", "--noinput", database="cash_assist_datahub_ca")
+            call_command("flush", "--noinput", database="cash_assist_datahub_erp")
             call_command("flush", "--noinput", database="registration_datahub")
             call_command(
-                "loaddata",
-                "hct_mis_api/apps/account/fixtures/superuser.json",
-                verbosity=0,
+                "loaddata", "hct_mis_api/apps/account/fixtures/superuser.json", verbosity=0,
             )
         start_time = time.time()
         programs_amount = options["programs_amount"]
@@ -188,9 +165,7 @@ class Command(BaseCommand):
             if options["noinput"]:
                 call_command("loadbusinessareas")
             else:
-                self.stdout.write(
-                    self.style.WARNING("BusinessAreas does not exist, ")
-                )
+                self.stdout.write(self.style.WARNING("BusinessAreas does not exist, "))
 
                 user_input = input("Type 'y' to generate, or 'n' to cancel: ")
 
@@ -203,9 +178,7 @@ class Command(BaseCommand):
             if options["noinput"]:
                 call_command("generatedocumenttypes")
             else:
-                self.stdout.write(
-                    self.style.WARNING("DocumentTypes does not exist, ")
-                )
+                self.stdout.write(self.style.WARNING("DocumentTypes does not exist, "))
 
                 user_input = input("Type 'y' to generate, or 'n' to cancel: ")
 
@@ -224,29 +197,18 @@ class Command(BaseCommand):
             rdi_datahub = RegistrationDataImportDatahubFactory(hct_id=rdi.id)
             for _ in range(15):
                 create_imported_household(
-                    {"registration_data_import": rdi_datahub,},
-                    {"registration_data_import": rdi_datahub,},
+                    {"registration_data_import": rdi_datahub,}, {"registration_data_import": rdi_datahub,},
                 )
         session = Session(source=Session.SOURCE_CA, status=Session.STATUS_READY)
         session.save()
-        cash_assist_datahub_fixtures.ServiceProviderFactory.create_batch(
-            10, session=session
-        )
-        cash_assist_datahub_fixtures.CashPlanFactory.create_batch(
-            10, session=session
-        )
-        cash_assist_datahub_fixtures.PaymentRecordFactory.create_batch(
-            10, session=session
-        )
+        cash_assist_datahub_fixtures.ServiceProviderFactory.create_batch(10, session=session)
+        cash_assist_datahub_fixtures.CashPlanFactory.create_batch(10, session=session)
+        cash_assist_datahub_fixtures.PaymentRecordFactory.create_batch(10, session=session)
 
         for _ in range(10):
             used_ids = list(Programme.objects.values_list("mis_id", flat=True))
             mis_id = Program.objects.filter(~Q(id__in=used_ids)).first().id
-            programme = cash_assist_datahub_fixtures.ProgrammeFactory(
-                session=session, mis_id=mis_id
-            )
+            programme = cash_assist_datahub_fixtures.ProgrammeFactory(session=session, mis_id=mis_id)
             programme.save()
 
-        self.stdout.write(
-            f"Generated fixtures in {(time.time() - start_time)} seconds"
-        )
+        self.stdout.write(f"Generated fixtures in {(time.time() - start_time)} seconds")

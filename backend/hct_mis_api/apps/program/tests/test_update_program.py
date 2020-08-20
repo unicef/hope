@@ -28,8 +28,7 @@ class TestUpdateProgram(APITestCase):
             request_string=self.UPDATE_PROGRAM_MUTATION,
             variables={
                 "programData": {
-                    "id": "UHJvZ3JhbU5vZGU6MTc4MWEwMGMtMjhl"
-                    "OS00OGRmLTlhOTUtZDg5ZWVmYWM1ZmY0",
+                    "id": "UHJvZ3JhbU5vZGU6MTc4MWEwMGMtMjhl" "OS00OGRmLTlhOTUtZDg5ZWVmYWM1ZmY0",
                     "name": "updated name",
                     "status": "FINISHED",
                 }
@@ -39,10 +38,7 @@ class TestUpdateProgram(APITestCase):
     def test_update_program_authenticated(self):
         user = UserFactory.create()
 
-        program = ProgramFactory.create(
-            status="DRAFT",
-            business_area=BusinessArea.objects.order_by("?").first(),
-        )
+        program = ProgramFactory.create(status="DRAFT", business_area=BusinessArea.objects.order_by("?").first(),)
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,

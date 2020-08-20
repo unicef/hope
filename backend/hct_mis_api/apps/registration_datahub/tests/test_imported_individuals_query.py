@@ -114,36 +114,26 @@ class TestImportedIndividualQuery(APITestCase):
             },
         ]
 
-        self.individuals = [
-            ImportedIndividualFactory(**individual)
-            for individual in self.individuals_to_create
-        ]
+        self.individuals = [ImportedIndividualFactory(**individual) for individual in self.individuals_to_create]
 
     def test_imported_individual_query_all(self):
         self.snapshot_graphql_request(
-            request_string=self.ALL_IMPORTED_INDIVIDUALS_QUERY,
-            context={"user": self.user},
+            request_string=self.ALL_IMPORTED_INDIVIDUALS_QUERY, context={"user": self.user},
         )
 
     def test_imported_individual_query_order_by_dob_a_all(self):
         self.snapshot_graphql_request(
-            request_string=self.ALL_IMPORTED_INDIVIDUALS_ORDER_BY_BIRTH_DATE_A_QUERY,
-            context={"user": self.user},
+            request_string=self.ALL_IMPORTED_INDIVIDUALS_ORDER_BY_BIRTH_DATE_A_QUERY, context={"user": self.user},
         )
 
     def test_imported_individual_query_order_by_dob_d_all(self):
         self.snapshot_graphql_request(
-            request_string=self.ALL_IMPORTED_INDIVIDUALS_ORDER_BY_BIRTH_DATE_D_QUERY,
-            context={"user": self.user},
+            request_string=self.ALL_IMPORTED_INDIVIDUALS_ORDER_BY_BIRTH_DATE_D_QUERY, context={"user": self.user},
         )
 
     def test_imported_individual_query_single(self):
         self.snapshot_graphql_request(
             request_string=self.IMPORTED_INDIVIDUAL_QUERY,
             context={"user": self.user},
-            variables={
-                "id": self.id_to_base64(
-                    self.individuals[0].id, "ImportedIndividual",
-                )
-            },
+            variables={"id": self.id_to_base64(self.individuals[0].id, "ImportedIndividual",)},
         )

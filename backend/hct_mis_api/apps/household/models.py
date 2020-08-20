@@ -45,13 +45,7 @@ DISABILITY_CHOICE = (
     ("WALKING", _("Difficulty walking or climbing steps")),
     ("MEMORY", _("Difficulty remembering or concentrating")),
     ("SELF_CARE", _("Difficulty with self care (washing, dressing)")),
-    (
-        "COMMUNICATING",
-        _(
-            "Difficulty communicating "
-            "(e.g understanding or being understood)"
-        ),
-    ),
+    ("COMMUNICATING", _("Difficulty communicating " "(e.g understanding or being understood)"),),
 )
 NON_BENEFICIARY = "NON_BENEFICIARY"
 HEAD = "HEAD"
@@ -129,23 +123,17 @@ INDIVIDUAL_HOUSEHOLD_STATUS = (("ACTIVE", "Active"), ("INACTIVE", "Inactive"))
 
 
 class Household(TimeStampedUUIDModel, AbstractSyncable):
-    status = models.CharField(
-        max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default="ACTIVE"
-    )
+    status = models.CharField(max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default="ACTIVE")
 
     consent = ImageField(validators=[validate_image_file_extension])
-    residence_status = models.CharField(
-        max_length=255, choices=RESIDENCE_STATUS_CHOICE,
-    )
+    residence_status = models.CharField(max_length=255, choices=RESIDENCE_STATUS_CHOICE,)
     country_origin = CountryField(blank=True)
     country = CountryField(blank=True)
 
     size = models.PositiveIntegerField()
     address = models.CharField(max_length=255, blank=True)
     """location contains lowest administrative area info"""
-    admin_area = models.ForeignKey(
-        "core.AdminArea", null=True, on_delete=models.SET_NULL
-    )
+    admin_area = models.ForeignKey("core.AdminArea", null=True, on_delete=models.SET_NULL)
 
     representatives = models.ManyToManyField(
         to="household.Individual",
@@ -167,55 +155,35 @@ class Household(TimeStampedUUIDModel, AbstractSyncable):
     male_age_group_12_17_count = models.PositiveIntegerField(default=0)
     male_adults_count = models.PositiveIntegerField(default=0)
     female_age_group_0_5_disabled_count = models.PositiveIntegerField(default=0)
-    female_age_group_6_11_disabled_count = models.PositiveIntegerField(
-        default=0
-    )
-    female_age_group_12_17_disabled_count = models.PositiveIntegerField(
-        default=0
-    )
+    female_age_group_6_11_disabled_count = models.PositiveIntegerField(default=0)
+    female_age_group_12_17_disabled_count = models.PositiveIntegerField(default=0)
     female_adults_disabled_count = models.PositiveIntegerField(default=0)
     male_age_group_0_5_disabled_count = models.PositiveIntegerField(default=0)
     male_age_group_6_11_disabled_count = models.PositiveIntegerField(default=0)
     male_age_group_12_17_disabled_count = models.PositiveIntegerField(default=0)
     male_adults_disabled_count = models.PositiveIntegerField(default=0)
     registration_data_import = models.ForeignKey(
-        "registration_data.RegistrationDataImport",
-        related_name="households",
-        on_delete=models.CASCADE,
+        "registration_data.RegistrationDataImport", related_name="households", on_delete=models.CASCADE,
     )
-    programs = models.ManyToManyField(
-        "program.Program", related_name="households", blank=True,
-    )
+    programs = models.ManyToManyField("program.Program", related_name="households", blank=True,)
     returnee = models.BooleanField(default=False, null=True)
     flex_fields = JSONField(default=dict)
     first_registration_date = models.DateField()
     last_registration_date = models.DateField()
-    head_of_household = models.OneToOneField(
-        "Individual",
-        related_name="heading_household",
-        on_delete=models.CASCADE,
-    )
+    head_of_household = models.OneToOneField("Individual", related_name="heading_household", on_delete=models.CASCADE,)
     unicef_id = models.CharField(max_length=250, blank=True)
-    business_area = models.ForeignKey(
-        "core.BusinessArea", on_delete=models.CASCADE
-    )
+    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
 
     @property
     def total_cash_received(self):
-        return (
-            self.payment_records.filter()
-            .aggregate(Sum("delivered_quantity"))
-            .get("delivered_quantity__sum")
-        )
+        return self.payment_records.filter().aggregate(Sum("delivered_quantity")).get("delivered_quantity__sum")
 
     def __str__(self):
         return f"Household ID: {self.id}"
 
 
 class DocumentValidator(TimeStampedUUIDModel):
-    type = models.ForeignKey(
-        "DocumentType", related_name="validators", on_delete=models.CASCADE
-    )
+    type = models.ForeignKey("DocumentType", related_name="validators", on_delete=models.CASCADE)
     regex = models.CharField(max_length=100, default=".*")
 
 
@@ -234,12 +202,8 @@ class DocumentType(TimeStampedUUIDModel):
 class Document(TimeStampedUUIDModel):
     document_number = models.CharField(max_length=255, blank=True)
     photo = models.ImageField(blank=True)
-    individual = models.ForeignKey(
-        "Individual", related_name="documents", on_delete=models.CASCADE
-    )
-    type = models.ForeignKey(
-        "DocumentType", related_name="documents", on_delete=models.CASCADE
-    )
+    individual = models.ForeignKey("Individual", related_name="documents", on_delete=models.CASCADE)
+    type = models.ForeignKey("DocumentType", related_name="documents", on_delete=models.CASCADE)
 
     def clean(self):
         from django.core.exceptions import ValidationError
@@ -258,12 +222,8 @@ class Agency(models.Model):
 
 
 class HouseholdIdentity(models.Model):
-    agency = models.ForeignKey(
-        "Agency", related_name="households_identities", on_delete=models.CASCADE
-    )
-    household = models.ForeignKey(
-        "Household", related_name="identities", on_delete=models.CASCADE
-    )
+    agency = models.ForeignKey("Agency", related_name="households_identities", on_delete=models.CASCADE)
+    household = models.ForeignKey("Household", related_name="identities", on_delete=models.CASCADE)
     document_number = models.CharField(max_length=255,)
 
     def __str__(self):
@@ -271,12 +231,8 @@ class HouseholdIdentity(models.Model):
 
 
 class IndividualIdentity(models.Model):
-    agency = models.ForeignKey(
-        "Agency", related_name="individual_identities", on_delete=models.CASCADE
-    )
-    individual = models.ForeignKey(
-        "Individual", related_name="identities", on_delete=models.CASCADE
-    )
+    agency = models.ForeignKey("Agency", related_name="individual_identities", on_delete=models.CASCADE)
+    individual = models.ForeignKey("Individual", related_name="identities", on_delete=models.CASCADE)
     number = models.CharField(max_length=255,)
 
     def __str__(self):
@@ -285,14 +241,10 @@ class IndividualIdentity(models.Model):
 
 class IndividualRoleInHousehold(TimeStampedUUIDModel, AbstractSyncable):
     individual = models.ForeignKey(
-        "household.Individual",
-        on_delete=models.CASCADE,
-        related_name="households_and_roles",
+        "household.Individual", on_delete=models.CASCADE, related_name="households_and_roles",
     )
     household = models.ForeignKey(
-        "household.Household",
-        on_delete=models.CASCADE,
-        related_name="individuals_and_roles",
+        "household.Household", on_delete=models.CASCADE, related_name="individuals_and_roles",
     )
     role = models.CharField(max_length=255, blank=True, choices=ROLE_CHOICE,)
 
@@ -304,24 +256,17 @@ class IndividualRoleInHousehold(TimeStampedUUIDModel, AbstractSyncable):
 
 
 class Individual(TimeStampedUUIDModel, AbstractSyncable):
-    status = models.CharField(
-        max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default="ACTIVE"
-    )
+    status = models.CharField(max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default="ACTIVE")
     individual_id = models.CharField(max_length=255, blank=True)
     photo = models.ImageField(blank=True)
-    full_name = models.CharField(
-        max_length=255,
-        validators=[MinLengthValidator(3), MaxLengthValidator(255)],
-    )
+    full_name = models.CharField(max_length=255, validators=[MinLengthValidator(3), MaxLengthValidator(255)],)
     given_name = models.CharField(max_length=85, blank=True,)
     middle_name = models.CharField(max_length=85, blank=True,)
     family_name = models.CharField(max_length=85, blank=True,)
     sex = models.CharField(max_length=255, choices=SEX_CHOICE,)
     birth_date = models.DateField()
     estimated_birth_date = models.BooleanField(default=False)
-    marital_status = models.CharField(
-        max_length=255, choices=MARITAL_STATUS_CHOICE,
-    )
+    marital_status = models.CharField(max_length=255, choices=MARITAL_STATUS_CHOICE,)
     phone_no = PhoneNumberField(blank=True)
     phone_no_alternative = PhoneNumberField(blank=True)
     relationship = models.CharField(
@@ -343,17 +288,10 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
             and not a member of one.""",
     )
     registration_data_import = models.ForeignKey(
-        "registration_data.RegistrationDataImport",
-        related_name="individuals",
-        on_delete=models.CASCADE,
+        "registration_data.RegistrationDataImport", related_name="individuals", on_delete=models.CASCADE,
     )
     disability = models.BooleanField(default=False,)
-    work_status = models.CharField(
-        max_length=20,
-        choices=WORK_STATUS_CHOICE,
-        blank=True,
-        default=NOT_PROVIDED,
-    )
+    work_status = models.CharField(max_length=20, choices=WORK_STATUS_CHOICE, blank=True, default=NOT_PROVIDED,)
     first_registration_date = models.DateField()
     last_registration_date = models.DateField()
     flex_fields = JSONField(default=dict)
@@ -367,10 +305,7 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
         return (
             today.year
             - self.birth_date.year
-            - (
-                (today.month, today.day)
-                < (self.birth_date.month, self.birth_date.day)
-            )
+            - ((today.month, today.day) < (self.birth_date.month, self.birth_date.day))
         )
 
     def __str__(self):
@@ -381,22 +316,11 @@ class EntitlementCard(TimeStampedUUIDModel):
     ACTIVE = "ACTIVE"
     ERRONEOUS = "ERRONEOUS"
     CLOSED = "CLOSED"
-    STATUS_CHOICE = Choices(
-        (ACTIVE, _("Active")),
-        (ERRONEOUS, _("Erroneous")),
-        (CLOSED, _("Closed")),
-    )
+    STATUS_CHOICE = Choices((ACTIVE, _("Active")), (ERRONEOUS, _("Erroneous")), (CLOSED, _("Closed")),)
     card_number = models.CharField(max_length=255)
-    status = models.CharField(
-        choices=STATUS_CHOICE, default=ACTIVE, max_length=10,
-    )
+    status = models.CharField(choices=STATUS_CHOICE, default=ACTIVE, max_length=10,)
     card_type = models.CharField(max_length=255)
     current_card_size = models.CharField(max_length=255)
     card_custodian = models.CharField(max_length=255)
     service_provider = models.CharField(max_length=255)
-    household = models.ForeignKey(
-        "Household",
-        related_name="entitlement_cards",
-        on_delete=models.SET_NULL,
-        null=True,
-    )
+    household = models.ForeignKey("Household", related_name="entitlement_cards", on_delete=models.SET_NULL, null=True,)

@@ -27,9 +27,7 @@ class Household(SessionModel):
     mis_id = models.UUIDField()
     unhcr_id = models.CharField(max_length=255, null=True)
     unicef_id = models.CharField(max_length=255, null=True)
-    status = models.CharField(
-        max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default="ACTIVE"
-    )
+    status = models.CharField(max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default="ACTIVE")
     household_size = models.PositiveIntegerField()
     # registration household id
     form_number = models.CharField(max_length=255, null=True)
@@ -37,9 +35,7 @@ class Household(SessionModel):
     admin1 = models.CharField(max_length=255, null=True)
     admin2 = models.CharField(max_length=255, null=True)
     country = models.CharField(null=True, max_length=3)
-    residence_status = models.CharField(
-        max_length=255, choices=RESIDENCE_STATUS_CHOICE, null=True
-    )
+    residence_status = models.CharField(max_length=255, choices=RESIDENCE_STATUS_CHOICE, null=True)
     registration_date = models.DateField(null=True)
 
     class Meta:
@@ -70,12 +66,8 @@ class Individual(SessionModel):
     sex = models.CharField(max_length=255, choices=SEX_CHOICE,)
     date_of_birth = models.DateField()
     estimated_date_of_birth = models.BooleanField()
-    relationship = models.CharField(
-        max_length=255, null=True, choices=RELATIONSHIP_CHOICE,
-    )
-    marital_status = models.CharField(
-        max_length=255, choices=MARITAL_STATUS_CHOICE,
-    )
+    relationship = models.CharField(max_length=255, null=True, choices=RELATIONSHIP_CHOICE,)
+    marital_status = models.CharField(max_length=255, choices=MARITAL_STATUS_CHOICE,)
     phone_number = models.CharField(max_length=14, null=True)
 
     class Meta:
@@ -118,11 +110,7 @@ class TargetPopulationEntry(SessionModel):
     individual_mis_id = models.UUIDField(null=True)
     target_population_mis_id = models.UUIDField()
     vulnerability_score = models.DecimalField(
-        blank=True,
-        null=True,
-        decimal_places=3,
-        max_digits=6,
-        help_text="Written by a tool such as Corticon.",
+        blank=True, null=True, decimal_places=3, max_digits=6, help_text="Written by a tool such as Corticon.",
     )
 
     class Meta:
@@ -178,9 +166,7 @@ class Document(SessionModel):
         (DAMAGED, _("Damaged")),
     )
 
-    status = models.CharField(
-        choices=STATUS_CHOICE, null=True, max_length=30, default=None
-    )
+    status = models.CharField(choices=STATUS_CHOICE, null=True, max_length=30, default=None)
     date_of_expiry = models.DateField(null=True, default=None)
     photo = models.ImageField(blank=True, default="")
     mis_id = models.UUIDField()

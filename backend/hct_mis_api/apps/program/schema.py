@@ -91,13 +91,9 @@ class CashPlanNode(DjangoObjectType):
 
 class Query(graphene.ObjectType):
     program = relay.Node.Field(ProgramNode)
-    all_programs = DjangoFilterConnectionField(
-        ProgramNode, filterset_class=ProgramFilter
-    )
+    all_programs = DjangoFilterConnectionField(ProgramNode, filterset_class=ProgramFilter)
     cash_plan = relay.Node.Field(CashPlanNode)
-    all_cash_plans = DjangoFilterConnectionField(
-        CashPlanNode, filterset_class=CashPlanFilter
-    )
+    all_cash_plans = DjangoFilterConnectionField(CashPlanNode, filterset_class=CashPlanFilter)
     program_status_choices = graphene.List(ChoiceObject)
     program_frequency_of_payments_choices = graphene.List(ChoiceObject)
     program_sector_choices = graphene.List(ChoiceObject)
