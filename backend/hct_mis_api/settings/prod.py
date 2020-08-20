@@ -6,9 +6,7 @@ from .base import *  # noqa: ignore=F403
 DEBUG = False
 IS_STAGING = False
 
-DEFAULT_FROM_EMAIL = os.getenv(
-    "DEFAULT_FROM_EMAIL", "HCT-MIS <noreply@hct-mis.org>"
-)
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "HCT-MIS <noreply@hct-mis.org>")
 
 # Sentry Configs
 INSTALLED_APPS += ("raven.contrib.django.raven_compat",)

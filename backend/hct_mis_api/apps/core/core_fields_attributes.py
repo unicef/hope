@@ -58,10 +58,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "required": True,
         "label": {"English(EN)": "Residence status"},
         "hint": "",
-        "choices": [
-            {"label": {"English(EN)": label}, "value": value,}
-            for value, label in RESIDENCE_STATUS_CHOICE
-        ],
+        "choices": [{"label": {"English(EN)": label}, "value": value,} for value, label in RESIDENCE_STATUS_CHOICE],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "residence_status_h_c",
     },
@@ -124,9 +121,7 @@ CORE_FIELDS_ATTRIBUTES = [
             "name": "admin1",
             "lookup": "admin1",
             "required": False,
-            "label": {
-                "English(EN)": "Household resides in (Select administrative level 1)"
-            },
+            "label": {"English(EN)": "Household resides in (Select administrative level 1)"},
             "hint": "",
             "choices": lambda: AdminArea.get_admin_areas_as_choices(1),
             "associated_with": _HOUSEHOLD,
@@ -140,9 +135,7 @@ CORE_FIELDS_ATTRIBUTES = [
             "name": "admin2",
             "lookup": "admin2",
             "required": False,
-            "label": {
-                "English(EN)": "Household resides in (Select administrative level 2)"
-            },
+            "label": {"English(EN)": "Household resides in (Select administrative level 2)"},
             "hint": "",
             "choices": lambda: AdminArea.get_admin_areas_as_choices(2),
             "associated_with": _HOUSEHOLD,
@@ -205,10 +198,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "required": True,
         "label": {"English(EN)": "Relationship to Head of Household"},
         "hint": "",
-        "choices": [
-            {"label": {"English(EN)": label}, "value": value,}
-            for value, label in RELATIONSHIP_CHOICE
-        ],
+        "choices": [{"label": {"English(EN)": label}, "value": value,} for value, label in RELATIONSHIP_CHOICE],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "relationship_i_c",
     },
@@ -268,10 +258,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "required": True,
         "label": {"English(EN)": "Sex"},
         "hint": "",
-        "choices": [
-            {"label": {"English(EN)": label}, "value": value,}
-            for value, label in SEX_CHOICE
-        ],
+        "choices": [{"label": {"English(EN)": label}, "value": value,} for value, label in SEX_CHOICE],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "sex_i_c",
     },
@@ -343,10 +330,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "required": True,
         "label": {"English(EN)": "Marital Status"},
         "hint": "",
-        "choices": [
-            {"label": {"English(EN)": label}, "value": value,}
-            for value, label in MARITAL_STATUS_CHOICE
-        ],
+        "choices": [{"label": {"English(EN)": label}, "value": value,} for value, label in MARITAL_STATUS_CHOICE],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "marital_status_i_c",
     },
@@ -584,9 +568,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "name": "pregnant_member",
         "lookup": "pregnant_member",
         "required": True,
-        "label": {
-            "English(EN)": "How many pregnant women are there in the Household?"
-        },
+        "label": {"English(EN)": "How many pregnant women are there in the Household?"},
         "hint": "",
         "choices": [],
         "associated_with": _HOUSEHOLD,
@@ -831,10 +813,7 @@ HOUSEHOLD_ID_FIELDS = [
         "required": False,
         "label": {"English(EN)": "Does the individual work?"},
         "hint": "",
-        "choices": [
-            {"label": {"English(EN)": label}, "value": value}
-            for value, label in WORK_STATUS_CHOICE
-        ],
+        "choices": [{"label": {"English(EN)": label}, "value": value} for value, label in WORK_STATUS_CHOICE],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "work_status_i_c",
     },
@@ -845,10 +824,7 @@ COLLECTORS_FIELDS = {
         "type": TYPE_LIST_OF_IDS,
         "name": "primary_collector_id",
         "required": True,
-        "label": {
-            "English(EN)": "List of primary collectors ids, "
-            "separated by a semicolon"
-        },
+        "label": {"English(EN)": "List of primary collectors ids, " "separated by a semicolon"},
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "primary_collector_id",
@@ -858,10 +834,7 @@ COLLECTORS_FIELDS = {
         "type": TYPE_LIST_OF_IDS,
         "name": "alternate_collector_id",
         "required": True,
-        "label": {
-            "English(EN)": "List of alternate collectors ids, "
-            "separated by a semicolon"
-        },
+        "label": {"English(EN)": "List of alternate collectors ids, " "separated by a semicolon"},
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "alternate_collector_id",
@@ -874,13 +847,8 @@ KOBO_COLLECTOR_FIELD = {
         "type": TYPE_SELECT_ONE,
         "name": "is_only_collector",
         "required": True,
-        "label": {
-            "English(EN)": "Is only a collector, not a part of household"
-        },
-        "choices": [
-            {"label": {"English(EN)": label}, "value": value,}
-            for value, label in YES_NO_CHOICE
-        ],
+        "label": {"English(EN)": "Is only a collector, not a part of household"},
+        "choices": [{"label": {"English(EN)": label}, "value": value,} for value, label in YES_NO_CHOICE],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "is_only_collector",
     },
@@ -891,10 +859,7 @@ KOBO_COLLECTOR_FIELD = {
         "required": True,
         "label": {"English(EN)": "Role"},
         "hint": "",
-        "choices": [
-            {"label": {"English(EN)": label}, "value": value,}
-            for value, label in ROLE_CHOICE
-        ],
+        "choices": [{"label": {"English(EN)": label}, "value": value,} for value, label in ROLE_CHOICE],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "role_i_c",
     },
@@ -924,12 +889,8 @@ def _core_fields_to_separated_dict(append_household_id=True):
     return result_dict
 
 
-FILTERABLE_CORE_FIELDS_ATTRIBUTES = [
-    x for x in CORE_FIELDS_ATTRIBUTES if x.get("type") in FILTERABLE_TYPES
-]
+FILTERABLE_CORE_FIELDS_ATTRIBUTES = [x for x in CORE_FIELDS_ATTRIBUTES if x.get("type") in FILTERABLE_TYPES]
 
-CORE_FIELDS_ATTRIBUTES_DICTIONARY = reduce(
-    _reduce_core_field_attr, CORE_FIELDS_ATTRIBUTES, {}
-)
+CORE_FIELDS_ATTRIBUTES_DICTIONARY = reduce(_reduce_core_field_attr, CORE_FIELDS_ATTRIBUTES, {})
 
 CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY = _core_fields_to_separated_dict()

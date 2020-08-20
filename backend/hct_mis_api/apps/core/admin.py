@@ -42,17 +42,11 @@ class FlexibleAttributeImporter:
     }
 
     # Constants for xls import
-    ATTRIBUTE_MODEL_FIELDS = [
-        field.name for field in FlexibleAttribute._meta.get_fields()
-    ]
+    ATTRIBUTE_MODEL_FIELDS = [field.name for field in FlexibleAttribute._meta.get_fields()]
 
-    GROUP_MODEL_FIELDS = [
-        field.name for field in FlexibleAttributeGroup._meta.get_fields()
-    ]
+    GROUP_MODEL_FIELDS = [field.name for field in FlexibleAttributeGroup._meta.get_fields()]
 
-    CHOICE_MODEL_FIELDS = [
-        field.name for field in FlexibleAttributeChoice._meta.get_fields()
-    ]
+    CHOICE_MODEL_FIELDS = [field.name for field in FlexibleAttributeChoice._meta.get_fields()]
 
     CORE_FIELD_SUFFIXES = (
         "_h_c",
@@ -82,9 +76,7 @@ class FlexibleAttributeImporter:
             "choice": self.CHOICE_MODEL_FIELDS,
         }.get(object_type_to_add)
 
-    def _assign_field_values(
-        self, value, header_name, object_type_to_add, row, row_number
-    ):
+    def _assign_field_values(self, value, header_name, object_type_to_add, row, row_number):
         model_fields = self._get_model_fields(object_type_to_add)
 
         if any(header_name.startswith(i) for i in self.JSON_MODEL_FIELDS):
@@ -102,19 +94,10 @@ class FlexibleAttributeImporter:
                     else:
                         is_index_field = False
                     # only index fields and group labels can be empty
-                    if (
-                        not value
-                        and not is_index_field
-                        and not object_type_to_add == "group"
-                    ):
-                        raise ValidationError(
-                            f"Survey Sheet: Row {row_number + 1}: "
-                            f"English label cannot be empty"
-                        )
+                    if not value and not is_index_field and not object_type_to_add == "group":
+                        raise ValidationError(f"Survey Sheet: Row {row_number + 1}: " f"English label cannot be empty")
 
-                self.json_fields_to_create[field_name].update(
-                    {language: cleared_value if value else ""}
-                )
+                self.json_fields_to_create[field_name].update({language: cleared_value if value else ""})
             return
 
         if header_name == "required":
@@ -127,48 +110,33 @@ class FlexibleAttributeImporter:
         if header_name in model_fields:
             if header_name == "type":
                 if not value:
-                    raise ValidationError(
-                        f"Survey Sheet: Row {row_number + 1}: Type is required"
-                    )
+                    raise ValidationError(f"Survey Sheet: Row {row_number + 1}: Type is required")
                 choice_key = value.split(" ")[0]
 
                 if choice_key in self.TYPE_CHOICE_MAP.keys():
-                    self.object_fields_to_create[
-                        "type"
-                    ] = self.TYPE_CHOICE_MAP.get(choice_key)
+                    self.object_fields_to_create["type"] = self.TYPE_CHOICE_MAP.get(choice_key)
             else:
-                is_attribute_name_empty = (
-                    header_name == "name" and value in (None, "")
-                )
+                is_attribute_name_empty = header_name == "name" and value in (None, "")
                 is_choice_list_name_empty = (
-                    header_name == "list_name"
-                    and object_type_to_add == "choice"
+                    header_name == "list_name" and object_type_to_add == "choice"
                 ) and not value
 
                 if is_attribute_name_empty:
-                    raise ValidationError(
-                        f"Survey Sheet: Row {row_number + 1}: Name is required"
-                    )
+                    raise ValidationError(f"Survey Sheet: Row {row_number + 1}: Name is required")
                 if is_choice_list_name_empty:
-                    raise ValidationError(
-                        f"Survey Sheet: Row {row_number + 1}: List Name is required"
-                    )
-                self.object_fields_to_create[header_name] = (
-                    value if value else ""
-                )
+                    raise ValidationError(f"Survey Sheet: Row {row_number + 1}: List Name is required")
+                self.object_fields_to_create[header_name] = value if value else ""
 
     def _can_add_row(self, row):
-        is_core_field = any(
-            row[1].value.endswith(i) for i in self.CORE_FIELD_SUFFIXES
-        ) and not row[0].value.endswith("_group")
+        is_core_field = any(row[1].value.endswith(i) for i in self.CORE_FIELD_SUFFIXES) and not row[0].value.endswith(
+            "_group"
+        )
 
         is_in_excluded = row[0].value in self.EXCLUDED_MODEL_FIELDS
 
         is_version_field = row[1].value == "__version__"
 
-        is_end_info = any(
-            row[0].value == i for i in ("end_repeat", "end_group")
-        )
+        is_end_info = any(row[0].value == i for i in ("end_repeat", "end_group"))
 
         if is_end_info:
             if self.current_group_tree:
@@ -202,9 +170,7 @@ class FlexibleAttributeImporter:
         self.object_fields_to_create = {}
 
     def _handle_choices(self, sheets):
-        choices_assigned_to_fields = self._get_list_of_field_choices(
-            sheets["survey"]
-        )
+        choices_assigned_to_fields = self._get_list_of_field_choices(sheets["survey"])
         choices_from_db = FlexibleAttributeChoice.objects.all()
         choices_first_row = sheets["choices"].row(0)
         choices_headers_map = [col.value for col in choices_first_row]
@@ -218,10 +184,7 @@ class FlexibleAttributeImporter:
                 continue
 
             if row[0].value not in choices_assigned_to_fields:
-                raise ValidationError(
-                    f"Choices Sheet: Row {row_number + 1}: "
-                    f"Choice is not assigned to any field"
-                )
+                raise ValidationError(f"Choices Sheet: Row {row_number + 1}: " f"Choice is not assigned to any field")
 
             for cell, header_name in zip(row, choices_headers_map):
                 self._assign_field_values(
@@ -229,8 +192,7 @@ class FlexibleAttributeImporter:
                 )
 
             obj = FlexibleAttributeChoice.all_objects.filter(
-                list_name=self.object_fields_to_create["list_name"],
-                name=self.object_fields_to_create["name"],
+                list_name=self.object_fields_to_create["list_name"], name=self.object_fields_to_create["name"],
             ).first()
 
             if obj:
@@ -239,19 +201,12 @@ class FlexibleAttributeImporter:
                 obj.save()
                 updated_choices.append(obj)
             else:
-                choice = FlexibleAttributeChoice(
-                    **self.object_fields_to_create,
-                    **self.json_fields_to_create,
-                )
+                choice = FlexibleAttributeChoice(**self.object_fields_to_create, **self.json_fields_to_create,)
                 to_create_choices.append(choice)
 
-        created_choices = FlexibleAttributeChoice.objects.bulk_create(
-            to_create_choices,
-        )
+        created_choices = FlexibleAttributeChoice.objects.bulk_create(to_create_choices,)
 
-        choices_to_delete = set(choices_from_db).difference(
-            set(created_choices + updated_choices)
-        )
+        choices_to_delete = set(choices_from_db).difference(set(created_choices + updated_choices))
 
         for choice in choices_to_delete:
             choice.delete()
@@ -274,11 +229,7 @@ class FlexibleAttributeImporter:
             if all([cell.ctype == xlrd.XL_CELL_EMPTY for cell in row]):
                 continue
 
-            object_type_to_add = (
-                "group"
-                if row[0].value in ("begin_group", "begin_repeat")
-                else "attribute"
-            )
+            object_type_to_add = "group" if row[0].value in ("begin_group", "begin_repeat") else "attribute"
             repeatable = True if row[0].value == "begin_repeat" else False
             self._reset_model_fields_variables()
 
@@ -292,15 +243,10 @@ class FlexibleAttributeImporter:
                     value, header_name, object_type_to_add, row, row_number,
                 )
 
-            is_flex_field = any(
-                self.object_fields_to_create["name"].endswith(i)
-                for i in self.FLEX_FIELD_SUFFIXES
-            )
+            is_flex_field = any(self.object_fields_to_create["name"].endswith(i) for i in self.FLEX_FIELD_SUFFIXES)
 
             if object_type_to_add == "group":
-                obj = FlexibleAttributeGroup.all_objects.filter(
-                    name=self.object_fields_to_create["name"],
-                ).first()
+                obj = FlexibleAttributeGroup.all_objects.filter(name=self.object_fields_to_create["name"],).first()
 
                 if self.current_group_tree:
                     parent = self.current_group_tree[-1]
@@ -331,9 +277,7 @@ class FlexibleAttributeImporter:
 
             elif object_type_to_add == "attribute" and is_flex_field:
                 choice_name = self._get_field_choice_name(row)
-                obj = FlexibleAttribute.all_objects.filter(
-                    name=self.object_fields_to_create["name"],
-                ).first()
+                obj = FlexibleAttribute.all_objects.filter(name=self.object_fields_to_create["name"],).first()
 
                 if self.current_group_tree:
                     parent = self.current_group_tree[-1]
@@ -341,13 +285,9 @@ class FlexibleAttributeImporter:
                     parent = None
 
                 if obj:
-                    if (
-                        obj.type != self.object_fields_to_create["type"]
-                        and not obj.is_removed
-                    ):
+                    if obj.type != self.object_fields_to_create["type"] and not obj.is_removed:
                         raise ValidationError(
-                            f"Survey Sheet: Row {row_number + 1}: Type of the "
-                            f"attribute cannot be changed!"
+                            f"Survey Sheet: Row {row_number + 1}: Type of the " f"attribute cannot be changed!"
                         )
                     obj.type = self.object_fields_to_create["type"]
                     obj.name = self.object_fields_to_create["name"]
@@ -361,20 +301,13 @@ class FlexibleAttributeImporter:
                 else:
                     field = FlexibleAttribute.objects.create(
                         group=parent,
-                        associated_with=(
-                            0
-                            if self.object_fields_to_create["name"][-4:]
-                            == "_h_f"
-                            else 1
-                        ),
+                        associated_with=(0 if self.object_fields_to_create["name"][-4:] == "_h_f" else 1),
                         **self.object_fields_to_create,
                         **self.json_fields_to_create,
                     )
 
                 if choice_name:
-                    choices = FlexibleAttributeChoice.objects.filter(
-                        list_name=choice_name,
-                    )
+                    choices = FlexibleAttributeChoice.objects.filter(list_name=choice_name,)
                     field.choices.set(choices)
 
                 all_attrs.append(field)

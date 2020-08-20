@@ -34,22 +34,14 @@ from registration_datahub.validators import (
 )
 
 
-def create_registration_data_import_objects(
-    registration_data_import_data, user, data_source
-):
-    import_data_id = decode_id_string(
-        registration_data_import_data.pop("import_data_id")
-    )
+def create_registration_data_import_objects(registration_data_import_data, user, data_source):
+    import_data_id = decode_id_string(registration_data_import_data.pop("import_data_id"))
     import_data_obj = ImportData.objects.get(id=import_data_id)
 
-    business_area = BusinessArea.objects.get(
-        slug=registration_data_import_data.pop("business_area_slug")
-    )
+    business_area = BusinessArea.objects.get(slug=registration_data_import_data.pop("business_area_slug"))
 
     created_obj_datahub = RegistrationDataImportDatahub.objects.create(
-        business_area_slug=business_area.slug,
-        import_data=import_data_obj,
-        **registration_data_import_data,
+        business_area_slug=business_area.slug, import_data=import_data_obj, **registration_data_import_data,
     )
     created_obj_hct = RegistrationDataImport.objects.create(
         status=RegistrationDataImport.IMPORTING,
@@ -91,9 +83,7 @@ class RegistrationXlsxImportMutation(BaseValidator, graphene.Mutation):
     registration_data_import = graphene.Field(RegistrationDataImportNode)
 
     class Arguments:
-        registration_data_import_data = RegistrationXlsxImportMutationInput(
-            required=True
-        )
+        registration_data_import_data = RegistrationXlsxImportMutationInput(required=True)
 
     @classmethod
     @is_authenticated
@@ -103,9 +93,7 @@ class RegistrationXlsxImportMutation(BaseValidator, graphene.Mutation):
             created_obj_hct,
             import_data_obj,
             business_area,
-        ) = create_registration_data_import_objects(
-            registration_data_import_data, info.context.user, "XLS"
-        )
+        ) = create_registration_data_import_objects(registration_data_import_data, info.context.user, "XLS")
 
         AirflowApi.start_dag(
             dag_id="CreateRegistrationDataImportXLSX",
@@ -123,9 +111,7 @@ class RegistrationKoboImportMutation(BaseValidator, graphene.Mutation):
     registration_data_import = graphene.Field(RegistrationDataImportNode)
 
     class Arguments:
-        registration_data_import_data = RegistrationKoboImportMutationInput(
-            required=True
-        )
+        registration_data_import_data = RegistrationKoboImportMutationInput(required=True)
 
     @classmethod
     @is_authenticated
@@ -135,9 +121,7 @@ class RegistrationKoboImportMutation(BaseValidator, graphene.Mutation):
             created_obj_hct,
             import_data_obj,
             business_area,
-        ) = create_registration_data_import_objects(
-            registration_data_import_data, info.context.user, "KOBO"
-        )
+        ) = create_registration_data_import_objects(registration_data_import_data, info.context.user, "KOBO")
 
         AirflowApi.start_dag(
             dag_id="CreateRegistrationDataImportKobo",
@@ -161,10 +145,7 @@ class MergeRegistrationDataImportMutation(BaseValidator, graphene.Mutation):
     def validate_object_status(cls, *args, **kwargs):
         status = kwargs.get("status")
         if status != RegistrationDataImport.IN_REVIEW:
-            raise ValidationError(
-                "Only In Review Registration Data Import "
-                "can be merged into Population"
-            )
+            raise ValidationError("Only In Review Registration Data Import " "can be merged into Population")
 
     @classmethod
     @is_authenticated
@@ -173,8 +154,7 @@ class MergeRegistrationDataImportMutation(BaseValidator, graphene.Mutation):
         obj_hct = RegistrationDataImport.objects.get(id=decode_id,)
         cls.validate(status=obj_hct.status)
         AirflowApi.start_dag(
-            dag_id="MergeRegistrationImportData",
-            context={"registration_data_import_id": decode_id,},
+            dag_id="MergeRegistrationImportData", context={"registration_data_import_id": decode_id,},
         )
         obj_hct.status = RegistrationDataImport.MERGING
         obj_hct.save()
@@ -221,17 +201,13 @@ class UploadImportDataXLSXFile(
             number_of_individuals += 1
 
         created = ImportData.objects.create(
-            file=file,
-            number_of_households=number_of_households,
-            number_of_individuals=number_of_individuals,
+            file=file, number_of_households=number_of_households, number_of_individuals=number_of_individuals,
         )
 
         return UploadImportDataXLSXFile(created, [])
 
 
-class SaveKoboProjectImportDataMutation(
-    KoboProjectImportDataValidator, graphene.Mutation
-):
+class SaveKoboProjectImportDataMutation(KoboProjectImportDataValidator, graphene.Mutation):
     import_data = graphene.Field(ImportDataNode)
     errors = graphene.List(KoboErrorNode)
 
@@ -248,27 +224,19 @@ class SaveKoboProjectImportDataMutation(
 
         business_area = BusinessArea.objects.get(slug=business_area_slug)
 
-        errors = cls.validate(
-            submissions=submissions, business_area_name=business_area.name
-        )
+        errors = cls.validate(submissions=submissions, business_area_name=business_area.name)
 
         if errors:
             errors.sort(key=operator.itemgetter("header"))
             return UploadImportDataXLSXFile(None, errors)
 
-        number_of_households, number_of_individuals = count_population(
-            submissions
-        )
+        number_of_households, number_of_individuals = count_population(submissions)
 
         import_file_name = f"project-uid-{uid}-{time.time()}.json"
-        file = File(
-            BytesIO(json.dumps(submissions).encode()), name=import_file_name
-        )
+        file = File(BytesIO(json.dumps(submissions).encode()), name=import_file_name)
 
         created = ImportData.objects.create(
-            file=file,
-            number_of_households=number_of_households,
-            number_of_individuals=number_of_individuals,
+            file=file, number_of_households=number_of_households, number_of_individuals=number_of_individuals,
         )
 
         return SaveKoboProjectImportDataMutation(created, [])

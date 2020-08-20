@@ -255,24 +255,16 @@ class Countries:
         if output_code not in ("alpha2", "alpha3"):
             raise ValueError("output_code have to be one of: alpha2, alpha3")
         return [
-            {
-                "label": {"English(EN)": name},
-                "value": alpha2 if output_code == "alpha2" else alpha3,
-            }
+            {"label": {"English(EN)": name}, "value": alpha2 if output_code == "alpha2" else alpha3,}
             for name, alpha2, alpha3 in cls.COUNTRIES
         ]
 
     @classmethod
     def is_valid_country_choice(cls, choice: str) -> bool:
-        return any(
-            choice in CaseInsensitiveTuple(country_tuple)
-            for country_tuple in cls.COUNTRIES
-        )
+        return any(choice in CaseInsensitiveTuple(country_tuple) for country_tuple in cls.COUNTRIES)
 
     @classmethod
-    def get_country_value(
-        cls, input_value: str, output_type: str = "alpha2", *args, **kwargs
-    ) -> str:
+    def get_country_value(cls, input_value: str, output_type: str = "alpha2", *args, **kwargs) -> str:
         index_map = {
             "name": 0,
             "alpha2": 1,
@@ -280,9 +272,7 @@ class Countries:
         }
 
         if output_type not in ("name", "alpha2", "alpha3"):
-            raise ValueError(
-                "output_type have to be one of: name, alpha2, alpha3"
-            )
+            raise ValueError("output_type have to be one of: name, alpha2, alpha3")
 
         for country_tuple in cls.COUNTRIES:
             if input_value in CaseInsensitiveTuple(country_tuple):

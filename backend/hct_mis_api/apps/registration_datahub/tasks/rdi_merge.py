@@ -93,9 +93,7 @@ class RdiMergeTask:
         business_area = obj_hct.business_area
         for imported_household in imported_households:
             household = Household(
-                **model_to_dict(
-                    imported_household, fields=self.HOUSEHOLD_FIELDS
-                ),
+                **model_to_dict(imported_household, fields=self.HOUSEHOLD_FIELDS),
                 registration_data_import=obj_hct,
                 business_area=business_area,
             )
@@ -104,59 +102,42 @@ class RdiMergeTask:
 
         return households_dict
 
-    def _prepare_individual_documents_and_identities(
-        self, imported_individual, individual
-    ):
+    def _prepare_individual_documents_and_identities(self, imported_individual, individual):
         documents_to_create = []
         for imported_document in imported_individual.documents.all():
             document_type, _ = DocumentType.objects.get_or_create(
-                country=imported_document.type.country,
-                type=imported_document.type.type,
+                country=imported_document.type.country, type=imported_document.type.type,
             )
             document = Document(
-                document_number=imported_document.document_number,
-                type=document_type,
-                individual=individual,
+                document_number=imported_document.document_number, type=document_type, individual=individual,
             )
             documents_to_create.append(document)
         identities_to_create = []
         for imported_identity in imported_individual.identities.all():
             agency, _ = Agency.objects.get_or_create(
-                type=imported_identity.agency.type,
-                label=imported_identity.agency.label,
+                type=imported_identity.agency.type, label=imported_identity.agency.label,
             )
             identity = IndividualIdentity(
-                agency=agency,
-                number=imported_identity.document_number,
-                individual=individual,
+                agency=agency, number=imported_identity.document_number, individual=individual,
             )
             identities_to_create.append(identity)
 
         return documents_to_create, identities_to_create
 
-    def _prepare_individuals(
-        self, imported_individuals, households_dict, obj_hct
-    ):
+    def _prepare_individuals(self, imported_individuals, households_dict, obj_hct):
         individuals_dict = {}
         documents_to_create = []
         identities_to_create = []
         for imported_individual in imported_individuals:
-            values = model_to_dict(
-                imported_individual, fields=self.INDIVIDUAL_FIELDS
-            )
+            values = model_to_dict(imported_individual, fields=self.INDIVIDUAL_FIELDS)
             household = households_dict.get(imported_individual.household.id)
 
-            individual = Individual(
-                **values, household=household, registration_data_import=obj_hct
-            )
+            individual = Individual(**values, household=household, registration_data_import=obj_hct)
             individuals_dict[imported_individual.id] = individual
             if imported_individual.relationship == HEAD and household:
                 household.head_of_household = individual
 
-            (
-                documents,
-                identities,
-            ) = self._prepare_individual_documents_and_identities(
+            (documents, identities,) = self._prepare_individual_documents_and_identities(
                 imported_individual, individual
             )
 
@@ -180,35 +161,20 @@ class RdiMergeTask:
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
     def execute(self, registration_data_import_id):
-        obj_hub = RegistrationDataImportDatahub.objects.get(
-            hct_id=registration_data_import_id,
-        )
-        obj_hct = RegistrationDataImport.objects.get(
-            id=registration_data_import_id,
-        )
-        imported_households = ImportedHousehold.objects.filter(
-            registration_data_import=obj_hub
-        )
-        imported_individuals = ImportedIndividual.objects.filter(
-            registration_data_import=obj_hub
-        )
+        obj_hub = RegistrationDataImportDatahub.objects.get(hct_id=registration_data_import_id,)
+        obj_hct = RegistrationDataImport.objects.get(id=registration_data_import_id,)
+        imported_households = ImportedHousehold.objects.filter(registration_data_import=obj_hub)
+        imported_individuals = ImportedIndividual.objects.filter(registration_data_import=obj_hub)
         imported_roles = ImportedIndividualRoleInHousehold.objects.filter(
-            household__in=imported_households,
-            individual__in=imported_individuals,
+            household__in=imported_households, individual__in=imported_individuals,
         )
 
         households_dict = self._prepare_households(imported_households, obj_hct)
-        (
-            individuals_dict,
-            documents_to_create,
-            identities_to_create,
-        ) = self._prepare_individuals(
+        (individuals_dict, documents_to_create, identities_to_create,) = self._prepare_individuals(
             imported_individuals, households_dict, obj_hct
         )
 
-        roles_to_create = self._prepare_roles(
-            imported_roles, households_dict, individuals_dict
-        )
+        roles_to_create = self._prepare_roles(imported_roles, households_dict, individuals_dict)
 
         Household.objects.bulk_create(households_dict.values())
         Individual.objects.bulk_create(individuals_dict.values())
