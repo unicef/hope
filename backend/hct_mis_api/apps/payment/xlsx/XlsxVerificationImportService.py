@@ -50,6 +50,8 @@ class XlsxVerificationImportService:
         if not self.was_validation_run:
             raise GraphQLError("Run validation before import.")
         for row in self.ws_verifications.iter_rows(min_row=2):
+            if not any([cell.value for cell in row]):
+                continue
             self._import_row(row)
         PaymentVerification.objects.bulk_update(self.payment_verifications_to_save, ("status", "received_amount"))
 
@@ -187,6 +189,8 @@ class XlsxVerificationImportService:
 
     def _validate_rows(self):
         for row in self.ws_verifications.iter_rows(min_row=2):
+            if not any([cell.value for cell in row]):
+                continue
             self._validate_row_types(row)
             self._validate_payment_record_id(row)
             self._validate_row_received(row)
