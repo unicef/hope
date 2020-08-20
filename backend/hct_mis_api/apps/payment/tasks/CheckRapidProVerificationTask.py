@@ -1,5 +1,6 @@
 from payment.models import CashPlanPaymentVerification, PaymentVerification
 from payment.rapid_pro.api import RapidProAPI
+from payment.utils import from_received_to_status
 
 
 class CheckRapidProVerificationTask:
@@ -57,14 +58,8 @@ class CheckRapidProVerificationTask:
         delivered_amount = (
             payment_record_verification.payment_record.delivered_quantity
         )
-        status = payment_record_verification.status
-        if received:
-            if received_amount == delivered_amount:
-                status = PaymentVerification.STATUS_RECEIVED
-            else:
-                status = PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
-        else:
-            status = PaymentVerification.STATUS_NOT_RECEIVED
-        payment_record_verification.status = status
+        payment_record_verification.status = from_received_to_status(
+            received, received_amount, delivered_amount
+        )
         payment_record_verification.received_amount = received_amount
         return payment_record_verification
