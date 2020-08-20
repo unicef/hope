@@ -354,10 +354,14 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
           To see more details please activate Verification Plan
         </BottomTitle>
       ) : null}
-      {!cashPlan.verifications.edges.length ? (
+      {!cashPlan.verifications.edges.length &&
+      cashPlan.verificationStatus !== 'ACTIVE' ? (
         <BottomTitle>
           To see more details please create Verification Plan
         </BottomTitle>
+      ) : null}
+      {cashPlan.verificationStatus === 'TRANSACTION_COMPLETED_WITH_ERRORS' ? (
+        <BottomTitle>Transaction completed with errors</BottomTitle>
       ) : null}
       <TableWrapper>
         <UniversalActivityLogTable objectId='some id' />
