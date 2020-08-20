@@ -16,12 +16,7 @@ ALLOWED_HOSTS = ["localhost", "127.0.0.1", "10.0.2.2", os.getenv("DOMAIN", "")]
 # EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-        "TIMEOUT": 1800,
-    }
-}
+CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache", "TIMEOUT": 1800,}}
 
 # change logging level to debug
 LOGGING["loggers"]["django.request"]["level"] = "DEBUG"
@@ -35,7 +30,5 @@ AIRFLOW_HOST = "airflow_webserver"
 
 # ELASTICSEARCH SETTINGS
 ELASTICSEARCH_DSL = {
-    'default': {
-        'hosts': 'elasticsearch:9200'
-    },
+    "default": {"hosts": "elasticsearch:9200"},
 }

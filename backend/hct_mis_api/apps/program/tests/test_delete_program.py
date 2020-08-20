@@ -23,36 +23,25 @@ class TestDeleteProgram(APITestCase):
     def test_delete_program_not_authenticated(self):
         self.snapshot_graphql_request(
             request_string=self.DELETE_PROGRAM_MUTATION,
-            variables={
-                "programId": "UHJvZ3JhbU5vZGU6MDBkMmU4ZWQtOThm"
-                "My00YTM5LWJiZWYtZmI5YWUwNWYyOThh"
-            },
+            variables={"programId": "UHJvZ3JhbU5vZGU6MDBkMmU4ZWQtOThm" "My00YTM5LWJiZWYtZmI5YWUwNWYyOThh"},
         )
 
     def test_delete_program_authenticated(self):
-        program_draft = ProgramFactory.create(
-            status="DRAFT",
-            business_area=BusinessArea.objects.order_by("?").first(),
-        )
+        program_draft = ProgramFactory.create(status="DRAFT", business_area=BusinessArea.objects.order_by("?").first(),)
 
         self.snapshot_graphql_request(
             request_string=self.DELETE_PROGRAM_MUTATION,
             context={"user": self.user},
-            variables={
-                "programId": self.id_to_base64(program_draft.id, "Program")
-            },
+            variables={"programId": self.id_to_base64(program_draft.id, "Program")},
         )
 
     def test_delete_active_program(self):
         program_active = ProgramFactory.create(
-            status="ACTIVE",
-            business_area=BusinessArea.objects.order_by("?").first(),
+            status="ACTIVE", business_area=BusinessArea.objects.order_by("?").first(),
         )
 
         self.snapshot_graphql_request(
             request_string=self.DELETE_PROGRAM_MUTATION,
             context={"user": self.user},
-            variables={
-                "programId": self.id_to_base64(program_active.id, "Program")
-            },
+            variables={"programId": self.id_to_base64(program_active.id, "Program")},
         )

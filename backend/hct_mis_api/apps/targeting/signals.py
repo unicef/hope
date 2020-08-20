@@ -22,9 +22,7 @@ def calculate_candidate_counts(target_population):
     else:
         households = target_population.households
     households_count = households.count()
-    individuals_count = households.aggregate(individuals_count=Sum("size")).get(
-        "individuals_count"
-    )
+    individuals_count = households.aggregate(individuals_count=Sum("size")).get("individuals_count")
     target_population.candidate_list_total_households = households_count
     target_population.candidate_list_total_individuals = individuals_count
 
@@ -44,9 +42,7 @@ def calculate_final_counts(target_population):
     else:
         households = target_population.final_list
     households_count = households.count()
-    individuals_count = households.aggregate(individuals_count=Sum("size")).get(
-        "individuals_count"
-    )
+    individuals_count = households.aggregate(individuals_count=Sum("size")).get("individuals_count")
     target_population.final_list_total_households = households_count
     target_population.final_list_total_individuals = individuals_count
 
@@ -54,17 +50,13 @@ def calculate_final_counts(target_population):
 @receiver(post_save, sender=TargetingCriteriaRuleFilter)
 def post_save_rule_filter(sender, instance, *args, **kwargs):
     try:
-        target_population = (
-            instance.targeting_criteria_rule.targeting_criteria.target_population_candidate
-        )
+        target_population = instance.targeting_criteria_rule.targeting_criteria.target_population_candidate
         calculate_candidate_counts(target_population)
         target_population.save()
     except TargetPopulation.DoesNotExist:
         pass
     try:
-        target_population = (
-            instance.targeting_criteria_rule.targeting_criteria.target_population_final
-        )
+        target_population = instance.targeting_criteria_rule.targeting_criteria.target_population_final
         calculate_final_counts(target_population)
         target_population.save()
     except TargetPopulation.DoesNotExist:
@@ -74,9 +66,7 @@ def post_save_rule_filter(sender, instance, *args, **kwargs):
 @receiver(post_save, sender=TargetingCriteriaRule)
 def post_save_rule(sender, instance, *args, **kwargs):
     try:
-        target_population = (
-            instance.targeting_criteria.target_population_candidate
-        )
+        target_population = instance.targeting_criteria.target_population_candidate
         calculate_candidate_counts(target_population)
         target_population.save()
     except TargetPopulation.DoesNotExist:

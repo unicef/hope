@@ -19,12 +19,8 @@ class RegistrationDataImportDatahubFactory(factory.DjangoModelFactory):
     class Meta:
         model = RegistrationDataImportDatahub
 
-    name = factory.Faker(
-        "sentence", nb_words=6, variable_nb_words=True, ext_word_list=None,
-    )
-    import_date = factory.Faker(
-        "date_time_this_decade", before_now=True, tzinfo=utc,
-    )
+    name = factory.Faker("sentence", nb_words=6, variable_nb_words=True, ext_word_list=None,)
+    import_date = factory.Faker("date_time_this_decade", before_now=True, tzinfo=utc,)
 
 
 class ImportedHouseholdFactory(factory.DjangoModelFactory):
@@ -32,29 +28,17 @@ class ImportedHouseholdFactory(factory.DjangoModelFactory):
         model = ImportedHousehold
 
     consent = factory.django.ImageField(color="blue")
-    residence_status = factory.fuzzy.FuzzyChoice(
-        RESIDENCE_STATUS_CHOICE, getter=lambda c: c[0],
-    )
+    residence_status = factory.fuzzy.FuzzyChoice(RESIDENCE_STATUS_CHOICE, getter=lambda c: c[0],)
     country = factory.Faker("country_code", representation="alpha-2")
-    country_origin = factory.fuzzy.FuzzyChoice(
-        NATIONALITIES, getter=lambda c: c[0],
-    )
+    country_origin = factory.fuzzy.FuzzyChoice(NATIONALITIES, getter=lambda c: c[0],)
     size = factory.fuzzy.FuzzyInteger(3, 8)
     address = factory.Faker("address")
-    registration_data_import = factory.SubFactory(
-        RegistrationDataImportDatahubFactory,
-    )
-    first_registration_date = factory.Faker(
-        "date_this_year", before_today=True, after_today=False
-    )
-    last_registration_date = factory.Faker(
-        "date_this_year", before_today=True, after_today=False
-    )
+    registration_data_import = factory.SubFactory(RegistrationDataImportDatahubFactory,)
+    first_registration_date = factory.Faker("date_this_year", before_today=True, after_today=False)
+    last_registration_date = factory.Faker("date_this_year", before_today=True, after_today=False)
     admin1 = ""
     admin2 = ""
-    geopoint = factory.LazyAttribute(
-        lambda o: Point(factory.Faker("latlng").generate())
-    )
+    geopoint = factory.LazyAttribute(lambda o: Point(factory.Faker("latlng").generate()))
     female_age_group_0_5_count = factory.fuzzy.FuzzyInteger(3, 8)
     female_age_group_6_11_count = factory.fuzzy.FuzzyInteger(3, 8)
     female_age_group_12_17_count = factory.fuzzy.FuzzyInteger(3, 8)
@@ -78,33 +62,21 @@ class ImportedIndividualFactory(factory.DjangoModelFactory):
     class Meta:
         model = ImportedIndividual
 
-    full_name = factory.LazyAttribute(
-        lambda o: f"{o.given_name} {o.middle_name} {o.family_name}"
-    )
+    full_name = factory.LazyAttribute(lambda o: f"{o.given_name} {o.middle_name} {o.family_name}")
     given_name = factory.Faker("first_name")
     middle_name = factory.Faker("first_name")
     family_name = factory.Faker("last_name")
     sex = factory.fuzzy.FuzzyChoice(SEX_CHOICE, getter=lambda c: c[0],)
-    birth_date = factory.Faker(
-        "date_of_birth", tzinfo=utc, minimum_age=16, maximum_age=90
-    )
+    birth_date = factory.Faker("date_of_birth", tzinfo=utc, minimum_age=16, maximum_age=90)
     estimated_birth_date = factory.fuzzy.FuzzyChoice((True, False))
-    marital_status = factory.fuzzy.FuzzyChoice(
-        MARITAL_STATUS_CHOICE, getter=lambda c: c[0],
-    )
+    marital_status = factory.fuzzy.FuzzyChoice(MARITAL_STATUS_CHOICE, getter=lambda c: c[0],)
     phone_no = factory.Faker("phone_number")
     phone_no_alternative = ""
-    registration_data_import = factory.SubFactory(
-        RegistrationDataImportDatahubFactory
-    )
+    registration_data_import = factory.SubFactory(RegistrationDataImportDatahubFactory)
     disability = factory.fuzzy.FuzzyChoice((True, False))
     household = factory.SubFactory(ImportedHouseholdFactory)
-    first_registration_date = factory.Faker(
-        "date_this_year", before_today=True, after_today=False
-    )
-    last_registration_date = factory.Faker(
-        "date_this_year", before_today=True, after_today=False
-    )
+    first_registration_date = factory.Faker("date_this_year", before_today=True, after_today=False)
+    last_registration_date = factory.Faker("date_this_year", before_today=True, after_today=False)
 
 
 def create_imported_household(household_args=None, individual_args=None):
@@ -114,9 +86,7 @@ def create_imported_household(household_args=None, individual_args=None):
         individual_args = {}
     household = ImportedHouseholdFactory.build(**household_args)
     household.save()
-    individuals = ImportedIndividualFactory.create_batch(
-        household.size, household=household, **individual_args
-    )
+    individuals = ImportedIndividualFactory.create_batch(household.size, household=household, **individual_args)
     individuals[0].relationship = "HEAD"
     individuals[0].save()
     household.head_of_household = individuals[0]

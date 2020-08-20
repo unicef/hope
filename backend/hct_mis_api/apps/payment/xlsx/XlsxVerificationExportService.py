@@ -1,5 +1,3 @@
-from typing import List, Tuple, Dict
-
 import openpyxl
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.datavalidation import DataValidation
@@ -10,7 +8,7 @@ from payment.models import PaymentVerification
 class XlsxVerificationExportService:
     HEADERS = (
         "payment_record_id",
-        "verification_status",
+        "received",
         "head_of_household",
         "household_id",
         "delivered_amount",
@@ -21,13 +19,12 @@ class XlsxVerificationExportService:
     VERSION_CELL_NAME_COORDINATES = "A1"
     VERSION_CELL_COORDINATES = "B1"
     VERSION_CELL_NAME = "FILE_TEMPLATE_VERSION"
-    VERSION = "1.0"
+    VERSION = "1.1"
+    TRUE_FALSE_MAPPING = {True: "YES", False: "NO"}
 
     def __init__(self, cashplan_payment_verification):
         self.cashplan_payment_verification = cashplan_payment_verification
-        self.payment_record_verifications = (
-            cashplan_payment_verification.payment_record_verifications.all()
-        )
+        self.payment_record_verifications = cashplan_payment_verification.payment_record_verifications.all()
 
     def _create_workbook(self) -> openpyxl.Workbook:
         wb = openpyxl.Workbook()
@@ -42,22 +39,26 @@ class XlsxVerificationExportService:
         self.ws_meta[
             XlsxVerificationExportService.VERSION_CELL_NAME_COORDINATES
         ] = XlsxVerificationExportService.VERSION_CELL_NAME
-        self.ws_meta[
-            XlsxVerificationExportService.VERSION_CELL_COORDINATES
-        ] = XlsxVerificationExportService.VERSION
+        self.ws_meta[XlsxVerificationExportService.VERSION_CELL_COORDINATES] = XlsxVerificationExportService.VERSION
 
     def _add_headers(self):
         headers_row = XlsxVerificationExportService.HEADERS
         self.ws_verifications.append(headers_row)
 
+    def _to_received_column(self, payment_record_verification):
+        status = payment_record_verification.status
+        if payment_record_verification.status == PaymentVerification.STATUS_PENDING:
+            return None
+        if status == PaymentVerification.STATUS_NOT_RECEIVED:
+            return XlsxVerificationExportService.TRUE_FALSE_MAPPING[False]
+        return XlsxVerificationExportService.TRUE_FALSE_MAPPING[True]
+
     def _add_payment_record_verification_row(self, payment_record_verification):
 
         payment_record_verification_row = (
             str(payment_record_verification.payment_record_id),
-            payment_record_verification.status,
-            str(
-                payment_record_verification.payment_record.household.head_of_household.full_name
-            ),
+            self._to_received_column(payment_record_verification),
+            str(payment_record_verification.payment_record.household.head_of_household.full_name),
             str(payment_record_verification.payment_record.household_id),
             payment_record_verification.payment_record.delivered_quantity,
             payment_record_verification.received_amount,
@@ -66,19 +67,13 @@ class XlsxVerificationExportService:
 
     def _add_payment_record_verifications(self):
         for payment_record_verification in self.payment_record_verifications:
-            self._add_payment_record_verification_row(
-                payment_record_verification
-            )
+            self._add_payment_record_verification_row(payment_record_verification)
 
     def _add_data_validation(self):
-        statuses = [x[0] for x in PaymentVerification.STATUS_CHOICES]
-        self.dv_verification_status = DataValidation(
-            type="list", formula1=f'"{",".join(statuses)}"', allow_blank=False
-        )
-        self.dv_verification_status.add(
-            f"B2:B{len(self.ws_verifications['B'])}"
-        )
-        self.ws_verifications.add_data_validation(self.dv_verification_status)
+        self.dv_received = DataValidation(type="list", formula1=f'"YES,NO"', allow_blank=False)
+        self.dv_received.add(f"B2:B{len(self.ws_verifications['B'])}")
+        self.ws_verifications.add_data_validation(self.dv_received)
+        cell_range = self.ws_verifications["B2":f"B{len(self.ws_verifications['B'])}"]
 
     def generate_workbook(self):
         self._create_workbook()
@@ -97,9 +92,7 @@ class XlsxVerificationExportService:
 
         column_widths = []
 
-        for i, col in enumerate(
-            ws.iter_cols(min_col=min_col, max_col=max_col, min_row=min_row)
-        ):
+        for i, col in enumerate(ws.iter_cols(min_col=min_col, max_col=max_col, min_row=min_row)):
 
             for cell in col:
                 value = cell.value

@@ -25,16 +25,11 @@ class CheckAgainstSanctionListMutation(
             return CheckAgainstSanctionListMutation(False, errors)
 
         user = info.context.user
-        uploaded_file = UploadedXLSXFile.objects.create(
-            file=file, associated_email=user.email
-        )
+        uploaded_file = UploadedXLSXFile.objects.create(file=file, associated_email=user.email)
 
         AirflowApi.start_dag(
             dag_id="CheckAgainstSanctionList",
-            context={
-                "uploaded_file_id": str(uploaded_file.id),
-                "original_file_name": file.name,
-            },
+            context={"uploaded_file_id": str(uploaded_file.id), "original_file_name": file.name,},
         )
 
         return CheckAgainstSanctionListMutation(True, errors)

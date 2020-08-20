@@ -390,30 +390,17 @@ class TestKoboSaveValidatorsMethods(TestCase):
         result = KoboProjectImportDataValidator.image_validator(
             "signature-17_10_32.png", "consent_h_c", invalid_attachments
         )
-        expected = (
-            "Specified image signature-17_10_32.png for field "
-            "consent_h_c is not in attachments"
-        )
+        expected = "Specified image signature-17_10_32.png for field " "consent_h_c is not in attachments"
         self.assertEqual(result, expected)
 
         # test for empty value
-        result = KoboProjectImportDataValidator.image_validator(
-            "signature-17_10_32.png", "consent_h_c", []
-        )
-        expected = (
-            "Specified image signature-17_10_32.png for field "
-            "consent_h_c is not in attachments"
-        )
+        result = KoboProjectImportDataValidator.image_validator("signature-17_10_32.png", "consent_h_c", [])
+        expected = "Specified image signature-17_10_32.png for field " "consent_h_c is not in attachments"
         self.assertEqual(result, expected)
 
         # test invalid file extension
-        result = KoboProjectImportDataValidator.image_validator(
-            "signature-17_10_32.txt", "consent_h_c", []
-        )
-        expected = (
-            "Specified image signature-17_10_32.txt for field "
-            "consent_h_c is not a valid image file"
-        )
+        result = KoboProjectImportDataValidator.image_validator("signature-17_10_32.txt", "consent_h_c", [])
+        expected = "Specified image signature-17_10_32.txt for field " "consent_h_c is not a valid image file"
         self.assertEqual(result, expected)
 
     def test_geopoint_validator(self):
@@ -430,26 +417,17 @@ class TestKoboSaveValidatorsMethods(TestCase):
             None,
         )
         for valid_option in valid_geolocations:
-            self.assertIsNone(
-                KoboProjectImportDataValidator.geopoint_validator(
-                    valid_option, "hh_geopoint_h_c",
-                )
-            )
+            self.assertIsNone(KoboProjectImportDataValidator.geopoint_validator(valid_option, "hh_geopoint_h_c",))
 
         for invalid_option in invalid_geolocations:
             self.assertEqual(
-                KoboProjectImportDataValidator.geopoint_validator(
-                    invalid_option, "hh_geopoint_h_c",
-                ),
+                KoboProjectImportDataValidator.geopoint_validator(invalid_option, "hh_geopoint_h_c",),
                 f"Invalid geopoint {invalid_option} for field hh_geopoint_h_c",
             )
 
     def test_date_validator(self):
         test_data = (
-            {
-                "args": ("2020-05-28T17:13:31.590+02:00", "birth_date_i_c"),
-                "expected": None,
-            },
+            {"args": ("2020-05-28T17:13:31.590+02:00", "birth_date_i_c"), "expected": None,},
             {"args": ("2020-05-28", "birth_date_i_c"), "expected": None,},
             {
                 "args": ("2020-13-32T25:13:31.590+02:00", "birth_date_i_c"),
@@ -469,9 +447,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
             },
         )
         for data in test_data:
-            result = KoboProjectImportDataValidator.date_validator(
-                *data["args"]
-            )
+            result = KoboProjectImportDataValidator.date_validator(*data["args"])
             self.assertEqual(result, data["expected"])
 
     def test_get_field_type_error(self):
@@ -484,15 +460,11 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 "args": ("size_h_c", "four", attachments),
                 "expected": {
                     "header": "size_h_c",
-                    "message": "Invalid value four of type str for field "
-                    "size_h_c of type int",
+                    "message": "Invalid value four of type str for field " "size_h_c of type int",
                 },
             },
             # STRING
-            {
-                "args": ("address_h_c", "Street 123", attachments),
-                "expected": None,
-            },
+            {"args": ("address_h_c", "Street 123", attachments), "expected": None,},
             {"args": ("address_h_c", 123, attachments), "expected": None},
             # BOOL
             {"args": ("returnee_h_c", True, attachments), "expected": None},
@@ -507,36 +479,24 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 "args": ("returnee_h_c", "123", attachments),
                 "expected": {
                     "header": "returnee_h_c",
-                    "message": "Invalid value 123 of type str for field "
-                    "returnee_h_c of type bool",
+                    "message": "Invalid value 123 of type str for field " "returnee_h_c of type bool",
                 },
             },
             {
                 "args": ("returnee_h_c", 123, attachments),
                 "expected": {
                     "header": "returnee_h_c",
-                    "message": "Invalid value 123 of type int for field "
-                    "returnee_h_c of type bool",
+                    "message": "Invalid value 123 of type int for field " "returnee_h_c of type bool",
                 },
             },
             # SELECT ONE
             {"args": ("sex_i_c", "MALE", attachments), "expected": None},
             {
                 "args": ("sex_i_c", "YES", attachments),
-                "expected": {
-                    "header": "sex_i_c",
-                    "message": "Invalid choice YES for field sex_i_c",
-                },
+                "expected": {"header": "sex_i_c", "message": "Invalid choice YES for field sex_i_c",},
             },
             # DATE
-            {
-                "args": (
-                    "birth_date_i_c",
-                    "2020-05-28T17:13:31.590+02:00",
-                    attachments,
-                ),
-                "expected": None,
-            },
+            {"args": ("birth_date_i_c", "2020-05-28T17:13:31.590+02:00", attachments,), "expected": None,},
             {
                 "args": ("birth_date_i_c", "2020/05/28", attachments),
                 "expected": {
@@ -547,20 +507,12 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 },
             },
             # GEOPOINT
+            {"args": ("hh_geopoint_h_c", "12.123 13.123", attachments), "expected": None,},
             {
-                "args": ("hh_geopoint_h_c", "12.123 13.123", attachments),
-                "expected": None,
-            },
-            {
-                "args": (
-                    "hh_geopoint_h_c",
-                    "GeoPoint 12.123, 32.123",
-                    attachments,
-                ),
+                "args": ("hh_geopoint_h_c", "GeoPoint 12.123, 32.123", attachments,),
                 "expected": {
                     "header": "hh_geopoint_h_c",
-                    "message": "Invalid geopoint GeoPoint 12.123, 32.123 "
-                    "for field hh_geopoint_h_c",
+                    "message": "Invalid geopoint GeoPoint 12.123, 32.123 " "for field hh_geopoint_h_c",
                 },
             },
             # IMAGE
@@ -568,75 +520,38 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 "args": ("consent_h_c", "signature-17_10_3.png", attachments),
                 "expected": {
                     "header": "consent_h_c",
-                    "message": "Specified image signature-17_10_3.png "
-                    "for field consent_h_c is not in attachments",
+                    "message": "Specified image signature-17_10_3.png " "for field consent_h_c is not in attachments",
                 },
             },
         )
 
         for data in test_data:
-            result = KoboProjectImportDataValidator._get_field_type_error(
-                *data["args"]
-            )
+            result = KoboProjectImportDataValidator._get_field_type_error(*data["args"])
             self.assertEqual(result, data["expected"])
 
     def test_validate_fields(self):
-        result = KoboProjectImportDataValidator.validate_fields(
-            self.VALID_JSON, "Afghanistan"
-        )
+        result = KoboProjectImportDataValidator.validate_fields(self.VALID_JSON, "Afghanistan")
         self.assertEqual(result, [])
 
-        result = KoboProjectImportDataValidator.validate_fields(
-            self.INVALID_JSON, "Afghanistan"
-        )
+        result = KoboProjectImportDataValidator.validate_fields(self.INVALID_JSON, "Afghanistan")
 
         result.sort(key=itemgetter("header"))
 
         expected = [
-            {
-                "header": "admin1_h_c",
-                "message": "Invalid choice SO25 for field admin1_h_c",
-            },
-            {
-                "header": "admin2_h_c",
-                "message": "Invalid choice SO2502 for field admin2_h_c",
-            },
-            {
-                "header": "f_0_5_age_group_h_c",
-                "message": "Missing household required field f_0_5_age_group_h_c",
-            },
-            {
-                "header": "f_0_5_disability_h_c",
-                "message": "Missing household required field f_0_5_disability_h_c",
-            },
-            {
-                "header": "f_12_17_age_group_h_c",
-                "message": "Missing household required field f_12_17_age_group_h_c",
-            },
-            {
-                "header": "f_12_17_disability_h_c",
-                "message": "Missing household required field f_12_17_disability_h_c",
-            },
-            {
-                "header": "f_6_11_age_group_h_c",
-                "message": "Missing household required field f_6_11_age_group_h_c",
-            },
-            {
-                "header": "f_6_11_disability_h_c",
-                "message": "Missing household required field f_6_11_disability_h_c",
-            },
+            {"header": "admin1_h_c", "message": "Invalid choice SO25 for field admin1_h_c",},
+            {"header": "admin2_h_c", "message": "Invalid choice SO2502 for field admin2_h_c",},
+            {"header": "f_0_5_age_group_h_c", "message": "Missing household required field f_0_5_age_group_h_c",},
+            {"header": "f_0_5_disability_h_c", "message": "Missing household required field f_0_5_disability_h_c",},
+            {"header": "f_12_17_age_group_h_c", "message": "Missing household required field f_12_17_age_group_h_c",},
+            {"header": "f_12_17_disability_h_c", "message": "Missing household required field f_12_17_disability_h_c",},
+            {"header": "f_6_11_age_group_h_c", "message": "Missing household required field f_6_11_age_group_h_c",},
+            {"header": "f_6_11_disability_h_c", "message": "Missing household required field f_6_11_disability_h_c",},
             {
                 "header": "f_adults_disability_h_c",
                 "message": "Missing household required field f_adults_disability_h_c",
             },
-            {
-                "header": "f_adults_h_c",
-                "message": "Missing household required field f_adults_h_c",
-            },
-            {
-                "header": "f_pregnant_h_c",
-                "message": "Missing household required field f_pregnant_h_c",
-            },
+            {"header": "f_adults_h_c", "message": "Missing household required field f_adults_h_c",},
+            {"header": "f_pregnant_h_c", "message": "Missing household required field f_pregnant_h_c",},
             {
                 "header": "first_registration_date_h_c",
                 "message": "Missing household required field first_registration_date_h_c",
@@ -653,74 +568,26 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 "header": "first_registration_date_i_c",
                 "message": "Missing individual required field first_registration_date_i_c",
             },
-            {
-                "header": "is_only_collector",
-                "message": "Missing individual required field is_only_collector",
-            },
-            {
-                "header": "is_only_collector",
-                "message": "Missing individual required field is_only_collector",
-            },
-            {
-                "header": "is_only_collector",
-                "message": "Missing individual required field is_only_collector",
-            },
-            {
-                "header": "m_0_5_age_group_h_c",
-                "message": "Missing household required field m_0_5_age_group_h_c",
-            },
-            {
-                "header": "m_0_5_disability_h_c",
-                "message": "Missing household required field m_0_5_disability_h_c",
-            },
-            {
-                "header": "m_12_17_age_group_h_c",
-                "message": "Missing household required field m_12_17_age_group_h_c",
-            },
-            {
-                "header": "m_12_17_disability_h_c",
-                "message": "Missing household required field m_12_17_disability_h_c",
-            },
-            {
-                "header": "m_6_11_age_group_h_c",
-                "message": "Missing household required field m_6_11_age_group_h_c",
-            },
-            {
-                "header": "m_6_11_disability_h_c",
-                "message": "Missing household required field m_6_11_disability_h_c",
-            },
+            {"header": "is_only_collector", "message": "Missing individual required field is_only_collector",},
+            {"header": "is_only_collector", "message": "Missing individual required field is_only_collector",},
+            {"header": "is_only_collector", "message": "Missing individual required field is_only_collector",},
+            {"header": "m_0_5_age_group_h_c", "message": "Missing household required field m_0_5_age_group_h_c",},
+            {"header": "m_0_5_disability_h_c", "message": "Missing household required field m_0_5_disability_h_c",},
+            {"header": "m_12_17_age_group_h_c", "message": "Missing household required field m_12_17_age_group_h_c",},
+            {"header": "m_12_17_disability_h_c", "message": "Missing household required field m_12_17_disability_h_c",},
+            {"header": "m_6_11_age_group_h_c", "message": "Missing household required field m_6_11_age_group_h_c",},
+            {"header": "m_6_11_disability_h_c", "message": "Missing household required field m_6_11_disability_h_c",},
             {
                 "header": "m_adults_disability_h_c",
                 "message": "Missing household required field m_adults_disability_h_c",
             },
-            {
-                "header": "m_adults_h_c",
-                "message": "Missing household required field m_adults_h_c",
-            },
-            {
-                "header": "residence_status_h_c",
-                "message": "Invalid choice host for field residence_status_h_c",
-            },
-            {
-                "header": "role_i_c",
-                "message": "Only one person can be a primary collector",
-            },
-            {
-                "header": "size_h_c",
-                "message": "Missing household required field size_h_c",
-            },
-            {
-                "header": "work_status_i_c",
-                "message": "Invalid choice 0 for field work_status_i_c",
-            },
-            {
-                "header": "work_status_i_c",
-                "message": "Invalid choice 0 for field work_status_i_c",
-            },
-            {
-                "header": "work_status_i_c",
-                "message": "Invalid choice 0 for field work_status_i_c",
-            },
+            {"header": "m_adults_h_c", "message": "Missing household required field m_adults_h_c",},
+            {"header": "residence_status_h_c", "message": "Invalid choice host for field residence_status_h_c",},
+            {"header": "role_i_c", "message": "Only one person can be a primary collector",},
+            {"header": "size_h_c", "message": "Missing household required field size_h_c",},
+            {"header": "work_status_i_c", "message": "Invalid choice 0 for field work_status_i_c",},
+            {"header": "work_status_i_c", "message": "Invalid choice 0 for field work_status_i_c",},
+            {"header": "work_status_i_c", "message": "Invalid choice 0 for field work_status_i_c",},
         ]
 
         self.assertEqual(result, expected)

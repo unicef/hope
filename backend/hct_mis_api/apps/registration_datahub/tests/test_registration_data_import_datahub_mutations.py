@@ -99,7 +99,9 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
             charset=None,
         )
 
-        xlsx_valid_file_path = f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/new_reg_data_import.xlsx"
+        xlsx_valid_file_path = (
+            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/new_reg_data_import.xlsx"
+        )
 
         with open(xlsx_valid_file_path, "rb") as file:
             self.valid_file = SimpleUploadedFile(file.name, file.read())
@@ -108,10 +110,7 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.UPLOAD_REGISTRATION_DATA_IMPORT_DATAHUB,
             context={"user": self.user},
-            variables={
-                "file": self.valid_file,
-                "businessAreaSlug": "afghanistan",
-            },
+            variables={"file": self.valid_file, "businessAreaSlug": "afghanistan",},
         )
 
         import_data_obj = ImportData.objects.first()
@@ -121,9 +120,7 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
 
     def test_registration_data_import_create(self):
         import_data_obj = ImportData.objects.create(
-            file=self.valid_file,
-            number_of_households=3,
-            number_of_individuals=6,
+            file=self.valid_file, number_of_households=3, number_of_individuals=6,
         )
 
         self.snapshot_graphql_request(
@@ -131,9 +128,7 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
             context={"user": self.user},
             variables={
                 "registrationDataImportData": {
-                    "importDataId": self.id_to_base64(
-                        import_data_obj.id, "ImportData"
-                    ),
+                    "importDataId": self.id_to_base64(import_data_obj.id, "ImportData"),
                     "name": "New Import of Data 123",
                     "businessAreaSlug": "afghanistan",
                 }
