@@ -1,7 +1,6 @@
 import io
 import uuid
 
-from django.core.exceptions import ValidationError
 from django.core.management import call_command
 from graphql import GraphQLError
 from openpyxl.writer.excel import save_virtual_workbook
@@ -83,11 +82,58 @@ class TestXlsxVerificationImport(APITestCase):
         cls.cash_plan = cash_plan
         cls.verification = cash_plan.verifications.first()
 
+    def test_export_received_from_pending(self):
+        export_service = XlsxVerificationExportService(
+            TestXlsxVerificationImport.verification
+        )
+        wb = export_service.generate_workbook()
+        self.assertEqual(wb.active["B2"].value, None)
+
+    def test_export_received_from_not_received(self):
+        TestXlsxVerificationImport.verification.payment_record_verifications.all().update(
+            status=PaymentVerification.STATUS_NOT_RECEIVED
+        )
+        export_service = XlsxVerificationExportService(
+            TestXlsxVerificationImport.verification
+        )
+        wb = export_service.generate_workbook()
+        TestXlsxVerificationImport.verification.payment_record_verifications.all().update(
+            status=PaymentVerification.STATUS_PENDING
+        )
+        self.assertEqual(wb.active["B2"].value, "NO")
+
+    def test_export_received_from_received(self):
+        TestXlsxVerificationImport.verification.payment_record_verifications.all().update(
+            status=PaymentVerification.STATUS_RECEIVED
+        )
+        export_service = XlsxVerificationExportService(
+            TestXlsxVerificationImport.verification
+        )
+        wb = export_service.generate_workbook()
+        TestXlsxVerificationImport.verification.payment_record_verifications.all().update(
+            status=PaymentVerification.STATUS_PENDING
+        )
+        self.assertEqual(wb.active["B2"].value, "YES")
+
+    def test_export_received_from_received_with_issues(self):
+        TestXlsxVerificationImport.verification.payment_record_verifications.all().update(
+            status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
+        )
+        export_service = XlsxVerificationExportService(
+            TestXlsxVerificationImport.verification
+        )
+        wb = export_service.generate_workbook()
+        TestXlsxVerificationImport.verification.payment_record_verifications.all().update(
+            status=PaymentVerification.STATUS_PENDING
+        )
+        self.assertEqual(wb.active["B2"].value, "YES")
+
     def test_validation_valid_not_changed_file(self):
         export_service = XlsxVerificationExportService(
             TestXlsxVerificationImport.verification
         )
         wb = export_service.generate_workbook()
+        export_service.generate_file("test.xlsx")
         file = io.BytesIO(save_virtual_workbook(wb))
         import_service = XlsxVerificationImportService(
             TestXlsxVerificationImport.verification, file
@@ -97,12 +143,14 @@ class TestXlsxVerificationImport(APITestCase):
 
         self.assertEqual(import_service.errors, [])
 
+    #
     def test_validation_valid_status_changed(self):
         export_service = XlsxVerificationExportService(
             TestXlsxVerificationImport.verification
         )
         wb = export_service.generate_workbook()
-        wb.active["B2"] = PaymentVerification.STATUS_NOT_RECEIVED
+        wb.active["B2"] = "NO"
+        wb.active["F2"] = 0
         file = io.BytesIO(save_virtual_workbook(wb))
         import_service = XlsxVerificationImportService(
             TestXlsxVerificationImport.verification, file
@@ -111,12 +159,12 @@ class TestXlsxVerificationImport(APITestCase):
         import_service.validate()
         self.assertEqual(import_service.errors, [])
 
-    def test_validation_invalid_status_changed(self):
+    def test_validation_invalid_received_changed(self):
         export_service = XlsxVerificationExportService(
             TestXlsxVerificationImport.verification
         )
         wb = export_service.generate_workbook()
-        wb.active["B2"] = "NOT_CORRECT_STATUS"
+        wb.active["B2"] = "NOT_CORRECT_RECEIVED"
         file = io.BytesIO(save_virtual_workbook(wb))
         import_service = XlsxVerificationImportService(
             TestXlsxVerificationImport.verification, file
@@ -129,8 +177,8 @@ class TestXlsxVerificationImport(APITestCase):
                 (
                     "Payment Verifications",
                     "B2",
-                    "The status of this payment verification is not correct: NOT_CORRECT_STATUS should be one of: "
-                    "['PENDING', 'RECEIVED', 'NOT_RECEIVED', 'RECEIVED_WITH_ISSUES']",
+                    "The received of this payment verification is not correct: NOT_CORRECT_RECEIVED should be one of: "
+                    "[None, 'YES', 'NO']",
                 )
             ],
         )
@@ -201,56 +249,12 @@ class TestXlsxVerificationImport(APITestCase):
             ],
         )
 
-    def test_validation_invalid_status_received_without_received_amount(self):
+    def test_validation_invalid_received_not_received_with_amount(self):
         export_service = XlsxVerificationExportService(
             TestXlsxVerificationImport.verification
         )
         wb = export_service.generate_workbook()
-        payment_record_id = wb.active["A2"].value
-        payment_verification = PaymentVerification.objects.get(
-            payment_record__id=payment_record_id
-        )
-        self.assertEqual(
-            payment_verification.status, PaymentVerification.STATUS_PENDING
-        )
-        wb.active["B2"] = PaymentVerification.STATUS_RECEIVED
-        file = io.BytesIO(save_virtual_workbook(wb))
-        import_service = XlsxVerificationImportService(
-            TestXlsxVerificationImport.verification, file
-        )
-        import_service.open_workbook()
-        import_service.validate()
-        self.assertEqual(
-            import_service.errors,
-            [
-                (
-                    "Payment Verifications",
-                    "B2",
-                    f"Wrong status {PaymentVerification.STATUS_RECEIVED} when received_amount (None) ≠ delivered_amount ({payment_verification.payment_record.delivered_quantity})",
-                )
-            ],
-        )
-
-        payment_verification = PaymentVerification.objects.get(
-            payment_record__id=payment_record_id
-        )
-        self.assertEqual(
-            payment_verification.status, PaymentVerification.STATUS_PENDING
-        )
-
-    def test_validation_invalid_status_not_received_with_received_amount(self):
-        export_service = XlsxVerificationExportService(
-            TestXlsxVerificationImport.verification
-        )
-        wb = export_service.generate_workbook()
-        payment_record_id = wb.active["A2"].value
-        payment_verification = PaymentVerification.objects.get(
-            payment_record__id=payment_record_id
-        )
-        self.assertEqual(
-            payment_verification.status, PaymentVerification.STATUS_PENDING
-        )
-        wb.active["B2"] = PaymentVerification.STATUS_NOT_RECEIVED
+        wb.active["B2"] = "NO"
         wb.active["F2"] = 10
         file = io.BytesIO(save_virtual_workbook(wb))
         import_service = XlsxVerificationImportService(
@@ -258,107 +262,23 @@ class TestXlsxVerificationImport(APITestCase):
         )
         import_service.open_workbook()
         import_service.validate()
-        received_amount = (
-            "None" if wb.active["F2"].value is None else wb.active["F2"].value
-        )
         self.assertEqual(
             import_service.errors,
             [
                 (
                     "Payment Verifications",
                     "B2",
-                    f"Wrong status {PaymentVerification.STATUS_NOT_RECEIVED} when received_amount ({format(received_amount,'.2f')}) is not 0 or empty",
+                    "If received_amount(10.00) is not 0, you should set received to YES",
                 )
             ],
         )
 
-        payment_verification = PaymentVerification.objects.get(
-            payment_record__id=payment_record_id
-        )
-        self.assertEqual(
-            payment_verification.status, PaymentVerification.STATUS_PENDING
-        )
-
-    def test_validation_invalid_status_received_with_issues_without_received_amount(
-        self,
-    ):
+    def test_validation_invalid_received_received_with_0_amount(self):
         export_service = XlsxVerificationExportService(
             TestXlsxVerificationImport.verification
         )
         wb = export_service.generate_workbook()
-        payment_record_id = wb.active["A2"].value
-        payment_verification = PaymentVerification.objects.get(
-            payment_record__id=payment_record_id
-        )
-        self.assertEqual(
-            payment_verification.status, PaymentVerification.STATUS_PENDING
-        )
-        wb.active["B2"] = PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
-        wb.active["F2"] = 0
-        file = io.BytesIO(save_virtual_workbook(wb))
-        import_service = XlsxVerificationImportService(
-            TestXlsxVerificationImport.verification, file
-        )
-        import_service.open_workbook()
-        import_service.validate()
-        received_amount = (
-            "None" if wb.active["F2"].value is None else wb.active["F2"].value
-        )
-        self.assertEqual(
-            import_service.errors,
-            [
-                (
-                    "Payment Verifications",
-                    "B2",
-                    f"Wrong status {PaymentVerification.STATUS_RECEIVED_WITH_ISSUES} when received_amount ({format(received_amount,'.2f')}) is 0 or empty",
-                )
-            ],
-        )
-
-        payment_verification = PaymentVerification.objects.get(
-            payment_record__id=payment_record_id
-        )
-        self.assertEqual(
-            payment_verification.status, PaymentVerification.STATUS_PENDING
-        )
-
-    def test_validation_valid_status_received(self):
-        export_service = XlsxVerificationExportService(
-            TestXlsxVerificationImport.verification
-        )
-        wb = export_service.generate_workbook()
-        payment_record_id = wb.active["A2"].value
-        payment_verification = PaymentVerification.objects.get(
-            payment_record__id=payment_record_id
-        )
-        self.assertEqual(
-            payment_verification.status, PaymentVerification.STATUS_PENDING
-        )
-        wb.active["B2"] = PaymentVerification.STATUS_RECEIVED
-        wb.active["F2"] = payment_verification.payment_record.delivered_quantity
-        file = io.BytesIO(save_virtual_workbook(wb))
-        import_service = XlsxVerificationImportService(
-            TestXlsxVerificationImport.verification, file
-        )
-        import_service.open_workbook()
-        import_service.validate()
-        self.assertEqual(
-            import_service.errors, [],
-        )
-
-    def test_validation_valid_status_not_received(self):
-        export_service = XlsxVerificationExportService(
-            TestXlsxVerificationImport.verification
-        )
-        wb = export_service.generate_workbook()
-        payment_record_id = wb.active["A2"].value
-        payment_verification = PaymentVerification.objects.get(
-            payment_record__id=payment_record_id
-        )
-        self.assertEqual(
-            payment_verification.status, PaymentVerification.STATUS_PENDING
-        )
-        wb.active["B2"] = PaymentVerification.STATUS_NOT_RECEIVED
+        wb.active["B2"] = "YES"
         wb.active["F2"] = 0
         file = io.BytesIO(save_virtual_workbook(wb))
         import_service = XlsxVerificationImportService(
@@ -367,10 +287,17 @@ class TestXlsxVerificationImport(APITestCase):
         import_service.open_workbook()
         import_service.validate()
         self.assertEqual(
-            import_service.errors, [],
+            import_service.errors,
+            [
+                (
+                    "Payment Verifications",
+                    "B2",
+                    "If received_amount is 0, you should set received to NO",
+                )
+            ],
         )
 
-    def test_validation_valid_status_received_with_issues(self):
+    def test_import_valid_status_changed_received_no(self):
         export_service = XlsxVerificationExportService(
             TestXlsxVerificationImport.verification
         )
@@ -382,45 +309,7 @@ class TestXlsxVerificationImport(APITestCase):
         self.assertEqual(
             payment_verification.status, PaymentVerification.STATUS_PENDING
         )
-        wb.active["B2"] = PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
-        wb.active["F2"] = 1
-        file = io.BytesIO(save_virtual_workbook(wb))
-        import_service = XlsxVerificationImportService(
-            TestXlsxVerificationImport.verification, file
-        )
-        import_service.open_workbook()
-        import_service.validate()
-        self.assertEqual(
-            import_service.errors, [],
-        )
-
-    def test_import_valid_not_changed_file(self):
-        export_service = XlsxVerificationExportService(
-            TestXlsxVerificationImport.verification
-        )
-        wb = export_service.generate_workbook()
-        file = io.BytesIO(save_virtual_workbook(wb))
-        import_service = XlsxVerificationImportService(
-            TestXlsxVerificationImport.verification, file
-        )
-        import_service.open_workbook()
-        import_service.validate()
-        self.assertEqual(import_service.errors, [])
-        import_service.import_verifications()
-
-    def test_import_valid_status_changed(self):
-        export_service = XlsxVerificationExportService(
-            TestXlsxVerificationImport.verification
-        )
-        wb = export_service.generate_workbook()
-        payment_record_id = wb.active["A2"].value
-        payment_verification = PaymentVerification.objects.get(
-            payment_record__id=payment_record_id
-        )
-        self.assertEqual(
-            payment_verification.status, PaymentVerification.STATUS_PENDING
-        )
-        wb.active["B2"] = PaymentVerification.STATUS_NOT_RECEIVED
+        wb.active["B2"] = "NO"
         file = io.BytesIO(save_virtual_workbook(wb))
         import_service = XlsxVerificationImportService(
             TestXlsxVerificationImport.verification, file
@@ -435,4 +324,78 @@ class TestXlsxVerificationImport(APITestCase):
         )
         self.assertEqual(
             payment_verification.status, PaymentVerification.STATUS_NOT_RECEIVED
+        )
+
+    def test_import_valid_status_changed_received_yes_not_full(self):
+        export_service = XlsxVerificationExportService(
+            TestXlsxVerificationImport.verification
+        )
+        wb = export_service.generate_workbook()
+        payment_record_id = wb.active["A2"].value
+        payment_verification = PaymentVerification.objects.get(
+            payment_record__id=payment_record_id
+        )
+        self.assertEqual(
+            payment_verification.status, PaymentVerification.STATUS_PENDING
+        )
+        wb.active["B2"] = "YES"
+        wb.active["F2"] = (
+            payment_verification.payment_record.delivered_quantity - 1
+        )
+        file = io.BytesIO(save_virtual_workbook(wb))
+        import_service = XlsxVerificationImportService(
+            TestXlsxVerificationImport.verification, file
+        )
+        import_service.open_workbook()
+        import_service.validate()
+        import_service.import_verifications()
+        self.assertEqual(import_service.errors, [])
+
+        payment_verification = PaymentVerification.objects.get(
+            payment_record__id=payment_record_id
+        )
+        self.assertEqual(
+            payment_verification.status,
+            PaymentVerification.STATUS_RECEIVED_WITH_ISSUES,
+        )
+        self.assertEqual(
+            payment_verification.received_amount,
+            payment_verification.payment_record.delivered_quantity - 1,
+        )
+
+    def test_import_valid_status_changed_received_yes_full(self):
+        export_service = XlsxVerificationExportService(
+            TestXlsxVerificationImport.verification
+        )
+        wb = export_service.generate_workbook()
+        payment_record_id = wb.active["A2"].value
+        payment_verification = PaymentVerification.objects.get(
+            payment_record__id=payment_record_id
+        )
+        self.assertEqual(
+            payment_verification.status, PaymentVerification.STATUS_PENDING
+        )
+        wb.active["B2"] = "YES"
+        wb.active["F2"] = (
+            payment_verification.payment_record.delivered_quantity
+        )
+        file = io.BytesIO(save_virtual_workbook(wb))
+        import_service = XlsxVerificationImportService(
+            TestXlsxVerificationImport.verification, file
+        )
+        import_service.open_workbook()
+        import_service.validate()
+        import_service.import_verifications()
+        self.assertEqual(import_service.errors, [])
+
+        payment_verification = PaymentVerification.objects.get(
+            payment_record__id=payment_record_id
+        )
+        self.assertEqual(
+            payment_verification.status,
+            PaymentVerification.STATUS_RECEIVED,
+        )
+        self.assertEqual(
+            payment_verification.received_amount,
+            payment_verification.payment_record.delivered_quantity,
         )

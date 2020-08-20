@@ -4,6 +4,7 @@ import openpyxl
 from graphql import GraphQLError
 
 from payment.models import PaymentVerification
+from payment.utils import from_received_yes_no_to_status, float_to_decimal
 from payment.xlsx.XlsxVerificationExportService import (
     XlsxVerificationExportService,
 )
@@ -12,10 +13,6 @@ from payment.xlsx.XlsxVerificationExportService import (
 class XlsxVerificationImportService:
     TYPES_READABLE_MAPPING = {"s": "text", "n": "number"}
     COLUMNS_TYPES = ("s", "s", "s", "s", "n", "n")
-
-    PAYMENT_VERIFICATION_STATUSES = [
-        x[0] for x in PaymentVerification.STATUS_CHOICES
-    ]
 
     def __init__(self, cashplan_payment_verification, file):
         self.file = file
@@ -119,7 +116,9 @@ class XlsxVerificationImportService:
     def _validate_row_types(self, row):
         column = 0
         for cell in row:
-
+            if cell.value is None:
+                column += 1
+                continue
             if (
                 cell.data_type
                 != XlsxVerificationImportService.COLUMNS_TYPES[column]
@@ -146,76 +145,54 @@ class XlsxVerificationImportService:
                 )
             )
 
-    def _validate_row_status(self, row):
+    def _validate_row_received(self, row):
+        valid_received = [None, "YES", "NO"]
         cell = row[1]
-        if (
-            cell.value
-            not in XlsxVerificationImportService.PAYMENT_VERIFICATION_STATUSES
-        ):
+        if cell.value not in valid_received:
             self.errors.append(
                 (
                     "Payment Verifications",
                     cell.coordinate,
-                    f"The status of this payment verification is not correct: {cell.value} should be one of: {XlsxVerificationImportService.PAYMENT_VERIFICATION_STATUSES}",
+                    f"The received of this payment verification is not correct: {cell.value} should be one of: {valid_received}",
                 )
             )
 
-    def _validate_status_to_received_amount(self, row):
+    def _validate_received_to_received_amount(self, row):
         payment_record_id = row[0].value
         payment_record = self.payment_records_dict.get(payment_record_id)
         if payment_record is None:
             return
-        delivered_amount = payment_record.delivered_quantity
         received_amount = row[5].value
         if received_amount is not None:
-            received_amount = Decimal(format(round(received_amount, 2), '.2f'))
-        status_cell = row[1]
-        status = status_cell.value
-        if (
-            status == PaymentVerification.STATUS_PENDING
-            and received_amount is not None
-        ):
+            received_amount = Decimal(format(round(received_amount, 2), ".2f"))
+        received_cell = row[1]
+        received = received_cell.value
+        if received is None and received_amount is not None:
             self.errors.append(
                 (
                     "Payment Verifications",
-                    status_cell.coordinate,
-                    f"Wrong status {PaymentVerification.STATUS_PENDING} when received_amount ({received_amount}) is not empty",
+                    received_cell.coordinate,
+                    f"You can't set received_amount {received_amount} and not set received to YES",
+                )
+            )
+        elif received_amount == 0 and received != "NO":
+            self.errors.append(
+                (
+                    "Payment Verifications",
+                    received_cell.coordinate,
+                    f"If received_amount is 0, you should set received to NO",
                 )
             )
         elif (
-            status == PaymentVerification.STATUS_NOT_RECEIVED
-            and received_amount is not None
-            and received_amount != Decimal(0)
+            received_amount is not None
+            and received_amount != 0
+            and received != "YES"
         ):
             self.errors.append(
                 (
                     "Payment Verifications",
-                    status_cell.coordinate,
-                    f"Wrong status {PaymentVerification.STATUS_NOT_RECEIVED} when received_amount ({received_amount}) is not 0 or empty",
-                )
-            )
-        elif status == PaymentVerification.STATUS_RECEIVED_WITH_ISSUES and (
-            received_amount is None or received_amount == Decimal(0)
-        ):
-            self.errors.append(
-                (
-                    "Payment Verifications",
-                    status_cell.coordinate,
-                    f"Wrong status {PaymentVerification.STATUS_RECEIVED_WITH_ISSUES} when received_amount ({received_amount}) is 0 or empty",
-                )
-            )
-        elif (
-            status == PaymentVerification.STATUS_RECEIVED
-            and received_amount != delivered_amount
-        ):
-            received_amount_text = (
-                "None" if received_amount is None else received_amount
-            )
-            self.errors.append(
-                (
-                    "Payment Verifications",
-                    status_cell.coordinate,
-                    f"Wrong status {PaymentVerification.STATUS_RECEIVED} when received_amount ({received_amount_text}) ≠ delivered_amount ({delivered_amount})",
+                    received_cell.coordinate,
+                    f"If received_amount({received_amount}) is not 0, you should set received to YES",
                 )
             )
 
@@ -223,17 +200,23 @@ class XlsxVerificationImportService:
         for row in self.ws_verifications.iter_rows(min_row=2):
             self._validate_row_types(row)
             self._validate_payment_record_id(row)
-            self._validate_row_status(row)
-            self._validate_status_to_received_amount(row)
+            self._validate_row_received(row)
+            self._validate_received_to_received_amount(row)
 
     def _import_row(self, row):
+
         payment_record_id = row[0].value
-        status = row[1].value
+        received = row[1].value
         received_amount = row[5].value
         payment_verification = self.payment_record_verifications_dict[
             payment_record_id
         ]
-        payment_verification.status = status
+        payment_record = self.payment_records_dict.get(payment_record_id)
+        delivered_amount = payment_record.delivered_quantity
+
+        payment_verification.status = from_received_yes_no_to_status(
+            received, received_amount, delivered_amount
+        )
         if received_amount is not None and received_amount != "":
-            payment_verification.received_amount = received_amount
+            payment_verification.received_amount = float_to_decimal(received_amount)
         self.payment_verifications_to_save.append(payment_verification)
