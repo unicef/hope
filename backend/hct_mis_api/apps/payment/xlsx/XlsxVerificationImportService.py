@@ -9,7 +9,15 @@ from payment.xlsx.XlsxVerificationExportService import XlsxVerificationExportSer
 
 
 class XlsxVerificationImportService:
-    TYPES_READABLE_MAPPING = {"s": "text", "n": "number"}
+    TYPES_READABLE_MAPPING = {
+        "s": "text",
+        "n": "number",
+        "f": "formula",
+        "b": "bool",
+        "inlineStr": "inlineStr",
+        "e": "error",
+        "str": "text",
+    }
     COLUMNS_TYPES = ("s", "s", "s", "s", "n", "n")
 
     def __init__(self, cashplan_payment_verification, file):
