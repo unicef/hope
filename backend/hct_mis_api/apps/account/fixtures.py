@@ -13,10 +13,6 @@ class UserFactory(factory.DjangoModelFactory):
 
     last_name = factory.Faker("last_name")
 
-    email = factory.LazyAttribute(
-        lambda o: f"{o.first_name.lower()}.{o.last_name.lower()}@unicef.com"
-    )
+    email = factory.LazyAttribute(lambda o: f"{o.first_name.lower()}.{o.last_name.lower()}@unicef.com")
 
-    username = factory.LazyAttribute(
-        lambda o: f"{o.first_name}{o.last_name}"
-    )
+    username = factory.LazyAttribute(lambda o: f"{o.first_name}{o.last_name}")

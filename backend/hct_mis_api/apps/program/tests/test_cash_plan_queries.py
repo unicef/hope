@@ -65,9 +65,7 @@ class TestCashPlanQueries(APITestCase):
         super().setUp()
         call_command("loadbusinessareas")
         self.user = UserFactory()
-        program = ProgramFactory.create(
-            business_area=BusinessArea.objects.order_by("?").first()
-        )
+        program = ProgramFactory.create(business_area=BusinessArea.objects.order_by("?").first())
         self.CASH_PLANS_TO_CREATE = [
             {
                 "business_area": BusinessArea.objects.first(),
@@ -78,14 +76,10 @@ class TestCashPlanQueries(APITestCase):
                 "assistance_measurement": "Syrian pound",
                 "dispersion_date": "2020-04-25",
                 "distribution_level": "Registration Group",
-                "end_date": datetime.strptime(
-                    "2064-03-14T22:52:54", "%Y-%m-%dT%H:%M:%S",
-                ),
+                "end_date": datetime.strptime("2064-03-14T22:52:54", "%Y-%m-%dT%H:%M:%S",),
                 "name": "Far yet reveal area bar almost dinner.",
                 "total_persons_covered": 540,
-                "start_date": datetime.strptime(
-                    "2051-11-30T00:02:09", "%Y-%m-%dT%H:%M:%S",
-                ),
+                "start_date": datetime.strptime("2051-11-30T00:02:09", "%Y-%m-%dT%H:%M:%S",),
                 "status": "Transaction Completed",
                 "total_delivered_quantity": 53477453.27,
                 "total_entitled_quantity": 56657648.82,
@@ -101,14 +95,10 @@ class TestCashPlanQueries(APITestCase):
                 "assistance_measurement": "Cuban peso",
                 "dispersion_date": "2020-02-22",
                 "distribution_level": "Registration Group",
-                "end_date": datetime.strptime(
-                    "2028-03-31T18:44:15", "%Y-%m-%dT%H:%M:%S",
-                ),
+                "end_date": datetime.strptime("2028-03-31T18:44:15", "%Y-%m-%dT%H:%M:%S",),
                 "name": "Despite action TV after.",
                 "total_persons_covered": 100,
-                "start_date": datetime.strptime(
-                    "2041-06-14T10:15:44", "%Y-%m-%dT%H:%M:%S",
-                ),
+                "start_date": datetime.strptime("2041-06-14T10:15:44", "%Y-%m-%dT%H:%M:%S",),
                 "status": "Transaction Completed",
                 "total_delivered_quantity": 41935107.03,
                 "total_entitled_quantity": 38204833.92,
@@ -126,15 +116,11 @@ class TestCashPlanQueries(APITestCase):
     def test_get_single_cash_plan(self):
         self.snapshot_graphql_request(
             request_string=self.QUERY_SINGLE_CASH_PLAN,
-            variables={
-                "id": "Q2FzaFBsYW5Ob2RlOmM3ZTc2OGYxLTU2M"
-                "jYtNDEzZS1hMDMyLTVmYjE4Nzg5Zjk4NQ=="
-            },
+            variables={"id": "Q2FzaFBsYW5Ob2RlOmM3ZTc2OGYxLTU2M" "jYtNDEzZS1hMDMyLTVmYjE4Nzg5Zjk4NQ=="},
             context={"user": self.user},
         )
 
     def test_get_all_cash_plans(self):
         self.snapshot_graphql_request(
-            request_string=self.QUERY_ALL_CASH_PLANS,
-            context={"user": self.user},
+            request_string=self.QUERY_ALL_CASH_PLANS, context={"user": self.user},
         )

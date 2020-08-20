@@ -36,19 +36,12 @@ class TestApproveTargetPopulationMutation(APITestCase):
     @classmethod
     def setUpTestData(cls):
         call_command("loadbusinessareas")
-        cls.program = ProgramFactory.create(
-            status="ACTIVE",
-            business_area=BusinessArea.objects.order_by("?").first(),
-        )
+        cls.program = ProgramFactory.create(status="ACTIVE", business_area=BusinessArea.objects.order_by("?").first(),)
         cls.user = UserFactory.create()
         cls.households = []
-        (household, individuals) = create_household(
-            {"size": 1, "residence_status": "CITIZEN",},
-        )
+        (household, individuals) = create_household({"size": 1, "residence_status": "CITIZEN",},)
         cls.household_size_1 = household
-        (household, individuals) = create_household(
-            {"size": 2, "residence_status": "CITIZEN",},
-        )
+        (household, individuals) = create_household({"size": 2, "residence_status": "CITIZEN",},)
         cls.household_size_2 = household
         cls.households.append(cls.household_size_1)
         cls.households.append(cls.household_size_2)
@@ -56,48 +49,27 @@ class TestApproveTargetPopulationMutation(APITestCase):
         tp = TargetPopulation(name="Draft Target Population", status="DRAFT")
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {
-                "field_name": "residence_status",
-                "arguments": ["CITIZEN"],
-                "comparision_method": "EQUALS",
-            }
+            {"field_name": "residence_status", "arguments": ["CITIZEN"], "comparision_method": "EQUALS",}
         )
         tp.save()
         cls.target_population_draft = tp
 
-        tp = TargetPopulation(
-            name="Approved Target Population with final filters",
-            status="APPROVED",
-        )
+        tp = TargetPopulation(name="Approved Target Population with final filters", status="APPROVED",)
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {
-                "field_name": "residence_status",
-                "arguments": ["CITIZEN"],
-                "comparision_method": "EQUALS",
-            }
+            {"field_name": "residence_status", "arguments": ["CITIZEN"], "comparision_method": "EQUALS",}
         )
         tp.final_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {
-                "field_name": "size",
-                "arguments": [2],
-                "comparision_method": "EQUALS",
-            }
+            {"field_name": "size", "arguments": [2], "comparision_method": "EQUALS",}
         )
         tp.save()
         tp.households.set(cls.households)
         cls.target_population_approved_with_final_rule = tp
 
-        tp = TargetPopulation(
-            name="Approved Target Population", status="APPROVED"
-        )
+        tp = TargetPopulation(name="Approved Target Population", status="APPROVED")
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {
-                "field_name": "residence_status",
-                "arguments": ["CITIZEN"],
-                "comparision_method": "EQUALS",
-            }
+            {"field_name": "residence_status", "arguments": ["CITIZEN"], "comparision_method": "EQUALS",}
         )
         tp.save()
         tp.households.set(cls.households)
@@ -109,9 +81,7 @@ class TestApproveTargetPopulationMutation(APITestCase):
         targeting_criteria.save()
         rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)
         rule.save()
-        rule_filter = TargetingCriteriaRuleFilter(
-            **rule_filter, targeting_criteria_rule=rule
-        )
+        rule_filter = TargetingCriteriaRuleFilter(**rule_filter, targeting_criteria_rule=rule)
         rule_filter.save()
         return targeting_criteria
 
@@ -120,9 +90,7 @@ class TestApproveTargetPopulationMutation(APITestCase):
             request_string=self.APPROVE_TARGET_MUTATION,
             context={"user": self.user},
             variables={
-                "id": self.id_to_base64(
-                    self.target_population_draft.id, "TargetPopulation"
-                ),
+                "id": self.id_to_base64(self.target_population_draft.id, "TargetPopulation"),
                 "programId": self.id_to_base64(self.program.id, "Program"),
             },
         )
@@ -132,10 +100,7 @@ class TestApproveTargetPopulationMutation(APITestCase):
             request_string=self.APPROVE_TARGET_MUTATION,
             context={"user": self.user},
             variables={
-                "id": self.id_to_base64(
-                    self.target_population_approved_with_final_rule.id,
-                    "TargetPopulation",
-                ),
+                "id": self.id_to_base64(self.target_population_approved_with_final_rule.id, "TargetPopulation",),
                 "programId": self.id_to_base64(self.program.id, "Program"),
             },
         )
@@ -166,13 +131,9 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
         cls.user = UserFactory.create()
         cls.households = []
 
-        (household, individuals) = create_household(
-            {"size": 1, "residence_status": "CITIZEN",},
-        )
+        (household, individuals) = create_household({"size": 1, "residence_status": "CITIZEN",},)
         cls.household_size_1 = household
-        (household, individuals) = create_household(
-            {"size": 2, "residence_status": "CITIZEN",},
-        )
+        (household, individuals) = create_household({"size": 2, "residence_status": "CITIZEN",},)
         cls.household_size_2 = household
         cls.households.append(cls.household_size_1)
         cls.households.append(cls.household_size_2)
@@ -180,48 +141,27 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
         tp = TargetPopulation(name="Draft Target Population", status="DRAFT")
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {
-                "field_name": "residence_status",
-                "arguments": ["CITIZEN"],
-                "comparision_method": "EQUALS",
-            }
+            {"field_name": "residence_status", "arguments": ["CITIZEN"], "comparision_method": "EQUALS",}
         )
         tp.save()
         cls.target_population_draft = tp
 
-        tp = TargetPopulation(
-            name="Approved Target Population with final filters",
-            status="APPROVED",
-        )
+        tp = TargetPopulation(name="Approved Target Population with final filters", status="APPROVED",)
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {
-                "field_name": "residence_status",
-                "arguments": ["CITIZEN"],
-                "comparision_method": "EQUALS",
-            }
+            {"field_name": "residence_status", "arguments": ["CITIZEN"], "comparision_method": "EQUALS",}
         )
         tp.final_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {
-                "field_name": "size",
-                "arguments": [2],
-                "comparision_method": "EQUALS",
-            }
+            {"field_name": "size", "arguments": [2], "comparision_method": "EQUALS",}
         )
         tp.save()
         tp.households.set(cls.households)
         cls.target_population_approved_with_final_rule = tp
 
-        tp = TargetPopulation(
-            name="Approved Target Population", status="APPROVED"
-        )
+        tp = TargetPopulation(name="Approved Target Population", status="APPROVED")
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {
-                "field_name": "residence_status",
-                "arguments": ["CITIZEN"],
-                "comparision_method": "EQUALS",
-            }
+            {"field_name": "residence_status", "arguments": ["CITIZEN"], "comparision_method": "EQUALS",}
         )
         tp.save()
         tp.households.set(cls.households)
@@ -233,9 +173,7 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
         targeting_criteria.save()
         rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)
         rule.save()
-        rule_filter = TargetingCriteriaRuleFilter(
-            **rule_filter, targeting_criteria_rule=rule
-        )
+        rule_filter = TargetingCriteriaRuleFilter(**rule_filter, targeting_criteria_rule=rule)
         rule_filter.save()
         return targeting_criteria
 
@@ -244,10 +182,7 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
             request_string=self.UNAPPROVE_TARGET_MUTATION,
             context={"user": self.user},
             variables={
-                "id": self.id_to_base64(
-                    self.target_population_approved_with_final_rule.id,
-                    "TargetPopulation",
-                )
+                "id": self.id_to_base64(self.target_population_approved_with_final_rule.id, "TargetPopulation",)
             },
         )
 
@@ -255,11 +190,7 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.UNAPPROVE_TARGET_MUTATION,
             context={"user": self.user},
-            variables={
-                "id": self.id_to_base64(
-                    self.target_population_draft.id, "TargetPopulation"
-                )
-            },
+            variables={"id": self.id_to_base64(self.target_population_draft.id, "TargetPopulation")},
         )
 
 
@@ -296,13 +227,9 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
         cls.user = UserFactory.create()
         cls.households = []
 
-        (household, individuals) = create_household(
-            {"size": 1, "residence_status": "CITIZEN",},
-        )
+        (household, individuals) = create_household({"size": 1, "residence_status": "CITIZEN",},)
         cls.household_size_1 = household
-        (household, individuals) = create_household(
-            {"size": 2, "residence_status": "CITIZEN",},
-        )
+        (household, individuals) = create_household({"size": 2, "residence_status": "CITIZEN",},)
         cls.household_size_2 = household
         cls.households.append(cls.household_size_1)
         cls.households.append(cls.household_size_2)
@@ -310,48 +237,27 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
         tp = TargetPopulation(name="Draft Target Population", status="DRAFT")
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {
-                "field_name": "residence_status",
-                "arguments": ["CITIZEN"],
-                "comparision_method": "EQUALS",
-            }
+            {"field_name": "residence_status", "arguments": ["CITIZEN"], "comparision_method": "EQUALS",}
         )
         tp.save()
         cls.target_population_draft = tp
 
-        tp = TargetPopulation(
-            name="Approved Target Population with final filters",
-            status="APPROVED",
-        )
+        tp = TargetPopulation(name="Approved Target Population with final filters", status="APPROVED",)
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {
-                "field_name": "residence_status",
-                "arguments": ["CITIZEN"],
-                "comparision_method": "EQUALS",
-            }
+            {"field_name": "residence_status", "arguments": ["CITIZEN"], "comparision_method": "EQUALS",}
         )
         tp.final_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {
-                "field_name": "size",
-                "arguments": [2],
-                "comparision_method": "EQUALS",
-            }
+            {"field_name": "size", "arguments": [2], "comparision_method": "EQUALS",}
         )
         tp.save()
         tp.households.set(cls.households)
         cls.target_population_approved_with_final_rule = tp
 
-        tp = TargetPopulation(
-            name="Approved Target Population", status="APPROVED"
-        )
+        tp = TargetPopulation(name="Approved Target Population", status="APPROVED")
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {
-                "field_name": "residence_status",
-                "arguments": ["CITIZEN"],
-                "comparision_method": "EQUALS",
-            }
+            {"field_name": "residence_status", "arguments": ["CITIZEN"], "comparision_method": "EQUALS",}
         )
         tp.save()
         tp.households.set(cls.households)
@@ -363,9 +269,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
         targeting_criteria.save()
         rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)
         rule.save()
-        rule_filter = TargetingCriteriaRuleFilter(
-            **rule_filter, targeting_criteria_rule=rule
-        )
+        rule_filter = TargetingCriteriaRuleFilter(**rule_filter, targeting_criteria_rule=rule)
         rule_filter.save()
         return targeting_criteria
 
@@ -374,10 +278,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
             request_string=self.FINALIZE_TARGET_MUTATION,
             context={"user": self.user},
             variables={
-                "id": self.id_to_base64(
-                    self.target_population_approved_with_final_rule.id,
-                    "TargetPopulation",
-                )
+                "id": self.id_to_base64(self.target_population_approved_with_final_rule.id, "TargetPopulation",)
             },
         )
 
@@ -385,20 +286,12 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.FINALIZE_TARGET_MUTATION,
             context={"user": self.user},
-            variables={
-                "id": self.id_to_base64(
-                    self.target_population_approved.id, "TargetPopulation"
-                )
-            },
+            variables={"id": self.id_to_base64(self.target_population_approved.id, "TargetPopulation")},
         )
 
     def test_finalize_fail_target_population(self):
         self.snapshot_graphql_request(
             request_string=self.FINALIZE_TARGET_MUTATION,
             context={"user": self.user},
-            variables={
-                "id": self.id_to_base64(
-                    self.target_population_draft.id, "TargetPopulation",
-                )
-            },
+            variables={"id": self.id_to_base64(self.target_population_draft.id, "TargetPopulation",)},
         )

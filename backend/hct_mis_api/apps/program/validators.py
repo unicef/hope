@@ -14,13 +14,9 @@ class ProgramValidator(BaseValidator):
         if current_status == "DRAFT" and status_to_set != "ACTIVE":
             raise ValidationError("Draft status can only be changed to Active")
         elif current_status == "ACTIVE" and status_to_set != "FINISHED":
-            raise ValidationError(
-                "Active status can only be changed to Finished"
-            )
+            raise ValidationError("Active status can only be changed to Finished")
         elif current_status == "FINISHED" and status_to_set != "ACTIVE":
-            raise ValidationError(
-                "Finished status can only be changed to Active"
-            )
+            raise ValidationError("Finished status can only be changed to Active")
 
 
 class ProgramDeletionValidator(BaseValidator):

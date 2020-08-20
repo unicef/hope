@@ -27,12 +27,7 @@ class GoldenRecordTargetingCriteriaQueryTestCase(APITestCase):
             "rules": [
                 {
                     "filters": [
-                        {
-                            "comparisionMethod": "EQUALS",
-                            "arguments": [2],
-                            "fieldName": "size",
-                            "isFlexField": False,
-                        }
+                        {"comparisionMethod": "EQUALS", "arguments": [2], "fieldName": "size", "isFlexField": False,}
                     ]
                 }
             ]
@@ -80,11 +75,7 @@ class GoldenRecordTargetingCriteriaQueryTestCase(APITestCase):
                     "filters": [
                         {
                             "comparisionMethod": "CONTAINS",
-                            "arguments": [
-                                "other_public",
-                                "pharmacy",
-                                "other_private",
-                            ],
+                            "arguments": ["other_public", "pharmacy", "other_private",],
                             "fieldName": "treatment_facility_h_f",
                             "isFlexField": True,
                         }
@@ -97,15 +88,11 @@ class GoldenRecordTargetingCriteriaQueryTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         call_command("loadflexfieldsattributes")
-        (household, individuals) = create_household(
-            {"size": 1, "residence_status": "CITIZEN",},
-        )
+        (household, individuals) = create_household({"size": 1, "residence_status": "CITIZEN",},)
         cls.household_size_1 = household
         cls.household_residence_status_citizen = cls.household_size_1
 
-        (household, individuals) = create_household(
-            {"size": 2, "residence_status": "REFUGEE",},
-        )
+        (household, individuals) = create_household({"size": 2, "residence_status": "REFUGEE",},)
         cls.household_residence_status_refugee = household
         cls.household_size_2 = cls.household_residence_status_refugee
 
@@ -126,6 +113,7 @@ class GoldenRecordTargetingCriteriaQueryTestCase(APITestCase):
             request_string=GoldenRecordTargetingCriteriaQueryTestCase.QUERY,
             variables=GoldenRecordTargetingCriteriaQueryTestCase.FLEX_FIELD_VARIABLES,
         )
+
     def test_golden_record_by_targeting_criteria_select_many(self):
         self.snapshot_graphql_request(
             request_string=GoldenRecordTargetingCriteriaQueryTestCase.QUERY,
