@@ -33,7 +33,7 @@ class XlsxVerificationImportService:
         self.was_validation_run = False
 
     def open_workbook(self) -> openpyxl.Workbook:
-        wb = openpyxl.load_workbook(self.file)
+        wb = openpyxl.load_workbook(self.file, data_only=True)
         self.wb = wb
         self.ws_verifications = wb[XlsxVerificationExportService.VERIFICATION_SHEET]
         return wb
