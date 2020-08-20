@@ -289,7 +289,7 @@ export function CreateVerificationPlan({
                       name='confidenceInterval'
                       label='Confidence Interval'
                       min={1}
-                      max={10}
+                      max={100}
                       component={FormikSliderField}
                       suffix='%'
                     />
