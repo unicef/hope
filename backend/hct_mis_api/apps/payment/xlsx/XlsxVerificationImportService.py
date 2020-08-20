@@ -208,4 +208,6 @@ class XlsxVerificationImportService:
         payment_verification.status = from_received_yes_no_to_status(received, received_amount, delivered_amount)
         if received_amount is not None and received_amount != "":
             payment_verification.received_amount = float_to_decimal(received_amount)
+        else:
+            payment_verification.received_amount = None
         self.payment_verifications_to_save.append(payment_verification)
