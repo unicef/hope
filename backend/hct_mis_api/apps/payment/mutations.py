@@ -19,7 +19,7 @@ from payment.inputs import (
 from payment.models import CashPlanPaymentVerification, PaymentVerification
 from payment.rapid_pro.api import RapidProAPI
 from payment.schema import PaymentVerificationNode
-from payment.utils import get_number_of_samples
+from payment.utils import get_number_of_samples, from_received_to_status
 from payment.xlsx.XlsxVerificationImportService import XlsxVerificationImportService
 from program.models import CashPlan
 from program.schema import CashPlanNode
@@ -456,6 +456,48 @@ class UpdatePaymentVerificationStatusAndReceivedAmount(graphene.Mutation):
         return UpdatePaymentVerificationStatusAndReceivedAmount(payment_verification)
 
 
+class UpdatePaymentVerificationReceivedAndReceivedAmount(graphene.Mutation):
+
+    payment_verification = graphene.Field(PaymentVerificationNode)
+
+    class Arguments:
+        payment_verification_id = graphene.ID(required=True)
+        received_amount = graphene.Decimal(required=True)
+        received = graphene.Boolean(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(
+        cls, root, info, payment_verification_id, received_amount, received, **kwargs,
+    ):
+        payment_verification = get_object_or_404(PaymentVerification, id=decode_id_string(payment_verification_id))
+        if (
+            payment_verification.cash_plan_payment_verification.verification_method
+            != CashPlanPaymentVerification.VERIFICATION_METHOD_MANUAL
+        ):
+            raise GraphQLError(f"You can only update status of payment verification for MANUAL verification method")
+        if payment_verification.cash_plan_payment_verification.status != CashPlanPaymentVerification.STATUS_ACTIVE:
+            raise GraphQLError(
+                f"You can only update status of payment verification for {CashPlanPaymentVerification.STATUS_ACTIVE} cash plan verification"
+            )
+        delivered_amount = payment_verification.payment_record.delivered_quantity
+
+        if received is None and received_amount is not None and received_amount == 0:
+            raise GraphQLError(f"You can't set received_amount {received_amount} and not set received to NO")
+        if received is None and received_amount is not None:
+            raise GraphQLError(f"You can't set received_amount {received_amount} and not set received to YES")
+        elif received_amount == 0 and received:
+            raise GraphQLError(f"If received_amount is 0, you should set received to NO",)
+        elif received_amount is not None and received_amount != 0 and not received:
+            raise GraphQLError(f"If received_amount({received_amount}) is not 0, you should set received to YES")
+
+        payment_verification.status = from_received_to_status(received,received_amount,delivered_amount)
+        payment_verification.received_amount = received_amount
+        payment_verification.save()
+        return UpdatePaymentVerificationStatusAndReceivedAmount(payment_verification)
+
+
 class XlsxErrorNode(graphene.ObjectType):
     sheet = graphene.String()
     coordinates = graphene.String()
@@ -505,3 +547,4 @@ class Mutations(graphene.ObjectType):
     finish_cash_plan_payment_verification = FinishCashPlanVerificationMutation.Field()
     discard_cash_plan_payment_verification = DiscardCashPlanVerificationMutation.Field()
     update_payment_verification_status_and_received_amount = UpdatePaymentVerificationStatusAndReceivedAmount.Field()
+    update_payment_verification_received_and_received_amount = UpdatePaymentVerificationReceivedAndReceivedAmount.Field()

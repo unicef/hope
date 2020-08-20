@@ -15,7 +15,10 @@ import { useSnackbar } from '../../hooks/useSnackBar';
 import { Formik, Form, Field } from 'formik';
 import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
-import { useUpdatePaymentVerificationStatusAndReceivedAmountMutation } from '../../__generated__/graphql';
+import {
+  useUpdatePaymentVerificationReceivedAndReceivedAmountMutation,
+  useUpdatePaymentVerificationStatusAndReceivedAmountMutation,
+} from '../../__generated__/graphql';
 
 export interface Props {
   paymentVerificationId: string;
@@ -29,7 +32,7 @@ export function VerifyManual({
   const [
     mutate,
     { error },
-  ] = useUpdatePaymentVerificationStatusAndReceivedAmountMutation();
+  ] = useUpdatePaymentVerificationReceivedAndReceivedAmountMutation();
 
   const DialogTitleWrapper = styled.div`
     border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -51,8 +54,11 @@ export function VerifyManual({
       await mutate({
         variables: {
           paymentVerificationId,
-          status: values.status,
-          receivedAmount: parseFloat(values.receivedAmount).toFixed(2),
+          received: values.status === 'RECEIVED',
+          receivedAmount:
+            values.status === 'RECEIVED'
+              ? parseFloat(values.receivedAmount).toFixed(2)
+              : 0,
         },
       });
     } catch (e) {
