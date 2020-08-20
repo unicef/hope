@@ -58,24 +58,16 @@ def get_field_name(field_name: str) -> str:
         return field_name
 
 
-def reduce_assets_list(
-    assets: list, deployed: bool = True, *args, **kwarg
-) -> list:
+def reduce_assets_list(assets: list, deployed: bool = True, *args, **kwarg) -> list:
     if deployed:
-        return [
-            reduce_asset(asset)
-            for asset in assets
-            if asset["has_deployment"] and asset["deployment__active"]
-        ]
+        return [reduce_asset(asset) for asset in assets if asset["has_deployment"] and asset["deployment__active"]]
     return [reduce_asset(asset) for asset in assets]
 
 
 def count_population(results: list) -> Tuple[int, int]:
     total_individuals_count = 0
     for result in results:
-        total_individuals_count += len(
-            result[KOBO_FORM_INDIVIDUALS_COLUMN_NAME]
-        )
+        total_individuals_count += len(result[KOBO_FORM_INDIVIDUALS_COLUMN_NAME])
 
     total_households_count = len(results)
 

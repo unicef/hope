@@ -28,14 +28,8 @@ from utils.models import TimeStampedUUIDModel
 
 
 class ImportedHouseholdIdentity(models.Model):
-    agency = models.ForeignKey(
-        "ImportedAgency",
-        related_name="households_identities",
-        on_delete=models.CASCADE,
-    )
-    household = models.ForeignKey(
-        "ImportedHousehold", related_name="identities", on_delete=models.CASCADE
-    )
+    agency = models.ForeignKey("ImportedAgency", related_name="households_identities", on_delete=models.CASCADE,)
+    household = models.ForeignKey("ImportedHousehold", related_name="identities", on_delete=models.CASCADE)
     document_number = models.CharField(max_length=255,)
 
     def __str__(self):
@@ -44,9 +38,7 @@ class ImportedHouseholdIdentity(models.Model):
 
 class ImportedHousehold(TimeStampedUUIDModel):
     consent = ImageField(validators=[validate_image_file_extension])
-    residence_status = models.CharField(
-        max_length=255, choices=RESIDENCE_STATUS_CHOICE,
-    )
+    residence_status = models.CharField(max_length=255, choices=RESIDENCE_STATUS_CHOICE,)
     country_origin = CountryField()
     size = models.PositiveIntegerField()
     address = models.CharField(max_length=255, blank=True, default="")
@@ -64,24 +56,16 @@ class ImportedHousehold(TimeStampedUUIDModel):
     male_age_group_12_17_count = models.PositiveIntegerField(default=0)
     male_adults_count = models.PositiveIntegerField(default=0)
     female_age_group_0_5_disabled_count = models.PositiveIntegerField(default=0)
-    female_age_group_6_11_disabled_count = models.PositiveIntegerField(
-        default=0
-    )
-    female_age_group_12_17_disabled_count = models.PositiveIntegerField(
-        default=0
-    )
+    female_age_group_6_11_disabled_count = models.PositiveIntegerField(default=0)
+    female_age_group_12_17_disabled_count = models.PositiveIntegerField(default=0)
     female_adults_disabled_count = models.PositiveIntegerField(default=0)
     male_age_group_0_5_disabled_count = models.PositiveIntegerField(default=0)
     male_age_group_6_11_disabled_count = models.PositiveIntegerField(default=0)
     male_age_group_12_17_disabled_count = models.PositiveIntegerField(default=0)
     male_adults_disabled_count = models.PositiveIntegerField(default=0)
-    head_of_household = models.OneToOneField(
-        "ImportedIndividual", on_delete=models.CASCADE, null=True
-    )
+    head_of_household = models.OneToOneField("ImportedIndividual", on_delete=models.CASCADE, null=True)
     registration_data_import = models.ForeignKey(
-        "RegistrationDataImportDatahub",
-        related_name="households",
-        on_delete=models.CASCADE,
+        "RegistrationDataImportDatahub", related_name="households", on_delete=models.CASCADE,
     )
     first_registration_date = models.DateField()
     last_registration_date = models.DateField()
@@ -95,42 +79,23 @@ class ImportedHousehold(TimeStampedUUIDModel):
 class ImportedIndividual(TimeStampedUUIDModel):
     individual_id = models.CharField(max_length=255, blank=True)
     photo = models.ImageField(blank=True)
-    full_name = models.CharField(
-        max_length=255,
-        validators=[MinLengthValidator(3), MaxLengthValidator(255)],
-    )
+    full_name = models.CharField(max_length=255, validators=[MinLengthValidator(3), MaxLengthValidator(255)],)
     given_name = models.CharField(max_length=85, blank=True, default="")
     middle_name = models.CharField(max_length=85, blank=True, default="")
     family_name = models.CharField(max_length=85, blank=True, default="")
-    relationship = models.CharField(
-        max_length=255, blank=True, choices=RELATIONSHIP_CHOICE, default="",
-    )
+    relationship = models.CharField(max_length=255, blank=True, choices=RELATIONSHIP_CHOICE, default="",)
     sex = models.CharField(max_length=255, choices=SEX_CHOICE,)
     birth_date = models.DateField()
     estimated_birth_date = models.BooleanField(default=False)
-    marital_status = models.CharField(
-        max_length=255, choices=MARITAL_STATUS_CHOICE,
-    )
+    marital_status = models.CharField(max_length=255, choices=MARITAL_STATUS_CHOICE,)
     phone_no = PhoneNumberField(blank=True, default="")
     phone_no_alternative = PhoneNumberField(blank=True, default="")
-    household = models.ForeignKey(
-        "ImportedHousehold",
-        null=True,
-        related_name="individuals",
-        on_delete=models.CASCADE,
-    )
+    household = models.ForeignKey("ImportedHousehold", null=True, related_name="individuals", on_delete=models.CASCADE,)
     registration_data_import = models.ForeignKey(
-        "RegistrationDataImportDatahub",
-        related_name="individuals",
-        on_delete=models.CASCADE,
+        "RegistrationDataImportDatahub", related_name="individuals", on_delete=models.CASCADE,
     )
     disability = models.BooleanField(default=False)
-    work_status = models.CharField(
-        max_length=20,
-        choices=WORK_STATUS_CHOICE,
-        blank=True,
-        default=NOT_PROVIDED,
-    )
+    work_status = models.CharField(max_length=20, choices=WORK_STATUS_CHOICE, blank=True, default=NOT_PROVIDED,)
     first_registration_date = models.DateField()
     last_registration_date = models.DateField()
     flex_fields = JSONField(default=dict)
@@ -141,10 +106,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
         return (
             today.year
             - self.birth_date.year
-            - (
-                (today.month, today.day)
-                < (self.birth_date.month, self.birth_date.day)
-            )
+            - ((today.month, today.day) < (self.birth_date.month, self.birth_date.day))
         )
 
     @property
@@ -169,16 +131,8 @@ class ImportedIndividual(TimeStampedUUIDModel):
 
 
 class ImportedIndividualRoleInHousehold(TimeStampedUUIDModel):
-    individual = models.ForeignKey(
-        "ImportedIndividual",
-        on_delete=models.CASCADE,
-        related_name="households_and_roles",
-    )
-    household = models.ForeignKey(
-        "ImportedHousehold",
-        on_delete=models.CASCADE,
-        related_name="individuals_and_roles",
-    )
+    individual = models.ForeignKey("ImportedIndividual", on_delete=models.CASCADE, related_name="households_and_roles",)
+    household = models.ForeignKey("ImportedHousehold", on_delete=models.CASCADE, related_name="individuals_and_roles",)
     role = models.CharField(max_length=255, blank=True, choices=ROLE_CHOICE,)
 
     class Meta:
@@ -199,14 +153,9 @@ class RegistrationDataImportDatahub(TimeStampedUUIDModel):
     import_date = models.DateTimeField(auto_now_add=True)
     hct_id = models.UUIDField(null=True)
     import_data = models.OneToOneField(
-        "ImportData",
-        related_name="registration_data_import",
-        on_delete=models.CASCADE,
-        null=True,
+        "ImportData", related_name="registration_data_import", on_delete=models.CASCADE, null=True,
     )
-    import_done = models.CharField(
-        max_length=15, choices=IMPORT_DONE_CHOICES, default=NOT_STARTED
-    )
+    import_done = models.CharField(max_length=15, choices=IMPORT_DONE_CHOICES, default=NOT_STARTED)
     business_area_slug = models.CharField(max_length=250, blank=True)
 
     def __str__(self):
@@ -222,19 +171,13 @@ class ImportData(TimeStampedUUIDModel):
     )
 
     file = models.FileField()
-    data_type = models.CharField(
-        max_length=4, choices=DATA_TYPE_CHOICES, default=XLSX
-    )
+    data_type = models.CharField(max_length=4, choices=DATA_TYPE_CHOICES, default=XLSX)
     number_of_households = models.PositiveIntegerField()
     number_of_individuals = models.PositiveIntegerField()
 
 
 class DocumentValidator(TimeStampedUUIDModel):
-    type = models.ForeignKey(
-        "ImportedDocumentType",
-        related_name="validators",
-        on_delete=models.CASCADE,
-    )
+    type = models.ForeignKey("ImportedDocumentType", related_name="validators", on_delete=models.CASCADE,)
     regex = models.CharField(max_length=100, default=".*")
 
 
@@ -253,14 +196,8 @@ class ImportedDocumentType(TimeStampedUUIDModel):
 class ImportedDocument(TimeStampedUUIDModel):
     document_number = models.CharField(max_length=255, blank=True)
     photo = models.ImageField(blank=True)
-    individual = models.ForeignKey(
-        "ImportedIndividual", related_name="documents", on_delete=models.CASCADE
-    )
-    type = models.ForeignKey(
-        "ImportedDocumentType",
-        related_name="documents",
-        on_delete=models.CASCADE,
-    )
+    individual = models.ForeignKey("ImportedIndividual", related_name="documents", on_delete=models.CASCADE)
+    type = models.ForeignKey("ImportedDocumentType", related_name="documents", on_delete=models.CASCADE,)
 
     def clean(self):
         from django.core.exceptions import ValidationError
@@ -279,14 +216,8 @@ class ImportedAgency(models.Model):
 
 
 class ImportedIndividualIdentity(models.Model):
-    agency = models.ForeignKey(
-        "ImportedAgency", related_name="identities", on_delete=models.CASCADE
-    )
-    individual = models.ForeignKey(
-        "ImportedIndividual",
-        related_name="identities",
-        on_delete=models.CASCADE,
-    )
+    agency = models.ForeignKey("ImportedAgency", related_name="identities", on_delete=models.CASCADE)
+    individual = models.ForeignKey("ImportedIndividual", related_name="identities", on_delete=models.CASCADE,)
     document_number = models.CharField(max_length=255,)
 
     def __str__(self):

@@ -58,20 +58,18 @@ class RapidProAPI:
         data = {"flow": flow_uuid, "urns": urns, "restart_participants": True}
         print(data)
 
-        response = self._handle_post_request(
-            RapidProAPI.FLOW_STARTS_ENDPOINT, data,
-        )
+        response = self._handle_post_request(RapidProAPI.FLOW_STARTS_ENDPOINT, data,)
         print(response)
         return response
 
     def get_flow_runs(self):
-        return self._get_paginated_results(
-            f"{RapidProAPI.FLOW_RUNS_ENDPOINT}?responded=true"
-        )
+        return self._get_paginated_results(f"{RapidProAPI.FLOW_RUNS_ENDPOINT}?responded=true")
 
-    def get_mapped_flow_runs(self,start_uuid):
+    def get_mapped_flow_runs(self, start_uuid):
         results = self.get_flow_runs()
-        mapped_results = [self._map_to_internal_structure(x) for x in results if x.get("start").get("uuid") == start_uuid]
+        mapped_results = [
+            self._map_to_internal_structure(x) for x in results if x.get("start").get("uuid") == start_uuid
+        ]
         return mapped_results
 
     def _get_paginated_results(self, url) -> list:
@@ -92,34 +90,28 @@ class RapidProAPI:
         received = None
         received_amount = None
         if not values:
-            return {"phone_number":phone_number,"received":None,"received_amount":None}
+            return {"phone_number": phone_number, "received": None, "received_amount": None}
         received_variable = values.get(variable_received_name)
         if received_variable is not None:
             received = received_variable.get("value").upper() == variable_received_positive_string
         received_amount_variable = values.get(variable_amount_name)
         if received_variable is not None:
             received_amount = received_amount_variable.get("value")
-        return {"phone_number":phone_number,"received":received,"received_amount":received_amount}
-
+        return {"phone_number": phone_number, "received": received, "received_amount": received_amount}
 
     def create_group(self, name):
         print(name)
-        group = self._handle_post_request(
-            RapidProAPI.GROUPS_ENDPOINT, {"name": name}
-        )
+        group = self._handle_post_request(RapidProAPI.GROUPS_ENDPOINT, {"name": name})
         return group
 
     def create_contact(self, name, tel, group_uuid):
         print({"name": name, "groups": [group_uuid], "urns": [f"tel:{tel}"]})
         contact = self._handle_post_request(
-            RapidProAPI.CONTACTS_ENDPOINT,
-            {"name": name, "groups": [group_uuid], "urns": [f"tel:{tel}"]},
+            RapidProAPI.CONTACTS_ENDPOINT, {"name": name, "groups": [group_uuid], "urns": [f"tel:{tel}"]},
         )
         return contact
 
-    def create_contacts_and_groups_for_verification(
-        self, cash_plan_verification
-    ):
+    def create_contacts_and_groups_for_verification(self, cash_plan_verification):
         individuals = Individual.objects.filter(
             heading_household__payment_records__verifications__cash_plan_payment_verification=cash_plan_verification.id
         )

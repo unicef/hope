@@ -66,40 +66,24 @@ class TestTargetPopulationQuery(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        (household, individuals) = create_household(
-            {"size": 1, "residence_status": "CITIZEN", },
-        )
-        (household, individuals) = create_household(
-            {"size": 1, "residence_status": "CITIZEN", },
-        )
+        (household, individuals) = create_household({"size": 1, "residence_status": "CITIZEN",},)
+        (household, individuals) = create_household({"size": 1, "residence_status": "CITIZEN",},)
         cls.household_size_1 = household
         cls.household_residence_status_citizen = cls.household_size_1
-        (household, individuals) = create_household(
-            {"size": 2, "residence_status": "REFUGEE", },
-        )
+        (household, individuals) = create_household({"size": 2, "residence_status": "REFUGEE",},)
         cls.household_residence_status_refugee = household
         cls.household_size_2 = cls.household_residence_status_refugee
 
         cls.user = UserFactory.create()
         targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {
-                "field_name": "size",
-                "arguments": [2],
-                "comparision_method": "EQUALS",
-            }
+            {"field_name": "size", "arguments": [2], "comparision_method": "EQUALS",}
         )
         cls.target_population_size_2 = TargetPopulation(
-            name="target_population_size_2",
-            created_by=cls.user,
-            candidate_list_targeting_criteria=targeting_criteria,
+            name="target_population_size_2", created_by=cls.user, candidate_list_targeting_criteria=targeting_criteria,
         )
         cls.target_population_size_2.save()
         targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {
-                "field_name": "residence_status",
-                "arguments": ["REFUGEE"],
-                "comparision_method": "EQUALS",
-            }
+            {"field_name": "residence_status", "arguments": ["REFUGEE"], "comparision_method": "EQUALS",}
         )
         cls.target_population_residence_status = TargetPopulation(
             name="target_population_residence_status",
@@ -109,11 +93,7 @@ class TestTargetPopulationQuery(APITestCase):
         cls.target_population_residence_status.save()
 
         targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {
-                "field_name": "size",
-                "arguments": [1],
-                "comparision_method": "EQUALS",
-            }
+            {"field_name": "size", "arguments": [1], "comparision_method": "EQUALS",}
         )
         cls.target_population_size_1_approved = TargetPopulation(
             name="target_population_size_1_approved",
@@ -123,8 +103,7 @@ class TestTargetPopulationQuery(APITestCase):
         )
         cls.target_population_size_1_approved.save()
         HouseholdSelection.objects.create(
-            household=cls.household_size_1,
-            target_population=cls.target_population_size_1_approved,
+            household=cls.household_size_1, target_population=cls.target_population_size_1_approved,
         )
 
     @staticmethod
@@ -133,16 +112,12 @@ class TestTargetPopulationQuery(APITestCase):
         targeting_criteria.save()
         rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)
         rule.save()
-        rule_filter = TargetingCriteriaRuleFilter(
-            **rule_filter, targeting_criteria_rule=rule
-        )
+        rule_filter = TargetingCriteriaRuleFilter(**rule_filter, targeting_criteria_rule=rule)
         rule_filter.save()
         return targeting_criteria
 
     def test_simple_all_targets_query(self):
-        self.snapshot_graphql_request(
-            request_string=TestTargetPopulationQuery.ALL_TARGET_POPULATION_QUERY,
-        )
+        self.snapshot_graphql_request(request_string=TestTargetPopulationQuery.ALL_TARGET_POPULATION_QUERY,)
 
     def test_simple_all_targets_query_filter_finalListTotalHouseholdsMin(self):
         self.snapshot_graphql_request(
@@ -153,23 +128,11 @@ class TestTargetPopulationQuery(APITestCase):
     def test_simple_target_query(self):
         self.snapshot_graphql_request(
             request_string=TestTargetPopulationQuery.TARGET_POPULATION_QUERY,
-            variables={
-                "id": self.id_to_base64(
-                    self.target_population_size_1_approved.id,
-                    "TargetPopulation",
-                )
-            },
+            variables={"id": self.id_to_base64(self.target_population_size_1_approved.id, "TargetPopulation",)},
         )
 
     def test_simple_target_query_2(self):
         self.snapshot_graphql_request(
             request_string=TestTargetPopulationQuery.TARGET_POPULATION_QUERY,
-            variables={
-                "id": self.id_to_base64(
-                    self.target_population_residence_status.id,
-                    "TargetPopulation",
-                )
-            },
+            variables={"id": self.id_to_base64(self.target_population_residence_status.id, "TargetPopulation",)},
         )
-
-

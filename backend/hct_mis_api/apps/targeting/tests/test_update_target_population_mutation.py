@@ -171,22 +171,14 @@ class TestUpdateTargetPopulationMutation(APITestCase):
         cls.draft_target_population = TargetPopulation(
             name="draft_target_population",
             candidate_list_targeting_criteria=cls.get_targeting_criteria_for_rule(
-                {
-                    "field_name": "size",
-                    "arguments": [2],
-                    "comparision_method": "EQUALS",
-                }
+                {"field_name": "size", "arguments": [2], "comparision_method": "EQUALS",}
             ),
         )
         cls.draft_target_population.save()
         cls.approved_target_population = TargetPopulation(
             name="approved_target_population",
             candidate_list_targeting_criteria=cls.get_targeting_criteria_for_rule(
-                {
-                    "field_name": "size",
-                    "arguments": [1],
-                    "comparision_method": "GREATER_THAN",
-                }
+                {"field_name": "size", "arguments": [1], "comparision_method": "GREATER_THAN",}
             ),
             status="APPROVED",
         )
@@ -199,9 +191,7 @@ class TestUpdateTargetPopulationMutation(APITestCase):
         targeting_criteria.save()
         rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)
         rule.save()
-        rule_filter = TargetingCriteriaRuleFilter(
-            **rule_filter, targeting_criteria_rule=rule
-        )
+        rule_filter = TargetingCriteriaRuleFilter(**rule_filter, targeting_criteria_rule=rule)
         rule_filter.save()
         return targeting_criteria
 
@@ -210,9 +200,7 @@ class TestUpdateTargetPopulationMutation(APITestCase):
         variables["updateTargetPopulationInput"]["id"] = self.id_to_base64(
             self.draft_target_population.id, "TargetPopulation"
         )
-        variables["updateTargetPopulationInput"][
-            "name"
-        ] = "draft_target_population updated"
+        variables["updateTargetPopulationInput"]["name"] = "draft_target_population updated"
 
         self.snapshot_graphql_request(
             request_string=TestUpdateTargetPopulationMutation.MUTATION_QUERY,
@@ -233,15 +221,11 @@ class TestUpdateTargetPopulationMutation(APITestCase):
         )
 
     def test_fail_update_draft_mutation_wrong_args_count(self):
-        variables = copy.deepcopy(
-            TestUpdateTargetPopulationMutation.VARIABLES_WRONG_ARGS_COUNT
-        )
+        variables = copy.deepcopy(TestUpdateTargetPopulationMutation.VARIABLES_WRONG_ARGS_COUNT)
         variables["updateTargetPopulationInput"]["id"] = self.id_to_base64(
             self.draft_target_population.id, "TargetPopulation"
         )
-        variables["updateTargetPopulationInput"][
-            "name"
-        ] = "draft_target_population wrong"
+        variables["updateTargetPopulationInput"]["name"] = "draft_target_population wrong"
 
         self.snapshot_graphql_request(
             request_string=TestUpdateTargetPopulationMutation.MUTATION_QUERY,
@@ -250,15 +234,11 @@ class TestUpdateTargetPopulationMutation(APITestCase):
         )
 
     def test_fail_update_draft_mutation_wrong_comparision_method(self):
-        variables = copy.deepcopy(
-            TestUpdateTargetPopulationMutation.VARIABLES_WRONG_COMPARISION_METHOD
-        )
+        variables = copy.deepcopy(TestUpdateTargetPopulationMutation.VARIABLES_WRONG_COMPARISION_METHOD)
         variables["updateTargetPopulationInput"]["id"] = self.id_to_base64(
             self.draft_target_population.id, "TargetPopulation"
         )
-        variables["updateTargetPopulationInput"][
-            "name"
-        ] = "draft_target_population wrong"
+        variables["updateTargetPopulationInput"]["name"] = "draft_target_population wrong"
 
         self.snapshot_graphql_request(
             request_string=TestUpdateTargetPopulationMutation.MUTATION_QUERY,
@@ -267,15 +247,11 @@ class TestUpdateTargetPopulationMutation(APITestCase):
         )
 
     def test_fail_update_draft_mutation_unknown_comparision_method(self):
-        variables = copy.deepcopy(
-            TestUpdateTargetPopulationMutation.VARIABLES_UNKNOWN_COMPARISION_METHOD
-        )
+        variables = copy.deepcopy(TestUpdateTargetPopulationMutation.VARIABLES_UNKNOWN_COMPARISION_METHOD)
         variables["updateTargetPopulationInput"]["id"] = self.id_to_base64(
             self.draft_target_population.id, "TargetPopulation"
         )
-        variables["updateTargetPopulationInput"][
-            "name"
-        ] = "draft_target_population wrong"
+        variables["updateTargetPopulationInput"]["name"] = "draft_target_population wrong"
 
         self.snapshot_graphql_request(
             request_string=TestUpdateTargetPopulationMutation.MUTATION_QUERY,
@@ -284,15 +260,11 @@ class TestUpdateTargetPopulationMutation(APITestCase):
         )
 
     def test_fail_update_draft_mutation_unknown_flex_field_name(self):
-        variables = copy.deepcopy(
-            TestUpdateTargetPopulationMutation.VARIABLES_UNKNOWN_FLEX_FIELD_NAME
-        )
+        variables = copy.deepcopy(TestUpdateTargetPopulationMutation.VARIABLES_UNKNOWN_FLEX_FIELD_NAME)
         variables["updateTargetPopulationInput"]["id"] = self.id_to_base64(
             self.draft_target_population.id, "TargetPopulation"
         )
-        variables["updateTargetPopulationInput"][
-            "name"
-        ] = "draft_target_population wrong"
+        variables["updateTargetPopulationInput"]["name"] = "draft_target_population wrong"
 
         self.snapshot_graphql_request(
             request_string=TestUpdateTargetPopulationMutation.MUTATION_QUERY,
@@ -301,15 +273,11 @@ class TestUpdateTargetPopulationMutation(APITestCase):
         )
 
     def test_fail_update_draft_mutation_unknown_core_field_name(self):
-        variables = copy.deepcopy(
-            TestUpdateTargetPopulationMutation.VARIABLES_UNKNOWN_CORE_FIELD_NAME
-        )
+        variables = copy.deepcopy(TestUpdateTargetPopulationMutation.VARIABLES_UNKNOWN_CORE_FIELD_NAME)
         variables["updateTargetPopulationInput"]["id"] = self.id_to_base64(
             self.draft_target_population.id, "TargetPopulation"
         )
-        variables["updateTargetPopulationInput"][
-            "name"
-        ] = "draft_target_population wrong"
+        variables["updateTargetPopulationInput"]["name"] = "draft_target_population wrong"
 
         self.snapshot_graphql_request(
             request_string=TestUpdateTargetPopulationMutation.MUTATION_QUERY,

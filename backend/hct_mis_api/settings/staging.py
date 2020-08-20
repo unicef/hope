@@ -22,12 +22,7 @@ ALLOWED_HOSTS = [
 # EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 # CACHE
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-        "TIMEOUT": 1800,
-    }
-}
+CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache", "TIMEOUT": 1800,}}
 
 ## STORAGE
 STATIC_LOCATION = "static"
@@ -52,17 +47,17 @@ if os.getenv("POSTGRES_SSL", False):
     DATABASES["cash_assist_datahub_mis"]["OPTIONS"] = {
         "sslmode": "verify-full",
         "sslrootcert": "/code/psql-cert.crt",
-        "options": "-c search_path=mis"
+        "options": "-c search_path=mis",
     }
     DATABASES["cash_assist_datahub_ca"]["OPTIONS"] = {
         "sslmode": "verify-full",
         "sslrootcert": "/code/psql-cert.crt",
-        "options": "-c search_path=ca"
+        "options": "-c search_path=ca",
     }
     DATABASES["cash_assist_datahub_erp"]["OPTIONS"] = {
         "sslmode": "verify-full",
         "sslrootcert": "/code/psql-cert.crt",
-        "options": "-c search_path=erp"
+        "options": "-c search_path=erp",
     }
     DATABASES["registration_datahub"]["OPTIONS"] = {
         "sslmode": "verify-full",
@@ -70,15 +65,12 @@ if os.getenv("POSTGRES_SSL", False):
     }
 
 sentry_sdk.init(
-    dsn=os.getenv("SENTRY_DSN"),
-    integrations=[DjangoIntegration()],
+    dsn=os.getenv("SENTRY_DSN"), integrations=[DjangoIntegration()],
 )
 
 AIRFLOW_HOST = "hct-mis-airflow-web"
 
 # ELASTICSEARCH SETTINGS
 ELASTICSEARCH_DSL = {
-    'default': {
-        'hosts': 'https://elasticsearch.unicef.io/'
-    },
+    "default": {"hosts": "https://elasticsearch.unicef.io/"},
 }

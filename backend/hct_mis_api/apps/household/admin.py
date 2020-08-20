@@ -5,7 +5,8 @@ from household.models import (
     Individual,
     DocumentType,
     Document,
-    Agency, IndividualRoleInHousehold,
+    Agency,
+    IndividualRoleInHousehold,
 )
 
 

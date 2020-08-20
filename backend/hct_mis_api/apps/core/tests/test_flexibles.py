@@ -24,16 +24,10 @@ class TestFlexibles(TestCase):
         self.admin = FlexibleAttributeAdmin(FlexibleAttribute, site)
 
     def load_xls(self, name):
-        with open(
-            f"{settings.PROJECT_ROOT}/apps/core/tests/test_files/{name}", "rb",
-        ) as f:
-            file_upload = SimpleUploadedFile(
-                "xls_file", f.read(), content_type="text/html"
-            )
+        with open(f"{settings.PROJECT_ROOT}/apps/core/tests/test_files/{name}", "rb",) as f:
+            file_upload = SimpleUploadedFile("xls_file", f.read(), content_type="text/html")
             data = {"xls_file": file_upload}
-        request = self.factory.post(
-            "import-xls/", data=data, format="multipart"
-        )
+        request = self.factory.post("import-xls/", data=data, format="multipart")
         setattr(request, "session", "session")
         messages = FallbackStorage(request)
         setattr(request, "_messages", messages)
@@ -55,8 +49,7 @@ class TestFlexibles(TestCase):
         self.assertEqual(expected_groups_count, len(groups_from_db))
         self.assertEqual(expected_choices_count, len(choices_from_db))
         self.assertEqual(
-            expected_repeated_groups,
-            len(groups_from_db.filter(repeatable=True)),
+            expected_repeated_groups, len(groups_from_db.filter(repeatable=True)),
         )
 
         """
@@ -74,12 +67,8 @@ class TestFlexibles(TestCase):
             vulnerability_questions
         """
 
-        household_questions_group = FlexibleAttributeGroup.objects.get(
-            name="household_questions"
-        )
-        individual_questions_group = FlexibleAttributeGroup.objects.get(
-            name="individual_questions"
-        )
+        household_questions_group = FlexibleAttributeGroup.objects.get(name="household_questions")
+        individual_questions_group = FlexibleAttributeGroup.objects.get(name="individual_questions")
         groups_tree_dict = {
             "consent": None,
             "household_questions": None,
@@ -119,24 +108,16 @@ class TestFlexibles(TestCase):
             "If member is a child, does he/she currently enrolled in school",
         ]
 
-        yes_choice = FlexibleAttributeChoice.objects.get(
-            list_name="yes_no", name=1
-        )
-        no_choice = FlexibleAttributeChoice.objects.get(
-            list_name="yes_no", name=0
-        )
+        yes_choice = FlexibleAttributeChoice.objects.get(list_name="yes_no", name=1)
+        no_choice = FlexibleAttributeChoice.objects.get(list_name="yes_no", name=0)
 
         for name, label in zip(selected_attribs, attrib_english_labels):
             attrib = FlexibleAttribute.objects.get(name=name)
             expected_associated_with = 0 if attrib.name[-4:] == "_h_f" else 1
             self.assertEqual(attrib.label["English(EN)"], label)
             self.assertEqual(attrib.associated_with, expected_associated_with)
-            self.assertTrue(
-                yes_choice.flex_attributes.filter(id=attrib.id).exists()
-            )
-            self.assertTrue(
-                no_choice.flex_attributes.filter(id=attrib.id).exists()
-            )
+            self.assertTrue(yes_choice.flex_attributes.filter(id=attrib.id).exists())
+            self.assertTrue(no_choice.flex_attributes.filter(id=attrib.id).exists())
 
         # Test updating/deleting values
         self.load_xls("flex_updated.xls")
@@ -149,13 +130,9 @@ class TestFlexibles(TestCase):
             "household_vulnerabilities",
         ]
 
-        groups_from_db = FlexibleAttributeGroup.objects.filter(
-            name__in=deleted_groups
-        )
+        groups_from_db = FlexibleAttributeGroup.objects.filter(name__in=deleted_groups)
 
-        deleted_groups_from_db = FlexibleAttributeGroup.all_objects.filter(
-            name__in=deleted_groups
-        )
+        deleted_groups_from_db = FlexibleAttributeGroup.all_objects.filter(name__in=deleted_groups)
         self.assertEqual(len(groups_from_db), 0)
 
         # check if they are soft deleted
@@ -164,9 +141,7 @@ class TestFlexibles(TestCase):
         consent_group = FlexibleAttributeGroup.objects.get(name="consent")
         self.assertEqual(consent_group.label["English(EN)"], "Consent Edited")
 
-        introduction = FlexibleAttribute.objects.filter(
-            type="note", name="introduction_h_f"
-        ).exists()
+        introduction = FlexibleAttribute.objects.filter(type="note", name="introduction_h_f").exists()
         self.assertFalse(introduction)
 
     def test_flexibles_type_validation(self):

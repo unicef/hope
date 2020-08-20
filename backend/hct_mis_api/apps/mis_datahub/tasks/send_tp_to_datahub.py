@@ -78,8 +78,7 @@ class SendTPToDatahubTask:
         documents_to_bulk_create = []
         tp_entries_to_bulk_create = []
         dh_session = dh_mis_models.Session(
-            source=dh_mis_models.Session.SOURCE_MIS,
-            status=dh_mis_models.Session.STATUS_READY,
+            source=dh_mis_models.Session.SOURCE_MIS, status=dh_mis_models.Session.STATUS_READY,
         )
         dh_session.save()
         target_population_selections = HouseholdSelection.objects.filter(
@@ -98,10 +97,7 @@ class SendTPToDatahubTask:
         # )
 
         program = target_population.program
-        if (
-            program.last_sync_at is None
-            or program.last_sync_at < program.updated_at
-        ):
+        if program.last_sync_at is None or program.last_sync_at < program.updated_at:
             dh_program = self.send_program(program)
             dh_program.session = dh_session
             dh_program.save()
@@ -113,9 +109,7 @@ class SendTPToDatahubTask:
         household_ids = households.values_list("id", flat=True)
 
         for household in households:
-            dh_household, dh_individuals = self.send_household(
-                household, program, dh_session, household_ids,
-            )
+            dh_household, dh_individuals = self.send_household(household, program, dh_session, household_ids,)
             dh_household.session = dh_session
             households_to_bulk_create.append(dh_household)
             individuals_to_bulk_create.extend(dh_individuals)
@@ -127,9 +121,7 @@ class SendTPToDatahubTask:
         dh_mis_models.Household.objects.bulk_create(households_to_bulk_create)
         dh_mis_models.Individual.objects.bulk_create(individuals_to_bulk_create)
         dh_mis_models.Document.objects.bulk_create(documents_to_bulk_create)
-        dh_mis_models.TargetPopulationEntry.objects.bulk_create(
-            tp_entries_to_bulk_create
-        )
+        dh_mis_models.TargetPopulationEntry.objects.bulk_create(tp_entries_to_bulk_create)
         target_population.sent_to_datahub = True
         target_population.save()
         households.update(last_sync_at=timezone.now())
@@ -141,41 +133,27 @@ class SendTPToDatahubTask:
         return args
 
     def send_program(self, program):
-        dh_program_args = self.build_arg_dict(
-            program, SendTPToDatahubTask.MAPPING_PROGRAM_DICT
-        )
+        dh_program_args = self.build_arg_dict(program, SendTPToDatahubTask.MAPPING_PROGRAM_DICT)
 
         dh_program = dh_mis_models.Program(**dh_program_args)
         return dh_program
 
     def send_target_population(self, target_population):
-        dh_tp_args = self.build_arg_dict(
-            target_population, SendTPToDatahubTask.MAPPING_TP_DICT
-        )
+        dh_tp_args = self.build_arg_dict(target_population, SendTPToDatahubTask.MAPPING_TP_DICT)
         dh_target = dh_mis_models.TargetPopulation(**dh_tp_args)
         return dh_target
 
-    def send_individual(
-        self, individual, dh_household, dh_session, household_ids
-    ):
-        dh_individual_args = self.build_arg_dict(
-            individual, SendTPToDatahubTask.MAPPING_INDIVIDUAL_DICT
-        )
+    def send_individual(self, individual, dh_household, dh_session, household_ids):
+        dh_individual_args = self.build_arg_dict(individual, SendTPToDatahubTask.MAPPING_INDIVIDUAL_DICT)
         dh_individual = dh_mis_models.Individual(**dh_individual_args)
         dh_individual.household = dh_household
 
         for document in individual.documents.all():
-            dh_document_args = self.build_arg_dict(
-                document, SendTPToDatahubTask.MAPPING_DOCUMENT_DICT
-            )
-            dh_document, _ = dh_mis_models.Document.objects.get_or_create(
-                **dh_document_args, session=dh_session,
-            )
+            dh_document_args = self.build_arg_dict(document, SendTPToDatahubTask.MAPPING_DOCUMENT_DICT)
+            dh_document, _ = dh_mis_models.Document.objects.get_or_create(**dh_document_args, session=dh_session,)
 
         dh_individual.unchr_id = self.get_unhcr_individual_id(individual)
-        roles = individual.households_and_roles.filter(
-            household__id__in=household_ids
-        )
+        roles = individual.households_and_roles.filter(household__id__in=household_ids)
         for role in roles:
             dh_mis_models.IndividualRoleInHousehold.objects.get_or_create(
                 role=role.role,
@@ -188,49 +166,36 @@ class SendTPToDatahubTask:
         return dh_individual
 
     def send_household(self, household, program, dh_session, household_ids):
-        dh_household_args = self.build_arg_dict(
-            household, SendTPToDatahubTask.MAPPING_HOUSEHOLD_DICT
-        )
+        dh_household_args = self.build_arg_dict(household, SendTPToDatahubTask.MAPPING_HOUSEHOLD_DICT)
         dh_household = dh_mis_models.Household(**dh_household_args)
         dh_household.country = household.country.alpha3
         dh_household.unhcr_id = self.get_unhcr_household_id(household)
 
         head_of_household = household.head_of_household
-        collectors_ids = list(
-            household.representatives.values_list("id", flat=True)
-        )
+        collectors_ids = list(household.representatives.values_list("id", flat=True))
         ids = {head_of_household.id, *collectors_ids}
         individuals_to_create = []
         if program.individual_data_needed:
             individuals = household.individuals.all()
             for individual in individuals:
                 if self.should_send_individual(individual, household):
-                    dh_individual = self.send_individual(
-                        individual, dh_household, dh_session, household_ids,
-                    )
+                    dh_individual = self.send_individual(individual, dh_household, dh_session, household_ids,)
                     dh_individual.session = dh_session
                     individuals_to_create.append(dh_individual)
         else:
             individuals = (
                 Individual.objects.filter(id__in=ids)
-                .filter(
-                    Q(last_sync_at__isnull=True)
-                    | Q(last_sync_at__lte=F("updated_at"))
-                )
+                .filter(Q(last_sync_at__isnull=True) | Q(last_sync_at__lte=F("updated_at")))
                 .prefetch_related(
                     Prefetch(
                         "households_and_roles",
-                        queryset=IndividualRoleInHousehold.objects.filter(
-                            household=household.id
-                        ),
+                        queryset=IndividualRoleInHousehold.objects.filter(household=household.id),
                     )
                 )
             )
             for individual in individuals:
                 if self.should_send_individual(individual, household):
-                    dh_individual = self.send_individual(
-                        individual, dh_household, dh_session, household_ids,
-                    )
+                    dh_individual = self.send_individual(individual, dh_household, dh_session, household_ids,)
                     dh_individual.session = dh_session
                     individuals_to_create.append(dh_individual)
         individuals.update(last_sync_at=timezone.now())
@@ -238,17 +203,12 @@ class SendTPToDatahubTask:
         return dh_household, individuals_to_create
 
     def should_send_individual(self, individual, household):
-        is_synced = (
-            individual.last_sync_at is None
-            or individual.last_sync_at > individual.updated_at
-        )
+        is_synced = individual.last_sync_at is None or individual.last_sync_at > individual.updated_at
         is_allowed_to_share = household.business_area.has_data_sharing_agreement
         return is_synced and is_allowed_to_share
 
     def send_target_entry(self, target_population_selection):
-        household_unhcr_id = self.get_unhcr_household_id(
-            target_population_selection.household
-        )
+        household_unhcr_id = self.get_unhcr_household_id(target_population_selection.household)
         return dh_mis_models.TargetPopulationEntry(
             target_population_mis_id=target_population_selection.target_population.id,
             household_mis_id=target_population_selection.household.id,

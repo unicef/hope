@@ -45,9 +45,7 @@ def decode_id_string(id_string):
     return b64decode(id_string).decode().split(":")[1]
 
 
-def unique_slugify(
-    instance, value, slug_field_name="slug", queryset=None, slug_separator="-"
-):
+def unique_slugify(instance, value, slug_field_name="slug", queryset=None, slug_separator="-"):
     """
     Calculates and stores a unique slug of ``value`` for an instance.
 
@@ -170,9 +168,7 @@ def serialize_flex_attributes():
     }
 
     for attr in flex_attributes:
-        associated_with = (
-            "Household" if attr.associated_with == 0 else "Individual"
-        )
+        associated_with = "Household" if attr.associated_with == 0 else "Individual"
         dict_key = associated_with.lower() + "s"
 
         result_dict[dict_key][attr.name] = {
@@ -191,9 +187,7 @@ def serialize_flex_attributes():
 
 
 def get_combined_attributes():
-    from core.core_fields_attributes import (
-        CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY,
-    )
+    from core.core_fields_attributes import CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY
 
     flex_attrs = serialize_flex_attributes()
     return {
@@ -228,13 +222,9 @@ def age_to_birth_date_query(comparision_method, args):
     }
     args_count = comparision_method_args_count.get(comparision_method)
     if args_count is None:
-        raise ValidationError(
-            f"Age filter query don't supports {comparision_method} type"
-        )
+        raise ValidationError(f"Age filter query don't supports {comparision_method} type")
     if len(args) != args_count:
-        raise ValidationError(
-            f"Age {comparision_method} filter query expect {args_count} arguments"
-        )
+        raise ValidationError(f"Age {comparision_method} filter query expect {args_count} arguments")
     if comparision_method == "RANGE":
         return age_to_birth_date_range_query(field_name, *args)
     if comparision_method == "NOT_IN_RANGE":
@@ -247,9 +237,7 @@ def age_to_birth_date_query(comparision_method, args):
         return age_to_birth_date_range_query(field_name, args[0], None)
     if comparision_method == "LESS_THAN":
         return age_to_birth_date_range_query(field_name, None, args[0])
-    raise ValidationError(
-        f"Age filter query don't supports {comparision_method} type"
-    )
+    raise ValidationError(f"Age filter query don't supports {comparision_method} type")
 
 
 def get_attr_value(name, object, default=None):

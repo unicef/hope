@@ -17,9 +17,7 @@ def homepage(request):
 def schema(request):
     schema = graphene_settings.SCHEMA
     my_schema_str = schema_printer.print_schema(schema)
-    return HttpResponse(
-        my_schema_str, content_type="application/graphlq", status=200
-    )
+    return HttpResponse(my_schema_str, content_type="application/graphlq", status=200)
 
 
 def logout_view(request):
