@@ -9,6 +9,7 @@ import {
   useImportXlsxCashPlanVerificationMutation,
   ImportXlsxCashPlanVerificationMutation,
   XlsxErrorNode,
+  ImportXlsxCashPlanVerificationMutationResult,
 } from '../../../__generated__/graphql';
 import { UniversalTable } from '../UniversalTable';
 import { headCells } from './VerificationRecordsHeadCells';
@@ -90,19 +91,20 @@ export function VerificationRecordsTable({
   const handleImport = async (): Promise<void> => {
     if (fileToImport) {
       try {
-        await mutate({
+        const { data, errors } = await mutate({
           variables: {
             cashPlanVerificationId: id,
             file: fileToImport,
           },
         });
-      } catch {
-        return;
+
+        if (!errors && !data?.importXlsxCashPlanVerification?.errors.length) {
+          setOpenImport(false);
+          showMessage('Your import was successful!');
+        }
+      } catch (e) {
+        console.error(e);
       }
-    }
-    if (!xlsxErrors?.length && !error) {
-      setOpenImport(false);
-      showMessage('Your import was successful!');
     }
   };
   const exportButton =
