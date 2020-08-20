@@ -131,7 +131,6 @@ export function CreateVerificationPlan({
   }, [refetch, formValues, sampleSizesData]);
 
   const submit = async (values): Promise<void> => {
-    console.log(values);
     const { errors } = await mutate({
       variables: {
         input: {
