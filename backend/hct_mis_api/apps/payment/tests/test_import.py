@@ -133,7 +133,6 @@ class TestXlsxVerificationImport(APITestCase):
             TestXlsxVerificationImport.verification
         )
         wb = export_service.generate_workbook()
-        export_service.generate_file("test.xlsx")
         file = io.BytesIO(save_virtual_workbook(wb))
         import_service = XlsxVerificationImportService(
             TestXlsxVerificationImport.verification, file

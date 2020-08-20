@@ -19,7 +19,7 @@ class XlsxVerificationExportService:
     VERSION_CELL_NAME_COORDINATES = "A1"
     VERSION_CELL_COORDINATES = "B1"
     VERSION_CELL_NAME = "FILE_TEMPLATE_VERSION"
-    VERSION = "1.0"
+    VERSION = "1.1"
     TRUE_FALSE_MAPPING = {True: "YES", False: "NO"}
 
     def __init__(self, cashplan_payment_verification):
