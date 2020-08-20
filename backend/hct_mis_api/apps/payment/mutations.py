@@ -12,7 +12,10 @@ from core.filters import filter_age
 from core.permissions import is_authenticated
 from core.utils import decode_id_string
 from household.models import Individual
-from payment.inputs import CreatePaymentVerificationInput
+from payment.inputs import (
+    CreatePaymentVerificationInput,
+    EditCashPlanPaymentVerificationInput,
+)
 from payment.models import CashPlanPaymentVerification, PaymentVerification
 from payment.rapid_pro.api import RapidProAPI
 from payment.schema import PaymentVerificationNode
@@ -107,6 +110,186 @@ class CreatePaymentVerificationMutation(graphene.Mutation):
             sampling=sampling,
             verification_method=verification_channel,
         )
+        payment_record_verifications_to_create = []
+        for payment_record in payment_records:
+            payment_record_verification = PaymentVerification(
+                status_date=timezone.now(),
+                cash_plan_payment_verification=cash_plan_verification,
+                payment_record=payment_record,
+            )
+            payment_record_verifications_to_create.append(
+                payment_record_verification
+            )
+        cash_plan_verification.save()
+        PaymentVerification.objects.bulk_create(
+            payment_record_verifications_to_create
+        )
+        cash_plan.refresh_from_db()
+        cls.process_verification_method(cash_plan_verification, input)
+        return cls(cash_plan=cash_plan)
+
+    @classmethod
+    def process_sampling(cls, cash_plan, input):
+        arg = lambda name: input.get(name)
+        sampling = arg("sampling")
+        excluded_admin_areas = []
+        sex = None
+        age = None
+        confidence_interval = None
+        margin_of_error = None
+        payment_records = cash_plan.payment_records
+        if sampling == CashPlanPaymentVerification.SAMPLING_FULL_LIST:
+            excluded_admin_areas = arg("full_list_arguments").get(
+                "excluded_admin_areas", []
+            )
+        elif sampling == CashPlanPaymentVerification.SAMPLING_RANDOM:
+            random_sampling_arguments = arg("random_sampling_arguments")
+            confidence_interval = random_sampling_arguments.get(
+                "confidence_interval"
+            )
+            margin_of_error = random_sampling_arguments.get("margin_of_error")
+            sex = random_sampling_arguments.get("sex")
+            age = random_sampling_arguments.get("random_sampling_arguments")
+
+        payment_records = payment_records.filter(
+            ~(Q(household__admin_area__title__in=excluded_admin_areas))
+        )
+        if sex is not None:
+            payment_records = payment_records.filter(
+                household__head_of_household__sex=sex
+            )
+        if age is not None:
+            payment_records = filter_age(
+                "household__head_of_household__birth_date",
+                payment_records,
+                age.get(min),
+                age.get("max"),
+            )
+        payment_records_sample_count = payment_records.count()
+        if sampling == CashPlanPaymentVerification.SAMPLING_RANDOM:
+            payment_records_sample_count = get_number_of_samples(
+                payment_records_sample_count,
+                confidence_interval,
+                margin_of_error,
+            )
+            payment_records = payment_records.order_by("?")[
+                :payment_records_sample_count
+            ]
+        return (
+            payment_records,
+            confidence_interval,
+            margin_of_error,
+            payment_records_sample_count,
+            sampling,
+        )
+
+    @classmethod
+    def process_verification_method(cls, cash_plan_payment_verification, input):
+        verification_method = cash_plan_payment_verification.verification_method
+        if (
+            verification_method
+            == CashPlanPaymentVerification.VERIFICATION_METHOD_RAPIDPRO
+        ):
+            cls.process_rapid_pro_method(cash_plan_payment_verification, input)
+
+    @classmethod
+    def process_rapid_pro_method(cls, cash_plan_payment_verification, input):
+        rapid_pro_arguments = input["rapid_pro_arguments"]
+        flow_id = rapid_pro_arguments["flow_id"]
+        cash_plan_payment_verification.rapid_pro_flow_id = flow_id
+
+        cash_plan_payment_verification.save()
+
+
+class EditPaymentVerificationMutation(graphene.Mutation):
+
+    cash_plan = graphene.Field(CashPlanNode)
+
+    class Arguments:
+        input = EditCashPlanPaymentVerificationInput(required=True)
+
+    @staticmethod
+    def verify_required_arguments(input, field_name, options):
+        for key, value in options.items():
+            if key != input.get(field_name):
+                continue
+            for required in value.get("required"):
+                if input.get(required) is None:
+                    raise GraphQLError(
+                        f"You have to provide {required} in {key}"
+                    )
+            for not_allowed in value.get("not_allowed"):
+                if input.get(not_allowed) is not None:
+                    raise GraphQLError(
+                        f"You can't provide {not_allowed} in {key}"
+                    )
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root, info, input, **kwargs):
+        arg = lambda name: input.get(name)
+        cls.verify_required_arguments(
+            input,
+            "sampling",
+            {
+                CashPlanPaymentVerification.SAMPLING_FULL_LIST: {
+                    "required": ["full_list_arguments"],
+                    "not_allowed": ["random_sampling_arguments"],
+                },
+                CashPlanPaymentVerification.SAMPLING_RANDOM: {
+                    "required": ["random_sampling_arguments"],
+                    "not_allowed": ["full_list_arguments"],
+                },
+            },
+        )
+        cls.verify_required_arguments(
+            input,
+            "verification_channel",
+            {
+                CashPlanPaymentVerification.VERIFICATION_METHOD_RAPIDPRO: {
+                    "required": ["rapid_pro_arguments"],
+                    "not_allowed": ["xlsx_arguments", "manual_arguments"],
+                },
+                CashPlanPaymentVerification.VERIFICATION_METHOD_XLSX: {
+                    "required": [],
+                    "not_allowed": ["rapid_pro_arguments", "manual_arguments"],
+                },
+                CashPlanPaymentVerification.VERIFICATION_METHOD_MANUAL: {
+                    "required": [],
+                    "not_allowed": ["rapid_pro_arguments", "xlsx_arguments"],
+                },
+            },
+        )
+        cash_plan_payment_verification_id = arg(
+            "cash_plan_payment_verification_id"
+        )
+
+        cash_plan_verification = get_object_or_404(
+            CashPlanPaymentVerification, id=cash_plan_payment_verification_id
+        )
+        if (
+            cash_plan_verification.status
+            != CashPlanPaymentVerification.STATUS_PENDING
+        ):
+            raise GraphQLError(
+                "You can only edit PENDING Cash Plan Verification"
+            )
+        cash_plan = cash_plan_verification.cash_plan
+        verification_channel = arg("verification_channel")
+        (
+            payment_records,
+            confidence_interval,
+            margin_of_error,
+            payment_records_sample_count,
+            sampling,
+        ) = cls.process_sampling(cash_plan, input)
+        cash_plan_verification.confidence_interval = confidence_interval
+        cash_plan_verification.margin_of_error = margin_of_error
+        cash_plan_verification.sample_size = payment_records_sample_count
+        cash_plan_verification.sampling = sampling
+        cash_plan_verification.verification_method = verification_channel
+
         payment_record_verifications_to_create = []
         for payment_record in payment_records:
             payment_record_verification = PaymentVerification(

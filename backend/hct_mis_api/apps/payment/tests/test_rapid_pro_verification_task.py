@@ -1,13 +1,10 @@
-import io
 import uuid
 from unittest.mock import MagicMock, patch
 
-from django.core.exceptions import ValidationError
 from django.core.management import call_command
-from openpyxl.writer.excel import save_virtual_workbook
+from django.test import TestCase
 
 from account.fixtures import UserFactory
-from core.base_test_case import APITestCase
 from core.models import BusinessArea, AdminArea
 from household.fixtures import (
     create_household,
@@ -23,19 +20,12 @@ from payment.rapid_pro.api import RapidProAPI
 from payment.tasks.CheckRapidProVerificationTask import (
     CheckRapidProVerificationTask,
 )
-from payment.xlsx.XlsxVerificationExportService import (
-    XlsxVerificationExportService,
-)
-from payment.xlsx.XlsxVerificationImportService import (
-    XlsxVerificationImportService,
-)
 from program.fixtures import ProgramFactory, CashPlanFactory
 from registration_data.fixtures import RegistrationDataImportFactory
 from targeting.fixtures import TargetingCriteriaFactory, TargetPopulationFactory
 
 
-class TestRapidProVerificationTask(APITestCase):
-    verification = None
+class TestRapidProVerificationTask(TestCase):
     START_UUID = "3d946aa7-af58-4838-8dfd-553786d9bb35"
     ORIGINAL_RAPIDPRO_RUNS_RESPONSE = [
         {
@@ -122,6 +112,7 @@ class TestRapidProVerificationTask(APITestCase):
         cash_plan_payment_verification = CashPlanPaymentVerificationFactory(
             status=CashPlanPaymentVerification.STATUS_ACTIVE,
             verification_method=CashPlanPaymentVerification.VERIFICATION_METHOD_RAPIDPRO,
+            cash_plan=cash_plan,
         )
         for _ in range(payment_record_amount):
             registration_data_import = RegistrationDataImportFactory(
