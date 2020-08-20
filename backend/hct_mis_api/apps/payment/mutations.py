@@ -1,3 +1,4 @@
+import math
 from decimal import Decimal
 
 import graphene
@@ -471,6 +472,8 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(graphene.Mutation):
     def mutate(
         cls, root, info, payment_verification_id, received_amount, received, **kwargs,
     ):
+        if math.isnan(received_amount):
+            received_amount = None
         payment_verification = get_object_or_404(PaymentVerification, id=decode_id_string(payment_verification_id))
         if (
             payment_verification.cash_plan_payment_verification.verification_method
@@ -492,7 +495,7 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(graphene.Mutation):
         elif received_amount is not None and received_amount != 0 and not received:
             raise GraphQLError(f"If received_amount({received_amount}) is not 0, you should set received to YES")
 
-        payment_verification.status = from_received_to_status(received,received_amount,delivered_amount)
+        payment_verification.status = from_received_to_status(received, received_amount, delivered_amount)
         payment_verification.received_amount = received_amount
         payment_verification.save()
         return UpdatePaymentVerificationStatusAndReceivedAmount(payment_verification)
@@ -547,4 +550,6 @@ class Mutations(graphene.ObjectType):
     finish_cash_plan_payment_verification = FinishCashPlanVerificationMutation.Field()
     discard_cash_plan_payment_verification = DiscardCashPlanVerificationMutation.Field()
     update_payment_verification_status_and_received_amount = UpdatePaymentVerificationStatusAndReceivedAmount.Field()
-    update_payment_verification_received_and_received_amount = UpdatePaymentVerificationReceivedAndReceivedAmount.Field()
+    update_payment_verification_received_and_received_amount = (
+        UpdatePaymentVerificationReceivedAndReceivedAmount.Field()
+    )
