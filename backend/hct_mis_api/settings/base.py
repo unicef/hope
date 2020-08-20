@@ -408,30 +408,6 @@ RAPID_PRO_URL = os.getenv("RAPID_PRO_URL", "https://rapidpro.io")
 # DJANGO CONSTANCE settings
 CONSTANCE_REDIS_CONNECTION = f"redis://{REDIS_INSTANCE}/0"
 
-CONSTANCE_ADDITIONAL_FIELDS = {
-    "deduplication_fields_select": [
-        "django.forms.fields.ChoiceField",
-        {
-            "widget": "django.forms.SelectMultiple",
-            "choices": (
-                ("given_name", "Given name"),
-                ("full_name", "Full name"),
-                ("middle_name", "Middle name"),
-                ("family_name", "Family name"),
-                ("phone_no", "Phone number"),
-                ("phone_no_alternative", "Alternative phone number"),
-                ("relationship", "Relationship"),
-                ("sex", "Sex"),
-                ("birth_date", "Birth date"),
-                # ("household__size", "Household size"),
-                # ("household__address", "Household address"),
-                # ("household__country_origin", "Household country origin"),
-                # ("household__country", "Household country"),
-            ),
-        },
-    ],
-}
-
 CONSTANCE_CONFIG = {
     "DEDUPLICATION_BATCH_DUPLICATE_SCORE": (
         10.0,
