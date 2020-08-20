@@ -5,7 +5,11 @@ from household.documents import IndividualDocument
 from household.models import Individual, DUPLICATE, NEEDS_ADJUDICATION
 
 from registration_datahub.documents import ImportedIndividualDocument
-from registration_datahub.models import ImportedIndividual, DUPLICATE_IN_BATCH
+from registration_datahub.models import (
+    ImportedIndividual,
+    DUPLICATE_IN_BATCH,
+    SIMILAR_IN_BATCH,
+)
 
 
 class DeduplicateTask:
@@ -35,6 +39,15 @@ class DeduplicateTask:
             elif field_name == "birth_date":
                 single_query = {
                     "match": {field_name_as_key: {"query": str(field_value)}}
+                }
+            elif field_name == "full_name":
+                single_query = {
+                    "match": {
+                        field_name_as_key: {
+                            "query": str(field_value),
+                            "boost": 2.0,
+                        }
+                    }
                 }
             else:
                 single_query = {
@@ -90,8 +103,8 @@ class DeduplicateTask:
             # individual is mark as duplicate if have score above defined
             # in settings or if sha256 hashes for both individuals are the same
             if (
-                score >= duplicate_score
-                or individual.get_hash_key == individual_hit.hash_key
+                str(individual.get_hash_key) == individual_hit.hash_key
+                or score >= duplicate_score
             ):
                 duplicates.append(individual_hit.id)
                 original_individuals_ids_duplicates.append(individual.id)
@@ -100,11 +113,12 @@ class DeduplicateTask:
                 original_individuals_ids_possible_duplicates.append(
                     individual.id
                 )
+        print(individual)
+        print([(r.full_name, r.meta.score) for r in results])
 
         results_data = [
             {"hit_id": r.id, "full_name": r.full_name, "score": r.meta.score}
             for r in results
-            if document == IndividualDocument or r.meta.score >= duplicate_score
         ]
 
         return (
@@ -134,7 +148,10 @@ class DeduplicateTask:
         fields = cls._prepare_fields(individual, fields_names)
 
         query_dict = cls._prepare_query_dict(
-            individual, fields, 0, only_in_rdi,
+            individual,
+            fields,
+            config.DEDUPLICATION_BATCH_MIN_SCORE,
+            only_in_rdi,
         )
 
         return cls._get_duplicates_tuple(
@@ -292,17 +309,34 @@ class DeduplicateTask:
             to_bulk_update_results.append(imported_individual)
 
         # BATCH
-        ImportedIndividual.objects.filter(id__in=all_duplicates).update(
+        set_of_all_possible_duplicates = set(all_possible_duplicates)
+        set_of_all_duplicates = set(all_duplicates)
+
+        ImportedIndividual.objects.filter(id__in=set_of_all_duplicates).update(
             deduplication_batch_status=DUPLICATE_IN_BATCH
         )
 
-        # GOLDEN RECORD
         ImportedIndividual.objects.filter(
-            id__in=all_original_individuals_ids_duplicates
+            id__in=set_of_all_possible_duplicates.difference(
+                set_of_all_duplicates
+            )
+        ).update(deduplication_batch_status=SIMILAR_IN_BATCH)
+
+        # GOLDEN RECORD
+        set_of_all_original_individuals_ids_duplicates = set(
+            all_original_individuals_ids_duplicates
+        )
+        set_of_all_original_individuals_ids_possible_duplicates = set(
+            all_original_individuals_ids_possible_duplicates
+        )
+        ImportedIndividual.objects.filter(
+            id__in=set_of_all_original_individuals_ids_duplicates
         ).update(deduplication_golden_record_status=DUPLICATE)
 
         ImportedIndividual.objects.filter(
-            id__in=all_original_individuals_ids_possible_duplicates
+            id__in=set_of_all_original_individuals_ids_possible_duplicates.difference(
+                set_of_all_original_individuals_ids_duplicates
+            )
         ).update(deduplication_golden_record_status=NEEDS_ADJUDICATION)
 
         ImportedIndividual.objects.bulk_update(
