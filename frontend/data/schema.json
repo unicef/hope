@@ -20746,6 +20746,33 @@
             "deprecationReason": null
           },
           {
+            "name": "editCashPlanPaymentVerification",
+            "description": null,
+            "args": [
+              {
+                "name": "input",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "EditCashPlanPaymentVerificationInput",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "EditPaymentVerificationMutation",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "importXlsxCashPlanVerification",
             "description": null,
             "args": [
@@ -20913,6 +20940,61 @@
             "type": {
               "kind": "OBJECT",
               "name": "UpdatePaymentVerificationStatusAndReceivedAmount",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "updatePaymentVerificationReceivedAndReceivedAmount",
+            "description": null,
+            "args": [
+              {
+                "name": "paymentVerificationId",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "ID",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "received",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Boolean",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "receivedAmount",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Decimal",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "UpdatePaymentVerificationReceivedAndReceivedAmount",
               "ofType": null
             },
             "isDeprecated": false,
@@ -21567,6 +21649,126 @@
         "possibleTypes": null
       },
       {
+        "kind": "INPUT_OBJECT",
+        "name": "EditCashPlanPaymentVerificationInput",
+        "description": null,
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "cashPlanPaymentVerificationId",
+            "description": null,
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "ID",
+                "ofType": null
+              }
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "sampling",
+            "description": null,
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "verificationChannel",
+            "description": null,
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "businessAreaSlug",
+            "description": null,
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "fullListArguments",
+            "description": null,
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "FullListArguments",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "randomSamplingArguments",
+            "description": null,
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "RandomSamplingArguments",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "rapidProArguments",
+            "description": null,
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "RapidProArguments",
+              "ofType": null
+            },
+            "defaultValue": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "EditPaymentVerificationMutation",
+        "description": null,
+        "fields": [
+          {
+            "name": "cashPlan",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "CashPlanNode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "SCALAR",
         "name": "Upload",
         "description": null,
@@ -21769,6 +21971,29 @@
       {
         "kind": "OBJECT",
         "name": "UpdatePaymentVerificationStatusAndReceivedAmount",
+        "description": null,
+        "fields": [
+          {
+            "name": "paymentVerification",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "PaymentVerificationNode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "UpdatePaymentVerificationReceivedAndReceivedAmount",
         "description": null,
         "fields": [
           {
