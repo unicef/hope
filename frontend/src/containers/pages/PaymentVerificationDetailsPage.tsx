@@ -9,7 +9,7 @@ import { PageHeader } from '../../components/PageHeader';
 import { LabelizedField } from '../../components/LabelizedField';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
-import { NewPaymentVerificationDialog } from '../../components/payments/NewPaymentVerificationDialog';
+import { CreateVerificationPlan } from '../../components/payments/CreateVerificationPlan';
 import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
 import { EditNewPaymentVerificationDialog } from '../../components/payments/EditNewPaymentVerificationDialog';
 import { ActivateVerificationPlan } from '../../components/payments/ActivateVerificationPlan';
@@ -74,9 +74,6 @@ const StatusContainer = styled.div`
   min-width: 120px;
   max-width: 200px;
 `;
-// interface PaymentVerificationDetailsProps {
-//   registration: 'registr';
-// }
 
 export function PaymentVerificationDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
@@ -117,21 +114,33 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
         {cashPlan.verificationStatus === 'PENDING' &&
           cashPlan.verifications &&
           cashPlan.verifications.edges.length === 0 && (
-            <NewPaymentVerificationDialog cashPlanId={cashPlan.id} />
+            <CreateVerificationPlan cashPlanId={cashPlan.id} />
           )}
         {cashPlan.verificationStatus === 'PENDING' &&
           cashPlan.verifications &&
           cashPlan.verifications.edges.length !== 0 && (
             <Box display='flex'>
-              <EditNewPaymentVerificationDialog /> <ActivateVerificationPlan />
+              <EditNewPaymentVerificationDialog
+                cashPlanVerificationId={cashPlan.verifications.edges[0].node.id}
+              />
+              <ActivateVerificationPlan
+                cashPlanId={cashPlan.id}
+                cashPlanVerificationId={cashPlan.verifications.edges[0].node.id}
+              />
             </Box>
           )}
         {cashPlan.verificationStatus === 'ACTIVE' &&
           cashPlan.verifications &&
           cashPlan.verifications.edges.length !== 0 && (
             <Box display='flex'>
-              <FinishVerificationPlan />
-              <DiscardVerificationPlan />
+              <FinishVerificationPlan
+                cashPlanId={cashPlan.id}
+                cashPlanVerificationId={cashPlan.verifications.edges[0].node.id}
+              />
+              <DiscardVerificationPlan
+                cashPlanId={cashPlan.id}
+                cashPlanVerificationId={cashPlan.verifications.edges[0].node.id}
+              />
             </Box>
           )}
       </>
@@ -148,35 +157,35 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
               <Typography variant='h6'>Cash Plan Details</Typography>
             </Title>
             <Grid container>
-              <Grid item xs={4}>
-                <LabelizedField label='PROGRAMME NAME'>
-                  <p>{cashPlan.program.name}</p>
-                </LabelizedField>
-              </Grid>
-              <Grid item xs={4}>
-                <LabelizedField label='PROGRAMME ID'>
-                  <p>{decodeIdString(cashPlan.program.id)}</p>
-                </LabelizedField>
-              </Grid>
-              <Grid item xs={4}>
-                <LabelizedField label='PAYMENT RECORDS'>
-                  <p>{cashPlan.paymentRecords.totalCount}</p>
-                </LabelizedField>
-              </Grid>
-              <Grid item xs={4}>
-                <LabelizedField label='START DATE'>
-                  <p>
+              {[
+                { label: 'PROGRAMME NAME', value: cashPlan.program.name },
+                {
+                  label: 'PROGRAMME ID',
+                  value: decodeIdString(cashPlan.program.id),
+                },
+                {
+                  label: 'PAYMENT RECORDS',
+                  value: cashPlan.paymentRecords.totalCount,
+                },
+                {
+                  label: 'START DATE',
+                  value: (
                     <Moment format='DD/MM/YYYY'>{cashPlan.startDate}</Moment>
-                  </p>
-                </LabelizedField>
-              </Grid>
-              <Grid item xs={4}>
-                <LabelizedField label='END DATE'>
-                  <p>
+                  ),
+                },
+                {
+                  label: 'END DATE',
+                  value: (
                     <Moment format='DD/MM/YYYY'>{cashPlan.endDate}</Moment>
-                  </p>
-                </LabelizedField>
-              </Grid>
+                  ),
+                },
+              ].map((el) => (
+                <Grid item xs={4}>
+                  <LabelizedField label={el.label}>
+                    <p>{el.value}</p>
+                  </LabelizedField>
+                </Grid>
+              ))}
             </Grid>
           </Grid>
           <Grid item xs={3}>
@@ -245,36 +254,32 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                     </StatusContainer>
                   </LabelizedField>
                 </Grid>
-                <Grid item xs={4}>
-                  <LabelizedField label='SAMPLE SIZE'>
-                    <p>{verificationPlan.sampleSize}</p>
-                  </LabelizedField>
-                </Grid>
-                <Grid item xs={4}>
-                  <LabelizedField label='RECEIVED'>
-                    <p>{verificationPlan.receivedCount}</p>
-                  </LabelizedField>
-                </Grid>
-                <Grid item xs={4}>
-                  <LabelizedField label='VERIFICATION METHOD'>
-                    <p>{verificationPlan.verificationMethod}</p>
-                  </LabelizedField>
-                </Grid>
-                <Grid item xs={4}>
-                  <LabelizedField label='RESPONDED'>
-                    <p>{verificationPlan.respondedCount}</p>
-                  </LabelizedField>
-                </Grid>
-                <Grid item xs={4}>
-                  <LabelizedField label='NOT RECEIVED'>
-                    <p>{verificationPlan.notReceivedCount}</p>
-                  </LabelizedField>
-                </Grid>
-                <Grid item xs={4}>
-                  <LabelizedField label='SAMPLING'>
-                    <p>{verificationPlan.sampling}</p>
-                  </LabelizedField>
-                </Grid>
+                {[
+                  { label: 'SAMPLE SIZE', value: verificationPlan.sampleSize },
+                  {
+                    label: 'RECEIVED',
+                    value: verificationPlan.receivedCount || '-',
+                  },
+                  {
+                    label: 'VERIFICATION METHOD',
+                    value: verificationPlan.verificationMethod,
+                  },
+                  {
+                    label: 'RESPONDED',
+                    value: verificationPlan.respondedCount || '-',
+                  },
+                  {
+                    label: 'NOT RECEIVED',
+                    value: verificationPlan.notReceivedCount || '-',
+                  },
+                  { label: 'SAMPLING', value: verificationPlan.sampling },
+                ].map((el) => (
+                  <Grid item xs={4}>
+                    <LabelizedField label={el.label}>
+                      <p>{el.value}</p>
+                    </LabelizedField>
+                  </Grid>
+                ))}
               </Grid>
             </Grid>
             <Grid item xs={3}>
@@ -282,10 +287,10 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                 <Grid item xs={6}>
                   <Grid container direction='column'>
                     <LabelizedField label='RECEIVED CORRECT AMOUNT'>
-                      <p>{verificationPlan.receivedCount}</p>
+                      <p>{verificationPlan.receivedCount || '-'}</p>
                     </LabelizedField>
                     <LabelizedField label='RECEIVED WRONG AMOUNT'>
-                      <p>{verificationPlan.receivedWithProblemsCount}</p>
+                      <p>{verificationPlan.receivedWithProblemsCount || '-'}</p>
                     </LabelizedField>
                   </Grid>
                 </Grid>
@@ -322,7 +327,9 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
           </Grid>
         </Container>
       ) : null}
-      {cashPlan.verifications && cashPlan.verifications.edges.length ? (
+      {cashPlan.verifications &&
+      cashPlan.verifications.edges.length &&
+      cashPlan.verificationStatus === 'ACTIVE' ? (
         <>
           <Container>
             <VerificationRecordsFilters
@@ -332,17 +339,30 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
           </Container>
           <Container>
             <VerificationRecordsTable
+              verificationMethod={verificationPlan.verificationMethod}
               filter={debouncedFilter}
               id={verificationPlan.id}
             />
           </Container>
         </>
       ) : null}
-      {!cashPlan.verifications && cashPlan.verifications.edges.length && (
+      {cashPlan.verifications &&
+      cashPlan.verifications.edges.length &&
+      cashPlan.verificationStatus !== 'ACTIVE' &&
+      cashPlan.verificationStatus !== 'FINISHED' ? (
+        <BottomTitle>
+          To see more details please activate Verification Plan
+        </BottomTitle>
+      ) : null}
+      {!cashPlan.verifications.edges.length &&
+      cashPlan.verificationStatus !== 'ACTIVE' ? (
         <BottomTitle>
           To see more details please create Verification Plan
         </BottomTitle>
-      )}
+      ) : null}
+      {cashPlan.verificationStatus === 'TRANSACTION_COMPLETED_WITH_ERRORS' ? (
+        <BottomTitle>Transaction completed with errors</BottomTitle>
+      ) : null}
       <TableWrapper>
         <UniversalActivityLogTable objectId='some id' />
       </TableWrapper>
