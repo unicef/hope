@@ -142,7 +142,23 @@ class XlsxVerificationImportService:
             received_amount = Decimal(format(round(received_amount, 2), ".2f"))
         received_cell = row[1]
         received = received_cell.value
-        if received is None and received_amount is not None:
+        if received == "YES" and received_amount is None:
+            self.errors.append(
+                (
+                    "Payment Verifications",
+                    received_cell.coordinate,
+                    f"You set received to YES, but didn't set received_amount",
+                )
+            )
+        elif received is None and received_amount is not None and received_amount == 0:
+            self.errors.append(
+                (
+                    "Payment Verifications",
+                    received_cell.coordinate,
+                    f"You can't set received_amount {received_amount} and not set received to NO",
+                )
+            )
+        elif received is None and received_amount is not None:
             self.errors.append(
                 (
                     "Payment Verifications",
