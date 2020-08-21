@@ -43,10 +43,7 @@ class DeduplicateTask:
             elif field_name == "full_name":
                 single_query = {
                     "match": {
-                        field_name_as_key: {
-                            "query": str(field_value),
-                            "boost": 2.0,
-                        }
+                        field_name_as_key: {"query": field_value, "boost": 2.0,}
                     }
                 }
             else:
@@ -73,16 +70,15 @@ class DeduplicateTask:
         }
 
         if only_in_rdi is True:
-            query_dict["query"]["bool"]["must"].append(
+            query_dict["query"]["bool"]["filter"] = [
                 {
-                    "match": {
-                        "registration_data_import_id": {
-                            "query": individual.registration_data_import.id
-                        }
+                    "term": {
+                        "registration_data_import_id": str(
+                            individual.registration_data_import.id
+                        )
                     }
                 },
-            )
-
+            ]
         return query_dict
 
     @staticmethod
@@ -113,8 +109,6 @@ class DeduplicateTask:
                 original_individuals_ids_possible_duplicates.append(
                     individual.id
                 )
-        print(individual)
-        print([(r.full_name, r.meta.score) for r in results])
 
         results_data = [
             {"hit_id": r.id, "full_name": r.full_name, "score": r.meta.score}
