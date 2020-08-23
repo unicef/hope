@@ -69,6 +69,21 @@ export function EditVerificationPlan({
   const { showMessage } = useSnackbar();
   const [mutate] = useEditCashPlanPaymentVerificationMutation();
   const businessArea = useBusinessArea();
+  const initialValues = {
+    confidenceInterval: 1,
+    marginOfError: 1,
+    filterAgeMin: 0,
+    filterAgeMax: 0,
+    filterSex: '',
+    excludedAdminAreasFull: [],
+    excludedAdminAreasRandom: [],
+    verificationChannel: 'MANUAL',
+    rapidProFlow: '',
+    adminCheckbox: false,
+    ageCheckbox: false,
+    sexCheckbox: false,
+  };
+
   const [formValues, setFormValues] = useState(initialValues);
 
   const { data: rapidProFlows } = useAllRapidProFlowsQuery({
@@ -126,21 +141,6 @@ export function EditVerificationPlan({
       refetch();
     }
   }, [refetch, formValues, sampleSizesData]);
-
-  const initialValues = {
-    confidenceInterval: 1,
-    marginOfError: 1,
-    filterAgeMin: 0,
-    filterAgeMax: 0,
-    filterSex: '',
-    excludedAdminAreasFull: [],
-    excludedAdminAreasRandom: [],
-    verificationChannel: 'MANUAL',
-    rapidProFlow: '',
-    adminCheckbox: false,
-    ageCheckbox: false,
-    sexCheckbox: false,
-  };
 
   const submit = async (values): Promise<void> => {
     const { errors } = await mutate({
