@@ -21,7 +21,9 @@ def from_received_to_status(received, received_amount, delivered_amount):
     if received is None:
         return PaymentVerification.STATUS_PENDING
     if received:
-        if received_amount_dec == delivered_amount:
+        if received_amount_dec is None:
+            return PaymentVerification.STATUS_RECEIVED
+        elif received_amount_dec == delivered_amount:
             return PaymentVerification.STATUS_RECEIVED
         else:
             return PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
