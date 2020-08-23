@@ -352,6 +352,20 @@ enum DocumentTypeType {
   OTHER
 }
 
+input EditCashPlanPaymentVerificationInput {
+  cashPlanPaymentVerificationId: ID!
+  sampling: String!
+  verificationChannel: String!
+  businessAreaSlug: String!
+  fullListArguments: FullListArguments
+  randomSamplingArguments: RandomSamplingArguments
+  rapidProArguments: RapidProArguments
+}
+
+type EditPaymentVerificationMutation {
+  cashPlan: CashPlanNode
+}
+
 type FieldAttributeNode {
   id: String
   type: String
@@ -1115,6 +1129,7 @@ type MergeRegistrationDataImportMutation {
 
 type Mutations {
   createCashPlanPaymentVerification(input: CreatePaymentVerificationInput!): CreatePaymentVerificationMutation
+  editCashPlanPaymentVerification(input: EditCashPlanPaymentVerificationInput!): EditPaymentVerificationMutation
   importXlsxCashPlanVerification(cashPlanVerificationId: ID!, file: Upload!): ImportXlsxCashPlanVerification
   activateCashPlanPaymentVerification(cashPlanVerificationId: ID!): ActivateCashPlanVerificationMutation
   finishCashPlanPaymentVerification(cashPlanVerificationId: ID!): FinishCashPlanVerificationMutation
