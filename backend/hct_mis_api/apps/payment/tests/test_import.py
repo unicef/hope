@@ -77,7 +77,7 @@ class TestXlsxVerificationImport(TestCase):
     def test_export_received_from_pending(self):
         export_service = XlsxVerificationExportService(TestXlsxVerificationImport.verification)
         wb = export_service.generate_workbook()
-        self.assertEqual(wb.active["B2"].value, None)
+        self.assertEqual(wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"].value, None)
 
     def test_export_received_from_not_received(self):
         TestXlsxVerificationImport.verification.payment_record_verifications.all().update(
@@ -88,7 +88,7 @@ class TestXlsxVerificationImport(TestCase):
         TestXlsxVerificationImport.verification.payment_record_verifications.all().update(
             status=PaymentVerification.STATUS_PENDING
         )
-        self.assertEqual(wb.active["B2"].value, "NO")
+        self.assertEqual(wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"].value, "NO")
 
     def test_export_received_from_received(self):
         TestXlsxVerificationImport.verification.payment_record_verifications.all().update(
@@ -99,7 +99,7 @@ class TestXlsxVerificationImport(TestCase):
         TestXlsxVerificationImport.verification.payment_record_verifications.all().update(
             status=PaymentVerification.STATUS_PENDING
         )
-        self.assertEqual(wb.active["B2"].value, "YES")
+        self.assertEqual(wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"].value, "YES")
 
     def test_export_received_from_received_with_issues(self):
         TestXlsxVerificationImport.verification.payment_record_verifications.all().update(
@@ -110,7 +110,7 @@ class TestXlsxVerificationImport(TestCase):
         TestXlsxVerificationImport.verification.payment_record_verifications.all().update(
             status=PaymentVerification.STATUS_PENDING
         )
-        self.assertEqual(wb.active["B2"].value, "YES")
+        self.assertEqual(wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"].value, "YES")
 
     def test_validation_valid_not_changed_file(self):
         export_service = XlsxVerificationExportService(TestXlsxVerificationImport.verification)
@@ -126,8 +126,8 @@ class TestXlsxVerificationImport(TestCase):
     def test_validation_valid_status_changed(self):
         export_service = XlsxVerificationExportService(TestXlsxVerificationImport.verification)
         wb = export_service.generate_workbook()
-        wb.active["B2"] = "NO"
-        wb.active["F2"] = 0
+        wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"] = "NO"
+        wb.active[f"{XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_LETTER}2"] = 0
         file = io.BytesIO(save_virtual_workbook(wb))
         import_service = XlsxVerificationImportService(TestXlsxVerificationImport.verification, file)
         import_service.open_workbook()
@@ -137,7 +137,7 @@ class TestXlsxVerificationImport(TestCase):
     def test_validation_invalid_received_changed(self):
         export_service = XlsxVerificationExportService(TestXlsxVerificationImport.verification)
         wb = export_service.generate_workbook()
-        wb.active["B2"] = "NOT_CORRECT_RECEIVED"
+        wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"] = "NOT_CORRECT_RECEIVED"
         file = io.BytesIO(save_virtual_workbook(wb))
         import_service = XlsxVerificationImportService(TestXlsxVerificationImport.verification, file)
         import_service.open_workbook()
@@ -147,7 +147,7 @@ class TestXlsxVerificationImport(TestCase):
             [
                 (
                     "Payment Verifications",
-                    "B2",
+                    f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2",
                     "The received of this payment verification is not correct: NOT_CORRECT_RECEIVED should be one of: "
                     "[None, 'YES', 'NO']",
                 )
@@ -190,42 +190,42 @@ class TestXlsxVerificationImport(TestCase):
     def test_validation_wrong_type(self):
         export_service = XlsxVerificationExportService(TestXlsxVerificationImport.verification)
         wb = export_service.generate_workbook()
-        wb.active["C3"] = 2
+        wb.active[f"{XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_LETTER}3"] = "A"
         file = io.BytesIO(save_virtual_workbook(wb))
         import_service = XlsxVerificationImportService(TestXlsxVerificationImport.verification, file)
         import_service.open_workbook()
         import_service.validate()
         self.assertEqual(
             import_service.errors,
-            [("Payment Verifications", "C3", "Wrong type off cell text expected, number given.",)],
+            [("Payment Verifications", f"{XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_LETTER}3", "Wrong type off cell number expected, text given.",)],
         )
 
     def test_validation_invalid_received_not_received_with_amount(self):
         export_service = XlsxVerificationExportService(TestXlsxVerificationImport.verification)
         wb = export_service.generate_workbook()
-        wb.active["B2"] = "NO"
-        wb.active["F2"] = 10
+        wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"] = "NO"
+        wb.active[f"{XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_LETTER}2"] = 10
         file = io.BytesIO(save_virtual_workbook(wb))
         import_service = XlsxVerificationImportService(TestXlsxVerificationImport.verification, file)
         import_service.open_workbook()
         import_service.validate()
         self.assertEqual(
             import_service.errors,
-            [("Payment Verifications", "B2", "If received_amount(10.00) is not 0, you should set received to YES",)],
+            [("Payment Verifications", f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2", "If received_amount(10.00) is not 0, you should set received to YES",)],
         )
 
     def test_validation_invalid_received_received_with_0_amount(self):
         export_service = XlsxVerificationExportService(TestXlsxVerificationImport.verification)
         wb = export_service.generate_workbook()
-        wb.active["B2"] = "YES"
-        wb.active["F2"] = 0
+        wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"] = "YES"
+        wb.active[f"{XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_LETTER}2"] = 0
         file = io.BytesIO(save_virtual_workbook(wb))
         import_service = XlsxVerificationImportService(TestXlsxVerificationImport.verification, file)
         import_service.open_workbook()
         import_service.validate()
         self.assertEqual(
             import_service.errors,
-            [("Payment Verifications", "B2", "If received_amount is 0, you should set received to NO",)],
+            [("Payment Verifications", f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2", "If received_amount is 0, you should set received to NO",)],
         )
 
     def test_import_valid_status_changed_received_no(self):
@@ -234,7 +234,7 @@ class TestXlsxVerificationImport(TestCase):
         payment_record_id = wb.active["A2"].value
         payment_verification = PaymentVerification.objects.get(payment_record__id=payment_record_id)
         self.assertEqual(payment_verification.status, PaymentVerification.STATUS_PENDING)
-        wb.active["B2"] = "NO"
+        wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"] = "NO"
         file = io.BytesIO(save_virtual_workbook(wb))
         import_service = XlsxVerificationImportService(TestXlsxVerificationImport.verification, file)
         import_service.open_workbook()
@@ -251,8 +251,8 @@ class TestXlsxVerificationImport(TestCase):
         payment_record_id = wb.active["A2"].value
         payment_verification = PaymentVerification.objects.get(payment_record__id=payment_record_id)
         self.assertEqual(payment_verification.status, PaymentVerification.STATUS_PENDING)
-        wb.active["B2"] = "YES"
-        wb.active["F2"] = payment_verification.payment_record.delivered_quantity - 1
+        wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"] = "YES"
+        wb.active[f"{XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_LETTER}2"] = payment_verification.payment_record.delivered_quantity - 1
         file = io.BytesIO(save_virtual_workbook(wb))
         import_service = XlsxVerificationImportService(TestXlsxVerificationImport.verification, file)
         import_service.open_workbook()
@@ -274,8 +274,8 @@ class TestXlsxVerificationImport(TestCase):
         payment_record_id = wb.active["A2"].value
         payment_verification = PaymentVerification.objects.get(payment_record__id=payment_record_id)
         self.assertEqual(payment_verification.status, PaymentVerification.STATUS_PENDING)
-        wb.active["B2"] = "YES"
-        wb.active["F2"] = payment_verification.payment_record.delivered_quantity
+        wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"] = "YES"
+        wb.active[f"{XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_LETTER}2"] = payment_verification.payment_record.delivered_quantity
         file = io.BytesIO(save_virtual_workbook(wb))
         import_service = XlsxVerificationImportService(TestXlsxVerificationImport.verification, file)
         import_service.open_workbook()
