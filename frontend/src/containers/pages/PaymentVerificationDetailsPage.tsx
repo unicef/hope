@@ -11,7 +11,7 @@ import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
 import { CreateVerificationPlan } from '../../components/payments/CreateVerificationPlan';
 import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
-import { EditNewPaymentVerificationDialog } from '../../components/payments/EditNewPaymentVerificationDialog';
+import { EditVerificationPlan } from '../../components/payments/EditVerificationPlan';
 import { ActivateVerificationPlan } from '../../components/payments/ActivateVerificationPlan';
 import { FinishVerificationPlan } from '../../components/payments/FinishVerificationPlan';
 import { DiscardVerificationPlan } from '../../components/payments/DiscardVerificationPlan';
@@ -120,7 +120,8 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
           cashPlan.verifications &&
           cashPlan.verifications.edges.length !== 0 && (
             <Box display='flex'>
-              <EditNewPaymentVerificationDialog
+              <EditVerificationPlan
+                cashPlanId={cashPlan.id}
                 cashPlanVerificationId={cashPlan.verifications.edges[0].node.id}
               />
               <ActivateVerificationPlan
