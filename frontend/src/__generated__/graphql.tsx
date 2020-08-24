@@ -3819,7 +3819,7 @@ export type AllPaymentVerificationsQuery = (
             & Pick<HouseholdNode, 'id'>
             & { headOfHousehold: (
               { __typename?: 'IndividualNode' }
-              & Pick<IndividualNode, 'fullName'>
+              & Pick<IndividualNode, 'id' | 'fullName'>
             ) }
           ) }
         ) }
@@ -6769,6 +6769,7 @@ export const AllPaymentVerificationsDocument = gql`
           household {
             id
             headOfHousehold {
+              id
               fullName
             }
           }
