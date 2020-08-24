@@ -29,6 +29,9 @@ export const CashPlan = gql`
             sampling
             receivedCount
             receivedWithProblemsCount
+            rapidProFlowId
+            confidenceInterval
+            marginOfError
           }
         }
       }
