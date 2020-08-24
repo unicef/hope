@@ -78,16 +78,24 @@ export function EditVerificationPlan({
   console.log('🔵', cashPlan);
   const verification = cashPlan?.verifications?.edges[0].node;
 
+  useEffect(() => {
+    if (verification.sampling === 'FULL_LIST') {
+      setSelectedTab(0);
+    } else {
+      setSelectedTab(1);
+    }
+  }, [verification.sampling]);
+
   const initialValues = {
-    confidenceInterval: 0,
-    marginOfError: 1,
+    confidenceInterval: verification.confidenceInterval || 1,
+    marginOfError: verification.marginOfError || 1,
     filterAgeMin: 0,
     filterAgeMax: 0,
     filterSex: '',
     excludedAdminAreasFull: [],
     excludedAdminAreasRandom: [],
-    verificationChannel: 'MANUAL',
-    rapidProFlow: '',
+    verificationChannel: verification.verificationMethod || null,
+    rapidProFlow: verification.rapidProFlowId || null,
     adminCheckbox: false,
     ageCheckbox: false,
     sexCheckbox: false,
