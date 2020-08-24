@@ -69,8 +69,17 @@ export function EditVerificationPlan({
   const { showMessage } = useSnackbar();
   const [mutate] = useEditCashPlanPaymentVerificationMutation();
   const businessArea = useBusinessArea();
+  const {
+    data: { cashPlan },
+    loading,
+  } = useCashPlanQuery({
+    variables: { id: cashPlanId },
+  });
+  console.log('🔵', cashPlan);
+  const verification = cashPlan?.verifications?.edges[0].node;
+
   const initialValues = {
-    confidenceInterval: 1,
+    confidenceInterval: 0,
     marginOfError: 1,
     filterAgeMin: 0,
     filterAgeMax: 0,
@@ -97,15 +106,6 @@ export function EditVerificationPlan({
       businessArea,
     },
   });
-
-  const {
-    data: { cashPlan },
-    loading,
-  } = useCashPlanQuery({
-    variables: { id: cashPlanId },
-  });
-
-  console.log('🔵', cashPlan);
 
   const { data: sampleSizesData, refetch } = useSampleSizeQuery({
     variables: {
