@@ -75,7 +75,6 @@ export function EditVerificationPlan({
   } = useCashPlanQuery({
     variables: { id: cashPlanId },
   });
-  console.log('🔵', cashPlan);
   const verification = cashPlan?.verifications?.edges[0].node;
 
   useEffect(() => {
