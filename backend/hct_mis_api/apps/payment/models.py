@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+from django.contrib.postgres.fields import JSONField
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import Sum, UUIDField
@@ -104,6 +105,9 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel):
     rapid_pro_flow_id = models.CharField(max_length=255, blank=True)
     rapid_pro_flow_start_uuid = models.CharField(max_length=255, blank=True)
     # rapid_pro_start_flow_date = models.DateTimeField(null=True)
+    age_filter = JSONField(null=True)
+    excluded_admin_areas_filter = JSONField(null=True)
+    sex_filter = models.CharField(null=True, max_length=10)
 
 
 @receiver(
