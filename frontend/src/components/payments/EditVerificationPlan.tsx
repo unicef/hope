@@ -19,10 +19,11 @@ import { TabPanel } from '../TabPanel';
 import { FormikSliderField } from '../../shared/Formik/FormikSliderField';
 import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
 import {
-  useCreateCashPlanPaymentVerificationMutation,
   useAllRapidProFlowsQuery,
   useAllAdminAreasQuery,
   useSampleSizeQuery,
+  useEditCashPlanPaymentVerificationMutation,
+  useCashPlanQuery,
 } from '../../__generated__/graphql';
 import { FormikMultiSelectField } from '../../shared/Formik/FormikMultiSelectField';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
@@ -55,32 +56,48 @@ const DialogContainer = styled.div`
   width: 700px;
 `;
 
-const initialValues = {
-  confidenceInterval: 1,
-  marginOfError: 1,
-  filterAgeMin: 0,
-  filterAgeMax: 0,
-  filterSex: '',
-  excludedAdminAreasFull: [],
-  excludedAdminAreasRandom: [],
-  verificationChannel: 'MANUAL',
-  rapidProFlow: '',
-  adminCheckbox: false,
-  ageCheckbox: false,
-  sexCheckbox: false,
-};
-
 export interface Props {
+  cashPlanVerificationId: string;
   cashPlanId: string;
 }
-export function CreateVerificationPlan({
+export function EditVerificationPlan({
+  cashPlanVerificationId,
   cashPlanId,
 }: Props): React.ReactElement {
   const [open, setOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
   const { showMessage } = useSnackbar();
-  const [mutate] = useCreateCashPlanPaymentVerificationMutation();
+  const [mutate] = useEditCashPlanPaymentVerificationMutation();
   const businessArea = useBusinessArea();
+  const {
+    data: { cashPlan },
+  } = useCashPlanQuery({
+    variables: { id: cashPlanId },
+  });
+  const verification = cashPlan?.verifications?.edges[0].node;
+  useEffect(() => {
+    if (verification.sampling === 'FULL_LIST') {
+      setSelectedTab(0);
+    } else {
+      setSelectedTab(1);
+    }
+  }, [verification.sampling]);
+
+  const initialValues = {
+    confidenceInterval: verification.confidenceInterval * 100 || 1,
+    marginOfError: verification.marginOfError * 100 || 1,
+    filterAgeMin: verification.ageFilter?.min || 0,
+    filterAgeMax: verification.ageFilter?.max || 0,
+    filterSex: verification.sexFilter || '',
+    excludedAdminAreasFull: verification.excludedAdminAreasFilter,
+    excludedAdminAreasRandom: verification.excludedAdminAreasFilter,
+    verificationChannel: verification.verificationMethod || null,
+    rapidProFlow: verification.rapidProFlowId || null,
+    adminCheckbox: Boolean(verification.excludedAdminAreasFilter) || false,
+    ageCheckbox: Boolean(verification.ageFilter?.min) || false,
+    sexCheckbox: Boolean(verification.sexFilter) || false,
+  };
+
   const [formValues, setFormValues] = useState(initialValues);
 
   const { data: rapidProFlows } = useAllRapidProFlowsQuery({
@@ -110,12 +127,14 @@ export function CreateVerificationPlan({
         randomSamplingArguments:
           selectedTab === 1
             ? {
-                confidenceInterval: formValues.confidenceInterval * 0.01,
+                confidenceInterval: Number(
+                  (formValues.confidenceInterval * 0.01).toFixed(2),
+                ),
                 marginOfError: formValues.marginOfError * 0.01,
                 excludedAdminAreas: formValues.excludedAdminAreasRandom,
                 age: {
-                  min: formValues.filterAgeMin || 0,
-                  max: formValues.filterAgeMax || 0,
+                  min: formValues.filterAgeMin || null,
+                  max: formValues.filterAgeMax || null,
                 },
                 sex: formValues.filterSex,
               }
@@ -134,7 +153,7 @@ export function CreateVerificationPlan({
     const { errors } = await mutate({
       variables: {
         input: {
-          cashPlanId,
+          cashPlanPaymentVerificationId: cashPlanVerificationId,
           sampling: selectedTab === 0 ? 'FULL_LIST' : 'RANDOM',
           fullListArguments:
             selectedTab === 0
@@ -177,7 +196,7 @@ export function CreateVerificationPlan({
       showMessage('Error while submitting');
       return;
     }
-    showMessage('New verification plan created.');
+    showMessage('Verification plan edited.');
   };
 
   const mappedAdminAreas =
@@ -202,7 +221,7 @@ export function CreateVerificationPlan({
             onClick={() => setOpen(true)}
             data-cy='button-new-plan'
           >
-            CREATE VERIFICATION PLAN
+            EDIT VERIFICATION PLAN
           </Button>
           <Dialog
             open={open}
@@ -212,7 +231,7 @@ export function CreateVerificationPlan({
           >
             <DialogTitleWrapper>
               <DialogTitle id='scroll-dialog-title'>
-                Create Verification Plan
+                Edit Verification Plan
               </DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>

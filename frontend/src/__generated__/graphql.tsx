@@ -88,6 +88,12 @@ export type AdminAreaNodeEdge = {
   cursor: Scalars['String'],
 };
 
+export type AgeFilterObject = {
+   __typename?: 'AgeFilterObject',
+  min?: Maybe<Scalars['Int']>,
+  max?: Maybe<Scalars['Int']>,
+};
+
 export type AgeInput = {
   min?: Maybe<Scalars['Int']>,
   max?: Maybe<Scalars['Int']>,
@@ -308,6 +314,9 @@ export type CashPlanPaymentVerificationNode = Node & {
   marginOfError?: Maybe<Scalars['Float']>,
   rapidProFlowId: Scalars['String'],
   rapidProFlowStartUuid: Scalars['String'],
+  ageFilter?: Maybe<AgeFilterObject>,
+  excludedAdminAreasFilter?: Maybe<Array<Maybe<Scalars['String']>>>,
+  sexFilter?: Maybe<Scalars['String']>,
   paymentRecordVerifications: PaymentVerificationNodeConnection,
 };
 
@@ -3283,6 +3292,22 @@ export type CopyTargetPopulationMutation = (
   )> }
 );
 
+export type EditCashPlanPaymentVerificationMutationVariables = {
+  input: EditCashPlanPaymentVerificationInput
+};
+
+
+export type EditCashPlanPaymentVerificationMutation = (
+  { __typename?: 'Mutations' }
+  & { editCashPlanPaymentVerification: Maybe<(
+    { __typename?: 'EditPaymentVerificationMutation' }
+    & { cashPlan: Maybe<(
+      { __typename?: 'CashPlanNode' }
+      & Pick<CashPlanNode, 'id'>
+    )> }
+  )> }
+);
+
 export type FinalizeTpMutationVariables = {
   id: Scalars['ID']
 };
@@ -3803,7 +3828,7 @@ export type AllPaymentVerificationsQuery = (
             & Pick<HouseholdNode, 'id'>
             & { headOfHousehold: (
               { __typename?: 'IndividualNode' }
-              & Pick<IndividualNode, 'fullName'>
+              & Pick<IndividualNode, 'id' | 'fullName'>
             ) }
           ) }
         ) }
@@ -3927,7 +3952,11 @@ export type CashPlanQuery = (
         { __typename?: 'CashPlanPaymentVerificationNodeEdge' }
         & { node: Maybe<(
           { __typename?: 'CashPlanPaymentVerificationNode' }
-          & Pick<CashPlanPaymentVerificationNode, 'id' | 'status' | 'sampleSize' | 'receivedCount' | 'notReceivedCount' | 'respondedCount' | 'verificationMethod' | 'sampling' | 'receivedWithProblemsCount'>
+          & Pick<CashPlanPaymentVerificationNode, 'id' | 'status' | 'sampleSize' | 'receivedCount' | 'notReceivedCount' | 'respondedCount' | 'verificationMethod' | 'sampling' | 'receivedWithProblemsCount' | 'rapidProFlowId' | 'confidenceInterval' | 'marginOfError' | 'excludedAdminAreasFilter' | 'sexFilter'>
+          & { ageFilter: Maybe<(
+            { __typename?: 'AgeFilterObject' }
+            & Pick<AgeFilterObject, 'min' | 'max'>
+          )> }
         )> }
       )>> }
     ), program: (
@@ -5548,6 +5577,57 @@ export function useCopyTargetPopulationMutation(baseOptions?: ApolloReactHooks.M
 export type CopyTargetPopulationMutationHookResult = ReturnType<typeof useCopyTargetPopulationMutation>;
 export type CopyTargetPopulationMutationResult = ApolloReactCommon.MutationResult<CopyTargetPopulationMutation>;
 export type CopyTargetPopulationMutationOptions = ApolloReactCommon.BaseMutationOptions<CopyTargetPopulationMutation, CopyTargetPopulationMutationVariables>;
+export const EditCashPlanPaymentVerificationDocument = gql`
+    mutation editCashPlanPaymentVerification($input: EditCashPlanPaymentVerificationInput!) {
+  editCashPlanPaymentVerification(input: $input) {
+    cashPlan {
+      id
+    }
+  }
+}
+    `;
+export type EditCashPlanPaymentVerificationMutationFn = ApolloReactCommon.MutationFunction<EditCashPlanPaymentVerificationMutation, EditCashPlanPaymentVerificationMutationVariables>;
+export type EditCashPlanPaymentVerificationComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<EditCashPlanPaymentVerificationMutation, EditCashPlanPaymentVerificationMutationVariables>, 'mutation'>;
+
+    export const EditCashPlanPaymentVerificationComponent = (props: EditCashPlanPaymentVerificationComponentProps) => (
+      <ApolloReactComponents.Mutation<EditCashPlanPaymentVerificationMutation, EditCashPlanPaymentVerificationMutationVariables> mutation={EditCashPlanPaymentVerificationDocument} {...props} />
+    );
+    
+export type EditCashPlanPaymentVerificationProps<TChildProps = {}> = ApolloReactHoc.MutateProps<EditCashPlanPaymentVerificationMutation, EditCashPlanPaymentVerificationMutationVariables> & TChildProps;
+export function withEditCashPlanPaymentVerification<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  EditCashPlanPaymentVerificationMutation,
+  EditCashPlanPaymentVerificationMutationVariables,
+  EditCashPlanPaymentVerificationProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, EditCashPlanPaymentVerificationMutation, EditCashPlanPaymentVerificationMutationVariables, EditCashPlanPaymentVerificationProps<TChildProps>>(EditCashPlanPaymentVerificationDocument, {
+      alias: 'editCashPlanPaymentVerification',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useEditCashPlanPaymentVerificationMutation__
+ *
+ * To run a mutation, you first call `useEditCashPlanPaymentVerificationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useEditCashPlanPaymentVerificationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [editCashPlanPaymentVerificationMutation, { data, loading, error }] = useEditCashPlanPaymentVerificationMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useEditCashPlanPaymentVerificationMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<EditCashPlanPaymentVerificationMutation, EditCashPlanPaymentVerificationMutationVariables>) {
+        return ApolloReactHooks.useMutation<EditCashPlanPaymentVerificationMutation, EditCashPlanPaymentVerificationMutationVariables>(EditCashPlanPaymentVerificationDocument, baseOptions);
+      }
+export type EditCashPlanPaymentVerificationMutationHookResult = ReturnType<typeof useEditCashPlanPaymentVerificationMutation>;
+export type EditCashPlanPaymentVerificationMutationResult = ApolloReactCommon.MutationResult<EditCashPlanPaymentVerificationMutation>;
+export type EditCashPlanPaymentVerificationMutationOptions = ApolloReactCommon.BaseMutationOptions<EditCashPlanPaymentVerificationMutation, EditCashPlanPaymentVerificationMutationVariables>;
 export const FinalizeTpDocument = gql`
     mutation FinalizeTP($id: ID!) {
   finalizeTargetPopulation(id: $id) {
@@ -6702,6 +6782,7 @@ export const AllPaymentVerificationsDocument = gql`
           household {
             id
             headOfHousehold {
+              id
               fullName
             }
           }
@@ -7064,6 +7145,15 @@ export const CashPlanDocument = gql`
           sampling
           receivedCount
           receivedWithProblemsCount
+          rapidProFlowId
+          confidenceInterval
+          marginOfError
+          ageFilter {
+            min
+            max
+          }
+          excludedAdminAreasFilter
+          sexFilter
         }
       }
     }
@@ -9062,6 +9152,7 @@ export type ResolversTypes = {
   CashPlanPaymentVerificationStatus: CashPlanPaymentVerificationStatus,
   CashPlanPaymentVerificationSampling: CashPlanPaymentVerificationSampling,
   CashPlanPaymentVerificationVerificationMethod: CashPlanPaymentVerificationVerificationMethod,
+  AgeFilterObject: ResolverTypeWrapper<AgeFilterObject>,
   PaymentVerificationNodeConnection: ResolverTypeWrapper<PaymentVerificationNodeConnection>,
   PaymentVerificationNodeEdge: ResolverTypeWrapper<PaymentVerificationNodeEdge>,
   PaymentVerificationNode: ResolverTypeWrapper<PaymentVerificationNode>,
@@ -9250,6 +9341,7 @@ export type ResolversParentTypes = {
   CashPlanPaymentVerificationStatus: CashPlanPaymentVerificationStatus,
   CashPlanPaymentVerificationSampling: CashPlanPaymentVerificationSampling,
   CashPlanPaymentVerificationVerificationMethod: CashPlanPaymentVerificationVerificationMethod,
+  AgeFilterObject: AgeFilterObject,
   PaymentVerificationNodeConnection: PaymentVerificationNodeConnection,
   PaymentVerificationNodeEdge: PaymentVerificationNodeEdge,
   PaymentVerificationNode: PaymentVerificationNode,
@@ -9417,6 +9509,11 @@ export type AdminAreaNodeEdgeResolvers<ContextType = any, ParentType extends Res
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
 };
 
+export type AgeFilterObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['AgeFilterObject'] = ResolversParentTypes['AgeFilterObject']> = {
+  min?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  max?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
 export type ApproveTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ApproveTargetPopulationMutation'] = ResolversParentTypes['ApproveTargetPopulationMutation']> = {
   targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
 };
@@ -9526,6 +9623,9 @@ export type CashPlanPaymentVerificationNodeResolvers<ContextType = any, ParentTy
   marginOfError?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   rapidProFlowId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   rapidProFlowStartUuid?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  ageFilter?: Resolver<Maybe<ResolversTypes['AgeFilterObject']>, ParentType, ContextType>,
+  excludedAdminAreasFilter?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
+  sexFilter?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   paymentRecordVerifications?: Resolver<ResolversTypes['PaymentVerificationNodeConnection'], ParentType, ContextType, CashPlanPaymentVerificationNodePaymentRecordVerificationsArgs>,
 };
 
@@ -10570,6 +10670,7 @@ export type Resolvers<ContextType = any> = {
   AdminAreaNode?: AdminAreaNodeResolvers<ContextType>,
   AdminAreaNodeConnection?: AdminAreaNodeConnectionResolvers<ContextType>,
   AdminAreaNodeEdge?: AdminAreaNodeEdgeResolvers<ContextType>,
+  AgeFilterObject?: AgeFilterObjectResolvers<ContextType>,
   ApproveTargetPopulationMutation?: ApproveTargetPopulationMutationResolvers<ContextType>,
   Arg?: GraphQLScalarType,
   BusinessAreaNode?: BusinessAreaNodeResolvers<ContextType>,

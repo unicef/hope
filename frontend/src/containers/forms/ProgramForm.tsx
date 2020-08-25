@@ -94,7 +94,7 @@ interface ProgramFormPropTypes {
 }
 
 export function ProgramForm({
-  program,
+  program = null,
   onSubmit,
   renderSubmit,
   open,

@@ -112,7 +112,16 @@ class ServiceProviderNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
+class AgeFilterObject(graphene.ObjectType):
+    min = graphene.Int()
+    max = graphene.Int()
+
+
 class CashPlanPaymentVerificationNode(DjangoObjectType):
+    excluded_admin_areas_filter = graphene.List(graphene.String)
+
+    age_filter = graphene.Field(AgeFilterObject)
+
     class Meta:
         model = CashPlanPaymentVerification
         interfaces = (relay.Node,)
