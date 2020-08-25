@@ -142,9 +142,9 @@ class CreatePaymentVerificationMutation(graphene.Mutation):
             sex = random_sampling_arguments.get("sex")
             age = random_sampling_arguments.get("age")
             excluded_admin_areas = random_sampling_arguments.get("excluded_admin_areas", [])
-        excluded_admin_areas = [decode_id_string(x) for x in excluded_admin_areas]
+        excluded_admin_areas_decoded = [decode_id_string(x) for x in excluded_admin_areas]
 
-        payment_records = payment_records.filter(~(Q(household__admin_area__id__in=excluded_admin_areas)))
+        payment_records = payment_records.filter(~(Q(household__admin_area__id__in=excluded_admin_areas_decoded)))
         if sex is not None:
             payment_records = payment_records.filter(household__head_of_household__sex=sex)
         if age is not None:
@@ -300,9 +300,9 @@ class EditPaymentVerificationMutation(graphene.Mutation):
             sex = random_sampling_arguments.get("sex")
             age = random_sampling_arguments.get("age")
 
-        excluded_admin_areas = [decode_id_string(x) for x in excluded_admin_areas]
+        excluded_admin_areas_decoded = [decode_id_string(x) for x in excluded_admin_areas]
 
-        payment_records = payment_records.filter(~(Q(household__admin_area__id__in=excluded_admin_areas)))
+        payment_records = payment_records.filter(~(Q(household__admin_area__id__in=excluded_admin_areas_decoded)))
         if sex is not None:
             payment_records = payment_records.filter(household__head_of_household__sex=sex)
         if age is not None:
