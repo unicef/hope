@@ -88,15 +88,15 @@ export function EditVerificationPlan({
   const initialValues = {
     confidenceInterval: verification.confidenceInterval * 100 || 1,
     marginOfError: verification.marginOfError * 100 || 1,
-    filterAgeMin: 0,
-    filterAgeMax: 0,
+    filterAgeMin: verification.ageFilter?.min || 0,
+    filterAgeMax: verification.ageFilter?.max || 0,
     filterSex: verification.sexFilter || '',
-    excludedAdminAreasFull: [],
-    excludedAdminAreasRandom: [],
+    excludedAdminAreasFull: verification.excludedAdminAreasFilter,
+    excludedAdminAreasRandom: verification.excludedAdminAreasFilter,
     verificationChannel: verification.verificationMethod || null,
     rapidProFlow: verification.rapidProFlowId || null,
-    adminCheckbox: false,
-    ageCheckbox: false,
+    adminCheckbox: Boolean(verification.excludedAdminAreasFilter) || false,
+    ageCheckbox: Boolean(verification.ageFilter?.min) || false,
     sexCheckbox: Boolean(verification.sexFilter) || false,
   };
 
@@ -308,7 +308,7 @@ export function EditVerificationPlan({
                       name='confidenceInterval'
                       label='Confidence Interval'
                       min={1}
-                      max={100}
+                      max={99}
                       component={FormikSliderField}
                       suffix='%'
                     />

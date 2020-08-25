@@ -19,11 +19,11 @@ export type Scalars = {
   UUID: any,
   Date: any,
   Decimal: any,
-  JSONString: any,
   JSONLazyString: any,
   FlexFieldsScalar: any,
   GeoJSON: any,
   Arg: any,
+  JSONString: any,
   Upload: any,
 };
 
@@ -86,6 +86,12 @@ export type AdminAreaNodeEdge = {
    __typename?: 'AdminAreaNodeEdge',
   node?: Maybe<AdminAreaNode>,
   cursor: Scalars['String'],
+};
+
+export type AgeFilterObject = {
+   __typename?: 'AgeFilterObject',
+  min?: Maybe<Scalars['Int']>,
+  max?: Maybe<Scalars['Int']>,
 };
 
 export type AgeInput = {
@@ -308,8 +314,8 @@ export type CashPlanPaymentVerificationNode = Node & {
   marginOfError?: Maybe<Scalars['Float']>,
   rapidProFlowId: Scalars['String'],
   rapidProFlowStartUuid: Scalars['String'],
-  ageFilter?: Maybe<Scalars['JSONString']>,
-  excludedAdminAreasFilter?: Maybe<Scalars['JSONString']>,
+  ageFilter?: Maybe<AgeFilterObject>,
+  excludedAdminAreasFilter?: Maybe<Array<Maybe<Scalars['String']>>>,
   sexFilter?: Maybe<Scalars['String']>,
   paymentRecordVerifications: PaymentVerificationNodeConnection,
 };
@@ -3946,7 +3952,11 @@ export type CashPlanQuery = (
         { __typename?: 'CashPlanPaymentVerificationNodeEdge' }
         & { node: Maybe<(
           { __typename?: 'CashPlanPaymentVerificationNode' }
-          & Pick<CashPlanPaymentVerificationNode, 'id' | 'status' | 'sampleSize' | 'receivedCount' | 'notReceivedCount' | 'respondedCount' | 'verificationMethod' | 'sampling' | 'receivedWithProblemsCount' | 'rapidProFlowId' | 'confidenceInterval' | 'marginOfError' | 'ageFilter' | 'excludedAdminAreasFilter' | 'sexFilter'>
+          & Pick<CashPlanPaymentVerificationNode, 'id' | 'status' | 'sampleSize' | 'receivedCount' | 'notReceivedCount' | 'respondedCount' | 'verificationMethod' | 'sampling' | 'receivedWithProblemsCount' | 'rapidProFlowId' | 'confidenceInterval' | 'marginOfError' | 'excludedAdminAreasFilter' | 'sexFilter'>
+          & { ageFilter: Maybe<(
+            { __typename?: 'AgeFilterObject' }
+            & Pick<AgeFilterObject, 'min' | 'max'>
+          )> }
         )> }
       )>> }
     ), program: (
@@ -7138,7 +7148,10 @@ export const CashPlanDocument = gql`
           rapidProFlowId
           confidenceInterval
           marginOfError
-          ageFilter
+          ageFilter {
+            min
+            max
+          }
           excludedAdminAreasFilter
           sexFilter
         }
@@ -9139,7 +9152,7 @@ export type ResolversTypes = {
   CashPlanPaymentVerificationStatus: CashPlanPaymentVerificationStatus,
   CashPlanPaymentVerificationSampling: CashPlanPaymentVerificationSampling,
   CashPlanPaymentVerificationVerificationMethod: CashPlanPaymentVerificationVerificationMethod,
-  JSONString: ResolverTypeWrapper<Scalars['JSONString']>,
+  AgeFilterObject: ResolverTypeWrapper<AgeFilterObject>,
   PaymentVerificationNodeConnection: ResolverTypeWrapper<PaymentVerificationNodeConnection>,
   PaymentVerificationNodeEdge: ResolverTypeWrapper<PaymentVerificationNodeEdge>,
   PaymentVerificationNode: ResolverTypeWrapper<PaymentVerificationNode>,
@@ -9198,6 +9211,7 @@ export type ResolversTypes = {
   AgeInput: AgeInput,
   GetCashplanVerificationSampleSizeObject: ResolverTypeWrapper<GetCashplanVerificationSampleSizeObject>,
   GroupAttributeNode: ResolverTypeWrapper<GroupAttributeNode>,
+  JSONString: ResolverTypeWrapper<Scalars['JSONString']>,
   KoboAssetObject: ResolverTypeWrapper<KoboAssetObject>,
   KoboAssetObjectConnection: ResolverTypeWrapper<KoboAssetObjectConnection>,
   KoboAssetObjectEdge: ResolverTypeWrapper<KoboAssetObjectEdge>,
@@ -9327,7 +9341,7 @@ export type ResolversParentTypes = {
   CashPlanPaymentVerificationStatus: CashPlanPaymentVerificationStatus,
   CashPlanPaymentVerificationSampling: CashPlanPaymentVerificationSampling,
   CashPlanPaymentVerificationVerificationMethod: CashPlanPaymentVerificationVerificationMethod,
-  JSONString: Scalars['JSONString'],
+  AgeFilterObject: AgeFilterObject,
   PaymentVerificationNodeConnection: PaymentVerificationNodeConnection,
   PaymentVerificationNodeEdge: PaymentVerificationNodeEdge,
   PaymentVerificationNode: PaymentVerificationNode,
@@ -9386,6 +9400,7 @@ export type ResolversParentTypes = {
   AgeInput: AgeInput,
   GetCashplanVerificationSampleSizeObject: GetCashplanVerificationSampleSizeObject,
   GroupAttributeNode: GroupAttributeNode,
+  JSONString: Scalars['JSONString'],
   KoboAssetObject: KoboAssetObject,
   KoboAssetObjectConnection: KoboAssetObjectConnection,
   KoboAssetObjectEdge: KoboAssetObjectEdge,
@@ -9492,6 +9507,11 @@ export type AdminAreaNodeConnectionResolvers<ContextType = any, ParentType exten
 export type AdminAreaNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['AdminAreaNodeEdge'] = ResolversParentTypes['AdminAreaNodeEdge']> = {
   node?: Resolver<Maybe<ResolversTypes['AdminAreaNode']>, ParentType, ContextType>,
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type AgeFilterObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['AgeFilterObject'] = ResolversParentTypes['AgeFilterObject']> = {
+  min?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  max?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 
 export type ApproveTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ApproveTargetPopulationMutation'] = ResolversParentTypes['ApproveTargetPopulationMutation']> = {
@@ -9603,8 +9623,8 @@ export type CashPlanPaymentVerificationNodeResolvers<ContextType = any, ParentTy
   marginOfError?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   rapidProFlowId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   rapidProFlowStartUuid?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  ageFilter?: Resolver<Maybe<ResolversTypes['JSONString']>, ParentType, ContextType>,
-  excludedAdminAreasFilter?: Resolver<Maybe<ResolversTypes['JSONString']>, ParentType, ContextType>,
+  ageFilter?: Resolver<Maybe<ResolversTypes['AgeFilterObject']>, ParentType, ContextType>,
+  excludedAdminAreasFilter?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
   sexFilter?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   paymentRecordVerifications?: Resolver<ResolversTypes['PaymentVerificationNodeConnection'], ParentType, ContextType, CashPlanPaymentVerificationNodePaymentRecordVerificationsArgs>,
 };
@@ -10650,6 +10670,7 @@ export type Resolvers<ContextType = any> = {
   AdminAreaNode?: AdminAreaNodeResolvers<ContextType>,
   AdminAreaNodeConnection?: AdminAreaNodeConnectionResolvers<ContextType>,
   AdminAreaNodeEdge?: AdminAreaNodeEdgeResolvers<ContextType>,
+  AgeFilterObject?: AgeFilterObjectResolvers<ContextType>,
   ApproveTargetPopulationMutation?: ApproveTargetPopulationMutationResolvers<ContextType>,
   Arg?: GraphQLScalarType,
   BusinessAreaNode?: BusinessAreaNodeResolvers<ContextType>,
