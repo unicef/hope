@@ -71,12 +71,10 @@ export function EditVerificationPlan({
   const businessArea = useBusinessArea();
   const {
     data: { cashPlan },
-    loading,
   } = useCashPlanQuery({
     variables: { id: cashPlanId },
   });
   const verification = cashPlan?.verifications?.edges[0].node;
-  console.log('⚪️verif', verification);
   useEffect(() => {
     if (verification.sampling === 'FULL_LIST') {
       setSelectedTab(0);
@@ -129,7 +127,9 @@ export function EditVerificationPlan({
         randomSamplingArguments:
           selectedTab === 1
             ? {
-                confidenceInterval: formValues.confidenceInterval * 0.01,
+                confidenceInterval: Number(
+                  (formValues.confidenceInterval * 0.01).toFixed(2),
+                ),
                 marginOfError: formValues.marginOfError * 0.01,
                 excludedAdminAreas: formValues.excludedAdminAreasRandom,
                 age: {
@@ -158,7 +158,7 @@ export function EditVerificationPlan({
           fullListArguments:
             selectedTab === 0
               ? {
-                  excludedAdminAreas: values.excludedAdminAreasFull,
+                  excludedAdminAreas: values.excludedAdminAreasFull || [],
                 }
               : null,
           verificationChannel: values.verificationChannel,
@@ -175,7 +175,7 @@ export function EditVerificationPlan({
                   marginOfError: values.marginOfError * 0.01,
                   excludedAdminAreas: values.adminCheckbox
                     ? values.excludedAdminAreasRandom
-                    : null,
+                    : [],
                   age: values.ageCheckbox
                     ? { min: values.filterAgeMin, max: values.filterAgeMax }
                     : null,
