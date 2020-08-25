@@ -32,7 +32,10 @@ export const CashPlan = gql`
             rapidProFlowId
             confidenceInterval
             marginOfError
-            ageFilter
+            ageFilter {
+              min
+              max
+            }
             excludedAdminAreasFilter
             sexFilter
           }
