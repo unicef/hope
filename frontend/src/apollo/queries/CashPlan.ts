@@ -32,6 +32,9 @@ export const CashPlan = gql`
             rapidProFlowId
             confidenceInterval
             marginOfError
+            ageFilter
+            excludedAdminAreasFilter
+            sexFilter
           }
         }
       }
