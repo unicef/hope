@@ -139,7 +139,7 @@ export function CreateVerificationPlan({
           fullListArguments:
             selectedTab === 0
               ? {
-                  excludedAdminAreas: values.excludedAdminAreasFull,
+                  excludedAdminAreas: values.excludedAdminAreasFull || [],
                 }
               : null,
           verificationChannel: values.verificationChannel,
@@ -156,7 +156,7 @@ export function CreateVerificationPlan({
                   marginOfError: values.marginOfError * 0.01,
                   excludedAdminAreas: values.adminCheckbox
                     ? values.excludedAdminAreasRandom
-                    : null,
+                    : [],
                   age: values.ageCheckbox
                     ? { min: values.filterAgeMin, max: values.filterAgeMax }
                     : null,
