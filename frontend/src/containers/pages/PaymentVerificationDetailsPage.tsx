@@ -9,7 +9,6 @@ import { PageHeader } from '../../components/PageHeader';
 import { LabelizedField } from '../../components/LabelizedField';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
-import { CreateVerificationPlan } from '../../components/payments/CreateVerificationPlan';
 import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
 import { EditVerificationPlan } from '../../components/payments/EditVerificationPlan';
 import { ActivateVerificationPlan } from '../../components/payments/ActivateVerificationPlan';
@@ -26,6 +25,7 @@ import { VerificationRecordsTable } from '../tables/VerificationRecordsTable';
 import { Missing } from '../../components/Missing';
 import { useDebounce } from '../../hooks/useDebounce';
 import { VerificationRecordsFilters } from '../tables/VerificationRecordsTable/VerificationRecordsFilters';
+import { CreateVerificationPlan } from '../../components/payments/CreateVerificationPlan';
 
 const Container = styled.div`
   display: flex;
@@ -119,7 +119,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
         {cashPlan.verificationStatus === 'PENDING' &&
           cashPlan.verifications &&
           cashPlan.verifications.edges.length !== 0 && (
-            <Box display='flex'>
+            <Box alignItems='center' display='flex'>
               <EditVerificationPlan
                 cashPlanId={cashPlan.id}
                 cashPlanVerificationId={cashPlan.verifications.edges[0].node.id}

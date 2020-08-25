@@ -76,7 +76,7 @@ export function EditVerificationPlan({
     variables: { id: cashPlanId },
   });
   const verification = cashPlan?.verifications?.edges[0].node;
-
+  console.log('⚪️verif', verification);
   useEffect(() => {
     if (verification.sampling === 'FULL_LIST') {
       setSelectedTab(0);
@@ -86,18 +86,18 @@ export function EditVerificationPlan({
   }, [verification.sampling]);
 
   const initialValues = {
-    confidenceInterval: verification.confidenceInterval || 1,
-    marginOfError: verification.marginOfError || 1,
+    confidenceInterval: verification.confidenceInterval * 100 || 1,
+    marginOfError: verification.marginOfError * 100 || 1,
     filterAgeMin: 0,
     filterAgeMax: 0,
-    filterSex: '',
+    filterSex: verification.sexFilter || '',
     excludedAdminAreasFull: [],
     excludedAdminAreasRandom: [],
     verificationChannel: verification.verificationMethod || null,
     rapidProFlow: verification.rapidProFlowId || null,
     adminCheckbox: false,
     ageCheckbox: false,
-    sexCheckbox: false,
+    sexCheckbox: Boolean(verification.sexFilter) || false,
   };
 
   const [formValues, setFormValues] = useState(initialValues);
@@ -133,8 +133,8 @@ export function EditVerificationPlan({
                 marginOfError: formValues.marginOfError * 0.01,
                 excludedAdminAreas: formValues.excludedAdminAreasRandom,
                 age: {
-                  min: formValues.filterAgeMin || 0,
-                  max: formValues.filterAgeMax || 0,
+                  min: formValues.filterAgeMin || null,
+                  max: formValues.filterAgeMax || null,
                 },
                 sex: formValues.filterSex,
               }
