@@ -94,6 +94,9 @@ class CreatePaymentVerificationMutation(graphene.Mutation):
             margin_of_error,
             payment_records_sample_count,
             sampling,
+            excluded_admin_areas,
+            sex,
+            age,
         ) = cls.process_sampling(cash_plan, input)
         cash_plan_verification = CashPlanPaymentVerification(
             cash_plan=cash_plan,
@@ -103,6 +106,9 @@ class CreatePaymentVerificationMutation(graphene.Mutation):
             sampling=sampling,
             verification_method=verification_channel,
         )
+        cash_plan_verification.sex_filter = sex
+        cash_plan_verification.age_filter = age
+        cash_plan_verification.excluded_admin_areas_filter = excluded_admin_areas
         payment_record_verifications_to_create = []
         for payment_record in payment_records:
             payment_record_verification = PaymentVerification(
@@ -134,14 +140,16 @@ class CreatePaymentVerificationMutation(graphene.Mutation):
             confidence_interval = random_sampling_arguments.get("confidence_interval")
             margin_of_error = random_sampling_arguments.get("margin_of_error")
             sex = random_sampling_arguments.get("sex")
-            age = random_sampling_arguments.get("random_sampling_arguments")
+            age = random_sampling_arguments.get("age")
+            excluded_admin_areas = random_sampling_arguments.get("excluded_admin_areas", [])
+        excluded_admin_areas_decoded = [decode_id_string(x) for x in excluded_admin_areas]
 
-        payment_records = payment_records.filter(~(Q(household__admin_area__title__in=excluded_admin_areas)))
+        payment_records = payment_records.filter(~(Q(household__admin_area__id__in=excluded_admin_areas_decoded)))
         if sex is not None:
             payment_records = payment_records.filter(household__head_of_household__sex=sex)
         if age is not None:
             payment_records = filter_age(
-                "household__head_of_household__birth_date", payment_records, age.get(min), age.get("max"),
+                "household__head_of_household__birth_date", payment_records, age.get("min"), age.get("max"),
             )
         payment_records_sample_count = payment_records.count()
         if sampling == CashPlanPaymentVerification.SAMPLING_RANDOM:
@@ -155,6 +163,9 @@ class CreatePaymentVerificationMutation(graphene.Mutation):
             margin_of_error,
             payment_records_sample_count,
             sampling,
+            excluded_admin_areas,
+            sex,
+            age,
         )
 
     @classmethod
@@ -241,6 +252,9 @@ class EditPaymentVerificationMutation(graphene.Mutation):
             margin_of_error,
             payment_records_sample_count,
             sampling,
+            excluded_admin_areas,
+            sex,
+            age,
         ) = cls.process_sampling(cash_plan, input)
 
         cash_plan_verification.confidence_interval = confidence_interval
@@ -248,6 +262,9 @@ class EditPaymentVerificationMutation(graphene.Mutation):
         cash_plan_verification.sample_size = payment_records_sample_count
         cash_plan_verification.sampling = sampling
         cash_plan_verification.verification_method = verification_channel
+        cash_plan_verification.sex_filter = sex
+        cash_plan_verification.age_filter = age
+        cash_plan_verification.excluded_admin_areas_filter = excluded_admin_areas
         cash_plan_verification.payment_record_verifications.all().delete()
         payment_record_verifications_to_create = []
         for payment_record in payment_records:
@@ -279,15 +296,18 @@ class EditPaymentVerificationMutation(graphene.Mutation):
             random_sampling_arguments = arg("random_sampling_arguments")
             confidence_interval = random_sampling_arguments.get("confidence_interval")
             margin_of_error = random_sampling_arguments.get("margin_of_error")
+            excluded_admin_areas = random_sampling_arguments.get("excluded_admin_areas", [])
             sex = random_sampling_arguments.get("sex")
-            age = random_sampling_arguments.get("random_sampling_arguments")
+            age = random_sampling_arguments.get("age")
 
-        payment_records = payment_records.filter(~(Q(household__admin_area__title__in=excluded_admin_areas)))
+        excluded_admin_areas_decoded = [decode_id_string(x) for x in excluded_admin_areas]
+
+        payment_records = payment_records.filter(~(Q(household__admin_area__id__in=excluded_admin_areas_decoded)))
         if sex is not None:
             payment_records = payment_records.filter(household__head_of_household__sex=sex)
         if age is not None:
             payment_records = filter_age(
-                "household__head_of_household__birth_date", payment_records, age.get(min), age.get("max"),
+                "household__head_of_household__birth_date", payment_records, age.get("min"), age.get("max"),
             )
         payment_records_sample_count = payment_records.count()
         if sampling == CashPlanPaymentVerification.SAMPLING_RANDOM:
@@ -301,6 +321,9 @@ class EditPaymentVerificationMutation(graphene.Mutation):
             margin_of_error,
             payment_records_sample_count,
             sampling,
+            excluded_admin_areas,
+            sex,
+            age,
         )
 
     @classmethod

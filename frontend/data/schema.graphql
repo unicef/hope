@@ -34,6 +34,11 @@ type AdminAreaNodeEdge {
   cursor: String!
 }
 
+type AgeFilterObject {
+  min: Int
+  max: Int
+}
+
 input AgeInput {
   min: Int
   max: Int
@@ -146,6 +151,9 @@ type CashPlanPaymentVerificationNode implements Node {
   marginOfError: Float
   rapidProFlowId: String!
   rapidProFlowStartUuid: String!
+  ageFilter: AgeFilterObject
+  excludedAdminAreasFilter: [String]
+  sexFilter: String
   paymentRecordVerifications(before: String, after: String, first: Int, last: Int): PaymentVerificationNodeConnection!
 }
 
