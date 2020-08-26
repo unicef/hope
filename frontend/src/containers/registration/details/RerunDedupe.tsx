@@ -46,6 +46,7 @@ export function RerunDedupe({
     try {
       await mutate();
       showMessage('Rerunning Deduplication started');
+      setOpen(false);
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
     }
