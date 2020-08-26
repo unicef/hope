@@ -21,9 +21,9 @@ export type Scalars = {
   Decimal: any,
   JSONLazyString: any,
   FlexFieldsScalar: any,
-  JSONString: any,
   GeoJSON: any,
   Arg: any,
+  JSONString: any,
   Upload: any,
 };
 
@@ -452,6 +452,13 @@ export type CreateTargetPopulationMutation = {
 
 
 
+
+export type DeduplicationResultNode = {
+   __typename?: 'DeduplicationResultNode',
+  hitId?: Maybe<Scalars['ID']>,
+  fullName?: Maybe<Scalars['String']>,
+  score?: Maybe<Scalars['Float']>,
+};
 
 export type DeleteProgram = {
    __typename?: 'DeleteProgram',
@@ -1169,6 +1176,18 @@ export enum ImportedHouseholdResidenceStatus {
   Other = 'OTHER'
 }
 
+export enum ImportedIndividualDeduplicationBatchStatus {
+  SimilarInBatch = 'SIMILAR_IN_BATCH',
+  DuplicateInBatch = 'DUPLICATE_IN_BATCH',
+  UniqueInBatch = 'UNIQUE_IN_BATCH'
+}
+
+export enum ImportedIndividualDeduplicationGoldenRecordStatus {
+  Unique = 'UNIQUE',
+  Duplicate = 'DUPLICATE',
+  NeedsAdjudication = 'NEEDS_ADJUDICATION'
+}
+
 export type ImportedIndividualIdentityNode = {
    __typename?: 'ImportedIndividualIdentityNode',
   id: Scalars['ID'],
@@ -1209,10 +1228,10 @@ export type ImportedIndividualNode = Node & {
   workStatus?: Maybe<ImportedIndividualWorkStatus>,
   firstRegistrationDate: Scalars['Date'],
   lastRegistrationDate: Scalars['Date'],
-  deduplicationBatchStatus: Scalars['String'],
-  deduplicationGoldenRecordStatus: Scalars['String'],
-  deduplicationBatchResults: Scalars['JSONString'],
-  deduplicationGoldenRecordResults: Scalars['JSONString'],
+  deduplicationBatchStatus?: Maybe<ImportedIndividualDeduplicationBatchStatus>,
+  deduplicationGoldenRecordStatus?: Maybe<ImportedIndividualDeduplicationGoldenRecordStatus>,
+  deduplicationBatchResults?: Maybe<Array<Maybe<DeduplicationResultNode>>>,
+  deduplicationGoldenRecordResults?: Maybe<Array<Maybe<DeduplicationResultNode>>>,
   flexFields: Scalars['JSONString'],
   importedhousehold?: Maybe<ImportedHouseholdNode>,
   documents: ImportedDocumentNodeConnection,
@@ -1258,6 +1277,12 @@ export type ImportXlsxCashPlanVerification = {
   cashPlan?: Maybe<CashPlanNode>,
   errors?: Maybe<Array<Maybe<XlsxErrorNode>>>,
 };
+
+export enum IndividualDeduplicationStatus {
+  Unique = 'UNIQUE',
+  Duplicate = 'DUPLICATE',
+  NeedsAdjudication = 'NEEDS_ADJUDICATION'
+}
 
 export type IndividualIdentityNode = {
    __typename?: 'IndividualIdentityNode',
@@ -1305,8 +1330,8 @@ export type IndividualNode = Node & {
   enrolledInNutritionProgramme: Scalars['Boolean'],
   administrationOfRutf: Scalars['Boolean'],
   unicefId: Scalars['String'],
-  deduplicationStatus: Scalars['String'],
-  deduplicationResults: Scalars['JSONString'],
+  deduplicationStatus: IndividualDeduplicationStatus,
+  deduplicationResults?: Maybe<Array<Maybe<DeduplicationResultNode>>>,
   representedHouseholds: HouseholdNodeConnection,
   headingHousehold?: Maybe<HouseholdNode>,
   documents: DocumentNodeConnection,
@@ -1499,6 +1524,7 @@ export type Mutations = {
   registrationKoboImport?: Maybe<RegistrationKoboImportMutation>,
   saveKoboImportData?: Maybe<SaveKoboProjectImportDataMutation>,
   mergeRegistrationDataImport?: Maybe<MergeRegistrationDataImportMutation>,
+  rerunDedupe?: Maybe<RegistrationDeduplicationMutation>,
   checkAgainstSanctionList?: Maybe<CheckAgainstSanctionListMutation>,
 };
 
@@ -1628,6 +1654,11 @@ export type MutationsSaveKoboImportDataArgs = {
 
 export type MutationsMergeRegistrationDataImportArgs = {
   id: Scalars['ID']
+};
+
+
+export type MutationsRerunDedupeArgs = {
+  registrationDataImportDatahubId: Scalars['ID']
 };
 
 
@@ -2340,6 +2371,7 @@ export type RegistrationDataImportDatahubNode = Node & {
   importData?: Maybe<ImportDataNode>,
   importDone: RegistrationDataImportDatahubImportDone,
   businessAreaSlug: Scalars['String'],
+  errorMessage: Scalars['String'],
   households: ImportedHouseholdNodeConnection,
   individuals: ImportedIndividualNodeConnection,
 };
@@ -2431,8 +2463,14 @@ export enum RegistrationDataImportStatus {
   InReview = 'IN_REVIEW',
   Merged = 'MERGED',
   Merging = 'MERGING',
-  Importing = 'IMPORTING'
+  Importing = 'IMPORTING',
+  DeduplicationFailed = 'DEDUPLICATION_FAILED'
 }
+
+export type RegistrationDeduplicationMutation = {
+   __typename?: 'RegistrationDeduplicationMutation',
+  ok?: Maybe<Scalars['Boolean']>,
+};
 
 export type RegistrationKoboImportMutation = {
    __typename?: 'RegistrationKoboImportMutation',
@@ -3432,6 +3470,19 @@ export type ImportXlsxCashPlanVerificationMutation = (
       { __typename?: 'XlsxErrorNode' }
       & Pick<XlsxErrorNode, 'sheet' | 'coordinates' | 'message'>
     )>>> }
+  )> }
+);
+
+export type RerunDedupeMutationVariables = {
+  registrationDataImportDatahubId: Scalars['ID']
+};
+
+
+export type RerunDedupeMutation = (
+  { __typename?: 'Mutations' }
+  & { rerunDedupe: Maybe<(
+    { __typename?: 'RegistrationDeduplicationMutation' }
+    & Pick<RegistrationDeduplicationMutation, 'ok'>
   )> }
 );
 
@@ -4476,7 +4527,7 @@ export type RegistrationMinimalFragment = (
 
 export type RegistrationDetailedFragment = (
   { __typename?: 'RegistrationDataImportNode' }
-  & Pick<RegistrationDataImportNode, 'numberOfIndividuals'>
+  & Pick<RegistrationDataImportNode, 'numberOfIndividuals' | 'datahubId'>
   & RegistrationMinimalFragment
 );
 
@@ -4893,6 +4944,7 @@ export const RegistrationDetailedFragmentDoc = gql`
     fragment registrationDetailed on RegistrationDataImportNode {
   ...registrationMinimal
   numberOfIndividuals
+  datahubId
 }
     ${RegistrationMinimalFragmentDoc}`;
 export const ImportedHouseholdMinimalFragmentDoc = gql`
@@ -5893,6 +5945,55 @@ export function useImportXlsxCashPlanVerificationMutation(baseOptions?: ApolloRe
 export type ImportXlsxCashPlanVerificationMutationHookResult = ReturnType<typeof useImportXlsxCashPlanVerificationMutation>;
 export type ImportXlsxCashPlanVerificationMutationResult = ApolloReactCommon.MutationResult<ImportXlsxCashPlanVerificationMutation>;
 export type ImportXlsxCashPlanVerificationMutationOptions = ApolloReactCommon.BaseMutationOptions<ImportXlsxCashPlanVerificationMutation, ImportXlsxCashPlanVerificationMutationVariables>;
+export const RerunDedupeDocument = gql`
+    mutation RerunDedupe($registrationDataImportDatahubId: ID!) {
+  rerunDedupe(registrationDataImportDatahubId: $registrationDataImportDatahubId) {
+    ok
+  }
+}
+    `;
+export type RerunDedupeMutationFn = ApolloReactCommon.MutationFunction<RerunDedupeMutation, RerunDedupeMutationVariables>;
+export type RerunDedupeComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<RerunDedupeMutation, RerunDedupeMutationVariables>, 'mutation'>;
+
+    export const RerunDedupeComponent = (props: RerunDedupeComponentProps) => (
+      <ApolloReactComponents.Mutation<RerunDedupeMutation, RerunDedupeMutationVariables> mutation={RerunDedupeDocument} {...props} />
+    );
+    
+export type RerunDedupeProps<TChildProps = {}> = ApolloReactHoc.MutateProps<RerunDedupeMutation, RerunDedupeMutationVariables> & TChildProps;
+export function withRerunDedupe<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  RerunDedupeMutation,
+  RerunDedupeMutationVariables,
+  RerunDedupeProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, RerunDedupeMutation, RerunDedupeMutationVariables, RerunDedupeProps<TChildProps>>(RerunDedupeDocument, {
+      alias: 'rerunDedupe',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useRerunDedupeMutation__
+ *
+ * To run a mutation, you first call `useRerunDedupeMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRerunDedupeMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [rerunDedupeMutation, { data, loading, error }] = useRerunDedupeMutation({
+ *   variables: {
+ *      registrationDataImportDatahubId: // value for 'registrationDataImportDatahubId'
+ *   },
+ * });
+ */
+export function useRerunDedupeMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<RerunDedupeMutation, RerunDedupeMutationVariables>) {
+        return ApolloReactHooks.useMutation<RerunDedupeMutation, RerunDedupeMutationVariables>(RerunDedupeDocument, baseOptions);
+      }
+export type RerunDedupeMutationHookResult = ReturnType<typeof useRerunDedupeMutation>;
+export type RerunDedupeMutationResult = ApolloReactCommon.MutationResult<RerunDedupeMutation>;
+export type RerunDedupeMutationOptions = ApolloReactCommon.BaseMutationOptions<RerunDedupeMutation, RerunDedupeMutationVariables>;
 export const UpdatePaymentVerificationReceivedAndReceivedAmountDocument = gql`
     mutation updatePaymentVerificationReceivedAndReceivedAmount($paymentVerificationId: ID!, $receivedAmount: Decimal!, $received: Boolean!) {
   updatePaymentVerificationReceivedAndReceivedAmount(paymentVerificationId: $paymentVerificationId, receivedAmount: $receivedAmount, received: $received) {
@@ -9198,7 +9299,8 @@ export type ResolversTypes = {
   RegistrationDataImportDataSource: RegistrationDataImportDataSource,
   IndividualWorkStatus: IndividualWorkStatus,
   FlexFieldsScalar: ResolverTypeWrapper<Scalars['FlexFieldsScalar']>,
-  JSONString: ResolverTypeWrapper<Scalars['JSONString']>,
+  IndividualDeduplicationStatus: IndividualDeduplicationStatus,
+  DeduplicationResultNode: ResolverTypeWrapper<DeduplicationResultNode>,
   DocumentNodeConnection: ResolverTypeWrapper<DocumentNodeConnection>,
   DocumentNodeEdge: ResolverTypeWrapper<DocumentNodeEdge>,
   DocumentNode: ResolverTypeWrapper<DocumentNode>,
@@ -9236,6 +9338,7 @@ export type ResolversTypes = {
   AgeInput: AgeInput,
   GetCashplanVerificationSampleSizeObject: ResolverTypeWrapper<GetCashplanVerificationSampleSizeObject>,
   GroupAttributeNode: ResolverTypeWrapper<GroupAttributeNode>,
+  JSONString: ResolverTypeWrapper<Scalars['JSONString']>,
   KoboAssetObject: ResolverTypeWrapper<KoboAssetObject>,
   KoboAssetObjectConnection: ResolverTypeWrapper<KoboAssetObjectConnection>,
   KoboAssetObjectEdge: ResolverTypeWrapper<KoboAssetObjectEdge>,
@@ -9257,6 +9360,8 @@ export type ResolversTypes = {
   ImportedIndividualNodeConnection: ResolverTypeWrapper<ImportedIndividualNodeConnection>,
   ImportedIndividualNodeEdge: ResolverTypeWrapper<ImportedIndividualNodeEdge>,
   ImportedIndividualWorkStatus: ImportedIndividualWorkStatus,
+  ImportedIndividualDeduplicationBatchStatus: ImportedIndividualDeduplicationBatchStatus,
+  ImportedIndividualDeduplicationGoldenRecordStatus: ImportedIndividualDeduplicationGoldenRecordStatus,
   ImportedDocumentNodeConnection: ResolverTypeWrapper<ImportedDocumentNodeConnection>,
   ImportedDocumentNodeEdge: ResolverTypeWrapper<ImportedDocumentNodeEdge>,
   ImportedDocumentNode: ResolverTypeWrapper<ImportedDocumentNode>,
@@ -9310,6 +9415,7 @@ export type ResolversTypes = {
   SaveKoboProjectImportDataMutation: ResolverTypeWrapper<SaveKoboProjectImportDataMutation>,
   KoboErrorNode: ResolverTypeWrapper<KoboErrorNode>,
   MergeRegistrationDataImportMutation: ResolverTypeWrapper<MergeRegistrationDataImportMutation>,
+  RegistrationDeduplicationMutation: ResolverTypeWrapper<RegistrationDeduplicationMutation>,
   CheckAgainstSanctionListMutation: ResolverTypeWrapper<CheckAgainstSanctionListMutation>,
 };
 
@@ -9387,7 +9493,8 @@ export type ResolversParentTypes = {
   RegistrationDataImportDataSource: RegistrationDataImportDataSource,
   IndividualWorkStatus: IndividualWorkStatus,
   FlexFieldsScalar: Scalars['FlexFieldsScalar'],
-  JSONString: Scalars['JSONString'],
+  IndividualDeduplicationStatus: IndividualDeduplicationStatus,
+  DeduplicationResultNode: DeduplicationResultNode,
   DocumentNodeConnection: DocumentNodeConnection,
   DocumentNodeEdge: DocumentNodeEdge,
   DocumentNode: DocumentNode,
@@ -9425,6 +9532,7 @@ export type ResolversParentTypes = {
   AgeInput: AgeInput,
   GetCashplanVerificationSampleSizeObject: GetCashplanVerificationSampleSizeObject,
   GroupAttributeNode: GroupAttributeNode,
+  JSONString: Scalars['JSONString'],
   KoboAssetObject: KoboAssetObject,
   KoboAssetObjectConnection: KoboAssetObjectConnection,
   KoboAssetObjectEdge: KoboAssetObjectEdge,
@@ -9446,6 +9554,8 @@ export type ResolversParentTypes = {
   ImportedIndividualNodeConnection: ImportedIndividualNodeConnection,
   ImportedIndividualNodeEdge: ImportedIndividualNodeEdge,
   ImportedIndividualWorkStatus: ImportedIndividualWorkStatus,
+  ImportedIndividualDeduplicationBatchStatus: ImportedIndividualDeduplicationBatchStatus,
+  ImportedIndividualDeduplicationGoldenRecordStatus: ImportedIndividualDeduplicationGoldenRecordStatus,
   ImportedDocumentNodeConnection: ImportedDocumentNodeConnection,
   ImportedDocumentNodeEdge: ImportedDocumentNodeEdge,
   ImportedDocumentNode: ImportedDocumentNode,
@@ -9499,6 +9609,7 @@ export type ResolversParentTypes = {
   SaveKoboProjectImportDataMutation: SaveKoboProjectImportDataMutation,
   KoboErrorNode: KoboErrorNode,
   MergeRegistrationDataImportMutation: MergeRegistrationDataImportMutation,
+  RegistrationDeduplicationMutation: RegistrationDeduplicationMutation,
   CheckAgainstSanctionListMutation: CheckAgainstSanctionListMutation,
 };
 
@@ -9711,6 +9822,12 @@ export interface DateTimeScalarConfig extends GraphQLScalarTypeConfig<ResolversT
 export interface DecimalScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Decimal'], any> {
   name: 'Decimal'
 }
+
+export type DeduplicationResultNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeduplicationResultNode'] = ResolversParentTypes['DeduplicationResultNode']> = {
+  hitId?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>,
+  fullName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  score?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+};
 
 export type DeleteProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteProgram'] = ResolversParentTypes['DeleteProgram']> = {
   ok?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
@@ -10025,10 +10142,10 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   workStatus?: Resolver<Maybe<ResolversTypes['ImportedIndividualWorkStatus']>, ParentType, ContextType>,
   firstRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   lastRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
-  deduplicationBatchStatus?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  deduplicationGoldenRecordStatus?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  deduplicationBatchResults?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
-  deduplicationGoldenRecordResults?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
+  deduplicationBatchStatus?: Resolver<Maybe<ResolversTypes['ImportedIndividualDeduplicationBatchStatus']>, ParentType, ContextType>,
+  deduplicationGoldenRecordStatus?: Resolver<Maybe<ResolversTypes['ImportedIndividualDeduplicationGoldenRecordStatus']>, ParentType, ContextType>,
+  deduplicationBatchResults?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeduplicationResultNode']>>>, ParentType, ContextType>,
+  deduplicationGoldenRecordResults?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeduplicationResultNode']>>>, ParentType, ContextType>,
   flexFields?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   importedhousehold?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['ImportedDocumentNodeConnection'], ParentType, ContextType, ImportedIndividualNodeDocumentsArgs>,
@@ -10089,8 +10206,8 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   enrolledInNutritionProgramme?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   administrationOfRutf?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   unicefId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  deduplicationStatus?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  deduplicationResults?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
+  deduplicationStatus?: Resolver<ResolversTypes['IndividualDeduplicationStatus'], ParentType, ContextType>,
+  deduplicationResults?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeduplicationResultNode']>>>, ParentType, ContextType>,
   representedHouseholds?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, IndividualNodeRepresentedHouseholdsArgs>,
   headingHousehold?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, IndividualNodeDocumentsArgs>,
@@ -10215,6 +10332,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   registrationKoboImport?: Resolver<Maybe<ResolversTypes['RegistrationKoboImportMutation']>, ParentType, ContextType, RequireFields<MutationsRegistrationKoboImportArgs, 'registrationDataImportData'>>,
   saveKoboImportData?: Resolver<Maybe<ResolversTypes['SaveKoboProjectImportDataMutation']>, ParentType, ContextType, RequireFields<MutationsSaveKoboImportDataArgs, 'businessAreaSlug' | 'uid'>>,
   mergeRegistrationDataImport?: Resolver<Maybe<ResolversTypes['MergeRegistrationDataImportMutation']>, ParentType, ContextType, RequireFields<MutationsMergeRegistrationDataImportArgs, 'id'>>,
+  rerunDedupe?: Resolver<Maybe<ResolversTypes['RegistrationDeduplicationMutation']>, ParentType, ContextType, RequireFields<MutationsRerunDedupeArgs, 'registrationDataImportDatahubId'>>,
   checkAgainstSanctionList?: Resolver<Maybe<ResolversTypes['CheckAgainstSanctionListMutation']>, ParentType, ContextType, RequireFields<MutationsCheckAgainstSanctionListArgs, 'file'>>,
 };
 
@@ -10439,6 +10557,7 @@ export type RegistrationDataImportDatahubNodeResolvers<ContextType = any, Parent
   importData?: Resolver<Maybe<ResolversTypes['ImportDataNode']>, ParentType, ContextType>,
   importDone?: Resolver<ResolversTypes['RegistrationDataImportDatahubImportDone'], ParentType, ContextType>,
   businessAreaSlug?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  errorMessage?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   households?: Resolver<ResolversTypes['ImportedHouseholdNodeConnection'], ParentType, ContextType, RegistrationDataImportDatahubNodeHouseholdsArgs>,
   individuals?: Resolver<ResolversTypes['ImportedIndividualNodeConnection'], ParentType, ContextType, RegistrationDataImportDatahubNodeIndividualsArgs>,
 };
@@ -10482,6 +10601,10 @@ export type RegistrationDataImportNodeConnectionResolvers<ContextType = any, Par
 export type RegistrationDataImportNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['RegistrationDataImportNodeEdge'] = ResolversParentTypes['RegistrationDataImportNodeEdge']> = {
   node?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type RegistrationDeduplicationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['RegistrationDeduplicationMutation'] = ResolversParentTypes['RegistrationDeduplicationMutation']> = {
+  ok?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
 export type RegistrationKoboImportMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['RegistrationKoboImportMutation'] = ResolversParentTypes['RegistrationKoboImportMutation']> = {
@@ -10724,6 +10847,7 @@ export type Resolvers<ContextType = any> = {
   Date?: GraphQLScalarType,
   DateTime?: GraphQLScalarType,
   Decimal?: GraphQLScalarType,
+  DeduplicationResultNode?: DeduplicationResultNodeResolvers<ContextType>,
   DeleteProgram?: DeleteProgramResolvers<ContextType>,
   DeleteRegistrationDataImport?: DeleteRegistrationDataImportResolvers<ContextType>,
   DeleteTargetPopulationMutationPayload?: DeleteTargetPopulationMutationPayloadResolvers<ContextType>,
@@ -10797,6 +10921,7 @@ export type Resolvers<ContextType = any> = {
   RegistrationDataImportNode?: RegistrationDataImportNodeResolvers<ContextType>,
   RegistrationDataImportNodeConnection?: RegistrationDataImportNodeConnectionResolvers<ContextType>,
   RegistrationDataImportNodeEdge?: RegistrationDataImportNodeEdgeResolvers<ContextType>,
+  RegistrationDeduplicationMutation?: RegistrationDeduplicationMutationResolvers<ContextType>,
   RegistrationKoboImportMutation?: RegistrationKoboImportMutationResolvers<ContextType>,
   RegistrationXlsxImportMutation?: RegistrationXlsxImportMutationResolvers<ContextType>,
   SaveKoboProjectImportDataMutation?: SaveKoboProjectImportDataMutationResolvers<ContextType>,
