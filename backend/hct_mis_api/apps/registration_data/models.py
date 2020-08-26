@@ -10,11 +10,13 @@ class RegistrationDataImport(TimeStampedUUIDModel):
     IN_REVIEW = "IN_REVIEW"
     MERGING = "MERGING"
     MERGED = "MERGED"
+    DEDUPLICATION_FAILED = "DEDUPLICATION_FAILED"
     STATUS_CHOICE = (
         (IN_REVIEW, _("In Review")),
         (MERGED, _("Merged")),
         (MERGING, _("Merging")),
         (IMPORTING, _("Importing")),
+        (DEDUPLICATION_FAILED, _("Deduplication Failed")),
     )
     DATA_SOURCE_CHOICE = (
         ("XLS", "Excel"),
