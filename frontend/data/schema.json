@@ -12350,6 +12350,22 @@
             "deprecationReason": null
           },
           {
+            "name": "errorMessage",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "businessArea",
             "description": null,
             "args": [],
@@ -12524,6 +12540,12 @@
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "DEDUPLICATION",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "possibleTypes": null
@@ -12612,6 +12634,12 @@
           },
           {
             "name": "NEEDS_ADJUDICATION",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "A_",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -18049,22 +18077,6 @@
             "deprecationReason": null
           },
           {
-            "name": "errorMessage",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "households",
             "description": null,
             "args": [
@@ -18657,6 +18669,12 @@
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "A_",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "possibleTypes": null
@@ -18683,6 +18701,12 @@
           },
           {
             "name": "NEEDS_ADJUDICATION",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "A_",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null

@@ -129,6 +129,7 @@ DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE = (
     (UNIQUE, "Unique"),
     (DUPLICATE, "Duplicate"),
     (NEEDS_ADJUDICATION, "Needs Adjudication"),
+    ("", "-"),
 )
 
 
