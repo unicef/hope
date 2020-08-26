@@ -292,3 +292,4 @@ class Mutations(graphene.ObjectType):
     registration_kobo_import = RegistrationKoboImportMutation.Field()
     save_kobo_import_data = SaveKoboProjectImportDataMutation.Field()
     merge_registration_data_import = MergeRegistrationDataImportMutation.Field()
+    rerun_dedupe = RegistrationDeduplicationMutation.Field()
