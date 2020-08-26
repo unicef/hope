@@ -893,12 +893,14 @@ enum ImportedIndividualDeduplicationBatchStatus {
   SIMILAR_IN_BATCH
   DUPLICATE_IN_BATCH
   UNIQUE_IN_BATCH
+  A_
 }
 
 enum ImportedIndividualDeduplicationGoldenRecordStatus {
   UNIQUE
   DUPLICATE
   NEEDS_ADJUDICATION
+  A_
 }
 
 type ImportedIndividualIdentityNode {
@@ -977,6 +979,7 @@ enum IndividualDeduplicationStatus {
   UNIQUE
   DUPLICATE
   NEEDS_ADJUDICATION
+  A_
 }
 
 type IndividualIdentityNode {
@@ -1496,7 +1499,6 @@ type RegistrationDataImportDatahubNode implements Node {
   importData: ImportDataNode
   importDone: RegistrationDataImportDatahubImportDone!
   businessAreaSlug: String!
-  errorMessage: String!
   households(before: String, after: String, first: Int, last: Int): ImportedHouseholdNodeConnection!
   individuals(before: String, after: String, first: Int, last: Int): ImportedIndividualNodeConnection!
 }
@@ -1525,6 +1527,7 @@ type RegistrationDataImportNode implements Node {
   numberOfIndividuals: Int!
   numberOfHouseholds: Int!
   datahubId: UUID
+  errorMessage: String!
   businessArea: BusinessAreaNode
   households(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
@@ -1548,6 +1551,7 @@ enum RegistrationDataImportStatus {
   MERGING
   IMPORTING
   DEDUPLICATION_FAILED
+  DEDUPLICATION
 }
 
 type RegistrationDeduplicationMutation {

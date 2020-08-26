@@ -115,9 +115,7 @@ class RegistrationDeduplicationMutation(BaseValidator, graphene.Mutation):
         registration_data_import_datahub_id = graphene.ID(required=True)
 
     @classmethod
-    def validate_object_status(cls, registration_data_import_datahub_id, *args, **kwargs):
-        rdi_obj = RegistrationDataImportDatahub.objects.get(id=registration_data_import_datahub_id)
-
+    def validate_object_status(cls, rdi_obj, *args, **kwargs):
         if rdi_obj.status != RegistrationDataImport.DEDUPLICATION_FAILED:
             raise ValidationError(
                 "Deduplication can only be called when Registration Data Import" "status is Deduplication Failed"
@@ -126,11 +124,16 @@ class RegistrationDeduplicationMutation(BaseValidator, graphene.Mutation):
     @classmethod
     @is_authenticated
     def mutate(cls, root, info, registration_data_import_datahub_id):
-        cls.validate(registration_data_import_datahub_id=registration_data_import_datahub_id)
+        rdi_obj = RegistrationDataImport.objects.get(datahub_id=registration_data_import_datahub_id)
+
+        cls.validate(rdi_obj=rdi_obj)
+
+        rdi_obj.status = RegistrationDataImport.DEDUPLICATION
+        rdi_obj.save()
 
         AirflowApi.start_dag(
             dag_id="RegistrationDataImportDeduplication",
-            context={"registration_data_import_id": str(registration_data_import_datahub_id),},
+            context={"registration_data_import_id": str(registration_data_import_datahub_id)},
         )
 
         return cls(ok=True)

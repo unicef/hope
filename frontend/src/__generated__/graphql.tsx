@@ -1179,13 +1179,15 @@ export enum ImportedHouseholdResidenceStatus {
 export enum ImportedIndividualDeduplicationBatchStatus {
   SimilarInBatch = 'SIMILAR_IN_BATCH',
   DuplicateInBatch = 'DUPLICATE_IN_BATCH',
-  UniqueInBatch = 'UNIQUE_IN_BATCH'
+  UniqueInBatch = 'UNIQUE_IN_BATCH',
+  A = 'A_'
 }
 
 export enum ImportedIndividualDeduplicationGoldenRecordStatus {
   Unique = 'UNIQUE',
   Duplicate = 'DUPLICATE',
-  NeedsAdjudication = 'NEEDS_ADJUDICATION'
+  NeedsAdjudication = 'NEEDS_ADJUDICATION',
+  A = 'A_'
 }
 
 export type ImportedIndividualIdentityNode = {
@@ -1281,7 +1283,8 @@ export type ImportXlsxCashPlanVerification = {
 export enum IndividualDeduplicationStatus {
   Unique = 'UNIQUE',
   Duplicate = 'DUPLICATE',
-  NeedsAdjudication = 'NEEDS_ADJUDICATION'
+  NeedsAdjudication = 'NEEDS_ADJUDICATION',
+  A = 'A_'
 }
 
 export type IndividualIdentityNode = {
@@ -2371,7 +2374,6 @@ export type RegistrationDataImportDatahubNode = Node & {
   importData?: Maybe<ImportDataNode>,
   importDone: RegistrationDataImportDatahubImportDone,
   businessAreaSlug: Scalars['String'],
-  errorMessage: Scalars['String'],
   households: ImportedHouseholdNodeConnection,
   individuals: ImportedIndividualNodeConnection,
 };
@@ -2424,6 +2426,7 @@ export type RegistrationDataImportNode = Node & {
   numberOfIndividuals: Scalars['Int'],
   numberOfHouseholds: Scalars['Int'],
   datahubId?: Maybe<Scalars['UUID']>,
+  errorMessage: Scalars['String'],
   businessArea?: Maybe<BusinessAreaNode>,
   households: HouseholdNodeConnection,
   individuals: IndividualNodeConnection,
@@ -2464,7 +2467,8 @@ export enum RegistrationDataImportStatus {
   Merged = 'MERGED',
   Merging = 'MERGING',
   Importing = 'IMPORTING',
-  DeduplicationFailed = 'DEDUPLICATION_FAILED'
+  DeduplicationFailed = 'DEDUPLICATION_FAILED',
+  Deduplication = 'DEDUPLICATION'
 }
 
 export type RegistrationDeduplicationMutation = {
@@ -10557,7 +10561,6 @@ export type RegistrationDataImportDatahubNodeResolvers<ContextType = any, Parent
   importData?: Resolver<Maybe<ResolversTypes['ImportDataNode']>, ParentType, ContextType>,
   importDone?: Resolver<ResolversTypes['RegistrationDataImportDatahubImportDone'], ParentType, ContextType>,
   businessAreaSlug?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  errorMessage?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   households?: Resolver<ResolversTypes['ImportedHouseholdNodeConnection'], ParentType, ContextType, RegistrationDataImportDatahubNodeHouseholdsArgs>,
   individuals?: Resolver<ResolversTypes['ImportedIndividualNodeConnection'], ParentType, ContextType, RegistrationDataImportDatahubNodeIndividualsArgs>,
 };
@@ -10586,6 +10589,7 @@ export type RegistrationDataImportNodeResolvers<ContextType = any, ParentType ex
   numberOfIndividuals?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   numberOfHouseholds?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   datahubId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
+  errorMessage?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   businessArea?: Resolver<Maybe<ResolversTypes['BusinessAreaNode']>, ParentType, ContextType>,
   households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeHouseholdsArgs>,
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeIndividualsArgs>,

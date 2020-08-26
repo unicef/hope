@@ -173,7 +173,5 @@ class Query(graphene.ObjectType):
     def resolve_deduplication_batch_status_choices(self, info, **kwargs):
         return to_choice_object(DEDUPLICATION_BATCH_STATUS_CHOICE)
 
-    def resolve_deduplication_golden_record_status_choices(
-        self, info, **kwargs
-    ):
+    def resolve_deduplication_golden_record_status_choices(self, info, **kwargs):
         return to_choice_object(DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE)
