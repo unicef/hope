@@ -15,16 +15,12 @@ class APITestCase(SnapshotTestTestCase):
         super().setUp()
         self.client = Client(schema)
 
-    def snapshot_graphql_request(
-        self, request_string, context=None, variables=None
-    ):
+    def snapshot_graphql_request(self, request_string, context=None, variables=None):
         if context is None:
             context = {}
 
         graphql_request = self.client.execute(
-            request_string,
-            variables=variables,
-            context=self.generate_context(**context),
+            request_string, variables=variables, context=self.generate_context(**context),
         )
 
         self.assertMatchSnapshot(graphql_request)
@@ -38,9 +34,7 @@ class APITestCase(SnapshotTestTestCase):
 
     @staticmethod
     def id_to_base64(id, name):
-        return base64.b64encode(
-            f"{name}Node:{str(id)}".encode("utf-8")
-        ).decode()
+        return base64.b64encode(f"{name}Node:{str(id)}".encode("utf-8")).decode()
 
     @staticmethod
     def __set_context_files(context, files):

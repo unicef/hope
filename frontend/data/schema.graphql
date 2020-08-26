@@ -34,6 +34,11 @@ type AdminAreaNodeEdge {
   cursor: String!
 }
 
+type AgeFilterObject {
+  min: Int
+  max: Int
+}
+
 input AgeInput {
   min: Int
   max: Int
@@ -146,6 +151,9 @@ type CashPlanPaymentVerificationNode implements Node {
   marginOfError: Float
   rapidProFlowId: String!
   rapidProFlowStartUuid: String!
+  ageFilter: AgeFilterObject
+  excludedAdminAreasFilter: [String]
+  sexFilter: String
   paymentRecordVerifications(before: String, after: String, first: Int, last: Int): PaymentVerificationNodeConnection!
 }
 
@@ -350,6 +358,20 @@ enum DocumentTypeType {
   NATIONAL_PASSPORT
   ELECTORAL_CARD
   OTHER
+}
+
+input EditCashPlanPaymentVerificationInput {
+  cashPlanPaymentVerificationId: ID!
+  sampling: String!
+  verificationChannel: String!
+  businessAreaSlug: String!
+  fullListArguments: FullListArguments
+  randomSamplingArguments: RandomSamplingArguments
+  rapidProArguments: RapidProArguments
+}
+
+type EditPaymentVerificationMutation {
+  cashPlan: CashPlanNode
 }
 
 type FieldAttributeNode {
@@ -1121,11 +1143,13 @@ type MergeRegistrationDataImportMutation {
 
 type Mutations {
   createCashPlanPaymentVerification(input: CreatePaymentVerificationInput!): CreatePaymentVerificationMutation
+  editCashPlanPaymentVerification(input: EditCashPlanPaymentVerificationInput!): EditPaymentVerificationMutation
   importXlsxCashPlanVerification(cashPlanVerificationId: ID!, file: Upload!): ImportXlsxCashPlanVerification
   activateCashPlanPaymentVerification(cashPlanVerificationId: ID!): ActivateCashPlanVerificationMutation
   finishCashPlanPaymentVerification(cashPlanVerificationId: ID!): FinishCashPlanVerificationMutation
   discardCashPlanPaymentVerification(cashPlanVerificationId: ID!): DiscardCashPlanVerificationMutation
   updatePaymentVerificationStatusAndReceivedAmount(paymentVerificationId: ID!, receivedAmount: Decimal!, status: PaymentVerificationStatusForUpdate): UpdatePaymentVerificationStatusAndReceivedAmount
+  updatePaymentVerificationReceivedAndReceivedAmount(paymentVerificationId: ID!, received: Boolean!, receivedAmount: Decimal!): UpdatePaymentVerificationReceivedAndReceivedAmount
   createTargetPopulation(input: CreateTargetPopulationInput!): CreateTargetPopulationMutation
   updateTargetPopulation(input: UpdateTargetPopulationInput!): UpdateTargetPopulationMutation
   copyTargetPopulation(input: CopyTargetPopulationMutationInput!): CopyTargetPopulationMutationPayload
@@ -1667,6 +1691,10 @@ scalar UUID
 
 type UnapproveTargetPopulationMutation {
   targetPopulation: TargetPopulationNode
+}
+
+type UpdatePaymentVerificationReceivedAndReceivedAmount {
+  paymentVerification: PaymentVerificationNode
 }
 
 type UpdatePaymentVerificationStatusAndReceivedAmount {

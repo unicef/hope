@@ -15,9 +15,7 @@ class TokenInvalid(Exception):
 
 
 class KoboAPI:
-    KPI_URL = os.getenv(
-        "KOBO_API_URL", "https://kobo.humanitarianresponse.info"
-    )
+    KPI_URL = os.getenv("KOBO_API_URL", "https://kobo.humanitarianresponse.info")
 
     def __init__(self, business_area_slug, kpi_url: str = None):
         if kpi_url:
@@ -26,16 +24,15 @@ class KoboAPI:
         self._get_token(business_area_slug)
 
     def _handle_paginated_results(self, url):
-        data: dict = self._handle_request(url)
-
-        results: list = data["results"]
+        next_url = url
+        results: list = []
 
         # if there will be more than 30000 results,
         # we need to make additional queries
-        while data["next"]:
-            data = self._handle_request(data["next"])
+        while next_url:
+            data = self._handle_request(next_url)
+            next_url = data["next"]
             results.extend(data["results"])
-
         return results
 
     def _get_url(self, endpoint: str):

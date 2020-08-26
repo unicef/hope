@@ -14,6 +14,7 @@
     "@typescript-eslint/prefer-optional-chain": "warn",
     "react/jsx-max-props-per-line": 0,
     "react/destructuring-assignment": 1,
+    "react/require-default-props": 1,
     "spaced-comment": 0
   }
 }

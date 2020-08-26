@@ -46,9 +46,7 @@ from core.utils import decode_id_string, LazyEvalMethodsDict
 
 
 class AdminAreaFilter(FilterSet):
-    business_area = CharFilter(
-        field_name="admin_area_type__business_area__slug",
-    )
+    business_area = CharFilter(field_name="admin_area_type__business_area__slug",)
 
     class Meta:
         model = AdminArea
@@ -150,9 +148,7 @@ class FlexibleAttributeNode(DjangoObjectType):
         return self.choices.all()
 
     def resolve_associated_with(self, info):
-        return str(
-            FlexibleAttribute.ASSOCIATED_WITH_CHOICES[self.associated_with][1]
-        )
+        return str(FlexibleAttribute.ASSOCIATED_WITH_CHOICES[self.associated_with][1])
 
     class Meta:
         model = FlexibleAttribute
@@ -220,10 +216,7 @@ class FieldAttributeNode(graphene.ObjectType):
     is_flex_field = graphene.Boolean()
 
     def resolve_choices(parent, info):
-        if isinstance(
-            _custom_dict_or_attr_resolver("choices", None, parent, info),
-            Iterable,
-        ):
+        if isinstance(_custom_dict_or_attr_resolver("choices", None, parent, info), Iterable,):
             return sorted(parent["choices"], key=itemgetter("value"))
         return parent.choices.order_by("name").all()
 
@@ -233,19 +226,13 @@ class FieldAttributeNode(graphene.ObjectType):
         return False
 
     def resolve_labels(parent, info):
-        return resolve_label(
-            _custom_dict_or_attr_resolver("label", None, parent, info)
-        )
+        return resolve_label(_custom_dict_or_attr_resolver("label", None, parent, info))
 
     def resolve_label_en(parent, info):
-        return _custom_dict_or_attr_resolver("label", None, parent, info)[
-            "English(EN)"
-        ]
+        return _custom_dict_or_attr_resolver("label", None, parent, info)["English(EN)"]
 
     def resolve_associated_with(self, info):
-        resolved = _custom_dict_or_attr_resolver(
-            "associated_with", None, self, info
-        )
+        resolved = _custom_dict_or_attr_resolver("associated_with", None, self, info)
         if resolved == 0:
             return "Household"
         elif resolved == 1:
@@ -257,25 +244,15 @@ class FieldAttributeNode(graphene.ObjectType):
 class GroupAttributeNode(DjangoObjectType):
     label_en = graphene.String()
     flex_attributes = graphene.List(
-        FieldAttributeNode,
-        flex_field=graphene.Boolean(),
-        description="All field datatype meta.",
+        FieldAttributeNode, flex_field=graphene.Boolean(), description="All field datatype meta.",
     )
 
     class Meta:
         model = FlexibleAttributeGroup
-        fields = [
-            "id",
-            "name",
-            "label",
-            "flex_attributes",
-            "label_en"
-        ]
+        fields = ["id", "name", "label", "flex_attributes", "label_en"]
 
     def resolve_label_en(self, info):
-        return _custom_dict_or_attr_resolver("label", None, self, info)[
-            "English(EN)"
-        ]
+        return _custom_dict_or_attr_resolver("label", None, self, info)["English(EN)"]
 
     def resolve_flex_attributes(self, info):
         return self.flex_attributes.all()
@@ -311,9 +288,7 @@ class GeoJSON(graphene.Scalar):
 
 @convert_django_field.register(GeometryField)
 def convert_field_to_geojson(field, registry=None):
-    return graphene.Field(
-        GeoJSON, description=field.help_text, required=not field.null
-    )
+    return graphene.Field(GeoJSON, description=field.help_text, required=not field.null)
 
 
 def get_fields_attr_generators(flex_field):
@@ -337,29 +312,18 @@ def resolve_assets(business_area_slug, uid: str = None, *args, **kwargs):
     except AttributeError as error:
         raise GraphQLError(str(error))
 
-    return return_method(
-        assets, only_deployed=kwargs.get("only_deployed", False)
-    )
+    return return_method(assets, only_deployed=kwargs.get("only_deployed", False))
 
 
 class Query(graphene.ObjectType):
     admin_area = relay.Node.Field(AdminAreaNode)
-    all_admin_areas = DjangoFilterConnectionField(
-        AdminAreaNode, filterset_class=AdminAreaFilter
-    )
+    all_admin_areas = DjangoFilterConnectionField(AdminAreaNode, filterset_class=AdminAreaFilter)
     all_business_areas = DjangoFilterConnectionField(BusinessAreaNode)
-    all_log_entries = ConnectionField(
-        LogEntryObjectConnection, object_id=graphene.String(required=True),
-    )
+    all_log_entries = ConnectionField(LogEntryObjectConnection, object_id=graphene.String(required=True),)
     all_fields_attributes = graphene.List(
-        FieldAttributeNode,
-        flex_field=graphene.Boolean(),
-        description="All field datatype meta.",
+        FieldAttributeNode, flex_field=graphene.Boolean(), description="All field datatype meta.",
     )
-    all_groups_with_fields = graphene.List(
-        GroupAttributeNode,
-        description="Get all groups that contains flex fields",
-    )
+    all_groups_with_fields = graphene.List(GroupAttributeNode, description="Get all groups that contains flex fields",)
     kobo_project = graphene.Field(
         KoboAssetObject,
         uid=graphene.String(required=True),
@@ -383,15 +347,8 @@ class Query(graphene.ObjectType):
     def resolve_kobo_project(self, info, uid, business_area_slug, **kwargs):
         return resolve_assets(business_area_slug=business_area_slug, uid=uid)
 
-    def resolve_all_kobo_projects(
-        self, info, business_area_slug, *args, **kwargs
-    ):
-        return resolve_assets(
-            business_area_slug=business_area_slug,
-            only_deployed=kwargs.get("only_deployed", False),
-        )
+    def resolve_all_kobo_projects(self, info, business_area_slug, *args, **kwargs):
+        return resolve_assets(business_area_slug=business_area_slug, only_deployed=kwargs.get("only_deployed", False),)
 
     def resolve_all_groups_with_fields(self, info, **kwargs):
-        return FlexibleAttributeGroup.objects.distinct().filter(
-            flex_attributes__isnull=False
-        )
+        return FlexibleAttributeGroup.objects.distinct().filter(flex_attributes__isnull=False)

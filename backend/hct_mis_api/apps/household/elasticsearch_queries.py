@@ -10,29 +10,16 @@ This file contains some test queries to play with ElasticSearch,
 the file will be removed in the future
 """
 query = IndividualDocument.search().query(
-    MoreLikeThis(
-        like="Lroi",
-        min_term_freq=1,
-        fields=["given_name", "full_name"],
-        analyzer="phonetic",
-    )
+    MoreLikeThis(like="Lroi", min_term_freq=1, fields=["given_name", "full_name"], analyzer="phonetic",)
 )
 
 query2 = IndividualDocument.search().query(
-    MoreLikeThis(
-        like="Lori",
-        min_term_freq=1,
-        fields=["given_name", "full_name"],
-        analyzer="phonetic",
-    )
+    MoreLikeThis(like="Lori", min_term_freq=1, fields=["given_name", "full_name"], analyzer="phonetic",)
 )
 
 query3 = ImportedIndividualDocument.search().query(
     MoreLikeThis(
-        like={
-            "_id": "170fa724-51f2-44df-a5be-df83dcf624da",
-            "_index": "importedindividuals",
-        },
+        like={"_id": "170fa724-51f2-44df-a5be-df83dcf624da", "_index": "importedindividuals",},
         min_term_freq=1,
         fields=["given_name", "full_name"],
         analyzer="phonetic",

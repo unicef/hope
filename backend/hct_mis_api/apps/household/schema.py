@@ -81,9 +81,7 @@ class HouseholdFilter(FilterSet):
 class IndividualFilter(FilterSet):
     business_area = CharFilter(field_name="household__business_area__slug",)
     age = AgeRangeFilter(field_name="birth_date")
-    sex = ModelMultipleChoiceFilter(
-        to_field_name="sex", queryset=Individual.objects.all(),
-    )
+    sex = ModelMultipleChoiceFilter(to_field_name="sex", queryset=Individual.objects.all(),)
     programme = CharFilter(field_name="household__programs__name")
     search = CharFilter(method="search_filter")
 
@@ -98,14 +96,7 @@ class IndividualFilter(FilterSet):
         }
 
     order_by = OrderingFilter(
-        fields=(
-            "id",
-            "full_name",
-            "household__id",
-            "birth_date",
-            "sex",
-            "household__admin_area__title",
-        )
+        fields=("id", "full_name", "household__id", "birth_date", "sex", "household__admin_area__title",)
     )
 
     def search_filter(self, qs, name, value):
@@ -210,17 +201,10 @@ class HouseholdNode(DjangoObjectType):
 
     def resolve_individuals(parent, info):
         individuals_ids = list(parent.individuals.values_list("id", flat=True))
-        collectors_ids = list(
-            parent.representatives.values_list("id", flat=True)
-        )
+        collectors_ids = list(parent.representatives.values_list("id", flat=True))
         ids = list(set(individuals_ids + collectors_ids))
         return Individual.objects.filter(id__in=ids).prefetch_related(
-            Prefetch(
-                "households_and_roles",
-                queryset=IndividualRoleInHousehold.objects.filter(
-                    household=parent.id
-                ),
-            )
+            Prefetch("households_and_roles", queryset=IndividualRoleInHousehold.objects.filter(household=parent.id),)
         )
 
     class Meta:
@@ -256,13 +240,9 @@ class IndividualNode(DjangoObjectType):
 
 class Query(graphene.ObjectType):
     household = relay.Node.Field(HouseholdNode)
-    all_households = DjangoFilterConnectionField(
-        HouseholdNode, filterset_class=HouseholdFilter,
-    )
+    all_households = DjangoFilterConnectionField(HouseholdNode, filterset_class=HouseholdFilter,)
     individual = relay.Node.Field(IndividualNode)
-    all_individuals = DjangoFilterConnectionField(
-        IndividualNode, filterset_class=IndividualFilter,
-    )
+    all_individuals = DjangoFilterConnectionField(IndividualNode, filterset_class=IndividualFilter,)
     residence_status_choices = graphene.List(ChoiceObject)
     sex_choices = graphene.List(ChoiceObject)
     marital_status_choices = graphene.List(ChoiceObject)
@@ -270,9 +250,7 @@ class Query(graphene.ObjectType):
     role_choices = graphene.List(ChoiceObject)
 
     def resolve_all_households(self, info, **kwargs):
-        return Household.objects.annotate(
-            total_cash=Sum("payment_records__delivered_quantity")
-        ).order_by("created_at")
+        return Household.objects.annotate(total_cash=Sum("payment_records__delivered_quantity")).order_by("created_at")
 
     def resolve_residence_status_choices(self, info, **kwargs):
         return to_choice_object(RESIDENCE_STATUS_CHOICE)

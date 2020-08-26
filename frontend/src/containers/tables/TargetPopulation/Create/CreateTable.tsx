@@ -11,13 +11,11 @@ const TableWrapper = styled.div`
 
 interface TargetPopulationHouseholdProps {
   id?: string;
-  query?;
-  queryObjectName?;
   variables?;
 }
 
 export const CreateTable = ({
-  id,
+  id = null,
   variables,
 }: TargetPopulationHouseholdProps): ReactElement => {
   const initialVariables = {

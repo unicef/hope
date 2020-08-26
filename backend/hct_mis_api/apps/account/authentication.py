@@ -17,9 +17,7 @@ def social_details(backend, details, response, *args, **kwargs):
 
     if not r["details"].get("email"):
         user_data = backend.user_data(None, response=response) or {}
-        r["details"]["email"] = user_data.get(
-            "email", user_data.get("signInNames.emailAddress")
-        )
+        r["details"]["email"] = user_data.get("email", user_data.get("signInNames.emailAddress"))
 
     r["details"]["idp"] = response.get("idp", "")
 
@@ -35,9 +33,7 @@ def user_details(strategy, details, backend, user=None, *args, **kwargs):
         user.username = details["fullname"]
         user.save()
 
-    return social_core_user.user_details(
-        strategy, details, backend, user, *args, **kwargs
-    )
+    return social_core_user.user_details(strategy, details, backend, user, *args, **kwargs)
 
 
 def require_email(strategy, details, user=None, is_new=False, *args, **kwargs):

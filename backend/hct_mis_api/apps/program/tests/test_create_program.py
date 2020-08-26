@@ -46,26 +46,19 @@ class TestCreateProgram(APITestCase):
                 "cashPlus": True,
                 "populationGoal": 150000,
                 "administrativeAreasOfImplementation": "Lorem Ipsum",
-                "businessAreaSlug":  BusinessArea.objects.order_by("?").first().slug,
+                "businessAreaSlug": BusinessArea.objects.order_by("?").first().slug,
             }
         }
 
     def test_create_program_not_authenticated(self):
-        self.snapshot_graphql_request(
-            request_string=self.CREATE_PROGRAM_MUTATION,
-            variables=self.program_data
-        )
+        self.snapshot_graphql_request(request_string=self.CREATE_PROGRAM_MUTATION, variables=self.program_data)
 
     def test_create_program_authenticated(self):
         self.snapshot_graphql_request(
-            request_string=self.CREATE_PROGRAM_MUTATION,
-            context={"user": self.user},
-            variables=self.program_data
+            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
         )
 
     def test_create_program_invalid_dates(self):
         self.snapshot_graphql_request(
-            request_string=self.CREATE_PROGRAM_MUTATION,
-            context={"user": self.user},
-            variables=self.program_data
+            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
         )
