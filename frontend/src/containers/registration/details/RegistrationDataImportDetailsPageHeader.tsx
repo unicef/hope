@@ -32,6 +32,7 @@ export function RegistrationDataImportDetailsPageHeader({
           </MergeButtonContainer>
         </div>
       );
+      break;
     case RegistrationDataImportStatus.DeduplicationFailed:
       buttons = (
         <div>
