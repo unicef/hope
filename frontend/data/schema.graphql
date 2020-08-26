@@ -276,6 +276,12 @@ scalar DateTime
 
 scalar Decimal
 
+type DeduplicationResultNode {
+  hitId: ID
+  fullName: String
+  score: Float
+}
+
 type DeleteProgram {
   ok: Boolean
 }
@@ -883,6 +889,18 @@ enum ImportedHouseholdResidenceStatus {
   OTHER
 }
 
+enum ImportedIndividualDeduplicationBatchStatus {
+  SIMILAR_IN_BATCH
+  DUPLICATE_IN_BATCH
+  UNIQUE_IN_BATCH
+}
+
+enum ImportedIndividualDeduplicationGoldenRecordStatus {
+  UNIQUE
+  DUPLICATE
+  NEEDS_ADJUDICATION
+}
+
 type ImportedIndividualIdentityNode {
   id: ID!
   individual: ImportedIndividualNode!
@@ -921,10 +939,10 @@ type ImportedIndividualNode implements Node {
   workStatus: ImportedIndividualWorkStatus
   firstRegistrationDate: Date!
   lastRegistrationDate: Date!
-  deduplicationBatchStatus: String!
-  deduplicationGoldenRecordStatus: String!
-  deduplicationBatchResults: JSONString!
-  deduplicationGoldenRecordResults: JSONString!
+  deduplicationBatchStatus: ImportedIndividualDeduplicationBatchStatus
+  deduplicationGoldenRecordStatus: ImportedIndividualDeduplicationGoldenRecordStatus
+  deduplicationBatchResults: [DeduplicationResultNode]
+  deduplicationGoldenRecordResults: [DeduplicationResultNode]
   flexFields: JSONString!
   importedhousehold: ImportedHouseholdNode
   documents(before: String, after: String, first: Int, last: Int): ImportedDocumentNodeConnection!
@@ -953,6 +971,12 @@ enum ImportedIndividualWorkStatus {
   YES
   NO
   NOT_PROVIDED
+}
+
+enum IndividualDeduplicationStatus {
+  UNIQUE
+  DUPLICATE
+  NEEDS_ADJUDICATION
 }
 
 type IndividualIdentityNode {
@@ -999,8 +1023,8 @@ type IndividualNode implements Node {
   enrolledInNutritionProgramme: Boolean!
   administrationOfRutf: Boolean!
   unicefId: String!
-  deduplicationStatus: String!
-  deduplicationResults: JSONString!
+  deduplicationStatus: IndividualDeduplicationStatus!
+  deduplicationResults: [DeduplicationResultNode]
   representedHouseholds(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   headingHousehold: HouseholdNode
   documents(before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
@@ -1166,6 +1190,7 @@ type Mutations {
   registrationKoboImport(registrationDataImportData: RegistrationKoboImportMutationInput!): RegistrationKoboImportMutation
   saveKoboImportData(businessAreaSlug: String!, uid: Upload!): SaveKoboProjectImportDataMutation
   mergeRegistrationDataImport(id: ID!): MergeRegistrationDataImportMutation
+  rerunDedupe(registrationDataImportDatahubId: ID!): RegistrationDeduplicationMutation
   checkAgainstSanctionList(file: Upload!): CheckAgainstSanctionListMutation
 }
 
@@ -1471,6 +1496,7 @@ type RegistrationDataImportDatahubNode implements Node {
   importData: ImportDataNode
   importDone: RegistrationDataImportDatahubImportDone!
   businessAreaSlug: String!
+  errorMessage: String!
   households(before: String, after: String, first: Int, last: Int): ImportedHouseholdNodeConnection!
   individuals(before: String, after: String, first: Int, last: Int): ImportedIndividualNodeConnection!
 }
@@ -1521,6 +1547,11 @@ enum RegistrationDataImportStatus {
   MERGED
   MERGING
   IMPORTING
+  DEDUPLICATION_FAILED
+}
+
+type RegistrationDeduplicationMutation {
+  ok: Boolean
 }
 
 type RegistrationKoboImportMutation {
