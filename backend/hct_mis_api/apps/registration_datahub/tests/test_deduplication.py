@@ -30,9 +30,12 @@ from registration_datahub.tasks.batch_deduplicate import DeduplicateTask
 
 
 @override_config(
-    DEDUPLICATION_BATCH_DUPLICATE_SCORE=3,
-    DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE=1.2,
-    DEDUPLICATION_GOLDEN_RECORD_DUPLICATE_SCORE=3,
+    DEDUPLICATION_BATCH_DUPLICATE_SCORE=4.0,
+    DEDUPLICATION_BATCH_MIN_SCORE=3.7,
+    DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE=4.0,
+    DEDUPLICATION_GOLDEN_RECORD_DUPLICATE_SCORE=7.0,
+    DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE=100,
+    DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_PERCENTAGE=100,
 )
 class TestBatchDeduplication(BaseElasticSearchTestCase):
     multi_db = True
@@ -56,9 +59,11 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
         cls.registration_data_import_datahub = RegistrationDataImportDatahubFactory(
             import_data=import_data
         )
-        RegistrationDataImportFactory(
+        rdi = RegistrationDataImportFactory(
             datahub_id=cls.registration_data_import_datahub.id
         )
+        cls.registration_data_import_datahub.hct_id = rdi.id
+        cls.registration_data_import_datahub.save()
 
         registration_data_import_second = RegistrationDataImportFactory()
         (
@@ -70,6 +75,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
             },
             individuals_data=[
                 {
+                    # DUPLICATE
                     "registration_data_import": cls.registration_data_import_datahub,
                     "given_name": "Test",
                     "full_name": "Test Testowski",
@@ -106,6 +112,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
                     "birth_date": "1996-12-12",
                 },
                 {
+                    # DUPLICATE
                     "registration_data_import": cls.registration_data_import_datahub,
                     "given_name": "Tessta",
                     "full_name": "Tessta Testowski",
@@ -118,6 +125,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
                     "birth_date": "1997-07-07",
                 },
                 {
+                    # DUPLICATE
                     "registration_data_import": cls.registration_data_import_datahub,
                     "given_name": "Test",
                     "full_name": "Test Testowski",
@@ -142,6 +150,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
                     "birth_date": "1997-08-08",
                 },
                 {
+                    # DUPLICATE
                     "registration_data_import": cls.registration_data_import_datahub,
                     "given_name": "Tessta",
                     "full_name": "Tessta Testowski",
@@ -297,8 +306,8 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
 
 
 @override_config(
-    DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE=1.2,
-    DEDUPLICATION_GOLDEN_RECORD_DUPLICATE_SCORE=3,
+    DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE=4.0,
+    DEDUPLICATION_GOLDEN_RECORD_DUPLICATE_SCORE=7.0,
 )
 class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
     multi_db = True
