@@ -206,10 +206,10 @@ class DeduplicateTask:
             registration_data_import=registration_data_import_datahub
         )
         allowed_duplicates_batch_amount = round(
-            imported_individuals.count() * config.DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE
+            imported_individuals.count() * (config.DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE / 100)
         )
         allowed_duplicates_golden_record_amount = round(
-            imported_individuals.count() * config.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_PERCENTAGE
+            imported_individuals.count() * (config.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_PERCENTAGE / 100)
         )
         all_duplicates = []
         all_possible_duplicates = []
@@ -243,9 +243,9 @@ class DeduplicateTask:
             all_original_individuals_ids_possible_duplicates.extend(original_individuals_ids_possible_duplicates)
             to_bulk_update_results.append(imported_individual)
 
-            batch_amount_exceeded = all_possible_duplicates >= allowed_duplicates_batch_amount
+            batch_amount_exceeded = len(all_possible_duplicates) >= allowed_duplicates_batch_amount
             golden_record_amount_exceeded = (
-                allowed_duplicates_golden_record_amount >= allowed_duplicates_golden_record_amount
+                len(all_original_individuals_ids_duplicates) >= allowed_duplicates_golden_record_amount
             )
 
             checked_individuals_ids.append(imported_individual.id)
@@ -292,9 +292,19 @@ class DeduplicateTask:
             to_bulk_update_results, ["deduplication_batch_results", "deduplication_golden_record_results",],
         )
         registration_data_import_datahub.refresh_from_db()
-        if registration_data_import_datahub.status == RegistrationDataImport.DEDUPLICATION_FAILED:
-            registration_data_import_datahub.individuals.filter(Q(status=UNIQUE_IN_BATCH) & Q(status=UNIQUE)).exclude(
-                id__in=checked_individuals_ids
-            ).update(
+        registration_data_import = RegistrationDataImport.objects.get(id=registration_data_import_datahub.hct_id)
+        if registration_data_import.status == RegistrationDataImport.DEDUPLICATION_FAILED:
+            registration_data_import_datahub.individuals.filter(
+                Q(deduplication_batch_status=UNIQUE_IN_BATCH) & Q(deduplication_golden_record_status=UNIQUE)
+            ).exclude(id__in=checked_individuals_ids).update(
                 deduplication_batch_status="", deduplication_golden_record_status="",
             )
+        else:
+            registration_data_import_datahub.individuals.exclude(
+                Q(id__in=set_of_all_duplicates.union(set_of_all_possible_duplicates))
+            ).update(deduplication_batch_status=UNIQUE_IN_BATCH)
+            registration_data_import_datahub.individuals.exclude(
+                id__in=set_of_all_original_individuals_ids_duplicates.union(
+                    set_of_all_original_individuals_ids_possible_duplicates
+                )
+            ).update(deduplication_golden_record_status=UNIQUE,)
