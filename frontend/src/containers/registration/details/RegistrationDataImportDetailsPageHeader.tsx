@@ -8,6 +8,7 @@ import { PageHeader } from '../../../components/PageHeader';
 import { BreadCrumbsItem } from '../../../components/BreadCrumbs';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { MergeRegistrationDataImportDialog } from './MergeRegistrationDataImportDialog';
+import { RerunDedupe } from './RerunDedupe';
 
 export interface RegistrationDataImportDetailsPageHeaderPropTypes {
   registration: RegistrationDetailedFragment;
@@ -26,6 +27,9 @@ export function RegistrationDataImportDetailsPageHeader({
     case RegistrationDataImportStatus.InReview:
       buttons = (
         <div>
+          <MergeButtonContainer>
+            <RerunDedupe registration={registration} />
+          </MergeButtonContainer>
           <MergeButtonContainer>
             <MergeRegistrationDataImportDialog registration={registration} />
           </MergeButtonContainer>
