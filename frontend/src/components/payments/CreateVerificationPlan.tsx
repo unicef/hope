@@ -30,6 +30,7 @@ import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { FormikEffect } from '../FormikEffect';
 import { CashPlan } from '../../apollo/queries/CashPlan';
+import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -62,9 +63,11 @@ const initialValues = {
   filterSex: '',
   excludedAdminAreasFull: [],
   excludedAdminAreasRandom: [],
-
-  verificationChannel: '',
+  verificationChannel: 'MANUAL',
   rapidProFlow: '',
+  adminCheckbox: false,
+  ageCheckbox: false,
+  sexCheckbox: false,
 };
 
 export interface Props {
@@ -136,7 +139,7 @@ export function CreateVerificationPlan({
           fullListArguments:
             selectedTab === 0
               ? {
-                  excludedAdminAreas: values.excludedAdminAreasFull,
+                  excludedAdminAreas: values.excludedAdminAreasFull || [],
                 }
               : null,
           verificationChannel: values.verificationChannel,
@@ -151,9 +154,13 @@ export function CreateVerificationPlan({
               ? {
                   confidenceInterval: values.confidenceInterval * 0.01,
                   marginOfError: values.marginOfError * 0.01,
-                  excludedAdminAreas: values.excludedAdminAreasRandom,
-                  age: { min: values.filterAgeMin, max: values.filterAgeMax },
-                  sex: values.filterSex,
+                  excludedAdminAreas: values.adminCheckbox
+                    ? values.excludedAdminAreasRandom
+                    : [],
+                  age: values.ageCheckbox
+                    ? { min: values.filterAgeMin, max: values.filterAgeMax }
+                    : null,
+                  sex: values.sexCheckbox ? values.filterSex : null,
                 }
               : null,
           businessAreaSlug: businessArea,
@@ -282,7 +289,7 @@ export function CreateVerificationPlan({
                       name='confidenceInterval'
                       label='Confidence Interval'
                       min={1}
-                      max={10}
+                      max={99}
                       component={FormikSliderField}
                       suffix='%'
                     />
@@ -296,44 +303,72 @@ export function CreateVerificationPlan({
                     />
                     <Typography variant='caption'>Cluster Filters</Typography>
                     <Box flexDirection='column' display='flex'>
-                      <Field
-                        name='excludedAdminAreasRandom'
-                        choices={mappedAdminAreas}
-                        variant='filled'
-                        label='Filter Out Admin Areas'
-                        component={FormikMultiSelectField}
-                      />
+                      <Box display='flex'>
+                        <Field
+                          name='adminCheckbox'
+                          label='Admin'
+                          component={FormikCheckboxField}
+                        />
+                        <Field
+                          name='ageCheckbox'
+                          label='Age'
+                          component={FormikCheckboxField}
+                        />
+                        <Field
+                          name='sexCheckbox'
+                          label='Sex'
+                          component={FormikCheckboxField}
+                        />
+                      </Box>
+                      {values.adminCheckbox && (
+                        <Field
+                          name='excludedAdminAreasRandom'
+                          choices={mappedAdminAreas}
+                          variant='filled'
+                          label='Filter Out Admin Areas'
+                          component={FormikMultiSelectField}
+                        />
+                      )}
+
                       <Grid container>
-                        <Grid item xs={4}>
-                          <Field
-                            name='filterAgeMin'
-                            label='Age Min'
-                            type='number'
-                            color='primary'
-                            component={FormikTextField}
-                          />
-                        </Grid>
-                        <Grid item xs={4}>
-                          <Field
-                            name='filterAgeMax'
-                            label='Age Max'
-                            type='number'
-                            color='primary'
-                            component={FormikTextField}
-                          />
-                        </Grid>
-                        <Grid item xs={5}>
-                          <Field
-                            name='filterSex'
-                            label='Sex'
-                            color='primary'
-                            choices={[
-                              { value: 'FEMALE', name: 'Female' },
-                              { value: 'MALE', name: 'Male' },
-                            ]}
-                            component={FormikSelectField}
-                          />
-                        </Grid>
+                        {values.ageCheckbox && (
+                          <Grid item xs={12}>
+                            <Grid container>
+                              <Grid item xs={4}>
+                                <Field
+                                  name='filterAgeMin'
+                                  label='Age Min'
+                                  type='number'
+                                  color='primary'
+                                  component={FormikTextField}
+                                />
+                              </Grid>
+                              <Grid item xs={4}>
+                                <Field
+                                  name='filterAgeMax'
+                                  label='Age Max'
+                                  type='number'
+                                  color='primary'
+                                  component={FormikTextField}
+                                />
+                              </Grid>
+                            </Grid>
+                          </Grid>
+                        )}
+                        {values.sexCheckbox && (
+                          <Grid item xs={5}>
+                            <Field
+                              name='filterSex'
+                              label='Sex'
+                              color='primary'
+                              choices={[
+                                { value: 'FEMALE', name: 'Female' },
+                                { value: 'MALE', name: 'Male' },
+                              ]}
+                              component={FormikSelectField}
+                            />
+                          </Grid>
+                        )}
                       </Grid>
                     </Box>
 

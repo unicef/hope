@@ -73,27 +73,19 @@ class AgeRangeFilter(Filter):
             if min_value is not None and max_value is not None:
                 self.lookup_expr = "range"
                 # year +1 , day-1
-                max_date = date(
-                    current.year - min_value + 1, current.month, current.day,
-                )
+                max_date = date(current.year - min_value + 1, current.month, current.day,)
                 max_date = max_date - timedelta(days=1)
-                min_date = date(
-                    current.year - max_value, current.month, current.day,
-                )
+                min_date = date(current.year - max_value, current.month, current.day,)
                 values = (min_date, max_date)
             elif min_value is not None and max_value is None:
                 self.lookup_expr = "lte"
                 # year +1 , day-1
-                max_date = date(
-                    current.year - min_value + 1, current.month, current.day,
-                )
+                max_date = date(current.year - min_value + 1, current.month, current.day,)
                 max_date = max_date - timedelta(days=1)
                 values = max_date
             elif min_value is None and max_value is not None:
                 self.lookup_expr = "gte"
-                min_date = date(
-                    current.year - max_value, current.month, current.day,
-                )
+                min_date = date(current.year - max_value, current.month, current.day,)
                 values = min_date
 
         return super().filter(qs, values)

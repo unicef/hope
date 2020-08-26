@@ -74,7 +74,7 @@ export const FormikMultiSelectField = ({
             {selected.map((value) => (
               <Chip
                 key={value}
-                label={choices.find((el) => el.value === value).name || ''}
+                label={choices.find((el) => el.value === value)?.name || ''}
                 className={classes.chip}
               />
             ))}

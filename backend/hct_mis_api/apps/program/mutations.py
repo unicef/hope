@@ -60,13 +60,10 @@ class CreateProgram(CommonValidator, graphene.Mutation):
         business_area = BusinessArea.objects.get(slug=business_area_slug)
 
         cls.validate(
-            start_date=program_data.get("start_date"),
-            end_date=program_data.get("end_date"),
+            start_date=program_data.get("start_date"), end_date=program_data.get("end_date"),
         )
 
-        program = Program.objects.create(
-            **program_data, status="DRAFT", business_area=business_area,
-        )
+        program = Program.objects.create(**program_data, status="DRAFT", business_area=business_area,)
 
         return CreateProgram(program)
 

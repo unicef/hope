@@ -22,11 +22,7 @@ class UsersFilter(FilterSet):
 
     def filter_by_full_name(self, qs, name, value):
         for term in value.split():
-            qs = qs.filter(
-                Q(first_name__icontains=term)
-                | Q(last_name__icontains=term)
-                | Q(email__icontains=term)
-            )
+            qs = qs.filter(Q(first_name__icontains=term) | Q(last_name__icontains=term) | Q(email__icontains=term))
         return qs
 
 
@@ -47,13 +43,9 @@ class UserNode(DjangoObjectType):
 
 class Query(graphene.ObjectType):
     me = graphene.Field(UserObjectType)
-    all_users = DjangoFilterConnectionField(
-        UserNode, filterset_class=UsersFilter,
-    )
+    all_users = DjangoFilterConnectionField(UserNode, filterset_class=UsersFilter,)
 
     def resolve_me(self, info, **kwargs):
         if not info.context.user.is_authenticated:
-            raise PermissionDenied(
-                "Permission Denied: User is not authenticated."
-            )
+            raise PermissionDenied("Permission Denied: User is not authenticated.")
         return info.context.user
