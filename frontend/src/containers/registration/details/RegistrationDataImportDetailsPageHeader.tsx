@@ -28,10 +28,15 @@ export function RegistrationDataImportDetailsPageHeader({
       buttons = (
         <div>
           <MergeButtonContainer>
-            <RerunDedupe registration={registration} />
-          </MergeButtonContainer>
-          <MergeButtonContainer>
             <MergeRegistrationDataImportDialog registration={registration} />
+          </MergeButtonContainer>
+        </div>
+      );
+    case RegistrationDataImportStatus.DeduplicationFailed:
+      buttons = (
+        <div>
+          <MergeButtonContainer>
+            <RerunDedupe registration={registration} />
           </MergeButtonContainer>
         </div>
       );
