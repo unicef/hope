@@ -308,7 +308,9 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
     enrolled_in_nutrition_programme = models.BooleanField(default=False)
     administration_of_rutf = models.BooleanField(default=False)
     unicef_id = models.CharField(max_length=250, blank=True)
-    deduplication_status = models.CharField(max_length=50, default=UNIQUE)
+    deduplication_status = models.CharField(
+        max_length=50, default=UNIQUE, choices=DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
+    )
     deduplication_results = JSONField(default=dict)
 
     @property

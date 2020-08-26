@@ -24,6 +24,7 @@ from household.models import (
     WORK_STATUS_CHOICE,
     NOT_PROVIDED,
     UNIQUE,
+    DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
 )
 from utils.models import TimeStampedUUIDModel
 
@@ -110,10 +111,10 @@ class ImportedIndividual(TimeStampedUUIDModel):
     first_registration_date = models.DateField()
     last_registration_date = models.DateField()
     deduplication_batch_status = models.CharField(
-        max_length=50, default=UNIQUE_IN_BATCH
+        max_length=50, default=UNIQUE_IN_BATCH, choices=DEDUPLICATION_BATCH_STATUS_CHOICE, blank=True,
     )
     deduplication_golden_record_status = models.CharField(
-        max_length=50, default=UNIQUE
+        max_length=50, default=UNIQUE, choices=DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE, blank=True,
     )
     deduplication_batch_results = JSONField(default=dict)
     deduplication_golden_record_results = JSONField(default=dict)
@@ -177,6 +178,7 @@ class RegistrationDataImportDatahub(TimeStampedUUIDModel):
     )
     import_done = models.CharField(max_length=15, choices=IMPORT_DONE_CHOICES, default=NOT_STARTED)
     business_area_slug = models.CharField(max_length=250, blank=True)
+    error_message = models.TextField(blank=True)
 
     def __str__(self):
         return self.name
