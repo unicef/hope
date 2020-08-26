@@ -98,21 +98,13 @@ class TestHouseholdQuery(APITestCase):
         call_command("loadbusinessareas")
         self.user = UserFactory.create()
         family_sizes_list = (2, 4, 5, 1, 3, 11, 14)
-        self.program_one = ProgramFactory(
-            name="Test program ONE", business_area=BusinessArea.objects.first(),
-        )
-        self.program_two = ProgramFactory(
-            name="Test program TWO", business_area=BusinessArea.objects.first(),
-        )
+        self.program_one = ProgramFactory(name="Test program ONE", business_area=BusinessArea.objects.first(),)
+        self.program_two = ProgramFactory(name="Test program TWO", business_area=BusinessArea.objects.first(),)
 
         self.households = []
         for index, family_size in enumerate(family_sizes_list):
             (household, individuals) = create_household(
-                {
-                    "size": family_size,
-                    "address": "Lorem Ipsum",
-                    "country_origin": "PL",
-                },
+                {"size": family_size, "address": "Lorem Ipsum", "country_origin": "PL",},
             )
             if index % 2:
                 household.programs.add(self.program_one)
@@ -123,34 +115,28 @@ class TestHouseholdQuery(APITestCase):
 
     def test_household_query_all(self):
         self.snapshot_graphql_request(
-            request_string=self.ALL_HOUSEHOLD_QUERY,
-            context={"user": self.user},
+            request_string=self.ALL_HOUSEHOLD_QUERY, context={"user": self.user},
         )
 
     def test_household_query_all_range(self):
         self.snapshot_graphql_request(
-            request_string=self.ALL_HOUSEHOLD_QUERY_RANGE,
-            context={"user": self.user},
+            request_string=self.ALL_HOUSEHOLD_QUERY_RANGE, context={"user": self.user},
         )
 
     def test_household_query_all_min(self):
         self.snapshot_graphql_request(
-            request_string=self.ALL_HOUSEHOLD_QUERY_MIN,
-            context={"user": self.user},
+            request_string=self.ALL_HOUSEHOLD_QUERY_MIN, context={"user": self.user},
         )
 
     def test_household_query_all_max(self):
         self.snapshot_graphql_request(
-            request_string=self.ALL_HOUSEHOLD_QUERY_MAX,
-            context={"user": self.user},
+            request_string=self.ALL_HOUSEHOLD_QUERY_MAX, context={"user": self.user},
         )
 
     def test_household_filter_by_programme(self):
         self.snapshot_graphql_request(
             request_string=self.ALL_HOUSEHOLD_FILTER_PROGRAMS_QUERY,
-            variables={
-                "programs": [self.id_to_base64(self.program_one.id, "Program")]
-            },
+            variables={"programs": [self.id_to_base64(self.program_one.id, "Program")]},
             context={"user": self.user},
         )
 
@@ -158,7 +144,5 @@ class TestHouseholdQuery(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.HOUSEHOLD_QUERY,
             context={"user": self.user},
-            variables={
-                "id": self.id_to_base64(self.households[0].id, "Household")
-            },
+            variables={"id": self.id_to_base64(self.households[0].id, "Household")},
         )

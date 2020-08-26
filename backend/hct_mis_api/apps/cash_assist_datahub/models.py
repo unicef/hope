@@ -44,15 +44,9 @@ class CashPlan(SessionModel):
     TRANSACTION_COMPLETED_WITH_ERRORS = "Transaction Completed with Errors"
     STATUS_CHOICE = (
         (DISTRIBUTION_COMPLETED, _("Distribution Completed")),
-        (
-            DISTRIBUTION_COMPLETED_WITH_ERRORS,
-            _("Distribution Completed with Errors"),
-        ),
+        (DISTRIBUTION_COMPLETED_WITH_ERRORS, _("Distribution Completed with Errors"),),
         (TRANSACTION_COMPLETED, _("Transaction Completed")),
-        (
-            TRANSACTION_COMPLETED_WITH_ERRORS,
-            _("Transaction Completed with Errors"),
-        ),
+        (TRANSACTION_COMPLETED_WITH_ERRORS, _("Transaction Completed with Errors"),),
     )
     business_area = models.CharField(max_length=20, null=True)
     cash_plan_id = models.CharField(max_length=255)
@@ -79,28 +73,16 @@ class CashPlan(SessionModel):
     total_persons_covered_revised = models.IntegerField(null=True)
     payment_records_count = models.IntegerField(null=True)
     total_entitled_quantity = models.DecimalField(
-        decimal_places=2,
-        max_digits=12,
-        validators=[MinValueValidator(Decimal("0.01"))],
-        null=True,
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True,
     )
     total_entitled_quantity_revised = models.DecimalField(
-        decimal_places=2,
-        max_digits=12,
-        validators=[MinValueValidator(Decimal("0.01"))],
-        null=True,
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True,
     )
     total_delivered_quantity = models.DecimalField(
-        decimal_places=2,
-        max_digits=12,
-        validators=[MinValueValidator(Decimal("0.01"))],
-        null=True,
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True,
     )
     total_undelivered_quantity = models.DecimalField(
-        decimal_places=2,
-        max_digits=12,
-        validators=[MinValueValidator(Decimal("0.01"))],
-        null=True,
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True,
     )
 
     class Meta:
@@ -117,8 +99,7 @@ class PaymentRecord(SessionModel):
     DELIVERY_TYPE_DEPOSIT_TO_CARD = "DEPOSIT_TO_CARD"
     DELIVERY_TYPE_TRANSFER = "TRANSFER"
     ENTITLEMENT_CARD_STATUS_CHOICE = Choices(
-        (ENTITLEMENT_CARD_STATUS_ACTIVE, _("Active")),
-        (ENTITLEMENT_CARD_STATUS_INACTIVE, _("Inactive")),
+        (ENTITLEMENT_CARD_STATUS_ACTIVE, _("Active")), (ENTITLEMENT_CARD_STATUS_INACTIVE, _("Inactive")),
     )
     DELIVERY_TYPE_CHOICE = (
         (DELIVERY_TYPE_CASH, _("Cash")),
@@ -138,30 +119,19 @@ class PaymentRecord(SessionModel):
     total_persons_covered = models.IntegerField(null=True)
     distribution_modality = models.CharField(max_length=255, null=True)
     target_population_mis_id = models.UUIDField(null=True)
-    target_population_cash_assist_id = models.CharField(
-        max_length=255, null=True
-    )
+    target_population_cash_assist_id = models.CharField(max_length=255, null=True)
     entitlement_card_number = models.CharField(max_length=255, null=True)
     entitlement_card_status = models.CharField(max_length=20, null=True)
     entitlement_card_issue_date = models.DateField(null=True)
     delivery_type = models.CharField(
-        choices=DELIVERY_TYPE_CHOICE,
-        default=DELIVERY_TYPE_CASH,
-        max_length=20,
-        null=True,
+        choices=DELIVERY_TYPE_CHOICE, default=DELIVERY_TYPE_CASH, max_length=20, null=True,
     )
     currency = models.CharField(max_length=4, null=True)
     entitlement_quantity = models.DecimalField(
-        decimal_places=2,
-        max_digits=12,
-        validators=[MinValueValidator(Decimal("0.01"))],
-        null=True,
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True,
     )
     delivered_quantity = models.DecimalField(
-        decimal_places=2,
-        max_digits=12,
-        validators=[MinValueValidator(Decimal("0.01"))],
-        null=True,
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True,
     )
     delivery_date = models.DateTimeField(null=True)
     service_provider_ca_id = models.CharField(max_length=255, null=True)

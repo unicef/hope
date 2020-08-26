@@ -21,21 +21,10 @@ from targeting.models import (
 
 def comparision_method_resolver(obj):
     core_fields = CORE_FIELDS_ATTRIBUTES
-    core_field_attrs = [
-        attr for attr in core_fields if attr.get("name") == obj.field_name
-    ]
+    core_field_attrs = [attr for attr in core_fields if attr.get("name") == obj.field_name]
     core_field_attr = core_field_attrs[0]
     if core_field_attr.get("type") == "INTEGER":
-        return random.choice(
-            [
-                "EQUALS",
-                "NOT_EQUALS",
-                "RANGE",
-                "NOT_IN_RANGE",
-                "GREATER_THAN",
-                "LESS_THAN",
-            ]
-        )
+        return random.choice(["EQUALS", "NOT_EQUALS", "RANGE", "NOT_IN_RANGE", "GREATER_THAN", "LESS_THAN",])
 
     if core_field_attr.get("type") == "SELECT_ONE":
         return random.choice(["EQUALS", "NOT_EQUALS",])
@@ -54,10 +43,7 @@ def arguments_resolver(obj):
         max = random.randint(min, random.randint(min + 1, 10))
     if obj.field_name == "residence_status":
         return [random.choice([x[0] for x in RESIDENCE_STATUS_CHOICE])]
-    if (
-        obj.comparision_method == "RANGE"
-        or obj.comparision_method == "NOT_IN_RANGE"
-    ):
+    if obj.comparision_method == "RANGE" or obj.comparision_method == "NOT_IN_RANGE":
         return [min, max]
     return [min]
 
@@ -85,16 +71,10 @@ class TargetPopulationFactory(factory.DjangoModelFactory):
     class Meta:
         model = TargetPopulation
 
-    name = factory.Faker(
-        "sentence", nb_words=6, variable_nb_words=True, ext_word_list=None,
-    )
+    name = factory.Faker("sentence", nb_words=6, variable_nb_words=True, ext_word_list=None,)
     created_by = factory.SubFactory(UserFactory)
-    created_at = factory.Faker(
-        "date_time_this_decade", before_now=False, after_now=True
-    )
-    updated_at = factory.LazyAttribute(
-        lambda t: t.created_at + dt.timedelta(days=random.randint(60, 1000))
-    )
+    created_at = factory.Faker("date_time_this_decade", before_now=False, after_now=True)
+    updated_at = factory.LazyAttribute(lambda t: t.created_at + dt.timedelta(days=random.randint(60, 1000)))
     status = factory.fuzzy.FuzzyChoice(["DRAFT"])
     business_area = None
 

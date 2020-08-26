@@ -40,14 +40,10 @@ class ImportedHouseholdFilter(FilterSet):
         model = ImportedHousehold
         fields = ()
 
-    order_by = OrderingFilter(
-        fields=("id", "head_of_household", "size", "registration_date",)
-    )
+    order_by = OrderingFilter(fields=("id", "head_of_household", "size", "registration_date",))
 
     def filter_rdi_id(self, queryset, model_field, value):
-        return queryset.filter(
-            registration_data_import__hct_id=decode_id_string(value)
-        )
+        return queryset.filter(registration_data_import__hct_id=decode_id_string(value))
 
 
 class ImportedIndividualFilter(FilterSet):
@@ -69,9 +65,7 @@ class ImportedIndividualFilter(FilterSet):
     )
 
     def filter_rdi_id(self, queryset, model_field, value):
-        return queryset.filter(
-            registration_data_import__hct_id=decode_id_string(value)
-        )
+        return queryset.filter(registration_data_import__hct_id=decode_id_string(value))
 
 
 class ImportedHouseholdNode(DjangoObjectType):
@@ -139,6 +133,7 @@ class ImportedDocumentNode(DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
+
 class ImportedIndividualIdentityNode(DjangoObjectType):
     type = graphene.String(description="Agency type")
 
@@ -165,12 +160,8 @@ class Query(graphene.ObjectType):
     all_imported_households = DjangoFilterConnectionField(
         ImportedHouseholdNode, filterset_class=ImportedHouseholdFilter,
     )
-    registration_data_import_datahub = relay.Node.Field(
-        RegistrationDataImportDatahubNode,
-    )
-    all_registration_data_imports_datahub = DjangoFilterConnectionField(
-        RegistrationDataImportDatahubNode,
-    )
+    registration_data_import_datahub = relay.Node.Field(RegistrationDataImportDatahubNode,)
+    all_registration_data_imports_datahub = DjangoFilterConnectionField(RegistrationDataImportDatahubNode,)
     imported_individual = relay.Node.Field(ImportedIndividualNode)
     all_imported_individuals = DjangoFilterConnectionField(
         ImportedIndividualNode, filterset_class=ImportedIndividualFilter,

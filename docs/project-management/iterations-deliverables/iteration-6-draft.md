@@ -86,6 +86,10 @@ Make household nullable to allow for Collector object.
 
 \*\*\*\*[**link to ticket**](https://unicef.visualstudio.com/ICTD-HCT-MIS/_sprints/backlog/Software%20Engineering/ICTD-HCT-MIS/Iteration%206/Sprint%201%20%28i.6%29?workitem=64344)\*\*\*\*
 
+## Change Request - **August 17**th 2020
+
+\*\*\*\*[**link to ticket**](https://unicef.visualstudio.com/ICTD-HCT-MIS/_workitems/edit/68702)\*\*\*\*
+
 
 
 

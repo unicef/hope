@@ -13,9 +13,7 @@ class TestFlexibleHelperMethods(TestCase):
     def setUp(self):
         site = AdminSite()
         self.admin = FlexibleAttributeAdmin(FlexibleAttribute, site)
-        wb = xlrd.open_workbook(
-            f"{settings.PROJECT_ROOT}/apps/core/tests/test_files/flex_init.xls",
-        )
+        wb = xlrd.open_workbook(f"{settings.PROJECT_ROOT}/apps/core/tests/test_files/flex_init.xls",)
 
         self.survey_sheet = wb.sheet_by_name("survey")
         self.choices_sheet = wb.sheet_by_name("choices")
@@ -88,29 +86,17 @@ class TestFlexibleHelperMethods(TestCase):
         required_value = row[6].value
         label_value = row[2].value
 
-        self.admin._assign_field_values(
-            type_value, "type", "attribute", row, 61
-        )
-        self.admin._assign_field_values(
-            name_value, "name", "attribute", row, 61
-        )
-        self.admin._assign_field_values(
-            required_value, "required", "attribute", row, 61
-        )
-        self.admin._assign_field_values(
-            label_value, "label::English(EN)", "attribute", row, 61
-        )
+        self.admin._assign_field_values(type_value, "type", "attribute", row, 61)
+        self.admin._assign_field_values(name_value, "name", "attribute", row, 61)
+        self.admin._assign_field_values(required_value, "required", "attribute", row, 61)
+        self.admin._assign_field_values(label_value, "label::English(EN)", "attribute", row, 61)
         expected_fields = {
             "type": "INTEGER",
             "name": "dairy_h_f",
             "required": False,
         }
 
-        expected_json_fields = {
-            "label": {
-                "English(EN)": "Milk and dairy products: yoghurt, cheese",
-            }
-        }
+        expected_json_fields = {"label": {"English(EN)": "Milk and dairy products: yoghurt, cheese",}}
 
         self.assertEqual(self.admin.object_fields_to_create, expected_fields)
         self.assertEqual(self.admin.json_fields_to_create, expected_json_fields)
@@ -158,12 +144,8 @@ class TestFlexibleHelperMethods(TestCase):
         label_value = row[2].value
 
         self.admin._assign_field_values(name_value, "name", "group", row, 4)
-        self.admin._assign_field_values(
-            required_value, "required", "group", row, 4
-        )
-        self.admin._assign_field_values(
-            label_value, "label::English(EN)", "group", row, 4
-        )
+        self.admin._assign_field_values(required_value, "required", "group", row, 4)
+        self.admin._assign_field_values(label_value, "label::English(EN)", "group", row, 4)
         expected_fields = {
             "name": "consent",
             "required": False,
@@ -175,14 +157,7 @@ class TestFlexibleHelperMethods(TestCase):
         self.assertEqual(self.admin.json_fields_to_create, expected_json_fields)
 
         self.assertRaisesMessage(
-            ValidationError,
-            "Row 62: Name is required",
-            self.admin._assign_field_values,
-            "",
-            "name",
-            "group",
-            row,
-            61,
+            ValidationError, "Row 62: Name is required", self.admin._assign_field_values, "", "name", "group", row, 61,
         )
 
     def test_assign_field_values_choice(self):
@@ -196,13 +171,9 @@ class TestFlexibleHelperMethods(TestCase):
         name_value = row[1].value
         label_value = row[2].value
 
-        self.admin._assign_field_values(
-            list_name_value, "list_name", "choice", row, 1
-        )
+        self.admin._assign_field_values(list_name_value, "list_name", "choice", row, 1)
         self.admin._assign_field_values(name_value, "name", "choice", row, 1)
-        self.admin._assign_field_values(
-            label_value, "label::English(EN)", "choice", row, 1
-        )
+        self.admin._assign_field_values(label_value, "label::English(EN)", "choice", row, 1)
         expected_fields = {
             "list_name": "yes_no",
             "name": "1",
@@ -234,56 +205,19 @@ class TestFlexibleHelperMethods(TestCase):
             1,
         )
         self.assertRaisesMessage(
-            ValidationError,
-            "Row 2: Name is required",
-            self.admin._assign_field_values,
-            "",
-            "name",
-            "choice",
-            row,
-            1,
+            ValidationError, "Row 2: Name is required", self.admin._assign_field_values, "", "name", "choice", row, 1,
         )
 
     def test_set_can_add_flag(self):
         cases_to_test = [
-            {
-                "row": [Cell(1, "text", None,), Cell(1, "test_h_c", None,)],
-                "expected": False,
-            },
-            {
-                "row": [Cell(1, "text", None,), Cell(1, "test_i_c", None,)],
-                "expected": False,
-            },
-            {
-                "row": [Cell(1, "start", None,), Cell(1, "start", None,)],
-                "expected": False,
-            },
-            {
-                "row": [Cell(1, "end", None,), Cell(1, "end", None,)],
-                "expected": False,
-            },
-            {
-                "row": [
-                    Cell(1, "deviceid", None,),
-                    Cell(1, "deviceid", None,),
-                ],
-                "expected": False,
-            },
-            {
-                "row": [Cell(1, "end_repeat", None,), Cell(1, "", None,)],
-                "expected": False,
-            },
-            {
-                "row": [Cell(1, "end_group", None,), Cell(1, "", None,)],
-                "expected": False,
-            },
-            {
-                "row": [
-                    Cell(1, "begin_group", None,),
-                    Cell(1, "test_group", None,),
-                ],
-                "expected": True,
-            },
+            {"row": [Cell(1, "text", None,), Cell(1, "test_h_c", None,)], "expected": False,},
+            {"row": [Cell(1, "text", None,), Cell(1, "test_i_c", None,)], "expected": False,},
+            {"row": [Cell(1, "start", None,), Cell(1, "start", None,)], "expected": False,},
+            {"row": [Cell(1, "end", None,), Cell(1, "end", None,)], "expected": False,},
+            {"row": [Cell(1, "deviceid", None,), Cell(1, "deviceid", None,),], "expected": False,},
+            {"row": [Cell(1, "end_repeat", None,), Cell(1, "", None,)], "expected": False,},
+            {"row": [Cell(1, "end_group", None,), Cell(1, "", None,)], "expected": False,},
+            {"row": [Cell(1, "begin_group", None,), Cell(1, "test_group", None,),], "expected": True,},
         ]
 
         for case in cases_to_test:
@@ -320,15 +254,9 @@ class TestFlexibleHelperMethods(TestCase):
 
     def test_get_field_choice_name(self):
         cases_to_test = [
+            {"row": [Cell(1, "text", None,), Cell(1, "first_name", None,)], "expected": None,},
             {
-                "row": [Cell(1, "text", None,), Cell(1, "first_name", None,)],
-                "expected": None,
-            },
-            {
-                "row": [
-                    Cell(1, "select_one test_group", None,),
-                    Cell(1, "test_group", None,),
-                ],
+                "row": [Cell(1, "select_one test_group", None,), Cell(1, "test_group", None,),],
                 "expected": "test_group",
             },
         ]

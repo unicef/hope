@@ -9,9 +9,7 @@ from registration_datahub.validators import UploadXLSXValidator
 
 
 class TestXLSXValidatorsMethods(TestCase):
-    FILES_DIR_PATH = (
-        f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file"
-    )
+    FILES_DIR_PATH = f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file"
 
     def test_geolocation_validator(self):
         # test correct values:
@@ -21,11 +19,7 @@ class TestXLSXValidatorsMethods(TestCase):
             "54.1234252, 67.535232",
         )
         for value in correct_values:
-            self.assertTrue(
-                UploadXLSXValidator.geolocation_validator(
-                    value, "hh_geopoint_h_c"
-                )
-            )
+            self.assertTrue(UploadXLSXValidator.geolocation_validator(value, "hh_geopoint_h_c"))
 
         # test incorrect values:
         incorrect_values = (
@@ -36,11 +30,7 @@ class TestXLSXValidatorsMethods(TestCase):
         )
 
         for value in incorrect_values:
-            self.assertFalse(
-                UploadXLSXValidator.geolocation_validator(
-                    value, "hh_geopoint_h_c"
-                )
-            )
+            self.assertFalse(UploadXLSXValidator.geolocation_validator(value, "hh_geopoint_h_c"))
 
     def test_date_validator(self):
         # test correct values:
@@ -53,9 +43,7 @@ class TestXLSXValidatorsMethods(TestCase):
             "27.12.2020",
         )
         for value in correct_values:
-            self.assertTrue(
-                UploadXLSXValidator.date_validator(value, "birth_date_i_c")
-            )
+            self.assertTrue(UploadXLSXValidator.date_validator(value, "birth_date_i_c"))
 
         # test incorrect values:
         incorrect_values = (
@@ -67,9 +55,7 @@ class TestXLSXValidatorsMethods(TestCase):
         )
 
         for value in incorrect_values:
-            self.assertFalse(
-                UploadXLSXValidator.date_validator(value, "birth_date_i_c")
-            )
+            self.assertFalse(UploadXLSXValidator.date_validator(value, "birth_date_i_c"))
 
     def test_integer_validator(self):
         # test correct values:
@@ -82,9 +68,7 @@ class TestXLSXValidatorsMethods(TestCase):
             -12,
         )
         for value in correct_values:
-            self.assertTrue(
-                UploadXLSXValidator.integer_validator(value, "size_h_c")
-            )
+            self.assertTrue(UploadXLSXValidator.integer_validator(value, "size_h_c"))
 
         # test incorrect values:
         incorrect_values = (
@@ -96,9 +80,7 @@ class TestXLSXValidatorsMethods(TestCase):
         )
 
         for value in incorrect_values:
-            self.assertFalse(
-                UploadXLSXValidator.integer_validator(value, "size_h_c")
-            )
+            self.assertFalse(UploadXLSXValidator.integer_validator(value, "size_h_c"))
 
     def test_phone_validator(self):
         # test correct values:
@@ -112,9 +94,7 @@ class TestXLSXValidatorsMethods(TestCase):
             "+48 69 563 7300",
         )
         for value in correct_values:
-            self.assertTrue(
-                UploadXLSXValidator.phone_validator(value, "phone_no_i_c")
-            )
+            self.assertTrue(UploadXLSXValidator.phone_validator(value, "phone_no_i_c"))
 
         # test incorrect values:
         incorrect_values = (
@@ -129,9 +109,7 @@ class TestXLSXValidatorsMethods(TestCase):
         )
 
         for value in incorrect_values:
-            self.assertFalse(
-                UploadXLSXValidator.phone_validator(value, "phone_no_i_c")
-            )
+            self.assertFalse(UploadXLSXValidator.phone_validator(value, "phone_no_i_c"))
 
     def test_choice_validator(self):
         test_correct_values = (("REFUGEE", "residence_status_h_c"),)
@@ -145,21 +123,16 @@ class TestXLSXValidatorsMethods(TestCase):
             self.assertTrue(UploadXLSXValidator.choice_validator(value, header))
 
         for value, header in test_incorrect_values:
-            self.assertFalse(
-                UploadXLSXValidator.choice_validator(value, header)
-            )
+            self.assertFalse(UploadXLSXValidator.choice_validator(value, header))
 
     def test_rows_validator_too_many_head_of_households(self):
-        wb = openpyxl.load_workbook(
-            f"{self.FILES_DIR_PATH}/error-xlsx.xlsx", data_only=True,
-        )
+        wb = openpyxl.load_workbook(f"{self.FILES_DIR_PATH}/error-xlsx.xlsx", data_only=True,)
         result = UploadXLSXValidator.rows_validator(wb["Individuals"])
         expected = [
             {
                 "row_number": 0,
                 "header": "relationship_i_c",
-                "message": "Sheet: Individuals, There are multiple head of "
-                "households for household with id: 3",
+                "message": "Sheet: Individuals, There are multiple head of " "households for household with id: 3",
             }
         ]
 
@@ -167,13 +140,9 @@ class TestXLSXValidatorsMethods(TestCase):
 
     def test_rows_validator(self):
 
-        wb = openpyxl.load_workbook(
-            f"{self.FILES_DIR_PATH}/invalid_rows.xlsx", data_only=True,
-        )
+        wb = openpyxl.load_workbook(f"{self.FILES_DIR_PATH}/invalid_rows.xlsx", data_only=True,)
 
-        wb_valid = openpyxl.load_workbook(
-            f"{self.FILES_DIR_PATH}/new_reg_data_import.xlsx", data_only=True,
-        )
+        wb_valid = openpyxl.load_workbook(f"{self.FILES_DIR_PATH}/new_reg_data_import.xlsx", data_only=True,)
         UploadXLSXValidator.image_loader = SheetImageLoader(wb["Individuals"])
 
         sheets_and_expected_values = (
@@ -526,33 +495,19 @@ class TestXLSXValidatorsMethods(TestCase):
         files_to_test = (
             (
                 f"{self.FILES_DIR_PATH}/" f"image.png",
-                [
-                    {
-                        "row_number": 1,
-                        "message": "Only .xlsx files are accepted for import",
-                    }
-                ],
+                [{"row_number": 1, "message": "Only .xlsx files are accepted for import",}],
             ),
-            (
-                f"{self.FILES_DIR_PATH}/" f"not_excel_file.xlsx",
-                [{"row_number": 1, "message": "Invalid .xlsx file"}],
-            ),
+            (f"{self.FILES_DIR_PATH}/" f"not_excel_file.xlsx", [{"row_number": 1, "message": "Invalid .xlsx file"}],),
         )
 
         for file_path, expected_values in files_to_test:
             with open(file_path, "rb") as file:
                 result = UploadXLSXValidator.validate_file_extension(file=file)
-                self.assertEqual(
-                    result[0]["row_number"], expected_values[0]["row_number"]
-                )
-                self.assertEqual(
-                    result[0]["message"], expected_values[0]["message"]
-                )
+                self.assertEqual(result[0]["row_number"], expected_values[0]["row_number"])
+                self.assertEqual(result[0]["message"], expected_values[0]["message"])
 
     def test_validate_file_with_template(self):
-        invalid_cols_file_path = (
-            f"{self.FILES_DIR_PATH}/new_reg_data_import.xlsx"
-        )
+        invalid_cols_file_path = f"{self.FILES_DIR_PATH}/new_reg_data_import.xlsx"
         with open(invalid_cols_file_path, "rb") as file:
             errors = UploadXLSXValidator.validate_file_with_template(file=file)
             errors.sort(key=operator.itemgetter("row_number", "header"))
@@ -560,31 +515,19 @@ class TestXLSXValidatorsMethods(TestCase):
 
     def test_required_validator(self):
         with mock.patch.dict(
-            "registration_datahub.validators.UploadXLSXValidator.ALL_FIELDS",
-            {"test": {"required": True}},
-            clear=True,
+            "registration_datahub.validators.UploadXLSXValidator.ALL_FIELDS", {"test": {"required": True}}, clear=True,
         ):
-            result = UploadXLSXValidator.required_validator(
-                value="tak", header="test"
-            )
+            result = UploadXLSXValidator.required_validator(value="tak", header="test")
             self.assertTrue(result)
 
         with mock.patch.dict(
-            "registration_datahub.validators.UploadXLSXValidator.ALL_FIELDS",
-            {"test": {"required": True}},
-            clear=True,
+            "registration_datahub.validators.UploadXLSXValidator.ALL_FIELDS", {"test": {"required": True}}, clear=True,
         ):
-            result = UploadXLSXValidator.required_validator(
-                value="", header="test"
-            )
+            result = UploadXLSXValidator.required_validator(value="", header="test")
             self.assertFalse(result)
 
         with mock.patch.dict(
-            "registration_datahub.validators.UploadXLSXValidator.ALL_FIELDS",
-            {"test": {"required": False}},
-            clear=True,
+            "registration_datahub.validators.UploadXLSXValidator.ALL_FIELDS", {"test": {"required": False}}, clear=True,
         ):
-            result = UploadXLSXValidator.required_validator(
-                value="", header="test"
-            )
+            result = UploadXLSXValidator.required_validator(value="", header="test")
             self.assertTrue(result)

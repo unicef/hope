@@ -23,13 +23,7 @@ class RegistrationDataImportFilter(FilterSet):
         }
 
     order_by = OrderingFilter(
-        fields=(
-            "name",
-            "status",
-            "import_date",
-            "number_of_households",
-            "imported_by__given_name",
-        )
+        fields=("name", "status", "import_date", "number_of_households", "imported_by__given_name",)
     )
 
 
@@ -42,17 +36,11 @@ class RegistrationDataImportNode(DjangoObjectType):
 
 
 class Query(graphene.ObjectType):
-    registration_data_import = graphene.relay.Node.Field(
-        RegistrationDataImportNode,
-    )
+    registration_data_import = graphene.relay.Node.Field(RegistrationDataImportNode,)
     all_registration_data_imports = DjangoFilterConnectionField(
-        RegistrationDataImportNode,
-        filterset_class=RegistrationDataImportFilter,
+        RegistrationDataImportNode, filterset_class=RegistrationDataImportFilter,
     )
     registration_data_status_choices = graphene.List(ChoiceObject)
 
     def resolve_registration_data_status_choices(self, info, **kwargs):
-        return [
-            {"name": name, "value": value}
-            for value, name in RegistrationDataImport.STATUS_CHOICE
-        ]
+        return [{"name": name, "value": value} for value, name in RegistrationDataImport.STATUS_CHOICE]

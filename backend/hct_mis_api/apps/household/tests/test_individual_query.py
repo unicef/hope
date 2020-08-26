@@ -66,12 +66,8 @@ class TestIndividualQuery(APITestCase):
         super().setUp()
         call_command("loadbusinessareas")
         self.user = UserFactory()
-        program_one = ProgramFactory(
-            name="Test program ONE", business_area=BusinessArea.objects.first(),
-        )
-        program_two = ProgramFactory(
-            name="Test program TWO", business_area=BusinessArea.objects.first(),
-        )
+        program_one = ProgramFactory(name="Test program ONE", business_area=BusinessArea.objects.first(),)
+        program_two = ProgramFactory(name="Test program TWO", business_area=BusinessArea.objects.first(),)
 
         household_one = HouseholdFactory.build()
         household_two = HouseholdFactory.build()
@@ -121,10 +117,7 @@ class TestIndividualQuery(APITestCase):
         ]
 
         self.individuals = [
-            IndividualFactory(
-                household=household_one if index % 2 else household_two,
-                **individual
-            )
+            IndividualFactory(household=household_one if index % 2 else household_two, **individual)
             for index, individual in enumerate(self.individuals_to_create)
         ]
         household_one.head_of_household = self.individuals[0]
@@ -134,21 +127,17 @@ class TestIndividualQuery(APITestCase):
 
     def test_individual_query_all(self):
         self.snapshot_graphql_request(
-            request_string=self.ALL_INDIVIDUALS_QUERY,
-            context={"user": self.user},
+            request_string=self.ALL_INDIVIDUALS_QUERY, context={"user": self.user},
         )
 
     def test_individual_query_single(self):
         self.snapshot_graphql_request(
             request_string=self.INDIVIDUAL_QUERY,
             context={"user": self.user},
-            variables={
-                "id": self.id_to_base64(self.individuals[0].id, "Individual")
-            },
+            variables={"id": self.id_to_base64(self.individuals[0].id, "Individual")},
         )
 
     def test_individual_programme_filter(self):
         self.snapshot_graphql_request(
-            request_string=self.ALL_INDIVIDUALS_BY_PROGRAMME_QUERY,
-            context={"user": self.user},
+            request_string=self.ALL_INDIVIDUALS_BY_PROGRAMME_QUERY, context={"user": self.user},
         )
