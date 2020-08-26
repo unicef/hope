@@ -108,6 +108,34 @@ class RegistrationXlsxImportMutation(BaseValidator, graphene.Mutation):
         return RegistrationXlsxImportMutation(created_obj_hct)
 
 
+class RegistrationDeduplicationMutation(BaseValidator, graphene.Mutation):
+    ok = graphene.Boolean()
+
+    class Arguments:
+        registration_data_import_datahub_id = graphene.ID(required=True)
+
+    @classmethod
+    def validate_object_status(cls, registration_data_import_datahub_id, *args, **kwargs):
+        rdi_obj = RegistrationDataImportDatahub.objects.get(id=registration_data_import_datahub_id)
+
+        if rdi_obj.status != RegistrationDataImport.DEDUPLICATION_FAILED:
+            raise ValidationError(
+                "Deduplication can only be called when Registration Data Import" "status is Deduplication Failed"
+            )
+
+    @classmethod
+    @is_authenticated
+    def mutate(cls, root, info, registration_data_import_datahub_id):
+        cls.validate(registration_data_import_datahub_id=registration_data_import_datahub_id)
+
+        AirflowApi.start_dag(
+            dag_id="RegistrationDataImportDeduplication",
+            context={"registration_data_import_id": str(registration_data_import_datahub_id),},
+        )
+
+        return cls(ok=True)
+
+
 class RegistrationKoboImportMutation(BaseValidator, graphene.Mutation):
     registration_data_import = graphene.Field(RegistrationDataImportNode)
 
