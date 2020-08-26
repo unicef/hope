@@ -195,16 +195,17 @@ class DeduplicateTask:
         )
 
     @staticmethod
-    def set_error_message_and_status(registration_data_import_datahub, message):
-        registration_data_import_datahub.error_message = message
-        registration_data_import_datahub.status = RegistrationDataImport.DEDUPLICATION_FAILED
-        registration_data_import_datahub.save()
+    def set_error_message_and_status(registration_data_import, message):
+        registration_data_import.error_message = message
+        registration_data_import.status = RegistrationDataImport.DEDUPLICATION_FAILED
+        registration_data_import.save()
 
     @classmethod
     def deduplicate_imported_individuals(cls, registration_data_import_datahub):
         imported_individuals = ImportedIndividual.objects.filter(
             registration_data_import=registration_data_import_datahub
         )
+        registration_data_import = RegistrationDataImport.objects.get(id=registration_data_import_datahub.hct_id)
         allowed_duplicates_batch_amount = round(
             imported_individuals.count() * (config.DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE / 100)
         )
@@ -252,15 +253,15 @@ class DeduplicateTask:
 
             if batch_amount_exceeded:
                 message = "Import exceeded allowed percentage of duplicates for a batch."
-                cls.set_error_message_and_status(registration_data_import_datahub, message)
+                cls.set_error_message_and_status(registration_data_import, message)
                 break
             elif golden_record_amount_exceeded:
                 message = "Import exceeded allowed percentage of duplicates for a golden record."
-                cls.set_error_message_and_status(registration_data_import_datahub, message)
+                cls.set_error_message_and_status(registration_data_import, message)
                 break
             elif batch_amount_exceeded and golden_record_amount_exceeded:
                 message = "Import exceeded allowed percentage of duplicates for batch and golden record."
-                cls.set_error_message_and_status(registration_data_import_datahub, message)
+                cls.set_error_message_and_status(registration_data_import, message)
                 break
 
         # BATCH
@@ -281,7 +282,6 @@ class DeduplicateTask:
         ImportedIndividual.objects.filter(id__in=set_of_all_original_individuals_ids_duplicates).update(
             deduplication_golden_record_status=DUPLICATE
         )
-
         ImportedIndividual.objects.filter(
             id__in=set_of_all_original_individuals_ids_possible_duplicates.difference(
                 set_of_all_original_individuals_ids_duplicates
@@ -292,7 +292,6 @@ class DeduplicateTask:
             to_bulk_update_results, ["deduplication_batch_results", "deduplication_golden_record_results",],
         )
         registration_data_import_datahub.refresh_from_db()
-        registration_data_import = RegistrationDataImport.objects.get(id=registration_data_import_datahub.hct_id)
         if registration_data_import.status == RegistrationDataImport.DEDUPLICATION_FAILED:
             registration_data_import_datahub.individuals.filter(
                 Q(deduplication_batch_status=UNIQUE_IN_BATCH) & Q(deduplication_golden_record_status=UNIQUE)
@@ -307,4 +306,7 @@ class DeduplicateTask:
                 id__in=set_of_all_original_individuals_ids_duplicates.union(
                     set_of_all_original_individuals_ids_possible_duplicates
                 )
-            ).update(deduplication_golden_record_status=UNIQUE,)
+            ).update(deduplication_golden_record_status=UNIQUE)
+
+            registration_data_import.status = RegistrationDataImport.IN_REVIEW
+            registration_data_import.save()
