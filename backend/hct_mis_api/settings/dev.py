@@ -30,5 +30,10 @@ AIRFLOW_HOST = "airflow_webserver"
 
 # ELASTICSEARCH SETTINGS
 ELASTICSEARCH_DSL = {
-    "default": {"hosts": "elasticsearch:9200"},
+    'default': {
+        'hosts': 'elasticsearch:9200'
+    },
+    'test': {
+        'hosts': 'elasticsearch_test:9200'
+    },
 }

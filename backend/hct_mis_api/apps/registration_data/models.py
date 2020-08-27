@@ -10,11 +10,15 @@ class RegistrationDataImport(TimeStampedUUIDModel):
     IN_REVIEW = "IN_REVIEW"
     MERGING = "MERGING"
     MERGED = "MERGED"
+    DEDUPLICATION_FAILED = "DEDUPLICATION_FAILED"
+    DEDUPLICATION = "DEDUPLICATION"
     STATUS_CHOICE = (
         (IN_REVIEW, _("In Review")),
         (MERGED, _("Merged")),
         (MERGING, _("Merging")),
         (IMPORTING, _("Importing")),
+        (DEDUPLICATION_FAILED, _("Deduplication Failed")),
+        (DEDUPLICATION, _("Deduplication")),
     )
     DATA_SOURCE_CHOICE = (
         ("XLS", "Excel"),
@@ -30,6 +34,7 @@ class RegistrationDataImport(TimeStampedUUIDModel):
     number_of_individuals = models.PositiveIntegerField()
     number_of_households = models.PositiveIntegerField()
     datahub_id = models.UUIDField(null=True, default=None)
+    error_message = models.TextField(blank=True)
 
     business_area = models.ForeignKey("core.BusinessArea", null=True, on_delete=models.CASCADE)
 

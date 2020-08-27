@@ -1,3 +1,4 @@
+from django.core.management import call_command
 from django.db import transaction
 from django.forms import model_to_dict
 
@@ -184,3 +185,10 @@ class RdiMergeTask:
 
         obj_hct.status = RegistrationDataImport.MERGED
         obj_hct.save()
+
+        call_command(
+            "search_index",
+            "--populate",
+            "--models",
+            "household.Individual",
+        )

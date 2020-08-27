@@ -22,6 +22,7 @@ export const registrationDetailed = gql`
   fragment registrationDetailed on RegistrationDataImportNode {
     ...registrationMinimal
     numberOfIndividuals
+    datahubId
   }
 `;
 
@@ -62,6 +63,8 @@ export const importedIndividualMinimal = gql`
     sex
     role
     relationship
+    deduplicationBatchStatus
+    deduplicationGoldenRecordStatus
   }
 `;
 
@@ -76,6 +79,7 @@ export const importedIndividualDetailed = gql`
     documents {
       edges {
         node {
+          id
           type {
             label
           }
@@ -83,7 +87,8 @@ export const importedIndividualDetailed = gql`
         }
       }
     }
-    identities{
+    identities {
+      id
       documentNumber
       type
     }
