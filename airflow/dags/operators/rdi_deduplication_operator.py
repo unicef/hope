@@ -3,7 +3,7 @@ from .base import DjangoOperator
 
 class RDIDeduplicationOperator(DjangoOperator):
     def execute(self, context, **kwargs):
-        from registration_datahub.tasks.batch_deduplicate import DeduplicateTask
+        from registration_datahub.tasks.deduplicate import DeduplicateTask
         from registration_datahub.models import RegistrationDataImportDatahub
 
         dag_run = context["dag_run"]

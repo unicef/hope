@@ -186,9 +186,11 @@ class DeduplicateTask:
 
     @staticmethod
     def _mark_individuals(all_duplicates, all_possible_duplicates, to_bulk_update_results):
-        Individual.objects.filter(id__in=all_possible_duplicates).update(deduplication_status=NEEDS_ADJUDICATION)
-
         Individual.objects.filter(id__in=all_duplicates).update(deduplication_status=DUPLICATE)
+
+        Individual.objects.filter(id__in=set(all_possible_duplicates).difference(set(all_duplicates))).update(
+            deduplication_status=NEEDS_ADJUDICATION
+        )
 
         Individual.objects.bulk_update(
             to_bulk_update_results, ["deduplication_results",],

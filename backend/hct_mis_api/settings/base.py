@@ -396,6 +396,8 @@ CONSTANCE_CONFIG = {
         "If percentage of duplicates is higher or equal to this setting, deduplication is aborted",
         "percentages",
     ),
+    # SANCTION LIST
+    "SANCTION_LIST_MATCH_SCORE": (10.0, "Results equal or above this score are considered possible matches",),
 }
 
 CONSTANCE_DBS = ("default",)
