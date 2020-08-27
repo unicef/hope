@@ -20,7 +20,7 @@ from payment.inputs import (
 from payment.models import CashPlanPaymentVerification, PaymentVerification
 from payment.rapid_pro.api import RapidProAPI
 from payment.schema import PaymentVerificationNode
-from payment.utils import get_number_of_samples, from_received_to_status
+from payment.utils import get_number_of_samples, from_received_to_status, calculate_counts
 from payment.xlsx.XlsxVerificationImportService import XlsxVerificationImportService
 from program.models import CashPlan
 from program.schema import CashPlanNode
@@ -357,28 +357,26 @@ class ActivateCashPlanVerificationMutation(graphene.Mutation):
         if cashplan_payment_verification.status != CashPlanPaymentVerification.STATUS_PENDING:
             raise GraphQLError("You can activate only PENDING verification")
         cashplan_payment_verification.status = CashPlanPaymentVerification.STATUS_ACTIVE
-        cashplan_payment_verification.save()
         if (
             cashplan_payment_verification.verification_method
             == CashPlanPaymentVerification.VERIFICATION_METHOD_RAPIDPRO
         ):
             cls.activate_rapidpro(cashplan_payment_verification)
+        cashplan_payment_verification.save()
         return ActivateCashPlanVerificationMutation(cashplan_payment_verification.cash_plan)
 
     @classmethod
     def activate_rapidpro(cls, cashplan_payment_verification):
-        business_area_slug = input["business_area_slug"]
+        business_area_slug = cashplan_payment_verification.cash_plan.business_area.slug
         api = RapidProAPI(business_area_slug)
         phone_numbers = list(
             Individual.objects.filter(
-                heading_household__payment_records__verifications__cash_plan_payment_verification=cash_plan_payment_verification.id
+                heading_household__payment_records__verifications__cash_plan_payment_verification=cashplan_payment_verification.id
             ).values_list("phone_no", flat=True)
         )
         # TODO Uncomment when correct phone numbers in user
-        # flow_start_info = api.start_flow(flow_id, phone_numbers)
-        # cash_plan_payment_verification.rapid_pro_flow_start_uuid = flow_start_info.get(
-        #     "uuid"
-        # )
+        flow_start_info = api.start_flow(cashplan_payment_verification.rapid_pro_flow_id, phone_numbers)
+        cashplan_payment_verification.rapid_pro_flow_start_uuid = flow_start_info.get("uuid")
 
 
 class FinishCashPlanVerificationMutation(graphene.Mutation):
@@ -477,6 +475,9 @@ class UpdatePaymentVerificationStatusAndReceivedAmount(graphene.Mutation):
         payment_verification.status = status
         payment_verification.received_amount = received_amount
         payment_verification.save()
+        cashplan_payment_verification = payment_verification.cash_plan_payment_verification
+        calculate_counts(cashplan_payment_verification)
+        cashplan_payment_verification.save()
         return UpdatePaymentVerificationStatusAndReceivedAmount(payment_verification)
 
 
@@ -521,6 +522,9 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(graphene.Mutation):
         payment_verification.status = from_received_to_status(received, received_amount, delivered_amount)
         payment_verification.received_amount = received_amount
         payment_verification.save()
+        cashplan_payment_verification = payment_verification.cash_plan_payment_verification
+        calculate_counts(cashplan_payment_verification)
+        cashplan_payment_verification.save()
         return UpdatePaymentVerificationStatusAndReceivedAmount(payment_verification)
 
 
@@ -562,6 +566,8 @@ class ImportXlsxCashPlanVerification(graphene.Mutation,):
         if len(import_service.errors):
             return ImportXlsxCashPlanVerification(None, import_service.errors)
         import_service.import_verifications()
+        calculate_counts(cashplan_payment_verification)
+        cashplan_payment_verification.save()
         return ImportXlsxCashPlanVerification(cashplan_payment_verification.cash_plan, import_service.errors)
 
 

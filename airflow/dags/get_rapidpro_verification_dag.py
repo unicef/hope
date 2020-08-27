@@ -6,9 +6,9 @@ from operators.get_rapidpro_verification_operator import (
 
 
 dag = DAG(
-    "PullFromCaDh",
+    "GetSyncRunRapidPro",
     description="Get results from RAPIDPRO API and verify existing verifications",
-    schedule_interval="@hourly",
+    schedule_interval=timedelta(minutes=20),
     start_date=datetime.now() - timedelta(days=1),
 )
 

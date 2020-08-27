@@ -1,6 +1,7 @@
 from decimal import Decimal
 from math import ceil
 
+from django.db.models import Q
 from scipy.special import ndtri
 
 from payment.models import PaymentVerification
@@ -44,3 +45,18 @@ def from_received_yes_no_to_status(received, received_amount, delivered_amount):
     elif received == "NO":
         received_bool = False
     return from_received_to_status(received_bool, received_amount, delivered_amount)
+
+
+def calculate_counts(cash_plan_verification):
+    cash_plan_verification.responded_count = cash_plan_verification.payment_record_verifications.filter(
+        ~Q(status=PaymentVerification.STATUS_PENDING)
+    ).count()
+    cash_plan_verification.received_count = cash_plan_verification.payment_record_verifications.filter(
+        Q(status=PaymentVerification.STATUS_RECEIVED)
+    ).count()
+    cash_plan_verification.not_received_count = cash_plan_verification.payment_record_verifications.filter(
+        Q(status=PaymentVerification.STATUS_NOT_RECEIVED)
+    ).count()
+    cash_plan_verification.received_with_problems_count = cash_plan_verification.payment_record_verifications.filter(
+        Q(status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES)
+    ).count()

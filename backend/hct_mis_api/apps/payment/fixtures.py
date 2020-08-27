@@ -54,7 +54,7 @@ class PaymentRecordFactory(factory.DjangoModelFactory):
 
 
 class CashPlanPaymentVerificationFactory(factory.DjangoModelFactory):
-    status = fuzzy.FuzzyChoice(CashPlanPaymentVerification.STATUS_CHOICES, getter=lambda c: c[0],)
+    status = fuzzy.FuzzyChoice(((CashPlanPaymentVerification.STATUS_PENDING,"pending"),), getter=lambda c: c[0],)
     sampling = fuzzy.FuzzyChoice(CashPlanPaymentVerification.SAMPLING_CHOICES, getter=lambda c: c[0],)
     verification_method = fuzzy.FuzzyChoice(
         CashPlanPaymentVerification.VERIFICATION_METHOD_CHOICES, getter=lambda c: c[0],
