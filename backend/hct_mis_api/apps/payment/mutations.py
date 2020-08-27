@@ -96,7 +96,7 @@ class CreatePaymentVerificationMutation(graphene.Mutation):
             sampling,
             excluded_admin_areas,
             sex,
-            age
+            age,
         ) = cls.process_sampling(cash_plan, input)
         cash_plan_verification = CashPlanPaymentVerification(
             cash_plan=cash_plan,
@@ -163,7 +163,7 @@ class CreatePaymentVerificationMutation(graphene.Mutation):
             sampling,
             excluded_admin_areas,
             sex,
-            age
+            age,
         )
 
     @classmethod
@@ -252,7 +252,7 @@ class EditPaymentVerificationMutation(graphene.Mutation):
             sampling,
             excluded_admin_areas,
             sex,
-            age
+            age,
         ) = cls.process_sampling(cash_plan, input)
 
         cash_plan_verification.confidence_interval = confidence_interval
@@ -318,7 +318,7 @@ class EditPaymentVerificationMutation(graphene.Mutation):
             sampling,
             excluded_admin_areas,
             sex,
-            age
+            age,
         )
 
     @classmethod
@@ -352,28 +352,26 @@ class ActivateCashPlanVerificationMutation(graphene.Mutation):
         if cashplan_payment_verification.status != CashPlanPaymentVerification.STATUS_PENDING:
             raise GraphQLError("You can activate only PENDING verification")
         cashplan_payment_verification.status = CashPlanPaymentVerification.STATUS_ACTIVE
-        cashplan_payment_verification.save()
         if (
             cashplan_payment_verification.verification_method
             == CashPlanPaymentVerification.VERIFICATION_METHOD_RAPIDPRO
         ):
             cls.activate_rapidpro(cashplan_payment_verification)
+        cashplan_payment_verification.save()
         return ActivateCashPlanVerificationMutation(cashplan_payment_verification.cash_plan)
 
     @classmethod
     def activate_rapidpro(cls, cashplan_payment_verification):
-        business_area_slug = input["business_area_slug"]
+        business_area_slug = cashplan_payment_verification.cash_plan.business_area.slug
         api = RapidProAPI(business_area_slug)
         phone_numbers = list(
             Individual.objects.filter(
-                heading_household__payment_records__verifications__cash_plan_payment_verification=cash_plan_payment_verification.id
+                heading_household__payment_records__verifications__cash_plan_payment_verification=cashplan_payment_verification.id
             ).values_list("phone_no", flat=True)
         )
         # TODO Uncomment when correct phone numbers in user
-        # flow_start_info = api.start_flow(flow_id, phone_numbers)
-        # cash_plan_payment_verification.rapid_pro_flow_start_uuid = flow_start_info.get(
-        #     "uuid"
-        # )
+        flow_start_info = api.start_flow(cashplan_payment_verification.rapid_pro_flow_id, phone_numbers)
+        cashplan_payment_verification.rapid_pro_flow_start_uuid = flow_start_info.get("uuid")
 
 
 class FinishCashPlanVerificationMutation(graphene.Mutation):
