@@ -3,6 +3,7 @@ from django.conf import settings
 
 from core.models import BusinessArea
 from household.models import Individual
+from constance import config
 from payment.models import CashPlanPaymentVerification
 
 
@@ -53,8 +54,7 @@ class RapidProAPI:
         return flows["results"]
 
     def start_flow(self, flow_uuid, phone_numbers):
-        urns = [f"tel:{x}" for x in phone_numbers]
-        # urns = ["telegram:1079068080"]
+        urns = [f"{config.RAPID_PRO_PROVIDER}:{x}" for x in phone_numbers]
         data = {"flow": flow_uuid, "urns": urns, "restart_participants": True}
 
         response = self._handle_post_request(RapidProAPI.FLOW_STARTS_ENDPOINT, data,)
@@ -105,7 +105,7 @@ class RapidProAPI:
 
     def create_contact(self, name, tel, group_uuid):
         contact = self._handle_post_request(
-            RapidProAPI.CONTACTS_ENDPOINT, {"name": name, "groups": [group_uuid], "urns": [f"tel:{tel}"]},
+            RapidProAPI.CONTACTS_ENDPOINT, {"name": name, "groups": [group_uuid], "urns": [f"{config.RAPID_PRO_PROVIDER}:{tel}"]},
         )
         return contact
 
