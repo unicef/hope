@@ -10,6 +10,7 @@ from household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
     Agency,
+    DUPLICATE,
 )
 from household.models import Household
 from household.models import Individual
@@ -191,9 +192,10 @@ class RdiMergeTask:
         )
 
         DeduplicateTask.deduplicate_individuals(registration_data_import=obj_hct)
-
-        obj_hct.status = RegistrationDataImport.MERGED
-        obj_hct.save()
+        Individual.objects.filter(registration_data_import=obj_hub, deduplication_status=DUPLICATE).delete()
 
         # SANCTION LIST CHECK
         CheckAgainstSanctionListPreMergeTask.execute()
+
+        obj_hct.status = RegistrationDataImport.MERGED
+        obj_hct.save()
