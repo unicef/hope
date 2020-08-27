@@ -153,3 +153,5 @@ class CashPlan(TimeStampedUUIDModel):
 
 
 auditlog.register(Program)
+
+auditlog.register(CashPlan)
