@@ -29,3 +29,5 @@ ADD ./dags/. /usr/local/airflow/dags
 ADD ./connectors/. /usr/local/airflow/connectors
 
 COPY ./config/airflow.cfg /usr/local/airflow/airflow.cfg
+
+COPY ./init_local_user.py /usr/local/airflow/init_local_user.py
