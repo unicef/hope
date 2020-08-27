@@ -6,6 +6,8 @@ import sys
 ####
 # Change per project
 ####
+from django.core.validators import MinValueValidator, MaxValueValidator
+from django.forms import SelectMultiple
 from django.utils.text import slugify
 
 PROJECT_NAME = "hct_mis_api"
@@ -224,6 +226,7 @@ OTHER_APPS = [
     "social_django",
     "corsheaders",
     "django_elasticsearch_dsl",
+    "constance",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
@@ -280,7 +283,7 @@ LOGGING = {
 
 GIT_VERSION = os.getenv("GIT_VERSION", "UNKNOWN")
 
-REDIS_INSTANCE = os.getenv("REDIS_INSTANCE")
+REDIS_INSTANCE = os.getenv("REDIS_INSTANCE", "redis")
 
 if REDIS_INSTANCE:
     CACHES = {
@@ -362,3 +365,37 @@ SANCTION_LIST_CC_MAIL = os.getenv("SANCTION_LIST_CC_MAIL", "dfam-cashassistance@
 ELASTICSEARCH_DSL_AUTOSYNC = False
 
 RAPID_PRO_URL = os.getenv("RAPID_PRO_URL", "https://rapidpro.io")
+
+# DJANGO CONSTANCE settings
+CONSTANCE_REDIS_CONNECTION = f"redis://{REDIS_INSTANCE}/0"
+
+CONSTANCE_ADDITIONAL_FIELDS = {
+    "percentages": (
+        "django.forms.fields.IntegerField",
+        {"widget": "django.forms.widgets.NumberInput", "validators": [MinValueValidator(0), MaxValueValidator(100)],},
+    )
+}
+
+CONSTANCE_CONFIG = {
+    # BATCH SETTINGS
+    "DEDUPLICATION_BATCH_DUPLICATE_SCORE": (50.0, "Results equal or above this score are considered duplicates",),
+    "DEDUPLICATION_BATCH_MIN_SCORE": (15.0, "Results below the minimum score will not be taken into account",),
+    "DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE": (
+        50,
+        "If percentage of duplicates is higher or equal to this setting, " "deduplication is aborted",
+        "percentages",
+    ),
+    # GOLDEN RECORDS SETTINGS
+    "DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE": (50.0, "Results below the minimum score will not be taken into account",),
+    "DEDUPLICATION_GOLDEN_RECORD_DUPLICATE_SCORE": (
+        70.0,
+        "Results equal or above this score are considered duplicates",
+    ),
+    "DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_PERCENTAGE": (
+        50,
+        "If percentage of duplicates is higher or equal to this setting, deduplication is aborted",
+        "percentages",
+    ),
+}
+
+CONSTANCE_DBS = ("default",)

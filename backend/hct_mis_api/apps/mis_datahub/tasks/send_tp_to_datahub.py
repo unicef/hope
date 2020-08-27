@@ -38,7 +38,7 @@ class SendTPToDatahubTask:
         "admin1": "admin_area.title",
         "admin2": "admin_area.parent.title",
         "residence_status": "residence_status",
-        "registration_date": "registration_date",
+        "registration_date": "last_registration_date",
     }
     MAPPING_INDIVIDUAL_DICT = {
         "mis_id": "id",
@@ -53,7 +53,7 @@ class SendTPToDatahubTask:
         "estimated_date_of_birth": "estimated_birth_date",
         "relationship": "relationship",
         "marital_status": "marital_status",
-        "phone_number": "phone_number",
+        "phone_number": "phone_no",
         "household_mis_id": "household.id",
     }
     MAPPING_DOCUMENT_DICT = {

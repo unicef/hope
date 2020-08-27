@@ -82,7 +82,7 @@ interface TableComponentProps<T> {
 }
 
 export function TableComponent<T>({
-  title,
+  title = '',
   renderRow,
   data,
   headCells,
@@ -95,10 +95,10 @@ export function TableComponent<T>({
   handleRequestSort,
   order,
   orderBy,
-  loading,
-  allowSort,
+  loading = false,
+  allowSort = true,
   isOnPaper = true,
-  actions,
+  actions = [],
 }: TableComponentProps<T>): React.ReactElement {
   const classes = useStyles({});
 
