@@ -1,6 +1,8 @@
+import traceback
+
 from payment.models import CashPlanPaymentVerification, PaymentVerification
 from payment.rapid_pro.api import RapidProAPI
-from payment.utils import from_received_to_status
+from payment.utils import from_received_to_status, calculate_counts
 
 
 class CheckRapidProVerificationTask:
@@ -10,7 +12,10 @@ class CheckRapidProVerificationTask:
             status=CashPlanPaymentVerification.STATUS_ACTIVE,
         )
         for cashplan_payment_verification in active_rapidpro_verifications:
-            self._verify_cashplan_payment_verification(cashplan_payment_verification)
+            try:
+                self._verify_cashplan_payment_verification(cashplan_payment_verification)
+            except Exception as e:
+                print(traceback.format_exc())
 
     def _verify_cashplan_payment_verification(self, cashplan_payment_verification):
         payment_record_verifications = cashplan_payment_verification.payment_record_verifications.prefetch_related(
@@ -30,6 +35,8 @@ class CheckRapidProVerificationTask:
             if payment_record_verification:
                 payment_record_verification_to_update.append(payment_record_verification)
         PaymentVerification.objects.bulk_update(payment_record_verification_to_update, ("status", "received_amount"))
+        calculate_counts(cashplan_payment_verification)
+        cashplan_payment_verification.save()
 
     def _rapid_pro_results_to_payment_record_verification(
         self, payment_record_verifications_phone_number_dict, rapid_pro_result
