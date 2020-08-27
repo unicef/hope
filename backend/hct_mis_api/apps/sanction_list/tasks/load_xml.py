@@ -5,6 +5,7 @@ from urllib.request import urlopen
 
 import dateutil.parser
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.management import call_command
 from django.db.models import QuerySet
 from django.forms import model_to_dict
 from django.utils.functional import cached_property
@@ -416,3 +417,10 @@ class LoadSanctionListXMLTask:
         SanctionListIndividualDateOfBirth.objects.all().delete()
         if dob_from_file:
             SanctionListIndividualDateOfBirth.objects.bulk_create(dob_from_file)
+
+        call_command(
+            "search_index",
+            "--populate",
+            "--models",
+            "sanction_list.SanctionListIndividual",
+        )
