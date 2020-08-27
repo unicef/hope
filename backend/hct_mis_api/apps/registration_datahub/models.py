@@ -23,8 +23,21 @@ from household.models import (
     IDENTIFICATION_TYPE_CHOICE,
     WORK_STATUS_CHOICE,
     NOT_PROVIDED,
+    UNIQUE,
+    DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
 )
 from utils.models import TimeStampedUUIDModel
+
+
+SIMILAR_IN_BATCH = "SIMILAR_IN_BATCH"
+DUPLICATE_IN_BATCH = "DUPLICATE_IN_BATCH"
+UNIQUE_IN_BATCH = "UNIQUE_IN_BATCH"
+DEDUPLICATION_BATCH_STATUS_CHOICE = (
+    (SIMILAR_IN_BATCH, "Similar in batch"),
+    (DUPLICATE_IN_BATCH, "Duplicate in batch"),
+    (UNIQUE_IN_BATCH, "Unique in batch"),
+    ("", "-"),
+)
 
 
 class ImportedHouseholdIdentity(models.Model):
@@ -98,6 +111,14 @@ class ImportedIndividual(TimeStampedUUIDModel):
     work_status = models.CharField(max_length=20, choices=WORK_STATUS_CHOICE, blank=True, default=NOT_PROVIDED,)
     first_registration_date = models.DateField()
     last_registration_date = models.DateField()
+    deduplication_batch_status = models.CharField(
+        max_length=50, default=UNIQUE_IN_BATCH, choices=DEDUPLICATION_BATCH_STATUS_CHOICE, blank=True,
+    )
+    deduplication_golden_record_status = models.CharField(
+        max_length=50, default=UNIQUE, choices=DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE, blank=True,
+    )
+    deduplication_batch_results = JSONField(default=dict)
+    deduplication_golden_record_results = JSONField(default=dict)
     flex_fields = JSONField(default=dict)
 
     @property
@@ -111,7 +132,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
 
     @property
     def get_hash_key(self):
-        from hashlib import md5
+        from hashlib import sha256
 
         fields = (
             "given_name",
@@ -121,10 +142,11 @@ class ImportedIndividual(TimeStampedUUIDModel):
             "birth_date",
             "phone_no",
             "phone_no_alternative",
+            "relationship",
         )
         values = [str(getattr(self, field)) for field in fields]
 
-        return md5(";".join(values).encode()).digest()
+        return sha256(";".join(values).encode()).hexdigest()
 
     def __str__(self):
         return self.full_name

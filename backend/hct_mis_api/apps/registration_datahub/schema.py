@@ -9,8 +9,12 @@ from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
 from core.extended_connection import ExtendedConnection
-from core.utils import decode_id_string
-from household.models import ROLE_NO_ROLE
+from core.schema import ChoiceObject
+from core.utils import decode_id_string, to_choice_object
+from household.models import (
+    ROLE_NO_ROLE,
+    DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
+)
 from registration_datahub.models import (
     ImportedHousehold,
     ImportedIndividual,
@@ -19,7 +23,14 @@ from registration_datahub.models import (
     ImportedDocumentType,
     ImportedDocument,
     ImportedIndividualIdentity,
+    DEDUPLICATION_BATCH_STATUS_CHOICE,
 )
+
+
+class DeduplicationResultNode(graphene.ObjectType):
+    hit_id = graphene.ID()
+    full_name = graphene.String()
+    score = graphene.Float()
 
 
 class ImportedHouseholdFilter(FilterSet):
@@ -42,7 +53,16 @@ class ImportedIndividualFilter(FilterSet):
         model = ImportedIndividual
         fields = ("household",)
 
-    order_by = OrderingFilter(fields=("id", "full_name", "birth_date", "sex",))
+    order_by = OrderingFilter(
+        fields=(
+            "id",
+            "full_name",
+            "birth_date",
+            "sex",
+            "deduplication_batch_status",
+            "deduplication_golden_record_status",
+        )
+    )
 
     def filter_rdi_id(self, queryset, model_field, value):
         return queryset.filter(registration_data_import__hct_id=decode_id_string(value))
@@ -70,6 +90,8 @@ class ImportedIndividualNode(DjangoObjectType):
     estimated_birth_date = graphene.Boolean(required=False)
     role = graphene.String()
     relationship = graphene.String()
+    deduplication_batch_results = graphene.List(DeduplicationResultNode)
+    deduplication_golden_record_results = graphene.List(DeduplicationResultNode)
 
     def resolve_role(parent, info):
         role = parent.households_and_roles.first()
@@ -145,3 +167,11 @@ class Query(graphene.ObjectType):
         ImportedIndividualNode, filterset_class=ImportedIndividualFilter,
     )
     import_data = relay.Node.Field(ImportDataNode)
+    deduplication_batch_status_choices = graphene.List(ChoiceObject)
+    deduplication_golden_record_status_choices = graphene.List(ChoiceObject)
+
+    def resolve_deduplication_batch_status_choices(self, info, **kwargs):
+        return to_choice_object(DEDUPLICATION_BATCH_STATUS_CHOICE)
+
+    def resolve_deduplication_golden_record_status_choices(self, info, **kwargs):
+        return to_choice_object(DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE)
