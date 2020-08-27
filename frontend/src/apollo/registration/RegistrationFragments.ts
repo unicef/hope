@@ -79,6 +79,7 @@ export const importedIndividualDetailed = gql`
     documents {
       edges {
         node {
+          id
           type {
             label
           }
@@ -87,6 +88,7 @@ export const importedIndividualDetailed = gql`
       }
     }
     identities {
+      id
       documentNumber
       type
     }
