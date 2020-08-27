@@ -152,11 +152,11 @@ interface CriteriaProps {
 
 export function Criteria({
   rules,
-  removeFunction,
-  editFunction,
+  removeFunction = () => null,
+  editFunction = () => null,
   isEdit,
   canRemove,
-  alternative,
+  alternative = null,
 }: CriteriaProps) {
   return (
     <CriteriaElement alternative={alternative} data-cy='criteria-container'>

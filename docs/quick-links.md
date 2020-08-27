@@ -20,6 +20,12 @@ If you lack access to any links below, please contact [**Brandin Lewis**](introd
 * \*\*\*\*[**TeamGantt**](https://prod.teamgantt.com/gantt/schedule/?ids=1794245&public_keys=O5dlvTv5qm0V&zoom=d100&font_size=12&estimated_hours=0&assigned_resources=0&percent_complete=0&documents=0&comments=0&col_width=355&hide_header_tabs=0&menu_view=1&resource_filter=1&name_in_bar=0&name_next_to_bar=0&resource_names=1&resource_hours=1#user=&company=&custom=&date_filter=&hide_completed=false&color_filter=)\*\*\*\*
 * \*\*\*\*[**Data Dictionary**](https://unicef.sharepoint.com/:x:/r/teams/EMOPS-HCT-MIS/DocumentLibrary2/Overarching%20Documentation/Requirements/Data%20Dictionary.xlsx?d=w41de76b5566c42c9b96533d8ed4fbc4f&csf=1&e=9u97LV) 
 
+### User Stories
+
+* \*\*\*\*[**Deduplication**](https://docs.google.com/document/d/1GLvUzV4CnUy7SDzsMccoj2ZtL_vcMHB4cyi5_7vgeLU/edit)\*\*\*\*
+* \*\*\*\*[**UN Sanction list**](https://docs.google.com/document/d/1NHudUBQjFYfDN9zshpW7ufYRKgV16woJ/edit)\*\*\*\*
+* **Grievance and Feedback**
+
 ### Technical / product related
 
 * \*\*\*\*[**Github Repo**](https://github.com/unicef/hct-mis) ****
