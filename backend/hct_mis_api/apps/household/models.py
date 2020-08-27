@@ -26,9 +26,11 @@ RESIDENCE_STATUS_CHOICE = (
     ("OTHER", _("Other")),
 )
 # INDIVIDUALS
+MALE = "MALE"
+FEMALE = "FEMALE"
 SEX_CHOICE = (
-    ("MALE", _("Male")),
-    ("FEMALE", _("Female")),
+    (MALE, _("Male")),
+    (FEMALE, _("Female")),
 )
 MARITAL_STATUS_CHOICE = (
     ("SINGLE", _("SINGLE")),
@@ -120,6 +122,15 @@ IDENTIFICATION_TYPE_DICT = {
     IDENTIFICATION_TYPE_OTHER: "Other",
 }
 INDIVIDUAL_HOUSEHOLD_STATUS = (("ACTIVE", "Active"), ("INACTIVE", "Inactive"))
+UNIQUE = "UNIQUE"
+DUPLICATE = "DUPLICATE"
+NEEDS_ADJUDICATION = "NEEDS_ADJUDICATION"
+DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE = (
+    (UNIQUE, "Unique"),
+    (DUPLICATE, "Duplicate"),
+    (NEEDS_ADJUDICATION, "Needs Adjudication"),
+    ("", "-"),
+)
 
 
 class Household(TimeStampedUUIDModel, AbstractSyncable):
@@ -298,6 +309,10 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
     enrolled_in_nutrition_programme = models.BooleanField(default=False)
     administration_of_rutf = models.BooleanField(default=False)
     unicef_id = models.CharField(max_length=250, blank=True)
+    deduplication_status = models.CharField(
+        max_length=50, default=UNIQUE, choices=DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
+    )
+    deduplication_results = JSONField(default=dict)
 
     @property
     def age(self):
@@ -307,6 +322,24 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
             - self.birth_date.year
             - ((today.month, today.day) < (self.birth_date.month, self.birth_date.day))
         )
+
+    @property
+    def get_hash_key(self):
+        from hashlib import sha256
+
+        fields = (
+            "given_name",
+            "middle_name",
+            "family_name",
+            "sex",
+            "birth_date",
+            "phone_no",
+            "phone_no_alternative",
+            "relationship",
+        )
+        values = [str(getattr(self, field)) for field in fields]
+
+        return sha256(";".join(values).encode()).hexdigest()
 
     def __str__(self):
         return self.full_name

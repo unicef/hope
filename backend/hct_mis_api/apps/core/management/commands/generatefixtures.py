@@ -211,4 +211,6 @@ class Command(BaseCommand):
             programme = cash_assist_datahub_fixtures.ProgrammeFactory(session=session, mis_id=mis_id)
             programme.save()
 
+        call_command("search_index", "--rebuild", "-f")
+
         self.stdout.write(f"Generated fixtures in {(time.time() - start_time)} seconds")
