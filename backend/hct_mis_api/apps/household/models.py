@@ -313,7 +313,6 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
         max_length=50, default=UNIQUE, choices=DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
     )
     deduplication_results = JSONField(default=dict)
-    sanction_list_results = JSONField(default=dict)
     sanction_list_possible_match = models.BooleanField(default=False)
 
     @property
