@@ -140,9 +140,11 @@ class CreatePaymentVerificationMutation(graphene.Mutation):
             confidence_interval = random_sampling_arguments.get("confidence_interval")
             margin_of_error = random_sampling_arguments.get("margin_of_error")
             sex = random_sampling_arguments.get("sex")
-            age = random_sampling_arguments.get("random_sampling_arguments")
+            age = random_sampling_arguments.get("age")
+            excluded_admin_areas = random_sampling_arguments.get("excluded_admin_areas", [])
+        excluded_admin_areas_decoded = [decode_id_string(x) for x in excluded_admin_areas]
 
-        payment_records = payment_records.filter(~(Q(household__admin_area__title__in=excluded_admin_areas)))
+        payment_records = payment_records.filter(~(Q(household__admin_area__id__in=excluded_admin_areas_decoded)))
         if sex is not None:
             payment_records = payment_records.filter(household__head_of_household__sex=sex)
         if age is not None:
@@ -294,10 +296,13 @@ class EditPaymentVerificationMutation(graphene.Mutation):
             random_sampling_arguments = arg("random_sampling_arguments")
             confidence_interval = random_sampling_arguments.get("confidence_interval")
             margin_of_error = random_sampling_arguments.get("margin_of_error")
+            excluded_admin_areas = random_sampling_arguments.get("excluded_admin_areas", [])
             sex = random_sampling_arguments.get("sex")
-            age = random_sampling_arguments.get("random_sampling_arguments")
+            age = random_sampling_arguments.get("age")
 
-        payment_records = payment_records.filter(~(Q(household__admin_area__title__in=excluded_admin_areas)))
+        excluded_admin_areas_decoded = [decode_id_string(x) for x in excluded_admin_areas]
+
+        payment_records = payment_records.filter(~(Q(household__admin_area__id__in=excluded_admin_areas_decoded)))
         if sex is not None:
             payment_records = payment_records.filter(household__head_of_household__sex=sex)
         if age is not None:
