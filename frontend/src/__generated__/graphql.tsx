@@ -4568,7 +4568,7 @@ export type ImportedIndividualDetailedFragment = (
       { __typename?: 'ImportedDocumentNodeEdge' }
       & { node: Maybe<(
         { __typename?: 'ImportedDocumentNode' }
-        & Pick<ImportedDocumentNode, 'documentNumber'>
+        & Pick<ImportedDocumentNode, 'id' | 'documentNumber'>
         & { type: (
           { __typename?: 'ImportedDocumentTypeNode' }
           & Pick<ImportedDocumentTypeNode, 'label'>
@@ -4577,7 +4577,7 @@ export type ImportedIndividualDetailedFragment = (
     )>> }
   ), identities: Array<(
     { __typename?: 'ImportedIndividualIdentityNode' }
-    & Pick<ImportedIndividualIdentityNode, 'documentNumber' | 'type'>
+    & Pick<ImportedIndividualIdentityNode, 'id' | 'documentNumber' | 'type'>
   )>, household: Maybe<(
     { __typename?: 'ImportedHouseholdNode' }
     & Pick<ImportedHouseholdNode, 'id' | 'admin1' | 'admin2' | 'address'>
@@ -5001,6 +5001,7 @@ export const ImportedIndividualDetailedFragmentDoc = gql`
   documents {
     edges {
       node {
+        id
         type {
           label
         }
@@ -5009,6 +5010,7 @@ export const ImportedIndividualDetailedFragmentDoc = gql`
     }
   }
   identities {
+    id
     documentNumber
     type
   }
