@@ -222,7 +222,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
             ],
         )
 
-        call_command("search_index", "--rebuild", "-f")
+        cls.rebuild_search_index()
 
     def test_batch_deduplication(self):
         task = DeduplicateTask()
@@ -425,7 +425,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                 },
             ],
         )
-        call_command("search_index", "--rebuild", "-f")
+        cls.rebuild_search_index()
 
     def test_golden_record_deduplication(self):
         task = DeduplicateTask()
