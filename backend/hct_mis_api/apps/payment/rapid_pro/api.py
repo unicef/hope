@@ -3,6 +3,7 @@ from django.conf import settings
 
 from core.models import BusinessArea
 from household.models import Individual
+from constance import config
 from payment.models import CashPlanPaymentVerification
 
 
@@ -53,13 +54,10 @@ class RapidProAPI:
         return flows["results"]
 
     def start_flow(self, flow_uuid, phone_numbers):
-        urns = [f"tel:{x}" for x in phone_numbers]
-        # urns = ["telegram:1079068080"]
+        urns = [f"{config.RAPID_PRO_PROVIDER}:{x}" for x in phone_numbers]
         data = {"flow": flow_uuid, "urns": urns, "restart_participants": True}
-        print(data)
 
         response = self._handle_post_request(RapidProAPI.FLOW_STARTS_ENDPOINT, data,)
-        print(response)
         return response
 
     def get_flow_runs(self):
@@ -68,7 +66,9 @@ class RapidProAPI:
     def get_mapped_flow_runs(self, start_uuid):
         results = self.get_flow_runs()
         mapped_results = [
-            self._map_to_internal_structure(x) for x in results if x.get("start").get("uuid") == start_uuid
+            self._map_to_internal_structure(x)
+            for x in results
+            if x.get("start") is not None and x.get("start").get("uuid") == start_uuid
         ]
         return mapped_results
 
@@ -100,14 +100,12 @@ class RapidProAPI:
         return {"phone_number": phone_number, "received": received, "received_amount": received_amount}
 
     def create_group(self, name):
-        print(name)
         group = self._handle_post_request(RapidProAPI.GROUPS_ENDPOINT, {"name": name})
         return group
 
     def create_contact(self, name, tel, group_uuid):
-        print({"name": name, "groups": [group_uuid], "urns": [f"tel:{tel}"]})
         contact = self._handle_post_request(
-            RapidProAPI.CONTACTS_ENDPOINT, {"name": name, "groups": [group_uuid], "urns": [f"tel:{tel}"]},
+            RapidProAPI.CONTACTS_ENDPOINT, {"name": name, "groups": [group_uuid], "urns": [f"{config.RAPID_PRO_PROVIDER}:{tel}"]},
         )
         return contact
 
