@@ -26,7 +26,7 @@ from registration_datahub.models import (
     DUPLICATE_IN_BATCH,
     UNIQUE_IN_BATCH,
 )
-from registration_datahub.tasks.batch_deduplicate import DeduplicateTask
+from registration_datahub.tasks.deduplicate import DeduplicateTask
 
 
 @override_config(
