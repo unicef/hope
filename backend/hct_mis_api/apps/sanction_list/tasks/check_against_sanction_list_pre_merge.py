@@ -1,3 +1,5 @@
+from pprint import pprint
+
 from constance import config
 
 from household.models import Individual
@@ -45,5 +47,9 @@ class CheckAgainstSanctionListPreMergeTask:
                 score = individual_hit.meta.score
                 if score >= possible_match_score:
                     possible_matches.add(individual_hit.id)
+
+            print(f"SANCTION LIST INDIVIDUAL: {individual.full_name} - reference number: {individual.reference_number}")
+            print("Scores:")
+            pprint([(r.full_name, r.meta.score) for r in results])
 
         Individual.objects.filter(id__in=possible_matches).update(sanction_list_possible_match=True)
