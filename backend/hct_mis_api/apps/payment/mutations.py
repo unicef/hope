@@ -20,7 +20,7 @@ from payment.inputs import (
 from payment.models import CashPlanPaymentVerification, PaymentVerification
 from payment.rapid_pro.api import RapidProAPI
 from payment.schema import PaymentVerificationNode
-from payment.utils import get_number_of_samples, from_received_to_status
+from payment.utils import get_number_of_samples, from_received_to_status, calculate_counts
 from payment.xlsx.XlsxVerificationImportService import XlsxVerificationImportService
 from program.models import CashPlan
 from program.schema import CashPlanNode
@@ -475,6 +475,9 @@ class UpdatePaymentVerificationStatusAndReceivedAmount(graphene.Mutation):
         payment_verification.status = status
         payment_verification.received_amount = received_amount
         payment_verification.save()
+        cashplan_payment_verification = payment_verification.cash_plan_payment_verification
+        calculate_counts(cashplan_payment_verification)
+        cashplan_payment_verification.save()
         return UpdatePaymentVerificationStatusAndReceivedAmount(payment_verification)
 
 
@@ -519,6 +522,9 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(graphene.Mutation):
         payment_verification.status = from_received_to_status(received, received_amount, delivered_amount)
         payment_verification.received_amount = received_amount
         payment_verification.save()
+        cashplan_payment_verification = payment_verification.cash_plan_payment_verification
+        calculate_counts(cashplan_payment_verification)
+        cashplan_payment_verification.save()
         return UpdatePaymentVerificationStatusAndReceivedAmount(payment_verification)
 
 
@@ -560,6 +566,8 @@ class ImportXlsxCashPlanVerification(graphene.Mutation,):
         if len(import_service.errors):
             return ImportXlsxCashPlanVerification(None, import_service.errors)
         import_service.import_verifications()
+        calculate_counts(cashplan_payment_verification)
+        cashplan_payment_verification.save()
         return ImportXlsxCashPlanVerification(cashplan_payment_verification.cash_plan, import_service.errors)
 
 
