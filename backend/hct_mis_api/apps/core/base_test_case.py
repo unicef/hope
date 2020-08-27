@@ -54,3 +54,7 @@ class BaseElasticSearchTestCase(TestCase):
     def tearDownClass(cls):
         call_command("search_index", "--delete", "-f")
         super().tearDownClass()
+
+    @classmethod
+    def rebuild_search_index(cls):
+        call_command("search_index", "--rebuild", "-f")

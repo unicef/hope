@@ -2,6 +2,7 @@ from constance import config
 
 from household.models import Individual
 from sanction_list.documents import SanctionListIndividualESDocument
+from sanction_list.models import SanctionListIndividual
 
 
 class CheckAgainstSanctionListPreMergeTask:
@@ -27,9 +28,10 @@ class CheckAgainstSanctionListPreMergeTask:
         return query_dict
 
     @classmethod
-    def execute(cls, registration_data_import):
-        individuals = registration_data_import.individuals.all()
-        duplicate_score = config.SANCTION_LIST_MATCH_SCORE
+    def execute(cls, individuals=None):
+        if individuals is None:
+            individuals = SanctionListIndividual.objects.all()
+        possible_match_score = config.SANCTION_LIST_MATCH_SCORE
         document = SanctionListIndividualESDocument
 
         possible_matches = set()
@@ -41,13 +43,7 @@ class CheckAgainstSanctionListPreMergeTask:
             results = query.execute()
             for individual_hit in results:
                 score = individual_hit.meta.score
-                if score >= duplicate_score:
-                    possible_matches.add(individual)
-                    if individual not in possible_matches:
-                        individual.sanction_list_possible_match = True
+                if score >= possible_match_score:
+                    possible_matches.add(individual_hit.id)
 
-            individual.sanction_list_results = [
-                {"hit_id": r.id, "full_name": r.full_name, "score": r.meta.score} for r in results
-            ]
-
-        Individual.objects.bulk_update(possible_matches, ("sanction_list_results", "sanction_list_possible_match"))
+        Individual.objects.filter(id__in=possible_matches).update(sanction_list_possible_match=True)
