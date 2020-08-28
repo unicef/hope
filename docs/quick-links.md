@@ -24,7 +24,7 @@ If you lack access to any links below, please contact [**Brandin Lewis**](introd
 
 * \*\*\*\*[**Deduplication**](https://docs.google.com/document/d/1GLvUzV4CnUy7SDzsMccoj2ZtL_vcMHB4cyi5_7vgeLU/edit)\*\*\*\*
 * \*\*\*\*[**UN Sanction list**](https://docs.google.com/document/d/1NHudUBQjFYfDN9zshpW7ufYRKgV16woJ/edit)\*\*\*\*
-* **Grievance and Feedback**
+* \*\*\*\*[**Grievance and Feedback**](https://docs.google.com/document/d/1OsQm41uCCO_Ah_jAoUtIBztoCjcLdFRvgY6ophXSJ5k/edit)\*\*\*\*
 
 ### Technical / product related
 
