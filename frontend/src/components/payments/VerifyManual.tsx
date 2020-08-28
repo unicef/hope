@@ -6,7 +6,6 @@ import {
   Box,
   Grid,
 } from '@material-ui/core';
-import CheckRoundedIcon from '@material-ui/icons/CheckRounded';
 import styled from 'styled-components';
 
 import { Dialog } from '../../containers/dialogs/Dialog';
@@ -15,10 +14,7 @@ import { useSnackbar } from '../../hooks/useSnackBar';
 import { Formik, Form, Field } from 'formik';
 import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
-import {
-  useUpdatePaymentVerificationReceivedAndReceivedAmountMutation,
-  useUpdatePaymentVerificationStatusAndReceivedAmountMutation,
-} from '../../__generated__/graphql';
+import { useUpdatePaymentVerificationReceivedAndReceivedAmountMutation } from '../../__generated__/graphql';
 
 export interface Props {
   paymentVerificationId: string;
@@ -27,7 +23,6 @@ export function VerifyManual({
   paymentVerificationId,
 }: Props): React.ReactElement {
   const [VerifyManualDialogOpen, setVerifyManualDialogOpen] = useState(false);
-  const [mutationError, setError] = useState(null);
   const { showMessage } = useSnackbar();
   const [
     mutate,
