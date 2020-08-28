@@ -197,7 +197,6 @@ PROJECT_APPS = [
     "registration_datahub",
     "mptt",
     "django_extensions",
-    "auditlog",
     "registration_data",
     "cash_assist_datahub",
     "mis_datahub",
@@ -227,6 +226,7 @@ OTHER_APPS = [
     "corsheaders",
     "django_elasticsearch_dsl",
     "constance",
+    "auditlog",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
