@@ -8,6 +8,8 @@ export const AllPaymentVerifications = gql`
     $last: Int
     $orderBy: String
     $cashPlanPaymentVerification: ID
+    $search: String
+    $status: String
   ) {
     allPaymentVerifications(
       after: $after
@@ -16,6 +18,8 @@ export const AllPaymentVerifications = gql`
       last: $last
       orderBy: $orderBy
       cashPlanPaymentVerification: $cashPlanPaymentVerification
+      search: $search
+      status: $status
     ) {
       pageInfo {
         hasNextPage
