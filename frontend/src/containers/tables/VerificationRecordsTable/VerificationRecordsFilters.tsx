@@ -14,15 +14,14 @@ import {
 } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
 import { KeyboardArrowDown, KeyboardArrowUp } from '@material-ui/icons';
-import { useCashPlanVerificationStatusChoicesQuery } from '../../../__generated__/graphql';
+import { usePaymentVerificationStatusChoicesQuery } from '../../../__generated__/graphql';
 
 const Container = styled.div`
   display: flex;
   flex: 1;
   width: 100%;
   background-color: #fff;
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
+
   flex-direction: row;
   align-items: center;
 
@@ -56,7 +55,7 @@ export function VerificationRecordsFilters({
     onFilterChange({ ...filter, [name]: e.target.value });
   const {
     data: statusChoicesData,
-  } = useCashPlanVerificationStatusChoicesQuery();
+  } = usePaymentVerificationStatusChoicesQuery();
   if (!statusChoicesData) {
     return null;
   }
@@ -89,12 +88,12 @@ export function VerificationRecordsFilters({
       <Container>
         {show ? (
           <Grid container spacing={3}>
-            <Grid item xs={3}>
+            <Grid item>
               <SearchTextField
                 label='Search'
                 variant='outlined'
                 margin='dense'
-                onChange={(e) => handleFilterChange(e, 'text')}
+                onChange={(e) => handleFilterChange(e, 'search')}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position='start'>
@@ -105,21 +104,21 @@ export function VerificationRecordsFilters({
                 data-cy='filters-search'
               />
             </Grid>
-            <Grid item xs={3}>
+            <Grid item>
               <StyledFormControl variant='outlined' margin='dense'>
                 <InputLabel>Verification Status</InputLabel>
                 <Select
                   /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
                   // @ts-ignore
-                  onChange={(e) => handleFilterChange(e, 'verificationStatus')}
+                  onChange={(e) => handleFilterChange(e, 'status')}
                   variant='outlined'
                   label='Verification Status'
-                  value={filter.verificationStatus || ''}
+                  value={filter.status || ''}
                 >
                   <MenuItem value=''>
                     <em>None</em>
                   </MenuItem>
-                  {statusChoicesData.cashPlanVerificationStatusChoices.map(
+                  {statusChoicesData.paymentVerificationStatusChoices.map(
                     (item) => {
                       return (
                         <MenuItem key={item.value} value={item.value}>
