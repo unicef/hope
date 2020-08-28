@@ -364,10 +364,13 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
       {cashPlan.verificationStatus === 'TRANSACTION_COMPLETED_WITH_ERRORS' ? (
         <BottomTitle>Transaction completed with errors</BottomTitle>
       ) : null}
-      <TableWrapper>
-        <UniversalActivityLogTable objectId='some id' />
-      </TableWrapper>
+      {cashPlan.verifications?.edges[0]?.node?.id && (
+        <TableWrapper>
+          <UniversalActivityLogTable
+            objectId={cashPlan.verifications.edges[0].node.id}
+          />
+        </TableWrapper>
+      )}
     </>
-    //connect it later
   );
 }
