@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { Button, DialogContent, DialogTitle, Box } from '@material-ui/core';
-import CheckRoundedIcon from '@material-ui/icons/CheckRounded';
 import styled from 'styled-components';
-
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';

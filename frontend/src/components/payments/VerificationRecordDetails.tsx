@@ -239,7 +239,7 @@ export function VerificationRecordDetails({
         </Grid>
       </Overview>
       <TableWrapper>
-        <UniversalActivityLogTable objectId='some id' />
+        <UniversalActivityLogTable objectId={paymentVerification.id} />
       </TableWrapper>
     </>
   );
