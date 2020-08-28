@@ -397,7 +397,7 @@ CONSTANCE_CONFIG = {
         "percentages",
     ),
     # SANCTION LIST
-    "SANCTION_LIST_MATCH_SCORE": (10.0, "Results equal or above this score are considered possible matches",),
+    "SANCTION_LIST_MATCH_SCORE": (6.0, "Results equal or above this score are considered possible matches",),
     # RAPID PRO
     "RAPID_PRO_PROVIDER": ("tel", "Rapid pro messages provider (telegram/tel)"),
 }

@@ -1,10 +1,14 @@
+import logging
 from pprint import pprint
 
 from constance import config
 
+from household.documents import IndividualDocument
 from household.models import Individual
-from sanction_list.documents import SanctionListIndividualESDocument
 from sanction_list.models import SanctionListIndividual
+
+
+log = logging.getLogger(__name__)
 
 
 class CheckAgainstSanctionListPreMergeTask:
@@ -18,7 +22,7 @@ class CheckAgainstSanctionListPreMergeTask:
                             "dis_max": {
                                 "queries": [
                                     {"match": {"full_name": {"query": individual.full_name}}},
-                                    {"match": {"dates_of_birth.date": {"query": individual.birth_date}}},
+                                    {"terms": {"birth_date": [dob.date for dob in individual.dates_of_birth.all()]}},
                                 ]
                             }
                         }
@@ -34,7 +38,7 @@ class CheckAgainstSanctionListPreMergeTask:
         if individuals is None:
             individuals = SanctionListIndividual.objects.all()
         possible_match_score = config.SANCTION_LIST_MATCH_SCORE
-        document = SanctionListIndividualESDocument
+        document = IndividualDocument
 
         possible_matches = set()
         for individual in individuals:
@@ -48,8 +52,10 @@ class CheckAgainstSanctionListPreMergeTask:
                 if score >= possible_match_score:
                     possible_matches.add(individual_hit.id)
 
-            print(f"SANCTION LIST INDIVIDUAL: {individual.full_name} - reference number: {individual.reference_number}")
-            print("Scores:")
-            pprint([(r.full_name, r.meta.score) for r in results])
+            log.info(
+                f"SANCTION LIST INDIVIDUAL: {individual.full_name} - reference number: {individual.reference_number}"
+                f"Scores: ",
+            )
+            log.info([(r.full_name, r.meta.score) for r in results])
 
         Individual.objects.filter(id__in=possible_matches).update(sanction_list_possible_match=True)

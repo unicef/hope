@@ -187,12 +187,19 @@ class RdiMergeTask:
         IndividualRoleInHousehold.objects.bulk_create(roles_to_create)
 
         # DEDUPLICATION
+
+        # populate before deduplication
         call_command(
             "search_index", "--populate", "--models", "household.Individual",
         )
 
         DeduplicateTask.deduplicate_individuals(registration_data_import=obj_hct)
         Individual.objects.filter(registration_data_import=obj_hub, deduplication_status=DUPLICATE).delete()
+
+        # re-populate after removing duplicates
+        call_command(
+            "search_index", "--populate", "--models", "household.Individual",
+        )
 
         # SANCTION LIST CHECK
         CheckAgainstSanctionListPreMergeTask.execute()

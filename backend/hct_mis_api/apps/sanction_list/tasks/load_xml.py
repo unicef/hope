@@ -422,19 +422,16 @@ class LoadSanctionListXMLTask:
         SanctionListIndividualDateOfBirth.objects.all().delete()
         if dob_from_file:
             for single_dob in dob_from_file:
-                single_dob.pop("id")
-                dob_obj, created = SanctionListIndividualDateOfBirth.objects.get_or_create(**single_dob)
+                dob_obj, created = SanctionListIndividualDateOfBirth.objects.get_or_create(
+                    individual=single_dob.individual, date=single_dob.date,
+                )
                 if created is True:
-                    individuals_to_check_against_sanction_list.append(dob_obj.individual.id)
+                    individuals_to_check_against_sanction_list.append(dob_obj.individual)
             SanctionListIndividualDateOfBirth.objects.bulk_create(dob_from_file)
 
-        individuals_to_check_against_sanction_list.extend(
-            i.id for i in individuals_to_create
-        )
+        individuals_to_check_against_sanction_list.extend(individuals_to_create)
 
-        individuals_to_check_against_sanction_list.extend(
-            i.id for i in individuals_to_update
-        )
+        individuals_to_check_against_sanction_list.extend(individuals_to_update)
 
         call_command(
             "search_index", "--populate", "--models", "sanction_list.SanctionListIndividual",
