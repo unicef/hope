@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { Button, DialogContent, DialogTitle, Box } from '@material-ui/core';
 import CheckRoundedIcon from '@material-ui/icons/CheckRounded';
 import styled from 'styled-components';
@@ -6,9 +7,12 @@ import styled from 'styled-components';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
 import { useSnackbar } from '../../hooks/useSnackBar';
-import { useFinishCashPlanPaymentVerificationMutation } from '../../__generated__/graphql';
+import {
+  useFinishCashPlanPaymentVerificationMutation,
+  useCashPlanQuery,
+} from '../../__generated__/graphql';
 import { CashPlan } from '../../apollo/queries/CashPlan';
-import { Missing } from '../Missing';
+import { LoadingComponent } from '../LoadingComponent';
 
 export interface Props {
   cashPlanVerificationId: string;
@@ -21,6 +25,21 @@ export function FinishVerificationPlan({
   const [finishDialogOpen, setFinishDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const [mutate] = useFinishCashPlanPaymentVerificationMutation();
+  const { id } = useParams();
+  const { data, loading } = useCashPlanQuery({
+    variables: { id },
+  });
+  if (loading) {
+    return <LoadingComponent />;
+  }
+  if (!data) {
+    return null;
+  }
+  const { cashPlan } = data;
+  const verificationPlan =
+    cashPlan && cashPlan.verifications && cashPlan.verifications.edges.length
+      ? cashPlan.verifications.edges[0].node
+      : null;
 
   const finish = async (): Promise<void> => {
     const { errors } = await mutate({
@@ -50,6 +69,29 @@ export function FinishVerificationPlan({
     width: 700px;
   `;
 
+  const beneficiariesPercent = () => {
+    if (verificationPlan?.respondedCount && verificationPlan?.sampleSize !== 0)
+      return (
+        (verificationPlan?.respondedCount / verificationPlan?.sampleSize) * 100
+      );
+    return null;
+  };
+
+  const grievanceTickets = () => {
+    if (
+      verificationPlan?.notReceivedCount &&
+      verificationPlan?.sampleSize &&
+      verificationPlan?.respondedCount
+    ) {
+      return (
+        verificationPlan?.notReceivedCount +
+        (verificationPlan?.sampleSize - verificationPlan?.respondedCount) +
+        verificationPlan?.receivedWithProblemsCount
+      );
+    }
+    return null;
+  };
+
   return (
     <>
       <Box p={2}>
@@ -76,15 +118,20 @@ export function FinishVerificationPlan({
         <DialogContent>
           <DialogContainer>
             <Box p={5}>
-              <div>
-                Only <Missing /> of the beneficiaries have responded to this
-                payment verification.
-              </div>
+              {beneficiariesPercent() && (
+                <div>
+                  Only
+                  {beneficiariesPercent()} % of the beneficiaries have responded
+                  to this payment verification.
+                </div>
+              )}
               <div>Are you sure that you want to finish?</div>
-              <div>
-                Closing this verification will generate <Missing /> grievance
-                tickets.
-              </div>
+              {grievanceTickets() && (
+                <div>
+                  Closing this verification will generate {grievanceTickets()}
+                  grievance tickets.
+                </div>
+              )}
             </Box>
           </DialogContainer>
         </DialogContent>
