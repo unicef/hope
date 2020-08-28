@@ -1,9 +1,11 @@
 import json
 from collections import defaultdict
+from datetime import datetime, date
 from io import BytesIO
 from typing import Union
 
 import openpyxl
+from dateutil.parser import parse
 from django.contrib.gis.geos import Point
 from django.core.files import File
 from django.core.files.storage import default_storage
@@ -16,7 +18,7 @@ from openpyxl_image_loader import SheetImageLoader
 from core.core_fields_attributes import (
     TYPE_INTEGER,
     TYPE_SELECT_ONE,
-    COLLECTORS_FIELDS,
+    COLLECTORS_FIELDS, TYPE_DATE,
 )
 from core.kobo.api import KoboAPI
 from core.kobo.common import get_field_name, KOBO_FORM_INDIVIDUALS_COLUMN_NAME
@@ -85,6 +87,13 @@ class RdiBaseCreateTask:
                     return int(value)
                 except ValueError:
                     return str(value)
+
+        if value_type == TYPE_DATE:
+            if isinstance(value, (date, datetime)):
+                return value
+
+            if isinstance(value, str):
+                value = parse(value)
 
         return value
 
@@ -357,7 +366,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                             obj_to_create, combined_fields[header]["name"], value,
                         )
                 elif hasattr(obj_to_create, combined_fields[header]["name"],) and header != "household_id":
-
                     value = self._cast_value(cell.value, header)
                     if value in (None, ""):
                         continue
