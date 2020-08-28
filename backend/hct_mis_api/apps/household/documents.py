@@ -16,6 +16,7 @@ class IndividualDocument(Document):
     phone_no = fields.KeywordField("phone_no.__str__")
     phone_no_alternative = fields.KeywordField("phone_no_alternative.__str__")
     hash_key = fields.KeywordField(boost=3.0)
+    business_area = fields.KeywordField()
     household = fields.ObjectField(
         properties={
             "size": fields.IntegerField(),
@@ -29,6 +30,9 @@ class IndividualDocument(Document):
 
     def prepare_hash_key(self, instance):
         return instance.get_hash_key
+
+    def prepare_business_area(self, instance):
+        return instance.registration_data_import.business_area.slug
 
     class Index:
         name = "individuals"

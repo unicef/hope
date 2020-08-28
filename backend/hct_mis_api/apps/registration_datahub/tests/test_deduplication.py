@@ -48,7 +48,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
             number_of_households=10,
             number_of_individuals=100,
         )
-        business_area = BusinessArea.objects.create(
+        cls.business_area = BusinessArea.objects.create(
             code="0060",
             name="Afghanistan",
             long_name="THE ISLAMIC REPUBLIC OF AFGHANISTAN",
@@ -57,15 +57,17 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
             has_data_sharing_agreement=True,
         )
         cls.registration_data_import_datahub = RegistrationDataImportDatahubFactory(
-            import_data=import_data
+            import_data=import_data,
+            business_area_slug=cls.business_area.slug,
         )
         rdi = RegistrationDataImportFactory(
-            datahub_id=cls.registration_data_import_datahub.id
+            datahub_id=cls.registration_data_import_datahub.id,
+            business_area=cls.business_area,
         )
         cls.registration_data_import_datahub.hct_id = rdi.id
         cls.registration_data_import_datahub.save()
 
-        registration_data_import_second = RegistrationDataImportFactory()
+        registration_data_import_second = RegistrationDataImportFactory(business_area=cls.business_area)
         (
             cls.household,
             cls.individuals,
@@ -168,7 +170,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
         create_household_and_individuals(
             household_data={
                 "registration_data_import": registration_data_import_second,
-                "business_area": business_area,
+                "business_area": cls.business_area,
             },
             individuals_data=[
                 {
@@ -226,6 +228,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
 
     def test_batch_deduplication(self):
         task = DeduplicateTask()
+        task.business_area = self.business_area.slug
         task.deduplicate_imported_individuals(
             self.registration_data_import_datahub
         )
@@ -315,9 +318,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
-        cls.registration_data_import = RegistrationDataImportFactory()
-        registration_data_import_second = RegistrationDataImportFactory()
-        business_area = BusinessArea.objects.create(
+        cls.business_area = BusinessArea.objects.create(
             code="0060",
             name="Afghanistan",
             long_name="THE ISLAMIC REPUBLIC OF AFGHANISTAN",
@@ -325,10 +326,12 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             region_name="SAR",
             has_data_sharing_agreement=True,
         )
+        cls.registration_data_import = RegistrationDataImportFactory(business_area=cls.business_area)
+        registration_data_import_second = RegistrationDataImportFactory(business_area=cls.business_area)
         cls.household, cls.individuals = create_household_and_individuals(
             household_data={
                 "registration_data_import": cls.registration_data_import,
-                "business_area": business_area,
+                "business_area": cls.business_area,
             },
             individuals_data=[
                 {
@@ -384,7 +387,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         create_household_and_individuals(
             household_data={
                 "registration_data_import": registration_data_import_second,
-                "business_area": business_area,
+                "business_area": cls.business_area,
             },
             individuals_data=[
                 {
@@ -429,6 +432,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
 
     def test_golden_record_deduplication(self):
         task = DeduplicateTask()
+        task.business_area = self.business_area.slug
         task.deduplicate_individuals(self.registration_data_import)
         needs_adjudication = Individual.objects.filter(
             deduplication_status=NEEDS_ADJUDICATION

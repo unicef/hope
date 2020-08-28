@@ -16,6 +16,8 @@ from registration_datahub.models import (
 
 
 class DeduplicateTask:
+    business_area = None
+
     @staticmethod
     def _prepare_fields(individual, fields_names):
         fields = model_to_dict(individual, fields=fields_names)
@@ -28,8 +30,8 @@ class DeduplicateTask:
 
         return fields
 
-    @staticmethod
-    def _prepare_query_dict(individual, fields, min_score, only_in_rdi=False):
+    @classmethod
+    def _prepare_query_dict(cls, individual, fields, min_score, only_in_rdi=False):
         query_fields = []
         for field_name, field_value in fields.items():
             field_name_as_key = field_name.replace("__", ".")
@@ -38,10 +40,10 @@ class DeduplicateTask:
             elif field_name == "birth_date":
                 single_query = {"match": {field_name_as_key: {"query": str(field_value)}}}
             elif field_name == "full_name":
-                single_query = {"match": {field_name_as_key: {"query": field_value, "boost": 2.0,}}}
+                single_query = {"match": {field_name_as_key: {"query": field_value, "boost": 2.0}}}
             else:
                 single_query = {
-                    "fuzzy": {field_name_as_key: {"value": field_value, "fuzziness": "AUTO", "transpositions": True,}}
+                    "fuzzy": {field_name_as_key: {"value": field_value, "fuzziness": "AUTO", "transpositions": True}}
                 }
 
             query_fields.append(single_query)
@@ -60,6 +62,12 @@ class DeduplicateTask:
             query_dict["query"]["bool"]["filter"] = [
                 {"term": {"registration_data_import_id": str(individual.registration_data_import.id)}},
             ]
+        # business area should never be None but better double check
+        elif only_in_rdi is False and cls.business_area is not None:
+            query_dict["query"]["bool"]["filter"] = [
+                {"term": {"business_area": cls.business_area}},
+            ]
+
         return query_dict
 
     @staticmethod
@@ -175,6 +183,7 @@ class DeduplicateTask:
 
     @classmethod
     def deduplicate_individuals(cls, registration_data_import):
+        cls.business_area = registration_data_import.business_area.slug
         (
             all_duplicates,
             all_possible_duplicates,
@@ -208,6 +217,7 @@ class DeduplicateTask:
             registration_data_import=registration_data_import_datahub
         )
         registration_data_import = RegistrationDataImport.objects.get(id=registration_data_import_datahub.hct_id)
+        cls.business_area = registration_data_import_datahub.business_area_slug
         allowed_duplicates_batch_amount = round(
             imported_individuals.count() * (config.DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE / 100)
         )
