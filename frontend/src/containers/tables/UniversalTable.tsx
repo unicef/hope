@@ -26,7 +26,7 @@ export function UniversalTable<T, K>({
   renderRow,
   headCells,
   title,
-  getTitle = () => '',
+  getTitle,
   isOnPaper,
   defaultOrderBy,
   defaultOrderDirection,
