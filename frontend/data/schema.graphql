@@ -1380,7 +1380,7 @@ type Query {
   paymentRecord(id: ID!): PaymentRecordNode
   paymentRecordVerification(id: ID!): PaymentVerificationNode
   allPaymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID, orderBy: String): PaymentRecordNodeConnection
-  allPaymentVerifications(before: String, after: String, first: Int, last: Int, cashPlanPaymentVerification: ID, orderBy: String): PaymentVerificationNodeConnection
+  allPaymentVerifications(before: String, after: String, first: Int, last: Int, cashPlanPaymentVerification: ID, status: String, search: String, orderBy: String): PaymentVerificationNodeConnection
   paymentRecordStatusChoices: [ChoiceObject]
   paymentRecordEntitlementCardStatusChoices: [ChoiceObject]
   paymentRecordDeliveryTypeChoices: [ChoiceObject]
