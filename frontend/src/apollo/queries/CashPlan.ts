@@ -24,7 +24,6 @@ export const CashPlan = gql`
             sampleSize
             receivedCount
             notReceivedCount
-            notRespondedCount
             respondedCount
             verificationMethod
             sampling
