@@ -6,6 +6,20 @@ description: Change request for Iteration 4 Deliverables
 
 ## Iteration 6
 
+**------------------------------------------------**
+
+### BusinessArea info
+
+**August 17th 2020**
+
+\*\*\*\*[**link to ticket**](https://unicef.visualstudio.com/ICTD-HCT-MIS/_workitems/edit/68702)\*\*\*\*
+
+Add BusinessArea info to the ****Session model**.**
+
+We need to add a `mis_datahub.business_area` field to the Session model equal to the `mis_datahub.Program..business_area` field.
+
+**------------------------------------------------**
+
 ### **Target Population Updates**
 
 \*\*\*\*[**See Related Document**](https://docs.google.com/document/d/1WBLRN_DPK29KqWDrZ0eHuJUpiby3VW4EE6uipENlFmQ/edit?usp=sharing)\*\*\*\*

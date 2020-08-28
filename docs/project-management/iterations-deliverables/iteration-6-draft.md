@@ -66,29 +66,9 @@ The following items are deemed out of scope:
 * Support for multiple verification methods for one cash plan \(to be handled post-MVP/not clear if ever needed\).
 * Support for searching duplicates in neighboring business areas \(to be handled post-MVP\).
 
-## Change Request - July 2nd 2020
 
-Data Model Change:
 
-* Change Data model to allow for Many to Many Individuals to Households
-* If we find a duplicate that belongs to two households - because we have the many 2 many - but based on their ROLE - we can allow for the duplicate.
-* Three factors:
-  * Membership
-  * Role
-  * Collector Type
 
-OPTION 1  
-representatives = m2m\(through=individuals\)
-
-Make household nullable to allow for Collector object.
-
-## Change Request - **August 17**th 2020
-
-\*\*\*\*[**link to ticket**](https://unicef.visualstudio.com/ICTD-HCT-MIS/_workitems/edit/68702)\*\*\*\*
-
-## Change Request - July 8th 2020
-
-\*\*\*\*[**link to ticket**](https://unicef.visualstudio.com/ICTD-HCT-MIS/_sprints/backlog/Software%20Engineering/ICTD-HCT-MIS/Iteration%206/Sprint%201%20%28i.6%29?workitem=64344)\*\*\*\*
 
 
 
