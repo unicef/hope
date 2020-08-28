@@ -64,6 +64,8 @@ export function VerificationRecordsTable({
 
   const initialVariables: AllPaymentVerificationsQueryVariables = {
     cashPlanPaymentVerification: id,
+    search: filter.search,
+    status: filter.status,
   };
 
   const useStyles = makeStyles(() => ({
