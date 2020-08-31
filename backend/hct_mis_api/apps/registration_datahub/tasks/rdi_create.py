@@ -53,7 +53,7 @@ from registration_datahub.models import (
     ImportedIndividual,
 )
 from registration_datahub.models import RegistrationDataImportDatahub
-from registration_datahub.tasks.batch_deduplicate import DeduplicateTask
+from registration_datahub.tasks.deduplicate import DeduplicateTask
 from registration_datahub.tasks.utils import collectors_str_ids_to_list
 
 

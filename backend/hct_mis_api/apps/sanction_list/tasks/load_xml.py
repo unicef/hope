@@ -5,11 +5,13 @@ from urllib.request import urlopen
 
 import dateutil.parser
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.management import call_command
 from django.db.models import QuerySet
 from django.forms import model_to_dict
 from django.utils.functional import cached_property
 
 from core.countries import Countries
+from household.models import Individual
 from sanction_list.models import (
     SanctionListIndividual,
     SanctionListIndividualDocument,
@@ -18,6 +20,7 @@ from sanction_list.models import (
     SanctionListIndividualAliasName,
     SanctionListIndividualDateOfBirth,
 )
+from sanction_list.tasks.check_against_sanction_list_pre_merge import CheckAgainstSanctionListPreMergeTask
 
 
 class LoadSanctionListXMLTask:
@@ -380,7 +383,10 @@ class LoadSanctionListXMLTask:
             dob_from_file.update(individual_data_dict.get("birth_dates"))
 
         # SanctionListIndividual
-        SanctionListIndividual.all_objects.bulk_create(self._get_individuals_to_create(individuals_from_file))
+        individuals_to_check_against_sanction_list = []
+
+        individuals_to_create = self._get_individuals_to_create(individuals_from_file)
+        SanctionListIndividual.all_objects.bulk_create(individuals_to_create)
 
         individuals_to_update = self._get_individuals_to_update(individuals_from_file)
 
@@ -415,4 +421,20 @@ class LoadSanctionListXMLTask:
         # SanctionListIndividualDateOfBirth
         SanctionListIndividualDateOfBirth.objects.all().delete()
         if dob_from_file:
+            for single_dob in dob_from_file:
+                dob_obj, created = SanctionListIndividualDateOfBirth.objects.get_or_create(
+                    individual=single_dob.individual, date=single_dob.date,
+                )
+                if created is True:
+                    individuals_to_check_against_sanction_list.append(dob_obj.individual)
             SanctionListIndividualDateOfBirth.objects.bulk_create(dob_from_file)
+
+        individuals_to_check_against_sanction_list.extend(individuals_to_create)
+
+        individuals_to_check_against_sanction_list.extend(individuals_to_update)
+
+        call_command(
+            "search_index", "--populate", "--models", "sanction_list.SanctionListIndividual",
+        )
+
+        CheckAgainstSanctionListPreMergeTask.execute(individuals_to_check_against_sanction_list)

@@ -49,8 +49,13 @@ class BaseElasticSearchTestCase(TestCase):
         connections.create_connection(
             hosts=["elasticsearch_test:9200"], timeout=20
         )
+        cls.rebuild_search_index()
 
     @classmethod
     def tearDownClass(cls):
         call_command("search_index", "--delete", "-f")
         super().tearDownClass()
+
+    @classmethod
+    def rebuild_search_index(cls):
+        call_command("search_index", "--rebuild", "-f")
