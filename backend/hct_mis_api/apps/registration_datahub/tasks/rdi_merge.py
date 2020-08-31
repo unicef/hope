@@ -10,6 +10,7 @@ from household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
     Agency,
+    DUPLICATE,
 )
 from household.models import Household
 from household.models import Individual
@@ -20,6 +21,8 @@ from registration_datahub.models import (
     ImportedIndividualRoleInHousehold,
     ImportedIndividual,
 )
+from registration_datahub.tasks.deduplicate import DeduplicateTask
+from sanction_list.tasks.check_against_sanction_list_pre_merge import CheckAgainstSanctionListPreMergeTask
 
 
 class RdiMergeTask:
@@ -183,12 +186,23 @@ class RdiMergeTask:
         IndividualIdentity.objects.bulk_create(identities_to_create)
         IndividualRoleInHousehold.objects.bulk_create(roles_to_create)
 
+        # DEDUPLICATION
+
+        # populate before deduplication
+        call_command(
+            "search_index", "--populate", "--models", "household.Individual",
+        )
+
+        DeduplicateTask.deduplicate_individuals(registration_data_import=obj_hct)
+        Individual.objects.filter(registration_data_import=obj_hub, deduplication_status=DUPLICATE).delete()
+
+        # re-populate after removing duplicates
+        call_command(
+            "search_index", "--populate", "--models", "household.Individual",
+        )
+
+        # SANCTION LIST CHECK
+        CheckAgainstSanctionListPreMergeTask.execute()
+
         obj_hct.status = RegistrationDataImport.MERGED
         obj_hct.save()
-
-        call_command(
-            "search_index",
-            "--populate",
-            "--models",
-            "household.Individual",
-        )
