@@ -4547,7 +4547,7 @@ export type RegistrationMinimalFragment = (
 
 export type RegistrationDetailedFragment = (
   { __typename?: 'RegistrationDataImportNode' }
-  & Pick<RegistrationDataImportNode, 'numberOfIndividuals' | 'datahubId'>
+  & Pick<RegistrationDataImportNode, 'numberOfIndividuals' | 'datahubId' | 'errorMessage'>
   & RegistrationMinimalFragment
 );
 
@@ -4965,6 +4965,7 @@ export const RegistrationDetailedFragmentDoc = gql`
   ...registrationMinimal
   numberOfIndividuals
   datahubId
+  errorMessage
 }
     ${RegistrationMinimalFragmentDoc}`;
 export const ImportedHouseholdMinimalFragmentDoc = gql`

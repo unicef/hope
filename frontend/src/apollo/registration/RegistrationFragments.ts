@@ -23,6 +23,7 @@ export const registrationDetailed = gql`
     ...registrationMinimal
     numberOfIndividuals
     datahubId
+    errorMessage
   }
 `;
 

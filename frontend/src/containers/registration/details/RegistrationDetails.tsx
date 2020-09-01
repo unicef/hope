@@ -87,9 +87,9 @@ export function RegistrationDetails({
                   />
                 </StatusContainer>
               </LabelizedField>
-              <Error>
-                ERROR MESSAGE is super long so I hope it will fit in there
-              </Error>
+              {registration.errorMessage && (
+                <Error>{registration.errorMessage}</Error>
+              )}
             </Box>
           </Grid>
           <Grid item xs={1}>
