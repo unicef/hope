@@ -44,8 +44,8 @@ class Command(BaseCommand):
         parser.add_argument(
             "--program",
             dest="programs_amount",
-            const=10,
-            default=10,
+            const=3,
+            default=3,
             action="store",
             nargs="?",
             type=int,
@@ -55,8 +55,8 @@ class Command(BaseCommand):
         parser.add_argument(
             "--cash-plan",
             dest="cash_plans_amount",
-            const=10,
-            default=10,
+            const=3,
+            default=3,
             action="store",
             nargs="?",
             type=int,
@@ -66,8 +66,8 @@ class Command(BaseCommand):
         parser.add_argument(
             "--payment-record",
             dest="payment_record_amount",
-            const=10,
-            default=10,
+            const=3,
+            default=3,
             action="store",
             nargs="?",
             type=int,
@@ -120,7 +120,7 @@ class Command(BaseCommand):
             business_area=BusinessArea.objects.first(),
         )
         for _ in range(cash_plans_amount):
-            cash_plan = CashPlanFactory.build(program=program, business_area=BusinessArea.objects.first(),)
+            cash_plan = CashPlanFactory.build(program=program, business_area=BusinessArea.objects.first(), )
             cash_plan.save()
             for _ in range(payment_record_amount):
                 registration_data_import = RegistrationDataImportFactory(
@@ -193,11 +193,13 @@ class Command(BaseCommand):
 
         # Data imports generation
 
-        for rdi in RegistrationDataImport.objects.all()[0:40]:
-            rdi_datahub = RegistrationDataImportDatahubFactory(hct_id=rdi.id)
-            for _ in range(15):
+        for rdi in RegistrationDataImport.objects.all():
+            rdi_datahub = RegistrationDataImportDatahubFactory(name=rdi.name, hct_id=rdi.id)
+            rdi.datahub_id = rdi_datahub.id
+            rdi.save()
+            for _ in range(10):
                 create_imported_household(
-                    {"registration_data_import": rdi_datahub,}, {"registration_data_import": rdi_datahub,},
+                    {"registration_data_import": rdi_datahub, }, {"registration_data_import": rdi_datahub, },
                 )
         session = Session(source=Session.SOURCE_CA, status=Session.STATUS_READY)
         session.save()
@@ -205,7 +207,7 @@ class Command(BaseCommand):
         cash_assist_datahub_fixtures.CashPlanFactory.create_batch(10, session=session)
         cash_assist_datahub_fixtures.PaymentRecordFactory.create_batch(10, session=session)
 
-        for _ in range(10):
+        for _ in range(programs_amount):
             used_ids = list(Programme.objects.values_list("mis_id", flat=True))
             mis_id = Program.objects.filter(~Q(id__in=used_ids)).first().id
             programme = cash_assist_datahub_fixtures.ProgrammeFactory(session=session, mis_id=mis_id)
