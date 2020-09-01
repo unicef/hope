@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Grid, Typography } from '@material-ui/core';
+import { Grid, Typography, Box } from '@material-ui/core';
 import { StatusBox } from '../../../components/StatusBox';
 import { registrationDataImportStatusToColor } from '../../../utils/utils';
 import { LabelizedField } from '../../../components/LabelizedField';
@@ -33,7 +33,7 @@ const BigValueContainer = styled.div`
   border-left-width: 1px;
   border-left-style: solid;
   display: flex;
-  height: 160px;
+  height: 180px;
 `;
 const BigValue = styled.div`
   font-family: ${({ theme }: { theme: MiśTheme }) =>
@@ -52,10 +52,15 @@ const Bold = styled.span`
   font-weight: bold;
   font-size: 16px;
 `;
+
 const BoldGrey = styled.span`
   font-weight: bold;
   font-size: 16px
   color: rgba(37, 59, 70, 0.6);
+`;
+
+const Error = styled.p`
+  color: ${({ theme }: { theme: MiśTheme }) => theme.hctPalette.red};
 `;
 
 interface RegistrationDetailsProps {
@@ -73,14 +78,19 @@ export function RegistrationDetails({
       <OverviewContainer>
         <Grid alignItems='center' container spacing={3}>
           <Grid item xs={2}>
-            <LabelizedField label='status'>
-              <StatusContainer>
-                <StatusBox
-                  status={registration.status}
-                  statusToColor={registrationDataImportStatusToColor}
-                />
-              </StatusContainer>
-            </LabelizedField>
+            <Box display='flex' flexDirection='column'>
+              <LabelizedField label='status'>
+                <StatusContainer>
+                  <StatusBox
+                    status={registration.status}
+                    statusToColor={registrationDataImportStatusToColor}
+                  />
+                </StatusContainer>
+              </LabelizedField>
+              <Error>
+                ERROR MESSAGE is super long so I hope it will fit in there
+              </Error>
+            </Box>
           </Grid>
           <Grid item xs={1}>
             <LabelizedField

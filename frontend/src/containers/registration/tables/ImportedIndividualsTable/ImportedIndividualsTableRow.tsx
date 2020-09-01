@@ -24,8 +24,12 @@ export function ImportedIndividualsTableRow({
 
   const relationshipChoicesDict = choicesToDict(choices.relationshipChoices);
   const roleChoicesDict = choicesToDict(choices.roleChoices);
-  const batchStatusChoicesDict = choicesToDict(choices.deduplicationBatchStatusChoices);
-  const goldenRecordStatusChoicesDict = choicesToDict(choices.deduplicationGoldenRecordStatusChoices);
+  const batchStatusChoicesDict = choicesToDict(
+    choices.deduplicationBatchStatusChoices,
+  );
+  const goldenRecordStatusChoicesDict = choicesToDict(
+    choices.deduplicationGoldenRecordStatusChoices,
+  );
   const handleClick = (): void => {
     const path = `/${businessArea}/registration-data-import/individual/${individual.id}`;
     history.push(path);
@@ -42,8 +46,16 @@ export function ImportedIndividualsTableRow({
         {moment(individual.birthDate).format('DD MMM YYYY')}
       </TableCell>
       <TableCell align='left'>{individual.sex}</TableCell>
-      <TableCell align='left'>{batchStatusChoicesDict[individual.deduplicationBatchStatus]}</TableCell>
-      <TableCell align='left'>{goldenRecordStatusChoicesDict[individual.deduplicationGoldenRecordStatus]}</TableCell>
+      <TableCell onClick={() => console.log('click first')} align='left'>
+        {batchStatusChoicesDict[individual.deduplicationBatchStatus]}
+      </TableCell>
+      <TableCell onClick={() => console.log('click second')} align='left'>
+        {
+          goldenRecordStatusChoicesDict[
+            individual.deduplicationGoldenRecordStatus
+          ]
+        }
+      </TableCell>
     </ClickableTableRow>
   );
 }
