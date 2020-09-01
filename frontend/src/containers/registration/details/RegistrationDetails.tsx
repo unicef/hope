@@ -9,13 +9,10 @@ import { RegistrationDetailedFragment } from '../../../__generated__/graphql';
 import { MiśTheme } from '../../../theme';
 
 const Container = styled.div`
-  display: flex;
-  flex: 1;
   width: 100%;
   background-color: #fff;
   padding: ${({ theme }) => theme.spacing(8)}px
     ${({ theme }) => theme.spacing(11)}px;
-  flex-direction: column;
   border-color: #b1b1b5;
   border-bottom-width: 1px;
   border-bottom-style: solid;
@@ -37,8 +34,7 @@ const BigValueContainer = styled.div`
   border-left-width: 1px;
   border-left-style: solid;
   display: flex;
-  align-items: flex-end;
-  height: 120px;
+  height: 160px;
 `;
 const BigValue = styled.div`
   font-family: ${({ theme }: { theme: MiśTheme }) =>
@@ -48,13 +44,19 @@ const BigValue = styled.div`
   line-height: 32px;
   margin-top: ${({ theme }) => theme.spacing(2)}px;
 `;
-const ChartContainer = styled.div`
-  width: 100px;
-  height: 100px;
-`;
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
+`;
+
+const Bold = styled.span`
+  font-weight: bold;
+  font-size: 16px;
+`;
+const BoldGrey = styled.span`
+  font-weight: bold;
+  font-size: 16px
+  color: rgba(37, 59, 70, 0.6);
 `;
 
 interface RegistrationDetailsProps {
@@ -67,11 +69,11 @@ export function RegistrationDetails({
   return (
     <Container>
       <Title>
-        <Typography variant='h6'>Import Data Details</Typography>
+        <Typography variant='h6'>Import Details</Typography>
       </Title>
       <OverviewContainer>
-        <Grid container spacing={6}>
-          <Grid item xs={4}>
+        <Grid alignItems='center' container spacing={3}>
+          <Grid item xs={2}>
             <LabelizedField label='status'>
               <StatusContainer>
                 <StatusBox
@@ -81,57 +83,69 @@ export function RegistrationDetails({
               </StatusContainer>
             </LabelizedField>
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={1}>
             <LabelizedField
-              label='DATA SOURCE'
+              label='Source of Data'
               value={registration.dataSource}
             />
           </Grid>
+          <Grid item xs={2}>
+            <BigValueContainer>
+              <LabelizedField
+                label='Total Number of Households'
+                dataCy='households'
+              >
+                <BigValue>{registration.numberOfHouseholds}</BigValue>
+              </LabelizedField>
+            </BigValueContainer>
+          </Grid>
+          <Grid item xs={2}>
+            <BigValueContainer>
+              <LabelizedField
+                label='Total Number of Individuals'
+                dataCy='individuals'
+              >
+                <BigValue>{registration.numberOfIndividuals}</BigValue>
+              </LabelizedField>
+            </BigValueContainer>
+          </Grid>
+          <Grid item xs={2}>
+            <BigValueContainer>
+              <LabelizedField label='Dedupe within batch'>
+                <div>
+                  <p>
+                    <Bold>78%</Bold> <BoldGrey>(104)</BoldGrey> Unique
+                  </p>
+                  <p>
+                    <Bold>28%</Bold> <BoldGrey>(24)</BoldGrey> Duplicates
+                  </p>
+                </div>
+              </LabelizedField>
+            </BigValueContainer>
+          </Grid>
+          <Grid item xs={3}>
+            <BigValueContainer>
+              <LabelizedField label='Dedupe against population'>
+                <div>
+                  <p>
+                    <Bold>78% </Bold>
+                    <BoldGrey>(104)</BoldGrey> Unique
+                  </p>
+                  <p>
+                    <Bold>28%</Bold>
+                    <BoldGrey> (24)</BoldGrey> Duplicates
+                  </p>
+                  <p>
+                    <Bold>11%</Bold> <BoldGrey>(11)</BoldGrey> Need Adjudication
+                  </p>
+                </div>
+              </LabelizedField>
+            </BigValueContainer>
+          </Grid>
         </Grid>
-        <BigValueContainer>
-          <LabelizedField
-            label='Total Number of Households'
-            dataCy='households'
-          >
-            <BigValue>{registration.numberOfHouseholds}</BigValue>
-          </LabelizedField>
-        </BigValueContainer>
-        <BigValueContainer>
-          <LabelizedField
-            label='Total Number of Individuals'
-            dataCy='individuals'
-          >
-            <BigValue>{registration.numberOfIndividuals}</BigValue>
-          </LabelizedField>
-        </BigValueContainer>
-        <BigValueContainer>
-          <LabelizedField label='Correct'>
-            <BigValue>90%</BigValue>
-          </LabelizedField>
-        </BigValueContainer>
-        <ChartContainer>
-          <Doughnut
-            width={100}
-            height={100}
-            options={{
-              maintainAspectRatio: false,
-              cutoutPercentage: 65,
-              legend: {
-                display: false,
-              },
-            }}
-            data={{
-              labels: ['Correct', 'Not Correct'],
-              datasets: [
-                {
-                  data: [90, 10],
-                  backgroundColor: ['#74C304', '#DADADA'],
-                  hoverBackgroundColor: ['#74C304', '#DADADA'],
-                },
-              ],
-            }}
-          />
-        </ChartContainer>
+        {/*
+
+     */}
       </OverviewContainer>
     </Container>
   );
