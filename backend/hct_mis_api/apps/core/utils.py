@@ -276,3 +276,9 @@ def nested_getattr(obj, attr, default=raise_attribute_error):
         if default != raise_attribute_error:
             return default
         raise
+
+
+def get_count_and_percentage(input_list, all_items_list):
+    count = len(input_list)
+    percentage = (count / len(all_items_list)) * 100
+    return {"count": count, "percentage": percentage}
