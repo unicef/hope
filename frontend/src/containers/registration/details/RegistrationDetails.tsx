@@ -1,7 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Grid, Typography } from '@material-ui/core';
-import { Doughnut } from 'react-chartjs-2';
 import { StatusBox } from '../../../components/StatusBox';
 import { registrationDataImportStatusToColor } from '../../../utils/utils';
 import { LabelizedField } from '../../../components/LabelizedField';
@@ -143,9 +142,6 @@ export function RegistrationDetails({
             </BigValueContainer>
           </Grid>
         </Grid>
-        {/*
-
-     */}
       </OverviewContainer>
     </Container>
   );
