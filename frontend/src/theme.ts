@@ -40,6 +40,7 @@ export const theme = {
     gray: '#4E606A',
     lightGray: '#d8d8d8',
     lighterGray: '#e4e4e4',
+    red: '#EF4343',
   },
   hctTypography: {
     fontFamily: FONT,
