@@ -1028,6 +1028,7 @@ type IndividualNode implements Node {
   unicefId: String!
   deduplicationStatus: IndividualDeduplicationStatus!
   deduplicationResults: [DeduplicationResultNode]
+  sanctionListPossibleMatch: Boolean!
   representedHouseholds(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   headingHousehold: HouseholdNode
   documents(before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
