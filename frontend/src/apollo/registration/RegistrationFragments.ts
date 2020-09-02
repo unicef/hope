@@ -24,6 +24,30 @@ export const registrationDetailed = gql`
     numberOfIndividuals
     datahubId
     errorMessage
+    batchDuplicatesCountAndPercentage {
+      count
+      percentage
+    }
+    batchPossibleDuplicatesCountAndPercentage {
+      count
+      percentage
+    }
+    batchUniqueCountAndPercentage {
+      count
+      percentage
+    }
+    goldenRecordUniqueCountAndPercentage {
+      count
+      percentage
+    }
+    goldenRecordDuplicatesCountAndPercentage {
+      count
+      percentage
+    }
+    goldenRecordPossibleDuplicatesCountAndPercentage {
+      count
+      percentage
+    }
   }
 `;
 
@@ -66,6 +90,22 @@ export const importedIndividualMinimal = gql`
     relationship
     deduplicationBatchStatus
     deduplicationGoldenRecordStatus
+    deduplicationGoldenRecordResults {
+      hitId
+      fullName
+      score
+      proximityToScore
+    }
+    deduplicationBatchResults {
+      hitId
+      fullName
+      score
+      proximityToScore
+    }
+    registrationDataImport {
+      id
+      hctId
+    }
   }
 `;
 
