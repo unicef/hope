@@ -85,8 +85,7 @@ def create_imported_household(household_args=None, individual_args=None):
         household_args = {}
     if individual_args is None:
         individual_args = {}
-    household = ImportedHouseholdFactory.build(**household_args)
-    household.save()
+    household = ImportedHouseholdFactory(**household_args)
     individuals = ImportedIndividualFactory.create_batch(household.size, household=household, **individual_args)
     individuals[0].relationship = "HEAD"
     individuals[0].save()
