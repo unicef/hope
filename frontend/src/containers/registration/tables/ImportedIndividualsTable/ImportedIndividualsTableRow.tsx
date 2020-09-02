@@ -1,5 +1,5 @@
 import TableCell from '@material-ui/core/TableCell';
-import React, { useState } from 'react';
+import React from 'react';
 import { useHistory } from 'react-router-dom';
 import moment from 'moment';
 import styled from 'styled-components';
@@ -13,9 +13,7 @@ import {
   decodeIdString,
   sexToCapitalize,
 } from '../../../../utils/utils';
-import { MiśTheme } from '../../../../theme';
 import { TableRow } from '@material-ui/core';
-import { BatchResults } from '../../details/BatchResults';
 import { DedupeResults } from '../../details/DedupeResults';
 
 interface ImportedIndividualsTableRowProps {
@@ -39,12 +37,6 @@ export function ImportedIndividualsTableRow({
     choices.deduplicationGoldenRecordStatusChoices,
   );
 
-  const Error = styled.span`
-    color: ${({ theme }: { theme: MiśTheme }) => theme.hctPalette.red};
-    font-weight: bold;
-    text-decoration: underline;
-    cursor: pointer;
-  `;
   const Pointer = styled.span`
     cursor: pointer;
   `;
