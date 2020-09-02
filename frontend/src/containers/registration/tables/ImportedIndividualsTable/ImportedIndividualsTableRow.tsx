@@ -8,7 +8,11 @@ import {
   ImportedIndividualMinimalFragment,
 } from '../../../../__generated__/graphql';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { choicesToDict, decodeIdString } from '../../../../utils/utils';
+import {
+  choicesToDict,
+  decodeIdString,
+  sexToCapitalize,
+} from '../../../../utils/utils';
 import { MiśTheme } from '../../../../theme';
 import { TableRow } from '@material-ui/core';
 
@@ -45,7 +49,9 @@ export function ImportedIndividualsTableRow({
     const path = `/${businessArea}/registration-data-import/individual/${individual.id}`;
     history.push(path);
   };
-  console.log(individual);
+  if (individual.deduplicationBatchResults.length) {
+    console.log(individual.deduplicationBatchResults);
+  }
   return (
     <TableRow hover key={individual.id}>
       <TableCell onClick={handleClick} align='left'>
@@ -59,7 +65,7 @@ export function ImportedIndividualsTableRow({
       <TableCell align='left'>
         {moment(individual.birthDate).format('DD MMM YYYY')}
       </TableCell>
-      <TableCell align='left'>{individual.sex}</TableCell>
+      <TableCell align='left'>{sexToCapitalize(individual.sex)}</TableCell>
       <TableCell onClick={() => console.log('click first')} align='left'>
         {individual.deduplicationBatchResults.length ? (
           <Error>
