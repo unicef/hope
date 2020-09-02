@@ -6,6 +6,7 @@ import { registrationDataImportStatusToColor } from '../../../utils/utils';
 import { LabelizedField } from '../../../components/LabelizedField';
 import { RegistrationDetailedFragment } from '../../../__generated__/graphql';
 import { MiśTheme } from '../../../theme';
+import { DedupeBox } from './DedupeBox';
 
 const Container = styled.div`
   width: 100%;
@@ -82,7 +83,7 @@ export function RegistrationDetails({
               <LabelizedField label='status'>
                 <StatusContainer>
                   <StatusBox
-                    status={registration.status}
+                    status={registration?.status}
                     statusToColor={registrationDataImportStatusToColor}
                   />
                 </StatusContainer>
@@ -118,38 +119,58 @@ export function RegistrationDetails({
               </LabelizedField>
             </BigValueContainer>
           </Grid>
-          <Grid item xs={2}>
-            <BigValueContainer>
-              <LabelizedField label='Dedupe within batch'>
-                <div>
-                  <p>
-                    <Bold>78%</Bold> <BoldGrey>(104)</BoldGrey> Unique
-                  </p>
-                  <p>
-                    <Bold>28%</Bold> <BoldGrey>(24)</BoldGrey> Duplicates
-                  </p>
-                </div>
-              </LabelizedField>
-            </BigValueContainer>
-          </Grid>
-          <Grid item xs={3}>
-            <BigValueContainer>
-              <LabelizedField label='Dedupe against population'>
-                <div>
-                  <p>
-                    <Bold>78% </Bold>
-                    <BoldGrey>(104)</BoldGrey> Unique
-                  </p>
-                  <p>
-                    <Bold>28%</Bold>
-                    <BoldGrey> (24)</BoldGrey> Duplicates
-                  </p>
-                  <p>
-                    <Bold>11%</Bold> <BoldGrey>(11)</BoldGrey> Need Adjudication
-                  </p>
-                </div>
-              </LabelizedField>
-            </BigValueContainer>
+          <Grid item xs={5}>
+            <Grid container direction='column'>
+              <DedupeBox
+                label='Within Batch'
+                options={[
+                  {
+                    name: 'Unique',
+                    percent:
+                      registration.batchUniqueCountAndPercentage.percentage,
+                    value: registration.batchUniqueCountAndPercentage.count,
+                  },
+                  {
+                    name: 'Duplicates',
+                    percent:
+                      registration.batchDuplicatesCountAndPercentage.percentage,
+                    value: registration.batchDuplicatesCountAndPercentage.count,
+                  },
+                ]}
+              />
+              <DedupeBox
+                label='In Population'
+                options={[
+                  {
+                    name: 'Unique',
+                    percent:
+                      registration.goldenRecordUniqueCountAndPercentage
+                        .percentage,
+                    value:
+                      registration.goldenRecordUniqueCountAndPercentage.count,
+                  },
+                  {
+                    name: 'Duplicates',
+                    percent:
+                      registration.goldenRecordDuplicatesCountAndPercentage
+                        .percentage,
+                    value:
+                      registration.goldenRecordDuplicatesCountAndPercentage
+                        .count,
+                  },
+                  {
+                    name: 'Need Adjudication',
+                    percent:
+                      registration
+                        .goldenRecordPossibleDuplicatesCountAndPercentage
+                        .percentage,
+                    value:
+                      registration
+                        .goldenRecordPossibleDuplicatesCountAndPercentage.count,
+                  },
+                ]}
+              />
+            </Grid>
           </Grid>
         </Grid>
       </OverviewContainer>
