@@ -17,6 +17,7 @@ from household.models import (
     ROLE_NO_ROLE,
     DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
     DUPLICATE,
+    NEEDS_ADJUDICATION,
 )
 from registration_datahub.models import (
     ImportedHousehold,
@@ -84,12 +85,22 @@ class ImportedIndividualFilter(FilterSet):
 class ImportedHouseholdNode(DjangoObjectType):
     country_origin = graphene.String(description="Country origin name")
     country = graphene.String(description="Country name")
+    has_duplicates = graphene.Boolean(
+        description="Mark household if any of individuals contains one of these statuses "
+        "‘Needs adjudication’, ‘Duplicate in batch’ and ‘Duplicate’"
+    )
 
-    def resolve_country(parrent, info):
-        return parrent.country.name
+    def resolve_country(parent, info):
+        return parent.country.name
 
-    def resolve_country_origin(parrent, info):
-        return parrent.country_origin.name
+    def resolve_country_origin(parent, info):
+        return parent.country_origin.name
+
+    def resolve_has_duplicates(parent, info):
+        return parent.individuals.filter(
+            Q(deduplication_batch_status=DUPLICATE_IN_BATCH)
+            | Q(deduplication_golden_record_status__in=(DUPLICATE, NEEDS_ADJUDICATION))
+        ).exists()
 
     class Meta:
         model = ImportedHousehold
