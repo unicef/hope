@@ -123,12 +123,12 @@ class ImportedIndividualNode(DjangoObjectType):
         return ROLE_NO_ROLE
 
     def resolve_deduplication_batch_results(parent, info):
-        key = "duplicates" if parent.deduplication_batch_results == DUPLICATE_IN_BATCH else "possible_duplicates"
+        key = "duplicates" if parent.deduplication_batch_status == DUPLICATE_IN_BATCH else "possible_duplicates"
         return parent.deduplication_batch_results.get(key, {})
 
     def resolve_deduplication_golden_record_results(parent, info):
         key = (
-            "duplicates" if parent.deduplication_golden_record_results == DUPLICATE_IN_BATCH else "possible_duplicates"
+            "duplicates" if parent.deduplication_golden_record_status == DUPLICATE_IN_BATCH else "possible_duplicates"
         )
         return parent.deduplication_golden_record_results.get(key, {})
 
