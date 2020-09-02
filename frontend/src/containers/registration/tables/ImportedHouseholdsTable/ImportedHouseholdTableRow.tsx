@@ -31,7 +31,9 @@ export function ImportedHouseholdTableRow({
       key={household.id}
     >
       <TableCell align='left'>
-        {household.hasDuplicates && <FlagTooltip />}
+        {household.hasDuplicates && (
+          <FlagTooltip message='Possible duplicates' />
+        )}
       </TableCell>
       <TableCell align='left'>{decodeIdString(household.id)}</TableCell>
       <TableCell align='left'>{household?.headOfHousehold?.fullName}</TableCell>
