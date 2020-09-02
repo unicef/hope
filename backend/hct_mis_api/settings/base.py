@@ -372,29 +372,56 @@ CONSTANCE_REDIS_CONNECTION = f"redis://{REDIS_INSTANCE}/0"
 CONSTANCE_ADDITIONAL_FIELDS = {
     "percentages": (
         "django.forms.fields.IntegerField",
-        {"widget": "django.forms.widgets.NumberInput", "validators": [MinValueValidator(0), MaxValueValidator(100)],},
-    )
+        {"widget": "django.forms.widgets.NumberInput", "validators": [MinValueValidator(0), MaxValueValidator(100)]},
+    ),
+    "positive_integers": (
+        "django.forms.fields.IntegerField",
+        {"widget": "django.forms.widgets.NumberInput", "validators": [MinValueValidator(0)]},
+    ),
 }
 
 CONSTANCE_CONFIG = {
     # BATCH SETTINGS
-    "DEDUPLICATION_BATCH_DUPLICATE_SCORE": (50.0, "Results equal or above this score are considered duplicates",),
-    "DEDUPLICATION_BATCH_MIN_SCORE": (15.0, "Results below the minimum score will not be taken into account",),
+    "DEDUPLICATION_BATCH_DUPLICATE_SCORE": (
+        50.0,
+        "Results equal or above this score are considered duplicates",
+        "positive_integers",
+    ),
+    # "DEDUPLICATION_BATCH_MIN_SCORE": (
+    #     15.0,
+    #     "Results below the minimum score will not be taken into account",
+    #     "positive_integers",
+    # ),
     "DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE": (
         50,
-        "If percentage of duplicates is higher or equal to this setting, " "deduplication is aborted",
+        "If percentage of duplicates is higher or equal to this setting, deduplication is aborted",
         "percentages",
     ),
+    "DEDUPLICATION_BATCH_DUPLICATES_ALLOWED": (
+        5,
+        "If amount of duplicates for single individual exceeds this limit deduplication is aborted",
+        "positive_integers",
+    ),
     # GOLDEN RECORDS SETTINGS
-    "DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE": (50.0, "Results below the minimum score will not be taken into account",),
+    "DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE": (
+        50.0,
+        "Results below the minimum score will not be taken into account",
+        "positive_integers",
+    ),
     "DEDUPLICATION_GOLDEN_RECORD_DUPLICATE_SCORE": (
         70.0,
         "Results equal or above this score are considered duplicates",
+        "positive_integers",
     ),
     "DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_PERCENTAGE": (
         50,
         "If percentage of duplicates is higher or equal to this setting, deduplication is aborted",
         "percentages",
+    ),
+    "DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_ALLOWED": (
+        5,
+        "If amount of duplicates for single individual exceeds this limit deduplication is aborted",
+        "positive_integers",
     ),
     # SANCTION LIST
     "SANCTION_LIST_MATCH_SCORE": (6.0, "Results equal or above this score are considered possible matches",),

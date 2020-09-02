@@ -32,11 +32,12 @@ from utils.models import TimeStampedUUIDModel
 SIMILAR_IN_BATCH = "SIMILAR_IN_BATCH"
 DUPLICATE_IN_BATCH = "DUPLICATE_IN_BATCH"
 UNIQUE_IN_BATCH = "UNIQUE_IN_BATCH"
+NOT_PROCESSED = "NOT_PROCESSED"
 DEDUPLICATION_BATCH_STATUS_CHOICE = (
     (SIMILAR_IN_BATCH, "Similar in batch"),
     (DUPLICATE_IN_BATCH, "Duplicate in batch"),
     (UNIQUE_IN_BATCH, "Unique in batch"),
-    ("", "-"),
+    (NOT_PROCESSED, "Not Processed"),
 )
 
 
