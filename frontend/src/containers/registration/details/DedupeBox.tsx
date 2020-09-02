@@ -49,7 +49,7 @@ export function DedupeBox({ label, options }: Props): React.ReactElement {
         <Grid item xs={9}>
           <Grid container direction='column'>
             {options.map((option) => (
-              <Grid container>
+              <Grid key={option.name} container>
                 <Grid item xs={4}>
                   <BoldGrey>
                     <Small>{option.name}</Small>

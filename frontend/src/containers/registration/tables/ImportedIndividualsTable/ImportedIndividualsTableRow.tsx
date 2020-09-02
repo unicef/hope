@@ -2,13 +2,15 @@ import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import moment from 'moment';
+import styled from 'styled-components';
 import {
   HouseholdChoiceDataQuery,
   ImportedIndividualMinimalFragment,
 } from '../../../../__generated__/graphql';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { ClickableTableRow } from '../../../../components/table/ClickableTableRow';
 import { choicesToDict, decodeIdString } from '../../../../utils/utils';
+import { MiśTheme } from '../../../../theme';
+import { TableRow } from '@material-ui/core';
 
 interface ImportedIndividualsTableRowProps {
   individual: ImportedIndividualMinimalFragment;
@@ -24,19 +26,31 @@ export function ImportedIndividualsTableRow({
 
   const relationshipChoicesDict = choicesToDict(choices.relationshipChoices);
   const roleChoicesDict = choicesToDict(choices.roleChoices);
-  const batchStatusChoicesDict = choicesToDict(
+  const deduplicationBatchDict = choicesToDict(
     choices.deduplicationBatchStatusChoices,
   );
-  const goldenRecordStatusChoicesDict = choicesToDict(
+  const deduplicationGoldenRecordDict = choicesToDict(
     choices.deduplicationGoldenRecordStatusChoices,
   );
+
+  const Error = styled.span`
+    color: ${({ theme }: { theme: MiśTheme }) => theme.hctPalette.red};
+    text-decoration: underline;
+    cursor: pointer;
+  `;
+  const Pointer = styled.span`
+    cursor: pointer;
+  `;
   const handleClick = (): void => {
     const path = `/${businessArea}/registration-data-import/individual/${individual.id}`;
     history.push(path);
   };
+  console.log(individual);
   return (
-    <ClickableTableRow hover onClick={handleClick} key={individual.id}>
-      <TableCell align='left'>{decodeIdString(individual.id)}</TableCell>
+    <TableRow hover key={individual.id}>
+      <TableCell onClick={handleClick} align='left'>
+        <Pointer>{decodeIdString(individual.id)}</Pointer>
+      </TableCell>
       <TableCell align='left'>{individual.fullName}</TableCell>
       <TableCell align='left'>{roleChoicesDict[individual.role]}</TableCell>
       <TableCell align='left'>
@@ -47,15 +61,33 @@ export function ImportedIndividualsTableRow({
       </TableCell>
       <TableCell align='left'>{individual.sex}</TableCell>
       <TableCell onClick={() => console.log('click first')} align='left'>
-        {batchStatusChoicesDict[individual.deduplicationBatchStatus]}
+        {individual.deduplicationBatchResults.length ? (
+          <Error>
+            {deduplicationBatchDict[individual.deduplicationBatchStatus]} (
+            {individual.deduplicationBatchResults.length})
+          </Error>
+        ) : (
+          `${deduplicationBatchDict[individual.deduplicationBatchStatus]}`
+        )}
       </TableCell>
       <TableCell onClick={() => console.log('click second')} align='left'>
-        {
-          goldenRecordStatusChoicesDict[
-            individual.deduplicationGoldenRecordStatus
-          ]
-        }
+        {individual.deduplicationGoldenRecordResults.length ? (
+          <Error>
+            {
+              deduplicationGoldenRecordDict[
+                individual.deduplicationGoldenRecordStatus
+              ]
+            }{' '}
+            ({individual.deduplicationGoldenRecordResults.length})
+          </Error>
+        ) : (
+          `${
+            deduplicationGoldenRecordDict[
+              individual.deduplicationGoldenRecordStatus
+            ]
+          }`
+        )}
       </TableCell>
-    </ClickableTableRow>
+    </TableRow>
   );
 }
