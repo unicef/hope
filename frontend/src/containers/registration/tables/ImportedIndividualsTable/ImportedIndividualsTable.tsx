@@ -14,8 +14,9 @@ interface ImportedIndividualsTableProps {
   rdiId?: string;
   household?: string;
   title?: string;
-  isOnPaper?: boolean;
+  showCheckbox?: boolean;
   rowsPerPageOptions?: number[];
+  isOnPaper?: boolean;
 }
 
 export function ImportedIndividualsTable({
@@ -24,12 +25,15 @@ export function ImportedIndividualsTable({
   title,
   household,
   rowsPerPageOptions = [10, 15, 20],
+  showCheckbox,
 }: ImportedIndividualsTableProps): ReactElement {
+  const [showDuplicates, setShowDuplicates] = useState(false);
+
   const initialVariables = {
     rdiId,
     household,
+    duplicatesOnly: showDuplicates,
   };
-  const [showDuplicates, setShowDuplicates] = useState(false);
 
   const {
     data: choicesData,
@@ -37,22 +41,24 @@ export function ImportedIndividualsTable({
   } = useHouseholdChoiceDataQuery();
   return (
     <>
-      <Grid container justify='flex-end' spacing={3}>
-        <Grid item>
-          <Box p={3}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  color='primary'
-                  checked={showDuplicates}
-                  onChange={() => setShowDuplicates(!showDuplicates)}
-                />
-              }
-              label='Show duplicates only'
-            />
-          </Box>
+      {showCheckbox && (
+        <Grid container justify='flex-end' spacing={3}>
+          <Grid item>
+            <Box p={3}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    color='primary'
+                    checked={showDuplicates}
+                    onChange={() => setShowDuplicates(!showDuplicates)}
+                  />
+                }
+                label='Show duplicates only'
+              />
+            </Box>
+          </Grid>
         </Grid>
-      </Grid>
+      )}
       <UniversalTable<
         ImportedIndividualMinimalFragment,
         AllImportedIndividualsQueryVariables
