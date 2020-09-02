@@ -100,7 +100,7 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
               <ImportedHouseholdTable rdiId={id} />
             </TabPanel>
             <TabPanel value={selectedTab} index={1}>
-              <ImportedIndividualsTable rdiId={id} />
+              <ImportedIndividualsTable showCheckbox rdiId={id} />
             </TabPanel>
           </Paper>
         </TableWrapper>
