@@ -49,17 +49,6 @@ const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
-const Bold = styled.span`
-  font-weight: bold;
-  font-size: 16px;
-`;
-
-const BoldGrey = styled.span`
-  font-weight: bold;
-  font-size: 16px
-  color: rgba(37, 59, 70, 0.6);
-`;
-
 const Error = styled.p`
   color: ${({ theme }: { theme: MiśTheme }) => theme.hctPalette.red};
 `;

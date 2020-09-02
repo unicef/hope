@@ -7,7 +7,6 @@ import {
 import { UniversalTable } from '../../../tables/UniversalTable';
 import { ImportedHouseholdTableRow } from './ImportedHouseholdTableRow';
 import { headCells } from './ImportedHouseholdTableHeadCells';
-import { FormControlLabel, Checkbox, Grid, Box } from '@material-ui/core';
 
 export function ImportedHouseholdTable({ rdiId }): ReactElement {
   const initialVariables = {

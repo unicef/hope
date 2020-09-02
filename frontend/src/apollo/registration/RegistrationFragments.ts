@@ -63,6 +63,7 @@ export const importedHouseholdMinimal = gql`
     admin2
     firstRegistrationDate
     lastRegistrationDate
+    hasDuplicates
   }
 `;
 export const importedHouseholdDetailed = gql`
