@@ -16,6 +16,7 @@ import {
 import { MiśTheme } from '../../../../theme';
 import { TableRow } from '@material-ui/core';
 import { BatchResults } from '../../details/BatchResults';
+import { DedupeResults } from '../../details/DedupeResults';
 
 interface ImportedIndividualsTableRowProps {
   individual: ImportedIndividualMinimalFragment;
@@ -51,7 +52,6 @@ export function ImportedIndividualsTableRow({
     const path = `/${businessArea}/registration-data-import/individual/${individual.id}`;
     history.push(path);
   };
-
   return (
     <TableRow hover key={individual.id}>
       <TableCell onClick={handleClick} align='left'>
@@ -69,10 +69,11 @@ export function ImportedIndividualsTableRow({
       <TableCell align='left'>
         {individual.deduplicationBatchResults.length ? (
           <>
-            <BatchResults
-              deduplicationBatchStatus={
+            <DedupeResults
+              status={
                 deduplicationBatchDict[individual.deduplicationBatchStatus]
               }
+              results={individual.deduplicationBatchResults}
               individual={individual}
             />
           </>
@@ -82,14 +83,15 @@ export function ImportedIndividualsTableRow({
       </TableCell>
       <TableCell align='left'>
         {individual.deduplicationGoldenRecordResults.length ? (
-          <Error>
-            {
+          <DedupeResults
+            status={
               deduplicationGoldenRecordDict[
                 individual.deduplicationGoldenRecordStatus
               ]
             }
-            ({individual.deduplicationGoldenRecordResults.length})
-          </Error>
+            results={individual.deduplicationGoldenRecordResults}
+            individual={individual}
+          />
         ) : (
           `${
             deduplicationGoldenRecordDict[

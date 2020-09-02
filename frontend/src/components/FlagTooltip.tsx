@@ -10,18 +10,11 @@ const useStyles = makeStyles((theme: MiśTheme) => ({
   check: { color: theme.hctPalette.green },
 }));
 
-export const FlagTooltip = ({
-  message = '',
-  errors = true,
-}): React.ReactElement => {
+export const FlagTooltip = ({ message = '' }): React.ReactElement => {
   const classes = useStyles();
   return (
     <Tooltip title={message}>
-      {errors ? (
-        <WarningIcon className={classes.warning} />
-      ) : (
-        <CheckCircle className={classes.check} />
-      )}
+      <WarningIcon className={classes.warning} />
     </Tooltip>
   );
 };
