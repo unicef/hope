@@ -81,7 +81,8 @@ class PullFromDatahubTask:
         session.status = session.STATUS_PROCESSING
         session.save()
         self.copy_service_providers(session)
-        Program.objects.bulk_update(self.copy_programs_ids(session), ["ca_id", "ca_hash_id"])
+        programs = self.copy_programs_ids(session)
+        Program.objects.bulk_update(programs, ["ca_id", "ca_hash_id"])
         TargetPopulation.objects.bulk_update(self.copy_target_population_ids(session), ["ca_id", "ca_hash_id"])
         self.copy_cash_plans(session)
         self.copy_payment_records(session)
@@ -125,12 +126,14 @@ class PullFromDatahubTask:
 
     def copy_programs_ids(self, session):
         dh_programs = ca_models.Programme.objects.filter(session=session)
-
+        import ipdb;ipdb.set_trace()
+        programs = []
         for dh_program in dh_programs:
             program = Program.objects.get(id=dh_program.mis_id)
             program.ca_id = dh_program.ca_id
             program.ca_hash_id = dh_program.ca_hash_id
-            yield program
+            programs.append(program)
+        return programs
 
     def copy_target_population_ids(self, session):
         dh_target_populations = ca_models.TargetPopulation.objects.filter(session=session)
