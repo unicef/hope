@@ -1,5 +1,5 @@
 import TableCell from '@material-ui/core/TableCell';
-import React from 'react';
+import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import moment from 'moment';
 import styled from 'styled-components';
@@ -15,6 +15,7 @@ import {
 } from '../../../../utils/utils';
 import { MiśTheme } from '../../../../theme';
 import { TableRow } from '@material-ui/core';
+import { BatchResults } from '../../details/BatchResults';
 
 interface ImportedIndividualsTableRowProps {
   individual: ImportedIndividualMinimalFragment;
@@ -39,6 +40,7 @@ export function ImportedIndividualsTableRow({
 
   const Error = styled.span`
     color: ${({ theme }: { theme: MiśTheme }) => theme.hctPalette.red};
+    font-weight: bold;
     text-decoration: underline;
     cursor: pointer;
   `;
@@ -49,9 +51,7 @@ export function ImportedIndividualsTableRow({
     const path = `/${businessArea}/registration-data-import/individual/${individual.id}`;
     history.push(path);
   };
-  if (individual.deduplicationBatchResults.length) {
-    console.log(individual.deduplicationBatchResults);
-  }
+
   return (
     <TableRow hover key={individual.id}>
       <TableCell onClick={handleClick} align='left'>
@@ -66,24 +66,28 @@ export function ImportedIndividualsTableRow({
         {moment(individual.birthDate).format('DD MMM YYYY')}
       </TableCell>
       <TableCell align='left'>{sexToCapitalize(individual.sex)}</TableCell>
-      <TableCell onClick={() => console.log('click first')} align='left'>
+      <TableCell align='left'>
         {individual.deduplicationBatchResults.length ? (
-          <Error>
-            {deduplicationBatchDict[individual.deduplicationBatchStatus]} (
-            {individual.deduplicationBatchResults.length})
-          </Error>
+          <>
+            <BatchResults
+              deduplicationBatchStatus={
+                deduplicationBatchDict[individual.deduplicationBatchStatus]
+              }
+              individual={individual}
+            />
+          </>
         ) : (
           `${deduplicationBatchDict[individual.deduplicationBatchStatus]}`
         )}
       </TableCell>
-      <TableCell onClick={() => console.log('click second')} align='left'>
+      <TableCell align='left'>
         {individual.deduplicationGoldenRecordResults.length ? (
           <Error>
             {
               deduplicationGoldenRecordDict[
                 individual.deduplicationGoldenRecordStatus
               ]
-            }{' '}
+            }
             ({individual.deduplicationGoldenRecordResults.length})
           </Error>
         ) : (
