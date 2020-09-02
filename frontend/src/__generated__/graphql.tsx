@@ -1151,6 +1151,7 @@ export type ImportedHouseholdNode = Node & {
   returnee: Scalars['Boolean'],
   flexFields: Scalars['JSONString'],
   individuals: ImportedIndividualNodeConnection,
+  hasDuplicates?: Maybe<Scalars['Boolean']>,
 };
 
 
@@ -4587,7 +4588,7 @@ export type RegistrationDetailedFragment = (
 
 export type ImportedHouseholdMinimalFragment = (
   { __typename?: 'ImportedHouseholdNode' }
-  & Pick<ImportedHouseholdNode, 'id' | 'size' | 'admin1' | 'admin2' | 'firstRegistrationDate' | 'lastRegistrationDate'>
+  & Pick<ImportedHouseholdNode, 'id' | 'size' | 'admin1' | 'admin2' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'hasDuplicates'>
   & { headOfHousehold: Maybe<(
     { __typename?: 'ImportedIndividualNode' }
     & Pick<ImportedIndividualNode, 'id' | 'fullName'>
@@ -5048,6 +5049,7 @@ export const ImportedHouseholdMinimalFragmentDoc = gql`
   admin2
   firstRegistrationDate
   lastRegistrationDate
+  hasDuplicates
 }
     `;
 export const ImportedHouseholdDetailedFragmentDoc = gql`
@@ -10266,6 +10268,7 @@ export type ImportedHouseholdNodeResolvers<ContextType = any, ParentType extends
   returnee?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   flexFields?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   individuals?: Resolver<ResolversTypes['ImportedIndividualNodeConnection'], ParentType, ContextType, ImportedHouseholdNodeIndividualsArgs>,
+  hasDuplicates?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
 export type ImportedHouseholdNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedHouseholdNodeConnection'] = ResolversParentTypes['ImportedHouseholdNodeConnection']> = {

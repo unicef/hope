@@ -873,6 +873,7 @@ type ImportedHouseholdNode implements Node {
   returnee: Boolean!
   flexFields: JSONString!
   individuals(before: String, after: String, first: Int, last: Int): ImportedIndividualNodeConnection!
+  hasDuplicates: Boolean
 }
 
 type ImportedHouseholdNodeConnection {
