@@ -27,6 +27,7 @@ from household.models import (
     IndividualRoleInHousehold,
     ROLE_NO_ROLE,
     IndividualIdentity,
+    DUPLICATE,
 )
 from registration_datahub.schema import DeduplicationResultNode
 from targeting.models import HouseholdSelection
@@ -230,6 +231,10 @@ class IndividualNode(DjangoObjectType):
         if role is not None:
             return role.role
         return ROLE_NO_ROLE
+
+    def resolve_deduplication_results(parent, info):
+        key = "duplicates" if parent.deduplication_status == DUPLICATE else "possible_duplicates"
+        return parent.deduplication_results.get(key, {})
 
     class Meta:
         model = Individual
