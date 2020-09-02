@@ -1,7 +1,9 @@
 from django.conf import settings
 from django.db import models
+from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 
+from registration_datahub.models import ImportedIndividual
 from utils.models import TimeStampedUUIDModel
 
 
@@ -40,6 +42,10 @@ class RegistrationDataImport(TimeStampedUUIDModel):
 
     def __str__(self):
         return self.name
+
+    @cached_property
+    def all_imported_individuals(self):
+        return ImportedIndividual.objects.filter(registration_data_import=self.datahub_id)
 
     class Meta:
         unique_together = ("name", "business_area")
