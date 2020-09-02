@@ -1,8 +1,10 @@
 import graphene
+from django.db.models import Q
 from django_filters import (
     FilterSet,
     OrderingFilter,
     CharFilter,
+    BooleanFilter,
 )
 from graphene import relay
 from graphene_django import DjangoObjectType
@@ -14,6 +16,7 @@ from core.utils import decode_id_string, to_choice_object
 from household.models import (
     ROLE_NO_ROLE,
     DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
+    DUPLICATE,
 )
 from registration_datahub.models import (
     ImportedHousehold,
@@ -24,6 +27,7 @@ from registration_datahub.models import (
     ImportedDocument,
     ImportedIndividualIdentity,
     DEDUPLICATION_BATCH_STATUS_CHOICE,
+    DUPLICATE_IN_BATCH,
 )
 
 
@@ -31,6 +35,7 @@ class DeduplicationResultNode(graphene.ObjectType):
     hit_id = graphene.ID()
     full_name = graphene.String()
     score = graphene.Float()
+    proximity_to_score = graphene.Float()
 
 
 class ImportedHouseholdFilter(FilterSet):
@@ -48,6 +53,7 @@ class ImportedHouseholdFilter(FilterSet):
 
 class ImportedIndividualFilter(FilterSet):
     rdi_id = CharFilter(method="filter_rdi_id")
+    duplicates_only = BooleanFilter(method="filter_duplicates_only")
 
     class Meta:
         model = ImportedIndividual
@@ -67,9 +73,15 @@ class ImportedIndividualFilter(FilterSet):
     def filter_rdi_id(self, queryset, model_field, value):
         return queryset.filter(registration_data_import__hct_id=decode_id_string(value))
 
+    def filter_duplicates_only(self, queryset, model_field, value):
+        if value is True:
+            return queryset.filter(
+                Q(deduplication_golden_record_status=DUPLICATE) | Q(deduplication_batch_status=DUPLICATE_IN_BATCH)
+            )
+        return queryset
+
 
 class ImportedHouseholdNode(DjangoObjectType):
-
     country_origin = graphene.String(description="Country origin name")
     country = graphene.String(description="Country name")
 
@@ -98,6 +110,16 @@ class ImportedIndividualNode(DjangoObjectType):
         if role is not None:
             return role.role
         return ROLE_NO_ROLE
+
+    def resolve_deduplication_batch_results(parent, info):
+        key = "duplicates" if parent.deduplication_batch_results == DUPLICATE_IN_BATCH else "possible_duplicates"
+        return parent.deduplication_batch_results.get(key, {})
+
+    def resolve_deduplication_golden_record_results(parent, info):
+        key = (
+            "duplicates" if parent.deduplication_golden_record_results == DUPLICATE_IN_BATCH else "possible_duplicates"
+        )
+        return parent.deduplication_golden_record_results.get(key, {})
 
     class Meta:
         model = ImportedIndividual
@@ -160,8 +182,8 @@ class Query(graphene.ObjectType):
     all_imported_households = DjangoFilterConnectionField(
         ImportedHouseholdNode, filterset_class=ImportedHouseholdFilter,
     )
-    registration_data_import_datahub = relay.Node.Field(RegistrationDataImportDatahubNode,)
-    all_registration_data_imports_datahub = DjangoFilterConnectionField(RegistrationDataImportDatahubNode,)
+    registration_data_import_datahub = relay.Node.Field(RegistrationDataImportDatahubNode)
+    all_registration_data_imports_datahub = DjangoFilterConnectionField(RegistrationDataImportDatahubNode)
     imported_individual = relay.Node.Field(ImportedIndividualNode)
     all_imported_individuals = DjangoFilterConnectionField(
         ImportedIndividualNode, filterset_class=ImportedIndividualFilter,
