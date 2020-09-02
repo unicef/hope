@@ -7,6 +7,7 @@ import {
   DialogContent,
   DialogTitle,
 } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 import {
   ImportedIndividualMinimalFragment,
   DeduplicationResultNode,
@@ -65,6 +66,13 @@ export function DedupeResults({
   const [open, setOpen] = useState(false);
   const history = useHistory();
   const businessArea = useBusinessArea();
+  const useStyles = makeStyles((theme) => ({
+    table: {
+      minWidth: 100,
+    },
+  }));
+  const classes = useStyles();
+
   function createData(hitId, score, proximityToScore) {
     return { hitId, score, proximityToScore };
   }
@@ -76,12 +84,15 @@ export function DedupeResults({
     const path = `/${businessArea}/population/individuals/${id}`;
     history.push(path);
   };
+
   return (
     <>
       <Error onClick={() => setOpen(true)}>
         {status} ({results.length})
       </Error>
       <Dialog
+        maxWidth='md'
+        fullWidth
         open={open}
         onClose={() => setOpen(false)}
         scroll='paper'
@@ -100,7 +111,7 @@ export function DedupeResults({
               are listed below.
             </div>
           </DialogDescription>
-          <Table>
+          <Table className={classes.table}>
             <TableHead>
               <TableRow>
                 <TableCell style={{ width: 100 }}>Individual ID</TableCell>
@@ -124,6 +135,7 @@ export function DedupeResults({
                   </TableCell>
                   <TableCell align='right'>{row.score.toFixed(2)}</TableCell>
                   <TableCell align='right'>
+                    {row.proximityToScore > 0 && '+'}{' '}
                     {row.proximityToScore.toFixed(2)}
                   </TableCell>
                 </TableRow>
