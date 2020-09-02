@@ -1,3 +1,5 @@
+import logging
+
 from django.db.models import Q
 from django.forms import model_to_dict
 from constance import config
@@ -13,6 +15,9 @@ from registration_datahub.models import (
     SIMILAR_IN_BATCH,
     UNIQUE_IN_BATCH,
 )
+
+
+log = logging.getLogger(__name__)
 
 
 class DeduplicateTask:
@@ -100,12 +105,7 @@ class DeduplicateTask:
                         "proximity_to_score": score - duplicate_score,
                     }
                 )
-            else:
-                possible_duplicates_score = (
-                    config.DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE
-                    if document == IndividualDocument
-                    else config.DEDUPLICATION_BATCH_MIN_SCORE
-                )
+            elif document == IndividualDocument:
                 possible_duplicates.append(individual_hit.id)
                 original_individuals_ids_possible_duplicates.append(individual.id)
                 results_data["possible_duplicates"].append(
@@ -113,9 +113,11 @@ class DeduplicateTask:
                         "hit_id": individual_hit.id,
                         "full_name": individual_hit.full_name,
                         "score": individual_hit.meta.score,
-                        "proximity_to_score": score - possible_duplicates_score,
+                        "proximity_to_score": score - config.DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE,
                     }
                 )
+        log.info(f"INDIVIDUAL {individual}")
+        log.info([(r.full_name, r.meta.score) for r in results])
 
         return (
             duplicates,
@@ -243,10 +245,10 @@ class DeduplicateTask:
         registration_data_import = RegistrationDataImport.objects.get(id=registration_data_import_datahub.hct_id)
         cls.business_area = registration_data_import_datahub.business_area_slug
         allowed_duplicates_batch_amount = round(
-            imported_individuals.count() * (config.DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE / 100)
+            (imported_individuals.count() or 1) * (config.DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE / 100)
         )
         allowed_duplicates_golden_record_amount = round(
-            imported_individuals.count() * (config.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_PERCENTAGE / 100)
+            (imported_individuals.count() or 1) * (config.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_PERCENTAGE / 100)
         )
 
         print(allowed_duplicates_batch_amount)
