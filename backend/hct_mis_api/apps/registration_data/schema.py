@@ -66,7 +66,7 @@ class RegistrationDataImportNode(DjangoObjectType):
         return get_count_and_percentage(gr_similar, root.all_imported_individuals)
 
     def resolve_batch_unique_count_and_percentage(root, info, **kwargs):
-        unique = root.all_imported_individuals.filter(deduplication_golden_record_status=UNIQUE_IN_BATCH)
+        unique = root.all_imported_individuals.filter(deduplication_batch_status=UNIQUE_IN_BATCH)
         return get_count_and_percentage(unique, root.all_imported_individuals)
 
     def resolve_golden_record_unique_count_and_percentage(root, info, **kwargs):
