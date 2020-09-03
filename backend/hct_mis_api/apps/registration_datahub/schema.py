@@ -12,7 +12,7 @@ from graphene_django.filter import DjangoFilterConnectionField
 
 from core.extended_connection import ExtendedConnection
 from core.schema import ChoiceObject
-from core.utils import decode_id_string, to_choice_object
+from core.utils import decode_id_string, to_choice_object, encode_id_base64, encode_ids
 from household.models import (
     ROLE_NO_ROLE,
     DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
@@ -124,13 +124,15 @@ class ImportedIndividualNode(DjangoObjectType):
 
     def resolve_deduplication_batch_results(parent, info):
         key = "duplicates" if parent.deduplication_batch_status == DUPLICATE_IN_BATCH else "possible_duplicates"
-        return parent.deduplication_batch_results.get(key, {})
+        results = parent.deduplication_batch_results.get(key, {})
+        return encode_ids(results, "ImportedIndividual", "hit_id")
 
     def resolve_deduplication_golden_record_results(parent, info):
         key = (
             "duplicates" if parent.deduplication_golden_record_status == DUPLICATE_IN_BATCH else "possible_duplicates"
         )
-        return parent.deduplication_golden_record_results.get(key, {})
+        results = parent.deduplication_golden_record_results.get(key, {})
+        return encode_ids(results, "Individual", "hit_id")
 
     class Meta:
         model = ImportedIndividual

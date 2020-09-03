@@ -13,7 +13,7 @@ from graphene_django.filter import DjangoFilterConnectionField
 from core.extended_connection import ExtendedConnection
 from core.filters import AgeRangeFilter, IntegerRangeFilter
 from core.schema import ChoiceObject
-from core.utils import to_choice_object
+from core.utils import to_choice_object, encode_id_base64, encode_ids
 from household.models import (
     Household,
     Individual,
@@ -234,7 +234,8 @@ class IndividualNode(DjangoObjectType):
 
     def resolve_deduplication_results(parent, info):
         key = "duplicates" if parent.deduplication_status == DUPLICATE else "possible_duplicates"
-        return parent.deduplication_results.get(key, {})
+        results = parent.deduplication_results.get(key, {})
+        return encode_ids(results, "Individual", "hit_id")
 
     class Meta:
         model = Individual
