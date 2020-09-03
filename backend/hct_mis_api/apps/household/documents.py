@@ -7,7 +7,7 @@ from .models import Individual
 
 @registry.register_document
 class IndividualDocument(Document):
-    id = fields.TextField(boost=0)
+    id = fields.KeywordField(boost=0)
     given_name = fields.TextField(analyzer=phonetic_analyzer)
     middle_name = fields.TextField(analyzer=phonetic_analyzer)
     family_name = fields.TextField(analyzer=phonetic_analyzer)

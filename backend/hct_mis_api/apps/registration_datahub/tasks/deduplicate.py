@@ -1,23 +1,19 @@
 import logging
 
-from django.core.management import call_command
+from constance import config
 from django.db.models import Q
 from django.forms import model_to_dict
-from constance import config
 
 from household.documents import IndividualDocument
-from household.elasticsearch_utils import rebuild_search_index, populate_all_indexes
+from household.elasticsearch_utils import populate_all_indexes
 from household.models import Individual, DUPLICATE, NEEDS_ADJUDICATION, UNIQUE, NOT_PROCESSED
 from registration_data.models import RegistrationDataImport
-
 from registration_datahub.documents import ImportedIndividualDocument
 from registration_datahub.models import (
     ImportedIndividual,
     DUPLICATE_IN_BATCH,
-    SIMILAR_IN_BATCH,
     UNIQUE_IN_BATCH,
 )
-
 
 log = logging.getLogger(__name__)
 
