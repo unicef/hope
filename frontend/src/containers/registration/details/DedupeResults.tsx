@@ -56,12 +56,14 @@ interface DedupeResultsProps {
   individual: ImportedIndividualMinimalFragment;
   status: string;
   results: Array<DeduplicationResultNode>;
+  isInBatch?: boolean;
 }
 
 export function DedupeResults({
   individual,
   status,
   results,
+  isInBatch = false,
 }: DedupeResultsProps): React.ReactElement {
   const [open, setOpen] = useState(false);
   const history = useHistory();
@@ -80,11 +82,15 @@ export function DedupeResults({
   const rows = results.map((result) => {
     return createData(result.hitId, result.score, result.proximityToScore);
   });
-  const handleClick = (id): void => {
-    const path = `/${businessArea}/population/individuals/${id}`;
+  const handleClickBatch = (id): void => {
+    const path = `/${businessArea}/registration-data-import/individual/${id}`;
     history.push(path);
   };
 
+  const handleClickGoldenRecord = (id): void => {
+    const path = `/${businessArea}/population/individuals/${id}`;
+    history.push(path);
+  };
   return (
     <>
       <Error onClick={() => setOpen(true)}>
@@ -127,11 +133,15 @@ export function DedupeResults({
               {rows.map((row) => (
                 <TableRow key={row.hitId}>
                   <TableCell
-                    onClick={() => handleClick(row.hitId)}
+                    onClick={() =>
+                      isInBatch
+                        ? handleClickBatch(row.hitId)
+                        : handleClickGoldenRecord(row.hitId)
+                    }
                     component='th'
                     scope='row'
                   >
-                    <Pointer>{row.hitId}</Pointer>
+                    <Pointer>{decodeIdString(row.hitId)}</Pointer>
                   </TableCell>
                   <TableCell align='right'>{row.score.toFixed(2)}</TableCell>
                   <TableCell align='right'>
