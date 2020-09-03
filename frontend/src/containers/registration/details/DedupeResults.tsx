@@ -8,10 +8,6 @@ import {
   DialogTitle,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import {
-  ImportedIndividualMinimalFragment,
-  DeduplicationResultNode,
-} from '../../../__generated__/graphql';
 import { useHistory } from 'react-router-dom';
 import { MiśTheme } from '../../../theme';
 import { decodeIdString } from '../../../utils/utils';
@@ -20,6 +16,10 @@ import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
+import {
+  ImportedIndividualMinimalFragment,
+  DeduplicationResultNode,
+} from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 
 const DialogTitleWrapper = styled.div`
@@ -74,11 +74,9 @@ export function DedupeResults({
     },
   }));
   const classes = useStyles();
-
   function createData(hitId, score, proximityToScore) {
     return { hitId, score, proximityToScore };
   }
-
   const rows = results.map((result) => {
     return createData(result.hitId, result.score, result.proximityToScore);
   });
@@ -121,10 +119,10 @@ export function DedupeResults({
             <TableHead>
               <TableRow>
                 <TableCell style={{ width: 100 }}>Individual ID</TableCell>
-                <TableCell style={{ width: 100 }} align='right'>
+                <TableCell style={{ width: 100 }} align='left'>
                   Similarity Score
                 </TableCell>
-                <TableCell style={{ width: 100 }} align='right'>
+                <TableCell style={{ width: 100 }} align='left'>
                   Proximity to the Score
                 </TableCell>
               </TableRow>
@@ -143,8 +141,8 @@ export function DedupeResults({
                   >
                     <Pointer>{decodeIdString(row.hitId)}</Pointer>
                   </TableCell>
-                  <TableCell align='right'>{row.score.toFixed(2)}</TableCell>
-                  <TableCell align='right'>
+                  <TableCell align='left'>{row.score.toFixed(2)}</TableCell>
+                  <TableCell align='left'>
                     {row.proximityToScore > 0 && '+'}{' '}
                     {row.proximityToScore.toFixed(2)}
                   </TableCell>

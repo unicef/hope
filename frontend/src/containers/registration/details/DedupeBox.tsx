@@ -56,7 +56,7 @@ export function DedupeBox({ label, options }: Props): React.ReactElement {
                   </BoldGrey>
                 </Grid>
                 <Grid item xs={4}>
-                  <Bold>{option.percent}%</Bold>
+                  <Bold>{option.percent.toFixed(2)}%</Bold>
                 </Grid>
                 <Grid item xs={4}>
                   <BoldGrey>{option.value}</BoldGrey>
