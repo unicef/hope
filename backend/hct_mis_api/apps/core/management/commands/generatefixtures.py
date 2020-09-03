@@ -10,6 +10,7 @@ from cash_assist_datahub import fixtures as cash_assist_datahub_fixtures
 from cash_assist_datahub.models import Session, Programme
 from core.fixtures import AdminAreaFactory, AdminAreaTypeFactory
 from core.models import BusinessArea, AdminArea
+from household.elasticsearch_utils import rebuild_search_index
 from household.fixtures import (
     EntitlementCardFactory,
     DocumentFactory,
@@ -213,6 +214,6 @@ class Command(BaseCommand):
             programme = cash_assist_datahub_fixtures.ProgrammeFactory(session=session, mis_id=mis_id)
             programme.save()
 
-        call_command("search_index", "--rebuild", "-f")
+        rebuild_search_index()
 
         self.stdout.write(f"Generated fixtures in {(time.time() - start_time)} seconds")

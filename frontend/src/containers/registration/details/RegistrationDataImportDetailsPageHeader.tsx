@@ -23,7 +23,7 @@ export function RegistrationDataImportDetailsPageHeader({
 }: RegistrationDataImportDetailsPageHeaderPropTypes): React.ReactElement {
   let buttons = null;
   // eslint-disable-next-line default-case
-  switch (registration.status) {
+  switch (registration?.status) {
     case RegistrationDataImportStatus.InReview:
       buttons = (
         <div>

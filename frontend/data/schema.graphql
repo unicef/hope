@@ -226,6 +226,11 @@ type CoreFieldChoiceObject {
   listName: String
 }
 
+type CountAndPercentageNode {
+  count: Int
+  percentage: Float
+}
+
 input CreatePaymentVerificationInput {
   cashPlanId: ID!
   sampling: String!
@@ -280,6 +285,7 @@ type DeduplicationResultNode {
   hitId: ID
   fullName: String
   score: Float
+  proximityToScore: Float
 }
 
 type DeleteProgram {
@@ -867,6 +873,7 @@ type ImportedHouseholdNode implements Node {
   returnee: Boolean!
   flexFields: JSONString!
   individuals(before: String, after: String, first: Int, last: Int): ImportedIndividualNodeConnection!
+  hasDuplicates: Boolean
 }
 
 type ImportedHouseholdNodeConnection {
@@ -893,14 +900,14 @@ enum ImportedIndividualDeduplicationBatchStatus {
   SIMILAR_IN_BATCH
   DUPLICATE_IN_BATCH
   UNIQUE_IN_BATCH
-  A_
+  NOT_PROCESSED
 }
 
 enum ImportedIndividualDeduplicationGoldenRecordStatus {
   UNIQUE
   DUPLICATE
   NEEDS_ADJUDICATION
-  A_
+  NOT_PROCESSED
 }
 
 type ImportedIndividualIdentityNode {
@@ -979,7 +986,7 @@ enum IndividualDeduplicationStatus {
   UNIQUE
   DUPLICATE
   NEEDS_ADJUDICATION
-  A_
+  NOT_PROCESSED
 }
 
 type IndividualIdentityNode {
@@ -1028,6 +1035,7 @@ type IndividualNode implements Node {
   unicefId: String!
   deduplicationStatus: IndividualDeduplicationStatus!
   deduplicationResults: [DeduplicationResultNode]
+  sanctionListPossibleMatch: Boolean!
   representedHouseholds(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   headingHousehold: HouseholdNode
   documents(before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
@@ -1429,7 +1437,7 @@ type Query {
   registrationDataImportDatahub(id: ID!): RegistrationDataImportDatahubNode
   allRegistrationDataImportsDatahub(before: String, after: String, first: Int, last: Int): RegistrationDataImportDatahubNodeConnection
   importedIndividual(id: ID!): ImportedIndividualNode
-  allImportedIndividuals(before: String, after: String, first: Int, last: Int, household: ID, rdiId: String, orderBy: String): ImportedIndividualNodeConnection
+  allImportedIndividuals(before: String, after: String, first: Int, last: Int, household: ID, rdiId: String, duplicatesOnly: Boolean, orderBy: String): ImportedIndividualNodeConnection
   importData(id: ID!): ImportDataNode
   deduplicationBatchStatusChoices: [ChoiceObject]
   deduplicationGoldenRecordStatusChoices: [ChoiceObject]
@@ -1531,6 +1539,12 @@ type RegistrationDataImportNode implements Node {
   businessArea: BusinessAreaNode
   households(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
+  batchDuplicatesCountAndPercentage: CountAndPercentageNode
+  goldenRecordDuplicatesCountAndPercentage: CountAndPercentageNode
+  batchPossibleDuplicatesCountAndPercentage: CountAndPercentageNode
+  goldenRecordPossibleDuplicatesCountAndPercentage: CountAndPercentageNode
+  batchUniqueCountAndPercentage: CountAndPercentageNode
+  goldenRecordUniqueCountAndPercentage: CountAndPercentageNode
 }
 
 type RegistrationDataImportNodeConnection {

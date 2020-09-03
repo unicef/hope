@@ -1,6 +1,7 @@
 import datetime as dt
 import re
 from collections import MutableMapping
+from typing import List
 
 from django.core.exceptions import ValidationError
 from django.db.models import Q, F
@@ -43,6 +44,15 @@ def decode_id_string(id_string):
     from base64 import b64decode
 
     return b64decode(id_string).decode().split(":")[1]
+
+
+def encode_id_base64(id_string, model_name):
+    if not id_string:
+        return
+
+    from base64 import b64encode
+
+    return b64encode(f"{model_name}Node:{str(id_string)}".encode("utf-8")).decode()
 
 
 def unique_slugify(instance, value, slug_field_name="slug", queryset=None, slug_separator="-"):
@@ -279,7 +289,15 @@ def nested_getattr(obj, attr, default=raise_attribute_error):
 
 
 def get_count_and_percentage(input_list, all_items_list):
-    count = len(input_list) or 1
+    count = len(input_list)
     all_items_count = len(all_items_list) or 1
     percentage = (count / all_items_count) * 100
     return {"count": count, "percentage": percentage}
+
+
+def encode_ids(results: List[dict], model_name: str, key: str) -> List[dict]:
+    if results:
+        for result in results:
+            result_id = result[key]
+            result[key] = encode_id_base64(result_id, model_name)
+    return results

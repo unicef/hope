@@ -23,6 +23,31 @@ export const registrationDetailed = gql`
     ...registrationMinimal
     numberOfIndividuals
     datahubId
+    errorMessage
+    batchDuplicatesCountAndPercentage {
+      count
+      percentage
+    }
+    batchPossibleDuplicatesCountAndPercentage {
+      count
+      percentage
+    }
+    batchUniqueCountAndPercentage {
+      count
+      percentage
+    }
+    goldenRecordUniqueCountAndPercentage {
+      count
+      percentage
+    }
+    goldenRecordDuplicatesCountAndPercentage {
+      count
+      percentage
+    }
+    goldenRecordPossibleDuplicatesCountAndPercentage {
+      count
+      percentage
+    }
   }
 `;
 
@@ -38,6 +63,7 @@ export const importedHouseholdMinimal = gql`
     admin2
     firstRegistrationDate
     lastRegistrationDate
+    hasDuplicates
   }
 `;
 export const importedHouseholdDetailed = gql`
@@ -65,6 +91,22 @@ export const importedIndividualMinimal = gql`
     relationship
     deduplicationBatchStatus
     deduplicationGoldenRecordStatus
+    deduplicationGoldenRecordResults {
+      hitId
+      fullName
+      score
+      proximityToScore
+    }
+    deduplicationBatchResults {
+      hitId
+      fullName
+      score
+      proximityToScore
+    }
+    registrationDataImport {
+      id
+      hctId
+    }
   }
 `;
 

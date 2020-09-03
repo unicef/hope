@@ -7,7 +7,6 @@ import graphene
 import openpyxl
 from django.core.exceptions import ValidationError
 from django.core.files import File
-from django.db import transaction
 from graphene_file_upload.scalars import Upload
 
 from core.airflow_api import AirflowApi
@@ -28,7 +27,6 @@ from registration_datahub.schema import (
     XlsxRowErrorNode,
     KoboErrorNode,
 )
-from registration_datahub.tasks.rdi_merge import RdiMergeTask
 from registration_datahub.validators import (
     UploadXLSXValidator,
     KoboProjectImportDataValidator,
