@@ -1,10 +1,12 @@
 import logging
 
+from django.core.management import call_command
 from django.db.models import Q
 from django.forms import model_to_dict
 from constance import config
 
 from household.documents import IndividualDocument
+from household.elasticsearch_utils import rebuild_search_index
 from household.models import Individual, DUPLICATE, NEEDS_ADJUDICATION, UNIQUE, NOT_PROCESSED
 from registration_data.models import RegistrationDataImport
 
@@ -209,6 +211,8 @@ class DeduplicateTask:
 
     @classmethod
     def deduplicate_individuals(cls, registration_data_import):
+        rebuild_search_index()
+
         cls.business_area = registration_data_import.business_area.slug
         (
             all_duplicates,
@@ -239,6 +243,8 @@ class DeduplicateTask:
 
     @classmethod
     def deduplicate_imported_individuals(cls, registration_data_import_datahub):
+        rebuild_search_index()
+
         imported_individuals = ImportedIndividual.objects.filter(
             registration_data_import=registration_data_import_datahub
         )
@@ -374,4 +380,5 @@ class DeduplicateTask:
             ).update(deduplication_golden_record_status=UNIQUE)
 
             registration_data_import.status = RegistrationDataImport.IN_REVIEW
+            registration_data_import.error_message = ""
             registration_data_import.save()
