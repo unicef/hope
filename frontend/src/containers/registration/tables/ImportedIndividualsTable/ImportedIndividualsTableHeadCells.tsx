@@ -40,13 +40,13 @@ export const headCells: HeadCell<ImportedIndividualMinimalFragment>[] = [
   },
   {
     disablePadding: false,
-    label: 'Deduplication Batch Status',
+    label: 'Dedupe within Batch',
     id: 'deduplicationBatchStatus',
     numeric: false,
   },
   {
     disablePadding: false,
-    label: 'Deduplication Golden Record Status',
+    label: 'Dedupe against Population',
     id: 'deduplicationGoldenRecordStatus',
     numeric: false,
   },

@@ -1,21 +1,18 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Grid, Typography } from '@material-ui/core';
-import { Doughnut } from 'react-chartjs-2';
+import { Grid, Typography, Box } from '@material-ui/core';
 import { StatusBox } from '../../../components/StatusBox';
 import { registrationDataImportStatusToColor } from '../../../utils/utils';
 import { LabelizedField } from '../../../components/LabelizedField';
 import { RegistrationDetailedFragment } from '../../../__generated__/graphql';
 import { MiśTheme } from '../../../theme';
+import { DedupeBox } from './DedupeBox';
 
 const Container = styled.div`
-  display: flex;
-  flex: 1;
   width: 100%;
   background-color: #fff;
   padding: ${({ theme }) => theme.spacing(8)}px
     ${({ theme }) => theme.spacing(11)}px;
-  flex-direction: column;
   border-color: #b1b1b5;
   border-bottom-width: 1px;
   border-bottom-style: solid;
@@ -37,8 +34,7 @@ const BigValueContainer = styled.div`
   border-left-width: 1px;
   border-left-style: solid;
   display: flex;
-  align-items: flex-end;
-  height: 120px;
+  height: 180px;
 `;
 const BigValue = styled.div`
   font-family: ${({ theme }: { theme: MiśTheme }) =>
@@ -48,13 +44,13 @@ const BigValue = styled.div`
   line-height: 32px;
   margin-top: ${({ theme }) => theme.spacing(2)}px;
 `;
-const ChartContainer = styled.div`
-  width: 100px;
-  height: 100px;
-`;
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
+`;
+
+const Error = styled.p`
+  color: ${({ theme }: { theme: MiśTheme }) => theme.hctPalette.red};
 `;
 
 interface RegistrationDetailsProps {
@@ -67,71 +63,110 @@ export function RegistrationDetails({
   return (
     <Container>
       <Title>
-        <Typography variant='h6'>Import Data Details</Typography>
+        <Typography variant='h6'>Import Details</Typography>
       </Title>
       <OverviewContainer>
-        <Grid container spacing={6}>
-          <Grid item xs={4}>
-            <LabelizedField label='status'>
-              <StatusContainer>
-                <StatusBox
-                  status={registration.status}
-                  statusToColor={registrationDataImportStatusToColor}
-                />
-              </StatusContainer>
-            </LabelizedField>
+        <Grid alignItems='center' container spacing={3}>
+          <Grid item xs={2}>
+            <Box display='flex' flexDirection='column'>
+              <LabelizedField label='status'>
+                <StatusContainer>
+                  <StatusBox
+                    status={registration?.status}
+                    statusToColor={registrationDataImportStatusToColor}
+                  />
+                </StatusContainer>
+              </LabelizedField>
+              {registration.errorMessage && (
+                <Error>{registration.errorMessage}</Error>
+              )}
+            </Box>
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={1}>
             <LabelizedField
-              label='DATA SOURCE'
+              label='Source of Data'
               value={registration.dataSource}
             />
           </Grid>
+          <Grid item xs={2}>
+            <BigValueContainer>
+              <LabelizedField
+                label='Total Number of Households'
+                dataCy='households'
+              >
+                <BigValue>{registration.numberOfHouseholds}</BigValue>
+              </LabelizedField>
+            </BigValueContainer>
+          </Grid>
+          <Grid item xs={2}>
+            <BigValueContainer>
+              <LabelizedField
+                label='Total Number of Individuals'
+                dataCy='individuals'
+              >
+                <BigValue>{registration.numberOfIndividuals}</BigValue>
+              </LabelizedField>
+            </BigValueContainer>
+          </Grid>
+          {registration.status === 'DEDUPLICATION_FAILED' ? null : (
+            <Grid item xs={5}>
+              <Grid container direction='column'>
+                <DedupeBox
+                  label='Within Batch'
+                  options={[
+                    {
+                      name: 'Unique',
+                      percent:
+                        registration.batchUniqueCountAndPercentage.percentage,
+                      value: registration.batchUniqueCountAndPercentage.count,
+                    },
+                    {
+                      name: 'Duplicates',
+                      percent:
+                        registration.batchDuplicatesCountAndPercentage
+                          .percentage,
+                      value:
+                        registration.batchDuplicatesCountAndPercentage.count,
+                    },
+                  ]}
+                />
+                <DedupeBox
+                  label='In Population'
+                  options={[
+                    {
+                      name: 'Unique',
+                      percent:
+                        registration.goldenRecordUniqueCountAndPercentage
+                          .percentage,
+                      value:
+                        registration.goldenRecordUniqueCountAndPercentage.count,
+                    },
+                    {
+                      name: 'Duplicates',
+                      percent:
+                        registration.goldenRecordDuplicatesCountAndPercentage
+                          .percentage,
+                      value:
+                        registration.goldenRecordDuplicatesCountAndPercentage
+                          .count,
+                    },
+                    {
+                      name: 'Need Adjudication',
+                      percent:
+                        registration
+                          .goldenRecordPossibleDuplicatesCountAndPercentage
+                          .percentage,
+                      value:
+                        registration
+                          .goldenRecordPossibleDuplicatesCountAndPercentage
+                          .count,
+                    },
+                  ]}
+                />
+              </Grid>
+            </Grid>
+          )}
         </Grid>
-        <BigValueContainer>
-          <LabelizedField
-            label='Total Number of Households'
-            dataCy='households'
-          >
-            <BigValue>{registration.numberOfHouseholds}</BigValue>
-          </LabelizedField>
-        </BigValueContainer>
-        <BigValueContainer>
-          <LabelizedField
-            label='Total Number of Individuals'
-            dataCy='individuals'
-          >
-            <BigValue>{registration.numberOfIndividuals}</BigValue>
-          </LabelizedField>
-        </BigValueContainer>
-        <BigValueContainer>
-          <LabelizedField label='Correct'>
-            <BigValue>90%</BigValue>
-          </LabelizedField>
-        </BigValueContainer>
-        <ChartContainer>
-          <Doughnut
-            width={100}
-            height={100}
-            options={{
-              maintainAspectRatio: false,
-              cutoutPercentage: 65,
-              legend: {
-                display: false,
-              },
-            }}
-            data={{
-              labels: ['Correct', 'Not Correct'],
-              datasets: [
-                {
-                  data: [90, 10],
-                  backgroundColor: ['#74C304', '#DADADA'],
-                  hoverBackgroundColor: ['#74C304', '#DADADA'],
-                },
-              ],
-            }}
-          />
-        </ChartContainer>
       </OverviewContainer>
     </Container>
   );

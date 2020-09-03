@@ -1,21 +1,19 @@
 import logging
 
+from constance import config
 from django.db.models import Q
 from django.forms import model_to_dict
-from constance import config
 
 from household.documents import IndividualDocument
+from household.elasticsearch_utils import populate_all_indexes
 from household.models import Individual, DUPLICATE, NEEDS_ADJUDICATION, UNIQUE, NOT_PROCESSED
 from registration_data.models import RegistrationDataImport
-
 from registration_datahub.documents import ImportedIndividualDocument
 from registration_datahub.models import (
     ImportedIndividual,
     DUPLICATE_IN_BATCH,
-    SIMILAR_IN_BATCH,
     UNIQUE_IN_BATCH,
 )
-
 
 log = logging.getLogger(__name__)
 
@@ -209,6 +207,8 @@ class DeduplicateTask:
 
     @classmethod
     def deduplicate_individuals(cls, registration_data_import):
+        populate_all_indexes()
+
         cls.business_area = registration_data_import.business_area.slug
         (
             all_duplicates,
@@ -239,6 +239,8 @@ class DeduplicateTask:
 
     @classmethod
     def deduplicate_imported_individuals(cls, registration_data_import_datahub):
+        populate_all_indexes()
+
         imported_individuals = ImportedIndividual.objects.filter(
             registration_data_import=registration_data_import_datahub
         )
@@ -374,4 +376,5 @@ class DeduplicateTask:
             ).update(deduplication_golden_record_status=UNIQUE)
 
             registration_data_import.status = RegistrationDataImport.IN_REVIEW
+            registration_data_import.error_message = ""
             registration_data_import.save()
