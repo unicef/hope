@@ -1,7 +1,6 @@
 import React, { ReactElement } from 'react';
 import {
   AllPaymentRecordsQueryVariables,
-  CashPlanNode,
   HouseholdNode,
   PaymentRecordNode,
   useAllPaymentRecordsQuery,
@@ -11,7 +10,6 @@ import { headCells } from './PaymentRecordHouseholdTableHeadCells';
 import { PaymentRecordHouseholdTableRow } from './PaymentRecordHouseholdTableRow';
 
 interface PaymentRecordTableProps {
-  cashPlan?: CashPlanNode;
   household?: HouseholdNode;
   openInNewTab?: boolean;
 }
