@@ -62,6 +62,7 @@ export function ImportedIndividualsTableRow({
         {individual.deduplicationBatchResults.length ? (
           <>
             <DedupeResults
+              isInBatch
               status={
                 deduplicationBatchDict[individual.deduplicationBatchStatus]
               }
