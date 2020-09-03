@@ -1,8 +1,8 @@
 FROM node:13-alpine as dev
 
 WORKDIR /code/
-ADD package*.json /code/
-RUN npm install
+ADD yarn.lock package.json /code/
+RUN yarn install
 ADD . /code/
 
 EXPOSE 3000
