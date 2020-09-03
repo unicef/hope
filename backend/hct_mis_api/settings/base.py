@@ -404,12 +404,12 @@ CONSTANCE_CONFIG = {
     ),
     # GOLDEN RECORDS SETTINGS
     "DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE": (
-        50.0,
+        25.0,
         "Results below the minimum score will not be taken into account",
         "positive_integers",
     ),
     "DEDUPLICATION_GOLDEN_RECORD_DUPLICATE_SCORE": (
-        70.0,
+        40.0,
         "Results equal or above this score are considered duplicates",
         "positive_integers",
     ),
