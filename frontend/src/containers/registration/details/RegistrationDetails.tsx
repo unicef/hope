@@ -108,59 +108,64 @@ export function RegistrationDetails({
               </LabelizedField>
             </BigValueContainer>
           </Grid>
-          <Grid item xs={5}>
-            <Grid container direction='column'>
-              <DedupeBox
-                label='Within Batch'
-                options={[
-                  {
-                    name: 'Unique',
-                    percent:
-                      registration.batchUniqueCountAndPercentage.percentage,
-                    value: registration.batchUniqueCountAndPercentage.count,
-                  },
-                  {
-                    name: 'Duplicates',
-                    percent:
-                      registration.batchDuplicatesCountAndPercentage.percentage,
-                    value: registration.batchDuplicatesCountAndPercentage.count,
-                  },
-                ]}
-              />
-              <DedupeBox
-                label='In Population'
-                options={[
-                  {
-                    name: 'Unique',
-                    percent:
-                      registration.goldenRecordUniqueCountAndPercentage
-                        .percentage,
-                    value:
-                      registration.goldenRecordUniqueCountAndPercentage.count,
-                  },
-                  {
-                    name: 'Duplicates',
-                    percent:
-                      registration.goldenRecordDuplicatesCountAndPercentage
-                        .percentage,
-                    value:
-                      registration.goldenRecordDuplicatesCountAndPercentage
-                        .count,
-                  },
-                  {
-                    name: 'Need Adjudication',
-                    percent:
-                      registration
-                        .goldenRecordPossibleDuplicatesCountAndPercentage
-                        .percentage,
-                    value:
-                      registration
-                        .goldenRecordPossibleDuplicatesCountAndPercentage.count,
-                  },
-                ]}
-              />
+          {registration.status === 'DEDUPLICATION_FAILED' ? null : (
+            <Grid item xs={5}>
+              <Grid container direction='column'>
+                <DedupeBox
+                  label='Within Batch'
+                  options={[
+                    {
+                      name: 'Unique',
+                      percent:
+                        registration.batchUniqueCountAndPercentage.percentage,
+                      value: registration.batchUniqueCountAndPercentage.count,
+                    },
+                    {
+                      name: 'Duplicates',
+                      percent:
+                        registration.batchDuplicatesCountAndPercentage
+                          .percentage,
+                      value:
+                        registration.batchDuplicatesCountAndPercentage.count,
+                    },
+                  ]}
+                />
+                <DedupeBox
+                  label='In Population'
+                  options={[
+                    {
+                      name: 'Unique',
+                      percent:
+                        registration.goldenRecordUniqueCountAndPercentage
+                          .percentage,
+                      value:
+                        registration.goldenRecordUniqueCountAndPercentage.count,
+                    },
+                    {
+                      name: 'Duplicates',
+                      percent:
+                        registration.goldenRecordDuplicatesCountAndPercentage
+                          .percentage,
+                      value:
+                        registration.goldenRecordDuplicatesCountAndPercentage
+                          .count,
+                    },
+                    {
+                      name: 'Need Adjudication',
+                      percent:
+                        registration
+                          .goldenRecordPossibleDuplicatesCountAndPercentage
+                          .percentage,
+                      value:
+                        registration
+                          .goldenRecordPossibleDuplicatesCountAndPercentage
+                          .count,
+                    },
+                  ]}
+                />
+              </Grid>
             </Grid>
-          </Grid>
+          )}
         </Grid>
       </OverviewContainer>
     </Container>
