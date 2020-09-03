@@ -2570,6 +2570,16 @@
                 "defaultValue": null
               },
               {
+                "name": "duplicatesOnly",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "orderBy",
                 "description": null,
                 "type": {
@@ -11813,6 +11823,22 @@
             "deprecationReason": null
           },
           {
+            "name": "sanctionListPossibleMatch",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "representedHouseholds",
             "description": null,
             "args": [
@@ -12510,6 +12536,78 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "batchDuplicatesCountAndPercentage",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "CountAndPercentageNode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "goldenRecordDuplicatesCountAndPercentage",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "CountAndPercentageNode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "batchPossibleDuplicatesCountAndPercentage",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "CountAndPercentageNode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "goldenRecordPossibleDuplicatesCountAndPercentage",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "CountAndPercentageNode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "batchUniqueCountAndPercentage",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "CountAndPercentageNode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "goldenRecordUniqueCountAndPercentage",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "CountAndPercentageNode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -12594,6 +12692,41 @@
         "possibleTypes": null
       },
       {
+        "kind": "OBJECT",
+        "name": "CountAndPercentageNode",
+        "description": null,
+        "fields": [
+          {
+            "name": "count",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "percentage",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "ENUM",
         "name": "IndividualWorkStatus",
         "description": null,
@@ -12659,7 +12792,7 @@
             "deprecationReason": null
           },
           {
-            "name": "A_",
+            "name": "NOT_PROCESSED",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -12698,6 +12831,18 @@
           },
           {
             "name": "score",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "proximityToScore",
             "description": null,
             "args": [],
             "type": {
@@ -17307,6 +17452,18 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "hasDuplicates",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -18691,7 +18848,7 @@
             "deprecationReason": null
           },
           {
-            "name": "A_",
+            "name": "NOT_PROCESSED",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -18726,7 +18883,7 @@
             "deprecationReason": null
           },
           {
-            "name": "A_",
+            "name": "NOT_PROCESSED",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null

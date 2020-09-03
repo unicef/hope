@@ -9,7 +9,6 @@ from dateutil.parser import parse
 from django.contrib.gis.geos import Point
 from django.core.files import File
 from django.core.files.storage import default_storage
-from django.core.management import call_command
 from django.db import transaction
 from django.utils import timezone
 from django_countries.fields import Country
@@ -441,13 +440,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             status=RegistrationDataImport.IN_REVIEW
         )
 
-        call_command(
-            "search_index",
-            "--populate",
-            "--models",
-            "registration_datahub.ImportedIndividual",
-        )
-
         DeduplicateTask.deduplicate_imported_individuals(
             registration_data_import_datahub=registration_data_import
         )
@@ -685,13 +677,6 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
 
         RegistrationDataImport.objects.filter(id=registration_data_import.hct_id).update(
             status=RegistrationDataImport.IN_REVIEW
-        )
-
-        call_command(
-            "search_index",
-            "--populate",
-            "--models",
-            "registration_datahub.ImportedIndividual",
         )
 
         DeduplicateTask.deduplicate_imported_individuals(

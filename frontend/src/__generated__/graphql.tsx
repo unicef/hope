@@ -403,6 +403,12 @@ export type CoreFieldChoiceObject = {
   listName?: Maybe<Scalars['String']>,
 };
 
+export type CountAndPercentageNode = {
+   __typename?: 'CountAndPercentageNode',
+  count?: Maybe<Scalars['Int']>,
+  percentage?: Maybe<Scalars['Float']>,
+};
+
 export type CreatePaymentVerificationInput = {
   cashPlanId: Scalars['ID'],
   sampling: Scalars['String'],
@@ -458,6 +464,7 @@ export type DeduplicationResultNode = {
   hitId?: Maybe<Scalars['ID']>,
   fullName?: Maybe<Scalars['String']>,
   score?: Maybe<Scalars['Float']>,
+  proximityToScore?: Maybe<Scalars['Float']>,
 };
 
 export type DeleteProgram = {
@@ -1144,6 +1151,7 @@ export type ImportedHouseholdNode = Node & {
   returnee: Scalars['Boolean'],
   flexFields: Scalars['JSONString'],
   individuals: ImportedIndividualNodeConnection,
+  hasDuplicates?: Maybe<Scalars['Boolean']>,
 };
 
 
@@ -1180,14 +1188,14 @@ export enum ImportedIndividualDeduplicationBatchStatus {
   SimilarInBatch = 'SIMILAR_IN_BATCH',
   DuplicateInBatch = 'DUPLICATE_IN_BATCH',
   UniqueInBatch = 'UNIQUE_IN_BATCH',
-  A = 'A_'
+  NotProcessed = 'NOT_PROCESSED'
 }
 
 export enum ImportedIndividualDeduplicationGoldenRecordStatus {
   Unique = 'UNIQUE',
   Duplicate = 'DUPLICATE',
   NeedsAdjudication = 'NEEDS_ADJUDICATION',
-  A = 'A_'
+  NotProcessed = 'NOT_PROCESSED'
 }
 
 export type ImportedIndividualIdentityNode = {
@@ -1284,7 +1292,7 @@ export enum IndividualDeduplicationStatus {
   Unique = 'UNIQUE',
   Duplicate = 'DUPLICATE',
   NeedsAdjudication = 'NEEDS_ADJUDICATION',
-  A = 'A_'
+  NotProcessed = 'NOT_PROCESSED'
 }
 
 export type IndividualIdentityNode = {
@@ -1335,6 +1343,7 @@ export type IndividualNode = Node & {
   unicefId: Scalars['String'],
   deduplicationStatus: IndividualDeduplicationStatus,
   deduplicationResults?: Maybe<Array<Maybe<DeduplicationResultNode>>>,
+  sanctionListPossibleMatch: Scalars['Boolean'],
   representedHouseholds: HouseholdNodeConnection,
   headingHousehold?: Maybe<HouseholdNode>,
   documents: DocumentNodeConnection,
@@ -2289,6 +2298,7 @@ export type QueryAllImportedIndividualsArgs = {
   last?: Maybe<Scalars['Int']>,
   household?: Maybe<Scalars['ID']>,
   rdiId?: Maybe<Scalars['String']>,
+  duplicatesOnly?: Maybe<Scalars['Boolean']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -2432,6 +2442,12 @@ export type RegistrationDataImportNode = Node & {
   businessArea?: Maybe<BusinessAreaNode>,
   households: HouseholdNodeConnection,
   individuals: IndividualNodeConnection,
+  batchDuplicatesCountAndPercentage?: Maybe<CountAndPercentageNode>,
+  goldenRecordDuplicatesCountAndPercentage?: Maybe<CountAndPercentageNode>,
+  batchPossibleDuplicatesCountAndPercentage?: Maybe<CountAndPercentageNode>,
+  goldenRecordPossibleDuplicatesCountAndPercentage?: Maybe<CountAndPercentageNode>,
+  batchUniqueCountAndPercentage?: Maybe<CountAndPercentageNode>,
+  goldenRecordUniqueCountAndPercentage?: Maybe<CountAndPercentageNode>,
 };
 
 
@@ -4353,7 +4369,8 @@ export type AllImportedIndividualsQueryVariables = {
   last?: Maybe<Scalars['Int']>,
   rdiId?: Maybe<Scalars['String']>,
   household?: Maybe<Scalars['ID']>,
-  orderBy?: Maybe<Scalars['String']>
+  orderBy?: Maybe<Scalars['String']>,
+  duplicatesOnly?: Maybe<Scalars['Boolean']>
 };
 
 
@@ -4546,13 +4563,32 @@ export type RegistrationMinimalFragment = (
 
 export type RegistrationDetailedFragment = (
   { __typename?: 'RegistrationDataImportNode' }
-  & Pick<RegistrationDataImportNode, 'numberOfIndividuals' | 'datahubId'>
+  & Pick<RegistrationDataImportNode, 'numberOfIndividuals' | 'datahubId' | 'errorMessage'>
+  & { batchDuplicatesCountAndPercentage: Maybe<(
+    { __typename?: 'CountAndPercentageNode' }
+    & Pick<CountAndPercentageNode, 'count' | 'percentage'>
+  )>, batchPossibleDuplicatesCountAndPercentage: Maybe<(
+    { __typename?: 'CountAndPercentageNode' }
+    & Pick<CountAndPercentageNode, 'count' | 'percentage'>
+  )>, batchUniqueCountAndPercentage: Maybe<(
+    { __typename?: 'CountAndPercentageNode' }
+    & Pick<CountAndPercentageNode, 'count' | 'percentage'>
+  )>, goldenRecordUniqueCountAndPercentage: Maybe<(
+    { __typename?: 'CountAndPercentageNode' }
+    & Pick<CountAndPercentageNode, 'count' | 'percentage'>
+  )>, goldenRecordDuplicatesCountAndPercentage: Maybe<(
+    { __typename?: 'CountAndPercentageNode' }
+    & Pick<CountAndPercentageNode, 'count' | 'percentage'>
+  )>, goldenRecordPossibleDuplicatesCountAndPercentage: Maybe<(
+    { __typename?: 'CountAndPercentageNode' }
+    & Pick<CountAndPercentageNode, 'count' | 'percentage'>
+  )> }
   & RegistrationMinimalFragment
 );
 
 export type ImportedHouseholdMinimalFragment = (
   { __typename?: 'ImportedHouseholdNode' }
-  & Pick<ImportedHouseholdNode, 'id' | 'size' | 'admin1' | 'admin2' | 'firstRegistrationDate' | 'lastRegistrationDate'>
+  & Pick<ImportedHouseholdNode, 'id' | 'size' | 'admin1' | 'admin2' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'hasDuplicates'>
   & { headOfHousehold: Maybe<(
     { __typename?: 'ImportedIndividualNode' }
     & Pick<ImportedIndividualNode, 'id' | 'fullName'>
@@ -4572,6 +4608,16 @@ export type ImportedHouseholdDetailedFragment = (
 export type ImportedIndividualMinimalFragment = (
   { __typename?: 'ImportedIndividualNode' }
   & Pick<ImportedIndividualNode, 'id' | 'fullName' | 'birthDate' | 'sex' | 'role' | 'relationship' | 'deduplicationBatchStatus' | 'deduplicationGoldenRecordStatus'>
+  & { deduplicationGoldenRecordResults: Maybe<Array<Maybe<(
+    { __typename?: 'DeduplicationResultNode' }
+    & Pick<DeduplicationResultNode, 'hitId' | 'fullName' | 'score' | 'proximityToScore'>
+  )>>>, deduplicationBatchResults: Maybe<Array<Maybe<(
+    { __typename?: 'DeduplicationResultNode' }
+    & Pick<DeduplicationResultNode, 'hitId' | 'fullName' | 'score' | 'proximityToScore'>
+  )>>>, registrationDataImport: (
+    { __typename?: 'RegistrationDataImportDatahubNode' }
+    & Pick<RegistrationDataImportDatahubNode, 'id' | 'hctId'>
+  ) }
 );
 
 export type ImportedIndividualDetailedFragment = (
@@ -4964,6 +5010,31 @@ export const RegistrationDetailedFragmentDoc = gql`
   ...registrationMinimal
   numberOfIndividuals
   datahubId
+  errorMessage
+  batchDuplicatesCountAndPercentage {
+    count
+    percentage
+  }
+  batchPossibleDuplicatesCountAndPercentage {
+    count
+    percentage
+  }
+  batchUniqueCountAndPercentage {
+    count
+    percentage
+  }
+  goldenRecordUniqueCountAndPercentage {
+    count
+    percentage
+  }
+  goldenRecordDuplicatesCountAndPercentage {
+    count
+    percentage
+  }
+  goldenRecordPossibleDuplicatesCountAndPercentage {
+    count
+    percentage
+  }
 }
     ${RegistrationMinimalFragmentDoc}`;
 export const ImportedHouseholdMinimalFragmentDoc = gql`
@@ -4978,6 +5049,7 @@ export const ImportedHouseholdMinimalFragmentDoc = gql`
   admin2
   firstRegistrationDate
   lastRegistrationDate
+  hasDuplicates
 }
     `;
 export const ImportedHouseholdDetailedFragmentDoc = gql`
@@ -5003,6 +5075,22 @@ export const ImportedIndividualMinimalFragmentDoc = gql`
   relationship
   deduplicationBatchStatus
   deduplicationGoldenRecordStatus
+  deduplicationGoldenRecordResults {
+    hitId
+    fullName
+    score
+    proximityToScore
+  }
+  deduplicationBatchResults {
+    hitId
+    fullName
+    score
+    proximityToScore
+  }
+  registrationDataImport {
+    id
+    hctId
+  }
 }
     `;
 export const ImportedIndividualDetailedFragmentDoc = gql`
@@ -8199,8 +8287,8 @@ export type AllImportedHouseholdsQueryHookResult = ReturnType<typeof useAllImpor
 export type AllImportedHouseholdsLazyQueryHookResult = ReturnType<typeof useAllImportedHouseholdsLazyQuery>;
 export type AllImportedHouseholdsQueryResult = ApolloReactCommon.QueryResult<AllImportedHouseholdsQuery, AllImportedHouseholdsQueryVariables>;
 export const AllImportedIndividualsDocument = gql`
-    query AllImportedIndividuals($after: String, $before: String, $first: Int, $last: Int, $rdiId: String, $household: ID, $orderBy: String) {
-  allImportedIndividuals(after: $after, before: $before, first: $first, last: $last, rdiId: $rdiId, household: $household, orderBy: $orderBy) {
+    query AllImportedIndividuals($after: String, $before: String, $first: Int, $last: Int, $rdiId: String, $household: ID, $orderBy: String, $duplicatesOnly: Boolean) {
+  allImportedIndividuals(after: $after, before: $before, first: $first, last: $last, rdiId: $rdiId, household: $household, orderBy: $orderBy, duplicatesOnly: $duplicatesOnly) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -8254,6 +8342,7 @@ export function withAllImportedIndividuals<TProps, TChildProps = {}>(operationOp
  *      rdiId: // value for 'rdiId'
  *      household: // value for 'household'
  *      orderBy: // value for 'orderBy'
+ *      duplicatesOnly: // value for 'duplicatesOnly'
  *   },
  * });
  */
@@ -9370,6 +9459,7 @@ export type ResolversTypes = {
   RegistrationDataImportNode: ResolverTypeWrapper<RegistrationDataImportNode>,
   RegistrationDataImportStatus: RegistrationDataImportStatus,
   RegistrationDataImportDataSource: RegistrationDataImportDataSource,
+  CountAndPercentageNode: ResolverTypeWrapper<CountAndPercentageNode>,
   IndividualWorkStatus: IndividualWorkStatus,
   FlexFieldsScalar: ResolverTypeWrapper<Scalars['FlexFieldsScalar']>,
   IndividualDeduplicationStatus: IndividualDeduplicationStatus,
@@ -9564,6 +9654,7 @@ export type ResolversParentTypes = {
   RegistrationDataImportNode: RegistrationDataImportNode,
   RegistrationDataImportStatus: RegistrationDataImportStatus,
   RegistrationDataImportDataSource: RegistrationDataImportDataSource,
+  CountAndPercentageNode: CountAndPercentageNode,
   IndividualWorkStatus: IndividualWorkStatus,
   FlexFieldsScalar: Scalars['FlexFieldsScalar'],
   IndividualDeduplicationStatus: IndividualDeduplicationStatus,
@@ -9872,6 +9963,11 @@ export type CoreFieldChoiceObjectResolvers<ContextType = any, ParentType extends
   listName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
+export type CountAndPercentageNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['CountAndPercentageNode'] = ResolversParentTypes['CountAndPercentageNode']> = {
+  count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  percentage?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+};
+
 export type CreatePaymentVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreatePaymentVerificationMutation'] = ResolversParentTypes['CreatePaymentVerificationMutation']> = {
   cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
 };
@@ -9900,6 +9996,7 @@ export type DeduplicationResultNodeResolvers<ContextType = any, ParentType exten
   hitId?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>,
   fullName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   score?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  proximityToScore?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
 };
 
 export type DeleteProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteProgram'] = ResolversParentTypes['DeleteProgram']> = {
@@ -10171,6 +10268,7 @@ export type ImportedHouseholdNodeResolvers<ContextType = any, ParentType extends
   returnee?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   flexFields?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   individuals?: Resolver<ResolversTypes['ImportedIndividualNodeConnection'], ParentType, ContextType, ImportedHouseholdNodeIndividualsArgs>,
+  hasDuplicates?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
 export type ImportedHouseholdNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedHouseholdNodeConnection'] = ResolversParentTypes['ImportedHouseholdNodeConnection']> = {
@@ -10281,6 +10379,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   unicefId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   deduplicationStatus?: Resolver<ResolversTypes['IndividualDeduplicationStatus'], ParentType, ContextType>,
   deduplicationResults?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeduplicationResultNode']>>>, ParentType, ContextType>,
+  sanctionListPossibleMatch?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   representedHouseholds?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, IndividualNodeRepresentedHouseholdsArgs>,
   headingHousehold?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, IndividualNodeDocumentsArgs>,
@@ -10662,6 +10761,12 @@ export type RegistrationDataImportNodeResolvers<ContextType = any, ParentType ex
   businessArea?: Resolver<Maybe<ResolversTypes['BusinessAreaNode']>, ParentType, ContextType>,
   households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeHouseholdsArgs>,
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeIndividualsArgs>,
+  batchDuplicatesCountAndPercentage?: Resolver<Maybe<ResolversTypes['CountAndPercentageNode']>, ParentType, ContextType>,
+  goldenRecordDuplicatesCountAndPercentage?: Resolver<Maybe<ResolversTypes['CountAndPercentageNode']>, ParentType, ContextType>,
+  batchPossibleDuplicatesCountAndPercentage?: Resolver<Maybe<ResolversTypes['CountAndPercentageNode']>, ParentType, ContextType>,
+  goldenRecordPossibleDuplicatesCountAndPercentage?: Resolver<Maybe<ResolversTypes['CountAndPercentageNode']>, ParentType, ContextType>,
+  batchUniqueCountAndPercentage?: Resolver<Maybe<ResolversTypes['CountAndPercentageNode']>, ParentType, ContextType>,
+  goldenRecordUniqueCountAndPercentage?: Resolver<Maybe<ResolversTypes['CountAndPercentageNode']>, ParentType, ContextType>,
 };
 
 export type RegistrationDataImportNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['RegistrationDataImportNodeConnection'] = ResolversParentTypes['RegistrationDataImportNodeConnection']> = {
@@ -10914,6 +11019,7 @@ export type Resolvers<ContextType = any> = {
   ChoiceObject?: ChoiceObjectResolvers<ContextType>,
   CopyTargetPopulationMutationPayload?: CopyTargetPopulationMutationPayloadResolvers<ContextType>,
   CoreFieldChoiceObject?: CoreFieldChoiceObjectResolvers<ContextType>,
+  CountAndPercentageNode?: CountAndPercentageNodeResolvers<ContextType>,
   CreatePaymentVerificationMutation?: CreatePaymentVerificationMutationResolvers<ContextType>,
   CreateProgram?: CreateProgramResolvers<ContextType>,
   CreateTargetPopulationMutation?: CreateTargetPopulationMutationResolvers<ContextType>,

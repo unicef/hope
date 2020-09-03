@@ -58,7 +58,6 @@ export function CreateTargetPopulation() {
     <Formik
       initialValues={initialValues}
       onSubmit={(values) => {
-        console.log(values)
         mutate({
           variables: {
             input: {

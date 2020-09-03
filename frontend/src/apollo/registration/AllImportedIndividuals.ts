@@ -9,6 +9,7 @@ export const ALL_IMPORTED_INDIVIDUALS_QUERY = gql`
     $rdiId: String
     $household: ID
     $orderBy: String
+    $duplicatesOnly: Boolean
   ) {
     allImportedIndividuals(
       after: $after
@@ -18,6 +19,7 @@ export const ALL_IMPORTED_INDIVIDUALS_QUERY = gql`
       rdiId: $rdiId
       household: $household
       orderBy: $orderBy
+      duplicatesOnly: $duplicatesOnly
     ) {
       pageInfo {
         hasNextPage

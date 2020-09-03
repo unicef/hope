@@ -4,6 +4,12 @@ import { ImportedHouseholdMinimalFragment } from '../../../../__generated__/grap
 export const headCells: HeadCell<ImportedHouseholdMinimalFragment>[] = [
   {
     disablePadding: false,
+    label: '',
+    id: '',
+    numeric: false,
+  },
+  {
+    disablePadding: false,
     label: 'Source ID',
     id: 'id',
     numeric: false,
