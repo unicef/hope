@@ -129,7 +129,7 @@ class ImportedIndividualNode(DjangoObjectType):
 
     def resolve_deduplication_golden_record_results(parent, info):
         key = (
-            "duplicates" if parent.deduplication_golden_record_status == DUPLICATE_IN_BATCH else "possible_duplicates"
+            "duplicates" if parent.deduplication_golden_record_status == DUPLICATE else "possible_duplicates"
         )
         results = parent.deduplication_golden_record_results.get(key, {})
         return encode_ids(results, "Individual", "hit_id")
