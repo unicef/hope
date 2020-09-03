@@ -6,7 +6,7 @@ from django.forms import model_to_dict
 from constance import config
 
 from household.documents import IndividualDocument
-from household.elasticsearch_utils import rebuild_search_index
+from household.elasticsearch_utils import rebuild_search_index, populate_all_indexes
 from household.models import Individual, DUPLICATE, NEEDS_ADJUDICATION, UNIQUE, NOT_PROCESSED
 from registration_data.models import RegistrationDataImport
 
@@ -211,7 +211,7 @@ class DeduplicateTask:
 
     @classmethod
     def deduplicate_individuals(cls, registration_data_import):
-        rebuild_search_index()
+        populate_all_indexes()
 
         cls.business_area = registration_data_import.business_area.slug
         (
@@ -243,7 +243,7 @@ class DeduplicateTask:
 
     @classmethod
     def deduplicate_imported_individuals(cls, registration_data_import_datahub):
-        rebuild_search_index()
+        populate_all_indexes()
 
         imported_individuals = ImportedIndividual.objects.filter(
             registration_data_import=registration_data_import_datahub
