@@ -194,7 +194,7 @@ class RdiMergeTask:
         )
 
         DeduplicateTask.deduplicate_individuals(registration_data_import=obj_hct)
-        Individual.objects.filter(registration_data_import=obj_hub, deduplication_status=DUPLICATE).delete()
+        Individual.objects.filter(registration_data_import=obj_hct, deduplication_status=DUPLICATE).delete()
 
         # re-populate after removing duplicates
         call_command(
