@@ -42,9 +42,9 @@ class DeduplicationResultNode(graphene.ObjectType):
     score = graphene.Float()
     proximity_to_score = graphene.Float()
     location = graphene.String()
-    dob = graphene.Int()
+    age = graphene.Int()
 
-    def resolve_dob(self, info):
+    def resolve_age(self, info):
         date_of_birth = self.get("dob")
         if date_of_birth:
             today = date.today()
