@@ -132,6 +132,11 @@ def _setup_schema_database(verbosity, interactive, keepdb=False, debug_sql=False
 
 
 class PostgresTestRunner(TestRunner):
+    def teardown_databases(self, old_config, **kwargs):
+        connections["cash_assist_datahub_ca"].close()
+        connections["cash_assist_datahub_erp"].close()
+        return super().teardown_databases(old_config, **kwargs)
+
     def setup_databases(self, **kwargs):
         old_names = []
         created = False
@@ -141,15 +146,16 @@ class PostgresTestRunner(TestRunner):
                 aliases = kwargs.get("aliases")
                 aliases.discard(alias)
                 if not created:
-                    old_names.extends(
+                    old_names.extend(
                         _setup_schema_database(self.verbosity, self.interactive, self.keepdb, self.debug_sql,
                                                self.parallel, alias=alias))
                     created = True
                 else:
                     connection = connections[alias]
-                    old_names.append((connection, alias, True))
                     create_fake_test_db(connection.creation, verbosity=self.verbosity,
                                         autoclobber=not self.interactive,
                                         keepdb=self.keepdb,
                                         serialize=connection.settings_dict.get('TEST', {}).get('SERIALIZE', True))
-        return old_names.extend(super().setup_databases(**kwargs))
+        old_names.extend(super().setup_databases(**kwargs))
+
+        return old_names
