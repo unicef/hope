@@ -71,7 +71,7 @@ class PullFromDatahubTask:
     @transaction.atomic(using="default")
     @transaction.atomic(using="cash_assist_datahub_ca")
     def execute(self):
-        sessions = Session.objects.filter(status=Session.STATUS_READY)
+        sessions = Session.objects.filter(status=Session.STATUS_READY).order_by("last_modified_date")
         for session in sessions:
             try:
                 self.copy_session(session)
