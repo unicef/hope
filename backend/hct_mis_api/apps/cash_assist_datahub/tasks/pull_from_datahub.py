@@ -76,6 +76,8 @@ class PullFromDatahubTask:
             try:
                 self.copy_session(session)
             except Exception as e:
+                session = Session.STATUS_FAILED
+                session.save()
                 print(e)
 
     def build_arg_dict(self, model_object, mapping_dict):
