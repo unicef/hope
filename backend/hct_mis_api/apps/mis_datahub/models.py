@@ -74,7 +74,7 @@ class Individual(SessionModel):
     estimated_date_of_birth = models.BooleanField()
     relationship = models.CharField(max_length=255, null=True, choices=RELATIONSHIP_CHOICE,)
     marital_status = models.CharField(max_length=255, choices=MARITAL_STATUS_CHOICE,)
-    phone_number = models.CharField(max_length=14, null=True)
+    phone_number = models.CharField(max_length=60, null=True)
 
     class Meta:
         unique_together = ("session", "mis_id")
