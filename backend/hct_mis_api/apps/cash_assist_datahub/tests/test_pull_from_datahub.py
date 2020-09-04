@@ -225,7 +225,6 @@ class TestPullDataFromDatahub(TestCase):
         self.assertEqual(payment_record.status_date, self.dh_payment_record.status_date)
         self.assertEqual(payment_record.ca_id, self.dh_payment_record.ca_id)
         self.assertEqual(str(payment_record.ca_hash_id), str(self.dh_payment_record.ca_hash_id))
-        self.assertEqual(payment_record.registration_ca_id, self.dh_payment_record.registration_ca_id)
         self.assertEqual(str(payment_record.household_id), str(self.dh_payment_record.household_mis_id))
         self.assertEqual(str(payment_record.household.head_of_household_id),
                          str(self.dh_payment_record.head_of_household_mis_id))
@@ -235,7 +234,7 @@ class TestPullDataFromDatahub(TestCase):
         self.assertEqual(str(payment_record.target_population_id), str(self.dh_payment_record.target_population_mis_id))
         self.assertEqual(payment_record.entitlement_card_number, self.dh_payment_record.entitlement_card_number)
         self.assertEqual(payment_record.entitlement_card_status, self.dh_payment_record.entitlement_card_status)
-        self.assertEqual(payment_record.entitlement_card_issue_date, self.dh_payment_record.entitlement_card_issue_date)
+        self.assertEqual(payment_record.entitlement_card_issue_date, self.dh_payment_record.entitlement_card_issue_date.date())
         self.assertEqual(payment_record.delivery_type, self.dh_payment_record.delivery_type)
         self.assertEqual(payment_record.delivery_type, self.dh_payment_record.delivery_type)
         self.assertEqual(payment_record.currency, self.dh_payment_record.currency)
