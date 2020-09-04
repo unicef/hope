@@ -55,6 +55,7 @@ class PullFromDatahubTask:
         "household_id": "household_mis_id",
         "ca_id": "ca_id",
         "ca_hash_id": "ca_hash_id",
+        "status": "status",
         "status_date": "status_date",
         "transaction_reference_id": "transaction_reference_id",
         "vision_id": "vision_id",
@@ -72,7 +73,10 @@ class PullFromDatahubTask:
     def execute(self):
         sessions = Session.objects.filter(status=Session.STATUS_READY)
         for session in sessions:
-            self.copy_session(session)
+            try:
+                self.copy_session(session)
+            except Exception as e:
+                print(e)
 
     def build_arg_dict(self, model_object, mapping_dict):
         return {key: nested_getattr(model_object, mapping_dict[key]) for key in mapping_dict}
