@@ -4,7 +4,8 @@ from collections import MutableMapping
 from typing import List
 
 from django.core.exceptions import ValidationError
-from django.db.models import Q, F
+from django.db.models import Q, F, Model
+from django.forms import model_to_dict
 from django.template.defaultfilters import slugify
 
 
@@ -301,3 +302,46 @@ def encode_ids(results: List[dict], model_name: str, key: str) -> List[dict]:
             result_id = result[key]
             result[key] = encode_id_base64(result_id, model_name)
     return results
+
+
+def to_dict(instance, fields=None, dict_fields=None):
+    if fields is None:
+        fields = [f.name for f in instance._meta.fields]
+
+    data = model_to_dict(instance, fields)
+
+    for field in fields:
+        main_field = getattr(instance, field, "__NOT_EXIST__")
+        if main_field != "__NOT_EXIST__":
+            data[field] = main_field if issubclass(type(main_field), Model) else main_field
+
+    if dict_fields and isinstance(dict_fields, dict):
+        for main_field_key, nested_fields in dict_fields.items():
+            main_field = getattr(instance, main_field_key, "__NOT_EXIST__")
+            if main_field != "__NOT_EXIST__":
+                if hasattr(main_field, "db"):
+                    objs = main_field.all()
+                    data[main_field_key] = []
+                    multi = True
+                else:
+                    objs = [main_field]
+                    multi = False
+
+                for obj in objs:
+                    instance_data_dict = {}
+                    for nested_field in nested_fields:
+                        attrs_to_get = nested_field.split(".")
+                        value = None
+                        for attr in attrs_to_get:
+                            if value:
+                                value = getattr(value, attr, "__EMPTY_VALUE__")
+                            else:
+                                value = getattr(obj, attr, "__EMPTY_VALUE__")
+                        if value != "__EMPTY_VALUE__":
+                            instance_data_dict[attrs_to_get[-1]] = value
+                    if instance_data_dict and multi is True:
+                        data[main_field_key].append(instance_data_dict)
+                    elif multi is False:
+                        data[main_field_key] = instance_data_dict
+
+    return data
