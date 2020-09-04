@@ -11,7 +11,6 @@ from targeting.models import TargetPopulation
 
 
 class PullFromDatahubTask:
-
     MAPPING_CASH_PLAN_DICT = {
         "ca_id": "cash_plan_id",
         "ca_hash_id": "cash_plan_hash_id",
@@ -31,6 +30,7 @@ class PullFromDatahubTask:
         "delivery_type": "delivery_type",
         "comments": "comments",
         "coverage_duration": "coverage_duration",
+        "coverage_unit": "coverage_unit",
         "dispersion_date": "dispersion_date",
         "end_date": "end_date",
         "start_date": "start_date",
@@ -109,6 +109,7 @@ class PullFromDatahubTask:
             payment_record_args["service_provider"] = ServiceProvider.objects.get(
                 ca_id=dh_payment_record.service_provider_ca_id
             )
+            payment_record_args["cash_plan"] = CashPlan.objects.get(ca_id=dh_payment_record.cash_plan_ca_id)
             (payment_record, created,) = PaymentRecord.objects.update_or_create(
                 ca_id=dh_payment_record.ca_id, defaults=payment_record_args
             )
@@ -126,7 +127,6 @@ class PullFromDatahubTask:
 
     def copy_programs_ids(self, session):
         dh_programs = ca_models.Programme.objects.filter(session=session)
-        import ipdb;ipdb.set_trace()
         programs = []
         for dh_program in dh_programs:
             program = Program.objects.get(id=dh_program.mis_id)
