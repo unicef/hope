@@ -20,6 +20,7 @@ from registration_datahub.models import (
     ImportedHousehold,
     ImportedIndividualRoleInHousehold,
     ImportedIndividual,
+    DUPLICATE_IN_BATCH,
 )
 from registration_datahub.tasks.deduplicate import DeduplicateTask
 from sanction_list.tasks.check_against_sanction_list_pre_merge import CheckAgainstSanctionListPreMergeTask
@@ -168,7 +169,25 @@ class RdiMergeTask:
         obj_hub = RegistrationDataImportDatahub.objects.get(hct_id=registration_data_import_id,)
         obj_hct = RegistrationDataImport.objects.get(id=registration_data_import_id,)
         imported_households = ImportedHousehold.objects.filter(registration_data_import=obj_hub)
-        imported_individuals = ImportedIndividual.objects.filter(registration_data_import=obj_hub)
+        imported_individuals = ImportedIndividual.objects.order_by("first_registration_date").filter(
+            registration_data_import=obj_hub
+        )
+        duplicated_imported_individuals = imported_individuals.filter(deduplication_batch_status=DUPLICATE_IN_BATCH)
+
+        batch_duplicates = []
+        ignored_ids = []
+        for duplicated_individual in duplicated_imported_individuals:
+            batch_duplicates.extend(
+                [
+                    i["hit_id"]
+                    for i in duplicated_individual.deduplication_batch_results["duplicates"]
+                    if i["hit_id"] not in ignored_ids
+                ]
+            )
+            ignored_ids.append(str(duplicated_individual.id))
+
+        imported_individuals = imported_individuals.exclude(id__in=batch_duplicates)
+
         imported_roles = ImportedIndividualRoleInHousehold.objects.filter(
             household__in=imported_households, individual__in=imported_individuals,
         )
@@ -189,7 +208,11 @@ class RdiMergeTask:
         # DEDUPLICATION
 
         DeduplicateTask.deduplicate_individuals(registration_data_import=obj_hct)
-        Individual.objects.filter(registration_data_import=obj_hct, deduplication_status=DUPLICATE).delete()
+
+        # TODO: handle assignment of head of household and roles
+        #  (check: https://docs.google.com/document/d/14crNGkT9JGeJWJQSGcmPvlK8mvhOS1PvwAoZrj7-SrY/edit)
+        duplicates = Individual.objects.filter(registration_data_import=obj_hct, deduplication_status=DUPLICATE)
+        duplicates.delete()
 
         # re-build after removing duplicates
         rebuild_search_index()
