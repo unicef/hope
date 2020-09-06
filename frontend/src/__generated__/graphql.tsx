@@ -465,6 +465,8 @@ export type DeduplicationResultNode = {
   fullName?: Maybe<Scalars['String']>,
   score?: Maybe<Scalars['Float']>,
   proximityToScore?: Maybe<Scalars['Float']>,
+  location?: Maybe<Scalars['String']>,
+  age?: Maybe<Scalars['Int']>,
 };
 
 export type DeleteProgram = {
@@ -4610,10 +4612,10 @@ export type ImportedIndividualMinimalFragment = (
   & Pick<ImportedIndividualNode, 'id' | 'fullName' | 'birthDate' | 'sex' | 'role' | 'relationship' | 'deduplicationBatchStatus' | 'deduplicationGoldenRecordStatus'>
   & { deduplicationGoldenRecordResults: Maybe<Array<Maybe<(
     { __typename?: 'DeduplicationResultNode' }
-    & Pick<DeduplicationResultNode, 'hitId' | 'fullName' | 'score' | 'proximityToScore'>
+    & Pick<DeduplicationResultNode, 'hitId' | 'fullName' | 'score' | 'proximityToScore' | 'age' | 'location'>
   )>>>, deduplicationBatchResults: Maybe<Array<Maybe<(
     { __typename?: 'DeduplicationResultNode' }
-    & Pick<DeduplicationResultNode, 'hitId' | 'fullName' | 'score' | 'proximityToScore'>
+    & Pick<DeduplicationResultNode, 'hitId' | 'fullName' | 'score' | 'proximityToScore' | 'age' | 'location'>
   )>>>, registrationDataImport: (
     { __typename?: 'RegistrationDataImportDatahubNode' }
     & Pick<RegistrationDataImportDatahubNode, 'id' | 'hctId'>
@@ -5080,12 +5082,16 @@ export const ImportedIndividualMinimalFragmentDoc = gql`
     fullName
     score
     proximityToScore
+    age
+    location
   }
   deduplicationBatchResults {
     hitId
     fullName
     score
     proximityToScore
+    age
+    location
   }
   registrationDataImport {
     id
@@ -9997,6 +10003,8 @@ export type DeduplicationResultNodeResolvers<ContextType = any, ParentType exten
   fullName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   score?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   proximityToScore?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  location?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  age?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 
 export type DeleteProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteProgram'] = ResolversParentTypes['DeleteProgram']> = {
