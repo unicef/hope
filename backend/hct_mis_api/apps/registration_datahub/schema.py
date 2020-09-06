@@ -1,4 +1,8 @@
+from datetime import date
+
 import graphene
+from dateutil.parser import parse
+from dateutil.relativedelta import relativedelta
 from django.db.models import Q
 from django_filters import (
     FilterSet,
@@ -12,7 +16,7 @@ from graphene_django.filter import DjangoFilterConnectionField
 
 from core.extended_connection import ExtendedConnection
 from core.schema import ChoiceObject
-from core.utils import decode_id_string, to_choice_object, encode_id_base64, encode_ids
+from core.utils import decode_id_string, to_choice_object, encode_ids
 from household.models import (
     ROLE_NO_ROLE,
     DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
@@ -37,6 +41,17 @@ class DeduplicationResultNode(graphene.ObjectType):
     full_name = graphene.String()
     score = graphene.Float()
     proximity_to_score = graphene.Float()
+    location = graphene.String()
+    age = graphene.Int()
+
+    def resolve_age(self, info):
+        date_of_birth = self.get("dob")
+        if date_of_birth:
+            today = date.today()
+            return relativedelta(today, parse(date_of_birth)).years
+
+    def resolve_location(self, info):
+        return self.get("location") or "Not provided"
 
 
 class ImportedHouseholdFilter(FilterSet):
@@ -128,9 +143,7 @@ class ImportedIndividualNode(DjangoObjectType):
         return encode_ids(results, "ImportedIndividual", "hit_id")
 
     def resolve_deduplication_golden_record_results(parent, info):
-        key = (
-            "duplicates" if parent.deduplication_golden_record_status == DUPLICATE else "possible_duplicates"
-        )
+        key = "duplicates" if parent.deduplication_golden_record_status == DUPLICATE else "possible_duplicates"
         results = parent.deduplication_golden_record_results.get(key, {})
         return encode_ids(results, "Individual", "hit_id")
 
