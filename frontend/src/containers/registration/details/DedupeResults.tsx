@@ -74,11 +74,18 @@ export function DedupeResults({
     },
   }));
   const classes = useStyles();
-  function createData(hitId, score, proximityToScore) {
-    return { hitId, score, proximityToScore };
+  function createData(hitId, fullName, age, location, score, proximityToScore) {
+    return { hitId, fullName, age, location, score, proximityToScore };
   }
   const rows = results.map((result) => {
-    return createData(result.hitId, result.score, result.proximityToScore);
+    return createData(
+      result.hitId,
+      result.fullName,
+      result.age,
+      result.location,
+      result.score,
+      result.proximityToScore,
+    );
   });
   const handleClickBatch = (id): void => {
     const path = `/${businessArea}/registration-data-import/individual/${id}`;
@@ -110,15 +117,19 @@ export function DedupeResults({
             <div>
               Duplicates of{' '}
               <Bold>
-                {decodeIdString(individual.id)} {individual.fullName}
+                {individual.fullName} ({decodeIdString(individual.id)})
               </Bold>{' '}
-              are listed below.
+              {isInBatch ? 'within batch ' : 'against population '}are listed
+              below.
             </div>
           </DialogDescription>
           <Table className={classes.table}>
             <TableHead>
               <TableRow>
                 <TableCell style={{ width: 100 }}>Individual ID</TableCell>
+                <TableCell style={{ width: 100 }}>Full Name</TableCell>
+                <TableCell style={{ width: 100 }}>Age</TableCell>
+                <TableCell style={{ width: 100 }}>Location</TableCell>
                 <TableCell style={{ width: 100 }} align='left'>
                   Similarity Score
                 </TableCell>
@@ -141,6 +152,11 @@ export function DedupeResults({
                   >
                     <Pointer>{decodeIdString(row.hitId)}</Pointer>
                   </TableCell>
+                  <TableCell align='left'>{row.fullName}</TableCell>
+                  <TableCell align='left'>
+                    {row.age || 'Not provided'}
+                  </TableCell>
+                  <TableCell align='left'>{row.location}</TableCell>
                   <TableCell align='left'>{row.score.toFixed(2)}</TableCell>
                   <TableCell align='left'>
                     {row.proximityToScore > 0 && '+'}{' '}

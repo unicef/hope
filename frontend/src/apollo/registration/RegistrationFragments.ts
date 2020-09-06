@@ -96,12 +96,16 @@ export const importedIndividualMinimal = gql`
       fullName
       score
       proximityToScore
+      age
+      location
     }
     deduplicationBatchResults {
       hitId
       fullName
       score
       proximityToScore
+      age
+      location
     }
     registrationDataImport {
       id
