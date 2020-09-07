@@ -286,6 +286,8 @@ type DeduplicationResultNode {
   fullName: String
   score: Float
   proximityToScore: Float
+  location: String
+  age: Int
 }
 
 type DeleteProgram {
