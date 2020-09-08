@@ -14,6 +14,10 @@ export const HouseholdChoiceData = gql`
       name
       value
     }
+    maritalStatusChoices {
+      name
+      value
+    }
     deduplicationBatchStatusChoices {
       name
       value
