@@ -120,6 +120,16 @@ export function IndividualsBioData({
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
+          <LabelizedField label='Phone Number'>
+            <div>{individual.phoneNo}</div>
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label='Alternate Phone Number'>
+            <div>{individual.phoneNoAlternative || '-'}</div>
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
           <LabelizedField label='Household ID'>
             <ContentLink onClick={() => openHousehold()}>
               {decodeIdString(individual.household.id)}

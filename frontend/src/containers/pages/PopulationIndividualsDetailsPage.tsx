@@ -9,7 +9,6 @@ import {
   IndividualNode,
   useIndividualQuery,
 } from '../../__generated__/graphql';
-import { IndividualContactDetails } from '../../components/population/IndividualContactDetails';
 import { IndividualVulnerabilities } from '../../components/population/IndividualVunerabilities';
 import { CashPlus } from '../../components/population/CashPlus';
 import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
@@ -51,7 +50,6 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
       />
       <Container>
         <IndividualsBioData individual={individual as IndividualNode} />
-        <IndividualContactDetails individual={individual as IndividualNode} />
         <IndividualVulnerabilities individual={individual as IndividualNode} />
         <CashPlus individual={individual as IndividualNode} />
         <UniversalActivityLogTable objectId={individual.id} />

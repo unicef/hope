@@ -7,7 +7,6 @@ import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { decodeIdString } from '../../../../utils/utils';
 import { useImportedIndividualQuery } from '../../../../__generated__/graphql';
 import { RegistrationIndividualsBioData } from './RegistrationIndividualBioData';
-import { RegistrationIndividualContactDetails } from './RegistrationIndividualContactDetails';
 import { RegistrationIndividualVulnerabilities } from './RegistrationIndividualVulnerabilities';
 
 const Container = styled.div`
@@ -56,7 +55,6 @@ export function RegistrationIndividualDetailsPage(): React.ReactElement {
       />
       <Container>
         <RegistrationIndividualsBioData individual={importedIndividual} />
-        <RegistrationIndividualContactDetails individual={importedIndividual} />
         <RegistrationIndividualVulnerabilities
           individual={importedIndividual}
         />
