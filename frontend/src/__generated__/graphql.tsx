@@ -3667,6 +3667,17 @@ export type PaymentVerificationStatusChoicesQuery = (
   )>>> }
 );
 
+export type CashPlanVerificationSamplingChoicesQueryVariables = {};
+
+
+export type CashPlanVerificationSamplingChoicesQuery = (
+  { __typename?: 'Query' }
+  & { cashPlanVerificationSamplingChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>> }
+);
+
 export type AllAdminAreasQueryVariables = {
   title?: Maybe<Scalars['String']>,
   businessArea?: Maybe<Scalars['String']>,
@@ -4090,6 +4101,9 @@ export type HouseholdChoiceDataQuery = (
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
   )>>>, roleChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, maritalStatusChoices: Maybe<Array<Maybe<(
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
   )>>>, deduplicationBatchStatusChoices: Maybe<Array<Maybe<(
@@ -6524,6 +6538,56 @@ export function usePaymentVerificationStatusChoicesLazyQuery(baseOptions?: Apoll
 export type PaymentVerificationStatusChoicesQueryHookResult = ReturnType<typeof usePaymentVerificationStatusChoicesQuery>;
 export type PaymentVerificationStatusChoicesLazyQueryHookResult = ReturnType<typeof usePaymentVerificationStatusChoicesLazyQuery>;
 export type PaymentVerificationStatusChoicesQueryResult = ApolloReactCommon.QueryResult<PaymentVerificationStatusChoicesQuery, PaymentVerificationStatusChoicesQueryVariables>;
+export const CashPlanVerificationSamplingChoicesDocument = gql`
+    query cashPlanVerificationSamplingChoices {
+  cashPlanVerificationSamplingChoices {
+    name
+    value
+  }
+}
+    `;
+export type CashPlanVerificationSamplingChoicesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<CashPlanVerificationSamplingChoicesQuery, CashPlanVerificationSamplingChoicesQueryVariables>, 'query'>;
+
+    export const CashPlanVerificationSamplingChoicesComponent = (props: CashPlanVerificationSamplingChoicesComponentProps) => (
+      <ApolloReactComponents.Query<CashPlanVerificationSamplingChoicesQuery, CashPlanVerificationSamplingChoicesQueryVariables> query={CashPlanVerificationSamplingChoicesDocument} {...props} />
+    );
+    
+export type CashPlanVerificationSamplingChoicesProps<TChildProps = {}> = ApolloReactHoc.DataProps<CashPlanVerificationSamplingChoicesQuery, CashPlanVerificationSamplingChoicesQueryVariables> & TChildProps;
+export function withCashPlanVerificationSamplingChoices<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CashPlanVerificationSamplingChoicesQuery,
+  CashPlanVerificationSamplingChoicesQueryVariables,
+  CashPlanVerificationSamplingChoicesProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, CashPlanVerificationSamplingChoicesQuery, CashPlanVerificationSamplingChoicesQueryVariables, CashPlanVerificationSamplingChoicesProps<TChildProps>>(CashPlanVerificationSamplingChoicesDocument, {
+      alias: 'cashPlanVerificationSamplingChoices',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCashPlanVerificationSamplingChoicesQuery__
+ *
+ * To run a query within a React component, call `useCashPlanVerificationSamplingChoicesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCashPlanVerificationSamplingChoicesQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCashPlanVerificationSamplingChoicesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useCashPlanVerificationSamplingChoicesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<CashPlanVerificationSamplingChoicesQuery, CashPlanVerificationSamplingChoicesQueryVariables>) {
+        return ApolloReactHooks.useQuery<CashPlanVerificationSamplingChoicesQuery, CashPlanVerificationSamplingChoicesQueryVariables>(CashPlanVerificationSamplingChoicesDocument, baseOptions);
+      }
+export function useCashPlanVerificationSamplingChoicesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<CashPlanVerificationSamplingChoicesQuery, CashPlanVerificationSamplingChoicesQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<CashPlanVerificationSamplingChoicesQuery, CashPlanVerificationSamplingChoicesQueryVariables>(CashPlanVerificationSamplingChoicesDocument, baseOptions);
+        }
+export type CashPlanVerificationSamplingChoicesQueryHookResult = ReturnType<typeof useCashPlanVerificationSamplingChoicesQuery>;
+export type CashPlanVerificationSamplingChoicesLazyQueryHookResult = ReturnType<typeof useCashPlanVerificationSamplingChoicesLazyQuery>;
+export type CashPlanVerificationSamplingChoicesQueryResult = ApolloReactCommon.QueryResult<CashPlanVerificationSamplingChoicesQuery, CashPlanVerificationSamplingChoicesQueryVariables>;
 export const AllAdminAreasDocument = gql`
     query AllAdminAreas($title: String, $businessArea: String, $first: Int) {
   allAdminAreas(title_Icontains: $title, businessArea: $businessArea, first: $first) {
@@ -7556,6 +7620,10 @@ export const HouseholdChoiceDataDocument = gql`
     value
   }
   roleChoices {
+    name
+    value
+  }
+  maritalStatusChoices {
     name
     value
   }
