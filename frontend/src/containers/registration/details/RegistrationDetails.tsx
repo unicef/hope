@@ -77,7 +77,7 @@ export function RegistrationDetails({
                   />
                 </StatusContainer>
               </LabelizedField>
-              {registration.errorMessage && (
+              {registration?.errorMessage && (
                 <Error>{registration.errorMessage}</Error>
               )}
             </Box>
@@ -85,7 +85,7 @@ export function RegistrationDetails({
           <Grid item xs={1}>
             <LabelizedField
               label='Source of Data'
-              value={registration.dataSource}
+              value={registration?.dataSource}
             />
           </Grid>
           <Grid item xs={2}>
@@ -94,7 +94,7 @@ export function RegistrationDetails({
                 label='Total Number of Households'
                 dataCy='households'
               >
-                <BigValue>{registration.numberOfHouseholds}</BigValue>
+                <BigValue>{registration?.numberOfHouseholds}</BigValue>
               </LabelizedField>
             </BigValueContainer>
           </Grid>
@@ -104,7 +104,7 @@ export function RegistrationDetails({
                 label='Total Number of Individuals'
                 dataCy='individuals'
               >
-                <BigValue>{registration.numberOfIndividuals}</BigValue>
+                <BigValue>{registration?.numberOfIndividuals}</BigValue>
               </LabelizedField>
             </BigValueContainer>
           </Grid>
@@ -117,16 +117,16 @@ export function RegistrationDetails({
                     {
                       name: 'Unique',
                       percent:
-                        registration.batchUniqueCountAndPercentage.percentage,
-                      value: registration.batchUniqueCountAndPercentage.count,
+                        registration?.batchUniqueCountAndPercentage.percentage,
+                      value: registration?.batchUniqueCountAndPercentage.count,
                     },
                     {
                       name: 'Duplicates',
                       percent:
-                        registration.batchDuplicatesCountAndPercentage
+                        registration?.batchDuplicatesCountAndPercentage
                           .percentage,
                       value:
-                        registration.batchDuplicatesCountAndPercentage.count,
+                        registration?.batchDuplicatesCountAndPercentage.count,
                     },
                   ]}
                 />
@@ -136,29 +136,30 @@ export function RegistrationDetails({
                     {
                       name: 'Unique',
                       percent:
-                        registration.goldenRecordUniqueCountAndPercentage
+                        registration?.goldenRecordUniqueCountAndPercentage
                           .percentage,
                       value:
-                        registration.goldenRecordUniqueCountAndPercentage.count,
+                        registration?.goldenRecordUniqueCountAndPercentage
+                          .count,
                     },
                     {
                       name: 'Duplicates',
                       percent:
-                        registration.goldenRecordDuplicatesCountAndPercentage
+                        registration?.goldenRecordDuplicatesCountAndPercentage
                           .percentage,
                       value:
-                        registration.goldenRecordDuplicatesCountAndPercentage
+                        registration?.goldenRecordDuplicatesCountAndPercentage
                           .count,
                     },
                     {
                       name: 'Need Adjudication',
                       percent:
                         registration
-                          .goldenRecordPossibleDuplicatesCountAndPercentage
+                          ?.goldenRecordPossibleDuplicatesCountAndPercentage
                           .percentage,
                       value:
                         registration
-                          .goldenRecordPossibleDuplicatesCountAndPercentage
+                          ?.goldenRecordPossibleDuplicatesCountAndPercentage
                           .count,
                     },
                   ]}
