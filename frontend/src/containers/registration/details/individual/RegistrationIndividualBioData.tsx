@@ -8,12 +8,17 @@ import {
   getAgeFromDob,
   sexToCapitalize,
   maritalStatusToColor,
+  choicesToDict,
 } from '../../../../utils/utils';
-import { ImportedIndividualDetailedFragment } from '../../../../__generated__/graphql';
+import {
+  ImportedIndividualDetailedFragment,
+  useHouseholdChoiceDataQuery,
+} from '../../../../__generated__/graphql';
 import { LabelizedField } from '../../../../components/LabelizedField';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { Missing } from '../../../../components/Missing';
 import { StatusBox } from '../../../../components/StatusBox';
+import { LoadingComponent } from '../../../../components/LoadingComponent';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px
@@ -54,7 +59,21 @@ export function RegistrationIndividualsBioData({
       `/${businessArea}/registration-data-import/household/${individual.household.id}`,
     );
   };
+  const {
+    data: choicesData,
+    loading: choicesLoading,
+  } = useHouseholdChoiceDataQuery();
 
+  if (choicesLoading) {
+    return <LoadingComponent />;
+  }
+  const relationshipChoicesDict = choicesToDict(
+    choicesData.relationshipChoices,
+  );
+  const maritalStatusChoicesDict = choicesToDict(
+    choicesData.maritalStatusChoices,
+  );
+  const roleChoicesDict = choicesToDict(choicesData.roleChoices);
   const mappedIndividualDocuments = individual.documents?.edges?.map((edge) => (
     <Grid item xs={3}>
       <LabelizedField label={edge.node.type.label}>
@@ -139,19 +158,19 @@ export function RegistrationIndividualsBioData({
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Role'>
-            <div>{individual.role}</div>
+            <div>{roleChoicesDict[individual.role]}</div>
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Relationship to HOH'>
-            <div>{individual.relationship}</div>
+            <div>{relationshipChoicesDict[individual.relationship]}</div>
           </LabelizedField>
         </Grid>
         {mappedIndividualDocuments}
         {mappedIdentities}
         <Grid item xs={3}>
           <LabelizedField label='Marital Status'>
-            <div>{individual.maritalStatus}</div>
+            <div>{maritalStatusChoicesDict[individual.maritalStatus]}</div>
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>

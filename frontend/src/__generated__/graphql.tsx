@@ -4103,6 +4103,9 @@ export type HouseholdChoiceDataQuery = (
   )>>>, roleChoices: Maybe<Array<Maybe<(
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, maritalStatusChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
   )>>>, deduplicationBatchStatusChoices: Maybe<Array<Maybe<(
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
@@ -7617,6 +7620,10 @@ export const HouseholdChoiceDataDocument = gql`
     value
   }
   roleChoices {
+    name
+    value
+  }
+  maritalStatusChoices {
     name
     value
   }
