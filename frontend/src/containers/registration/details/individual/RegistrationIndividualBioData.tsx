@@ -63,11 +63,11 @@ export function RegistrationIndividualsBioData({
     </Grid>
   ));
   const mappedIdentities = individual.identities?.map((item) => (
-      <Grid item xs={3}>
-        <LabelizedField label={`${item.type} ID`}>
-          <div>{item.documentNumber}</div>
-        </LabelizedField>
-      </Grid>
+    <Grid item xs={3}>
+      <LabelizedField label={`${item.type} ID`}>
+        <div>{item.documentNumber}</div>
+      </LabelizedField>
+    </Grid>
   ));
 
   return (
@@ -118,6 +118,16 @@ export function RegistrationIndividualsBioData({
                 ? individual.estimatedBirthDate
                 : 'No'}
             </div>
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label='Phone Number'>
+            <div>{individual.phoneNo}</div>
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label='Alternate Phone Number'>
+            <div>{individual.phoneNoAlternative || '-'}</div>
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>

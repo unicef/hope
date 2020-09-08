@@ -14,11 +14,16 @@ import { EditVerificationPlan } from '../../components/payments/EditVerification
 import { ActivateVerificationPlan } from '../../components/payments/ActivateVerificationPlan';
 import { FinishVerificationPlan } from '../../components/payments/FinishVerificationPlan';
 import { DiscardVerificationPlan } from '../../components/payments/DiscardVerificationPlan';
-import { useCashPlanQuery } from '../../__generated__/graphql';
+import {
+  useCashPlanQuery,
+  useCashPlanVerificationSamplingChoicesLazyQuery,
+  useCashPlanVerificationSamplingChoicesQuery,
+} from '../../__generated__/graphql';
 import { LoadingComponent } from '../../components/LoadingComponent';
 import {
   decodeIdString,
   paymentVerificationStatusToColor,
+  choicesToDict,
 } from '../../utils/utils';
 import { StatusBox } from '../../components/StatusBox';
 import { VerificationRecordsTable } from '../tables/VerificationRecordsTable';
@@ -86,13 +91,21 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
   const { data, loading } = useCashPlanQuery({
     variables: { id },
   });
+  const {
+    data: choicesData,
+    loading: choicesLoading,
+  } = useCashPlanVerificationSamplingChoicesQuery();
+  if (loading || choicesLoading) return null;
+
   if (loading) {
     return <LoadingComponent />;
   }
   if (!data) {
     return null;
   }
-
+  const samplingChoicesDict = choicesToDict(
+    choicesData.cashPlanVerificationSamplingChoices,
+  );
   const { cashPlan } = data;
   const verificationPlan =
     cashPlan && cashPlan.verifications && cashPlan.verifications.edges.length
@@ -273,7 +286,10 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                     label: 'NOT RECEIVED',
                     value: verificationPlan.notReceivedCount || '-',
                   },
-                  { label: 'SAMPLING', value: verificationPlan.sampling },
+                  {
+                    label: 'SAMPLING',
+                    value: samplingChoicesDict[verificationPlan.sampling],
+                  },
                 ].map((el) => (
                   <Grid item xs={4}>
                     <LabelizedField label={el.label}>
