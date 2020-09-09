@@ -1,18 +1,23 @@
 import uuid
 from datetime import timedelta
+from time import sleep
+from unittest.mock import patch, MagicMock
 
 from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
 
-from cash_assist_datahub.models import CashPlan as DHCashPlan, PaymentRecord as DHPaymentRecord, \
-    TargetPopulation as DHTargetPopulation, ServiceProvider as DHServiceProvider, Programme as DHProgram
+from cash_assist_datahub.models import (
+    CashPlan as DHCashPlan,
+    PaymentRecord as DHPaymentRecord,
+    TargetPopulation as DHTargetPopulation,
+    ServiceProvider as DHServiceProvider,
+    Programme as DHProgram,
+)
 from cash_assist_datahub.models import Session
 from cash_assist_datahub.tasks.pull_from_datahub import PullFromDatahubTask
 from core.models import BusinessArea
-from household.fixtures import (
-    create_household,
-)
+from household.fixtures import create_household
 from payment.models import PaymentRecord, ServiceProvider
 from program.models import Program, CashPlan
 from targeting.models import TargetPopulation
@@ -226,15 +231,18 @@ class TestPullDataFromDatahub(TestCase):
         self.assertEqual(payment_record.ca_id, self.dh_payment_record.ca_id)
         self.assertEqual(str(payment_record.ca_hash_id), str(self.dh_payment_record.ca_hash_id))
         self.assertEqual(str(payment_record.household_id), str(self.dh_payment_record.household_mis_id))
-        self.assertEqual(str(payment_record.household.head_of_household_id),
-                         str(self.dh_payment_record.head_of_household_mis_id))
+        self.assertEqual(
+            str(payment_record.household.head_of_household_id), str(self.dh_payment_record.head_of_household_mis_id)
+        )
         self.assertEqual(payment_record.full_name, self.dh_payment_record.full_name)
         self.assertEqual(payment_record.total_persons_covered, self.dh_payment_record.total_persons_covered)
         self.assertEqual(payment_record.distribution_modality, self.dh_payment_record.distribution_modality)
         self.assertEqual(str(payment_record.target_population_id), str(self.dh_payment_record.target_population_mis_id))
         self.assertEqual(payment_record.entitlement_card_number, self.dh_payment_record.entitlement_card_number)
         self.assertEqual(payment_record.entitlement_card_status, self.dh_payment_record.entitlement_card_status)
-        self.assertEqual(payment_record.entitlement_card_issue_date, self.dh_payment_record.entitlement_card_issue_date.date())
+        self.assertEqual(
+            payment_record.entitlement_card_issue_date, self.dh_payment_record.entitlement_card_issue_date.date()
+        )
         self.assertEqual(payment_record.delivery_type, self.dh_payment_record.delivery_type)
         self.assertEqual(payment_record.delivery_type, self.dh_payment_record.delivery_type)
         self.assertEqual(payment_record.currency, self.dh_payment_record.currency)
@@ -244,3 +252,68 @@ class TestPullDataFromDatahub(TestCase):
         self.assertEqual(payment_record.transaction_reference_id, self.dh_payment_record.transaction_reference_id)
         self.assertEqual(payment_record.vision_id, self.dh_payment_record.vision_id)
         self.assertEqual(payment_record.service_provider_id, service_provider.id)
+
+
+class TestSessionsPullDataFromDatahub(TestCase):
+    multi_db = True
+
+    @classmethod
+    def setUpTestData(cls):
+        call_command("loadbusinessareas")
+
+    def test_multiple_sessions_same_ba_working(self):
+        session1 = Session(status=Session.STATUS_READY, business_area=BusinessArea.objects.first().code)
+        session1.save()
+        session2 = Session(status=Session.STATUS_READY, business_area=BusinessArea.objects.first().code)
+        session2.save()
+        copy_session_mock = MagicMock()
+        with patch("cash_assist_datahub.tasks.pull_from_datahub.PullFromDatahubTask.copy_session", copy_session_mock):
+            task = PullFromDatahubTask()
+            task.execute()
+            self.assertEqual(copy_session_mock.call_count, 2)
+        session1.delete()
+        session2.delete()
+
+    def test_multiple_sessions_same_ba_fail(self):
+        session1 = Session(status=Session.STATUS_FAILED, business_area=BusinessArea.objects.first().code)
+        session1.save()
+        session2 = Session(status=Session.STATUS_READY, business_area=BusinessArea.objects.first().code)
+        session2.save()
+        copy_session_mock = MagicMock()
+        with patch("cash_assist_datahub.tasks.pull_from_datahub.PullFromDatahubTask.copy_session", copy_session_mock):
+            task = PullFromDatahubTask()
+            task.execute()
+            self.assertEqual(copy_session_mock.call_count, 0)
+            self.assertEqual(copy_session_mock.call_args_list, [])
+        session1.delete()
+        session2.delete()
+
+    def test_multiple_sessions_same_ba_fail(self):
+        session1 = Session(status=Session.STATUS_FAILED, business_area=BusinessArea.objects.first().code)
+        session1.save()
+        session2 = Session(status=Session.STATUS_READY, business_area=BusinessArea.objects.first().code)
+        session2.save()
+        copy_session_mock = MagicMock()
+        with patch("cash_assist_datahub.tasks.pull_from_datahub.PullFromDatahubTask.copy_session", copy_session_mock):
+            task = PullFromDatahubTask()
+            task.execute()
+            self.assertEqual(copy_session_mock.call_count, 0)
+        session1.delete()
+        session2.delete()
+
+    def test_multiple_sessions_different_ba_run1(self):
+        session1 = Session(status=Session.STATUS_FAILED, business_area=BusinessArea.objects.first().code)
+        session1.save()
+        session2 = Session(status=Session.STATUS_READY, business_area=BusinessArea.objects.first().code)
+        session2.save()
+        session3 = Session(status=Session.STATUS_READY, business_area=BusinessArea.objects.all()[3].code)
+        session3.save()
+        copy_session_mock = MagicMock()
+        with patch("cash_assist_datahub.tasks.pull_from_datahub.PullFromDatahubTask.copy_session", copy_session_mock):
+            task = PullFromDatahubTask()
+            task.execute()
+            self.assertEqual(copy_session_mock.call_count, 1)
+            self.assertEqual(copy_session_mock.call_args_list[0][0][0].id, session3.id)
+        session1.delete()
+        session2.delete()
+        session3.delete()

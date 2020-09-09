@@ -13,13 +13,7 @@ from utils.models import AbstractSession
 
 
 class Session(AbstractSession):
-    business_area = models.CharField(
-        max_length=20,
-        help_text="""Same as the business area set on program, but
-            this is set as the same value, and all other
-            models this way can get easy access to the business area
-            via the session.""",
-    )
+    pass
 
 
 class SessionModel(models.Model):
