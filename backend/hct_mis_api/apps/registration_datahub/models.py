@@ -121,6 +121,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
     deduplication_batch_results = JSONField(default=dict)
     deduplication_golden_record_results = JSONField(default=dict)
     flex_fields = JSONField(default=dict)
+    pregnant = models.BooleanField(default=False)
 
     @property
     def age(self):
