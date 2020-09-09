@@ -315,6 +315,7 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
     )
     deduplication_results = JSONField(default=dict)
     sanction_list_possible_match = models.BooleanField(default=False)
+    pregnant = models.BooleanField(default=False)
 
     @property
     def age(self):
