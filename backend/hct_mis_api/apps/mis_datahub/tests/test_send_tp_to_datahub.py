@@ -34,7 +34,6 @@ class TestSendTpToDatahub(TestCase):
         business_area_with_data_sharing = BusinessArea.objects.first()
         business_area_with_data_sharing.has_data_sharing_agreement = True
         business_area_with_data_sharing.save()
-
     @staticmethod
     def _create_target_population(**kwargs):
         tp_nullable = {
@@ -60,7 +59,7 @@ class TestSendTpToDatahub(TestCase):
     def setUpTestData(cls):
         cls._pre_test_commands()
 
-        business_area_with_data_sharing = BusinessArea.objects.get(has_data_sharing_agreement=True)
+        business_area_with_data_sharing = BusinessArea.objects.first()
         state_area_type = AdminAreaTypeFactory(
             name="State", business_area=business_area_with_data_sharing, admin_level=1,
         )
@@ -162,6 +161,7 @@ class TestSendTpToDatahub(TestCase):
             status=TargetPopulation.STATUS_FINALIZED,
         )
         cls.target_population_third.households.set([cls.household_second])
+        import ipdb;ipdb.set_trace()
 
     def test_individual_data_needed_true(self):
         task = SendTPToDatahubTask()
