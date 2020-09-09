@@ -778,6 +778,18 @@ CORE_FIELDS_ATTRIBUTES = [
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "m_adults_disability_h_c",
     },
+    {
+        "id": "b2593385-5a81-452e-ae9a-28292e35714b",
+        "type": TYPE_BOOL,
+        "name": "pregnant",
+        "lookup": "pregnant",
+        "required": False,
+        "label": {"English(EN)": "Is pregnant?"},
+        "hint": "",
+        "choices": [],
+        "associated_with": _INDIVIDUAL,
+        "xlsx_field": "pregnant_I_c",
+    },
 ]
 
 HOUSEHOLD_ID_FIELDS = [
