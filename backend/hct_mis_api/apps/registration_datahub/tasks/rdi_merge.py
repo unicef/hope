@@ -199,6 +199,7 @@ class RdiMergeTask:
 
         for individual in duplicates:
             for duplicate in individual.deduplication_results["duplicates"]:
+                # TODO: Grievance
                 print(f"Individual: {individual.id} is duplicate for Individual: {duplicate.get('hit_id')}")
 
         needs_adjudication = Individual.objects.filter(
@@ -206,6 +207,7 @@ class RdiMergeTask:
         )
         for individual in needs_adjudication:
             for possible_duplicate in individual.deduplication_results["possible_duplicates"]:
+                # TODO: Grievance
                 print(
                     f"Individual: {individual.id} is possible duplicate for "
                     f"Individual: {possible_duplicate.get('hit_id')}"
