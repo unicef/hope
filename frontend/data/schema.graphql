@@ -102,7 +102,7 @@ type CashPlanNode implements Node {
   dispersionDate: DateTime!
   coverageDuration: Int!
   coverageUnit: String!
-  comments: String!
+  comments: String
   program: ProgramNode!
   deliveryType: String!
   assistanceMeasurement: String!
