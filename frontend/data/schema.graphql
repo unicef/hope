@@ -486,6 +486,7 @@ type HouseholdNode implements Node {
   selections: [HouseholdSelection!]!
   totalCashReceived: Decimal
   selection: HouseholdSelection
+  sanctionListPossibleMatch: Boolean
 }
 
 type HouseholdNodeConnection {

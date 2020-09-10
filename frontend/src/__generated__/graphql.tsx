@@ -693,6 +693,7 @@ export type HouseholdNode = Node & {
   selections: Array<HouseholdSelection>,
   totalCashReceived?: Maybe<Scalars['Decimal']>,
   selection?: Maybe<HouseholdSelection>,
+  sanctionListPossibleMatch?: Maybe<Scalars['Boolean']>,
 };
 
 
@@ -3012,7 +3013,7 @@ export type XlsxRowErrorNode = {
 
 export type HouseholdMinimalFragment = (
   { __typename?: 'HouseholdNode' }
-  & Pick<HouseholdNode, 'id' | 'createdAt' | 'residenceStatus' | 'size' | 'totalCashReceived' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'status' | 'address'>
+  & Pick<HouseholdNode, 'id' | 'createdAt' | 'residenceStatus' | 'size' | 'totalCashReceived' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'status' | 'sanctionListPossibleMatch' | 'address'>
   & { headOfHousehold: (
     { __typename?: 'IndividualNode' }
     & Pick<IndividualNode, 'id' | 'fullName'>
@@ -4856,6 +4857,7 @@ export const HouseholdMinimalFragmentDoc = gql`
   firstRegistrationDate
   lastRegistrationDate
   status
+  sanctionListPossibleMatch
   headOfHousehold {
     id
     fullName
@@ -10240,6 +10242,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   selections?: Resolver<Array<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
   totalCashReceived?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
   selection?: Resolver<Maybe<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
+  sanctionListPossibleMatch?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
 export type HouseholdNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['HouseholdNodeConnection'] = ResolversParentTypes['HouseholdNodeConnection']> = {
