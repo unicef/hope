@@ -187,6 +187,10 @@ class Household(TimeStampedUUIDModel, AbstractSyncable):
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
 
     @property
+    def sanction_list_possible_match(self):
+        return self.individuals.filter(sanction_list_possible_match=True).count() > 0
+
+    @property
     def total_cash_received(self):
         return self.payment_records.filter().aggregate(Sum("delivered_quantity")).get("delivered_quantity__sum")
 
