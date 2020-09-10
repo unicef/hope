@@ -79,6 +79,7 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
       <PageHeader
         title={`Household ID: ${decodeIdString(id)}`}
         breadCrumbs={breadCrumbsItems}
+        withFlag={household.sanctionListPossibleMatch}
       />
       <HouseholdDetails houseHold={household as HouseholdNode} />
       <Container>
