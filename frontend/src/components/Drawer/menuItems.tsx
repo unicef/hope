@@ -33,7 +33,7 @@ export const menuItems = [
     collapsable: true,
     secondaryActions: [
       {
-        name: 'Household',
+        name: 'Households',
         href: '/population/household',
         selectedRegexp: /^\/population\/household.*$/,
         icon: <PeopleAltRoundedIcon />,
