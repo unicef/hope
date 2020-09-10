@@ -189,6 +189,7 @@ class HouseholdNode(DjangoObjectType):
     country = graphene.String(description="Country name")
     flex_fields = FlexFieldsScalar()
     selection = graphene.Field(HouseholdSelection)
+    sanction_list_possible_match = graphene.Boolean()
 
     def resolve_country(parrent, info):
         return parrent.country.name
