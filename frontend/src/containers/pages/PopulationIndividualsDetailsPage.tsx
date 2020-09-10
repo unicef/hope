@@ -47,6 +47,7 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
       <PageHeader
         title={`Individual ID: ${decodeIdString(id)}`}
         breadCrumbs={breadCrumbsItems}
+        withFlag={individual.sanctionListPossibleMatch}
       />
       <Container>
         <IndividualsBioData individual={individual as IndividualNode} />
