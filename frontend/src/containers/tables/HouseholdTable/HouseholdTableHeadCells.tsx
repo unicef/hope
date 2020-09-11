@@ -4,6 +4,13 @@ import { HouseholdNode } from '../../../__generated__/graphql';
 export const headCells: HeadCell<HouseholdNode>[] = [
   {
     disablePadding: false,
+    label: '',
+    id: 'sanctionListPossibleMatch',
+    numeric: false,
+    dataCy: 'sanction-list-possible-match',
+  },
+  {
+    disablePadding: false,
     label: 'Household ID',
     id: 'id',
     numeric: false,
