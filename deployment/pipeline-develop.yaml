@@ -1,0 +1,109 @@
+trigger:
+  batch: true
+  branches:
+    include:
+    - develop
+  paths:
+    exclude:
+    -  docs/*
+resources:
+  - repo: self
+
+variables:
+  # ========================================================================
+  #                          Mandatory variables 
+  # ========================================================================
+  Docker.backend.filePath: "**/backend/Dockerfile"
+  Docker.frontend.filePath: "**/frontend/Dockerfile"
+  Docker.airflow.filePath: "**/airflow/Dockerfile"
+  Docker.backend.repository: "hope-backend"
+  Docker.frontend.repository: "hope-frontend"
+  Docker.airflow.repository: "hope-airflow"
+  Docker.registry: "uniappsk8sdevacr"
+  Kubernetes.serviceConnection: "ICTD-HOPE-DEV-uni-apps-aks-dev-ictd-hope-dev-1593457625386"
+  Kubernetes.namespace: "ictd-hope-dev"
+
+stages:
+  - stage: build_and_push
+    displayName: BUILD and PUSH
+    jobs:
+      - job: build_push_backend
+        displayName: "[BACKEND]"
+        steps:
+          - task: Docker@2
+            displayName: Build&Push
+            inputs:
+              command: buildAndPush
+              dockerfile: $(Docker.backend.filePath)
+              repository: $(Docker.backend.repository)
+              containerRegistry: $(Docker.registry)
+              tags: |
+                $(Build.BuildId)
+                dev-latest
+
+      - job: build_push_airflow
+        displayName: "[AIRFLOW]"
+        steps:
+          - task: Docker@2
+            displayName: Build&Push
+            inputs:
+              command: buildAndPush
+              dockerfile: $(Docker.airflow.filePath)
+              repository: $(Docker.airflow.repository)
+              containerRegistry: $(Docker.registry)
+              buildContext: "$(Build.SourcesDirectory)"
+              tags: |
+                $(Build.BuildId)
+                dev-latest
+
+      - job: build_push_frontend
+        displayName: "[FRONTEND]"
+        steps:
+          - task: Docker@2
+            displayName: Build&Push
+            inputs:
+              command: buildAndPush
+              dockerfile: $(Docker.frontend.filePath)
+              repository: $(Docker.frontend.repository)
+              containerRegistry: $(Docker.registry)
+              tags: |
+                $(Build.BuildId)
+                dev-latest
+
+  - stage: deploy
+    displayName: DEPLOY
+    # condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+    jobs:
+      - job: deploy_hope
+        displayName: "[HOPE]"
+        steps:
+          - task: HelmDeploy@0
+            displayName: "[HOPE] DEPLOY"
+            inputs:
+              connectionType: 'Kubernetes Service Connection'
+              kubernetesServiceConnection: $(Kubernetes.serviceConnection)
+              namespace: $(Kubernetes.namespace)
+              command: 'upgrade'
+              chartType: 'FilePath'
+              chartPath: '**/deployment/hope'
+              releaseName: 'hope'
+              install: true
+              waitForExecution: false
+              arguments: "--timeout 600s"
+              overrideValues: >-
+                backend.image=uniappsk8sdevacr.azurecr.io/$(Docker.backend.repository):$(Build.BuildId),
+                backend.config.STORAGE_AZURE_ACCOUNT_NAME="$(STORAGE_AZURE_ACCOUNT_NAME)",
+                backend.config.AZURE_CLIENT_ID=$(AZURE_CLIENT_ID),
+                backend.secret.SECRET_KEY="$(SECRET_KEY)",
+                backend.secret.STORAGE_AZURE_ACCOUNT_KEY=$(STORAGE_AZURE_ACCOUNT_KEY),
+                backend.secret.AZURE_CLIENT_KEY=$(AZURE_CLIENT_SECRET),
+                backend.secret.AZURE_TENANT_KEY=$(AZURE_TENANT_KEY),
+                frontend.image=uniappsk8sdevacr.azurecr.io/$(Docker.frontend.repository):$(Build.BuildId),
+                ingress.host="dev-hope.unitst.org",
+                ingress.tls=true,
+                airflow.airflow.image.repository=uniappsk8sdevacr.azurecr.io/$(Docker.frontend.repository),
+                airflow.airflow.image.tag=$(Build.BuildId),
+                postgresql.postgresqlPassword=$(POSTGRES_PASSWORD),
+                registrationdatahubpostgresql.postgresqlPassword=$(REGISTRATION_DATAHUB_POSTGRES_PASSWORD),,
+                cashassistdatahubpostgresql.postgresqlPassword=$(CASH_ASSIST_REGISTRATION_DATAHUB_POSTGRES_PASSWORD),
+                airflow.externalDatabase.password=$(POSTGRES_PASSWORD),
