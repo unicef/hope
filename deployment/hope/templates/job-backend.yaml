@@ -1,0 +1,65 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "hope.fullname" . }}-backend-release
+  labels:
+    {{- include "hope.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "5"
+    "helm.sh/hook-delete-policy": hook-succeeded,hook-failed
+spec:
+  template:
+    spec:
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}-backend-release
+          command: ["/bin/sh"]
+          args: ["-c", "python3 /code/manage.py collectstatic --noinput && python3 /code/manage.py migratealldb"]
+          securityContext:
+            {{- toYaml .Values.backend.securityContext | nindent 12 }}
+          image: "{{ .Values.backend.image }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          envFrom:
+          - secretRef:
+              name: {{ include "hope.fullname" . }}-backend
+          - configMapRef:
+              name: {{ include "hope.fullname" . }}-backend
+      restartPolicy: Never
+  backoffLimit: 20
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "hope.fullname" . }}-backend-init
+  labels:
+    {{- include "hope.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "5"
+    "helm.sh/hook-delete-policy": hook-succeeded,hook-failed
+spec:
+  template:
+    spec:
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}-backend-release
+          command: ["/bin/sh"]
+          args: ["-c", "python3 /code/manage.py collectstatic --noinput && python3 /code/manage.py init"]
+          securityContext:
+            {{- toYaml .Values.backend.securityContext | nindent 12 }}
+          image: "{{ .Values.backend.image }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          envFrom:
+          - secretRef:
+              name: {{ include "hope.fullname" . }}-backend
+          - configMapRef:
+              name: {{ include "hope.fullname" . }}-backend
+      restartPolicy: Never
+  backoffLimit: 20
