@@ -4,12 +4,6 @@ import { PaymentVerificationNodeEdge } from '../../../__generated__/graphql';
 export const headCells: HeadCell<PaymentVerificationNodeEdge>[] = [
   {
     disablePadding: false,
-    label: '',
-    id: 'selectedForGrievance',
-    numeric: false,
-  },
-  {
-    disablePadding: false,
     label: 'Payment ID',
     id: 'payment_record',
     numeric: false,
