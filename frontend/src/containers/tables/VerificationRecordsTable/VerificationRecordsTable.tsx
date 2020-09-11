@@ -9,18 +9,11 @@ import {
   useImportXlsxCashPlanVerificationMutation,
   ImportXlsxCashPlanVerificationMutation,
   XlsxErrorNode,
-  ImportXlsxCashPlanVerificationMutationResult,
 } from '../../../__generated__/graphql';
 import { UniversalTable } from '../UniversalTable';
 import { headCells } from './VerificationRecordsHeadCells';
 import { VerificationRecordsTableRow } from './VerificationRecordsTableRow';
-import {
-  Button,
-  Box,
-  makeStyles,
-  DialogTitle,
-  DialogContent,
-} from '@material-ui/core';
+import { Button, Box, makeStyles, DialogTitle } from '@material-ui/core';
 import { GetApp, Publish } from '@material-ui/icons';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { Dialog } from '../../dialogs/Dialog';
@@ -37,14 +30,6 @@ const DialogFooter = styled.div`
   margin: 0;
   border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
   text-align: right;
-`;
-
-const StyledDialogFooter = styled(DialogFooter)`
-  && {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-  }
 `;
 
 const Error = styled.div`
