@@ -1,6 +1,7 @@
 import re
 from datetime import date
 
+from dateutil.relativedelta import relativedelta
 from django.contrib.gis.db.models import PointField
 from django.contrib.postgres.fields import JSONField
 from django.core.validators import (
@@ -322,12 +323,7 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
 
     @property
     def age(self):
-        today = date.today()
-        return (
-            today.year
-            - self.birth_date.year
-            - ((today.month, today.day) < (self.birth_date.month, self.birth_date.day))
-        )
+        return relativedelta(date.today(), self.birth_date).years
 
     @property
     def get_hash_key(self):
