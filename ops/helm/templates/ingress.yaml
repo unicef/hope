@@ -37,8 +37,8 @@ spec:
     - host: {{ .Values.domain }}
       http:
         paths:
-        - path: /
-          backend:
+        - path: 
+          backend:/
             serviceName: frontend
             servicePort: {{ .Values.frontend.port }}
 ---

@@ -1,0 +1,21 @@
+dependencies:
+- name: postgresql
+  repository: https://charts.bitnami.com/bitnami
+  version: 7.x.x
+- name: postgresql
+  repository: https://charts.bitnami.com/bitnami
+  version: 7.x.x
+- name: postgresql
+  repository: https://charts.bitnami.com/bitnami
+  version: 7.x.x
+- name: redis
+  repository: https://charts.bitnami.com/bitnami
+  version: 10.x.x
+- name: elasticsearch
+  repository: https://charts.bitnami.com/bitnami
+  version: 12.x.x
+- name: airflow
+  repository: https://charts.bitnami.com/bitnami
+  version: 6.x.x
+digest: sha256:48b4da39757d192c1aa956e01c08e3dfe8672502bc491a3f151438a1f4f187de
+generated: "2020-09-09T16:31:56.661564+02:00"
