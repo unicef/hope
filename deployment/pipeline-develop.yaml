@@ -90,20 +90,21 @@ stages:
               install: true
               waitForExecution: false
               arguments: "--timeout 600s"
-              overrideValues: >-
-                backend.image=uniappsk8sdevacr.azurecr.io/$(Docker.backend.repository):$(Build.BuildId),
-                backend.config.STORAGE_AZURE_ACCOUNT_NAME="$(STORAGE_AZURE_ACCOUNT_NAME)",
-                backend.config.AZURE_CLIENT_ID=$(AZURE_CLIENT_ID),
-                backend.secret.SECRET_KEY="$(SECRET_KEY)",
-                backend.secret.STORAGE_AZURE_ACCOUNT_KEY=$(STORAGE_AZURE_ACCOUNT_KEY),
-                backend.secret.AZURE_CLIENT_KEY=$(AZURE_CLIENT_SECRET),
-                backend.secret.AZURE_TENANT_KEY=$(AZURE_TENANT_KEY),
-                frontend.image=uniappsk8sdevacr.azurecr.io/$(Docker.frontend.repository):$(Build.BuildId),
-                ingress.host="dev-hope.unitst.org",
-                ingress.tls=true,
-                airflow.airflow.image.repository=uniappsk8sdevacr.azurecr.io/$(Docker.frontend.repository),
-                airflow.airflow.image.tag=$(Build.BuildId),
-                postgresql.postgresqlPassword=$(POSTGRES_PASSWORD),
-                registrationdatahubpostgresql.postgresqlPassword=$(REGISTRATION_DATAHUB_POSTGRES_PASSWORD),,
-                cashassistdatahubpostgresql.postgresqlPassword=$(CASH_ASSIST_REGISTRATION_DATAHUB_POSTGRES_PASSWORD),
-                airflow.externalDatabase.password=$(POSTGRES_PASSWORD),
+              valueFile: '**/deployment/azure-values.yaml'
+              overrideValues: "
+                backend.image=uniappsk8sdevacr.azurecr.io/$(Docker.backend.repository):$(Build.BuildId),\
+                backend.config.STORAGE_AZURE_ACCOUNT_NAME=$(STORAGE_AZURE_ACCOUNT_NAME),\
+                backend.config.AZURE_CLIENT_ID=$(AZURE_CLIENT_ID),\
+                backend.secret.SECRET_KEY=$(SECRET_KEY),\
+                backend.secret.STORAGE_AZURE_ACCOUNT_KEY=$(STORAGE_AZURE_ACCOUNT_KEY),\
+                backend.secret.AZURE_CLIENT_KEY=$(AZURE_CLIENT_SECRET),\
+                backend.secret.AZURE_TENANT_KEY=$(AZURE_TENANT_KEY),\
+                frontend.image=uniappsk8sdevacr.azurecr.io/$(Docker.frontend.repository):$(Build.BuildId),\
+                ingress.host=dev-hope.unitst.org,\
+                ingress.tls=true,\
+                airflow.airflow.image.repository=uniappsk8sdevacr.azurecr.io/$(Docker.frontend.repository),\
+                airflow.airflow.image.tag=$(Build.BuildId),\
+                postgresql.postgresqlPassword=$(POSTGRES_PASSWORD),\
+                registrationdatahubpostgresql.postgresqlPassword=$(REGISTRATION_DATAHUB_POSTGRES_PASSWORD),\
+                cashassistdatahubpostgresql.postgresqlPassword=$(CASH_ASSIST_REGISTRATION_DATAHUB_POSTGRES_PASSWORD),\
+                airflow.externalDatabase.password=$(POSTGRES_PASSWORD),"
