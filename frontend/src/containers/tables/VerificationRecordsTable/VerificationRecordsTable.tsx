@@ -25,13 +25,6 @@ const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
 `;
 
-const DialogFooter = styled.div`
-  padding: 12px 16px;
-  margin: 0;
-  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  text-align: right;
-`;
-
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};
   padding: 20px;
@@ -180,6 +173,16 @@ export function VerificationRecordsTable({
 
     setSelected(newSelected);
   };
+
+  const handleSelectAllCheckboxesClick = (event, rows) => {
+    if (event.target.checked) {
+      const newSelecteds = rows.map((row) => row.paymentRecord.id);
+      setSelected(newSelecteds);
+      return;
+    }
+    setSelected([]);
+  };
+  const numSelected = selected.length;
   return (
     <>
       <UniversalTable<
@@ -189,9 +192,11 @@ export function VerificationRecordsTable({
         title='Verification Records'
         actions={[exportButton, importButton]}
         headCells={headCells}
+        onSelectAllClick={handleSelectAllCheckboxesClick}
         query={useAllPaymentVerificationsQuery}
         queriedObjectName='allPaymentVerifications'
         initialVariables={initialVariables}
+        numSelected={numSelected}
         renderRow={(row) => (
           <VerificationRecordsTableRow
             checkboxClickHandler={handleCheckboxClick}

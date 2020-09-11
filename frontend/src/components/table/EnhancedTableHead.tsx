@@ -5,6 +5,7 @@ import TableCell from '@material-ui/core/TableCell';
 import styled from 'styled-components';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
+import { Checkbox } from '@material-ui/core';
 
 type Order = 'asc' | 'desc';
 
@@ -64,8 +65,11 @@ interface EnhancedTableProps<T> {
   order: Order;
   orderBy: string;
   rowCount: number;
+  numSelected?: number;
   headCells: HeadCell<T>[];
   allowSort?: boolean;
+  onSelectAllClick?: (event, rows) => void;
+  data?: T[];
 }
 
 export function EnhancedTableHead<T>(
@@ -78,16 +82,30 @@ export function EnhancedTableHead<T>(
     headCells,
     onRequestSort,
     allowSort = true,
+    onSelectAllClick,
+    rowCount,
+    numSelected = 0,
+    data = [],
   } = props;
   const createSortHandler = (property: keyof T | string) => (
     event: React.MouseEvent<unknown>,
   ) => {
     onRequestSort(event, property);
   };
-
   return (
     <TableHead>
       <TableRow>
+        {onSelectAllClick && data.length ? (
+          <TableCell padding='checkbox'>
+            <Checkbox
+              color='primary'
+              indeterminate={numSelected > 0 && numSelected < rowCount}
+              checked={rowCount > 0 && numSelected === rowCount}
+              onChange={(event) => onSelectAllClick(event, data)}
+              inputProps={{ 'aria-label': 'select all desserts' }}
+            />
+          </TableCell>
+        ) : null}
         {headCells.map((headCell) => (
           <TableCell
             key={headCell.id.toString()}

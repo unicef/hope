@@ -171,7 +171,6 @@ export function CreateVerificationPlan({
       ],
     });
     setOpen(false);
-    console.log(errors);
 
     if (errors) {
       showMessage('Error while submitting');
