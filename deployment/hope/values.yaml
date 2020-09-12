@@ -7,7 +7,7 @@ global:
   fullnameOverride: ""
   env: "dev"
   storageClass: "standard"
-  imagePullPolicy: Never
+  imagePullPolicy: Always
 
 backend:
   image: backend:latest
