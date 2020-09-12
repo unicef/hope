@@ -6,6 +6,7 @@ trigger:
   paths:
     exclude:
     -  docs/*
+pr: none
 resources:
   - repo: self
 
@@ -72,7 +73,6 @@ stages:
 
   - stage: deploy
     displayName: DEPLOY
-    # condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
     jobs:
       - job: deploy_hope
         displayName: "[HOPE]"
