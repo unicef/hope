@@ -33,7 +33,8 @@ backend:
     DOMAIN: ""
     ENV: ""
     AZURE_CLIENT_ID: ""
-
+    AZURE_TENANT_KEY: ""
+    AZURE_CLIENT_SECRET: ""
   staticStorage:
     secretName: ""
     accountName: ""
