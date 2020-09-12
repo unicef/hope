@@ -17,5 +17,5 @@ dependencies:
 - name: airflow
   repository: https://charts.bitnami.com/bitnami
   version: 6.x.x
-digest: sha256:48b4da39757d192c1aa956e01c08e3dfe8672502bc491a3f151438a1f4f187de
-generated: "2020-09-09T16:31:56.661564+02:00"
+digest: sha256:03bd5ce7d577549595546d5fd09baaa65169d22f06246186ae68de5f2ab97f44
+generated: "2020-09-12T14:52:11.754186+02:00"
