@@ -189,6 +189,7 @@ cashassistdatahubpostgresql:
 
 redis:
   enabled: true
+  fullnameOverride: redis-main
   persistence.enabled: true
   cluster:
     slaveCount: 0
