@@ -91,6 +91,7 @@ stages:
               waitForExecution: false
               arguments: "--timeout 600s"
               valueFile: '**/deployment/azure-values.yaml'
+              failOnStderr: false 
               overrideValues: "
                 global.env=dev,\
                 backend.image=uniappsk8sdevacr.azurecr.io/$(Docker.backend.repository):$(Build.BuildId),\
