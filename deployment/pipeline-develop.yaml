@@ -78,6 +78,14 @@ stages:
         displayName: "[HOPE]"
         steps:
           - task: HelmDeploy@0
+            displayName: "[HOPE] Update Chart dependencies"
+            inputs:
+              connectionType: 'Kubernetes Service Connection'
+              kubernetesServiceConnection: $(Kubernetes.serviceConnection)     
+              command: package
+              updatedependency: true
+              chartPath: '**/deployment/hope'
+          - task: HelmDeploy@0
             displayName: "[HOPE] DEPLOY"
             inputs:
               connectionType: 'Kubernetes Service Connection'
