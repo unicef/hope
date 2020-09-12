@@ -5,7 +5,7 @@ global:
   imagePullSecrets: []
   nameOverride: ""
   fullnameOverride: ""
-  environment: "dev"
+  env: "dev"
   storageClass: "standard"
   imagePullPolicy: Never
 
@@ -100,7 +100,7 @@ frontend:
 
 ingress:
   enabled: true
-  annotations: {}
+  annotations: []
     # kubernetes.io/ingress.class: azure/application-gateway
     # appgw.ingress.kubernetes.io/ssl-redirect: "true"
   host: hope-dev.test
@@ -224,7 +224,7 @@ airflow:
         tls: false
         tlsHosts: [airflow.test]
         tlsSecret: "aks-unitst-tls"
-    annotations: {}
+    annotations: []
   airflow:
     extraEnvVarsCM: hope-airflow-extra
     extraEnvVarsSecret: hope-airflow-extra
@@ -246,7 +246,4 @@ airflow:
             items:
             - key: airflow-entrypoint.sh
               path: entrypoint.sh
-
-          # kubernetes.io/ingress.class: "azure/application-gateway"
-          # appgw.ingress.kubernetes.io/ssl-redirect: "true"
 
