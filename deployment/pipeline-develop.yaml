@@ -89,6 +89,7 @@ stages:
               releaseName: 'hope'
               install: true
               waitForExecution: false
+              force: true
               arguments: "--timeout 600s"
               valueFile: '**/deployment/azure-values.yaml'
               failOnStderr: false 
