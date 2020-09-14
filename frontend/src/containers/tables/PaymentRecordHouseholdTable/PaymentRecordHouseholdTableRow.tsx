@@ -61,7 +61,7 @@ export function PaymentRecordHouseholdTableRow({
         {formatCurrency(paymentRecord.deliveredQuantity)}
       </TableCell>
       <TableCell align='right'>
-        <Moment format='DD/MM/YYYY'>{paymentRecord.deliveryDate}</Moment>
+        <Moment format='D MMM YYYY'>{paymentRecord.deliveryDate}</Moment>
       </TableCell>
     </ClickableTableRow>
   );

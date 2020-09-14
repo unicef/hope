@@ -127,7 +127,7 @@ export function IndividualsBioData({
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Date of Birth'>
-            <Moment format='DD/MM/YYYY'>{birthDate}</Moment>
+            <Moment format='D MMM YYYY'>{birthDate}</Moment>
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>

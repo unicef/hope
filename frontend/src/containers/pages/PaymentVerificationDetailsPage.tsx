@@ -184,13 +184,13 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                 {
                   label: 'START DATE',
                   value: (
-                    <Moment format='DD/MM/YYYY'>{cashPlan.startDate}</Moment>
+                    <Moment format='D MMM YYYY'>{cashPlan.startDate}</Moment>
                   ),
                 },
                 {
                   label: 'END DATE',
                   value: (
-                    <Moment format='DD/MM/YYYY'>{cashPlan.endDate}</Moment>
+                    <Moment format='D MMM YYYY'>{cashPlan.endDate}</Moment>
                   ),
                 },
               ].map((el) => (

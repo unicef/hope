@@ -7,6 +7,7 @@ export const CashPlan = gql`
       name
       startDate
       endDate
+      updatedAt
       status
       deliveryType
       fundsCommitment
