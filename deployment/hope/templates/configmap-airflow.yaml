@@ -13,6 +13,7 @@ data:
   DJANGO_ALLOWED_HOSTS: "{{.Values.ingress.host }},kubernetes.internal"
   DOMAIN: {{.Values.ingress.host }}
   ENV: {{ .Values.global.env }}
+  REDIS_INSTANCE: hope-main-redis-master
 {{- range $key, $value :=  .Values.backend.config }}
   {{ if eq $value "" }}
   {{ else }}
