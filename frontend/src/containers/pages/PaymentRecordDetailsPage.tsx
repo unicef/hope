@@ -18,7 +18,6 @@ const Container = styled.div`
 `;
 
 export function PaymentRecordDetailsPage(): React.ReactElement {
-  alert("dupa");
   const { id } = useParams();
   const { data, loading } = usePaymentRecordQuery({
     variables: { id },
