@@ -53,7 +53,7 @@ export function PaymentRecordHouseholdTableRow({
         </StatusContainer>
       </TableCell>
       <TableCell align='left'>{paymentRecord.fullName}</TableCell>
-      <TableCell align='left'>{paymentRecord.cashPlan.program.name}</TableCell>
+      <TableCell align='left'>{paymentRecord?.cashPlan?.program?.name}</TableCell>
       <TableCell align='right'>
         {formatCurrency(paymentRecord.entitlementQuantity)}
       </TableCell>
