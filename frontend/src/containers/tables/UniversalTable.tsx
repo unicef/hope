@@ -17,6 +17,8 @@ interface UniversalTableProps<T, K> {
   defaultOrderBy?: string;
   defaultOrderDirection?: string;
   actions?: Array<ReactElement>;
+  onSelectAllClick?: (event, rows) => void;
+  numSelected?: number;
 }
 export function UniversalTable<T, K>({
   rowsPerPageOptions = [5, 10, 15],
@@ -31,6 +33,8 @@ export function UniversalTable<T, K>({
   defaultOrderBy,
   defaultOrderDirection,
   actions,
+  onSelectAllClick,
+  numSelected = 0,
 }: UniversalTableProps<T, K>): ReactElement {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(rowsPerPageOptions[0]);
@@ -136,6 +140,8 @@ export function UniversalTable<T, K>({
       }}
       orderBy={orderBy}
       order={orderDirection as Order}
+      onSelectAllClick={onSelectAllClick}
+      numSelected={numSelected}
     />
   );
 }

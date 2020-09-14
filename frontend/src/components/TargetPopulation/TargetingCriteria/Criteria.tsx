@@ -50,7 +50,6 @@ const MathSign = styled.img`
 `;
 
 const CriteriaField = ({ field }) => {
-  console.log(field);
   let fieldElement;
   switch (field.comparisionMethod) {
     case 'NOT_EQUALS':
