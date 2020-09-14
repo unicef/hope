@@ -262,6 +262,8 @@ export type CashPlanNode = Node & {
   verificationStatus: Scalars['String'],
   paymentRecords: PaymentRecordNodeConnection,
   verifications: CashPlanPaymentVerificationNodeConnection,
+  bankReconciliationSuccess?: Maybe<Scalars['Int']>,
+  bankReconciliationError?: Maybe<Scalars['Int']>,
 };
 
 
@@ -4055,7 +4057,7 @@ export type CashPlanQuery = (
   { __typename?: 'Query' }
   & { cashPlan: Maybe<(
     { __typename?: 'CashPlanNode' }
-    & Pick<CashPlanNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'deliveryType' | 'fundsCommitment' | 'downPayment' | 'dispersionDate' | 'assistanceThrough' | 'caId' | 'verificationStatus'>
+    & Pick<CashPlanNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'deliveryType' | 'fundsCommitment' | 'downPayment' | 'dispersionDate' | 'assistanceThrough' | 'caId' | 'verificationStatus' | 'bankReconciliationSuccess' | 'bankReconciliationError'>
     & { verifications: (
       { __typename?: 'CashPlanPaymentVerificationNodeConnection' }
       & { edges: Array<Maybe<(
@@ -4161,10 +4163,14 @@ export type PaymentRecordQuery = (
   { __typename?: 'Query' }
   & { paymentRecord: Maybe<(
     { __typename?: 'PaymentRecordNode' }
-    & Pick<PaymentRecordNode, 'id' | 'status' | 'statusDate' | 'caId' | 'fullName' | 'distributionModality' | 'totalPersonsCovered' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'entitlementCardIssueDate' | 'entitlementCardNumber'>
+    & Pick<PaymentRecordNode, 'id' | 'status' | 'statusDate' | 'caId' | 'fullName' | 'distributionModality' | 'totalPersonsCovered' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'entitlementCardIssueDate' | 'entitlementCardNumber' | 'deliveryType'>
     & { household: (
       { __typename?: 'HouseholdNode' }
       & Pick<HouseholdNode, 'id' | 'size'>
+      & { headOfHousehold: (
+        { __typename?: 'IndividualNode' }
+        & Pick<IndividualNode, 'id' | 'phoneNo' | 'phoneNoAlternative'>
+      ) }
     ), targetPopulation: (
       { __typename?: 'TargetPopulationNode' }
       & Pick<TargetPopulationNode, 'id' | 'name'>
@@ -4174,8 +4180,27 @@ export type PaymentRecordQuery = (
       & { program: (
         { __typename?: 'ProgramNode' }
         & Pick<ProgramNode, 'id' | 'name'>
+      ), verifications: (
+        { __typename?: 'CashPlanPaymentVerificationNodeConnection' }
+        & { edges: Array<Maybe<(
+          { __typename?: 'CashPlanPaymentVerificationNodeEdge' }
+          & { node: Maybe<(
+            { __typename?: 'CashPlanPaymentVerificationNode' }
+            & Pick<CashPlanPaymentVerificationNode, 'id' | 'status' | 'verificationMethod'>
+          )> }
+        )>> }
       ) }
-    )>, serviceProvider: (
+    )>, verifications: (
+      { __typename?: 'PaymentVerificationNodeConnection' }
+      & Pick<PaymentVerificationNodeConnection, 'totalCount'>
+      & { edges: Array<Maybe<(
+        { __typename?: 'PaymentVerificationNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'PaymentVerificationNode' }
+          & Pick<PaymentVerificationNode, 'id' | 'status' | 'statusDate' | 'receivedAmount'>
+        )> }
+      )>> }
+    ), serviceProvider: (
       { __typename?: 'ServiceProviderNode' }
       & Pick<ServiceProviderNode, 'id' | 'fullName' | 'shortName'>
     ) }
@@ -7487,6 +7512,8 @@ export const CashPlanDocument = gql`
     caId
     dispersionDate
     verificationStatus
+    bankReconciliationSuccess
+    bankReconciliationError
     verifications {
       edges {
         node {
@@ -7808,6 +7835,11 @@ export const PaymentRecordDocument = gql`
     household {
       id
       size
+      headOfHousehold {
+        id
+        phoneNo
+        phoneNoAlternative
+      }
     }
     fullName
     distributionModality
@@ -7823,12 +7855,82 @@ export const PaymentRecordDocument = gql`
         id
         name
       }
+      verifications {
+        edges {
+          node {
+            id
+            status
+            verificationMethod
+          }
+        }
+      }
+    }
+    verifications {
+      totalCount
+      edges {
+        node {
+          id
+          status
+          statusDate
+          receivedAmount
+        }
+      }
     }
     currency
     entitlementQuantity
     deliveredQuantity
     deliveryDate
     deliveryDate
+    entitlementCardIssueDate
+    entitlementCardNumber
+    serviceProvider {
+      id
+      fullName
+      shortName
+    }
+    id
+    status
+    statusDate
+    caId
+    household {
+      id
+      size
+      headOfHousehold {
+        id
+        phoneNo
+        phoneNoAlternative
+      }
+    }
+    fullName
+    distributionModality
+    totalPersonsCovered
+    targetPopulation {
+      id
+      name
+    }
+    cashPlan {
+      id
+      caId
+      program {
+        id
+        name
+      }
+      verifications {
+        edges {
+          node {
+            id
+            status
+            verificationMethod
+          }
+        }
+      }
+    }
+    currency
+    entitlementQuantity
+    deliveredQuantity
+    deliveryDate
+    deliveryDate
+    deliveryType
     entitlementCardIssueDate
     entitlementCardNumber
     serviceProvider {
@@ -9972,6 +10074,8 @@ export type CashPlanNodeResolvers<ContextType = any, ParentType extends Resolver
   verificationStatus?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, CashPlanNodePaymentRecordsArgs>,
   verifications?: Resolver<ResolversTypes['CashPlanPaymentVerificationNodeConnection'], ParentType, ContextType, CashPlanNodeVerificationsArgs>,
+  bankReconciliationSuccess?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  bankReconciliationError?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 
 export type CashPlanNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['CashPlanNodeConnection'] = ResolversParentTypes['CashPlanNodeConnection']> = {

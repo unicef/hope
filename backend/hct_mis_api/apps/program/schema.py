@@ -7,6 +7,7 @@ from graphene_django.filter import DjangoFilterConnectionField
 from core.schema import ChoiceObject, LogEntryObjectConnection
 from core.extended_connection import ExtendedConnection
 from core.utils import to_choice_object
+from payment.models import CashPlanPaymentVerification
 from program.models import Program, CashPlan
 from django_filters import FilterSet, OrderingFilter, CharFilter
 
@@ -63,6 +64,7 @@ class CashPlanFilter(FilterSet):
             "status",
             "verification_status",
             "total_persons_covered",
+            "total_delivered_quantity",
             "assistance_measurement",
             "assistance_through",
             "delivery_type",
@@ -83,6 +85,9 @@ class CashPlanFilter(FilterSet):
 
 
 class CashPlanNode(DjangoObjectType):
+    bank_reconciliation_success = graphene.Int()
+    bank_reconciliation_error = graphene.Int()
+
     class Meta:
         model = CashPlan
         interfaces = (relay.Node,)
@@ -124,3 +129,13 @@ class Query(graphene.ObjectType):
 
     def resolve_cash_plan_status_choices(self, info, **kwargs):
         return to_choice_object(Program.STATUS_CHOICE)
+
+    def resolve_all_cash_plans(self, info, **kwargs):
+        return CashPlan.objects.annotate(
+            custom_order=Case(
+                When(verification_status=CashPlanPaymentVerification.STATUS_ACTIVE, then=Value(1)),
+                When(verification_status=CashPlanPaymentVerification.STATUS_PENDING, then=Value(2)),
+                When(verification_status=CashPlanPaymentVerification.STATUS_FINISHED, then=Value(3)),
+                output_field=IntegerField(),
+            )
+        ).order_by("custom_order")

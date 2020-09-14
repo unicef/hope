@@ -5,8 +5,9 @@ import { Grid, Paper, Typography } from '@material-ui/core';
 import { StatusBox } from '../StatusBox';
 import {
   decodeIdString,
-  paymentRecordStatusToColor,
   formatCurrency,
+  paymentRecordStatusToColor,
+  verificationRecordsStatusToColor,
 } from '../../utils/utils';
 import { LabelizedField } from '../LabelizedField';
 import { PaymentVerificationNode } from '../../__generated__/graphql';
@@ -108,7 +109,7 @@ export function VerificationRecordDetails({
               <StatusContainer>
                 <StatusBox
                   status={paymentVerification.status}
-                  statusToColor={paymentRecordStatusToColor}
+                  statusToColor={verificationRecordsStatusToColor}
                 />
               </StatusContainer>
             </LabelizedField>
