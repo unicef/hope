@@ -113,10 +113,11 @@ stages:
                 frontend.image=uniappsk8sdevacr.azurecr.io/$(Docker.frontend.repository):$(Build.BuildId),\
                 ingress.host=dev-hope.unitst.org,\
                 ingress.tls=true,\
+                airflow.baseUrl=dev-hope.unitst.org/airflow,\
+                airflow.airflow.baseUrl=dev-hope.unitst.org/airflow,\
                 airflow.airflow.image.repository=uniappsk8sdevacr.azurecr.io/$(Docker.airflow.repository),\
                 airflow.airflow.image.tag=$(Build.BuildId),\
                 airflow.ingress.hosts.0.name=dev-hope.unitst.org,\
-                airflow.ingress.hosts.0.tlsHosts.0=dev-hope.unitst.org,\
                 airflow.ingress.hosts.0.tls=true,\
                 postgresql.postgresqlPassword=$(POSTGRES_PASSWORD),\
                 registrationdatahubpostgresql.postgresqlPassword=$(REGISTRATION_DATAHUB_POSTGRES_PASSWORD),\
