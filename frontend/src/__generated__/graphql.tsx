@@ -1246,6 +1246,7 @@ export type ImportedIndividualNode = Node & {
   deduplicationBatchResults?: Maybe<Array<Maybe<DeduplicationResultNode>>>,
   deduplicationGoldenRecordResults?: Maybe<Array<Maybe<DeduplicationResultNode>>>,
   flexFields: Scalars['JSONString'],
+  pregnant: Scalars['Boolean'],
   importedhousehold?: Maybe<ImportedHouseholdNode>,
   documents: ImportedDocumentNodeConnection,
   identities: Array<ImportedIndividualIdentityNode>,
@@ -1347,6 +1348,7 @@ export type IndividualNode = Node & {
   deduplicationStatus: IndividualDeduplicationStatus,
   deduplicationResults?: Maybe<Array<Maybe<DeduplicationResultNode>>>,
   sanctionListPossibleMatch: Scalars['Boolean'],
+  pregnant: Scalars['Boolean'],
   representedHouseholds: HouseholdNodeConnection,
   headingHousehold?: Maybe<HouseholdNode>,
   documents: DocumentNodeConnection,
@@ -3105,7 +3107,7 @@ export type IndividualMinimalFragment = (
 
 export type IndividualDetailedFragment = (
   { __typename?: 'IndividualNode' }
-  & Pick<IndividualNode, 'givenName' | 'familyName' | 'estimatedBirthDate' | 'status' | 'enrolledInNutritionProgramme' | 'administrationOfRutf' | 'role' | 'relationship' | 'flexFields'>
+  & Pick<IndividualNode, 'givenName' | 'familyName' | 'estimatedBirthDate' | 'pregnant' | 'status' | 'enrolledInNutritionProgramme' | 'administrationOfRutf' | 'role' | 'relationship' | 'flexFields'>
   & { documents: (
     { __typename?: 'DocumentNodeConnection' }
     & { edges: Array<Maybe<(
@@ -4639,7 +4641,7 @@ export type ImportedIndividualMinimalFragment = (
 
 export type ImportedIndividualDetailedFragment = (
   { __typename?: 'ImportedIndividualNode' }
-  & Pick<ImportedIndividualNode, 'givenName' | 'familyName' | 'middleName' | 'estimatedBirthDate' | 'maritalStatus' | 'role' | 'relationship' | 'phoneNo' | 'phoneNoAlternative'>
+  & Pick<ImportedIndividualNode, 'givenName' | 'familyName' | 'middleName' | 'estimatedBirthDate' | 'maritalStatus' | 'pregnant' | 'role' | 'relationship' | 'phoneNo' | 'phoneNoAlternative'>
   & { documents: (
     { __typename?: 'ImportedDocumentNodeConnection' }
     & { edges: Array<Maybe<(
@@ -4968,6 +4970,7 @@ export const IndividualDetailedFragmentDoc = gql`
   givenName
   familyName
   estimatedBirthDate
+  pregnant
   status
   documents {
     edges {
@@ -5124,6 +5127,7 @@ export const ImportedIndividualDetailedFragmentDoc = gql`
   middleName
   estimatedBirthDate
   maritalStatus
+  pregnant
   documents {
     edges {
       node {
@@ -10398,6 +10402,7 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   deduplicationBatchResults?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeduplicationResultNode']>>>, ParentType, ContextType>,
   deduplicationGoldenRecordResults?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeduplicationResultNode']>>>, ParentType, ContextType>,
   flexFields?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
+  pregnant?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   importedhousehold?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['ImportedDocumentNodeConnection'], ParentType, ContextType, ImportedIndividualNodeDocumentsArgs>,
   identities?: Resolver<Array<ResolversTypes['ImportedIndividualIdentityNode']>, ParentType, ContextType>,
@@ -10460,6 +10465,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   deduplicationStatus?: Resolver<ResolversTypes['IndividualDeduplicationStatus'], ParentType, ContextType>,
   deduplicationResults?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeduplicationResultNode']>>>, ParentType, ContextType>,
   sanctionListPossibleMatch?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  pregnant?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   representedHouseholds?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, IndividualNodeRepresentedHouseholdsArgs>,
   headingHousehold?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, IndividualNodeDocumentsArgs>,
