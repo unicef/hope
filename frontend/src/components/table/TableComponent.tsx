@@ -79,6 +79,8 @@ interface TableComponentProps<T> {
   allowSort?: boolean;
   isOnPaper?: boolean;
   actions?: Array<React.ReactElement>;
+  onSelectAllClick?: (event, rows) => void;
+  numSelected?: number;
 }
 
 export function TableComponent<T>({
@@ -99,6 +101,8 @@ export function TableComponent<T>({
   allowSort = true,
   isOnPaper = true,
   actions = [],
+  onSelectAllClick,
+  numSelected = 0,
 }: TableComponentProps<T>): React.ReactElement {
   const classes = useStyles({});
 
@@ -167,6 +171,9 @@ export function TableComponent<T>({
             onRequestSort={handleRequestSort}
             rowCount={itemsCount}
             allowSort={allowSort}
+            onSelectAllClick={onSelectAllClick}
+            data={data}
+            numSelected={numSelected}
           />
           <TableBody>{body}</TableBody>
         </Table>
