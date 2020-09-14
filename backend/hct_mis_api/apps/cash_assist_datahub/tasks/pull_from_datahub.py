@@ -1,5 +1,5 @@
 from django.db import transaction
-from django.db.models import Q, F
+from django.db.models import Q, F, Count
 
 from cash_assist_datahub.models import Session
 from core.models import BusinessArea
@@ -11,7 +11,6 @@ from targeting.models import TargetPopulation
 
 
 class PullFromDatahubTask:
-
     MAPPING_CASH_PLAN_DICT = {
         "ca_id": "cash_plan_id",
         "ca_hash_id": "cash_plan_hash_id",
@@ -31,6 +30,7 @@ class PullFromDatahubTask:
         "delivery_type": "delivery_type",
         "comments": "comments",
         "coverage_duration": "coverage_duration",
+        "coverage_unit": "coverage_unit",
         "dispersion_date": "dispersion_date",
         "end_date": "end_date",
         "start_date": "start_date",
@@ -55,6 +55,7 @@ class PullFromDatahubTask:
         "household_id": "household_mis_id",
         "ca_id": "ca_id",
         "ca_hash_id": "ca_hash_id",
+        "status": "status",
         "status_date": "status_date",
         "transaction_reference_id": "transaction_reference_id",
         "vision_id": "vision_id",
@@ -70,9 +71,23 @@ class PullFromDatahubTask:
     @transaction.atomic(using="default")
     @transaction.atomic(using="cash_assist_datahub_ca")
     def execute(self):
-        sessions = Session.objects.filter(status=Session.STATUS_READY)
-        for session in sessions:
-            self.copy_session(session)
+        grouped_session = Session.objects.values("business_area").annotate(count=Count("business_area"))
+        for group in grouped_session:
+            session_queryset = Session.objects.filter(business_area=group.get("business_area"))
+            # if any session in this business area fails omit other sessions in this business area
+            if session_queryset.filter(status=Session.STATUS_FAILED).count() > 0:
+                continue
+            sessions = session_queryset.filter(status=Session.STATUS_READY).order_by("-last_modified_date")
+            try:
+                for session in sessions:
+                    try:
+                        self.copy_session(session)
+                    except Exception as e:
+                        session = Session.STATUS_FAILED
+                        session.save()
+                        raise e
+            except:
+                pass
 
     def build_arg_dict(self, model_object, mapping_dict):
         return {key: nested_getattr(model_object, mapping_dict[key]) for key in mapping_dict}
@@ -81,7 +96,8 @@ class PullFromDatahubTask:
         session.status = session.STATUS_PROCESSING
         session.save()
         self.copy_service_providers(session)
-        Program.objects.bulk_update(self.copy_programs_ids(session), ["ca_id", "ca_hash_id"])
+        programs = self.copy_programs_ids(session)
+        Program.objects.bulk_update(programs, ["ca_id", "ca_hash_id"])
         TargetPopulation.objects.bulk_update(self.copy_target_population_ids(session), ["ca_id", "ca_hash_id"])
         self.copy_cash_plans(session)
         self.copy_payment_records(session)
@@ -108,6 +124,7 @@ class PullFromDatahubTask:
             payment_record_args["service_provider"] = ServiceProvider.objects.get(
                 ca_id=dh_payment_record.service_provider_ca_id
             )
+            payment_record_args["cash_plan"] = CashPlan.objects.get(ca_id=dh_payment_record.cash_plan_ca_id)
             (payment_record, created,) = PaymentRecord.objects.update_or_create(
                 ca_id=dh_payment_record.ca_id, defaults=payment_record_args
             )
@@ -125,12 +142,13 @@ class PullFromDatahubTask:
 
     def copy_programs_ids(self, session):
         dh_programs = ca_models.Programme.objects.filter(session=session)
-
+        programs = []
         for dh_program in dh_programs:
             program = Program.objects.get(id=dh_program.mis_id)
             program.ca_id = dh_program.ca_id
             program.ca_hash_id = dh_program.ca_hash_id
-            yield program
+            programs.append(program)
+        return programs
 
     def copy_target_population_ids(self, session):
         dh_target_populations = ca_models.TargetPopulation.objects.filter(session=session)

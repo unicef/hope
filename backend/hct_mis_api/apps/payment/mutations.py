@@ -415,8 +415,35 @@ class DiscardCashPlanVerificationMutation(graphene.Mutation):
         if cashplan_payment_verification.status != CashPlanPaymentVerification.STATUS_ACTIVE:
             raise GraphQLError("You can discard only ACTIVE verification")
         cash_plan = cashplan_payment_verification.cash_plan
+        payment_records = cls.get_new_payment_records(cashplan_payment_verification)
+        payment_record_verifications_to_create = []
+        for payment_record in payment_records:
+            payment_record_verification = PaymentVerification(
+                status_date=timezone.now(),
+                cash_plan_payment_verification=cashplan_payment_verification,
+                payment_record=payment_record,
+            )
+            payment_record_verifications_to_create.append(payment_record_verification)
+        cashplan_payment_verification.save()
         cashplan_payment_verification.delete()
         return DiscardCashPlanVerificationMutation(cash_plan)
+
+    @classmethod
+    def get_new_payment_records(cls, cash_plan_verification):
+        payment_records = cash_plan_verification.cash_plan.payment_records.all()
+        excluded_admin_areas = cash_plan_verification.excluded_admin_areas_filter
+        sex = cash_plan_verification.sex_filter
+        age = cash_plan_verification.age_filter
+        if excluded_admin_areas:
+            excluded_admin_areas_decoded = [decode_id_string(x) for x in excluded_admin_areas]
+            payment_records = payment_records.filter(~(Q(household__admin_area__id__in=excluded_admin_areas_decoded)))
+        if sex is not None:
+            payment_records = payment_records.filter(household__head_of_household__sex=sex)
+        if age is not None:
+            payment_records = filter_age(
+                "household__head_of_household__birth_date", payment_records, age.get("min"), age.get("max"),
+            )
+        return payment_records
 
 
 class UpdatePaymentVerificationStatusAndReceivedAmount(graphene.Mutation):

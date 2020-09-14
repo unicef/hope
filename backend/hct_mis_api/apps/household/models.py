@@ -1,6 +1,7 @@
 import re
 from datetime import date
 
+from dateutil.relativedelta import relativedelta
 from django.contrib.gis.db.models import PointField
 from django.contrib.postgres.fields import JSONField
 from django.core.validators import (
@@ -187,6 +188,10 @@ class Household(TimeStampedUUIDModel, AbstractSyncable):
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
 
     @property
+    def sanction_list_possible_match(self):
+        return self.individuals.filter(sanction_list_possible_match=True).count() > 0
+
+    @property
     def total_cash_received(self):
         return self.payment_records.filter().aggregate(Sum("delivered_quantity")).get("delivered_quantity__sum")
 
@@ -315,15 +320,11 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
     )
     deduplication_results = JSONField(default=dict)
     sanction_list_possible_match = models.BooleanField(default=False)
+    pregnant = models.BooleanField(default=False)
 
     @property
     def age(self):
-        today = date.today()
-        return (
-            today.year
-            - self.birth_date.year
-            - ((today.month, today.day) < (self.birth_date.month, self.birth_date.day))
-        )
+        return relativedelta(date.today(), self.birth_date).years
 
     @property
     def get_hash_key(self):
@@ -337,7 +338,6 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
             "birth_date",
             "phone_no",
             "phone_no_alternative",
-            "relationship",
         )
         values = [str(getattr(self, field)) for field in fields]
 

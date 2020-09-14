@@ -120,6 +120,7 @@ class PaymentRecord(SessionModel):
     distribution_modality = models.CharField(max_length=255, null=True)
     target_population_mis_id = models.UUIDField(null=True)
     target_population_cash_assist_id = models.CharField(max_length=255, null=True)
+    cash_plan_ca_id = models.CharField(max_length=255, null=True)
     entitlement_card_number = models.CharField(max_length=255, null=True)
     entitlement_card_status = models.CharField(max_length=20, null=True)
     entitlement_card_issue_date = models.DateField(null=True)

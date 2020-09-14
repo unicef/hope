@@ -55,6 +55,7 @@ class SendTPToDatahubTask:
         "marital_status": "marital_status",
         "phone_number": "phone_no",
         "household_mis_id": "household.id",
+        "pregnant":"pregnant",
     }
     MAPPING_DOCUMENT_DICT = {
         "mis_id": "id",

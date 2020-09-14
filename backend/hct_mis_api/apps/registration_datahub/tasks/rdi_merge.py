@@ -11,6 +11,7 @@ from household.models import (
     IndividualRoleInHousehold,
     Agency,
     DUPLICATE,
+    NEEDS_ADJUDICATION,
 )
 from household.models import Household
 from household.models import Individual
@@ -20,7 +21,6 @@ from registration_datahub.models import (
     ImportedHousehold,
     ImportedIndividualRoleInHousehold,
     ImportedIndividual,
-    DUPLICATE_IN_BATCH,
 )
 from registration_datahub.tasks.deduplicate import DeduplicateTask
 from sanction_list.tasks.check_against_sanction_list_pre_merge import CheckAgainstSanctionListPreMergeTask
@@ -172,21 +172,6 @@ class RdiMergeTask:
         imported_individuals = ImportedIndividual.objects.order_by("first_registration_date").filter(
             registration_data_import=obj_hub
         )
-        duplicated_imported_individuals = imported_individuals.filter(deduplication_batch_status=DUPLICATE_IN_BATCH)
-
-        batch_duplicates = []
-        ignored_ids = []
-        for duplicated_individual in duplicated_imported_individuals:
-            batch_duplicates.extend(
-                [
-                    i["hit_id"]
-                    for i in duplicated_individual.deduplication_batch_results["duplicates"]
-                    if i["hit_id"] not in ignored_ids
-                ]
-            )
-            ignored_ids.append(str(duplicated_individual.id))
-
-        imported_individuals = imported_individuals.exclude(id__in=batch_duplicates)
 
         imported_roles = ImportedIndividualRoleInHousehold.objects.filter(
             household__in=imported_households, individual__in=imported_individuals,
@@ -206,16 +191,27 @@ class RdiMergeTask:
         IndividualRoleInHousehold.objects.bulk_create(roles_to_create)
 
         # DEDUPLICATION
+        rebuild_search_index()
 
         DeduplicateTask.deduplicate_individuals(registration_data_import=obj_hct)
 
-        # TODO: handle assignment of head of household and roles
-        #  (check: https://docs.google.com/document/d/14crNGkT9JGeJWJQSGcmPvlK8mvhOS1PvwAoZrj7-SrY/edit)
         duplicates = Individual.objects.filter(registration_data_import=obj_hct, deduplication_status=DUPLICATE)
-        duplicates.delete()
 
-        # re-build after removing duplicates
-        rebuild_search_index()
+        for individual in duplicates:
+            for duplicate in individual.deduplication_results["duplicates"]:
+                # TODO: Grievance
+                print(f"Individual: {individual.id} is duplicate for Individual: {duplicate.get('hit_id')}")
+
+        needs_adjudication = Individual.objects.filter(
+            registration_data_import=obj_hct, deduplication_status=NEEDS_ADJUDICATION
+        )
+        for individual in needs_adjudication:
+            for possible_duplicate in individual.deduplication_results["possible_duplicates"]:
+                # TODO: Grievance
+                print(
+                    f"Individual: {individual.id} is possible duplicate for "
+                    f"Individual: {possible_duplicate.get('hit_id')}"
+                )
 
         # SANCTION LIST CHECK
         CheckAgainstSanctionListPreMergeTask.execute()
