@@ -190,6 +190,15 @@ export function CreateVerificationPlan({
   const handleFormChange = (values) => {
     setFormValues(values);
   };
+
+  const getSampleSizePercentage = () => {
+    if (sampleSizesData?.sampleSize?.paymentRecordCount !== 0) {
+      return ` (${(sampleSizesData?.sampleSize?.sampleSize /
+        sampleSizesData?.sampleSize?.paymentRecordCount) *
+        100})%`;
+    }
+    return ` (0%)`;
+  };
   return (
     <Formik initialValues={initialValues} onSubmit={submit}>
       {({ submitForm, values, setValues }) => (
@@ -252,11 +261,8 @@ export function CreateVerificationPlan({
                       fontWeight='fontWeightBold'
                     >
                       Sample size: {sampleSizesData?.sampleSize?.sampleSize} out
-                      of {sampleSizesData?.sampleSize?.paymentRecordCount} (
-                      {(sampleSizesData?.sampleSize?.sampleSize /
-                        sampleSizesData?.sampleSize?.paymentRecordCount) *
-                        100}
-                      %)
+                      of {sampleSizesData?.sampleSize?.paymentRecordCount}
+                      {getSampleSizePercentage()}
                     </Box>
                     <Field
                       name='verificationChannel'

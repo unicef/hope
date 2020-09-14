@@ -20,6 +20,7 @@ import { Dialog } from '../../dialogs/Dialog';
 import { DialogActions } from '../../dialogs/DialogActions';
 import { DropzoneField } from '../../../components/DropzoneField';
 import { ImportErrors } from './errors/ImportErrors';
+import { CreateGrievanceTickets } from '../../../components/payments/CreateGrievanceTickets';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -89,6 +90,14 @@ export function VerificationRecordsTable({
       }
     }
   };
+  const grievanceButton = (
+    <Box mr={3}>
+      <CreateGrievanceTickets
+        grievanceTicketsNumber={selected.length}
+        disabled={selected.length === 0}
+      />
+    </Box>
+  );
   const exportButton =
     verificationMethod === 'XLSX' ? (
       <Box mr={3}>
@@ -190,7 +199,7 @@ export function VerificationRecordsTable({
         AllPaymentVerificationsQueryVariables
       >
         title='Verification Records'
-        actions={[exportButton, importButton]}
+        actions={[grievanceButton, exportButton, importButton]}
         headCells={headCells}
         onSelectAllClick={handleSelectAllCheckboxesClick}
         query={useAllPaymentVerificationsQuery}
