@@ -44,4 +44,10 @@ export const headCells: HeadCell<CashPlanNode>[] = [
     id: 'programme',
     numeric: false,
   },
+  {
+    disablePadding: false,
+    label: 'Last Modified Date',
+    id: 'updatedAt',
+    numeric: false,
+  },
 ];

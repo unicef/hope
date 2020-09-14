@@ -53,10 +53,13 @@ export function PaymentVerificationTableRow({
         {formatCurrency(plan.totalDeliveredQuantity)}
       </TableCell>
       <TableCell align='left'>
-        <Moment format='DD/MM/YYYY'>{plan.startDate}</Moment>-
-        <Moment format='DD/MM/YYYY'>{plan.endDate}</Moment>
+        <Moment format='D MMM YYYY'>{plan.startDate}</Moment> -{' '}
+        <Moment format='D MMM YYYY'>{plan.endDate}</Moment>
       </TableCell>
       <TableCell align='left'>{plan.program.name}</TableCell>
+      <TableCell align='left'>
+        <Moment format='D MMM YYYY'>{plan.updatedAt}</Moment>
+      </TableCell>
     </ClickableTableRow>
   );
 }

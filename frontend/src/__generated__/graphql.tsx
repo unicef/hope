@@ -4055,7 +4055,7 @@ export type CashPlanQuery = (
   { __typename?: 'Query' }
   & { cashPlan: Maybe<(
     { __typename?: 'CashPlanNode' }
-    & Pick<CashPlanNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'deliveryType' | 'fundsCommitment' | 'downPayment' | 'dispersionDate' | 'assistanceThrough' | 'caId' | 'verificationStatus'>
+    & Pick<CashPlanNode, 'id' | 'name' | 'startDate' | 'endDate' | 'updatedAt' | 'status' | 'deliveryType' | 'fundsCommitment' | 'downPayment' | 'dispersionDate' | 'assistanceThrough' | 'caId' | 'verificationStatus'>
     & { verifications: (
       { __typename?: 'CashPlanPaymentVerificationNodeConnection' }
       & { edges: Array<Maybe<(
@@ -7478,6 +7478,7 @@ export const CashPlanDocument = gql`
     name
     startDate
     endDate
+    updatedAt
     status
     deliveryType
     fundsCommitment
