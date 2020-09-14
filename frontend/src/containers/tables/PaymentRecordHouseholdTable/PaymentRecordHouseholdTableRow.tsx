@@ -29,7 +29,7 @@ export function PaymentRecordHouseholdTableRow({
   const businessArea = useBusinessArea();
   const history = useHistory();
   const handleClick = (): void => {
-    const path = `/${businessArea}/payment_records/${paymentRecord.id}`;
+    const path = `/${businessArea}/payment-records/${paymentRecord.id}`;
     if (openInNewTab) {
       window.open(path);
     } else {
