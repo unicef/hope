@@ -221,7 +221,7 @@ airflow:
     enabled: true
     hosts:
       - name: airflow.test
-        path: /
+        path: /airflow/*
         tls: false
         tlsHosts: [airflow.test]
         tlsSecret: "aks-unitst-tls"
