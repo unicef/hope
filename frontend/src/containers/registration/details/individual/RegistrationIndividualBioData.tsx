@@ -7,7 +7,6 @@ import {
   decodeIdString,
   getAgeFromDob,
   sexToCapitalize,
-  maritalStatusToColor,
   choicesToDict,
 } from '../../../../utils/utils';
 import {
@@ -16,8 +15,7 @@ import {
 } from '../../../../__generated__/graphql';
 import { LabelizedField } from '../../../../components/LabelizedField';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { Missing } from '../../../../components/Missing';
-import { StatusBox } from '../../../../components/StatusBox';
+
 import { LoadingComponent } from '../../../../components/LoadingComponent';
 
 const Overview = styled(Paper)`
@@ -176,8 +174,7 @@ export function RegistrationIndividualsBioData({
         <Grid item xs={3}>
           <LabelizedField label='Pregnant'>
             <div>
-              <Missing />
-              {/* <div>{individual.pregnant ? 'YES' : 'NO' || '-'}</div> */}
+              <div>{individual.pregnant ? 'Yes' : 'No' || '-'}</div>
             </div>
           </LabelizedField>
         </Grid>

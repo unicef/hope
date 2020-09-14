@@ -956,6 +956,7 @@ type ImportedIndividualNode implements Node {
   deduplicationBatchResults: [DeduplicationResultNode]
   deduplicationGoldenRecordResults: [DeduplicationResultNode]
   flexFields: JSONString!
+  pregnant: Boolean!
   importedhousehold: ImportedHouseholdNode
   documents(before: String, after: String, first: Int, last: Int): ImportedDocumentNodeConnection!
   identities: [ImportedIndividualIdentityNode!]!
@@ -1039,6 +1040,7 @@ type IndividualNode implements Node {
   deduplicationStatus: IndividualDeduplicationStatus!
   deduplicationResults: [DeduplicationResultNode]
   sanctionListPossibleMatch: Boolean!
+  pregnant: Boolean!
   representedHouseholds(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   headingHousehold: HouseholdNode
   documents(before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
