@@ -122,6 +122,7 @@ export const importedIndividualDetailed = gql`
     middleName
     estimatedBirthDate
     maritalStatus
+    pregnant
     documents {
       edges {
         node {

@@ -176,8 +176,7 @@ export function IndividualsBioData({
         <Grid item xs={3}>
           <LabelizedField label='Pregnant'>
             <div>
-              <Missing />
-              {/* <div>{individual.pregnant ? 'YES' : 'NO' || '-'}</div> */}
+              <div>{individual.pregnant ? 'Yes' : 'No' || '-'}</div>
             </div>
           </LabelizedField>
         </Grid>

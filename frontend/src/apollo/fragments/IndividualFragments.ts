@@ -43,6 +43,7 @@ export const individualDetailed = gql`
     givenName
     familyName
     estimatedBirthDate
+    pregnant
     status
     documents {
       edges {
