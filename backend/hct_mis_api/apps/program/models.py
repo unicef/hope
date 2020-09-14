@@ -122,7 +122,7 @@ class CashPlan(TimeStampedUUIDModel):
     dispersion_date = models.DateTimeField()
     coverage_duration = models.PositiveIntegerField()
     coverage_unit = models.CharField(max_length=255)
-    comments = models.CharField(max_length=255)
+    comments = models.CharField(max_length=255, null=True)
     program = models.ForeignKey("program.Program", on_delete=models.CASCADE, related_name="cash_plans")
     delivery_type = models.CharField(max_length=255)
     assistance_measurement = models.CharField(max_length=255)

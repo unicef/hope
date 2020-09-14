@@ -1,26 +1,161 @@
 from __future__ import absolute_import
 
-from types import MethodType
-
+from django.conf import settings
 from django.db import connections
 from snapshottest.django import TestRunner
 
 
-def prepare_schema(self):
-    self.connect()
+def create_test_db_and_schemas(creation, verbosity=1, autoclobber=False, serialize=True, keepdb=False):
+    """
+    Create a test database, prompting the user for confirmation if the
+    database already exists. Return the name of the test database created.
+    """
+    # Don't import django.core.management if it isn't needed.
+    from django.core.management import call_command
 
-    options = self.connection.info.options
-    schema = options.replace("-c search_path=", "")
-    self.connection.cursor().execute(f"CREATE SCHEMA IF NOT EXISTS {schema}")
+    test_database_name = creation._get_test_db_name()
+
+    if verbosity >= 1:
+        action = 'Creating'
+        if keepdb:
+            action = "Using existing"
+
+        creation.log('%s test database for alias %s...' % (
+            action,
+            creation._get_database_display_str(verbosity, test_database_name),
+        ))
+
+    # We could skip this call if keepdb is True, but we instead
+    # give it the keepdb param. This is to handle the case
+    # where the test DB doesn't exist, in which case we need to
+    # create it, then just not destroy it. If we instead skip
+    # this, we will get an exception.
+    creation._create_test_db(verbosity, autoclobber, keepdb)
+    creation.connection.close()
+    settings.DATABASES[creation.connection.alias]["NAME"] = test_database_name
+    creation.connection.settings_dict["NAME"] = test_database_name
+
+    creation.connection.cursor().execute("CREATE SCHEMA IF NOT EXISTS ca")
+    creation.connection.cursor().execute("CREATE SCHEMA IF NOT EXISTS mis")
+    creation.connection.cursor().execute("CREATE SCHEMA IF NOT EXISTS erp")
+    # We report migrate messages at one level lower than that requested.
+    # This ensures we don't get flooded with messages during testing
+    # (unless you really ask to be flooded).
+    call_command(
+        'migrate',
+        verbosity=max(verbosity - 1, 0),
+        interactive=False,
+        database=creation.connection.alias,
+        run_syncdb=True,
+    )
+
+    # We then serialize the current state of the database into a string
+    # and store it on the connection. This slightly horrific process is so people
+    # who are testing on databases without transactions or who are using
+    # a TransactionTestCase still get a clean database on every test run.
+    if serialize:
+        creation.connection._test_serialized_contents = creation.serialize_db_to_string()
+
+    call_command('createcachetable', database=creation.connection.alias)
+
+    # Ensure a connection for the side effect of initializing the test database.
+    creation.connection.ensure_connection()
+
+    return test_database_name
+
+
+def create_fake_test_db(creation, verbosity=1, autoclobber=False, serialize=True, keepdb=False):
+    """
+    Create a test database, prompting the user for confirmation if the
+    database already exists. Return the name of the test database created.
+    """
+    # Don't import django.core.management if it isn't needed.
+    from django.core.management import call_command
+
+    test_database_name = creation._get_test_db_name()
+
+    if verbosity >= 1:
+        action = 'Creating'
+        if keepdb:
+            action = "Using existing"
+
+        creation.log('%s test database for alias %s...' % (
+            action,
+            creation._get_database_display_str(verbosity, test_database_name),
+        ))
+
+    # We could skip this call if keepdb is True, but we instead
+    # give it the keepdb param. This is to handle the case
+    # where the test DB doesn't exist, in which case we need to
+    # create it, then just not destroy it. If we instead skip
+    # this, we will get an exception.
+    creation.connection.close()
+    settings.DATABASES[creation.connection.alias]["NAME"] = test_database_name
+    creation.connection.settings_dict["NAME"] = test_database_name
+    call_command(
+        'migrate',
+        verbosity=max(verbosity - 1, 0),
+        interactive=False,
+        database=creation.connection.alias,
+        run_syncdb=True,
+    )
+    # We then serialize the current state of the database into a string
+    # and store it on the connection. This slightly horrific process is so people
+    # who are testing on databases without transactions or who are using
+    # a TransactionTestCase still get a clean database on every test run.
+    creation.connection.ensure_connection()
+
+    call_command('createcachetable', database=creation.connection.alias)
+
+    return test_database_name
+
+
+def _setup_schema_database(verbosity, interactive, keepdb=False, debug_sql=False, parallel=0, alias=None, **kwargs):
+    """Create the test databases."""
+
+    connection = connections[alias]
+    old_name = (connection, alias, True)
+    create_test_db_and_schemas(connection.creation,
+                               verbosity=verbosity,
+                               autoclobber=not interactive,
+                               keepdb=keepdb,
+                               serialize=connection.settings_dict.get('TEST', {}).get('SERIALIZE', True),
+                               )
+    if parallel > 1:
+        for index in range(parallel):
+            connection.creation.clone_test_db(
+                suffix=str(index + 1),
+                verbosity=verbosity,
+                keepdb=keepdb,
+            )
+    return [old_name]
 
 
 class PostgresTestRunner(TestRunner):
-    def setup_databases(self, **kwargs):
-        for connection_name in connections:
-            if connection_name in ("cash_assist_datahub_mis", "cash_assist_datahub_ca", "cash_assist_datahub_erp",):
-                connection = connections[connection_name]
-                connection.prepare_database = MethodType(prepare_schema, connection)
-                aliases = kwargs.get("aliases")
-                aliases.discard(connection_name)
+    def teardown_databases(self, old_config, **kwargs):
+        connections["cash_assist_datahub_ca"].close()
+        connections["cash_assist_datahub_erp"].close()
+        return super().teardown_databases(old_config, **kwargs)
 
-        return super().setup_databases(**kwargs)
+    def setup_databases(self, **kwargs):
+        old_names = []
+        created = False
+        for alias in connections:
+            if alias in ("cash_assist_datahub_mis", "cash_assist_datahub_ca", "cash_assist_datahub_erp",):
+
+                aliases = kwargs.get("aliases")
+                aliases.discard(alias)
+                if not created:
+                    old_names.extend(
+                        _setup_schema_database(self.verbosity, self.interactive, self.keepdb, self.debug_sql,
+                                               self.parallel, alias=alias))
+                    created = True
+                else:
+                    connection = connections[alias]
+                    create_fake_test_db(connection.creation, verbosity=self.verbosity,
+                                        autoclobber=not self.interactive,
+                                        keepdb=self.keepdb,
+                                        serialize=connection.settings_dict.get('TEST', {}).get('SERIALIZE', True))
+        old_names.extend(super().setup_databases(**kwargs))
+
+        return old_names

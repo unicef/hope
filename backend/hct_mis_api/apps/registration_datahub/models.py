@@ -121,6 +121,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
     deduplication_batch_results = JSONField(default=dict)
     deduplication_golden_record_results = JSONField(default=dict)
     flex_fields = JSONField(default=dict)
+    pregnant = models.BooleanField(default=False)
 
     @property
     def age(self):
@@ -143,7 +144,6 @@ class ImportedIndividual(TimeStampedUUIDModel):
             "birth_date",
             "phone_no",
             "phone_no_alternative",
-            "relationship",
         )
         values = [str(getattr(self, field)) for field in fields]
 

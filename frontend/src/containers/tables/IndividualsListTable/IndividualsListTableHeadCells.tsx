@@ -4,6 +4,13 @@ import { IndividualNode } from '../../../__generated__/graphql';
 export const headCells: HeadCell<IndividualNode>[] = [
   {
     disablePadding: false,
+    label: '',
+    id: 'sanctionListPossibleMatch',
+    numeric: false,
+    dataCy: 'sanction-list-possible-match',
+  },
+  {
+    disablePadding: false,
     label: 'Individual ID',
     id: 'id',
     numeric: false,

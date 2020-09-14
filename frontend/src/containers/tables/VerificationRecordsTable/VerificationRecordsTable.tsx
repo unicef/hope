@@ -9,42 +9,21 @@ import {
   useImportXlsxCashPlanVerificationMutation,
   ImportXlsxCashPlanVerificationMutation,
   XlsxErrorNode,
-  ImportXlsxCashPlanVerificationMutationResult,
 } from '../../../__generated__/graphql';
 import { UniversalTable } from '../UniversalTable';
 import { headCells } from './VerificationRecordsHeadCells';
 import { VerificationRecordsTableRow } from './VerificationRecordsTableRow';
-import {
-  Button,
-  Box,
-  makeStyles,
-  DialogTitle,
-  DialogContent,
-} from '@material-ui/core';
+import { Button, Box, makeStyles, DialogTitle } from '@material-ui/core';
 import { GetApp, Publish } from '@material-ui/icons';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { Dialog } from '../../dialogs/Dialog';
 import { DialogActions } from '../../dialogs/DialogActions';
 import { DropzoneField } from '../../../components/DropzoneField';
 import { ImportErrors } from './errors/ImportErrors';
+import { CreateGrievanceTickets } from '../../../components/payments/CreateGrievanceTickets';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-`;
-
-const DialogFooter = styled.div`
-  padding: 12px 16px;
-  margin: 0;
-  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  text-align: right;
-`;
-
-const StyledDialogFooter = styled(DialogFooter)`
-  && {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-  }
 `;
 
 const Error = styled.div`
@@ -60,6 +39,8 @@ export function VerificationRecordsTable({
   const { showMessage } = useSnackbar();
   const [open, setOpenImport] = useState(false);
   const [fileToImport, setFileToImport] = useState(null);
+  const [selected, setSelected] = useState([]);
+
   const { t } = useTranslation();
 
   const initialVariables: AllPaymentVerificationsQueryVariables = {
@@ -109,6 +90,14 @@ export function VerificationRecordsTable({
       }
     }
   };
+  const grievanceButton = (
+    <Box mr={3}>
+      <CreateGrievanceTickets
+        grievanceTicketsNumber={selected.length}
+        disabled={selected.length === 0}
+      />
+    </Box>
+  );
   const exportButton =
     verificationMethod === 'XLSX' ? (
       <Box mr={3}>
@@ -174,6 +163,35 @@ export function VerificationRecordsTable({
     </>
   );
 
+  const handleCheckboxClick = (event, name) => {
+    const selectedIndex = selected.indexOf(name);
+    let newSelected = [];
+
+    if (selectedIndex === -1) {
+      newSelected = newSelected.concat(selected, name);
+    } else if (selectedIndex === 0) {
+      newSelected = newSelected.concat(selected.slice(1));
+    } else if (selectedIndex === selected.length - 1) {
+      newSelected = newSelected.concat(selected.slice(0, -1));
+    } else if (selectedIndex > 0) {
+      newSelected = newSelected.concat(
+        selected.slice(0, selectedIndex),
+        selected.slice(selectedIndex + 1),
+      );
+    }
+
+    setSelected(newSelected);
+  };
+
+  const handleSelectAllCheckboxesClick = (event, rows) => {
+    if (event.target.checked) {
+      const newSelecteds = rows.map((row) => row.paymentRecord.id);
+      setSelected(newSelecteds);
+      return;
+    }
+    setSelected([]);
+  };
+  const numSelected = selected.length;
   return (
     <>
       <UniversalTable<
@@ -181,12 +199,20 @@ export function VerificationRecordsTable({
         AllPaymentVerificationsQueryVariables
       >
         title='Verification Records'
-        actions={[exportButton, importButton]}
+        actions={[grievanceButton, exportButton, importButton]}
         headCells={headCells}
+        onSelectAllClick={handleSelectAllCheckboxesClick}
         query={useAllPaymentVerificationsQuery}
         queriedObjectName='allPaymentVerifications'
         initialVariables={initialVariables}
-        renderRow={(row) => <VerificationRecordsTableRow record={row} />}
+        numSelected={numSelected}
+        renderRow={(row) => (
+          <VerificationRecordsTableRow
+            checkboxClickHandler={handleCheckboxClick}
+            selected={selected}
+            record={row}
+          />
+        )}
       />
       <Dialog
         open={open}

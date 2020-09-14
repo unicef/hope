@@ -13,6 +13,7 @@ import {
   decodeIdString,
   formatCurrency,
 } from '../../../utils/utils';
+import { Flag } from '../../../components/Flag';
 
 interface HouseHoldTableRowProps {
   household: HouseholdNode;
@@ -39,6 +40,9 @@ export function HouseHoldTableRow({
       role='checkbox'
       key={household.id}
     >
+      <TableCell align='left'>
+        {household.sanctionListPossibleMatch && <Flag />}
+      </TableCell>
       <TableCell align='left'>{decodeIdString(household.id)}</TableCell>
       <TableCell align='left'>{household.headOfHousehold.fullName}</TableCell>
       <TableCell align='left'>{household.size}</TableCell>
