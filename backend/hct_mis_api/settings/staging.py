@@ -8,8 +8,8 @@ DEBUG = False
 IS_STAGING = True
 
 # domains/hosts etc.
-DOMAIN_NAME = "dev-hct.unitst.org"
-WWW_ROOT = "https://%s/" % DOMAIN_NAME
+DOMAIN_NAME = os.getenv("DOMAIN", "dev-hct.unitst.org")
+WWW_ROOT = "http://%s/" % DOMAIN_NAME
 
 # other
 # EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
