@@ -244,7 +244,7 @@ export type CashPlanNode = Node & {
   dispersionDate: Scalars['DateTime'],
   coverageDuration: Scalars['Int'],
   coverageUnit: Scalars['String'],
-  comments: Scalars['String'],
+  comments?: Maybe<Scalars['String']>,
   program: ProgramNode,
   deliveryType: Scalars['String'],
   assistanceMeasurement: Scalars['String'],
@@ -693,6 +693,7 @@ export type HouseholdNode = Node & {
   selections: Array<HouseholdSelection>,
   totalCashReceived?: Maybe<Scalars['Decimal']>,
   selection?: Maybe<HouseholdSelection>,
+  sanctionListPossibleMatch?: Maybe<Scalars['Boolean']>,
 };
 
 
@@ -3012,7 +3013,7 @@ export type XlsxRowErrorNode = {
 
 export type HouseholdMinimalFragment = (
   { __typename?: 'HouseholdNode' }
-  & Pick<HouseholdNode, 'id' | 'createdAt' | 'residenceStatus' | 'size' | 'totalCashReceived' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'status' | 'address'>
+  & Pick<HouseholdNode, 'id' | 'createdAt' | 'residenceStatus' | 'size' | 'totalCashReceived' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'status' | 'sanctionListPossibleMatch' | 'address'>
   & { headOfHousehold: (
     { __typename?: 'IndividualNode' }
     & Pick<IndividualNode, 'id' | 'fullName'>
@@ -3078,7 +3079,7 @@ export type HouseholdDetailedFragment = (
 
 export type IndividualMinimalFragment = (
   { __typename?: 'IndividualNode' }
-  & Pick<IndividualNode, 'id' | 'createdAt' | 'updatedAt' | 'fullName' | 'sex' | 'birthDate' | 'maritalStatus' | 'phoneNo' | 'role' | 'status'>
+  & Pick<IndividualNode, 'id' | 'createdAt' | 'updatedAt' | 'fullName' | 'sex' | 'birthDate' | 'maritalStatus' | 'phoneNo' | 'sanctionListPossibleMatch' | 'role' | 'status'>
   & { documents: (
     { __typename?: 'DocumentNodeConnection' }
     & { edges: Array<Maybe<(
@@ -4856,6 +4857,7 @@ export const HouseholdMinimalFragmentDoc = gql`
   firstRegistrationDate
   lastRegistrationDate
   status
+  sanctionListPossibleMatch
   headOfHousehold {
     id
     fullName
@@ -4880,6 +4882,7 @@ export const IndividualMinimalFragmentDoc = gql`
   birthDate
   maritalStatus
   phoneNo
+  sanctionListPossibleMatch
   role
   status
   documents {
@@ -9947,7 +9950,7 @@ export type CashPlanNodeResolvers<ContextType = any, ParentType extends Resolver
   dispersionDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   coverageDuration?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   coverageUnit?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  comments?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  comments?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   program?: Resolver<ResolversTypes['ProgramNode'], ParentType, ContextType>,
   deliveryType?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   assistanceMeasurement?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
@@ -10239,6 +10242,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   selections?: Resolver<Array<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
   totalCashReceived?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
   selection?: Resolver<Maybe<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
+  sanctionListPossibleMatch?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
 export type HouseholdNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['HouseholdNodeConnection'] = ResolversParentTypes['HouseholdNodeConnection']> = {

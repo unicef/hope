@@ -1,0 +1,78 @@
+version: '3.7'
+
+volumes:
+  backend-data:
+  db:
+  db_ca:
+  db_reg:
+  data_es:
+  data_es_test:
+
+services:
+  proxy:
+    image: unicef/hct-mis-proxy
+    environment:
+      - DJANGO_APPLICATION_SERVICE_HOST=backend
+      - FRONTEND_HOST=host.docker.internal:3000
+    build:
+      context: ./proxy
+      dockerfile: ./Dockerfile
+    ports:
+      - "8082:80"
+    depends_on:
+      - backend
+    volumes:
+      - backend-data:/data
+
+  redis:
+    restart: always
+    image: redis:4.0.11-alpine3.8
+    expose:
+      - "6379"
+
+  backend:
+    stdin_open: true
+    tty: true
+    image: unicef/hct-mis-backend
+    env_file:
+      - .env
+    environment:
+      - REDIS_INSTANCE=redis:6379
+    build:
+      context: ./backend
+      dockerfile: ./Dockerfile
+    ports:
+      - "8080:8000"
+    volumes:
+      - ./backend:/code/
+      - backend-data:/data
+    command: "dev"
+    depends_on:
+      - db
+      - redis
+      - cash_assist_datahub_db
+      - registration_datahub_db
+  db:
+    image: mdillon/postgis:9.5-alpine
+    volumes:
+      - db:/data/postgres
+    env_file:
+      - .env
+
+  cash_assist_datahub_db:
+    image: mdillon/postgis:9.5-alpine
+    volumes:
+      - db_ca:/data/postgres
+    env_file:
+      - .env
+    ports:
+      - "5433:5432"
+
+  registration_datahub_db:
+    image: mdillon/postgis:9.5-alpine
+    volumes:
+      - db_reg:/data/postgres
+    env_file:
+      - .env
+
+

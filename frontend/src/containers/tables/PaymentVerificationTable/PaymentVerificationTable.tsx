@@ -25,7 +25,7 @@ export function PaymentVerificationTable({
   };
   return (
     <UniversalTable<CashPlanNode, AllCashPlansQueryVariables>
-      title='List Of Cash Plans'
+      title='List of Cash Plans'
       headCells={headCells}
       query={useAllCashPlansQuery}
       queriedObjectName='allCashPlans'

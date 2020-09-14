@@ -1,9 +1,10 @@
-import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
+import TableCell from '@material-ui/core/TableCell';
 import { useHistory } from 'react-router-dom';
 import { IndividualNode } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
+import { Flag } from '../../../components/Flag';
 import {
   decodeIdString,
   getAgeFromDob,
@@ -34,6 +35,9 @@ export function IndividualsListTableRow({
       role='checkbox'
       key={individual.id}
     >
+      <TableCell align='left'>
+        {individual.sanctionListPossibleMatch && <Flag />}
+      </TableCell>
       <TableCell align='left'>{decodeIdString(individual.id)}</TableCell>
       <TableCell align='left'>{individual.fullName}</TableCell>
       <TableCell align='left'>
