@@ -1,8 +1,8 @@
 import datetime
 import random
 
-from django.conf import settings
 from dateutil.relativedelta import relativedelta
+from django.conf import settings
 from django.core.management import BaseCommand
 from faker import Faker
 from openpyxl.drawing.image import Image
@@ -45,8 +45,13 @@ class Command(BaseCommand):
         individuals_ws = wb["Individuals"]
         combined_fields = {**get_combined_attributes(), **COLLECTORS_FIELDS}
         faker = Faker()
+        today = datetime.date.today()
+
+        all_hh = []
+        all_ind = []
 
         for number in range(1, options["households_count"] + 1):
+            print(f"household: {number}")
             single_household_data = []
             for cell in households_ws[1]:
                 header = cell.value or ""
@@ -115,28 +120,28 @@ class Command(BaseCommand):
                 if len(name_list) == 3:
                     first_name = name_list[1]
                     last_name = name_list[2]
-                today = datetime.date.today()
+
                 birth_date = faker.date_of_birth()
                 age = relativedelta(today, birth_date).years
                 for cell in individuals_ws[1]:
                     header = cell.value or ""
                     if header in (
-                            "other_id_no_i_c",
-                            "other_id_type_i_c",
-                            "birth_certificate_no_i_c",
-                            "birth_certificate_photo_i_c",
-                            "drivers_license_no_i_c",
-                            "drivers_license_photo_i_c",
-                            "electoral_card_no_i_c",
-                            "electoral_card_photo_i_c",
-                            "unhcr_id_no_i_c",
-                            "unhcr_id_photo_i_c",
-                            "national_passport_i_c",
-                            "national_passport_photo_i_c",
-                            "national_id_i_c",
-                            "national_id_photo_i_c",
-                            "scope_id_no_i_c",
-                            "scope_id_photo_i_c",
+                        "other_id_no_i_c",
+                        "other_id_type_i_c",
+                        "birth_certificate_no_i_c",
+                        "birth_certificate_photo_i_c",
+                        "drivers_license_no_i_c",
+                        "drivers_license_photo_i_c",
+                        "electoral_card_no_i_c",
+                        "electoral_card_photo_i_c",
+                        "unhcr_id_no_i_c",
+                        "unhcr_id_photo_i_c",
+                        "national_passport_i_c",
+                        "national_passport_photo_i_c",
+                        "national_id_i_c",
+                        "national_id_photo_i_c",
+                        "scope_id_no_i_c",
+                        "scope_id_photo_i_c",
                     ):
                         single_individual_data.append("")
                         continue
@@ -226,7 +231,15 @@ class Command(BaseCommand):
                         value = ""
 
                     single_individual_data.append(value)
-                individuals_ws.append(single_individual_data)
-            households_ws.append(single_household_data)
+
+                all_ind.append(single_individual_data)
+            all_hh.append(single_household_data)
+
+        for hh in all_hh:
+            households_ws.append(hh)
+        print("households added")
+        for ind in all_ind:
+            individuals_ws.append(ind)
+        print("individuals added")
 
         wb.save("fake_file.xlsx")
