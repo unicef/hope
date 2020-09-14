@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { Button, Grid, Typography, Box } from '@material-ui/core';
+import { Box, Grid, Typography } from '@material-ui/core';
 import { Doughnut } from 'react-chartjs-2';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -16,18 +16,16 @@ import { FinishVerificationPlan } from '../../components/payments/FinishVerifica
 import { DiscardVerificationPlan } from '../../components/payments/DiscardVerificationPlan';
 import {
   useCashPlanQuery,
-  useCashPlanVerificationSamplingChoicesLazyQuery,
   useCashPlanVerificationSamplingChoicesQuery,
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../../components/LoadingComponent';
 import {
+  choicesToDict,
   decodeIdString,
   paymentVerificationStatusToColor,
-  choicesToDict,
 } from '../../utils/utils';
 import { StatusBox } from '../../components/StatusBox';
 import { VerificationRecordsTable } from '../tables/VerificationRecordsTable';
-import { Missing } from '../../components/Missing';
 import { useDebounce } from '../../hooks/useDebounce';
 import { VerificationRecordsFilters } from '../tables/VerificationRecordsTable/VerificationRecordsFilters';
 import { CreateVerificationPlan } from '../../components/payments/CreateVerificationPlan';
@@ -117,6 +115,12 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
       to: `/${businessArea}/payment-verification/`,
     },
   ];
+  const bankReconciliationSuccessPercentage =
+    (cashPlan.bankReconciliationSuccess / cashPlan.paymentRecords.totalCount) *
+    100;
+  const bankReconciliationErrorPercentage =
+    (cashPlan.bankReconciliationError / cashPlan.paymentRecords.totalCount) *
+    100;
 
   const toolbar = (
     <PageHeader
@@ -205,18 +209,16 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
           <Grid item xs={3}>
             <BorderLeftBox>
               <Title>
-                <Typography variant='h6'>
-                  Bank reconciliation <Missing />
-                </Typography>
+                <Typography variant='h6'>Bank reconciliation</Typography>
               </Title>
               <Grid container>
                 <Grid item xs={6}>
                   <Grid container direction='column'>
                     <LabelizedField label='SUCCESSFUL'>
-                      <p>90%</p>
+                      <p>{bankReconciliationSuccessPercentage.toFixed(2)}%</p>
                     </LabelizedField>
                     <LabelizedField label='ERRONEUS'>
-                      <p>10%</p>
+                      <p>{bankReconciliationErrorPercentage.toFixed(2)}%</p>
                     </LabelizedField>
                   </Grid>
                 </Grid>
@@ -236,7 +238,10 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                         labels: ['Successful', 'Erroneus'],
                         datasets: [
                           {
-                            data: [90, 10],
+                            data: [
+                              bankReconciliationSuccessPercentage,
+                              bankReconciliationErrorPercentage,
+                            ],
                             backgroundColor: ['#00509F', '#FFAA1F'],
                             hoverBackgroundColor: ['#00509F', '#FFAA1F'],
                           },
@@ -256,9 +261,9 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
             <Typography variant='h6'>Verification Plan Details</Typography>
           </Title>
           <Grid container>
-            <Grid item xs={9}>
+            <Grid item xs={11}>
               <Grid container>
-                <Grid item xs={4}>
+                <Grid item xs={3}>
                   <LabelizedField label='STATUS'>
                     <StatusContainer>
                       <StatusBox
@@ -269,29 +274,33 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                   </LabelizedField>
                 </Grid>
                 {[
-                  { label: 'SAMPLE SIZE', value: verificationPlan.sampleSize },
                   {
-                    label: 'RECEIVED',
-                    value: verificationPlan.receivedCount || '-',
-                  },
-                  {
-                    label: 'VERIFICATION METHOD',
-                    value: verificationPlan.verificationMethod,
+                    label: 'SAMPLING',
+                    value: samplingChoicesDict[verificationPlan.sampling],
                   },
                   {
                     label: 'RESPONDED',
                     value: verificationPlan.respondedCount || '-',
                   },
                   {
+                    label: 'RECEIVED WITH ISSUES',
+                    value: verificationPlan.receivedWithProblemsCount || '-',
+                  },
+                  {
+                    label: 'VERIFICATION METHOD',
+                    value: verificationPlan.verificationMethod,
+                  },
+                  { label: 'SAMPLE SIZE', value: verificationPlan.sampleSize },
+                  {
+                    label: 'RECEIVED',
+                    value: verificationPlan.receivedCount || '-',
+                  },
+                  {
                     label: 'NOT RECEIVED',
                     value: verificationPlan.notReceivedCount || '-',
                   },
-                  {
-                    label: 'SAMPLING',
-                    value: samplingChoicesDict[verificationPlan.sampling],
-                  },
                 ].map((el) => (
-                  <Grid item xs={4}>
+                  <Grid item xs={3}>
                     <LabelizedField label={el.label}>
                       <p>{el.value}</p>
                     </LabelizedField>
@@ -299,47 +308,36 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                 ))}
               </Grid>
             </Grid>
-            <Grid item xs={3}>
-              <Grid container>
-                <Grid item xs={6}>
-                  <Grid container direction='column'>
-                    <LabelizedField label='RECEIVED CORRECT AMOUNT'>
-                      <p>{verificationPlan.receivedCount || '-'}</p>
-                    </LabelizedField>
-                    <LabelizedField label='RECEIVED WRONG AMOUNT'>
-                      <p>{verificationPlan.receivedWithProblemsCount || '-'}</p>
-                    </LabelizedField>
-                  </Grid>
-                </Grid>
-                <Grid item xs={6}>
-                  <ChartContainer>
-                    <Doughnut
-                      width={100}
-                      height={100}
-                      options={{
-                        maintainAspectRatio: false,
-                        cutoutPercentage: 65,
-                        legend: {
-                          display: false,
-                        },
-                      }}
-                      data={{
-                        labels: ['CORRECT', 'WRONG'],
-                        datasets: [
-                          {
-                            data: [
-                              verificationPlan.receivedCount,
-                              verificationPlan.receivedWithProblemsCount,
-                            ],
-                            backgroundColor: ['#74C304', '#DADADA'],
-                            hoverBackgroundColor: ['#74C304', '#DADADA'],
-                          },
+            <Grid item xs={1}>
+              <ChartContainer>
+                <Doughnut
+                  width={200}
+                  height={200}
+                  options={{
+                    maintainAspectRatio: false,
+                    cutoutPercentage: 65,
+                    legend: {
+                      display: false,
+                    },
+                  }}
+                  data={{
+                    labels: ['RECEIVED', 'RECEIVED WITH ISSUES', "NOT RECEIVED", "PENDING"],
+                    datasets: [
+                      {
+                        data: [
+                          verificationPlan.receivedCount,
+                          verificationPlan.receivedWithProblemsCount,
+                          verificationPlan.notReceivedCount,
+                          verificationPlan.sampleSize -
+                            verificationPlan.respondedCount,
                         ],
-                      }}
-                    />
-                  </ChartContainer>
-                </Grid>
-              </Grid>
+                        backgroundColor: ['#31D237', '#F57F1A','#FF0100',"#DCDCDC"],
+                        hoverBackgroundColor: ['#31D237', '#F57F1A','#FF0100',"#DCDCDC"],
+                      },
+                    ],
+                  }}
+                />
+              </ChartContainer>
             </Grid>
           </Grid>
         </Container>
