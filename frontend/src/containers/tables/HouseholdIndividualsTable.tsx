@@ -136,7 +136,7 @@ export function HouseholdIndividualsTable({
               {relationshipChoicesDict[row.relationship]}
             </TableCell>
             <TableCell align='left'>
-              {<Moment format='DD/MM/YYYY'>{row.birthDate}</Moment> || '-'}
+              {<Moment format='D MMM YYYY'>{row.birthDate}</Moment> || '-'}
             </TableCell>
             <TableCell align='left'>{sexToCapitalize(row.sex)}</TableCell>
           </ClickableTableRow>

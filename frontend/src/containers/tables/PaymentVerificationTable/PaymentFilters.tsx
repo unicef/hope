@@ -16,8 +16,6 @@ import {
 } from '../../../__generated__/graphql';
 import moment from 'moment';
 
-// import { AdminAreasAutocomplete } from './AdminAreaAutocomplete';
-
 const Container = styled.div`
   display: flex;
   flex: 1;
@@ -36,15 +34,6 @@ const Container = styled.div`
   }
 `;
 
-const TextContainer = styled(TextField)`
-  input[type='number']::-webkit-inner-spin-button,
-  input[type='number']::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-  }
-  input[type='number'] {
-    -moz-appearance: textfield;
-  }
-`;
 const StyledFormControl = styled(FormControl)`
   width: 232px;
   color: #5f6368;
@@ -86,7 +75,7 @@ export function PaymentFilters({
       <Grid container spacing={3}>
         <Grid item>
           <SearchTextField
-            label='Search'
+            label='Cash Plan ID'
             variant='outlined'
             margin='dense'
             onChange={(e) => handleFilterChange(e, 'search')}
@@ -101,30 +90,27 @@ export function PaymentFilters({
         </Grid>
         <Grid item>
           <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>Programme</InputLabel>
+            <InputLabel>Status</InputLabel>
             <Select
               /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
               // @ts-ignore
-              onChange={(e) => handleFilterChange(e, 'program')}
+              onChange={(e) => handleFilterChange(e, 'verificationStatus')}
               variant='outlined'
-              label='Programme'
-              value={filter.program || ''}
-              InputProps={{
-                startAdornment: (
-                  <StartInputAdornment position='start'>
-                    <FlashOnIcon />
-                  </StartInputAdornment>
-                ),
-              }}
+              label='Status'
+              value={filter.verificationStatus || ''}
             >
               <MenuItem value=''>
                 <em>None</em>
               </MenuItem>
-              {programs.map((program) => (
-                <MenuItem key={program.id} value={program.id}>
-                  {program.name}
-                </MenuItem>
-              ))}
+              {statusChoicesData.cashPlanVerificationStatusChoices.map(
+                (item) => {
+                  return (
+                    <MenuItem key={item.value} value={item.value}>
+                      {item.name}
+                    </MenuItem>
+                  );
+                },
+              )}
             </Select>
           </StyledFormControl>
         </Grid>
@@ -141,41 +127,6 @@ export function PaymentFilters({
                 </InputAdornment>
               ),
             }}
-          />
-        </Grid>
-        <Grid item>
-          <KeyboardDatePicker
-            variant='inline'
-            disableToolbar
-            inputVariant='outlined'
-            margin='dense'
-            label='Start Date'
-            autoOk
-            onChange={(date) =>
-              onFilterChange({
-                ...filter,
-                startDate: moment(date).toISOString(),
-              })
-            }
-            value={filter.startDate || null}
-            format='DD/MM/YYYY'
-            InputAdornmentProps={{ position: 'end' }}
-          />
-        </Grid>
-        <Grid item>
-          <KeyboardDatePicker
-            variant='inline'
-            disableToolbar
-            inputVariant='outlined'
-            margin='dense'
-            label='End Date'
-            autoOk
-            onChange={(date) =>
-              onFilterChange({ ...filter, endDate: moment(date).toISOString() })
-            }
-            value={filter.endDate || null}
-            format='DD/MM/YYYY'
-            InputAdornmentProps={{ position: 'end' }}
           />
         </Grid>
         <Grid item>
@@ -212,28 +163,66 @@ export function PaymentFilters({
           </StyledFormControl>
         </Grid>
         <Grid item>
+          <KeyboardDatePicker
+            variant='inline'
+            disableToolbar
+            inputVariant='outlined'
+            margin='dense'
+            label='Start Date'
+            autoOk
+            onChange={(date) =>
+              onFilterChange({
+                ...filter,
+                startDate: moment(date).toISOString(),
+              })
+            }
+            value={filter.startDate || null}
+            format='D MMM YYYY'
+            InputAdornmentProps={{ position: 'end' }}
+          />
+        </Grid>
+        <Grid item>
+          <KeyboardDatePicker
+            variant='inline'
+            disableToolbar
+            inputVariant='outlined'
+            margin='dense'
+            label='End Date'
+            autoOk
+            onChange={(date) =>
+              onFilterChange({ ...filter, endDate: moment(date).toISOString() })
+            }
+            value={filter.endDate || null}
+            format='D MMM YYYY'
+            InputAdornmentProps={{ position: 'end' }}
+          />
+        </Grid>
+        <Grid item>
           <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>Status</InputLabel>
+            <InputLabel>Programme</InputLabel>
             <Select
               /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
               // @ts-ignore
-              onChange={(e) => handleFilterChange(e, 'verificationStatus')}
+              onChange={(e) => handleFilterChange(e, 'program')}
               variant='outlined'
-              label='Status'
-              value={filter.verificationStatus || ''}
+              label='Programme'
+              value={filter.program || ''}
+              InputProps={{
+                startAdornment: (
+                  <StartInputAdornment position='start'>
+                    <FlashOnIcon />
+                  </StartInputAdornment>
+                ),
+              }}
             >
               <MenuItem value=''>
                 <em>None</em>
               </MenuItem>
-              {statusChoicesData.cashPlanVerificationStatusChoices.map(
-                (item) => {
-                  return (
-                    <MenuItem key={item.value} value={item.value}>
-                      {item.name}
-                    </MenuItem>
-                  );
-                },
-              )}
+              {programs.map((program) => (
+                <MenuItem key={program.id} value={program.id}>
+                  {program.name}
+                </MenuItem>
+              ))}
             </Select>
           </StyledFormControl>
         </Grid>

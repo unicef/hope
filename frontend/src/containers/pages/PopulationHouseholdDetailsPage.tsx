@@ -112,7 +112,7 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
             <Grid item xs={3}>
               <LabelizedField label='Registered Date'>
                 <div>
-                  <Moment format='DD/MM/YYYY'>
+                  <Moment format='D MMM YYYY'>
                     {household.registrationDataImport.importDate}
                   </Moment>
                 </div>

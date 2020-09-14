@@ -28,7 +28,7 @@ export function UsersListTableRow({ user }: UsersListTableRowProps) {
       </TableCell>
       <TableCell align='left'>{user.email}</TableCell>
       <TableCell align='left'>
-        <Moment format='DD/MM/YYYY'>{user.lastLogin}</Moment>
+        <Moment format='D MMM YYYY'>{user.lastLogin}</Moment>
       </TableCell>
     </TableRow>
   );
