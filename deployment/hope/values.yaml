@@ -191,6 +191,9 @@ redis:
   enabled: true
   fullnameOverride: hope-main-redis
   persistence.enabled: true
+  usePassword: false
+  redis:
+    usePassword: false
   cluster:
     slaveCount: 0
     enabled: false
