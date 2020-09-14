@@ -223,10 +223,10 @@ airflow:
       - name: airflow.test
         path: /airflow/*
         tls: false
-        tlsHosts: [airflow.test]
         tlsSecret: "aks-unitst-tls"
     annotations: []
   airflow:
+    baseUrl: airflow.test
     extraEnvVarsCM: hope-airflow-extra
     extraEnvVarsSecret: hope-airflow-extra
     image:
