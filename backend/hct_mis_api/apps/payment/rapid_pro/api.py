@@ -56,11 +56,7 @@ class RapidProAPI:
     def start_flow(self, flow_uuid, phone_numbers):
         urns = [f"{config.RAPID_PRO_PROVIDER}:{x}" for x in phone_numbers]
         data = {"flow": flow_uuid, "urns": urns, "restart_participants": True}
-        print(data)
-        print(data)
-        print(data)
-        print(data)
-        print(data)
+
         response = self._handle_post_request(RapidProAPI.FLOW_STARTS_ENDPOINT, data,)
         return response
 
