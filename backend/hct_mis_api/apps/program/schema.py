@@ -83,6 +83,9 @@ class CashPlanFilter(FilterSet):
 
 
 class CashPlanNode(DjangoObjectType):
+    bank_reconciliation_success = graphene.Int()
+    bank_reconciliation_error = graphene.Int()
+
     class Meta:
         model = CashPlan
         interfaces = (relay.Node,)

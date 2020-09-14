@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { Button, Grid, Typography, Box } from '@material-ui/core';
+import { Box, Grid, Typography } from '@material-ui/core';
 import { Doughnut } from 'react-chartjs-2';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -16,18 +16,16 @@ import { FinishVerificationPlan } from '../../components/payments/FinishVerifica
 import { DiscardVerificationPlan } from '../../components/payments/DiscardVerificationPlan';
 import {
   useCashPlanQuery,
-  useCashPlanVerificationSamplingChoicesLazyQuery,
   useCashPlanVerificationSamplingChoicesQuery,
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../../components/LoadingComponent';
 import {
+  choicesToDict,
   decodeIdString,
   paymentVerificationStatusToColor,
-  choicesToDict,
 } from '../../utils/utils';
 import { StatusBox } from '../../components/StatusBox';
 import { VerificationRecordsTable } from '../tables/VerificationRecordsTable';
-import { Missing } from '../../components/Missing';
 import { useDebounce } from '../../hooks/useDebounce';
 import { VerificationRecordsFilters } from '../tables/VerificationRecordsTable/VerificationRecordsFilters';
 import { CreateVerificationPlan } from '../../components/payments/CreateVerificationPlan';
@@ -117,6 +115,12 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
       to: `/${businessArea}/payment-verification/`,
     },
   ];
+  const bankReconciliationSuccessPercentage =
+    (cashPlan.bankReconciliationSuccess / cashPlan.paymentRecords.totalCount) *
+    100;
+  const bankReconciliationErrorPercentage =
+    (cashPlan.bankReconciliationError / cashPlan.paymentRecords.totalCount) *
+    100;
 
   const toolbar = (
     <PageHeader
@@ -205,18 +209,16 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
           <Grid item xs={3}>
             <BorderLeftBox>
               <Title>
-                <Typography variant='h6'>
-                  Bank reconciliation <Missing />
-                </Typography>
+                <Typography variant='h6'>Bank reconciliation</Typography>
               </Title>
               <Grid container>
                 <Grid item xs={6}>
                   <Grid container direction='column'>
                     <LabelizedField label='SUCCESSFUL'>
-                      <p>90%</p>
+                      <p>{bankReconciliationSuccessPercentage.toFixed(2)}%</p>
                     </LabelizedField>
                     <LabelizedField label='ERRONEUS'>
-                      <p>10%</p>
+                      <p>{bankReconciliationErrorPercentage.toFixed(2)}%</p>
                     </LabelizedField>
                   </Grid>
                 </Grid>
@@ -236,7 +238,10 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                         labels: ['Successful', 'Erroneus'],
                         datasets: [
                           {
-                            data: [90, 10],
+                            data: [
+                              bankReconciliationSuccessPercentage,
+                              bankReconciliationErrorPercentage,
+                            ],
                             backgroundColor: ['#00509F', '#FFAA1F'],
                             hoverBackgroundColor: ['#00509F', '#FFAA1F'],
                           },

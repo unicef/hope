@@ -262,6 +262,8 @@ export type CashPlanNode = Node & {
   verificationStatus: Scalars['String'],
   paymentRecords: PaymentRecordNodeConnection,
   verifications: CashPlanPaymentVerificationNodeConnection,
+  bankReconciliationSuccess?: Maybe<Scalars['Int']>,
+  bankReconciliationError?: Maybe<Scalars['Int']>,
 };
 
 
@@ -4053,7 +4055,7 @@ export type CashPlanQuery = (
   { __typename?: 'Query' }
   & { cashPlan: Maybe<(
     { __typename?: 'CashPlanNode' }
-    & Pick<CashPlanNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'deliveryType' | 'fundsCommitment' | 'downPayment' | 'dispersionDate' | 'assistanceThrough' | 'caId' | 'verificationStatus'>
+    & Pick<CashPlanNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'deliveryType' | 'fundsCommitment' | 'downPayment' | 'dispersionDate' | 'assistanceThrough' | 'caId' | 'verificationStatus' | 'bankReconciliationSuccess' | 'bankReconciliationError'>
     & { verifications: (
       { __typename?: 'CashPlanPaymentVerificationNodeConnection' }
       & { edges: Array<Maybe<(
@@ -7483,6 +7485,8 @@ export const CashPlanDocument = gql`
     caId
     dispersionDate
     verificationStatus
+    bankReconciliationSuccess
+    bankReconciliationError
     verifications {
       edges {
         node {
@@ -9968,6 +9972,8 @@ export type CashPlanNodeResolvers<ContextType = any, ParentType extends Resolver
   verificationStatus?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, CashPlanNodePaymentRecordsArgs>,
   verifications?: Resolver<ResolversTypes['CashPlanPaymentVerificationNodeConnection'], ParentType, ContextType, CashPlanNodeVerificationsArgs>,
+  bankReconciliationSuccess?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  bankReconciliationError?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 
 export type CashPlanNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['CashPlanNodeConnection'] = ResolversParentTypes['CashPlanNodeConnection']> = {
