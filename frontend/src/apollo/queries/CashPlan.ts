@@ -16,6 +16,8 @@ export const CashPlan = gql`
       caId
       dispersionDate
       verificationStatus
+      bankReconciliationSuccess
+      bankReconciliationError
       verifications {
         edges {
           node {

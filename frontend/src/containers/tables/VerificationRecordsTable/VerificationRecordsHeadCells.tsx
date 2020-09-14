@@ -35,7 +35,7 @@ export const headCells: HeadCell<PaymentVerificationNodeEdge>[] = [
   {
     disablePadding: false,
     label: 'Received Amount',
-    id: 'received_amount',
+    id: 'receivedAmount',
     numeric: true,
   },
 ];
