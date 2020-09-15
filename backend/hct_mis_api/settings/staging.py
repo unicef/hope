@@ -61,7 +61,7 @@ sentry_sdk.init(
     dsn=os.getenv("SENTRY_DSN"), integrations=[DjangoIntegration()],
 )
 
-AIRFLOW_HOST = "hct-mis-airflow-web"
+AIRFLOW_HOST = os.getenv("AIRFLOW_HOST", "hct-mis-airflow-web")
 
 # ELASTICSEARCH SETTINGS
 ELASTICSEARCH_DSL = {
