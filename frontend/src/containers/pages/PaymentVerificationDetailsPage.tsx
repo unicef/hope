@@ -4,7 +4,6 @@ import { Box, Grid, Typography } from '@material-ui/core';
 import { Doughnut } from 'react-chartjs-2';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import Moment from 'react-moment';
 import { PageHeader } from '../../components/PageHeader';
 import { LabelizedField } from '../../components/LabelizedField';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
@@ -29,6 +28,7 @@ import { VerificationRecordsTable } from '../tables/VerificationRecordsTable';
 import { useDebounce } from '../../hooks/useDebounce';
 import { VerificationRecordsFilters } from '../tables/VerificationRecordsTable/VerificationRecordsFilters';
 import { CreateVerificationPlan } from '../../components/payments/CreateVerificationPlan';
+import { UniversalMoment } from '../../components/UniversalMoment';
 
 const Container = styled.div`
   display: flex;
@@ -188,14 +188,12 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                 {
                   label: 'START DATE',
                   value: (
-                    <Moment format='DD/MM/YYYY'>{cashPlan.startDate}</Moment>
+                    <UniversalMoment>{cashPlan.startDate}</UniversalMoment>
                   ),
                 },
                 {
                   label: 'END DATE',
-                  value: (
-                    <Moment format='DD/MM/YYYY'>{cashPlan.endDate}</Moment>
-                  ),
+                  value: <UniversalMoment>{cashPlan.endDate}</UniversalMoment>,
                 },
               ].map((el) => (
                 <Grid item xs={4}>
@@ -321,7 +319,12 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                     },
                   }}
                   data={{
-                    labels: ['RECEIVED', 'RECEIVED WITH ISSUES', "NOT RECEIVED", "PENDING"],
+                    labels: [
+                      'RECEIVED',
+                      'RECEIVED WITH ISSUES',
+                      'NOT RECEIVED',
+                      'PENDING',
+                    ],
                     datasets: [
                       {
                         data: [
@@ -331,8 +334,18 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                           verificationPlan.sampleSize -
                             verificationPlan.respondedCount,
                         ],
-                        backgroundColor: ['#31D237', '#F57F1A','#FF0100',"#DCDCDC"],
-                        hoverBackgroundColor: ['#31D237', '#F57F1A','#FF0100',"#DCDCDC"],
+                        backgroundColor: [
+                          '#31D237',
+                          '#F57F1A',
+                          '#FF0100',
+                          '#DCDCDC',
+                        ],
+                        hoverBackgroundColor: [
+                          '#31D237',
+                          '#F57F1A',
+                          '#FF0100',
+                          '#DCDCDC',
+                        ],
                       },
                     ],
                   }}
