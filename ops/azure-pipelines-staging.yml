@@ -7,7 +7,7 @@ trigger:
   paths:
     exclude:
     -  docs/*
-
+pr: none # we don't do any testing there yet
 resources:
   - repo: self
 

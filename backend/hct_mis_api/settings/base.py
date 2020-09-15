@@ -16,9 +16,9 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(os.path.join(PROJECT_ROOT, "apps/"))
 
 # domains/hosts etc.
-DOMAIN_NAME = os.getenv("DJANGO_ALLOWED_HOST", "localhost")
+DOMAIN_NAME = os.getenv("DOMAIN", "localhost")
 WWW_ROOT = "http://%s/" % DOMAIN_NAME
-ALLOWED_HOSTS = [DOMAIN_NAME]
+ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '*').split(',') + [DOMAIN_NAME]
 FRONTEND_HOST = os.getenv("HCT_MIS_FRONTEND_HOST", DOMAIN_NAME)
 
 ####
@@ -363,6 +363,7 @@ SANCTION_LIST_CC_MAIL = os.getenv("SANCTION_LIST_CC_MAIL", "dfam-cashassistance@
 
 # ELASTICSEARCH SETTINGS
 ELASTICSEARCH_DSL_AUTOSYNC = False
+ELASTICSEARCH_HOST = os.getenv("ELASTICSEARCH_HOST", "elasticsearch:9200")
 
 RAPID_PRO_URL = os.getenv("RAPID_PRO_URL", "https://rapidpro.io")
 

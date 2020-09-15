@@ -8,15 +8,8 @@ DEBUG = False
 IS_STAGING = True
 
 # domains/hosts etc.
-DOMAIN_NAME = "dev-hct.unitst.org"
-WWW_ROOT = "https://%s/" % DOMAIN_NAME
-ALLOWED_HOSTS = [
-    "localhost",
-    "127.0.0.1",
-    "*",
-    "10.0.2.2",
-    os.getenv("DOMAIN", ""),
-]
+DOMAIN_NAME = os.getenv("DOMAIN", "dev-hct.unitst.org")
+WWW_ROOT = "http://%s/" % DOMAIN_NAME
 
 # other
 # EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
@@ -68,9 +61,9 @@ sentry_sdk.init(
     dsn=os.getenv("SENTRY_DSN"), integrations=[DjangoIntegration()],
 )
 
-AIRFLOW_HOST = "hct-mis-airflow-web"
+AIRFLOW_HOST = os.getenv("AIRFLOW_HOST", "hct-mis-airflow-web")
 
 # ELASTICSEARCH SETTINGS
 ELASTICSEARCH_DSL = {
-    "default": {"hosts": "https://elasticsearch.unicef.io/"},
+    "default": {"hosts": ELASTICSEARCH_HOST, 'timeout': 30},
 }
