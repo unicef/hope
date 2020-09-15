@@ -59,7 +59,7 @@ const headCells: HeadCell<IndividualNode>[] = [
   },
   {
     disablePadding: false,
-    label: 'Sex',
+    label: 'Gender',
     id: 'sex',
     numeric: false,
   },
