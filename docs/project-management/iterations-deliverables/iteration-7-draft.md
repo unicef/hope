@@ -26,8 +26,9 @@ The goal of Iteration Seven is to implement Grievance & Feedback.
 
 ## **UX / UI Design Deliverables**
 
-* Design tweaks to some design deliverables from iteration 5 \(including new items like user management screens for iteration 6 development to happen or feedback & grievances for which some things like data change category are being still specified in detail\)
-* Design final clickable prototype of Payment Verification and Grievances/Feedback Tab
+* Design final clickable prototype of Dashboard Tab
+* Design final clickable prototype for Reports Tab
+* Design Final clickable prototype for Targeting Change Requests
 * Continued general upkeep of mockups to represent what is decided/built.
 * Demo for peer review with country offices \(as/if required\).
 
@@ -35,8 +36,7 @@ The goal of Iteration Seven is to implement Grievance & Feedback.
 
 ‌ Following are the dependencies Tivix team has on UNICEF teams in order to deliver on time.
 
-* UNICEF team to provide working in-country RapidPro setup for all HCT MIS environments.
-* UNICEF team to lead efforts to get Elasticsearch in all HCT MIS environments.
+* xyz
 
 ## **Change Order**
 
@@ -50,11 +50,7 @@ The goal of Iteration Seven is to implement Grievance & Feedback.
 
 The following items are deemed out of scope:
 
-* Implementation of roles and permission checks and logic in various modules \(to be done in a future iteration\)
-* UI for grievance tickets or management \(future iteration\)
-* Deduplication algorithms using biometrics or data hashing methods \(to be handled post-MVP\)
-* Support for multiple verification methods for one cash plan \(to be handled post-MVP/not clear if ever needed\).
-* Support for searching duplicates in neighboring business areas \(to be handled post-MVP\).
+* xyz
 
 
 
