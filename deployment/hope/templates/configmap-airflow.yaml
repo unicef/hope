@@ -14,7 +14,7 @@ data:
   DOMAIN: {{.Values.ingress.host }}
   ENV: {{ .Values.global.env }}
   REDIS_INSTANCE: hope-main-redis-master
-  C_FORCE_ROOT: 1
+  C_FORCE_ROOT: "1"
 {{- range $key, $value :=  .Values.backend.config }}
   {{ if eq $value "" }}
   {{ else }}
