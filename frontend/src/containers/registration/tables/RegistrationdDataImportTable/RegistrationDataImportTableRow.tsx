@@ -8,6 +8,7 @@ import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../../components/table/ClickableTableRow';
 import { StatusBox } from '../../../../components/StatusBox';
 import { registrationDataImportStatusToColor } from '../../../../utils/utils';
+import { UniversalMoment } from '../../../../components/UniversalMoment';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -47,7 +48,7 @@ export function RegistrationDataImportTableRow({
         </StatusContainer>
       </TableCell>
       <TableCell align='left'>
-        {moment(registrationDataImport.importDate).format('DD MMM YYYY')}
+        <UniversalMoment>{registrationDataImport.importDate}</UniversalMoment>
       </TableCell>
       <TableCell align='right'>
         {registrationDataImport.numberOfHouseholds}

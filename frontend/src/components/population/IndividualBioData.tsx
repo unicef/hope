@@ -114,7 +114,7 @@ export function IndividualsBioData({
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Sex'>
+          <LabelizedField label='Gender'>
             <div>{sexToCapitalize(individual.sex)}</div>
           </LabelizedField>
         </Grid>

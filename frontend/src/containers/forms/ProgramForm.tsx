@@ -22,6 +22,7 @@ import { FormikDateField } from '../../shared/Formik/FormikDateField';
 import { selectFields } from '../../utils/utils';
 import { DialogActions } from '../dialogs/DialogActions';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
+import { UniversalMoment } from '../../components/UniversalMoment';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -73,8 +74,8 @@ const validationSchema = Yup.object().shape({
         startDate &&
         schema.min(
           startDate,
-          `End date have to be grater than ${moment(startDate).format(
-            'DD/MM/YYYY',
+          `End date have to be greater than ${(
+            <UniversalMoment>{startDate}</UniversalMoment>
           )}`,
         ),
       '',
@@ -273,7 +274,7 @@ export function ProgramForm({
                   <FullWidth>
                     <Field
                       name='individualDataNeeded'
-                      label="Will this programme use individuals’ data for targeting or entitlement calculation? Setting this flag can reduce the number of households filtered in the target population."
+                      label='Will this programme use individuals’ data for targeting or entitlement calculation? Setting this flag can reduce the number of households filtered in the target population.'
                       disabled={program && program.status === 'ACTIVE'}
                       color='primary'
                       component={FormikCheckboxField}
