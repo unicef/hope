@@ -160,10 +160,12 @@ Get the Main PostgreSQL password for airflow.
 {{- $temp :=  printf "postgresql+psycopg2://%s:%s@%s:5432/%s" .Values.postgresql.postgresqlUsername .Values.postgresql.postgresqlPassword $fullName .Values.postgresql.postgresqlAirflowDatabase }}
 AIRFLOW_DATABASE_PASSWORD: {{ .Values.postgresql.postgresqlPassword | b64enc | quote }}
 AIRFLOW__CORE__SQL_ALCHEMY_CONN: {{ $temp | b64enc | quote }}
+AIRFLOW__CELERY__RESULT_BACKEND: {{ $temp | b64enc | quote }}
 {{- else }}
 {{- $temp :=  printf "postgresql+psycopg2://%s:%s@%s:5432/%s" .Values.postgresql.externalDatabase.user .Values.postgresql.externalDatabase.host .Values.postgresql.externalDatabase.host .Values.postgresql.externalDatabase.airflowName }}
 AIRFLOW_DATABASE_PASSWORD: {{ .Values.postgresql.externalDatabase.password | b64enc | quote }}
 AIRFLOW__CORE__SQL_ALCHEMY_CONN: {{ $temp | b64enc | quote }}
+AIRFLOW__CELERY__RESULT_BACKEND: {{ $temp | b64enc | quote }}
 {{- end -}}
 {{- end -}}
 
