@@ -7,9 +7,11 @@ The goal of Iteration Seven is to implement Grievance & Feedback.
 ## **Architectural design / Project Management Deliverables**
 
 * Sign-off the functional/technical specifications and flows for features to be implemented in later Iterations:
-  * Reporting
+  * Reporting - _including the leverage of Power BI_
   * Dashboard
   * Roles & Permissions
+  * Audit Trail - _potential integration with Sentinel_
+  * Annonimzation of Data
 * Maintain Project Roadmap / Timeline.
 * Participate in briefing and workshop remotely or in-person as required by UNICEF
 
@@ -23,6 +25,7 @@ The goal of Iteration Seven is to implement Grievance & Feedback.
   * Create Grievance Tickets:
     * Automated
     * Manual
+  * Ability to add / remove individuals from GR via the G&F tool.
 
 ## **UX / UI Design Deliverables**
 
@@ -45,6 +48,16 @@ The goal of Iteration Seven is to implement Grievance & Feedback.
 * Complete the development of the **Targeting Change Requests** according to the signed off spec from Iteration 6
   * * UI for Targeting
     * Backend for Data Model changes removing Programme Population and accounting for Steficon.
+
+**Programme Management List View**
+
+* Change to the overall design and layout of the Programme List View Screen \(ie: Card view to Table\)
+
+**Misc. Changes**
+
+* Misc. tweaks and feedback recieved from Unicef team provided via InVision Comments or another list shared.
+
+\*\*\*\*
 
 ## **Out of Scope**
 
