@@ -2,7 +2,8 @@ from django.db import transaction
 from django.forms import model_to_dict
 
 from core.models import AdminArea
-from household.elasticsearch_utils import rebuild_search_index
+from household.documents import IndividualDocument
+from household.elasticsearch_utils import populate_index
 from household.models import (
     Document,
     DocumentType,
@@ -191,7 +192,7 @@ class RdiMergeTask:
         IndividualRoleInHousehold.objects.bulk_create(roles_to_create)
 
         # DEDUPLICATION
-        rebuild_search_index()
+        populate_index(Individual.objects.filter(registration_data_import=obj_hct), IndividualDocument)
 
         DeduplicateTask.deduplicate_individuals(registration_data_import=obj_hct)
 

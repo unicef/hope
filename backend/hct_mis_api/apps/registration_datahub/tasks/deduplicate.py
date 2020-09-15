@@ -6,7 +6,7 @@ from django_countries.fields import Country
 
 from core.utils import to_dict
 from household.documents import IndividualDocument
-from household.elasticsearch_utils import populate_all_indexes
+from household.elasticsearch_utils import populate_all_indexes, populate_index
 from household.models import Individual, DUPLICATE, NEEDS_ADJUDICATION, UNIQUE, NOT_PROCESSED
 from registration_data.models import RegistrationDataImport
 from registration_datahub.documents import ImportedIndividualDocument
@@ -343,8 +343,6 @@ class DeduplicateTask:
 
     @classmethod
     def deduplicate_individuals(cls, registration_data_import):
-        populate_all_indexes()
-
         cls.business_area = registration_data_import.business_area.slug
         (
             all_duplicates,
@@ -375,11 +373,11 @@ class DeduplicateTask:
 
     @classmethod
     def deduplicate_imported_individuals(cls, registration_data_import_datahub):
-        populate_all_indexes()
-
         imported_individuals = ImportedIndividual.objects.filter(
             registration_data_import=registration_data_import_datahub
         )
+        populate_index(imported_individuals, ImportedIndividualDocument)
+
         registration_data_import = RegistrationDataImport.objects.get(id=registration_data_import_datahub.hct_id)
         cls.business_area = registration_data_import_datahub.business_area_slug
         allowed_duplicates_batch_amount = round(
