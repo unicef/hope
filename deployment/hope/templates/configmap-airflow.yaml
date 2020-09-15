@@ -15,6 +15,8 @@ data:
   ENV: {{ .Values.global.env }}
   REDIS_INSTANCE: hope-main-redis-master
   C_FORCE_ROOT: "1"
+  AIRFLOW__CORE__BROKER_URL: redis://hope-main-redis-master:6379/0
+  AIRFLOW__CELERY__BROKER_URL: redis://hope-main-redis-master:6379/0
 {{- range $key, $value :=  .Values.backend.config }}
   {{ if eq $value "" }}
   {{ else }}
