@@ -223,7 +223,7 @@ airflow:
     enabled: false
   baseUrl: airflow.test
   worker:
-    command: ["airflow worker"]
+    command: ["airflow", "worker"]
 
   ingress:
     enabled: true
@@ -242,7 +242,7 @@ airflow:
     extraEnvVarsCM: hope-airflow-extra
     extraEnvVarsSecret: hope-airflow-extra
     worker:
-      command: ["airflow worker"]
+      command: ["airflow", "worker"]
     image:
       repository: hope/airflow
       tag: latest
