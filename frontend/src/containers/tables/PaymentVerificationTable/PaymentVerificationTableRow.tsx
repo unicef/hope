@@ -2,7 +2,6 @@ import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import Moment from 'react-moment';
 import { CashPlanNode } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
@@ -12,6 +11,7 @@ import {
   paymentVerificationStatusToColor,
 } from '../../../utils/utils';
 import { StatusBox } from '../../../components/StatusBox';
+import { UniversalMoment } from '../../../components/UniversalMoment';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -53,10 +53,13 @@ export function PaymentVerificationTableRow({
         {formatCurrency(plan.totalDeliveredQuantity)}
       </TableCell>
       <TableCell align='left'>
-        <Moment format='DD/MM/YYYY'>{plan.startDate}</Moment>-
-        <Moment format='DD/MM/YYYY'>{plan.endDate}</Moment>
+        <UniversalMoment>{plan.startDate}</UniversalMoment> -{' '}
+        <UniversalMoment>{plan.endDate}</UniversalMoment>
       </TableCell>
       <TableCell align='left'>{plan.program.name}</TableCell>
+      <TableCell align='left'>
+        <UniversalMoment>{plan.updatedAt}</UniversalMoment>
+      </TableCell>
     </ClickableTableRow>
   );
 }

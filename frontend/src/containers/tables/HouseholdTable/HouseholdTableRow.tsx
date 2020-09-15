@@ -1,5 +1,4 @@
 import TableCell from '@material-ui/core/TableCell';
-import Moment from 'react-moment';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import {
@@ -14,6 +13,7 @@ import {
   formatCurrency,
 } from '../../../utils/utils';
 import { Flag } from '../../../components/Flag';
+import { UniversalMoment } from '../../../components/UniversalMoment';
 
 interface HouseHoldTableRowProps {
   household: HouseholdNode;
@@ -54,7 +54,7 @@ export function HouseHoldTableRow({
         {formatCurrency(household.totalCashReceived)}
       </TableCell>
       <TableCell align='right'>
-        <Moment format='DD/MM/YYYY'>{household.firstRegistrationDate}</Moment>
+        <UniversalMoment>{household.firstRegistrationDate}</UniversalMoment>
       </TableCell>
     </ClickableTableRow>
   );
