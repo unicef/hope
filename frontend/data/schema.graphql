@@ -120,6 +120,8 @@ type CashPlanNode implements Node {
   verificationStatus: String!
   paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
   verifications(before: String, after: String, first: Int, last: Int): CashPlanPaymentVerificationNodeConnection!
+  bankReconciliationSuccess: Int
+  bankReconciliationError: Int
 }
 
 type CashPlanNodeConnection {
