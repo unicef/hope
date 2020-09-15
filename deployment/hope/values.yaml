@@ -224,7 +224,8 @@ airflow:
   baseUrl: airflow.test
   worker:
     command: ["airflow", "worker"]
-
+  scheduler:
+    command: ["airflow", "scheduler"]
   ingress:
     enabled: true
     hosts:
@@ -243,6 +244,8 @@ airflow:
     extraEnvVarsSecret: hope-airflow-extra
     worker:
       command: ["airflow", "worker"]
+    scheduler:
+      command: ["airflow", "scheduler"]
     image:
       repository: hope/airflow
       tag: latest
