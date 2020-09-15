@@ -1,6 +1,5 @@
 import React from 'react';
 import styled from 'styled-components';
-import Moment from 'react-moment';
 import TableCell from '@material-ui/core/TableCell';
 import { useHistory } from 'react-router-dom';
 import { TargetPopulationNode } from '../../../__generated__/graphql';
@@ -11,6 +10,7 @@ import {
   targetPopulationStatusToColor,
   targetPopulationStatusMapping,
 } from '../../../utils/utils';
+import { UniversalMoment } from '../../../components/UniversalMoment';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -53,10 +53,10 @@ export function TargetPopulationTableRow({ targetPopulation }) {
         {targetPopulation.finalListTotalHouseholds}
       </TableCell>
       <TableCell align='left'>
-        <Moment format='MM/DD/YYYY'>{targetPopulation.createdAt}</Moment>
+        <UniversalMoment>{targetPopulation.createdAt}</UniversalMoment>
       </TableCell>
       <TableCell align='left'>
-        <Moment format='MM/DD/YYYY'>{targetPopulation.lastEditedAt}</Moment>
+        <UniversalMoment>{targetPopulation.lastEditedAt}</UniversalMoment>
       </TableCell>
       <TableCell align='left'>
         {targetPopulation.createdBy.firstName}{' '}
