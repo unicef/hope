@@ -1,0 +1,265 @@
+# Default values for hope.
+# This is a YAML-formatted file.
+
+global:
+  imagePullSecrets: []
+  nameOverride: ""
+  fullnameOverride: ""
+  env: "dev"
+  storageClass: "standard"
+  imagePullPolicy: Always
+
+backend:
+  image: backend:latest
+
+  replicaCount: 1
+  podAnnotations: {}
+
+  podSecurityContext: {}
+    # fsGroup: 2000
+
+  securityContext: {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+  resources: {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  service:
+    type: ClusterIP
+    port: 8000
+
+  config:
+    STORAGE_AZURE_ACCOUNT_NAME: ""
+    AZURE_CLIENT_ID: ""
+    POSTGRES_SQL: ""
+    AIRFLOW_HOST: "hope-airflow"
+
+  secret:
+    SECRET_KEY: ""
+    STORAGE_AZURE_ACCOUNT_KEY: ""
+    AZURE_CLIENT_SECRET: ""
+    AZURE_TENANT_KEY: ""
+    SENTRY_DSN: ""
+    
+frontend:
+  image: fronted:latest
+
+  replicaCount: 1
+  podAnnotations: {}
+
+  podSecurityContext: {}
+    # fsGroup: 2000
+
+  securityContext: {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+  resources: {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  service:
+    type: ClusterIP
+    port: 80
+
+ingress:
+  enabled: true
+  annotations: []
+    # kubernetes.io/ingress.class: azure/application-gateway
+    # appgw.ingress.kubernetes.io/ssl-redirect: "true"
+  host: hope-dev.test
+  tls: false
+  tlsSecret: "aks-unitst-tls"
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+postgresql:
+  enabled: true
+  postgresqlDatabase: backend-db
+  postgresqlUsername: postgres
+  postgresqlPassword: ""
+  postgresqlAirflowDatabase: airflow
+  # Script for adding postgis
+  # Don't modify
+  initdbScripts:
+    init_script.sh: |
+      #!/bin/sh
+      psql -U postgres backend-db -c "create extension if not exists postgis;"
+      psql -U postgres postgres -c "create database airflow"
+
+  externalDatabase:
+    host: ""
+    port: ""
+    user: ""
+    name: ""
+    password: ""
+    airflowName: ""
+
+  image:
+    tag: 10.12.0
+
+registrationdatahubpostgresql:
+  enabled: true
+  postgresqlDatabase: registration-datahub-db
+  postgresqlUsername: postgres
+  postgresqlPassword: ""
+
+  # Script for adding postgis
+  # Don't modify
+  initdbScripts:
+    init_script.sh: |
+      #!/bin/sh
+      psql -U postgres registration-datahub-db -c "create extension if not exists postgis;"
+
+  externalDatabase:
+    host: ""
+    port: ""
+    user: ""
+    name: ""
+    password: ""
+
+  image:
+    tag: 10.12.0
+
+cashassistdatahubpostgresql:
+  enabled: true
+  postgresqlDatabase: cashassist-datahub-hub
+  postgresqlUsername: postgres
+  postgresqlPassword: ""
+
+  # Script for adding postgis
+  # Don't modify
+  initdbScripts:
+    init_script.sh: |
+      #!/bin/sh
+      psql -U postgres cashassist-datahub-hub -c "create extension if not exists postgis;"
+
+  externalDatabase:
+    host: ""
+    port: ""
+    name: ""
+    user: ""
+    password: ""
+
+  image:
+    tag: 10.12.0
+
+redis:
+  enabled: true
+  fullnameOverride: hope-main-redis
+  persistence.enabled: true
+  usePassword: false
+  redis:
+    usePassword: false
+  cluster:
+    slaveCount: 0
+    enabled: false
+  image:
+    tag: 4.0.14
+
+elasticsearch:
+  enabled: true
+  master:
+    replicas: 1
+  coordinating:
+    replicas: 1
+  data:
+    replicas: 1
+  plugins: "analysis-phonetic"
+
+  externalElasticsearch:
+    host: ""
+
+airflow:
+  enabled: true
+  securityContext:
+    runAsUser: 0
+  postgresql:
+    enabled: false
+  baseUrl: airflow.test
+  worker:
+    command: ["airflow", "worker"]
+  scheduler:
+    command: ["airflow", "scheduler"]
+  ingress:
+    enabled: true
+    hosts:
+      - name: airflow.test
+        path: /airflow/*
+        tls: false
+        tlsSecret: "aks-unitst-tls"
+    annotations: []
+  redis:
+    usePassword: false
+  airflow:
+    redis:
+      usePassword: false
+    baseUrl: airflow.test
+    extraEnvVarsCM: hope-airflow-extra
+    extraEnvVarsSecret: hope-airflow-extra
+    worker:
+      command: ["airflow", "worker"]
+    scheduler:
+      command: ["airflow", "scheduler"]
+    image:
+      repository: hope/airflow
+      tag: latest
+    web:
+      extraVolumeMounts:
+        - name: entrypoint
+          mountPath: /entrypoint.sh
+          subPath: entrypoint.sh
+      extraVolumes:
+        - name: entrypoint
+          configMap:
+            name: hope-airflow-entrypoint
+            defaultMode: 0744
+            items:
+            - key: airflow-entrypoint.sh
+              path: entrypoint.sh
+
