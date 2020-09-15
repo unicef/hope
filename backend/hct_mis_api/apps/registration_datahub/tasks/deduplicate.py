@@ -422,7 +422,10 @@ class DeduplicateTask:
                 results_data,
             ) = cls.deduplicate_single_individual(imported_individual)
 
-            if len(results_data["duplicates"]) > config.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_ALLOWED:
+            if (
+                len(results_data["duplicates"]) > config.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_ALLOWED
+                and imported_individuals.count() > 1
+            ):
                 message = (
                     "The number of individuals deemed duplicate with an individual record of the batch "
                     f"exceed the maximum allowed ({config.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_ALLOWED})"
@@ -441,10 +444,12 @@ class DeduplicateTask:
             set_of_all_duplicates = set(all_duplicates)
             set_of_all_original_individuals_ids_duplicates = set(all_original_individuals_ids_duplicates)
 
-            batch_amount_exceeded = len(set_of_all_duplicates) >= allowed_duplicates_batch_amount
+            batch_amount_exceeded = (
+                len(set_of_all_duplicates) >= allowed_duplicates_batch_amount
+            ) and imported_individuals.count() > 1
             golden_record_amount_exceeded = (
                 len(set_of_all_original_individuals_ids_duplicates) >= allowed_duplicates_golden_record_amount
-            )
+            ) and imported_individuals.count() > 1
 
             checked_individuals_ids.append(imported_individual.id)
 
