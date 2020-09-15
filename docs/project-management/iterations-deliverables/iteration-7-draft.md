@@ -11,7 +11,7 @@ The goal of Iteration Seven is to implement Grievance & Feedback.
   * Dashboard
   * Roles & Permissions
   * Audit Trail - _potential integration with Sentinel_
-  * Annonimzation of Data
+  * Anonymization of Data
 * Maintain Project Roadmap / Timeline.
 * Participate in briefing and workshop remotely or in-person as required by UNICEF
 
@@ -55,23 +55,13 @@ The goal of Iteration Seven is to implement Grievance & Feedback.
 
 **Misc. Changes**
 
-* Misc. tweaks and feedback recieved from Unicef team provided via InVision Comments or another list shared.
-
-\*\*\*\*
+* Misc. tweaks and feedback received from Unicef team provided via InVision Comments or another list shared.
 
 ## **Out of Scope**
 
 The following items are deemed out of scope:
 
 * xyz
-
-
-
-
-
-
-
-
 
 
 
