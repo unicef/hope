@@ -232,8 +232,6 @@ airflow:
     annotations: []
   redis:
     usePassword: false
-  worker:
-    port: 8080
   airflow:
     redis:
       usePassword: false
@@ -243,8 +241,6 @@ airflow:
     image:
       repository: hope/airflow
       tag: latest
-    worker:
-      port: 8080
     web:
       extraVolumeMounts:
         - name: entrypoint
