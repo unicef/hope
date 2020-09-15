@@ -2,7 +2,6 @@ import React from 'react';
 import styled from 'styled-components';
 import { Grid, Paper, Typography } from '@material-ui/core';
 import { useHistory } from 'react-router-dom';
-import Moment from 'react-moment';
 import { LabelizedField } from '../LabelizedField';
 import {
   IndividualNode,
@@ -15,9 +14,8 @@ import {
   choicesToDict,
 } from '../../utils/utils';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { Missing } from '../Missing';
-import { StatusBox } from '../StatusBox';
 import { LoadingComponent } from '../LoadingComponent';
+import { UniversalMoment } from '../UniversalMoment';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px
@@ -127,7 +125,7 @@ export function IndividualsBioData({
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Date of Birth'>
-            <Moment format='D MMM YYYY'>{birthDate}</Moment>
+            <UniversalMoment>{birthDate}</UniversalMoment>
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>

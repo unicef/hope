@@ -1,6 +1,5 @@
 import styled from 'styled-components';
 import TableCell from '@material-ui/core/TableCell';
-import Moment from 'react-moment';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { PaymentRecordNode } from '../../../__generated__/graphql';
@@ -11,6 +10,7 @@ import {
   formatCurrency,
   paymentRecordStatusToColor,
 } from '../../../utils/utils';
+import { UniversalMoment } from '../../../components/UniversalMoment';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -53,7 +53,9 @@ export function PaymentRecordHouseholdTableRow({
         </StatusContainer>
       </TableCell>
       <TableCell align='left'>{paymentRecord.fullName}</TableCell>
-      <TableCell align='left'>{paymentRecord?.cashPlan?.program?.name}</TableCell>
+      <TableCell align='left'>
+        {paymentRecord?.cashPlan?.program?.name}
+      </TableCell>
       <TableCell align='right'>
         {formatCurrency(paymentRecord.entitlementQuantity)}
       </TableCell>
@@ -61,7 +63,7 @@ export function PaymentRecordHouseholdTableRow({
         {formatCurrency(paymentRecord.deliveredQuantity)}
       </TableCell>
       <TableCell align='right'>
-        <Moment format='D MMM YYYY'>{paymentRecord.deliveryDate}</Moment>
+        <UniversalMoment>{paymentRecord.deliveryDate}</UniversalMoment>
       </TableCell>
     </ClickableTableRow>
   );
