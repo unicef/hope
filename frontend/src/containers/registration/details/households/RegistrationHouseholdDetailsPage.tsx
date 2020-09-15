@@ -10,6 +10,7 @@ import { decodeIdString } from '../../../../utils/utils';
 import { ImportedIndividualsTable } from '../../tables/ImportedIndividualsTable';
 import { HouseholdDetails } from './HouseholdDetails';
 import { RegistrationDetails } from './RegistrationDetails';
+import { UniversalMoment } from '../../../../components/UniversalMoment';
 
 const Container = styled.div`
   padding: 20px;
@@ -19,7 +20,6 @@ const Container = styled.div`
     width: 100%;
   }
 `;
-
 
 export function RegistrationHouseholdDetailsPage(): React.ReactElement {
   const { id } = useParams();
@@ -60,9 +60,11 @@ export function RegistrationHouseholdDetailsPage(): React.ReactElement {
         />
         <RegistrationDetails
           hctId={importedHousehold.registrationDataImport.hctId}
-          registrationDate={moment(importedHousehold.firstRegistrationDate).format(
-            'DD MMM YYYY',
-          )}
+          registrationDate={`${(
+            <UniversalMoment>
+              {importedHousehold.firstRegistrationDate}
+            </UniversalMoment>
+          )}`}
         />
       </Container>
     </div>

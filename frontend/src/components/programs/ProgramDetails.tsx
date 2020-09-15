@@ -11,6 +11,7 @@ import {
 } from '../../__generated__/graphql';
 import { MiśTheme } from '../../theme';
 import { Missing } from '../Missing';
+import { UniversalMoment } from '../UniversalMoment';
 
 const Container = styled.div`
   display: flex;
@@ -93,13 +94,13 @@ export function ProgramDetails({
           <Grid item xs={4}>
             <LabelizedField
               label='START DATE'
-              value={moment(program.startDate).format('DD MMM YYYY')}
+              value={<UniversalMoment>{program.startDate}</UniversalMoment>}
             />
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
               label='END DATE'
-              value={moment(program.endDate).format('DD MMM YYYY')}
+              value={<UniversalMoment>{program.endDate}</UniversalMoment>}
             />
           </Grid>
 
