@@ -49,6 +49,7 @@ class PaymentRecordFilter(FilterSet):
 
 class PaymentVerificationFilter(FilterSet):
     search = CharFilter(method="search_filter")
+
     class Meta:
         fields = ("cash_plan_payment_verification", "status")
         model = PaymentVerification
@@ -65,6 +66,7 @@ class PaymentVerificationFilter(FilterSet):
             "received_amount",
         )
     )
+
     def search_filter(self, qs, name, value):
         values = value.split(" ")
         q_obj = Q()
@@ -189,8 +191,8 @@ class Query(graphene.ObjectType):
             margin_of_error = random_sampling_arguments.get("margin_of_error")
             sex = random_sampling_arguments.get("sex")
             age = random_sampling_arguments.get("random_sampling_arguments")
-
-        payment_records = payment_records.filter(~(Q(household__admin_area__title__in=excluded_admin_areas)))
+        if excluded_admin_areas is not None:
+            payment_records = payment_records.filter(~(Q(household__admin_area__title__in=excluded_admin_areas)))
         if sex is not None:
             payment_records = payment_records.filter(household__head_of_household__sex=sex)
         if age is not None:

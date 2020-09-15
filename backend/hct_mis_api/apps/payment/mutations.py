@@ -424,8 +424,11 @@ class DiscardCashPlanVerificationMutation(graphene.Mutation):
                 payment_record=payment_record,
             )
             payment_record_verifications_to_create.append(payment_record_verification)
+        cashplan_payment_verification.status = CashPlanPaymentVerification.STATUS_PENDING
+        cs = cashplan_payment_verification.cash_plan
+        cs.verification_status = CashPlanPaymentVerification.STATUS_PENDING
+        cs.save()
         cashplan_payment_verification.save()
-        cashplan_payment_verification.delete()
         return DiscardCashPlanVerificationMutation(cash_plan)
 
     @classmethod
