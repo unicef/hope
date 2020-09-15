@@ -230,7 +230,13 @@ airflow:
         tls: false
         tlsSecret: "aks-unitst-tls"
     annotations: []
+  redis:
+    usePassword: false
+  worker:
+    port: 8080
   airflow:
+    redis:
+      usePassword: false
     baseUrl: airflow.test
     extraEnvVarsCM: hope-airflow-extra
     extraEnvVarsSecret: hope-airflow-extra
