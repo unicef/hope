@@ -71,6 +71,7 @@ class PaymentRecord(TimeStampedUUIDModel):
     vision_id = models.CharField(max_length=255, null=True)
 
 
+
 class ServiceProvider(TimeStampedUUIDModel):
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     ca_id = models.CharField(max_length=255, unique=True)

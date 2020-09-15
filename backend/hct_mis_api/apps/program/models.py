@@ -12,6 +12,7 @@ from django.db.models import Sum
 from django.db.models.functions import Coalesce
 from django.utils.translation import ugettext_lazy as _
 
+from cash_assist_datahub.models import PaymentRecord
 from utils.models import TimeStampedUUIDModel, AbstractSyncable
 
 
@@ -150,6 +151,14 @@ class CashPlan(TimeStampedUUIDModel):
     @property
     def payment_records_count(self):
         return self.payment_records.count()
+
+    @property
+    def bank_reconciliation_success(self):
+        return self.payment_records.filter(status=PaymentRecord.STATUS_SUCCESS).count()
+
+    @property
+    def bank_reconciliation_error(self):
+        return self.payment_records.filter(status=PaymentRecord.STATUS_ERROR).count()
 
 
 auditlog.register(Program)

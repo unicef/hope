@@ -301,7 +301,12 @@ export function EditVerificationPlan({
                         label='RapidPro Flow'
                         style={{ width: '90%' }}
                         choices={
-                          rapidProFlows ? rapidProFlows.allRapidProFlows : []
+                          rapidProFlows
+                              ? rapidProFlows.allRapidProFlows.map((flow) => ({
+                                value: flow.id,
+                                name: flow.name,
+                              }))
+                              : []
                         }
                         component={FormikSelectField}
                       />
