@@ -13,6 +13,7 @@ import { LabelizedField } from '../LabelizedField';
 import { PaymentVerificationNode } from '../../__generated__/graphql';
 import { Missing } from '../Missing';
 import { UniversalActivityLogTable } from '../../containers/tables/UniversalActivityLogTable';
+import { UniversalMoment } from '../UniversalMoment';
 
 const Container = styled.div`
   display: flex;
@@ -75,9 +76,11 @@ export function VerificationRecordDetails({
           <Grid item xs={3}>
             <LabelizedField
               label='STATUS DATE'
-              value={moment(
-                paymentVerification.paymentRecord.statusDate,
-              ).format('DD MMM YYYY')}
+              value={
+                <UniversalMoment>
+                  {paymentVerification.paymentRecord.statusDate}
+                </UniversalMoment>
+              }
             />
           </Grid>
           <Grid item xs={3}>
@@ -117,9 +120,11 @@ export function VerificationRecordDetails({
           <Grid item xs={3}>
             <LabelizedField
               label='STATUS DATE'
-              value={moment(paymentVerification.statusDate).format(
-                'DD MMM YYYY',
-              )}
+              value={
+                <UniversalMoment>
+                  {paymentVerification.statusDate}
+                </UniversalMoment>
+              }
             />
           </Grid>
           <Grid item xs={3}>
@@ -207,9 +212,11 @@ export function VerificationRecordDetails({
           <Grid item xs={3}>
             <LabelizedField
               label='DELIVERY DATE'
-              value={moment(
-                paymentVerification.paymentRecord.deliveryDate,
-              ).format('DD MMM YYYY')}
+              value={
+                <UniversalMoment>
+                  {paymentVerification.paymentRecord.deliveryDate}
+                </UniversalMoment>
+              }
             />
           </Grid>
           <Grid item xs={3}>
@@ -226,9 +233,11 @@ export function VerificationRecordDetails({
           <Grid item xs={3}>
             <LabelizedField
               label='ENTITLEMENT CARD ISSUE DATE'
-              value={moment(
-                paymentVerification.paymentRecord.entitlementCardIssueDate,
-              ).format('DD MMM YYYY')}
+              value={
+                <UniversalMoment>
+                  {paymentVerification.paymentRecord.entitlementCardIssueDate}
+                </UniversalMoment>
+              }
             />
           </Grid>
           <Grid item xs={3}>

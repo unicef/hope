@@ -326,7 +326,7 @@ export function CreateVerificationPlan({
                         />
                         <Field
                           name='sexCheckbox'
-                          label='Sex'
+                          label='Gender'
                           component={FormikCheckboxField}
                         />
                       </Box>
@@ -369,7 +369,7 @@ export function CreateVerificationPlan({
                           <Grid item xs={5}>
                             <Field
                               name='filterSex'
-                              label='Sex'
+                              label='Gender'
                               color='primary'
                               choices={[
                                 { value: 'FEMALE', name: 'Female' },

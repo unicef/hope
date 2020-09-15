@@ -32,10 +32,6 @@ const ContentLink = styled.div`
   text-decoration: underline;
   cursor: pointer;
 `;
-const StatusContainer = styled.div`
-  min-width: 120px;
-  max-width: 200px;
-`;
 
 interface RegistrationIndividualBioDataProps {
   individual: ImportedIndividualDetailedFragment;
@@ -114,7 +110,7 @@ export function RegistrationIndividualsBioData({
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Sex'>
+          <LabelizedField label='Gender'>
             <div>{sexToCapitalize(individual.sex)}</div>
           </LabelizedField>
         </Grid>
