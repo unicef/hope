@@ -12,7 +12,7 @@ export const headCells: HeadCell<IndividualNode>[] = [
   {
     disablePadding: false,
     label: 'Individual ID',
-    id: 'id',
+    id: 'unicefId',
     numeric: false,
     dataCy: 'individual-id',
   },
