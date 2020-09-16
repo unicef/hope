@@ -78,10 +78,9 @@ export function DiscardVerificationPlan({
           <DialogContainer>
             <Box p={5}>
               <div>
-                Payment verification for households who have responded will not
-                be visible
+                Are you sure you would like to delete payment verification
+                records <br /> and restart the verification process?
               </div>
-              <div>or valid anymore. Are you sure?</div>
             </Box>
           </DialogContainer>
         </DialogContent>
