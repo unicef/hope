@@ -77,7 +77,7 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
   return (
     <div>
       <PageHeader
-        title={`Household ID: ${decodeIdString(id)}`}
+        title={`Household ID: ${household.unicefId}`}
         breadCrumbs={breadCrumbsItems}
         withFlag={household.sanctionListPossibleMatch}
       />

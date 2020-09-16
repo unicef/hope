@@ -38,10 +38,10 @@ export function IndividualsListTableRow({
       <TableCell align='left'>
         {individual.sanctionListPossibleMatch && <Flag />}
       </TableCell>
-      <TableCell align='left'>{decodeIdString(individual.id)}</TableCell>
+      <TableCell align='left'>{individual.unicefId}</TableCell>
       <TableCell align='left'>{individual.fullName}</TableCell>
       <TableCell align='left'>
-        {individual.household ? decodeIdString(individual.household.id) : ''}
+        {individual.household ? individual.household.unicefId : ''}
       </TableCell>
       <TableCell align='right'>{age}</TableCell>
       <TableCell align='left'>{sexToCapitalize(individual.sex)}</TableCell>

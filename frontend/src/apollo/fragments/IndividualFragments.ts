@@ -7,6 +7,7 @@ export const individualMinimal = gql`
     updatedAt
     fullName
     sex
+    unicefId
     birthDate
     maritalStatus
     phoneNo
@@ -28,6 +29,7 @@ export const individualMinimal = gql`
 
     household {
       id
+      unicefId
       status
       adminArea {
         id
