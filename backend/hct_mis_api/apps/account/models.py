@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.db.models import Count
 from django.utils.translation import ugettext_lazy as _
 from model_utils.models import UUIDModel
 
@@ -12,6 +13,22 @@ class User(AbstractUser, UUIDModel):
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
+
+    def all_permissions(self):
+        return (
+            self.roles.values("permissions__id")
+            .annotate(counts=Count("permissions__id"))
+            .values_list("permissions__id", "permissions__name", "permissions__write")
+            .count()
+        )
+
+    def has_permission(self, permission, business_area, write=False):
+        query = UserPermission.objects.filter(name=7).filter(
+            roles__users__id=self.id, roles__business_area=business_area
+        )
+        if write:
+            query = query.filter(write=True)
+        return query.count() > 0
 
 
 class UserRole(TimeStampedUUIDModel):
@@ -41,6 +58,7 @@ class UserPermission(TimeStampedUUIDModel):
         (PERMISSION_PROGRAM_MANAGEMENT, _("Program Management")),
         (PERMISSION_TARGETING, _("Targeting")),
         (PERMISSION_PAYMENT_VERIFICATION, _("Payment Verification")),
+        (PERMISSION_GRIEVANCES, _("Grievances")),
         (PERMISSION_REPORTING, _("Reporting")),
         (PERMISSION_USER_MANAGEMENT, _("User Management")),
         (PERMISSION_SETTINGS, _("Settings")),
