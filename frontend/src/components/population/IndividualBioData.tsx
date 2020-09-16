@@ -150,7 +150,7 @@ export function IndividualsBioData({
         <Grid item xs={3}>
           <LabelizedField label='Household ID'>
             <ContentLink onClick={() => openHousehold()}>
-              {decodeIdString(individual.household.id)}
+              {individual.household.unicefId}
             </ContentLink>
           </LabelizedField>
         </Grid>

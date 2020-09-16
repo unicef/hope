@@ -143,9 +143,7 @@ export function VerificationRecordDetails({
           <Grid item xs={3}>
             <LabelizedField
               label='HOUSEHOLD ID'
-              value={decodeIdString(
-                paymentVerification.paymentRecord.household.id,
-              )}
+              value={paymentVerification.paymentRecord.household.unicefId}
             />
           </Grid>
           <Grid item xs={3}>
@@ -174,7 +172,7 @@ export function VerificationRecordDetails({
               label='ALT. PHONE NUMBER'
               value={
                 paymentVerification.paymentRecord.household.headOfHousehold
-                  .phoneNoAlternative
+                  .phoneNoAlternative || '-'
               }
             />
           </Grid>
