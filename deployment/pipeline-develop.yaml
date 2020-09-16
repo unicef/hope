@@ -118,9 +118,9 @@ stages:
                 airflow.airflow.baseUrl=dev-hope.unitst.org/airflow,\
                 airflow.airflow.image.repository=uniappsk8sdevacr.azurecr.io/$(Docker.airflow.repository),\
                 airflow.airflow.image.tag=$(Build.BuildId),\
-                airflow.ingress.hosts.0.name=dev-hope.unitst.org,\
+                airflow.ingress.hosts.0.name=airflow-hope-dev.unitst.org,\
                 airflow.ingress.hosts.0.tls=true,\
-                airflow.ingress.hosts.0.path=/airflow/*,\
+                airflow.ingress.hosts.0.path=/,\
                 airflow.ingress.hosts.0.tlsSecret=aks-unitst-tls,\
                 postgresql.postgresqlPassword=$(POSTGRES_PASSWORD),\
                 registrationdatahubpostgresql.postgresqlPassword=$(REGISTRATION_DATAHUB_POSTGRES_PASSWORD),\
