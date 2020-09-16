@@ -45,7 +45,7 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
   return (
     <div>
       <PageHeader
-        title={`Individual ID: ${decodeIdString(id)}`}
+        title={`Individual ID: ${individual.unicefId}`}
         breadCrumbs={breadCrumbsItems}
         withFlag={individual.sanctionListPossibleMatch}
       />
