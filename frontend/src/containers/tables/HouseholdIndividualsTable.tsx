@@ -24,7 +24,7 @@ const headCells: HeadCell<IndividualNode>[] = [
   {
     disablePadding: false,
     label: 'Individual ID',
-    id: 'individualCaId',
+    id: 'unicefId',
     numeric: false,
   },
   {
@@ -121,7 +121,7 @@ export function HouseholdIndividualsTable({
             role='checkbox'
             key={row.id}
           >
-            <TableCell align='left'>{decodeIdString(row.id)}</TableCell>
+            <TableCell align='left'>{row.unicefId}</TableCell>
             <TableCell align='left'>{row.fullName}</TableCell>
             <TableCell align='left'>
               <StatusContainer>
