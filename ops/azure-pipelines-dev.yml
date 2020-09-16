@@ -1,11 +1,4 @@
-trigger:
-  batch: true
-  branches:
-    include:
-    - develop
-  paths:
-    exclude:
-    -  docs/*
+trigger: none
 pr: none # we don't do any testing there yet
 resources:
   - repo: self
