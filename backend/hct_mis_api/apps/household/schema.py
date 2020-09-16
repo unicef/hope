@@ -58,6 +58,7 @@ class HouseholdFilter(FilterSet):
             "sex",
             "household__id",
             "id",
+            "unicef_id",
             "household_ca_id",
             "size",
             "head_of_household__full_name",
@@ -75,7 +76,7 @@ class HouseholdFilter(FilterSet):
         for value in values:
             q_obj |= Q(head_of_household__given_name__icontains=value)
             q_obj |= Q(head_of_household__family_name__icontains=value)
-            q_obj |= Q(id__icontains=value)
+            q_obj |= Q(unicef_id__icontains=value)
         return qs.filter(q_obj)
 
 
@@ -97,7 +98,7 @@ class IndividualFilter(FilterSet):
         }
 
     order_by = OrderingFilter(
-        fields=("id", "full_name", "household__id", "birth_date", "sex", "household__admin_area__title",)
+        fields=("id", "unicef_id", "full_name", "household__id", "birth_date", "sex", "household__admin_area__title",)
     )
 
     def search_filter(self, qs, name, value):
@@ -105,7 +106,7 @@ class IndividualFilter(FilterSet):
         q_obj = Q()
         for value in values:
             q_obj |= Q(household__admin_area__title__icontains=value)
-            q_obj |= Q(id__icontains=value)
+            q_obj |= Q(unicef_id__icontains=value)
             q_obj |= Q(household__id__icontains=value)
             q_obj |= Q(full_name__icontains=value)
         return qs.filter(q_obj)

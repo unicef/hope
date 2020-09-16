@@ -150,7 +150,7 @@ export function PaymentRecordDetails({
           <Grid item xs={3}>
             <LabelizedField
               label='HOUSEHOLD ID'
-              value={decodeIdString(paymentRecord.household.id)}
+              value={paymentRecord.household.unicefId}
             />
           </Grid>
           <Grid item xs={3}>

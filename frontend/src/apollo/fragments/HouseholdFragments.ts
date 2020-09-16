@@ -11,6 +11,7 @@ export const householdMinimal = gql`
     lastRegistrationDate
     status
     sanctionListPossibleMatch
+    unicefId
     headOfHousehold {
       id
       fullName

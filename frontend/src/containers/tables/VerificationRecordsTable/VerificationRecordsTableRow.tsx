@@ -4,7 +4,6 @@ import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { PaymentVerificationNodeEdge } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
 import {
   decodeIdString,
   formatCurrency,
@@ -68,7 +67,7 @@ export function VerificationRecordsTableRow({
         {record.paymentRecord.household.headOfHousehold.fullName}
       </TableCell>
       <TableCell align='left'>
-        {decodeIdString(record.paymentRecord.household.id)}
+        {record.paymentRecord.household.unicefId}
       </TableCell>
       <TableCell align='right'>
         {formatCurrency(record.paymentRecord.deliveredQuantity)}
