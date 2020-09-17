@@ -92,8 +92,8 @@ export function PageHeader({
               <>
                 {breadCrumbs && <BreadCrumbs breadCrumbs={breadCrumbs} />}
                 <Typography variant='h5'>
-                  {title} {withFlag && <Flag />}{' '}
-                  {withTriangle && <FlagTooltip />}
+                  {title} {withTriangle && <FlagTooltip />}{' '}
+                  {withFlag && <Flag />}
                 </Typography>
               </>
             )}
