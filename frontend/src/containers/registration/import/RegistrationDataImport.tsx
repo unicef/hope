@@ -11,7 +11,6 @@ import {
   InputLabel,
   MenuItem,
   Select,
-  Typography,
 } from '@material-ui/core';
 import ExitToAppRoundedIcon from '@material-ui/icons/ExitToAppRounded';
 import { useDropzone } from 'react-dropzone';
@@ -32,10 +31,10 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { FormikTextField } from '../../../shared/Formik/FormikTextField';
 import { LoadingComponent } from '../../../components/LoadingComponent';
-import { ErrorsKobo } from './errors/KoboErrors';
-import { Errors } from './errors/PlainErrors';
 import { Dialog } from '../../dialogs/Dialog';
 import { DialogActions } from '../../dialogs/DialogActions';
+import { ErrorsKobo } from './errors/KoboErrors';
+import { Errors } from './errors/PlainErrors';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -125,9 +124,8 @@ export function RegistrationDataImport(): React.ReactElement {
   ] = useSaveKoboImportDataMutation();
   const [
     createRegistrationKoboMutate,
-    { loading: createKoboLoading },
   ] = useCreateRegistrationKoboImportMutation();
-  const { data: koboProjectsData, error, loading } = useAllKoboProjectsQuery({
+  const { data: koboProjectsData } = useAllKoboProjectsQuery({
     variables: { businessAreaSlug: businessArea },
   });
   const { t } = useTranslation();

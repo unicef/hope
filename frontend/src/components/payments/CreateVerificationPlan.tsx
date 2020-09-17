@@ -11,7 +11,6 @@ import {
   Box,
   Grid,
 } from '@material-ui/core';
-
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
@@ -179,13 +178,12 @@ export function CreateVerificationPlan({
     showMessage('New verification plan created.');
   };
 
-  const mappedAdminAreas =
-    data && data.allAdminAreas.edges.length
-      ? data.allAdminAreas.edges.map((el) => ({
-          value: el.node.id,
-          name: el.node.title,
-        }))
-      : [];
+  const mappedAdminAreas = data?.allAdminAreas?.edges?.length
+    ? data.allAdminAreas.edges.map((el) => ({
+        value: el.node.id,
+        name: el.node.title,
+      }))
+    : [];
 
   const handleFormChange = (values) => {
     setFormValues(values);

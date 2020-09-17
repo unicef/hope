@@ -1,6 +1,5 @@
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
-import moment from 'moment';
 import { ImportedHouseholdMinimalFragment } from '../../../../__generated__/graphql';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../../components/table/ClickableTableRow';

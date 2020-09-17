@@ -34,8 +34,10 @@ export function EditTargetPopulation({
     id: targetPopulation.id,
     name: targetPopulation.name || '',
     criterias: targetPopulationCriterias.rules || [],
-    candidateListCriterias: targetPopulation.candidateListTargetingCriteria?.rules || [],
-    targetPopulationCriterias: targetPopulation.finalListTargetingCriteria?.rules || [],
+    candidateListCriterias:
+      targetPopulation.candidateListTargetingCriteria?.rules || [],
+    targetPopulationCriterias:
+      targetPopulation.finalListTargetingCriteria?.rules || [],
   };
   const [mutate] = useUpdateTpMutation();
   const { showMessage } = useSnackbar();
@@ -66,7 +68,7 @@ export function EditTargetPopulation({
     }
   };
   const mapRules = (status, values) => {
-    switch(status) {
+    switch (status) {
       case 'DRAFT':
         return values.candidateListCriterias.map((rule) => {
           return {
@@ -79,7 +81,7 @@ export function EditTargetPopulation({
               };
             }),
           };
-        })
+        });
       default:
         return values.targetPopulationCriterias.map((rule) => {
           return {
@@ -92,20 +94,20 @@ export function EditTargetPopulation({
               };
             }),
           };
-        })
+        });
     }
-  }
+  };
   return (
     <Formik
       initialValues={initialValues}
       onSubmit={async (values) => {
-        const { data } = await mutate({
+        await mutate({
           variables: {
             input: {
               id: values.id,
               ...(targetPopulation.status === 'DRAFT' && { name: values.name }),
               targetingCriteria: {
-                rules: mapRules(targetPopulation.status, values)
+                rules: mapRules(targetPopulation.status, values),
               },
             },
           },

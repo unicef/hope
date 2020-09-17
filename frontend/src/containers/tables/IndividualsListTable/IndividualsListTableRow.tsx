@@ -5,11 +5,7 @@ import { IndividualNode } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
 import { Flag } from '../../../components/Flag';
-import {
-  decodeIdString,
-  getAgeFromDob,
-  sexToCapitalize,
-} from '../../../utils/utils';
+import { getAgeFromDob, sexToCapitalize } from '../../../utils/utils';
 
 interface IndividualsListTableRowProps {
   individual: IndividualNode;

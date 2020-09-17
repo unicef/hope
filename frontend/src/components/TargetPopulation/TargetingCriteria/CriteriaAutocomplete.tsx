@@ -12,7 +12,6 @@ interface Option {
 
 export function CriteriaAutocomplete({
   field,
-  form,
   ...otherProps
 }): React.ReactElement {
   const [open, setOpen] = useState(false);
@@ -55,7 +54,7 @@ export function CriteriaAutocomplete({
           // eslint-disable-next-line react/jsx-no-duplicate-props
           inputProps={{
             ...params.inputProps,
-            'data-cy': `autocomplete-target-criteria-option-${otherProps.index}`
+            'data-cy': `autocomplete-target-criteria-option-${otherProps.index}`,
           }}
         />
       )}
