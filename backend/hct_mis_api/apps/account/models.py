@@ -8,9 +8,6 @@ from utils.models import TimeStampedUUIDModel
 
 
 class User(AbstractUser, UUIDModel):
-    business_areas = models.ManyToManyField("core.BusinessArea", blank=True)
-    roles = models.ManyToManyField("account.UserRole", blank=True, related_name="users")
-
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
 
@@ -23,8 +20,8 @@ class User(AbstractUser, UUIDModel):
         )
 
     def has_permission(self, permission, business_area, write=False):
-        query = UserPermission.objects.filter(name=7).filter(
-            roles__users__id=self.id, roles__business_area=business_area
+        query = UserPermission.objects.filter(name=permission).filter(
+            roles__user_roles__users__id=self.id, roles__user_roles__business_area=business_area
         )
         if write:
             query = query.filter(write=True)
@@ -32,12 +29,20 @@ class User(AbstractUser, UUIDModel):
 
 
 class UserRole(TimeStampedUUIDModel):
+    business_area = models.ForeignKey("core.BusinessArea", related_name="user_roles", on_delete=models.CASCADE)
+    user = models.ForeignKey("account.User", related_name="user_roles", on_delete=models.CASCADE)
+    role = models.ForeignKey("account.Role", related_name="user_roles", on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.user} {self.role} in {self.business_area}"
+
+
+class Role(TimeStampedUUIDModel):
     name = models.CharField(max_length=250)
-    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     permissions = models.ManyToManyField("account.UserPermission", related_name="roles")
 
     def __str__(self):
-        return f"{self.name} in {self.business_area}"
+        return self.name
 
 
 class UserPermission(TimeStampedUUIDModel):
