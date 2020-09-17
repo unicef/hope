@@ -6,6 +6,7 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
 import { Flag } from '../../../components/Flag';
 import { getAgeFromDob, sexToCapitalize } from '../../../utils/utils';
+import { FlagTooltip } from '../../../components/FlagTooltip';
 
 interface IndividualsListTableRowProps {
   individual: IndividualNode;
@@ -33,6 +34,7 @@ export function IndividualsListTableRow({
     >
       <TableCell align='left'>
         {individual.sanctionListPossibleMatch && <Flag />}
+        {individual.deduplicationStatus !== 'UNIQUE' && <FlagTooltip />}
       </TableCell>
       <TableCell align='left'>{individual.unicefId}</TableCell>
       <TableCell align='left'>{individual.fullName}</TableCell>

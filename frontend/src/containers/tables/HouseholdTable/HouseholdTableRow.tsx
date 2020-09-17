@@ -10,6 +10,7 @@ import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
 import { choicesToDict, formatCurrency } from '../../../utils/utils';
 import { Flag } from '../../../components/Flag';
 import { UniversalMoment } from '../../../components/UniversalMoment';
+import { FlagTooltip } from '../../../components/FlagTooltip';
 
 interface HouseHoldTableRowProps {
   household: HouseholdNode;
@@ -22,7 +23,7 @@ export function HouseHoldTableRow({
 }: HouseHoldTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
-  const residanceStatusChoiceDict = choicesToDict(
+  const residenceStatusChoiceDict = choicesToDict(
     choicesData.residenceStatusChoices,
   );
   const handleClick = (): void => {
@@ -38,13 +39,14 @@ export function HouseHoldTableRow({
     >
       <TableCell align='left'>
         {household.sanctionListPossibleMatch && <Flag />}
+        {household.hasDuplicates && <FlagTooltip />}
       </TableCell>
       <TableCell align='left'>{household.unicefId}</TableCell>
       <TableCell align='left'>{household.headOfHousehold.fullName}</TableCell>
       <TableCell align='left'>{household.size}</TableCell>
       <TableCell align='left'>{household.adminArea?.title || '-'}</TableCell>
       <TableCell align='left'>
-        {residanceStatusChoiceDict[household.residenceStatus]}
+        {residenceStatusChoiceDict[household.residenceStatus]}
       </TableCell>
       <TableCell align='right'>
         {formatCurrency(household.totalCashReceived)}
