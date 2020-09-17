@@ -191,6 +191,7 @@ class HouseholdNode(DjangoObjectType):
     flex_fields = FlexFieldsScalar()
     selection = graphene.Field(HouseholdSelection)
     sanction_list_possible_match = graphene.Boolean()
+    has_duplicates = graphene.Boolean(description="Mark household if any of individuals has Duplicate status")
 
     def resolve_country(parrent, info):
         return parrent.country.name
@@ -209,6 +210,9 @@ class HouseholdNode(DjangoObjectType):
         return Individual.objects.filter(id__in=ids).prefetch_related(
             Prefetch("households_and_roles", queryset=IndividualRoleInHousehold.objects.filter(household=parent.id),)
         )
+
+    def resolve_has_duplicates(parent, info):
+        return parent.individuals.filter(deduplication_status=DUPLICATE).exists()
 
     class Meta:
         model = Household
