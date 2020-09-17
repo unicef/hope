@@ -17,7 +17,7 @@ const PaperContainer = styled(Paper)`
   border-bottom: 1px solid rgba(224, 224, 224, 1);
 `;
 
-export function CandidateListTab({ values }) {
+export function CandidateListTab({ values }): React.ReactElement {
   return (
     <>
       <FieldArray

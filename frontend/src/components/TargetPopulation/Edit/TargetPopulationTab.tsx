@@ -5,7 +5,10 @@ import { TargetingCriteria } from '../TargetingCriteria';
 import { Results } from '../Results';
 import { useFinalHouseholdsListByTargetingCriteriaQuery } from '../../../__generated__/graphql';
 
-export function TargetPopulationTab({ values, selectedTab }) {
+export function TargetPopulationTab({
+  values,
+  selectedTab,
+}): React.ReactElement {
   return (
     <>
       <FieldArray

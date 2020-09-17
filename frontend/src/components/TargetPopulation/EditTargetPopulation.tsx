@@ -6,7 +6,10 @@ import { PageHeader } from '../PageHeader';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { BreadCrumbsItem } from '../BreadCrumbs';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { useUpdateTpMutation } from '../../__generated__/graphql';
+import {
+  TargetingCriteriaRuleObjectType,
+  useUpdateTpMutation,
+} from '../../__generated__/graphql';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { TabPanel } from '../TabPanel';
 import { CandidateListTab } from './Edit/CandidateListTab';
@@ -29,7 +32,7 @@ export function EditTargetPopulation({
   cancelEdit,
   selectedTab = 0,
   targetPopulation,
-}: EditTargetPopulationProps) {
+}: EditTargetPopulationProps): React.ReactElement {
   const initialValues = {
     id: targetPopulation.id,
     name: targetPopulation.name || '',
@@ -59,7 +62,7 @@ export function EditTargetPopulation({
       <Tab label='Target Population' disabled={selectedTab !== 1} />
     </Tabs>
   );
-  const isTitleEditable = () => {
+  const isTitleEditable = (): boolean => {
     switch (targetPopulation.status) {
       case 'APPROVED':
         return false;
@@ -67,7 +70,7 @@ export function EditTargetPopulation({
         return true;
     }
   };
-  const mapRules = (status, values) => {
+  const mapRules = (status, values): TargetingCriteriaRuleObjectType[] => {
     switch (status) {
       case 'DRAFT':
         return values.candidateListCriterias.map((rule) => {

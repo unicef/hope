@@ -39,11 +39,11 @@ export function FinalizeTargetPopulation({
   setOpen,
   totalHouseholds,
   targetPopulationId,
-}) {
+}): React.ReactElement {
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
   const [mutate, loading] = useFinalizeTpMutation();
-  const onSubmit = (id) => {
+  const onSubmit = (id: string): void => {
     mutate({
       variables: {
         id,
