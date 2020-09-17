@@ -696,6 +696,7 @@ export type HouseholdNode = Node & {
   totalCashReceived?: Maybe<Scalars['Decimal']>,
   selection?: Maybe<HouseholdSelection>,
   sanctionListPossibleMatch?: Maybe<Scalars['Boolean']>,
+  hasDuplicates?: Maybe<Scalars['Boolean']>,
 };
 
 
@@ -3017,7 +3018,7 @@ export type XlsxRowErrorNode = {
 
 export type HouseholdMinimalFragment = (
   { __typename?: 'HouseholdNode' }
-  & Pick<HouseholdNode, 'id' | 'createdAt' | 'residenceStatus' | 'size' | 'totalCashReceived' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'status' | 'sanctionListPossibleMatch' | 'unicefId' | 'address'>
+  & Pick<HouseholdNode, 'id' | 'createdAt' | 'residenceStatus' | 'size' | 'totalCashReceived' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'status' | 'sanctionListPossibleMatch' | 'hasDuplicates' | 'unicefId' | 'address'>
   & { headOfHousehold: (
     { __typename?: 'IndividualNode' }
     & Pick<IndividualNode, 'id' | 'fullName'>
@@ -3083,7 +3084,7 @@ export type HouseholdDetailedFragment = (
 
 export type IndividualMinimalFragment = (
   { __typename?: 'IndividualNode' }
-  & Pick<IndividualNode, 'id' | 'createdAt' | 'updatedAt' | 'fullName' | 'sex' | 'unicefId' | 'birthDate' | 'maritalStatus' | 'phoneNo' | 'sanctionListPossibleMatch' | 'role' | 'status'>
+  & Pick<IndividualNode, 'id' | 'createdAt' | 'updatedAt' | 'fullName' | 'sex' | 'unicefId' | 'birthDate' | 'maritalStatus' | 'phoneNo' | 'sanctionListPossibleMatch' | 'deduplicationStatus' | 'role' | 'status'>
   & { documents: (
     { __typename?: 'DocumentNodeConnection' }
     & { edges: Array<Maybe<(
@@ -4885,6 +4886,7 @@ export const HouseholdMinimalFragmentDoc = gql`
   lastRegistrationDate
   status
   sanctionListPossibleMatch
+  hasDuplicates
   unicefId
   headOfHousehold {
     id
@@ -4912,6 +4914,7 @@ export const IndividualMinimalFragmentDoc = gql`
   maritalStatus
   phoneNo
   sanctionListPossibleMatch
+  deduplicationStatus
   role
   status
   documents {
@@ -10357,6 +10360,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   totalCashReceived?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
   selection?: Resolver<Maybe<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
   sanctionListPossibleMatch?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  hasDuplicates?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
 export type HouseholdNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['HouseholdNodeConnection'] = ResolversParentTypes['HouseholdNodeConnection']> = {
