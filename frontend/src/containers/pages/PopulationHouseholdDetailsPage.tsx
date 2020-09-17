@@ -79,6 +79,7 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
         title={`Household ID: ${household.unicefId}`}
         breadCrumbs={breadCrumbsItems}
         withFlag={household.sanctionListPossibleMatch}
+        withTriangle={household.hasDuplicates}
       />
       <HouseholdDetails houseHold={household as HouseholdNode} />
       <Container>
