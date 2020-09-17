@@ -2,6 +2,7 @@ import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
+import { Checkbox, TableRow } from '@material-ui/core';
 import { PaymentVerificationNodeEdge } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
@@ -10,7 +11,6 @@ import {
   verificationRecordsStatusToColor,
 } from '../../../utils/utils';
 import { StatusBox } from '../../../components/StatusBox';
-import { Checkbox, TableRow } from '@material-ui/core';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -29,14 +29,14 @@ export function VerificationRecordsTableRow({
   record,
   selected,
   checkboxClickHandler,
-}) {
+}): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
   const handleClick = (): void => {
     const path = `/${businessArea}/verification-records/${record.id}`;
     history.push(path);
   };
-  const isSelected = (name) => selected.indexOf(name) !== -1;
+  const isSelected = (name: string): boolean => selected.indexOf(name) !== -1;
 
   const isItemSelected = isSelected(record.paymentRecord.id);
 

@@ -1,8 +1,8 @@
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import moment from 'moment';
 import styled from 'styled-components';
+import { TableRow } from '@material-ui/core';
 import {
   HouseholdChoiceDataQuery,
   ImportedIndividualMinimalFragment,
@@ -13,7 +13,6 @@ import {
   decodeIdString,
   sexToCapitalize,
 } from '../../../../utils/utils';
-import { TableRow } from '@material-ui/core';
 import { DedupeResults } from '../../details/DedupeResults';
 import { UniversalMoment } from '../../../../components/UniversalMoment';
 

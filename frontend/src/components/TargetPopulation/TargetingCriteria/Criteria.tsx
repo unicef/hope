@@ -49,7 +49,7 @@ const MathSign = styled.img`
   vertical-align: middle;
 `;
 
-const CriteriaField = ({ field }) => {
+const CriteriaField = ({ field }): React.ReactElement => {
   let fieldElement;
   switch (field.comparisionMethod) {
     case 'NOT_EQUALS':

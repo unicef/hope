@@ -1,7 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Grid, Typography } from '@material-ui/core';
-import moment from 'moment';
 import { StatusBox } from '../StatusBox';
 import { choicesToDict, programStatusToColor } from '../../utils/utils';
 import { LabelizedField } from '../LabelizedField';
@@ -10,7 +9,6 @@ import {
   ProgramNode,
 } from '../../__generated__/graphql';
 import { MiśTheme } from '../../theme';
-import { Missing } from '../Missing';
 import { UniversalMoment } from '../UniversalMoment';
 
 const Container = styled.div`

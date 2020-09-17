@@ -10,7 +10,7 @@ export function TargetingHouseholds({
   selectedTab,
   candidateListTotalHouseholds,
   finalListTotalHouseholds,
-}) {
+}): React.ReactElement {
   let table;
   const hasSameResults =
     candidateListTotalHouseholds === finalListTotalHouseholds;

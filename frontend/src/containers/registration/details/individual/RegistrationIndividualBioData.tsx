@@ -14,7 +14,6 @@ import {
 } from '../../../../__generated__/graphql';
 import { LabelizedField } from '../../../../components/LabelizedField';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-
 import { LoadingComponent } from '../../../../components/LoadingComponent';
 import { UniversalMoment } from '../../../../components/UniversalMoment';
 

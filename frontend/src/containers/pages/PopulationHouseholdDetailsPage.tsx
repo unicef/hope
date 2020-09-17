@@ -17,7 +17,6 @@ import { HouseholdVulnerabilities } from '../../components/population/HouseholdV
 import { LabelizedField } from '../../components/LabelizedField';
 import { HouseholdIndividualsTable } from '../tables/HouseholdIndividualsTable';
 import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
-import { decodeIdString } from '../../utils/utils';
 import { PaymentRecordHouseholdTable } from '../tables/PaymentRecordHouseholdTable';
 import { UniversalMoment } from '../../components/UniversalMoment';
 

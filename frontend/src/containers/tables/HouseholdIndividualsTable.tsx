@@ -14,7 +14,6 @@ import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { StatusBox } from '../../components/StatusBox';
 import {
   choicesToDict,
-  decodeIdString,
   populationStatusToColor,
   sexToCapitalize,
 } from '../../utils/utils';

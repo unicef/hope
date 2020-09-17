@@ -1,9 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
-import { InputAdornment, Grid, FormControl } from '@material-ui/core';
+import { InputAdornment, Grid } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
-
-import moment from 'moment';
 // import TextField from '../../../shared/TextField';
 import TextField from '../../shared/TextField';
 // import { AdminAreasAutocomplete } from './AdminAreaAutocomplete';
@@ -26,30 +24,11 @@ const Container = styled.div`
   }
 `;
 
-const TextContainer = styled(TextField)`
-  input[type='number']::-webkit-inner-spin-button,
-  input[type='number']::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-  }
-  input[type='number'] {
-    -moz-appearance: textfield;
-  }
-`;
-const StyledFormControl = styled(FormControl)`
-  width: 232px;
-  color: #5f6368;
-  border-bottom: 0;
-`;
-
 const SearchTextField = styled(TextField)`
   flex: 1;
   && {
     min-width: 150px;
   }
-`;
-
-const StartInputAdornment = styled(InputAdornment)`
-  margin-right: 0;
 `;
 
 interface UsersListFiltersProps {

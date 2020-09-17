@@ -12,7 +12,7 @@ const InlineField = styled.div`
   width: 48%;
 `;
 
-export const SubField = (field, index) => {
+export const SubField = (field, index): React.ReactElement => {
   switch (field.fieldAttribute.type) {
     case 'INTEGER':
       return (

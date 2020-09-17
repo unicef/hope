@@ -51,7 +51,7 @@ export function DuplicateTargetPopulation({
   open,
   setOpen,
   targetPopulationId,
-}: DuplicateTargetPopulationPropTypes) {
+}: DuplicateTargetPopulationPropTypes): React.ReactElement {
   const [mutate] = useCopyTargetPopulationMutation();
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
@@ -73,16 +73,18 @@ export function DuplicateTargetPopulation({
         onSubmit={(values) => {
           mutate({
             variables: { input: { targetPopulationData: { ...values } } },
-          }).then((res) => {
-            setOpen(false);
-            return showMessage('Target Population Duplicated', {
-              pathname: `/${businessArea}/target-population/${res.data.copyTargetPopulation.targetPopulation.id}`,
-              historyMethod: 'push',
-            });
-          }, (error) => {
-            return showMessage('Name already exists');
-          })
-
+          }).then(
+            (res) => {
+              setOpen(false);
+              return showMessage('Target Population Duplicated', {
+                pathname: `/${businessArea}/target-population/${res.data.copyTargetPopulation.targetPopulation.id}`,
+                historyMethod: 'push',
+              });
+            },
+            () => {
+              return showMessage('Name already exists');
+            },
+          );
         }}
       >
         {({ submitForm }) => (
