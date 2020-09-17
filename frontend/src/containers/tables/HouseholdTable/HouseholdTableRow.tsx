@@ -38,8 +38,8 @@ export function HouseHoldTableRow({
       key={household.unicefId}
     >
       <TableCell align='left'>
-        {household.sanctionListPossibleMatch && <Flag />}
         {household.hasDuplicates && <FlagTooltip />}
+        {household.sanctionListPossibleMatch && <Flag />}
       </TableCell>
       <TableCell align='left'>{household.unicefId}</TableCell>
       <TableCell align='left'>{household.headOfHousehold.fullName}</TableCell>
