@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Button, DialogContent, DialogTitle, Box } from '@material-ui/core';
 import styled from 'styled-components';
-
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
 import { useSnackbar } from '../../hooks/useSnackBar';
@@ -35,10 +34,9 @@ export function FinishVerificationPlan({
     return null;
   }
   const { cashPlan } = data;
-  const verificationPlan =
-    cashPlan && cashPlan.verifications && cashPlan.verifications.edges.length
-      ? cashPlan.verifications.edges[0].node
-      : null;
+  const verificationPlan = cashPlan?.verifications?.edges?.length
+    ? cashPlan.verifications.edges[0].node
+    : null;
 
   const finish = async (): Promise<void> => {
     const { errors } = await mutate({

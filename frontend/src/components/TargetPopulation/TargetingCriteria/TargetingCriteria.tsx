@@ -70,10 +70,6 @@ const AddCriteria = styled.div`
   }
 `;
 
-const Row = styled.div`
-  width: 100%;
-`;
-
 interface TargetingCriteriaProps {
   selectedTab?: number;
   candidateListRules?;

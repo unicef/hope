@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { PageHeader } from '../../components/PageHeader';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
@@ -16,7 +15,6 @@ const Container = styled.div`
 `;
 
 export function PaymentVerificationPage(): React.ReactElement {
-  const { id } = useParams();
   const businessArea = useBusinessArea();
 
   const [filter, setFilter] = useState({
@@ -25,7 +23,7 @@ export function PaymentVerificationPage(): React.ReactElement {
     assistanceThrough: '',
     deliveryType: '',
     startDate: null,
-    endDate: null
+    endDate: null,
   });
   const debouncedFilter = useDebounce(filter, 500);
   const { data, loading } = useAllProgramsQuery({

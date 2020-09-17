@@ -11,7 +11,6 @@ import {
   Box,
   Grid,
 } from '@material-ui/core';
-
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
@@ -190,7 +189,6 @@ export function EditVerificationPlan({
       ],
     });
     setOpen(false);
-    console.log(errors);
 
     if (errors) {
       showMessage('Error while submitting');
@@ -199,13 +197,12 @@ export function EditVerificationPlan({
     showMessage('Verification plan edited.');
   };
 
-  const mappedAdminAreas =
-    data && data.allAdminAreas.edges.length
-      ? data.allAdminAreas.edges.map((el) => ({
-          value: el.node.id,
-          name: el.node.title,
-        }))
-      : [];
+  const mappedAdminAreas = data?.allAdminAreas?.edges?.length
+    ? data.allAdminAreas.edges.map((el) => ({
+        value: el.node.id,
+        name: el.node.title,
+      }))
+    : [];
 
   const handleFormChange = (values) => {
     setFormValues(values);
@@ -302,11 +299,11 @@ export function EditVerificationPlan({
                         style={{ width: '90%' }}
                         choices={
                           rapidProFlows
-                              ? rapidProFlows.allRapidProFlows.map((flow) => ({
+                            ? rapidProFlows.allRapidProFlows.map((flow) => ({
                                 value: flow.id,
                                 name: flow.name,
                               }))
-                              : []
+                            : []
                         }
                         component={FormikSelectField}
                       />

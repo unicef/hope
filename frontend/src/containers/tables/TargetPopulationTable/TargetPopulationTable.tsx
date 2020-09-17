@@ -6,9 +6,9 @@ import {
   AllTargetPopulationsQueryVariables,
 } from '../../../__generated__/graphql';
 import { UniversalTable } from '../UniversalTable';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { headCells } from './TargetPopulationTableHeadCells';
 import { TargetPopulationTableRow } from './TargetPopulationTableRow';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 
 const TableWrapper = styled.div`
   padding: 20px;
@@ -40,7 +40,9 @@ export const TargetPopulationTable = ({
         defaultOrderBy='createdAt'
         defaultOrderDirection='desc'
         initialVariables={initialVariables}
-        renderRow={(row) => <TargetPopulationTableRow key={row.id} targetPopulation={row} />}
+        renderRow={(row) => (
+          <TargetPopulationTableRow key={row.id} targetPopulation={row} />
+        )}
       />
     </TableWrapper>
   );

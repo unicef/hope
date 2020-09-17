@@ -3,7 +3,6 @@ import styled from 'styled-components';
 import { InputAdornment, Grid, FormControl } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
 
-import moment from 'moment';
 // import TextField from '../../../shared/TextField';
 import TextField from '../../shared/TextField';
 // import { AdminAreasAutocomplete } from './AdminAreaAutocomplete';

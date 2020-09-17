@@ -34,10 +34,6 @@ const DialogDescription = styled.div`
   color: rgba(0, 0, 0, 0.54);
 `;
 
-const ErrorMessage = styled.p`
-  color: ${({theme}) => theme.palette.error.main};
-`;
-
 export function FinalizeTargetPopulation({
   open,
   setOpen,
@@ -52,7 +48,7 @@ export function FinalizeTargetPopulation({
       variables: {
         id,
       },
-    }).then((res) => {
+    }).then(() => {
       setOpen(false);
       showMessage('Target Population Finalized', {
         pathname: `/${businessArea}/target-population/${id}`,
