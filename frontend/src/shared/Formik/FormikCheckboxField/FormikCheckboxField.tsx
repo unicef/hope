@@ -7,7 +7,7 @@ export const Check = ({
   label,
   ...otherProps
 }): React.ReactElement => {
-  const handleChange = (event) => {
+  const handleChange = () => {
     form.setFieldValue(field.name, !field.value);
   };
 

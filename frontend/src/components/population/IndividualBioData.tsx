@@ -8,7 +8,6 @@ import {
   useHouseholdChoiceDataQuery,
 } from '../../__generated__/graphql';
 import {
-  decodeIdString,
   getAgeFromDob,
   sexToCapitalize,
   choicesToDict,
@@ -30,10 +29,6 @@ const Title = styled.div`
 const ContentLink = styled.div`
   text-decoration: underline;
   cursor: pointer;
-`;
-const StatusContainer = styled.div`
-  min-width: 120px;
-  max-width: 200px;
 `;
 
 interface IndividualBioDataProps {

@@ -10,7 +10,6 @@ import {
 } from '@material-ui/core';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
 import { Field, Form, Formik } from 'formik';
-import moment from 'moment';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import {
@@ -39,11 +38,6 @@ const DialogFooter = styled.div`
   margin: 0;
   border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
   text-align: right;
-`;
-
-const MediumLabel = styled.div`
-  width: 60%;
-  margin: 12px 0;
 `;
 
 const DateFields = styled.div`

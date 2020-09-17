@@ -12,7 +12,6 @@ import {
 import { IndividualVulnerabilities } from '../../components/population/IndividualVunerabilities';
 import { CashPlus } from '../../components/population/CashPlus';
 import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
-import { decodeIdString } from '../../utils/utils';
 
 const Container = styled.div`
   padding: 20px;

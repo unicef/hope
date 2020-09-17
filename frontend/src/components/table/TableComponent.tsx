@@ -7,11 +7,11 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
+import FindInPageIcon from '@material-ui/icons/FindInPage';
+import { Box } from '@material-ui/core';
 import { LoadingComponent } from '../LoadingComponent';
 import { EnhancedTableToolbar } from './EnhancedTableToolbar';
 import { EnhancedTableHead, HeadCell } from './EnhancedTableHead';
-import FindInPageIcon from '@material-ui/icons/FindInPage';
-import { Box } from '@material-ui/core';
 
 export type Order = 'asc' | 'desc';
 

@@ -1,6 +1,6 @@
 import React from 'react';
-import { TargetPopulationHouseholdTable } from '../../../containers/tables/TargetPopulationHouseholdTable';
 import { FieldArray } from 'formik';
+import { TargetPopulationHouseholdTable } from '../../../containers/tables/TargetPopulationHouseholdTable';
 import { TargetingCriteria } from '../TargetingCriteria';
 import { Results } from '../Results';
 import { useFinalHouseholdsListByTargetingCriteriaQuery } from '../../../__generated__/graphql';

@@ -1,7 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Grid, Typography } from '@material-ui/core';
-import moment from 'moment';
 import { LabelizedField } from '../LabelizedField';
 import { TargetPopulationNode } from '../../__generated__/graphql';
 import { UniversalMoment } from '../UniversalMoment';
@@ -55,7 +54,7 @@ export function TargetPopulationDetails({
   ) : (
     '-'
   );
-  const programName = program && program.name ? program.name : '-';
+  const programName = program?.name ? program.name : '-';
   return (
     <Container data-cy='target-population-details-container'>
       <Title>
