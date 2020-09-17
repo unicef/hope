@@ -51,7 +51,7 @@ export function DuplicateTargetPopulation({
   open,
   setOpen,
   targetPopulationId,
-}: DuplicateTargetPopulationPropTypes) {
+}: DuplicateTargetPopulationPropTypes): React.ReactElement {
   const [mutate] = useCopyTargetPopulationMutation();
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();

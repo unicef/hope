@@ -185,11 +185,11 @@ export function CreateVerificationPlan({
       }))
     : [];
 
-  const handleFormChange = (values) => {
+  const handleFormChange = (values): void => {
     setFormValues(values);
   };
 
-  const getSampleSizePercentage = () => {
+  const getSampleSizePercentage = (): string => {
     if (sampleSizesData?.sampleSize?.paymentRecordCount !== 0) {
       return ` (${(sampleSizesData?.sampleSize?.sampleSize /
         sampleSizesData?.sampleSize?.paymentRecordCount) *
@@ -244,13 +244,15 @@ export function CreateVerificationPlan({
                   </StyledTabs>
                 </TabsContainer>
                 <TabPanel value={selectedTab} index={0}>
-                  <Field
-                    name='excludedAdminAreasFull'
-                    choices={mappedAdminAreas}
-                    variant='filled'
-                    label='Filter Out Admin Areas'
-                    component={FormikMultiSelectField}
-                  />
+                  {mappedAdminAreas && (
+                    <Field
+                      name='excludedAdminAreasFull'
+                      choices={mappedAdminAreas}
+                      variant='filled'
+                      label='Filter Out Admin Areas'
+                      component={FormikMultiSelectField}
+                    />
+                  )}
                   <Box pt={3}>
                     <Box
                       pb={3}

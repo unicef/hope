@@ -58,7 +58,11 @@ const useStyles = makeStyles((theme: MiśTheme) => ({
   warning: { color: theme.hctPalette.oragne, marginRight: '10px' },
 }));
 
-export function ApproveCandidateList({ open, setOpen, targetPopulationId }) {
+export function ApproveCandidateList({
+  open,
+  setOpen,
+  targetPopulationId,
+}): React.ReactElement {
   const { data: programs } = useAllProgramsQuery({
     variables: { status: 'ACTIVE' },
   });

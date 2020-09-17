@@ -29,14 +29,14 @@ export function VerificationRecordsTableRow({
   record,
   selected,
   checkboxClickHandler,
-}) {
+}): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
   const handleClick = (): void => {
     const path = `/${businessArea}/verification-records/${record.id}`;
     history.push(path);
   };
-  const isSelected = (name) => selected.indexOf(name) !== -1;
+  const isSelected = (name: string): boolean => selected.indexOf(name) !== -1;
 
   const isItemSelected = isSelected(record.paymentRecord.id);
 
