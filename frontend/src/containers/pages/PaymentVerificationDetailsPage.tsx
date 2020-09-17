@@ -3,7 +3,6 @@ import styled from 'styled-components';
 import { Box, Grid, Typography } from '@material-ui/core';
 import { Doughnut } from 'react-chartjs-2';
 import { useParams } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import { PageHeader } from '../../components/PageHeader';
 import { LabelizedField } from '../../components/LabelizedField';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
@@ -79,7 +78,6 @@ const StatusContainer = styled.div`
 `;
 
 export function PaymentVerificationDetailsPage(): React.ReactElement {
-  const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const [filter, setFilter] = useState({
     search: null,
@@ -105,10 +103,9 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
     choicesData.cashPlanVerificationSamplingChoices,
   );
   const { cashPlan } = data;
-  const verificationPlan =
-    cashPlan && cashPlan.verifications && cashPlan.verifications.edges.length
-      ? cashPlan.verifications.edges[0].node
-      : null;
+  const verificationPlan = cashPlan?.verifications?.edges?.length
+    ? cashPlan.verifications.edges[0].node
+    : null;
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: 'Payment Verification',

@@ -18,7 +18,7 @@ import {
   mapCriteriasToInitialValues,
 } from '../../utils/utils';
 import { CriteriaAutocomplete } from '../../components/TargetPopulation/TargetingCriteria/CriteriaAutocomplete';
-import { DialogActions } from '../dialogs/DialogActions'
+import { DialogActions } from '../dialogs/DialogActions';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -121,7 +121,7 @@ export function TargetCriteriaForm({
     filters: mappedFilters,
   };
 
-  const chooseFieldType = (value, arrayHelpers, index) => {
+  const chooseFieldType = (value, arrayHelpers, index): void => {
     const values = {
       isFlexField: value.isFlexField,
       fieldAttribute: {
@@ -153,7 +153,7 @@ export function TargetCriteriaForm({
     });
   };
 
-  const clearField = (arrayHelpers, index) => {
+  const clearField = (arrayHelpers, index): void => {
     return arrayHelpers.replace(index, {});
   };
 

@@ -1,6 +1,5 @@
 import React from 'react';
 import styled from 'styled-components';
-import moment from 'moment';
 import { Grid, Typography } from '@material-ui/core';
 import { CashPlanNode } from '../__generated__/graphql';
 import { MiśTheme } from '../theme';

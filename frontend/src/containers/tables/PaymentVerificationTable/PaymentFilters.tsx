@@ -6,15 +6,15 @@ import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
 import FormControl from '@material-ui/core/FormControl';
 import MonetizationOnIcon from '@material-ui/icons/MonetizationOn';
+import { KeyboardDatePicker } from '@material-ui/pickers';
+import moment from 'moment';
 import TextField from '../../../shared/TextField';
 import InputLabel from '../../../shared/InputLabel';
 import Select from '../../../shared/Select';
-import { KeyboardDatePicker } from '@material-ui/pickers';
 import {
   ProgramNode,
   useCashPlanVerificationStatusChoicesQuery,
 } from '../../../__generated__/graphql';
-import moment from 'moment';
 
 const Container = styled.div`
   display: flex;

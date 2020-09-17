@@ -37,6 +37,7 @@ const MenuProps = {
 };
 
 function getStyles(value, comparedValue, theme) {
+  if (!value || !comparedValue || !theme) return null;
   return {
     fontWeight:
       comparedValue.indexOf(value) === -1
@@ -55,10 +56,12 @@ export const FormikMultiSelectField = ({
   const classes = useStyles();
   const theme = useTheme();
 
-  const handleChange = (event) => {
+  const handleChange = (event): void => {
     form.setFieldValue(field.name, event.target.value);
   };
-
+  if (!choices) {
+    return null;
+  }
   return (
     <FormControl className={classes.formControl}>
       <InputLabel id='mutiple-chip-label'>{label}</InputLabel>
