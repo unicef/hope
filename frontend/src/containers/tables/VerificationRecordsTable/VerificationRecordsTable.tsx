@@ -163,7 +163,7 @@ export function VerificationRecordsTable({
     </>
   );
 
-  const handleCheckboxClick = (event, name) => {
+  const handleCheckboxClick = (event, name): void => {
     const selectedIndex = selected.indexOf(name);
     let newSelected = [];
 
@@ -183,7 +183,7 @@ export function VerificationRecordsTable({
     setSelected(newSelected);
   };
 
-  const handleSelectAllCheckboxesClick = (event, rows) => {
+  const handleSelectAllCheckboxesClick = (event, rows): void => {
     if (event.target.checked) {
       const newSelecteds = rows.map((row) => row.paymentRecord.id);
       setSelected(newSelecteds);

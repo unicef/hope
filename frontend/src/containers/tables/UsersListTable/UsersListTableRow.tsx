@@ -8,7 +8,9 @@ interface UsersListTableRowProps {
   user: UserNode;
 }
 
-export function UsersListTableRow({ user }: UsersListTableRowProps) {
+export function UsersListTableRow({
+  user,
+}: UsersListTableRowProps): React.ReactElement {
   return (
     <TableRow key={user.id}>
       <TableCell align='left'>{`${user.firstName} ${user.lastName}`}</TableCell>

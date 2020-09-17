@@ -11,7 +11,7 @@ import { TargetPopulationCore } from '../../components/TargetPopulation/TargetPo
 import { TargetPopulationDetails } from '../../components/TargetPopulation/TargetPopulationDetails';
 import { TargetPopulationPageHeader } from './headers/TargetPopulationPageHeader';
 
-export function TargetPopulationDetailsPage() {
+export function TargetPopulationDetailsPage(): React.ReactElement {
   const { id } = useParams();
   const { data } = useTargetPopulationQuery({
     variables: { id },
@@ -19,7 +19,7 @@ export function TargetPopulationDetailsPage() {
   const [isEdit, setEditState] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
 
-  const changeTab = (event: React.ChangeEvent<{}>, newValue: number) => {
+  const changeTab = (event: React.ChangeEvent<{}>, newValue: number): void => {
     setSelectedTab(newValue);
   };
 
@@ -38,7 +38,7 @@ export function TargetPopulationDetailsPage() {
       data-cy={`target-population-tabs-${selectedTab}`}
     >
       <Tab label='Programme Population' />
-      <Tab label='Target Population' disabled={status === 'DRAFT'}/>
+      <Tab label='Target Population' disabled={status === 'DRAFT'} />
     </Tabs>
   );
   return (

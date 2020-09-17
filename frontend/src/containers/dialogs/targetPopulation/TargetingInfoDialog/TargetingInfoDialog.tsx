@@ -57,9 +57,9 @@ const StyledTabPanel = styled(TabPanel)`
   }
 `;
 
-export function TargetingInfoDialog({ open, setOpen }) {
+export function TargetingInfoDialog({ open, setOpen }): React.ReactElement {
   const [selectedTab, setTab] = useState(0);
-  const changeTab = (event: React.ChangeEvent<{}>, newValue: number) => {
+  const changeTab = (event: React.ChangeEvent<{}>, newValue: number): void => {
     setTab(newValue);
   };
   const HeaderTabs = (

@@ -66,7 +66,7 @@ export function FinishVerificationPlan({
     width: 700px;
   `;
 
-  const beneficiariesPercent = () => {
+  const beneficiariesPercent = (): number => {
     if (verificationPlan?.respondedCount && verificationPlan?.sampleSize !== 0)
       return (
         (verificationPlan?.respondedCount / verificationPlan?.sampleSize) * 100
@@ -74,7 +74,7 @@ export function FinishVerificationPlan({
     return null;
   };
 
-  const grievanceTickets = () => {
+  const grievanceTickets = (): number => {
     if (
       verificationPlan?.notReceivedCount &&
       verificationPlan?.sampleSize &&

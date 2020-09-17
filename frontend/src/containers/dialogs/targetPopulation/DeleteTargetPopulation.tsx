@@ -35,7 +35,11 @@ const DialogDescription = styled.div`
   color: rgba(0, 0, 0, 0.54);
 `;
 
-export function DeleteTargetPopulation({ open, setOpen, targetPopulationId }) {
+export function DeleteTargetPopulation({
+  open,
+  setOpen,
+  targetPopulationId,
+}): React.ReactElement {
   const [mutate] = useDeleteTargetPopulationMutation();
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
