@@ -1,10 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
-import moment from 'moment';
 import { Grid, Paper, Typography } from '@material-ui/core';
 import { StatusBox } from '../StatusBox';
 import {
-  decodeIdString,
   formatCurrency,
   paymentRecordStatusToColor,
   verificationRecordsStatusToColor,

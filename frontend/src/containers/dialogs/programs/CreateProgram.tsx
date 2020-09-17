@@ -1,5 +1,4 @@
 import React, { useState, ReactElement } from 'react';
-import moment from 'moment';
 import { Button } from '@material-ui/core';
 import { useCreateProgramMutation } from '../../../__generated__/graphql';
 import { ProgramForm } from '../../forms/ProgramForm';

@@ -11,7 +11,6 @@ import {
   Box,
   Grid,
 } from '@material-ui/core';
-
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
@@ -179,19 +178,18 @@ export function CreateVerificationPlan({
     showMessage('New verification plan created.');
   };
 
-  const mappedAdminAreas =
-    data && data.allAdminAreas.edges.length
-      ? data.allAdminAreas.edges.map((el) => ({
-          value: el.node.id,
-          name: el.node.title,
-        }))
-      : [];
+  const mappedAdminAreas = data?.allAdminAreas?.edges?.length
+    ? data.allAdminAreas.edges.map((el) => ({
+        value: el.node.id,
+        name: el.node.title,
+      }))
+    : [];
 
-  const handleFormChange = (values) => {
+  const handleFormChange = (values): void => {
     setFormValues(values);
   };
 
-  const getSampleSizePercentage = () => {
+  const getSampleSizePercentage = (): string => {
     if (sampleSizesData?.sampleSize?.paymentRecordCount !== 0) {
       return ` (${(sampleSizesData?.sampleSize?.sampleSize /
         sampleSizesData?.sampleSize?.paymentRecordCount) *
@@ -246,13 +244,15 @@ export function CreateVerificationPlan({
                   </StyledTabs>
                 </TabsContainer>
                 <TabPanel value={selectedTab} index={0}>
-                  <Field
-                    name='excludedAdminAreasFull'
-                    choices={mappedAdminAreas}
-                    variant='filled'
-                    label='Filter Out Admin Areas'
-                    component={FormikMultiSelectField}
-                  />
+                  {mappedAdminAreas && (
+                    <Field
+                      name='excludedAdminAreasFull'
+                      choices={mappedAdminAreas}
+                      variant='filled'
+                      label='Filter Out Admin Areas'
+                      component={FormikMultiSelectField}
+                    />
+                  )}
                   <Box pt={3}>
                     <Box
                       pb={3}

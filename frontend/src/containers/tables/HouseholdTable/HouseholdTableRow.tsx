@@ -7,11 +7,7 @@ import {
 } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
-import {
-  choicesToDict,
-  decodeIdString,
-  formatCurrency,
-} from '../../../utils/utils';
+import { choicesToDict, formatCurrency } from '../../../utils/utils';
 import { Flag } from '../../../components/Flag';
 import { UniversalMoment } from '../../../components/UniversalMoment';
 

@@ -4,7 +4,6 @@ import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import Typography from '@material-ui/core/Typography';
 import { Link } from 'react-router-dom';
-import moment from 'moment';
 import { Grid } from '@material-ui/core';
 import { theme as themeObj } from '../../theme';
 import { choicesToDict, programStatusToColor } from '../../utils/utils';
