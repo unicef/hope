@@ -1,6 +1,5 @@
 import uuid
 from datetime import timedelta
-from time import sleep
 from unittest.mock import patch, MagicMock
 
 from django.core.management import call_command

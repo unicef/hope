@@ -255,7 +255,7 @@ class Countries:
         if output_code not in ("alpha2", "alpha3"):
             raise ValueError("output_code have to be one of: alpha2, alpha3")
         return [
-            {"label": {"English(EN)": name}, "value": alpha2 if output_code == "alpha2" else alpha3,}
+            {"label": {"English(EN)": name}, "value": alpha2 if output_code == "alpha2" else alpha3}
             for name, alpha2, alpha3 in cls.COUNTRIES
         ]
 

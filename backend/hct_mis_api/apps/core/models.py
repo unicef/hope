@@ -132,7 +132,7 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
     @classmethod
     def get_admin_areas_as_choices(cls, admin_level):
         return [
-            {"label": {"English(EN)": admin_area.title}, "value": admin_area.title,}
+            {"label": {"English(EN)": admin_area.title}, "value": admin_area.title}
             for admin_area in cls.objects.filter(admin_area_type__admin_level=admin_level)
         ]
 
