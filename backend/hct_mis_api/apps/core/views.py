@@ -1,13 +1,11 @@
-from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth.decorators import user_passes_test
 from django import forms
+from django.contrib.auth import logout
+from django.contrib.auth.decorators import user_passes_test
 from django.core.management import call_command
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from graphene_django.settings import graphene_settings
-
 from graphql.utils import schema_printer
-from django.contrib.auth import logout
 
 
 def homepage(request):

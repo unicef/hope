@@ -121,7 +121,7 @@ class Command(BaseCommand):
             business_area=BusinessArea.objects.first(),
         )
         for _ in range(cash_plans_amount):
-            cash_plan = CashPlanFactory.build(program=program, business_area=BusinessArea.objects.first(), )
+            cash_plan = CashPlanFactory.build(program=program, business_area=BusinessArea.objects.first(),)
             cash_plan.save()
             for _ in range(payment_record_amount):
                 registration_data_import = RegistrationDataImportFactory(
@@ -200,7 +200,7 @@ class Command(BaseCommand):
             rdi.save()
             for _ in range(10):
                 create_imported_household(
-                    {"registration_data_import": rdi_datahub, }, {"registration_data_import": rdi_datahub, },
+                    {"registration_data_import": rdi_datahub}, {"registration_data_import": rdi_datahub},
                 )
         session = Session(source=Session.SOURCE_CA, status=Session.STATUS_READY)
         session.save()

@@ -6,7 +6,6 @@ from core.models import BusinessArea
 from household.fixtures import (
     IndividualFactory,
     HouseholdFactory,
-    create_household,
 )
 from program.fixtures import ProgramFactory
 

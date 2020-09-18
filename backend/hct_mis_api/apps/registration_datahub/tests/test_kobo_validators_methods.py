@@ -53,12 +53,22 @@ class TestKoboSaveValidatorsMethods(TestCase):
             "_attachments": [
                 {
                     "mimetype": "image/png",
-                    "download_small_url": "https://kc.humanitarianresponse.info/media/small?media_file=wnosal%2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4%2F512ca816-5cab-45a6-a676-1f47cfe7658e%2Fsignature-17_32_52.png",
-                    "download_large_url": "https://kc.humanitarianresponse.info/media/large?media_file=wnosal%2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4%2F512ca816-5cab-45a6-a676-1f47cfe7658e%2Fsignature-17_32_52.png",
-                    "download_url": "https://kc.humanitarianresponse.info/media/original?media_file=wnosal%2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4%2F512ca816-5cab-45a6-a676-1f47cfe7658e%2Fsignature-17_32_52.png",
-                    "filename": "wnosal/attachments/b83407aca1d647a5bf65a3383ee761d4/512ca816-5cab-45a6-a676-1f47cfe7658e/signature-17_32_52.png",
+                    "download_small_url": "https://kc.humanitarianresponse.info/media/small?"
+                                          "media_file=wnosal%2Fattachments%"
+                                          "2Fb83407aca1d647a5bf65a3383ee761d4%2F512ca816-5cab-45a6-a676-1f47cfe7658e"
+                                          "%2Fsignature-17_32_52.png",
+                    "download_large_url": "https://kc.humanitarianresponse.info/media/large?media_file=wnosal%"
+                                          "2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4"
+                                          "%2F512ca816-5cab-45a6-a676-1f47cfe7658e%2Fsignature-17_32_52.png",
+                    "download_url": "https://kc.humanitarianresponse.info/media/original?media_file=wnosal"
+                                    "%2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4"
+                                    "%2F512ca816-5cab-45a6-a676-1f47cfe7658e%2Fsignature-17_32_52.png",
+                    "filename": "wnosal/attachments/b83407aca1d647a5bf65a3383ee761d4/"
+                                "512ca816-5cab-45a6-a676-1f47cfe7658e/signature-17_32_52.png",
                     "instance": 101804069,
-                    "download_medium_url": "https://kc.humanitarianresponse.info/media/medium?media_file=wnosal%2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4%2F512ca816-5cab-45a6-a676-1f47cfe7658e%2Fsignature-17_32_52.png",
+                    "download_medium_url": "https://kc.humanitarianresponse.info/media/medium?media_file=wnosal"
+                                           "%2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4"
+                                           "%2F512ca816-5cab-45a6-a676-1f47cfe7658e%2Fsignature-17_32_52.png",
                     "id": 34814249,
                     "xform": 549831,
                 }
@@ -427,8 +437,8 @@ class TestKoboSaveValidatorsMethods(TestCase):
 
     def test_date_validator(self):
         test_data = (
-            {"args": ("2020-05-28T17:13:31.590+02:00", "birth_date_i_c"), "expected": None,},
-            {"args": ("2020-05-28", "birth_date_i_c"), "expected": None,},
+            {"args": ("2020-05-28T17:13:31.590+02:00", "birth_date_i_c"), "expected": None},
+            {"args": ("2020-05-28", "birth_date_i_c"), "expected": None},
             {
                 "args": ("2020-13-32T25:13:31.590+02:00", "birth_date_i_c"),
                 "expected": (
@@ -464,7 +474,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 },
             },
             # STRING
-            {"args": ("address_h_c", "Street 123", attachments), "expected": None,},
+            {"args": ("address_h_c", "Street 123", attachments), "expected": None},
             {"args": ("address_h_c", 123, attachments), "expected": None},
             # BOOL
             {"args": ("returnee_h_c", True, attachments), "expected": None},
@@ -493,10 +503,10 @@ class TestKoboSaveValidatorsMethods(TestCase):
             {"args": ("sex_i_c", "MALE", attachments), "expected": None},
             {
                 "args": ("sex_i_c", "YES", attachments),
-                "expected": {"header": "sex_i_c", "message": "Invalid choice YES for field sex_i_c",},
+                "expected": {"header": "sex_i_c", "message": "Invalid choice YES for field sex_i_c"},
             },
             # DATE
-            {"args": ("birth_date_i_c", "2020-05-28T17:13:31.590+02:00", attachments,), "expected": None,},
+            {"args": ("birth_date_i_c", "2020-05-28T17:13:31.590+02:00", attachments,), "expected": None},
             {
                 "args": ("birth_date_i_c", "2020/05/28", attachments),
                 "expected": {
@@ -507,7 +517,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 },
             },
             # GEOPOINT
-            {"args": ("hh_geopoint_h_c", "12.123 13.123", attachments), "expected": None,},
+            {"args": ("hh_geopoint_h_c", "12.123 13.123", attachments), "expected": None},
             {
                 "args": ("hh_geopoint_h_c", "GeoPoint 12.123, 32.123", attachments,),
                 "expected": {
@@ -538,20 +548,20 @@ class TestKoboSaveValidatorsMethods(TestCase):
         result.sort(key=itemgetter("header"))
 
         expected = [
-            {"header": "admin1_h_c", "message": "Invalid choice SO25 for field admin1_h_c",},
-            {"header": "admin2_h_c", "message": "Invalid choice SO2502 for field admin2_h_c",},
-            {"header": "f_0_5_age_group_h_c", "message": "Missing household required field f_0_5_age_group_h_c",},
-            {"header": "f_0_5_disability_h_c", "message": "Missing household required field f_0_5_disability_h_c",},
-            {"header": "f_12_17_age_group_h_c", "message": "Missing household required field f_12_17_age_group_h_c",},
-            {"header": "f_12_17_disability_h_c", "message": "Missing household required field f_12_17_disability_h_c",},
-            {"header": "f_6_11_age_group_h_c", "message": "Missing household required field f_6_11_age_group_h_c",},
-            {"header": "f_6_11_disability_h_c", "message": "Missing household required field f_6_11_disability_h_c",},
+            {"header": "admin1_h_c", "message": "Invalid choice SO25 for field admin1_h_c"},
+            {"header": "admin2_h_c", "message": "Invalid choice SO2502 for field admin2_h_c"},
+            {"header": "f_0_5_age_group_h_c", "message": "Missing household required field f_0_5_age_group_h_c"},
+            {"header": "f_0_5_disability_h_c", "message": "Missing household required field f_0_5_disability_h_c"},
+            {"header": "f_12_17_age_group_h_c", "message": "Missing household required field f_12_17_age_group_h_c"},
+            {"header": "f_12_17_disability_h_c", "message": "Missing household required field f_12_17_disability_h_c"},
+            {"header": "f_6_11_age_group_h_c", "message": "Missing household required field f_6_11_age_group_h_c"},
+            {"header": "f_6_11_disability_h_c", "message": "Missing household required field f_6_11_disability_h_c"},
             {
                 "header": "f_adults_disability_h_c",
                 "message": "Missing household required field f_adults_disability_h_c",
             },
-            {"header": "f_adults_h_c", "message": "Missing household required field f_adults_h_c",},
-            {"header": "f_pregnant_h_c", "message": "Missing household required field f_pregnant_h_c",},
+            {"header": "f_adults_h_c", "message": "Missing household required field f_adults_h_c"},
+            {"header": "f_pregnant_h_c", "message": "Missing household required field f_pregnant_h_c"},
             {
                 "header": "first_registration_date_h_c",
                 "message": "Missing household required field first_registration_date_h_c",
@@ -568,26 +578,26 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 "header": "first_registration_date_i_c",
                 "message": "Missing individual required field first_registration_date_i_c",
             },
-            {"header": "is_only_collector", "message": "Missing individual required field is_only_collector",},
-            {"header": "is_only_collector", "message": "Missing individual required field is_only_collector",},
-            {"header": "is_only_collector", "message": "Missing individual required field is_only_collector",},
-            {"header": "m_0_5_age_group_h_c", "message": "Missing household required field m_0_5_age_group_h_c",},
-            {"header": "m_0_5_disability_h_c", "message": "Missing household required field m_0_5_disability_h_c",},
-            {"header": "m_12_17_age_group_h_c", "message": "Missing household required field m_12_17_age_group_h_c",},
-            {"header": "m_12_17_disability_h_c", "message": "Missing household required field m_12_17_disability_h_c",},
-            {"header": "m_6_11_age_group_h_c", "message": "Missing household required field m_6_11_age_group_h_c",},
-            {"header": "m_6_11_disability_h_c", "message": "Missing household required field m_6_11_disability_h_c",},
+            {"header": "is_only_collector", "message": "Missing individual required field is_only_collector"},
+            {"header": "is_only_collector", "message": "Missing individual required field is_only_collector"},
+            {"header": "is_only_collector", "message": "Missing individual required field is_only_collector"},
+            {"header": "m_0_5_age_group_h_c", "message": "Missing household required field m_0_5_age_group_h_c"},
+            {"header": "m_0_5_disability_h_c", "message": "Missing household required field m_0_5_disability_h_c"},
+            {"header": "m_12_17_age_group_h_c", "message": "Missing household required field m_12_17_age_group_h_c"},
+            {"header": "m_12_17_disability_h_c", "message": "Missing household required field m_12_17_disability_h_c"},
+            {"header": "m_6_11_age_group_h_c", "message": "Missing household required field m_6_11_age_group_h_c"},
+            {"header": "m_6_11_disability_h_c", "message": "Missing household required field m_6_11_disability_h_c"},
             {
                 "header": "m_adults_disability_h_c",
                 "message": "Missing household required field m_adults_disability_h_c",
             },
-            {"header": "m_adults_h_c", "message": "Missing household required field m_adults_h_c",},
-            {"header": "residence_status_h_c", "message": "Invalid choice host for field residence_status_h_c",},
-            {"header": "role_i_c", "message": "Only one person can be a primary collector",},
-            {"header": "size_h_c", "message": "Missing household required field size_h_c",},
-            {"header": "work_status_i_c", "message": "Invalid choice 0 for field work_status_i_c",},
-            {"header": "work_status_i_c", "message": "Invalid choice 0 for field work_status_i_c",},
-            {"header": "work_status_i_c", "message": "Invalid choice 0 for field work_status_i_c",},
+            {"header": "m_adults_h_c", "message": "Missing household required field m_adults_h_c"},
+            {"header": "residence_status_h_c", "message": "Invalid choice host for field residence_status_h_c"},
+            {"header": "role_i_c", "message": "Only one person can be a primary collector"},
+            {"header": "size_h_c", "message": "Missing household required field size_h_c"},
+            {"header": "work_status_i_c", "message": "Invalid choice 0 for field work_status_i_c"},
+            {"header": "work_status_i_c", "message": "Invalid choice 0 for field work_status_i_c"},
+            {"header": "work_status_i_c", "message": "Invalid choice 0 for field work_status_i_c"},
         ]
 
         self.assertEqual(result, expected)
