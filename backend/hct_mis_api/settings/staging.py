@@ -1,7 +1,9 @@
 from __future__ import absolute_import
-from .base import *  # noqa: ignore=F403
+
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
+
+from .base import *  # noqa: ignore=F403
 
 # dev overrides
 DEBUG = False
@@ -15,9 +17,9 @@ WWW_ROOT = "http://%s/" % DOMAIN_NAME
 # EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 # CACHE
-CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache", "TIMEOUT": 1800,}}
+CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache", "TIMEOUT": 1800}}
 
-## STORAGE
+# STORAGE
 STATIC_LOCATION = "static"
 MEDIA_LOCATION = "media"
 
@@ -65,5 +67,5 @@ AIRFLOW_HOST = os.getenv("AIRFLOW_HOST", "hct-mis-airflow-web")
 
 # ELASTICSEARCH SETTINGS
 ELASTICSEARCH_DSL = {
-    "default": {"hosts": ELASTICSEARCH_HOST, 'timeout': 30},
+    "default": {"hosts": ELASTICSEARCH_HOST, "timeout": 30},
 }

@@ -8,11 +8,7 @@ from .models import SanctionListIndividual
 class SanctionListIndividualESDocument(Document):
     full_name = fields.TextField()
     active = fields.BooleanField()
-    dates_of_birth = fields.ObjectField(
-        properties={
-            "date": fields.DateField(),
-        }
-    )
+    dates_of_birth = fields.ObjectField(properties={"date": fields.DateField()})
 
     def prepare_hash_key(self, instance):
         return instance.get_hash_key

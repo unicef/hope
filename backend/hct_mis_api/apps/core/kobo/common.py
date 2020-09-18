@@ -2,7 +2,6 @@ from typing import Tuple
 
 from dateutil.parser import parse
 
-
 KOBO_FORM_INDIVIDUALS_COLUMN_NAME = "individual_questions"
 
 

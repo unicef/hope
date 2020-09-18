@@ -3,7 +3,7 @@ from django.core.management import call_command
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
 from core.models import BusinessArea
-from household.fixtures import HouseholdFactory, create_household
+from household.fixtures import create_household
 from program.fixtures import ProgramFactory
 
 
@@ -104,7 +104,7 @@ class TestHouseholdQuery(APITestCase):
         self.households = []
         for index, family_size in enumerate(family_sizes_list):
             (household, individuals) = create_household(
-                {"size": family_size, "address": "Lorem Ipsum", "country_origin": "PL",},
+                {"size": family_size, "address": "Lorem Ipsum", "country_origin": "PL"},
             )
             if index % 2:
                 household.programs.add(self.program_one)

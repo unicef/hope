@@ -1,15 +1,15 @@
 import graphene
 from django.db.models import Case, When, Value, IntegerField, Q
+from django_filters import FilterSet, OrderingFilter, CharFilter
 from graphene import relay, ConnectionField
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
-from core.schema import ChoiceObject, LogEntryObjectConnection
 from core.extended_connection import ExtendedConnection
+from core.schema import ChoiceObject, LogEntryObjectConnection
 from core.utils import to_choice_object
 from payment.models import CashPlanPaymentVerification
 from program.models import Program, CashPlan
-from django_filters import FilterSet, OrderingFilter, CharFilter
 
 
 class ProgramFilter(FilterSet):

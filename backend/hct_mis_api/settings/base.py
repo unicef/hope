@@ -18,7 +18,7 @@ sys.path.append(os.path.join(PROJECT_ROOT, "apps/"))
 # domains/hosts etc.
 DOMAIN_NAME = os.getenv("DOMAIN", "localhost")
 WWW_ROOT = "http://%s/" % DOMAIN_NAME
-ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '*').split(',') + [DOMAIN_NAME]
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "*").split(",") + [DOMAIN_NAME]
 FRONTEND_HOST = os.getenv("HCT_MIS_FRONTEND_HOST", DOMAIN_NAME)
 
 ####
@@ -232,10 +232,10 @@ OTHER_APPS = [
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
 
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",},
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator", "OPTIONS": {"min_length": 12,},},
-    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",},
-    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",},
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator", "OPTIONS": {"min_length": 12}},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
 PASSWORD_RESET_TIMEOUT_DAYS = 31
@@ -268,11 +268,11 @@ LOGGING = {
         },
     },
     "filters": {"require_debug_false": {"()": "django.utils.log.RequireDebugFalse"}},
-    "handlers": {"default": {"level": LOG_LEVEL, "class": "logging.StreamHandler", "formatter": "standard",},},
+    "handlers": {"default": {"level": LOG_LEVEL, "class": "logging.StreamHandler", "formatter": "standard"}},
     "loggers": {
         "": {"handlers": ["default"], "level": "INFO", "propagate": True},
-        "console": {"handlers": ["default"], "level": "DEBUG", "propagate": True,},
-        "django.request": {"handlers": ["default"], "level": "ERROR", "propagate": False,},
+        "console": {"handlers": ["default"], "level": "DEBUG", "propagate": True},
+        "django.request": {"handlers": ["default"], "level": "ERROR", "propagate": False},
         "django.security.DisallowedHost": {
             # Skip "SuspiciousOperation: Invalid HTTP_HOST" e-mails.
             "handlers": ["default"],
@@ -290,13 +290,13 @@ if REDIS_INSTANCE:
         "default": {
             "BACKEND": "django_redis.cache.RedisCache",
             "LOCATION": f"redis://{REDIS_INSTANCE}/1",
-            "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient",},
+            "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
             "TIMEOUT": 3600,
         }
     }
     DJANGO_REDIS_IGNORE_EXCEPTIONS = not DEBUG
 else:
-    CACHES = {"default": {"BACKEND": "common.cache_backends.DummyRedisCache", "LOCATION": "hct_mis",}}
+    CACHES = {"default": {"BACKEND": "common.cache_backends.DummyRedisCache", "LOCATION": "hct_mis"}}
 
 SESSION_COOKIE_HTTPONLY = True
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
