@@ -46,9 +46,7 @@ class APITestCase(SnapshotTestTestCase):
 class BaseElasticSearchTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        connections.create_connection(
-            hosts=["elasticsearch_test:9200"], timeout=20
-        )
+        connections.create_connection(hosts=["elasticsearch_test:9200"], timeout=20)
         cls.rebuild_search_index()
 
     @classmethod

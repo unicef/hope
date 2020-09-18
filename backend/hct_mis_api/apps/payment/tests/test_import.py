@@ -56,7 +56,7 @@ class TestXlsxVerificationImport(TestCase):
                     "registration_data_import": registration_data_import,
                     "admin_area": AdminArea.objects.order_by("?").first(),
                 },
-                {"registration_data_import": registration_data_import,},
+                {"registration_data_import": registration_data_import},
             )
 
             household.programs.add(program)
@@ -197,7 +197,13 @@ class TestXlsxVerificationImport(TestCase):
         import_service.validate()
         self.assertEqual(
             import_service.errors,
-            [("Payment Verifications", f"{XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_LETTER}3", "Wrong type off cell number expected, text given.",)],
+            [
+                (
+                    "Payment Verifications",
+                    f"{XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_LETTER}3",
+                    "Wrong type off cell number expected, text given.",
+                )
+            ],
         )
 
     def test_validation_invalid_received_not_received_with_amount(self):
@@ -211,7 +217,13 @@ class TestXlsxVerificationImport(TestCase):
         import_service.validate()
         self.assertEqual(
             import_service.errors,
-            [("Payment Verifications", f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2", "If received_amount(10.00) is not 0, you should set received to YES",)],
+            [
+                (
+                    "Payment Verifications",
+                    f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2",
+                    "If received_amount(10.00) is not 0, you should set received to YES",
+                )
+            ],
         )
 
     def test_validation_invalid_received_received_with_0_amount(self):
@@ -225,7 +237,13 @@ class TestXlsxVerificationImport(TestCase):
         import_service.validate()
         self.assertEqual(
             import_service.errors,
-            [("Payment Verifications", f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2", "If received_amount is 0, you should set received to NO",)],
+            [
+                (
+                    "Payment Verifications",
+                    f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2",
+                    "If received_amount is 0, you should set received to NO",
+                )
+            ],
         )
 
     def test_import_valid_status_changed_received_no(self):
@@ -252,7 +270,9 @@ class TestXlsxVerificationImport(TestCase):
         payment_verification = PaymentVerification.objects.get(payment_record__id=payment_record_id)
         self.assertEqual(payment_verification.status, PaymentVerification.STATUS_PENDING)
         wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"] = "YES"
-        wb.active[f"{XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_LETTER}2"] = payment_verification.payment_record.delivered_quantity - 1
+        wb.active[f"{XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_LETTER}2"] = (
+            payment_verification.payment_record.delivered_quantity - 1
+        )
         file = io.BytesIO(save_virtual_workbook(wb))
         import_service = XlsxVerificationImportService(TestXlsxVerificationImport.verification, file)
         import_service.open_workbook()
@@ -275,7 +295,9 @@ class TestXlsxVerificationImport(TestCase):
         payment_verification = PaymentVerification.objects.get(payment_record__id=payment_record_id)
         self.assertEqual(payment_verification.status, PaymentVerification.STATUS_PENDING)
         wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"] = "YES"
-        wb.active[f"{XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_LETTER}2"] = payment_verification.payment_record.delivered_quantity
+        wb.active[
+            f"{XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_LETTER}2"
+        ] = payment_verification.payment_record.delivered_quantity
         file = io.BytesIO(save_virtual_workbook(wb))
         import_service = XlsxVerificationImportService(TestXlsxVerificationImport.verification, file)
         import_service.open_workbook()

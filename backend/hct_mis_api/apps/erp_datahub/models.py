@@ -1,9 +1,9 @@
 from decimal import Decimal
 
 from django.core.validators import MinValueValidator
+from django.db import models
 
 from utils.models import AbstractSession
-from django.db import models
 
 
 class Session(AbstractSession):

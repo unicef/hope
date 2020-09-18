@@ -2,10 +2,10 @@ import unittest
 from io import BytesIO
 from pathlib import Path
 
+from django.conf import settings
 from django.core import mail
 from django.core.files import File
 from django.test import TestCase
-from django.conf import settings
 
 from sanction_list.models import UploadedXLSXFile
 from sanction_list.tasks.check_against_sanction_list import CheckAgainstSanctionListTask
