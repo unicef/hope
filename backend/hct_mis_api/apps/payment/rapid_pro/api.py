@@ -1,10 +1,9 @@
 import requests
+from constance import config
 from django.conf import settings
 
 from core.models import BusinessArea
 from household.models import Individual
-from constance import config
-from payment.models import CashPlanPaymentVerification
 
 
 class TokenNotProvided(Exception):
@@ -105,7 +104,8 @@ class RapidProAPI:
 
     def create_contact(self, name, tel, group_uuid):
         contact = self._handle_post_request(
-            RapidProAPI.CONTACTS_ENDPOINT, {"name": name, "groups": [group_uuid], "urns": [f"{config.RAPID_PRO_PROVIDER}:{tel}"]},
+            RapidProAPI.CONTACTS_ENDPOINT,
+            {"name": name, "groups": [group_uuid], "urns": [f"{config.RAPID_PRO_PROVIDER}:{tel}"]},
         )
         return contact
 

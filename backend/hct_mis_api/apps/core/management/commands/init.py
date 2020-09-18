@@ -1,6 +1,7 @@
+import subprocess
+
 from django.core.management import call_command
 from django.core.management.commands import makemigrations
-import subprocess
 
 
 class Command(makemigrations.Command):

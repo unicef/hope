@@ -13,7 +13,7 @@ from graphene_django.filter import DjangoFilterConnectionField
 from core.extended_connection import ExtendedConnection
 from core.filters import AgeRangeFilter, IntegerRangeFilter
 from core.schema import ChoiceObject
-from core.utils import to_choice_object, encode_id_base64, encode_ids
+from core.utils import to_choice_object, encode_ids
 from household.models import (
     Household,
     Individual,
@@ -115,8 +115,8 @@ class IndividualFilter(FilterSet):
 class DocumentTypeNode(DjangoObjectType):
     country = graphene.String(description="Country name")
 
-    def resolve_country(parrent, info):
-        return parrent.country.name
+    def resolve_country(parent, info):
+        return parent.country.name
 
     class Meta:
         model = DocumentType
@@ -125,8 +125,8 @@ class DocumentTypeNode(DjangoObjectType):
 class IndividualIdentityNode(DjangoObjectType):
     type = graphene.String(description="Agency type")
 
-    def resolve_type(parrent, info):
-        return parrent.agency.type
+    def resolve_type(parent, info):
+        return parent.agency.type
 
     class Meta:
         model = IndividualIdentity
@@ -193,11 +193,11 @@ class HouseholdNode(DjangoObjectType):
     sanction_list_possible_match = graphene.Boolean()
     has_duplicates = graphene.Boolean(description="Mark household if any of individuals has Duplicate status")
 
-    def resolve_country(parrent, info):
-        return parrent.country.name
+    def resolve_country(parent, info):
+        return parent.country.name
 
-    def resolve_country_origin(parrent, info):
-        return parrent.country_origin.name
+    def resolve_country_origin(parent, info):
+        return parent.country_origin.name
 
     def resolve_selection(parent, info):
         selection = parent.selections.first()

@@ -5,18 +5,16 @@ import factory
 from factory import fuzzy
 from pytz import utc
 
-from core.models import BusinessArea
-from household.fixtures import HouseholdFactory
 from cash_assist_datahub.models import (
     PaymentRecord,
     ServiceProvider,
     CashPlan,
     Programme,
 )
-from payment import models as payment_models
+from core.models import BusinessArea
 from household.models import Household
+from payment import models as payment_models
 from program import models as program_models
-from targeting.fixtures import TargetPopulationFactory
 from targeting.models import TargetPopulation
 
 
