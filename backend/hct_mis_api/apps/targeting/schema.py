@@ -1,8 +1,6 @@
-from functools import reduce
-
 import django_filters
 import graphene
-from django.db.models import Q, Sum, Prefetch
+from django.db.models import Q, Prefetch
 from django_filters import FilterSet, CharFilter
 from graphene import relay, Scalar
 from graphene_django import DjangoObjectType, DjangoConnectionField
@@ -16,9 +14,6 @@ from core.schema import ExtendedConnection, FieldAttributeNode, ChoiceObject
 from core.utils import decode_id_string
 from household.models import Household
 from household.schema import HouseholdNode
-
-# TODO(codecakes): see if later the format can be kept consistent in FilterAttrType model.
-# by using FlexFieldNode and CoreFieldNode to return target filter rules.
 from targeting.validators import TargetingCriteriaInputValidator
 
 
@@ -61,7 +56,7 @@ class TargetPopulationFilter(django_filters.FilterSet):
         fname_query_key = f"{model_field}__given_name__icontains"
         lname_query_key = f"{model_field}__family_name__icontains"
         for name in value.strip().split():
-            queryset = queryset.filter(Q(**{fname_query_key: name,}) | Q(**{lname_query_key: name,}))
+            queryset = queryset.filter(Q(**{fname_query_key: name}) | Q(**{lname_query_key: name}))
         return queryset
 
     class Meta:
@@ -76,11 +71,10 @@ class TargetPopulationFilter(django_filters.FilterSet):
         )
 
         filter_overrides = {
-            target_models.IntegerRangeField: {"filter_class": django_filters.NumericRangeFilter,},
-            target_models.models.DateTimeField: {"filter_class": django_filters.DateTimeFilter,},
+            target_models.IntegerRangeField: {"filter_class": django_filters.NumericRangeFilter},
+            target_models.models.DateTimeField: {"filter_class": django_filters.DateTimeFilter},
         }
 
-    # TODO(codecakes): how to order?
     order_by = django_filters.OrderingFilter(
         fields=("name", "created_at", "created_by", "updated_at", "status", "total_households", "total_family_size",)
     )
@@ -114,11 +108,11 @@ class TargetingCriteriaRuleFilterNode(DjangoObjectType):
     def resolve_arguments(self, info):
         return self.arguments
 
-    def resolve_field_attribute(parrent, info):
-        if parrent.is_flex_field:
-            return FlexibleAttribute.objects.get(name=parrent.field_name)
+    def resolve_field_attribute(parent, info):
+        if parent.is_flex_field:
+            return FlexibleAttribute.objects.get(name=parent.field_name)
         else:
-            return CORE_FIELDS_ATTRIBUTES_DICTIONARY.get(parrent.field_name)
+            return CORE_FIELDS_ATTRIBUTES_DICTIONARY.get(parent.field_name)
 
     class Meta:
         model = target_models.TargetingCriteriaRuleFilter

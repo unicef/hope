@@ -27,9 +27,8 @@ class XlsxVerificationImportService:
         self.current_row = 0
         self.errors = []
         self.cashplan_payment_verification = cashplan_payment_verification
-        self.payment_record_verifications = self.cashplan_payment_verification.payment_record_verifications.all().prefetch_related(
-            "payment_record"
-        )
+        payment_record_verification_obj = self.cashplan_payment_verification.payment_record_verifications
+        self.payment_record_verifications = payment_record_verification_obj.all().prefetch_related("payment_record")
         self.payment_record_ids = [str(x.payment_record_id) for x in self.payment_record_verifications]
         self.payment_record_verifications_dict = {
             str(x.payment_record_id): x for x in self.payment_record_verifications
@@ -73,7 +72,8 @@ class XlsxVerificationImportService:
             or version != XlsxVerificationExportService.VERSION
         ):
             raise GraphQLError(
-                f"Unsupported file version ({version}). Only version: {XlsxVerificationExportService.VERSION} is supported"
+                f"Unsupported file version ({version}). "
+                f"Only version: {XlsxVerificationExportService.VERSION} is supported"
             )
 
     def _validate_headers(self):
@@ -84,7 +84,8 @@ class XlsxVerificationImportService:
                 (
                     "Payment Verifications",
                     None,
-                    f"Different count of headers. Acceptable headers count in file version {XlsxVerificationExportService.VERSION}: {len(accepted_headers)}",
+                    f"Different count of headers. Acceptable headers count in file version "
+                    f"{XlsxVerificationExportService.VERSION}: {len(accepted_headers)}",
                 )
             )
         column = 0
@@ -108,13 +109,15 @@ class XlsxVerificationImportService:
                 column += 1
                 continue
             if cell.data_type != XlsxVerificationImportService.COLUMNS_TYPES[column]:
+                readable_cell_error = XlsxVerificationImportService.TYPES_READABLE_MAPPING[
+                    XlsxVerificationImportService.COLUMNS_TYPES[column]
+                ]
                 self.errors.append(
                     (
                         "Payment Verifications",
                         cell.coordinate,
-                        f"Wrong type off cell"
-                        f" {XlsxVerificationImportService.TYPES_READABLE_MAPPING[XlsxVerificationImportService.COLUMNS_TYPES[column]]}"
-                        f" expected, {XlsxVerificationImportService.TYPES_READABLE_MAPPING[cell.data_type]} given.",
+                        f"Wrong type off cell {readable_cell_error} "
+                        f"expected, {XlsxVerificationImportService.TYPES_READABLE_MAPPING[cell.data_type]} given.",
                     )
                 )
             column += 1
@@ -138,7 +141,8 @@ class XlsxVerificationImportService:
                 (
                     "Payment Verifications",
                     cell.coordinate,
-                    f"The received of this payment verification is not correct: {cell.value} should be one of: {valid_received}",
+                    f"The received of this payment verification is not correct: "
+                    f"{cell.value} should be one of: {valid_received}",
                 )
             )
 

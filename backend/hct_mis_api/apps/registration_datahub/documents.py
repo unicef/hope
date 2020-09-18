@@ -60,7 +60,7 @@ class ImportedIndividualDocument(Document):
         }
     )
     households_and_roles = fields.ObjectField(
-        properties={"role": fields.KeywordField(), "individual": fields.KeywordField(attr="individual.id"),}
+        properties={"role": fields.KeywordField(), "individual": fields.KeywordField(attr="individual.id")}
     )
 
     def prepare_admin1(self, instance):
