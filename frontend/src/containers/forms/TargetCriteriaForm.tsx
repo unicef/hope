@@ -186,8 +186,9 @@ export function TargetCriteriaForm({
               </DialogTitleWrapper>
               <DialogContent>
                 <DialogDescription>
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit. Natus
-                  tempora iusto maxime? Odit expedita ipsam natus eos?
+                  Adding criteria below will target any individuals within a
+                  household that meet the filters applied. You may also add
+                  individual sub-criteria to further define an individual.
                 </DialogDescription>
                 <FieldArray
                   name='filters'
