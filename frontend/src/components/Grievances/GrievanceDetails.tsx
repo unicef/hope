@@ -9,6 +9,7 @@ import { Missing } from '../Missing';
 import { PageHeader } from '../PageHeader';
 import { StatusBox } from '../StatusBox';
 import { UniversalMoment } from '../UniversalMoment';
+import { Notes } from './Notes';
 
 export function GrievanceDetails(): React.ReactElement {
   const { id } = useParams();
@@ -46,6 +47,12 @@ export function GrievanceDetails(): React.ReactElement {
     align-items: center;
     flex-direction: row;
   `;
+  const NotesContainer = styled.div`
+    padding: 22px;
+  `;
+  const PastContainer = styled.div`
+    padding: 22px 22px 22px 0;
+  `;
   const Title = styled.div`
     padding-bottom: ${({ theme }) => theme.spacing(8)}px;
   `;
@@ -81,23 +88,49 @@ export function GrievanceDetails(): React.ReactElement {
     },
   ];
 
+  const tickets: string[] = ['189-19-15311', '183-19-82649'];
+
+  const formattedTickets = (strings: string[]) => strings.join(', ');
   return (
     <div>
       <PageHeader title={`Ticket #${id}`} breadCrumbs={breadCrumbsItems} />
-      <Container>
-        <Title>
-          <Typography variant='h6'>Details</Typography>
-        </Title>
-        <OverviewContainer>
-          <Grid container spacing={6}>
-            {FieldsArray.map((el) => (
-              <Grid item xs={el.size}>
-                <LabelizedField label={el.label}>{el.value}</LabelizedField>
+      <Grid container>
+        <Grid item xs={12}>
+          <Container>
+            <Title>
+              <Typography variant='h6'>Details</Typography>
+            </Title>
+            <OverviewContainer>
+              <Grid container spacing={6}>
+                {FieldsArray.map((el) => (
+                  <Grid item xs={el.size}>
+                    <LabelizedField label={el.label}>{el.value}</LabelizedField>
+                  </Grid>
+                ))}
               </Grid>
-            ))}
-          </Grid>
-        </OverviewContainer>
-      </Container>
+            </OverviewContainer>
+          </Container>
+        </Grid>
+        <Grid item xs={7}>
+          <NotesContainer>
+            <Notes />
+          </NotesContainer>
+        </Grid>
+        <Grid item xs={5}>
+          <PastContainer>
+            <Container>
+              <Title>
+                <Typography variant='h6'>Past tickets</Typography>
+              </Title>
+              <OverviewContainer>
+                <LabelizedField label='TICKET ID'>
+                  <p>{formattedTickets(tickets)}</p>
+                </LabelizedField>
+              </OverviewContainer>
+            </Container>
+          </PastContainer>
+        </Grid>
+      </Grid>
     </div>
   );
 }
