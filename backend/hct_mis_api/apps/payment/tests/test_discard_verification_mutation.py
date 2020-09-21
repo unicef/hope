@@ -1,7 +1,6 @@
 import base64
 
 from django.core.management import call_command
-from django.test import TestCase
 
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
@@ -56,7 +55,7 @@ class TestDiscardVerificationMutation(APITestCase):
                     "registration_data_import": registration_data_import,
                     "admin_area": AdminArea.objects.order_by("?").first(),
                 },
-                {"registration_data_import": registration_data_import,},
+                {"registration_data_import": registration_data_import},
             )
 
             household.programs.add(program)
