@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { InputAdornment, TextField, MenuItem, FormControl } from '@material-ui/core';
+import {
+  InputAdornment,
+  TextField,
+  MenuItem,
+  FormControl,
+} from '@material-ui/core';
 import { Search } from '@material-ui/icons';
 import { FlexFieldsTable } from '../../../tables/TargetPopulation/FlexFields';
 import { useFlexFieldsQuery } from '../../../../__generated__/graphql';
@@ -61,22 +66,28 @@ const StyledFormControl = styled(FormControl)`
   border-bottom: 0;
 `;
 
-export function FlexFieldTab() {
+export function FlexFieldTab(): React.ReactElement {
   const { data } = useFlexFieldsQuery();
-  const [searchValue, setSearchValue] = useState('')
+  const [searchValue, setSearchValue] = useState('');
   const [selectOptions, setSelectOptions] = useState([]);
   const [selectedOption, setSelectedOption] = useState('');
   useEffect(() => {
     if (data && !selectOptions.length) {
-      const options = data.allGroupsWithFields.reduce(function (accumulator, currentValue) {
+      const options = data.allGroupsWithFields.reduce(function(
+        accumulator,
+        currentValue,
+      ) {
         currentValue.flexAttributes.map(function(each) {
-          return !accumulator.includes(each.associatedWith) ? accumulator.push(each.associatedWith) : null
-        })
-        return accumulator
-      }, [])
-      setSelectOptions(options)
+          return !accumulator.includes(each.associatedWith)
+            ? accumulator.push(each.associatedWith)
+            : null;
+        });
+        return accumulator;
+      },
+      []);
+      setSelectOptions(options);
     }
-  }, [data, selectOptions])
+  }, [data, selectOptions]);
   if (!data) {
     return null;
   }
@@ -97,7 +108,7 @@ export function FlexFieldTab() {
             ),
           }}
         />
-        {selectOptions.length &&
+        {selectOptions.length && (
           <StyledFormControl variant='outlined' margin='dense'>
             <InputLabel>Type</InputLabel>
             <Select
@@ -111,14 +122,22 @@ export function FlexFieldTab() {
               <MenuItem value=''>
                 <em>All</em>
               </MenuItem>
-              {selectOptions.map(type => {
-                return <MenuItem key={type} value={type}>{type}</MenuItem>
+              {selectOptions.map((type) => {
+                return (
+                  <MenuItem key={type} value={type}>
+                    {type}
+                  </MenuItem>
+                );
               })}
             </Select>
           </StyledFormControl>
-        }
+        )}
       </FilterWrapper>
-      <FlexFieldsTable selectedOption={selectedOption} searchValue={searchValue} fields={data.allGroupsWithFields} />
+      <FlexFieldsTable
+        selectedOption={selectedOption}
+        searchValue={searchValue}
+        fields={data.allGroupsWithFields}
+      />
     </>
-  )
+  );
 }

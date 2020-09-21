@@ -36,7 +36,7 @@ const MenuProps = {
   },
 };
 
-function getStyles(value, comparedValue, theme) {
+function getStyles(value, comparedValue, theme): { fontWeight: number } {
   if (!value || !comparedValue || !theme) return null;
   return {
     fontWeight:
