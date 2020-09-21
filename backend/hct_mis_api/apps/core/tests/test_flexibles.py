@@ -102,7 +102,8 @@ class TestFlexibles(TestCase):
         attrib_english_labels = [
             "Does your family host an unaccompanied child / fosterchild?",
             "Has any of your children been ill with cough and fever at any time in the last 2 weeks?",
-            "If any child was sick, When he/she had an illness with a cough, did he/she breathe faster than usual with short, rapid breaths or have difficulty breathing?",
+            "If any child was sick, When he/she had an illness with a cough, did he/she breathe "
+            "faster than usual with short, rapid breaths or have difficulty breathing?",
             "If above is Yes, did you seek advice or treatment for the illness from any source?",
             "If member is a child, does he/she ever been enrolled in school?",
             "If member is a child, does he/she currently enrolled in school",

@@ -6,7 +6,6 @@ from household.documents import IndividualDocument
 from household.models import Individual, IDENTIFICATION_TYPE_NATIONAL_ID
 from sanction_list.models import SanctionListIndividual
 
-
 log = logging.getLogger(__name__)
 
 

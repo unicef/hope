@@ -16,14 +16,14 @@ def create_test_db_and_schemas(creation, verbosity=1, autoclobber=False, seriali
     test_database_name = creation._get_test_db_name()
 
     if verbosity >= 1:
-        action = 'Creating'
+        action = "Creating"
         if keepdb:
             action = "Using existing"
 
-        creation.log('%s test database for alias %s...' % (
-            action,
-            creation._get_database_display_str(verbosity, test_database_name),
-        ))
+        creation.log(
+            "%s test database for alias %s..."
+            % (action, creation._get_database_display_str(verbosity, test_database_name),)
+        )
 
     # We could skip this call if keepdb is True, but we instead
     # give it the keepdb param. This is to handle the case
@@ -42,7 +42,7 @@ def create_test_db_and_schemas(creation, verbosity=1, autoclobber=False, seriali
     # This ensures we don't get flooded with messages during testing
     # (unless you really ask to be flooded).
     call_command(
-        'migrate',
+        "migrate",
         verbosity=max(verbosity - 1, 0),
         interactive=False,
         database=creation.connection.alias,
@@ -56,7 +56,7 @@ def create_test_db_and_schemas(creation, verbosity=1, autoclobber=False, seriali
     if serialize:
         creation.connection._test_serialized_contents = creation.serialize_db_to_string()
 
-    call_command('createcachetable', database=creation.connection.alias)
+    call_command("createcachetable", database=creation.connection.alias)
 
     # Ensure a connection for the side effect of initializing the test database.
     creation.connection.ensure_connection()
@@ -75,14 +75,14 @@ def create_fake_test_db(creation, verbosity=1, autoclobber=False, serialize=True
     test_database_name = creation._get_test_db_name()
 
     if verbosity >= 1:
-        action = 'Creating'
+        action = "Creating"
         if keepdb:
             action = "Using existing"
 
-        creation.log('%s test database for alias %s...' % (
-            action,
-            creation._get_database_display_str(verbosity, test_database_name),
-        ))
+        creation.log(
+            "%s test database for alias %s..."
+            % (action, creation._get_database_display_str(verbosity, test_database_name),)
+        )
 
     # We could skip this call if keepdb is True, but we instead
     # give it the keepdb param. This is to handle the case
@@ -93,7 +93,7 @@ def create_fake_test_db(creation, verbosity=1, autoclobber=False, serialize=True
     settings.DATABASES[creation.connection.alias]["NAME"] = test_database_name
     creation.connection.settings_dict["NAME"] = test_database_name
     call_command(
-        'migrate',
+        "migrate",
         verbosity=max(verbosity - 1, 0),
         interactive=False,
         database=creation.connection.alias,
@@ -105,7 +105,7 @@ def create_fake_test_db(creation, verbosity=1, autoclobber=False, serialize=True
     # a TransactionTestCase still get a clean database on every test run.
     creation.connection.ensure_connection()
 
-    call_command('createcachetable', database=creation.connection.alias)
+    call_command("createcachetable", database=creation.connection.alias)
 
     return test_database_name
 
@@ -115,18 +115,17 @@ def _setup_schema_database(verbosity, interactive, keepdb=False, debug_sql=False
 
     connection = connections[alias]
     old_name = (connection, alias, True)
-    create_test_db_and_schemas(connection.creation,
-                               verbosity=verbosity,
-                               autoclobber=not interactive,
-                               keepdb=keepdb,
-                               serialize=connection.settings_dict.get('TEST', {}).get('SERIALIZE', True),
-                               )
+    create_test_db_and_schemas(
+        connection.creation,
+        verbosity=verbosity,
+        autoclobber=not interactive,
+        keepdb=keepdb,
+        serialize=connection.settings_dict.get("TEST", {}).get("SERIALIZE", True),
+    )
     if parallel > 1:
         for index in range(parallel):
             connection.creation.clone_test_db(
-                suffix=str(index + 1),
-                verbosity=verbosity,
-                keepdb=keepdb,
+                suffix=str(index + 1), verbosity=verbosity, keepdb=keepdb,
             )
     return [old_name]
 
@@ -147,15 +146,20 @@ class PostgresTestRunner(TestRunner):
                 aliases.discard(alias)
                 if not created:
                     old_names.extend(
-                        _setup_schema_database(self.verbosity, self.interactive, self.keepdb, self.debug_sql,
-                                               self.parallel, alias=alias))
+                        _setup_schema_database(
+                            self.verbosity, self.interactive, self.keepdb, self.debug_sql, self.parallel, alias=alias
+                        )
+                    )
                     created = True
                 else:
                     connection = connections[alias]
-                    create_fake_test_db(connection.creation, verbosity=self.verbosity,
-                                        autoclobber=not self.interactive,
-                                        keepdb=self.keepdb,
-                                        serialize=connection.settings_dict.get('TEST', {}).get('SERIALIZE', True))
+                    create_fake_test_db(
+                        connection.creation,
+                        verbosity=self.verbosity,
+                        autoclobber=not self.interactive,
+                        keepdb=self.keepdb,
+                        serialize=connection.settings_dict.get("TEST", {}).get("SERIALIZE", True),
+                    )
         old_names.extend(super().setup_databases(**kwargs))
 
         return old_names
