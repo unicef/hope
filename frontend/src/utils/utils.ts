@@ -303,7 +303,9 @@ export function formatCriteriaFilters({ filters }) {
   });
 }
 
-export function mapCriteriasToInitialValues(criteria) {
+export function mapCriteriasToInitialValues(
+  criteria,
+): { fieldName: string; value: { from: string; to: string } }[] {
   const mappedFilters = [];
   if (criteria.filters) {
     criteria.filters.map((each) => {
@@ -358,7 +360,7 @@ export function targetPopulationStatusMapping(status): string {
   return TARGETING_STATES[status];
 }
 
-export function stableSort(array, comparator) {
+export function stableSort(array, comparator): number[] {
   const stabilizedThis = array.map((el, index) => [el, index]);
   stabilizedThis.sort((a, b) => {
     const order = comparator(a[0], b[0]);
@@ -368,7 +370,7 @@ export function stableSort(array, comparator) {
   return stabilizedThis.map((el) => el[0]);
 }
 
-export function descendingComparator(a, b, orderBy) {
+export function descendingComparator(a, b, orderBy): number {
   if (b[orderBy] < a[orderBy]) {
     return -1;
   }
