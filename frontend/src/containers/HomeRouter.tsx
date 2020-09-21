@@ -29,6 +29,7 @@ import { PaymentVerificationPage } from './pages/PaymentVerificationPage';
 import { PaymentVerificationDetailsPage } from './pages/PaymentVerificationDetailsPage';
 import { VerificationRecordDetailsPage } from './pages/VerificationRecordDetailsPage';
 import { UsersList } from './pages/UsersList';
+import { GrievancesList } from '../components/Grievances/GrievancesList';
 
 const Root = styled.div`
   display: flex;
@@ -98,6 +99,9 @@ export function HomeRouter(): React.ReactElement {
           </Route>
           <Route path='/:businessArea/payment-verification/:id'>
             <PaymentVerificationDetailsPage />
+          </Route>
+          <Route path='/:businessArea/grievances-and-feedback'>
+            <GrievancesList />
           </Route>
           <Route path='/:businessArea/grievances-and-feedback/:id'>
             <GrievanceDetails />
