@@ -111,6 +111,7 @@ stages:
                 backend.secret.AZURE_CLIENT_SECRET=$(AZURE_CLIENT_SECRET),\
                 backend.secret.AZURE_TENANT_KEY=$(AZURE_TENANT_KEY),\
                 backend.secret.SENTRY_DSN=$(SENTRY_DSN),\
+                backend.secret.EMAIL_HOST=$(EMAIL_HOST),\
                 frontend.image=uniappsk8sdevacr.azurecr.io/$(Docker.frontend.repository):$(Build.BuildId),\
                 ingress.host=dev-hope.unitst.org,\
                 ingress.tls=true,\

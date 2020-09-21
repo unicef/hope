@@ -53,6 +53,7 @@ backend:
     AZURE_CLIENT_ID: ""
     POSTGRES_SQL: ""
     AIRFLOW_HOST: "hope-airflow"
+    EMAIL_HOST: ""
 
   secret:
     SECRET_KEY: ""
