@@ -6,7 +6,7 @@ from django_countries.fields import Country
 
 from core.utils import to_dict
 from household.documents import IndividualDocument
-from household.elasticsearch_utils import populate_all_indexes, populate_index
+from household.elasticsearch_utils import populate_index
 from household.models import Individual, DUPLICATE, NEEDS_ADJUDICATION, UNIQUE, NOT_PROCESSED
 from registration_data.models import RegistrationDataImport
 from registration_datahub.documents import ImportedIndividualDocument
@@ -362,7 +362,7 @@ class DeduplicateTask:
         )
 
         Individual.objects.bulk_update(
-            to_bulk_update_results, ["deduplication_results",],
+            to_bulk_update_results, ["deduplication_results"],
         )
 
     @staticmethod
@@ -500,7 +500,7 @@ class DeduplicateTask:
         ).update(deduplication_golden_record_status=NEEDS_ADJUDICATION)
 
         ImportedIndividual.objects.bulk_update(
-            to_bulk_update_results, ["deduplication_batch_results", "deduplication_golden_record_results",],
+            to_bulk_update_results, ["deduplication_batch_results", "deduplication_golden_record_results"],
         )
         registration_data_import_datahub.refresh_from_db()
         if registration_data_import.status == RegistrationDataImport.DEDUPLICATION_FAILED:

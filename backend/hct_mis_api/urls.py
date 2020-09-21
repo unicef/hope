@@ -19,7 +19,6 @@ from core.views import (
     call_command_view,
 )
 
-
 urlpatterns = [
     path("api/admin/", admin.site.urls),
     path("api/admin/call-command", call_command_view),

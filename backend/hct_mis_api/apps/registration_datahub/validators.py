@@ -51,7 +51,7 @@ class XLSXValidator(BaseValidator):
         file_suffix = Path(xlsx_file.name).suffix
         if file_suffix != ".xlsx":
             return [
-                {"row_number": 1, "header": f"{xlsx_file.name}", "message": "Only .xlsx files are accepted for import",}
+                {"row_number": 1, "header": f"{xlsx_file.name}", "message": "Only .xlsx files are accepted for import"}
             ]
 
         # Checking only extensions is not enough,
@@ -60,7 +60,7 @@ class XLSXValidator(BaseValidator):
             wb = load_workbook(xlsx_file, data_only=True)
             cls.WB = wb
         except BadZipfile:
-            return [{"row_number": 1, "header": f"{xlsx_file.name}", "message": "Invalid .xlsx file",}]
+            return [{"row_number": 1, "header": f"{xlsx_file.name}", "message": "Invalid .xlsx file"}]
 
         return []
 
@@ -346,16 +346,16 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
         head_of_household_count = defaultdict(int)
 
         identities_numbers = {
-            "unhcr_id_no": {"agency": "UNHCR", "validation_data": [], "numbers": [],},
-            "scope_id_no": {"agency": "WFP", "validation_data": [], "numbers": [],},
+            "unhcr_id_no": {"agency": "UNHCR", "validation_data": [], "numbers": []},
+            "scope_id_no": {"agency": "WFP", "validation_data": [], "numbers": []},
         }
         documents_numbers = {
-            "birth_certificate_no_i_c": {"type": "BIRTH_CERTIFICATE", "validation_data": [], "numbers": [],},
-            "drivers_license_no_i_c": {"type": "DRIVERS_LICENSE", "validation_data": [], "numbers": [],},
-            "electoral_card_no_i_c": {"type": "ELECTORAL_CARD", "validation_data": [], "numbers": [],},
-            "national_id_no_ic": {"type": "NATIONAL_ID", "validation_data": [], "numbers": [],},
-            "national_passport_i_c": {"type": "NATIONAL_PASSPORT", "validation_data": [], "numbers": [],},
-            "other_id_type_i_c": {"type": "OTHER", "names": [], "validation_data": [], "numbers": [],},
+            "birth_certificate_no_i_c": {"type": "BIRTH_CERTIFICATE", "validation_data": [], "numbers": []},
+            "drivers_license_no_i_c": {"type": "DRIVERS_LICENSE", "validation_data": [], "numbers": []},
+            "electoral_card_no_i_c": {"type": "ELECTORAL_CARD", "validation_data": [], "numbers": []},
+            "national_id_no_ic": {"type": "NATIONAL_ID", "validation_data": [], "numbers": []},
+            "national_passport_i_c": {"type": "NATIONAL_PASSPORT", "validation_data": [], "numbers": []},
+            "other_id_type_i_c": {"type": "OTHER", "names": [], "validation_data": [], "numbers": []},
             "other_id_no_i_c": None,
         }
         for row in sheet.iter_rows(min_row=3):
@@ -389,7 +389,7 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
                         f"of field {header.value}"
                     )
                     invalid_rows.append(
-                        {"row_number": cell.row, "header": header.value, "message": message,}
+                        {"row_number": cell.row, "header": header.value, "message": message}
                     )
 
                 if header.value in documents_numbers:
@@ -415,7 +415,7 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
             if count == 0:
                 message = f"Sheet: Individuals, Household with id: {household_id}, " "has to have a head of household"
                 invalid_rows.append(
-                    {"row_number": 0, "header": "relationship_i_c", "message": message,}
+                    {"row_number": 0, "header": "relationship_i_c", "message": message}
                 )
             elif count > 1:
                 message = (
@@ -423,7 +423,7 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
                     f"households for household with id: {household_id}"
                 )
                 invalid_rows.append(
-                    {"row_number": 0, "header": "relationship_i_c", "message": message,}
+                    {"row_number": 0, "header": "relationship_i_c", "message": message}
                 )
 
         invalid_doc_rows = []
@@ -440,7 +440,7 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
         file_suffix = Path(xlsx_file.name).suffix
         if file_suffix != ".xlsx":
             return [
-                {"row_number": 1, "header": f"{xlsx_file.name}", "message": "Only .xlsx files are accepted for import",}
+                {"row_number": 1, "header": f"{xlsx_file.name}", "message": "Only .xlsx files are accepted for import"}
             ]
 
         # Checking only extensions is not enough,
@@ -449,7 +449,7 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
             wb = load_workbook(xlsx_file, data_only=True)
             cls.WB = wb
         except BadZipfile:
-            return [{"row_number": 1, "header": f"{xlsx_file.name}", "message": "Invalid .xlsx file",}]
+            return [{"row_number": 1, "header": f"{xlsx_file.name}", "message": "Invalid .xlsx file"}]
 
         return []
 
@@ -483,7 +483,7 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
             if columns_difference:
                 errors.extend(
                     [
-                        {"row_number": 1, "header": col, "message": f"Missing column name {col}",}
+                        {"row_number": 1, "header": col, "message": f"Missing column name {col}"}
                         for col in columns_difference
                     ]
                 )
@@ -558,7 +558,7 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
         erroneous_collectors_ids = [item for item, count in ids_counter.items() if count > 1]
         message = "Household can contain only one " "primary and one alternate collector"
         errors.extend(
-            {"row_number": 1, "header": header, "message": f"{message}, erroneous id: {hh_id}",}
+            {"row_number": 1, "header": header, "message": f"{message}, erroneous id: {hh_id}"}
             for hh_id in erroneous_collectors_ids
         )
         return errors
@@ -857,16 +857,16 @@ class KoboProjectImportDataValidator(ImportDataValidator):
         # have fun debugging this ;_;
 
         identities_numbers = {
-            "unhcr_id_no": {"agency": "UNHCR", "validation_data": [], "numbers": [],},
-            "scope_id_no": {"agency": "WFP", "validation_data": [], "numbers": [],},
+            "unhcr_id_no": {"agency": "UNHCR", "validation_data": [], "numbers": []},
+            "scope_id_no": {"agency": "WFP", "validation_data": [], "numbers": []},
         }
         documents_numbers = {
-            "birth_certificate_no_i_c": {"type": "BIRTH_CERTIFICATE", "validation_data": [], "numbers": [],},
-            "drivers_license_no_i_c": {"type": "DRIVERS_LICENSE", "validation_data": [], "numbers": [],},
-            "electoral_card_no_i_c": {"type": "ELECTORAL_CARD", "validation_data": [], "numbers": [],},
-            "national_id_no_ic": {"type": "NATIONAL_ID", "validation_data": [], "numbers": [],},
-            "national_passport_i_c": {"type": "NATIONAL_PASSPORT", "validation_data": [], "numbers": [],},
-            "other_id_type_i_c": {"type": "OTHER", "names": [], "validation_data": [], "numbers": [],},
+            "birth_certificate_no_i_c": {"type": "BIRTH_CERTIFICATE", "validation_data": [], "numbers": []},
+            "drivers_license_no_i_c": {"type": "DRIVERS_LICENSE", "validation_data": [], "numbers": []},
+            "electoral_card_no_i_c": {"type": "ELECTORAL_CARD", "validation_data": [], "numbers": []},
+            "national_id_no_ic": {"type": "NATIONAL_ID", "validation_data": [], "numbers": []},
+            "national_passport_i_c": {"type": "NATIONAL_PASSPORT", "validation_data": [], "numbers": []},
+            "other_id_type_i_c": {"type": "OTHER", "names": [], "validation_data": [], "numbers": []},
             "other_id_no_i_c": None,
         }
 
@@ -917,37 +917,37 @@ class KoboProjectImportDataValidator(ImportDataValidator):
                         docs_and_identities_to_validate.append(current_individual_docs_and_identities)
 
                         i_expected_field_errors = [
-                            {"header": field, "message": "Missing individual " f"required field {field}",}
+                            {"header": field, "message": "Missing individual " f"required field {field}"}
                             for field in expected_i_fields
                         ]
                         errors.extend(i_expected_field_errors)
 
                     if head_of_hh_counter == 0:
                         errors.append(
-                            {"header": "relationship_i_c", "message": "Household has to have a " "head of household",}
+                            {"header": "relationship_i_c", "message": "Household has to have a " "head of household"}
                         )
                     if head_of_hh_counter > 1:
                         errors.append(
-                            {"header": "relationship_i_c", "message": "Only one person can " "be a head of household",}
+                            {"header": "relationship_i_c", "message": "Only one person can " "be a head of household"}
                         )
                     if primary_collector_counter == 0:
                         errors.append(
-                            {"header": "role_i_c", "message": "Household must have a " "primary collector",}
+                            {"header": "role_i_c", "message": "Household must have a " "primary collector"}
                         )
                     if primary_collector_counter > 1:
                         errors.append(
-                            {"header": "role_i_c", "message": "Only one person can " "be a primary collector",}
+                            {"header": "role_i_c", "message": "Only one person can " "be a primary collector"}
                         )
                     if alternate_collector_counter > 1:
                         errors.append(
-                            {"header": "role_i_c", "message": "Only one person can " "be a alternate collector",}
+                            {"header": "role_i_c", "message": "Only one person can " "be a alternate collector"}
                         )
                 else:
                     error = cls._get_field_type_error(hh_field, hh_value, attachments)
                     if error:
                         errors.append(error)
             hh_expected_field_errors = [
-                {"header": field, "message": f"Missing household required field {field}",}
+                {"header": field, "message": f"Missing household required field {field}"}
                 for field in expected_hh_fields
             ]
             errors.extend(hh_expected_field_errors)

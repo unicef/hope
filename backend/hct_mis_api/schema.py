@@ -1,18 +1,19 @@
+import graphene
+from graphene_django.debug import DjangoDebug
+
 import account.schema
 import core.schema
-import graphene
 import household.schema
+import payment.mutations
 import payment.schema
 import program.mutations
 import program.schema
 import registration_data.schema
-import registration_datahub.schema
 import registration_datahub.mutations
+import registration_datahub.schema
 import sanction_list.mutations
-import targeting.schema
 import targeting.mutations
-import payment.mutations
-from graphene_django.debug import DjangoDebug
+import targeting.schema
 
 
 class Query(

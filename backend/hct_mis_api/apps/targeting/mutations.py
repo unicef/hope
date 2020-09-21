@@ -11,7 +11,6 @@ from core.models import BusinessArea
 from core.permissions import is_authenticated
 from core.utils import decode_id_string
 from household.models import Household
-from mis_datahub.tasks.send_tp_to_datahub import SendTPToDatahubTask
 from program.models import Program
 from targeting.models import (
     TargetPopulation,
@@ -217,7 +216,7 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
         if target_population.final_list_targeting_criteria:
             """Gets all households from candidate list which 
             don't meet final_list_targeting_criteria and set them (HouseholdSelection m2m model)
-             final=False (final list is candidate list filtred by final=True"""
+             final=False (final list is candidate list filtered by final=True"""
             households_ids_queryset = target_population.households.filter(
                 ~Q(target_population.final_list_targeting_criteria.get_query())
             ).values_list("id")
