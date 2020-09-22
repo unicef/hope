@@ -4,12 +4,15 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { BreadCrumbsItem } from '../BreadCrumbs';
+import { ContainerWithBorder } from '../ContainerWithBorder';
 import { LabelizedField } from '../LabelizedField';
 import { Missing } from '../Missing';
+import { OverviewContainer } from '../OverviewContainer';
 import { PageHeader } from '../PageHeader';
 import { StatusBox } from '../StatusBox';
 import { UniversalMoment } from '../UniversalMoment';
 import { Notes } from './Notes';
+import { PastTickets } from './PastTickets';
 
 export function GrievanceDetails(): React.ReactElement {
   const { id } = useParams();
@@ -30,23 +33,6 @@ export function GrievanceDetails(): React.ReactElement {
       to: `/${businessArea}/grievance-and-feedback/`,
     },
   ];
-  const Container = styled.div`
-    display: flex;
-    flex: 1;
-    width: 100%;
-    background-color: #fff;
-    padding: ${({ theme }) => theme.spacing(8)}px
-      ${({ theme }) => theme.spacing(11)}px;
-    flex-direction: column;
-    border-color: #b1b1b5;
-    border-bottom-width: 1px;
-    border-bottom-style: solid;
-  `;
-  const OverviewContainer = styled.div`
-    display: flex;
-    align-items: center;
-    flex-direction: row;
-  `;
   const NotesContainer = styled.div`
     padding: 22px;
   `;
@@ -96,7 +82,7 @@ export function GrievanceDetails(): React.ReactElement {
       <PageHeader title={`Ticket #${id}`} breadCrumbs={breadCrumbsItems} />
       <Grid container>
         <Grid item xs={12}>
-          <Container>
+          <ContainerWithBorder>
             <Title>
               <Typography variant='h6'>Details</Typography>
             </Title>
@@ -109,7 +95,7 @@ export function GrievanceDetails(): React.ReactElement {
                 ))}
               </Grid>
             </OverviewContainer>
-          </Container>
+          </ContainerWithBorder>
         </Grid>
         <Grid item xs={7}>
           <NotesContainer>
@@ -117,18 +103,7 @@ export function GrievanceDetails(): React.ReactElement {
           </NotesContainer>
         </Grid>
         <Grid item xs={5}>
-          <PastContainer>
-            <Container>
-              <Title>
-                <Typography variant='h6'>Past tickets</Typography>
-              </Title>
-              <OverviewContainer>
-                <LabelizedField label='TICKET ID'>
-                  <p>{formattedTickets(tickets)}</p>
-                </LabelizedField>
-              </OverviewContainer>
-            </Container>
-          </PastContainer>
+          <PastTickets tickets={tickets} />
         </Grid>
       </Grid>
     </div>

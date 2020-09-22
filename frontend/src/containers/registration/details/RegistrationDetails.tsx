@@ -7,21 +7,8 @@ import { LabelizedField } from '../../../components/LabelizedField';
 import { RegistrationDetailedFragment } from '../../../__generated__/graphql';
 import { MiśTheme } from '../../../theme';
 import { DedupeBox } from './DedupeBox';
-
-const Container = styled.div`
-  width: 100%;
-  background-color: #fff;
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
-  border-color: #b1b1b5;
-  border-bottom-width: 1px;
-  border-bottom-style: solid;
-`;
-const OverviewContainer = styled.div`
-  display: flex;
-  align-items: center;
-  flex-direction: row;
-`;
+import { ContainerWithBorder } from '../../../components/ContainerWithBorder';
+import { OverviewContainer } from '../../../components/OverviewContainer';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -61,7 +48,7 @@ export function RegistrationDetails({
   registration,
 }: RegistrationDetailsProps): React.ReactElement {
   return (
-    <Container>
+    <ContainerWithBorder>
       <Title>
         <Typography variant='h6'>Import Details</Typography>
       </Title>
@@ -169,6 +156,6 @@ export function RegistrationDetails({
           )}
         </Grid>
       </OverviewContainer>
-    </Container>
+    </ContainerWithBorder>
   );
 }

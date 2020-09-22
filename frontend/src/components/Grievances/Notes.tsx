@@ -5,26 +5,10 @@ import React from 'react';
 import styled from 'styled-components';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { UniversalMoment } from '../UniversalMoment';
+import { ContainerWithBorder } from '../ContainerWithBorder';
+import { OverviewContainer } from '../OverviewContainer';
 
 export function Notes(): React.ReactElement {
-  const Container = styled.div`
-    display: flex;
-    flex: 1;
-    width: 100%;
-    background-color: #fff;
-    padding: ${({ theme }) => theme.spacing(8)}px
-      ${({ theme }) => theme.spacing(11)}px;
-    flex-direction: column;
-    border-color: #b1b1b5;
-    border-bottom-width: 1px;
-    border-bottom-style: solid;
-  `;
-  const OverviewContainer = styled.div`
-    display: flex;
-    align-items: center;
-    flex-direction: column;
-  `;
-
   const Title = styled.div`
     padding-bottom: ${({ theme }) => theme.spacing(8)}px;
   `;
@@ -99,7 +83,7 @@ export function Notes(): React.ReactElement {
       validationSchema={validationSchema}
     >
       {({ submitForm, values }) => (
-        <Container>
+        <ContainerWithBorder>
           <Title>
             <Typography variant='h6'>Notes</Typography>
           </Title>
@@ -141,7 +125,7 @@ export function Notes(): React.ReactElement {
               </Grid>
             </Grid>
           </OverviewContainer>
-        </Container>
+        </ContainerWithBorder>
       )}
     </Formik>
   );
