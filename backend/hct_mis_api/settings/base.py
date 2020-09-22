@@ -227,6 +227,7 @@ OTHER_APPS = [
     "django_elasticsearch_dsl",
     "constance",
     "auditlog",
+    "admin_extra_urls",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS

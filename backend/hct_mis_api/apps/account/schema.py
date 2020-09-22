@@ -2,28 +2,50 @@ import graphene
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
-from django_filters import FilterSet, OrderingFilter, CharFilter
+from django_filters import FilterSet, OrderingFilter, CharFilter, MultipleChoiceFilter
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
+from account.models import USER_PARTNER_CHOICES, USER_STATUS_CHOICES, Role
 from core.extended_connection import ExtendedConnection
 
 
 class UsersFilter(FilterSet):
-    full_name = CharFilter(field_name="full_name", method="filter_by_full_name")
+    business_area = CharFilter(required=True, method="business_area_filter")
+    search = CharFilter(method="search_filter")
+    status = MultipleChoiceFilter(field_name="status", choices=USER_STATUS_CHOICES)
+    partner = MultipleChoiceFilter(field_name="partner", choices=USER_PARTNER_CHOICES)
+    roles = MultipleChoiceFilter(choices=Role.get_roles_as_choices(), method="roles_filter")
 
     class Meta:
         model = get_user_model()
         fields = {
-            "full_name": ["exact", "icontains"],
+            "search": ["exact", "icontains"],
+            "status": ["exact"],
+            "partner": ["exact"],
+            "roles": ["exact"],
         }
 
-    order_by = OrderingFilter(fields=("full_name", "first_name", "last_name",))
+    order_by = OrderingFilter(fields=("first_name", "last_name", "last_login", "status", "partner", "email"))
 
-    def filter_by_full_name(self, qs, name, value):
-        for term in value.split():
-            qs = qs.filter(Q(first_name__icontains=term) | Q(last_name__icontains=term) | Q(email__icontains=term))
+    def search_filter(self, qs, name, value):
+        values = value.split(" ")
+        q_obj = Q()
+        for value in values:
+            q_obj |= Q(first_name__icontains=value)
+            q_obj |= Q(last_name__icontains=value)
+            q_obj |= Q(email__icontains=value)
+        return qs.filter(q_obj)
+
+    def business_area_filter(self, qs, name, value):
         return qs
+
+    def roles_filter(self, qs, name, values):
+        business_area_slug = self.data.get("business_area")
+        q_obj = Q()
+        for value in values:
+            q_obj |= Q(user_roles__role__name=value, user_roles__business_area__slug=business_area_slug)
+        return qs.filter(q_obj)
 
 
 class UserObjectType(DjangoObjectType):
@@ -43,7 +65,7 @@ class UserNode(DjangoObjectType):
 
 class Query(graphene.ObjectType):
     me = graphene.Field(UserObjectType)
-    all_users = DjangoFilterConnectionField(UserNode, filterset_class=UsersFilter,)
+    all_users = DjangoFilterConnectionField(UserNode, filterset_class=UsersFilter)
 
     def resolve_me(self, info, **kwargs):
         if not info.context.user.is_authenticated:
