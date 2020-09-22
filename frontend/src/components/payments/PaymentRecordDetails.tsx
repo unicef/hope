@@ -15,7 +15,7 @@ import {
 import { Missing } from '../Missing';
 import { UniversalActivityLogTable } from '../../containers/tables/UniversalActivityLogTable';
 import { UniversalMoment } from '../UniversalMoment';
-import { ContainerWithBorder } from '../ContainerWithBorder';
+import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
@@ -51,7 +51,7 @@ export function PaymentRecordDetails({
   }
   return (
     <>
-      <ContainerWithBorder>
+      <ContainerColumnWithBorder>
         <Title>
           <Typography variant='h6'>Payment Record Details</Typography>
         </Title>
@@ -92,9 +92,9 @@ export function PaymentRecordDetails({
             />
           </Grid>
         </Grid>
-      </ContainerWithBorder>
+      </ContainerColumnWithBorder>
       {paymentVerification != null ? (
-        <ContainerWithBorder>
+        <ContainerColumnWithBorder>
           <Title>
             <Typography variant='h6'>Verification Details</Typography>
           </Title>
@@ -126,7 +126,7 @@ export function PaymentRecordDetails({
               />
             </Grid>
           </Grid>
-        </ContainerWithBorder>
+        </ContainerColumnWithBorder>
       ) : null}
       <Overview>
         <Title>

@@ -10,7 +10,7 @@ import {
 } from '../../__generated__/graphql';
 import { MiśTheme } from '../../theme';
 import { UniversalMoment } from '../UniversalMoment';
-import { ContainerWithBorder } from '../ContainerWithBorder';
+import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
 import { OverviewContainer } from '../OverviewContainer';
 
 const StatusContainer = styled.div`
@@ -57,7 +57,7 @@ export function ProgramDetails({
   const programSectorChoicesDict = choicesToDict(programSectorChoices);
   const programScopeChoicesDict = choicesToDict(programScopeChoices);
   return (
-    <ContainerWithBorder data-cy='program-details-container'>
+    <ContainerColumnWithBorder data-cy='program-details-container'>
       <Title>
         <Typography variant='h6'>Programme Details</Typography>
       </Title>
@@ -139,6 +139,6 @@ export function ProgramDetails({
           </LabelizedField>
         </NumberOfHouseHolds>
       </OverviewContainer>
-    </ContainerWithBorder>
+    </ContainerColumnWithBorder>
   );
 }

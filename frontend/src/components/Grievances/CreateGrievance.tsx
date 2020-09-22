@@ -8,8 +8,8 @@ import { UniversalMoment } from '../UniversalMoment';
 import { PageHeader } from '../PageHeader';
 import { BreadCrumbsItem } from '../BreadCrumbs';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { ContainerWithBorder } from '../ContainerWithBorder';
 import { OverviewContainer } from '../OverviewContainer';
+import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
 
 export function CreateGrievance(): React.ReactElement {
   const Title = styled.div`
@@ -50,12 +50,12 @@ export function CreateGrievance(): React.ReactElement {
           <Grid container>
             <Grid item xs={9}>
               <NewTicket>
-                <ContainerWithBorder>
+                <ContainerColumnWithBorder>
                   <Title>
                     <Typography variant='h6'>Create Grievance</Typography>
                   </Title>
                   <OverviewContainer>modal content</OverviewContainer>
-                </ContainerWithBorder>
+                </ContainerColumnWithBorder>
               </NewTicket>
             </Grid>
           </Grid>

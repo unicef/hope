@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { BreadCrumbsItem } from '../BreadCrumbs';
-import { ContainerWithBorder } from '../ContainerWithBorder';
+import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
 import { LabelizedField } from '../LabelizedField';
 import { Missing } from '../Missing';
 import { OverviewContainer } from '../OverviewContainer';
@@ -76,13 +76,12 @@ export function GrievanceDetails(): React.ReactElement {
 
   const tickets: string[] = ['189-19-15311', '183-19-82649'];
 
-  const formattedTickets = (strings: string[]) => strings.join(', ');
   return (
     <div>
       <PageHeader title={`Ticket #${id}`} breadCrumbs={breadCrumbsItems} />
       <Grid container>
         <Grid item xs={12}>
-          <ContainerWithBorder>
+          <ContainerColumnWithBorder>
             <Title>
               <Typography variant='h6'>Details</Typography>
             </Title>
@@ -95,7 +94,7 @@ export function GrievanceDetails(): React.ReactElement {
                 ))}
               </Grid>
             </OverviewContainer>
-          </ContainerWithBorder>
+          </ContainerColumnWithBorder>
         </Grid>
         <Grid item xs={7}>
           <NotesContainer>

@@ -4,7 +4,7 @@ import { Grid, Typography } from '@material-ui/core';
 import { LabelizedField } from '../LabelizedField';
 import { TargetPopulationNode } from '../../__generated__/graphql';
 import { UniversalMoment } from '../UniversalMoment';
-import { ContainerWithBorder } from '../ContainerWithBorder';
+import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
 import { OverviewContainer } from '../OverviewContainer';
 
 const Title = styled.div`
@@ -40,7 +40,7 @@ export function TargetPopulationDetails({
   );
   const programName = program?.name ? program.name : '-';
   return (
-    <ContainerWithBorder data-cy='target-population-details-container'>
+    <ContainerColumnWithBorder data-cy='target-population-details-container'>
       <Title>
         <Typography variant='h6'>Details</Typography>
       </Title>
@@ -69,6 +69,6 @@ export function TargetPopulationDetails({
           </Grid>
         </Grid>
       </OverviewContainer>
-    </ContainerWithBorder>
+    </ContainerColumnWithBorder>
   );
 }

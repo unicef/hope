@@ -3,7 +3,7 @@ import React from 'react';
 import { Link, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { ContainerWithBorder } from '../ContainerWithBorder';
+import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
 import { Missing } from '../Missing';
 import { OverviewContainer } from '../OverviewContainer';
 import { PageHeader } from '../PageHeader';
@@ -49,7 +49,7 @@ export function GrievancesList(): React.ReactElement {
         </>
       </PageHeader>
       <ListContainer>
-        <ContainerWithBorder>
+        <ContainerColumnWithBorder>
           <Title>
             <Typography variant='h6'>Grievance and Feedback List</Typography>
           </Title>
@@ -58,7 +58,7 @@ export function GrievancesList(): React.ReactElement {
               table goes here
             </Grid>
           </OverviewContainer>
-        </ContainerWithBorder>
+        </ContainerColumnWithBorder>
       </ListContainer>
     </>
   );
