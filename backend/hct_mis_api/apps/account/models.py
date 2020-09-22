@@ -74,3 +74,7 @@ class Role(TimeStampedUUIDModel):
 
     def __str__(self):
         return self.name
+
+    @classmethod
+    def get_roles_as_choices(cls):
+        return [(role.name, role.name) for role in cls.objects.all()]
