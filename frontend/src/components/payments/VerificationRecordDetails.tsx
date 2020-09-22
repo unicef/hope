@@ -12,19 +12,7 @@ import { PaymentVerificationNode } from '../../__generated__/graphql';
 import { Missing } from '../Missing';
 import { UniversalActivityLogTable } from '../../containers/tables/UniversalActivityLogTable';
 import { UniversalMoment } from '../UniversalMoment';
-
-const Container = styled.div`
-  display: flex;
-  flex: 1;
-  width: 100%;
-  background-color: #fff;
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
-  flex-direction: column;
-  border-color: #b1b1b5;
-  border-bottom-width: 1px;
-  border-bottom-style: solid;
-`;
+import { ContainerWithBorder } from '../ContainerWithBorder';
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
@@ -56,7 +44,7 @@ export function VerificationRecordDetails({
 }: VerificationRecordDetailsProps): React.ReactElement {
   return (
     <>
-      <Container>
+      <ContainerWithBorder>
         <Title>
           <Typography variant='h6'>Payment Record Details</Typography>
         </Title>
@@ -99,8 +87,8 @@ export function VerificationRecordDetails({
             />
           </Grid>
         </Grid>
-      </Container>
-      <Container>
+      </ContainerWithBorder>
+      <ContainerWithBorder>
         <Title>
           <Typography variant='h6'>Verification Details</Typography>
         </Title>
@@ -132,7 +120,7 @@ export function VerificationRecordDetails({
             />
           </Grid>
         </Grid>
-      </Container>
+      </ContainerWithBorder>
       <Overview>
         <Title>
           <Typography variant='h6'>Household</Typography>

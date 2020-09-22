@@ -14,24 +14,7 @@ import TextField from '../../shared/TextField';
 import InputLabel from '../../shared/InputLabel';
 import Select from '../../shared/Select';
 import { AdminAreasAutocomplete } from './AdminAreaAutocomplete';
-
-const Container = styled.div`
-  display: flex;
-  flex: 1;
-  width: 100%;
-  background-color: #fff;
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
-  flex-direction: row;
-  align-items: center;
-  border-color: #b1b1b5;
-  border-bottom-width: 1px;
-  border-bottom-style: solid;
-
-  && > div {
-    margin: 5px;
-  }
-`;
+import { ContainerWithBorder } from '../ContainerWithBorder';
 
 const TextContainer = styled(TextField)`
   input[type='number']::-webkit-inner-spin-button,
@@ -74,7 +57,7 @@ export function HouseholdFilters({
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
   return (
-    <Container>
+    <ContainerWithBorder>
       <SearchTextField
         label='Search'
         variant='outlined'
@@ -208,6 +191,6 @@ export function HouseholdFilters({
           ),
         }}
       />
-    </Container>
+    </ContainerWithBorder>
   );
 }
