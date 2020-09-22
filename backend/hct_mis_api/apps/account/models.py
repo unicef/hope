@@ -1,9 +1,12 @@
 from django.contrib.auth.models import AbstractUser
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import Count
+from django import forms
 from django.utils.translation import ugettext_lazy as _
 from model_utils.models import UUIDModel
 
+from account.permissions import PERMISSIONS_CHOICES
 from utils.models import TimeStampedUUIDModel
 
 
@@ -19,13 +22,27 @@ class User(AbstractUser, UUIDModel):
             .count()
         )
 
-    def has_permission(self, permission, business_area, write=False):
-        query = UserPermission.objects.filter(name=permission).filter(
-            roles__user_roles__users__id=self.id, roles__user_roles__business_area=business_area
+    def has_permissions(self, permissions, business_area, write=False):
+        query = Role.objects.filter(
+            permissions__contains=permissions, user_roles__user=self, user_roles__business_area=business_area
         )
-        if write:
-            query = query.filter(write=True)
         return query.count() > 0
+
+    def has_permission(self, permission, business_area, write=False):
+        query = Role.objects.filter(
+            permissions__contains=[permission], user_roles__user=self, user_roles__business_area=business_area
+        )
+        return query.count() > 0
+
+
+class ChoiceArrayField(ArrayField):
+    def formfield(self, **kwargs):
+        defaults = {
+            "form_class": forms.MultipleChoiceField,
+            "choices": self.base_field.choices,
+        }
+        defaults.update(kwargs)
+        return super(ArrayField, self).formfield(**defaults)
 
 
 class UserRole(TimeStampedUUIDModel):
@@ -39,41 +56,7 @@ class UserRole(TimeStampedUUIDModel):
 
 class Role(TimeStampedUUIDModel):
     name = models.CharField(max_length=250)
-    permissions = models.ManyToManyField("account.UserPermission", related_name="roles")
+    permissions = ChoiceArrayField(models.CharField(choices=PERMISSIONS_CHOICES, max_length=255))
 
     def __str__(self):
         return self.name
-
-
-class UserPermission(TimeStampedUUIDModel):
-    PERMISSION_DASHBOARD = 1
-    PERMISSION_RDI = 2
-    PERMISSION_POPULATION = 3
-    PERMISSION_PROGRAM_MANAGEMENT = 4
-    PERMISSION_TARGETING = 5
-    PERMISSION_PAYMENT_VERIFICATION = 6
-    PERMISSION_GRIEVANCES = 7
-    PERMISSION_REPORTING = 8
-    PERMISSION_USER_MANAGEMENT = 9
-    PERMISSION_SETTINGS = 10
-    PERMISSIONS_CHOICES = (
-        (PERMISSION_DASHBOARD, _("Dashboard")),
-        (PERMISSION_RDI, _("Registration Data Import")),
-        (PERMISSION_POPULATION, _("Population")),
-        (PERMISSION_PROGRAM_MANAGEMENT, _("Program Management")),
-        (PERMISSION_TARGETING, _("Targeting")),
-        (PERMISSION_PAYMENT_VERIFICATION, _("Payment Verification")),
-        (PERMISSION_GRIEVANCES, _("Grievances")),
-        (PERMISSION_REPORTING, _("Reporting")),
-        (PERMISSION_USER_MANAGEMENT, _("User Management")),
-        (PERMISSION_SETTINGS, _("Settings")),
-    )
-    PERMISSIONS_CHOICES_DICT = dict(PERMISSIONS_CHOICES)
-    name = models.CharField(max_length=250, choices=PERMISSIONS_CHOICES)
-    write = models.BooleanField(default=False)
-
-    def __str__(self):
-        type_name = _("Read")
-        if self.write:
-            type_name = _("Write")
-        return f"{UserPermission.PERMISSIONS_CHOICES_DICT.get(int(self.name))} {type_name} Permission"
