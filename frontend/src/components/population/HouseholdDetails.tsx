@@ -84,12 +84,12 @@ export function HouseholdDetails({
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>
-            <LabelizedField label='Admin 1'>
+            <LabelizedField label='Administrative Level 1'>
               <div>{houseHold.address || '-'}</div>
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>
-            <LabelizedField label='Admin 2'>
+            <LabelizedField label='Administrative Level 2'>
               <div>{houseHold.adminArea?.title || '-'}</div>
             </LabelizedField>
           </Grid>
