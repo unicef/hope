@@ -233,21 +233,10 @@ OTHER_APPS = [
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-        "OPTIONS": {
-            "min_length": 12,
-        },
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator", "OPTIONS": {"min_length": 12,},},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",},
 ]
 
 PASSWORD_RESET_TIMEOUT_DAYS = 31
@@ -280,25 +269,11 @@ LOGGING = {
         },
     },
     "filters": {"require_debug_false": {"()": "django.utils.log.RequireDebugFalse"}},
-    "handlers": {
-        "default": {
-            "level": LOG_LEVEL,
-            "class": "logging.StreamHandler",
-            "formatter": "standard",
-        },
-    },
+    "handlers": {"default": {"level": LOG_LEVEL, "class": "logging.StreamHandler", "formatter": "standard",},},
     "loggers": {
         "": {"handlers": ["default"], "level": "INFO", "propagate": True},
-        "console": {
-            "handlers": ["default"],
-            "level": "DEBUG",
-            "propagate": True,
-        },
-        "django.request": {
-            "handlers": ["default"],
-            "level": "ERROR",
-            "propagate": False,
-        },
+        "console": {"handlers": ["default"], "level": "DEBUG", "propagate": True,},
+        "django.request": {"handlers": ["default"], "level": "ERROR", "propagate": False,},
         "django.security.DisallowedHost": {
             # Skip "SuspiciousOperation: Invalid HTTP_HOST" e-mails.
             "handlers": ["default"],
@@ -316,20 +291,13 @@ if REDIS_INSTANCE:
         "default": {
             "BACKEND": "django_redis.cache.RedisCache",
             "LOCATION": f"redis://{REDIS_INSTANCE}/1",
-            "OPTIONS": {
-                "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            },
+            "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient",},
             "TIMEOUT": 3600,
         }
     }
     DJANGO_REDIS_IGNORE_EXCEPTIONS = not DEBUG
 else:
-    CACHES = {
-        "default": {
-            "BACKEND": "common.cache_backends.DummyRedisCache",
-            "LOCATION": "hct_mis",
-        }
-    }
+    CACHES = {"default": {"BACKEND": "common.cache_backends.DummyRedisCache", "LOCATION": "hct_mis",}}
 
 SESSION_COOKIE_HTTPONLY = True
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
@@ -460,18 +428,14 @@ CONSTANCE_CONFIG = {
         "positive_integers",
     ),
     # SANCTION LIST
-    "SANCTION_LIST_MATCH_SCORE": (
-        6.0,
-        "Results equal or above this score are considered possible matches",
-    ),
+    "SANCTION_LIST_MATCH_SCORE": (6.0, "Results equal or above this score are considered possible matches",),
     # RAPID PRO
     "RAPID_PRO_PROVIDER": ("tel", "Rapid pro messages provider (telegram/tel)"),
 }
 
 CONSTANCE_DBS = ("default",)
 
-#MICROSOFT GRAPH
-AZURE_GRAPH_API_BASE_URL = 'https://graph.microsoft.com'
-AZURE_GRAPH_API_VERSION = 'v1.0'
-AZURE_GRAPH_API_PAGE_SIZE = 300
-AZURE_TOKEN_URL = 'https://login.microsoftonline.com/unicef.org/oauth2/token'
+# MICROSOFT GRAPH
+AZURE_GRAPH_API_BASE_URL = "https://graph.microsoft.com"
+AZURE_GRAPH_API_VERSION = "v1.0"
+AZURE_TOKEN_URL = "https://login.microsoftonline.com/unicef.org/oauth2/token"
