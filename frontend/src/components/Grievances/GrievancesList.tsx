@@ -1,6 +1,6 @@
-import { Grid, Typography } from '@material-ui/core';
+import { Button, Grid, Typography } from '@material-ui/core';
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { Missing } from '../Missing';
@@ -42,10 +42,28 @@ export function GrievancesList(): React.ReactElement {
     min-width: 120px;
     max-width: 200px;
   `;
+  const StyledLink = styled(Link)`
+    text-decoration: none;
+    color: #fff;
+  `;
 
   return (
     <>
-      <PageHeader title='Grievance and Feedback' />
+      <PageHeader title='Grievance and Feedback'>
+        <>
+          <Button
+            variant='contained'
+            color='primary'
+            data-cy='button-grievance-create-new'
+          >
+            <StyledLink
+              to={`/${businessArea}/grievance-and-feedback/new-ticket`}
+            >
+              NEW TICKET
+            </StyledLink>
+          </Button>
+        </>
+      </PageHeader>
       <ListContainer>
         <Container>
           <Title>

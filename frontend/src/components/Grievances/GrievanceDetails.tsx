@@ -27,7 +27,7 @@ export function GrievanceDetails(): React.ReactElement {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: 'Grievance and Feedback',
-      to: `/${businessArea}/grievances-and-feedback/`,
+      to: `/${businessArea}/grievance-and-feedback/`,
     },
   ];
   const Container = styled.div`
