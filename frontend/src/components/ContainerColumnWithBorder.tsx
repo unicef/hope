@@ -8,8 +8,7 @@ const Container = styled.div`
   background-color: #fff;
   padding: ${({ theme }) => theme.spacing(8)}px
     ${({ theme }) => theme.spacing(11)}px;
-  flex-direction: row;
-  align-items: center;
+  flex-direction: column;
   border-color: #b1b1b5;
   border-bottom-width: 1px;
   border-bottom-style: solid;
@@ -18,12 +17,12 @@ const Container = styled.div`
     margin: 5px;
   }
 `;
-interface ContainerWithBorderProps {
+interface ContainerColumnWithBorderProps {
   children: React.ReactNode;
   column?: boolean;
 }
-export function ContainerWithBorder({
+export function ContainerColumnWithBorder({
   children,
-}: ContainerWithBorderProps): React.ReactElement {
+}: ContainerColumnWithBorderProps): React.ReactElement {
   return <Container>{children}</Container>;
 }

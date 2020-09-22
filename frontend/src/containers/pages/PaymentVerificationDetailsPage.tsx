@@ -28,7 +28,19 @@ import { useDebounce } from '../../hooks/useDebounce';
 import { VerificationRecordsFilters } from '../tables/VerificationRecordsTable/VerificationRecordsFilters';
 import { CreateVerificationPlan } from '../../components/payments/CreateVerificationPlan';
 import { UniversalMoment } from '../../components/UniversalMoment';
-import { ContainerWithBorder } from '../../components/ContainerWithBorder';
+
+const Container = styled.div`
+  display: flex;
+  flex: 1;
+  width: 100%;
+  background-color: #fff;
+  padding: ${({ theme }) => theme.spacing(8)}px
+    ${({ theme }) => theme.spacing(11)}px;
+  flex-direction: column;
+  border-color: #b1b1b5;
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+`;
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
@@ -153,7 +165,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
   return (
     <>
       {toolbar}
-      <ContainerWithBorder>
+      <Container>
         <Grid container>
           <Grid item xs={9}>
             <Title>
@@ -237,9 +249,9 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
             </BorderLeftBox>
           </Grid>
         </Grid>
-      </ContainerWithBorder>
+      </Container>
       {cashPlan.verifications && cashPlan.verifications.edges.length ? (
-        <ContainerWithBorder>
+        <Container>
           <Title>
             <Typography variant='h6'>Verification Plan Details</Typography>
           </Title>
@@ -338,25 +350,25 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
               </ChartContainer>
             </Grid>
           </Grid>
-        </ContainerWithBorder>
+        </Container>
       ) : null}
       {cashPlan.verifications &&
       cashPlan.verifications.edges.length &&
       cashPlan.verificationStatus === 'ACTIVE' ? (
         <>
-          <ContainerWithBorder>
+          <Container>
             <VerificationRecordsFilters
               filter={filter}
               onFilterChange={setFilter}
             />
-          </ContainerWithBorder>
-          <ContainerWithBorder>
+          </Container>
+          <Container>
             <VerificationRecordsTable
               verificationMethod={verificationPlan.verificationMethod}
               filter={debouncedFilter}
               id={verificationPlan.id}
             />
-          </ContainerWithBorder>
+          </Container>
         </>
       ) : null}
       {cashPlan.verifications &&

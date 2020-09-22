@@ -7,7 +7,7 @@ import { LabelizedField } from '../../../components/LabelizedField';
 import { RegistrationDetailedFragment } from '../../../__generated__/graphql';
 import { MiśTheme } from '../../../theme';
 import { DedupeBox } from './DedupeBox';
-import { ContainerWithBorder } from '../../../components/ContainerWithBorder';
+import { ContainerColumnWithBorder } from '../../../components/ContainerColumnWithBorder';
 import { OverviewContainer } from '../../../components/OverviewContainer';
 
 const StatusContainer = styled.div`
@@ -48,7 +48,7 @@ export function RegistrationDetails({
   registration,
 }: RegistrationDetailsProps): React.ReactElement {
   return (
-    <ContainerWithBorder>
+    <ContainerColumnWithBorder>
       <Title>
         <Typography variant='h6'>Import Details</Typography>
       </Title>
@@ -156,6 +156,6 @@ export function RegistrationDetails({
           )}
         </Grid>
       </OverviewContainer>
-    </ContainerWithBorder>
+    </ContainerColumnWithBorder>
   );
 }

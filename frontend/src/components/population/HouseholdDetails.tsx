@@ -6,7 +6,7 @@ import { HouseholdNode } from '../../__generated__/graphql';
 import { formatCurrency } from '../../utils/utils';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { MiśTheme } from '../../theme';
-import { ContainerWithBorder } from '../ContainerWithBorder';
+import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
 
 const Overview = styled.div`
   display: flex;
@@ -34,7 +34,7 @@ export function HouseholdDetails({
 }: HouseholdDetailsProps): React.ReactElement {
   const businessArea = useBusinessArea();
   return (
-    <ContainerWithBorder>
+    <ContainerColumnWithBorder>
       <Title>
         <Typography variant='h6'>Details</Typography>
       </Title>
@@ -95,6 +95,6 @@ export function HouseholdDetails({
           </Grid>
         </Grid>
       </Overview>
-    </ContainerWithBorder>
+    </ContainerColumnWithBorder>
   );
 }

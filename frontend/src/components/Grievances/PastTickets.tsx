@@ -1,7 +1,7 @@
 import { Typography } from '@material-ui/core';
 import React from 'react';
 import styled from 'styled-components';
-import { ContainerWithBorder } from '../ContainerWithBorder';
+import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
 import { LabelizedField } from '../LabelizedField';
 import { OverviewContainer } from '../OverviewContainer';
 
@@ -17,7 +17,7 @@ export function PastTickets({ tickets }): React.ReactElement {
     strings ? strings.join(', ') : 'No past tickets';
   return (
     <PastContainer>
-      <ContainerWithBorder>
+      <ContainerColumnWithBorder>
         <Title>
           <Typography variant='h6'>Past tickets</Typography>
         </Title>
@@ -26,7 +26,7 @@ export function PastTickets({ tickets }): React.ReactElement {
             <p>{formattedTickets(tickets)}</p>
           </LabelizedField>
         </OverviewContainer>
-      </ContainerWithBorder>
+      </ContainerColumnWithBorder>
     </PastContainer>
   );
 }
