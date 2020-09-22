@@ -4,7 +4,7 @@ from django_filters import (
     FilterSet,
     OrderingFilter,
     CharFilter,
-    ModelMultipleChoiceFilter,
+    MultipleChoiceFilter,
 )
 from graphene import relay
 from graphene_django import DjangoObjectType
@@ -13,7 +13,7 @@ from graphene_django.filter import DjangoFilterConnectionField
 from core.extended_connection import ExtendedConnection
 from core.filters import AgeRangeFilter, IntegerRangeFilter
 from core.schema import ChoiceObject
-from core.utils import to_choice_object, encode_id_base64, encode_ids
+from core.utils import to_choice_object, encode_ids
 from household.models import (
     Household,
     Individual,
@@ -82,7 +82,7 @@ class HouseholdFilter(FilterSet):
 class IndividualFilter(FilterSet):
     business_area = CharFilter(field_name="household__business_area__slug",)
     age = AgeRangeFilter(field_name="birth_date")
-    sex = ModelMultipleChoiceFilter(to_field_name="sex", queryset=Individual.objects.all(),)
+    sex = MultipleChoiceFilter(field_name="sex", choices=SEX_CHOICE)
     programme = CharFilter(field_name="household__programs__name")
     search = CharFilter(method="search_filter")
 

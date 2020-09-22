@@ -1,13 +1,29 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models import Count
+from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
+from model_utils import Choices
 from model_utils.models import UUIDModel
 
 from utils.models import TimeStampedUUIDModel
 
 
+INVITED = "INVITED"
+ACTIVE = "ACTIVE"
+INACTIVE = "INACTIVE"
+USER_STATUS_CHOICES = (
+    (INVITED, _("Invited")),
+    (ACTIVE, _("Active")),
+    (INACTIVE, _("Inactive")),
+)
+USER_PARTNER_CHOICES = Choices("UNHCR", "WFP", "UNICEF")
+
+
 class User(AbstractUser, UUIDModel):
+    status = models.CharField(choices=USER_STATUS_CHOICES, max_length=10, default=INVITED)
+    partner = models.CharField(choices=USER_PARTNER_CHOICES, max_length=10, default=USER_PARTNER_CHOICES.UNICEF)
+
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
 
@@ -43,6 +59,10 @@ class Role(TimeStampedUUIDModel):
 
     def __str__(self):
         return self.name
+
+    @classmethod
+    def get_roles_as_choices(cls):
+        return [(role.name, role.name) for role in cls.objects.all()]
 
 
 class UserPermission(TimeStampedUUIDModel):

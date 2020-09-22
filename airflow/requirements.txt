@@ -16,6 +16,7 @@ git+https://github.com/Tivix/django-auditlog.git@master#egg=django-auditlog
 django-elasticsearch-dsl==7.1.4
 scipy==1.5.1
 django-constance[redis]==2.7.0
+admin-extra-urls==2.2.0
 
 # Etc
 Pillow==7.0.0
