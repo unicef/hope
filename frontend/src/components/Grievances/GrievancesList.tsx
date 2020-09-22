@@ -3,7 +3,9 @@ import React from 'react';
 import { Link, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { ContainerWithBorder } from '../ContainerWithBorder';
 import { Missing } from '../Missing';
+import { OverviewContainer } from '../OverviewContainer';
 import { PageHeader } from '../PageHeader';
 import { StatusBox } from '../StatusBox';
 
@@ -13,24 +15,6 @@ export function GrievancesList(): React.ReactElement {
   //   variables: { id },
   // });
   const businessArea = useBusinessArea();
-
-  const Container = styled.div`
-    display: flex;
-    flex: 1;
-    width: 100%;
-    background-color: #fff;
-    padding: ${({ theme }) => theme.spacing(8)}px
-      ${({ theme }) => theme.spacing(11)}px;
-    flex-direction: column;
-    border-color: #b1b1b5;
-    border-bottom-width: 1px;
-    border-bottom-style: solid;
-  `;
-  const OverviewContainer = styled.div`
-    display: flex;
-    align-items: center;
-    flex-direction: row;
-  `;
 
   const ListContainer = styled.div`
     padding: 22px;
@@ -65,7 +49,7 @@ export function GrievancesList(): React.ReactElement {
         </>
       </PageHeader>
       <ListContainer>
-        <Container>
+        <ContainerWithBorder>
           <Title>
             <Typography variant='h6'>Grievance and Feedback List</Typography>
           </Title>
@@ -74,7 +58,7 @@ export function GrievancesList(): React.ReactElement {
               table goes here
             </Grid>
           </OverviewContainer>
-        </Container>
+        </ContainerWithBorder>
       </ListContainer>
     </>
   );

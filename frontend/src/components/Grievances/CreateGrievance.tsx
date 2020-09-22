@@ -8,35 +8,15 @@ import { UniversalMoment } from '../UniversalMoment';
 import { PageHeader } from '../PageHeader';
 import { BreadCrumbsItem } from '../BreadCrumbs';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { ContainerWithBorder } from '../ContainerWithBorder';
+import { OverviewContainer } from '../OverviewContainer';
 
 export function CreateGrievance(): React.ReactElement {
-  const Container = styled.div`
-    display: flex;
-    flex: 1;
-    width: 100%;
-    background-color: #fff;
-    padding: ${({ theme }) => theme.spacing(8)}px
-      ${({ theme }) => theme.spacing(11)}px;
-    flex-direction: column;
-    border-color: #b1b1b5;
-    border-bottom-width: 1px;
-    border-bottom-style: solid;
-  `;
-  const OverviewContainer = styled.div`
-    display: flex;
-    align-items: center;
-    flex-direction: column;
-  `;
-
   const Title = styled.div`
     padding-bottom: ${({ theme }) => theme.spacing(8)}px;
   `;
-  const Name = styled.span`
-    font-size: 16px;
-  `;
-  const Date = styled.span`
-    font-size: 12px;
-    color: #848484;
+  const NewTicket = styled.div`
+    padding: 22px;
   `;
 
   const businessArea = useBusinessArea();
@@ -67,12 +47,18 @@ export function CreateGrievance(): React.ReactElement {
       {({ submitForm, values }) => (
         <>
           <PageHeader title='New Ticket' breadCrumbs={breadCrumbsItems} />
-          <Container>
-            <Title>
-              <Typography variant='h6'>Create Grievance</Typography>
-            </Title>
-            <OverviewContainer>modal content</OverviewContainer>
-          </Container>
+          <Grid container>
+            <Grid item xs={9}>
+              <NewTicket>
+                <ContainerWithBorder>
+                  <Title>
+                    <Typography variant='h6'>Create Grievance</Typography>
+                  </Title>
+                  <OverviewContainer>modal content</OverviewContainer>
+                </ContainerWithBorder>
+              </NewTicket>
+            </Grid>
+          </Grid>
         </>
       )}
     </Formik>

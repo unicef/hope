@@ -3,24 +3,7 @@ import styled from 'styled-components';
 import { Typography, Grid } from '@material-ui/core';
 import { LabelizedField } from '../../../../components/LabelizedField';
 import { ImportedHouseholdDetailedFragment } from '../../../../__generated__/graphql';
-
-const Container = styled.div`
-  display: flex;
-  flex: 1;
-  width: 100%;
-  background-color: #fff;
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
-  flex-direction: column;
-  align-items: center;
-  border-color: #b1b1b5;
-  border-bottom-width: 1px;
-  border-bottom-style: solid;
-
-  && > div {
-    margin: 5px;
-  }
-`;
+import { ContainerWithBorder } from '../../../../components/ContainerWithBorder';
 
 const Overview = styled.div`
   display: flex;
@@ -39,7 +22,7 @@ export function HouseholdDetails({
   household,
 }: HouseholdDetailsProps): React.ReactElement {
   return (
-    <Container>
+    <ContainerWithBorder>
       <Title>
         <Typography variant='h6'>Details</Typography>
       </Title>
@@ -72,6 +55,6 @@ export function HouseholdDetails({
           </Grid>
         </Grid>
       </Overview>
-    </Container>
+    </ContainerWithBorder>
   );
 }
