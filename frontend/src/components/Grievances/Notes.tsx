@@ -5,8 +5,8 @@ import React from 'react';
 import styled from 'styled-components';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { UniversalMoment } from '../UniversalMoment';
-import { ContainerWithBorder } from '../ContainerWithBorder';
-import { OverviewContainer } from '../OverviewContainer';
+import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
+import { OverviewContainerColumn } from '../OverviewContainerColumn';
 
 export function Notes(): React.ReactElement {
   const Title = styled.div`
@@ -83,11 +83,11 @@ export function Notes(): React.ReactElement {
       validationSchema={validationSchema}
     >
       {({ submitForm, values }) => (
-        <ContainerWithBorder>
+        <ContainerColumnWithBorder>
           <Title>
             <Typography variant='h6'>Notes</Typography>
           </Title>
-          <OverviewContainer>
+          <OverviewContainerColumn>
             {mappedNotes}
             <Grid container>
               <Grid item xs={2}>
@@ -124,8 +124,8 @@ export function Notes(): React.ReactElement {
                 </Grid>
               </Grid>
             </Grid>
-          </OverviewContainer>
-        </ContainerWithBorder>
+          </OverviewContainerColumn>
+        </ContainerColumnWithBorder>
       )}
     </Formik>
   );
