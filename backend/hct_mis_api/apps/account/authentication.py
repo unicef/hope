@@ -20,7 +20,7 @@ def social_details(backend, details, response, *args, **kwargs):
         r["details"]["email"] = user_data.get("email", user_data.get("signInNames.emailAddress"))
 
     r["details"]["idp"] = response.get("idp", "")
-
+    raise 
     return r
 
 
