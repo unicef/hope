@@ -249,7 +249,7 @@ export function CreateVerificationPlan({
                       name='excludedAdminAreasFull'
                       choices={mappedAdminAreas}
                       variant='filled'
-                      label='Filter Out Admin Areas'
+                      label='Filter Out Administrative Level Areas'
                       component={FormikMultiSelectField}
                     />
                   )}
@@ -316,7 +316,7 @@ export function CreateVerificationPlan({
                       <Box display='flex'>
                         <Field
                           name='adminCheckbox'
-                          label='Admin'
+                          label='Administrative Level'
                           component={FormikCheckboxField}
                         />
                         <Field
@@ -335,7 +335,7 @@ export function CreateVerificationPlan({
                           name='excludedAdminAreasRandom'
                           choices={mappedAdminAreas}
                           variant='filled'
-                          label='Filter Out Admin Areas'
+                          label='Filter Out Administrative Level Areas'
                           component={FormikMultiSelectField}
                         />
                       )}
