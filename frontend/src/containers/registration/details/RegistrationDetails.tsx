@@ -6,9 +6,9 @@ import { registrationDataImportStatusToColor } from '../../../utils/utils';
 import { LabelizedField } from '../../../components/LabelizedField';
 import { RegistrationDetailedFragment } from '../../../__generated__/graphql';
 import { MiśTheme } from '../../../theme';
-import { DedupeBox } from './DedupeBox';
 import { ContainerColumnWithBorder } from '../../../components/ContainerColumnWithBorder';
 import { OverviewContainer } from '../../../components/OverviewContainer';
+import { DedupeBox } from './DedupeBox';
 
 const StatusContainer = styled.div`
   min-width: 120px;
