@@ -66,7 +66,7 @@ export const menuItems = [
   },
   {
     name: 'Grievance and Feedback',
-    href: '/grievances-and-feedback',
+    href: '/grievance-and-feedback',
     selectedRegexp: /^\/test.*$/,
     icon: <Feedback />,
   },

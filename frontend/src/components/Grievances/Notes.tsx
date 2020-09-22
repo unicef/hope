@@ -1,4 +1,5 @@
 import { Avatar, Box, Button, Grid, Typography } from '@material-ui/core';
+import * as Yup from 'yup';
 import { Field, Form, Formik } from 'formik';
 import React from 'react';
 import styled from 'styled-components';
@@ -85,13 +86,17 @@ export function Notes(): React.ReactElement {
     newNote: '',
   };
 
+  const validationSchema = Yup.object().shape({
+    newNote: Yup.string().required('Note cannot be empty'),
+  });
+
   return (
     <Formik
       initialValues={initialValues}
       onSubmit={(values) => {
         console.log(values);
       }}
-      // validationSchema={validationSchema}
+      validationSchema={validationSchema}
     >
       {({ submitForm, values }) => (
         <Container>
