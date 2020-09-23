@@ -6,9 +6,9 @@ from graphene_django.filter import DjangoFilterConnectionField
 from core.extended_connection import ExtendedConnection
 from core.schema import ChoiceObject
 from core.utils import get_count_and_percentage
-from household.models import DUPLICATE, NEEDS_ADJUDICATION, UNIQUE
+from household.models import DUPLICATE, NEEDS_ADJUDICATION, UNIQUE, DUPLICATE_IN_BATCH
 from registration_data.models import RegistrationDataImport
-from registration_datahub.models import DUPLICATE_IN_BATCH, UNIQUE_IN_BATCH
+from registration_datahub.models import UNIQUE_IN_BATCH
 
 
 class RegistrationDataImportFilter(FilterSet):
