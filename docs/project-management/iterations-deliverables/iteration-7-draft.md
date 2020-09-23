@@ -2,7 +2,7 @@
 
 The goal of Iteration Seven is to implement Grievance & Feedback.
 
-**Expected start/end date:** September 28, 2020 - \(8 weeks\)
+**Expected start/end date:** September 28, 2020 - November 6, 2020 \(6 weeks\)
 
 ## **Architectural design / Project Management Deliverables**
 
@@ -17,7 +17,7 @@ The goal of Iteration Seven is to implement Grievance & Feedback.
 
 ## **Technical Deliverables**
 
-* Complete development of the **Grievance & Feedback** module according to the signed off requirements from Iteration 6:
+* Complete development of the [**Grievance & Feedback**](https://tivix.invisionapp.com/d/main#/console/19504414/407644790/preview) module according to the signed off requirements from Iteration 6:
   * Search & Filter a Table List view of Grievances & Feedback Tickets.
   * Grievance & Feedback Ticket details.
   * Grievance Ticket Types
@@ -45,13 +45,13 @@ The goal of Iteration Seven is to implement Grievance & Feedback.
 
 **Targeting Change Requests**
 
-* Complete the development of the **Targeting Change Requests** according to the signed off spec from Iteration 6
+* Complete the development of the [**Targeting Change Requests**](https://tivix.invisionapp.com/share/V6YS88179E5#/431828656_TargetPopultion-Create_-_With_Subcriteria_01) according to the signed off spec from Iteration 6
   * * UI for Targeting
     * Backend for Data Model changes removing Programme Population and accounting for Steficon.
 
 **Programme Management List View**
 
-* Change to the overall design and layout of the Programme List View Screen \(ie: Card view to Table\)
+* Change to the overall design and layout of the [**Programme List View Screen**](https://tivix.invisionapp.com/d/main#/console/19504414/407644574/preview) \(ie: Card view to Table\)
 
 **Misc. Changes**
 
