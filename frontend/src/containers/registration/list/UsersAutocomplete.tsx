@@ -11,6 +11,7 @@ import {
 } from '../../../__generated__/graphql';
 import { useDebounce } from '../../../hooks/useDebounce';
 import TextField from '../../../shared/TextField';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
 
 const StyledAutocomplete = styled(Autocomplete)`
   width: 232px;
@@ -26,12 +27,14 @@ export function UsersAutocomplete({
   inputValue,
 }): React.ReactElement {
   const [open, setOpen] = React.useState(false);
+  const businessArea = useBusinessArea();
   const debouncedInputText = useDebounce(inputValue, 500);
   const [newValue, setNewValue] = useState();
   const { data, loading } = useAllUsersQuery({
     variables: {
       first: 100,
-      fullName: debouncedInputText,
+      search: debouncedInputText,
+      businessArea,
     },
   });
   useEffect(() => setNewValue(value), [data, value]);
@@ -54,9 +57,9 @@ export function UsersAutocomplete({
         if (!option.node) {
           return '';
         }
-          const name = option.node.firstName
-              ? `${option.node.firstName} ${option.node.lastName}`
-              : option.node.email;
+        const name = option.node.firstName
+          ? `${option.node.firstName} ${option.node.lastName}`
+          : option.node.email;
         return name;
       }}
       options={get(data, 'allUsers.edges', [])}
