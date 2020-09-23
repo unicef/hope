@@ -101,7 +101,7 @@
   * [Iteration 4](project-management/iterations-deliverables/iteration-4.md)
   * [Iteration 5](project-management/iterations-deliverables/iteration-5.md)
   * [Iteration 6](project-management/iterations-deliverables/iteration-6-draft.md)
-  * [Iteration 7 \[DRAFT\]](project-management/iterations-deliverables/iteration-7-draft.md)
+  * [Iteration 7](project-management/iterations-deliverables/iteration-7-draft.md)
 * [Change Requests](project-management/change-request.md)
 * [Sprint Cadence](project-management/sprint-cadence.md)
 * [CO / User testing](project-management/co-user-testing.md)

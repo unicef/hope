@@ -1,4 +1,4 @@
-# Iteration 7 \[DRAFT\]
+# Iteration 7
 
 **v1.0 - September 15, 2020**
 
