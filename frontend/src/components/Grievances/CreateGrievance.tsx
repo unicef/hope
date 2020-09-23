@@ -12,21 +12,19 @@ import { Field, Form, Formik } from 'formik';
 import React from 'react';
 import styled from 'styled-components';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
-import { UniversalMoment } from '../UniversalMoment';
 import { PageHeader } from '../PageHeader';
 import { BreadCrumbsItem } from '../BreadCrumbs';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { OverviewContainer } from '../OverviewContainer';
 import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 
 export function CreateGrievance(): React.ReactElement {
-  const Title = styled.div`
-    padding-bottom: ${({ theme }) => theme.spacing(8)}px;
+  const BoxPadding = styled.div`
+    padding: 15px 0;
   `;
   const NewTicket = styled.div`
-    padding: 22px;
+    padding: 20px;
   `;
   const DialogFooter = styled.div`
     padding: 12px 16px;
@@ -34,9 +32,14 @@ export function CreateGrievance(): React.ReactElement {
     border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
     text-align: right;
   `;
-  const BoxWithBorder = styled.div`
+  const BoxWithBorderBottom = styled.div`
     border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-    padding-bottom: 30px;
+    padding: 15px 0;
+  `;
+  const BoxWithBorders = styled.div`
+    border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
+    border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
+    padding: 15px 0;
   `;
   const LookUp = styled.div`
     display: flex;
@@ -50,6 +53,7 @@ export function CreateGrievance(): React.ReactElement {
     text-align: center;
     padding: 25px;
     font-weight: 500;
+    cursor: pointer;
   `;
 
   const Consent = styled.p`
@@ -88,11 +92,11 @@ export function CreateGrievance(): React.ReactElement {
       {({ submitForm, values }) => (
         <>
           <PageHeader title='New Ticket' breadCrumbs={breadCrumbsItems} />
-          <Grid container>
-            <Grid item xs={9}>
+          <Grid container spacing={3}>
+            <Grid item xs={8}>
               <NewTicket>
                 <ContainerColumnWithBorder>
-                  <Grid container>
+                  <Grid container spacing={3}>
                     <Grid item xs={6}>
                       <Field
                         name='category'
@@ -125,131 +129,129 @@ export function CreateGrievance(): React.ReactElement {
                         component={FormikSelectField}
                       />
                     </Grid>
-                    <Grid item xs={12}>
-                      <BoxWithBorder />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <BoxWithBorder>
-                        <Box display='flex' flexDirection='column'>
-                          <Consent>
-                            Do you give your consent to UNICEF and its partners
-                            to view, edit and update your personal details and,
-                            if applicable, that of your household and dependants
-                            the purpose of the integrity UNICEFs beneficiary
-                            management system? Do you declare that the
-                            information you have provided is true and correct to
-                            the best of your knowledge?
-                          </Consent>
-                          <Field
-                            name='receivedConsent'
-                            label='Received Consent*'
-                            color='primary'
-                            component={FormikCheckboxField}
-                          />
-                          <Grid item xs={6}>
-                            <LookUp>
-                              <MarginRightSpan>
-                                <SearchIcon />
-                              </MarginRightSpan>
-                              <span>Look up Household</span>
-                            </LookUp>
-                          </Grid>
-                        </Box>
-                      </BoxWithBorder>
-                      <Grid item xs={6}>
-                        <BoxWithBorder>
-                          <Field
-                            name='assignedTo'
-                            label='Assigned to'
-                            variant='filled'
-                            choices={[
-                              {
-                                value: 'User1',
-                                name: 'User1',
-                              },
-                              {
-                                value: 'User2',
-                                name: 'User2',
-                              },
-                              {
-                                value: 'User3',
-                                name: 'User3',
-                              },
-                            ]}
-                            component={FormikSelectField}
-                          />
-                        </BoxWithBorder>
-                        <Grid item xs={12}>
-                          <BoxWithBorder>
-                            <Field
-                              name='Description'
-                              multiline
-                              fullWidth
-                              variant='filled'
-                              label='Description'
-                              component={FormikTextField}
-                            />
-                          </BoxWithBorder>
-                          <Grid item xs={6}>
-                            <Field
-                              name='administrativeLevel2'
-                              label='Administrative Level 2'
-                              variant='filled'
-                              choices={[
-                                {
-                                  value: 'Admin1',
-                                  name: 'Admin1',
-                                },
-                                {
-                                  value: 'Admin2',
-                                  name: 'Admin2',
-                                },
-                                {
-                                  value: 'Admin3',
-                                  name: 'Admin3',
-                                },
-                              ]}
-                              component={FormikSelectField}
-                            />
-                          </Grid>
-                          <Grid item xs={6}>
-                            <Field
-                              name='area'
-                              fullWidth
-                              variant='filled'
-                              label='Area / Village / Pay point'
-                              component={FormikTextField}
-                            />
-                          </Grid>
-                          <Grid item xs={6}>
-                            <Field
-                              name='languagesSpoken'
-                              label='Languages Spoken'
-                              variant='filled'
-                              choices={[
-                                {
-                                  value: 'English',
-                                  name: 'English',
-                                },
-                                {
-                                  value: 'French',
-                                  name: 'French',
-                                },
-                                {
-                                  value: 'Spanish',
-                                  name: 'Spanish',
-                                },
-                              ]}
-                              component={FormikSelectField}
-                            />
-                          </Grid>
-                          <Grid item xs={12}>
-                            <BoxWithBorder />
-                          </Grid>
+                  </Grid>
+                  <BoxWithBorders>
+                    <Box display='flex' flexDirection='column'>
+                      <Consent>
+                        Do you give your consent to UNICEF and its partners to
+                        view, edit and update your personal details and, if
+                        applicable, that of your household and dependants the
+                        purpose of the integrity UNICEFs beneficiary management
+                        system? Do you declare that the information you have
+                        provided is true and correct to the best of your
+                        knowledge?
+                      </Consent>
+                      <Field
+                        name='receivedConsent'
+                        label='Received Consent*'
+                        color='primary'
+                        component={FormikCheckboxField}
+                      />
+                      <Grid container spacing={3}>
+                        <Grid item xs={6}>
+                          <LookUp>
+                            <MarginRightSpan>
+                              <SearchIcon />
+                            </MarginRightSpan>
+                            <span>Look up Household</span>
+                          </LookUp>
                         </Grid>
                       </Grid>
+                    </Box>
+                  </BoxWithBorders>
+                  <BoxWithBorderBottom>
+                    <Grid container spacing={3}>
+                      <Grid item xs={6}>
+                        <Field
+                          name='assignedTo'
+                          label='Assigned to'
+                          variant='filled'
+                          choices={[
+                            {
+                              value: 'User1',
+                              name: 'User1',
+                            },
+                            {
+                              value: 'User2',
+                              name: 'User2',
+                            },
+                            {
+                              value: 'User3',
+                              name: 'User3',
+                            },
+                          ]}
+                          component={FormikSelectField}
+                        />
+                      </Grid>
                     </Grid>
-                  </Grid>
+                  </BoxWithBorderBottom>
+                  <BoxPadding>
+                    <Grid container spacing={3}>
+                      <Grid item xs={12}>
+                        <Field
+                          name='Description'
+                          multiline
+                          fullWidth
+                          variant='filled'
+                          label='Description'
+                          component={FormikTextField}
+                        />
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Field
+                          name='administrativeLevel2'
+                          label='Administrative Level 2'
+                          variant='filled'
+                          choices={[
+                            {
+                              value: 'Admin1',
+                              name: 'Admin1',
+                            },
+                            {
+                              value: 'Admin2',
+                              name: 'Admin2',
+                            },
+                            {
+                              value: 'Admin3',
+                              name: 'Admin3',
+                            },
+                          ]}
+                          component={FormikSelectField}
+                        />
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Field
+                          name='area'
+                          fullWidth
+                          variant='filled'
+                          label='Area / Village / Pay point'
+                          component={FormikTextField}
+                        />
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Field
+                          name='languagesSpoken'
+                          label='Languages Spoken'
+                          variant='filled'
+                          choices={[
+                            {
+                              value: 'English',
+                              name: 'English',
+                            },
+                            {
+                              value: 'French',
+                              name: 'French',
+                            },
+                            {
+                              value: 'Spanish',
+                              name: 'Spanish',
+                            },
+                          ]}
+                          component={FormikSelectField}
+                        />
+                      </Grid>
+                    </Grid>
+                  </BoxPadding>
 
                   <DialogFooter>
                     <DialogActions>
