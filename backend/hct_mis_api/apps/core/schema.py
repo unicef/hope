@@ -2,6 +2,8 @@ import json
 from collections import Iterable
 from operator import itemgetter
 
+from constance import config
+
 import graphene
 from auditlog.models import LogEntry
 from django.contrib.gis.db.models import GeometryField
@@ -46,7 +48,9 @@ from core.utils import decode_id_string, LazyEvalMethodsDict
 
 
 class AdminAreaFilter(FilterSet):
-    business_area = CharFilter(field_name="admin_area_type__business_area__slug",)
+    business_area = CharFilter(
+        field_name="admin_area_type__business_area__slug",
+    )
 
     class Meta:
         model = AdminArea
@@ -216,7 +220,10 @@ class FieldAttributeNode(graphene.ObjectType):
     is_flex_field = graphene.Boolean()
 
     def resolve_choices(parent, info):
-        if isinstance(_custom_dict_or_attr_resolver("choices", None, parent, info), Iterable,):
+        if isinstance(
+            _custom_dict_or_attr_resolver("choices", None, parent, info),
+            Iterable,
+        ):
             return sorted(parent["choices"], key=itemgetter("value"))
         return parent.choices.order_by("name").all()
 
@@ -244,7 +251,9 @@ class FieldAttributeNode(graphene.ObjectType):
 class GroupAttributeNode(DjangoObjectType):
     label_en = graphene.String()
     flex_attributes = graphene.List(
-        FieldAttributeNode, flex_field=graphene.Boolean(), description="All field datatype meta.",
+        FieldAttributeNode,
+        flex_field=graphene.Boolean(),
+        description="All field datatype meta.",
     )
 
     class Meta:
@@ -319,11 +328,19 @@ class Query(graphene.ObjectType):
     admin_area = relay.Node.Field(AdminAreaNode)
     all_admin_areas = DjangoFilterConnectionField(AdminAreaNode, filterset_class=AdminAreaFilter)
     all_business_areas = DjangoFilterConnectionField(BusinessAreaNode)
-    all_log_entries = ConnectionField(LogEntryObjectConnection, object_id=graphene.String(required=True),)
-    all_fields_attributes = graphene.List(
-        FieldAttributeNode, flex_field=graphene.Boolean(), description="All field datatype meta.",
+    all_log_entries = ConnectionField(
+        LogEntryObjectConnection,
+        object_id=graphene.String(required=True),
     )
-    all_groups_with_fields = graphene.List(GroupAttributeNode, description="Get all groups that contains flex fields",)
+    all_fields_attributes = graphene.List(
+        FieldAttributeNode,
+        flex_field=graphene.Boolean(),
+        description="All field datatype meta.",
+    )
+    all_groups_with_fields = graphene.List(
+        GroupAttributeNode,
+        description="Get all groups that contains flex fields",
+    )
     kobo_project = graphene.Field(
         KoboAssetObject,
         uid=graphene.String(required=True),
@@ -336,6 +353,10 @@ class Query(graphene.ObjectType):
         only_deployed=graphene.Boolean(required=False),
         description="All Kobo projects/assets.",
     )
+    cash_assist_url_prefix = graphene.String()
+
+    def resolve_cash_assist_url_prefix(self):
+        return config.CASH_ASSIST_URL_PREFIX
 
     def resolve_all_log_entries(self, info, object_id, **kwargs):
         id = decode_id_string(object_id)
@@ -348,7 +369,10 @@ class Query(graphene.ObjectType):
         return resolve_assets(business_area_slug=business_area_slug, uid=uid)
 
     def resolve_all_kobo_projects(self, info, business_area_slug, *args, **kwargs):
-        return resolve_assets(business_area_slug=business_area_slug, only_deployed=kwargs.get("only_deployed", False),)
+        return resolve_assets(
+            business_area_slug=business_area_slug,
+            only_deployed=kwargs.get("only_deployed", False),
+        )
 
     def resolve_all_groups_with_fields(self, info, **kwargs):
         return FlexibleAttributeGroup.objects.distinct().filter(flex_attributes__isnull=False)

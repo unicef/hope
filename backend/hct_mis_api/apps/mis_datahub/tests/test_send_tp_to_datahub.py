@@ -162,9 +162,6 @@ class TestSendTpToDatahub(TestCase):
             status=TargetPopulation.STATUS_FINALIZED,
         )
         cls.target_population_third.households.set([cls.household_second])
-        import ipdb
-
-        ipdb.set_trace()
 
     def test_individual_data_needed_true(self):
         task = SendTPToDatahubTask()

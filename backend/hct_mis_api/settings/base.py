@@ -428,6 +428,9 @@ CONSTANCE_CONFIG = {
     "SANCTION_LIST_MATCH_SCORE": (6.0, "Results equal or above this score are considered possible matches",),
     # RAPID PRO
     "RAPID_PRO_PROVIDER": ("tel", "Rapid pro messages provider (telegram/tel)"),
+
+    # CASH ASSIST
+    "CASH_ASSIST_URL_PREFIX": ("","Cash Assist base url used to generate url to cash assist"),
 }
 
 CONSTANCE_DBS = ("default",)
