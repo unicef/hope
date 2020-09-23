@@ -8,6 +8,7 @@ from graphene_django.filter import DjangoFilterConnectionField
 
 from account.models import USER_PARTNER_CHOICES, USER_STATUS_CHOICES, Role
 from core.extended_connection import ExtendedConnection
+from core.models import BusinessArea
 
 
 class UsersFilter(FilterSet):
@@ -48,13 +49,30 @@ class UsersFilter(FilterSet):
         return qs.filter(q_obj)
 
 
+
+
+class BusinessAreaNode1(DjangoObjectType):
+    class Meta:
+        model = BusinessArea
+        filter_fields = ["id"]
+        interfaces = (graphene.relay.Node,)
+        connection_class = ExtendedConnection
+
 class UserObjectType(DjangoObjectType):
+    business_areas = DjangoFilterConnectionField(BusinessAreaNode1)
+
+    def resolve_business_areas(self, info):
+        return []
     class Meta:
         model = get_user_model()
         exclude = ("password",)
 
-
 class UserNode(DjangoObjectType):
+    business_areas = DjangoFilterConnectionField(BusinessAreaNode1)
+
+    def resolve_business_areas(self, info):
+        return []
+
     class Meta:
         model = get_user_model()
         exclude = ("password",)
