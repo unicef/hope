@@ -82,7 +82,7 @@ class UserObjectType(DjangoObjectType):
     permissions = graphene.List(graphene.String)
 
     def resolve_business_areas(self, info):
-        return BusinessArea.objects.all()[:2]
+        return BusinessArea.objects.filter(user_roles__user=self).distinct()
 
     def resolve_permissions(self, info):
         return permissions_resolver(self.user_roles.all())
@@ -97,7 +97,7 @@ class UserNode(DjangoObjectType):
     permissions = graphene.List(graphene.String)
 
     def resolve_business_areas(self, info):
-        return BusinessArea.objects.all()[:2]
+        return BusinessArea.objects.filter(user_roles__user=self).distinct()
 
     def resolve_permissions(self, info):
         return permissions_resolver(self.user_roles.all())

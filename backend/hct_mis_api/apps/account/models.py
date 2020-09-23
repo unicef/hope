@@ -29,12 +29,7 @@ class User(AbstractUser, UUIDModel):
         return f"{self.first_name} {self.last_name}"
 
     def all_permissions(self):
-        return (
-            self.roles.values("permissions__id")
-            .annotate(counts=Count("permissions__id"))
-            .values_list("permissions__id", "permissions__name", "permissions__write")
-            .count()
-        )
+        return 
 
     def has_permissions(self, permissions, business_area, write=False):
         query = Role.objects.filter(
