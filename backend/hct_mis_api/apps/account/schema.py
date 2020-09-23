@@ -49,7 +49,7 @@ class UsersFilter(FilterSet):
         return qs.filter(q_obj)
 
 
-class BusinessAreaNode1(DjangoObjectType):
+class BusinessAreaForUserNode(DjangoObjectType):
     class Meta:
         model = BusinessArea
         filter_fields = ["id"]
@@ -58,10 +58,10 @@ class BusinessAreaNode1(DjangoObjectType):
 
 
 class UserObjectType(DjangoObjectType):
-    business_areas = DjangoFilterConnectionField(BusinessAreaNode1)
+    business_areas = DjangoFilterConnectionField(BusinessAreaForUserNode)
 
     def resolve_business_areas(self, info):
-        return BusinessArea.objects.all()[:2]
+        return BusinessArea.objects.filter(user_roles__user=self).distinct()
 
     class Meta:
         model = get_user_model()
@@ -69,10 +69,10 @@ class UserObjectType(DjangoObjectType):
 
 
 class UserNode(DjangoObjectType):
-    business_areas = DjangoFilterConnectionField(BusinessAreaNode1)
+    business_areas = DjangoFilterConnectionField(BusinessAreaForUserNode)
 
     def resolve_business_areas(self, info):
-        return BusinessArea.objects.all()[:2]
+        return BusinessArea.objects.filter(user_roles__user=self).distinct()
 
     class Meta:
         model = get_user_model()
