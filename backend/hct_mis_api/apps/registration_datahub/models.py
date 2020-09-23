@@ -28,6 +28,7 @@ from household.models import (
 )
 from utils.models import TimeStampedUUIDModel
 
+
 SIMILAR_IN_BATCH = "SIMILAR_IN_BATCH"
 DUPLICATE_IN_BATCH = "DUPLICATE_IN_BATCH"
 UNIQUE_IN_BATCH = "UNIQUE_IN_BATCH"
