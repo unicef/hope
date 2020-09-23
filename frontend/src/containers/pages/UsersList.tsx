@@ -20,7 +20,10 @@ const Container = styled.div`
 export function UsersList(): React.ReactElement {
   const { t } = useTranslation();
   const [filter, setFilter] = useState({
-    fullName: '',
+    search: '',
+    partner: '',
+    roles: '',
+    status: '',
   });
   const debouncedFilter = useDebounce(filter, 500);
 

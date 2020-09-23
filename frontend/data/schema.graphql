@@ -64,7 +64,7 @@ type BusinessAreaNode implements Node {
   rapidProApiKey: String
   slug: String!
   hasDataSharingAgreement: Boolean!
-  userSet(before: String, after: String, first: Int, last: Int): UserNodeConnection!
+  userRoles: [UserRoleNode!]!
   householdSet(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   paymentrecordSet(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
   serviceproviderSet(before: String, after: String, first: Int, last: Int): ServiceProviderNodeConnection!
@@ -1408,7 +1408,6 @@ type Query {
   adminArea(id: ID!): AdminAreaNode
   allAdminAreas(before: String, after: String, first: Int, last: Int, title: String, title_Icontains: String, businessArea: String): AdminAreaNodeConnection
   allBusinessAreas(before: String, after: String, first: Int, last: Int, id: UUID): BusinessAreaNodeConnection
-  allLogEntries(objectId: String!, before: String, after: String, first: Int, last: Int): LogEntryObjectConnection
   allFieldsAttributes(flexField: Boolean): [FieldAttributeNode]
   allGroupsWithFields: [GroupAttributeNode]
   koboProject(uid: String!, businessAreaSlug: String!): KoboAssetObject
@@ -1431,14 +1430,18 @@ type Query {
   household(id: ID!): HouseholdNode
   allHouseholds(before: String, after: String, first: Int, last: Int, businessArea: String, countryOrigin: String, countryOrigin_Icontains: String, address: String, address_Icontains: String, headOfHousehold_FullName: String, headOfHousehold_FullName_Icontains: String, size_Range: Int, size_Lte: Int, size_Gte: Int, adminArea: ID, targetPopulations: [ID], programs: [ID], residenceStatus: String, size: String, search: String, orderBy: String): HouseholdNodeConnection
   individual(id: ID!): IndividualNode
-  allIndividuals(before: String, after: String, first: Int, last: Int, programme: String, businessArea: String, fullName: String, fullName_Icontains: String, sex: [ID], age: String, search: String, orderBy: String): IndividualNodeConnection
+  allIndividuals(before: String, after: String, first: Int, last: Int, programme: String, businessArea: String, fullName: String, fullName_Icontains: String, sex: [String], age: String, search: String, orderBy: String): IndividualNodeConnection
   residenceStatusChoices: [ChoiceObject]
   sexChoices: [ChoiceObject]
   maritalStatusChoices: [ChoiceObject]
   relationshipChoices: [ChoiceObject]
   roleChoices: [ChoiceObject]
   me: UserObjectType
-  allUsers(before: String, after: String, first: Int, last: Int, fullName: String, orderBy: String): UserNodeConnection
+  allUsers(before: String, after: String, first: Int, last: Int, search: String, status: [String], partner: [String], roles: [String], businessArea: String!, orderBy: String): UserNodeConnection
+  allLogEntries(objectId: String!, before: String, after: String, first: Int, last: Int): LogEntryObjectConnection
+  userRolesChoices: [ChoiceObject]
+  userStatusChoices: [ChoiceObject]
+  userPartnerChoices: [ChoiceObject]
   importedHousehold(id: ID!): ImportedHouseholdNode
   allImportedHouseholds(before: String, after: String, first: Int, last: Int, rdiId: String, orderBy: String): ImportedHouseholdNodeConnection
   registrationDataImportDatahub(id: ID!): RegistrationDataImportDatahubNode
@@ -1597,6 +1600,14 @@ input RegistrationXlsxImportMutationInput {
   importDataId: ID
   name: String
   businessAreaSlug: String
+}
+
+type RoleNode {
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+  permissions: [String]!
+  userRoles: [UserRoleNode!]!
 }
 
 type SaveKoboProjectImportDataMutation {
@@ -1797,6 +1808,7 @@ type UploadImportDataXLSXFile {
 }
 
 type UserNode implements Node {
+  id: ID!
   lastLogin: DateTime
   isSuperuser: Boolean!
   username: String!
@@ -1806,12 +1818,15 @@ type UserNode implements Node {
   isStaff: Boolean!
   isActive: Boolean!
   dateJoined: DateTime!
-  id: ID!
-  businessAreas(before: String, after: String, first: Int, last: Int, id: UUID): BusinessAreaNodeConnection!
+  status: UserStatus!
+  partner: UserPartner!
+  userRoles: [UserRoleNode!]!
   targetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, orderBy: String): TargetPopulationNodeConnection!
   approvedTargetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, orderBy: String): TargetPopulationNodeConnection!
   finalizedTargetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, orderBy: String): TargetPopulationNodeConnection!
   registrationDataImports(before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
+  businessAreas(before: String, after: String, first: Int, last: Int, id: UUID): BusinessAreaNodeConnection
+  permissions: [String]
 }
 
 type UserNodeConnection {
@@ -1827,6 +1842,7 @@ type UserNodeEdge {
 }
 
 type UserObjectType {
+  id: UUID!
   lastLogin: DateTime
   isSuperuser: Boolean!
   username: String!
@@ -1836,12 +1852,34 @@ type UserObjectType {
   isStaff: Boolean!
   isActive: Boolean!
   dateJoined: DateTime!
-  id: UUID!
-  businessAreas(before: String, after: String, first: Int, last: Int, id: UUID): BusinessAreaNodeConnection!
+  status: UserStatus!
+  partner: UserPartner!
+  userRoles: [UserRoleNode!]!
   targetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, orderBy: String): TargetPopulationNodeConnection!
   approvedTargetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, orderBy: String): TargetPopulationNodeConnection!
   finalizedTargetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, orderBy: String): TargetPopulationNodeConnection!
   registrationDataImports(before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
+  businessAreas(before: String, after: String, first: Int, last: Int, id: UUID): BusinessAreaNodeConnection
+  permissions: [String]
+}
+
+enum UserPartner {
+  UNHCR
+  WFP
+  UNICEF
+}
+
+type UserRoleNode {
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  businessArea: BusinessAreaNode!
+  role: RoleNode!
+}
+
+enum UserStatus {
+  INVITED
+  ACTIVE
+  INACTIVE
 }
 
 type XlsxErrorNode {
