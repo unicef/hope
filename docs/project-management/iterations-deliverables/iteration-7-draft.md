@@ -1,23 +1,29 @@
 # Iteration 7 \[DRAFT\]
 
-The goal of Iteration Seven is to implement Grievance & Feedback.
+**v1.0 - September 15, 2020**
 
-**Expected start/end date:** September 28, 2020 - November 6, 2020 \(6 weeks\)
+**V1.1 - September 21, 2020 - added role totals in commercials**
 
-## **Architectural design / Project Management Deliverables**
+## **Iteration 7 Deliverables**
+
+The goal of Iteration 7 is to implement Grievance & Feedback, change requests relating to targeting \(ui, filtering\) and vulnerability score calculations\).
+
+**Expected start/end date: September 28, 2020 - November 20, 2020 \(8 weeks\)**
+
+###  **Architecture / Project Management Deliverables**
 
 * Sign-off the functional/technical specifications and flows for features to be implemented in later Iterations:
-  * Reporting - _including the leverage of Power BI_
+  * Reporting - on how to leverage of Power BI
   * Dashboard
   * Roles & Permissions
-  * Audit Trail - _potential integration with Sentinel_
+  * Audit Trail - potential integration with Sentinel
   * Anonymization of Data
 * Maintain Project Roadmap / Timeline.
 * Participate in briefing and workshop remotely or in-person as required by UNICEF
 
-## **Technical Deliverables**
+###  **Technical Deliverables**
 
-* Complete development of the [**Grievance & Feedback**](https://tivix.invisionapp.com/d/main#/console/19504414/407644790/preview) module according to the signed off requirements from Iteration 6:
+* Complete development of the Grievance & Feedback module according to the signed-off requirements from Iteration 6:
   * Search & Filter a Table List view of Grievances & Feedback Tickets.
   * Grievance & Feedback Ticket details.
   * Grievance Ticket Types
@@ -25,43 +31,50 @@ The goal of Iteration Seven is to implement Grievance & Feedback.
   * Create Grievance Tickets:
     * Automated
     * Manual
-  * Ability to add / remove individuals from GR via the G&F tool.
+  * Ability to add / remove individuals from GR via the G&F tool. ****
+* Implementation of vulnerability score calculations for Targeting. This will leverage [https://github.com/unicef/hct-mis-ruleengine](https://github.com/unicef/hct-mis-ruleengine) package which UNICEF will primarily provide a working version of.
 
-## **UX / UI Design Deliverables**
+### **Change Requests**
 
+\*\*\*\*[**https://drive.google.com/file/d/1wHlKYzsaEZRalNS-r71YMjTzaAD\_dMpx/view?usp=sharing**](https://drive.google.com/file/d/1wHlKYzsaEZRalNS-r71YMjTzaAD_dMpx/view?usp=sharing)\*\*\*\*
+
+[**https://docs.google.com/document/d/1ax8wG2Pc9NLUCEkgbmlA-lno0thDhuvvpYx7mNOIWPM/edit**](https://docs.google.com/document/d/1ax8wG2Pc9NLUCEkgbmlA-lno0thDhuvvpYx7mNOIWPM/edit)  
+****
+
+#### **Targeting Change Requests**
+
+* Complete the development of the Targeting Change Requests according to the signed off spec from Iteration 6 \(originally implemented in iteration 4\)
+  * UI for updated Targeting
+  * Backend for Data Model changes removing Programme Population ****
+
+#### **Programme Management List View**
+
+* Change to the overall design and layout of the Programme List View Screen \(ie: Card view to Table\) ****
+
+#### **Misc. Changes**
+
+* Misc. tweaks, label changes and feedback received from UNICEF team provided via InVision Comments or another list shared.
+
+### **UX / UI Design Deliverables**
+
+* Design Final clickable prototype for Targeting Change Requests.
 * Design final clickable prototype of Dashboard Tab
-* Design final clickable prototype for Reports Tab
-* Design Final clickable prototype for Targeting Change Requests
+* Establishing where Reports sits in the application from a linking perspective.
 * Continued general upkeep of mockups to represent what is decided/built.
 * Demo for peer review with country offices \(as/if required\).
 
 ## **UNICEF Dependencies**
 
-‌ Following are the dependencies Tivix team has on UNICEF teams in order to deliver on time.
+**‌** The following are the dependencies the Tivix team has on UNICEF teams in order to deliver on time.
 
-* xyz
-
-## **Change Order**
-
-**Targeting Change Requests**
-
-* Complete the development of the [**Targeting Change Requests**](https://tivix.invisionapp.com/share/V6YS88179E5#/431828656_TargetPopultion-Create_-_With_Subcriteria_01) according to the signed off spec from Iteration 6
-  * * UI for Targeting
-    * Backend for Data Model changes removing Programme Population and accounting for Steficon.
-
-**Programme Management List View**
-
-* Change to the overall design and layout of the [**Programme List View Screen**](https://tivix.invisionapp.com/d/main#/console/19504414/407644574/preview) \(ie: Card view to Table\)
-
-**Misc. Changes**
-
-* Misc. tweaks and feedback received from Unicef team provided via InVision Comments or another list shared.
+* Rule engine package: [https://github.com/unicef/hct-mis-ruleengine](https://github.com/unicef/hct-mis-ruleengine)
 
 ## **Out of Scope**
 
 The following items are deemed out of scope:
 
-* xyz
+* Implementation of roles and permission checks and logic in various modules \(to be done in a future iteration\)
+* Design of reporting interface, since it will be BI tool driven.
 
 
 
