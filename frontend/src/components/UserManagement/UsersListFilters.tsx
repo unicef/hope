@@ -1,12 +1,11 @@
 import React from 'react';
 import styled from 'styled-components';
-import { InputAdornment, Grid, FormControl } from '@material-ui/core';
+import { InputAdornment, Grid, FormControl, MenuItem } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
-
-import moment from 'moment';
-// import TextField from '../../../shared/TextField';
 import TextField from '../../shared/TextField';
-// import { AdminAreasAutocomplete } from './AdminAreaAutocomplete';
+import InputLabel from '../../shared/InputLabel';
+import Select from '../../shared/Select';
+import { useUserChoiceDataQuery } from '../../__generated__/graphql';
 
 const Container = styled.div`
   display: flex;
@@ -26,15 +25,6 @@ const Container = styled.div`
   }
 `;
 
-const TextContainer = styled(TextField)`
-  input[type='number']::-webkit-inner-spin-button,
-  input[type='number']::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-  }
-  input[type='number'] {
-    -moz-appearance: textfield;
-  }
-`;
 const StyledFormControl = styled(FormControl)`
   width: 232px;
   color: #5f6368;
@@ -48,10 +38,6 @@ const SearchTextField = styled(TextField)`
   }
 `;
 
-const StartInputAdornment = styled(InputAdornment)`
-  margin-right: 0;
-`;
-
 interface UsersListFiltersProps {
   onFilterChange;
   filter;
@@ -62,6 +48,10 @@ export function UsersListFilters({
 }: UsersListFiltersProps): React.ReactElement {
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
+  const { data: choices } = useUserChoiceDataQuery();
+  if (!choices) {
+    return null;
+  }
 
   return (
     <Container>
@@ -71,7 +61,7 @@ export function UsersListFilters({
             label='Search'
             variant='outlined'
             margin='dense'
-            onChange={(e) => handleFilterChange(e, 'fullName')}
+            onChange={(e) => handleFilterChange(e, 'search')}
             InputProps={{
               startAdornment: (
                 <InputAdornment position='start'>
@@ -80,6 +70,78 @@ export function UsersListFilters({
               ),
             }}
           />
+        </Grid>
+        <Grid item>
+          <StyledFormControl variant='outlined' margin='dense'>
+            <InputLabel>Partner</InputLabel>
+            <Select
+              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
+              // @ts-ignore
+              onChange={(e) => handleFilterChange(e, 'partner')}
+              variant='outlined'
+              label='Partner'
+              value={filter.partner || ''}
+            >
+              <MenuItem value=''>
+                <em>None</em>
+              </MenuItem>
+              {choices.userPartnerChoices.map((item) => {
+                return (
+                  <MenuItem key={item.value} value={item.value}>
+                    {item.name}
+                  </MenuItem>
+                );
+              })}
+            </Select>
+          </StyledFormControl>
+        </Grid>
+        <Grid item>
+          <StyledFormControl variant='outlined' margin='dense'>
+            <InputLabel>Role</InputLabel>
+            <Select
+              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
+              // @ts-ignore
+              onChange={(e) => handleFilterChange(e, 'roles')}
+              variant='outlined'
+              label='Role'
+              value={filter.roles || ''}
+            >
+              <MenuItem value=''>
+                <em>None</em>
+              </MenuItem>
+              {choices.userRolesChoices.map((item) => {
+                return (
+                  <MenuItem key={item.value} value={item.value}>
+                    {item.name}
+                  </MenuItem>
+                );
+              })}
+            </Select>
+          </StyledFormControl>
+        </Grid>
+        <Grid item>
+          <StyledFormControl variant='outlined' margin='dense'>
+            <InputLabel>Status</InputLabel>
+            <Select
+              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
+              // @ts-ignore
+              onChange={(e) => handleFilterChange(e, 'status')}
+              variant='outlined'
+              label='Status'
+              value={filter.status || ''}
+            >
+              <MenuItem value=''>
+                <em>None</em>
+              </MenuItem>
+              {choices.userStatusChoices.map((item) => {
+                return (
+                  <MenuItem key={item.value} value={item.value}>
+                    {item.name}
+                  </MenuItem>
+                );
+              })}
+            </Select>
+          </StyledFormControl>
         </Grid>
       </Grid>
     </Container>

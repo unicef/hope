@@ -4,8 +4,14 @@ import { UserNode } from '../../../__generated__/graphql';
 export const headCells: HeadCell<UserNode>[] = [
   {
     disablePadding: false,
+    label: '',
+    id: 'arrow',
+    numeric: false,
+  },
+  {
+    disablePadding: false,
     label: 'Name',
-    id: 'username',
+    id: 'lastName',
     numeric: false,
   },
   {
