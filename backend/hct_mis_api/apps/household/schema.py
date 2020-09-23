@@ -114,8 +114,8 @@ class IndividualFilter(FilterSet):
 class DocumentTypeNode(DjangoObjectType):
     country = graphene.String(description="Country name")
 
-    def resolve_country(parrent, info):
-        return parrent.country.name
+    def resolve_country(parent, info):
+        return parent.country.name
 
     class Meta:
         model = DocumentType
@@ -124,8 +124,8 @@ class DocumentTypeNode(DjangoObjectType):
 class IndividualIdentityNode(DjangoObjectType):
     type = graphene.String(description="Agency type")
 
-    def resolve_type(parrent, info):
-        return parrent.agency.type
+    def resolve_type(parent, info):
+        return parent.agency.type
 
     class Meta:
         model = IndividualIdentity
@@ -191,11 +191,11 @@ class HouseholdNode(DjangoObjectType):
     selection = graphene.Field(HouseholdSelection)
     sanction_list_possible_match = graphene.Boolean()
 
-    def resolve_country(parrent, info):
-        return parrent.country.name
+    def resolve_country(parent, info):
+        return parent.country.name
 
-    def resolve_country_origin(parrent, info):
-        return parrent.country_origin.name
+    def resolve_country_origin(parent, info):
+        return parent.country_origin.name
 
     def resolve_selection(parent, info):
         selection = parent.selections.first()

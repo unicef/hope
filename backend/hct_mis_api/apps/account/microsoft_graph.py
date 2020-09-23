@@ -1,12 +1,8 @@
 import logging
 
 import requests
-from constance import config as constance
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Group
-from social_django.models import UserSocialAuth
-
 
 AZURE_GRAPH_API_TOKEN_CACHE_KEY = "azure_graph_api_token_cache_key"
 AZURE_GRAPH_DELTA_LINK_KEY = "azure_graph_delta_link_key"
