@@ -156,6 +156,98 @@ export function CreateGrievance(): React.ReactElement {
                           </Grid>
                         </Box>
                       </BoxWithBorder>
+                      <Grid item xs={6}>
+                        <BoxWithBorder>
+                          <Field
+                            name='assignedTo'
+                            label='Assigned to'
+                            variant='filled'
+                            choices={[
+                              {
+                                value: 'User1',
+                                name: 'User1',
+                              },
+                              {
+                                value: 'User2',
+                                name: 'User2',
+                              },
+                              {
+                                value: 'User3',
+                                name: 'User3',
+                              },
+                            ]}
+                            component={FormikSelectField}
+                          />
+                        </BoxWithBorder>
+                        <Grid item xs={12}>
+                          <BoxWithBorder>
+                            <Field
+                              name='Description'
+                              multiline
+                              fullWidth
+                              variant='filled'
+                              label='Description'
+                              component={FormikTextField}
+                            />
+                          </BoxWithBorder>
+                          <Grid item xs={6}>
+                            <Field
+                              name='administrativeLevel2'
+                              label='Administrative Level 2'
+                              variant='filled'
+                              choices={[
+                                {
+                                  value: 'Admin1',
+                                  name: 'Admin1',
+                                },
+                                {
+                                  value: 'Admin2',
+                                  name: 'Admin2',
+                                },
+                                {
+                                  value: 'Admin3',
+                                  name: 'Admin3',
+                                },
+                              ]}
+                              component={FormikSelectField}
+                            />
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Field
+                              name='area'
+                              fullWidth
+                              variant='filled'
+                              label='Area / Village / Pay point'
+                              component={FormikTextField}
+                            />
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Field
+                              name='languagesSpoken'
+                              label='Languages Spoken'
+                              variant='filled'
+                              choices={[
+                                {
+                                  value: 'English',
+                                  name: 'English',
+                                },
+                                {
+                                  value: 'French',
+                                  name: 'French',
+                                },
+                                {
+                                  value: 'Spanish',
+                                  name: 'Spanish',
+                                },
+                              ]}
+                              component={FormikSelectField}
+                            />
+                          </Grid>
+                          <Grid item xs={12}>
+                            <BoxWithBorder />
+                          </Grid>
+                        </Grid>
+                      </Grid>
                     </Grid>
                   </Grid>
 
