@@ -173,10 +173,10 @@ class Query(graphene.ObjectType):
         return info.context.user
 
     def resolve_user_roles_choices(self, info, **kwargs):
-        return to_choice_object(USER_STATUS_CHOICES)
+        return to_choice_object(Role.get_roles_as_choices())
 
     def resolve_user_status_choices(self, info, **kwargs):
-        return to_choice_object(Role.get_roles_as_choices())
+        return to_choice_object(USER_STATUS_CHOICES)
 
     def resolve_user_partner_choices(self, info, **kwargs):
         return to_choice_object(USER_PARTNER_CHOICES)
