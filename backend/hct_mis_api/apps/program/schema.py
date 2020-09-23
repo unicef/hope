@@ -4,7 +4,8 @@ from graphene import relay, ConnectionField
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
-from core.schema import ChoiceObject, LogEntryObjectConnection
+from account.schema import LogEntryObjectConnection
+from core.schema import ChoiceObject
 from core.extended_connection import ExtendedConnection
 from core.utils import to_choice_object
 from payment.models import CashPlanPaymentVerification
