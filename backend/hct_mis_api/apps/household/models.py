@@ -14,6 +14,7 @@ from django.db.models import Sum
 from django.utils.translation import ugettext_lazy as _
 from django_countries.fields import CountryField
 from model_utils import Choices
+from model_utils.fields import UUIDField
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
 
@@ -131,6 +132,16 @@ DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE = (
     (UNIQUE, "Unique"),
     (DUPLICATE, "Duplicate"),
     (NEEDS_ADJUDICATION, "Needs Adjudication"),
+    (NOT_PROCESSED, "Not Processed"),
+)
+SIMILAR_IN_BATCH = "SIMILAR_IN_BATCH"
+DUPLICATE_IN_BATCH = "DUPLICATE_IN_BATCH"
+UNIQUE_IN_BATCH = "UNIQUE_IN_BATCH"
+NOT_PROCESSED = "NOT_PROCESSED"
+DEDUPLICATION_BATCH_STATUS_CHOICE = (
+    (SIMILAR_IN_BATCH, "Similar in batch"),
+    (DUPLICATE_IN_BATCH, "Duplicate in batch"),
+    (UNIQUE_IN_BATCH, "Unique in batch"),
     (NOT_PROCESSED, "Not Processed"),
 )
 
@@ -315,10 +326,15 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
     enrolled_in_nutrition_programme = models.BooleanField(default=False)
     administration_of_rutf = models.BooleanField(default=False)
     unicef_id = models.CharField(max_length=250, blank=True)
-    deduplication_status = models.CharField(
+    deduplication_golden_record_status = models.CharField(
         max_length=50, default=UNIQUE, choices=DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
     )
-    deduplication_results = JSONField(default=dict)
+    deduplication_batch_status = models.CharField(
+        max_length=50, default=UNIQUE_IN_BATCH, choices=DEDUPLICATION_BATCH_STATUS_CHOICE,
+    )
+    deduplication_golden_record_results = JSONField(default=dict)
+    deduplication_batch_results = JSONField(default=dict)
+    imported_individual_id = models.UUIDField(null=True)
     sanction_list_possible_match = models.BooleanField(default=False)
     pregnant = models.BooleanField(default=False)
 
