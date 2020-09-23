@@ -20,7 +20,6 @@ def social_details(backend, details, response, *args, **kwargs):
         r["details"]["email"] = user_data.get("email", user_data.get("signInNames.emailAddress"))
 
     r["details"]["idp"] = response.get("idp", "")
-    raise 
     return r
 
 
@@ -55,8 +54,8 @@ def create_user(strategy, details, backend, user=None, *args, **kwargs):
         first_name=fullname[0].capitalize(),
         last_name=fullname[-1].capitalize(),
     )
-    user.business_areas.add(BusinessArea.objects.first())
-    user.business_areas.add(BusinessArea.objects.all()[1])
+    # user.business_areas.add(BusinessArea.objects.first())
+    # user.business_areas.add(BusinessArea.objects.all()[1])
     user.set_unusable_password()
     user.save()
 

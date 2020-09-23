@@ -49,8 +49,6 @@ class UsersFilter(FilterSet):
         return qs.filter(q_obj)
 
 
-
-
 class BusinessAreaNode1(DjangoObjectType):
     class Meta:
         model = BusinessArea
@@ -58,20 +56,23 @@ class BusinessAreaNode1(DjangoObjectType):
         interfaces = (graphene.relay.Node,)
         connection_class = ExtendedConnection
 
+
 class UserObjectType(DjangoObjectType):
     business_areas = DjangoFilterConnectionField(BusinessAreaNode1)
 
     def resolve_business_areas(self, info):
-        return []
+        return BusinessArea.objects.all()[:2]
+
     class Meta:
         model = get_user_model()
         exclude = ("password",)
+
 
 class UserNode(DjangoObjectType):
     business_areas = DjangoFilterConnectionField(BusinessAreaNode1)
 
     def resolve_business_areas(self, info):
-        return []
+        return BusinessArea.objects.all()[:2]
 
     class Meta:
         model = get_user_model()
