@@ -4,6 +4,8 @@ from graphene import relay, ConnectionField
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
+from account.permissions import NodePermissionMixin, hopePermissionClass, PERMISSION_PROGRAM, PERMISSION_READ, \
+    DjangoPermissionFilterConnectionField
 from account.schema import LogEntryObjectConnection
 from core.schema import ChoiceObject
 from core.extended_connection import ExtendedConnection
@@ -21,7 +23,8 @@ class ProgramFilter(FilterSet):
         model = Program
 
 
-class ProgramNode(DjangoObjectType):
+class ProgramNode(NodePermissionMixin, DjangoObjectType):
+    permission_classes = (hopePermissionClass(f"{PERMISSION_PROGRAM}.{PERMISSION_READ}"),)
     budget = graphene.Decimal()
     total_entitled_quantity = graphene.Decimal()
     total_delivered_quantity = graphene.Decimal()
@@ -97,7 +100,7 @@ class CashPlanNode(DjangoObjectType):
 
 class Query(graphene.ObjectType):
     program = relay.Node.Field(ProgramNode)
-    all_programs = DjangoFilterConnectionField(ProgramNode, filterset_class=ProgramFilter)
+    all_programs = DjangoPermissionFilterConnectionField(ProgramNode, filterset_class=ProgramFilter)
     cash_plan = relay.Node.Field(CashPlanNode)
     all_cash_plans = DjangoFilterConnectionField(CashPlanNode, filterset_class=CashPlanFilter)
     program_status_choices = graphene.List(ChoiceObject)
