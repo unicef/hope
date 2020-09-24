@@ -39,7 +39,7 @@ class MicrosoftGraphAPI:
         self.delta_link = ""
 
     def get_token(self):
-        if not self.azure_client_id or self.secret:
+        if not self.azure_client_id or not self.secret:
             raise ValueError("Configure AZURE_CLIENT_ID and/or AZURE_CLIENT_SECRET")
 
         post_dict = {
