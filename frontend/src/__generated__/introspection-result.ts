@@ -21,7 +21,7 @@
             "name": "PaymentRecordNode"
           },
           {
-            "name": "BusinessAreaNode"
+            "name": "UserBusinessAreaNode"
           },
           {
             "name": "HouseholdNode"
@@ -58,6 +58,9 @@
           },
           {
             "name": "ServiceProviderNode"
+          },
+          {
+            "name": "BusinessAreaNode"
           },
           {
             "name": "ImportedHouseholdNode"

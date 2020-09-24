@@ -77,15 +77,26 @@ class RoleNode(DjangoObjectType):
         exclude = ("id",)
 
 
-class UserObjectType(DjangoObjectType):
-    business_areas = DjangoFilterConnectionField(BusinessAreaNode)
+class UserBusinessAreaNode(DjangoObjectType):
     permissions = graphene.List(graphene.String)
+
+    def resolve_permissions(self, info):
+        user_roles = UserRole.objects.filter(user=info.context.user, business_area_id=self.id)
+        return permissions_resolver(user_roles)
+
+    class Meta:
+        model = BusinessArea
+        filter_fields = ["id"]
+        interfaces = (graphene.relay.Node,)
+        connection_class = ExtendedConnection
+
+
+class UserObjectType(DjangoObjectType):
+    business_areas = DjangoFilterConnectionField(UserBusinessAreaNode)
 
     def resolve_business_areas(self, info):
         return BusinessArea.objects.filter(user_roles__user=self).distinct()
 
-    def resolve_permissions(self, info):
-        return permissions_resolver(self.user_roles.all())
 
     class Meta:
         model = get_user_model()
@@ -93,14 +104,10 @@ class UserObjectType(DjangoObjectType):
 
 
 class UserNode(DjangoObjectType):
-    business_areas = DjangoFilterConnectionField(BusinessAreaNode)
-    permissions = graphene.List(graphene.String)
+    business_areas = DjangoFilterConnectionField(UserBusinessAreaNode)
 
     def resolve_business_areas(self, info):
         return BusinessArea.objects.filter(user_roles__user=self).distinct()
-
-    def resolve_permissions(self, info):
-        return permissions_resolver(self.user_roles.all())
 
     class Meta:
         model = get_user_model()
