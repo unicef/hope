@@ -1,14 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { Box, Paper } from '@material-ui/core';
 import BlockRoundedIcon from '@material-ui/icons/BlockRounded';
 
 const Container = styled.div`
   padding: 20px;
-  //fontsize: 24px;
-  //lineheight: 28px;
-  //textalign: center;
-  //padding: 70px;
 `;
 const Icon = styled(BlockRoundedIcon)`
   && {
@@ -29,7 +25,7 @@ const SmallerText = styled.div`
   font-size: 16px;
 `;
 
-export function PermissionDenied() {
+export function PermissionDenied(): React.ReactElement {
   return (
     <Container>
       <Paper>
@@ -37,7 +33,7 @@ export function PermissionDenied() {
           <Icon />
           <Box>Permission Denied</Box>
           <SmallerText>
-            Ask Administrator to get access to this page
+            Ask the Administrator to get access to this page
           </SmallerText>
         </PaperContainer>
       </Paper>
