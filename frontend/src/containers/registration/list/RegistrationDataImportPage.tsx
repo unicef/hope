@@ -4,11 +4,10 @@ import { PageHeader } from '../../../components/PageHeader';
 import { RegistrationDataImport } from '../import/RegistrationDataImport';
 import { RegistrationDataImportTable } from '../tables/RegistrationdDataImportTable';
 import { useDebounce } from '../../../hooks/useDebounce';
-import { RegistrationFilters } from './RegistrationFilter';
-import { useMeQuery } from '../../../__generated__/graphql';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-
+import { PermissionDenied } from '../../../components/PermissionDenied';
+import { RegistrationFilters } from './RegistrationFilter';
 
 export function RegistrationDataImportPage(): React.ReactElement {
   const permissions = usePermissions();
@@ -19,7 +18,7 @@ export function RegistrationDataImportPage(): React.ReactElement {
     return null;
   }
   if (!hasPermissions([PERMISSIONS.RDI_LIST, PERMISSIONS.READ], permissions)) {
-    return <div>NO PERMISSIONS</div>;
+    return <PermissionDenied />;
   }
   const toolbar = (
     <PageHeader title={t('Registration Data Import')}>
