@@ -12,7 +12,7 @@ export const individualMinimal = gql`
     maritalStatus
     phoneNo
     sanctionListPossibleMatch
-    deduplicationStatus
+    deduplicationGoldenRecordStatus
     role
     status
     documents {
