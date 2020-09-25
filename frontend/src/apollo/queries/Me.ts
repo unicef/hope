@@ -14,6 +14,7 @@ export const Me = gql`
             id
             name
             slug
+            permissions
           }
         }
       }
