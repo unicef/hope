@@ -72,4 +72,4 @@ class Role(TimeStampedUUIDModel):
 
     @classmethod
     def get_roles_as_choices(cls):
-        return [(role.name, role.name) for role in cls.objects.all()]
+        return [(role.id, role.name) for role in cls.objects.all()]

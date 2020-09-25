@@ -55,26 +55,27 @@ def dict_to_choices() -> List[Tuple[str, str]]:
 
 class BasePermission:
     @classmethod
-    def has_permission(cls, info):
+    def has_permission(cls, info, **kwargs):
         return False
 
 
 class AllowAny(BasePermission):
     @classmethod
-    def has_permission(cls, info):
+    def has_permission(cls, info, **kwargs):
+        print(kwargs)
         return True
 
 
 class AllowAuthenticated(BasePermission):
     @classmethod
-    def has_permission(cls, info):
+    def has_permission(cls, info, **kwargs):
         return info.context.user.is_authenticated
 
 
 def hopePermissionClass(permission):
     class XDPerm(BasePermission):
         @classmethod
-        def has_permission(cls, info):
+        def has_permission(cls, info, **kwargs):
             return info.context.user.has_permission(permission)
 
     return XDPerm
@@ -85,7 +86,7 @@ class NodePermissionMixin:
 
     @classmethod
     def get_node(cls, info, id):
-        if all((perm.has_permission(info, id) for perm in cls.permission_classes)):
+        if all((perm.has_permission(info) for perm in cls.permission_classes)):
             try:
                 object_instance = cls._meta.model.objects.get(pk=id)  # type: ignore
             except cls._meta.model.DoesNotExist:  # type: ignore
@@ -142,10 +143,10 @@ class DjangoPermissionFilterConnectionField(DjangoConnectionField):
 
     @classmethod
     def resolve_queryset(cls, connection, iterable, info, args, filtering_args, filterset_class, permission_classes):
-        if not all((perm.has_node_permission(info, id) for perm in permission_classes)):
+        filter_kwargs = {k: v for k, v in args.items() if k in filtering_args}
+        if not all((perm.has_permission(info, **filter_kwargs) for perm in permission_classes)):
             raise GraphQLError("Permission Denied")
         qs = super(DjangoPermissionFilterConnectionField, cls).resolve_queryset(connection, iterable, info, args)
-        filter_kwargs = {k: v for k, v in args.items() if k in filtering_args}
         return filterset_class(data=filter_kwargs, queryset=qs, request=info.context).qs
 
     def get_queryset_resolver(self):
@@ -153,4 +154,5 @@ class DjangoPermissionFilterConnectionField(DjangoConnectionField):
             self.resolve_queryset,
             filterset_class=self.filterset_class,
             filtering_args=self.filtering_args,
+            permission_classes=self.permission_classes,
         )

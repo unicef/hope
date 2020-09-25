@@ -16,7 +16,7 @@
     <h3>Type a list of emails of ActiveDirectory users to add them to HOPE</h3>
     <form method="POST" id="load_users" novalidate>
         {% csrf_token %}
-        {{ form }}
+        {{ form.as_p }}
         <div><input type="submit" value="Add to HOPE"></div>
     </form>
 {% endblock content %}
