@@ -267,7 +267,7 @@ export function EditVerificationPlan({
                     <Field
                       name='excludedAdminAreasFull'
                       choices={mappedAdminAreas}
-                      variant='filled'
+                      variant='outlined'
                       label='Filter Out Administrative Level Areas'
                       component={FormikMultiSelectField}
                     />
@@ -353,7 +353,7 @@ export function EditVerificationPlan({
                         <Field
                           name='excludedAdminAreasRandom'
                           choices={mappedAdminAreas}
-                          variant='filled'
+                          variant='outlined'
                           label='Filter Out Administrative Level Areas'
                           component={FormikMultiSelectField}
                         />
