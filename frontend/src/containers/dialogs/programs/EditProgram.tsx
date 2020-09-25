@@ -1,5 +1,4 @@
 import React, { useState, ReactElement } from 'react';
-import moment from 'moment';
 import { Button } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/EditRounded';
 import {
@@ -11,6 +10,7 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { PROGRAM_QUERY } from '../../../apollo/queries/Program';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { ALL_LOG_ENTRIES_QUERY } from '../../../apollo/queries/AllLogEntries';
+import { UniversalMoment } from '../../../components/UniversalMoment';
 
 interface EditProgramProps {
   program: ProgramNode;
@@ -47,8 +47,8 @@ export function EditProgram({ program }: EditProgramProps): ReactElement {
         programData: {
           id: program.id,
           ...values,
-          startDate: moment(values.startDate).format('YYYY-MM-DD'),
-          endDate: moment(values.endDate).format('YYYY-MM-DD'),
+          startDate: <UniversalMoment>{values.startDate}</UniversalMoment>,
+          endDate: <UniversalMoment>{values.endDate}</UniversalMoment>,
           budget: parseFloat(values.budget).toFixed(2),
         },
       },

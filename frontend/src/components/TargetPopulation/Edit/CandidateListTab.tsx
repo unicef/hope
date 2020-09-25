@@ -1,12 +1,12 @@
 import React from 'react';
 import { Typography, Paper } from '@material-ui/core';
-import { TargetPopulationHouseholdTable } from '../../../containers/tables/TargetPopulationHouseholdTable';
 import { FieldArray } from 'formik';
+import { Label } from '@material-ui/icons';
+import styled from 'styled-components';
+import { TargetPopulationHouseholdTable } from '../../../containers/tables/TargetPopulationHouseholdTable';
 import { TargetingCriteria } from '../TargetingCriteria';
 import { Results } from '../Results';
 import { useGoldenRecordByTargetingCriteriaQuery } from '../../../__generated__/graphql';
-import { Label } from '@material-ui/icons';
-import styled from 'styled-components';
 
 const PaperContainer = styled(Paper)`
   display: flex;
@@ -17,7 +17,7 @@ const PaperContainer = styled(Paper)`
   border-bottom: 1px solid rgba(224, 224, 224, 1);
 `;
 
-export function CandidateListTab({values}) {
+export function CandidateListTab({ values }): React.ReactElement {
   return (
     <>
       <FieldArray

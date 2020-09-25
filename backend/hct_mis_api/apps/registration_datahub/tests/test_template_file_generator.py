@@ -14,7 +14,7 @@ class TestTemplateFileGenerator(TestCase):
 
     def test_handle_name_and_label_row(self):
         fields = {
-            "test": {"label": {"English(EN)": "My Test Label"}, "required": True, "type": "STRING", "choices": [],},
+            "test": {"label": {"English(EN)": "My Test Label"}, "required": True, "type": "STRING", "choices": []},
             "test_h_f": {
                 "label": {"English(EN)": "Flex Test Label"},
                 "required": False,
@@ -55,7 +55,7 @@ class TestTemplateFileGenerator(TestCase):
         "core.core_fields_attributes.CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY",
         {
             "households": {
-                "test": {"label": {"English(EN)": "My Test Label"}, "required": True, "type": "STRING", "choices": [],}
+                "test": {"label": {"English(EN)": "My Test Label"}, "required": True, "type": "STRING", "choices": []}
             },
             "individuals": {
                 "test2": {

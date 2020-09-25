@@ -1,6 +1,7 @@
+import subprocess
+
 from django.core.management import call_command
 from django.core.management.commands import makemigrations
-import subprocess
 
 from account.models import Role
 from account.permissions import PERMISSION_READ, PERMISSION_DASHBOARD

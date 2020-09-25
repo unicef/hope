@@ -70,10 +70,6 @@ const AddCriteria = styled.div`
   }
 `;
 
-const Row = styled.div`
-  width: 100%;
-`;
-
 interface TargetingCriteriaProps {
   selectedTab?: number;
   candidateListRules?;
@@ -88,27 +84,27 @@ export function TargetingCriteria({
   targetPopulationRules = [],
   isEdit = false,
   helpers,
-}: TargetingCriteriaProps) {
+}: TargetingCriteriaProps): React.ReactElement {
   const { t } = useTranslation();
   const [isOpen, setOpen] = useState(false);
   const [criteriaIndex, setIndex] = useState(null);
   const [criteriaObject, setCriteria] = useState({});
   const showAdditionalCriterias = selectedTab > 0;
-  const openModal = (criteria) => {
+  const openModal = (criteria): void => {
     setCriteria(criteria);
     setOpen(true);
   };
-  const closeModal = () => {
+  const closeModal = (): void => {
     setCriteria({});
     setIndex(null);
     return setOpen(false);
   };
-  const editCriteria = (criteria, index) => {
+  const editCriteria = (criteria, index): void => {
     setIndex(index);
     return openModal(criteria);
   };
 
-  const addCriteria = (values) => {
+  const addCriteria = (values): void => {
     if (criteriaIndex !== null) {
       helpers.replace(criteriaIndex, { filters: [...values.filters] });
     } else {

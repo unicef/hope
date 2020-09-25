@@ -5,11 +5,8 @@ import { IndividualNode } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
 import { Flag } from '../../../components/Flag';
-import {
-  decodeIdString,
-  getAgeFromDob,
-  sexToCapitalize,
-} from '../../../utils/utils';
+import { getAgeFromDob, sexToCapitalize } from '../../../utils/utils';
+import { FlagTooltip } from '../../../components/FlagTooltip';
 
 interface IndividualsListTableRowProps {
   individual: IndividualNode;
@@ -36,12 +33,13 @@ export function IndividualsListTableRow({
       key={individual.id}
     >
       <TableCell align='left'>
+        {individual.deduplicationStatus !== 'UNIQUE' && <FlagTooltip />}
         {individual.sanctionListPossibleMatch && <Flag />}
       </TableCell>
-      <TableCell align='left'>{decodeIdString(individual.id)}</TableCell>
+      <TableCell align='left'>{individual.unicefId}</TableCell>
       <TableCell align='left'>{individual.fullName}</TableCell>
       <TableCell align='left'>
-        {individual.household ? decodeIdString(individual.household.id) : ''}
+        {individual.household ? individual.household.unicefId : ''}
       </TableCell>
       <TableCell align='right'>{age}</TableCell>
       <TableCell align='left'>{sexToCapitalize(individual.sex)}</TableCell>

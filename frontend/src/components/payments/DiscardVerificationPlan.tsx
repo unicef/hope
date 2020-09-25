@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Button, DialogContent, DialogTitle, Box } from '@material-ui/core';
-import CheckRoundedIcon from '@material-ui/icons/CheckRounded';
 import styled from 'styled-components';
 import ClearIcon from '@material-ui/icons/Clear';
 import { Dialog } from '../../containers/dialogs/Dialog';
@@ -78,10 +77,9 @@ export function DiscardVerificationPlan({
           <DialogContainer>
             <Box p={5}>
               <div>
-                Payment verification for households who have responded will not
-                be visible
+                Are you sure you would like to delete payment verification
+                records <br /> and restart the verification process?
               </div>
-              <div>or valid anymore. Are you sure?</div>
             </Box>
           </DialogContainer>
         </DialogContent>

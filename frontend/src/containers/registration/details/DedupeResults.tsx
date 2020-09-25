@@ -9,13 +9,13 @@ import {
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { useHistory } from 'react-router-dom';
-import { MiśTheme } from '../../../theme';
-import { decodeIdString } from '../../../utils/utils';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
+import { decodeIdString } from '../../../utils/utils';
+import { MiśTheme } from '../../../theme';
 import {
   ImportedIndividualMinimalFragment,
   DeduplicationResultNode,
@@ -68,7 +68,7 @@ export function DedupeResults({
   const [open, setOpen] = useState(false);
   const history = useHistory();
   const businessArea = useBusinessArea();
-  const useStyles = makeStyles((theme) => ({
+  const useStyles = makeStyles(() => ({
     table: {
       minWidth: 100,
     },

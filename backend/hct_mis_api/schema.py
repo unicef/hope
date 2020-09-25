@@ -5,12 +5,14 @@ from graphene_django.forms.converter import convert_form_field
 
 import account.schema
 import core.schema
+import graphene
 import household.schema
 import payment.mutations
 import payment.schema
 import program.mutations
 import program.schema
 import registration_data.schema
+import registration_datahub.schema
 import registration_datahub.mutations
 import registration_datahub.schema
 import sanction_list.mutations

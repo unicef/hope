@@ -2,7 +2,7 @@ import { connect } from 'formik';
 import { useEffect } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 
-const FormikEffectComponent = ({ onChange, values }) => {
+const FormikEffectComponent = ({ onChange, values }): React.ReactElement => {
   const prevValues = usePrevious(values);
   useEffect(() => {
     // Don't run effect on form init

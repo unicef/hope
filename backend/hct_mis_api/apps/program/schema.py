@@ -1,18 +1,23 @@
 import graphene
 from django.db.models import Case, When, Value, IntegerField, Q
+from django_filters import FilterSet, OrderingFilter, CharFilter
 from graphene import relay, ConnectionField
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
-from account.permissions import NodePermissionMixin, hopePermissionClass, PERMISSION_PROGRAM, PERMISSION_READ, \
-    DjangoPermissionFilterConnectionField
 from account.schema import LogEntryObjectConnection
-from core.schema import ChoiceObject
+from account.permissions import (
+    NodePermissionMixin,
+    hopePermissionClass,
+    PERMISSION_PROGRAM,
+    PERMISSION_READ,
+    DjangoPermissionFilterConnectionField,
+)
 from core.extended_connection import ExtendedConnection
+from core.schema import ChoiceObject
 from core.utils import to_choice_object
 from payment.models import CashPlanPaymentVerification
 from program.models import Program, CashPlan
-from django_filters import FilterSet, OrderingFilter, CharFilter
 
 
 class ProgramFilter(FilterSet):

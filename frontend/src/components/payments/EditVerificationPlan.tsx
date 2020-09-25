@@ -11,7 +11,6 @@ import {
   Box,
   Grid,
 } from '@material-ui/core';
-
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
@@ -190,7 +189,6 @@ export function EditVerificationPlan({
       ],
     });
     setOpen(false);
-    console.log(errors);
 
     if (errors) {
       showMessage('Error while submitting');
@@ -199,19 +197,18 @@ export function EditVerificationPlan({
     showMessage('Verification plan edited.');
   };
 
-  const mappedAdminAreas =
-    data && data.allAdminAreas.edges.length
-      ? data.allAdminAreas.edges.map((el) => ({
-          value: el.node.id,
-          name: el.node.title,
-        }))
-      : [];
+  const mappedAdminAreas = data?.allAdminAreas?.edges?.length
+    ? data.allAdminAreas.edges.map((el) => ({
+        value: el.node.id,
+        name: el.node.title,
+      }))
+    : [];
 
-  const handleFormChange = (values) => {
+  const handleFormChange = (values): void => {
     setFormValues(values);
   };
 
-  const getSampleSizePercentage = () => {
+  const getSampleSizePercentage = (): string => {
     if (sampleSizesData?.sampleSize?.paymentRecordCount !== 0) {
       return ` (${(sampleSizesData?.sampleSize?.sampleSize /
         sampleSizesData?.sampleSize?.paymentRecordCount) *
@@ -266,13 +263,15 @@ export function EditVerificationPlan({
                   </StyledTabs>
                 </TabsContainer>
                 <TabPanel value={selectedTab} index={0}>
-                  <Field
-                    name='excludedAdminAreasFull'
-                    choices={mappedAdminAreas}
-                    variant='filled'
-                    label='Filter Out Admin Areas'
-                    component={FormikMultiSelectField}
-                  />
+                  {mappedAdminAreas && (
+                    <Field
+                      name='excludedAdminAreasFull'
+                      choices={mappedAdminAreas}
+                      variant='filled'
+                      label='Filter Out Administrative Level Areas'
+                      component={FormikMultiSelectField}
+                    />
+                  )}
                   <Box pt={3}>
                     <Box
                       pb={3}
@@ -302,11 +301,11 @@ export function EditVerificationPlan({
                         style={{ width: '90%' }}
                         choices={
                           rapidProFlows
-                              ? rapidProFlows.allRapidProFlows.map((flow) => ({
+                            ? rapidProFlows.allRapidProFlows.map((flow) => ({
                                 value: flow.id,
                                 name: flow.name,
                               }))
-                              : []
+                            : []
                         }
                         component={FormikSelectField}
                       />
@@ -336,7 +335,7 @@ export function EditVerificationPlan({
                       <Box display='flex'>
                         <Field
                           name='adminCheckbox'
-                          label='Admin'
+                          label='Administrative Level'
                           component={FormikCheckboxField}
                         />
                         <Field
@@ -346,7 +345,7 @@ export function EditVerificationPlan({
                         />
                         <Field
                           name='sexCheckbox'
-                          label='Sex'
+                          label='Gender'
                           component={FormikCheckboxField}
                         />
                       </Box>
@@ -355,7 +354,7 @@ export function EditVerificationPlan({
                           name='excludedAdminAreasRandom'
                           choices={mappedAdminAreas}
                           variant='filled'
-                          label='Filter Out Admin Areas'
+                          label='Filter Out Administrative Level Areas'
                           component={FormikMultiSelectField}
                         />
                       )}
@@ -389,7 +388,7 @@ export function EditVerificationPlan({
                           <Grid item xs={5}>
                             <Field
                               name='filterSex'
-                              label='Sex'
+                              label='Gender'
                               color='primary'
                               choices={[
                                 { value: 'FEMALE', name: 'Female' },

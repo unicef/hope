@@ -5,10 +5,7 @@ import factory
 from factory import fuzzy
 
 from account.fixtures import UserFactory
-from core.core_fields_attributes import (
-    CORE_FIELDS_ATTRIBUTES,
-    FILTERABLE_CORE_FIELDS_ATTRIBUTES,
-)
+from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES
 from household.fixtures import HouseholdFactory
 from household.models import RESIDENCE_STATUS_CHOICE
 from targeting.models import (
@@ -24,10 +21,10 @@ def comparision_method_resolver(obj):
     core_field_attrs = [attr for attr in core_fields if attr.get("name") == obj.field_name]
     core_field_attr = core_field_attrs[0]
     if core_field_attr.get("type") == "INTEGER":
-        return random.choice(["EQUALS", "NOT_EQUALS", "RANGE", "NOT_IN_RANGE", "GREATER_THAN", "LESS_THAN",])
+        return random.choice(["EQUALS", "NOT_EQUALS", "RANGE", "NOT_IN_RANGE", "GREATER_THAN", "LESS_THAN"])
 
     if core_field_attr.get("type") == "SELECT_ONE":
-        return random.choice(["EQUALS", "NOT_EQUALS",])
+        return random.choice(["EQUALS", "NOT_EQUALS"])
     if core_field_attr.get("type") == "STRING":
         return "CONTAINS"
 

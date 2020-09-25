@@ -20,7 +20,7 @@ export const FormikSliderField = ({
 }): React.ReactElement => {
   const classes = useStyles();
 
-  const handleSliderChange = (event, newValue) => {
+  const handleSliderChange = (event, newValue): void => {
     form.setFieldValue(field.name, newValue);
   };
 

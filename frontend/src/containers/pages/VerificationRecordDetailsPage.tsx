@@ -1,6 +1,5 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import styled from 'styled-components';
 import {
   PaymentVerificationNode,
   usePaymentRecordVerificationQuery,
@@ -12,24 +11,6 @@ import { LoadingComponent } from '../../components/LoadingComponent';
 import { VerificationRecordDetails } from '../../components/payments/VerificationRecordDetails';
 import { decodeIdString } from '../../utils/utils';
 import { VerifyManual } from '../../components/payments/VerifyManual';
-
-const Container = styled.div`
-  display: flex;
-  flex: 1;
-  width: 100%;
-  background-color: #fff;
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
-  flex-direction: column;
-  align-items: center;
-  border-color: #b1b1b5;
-  border-bottom-width: 1px;
-  border-bottom-style: solid;
-
-  && > div {
-    margin: 5px;
-  }
-`;
 
 export function VerificationRecordDetailsPage(): React.ReactElement {
   const { id } = useParams();

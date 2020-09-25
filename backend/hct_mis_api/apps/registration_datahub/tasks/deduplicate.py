@@ -6,15 +6,19 @@ from django_countries.fields import Country
 
 from core.utils import to_dict
 from household.documents import IndividualDocument
-from household.elasticsearch_utils import populate_all_indexes
-from household.models import Individual, DUPLICATE, NEEDS_ADJUDICATION, UNIQUE, NOT_PROCESSED
-from registration_data.models import RegistrationDataImport
-from registration_datahub.documents import ImportedIndividualDocument
-from registration_datahub.models import (
-    ImportedIndividual,
+from household.elasticsearch_utils import populate_index
+from household.models import (
+    Individual,
+    DUPLICATE,
+    NEEDS_ADJUDICATION,
+    UNIQUE,
+    NOT_PROCESSED,
     DUPLICATE_IN_BATCH,
     UNIQUE_IN_BATCH,
 )
+from registration_data.models import RegistrationDataImport
+from registration_datahub.documents import ImportedIndividualDocument
+from registration_datahub.models import ImportedIndividual
 
 log = logging.getLogger(__name__)
 
@@ -325,7 +329,7 @@ class DeduplicateTask:
                 results_data,
             ) = cls.deduplicate_single_individual(individual)
 
-            individual.deduplication_results = results_data
+            individual.deduplication_golden_record_results = results_data
             to_bulk_update_results.append(individual)
 
             all_duplicates.extend(duplicates)
@@ -343,8 +347,6 @@ class DeduplicateTask:
 
     @classmethod
     def deduplicate_individuals(cls, registration_data_import):
-        populate_all_indexes()
-
         cls.business_area = registration_data_import.business_area.slug
         (
             all_duplicates,
@@ -357,14 +359,14 @@ class DeduplicateTask:
 
     @staticmethod
     def _mark_individuals(all_duplicates, all_possible_duplicates, to_bulk_update_results):
-        Individual.objects.filter(id__in=all_duplicates).update(deduplication_status=DUPLICATE)
+        Individual.objects.filter(id__in=all_duplicates).update(deduplication_golden_record_status=DUPLICATE)
 
         Individual.objects.filter(id__in=set(all_possible_duplicates).difference(set(all_duplicates))).update(
-            deduplication_status=NEEDS_ADJUDICATION
+            deduplication_golden_record_status=NEEDS_ADJUDICATION
         )
 
         Individual.objects.bulk_update(
-            to_bulk_update_results, ["deduplication_results",],
+            to_bulk_update_results, ["deduplication_golden_record_results"],
         )
 
     @staticmethod
@@ -375,11 +377,11 @@ class DeduplicateTask:
 
     @classmethod
     def deduplicate_imported_individuals(cls, registration_data_import_datahub):
-        populate_all_indexes()
-
         imported_individuals = ImportedIndividual.objects.filter(
             registration_data_import=registration_data_import_datahub
         )
+        populate_index(imported_individuals, ImportedIndividualDocument)
+
         registration_data_import = RegistrationDataImport.objects.get(id=registration_data_import_datahub.hct_id)
         cls.business_area = registration_data_import_datahub.business_area_slug
         allowed_duplicates_batch_amount = round(
@@ -502,7 +504,7 @@ class DeduplicateTask:
         ).update(deduplication_golden_record_status=NEEDS_ADJUDICATION)
 
         ImportedIndividual.objects.bulk_update(
-            to_bulk_update_results, ["deduplication_batch_results", "deduplication_golden_record_results",],
+            to_bulk_update_results, ["deduplication_batch_results", "deduplication_golden_record_results"],
         )
         registration_data_import_datahub.refresh_from_db()
         if registration_data_import.status == RegistrationDataImport.DEDUPLICATION_FAILED:

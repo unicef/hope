@@ -4,8 +4,6 @@ import factory
 from factory import fuzzy
 from pytz import utc
 
-from core.fixtures import AdminAreaFactory
-from household.const import NATIONALITIES
 from household.models import (
     Household,
     EntitlementCard,
@@ -27,7 +25,7 @@ def flex_field_households(o):
     return {
         "treatment_facility_h_f": random.sample(
             [
-                "governent_health_center",
+                "government_health_center",
                 "governent_hospital",
                 "other_public",
                 "private_hospital",
@@ -136,20 +134,13 @@ def create_household(household_args=None, individual_args=None):
     return household, individuals
 
 
-def create_household_and_individuals(
-        household_data=None, individuals_data=None, imported=False
-):
+def create_household_and_individuals(household_data=None, individuals_data=None, imported=False):
     if household_data is None:
         household_data = {}
     if individuals_data is None:
         individuals_data = {}
-    household = HouseholdFactory.build(
-        **household_data, size=len(individuals_data)
-    )
-    individuals = [
-        IndividualFactory(household=household, **individual_data)
-        for individual_data in individuals_data
-    ]
+    household = HouseholdFactory.build(**household_data, size=len(individuals_data))
+    individuals = [IndividualFactory(household=household, **individual_data) for individual_data in individuals_data]
     household.head_of_household = individuals[0]
     household.save()
     return household, individuals

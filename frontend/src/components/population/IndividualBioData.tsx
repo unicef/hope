@@ -8,7 +8,6 @@ import {
   useHouseholdChoiceDataQuery,
 } from '../../__generated__/graphql';
 import {
-  decodeIdString,
   getAgeFromDob,
   sexToCapitalize,
   choicesToDict,
@@ -30,10 +29,6 @@ const Title = styled.div`
 const ContentLink = styled.div`
   text-decoration: underline;
   cursor: pointer;
-`;
-const StatusContainer = styled.div`
-  min-width: 120px;
-  max-width: 200px;
 `;
 
 interface IndividualBioDataProps {
@@ -114,7 +109,7 @@ export function IndividualsBioData({
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Sex'>
+          <LabelizedField label='Gender'>
             <div>{sexToCapitalize(individual.sex)}</div>
           </LabelizedField>
         </Grid>
@@ -150,7 +145,7 @@ export function IndividualsBioData({
         <Grid item xs={3}>
           <LabelizedField label='Household ID'>
             <ContentLink onClick={() => openHousehold()}>
-              {decodeIdString(individual.household.id)}
+              {individual.household.unicefId}
             </ContentLink>
           </LabelizedField>
         </Grid>
