@@ -1,5 +1,6 @@
 import React, { ReactElement } from 'react';
 import styled from 'styled-components';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
   UserNode,
   AllUsersQueryVariables,
@@ -20,8 +21,14 @@ interface UsersListTableProps {
 export const UsersListTable = ({
   filter,
 }: UsersListTableProps): ReactElement => {
+  const businessArea = useBusinessArea();
+
   const initialVariables = {
-    fullName: filter.fullName,
+    search: filter.search,
+    partner: filter.partner,
+    roles: filter.roles,
+    status: filter.status,
+    businessArea,
   };
   return (
     <TableWrapper>
@@ -31,7 +38,7 @@ export const UsersListTable = ({
         rowsPerPageOptions={[10, 15, 20]}
         query={useAllUsersQuery}
         queriedObjectName='allUsers'
-        defaultOrderBy='email'
+        defaultOrderBy='status'
         defaultOrderDirection='desc'
         initialVariables={initialVariables}
         renderRow={(row) => <UsersListTableRow user={row} key={row.id} />}

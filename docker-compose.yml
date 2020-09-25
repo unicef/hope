@@ -57,6 +57,7 @@ services:
       - redis
       - cash_assist_datahub_db
       - registration_datahub_db
+      - elasticsearch
   db:
     image: mdillon/postgis:9.5-alpine
     volumes:

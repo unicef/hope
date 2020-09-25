@@ -33,7 +33,7 @@ export function IndividualsListTableRow({
       key={individual.id}
     >
       <TableCell align='left'>
-        {individual.deduplicationStatus !== 'UNIQUE' && <FlagTooltip />}
+        {individual.deduplicationGoldenRecordStatus !== 'UNIQUE' && <FlagTooltip />}
         {individual.sanctionListPossibleMatch && <Flag />}
       </TableCell>
       <TableCell align='left'>{individual.unicefId}</TableCell>
