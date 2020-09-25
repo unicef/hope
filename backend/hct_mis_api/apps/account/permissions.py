@@ -8,6 +8,8 @@ from graphql import GraphQLError
 from collections import OrderedDict
 from model_utils import Choices
 
+from core.models import BusinessArea
+
 PERMISSION_CREATE = "CREATE"
 PERMISSION_UPDATE = "UPDATE"
 PERMISSION_DELETE = "DELETE"
@@ -62,7 +64,6 @@ class BasePermission:
 class AllowAny(BasePermission):
     @classmethod
     def has_permission(cls, info, **kwargs):
-        print(kwargs)
         return True
 
 
@@ -76,24 +77,37 @@ def hopePermissionClass(permission):
     class XDPerm(BasePermission):
         @classmethod
         def has_permission(cls, info, **kwargs):
-            return info.context.user.has_permission(permission)
+            business_area_arg = kwargs.get("business_area")
+            if isinstance(business_area_arg, BusinessArea):
+                business_area = business_area_arg
+            else:
+                if business_area_arg is None:
+                    return False
+                business_area = BusinessArea.objects.filter(slug=business_area_arg).first()
+                if business_area is None:
+                    return False
+            return info.context.user.has_permission(permission, business_area)
 
     return XDPerm
 
 
-class NodePermissionMixin:
+class BaseNodePermissionMixin:
     permission_classes = (AllowAny,)
 
     @classmethod
-    def get_node(cls, info, id):
-        if all((perm.has_permission(info) for perm in cls.permission_classes)):
-            try:
-                object_instance = cls._meta.model.objects.get(pk=id)  # type: ignore
-            except cls._meta.model.DoesNotExist:  # type: ignore
-                object_instance = None
-            return object_instance
-        else:
+    def check_node_permission(cls, info, object_instance):
+        business_area = object_instance.business_area
+        if not all((perm.has_permission(info, business_area=business_area) for perm in cls.permission_classes)):
             raise GraphQLError("Permission Denied")
+
+    @classmethod
+    def get_node(cls, info, id):
+        try:
+            object_instance = cls._meta.model.objects.get(pk=id)  # type: ignore
+            cls.check_node_permission(info, object_instance)
+        except cls._meta.model.DoesNotExist:  # type: ignore
+            object_instance = None
+        return object_instance
 
 
 class DjangoPermissionFilterConnectionField(DjangoConnectionField):

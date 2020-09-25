@@ -100,6 +100,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
                         message = _(f"{email} does not exist in the Unicef Active Directory")
                         form.add_error("emails", message)
                     except Http404:
+                        error = True
                         message = _(f"{email} does not exist in the Unicef Active Directory")
                         form.add_error("emails", message)
 
