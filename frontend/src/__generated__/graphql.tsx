@@ -688,6 +688,7 @@ export type HouseholdNode = Node & {
   totalCashReceived?: Maybe<Scalars['Decimal']>,
   selection?: Maybe<HouseholdSelection>,
   sanctionListPossibleMatch?: Maybe<Scalars['Boolean']>,
+  hasDuplicates?: Maybe<Scalars['Boolean']>,
 };
 
 
@@ -1286,7 +1287,14 @@ export type ImportXlsxCashPlanVerification = {
   errors?: Maybe<Array<Maybe<XlsxErrorNode>>>,
 };
 
-export enum IndividualDeduplicationStatus {
+export enum IndividualDeduplicationBatchStatus {
+  SimilarInBatch = 'SIMILAR_IN_BATCH',
+  DuplicateInBatch = 'DUPLICATE_IN_BATCH',
+  UniqueInBatch = 'UNIQUE_IN_BATCH',
+  NotProcessed = 'NOT_PROCESSED'
+}
+
+export enum IndividualDeduplicationGoldenRecordStatus {
   Unique = 'UNIQUE',
   Duplicate = 'DUPLICATE',
   NeedsAdjudication = 'NEEDS_ADJUDICATION',
@@ -1339,8 +1347,11 @@ export type IndividualNode = Node & {
   enrolledInNutritionProgramme: Scalars['Boolean'],
   administrationOfRutf: Scalars['Boolean'],
   unicefId: Scalars['String'],
-  deduplicationStatus: IndividualDeduplicationStatus,
-  deduplicationResults?: Maybe<Array<Maybe<DeduplicationResultNode>>>,
+  deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus,
+  deduplicationBatchStatus: IndividualDeduplicationBatchStatus,
+  deduplicationGoldenRecordResults?: Maybe<Array<Maybe<DeduplicationResultNode>>>,
+  deduplicationBatchResults?: Maybe<Array<Maybe<DeduplicationResultNode>>>,
+  importedIndividualId?: Maybe<Scalars['UUID']>,
   sanctionListPossibleMatch: Scalars['Boolean'],
   pregnant: Scalars['Boolean'],
   representedHouseholds: HouseholdNodeConnection,
@@ -3166,7 +3177,7 @@ export type XlsxRowErrorNode = {
 
 export type HouseholdMinimalFragment = (
   { __typename?: 'HouseholdNode' }
-  & Pick<HouseholdNode, 'id' | 'createdAt' | 'residenceStatus' | 'size' | 'totalCashReceived' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'status' | 'sanctionListPossibleMatch' | 'address'>
+  & Pick<HouseholdNode, 'id' | 'createdAt' | 'residenceStatus' | 'size' | 'totalCashReceived' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'status' | 'sanctionListPossibleMatch' | 'hasDuplicates' | 'unicefId' | 'address'>
   & { headOfHousehold: (
     { __typename?: 'IndividualNode' }
     & Pick<IndividualNode, 'id' | 'fullName'>
@@ -3232,7 +3243,7 @@ export type HouseholdDetailedFragment = (
 
 export type IndividualMinimalFragment = (
   { __typename?: 'IndividualNode' }
-  & Pick<IndividualNode, 'id' | 'createdAt' | 'updatedAt' | 'fullName' | 'sex' | 'birthDate' | 'maritalStatus' | 'phoneNo' | 'sanctionListPossibleMatch' | 'role' | 'status'>
+  & Pick<IndividualNode, 'id' | 'createdAt' | 'updatedAt' | 'fullName' | 'sex' | 'unicefId' | 'birthDate' | 'maritalStatus' | 'phoneNo' | 'sanctionListPossibleMatch' | 'deduplicationGoldenRecordStatus' | 'role' | 'status'>
   & { documents: (
     { __typename?: 'DocumentNodeConnection' }
     & { edges: Array<Maybe<(
@@ -3248,7 +3259,7 @@ export type IndividualMinimalFragment = (
     )>> }
   ), household: Maybe<(
     { __typename?: 'HouseholdNode' }
-    & Pick<HouseholdNode, 'id' | 'status'>
+    & Pick<HouseholdNode, 'id' | 'unicefId' | 'status'>
     & { adminArea: Maybe<(
       { __typename?: 'AdminAreaNode' }
       & Pick<AdminAreaNode, 'id' | 'title'>
@@ -4086,7 +4097,7 @@ export type AllPaymentVerificationsQuery = (
           & Pick<PaymentRecordNode, 'id' | 'deliveredQuantity'>
           & { household: (
             { __typename?: 'HouseholdNode' }
-            & Pick<HouseholdNode, 'id'>
+            & Pick<HouseholdNode, 'unicefId' | 'id'>
             & { headOfHousehold: (
               { __typename?: 'IndividualNode' }
               & Pick<IndividualNode, 'id' | 'fullName'>
@@ -4385,7 +4396,7 @@ export type PaymentRecordVerificationQuery = (
       & Pick<PaymentRecordNode, 'id' | 'status' | 'statusDate' | 'caId' | 'fullName' | 'distributionModality' | 'totalPersonsCovered' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'deliveryType' | 'entitlementCardIssueDate' | 'entitlementCardNumber'>
       & { household: (
         { __typename?: 'HouseholdNode' }
-        & Pick<HouseholdNode, 'id' | 'size'>
+        & Pick<HouseholdNode, 'unicefId' | 'id' | 'size'>
         & { headOfHousehold: (
           { __typename?: 'IndividualNode' }
           & Pick<IndividualNode, 'id' | 'phoneNo' | 'phoneNoAlternative'>
@@ -5065,6 +5076,8 @@ export const HouseholdMinimalFragmentDoc = gql`
   lastRegistrationDate
   status
   sanctionListPossibleMatch
+  hasDuplicates
+  unicefId
   headOfHousehold {
     id
     fullName
@@ -5086,10 +5099,12 @@ export const IndividualMinimalFragmentDoc = gql`
   updatedAt
   fullName
   sex
+  unicefId
   birthDate
   maritalStatus
   phoneNo
   sanctionListPossibleMatch
+  deduplicationGoldenRecordStatus
   role
   status
   documents {
@@ -5106,6 +5121,7 @@ export const IndividualMinimalFragmentDoc = gql`
   }
   household {
     id
+    unicefId
     status
     adminArea {
       id
@@ -7338,6 +7354,7 @@ export const AllPaymentVerificationsDocument = gql`
           id
           deliveredQuantity
           household {
+            unicefId
             id
             headOfHousehold {
               id
@@ -8194,6 +8211,7 @@ export const PaymentRecordVerificationDocument = gql`
       statusDate
       caId
       household {
+        unicefId
         id
         size
         headOfHousehold {
@@ -9895,7 +9913,8 @@ export type ResolversTypes = {
   IndividualRelationship: IndividualRelationship,
   IndividualWorkStatus: IndividualWorkStatus,
   FlexFieldsScalar: ResolverTypeWrapper<Scalars['FlexFieldsScalar']>,
-  IndividualDeduplicationStatus: IndividualDeduplicationStatus,
+  IndividualDeduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus,
+  IndividualDeduplicationBatchStatus: IndividualDeduplicationBatchStatus,
   DeduplicationResultNode: ResolverTypeWrapper<DeduplicationResultNode>,
   DocumentNodeConnection: ResolverTypeWrapper<DocumentNodeConnection>,
   DocumentNodeEdge: ResolverTypeWrapper<DocumentNodeEdge>,
@@ -10097,7 +10116,8 @@ export type ResolversParentTypes = {
   IndividualRelationship: IndividualRelationship,
   IndividualWorkStatus: IndividualWorkStatus,
   FlexFieldsScalar: Scalars['FlexFieldsScalar'],
-  IndividualDeduplicationStatus: IndividualDeduplicationStatus,
+  IndividualDeduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus,
+  IndividualDeduplicationBatchStatus: IndividualDeduplicationBatchStatus,
   DeduplicationResultNode: DeduplicationResultNode,
   DocumentNodeConnection: DocumentNodeConnection,
   DocumentNodeEdge: DocumentNodeEdge,
@@ -10620,6 +10640,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   totalCashReceived?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
   selection?: Resolver<Maybe<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
   sanctionListPossibleMatch?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  hasDuplicates?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
 export type HouseholdNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['HouseholdNodeConnection'] = ResolversParentTypes['HouseholdNodeConnection']> = {
@@ -10835,8 +10856,11 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   enrolledInNutritionProgramme?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   administrationOfRutf?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   unicefId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  deduplicationStatus?: Resolver<ResolversTypes['IndividualDeduplicationStatus'], ParentType, ContextType>,
-  deduplicationResults?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeduplicationResultNode']>>>, ParentType, ContextType>,
+  deduplicationGoldenRecordStatus?: Resolver<ResolversTypes['IndividualDeduplicationGoldenRecordStatus'], ParentType, ContextType>,
+  deduplicationBatchStatus?: Resolver<ResolversTypes['IndividualDeduplicationBatchStatus'], ParentType, ContextType>,
+  deduplicationGoldenRecordResults?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeduplicationResultNode']>>>, ParentType, ContextType>,
+  deduplicationBatchResults?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeduplicationResultNode']>>>, ParentType, ContextType>,
+  importedIndividualId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
   sanctionListPossibleMatch?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   pregnant?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   representedHouseholds?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, IndividualNodeRepresentedHouseholdsArgs>,

@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@material-ui/core';
 import { useDebounce } from '../../hooks/useDebounce';
 import { PageHeader } from '../../components/PageHeader';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { UsersListTable } from '../tables/UsersListTable';
 import { UsersListFilters } from '../../components/UserManagement/UsersListFilters';
 

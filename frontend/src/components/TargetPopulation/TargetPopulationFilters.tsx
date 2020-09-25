@@ -1,6 +1,11 @@
 import React from 'react';
 import styled from 'styled-components';
-import { TextField, InputAdornment, MenuItem, FormControl } from '@material-ui/core';
+import {
+  TextField,
+  InputAdornment,
+  MenuItem,
+  FormControl,
+} from '@material-ui/core';
 import { Person, Search, Group } from '@material-ui/icons';
 import Select from '../../shared/Select';
 import InputLabel from '../../shared/InputLabel';
@@ -86,7 +91,8 @@ export function TargetPopulationFilters({
   onFilterChange,
   filter,
 }: HouseholdFiltersProps): React.ReactElement {
-  const handleFilterChange = (e, name) => onFilterChange({ ...filter, [name]: e.target.value });
+  const handleFilterChange = (e, name): void =>
+    onFilterChange({ ...filter, [name]: e.target.value });
   return (
     <Container>
       <TextContainer
@@ -102,7 +108,6 @@ export function TargetPopulationFilters({
           ),
         }}
       />
-
       <StyledFormControl variant='outlined' margin='dense'>
         <InputLabel>Status</InputLabel>
         <Select
@@ -113,19 +118,18 @@ export function TargetPopulationFilters({
           label='Programme'
           InputProps={{
             startAdornment: (
-            <StartInputAdornment position='start'>
-              <Person />
-            </StartInputAdornment>
+              <StartInputAdornment position='start'>
+                <Person />
+              </StartInputAdornment>
             ),
           }}
         >
-        <MenuItem value=''>{TARGETING_STATES.NONE}</MenuItem>
-        <MenuItem value='DRAFT'>{TARGETING_STATES.DRAFT}</MenuItem>
-        <MenuItem value='APPROVED'>{TARGETING_STATES.APPROVED}</MenuItem>
-        <MenuItem value='FINALIZED'>{TARGETING_STATES.FINALIZED}</MenuItem>
+          <MenuItem value=''>{TARGETING_STATES.NONE}</MenuItem>
+          <MenuItem value='DRAFT'>{TARGETING_STATES.DRAFT}</MenuItem>
+          <MenuItem value='APPROVED'>{TARGETING_STATES.APPROVED}</MenuItem>
+          <MenuItem value='FINALIZED'>{TARGETING_STATES.FINALIZED}</MenuItem>
         </Select>
       </StyledFormControl>
-
       <TextContainer
         id='minFilter'
         value={filter.numIndividuals.min}

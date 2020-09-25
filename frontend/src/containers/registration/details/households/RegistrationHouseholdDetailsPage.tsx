@@ -1,13 +1,13 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useParams } from 'react-router-dom';
-import moment from 'moment';
 import { PageHeader } from '../../../../components/PageHeader';
 import { useImportedHouseholdQuery } from '../../../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../../../components/BreadCrumbs';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { decodeIdString } from '../../../../utils/utils';
 import { ImportedIndividualsTable } from '../../tables/ImportedIndividualsTable';
+import { UniversalMoment } from '../../../../components/UniversalMoment';
 import { HouseholdDetails } from './HouseholdDetails';
 import { RegistrationDetails } from './RegistrationDetails';
 
@@ -19,7 +19,6 @@ const Container = styled.div`
     width: 100%;
   }
 `;
-
 
 export function RegistrationHouseholdDetailsPage(): React.ReactElement {
   const { id } = useParams();
@@ -60,9 +59,11 @@ export function RegistrationHouseholdDetailsPage(): React.ReactElement {
         />
         <RegistrationDetails
           hctId={importedHousehold.registrationDataImport.hctId}
-          registrationDate={moment(importedHousehold.firstRegistrationDate).format(
-            'DD MMM YYYY',
-          )}
+          registrationDate={`${(
+            <UniversalMoment>
+              {importedHousehold.firstRegistrationDate}
+            </UniversalMoment>
+          )}`}
         />
       </Container>
     </div>

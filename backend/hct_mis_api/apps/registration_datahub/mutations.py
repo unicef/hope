@@ -184,7 +184,7 @@ class MergeRegistrationDataImportMutation(BaseValidator, graphene.Mutation):
         obj_hct = RegistrationDataImport.objects.get(id=decode_id,)
         cls.validate(status=obj_hct.status)
         AirflowApi.start_dag(
-            dag_id="MergeRegistrationImportData", context={"registration_data_import_id": decode_id,},
+            dag_id="MergeRegistrationImportData", context={"registration_data_import_id": decode_id},
         )
         obj_hct.status = RegistrationDataImport.MERGING
         obj_hct.save()

@@ -1,6 +1,5 @@
 import React from 'react';
 import styled from 'styled-components';
-import moment from 'moment';
 import { Grid, Typography } from '@material-ui/core';
 import { CashPlanNode } from '../__generated__/graphql';
 import { MiśTheme } from '../theme';
@@ -8,6 +7,7 @@ import { cashPlanStatusToColor } from '../utils/utils';
 import { LabelizedField } from './LabelizedField';
 import { StatusBox } from './StatusBox';
 import { Missing } from './Missing';
+import { UniversalMoment } from './UniversalMoment';
 
 const Container = styled.div`
   display: flex;
@@ -78,13 +78,13 @@ export function CashPlanDetails({
           <Grid item xs={4}>
             <LabelizedField
               label='plan start date'
-              value={moment(cashPlan.startDate).format('DD MMM YYYY')}
+              value={<UniversalMoment>{cashPlan.startDate}</UniversalMoment>}
             />
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
               label='plan end date'
-              value={moment(cashPlan.endDate).format('DD MMM YYYY')}
+              value={<UniversalMoment>{cashPlan.endDate}</UniversalMoment>}
             />
           </Grid>
           <Grid item xs={4}>
@@ -105,7 +105,9 @@ export function CashPlanDetails({
           <Grid item xs={4}>
             <LabelizedField
               label='dispertion date'
-              value={moment(cashPlan.dispersionDate).format('DD MMM YYYY')}
+              value={
+                <UniversalMoment>{cashPlan.dispersionDate}</UniversalMoment>
+              }
             />
           </Grid>
           <Grid item xs={4}>

@@ -106,3 +106,6 @@ venv.bak/
 
 # Pycharm/Jetbrains
 .idea*
+
+*.tgz
+
