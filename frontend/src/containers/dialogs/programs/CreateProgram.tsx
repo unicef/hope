@@ -1,11 +1,11 @@
 import React, { useState, ReactElement } from 'react';
-import moment from 'moment';
 import { Button } from '@material-ui/core';
 import { useCreateProgramMutation } from '../../../__generated__/graphql';
 import { ProgramForm } from '../../forms/ProgramForm';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/AllPrograms';
+import { UniversalMoment } from '../../../components/UniversalMoment';
 
 export function CreateProgram(): ReactElement {
   const [open, setOpen] = useState(false);
@@ -18,8 +18,8 @@ export function CreateProgram(): ReactElement {
       variables: {
         programData: {
           ...values,
-          startDate: moment(values.startDate).format('YYYY-MM-DD'),
-          endDate: moment(values.endDate).format('YYYY-MM-DD'),
+          startDate: <UniversalMoment>{values.startDate}</UniversalMoment>,
+          endDate: <UniversalMoment>{values.endDate}</UniversalMoment>,
           businessAreaSlug: businessArea,
         },
       },

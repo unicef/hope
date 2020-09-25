@@ -28,6 +28,7 @@ from household.models import (
     ROLE_NO_ROLE,
     IndividualIdentity,
     DUPLICATE,
+    DUPLICATE_IN_BATCH,
 )
 from registration_datahub.schema import DeduplicationResultNode
 from targeting.models import HouseholdSelection
@@ -58,6 +59,7 @@ class HouseholdFilter(FilterSet):
             "sex",
             "household__id",
             "id",
+            "unicef_id",
             "household_ca_id",
             "size",
             "head_of_household__full_name",
@@ -75,7 +77,7 @@ class HouseholdFilter(FilterSet):
         for value in values:
             q_obj |= Q(head_of_household__given_name__icontains=value)
             q_obj |= Q(head_of_household__family_name__icontains=value)
-            q_obj |= Q(id__icontains=value)
+            q_obj |= Q(unicef_id__icontains=value)
         return qs.filter(q_obj)
 
 
@@ -97,7 +99,7 @@ class IndividualFilter(FilterSet):
         }
 
     order_by = OrderingFilter(
-        fields=("id", "full_name", "household__id", "birth_date", "sex", "household__admin_area__title",)
+        fields=("id", "unicef_id", "full_name", "household__id", "birth_date", "sex", "household__admin_area__title",)
     )
 
     def search_filter(self, qs, name, value):
@@ -105,7 +107,7 @@ class IndividualFilter(FilterSet):
         q_obj = Q()
         for value in values:
             q_obj |= Q(household__admin_area__title__icontains=value)
-            q_obj |= Q(id__icontains=value)
+            q_obj |= Q(unicef_id__icontains=value)
             q_obj |= Q(household__id__icontains=value)
             q_obj |= Q(full_name__icontains=value)
         return qs.filter(q_obj)
@@ -190,6 +192,7 @@ class HouseholdNode(DjangoObjectType):
     flex_fields = FlexFieldsScalar()
     selection = graphene.Field(HouseholdSelection)
     sanction_list_possible_match = graphene.Boolean()
+    has_duplicates = graphene.Boolean(description="Mark household if any of individuals has Duplicate status")
 
     def resolve_country(parent, info):
         return parent.country.name
@@ -209,6 +212,9 @@ class HouseholdNode(DjangoObjectType):
             Prefetch("households_and_roles", queryset=IndividualRoleInHousehold.objects.filter(household=parent.id),)
         )
 
+    def resolve_has_duplicates(parent, info):
+        return parent.individuals.filter(deduplication_golden_record_status=DUPLICATE).exists()
+
     class Meta:
         model = Household
         filter_fields = []
@@ -225,7 +231,8 @@ class IndividualNode(DjangoObjectType):
     estimated_birth_date = graphene.Boolean(required=False)
     role = graphene.String()
     flex_fields = FlexFieldsScalar()
-    deduplication_results = graphene.List(DeduplicationResultNode)
+    deduplication_golden_record_results = graphene.List(DeduplicationResultNode)
+    deduplication_batch_results = graphene.List(DeduplicationResultNode)
 
     def resolve_role(parent, info):
         role = parent.households_and_roles.first()
@@ -233,10 +240,15 @@ class IndividualNode(DjangoObjectType):
             return role.role
         return ROLE_NO_ROLE
 
-    def resolve_deduplication_results(parent, info):
-        key = "duplicates" if parent.deduplication_status == DUPLICATE else "possible_duplicates"
-        results = parent.deduplication_results.get(key, {})
+    def resolve_deduplication_golden_record_results(parent, info):
+        key = "duplicates" if parent.deduplication_golden_record_status == DUPLICATE else "possible_duplicates"
+        results = parent.deduplication_golden_record_results.get(key, {})
         return encode_ids(results, "Individual", "hit_id")
+
+    def resolve_deduplication_batch_results(parent, info):
+        key = "duplicates" if parent.deduplication_batch_status == DUPLICATE_IN_BATCH else "possible_duplicates"
+        results = parent.deduplication_batch_results.get(key, {})
+        return encode_ids(results, "ImportedIndividual", "hit_id")
 
     class Meta:
         model = Individual

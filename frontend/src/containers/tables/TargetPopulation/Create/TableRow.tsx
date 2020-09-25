@@ -1,6 +1,5 @@
 import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
-import { useHistory } from 'react-router-dom';
 import { HouseholdNode } from '../../../../__generated__/graphql';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../../components/table/ClickableTableRow';
@@ -10,8 +9,9 @@ interface TargetPopulationHouseholdTableRowProps {
   household: HouseholdNode;
 }
 
-export function TargetPopulationHouseholdTableRow({ household }) {
-  const history = useHistory();
+export function TargetPopulationHouseholdTableRow({
+  household,
+}): React.ReactElement {
   const businessArea = useBusinessArea();
 
   const handleClick = (): void => {

@@ -1,6 +1,7 @@
 from django.core.management import call_command
 from django.test import TestCase
 
+import mis_datahub.models as dh_models
 from core.fixtures import AdminAreaTypeFactory, AdminAreaFactory
 from core.models import BusinessArea
 from household.fixtures import (
@@ -21,7 +22,6 @@ from mis_datahub.tasks.send_tp_to_datahub import SendTPToDatahubTask
 from program.fixtures import ProgramFactory
 from registration_data.fixtures import RegistrationDataImportFactory
 from targeting.models import TargetPopulation
-import mis_datahub.models as dh_models
 
 
 class TestSendTpToDatahub(TestCase):
@@ -34,6 +34,7 @@ class TestSendTpToDatahub(TestCase):
         business_area_with_data_sharing = BusinessArea.objects.first()
         business_area_with_data_sharing.has_data_sharing_agreement = True
         business_area_with_data_sharing.save()
+
     @staticmethod
     def _create_target_population(**kwargs):
         tp_nullable = {
@@ -161,7 +162,9 @@ class TestSendTpToDatahub(TestCase):
             status=TargetPopulation.STATUS_FINALIZED,
         )
         cls.target_population_third.households.set([cls.household_second])
-        import ipdb;ipdb.set_trace()
+        import ipdb
+
+        ipdb.set_trace()
 
     def test_individual_data_needed_true(self):
         task = SendTPToDatahubTask()

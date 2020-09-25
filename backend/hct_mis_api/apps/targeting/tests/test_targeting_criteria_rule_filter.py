@@ -2,11 +2,7 @@ from django.core.exceptions import ValidationError
 from django.core.management import call_command
 from django.test import TestCase
 
-from household.fixtures import (
-    HouseholdFactory,
-    IndividualFactory,
-    create_household,
-)
+from household.fixtures import create_household
 from household.models import Household
 from targeting.models import TargetingCriteriaRuleFilter
 
@@ -16,22 +12,22 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         households = []
 
         (household, individuals) = create_household(
-            {"size": 1, "residence_status": "CITIZEN",}, {"birth_date": "1970-11-29",},
+            {"size": 1, "residence_status": "CITIZEN"}, {"birth_date": "1970-11-29"},
         )
         households.append(household)
         self.household_50_yo = household
         (household, individuals) = create_household(
-            {"size": 1, "residence_status": "CITIZEN",}, {"birth_date": "1991-11-18",},
+            {"size": 1, "residence_status": "CITIZEN"}, {"birth_date": "1991-11-18"},
         )
         households.append(household)
         (household, individuals) = create_household(
-            {"size": 1, "residence_status": "CITIZEN",}, {"birth_date": "1991-11-18",},
+            {"size": 1, "residence_status": "CITIZEN"}, {"birth_date": "1991-11-18"},
         )
 
         households.append(household)
 
         (household, individuals) = create_household(
-            {"size": 2, "residence_status": "REFUGEE",}, {"birth_date": "1991-11-18",},
+            {"size": 2, "residence_status": "REFUGEE"}, {"birth_date": "1991-11-18"},
         )
 
         households.append(household)
@@ -178,7 +174,7 @@ class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
                 "size": 1,
                 "flex_fields": {
                     "total_households_h_f": 2,
-                    "treatment_facility_h_f": ["governent_health_center", "other_public", "private_doctor",],
+                    "treatment_facility_h_f": ["government_health_center", "other_public", "private_doctor"],
                     "other_treatment_facility_h_f": "testing other",
                 },
             }
@@ -190,13 +186,13 @@ class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
                 "size": 1,
                 "flex_fields": {
                     "total_households_h_f": 4,
-                    "treatment_facility_h_f": ["governent_health_center", "other_public",],
+                    "treatment_facility_h_f": ["government_health_center", "other_public"],
                 },
             }
         )
         self.household_total_households_4 = household
         create_household(
-            {"size": 1, "flex_fields": {"ddd": 3, "treatment_facility_h_f": []},}
+            {"size": 1, "flex_fields": {"ddd": 3, "treatment_facility_h_f": []}}
         )
 
     def test_rule_filter_household_total_households_4(self):
@@ -212,7 +208,7 @@ class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
         rule_filter = TargetingCriteriaRuleFilter(
             comparision_method="CONTAINS",
             field_name="treatment_facility_h_f",
-            arguments=["other_public", "private_doctor",],
+            arguments=["other_public", "private_doctor"],
             is_flex_field=True,
         )
         query = rule_filter.get_query()
@@ -223,7 +219,7 @@ class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
         rule_filter = TargetingCriteriaRuleFilter(
             comparision_method="CONTAINS",
             field_name="treatment_facility_h_f",
-            arguments=["other_public", "governent_health_center",],
+            arguments=["other_public", "government_health_center"],
             is_flex_field=True,
         )
         query = rule_filter.get_query()
@@ -234,7 +230,7 @@ class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
         rule_filter = TargetingCriteriaRuleFilter(
             comparision_method="NOT_CONTAINS",
             field_name="treatment_facility_h_f",
-            arguments=["other_public", "governent_health_center",],
+            arguments=["other_public", "government_health_center"],
             is_flex_field=True,
         )
         query = rule_filter.get_query()

@@ -24,7 +24,7 @@ export function SanctionList(): React.ReactElement {
   };
   const [
     checkAgainstSanctionMutate,
-    { data: uploadData, loading: fileLoading },
+    { loading: fileLoading },
   ] = useCheckAgainstSanctionListUploadMutation();
 
   const { t } = useTranslation();

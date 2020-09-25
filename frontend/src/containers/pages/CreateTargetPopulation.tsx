@@ -29,7 +29,7 @@ const Label = styled.p`
   color: #b1b1b5;
 `;
 
-export function CreateTargetPopulation() {
+export function CreateTargetPopulation(): React.ReactElement {
   const initialValues = {
     name: '',
     criterias: [],

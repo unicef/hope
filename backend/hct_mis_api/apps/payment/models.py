@@ -23,8 +23,9 @@ class PaymentRecord(TimeStampedUUIDModel):
     )
     ENTITLEMENT_CARD_STATUS_ACTIVE = "ACTIVE"
     ENTITLEMENT_CARD_STATUS_INACTIVE = "INACTIVE"
-    ENTITLEMENT_CARD_STATUS_CHOICE = Choices((ENTITLEMENT_CARD_STATUS_ACTIVE, _("Active")),
-                                             (ENTITLEMENT_CARD_STATUS_INACTIVE, _("Inactive")), )
+    ENTITLEMENT_CARD_STATUS_CHOICE = Choices(
+        (ENTITLEMENT_CARD_STATUS_ACTIVE, _("Active")), (ENTITLEMENT_CARD_STATUS_INACTIVE, _("Inactive")),
+    )
 
     DELIVERY_TYPE_CASH = "CASH"
     DELIVERY_TYPE_DEPOSIT_TO_CARD = "DEPOSIT_TO_CARD"
@@ -36,27 +37,26 @@ class PaymentRecord(TimeStampedUUIDModel):
         (DELIVERY_TYPE_TRANSFER, _("Transfer")),
     )
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
-    status = models.CharField(max_length=255, choices=STATUS_CHOICE, )
+    status = models.CharField(max_length=255, choices=STATUS_CHOICE,)
     status_date = models.DateTimeField()
     ca_id = models.CharField(max_length=255, null=True)
     ca_hash_id = models.UUIDField(unique=True, null=True)
     cash_plan = models.ForeignKey(
         "program.CashPlan", on_delete=models.CASCADE, related_name="payment_records", null=True,
     )
-    household = models.ForeignKey("household.Household", on_delete=models.CASCADE, related_name="payment_records", )
+    household = models.ForeignKey("household.Household", on_delete=models.CASCADE, related_name="payment_records",)
     full_name = models.CharField(max_length=255)
     total_persons_covered = models.IntegerField()
-    distribution_modality = models.CharField(max_length=255, )
+    distribution_modality = models.CharField(max_length=255,)
     target_population = models.ForeignKey(
         "targeting.TargetPopulation", on_delete=models.CASCADE, related_name="payment_records",
     )
     target_population_cash_assist_id = models.CharField(max_length=255)
-    entitlement_card_number = models.CharField(max_length=255, )
-    entitlement_card_status = models.CharField(choices=ENTITLEMENT_CARD_STATUS_CHOICE, default="ACTIVE",
-                                               max_length=20, )
+    entitlement_card_number = models.CharField(max_length=255,)
+    entitlement_card_status = models.CharField(choices=ENTITLEMENT_CARD_STATUS_CHOICE, default="ACTIVE", max_length=20,)
     entitlement_card_issue_date = models.DateField()
-    delivery_type = models.CharField(choices=DELIVERY_TYPE_CHOICE, default="ACTIVE", max_length=20, )
-    currency = models.CharField(max_length=4, )
+    delivery_type = models.CharField(choices=DELIVERY_TYPE_CHOICE, default="ACTIVE", max_length=20,)
+    currency = models.CharField(max_length=4,)
     entitlement_quantity = models.DecimalField(
         decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))],
     )
@@ -69,7 +69,6 @@ class PaymentRecord(TimeStampedUUIDModel):
     )
     transaction_reference_id = models.CharField(max_length=255, null=True)
     vision_id = models.CharField(max_length=255, null=True)
-
 
 
 class ServiceProvider(TimeStampedUUIDModel):
@@ -105,7 +104,7 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel):
         (VERIFICATION_METHOD_MANUAL, "MANUAL"),
     )
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING)
-    cash_plan = models.ForeignKey("program.CashPlan", on_delete=models.CASCADE, related_name="verifications", )
+    cash_plan = models.ForeignKey("program.CashPlan", on_delete=models.CASCADE, related_name="verifications",)
     sampling = models.CharField(max_length=50, choices=SAMPLING_CHOICES)
     verification_method = models.CharField(max_length=50, choices=VERIFICATION_METHOD_CHOICES)
     sample_size = models.PositiveIntegerField(null=True)

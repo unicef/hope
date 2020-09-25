@@ -10,7 +10,6 @@ import {
 } from '@material-ui/core';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
 import { Field, Form, Formik } from 'formik';
-import moment from 'moment';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import {
@@ -22,6 +21,7 @@ import { FormikDateField } from '../../shared/Formik/FormikDateField';
 import { selectFields } from '../../utils/utils';
 import { DialogActions } from '../dialogs/DialogActions';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
+import { UniversalMoment } from '../../components/UniversalMoment';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -38,11 +38,6 @@ const DialogFooter = styled.div`
   margin: 0;
   border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
   text-align: right;
-`;
-
-const MediumLabel = styled.div`
-  width: 60%;
-  margin: 12px 0;
 `;
 
 const DateFields = styled.div`
@@ -73,8 +68,8 @@ const validationSchema = Yup.object().shape({
         startDate &&
         schema.min(
           startDate,
-          `End date have to be grater than ${moment(startDate).format(
-            'DD/MM/YYYY',
+          `End date have to be greater than ${(
+            <UniversalMoment>{startDate}</UniversalMoment>
           )}`,
         ),
       '',
@@ -273,7 +268,7 @@ export function ProgramForm({
                   <FullWidth>
                     <Field
                       name='individualDataNeeded'
-                      label="Will this programme use individuals’ data for targeting or entitlement calculation? Setting this flag can reduce the number of households filtered in the target population."
+                      label='Will this programme use individuals’ data for targeting or entitlement calculation? Setting this flag can reduce the number of households filtered in the target population.'
                       disabled={program && program.status === 'ACTIVE'}
                       color='primary'
                       component={FormikCheckboxField}

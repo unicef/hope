@@ -154,7 +154,7 @@ class TestRdiCreateTask(TestCase):
                 "type": "BIRTH_CERTIFICATE",
                 "value": value,
             },
-            "individual_14_other": {"individual": individual, "name": name, "type": "OTHER",},
+            "individual_14_other": {"individual": individual, "name": name, "type": "OTHER"},
         }
         self.assertEqual(task.documents, expected)
         # other_id_no_i_c
@@ -169,7 +169,7 @@ class TestRdiCreateTask(TestCase):
                 "type": "BIRTH_CERTIFICATE",
                 "value": value,
             },
-            "individual_14_other": {"individual": individual, "name": name, "type": "OTHER", "value": number,},
+            "individual_14_other": {"individual": individual, "name": name, "type": "OTHER", "value": number},
         }
         self.assertEqual(task.documents, expected)
 
@@ -190,7 +190,7 @@ class TestRdiCreateTask(TestCase):
             cell, 14, individual, "birth_certificate_photo_i_c",
         )
         expected = {
-            "individual_14_birth_certificate_no_i_c": {"individual": individual, "photo": f"12-2020-06-22 12:00.jpg",}
+            "individual_14_birth_certificate_no_i_c": {"individual": individual, "photo": f"12-2020-06-22 12:00.jpg"}
         }
         self.assertEqual(task.documents, expected)
 
@@ -249,7 +249,7 @@ class TestRdiCreateTask(TestCase):
         documents = ImportedDocument.objects.values("document_number", "type_id")
         self.assertEqual(documents.count(), 1)
 
-        expected = [{"document_number": "CD1247246Q12W", "type_id": doc_type.id,}]
+        expected = [{"document_number": "CD1247246Q12W", "type_id": doc_type.id}]
         self.assertEqual(list(documents), expected)
 
         document = ImportedDocument.objects.first()
@@ -372,7 +372,7 @@ class TestRdiKoboCreateTask(TestCase):
 
         documents = ImportedDocument.objects.values_list("individual__full_name", flat=True)
         self.assertEqual(
-            sorted(list(documents)), ["Tesa Testowski", "Test Testowski", "Zbyszek Zbyszkowski", "abc efg",],
+            sorted(list(documents)), ["Tesa Testowski", "Test Testowski", "Zbyszek Zbyszkowski", "abc efg"],
         )
 
         first_household = households.get(size=3)
@@ -398,12 +398,21 @@ class TestRdiKoboCreateTask(TestCase):
         task.attachments = [
             {
                 "mimetype": "image/png",
-                "download_small_url": "https://kc.humanitarianresponse.info/media/small?media_file=wnosal%2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4%2Fc09130af-6c9c-4dba-8c7f-1b2ff1970d19%2Fsignature-14_59_24.png",
-                "download_large_url": "https://kc.humanitarianresponse.info/media/large?media_file=wnosal%2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4%2Fc09130af-6c9c-4dba-8c7f-1b2ff1970d19%2Fsignature-14_59_24.png",
-                "download_url": "https://kc.humanitarianresponse.info/media/original?media_file=wnosal%2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4%2Fc09130af-6c9c-4dba-8c7f-1b2ff1970d19%2Fsignature-14_59_24.png",
-                "filename": "wnosal/attachments/b83407aca1d647a5bf65a3383ee761d4/c09130af-6c9c-4dba-8c7f-1b2ff1970d19/signature-14_59_24.png",
+                "download_small_url": "https://kc.humanitarianresponse.info/media/small?media_file=wnosal"
+                                      "%2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4"
+                                      "%2Fc09130af-6c9c-4dba-8c7f-1b2ff1970d19%2Fsignature-14_59_24.png",
+                "download_large_url": "https://kc.humanitarianresponse.info/media/large?media_file=wnosal"
+                                      "%2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4"
+                                      "%2Fc09130af-6c9c-4dba-8c7f-1b2ff1970d19%2Fsignature-14_59_24.png",
+                "download_url": "https://kc.humanitarianresponse.info/media/original?media_file=wnosal"
+                                "%2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4"
+                                "%2Fc09130af-6c9c-4dba-8c7f-1b2ff1970d19%2Fsignature-14_59_24.png",
+                "filename": "wnosal/attachments/b83407aca1d647a5bf65a3383ee761d4/c09130af-6c9c-4dba-8c7f-1b2ff1970d19"
+                            "/signature-14_59_24.png",
                 "instance": 102612403,
-                "download_medium_url": "https://kc.humanitarianresponse.info/media/medium?media_file=wnosal%2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4%2Fc09130af-6c9c-4dba-8c7f-1b2ff1970d19%2Fsignature-14_59_24.png",
+                "download_medium_url": "https://kc.humanitarianresponse.info/media/medium?media_file=wnosal"
+                                       "%2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4"
+                                       "%2Fc09130af-6c9c-4dba-8c7f-1b2ff1970d19%2Fsignature-14_59_24.png",
                 "id": 35027752,
                 "xform": 549831,
             }
@@ -436,12 +445,21 @@ class TestRdiKoboCreateTask(TestCase):
         task.attachments = [
             {
                 "mimetype": "image/png",
-                "download_small_url": "https://kc.humanitarianresponse.info/media/small?media_file=wnosal%2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4%2Fc09130af-6c9c-4dba-8c7f-1b2ff1970d19%2Fsignature-14_59_24.png",
-                "download_large_url": "https://kc.humanitarianresponse.info/media/large?media_file=wnosal%2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4%2Fc09130af-6c9c-4dba-8c7f-1b2ff1970d19%2Fsignature-14_59_24.png",
-                "download_url": "https://kc.humanitarianresponse.info/media/original?media_file=wnosal%2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4%2Fc09130af-6c9c-4dba-8c7f-1b2ff1970d19%2Fsignature-14_59_24.png",
-                "filename": "wnosal/attachments/b83407aca1d647a5bf65a3383ee761d4/c09130af-6c9c-4dba-8c7f-1b2ff1970d19/signature-14_59_24.png",
+                "download_small_url": "https://kc.humanitarianresponse.info/media/small?media_file=wnosal"
+                                      "%2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4"
+                                      "%2Fc09130af-6c9c-4dba-8c7f-1b2ff1970d19%2Fsignature-14_59_24.png",
+                "download_large_url": "https://kc.humanitarianresponse.info/media/large?media_file=wnosal"
+                                      "%2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4"
+                                      "%2Fc09130af-6c9c-4dba-8c7f-1b2ff1970d19%2Fsignature-14_59_24.png",
+                "download_url": "https://kc.humanitarianresponse.info/media/original?media_file=wnosal"
+                                "%2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4"
+                                "%2Fc09130af-6c9c-4dba-8c7f-1b2ff1970d19%2Fsignature-14_59_24.png",
+                "filename": "wnosal/attachments/b83407aca1d647a5bf65a3383ee761d4/c09130af-6c9c-4dba-8c7f-1b2ff1970d19"
+                            "/signature-14_59_24.png",
                 "instance": 102612403,
-                "download_medium_url": "https://kc.humanitarianresponse.info/media/medium?media_file=wnosal%2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4%2Fc09130af-6c9c-4dba-8c7f-1b2ff1970d19%2Fsignature-14_59_24.png",
+                "download_medium_url": "https://kc.humanitarianresponse.info/media/medium?media_file=wnosal"
+                                       "%2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4"
+                                       "%2Fc09130af-6c9c-4dba-8c7f-1b2ff1970d19%2Fsignature-14_59_24.png",
                 "id": 35027752,
                 "xform": 549831,
             }
@@ -468,8 +486,8 @@ class TestRdiKoboCreateTask(TestCase):
 
         result = list(ImportedDocument.objects.values("document_number", "individual_id"))
         expected = [
-            {"document_number": "123123123", "individual_id": individual.id,},
-            {"document_number": "444111123", "individual_id": individual.id,},
+            {"document_number": "123123123", "individual_id": individual.id},
+            {"document_number": "444111123", "individual_id": individual.id},
         ]
         self.assertEqual(result, expected)
 
@@ -557,34 +575,61 @@ class TestRdiKoboCreateTask(TestCase):
             "_attachments": [
                 {
                     "mimetype": "image/png",
-                    "download_small_url": "https://kc.humanitarianresponse.info/media/small?media_file=wnosal%2Fattachments%2Fa716ab3cdfbc411aac9fa081874b6aa1%2F2946bbb1-27fd-438a-b716-d864591808b2%2Ftest-11_53_31.png",
-                    "download_large_url": "https://kc.humanitarianresponse.info/media/large?media_file=wnosal%2Fattachments%2Fa716ab3cdfbc411aac9fa081874b6aa1%2F2946bbb1-27fd-438a-b716-d864591808b2%2Ftest-11_53_31.png",
-                    "download_url": "https://kc.humanitarianresponse.info/media/original?media_file=wnosal%2Fattachments%2Fa716ab3cdfbc411aac9fa081874b6aa1%2F2946bbb1-27fd-438a-b716-d864591808b2%2Ftest-11_53_31.png",
-                    "filename": "wnosal/attachments/a716ab3cdfbc411aac9fa081874b6aa1/2946bbb1-27fd-438a-b716-d864591808b2/test-11_53_31.png",
+                    "download_small_url": "https://kc.humanitarianresponse.info/media/small?media_file=wnosal"
+                                          "%2Fattachments%2Fa716ab3cdfbc411aac9fa081874b6aa1"
+                                          "%2F2946bbb1-27fd-438a-b716-d864591808b2%2Ftest-11_53_31.png",
+                    "download_large_url": "https://kc.humanitarianresponse.info/media/large?media_file=wnosal"
+                                          "%2Fattachments%2Fa716ab3cdfbc411aac9fa081874b6aa1"
+                                          "%2F2946bbb1-27fd-438a-b716-d864591808b2%2Ftest-11_53_31.png",
+                    "download_url": "https://kc.humanitarianresponse.info/media/original?media_file=wnosal"
+                                    "%2Fattachments%2Fa716ab3cdfbc411aac9fa081874b6aa1"
+                                    "%2F2946bbb1-27fd-438a-b716-d864591808b2%2Ftest-11_53_31.png",
+                    "filename": "wnosal/attachments/a716ab3cdfbc411aac9fa081874b6aa1/"
+                                "2946bbb1-27fd-438a-b716-d864591808b2/test-11_53_31.png",
                     "instance": 104545171,
-                    "download_medium_url": "https://kc.humanitarianresponse.info/media/medium?media_file=wnosal%2Fattachments%2Fa716ab3cdfbc411aac9fa081874b6aa1%2F2946bbb1-27fd-438a-b716-d864591808b2%2Ftest-11_53_31.png",
+                    "download_medium_url": "https://kc.humanitarianresponse.info/media/medium?media_file=wnosal"
+                                           "%2Fattachments%2Fa716ab3cdfbc411aac9fa081874b6aa1"
+                                           "%2F2946bbb1-27fd-438a-b716-d864591808b2%2Ftest-11_53_31.png",
                     "id": 35910755,
                     "xform": 560567,
                 },
                 {
                     "mimetype": "image/png",
-                    "download_small_url": "https://kc.humanitarianresponse.info/media/small?media_file=wnosal%2Fattachments%2Fa716ab3cdfbc411aac9fa081874b6aa1%2F2946bbb1-27fd-438a-b716-d864591808b2%2Ftest-11_53_20.png",
-                    "download_large_url": "https://kc.humanitarianresponse.info/media/large?media_file=wnosal%2Fattachments%2Fa716ab3cdfbc411aac9fa081874b6aa1%2F2946bbb1-27fd-438a-b716-d864591808b2%2Ftest-11_53_20.png",
-                    "download_url": "https://kc.humanitarianresponse.info/media/original?media_file=wnosal%2Fattachments%2Fa716ab3cdfbc411aac9fa081874b6aa1%2F2946bbb1-27fd-438a-b716-d864591808b2%2Ftest-11_53_20.png",
-                    "filename": "wnosal/attachments/a716ab3cdfbc411aac9fa081874b6aa1/2946bbb1-27fd-438a-b716-d864591808b2/test-11_53_20.png",
+                    "download_small_url": "https://kc.humanitarianresponse.info/media/small?media_file=wnosal"
+                                          "%2Fattachments%2Fa716ab3cdfbc411aac9fa081874b6aa1"
+                                          "%2F2946bbb1-27fd-438a-b716-d864591808b2%2Ftest-11_53_20.png",
+                    "download_large_url": "https://kc.humanitarianresponse.info/media/large?media_file=wnosal"
+                                          "%2Fattachments%2Fa716ab3cdfbc411aac9fa081874b6aa1"
+                                          "%2F2946bbb1-27fd-438a-b716-d864591808b2%2Ftest-11_53_20.png",
+                    "download_url": "https://kc.humanitarianresponse.info/media/original?media_file=wnosal"
+                                    "%2Fattachments%2Fa716ab3cdfbc411aac9fa081874b6aa1"
+                                    "%2F2946bbb1-27fd-438a-b716-d864591808b2%2Ftest-11_53_20.png",
+                    "filename": "wnosal/attachments/a716ab3cdfbc411aac9fa081874b6aa1/"
+                                "2946bbb1-27fd-438a-b716-d864591808b2/test-11_53_20.png",
                     "instance": 104545171,
-                    "download_medium_url": "https://kc.humanitarianresponse.info/media/medium?media_file=wnosal%2Fattachments%2Fa716ab3cdfbc411aac9fa081874b6aa1%2F2946bbb1-27fd-438a-b716-d864591808b2%2Ftest-11_53_20.png",
+                    "download_medium_url": "https://kc.humanitarianresponse.info/media/medium?media_file=wnosal"
+                                           "%2Fattachments%2Fa716ab3cdfbc411aac9fa081874b6aa1"
+                                           "%2F2946bbb1-27fd-438a-b716-d864591808b2%2Ftest-11_53_20.png",
                     "id": 35910754,
                     "xform": 560567,
                 },
                 {
                     "mimetype": "image/png",
-                    "download_small_url": "https://kc.humanitarianresponse.info/media/small?media_file=wnosal%2Fattachments%2Fa716ab3cdfbc411aac9fa081874b6aa1%2F2946bbb1-27fd-438a-b716-d864591808b2%2Fsignature-11_53_11.png",
-                    "download_large_url": "https://kc.humanitarianresponse.info/media/large?media_file=wnosal%2Fattachments%2Fa716ab3cdfbc411aac9fa081874b6aa1%2F2946bbb1-27fd-438a-b716-d864591808b2%2Fsignature-11_53_11.png",
-                    "download_url": "https://kc.humanitarianresponse.info/media/original?media_file=wnosal%2Fattachments%2Fa716ab3cdfbc411aac9fa081874b6aa1%2F2946bbb1-27fd-438a-b716-d864591808b2%2Fsignature-11_53_11.png",
-                    "filename": "wnosal/attachments/a716ab3cdfbc411aac9fa081874b6aa1/2946bbb1-27fd-438a-b716-d864591808b2/signature-11_53_11.png",
+                    "download_small_url": "https://kc.humanitarianresponse.info/media/small?media_file=wnosal"
+                                          "%2Fattachments%2Fa716ab3cdfbc411aac9fa081874b6aa1"
+                                          "%2F2946bbb1-27fd-438a-b716-d864591808b2%2Fsignature-11_53_11.png",
+                    "download_large_url": "https://kc.humanitarianresponse.info/media/large?media_file=wnosal"
+                                          "%2Fattachments%2Fa716ab3cdfbc411aac9fa081874b6aa1"
+                                          "%2F2946bbb1-27fd-438a-b716-d864591808b2%2Fsignature-11_53_11.png",
+                    "download_url": "https://kc.humanitarianresponse.info/media/original?media_file=wnosal"
+                                    "%2Fattachments%2Fa716ab3cdfbc411aac9fa081874b6aa1"
+                                    "%2F2946bbb1-27fd-438a-b716-d864591808b2%2Fsignature-11_53_11.png",
+                    "filename": "wnosal/attachments/a716ab3cdfbc411aac9fa081874b6aa1/"
+                                "2946bbb1-27fd-438a-b716-d864591808b2/signature-11_53_11.png",
                     "instance": 104545171,
-                    "download_medium_url": "https://kc.humanitarianresponse.info/media/medium?media_file=wnosal%2Fattachments%2Fa716ab3cdfbc411aac9fa081874b6aa1%2F2946bbb1-27fd-438a-b716-d864591808b2%2Fsignature-11_53_11.png",
+                    "download_medium_url": "https://kc.humanitarianresponse.info/media/medium?media_file=wnosal"
+                                           "%2Fattachments%2Fa716ab3cdfbc411aac9fa081874b6aa1"
+                                           "%2F2946bbb1-27fd-438a-b716-d864591808b2%2Fsignature-11_53_11.png",
                     "id": 35910753,
                     "xform": 560567,
                 },

@@ -5957,6 +5957,18 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "hasDuplicates",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -12249,7 +12261,7 @@
             "deprecationReason": null
           },
           {
-            "name": "deduplicationStatus",
+            "name": "deduplicationGoldenRecordStatus",
             "description": null,
             "args": [],
             "type": {
@@ -12257,7 +12269,7 @@
               "name": null,
               "ofType": {
                 "kind": "ENUM",
-                "name": "IndividualDeduplicationStatus",
+                "name": "IndividualDeduplicationGoldenRecordStatus",
                 "ofType": null
               }
             },
@@ -12265,7 +12277,23 @@
             "deprecationReason": null
           },
           {
-            "name": "deduplicationResults",
+            "name": "deduplicationBatchStatus",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "IndividualDeduplicationBatchStatus",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "deduplicationGoldenRecordResults",
             "description": null,
             "args": [],
             "type": {
@@ -12276,6 +12304,34 @@
                 "name": "DeduplicationResultNode",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "deduplicationBatchResults",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DeduplicationResultNode",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "importedIndividualId",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "UUID",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -12733,7 +12789,7 @@
       },
       {
         "kind": "ENUM",
-        "name": "IndividualDeduplicationStatus",
+        "name": "IndividualDeduplicationGoldenRecordStatus",
         "description": null,
         "fields": null,
         "inputFields": null,
@@ -12753,6 +12809,41 @@
           },
           {
             "name": "NEEDS_ADJUDICATION",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "NOT_PROCESSED",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
+        "name": "IndividualDeduplicationBatchStatus",
+        "description": null,
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "SIMILAR_IN_BATCH",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "DUPLICATE_IN_BATCH",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "UNIQUE_IN_BATCH",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null

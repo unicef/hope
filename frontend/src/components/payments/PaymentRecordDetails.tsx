@@ -1,10 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
-import moment from 'moment';
 import { Grid, Paper, Typography } from '@material-ui/core';
 import { StatusBox } from '../StatusBox';
 import {
-  decodeIdString,
   formatCurrency,
   paymentRecordStatusToColor,
   verificationRecordsStatusToColor,
@@ -16,6 +14,7 @@ import {
 } from '../../__generated__/graphql';
 import { Missing } from '../Missing';
 import { UniversalActivityLogTable } from '../../containers/tables/UniversalActivityLogTable';
+import { UniversalMoment } from '../UniversalMoment';
 
 const Container = styled.div`
   display: flex;
@@ -82,7 +81,9 @@ export function PaymentRecordDetails({
           <Grid item xs={3}>
             <LabelizedField
               label='STATUS DATE'
-              value={moment(paymentRecord.statusDate).format('DD MMM YYYY')}
+              value={
+                <UniversalMoment>{paymentRecord.statusDate}</UniversalMoment>
+              }
             />
           </Grid>
           <Grid item xs={3}>
@@ -123,9 +124,11 @@ export function PaymentRecordDetails({
             <Grid item xs={3}>
               <LabelizedField
                 label='STATUS DATE'
-                value={moment(paymentVerification.statusDate).format(
-                  'DD MMM YYYY',
-                )}
+                value={
+                  <UniversalMoment>
+                    {paymentVerification.statusDate}
+                  </UniversalMoment>
+                }
               />
             </Grid>
             <Grid item xs={3}>
@@ -145,7 +148,7 @@ export function PaymentRecordDetails({
           <Grid item xs={3}>
             <LabelizedField
               label='HOUSEHOLD ID'
-              value={decodeIdString(paymentRecord.household.id)}
+              value={paymentRecord.household.unicefId}
             />
           </Grid>
           <Grid item xs={3}>
@@ -203,7 +206,9 @@ export function PaymentRecordDetails({
           <Grid item xs={3}>
             <LabelizedField
               label='DELIVERY DATE'
-              value={moment(paymentRecord.deliveryDate).format('DD MMM YYYY')}
+              value={
+                <UniversalMoment>{paymentRecord.deliveryDate}</UniversalMoment>
+              }
             />
           </Grid>
           <Grid item xs={3}>
@@ -220,9 +225,11 @@ export function PaymentRecordDetails({
           <Grid item xs={3}>
             <LabelizedField
               label='ENTITLEMENT CARD ISSUE DATE'
-              value={moment(paymentRecord.entitlementCardIssueDate).format(
-                'DD MMM YYYY',
-              )}
+              value={
+                <UniversalMoment>
+                  {paymentRecord.entitlementCardIssueDate}
+                </UniversalMoment>
+              }
             />
           </Grid>
           <Grid item xs={3}>

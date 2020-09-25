@@ -7,11 +7,10 @@ import {
   Grid,
 } from '@material-ui/core';
 import styled from 'styled-components';
-
+import { Formik, Form, Field } from 'formik';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
 import { useSnackbar } from '../../hooks/useSnackBar';
-import { Formik, Form, Field } from 'formik';
 import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { useUpdatePaymentVerificationReceivedAndReceivedAmountMutation } from '../../__generated__/graphql';
@@ -74,7 +73,7 @@ export function VerifyManual({
 
   return (
     <Formik initialValues={initialValues} onSubmit={submit}>
-      {({ submitForm, values, setValues }) => (
+      {({ values }) => (
         <Form>
           <Box p={2}>
             <Button

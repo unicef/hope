@@ -2,12 +2,12 @@ import styled from 'styled-components';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import moment from 'moment';
 import { RegistrationDataImportNode } from '../../../../__generated__/graphql';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../../components/table/ClickableTableRow';
 import { StatusBox } from '../../../../components/StatusBox';
 import { registrationDataImportStatusToColor } from '../../../../utils/utils';
+import { UniversalMoment } from '../../../../components/UniversalMoment';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -47,7 +47,7 @@ export function RegistrationDataImportTableRow({
         </StatusContainer>
       </TableCell>
       <TableCell align='left'>
-        {moment(registrationDataImport.importDate).format('DD MMM YYYY')}
+        <UniversalMoment>{registrationDataImport.importDate}</UniversalMoment>
       </TableCell>
       <TableCell align='right'>
         {registrationDataImport.numberOfHouseholds}

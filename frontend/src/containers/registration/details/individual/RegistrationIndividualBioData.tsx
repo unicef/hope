@@ -14,7 +14,6 @@ import {
 } from '../../../../__generated__/graphql';
 import { LabelizedField } from '../../../../components/LabelizedField';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-
 import { LoadingComponent } from '../../../../components/LoadingComponent';
 import { UniversalMoment } from '../../../../components/UniversalMoment';
 
@@ -31,10 +30,6 @@ const Title = styled.div`
 const ContentLink = styled.div`
   text-decoration: underline;
   cursor: pointer;
-`;
-const StatusContainer = styled.div`
-  min-width: 120px;
-  max-width: 200px;
 `;
 
 interface RegistrationIndividualBioDataProps {
@@ -114,7 +109,7 @@ export function RegistrationIndividualsBioData({
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Sex'>
+          <LabelizedField label='Gender'>
             <div>{sexToCapitalize(individual.sex)}</div>
           </LabelizedField>
         </Grid>
