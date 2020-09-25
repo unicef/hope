@@ -27,10 +27,9 @@ def social_details(backend, details, response, *args, **kwargs):
 def user_details(strategy, details, backend, user=None, *args, **kwargs):
     logger.debug(f"user_details for user {user} details:\n{details}")
     if user:
-        fullname = details["fullname"].split(" ")
-        user.first_name = fullname[0].capitalize()
-        user.last_name = fullname[-1].capitalize()
-        user.username = details["fullname"]
+        user.first_name = details.get("first_name")
+        user.last_name = details.get("last_name")
+        user.username = details["email"]
         user.save()
 
     return social_core_user.user_details(strategy, details, backend, user, *args, **kwargs)
@@ -51,9 +50,9 @@ def create_user(strategy, details, backend, user=None, *args, **kwargs):
 
     user = get_user_model().objects.create(
         email=details["email"],
-        username=details["fullname"],
-        first_name=fullname[0].capitalize(),
-        last_name=fullname[-1].capitalize(),
+        username=details["email"],
+        first_name=details.get("first_name"),
+        last_name=details.get("last_name"),
     )
     guest_user_role_afghanistan = UserRole()
     guest_user_role_afghanistan.role = Role.objects.filter(name="Guest").first()
