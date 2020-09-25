@@ -1,31 +1,20 @@
-from django import forms
+from admin_extra_urls.extras import ExtraUrlMixin, link
 from django.contrib import admin
+from django.contrib import messages
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.http import Http404
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.utils.safestring import mark_safe
+from django.utils.translation import gettext_lazy as _
 from requests import HTTPError
-from django.contrib import messages
-
 
 from account.microsoft_graph import MicrosoftGraphAPI, DJANGO_USER_MAP
-from account.models import User, UserRole
-from admin_extra_urls.extras import action, ExtraUrlMixin, link
 from account.models import User, UserRole, Role
-
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.utils.translation import gettext_lazy as _
-
 from core.models import BusinessArea
-from core.utils import build_arg_dict, build_arg_dict_from_dict
-
-
-class LoadUsersForm(forms.Form):
-    emails = forms.CharField(widget=forms.Textarea)
-    business_area = forms.ChoiceField(choices=[(ba.id, ba.name) for ba in BusinessArea.objects.all()])
-    role = forms.ChoiceField(choices=[(role.id, role.name) for role in Role.objects.all()])
+from core.utils import build_arg_dict_from_dict
 
 
 @admin.register(User)
@@ -53,6 +42,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
 
     @link()
     def load_ad_users(self, request):
+        from account.forms import LoadUsersForm
         opts = self.model._meta
         ctx = {
             "opts": opts,

@@ -9,6 +9,7 @@ from account.permissions import PERMISSION_READ, PERMISSION_DASHBOARD
 
 class Command(makemigrations.Command):
     def handle(self, *args, **options):
+        print("LOOOL")
         call_command(
             "reset_db",
             "--noinput",
@@ -20,6 +21,7 @@ class Command(makemigrations.Command):
             "--close-sessions",
             router="cash_assist_datahub_ca",
         )
+        print("LOOOL1")
         call_command(
             "reset_db",
             "--noinput",
