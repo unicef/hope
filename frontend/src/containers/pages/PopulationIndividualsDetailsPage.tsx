@@ -47,7 +47,7 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
         title={`Individual ID: ${individual.unicefId}`}
         breadCrumbs={breadCrumbsItems}
         withFlag={individual.sanctionListPossibleMatch}
-        withTriangle={individual.deduplicationStatus !== 'UNIQUE'}
+        withTriangle={individual.deduplicationGoldenRecordStatus !== 'UNIQUE'}
       />
       <Container>
         <IndividualsBioData individual={individual as IndividualNode} />

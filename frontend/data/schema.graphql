@@ -989,7 +989,14 @@ enum ImportedIndividualWorkStatus {
   NOT_PROVIDED
 }
 
-enum IndividualDeduplicationStatus {
+enum IndividualDeduplicationBatchStatus {
+  SIMILAR_IN_BATCH
+  DUPLICATE_IN_BATCH
+  UNIQUE_IN_BATCH
+  NOT_PROCESSED
+}
+
+enum IndividualDeduplicationGoldenRecordStatus {
   UNIQUE
   DUPLICATE
   NEEDS_ADJUDICATION
@@ -1040,8 +1047,11 @@ type IndividualNode implements Node {
   enrolledInNutritionProgramme: Boolean!
   administrationOfRutf: Boolean!
   unicefId: String!
-  deduplicationStatus: IndividualDeduplicationStatus!
-  deduplicationResults: [DeduplicationResultNode]
+  deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus!
+  deduplicationBatchStatus: IndividualDeduplicationBatchStatus!
+  deduplicationGoldenRecordResults: [DeduplicationResultNode]
+  deduplicationBatchResults: [DeduplicationResultNode]
+  importedIndividualId: UUID
   sanctionListPossibleMatch: Boolean!
   pregnant: Boolean!
   representedHouseholds(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
