@@ -7,5 +7,5 @@ export interface Props {
 }
 
 export function UniversalMoment({ children }: Props): React.ReactElement {
-  return <Moment format={DATE_FORMAT}>{children}</Moment>;
+  return children ? <Moment format={DATE_FORMAT}>{children}</Moment> : <>-</>;
 }
