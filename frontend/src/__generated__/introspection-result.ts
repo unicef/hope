@@ -21,13 +21,7 @@
             "name": "PaymentRecordNode"
           },
           {
-            "name": "BusinessAreaNode"
-          },
-          {
-            "name": "UserNode"
-          },
-          {
-            "name": "TargetPopulationNode"
+            "name": "UserBusinessAreaNode"
           },
           {
             "name": "HouseholdNode"
@@ -48,16 +42,25 @@
             "name": "PaymentVerificationNode"
           },
           {
-            "name": "IndividualNode"
+            "name": "TargetPopulationNode"
+          },
+          {
+            "name": "UserNode"
           },
           {
             "name": "RegistrationDataImportNode"
+          },
+          {
+            "name": "IndividualNode"
           },
           {
             "name": "DocumentNode"
           },
           {
             "name": "ServiceProviderNode"
+          },
+          {
+            "name": "BusinessAreaNode"
           },
           {
             "name": "ImportedHouseholdNode"

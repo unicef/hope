@@ -4,7 +4,7 @@ from django_filters import (
     FilterSet,
     OrderingFilter,
     CharFilter,
-    ModelMultipleChoiceFilter,
+    MultipleChoiceFilter,
 )
 from graphene import relay
 from graphene_django import DjangoObjectType
@@ -27,7 +27,8 @@ from household.models import (
     IndividualRoleInHousehold,
     ROLE_NO_ROLE,
     IndividualIdentity,
-    DUPLICATE, DUPLICATE_IN_BATCH,
+    DUPLICATE,
+    DUPLICATE_IN_BATCH,
 )
 from registration_datahub.schema import DeduplicationResultNode
 from targeting.models import HouseholdSelection
@@ -83,7 +84,7 @@ class HouseholdFilter(FilterSet):
 class IndividualFilter(FilterSet):
     business_area = CharFilter(field_name="household__business_area__slug",)
     age = AgeRangeFilter(field_name="birth_date")
-    sex = ModelMultipleChoiceFilter(to_field_name="sex", queryset=Individual.objects.all(),)
+    sex = MultipleChoiceFilter(field_name="sex", choices=SEX_CHOICE)
     programme = CharFilter(field_name="household__programs__name")
     search = CharFilter(method="search_filter")
 
