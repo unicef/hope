@@ -1,8 +1,10 @@
 from django import forms
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
-from django.db.models import Count
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 from model_utils.models import UUIDModel
@@ -24,12 +26,15 @@ USER_PARTNER_CHOICES = Choices("UNHCR", "WFP", "UNICEF")
 class User(AbstractUser, UUIDModel):
     status = models.CharField(choices=USER_STATUS_CHOICES, max_length=10, default=INVITED)
     partner = models.CharField(choices=USER_PARTNER_CHOICES, max_length=10, default=USER_PARTNER_CHOICES.UNICEF)
+    available_for_export = models.BooleanField(
+        default=True, help_text="Indicating if a User can be exported to CashAssist"
+    )
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
 
     def all_permissions(self):
-        return 
+        return
 
     def has_permissions(self, permissions, business_area, write=False):
         query = Role.objects.filter(
@@ -73,3 +78,8 @@ class Role(TimeStampedUUIDModel):
     @classmethod
     def get_roles_as_choices(cls):
         return [(role.id, role.name) for role in cls.objects.all()]
+
+
+@receiver(pre_save, sender=get_user_model())
+def pre_save_user(sender, instance, *args, **kwargs):
+    instance.available_for_export = True
