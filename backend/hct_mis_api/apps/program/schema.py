@@ -29,7 +29,8 @@ class ProgramFilter(FilterSet):
 
 
 class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (hopePermissionClass(f"{PERMISSION_PROGRAM}.{PERMISSION_READ}"),)
+    # TODO Enable permissions below
+    # permission_classes = (hopePermissionClass(f"{PERMISSION_PROGRAM}.{PERMISSION_READ}"),)
     budget = graphene.Decimal()
     total_entitled_quantity = graphene.Decimal()
     total_delivered_quantity = graphene.Decimal()
@@ -106,7 +107,9 @@ class CashPlanNode(DjangoObjectType):
 class Query(graphene.ObjectType):
     program = relay.Node.Field(ProgramNode)
     all_programs = DjangoPermissionFilterConnectionField(
-        ProgramNode, filterset_class=ProgramFilter, permission_classes=(hopePermissionClass("PERMISSION_PROGRAM.LIST"),)
+        ProgramNode, filterset_class=ProgramFilter,
+        # TODO Enable permissions below
+        # permission_classes=(hopePermissionClass("PERMISSION_PROGRAM.LIST"),)
     )
     cash_plan = relay.Node.Field(CashPlanNode)
     all_cash_plans = DjangoFilterConnectionField(CashPlanNode, filterset_class=CashPlanFilter)

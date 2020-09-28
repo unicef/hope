@@ -156,6 +156,8 @@ type CashPlanPaymentVerificationNode implements Node {
   ageFilter: AgeFilterObject
   excludedAdminAreasFilter: [String]
   sexFilter: String
+  activationDate: DateTime
+  completionDate: DateTime
   paymentRecordVerifications(before: String, after: String, first: Int, last: Int): PaymentVerificationNodeConnection!
 }
 
