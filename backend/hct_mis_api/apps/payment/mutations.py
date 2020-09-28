@@ -362,6 +362,7 @@ class ActivateCashPlanVerificationMutation(graphene.Mutation):
             == CashPlanPaymentVerification.VERIFICATION_METHOD_RAPIDPRO
         ):
             cls.activate_rapidpro(cashplan_payment_verification)
+        cashplan_payment_verification.activation_date = timezone.now()
         cashplan_payment_verification.save()
         return ActivateCashPlanVerificationMutation(cashplan_payment_verification.cash_plan)
 
@@ -395,6 +396,7 @@ class FinishCashPlanVerificationMutation(graphene.Mutation):
         if cashplan_payment_verification.status != CashPlanPaymentVerification.STATUS_ACTIVE:
             raise GraphQLError("You can finish only ACTIVE verification")
         cashplan_payment_verification.status = CashPlanPaymentVerification.STATUS_FINISHED
+        cashplan_payment_verification.completion_date = timezone.now()
         cashplan_payment_verification.save()
         return ActivateCashPlanVerificationMutation(cashplan_payment_verification.cash_plan)
 
