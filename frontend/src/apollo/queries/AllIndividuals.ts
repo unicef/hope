@@ -7,7 +7,7 @@ export const AllIndividuals = gql`
     $first: Int
     $last: Int
     $fullNameContains: String
-    $sex: [ID]
+    $sex: [String]
     $age: String
     $orderBy: String
     $search: String
