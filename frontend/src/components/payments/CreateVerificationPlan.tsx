@@ -30,6 +30,7 @@ import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { FormikEffect } from '../FormikEffect';
 import { CashPlan } from '../../apollo/queries/CashPlan';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
+import { ButtonTooltip } from '../ButtonTooltip';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -71,9 +72,11 @@ const initialValues = {
 
 export interface Props {
   cashPlanId: string;
+  disabled: boolean;
 }
 export function CreateVerificationPlan({
   cashPlanId,
+  disabled,
 }: Props): React.ReactElement {
   const [open, setOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
@@ -202,14 +205,16 @@ export function CreateVerificationPlan({
       {({ submitForm, values, setValues }) => (
         <Form>
           <FormikEffect values={values} onChange={handleFormChange(values)} />
-          <Button
+          <ButtonTooltip
+            disabled={disabled}
             color='primary'
             variant='contained'
             onClick={() => setOpen(true)}
             data-cy='button-new-plan'
           >
             CREATE VERIFICATION PLAN
-          </Button>
+          </ButtonTooltip>
+
           <Dialog
             open={open}
             onClose={() => setOpen(false)}
