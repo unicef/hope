@@ -200,11 +200,11 @@ export function RegistrationDataImport(): React.ReactElement {
     const koboProjects = koboProjectsData?.allKoboProjects?.edges || [];
     importTypeSpecificContent = (
       <div>
-        <FormControl variant='filled' margin='dense'>
+        <FormControl variant='outlined' margin='dense'>
           <InputLabel>Import from</InputLabel>
           <ComboBox
             value={koboProject}
-            variant='filled'
+            variant='outlined'
             label='Kobo Project'
             onChange={(e) => {
               setKoboProject(e.target.value);
@@ -291,11 +291,11 @@ export function RegistrationDataImport(): React.ReactElement {
                 </DialogTitle>
               </DialogTitleWrapper>
               <DialogContent>
-                <FormControl variant='filled' margin='dense'>
+                <FormControl variant='outlined' margin='dense'>
                   <InputLabel>Import from</InputLabel>
                   <ComboBox
                     value={importType}
-                    variant='filled'
+                    variant='outlined'
                     label=''
                     onChange={(e) => setImportType(e.target.value)}
                     fullWidth
@@ -321,7 +321,7 @@ export function RegistrationDataImport(): React.ReactElement {
                   fullWidth
                   label='Name Upload'
                   required
-                  variant='filled'
+                  variant='outlined'
                   component={FormikTextField}
                 />
               </DialogContent>
