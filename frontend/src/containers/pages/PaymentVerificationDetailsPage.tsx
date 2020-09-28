@@ -312,6 +312,22 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                     label: 'NOT RECEIVED',
                     value: verificationPlan.notReceivedCount || '-',
                   },
+                  {
+                    label: 'ACTIVATION DATE',
+                    value: (
+                      <UniversalMoment>
+                        {verificationPlan.activationDate}
+                      </UniversalMoment>
+                    ),
+                  },
+                  {
+                    label: 'COMPLETION DATE',
+                    value: (
+                      <UniversalMoment>
+                        {verificationPlan.completionDate}
+                      </UniversalMoment>
+                    ),
+                  },
                 ].map((el) => (
                   <Grid item xs={3}>
                     <LabelizedField label={el.label}>
