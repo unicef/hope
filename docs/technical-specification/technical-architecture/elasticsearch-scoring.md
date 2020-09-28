@@ -16,7 +16,7 @@ Elasticsearch uses Lucene's [Practical Scoring Function](https://www.elastic.co/
                  idf\(t\)²,  
                  t.getBoost\(\),  
                  norm\(t,d\)  
-                         \) \(t in q\)
+              \) \(t in q\)
 
 * score\(q,d\) is the relevance score of document d for query q.
 * queryNorm\(q\) is the query normalization factor.
