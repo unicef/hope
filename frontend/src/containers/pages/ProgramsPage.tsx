@@ -1,25 +1,22 @@
-import React from 'react';
-import styled from 'styled-components';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ProgramCard } from '../../components/programs/ProgramCard';
 import { PageHeader } from '../../components/PageHeader';
 import {
-  ProgramNode,
   useAllProgramsQuery,
   useProgrammeChoiceDataQuery,
 } from '../../__generated__/graphql';
 import { CreateProgram } from '../dialogs/programs/CreateProgram';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { LoadingComponent } from '../../components/LoadingComponent';
+import { ProgrammesTable } from '../tables/ProgrammesTable/ProgrammesTable';
+import { useDebounce } from '../../hooks/useDebounce';
+import { ProgrammesFilters } from '../tables/ProgrammesTable/ProgrammesFilter';
 
-const PageContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  margin-top: 20px;
-  justify-content: center;
-`;
 export function ProgramsPage(): React.ReactElement {
+  const [filter, setFilter] = useState({
+    status: '',
+  });
+  const debouncedFilter = useDebounce(filter, 500);
   const businessArea = useBusinessArea();
   const { data, loading } = useAllProgramsQuery({
     variables: {
@@ -29,7 +26,7 @@ export function ProgramsPage(): React.ReactElement {
   });
 
   const {
-    data: choices,
+    data: choicesData,
     loading: choicesLoading,
   } = useProgrammeChoiceDataQuery();
   const { t } = useTranslation();
@@ -42,19 +39,16 @@ export function ProgramsPage(): React.ReactElement {
   if (loading || choicesLoading) {
     return <LoadingComponent />;
   }
-  if (!data || !data.allPrograms || !choices) {
-    return <div>{toolbar}</div>;
-  }
-  const programsList = data.allPrograms.edges.map((node) => {
-    const program = node.node as ProgramNode;
-    return <ProgramCard key={program.id} program={program} choices={choices} />;
-  });
+
   return (
     <div>
       {toolbar}
-      <PageContainer data-cy='programs-page-container'>
-        {programsList}
-      </PageContainer>
+      <ProgrammesFilters
+        filter={filter}
+        onFilterChange={setFilter}
+        choicesData={choicesData}
+      />
+      <ProgrammesTable choicesData={choicesData} filter={debouncedFilter} />
     </div>
   );
 }

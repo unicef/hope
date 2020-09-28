@@ -43,6 +43,8 @@ export function programStatusToColor(
   status: string,
 ): string {
   switch (status) {
+    case 'DRAFT':
+      return theme.hctPalette.gray;
     case 'ACTIVE':
       return theme.hctPalette.green;
     case 'FINISHED':
