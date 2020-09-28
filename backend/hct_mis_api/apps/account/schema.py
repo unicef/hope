@@ -55,7 +55,7 @@ class UsersFilter(FilterSet):
         return qs.filter(q_obj)
 
     def business_area_filter(self, qs, name, value):
-        return qs
+        return qs.filter(user_roles__business_area__slug=value)
 
     def roles_filter(self, qs, name, values):
         business_area_slug = self.data.get("business_area")
@@ -173,6 +173,7 @@ class Query(graphene.ObjectType):
     user_roles_choices = graphene.List(ChoiceObject)
     user_status_choices = graphene.List(ChoiceObject)
     user_partner_choices = graphene.List(ChoiceObject)
+    has_available_users_to_export = graphene.Boolean(business_area_slug=graphene.String(required=True))
 
     def resolve_me(self, info, **kwargs):
         if not info.context.user.is_authenticated:
@@ -187,3 +188,8 @@ class Query(graphene.ObjectType):
 
     def resolve_user_partner_choices(self, info, **kwargs):
         return to_choice_object(USER_PARTNER_CHOICES)
+
+    def resolve_has_available_users_to_export(self, info, business_area_slug, **kwargs):
+        return get_user_model().objects.prefetch_related("user_roles").filter(
+            available_for_export=True, is_superuser=False, user_roles__business_area__slug=business_area_slug
+        ).exists()
