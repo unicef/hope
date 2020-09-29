@@ -4799,7 +4799,7 @@ export type RegistrationDataImportQuery = (
 
 export type RegistrationMinimalFragment = (
   { __typename?: 'RegistrationDataImportNode' }
-  & Pick<RegistrationDataImportNode, 'id' | 'createdAt' | 'name' | 'status' | 'importDate' | 'dataSource' | 'numberOfHouseholds'>
+  & Pick<RegistrationDataImportNode, 'id' | 'createdAt' | 'name' | 'status' | 'importDate' | 'dataSource' | 'numberOfHouseholds' | 'numberOfIndividuals'>
   & { importedBy: (
     { __typename?: 'UserNode' }
     & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -5256,6 +5256,7 @@ export const RegistrationMinimalFragmentDoc = gql`
   }
   dataSource
   numberOfHouseholds
+  numberOfIndividuals
 }
     `;
 export const RegistrationDetailedFragmentDoc = gql`
