@@ -22,7 +22,7 @@ export const FormikDateField = ({
       {...otherProps}
       name={field.name}
       variant='inline'
-      inputVariant='filled'
+      inputVariant='outlined'
       margin='dense'
       value={formattedValue}
       error={isInvalid}

@@ -96,7 +96,7 @@ class TestFlexibleHelperMethods(TestCase):
             "required": False,
         }
 
-        expected_json_fields = {"label": {"English(EN)": "Milk and dairy products: yoghurt, cheese",}}
+        expected_json_fields = {"label": {"English(EN)": "Milk and dairy products: yoghurt, cheese"}}
 
         self.assertEqual(self.admin.object_fields_to_create, expected_fields)
         self.assertEqual(self.admin.json_fields_to_create, expected_json_fields)
@@ -151,7 +151,7 @@ class TestFlexibleHelperMethods(TestCase):
             "required": False,
         }
 
-        expected_json_fields = {"label": {"English(EN)": "Consent",}}
+        expected_json_fields = {"label": {"English(EN)": "Consent"}}
 
         self.assertEqual(self.admin.object_fields_to_create, expected_fields)
         self.assertEqual(self.admin.json_fields_to_create, expected_json_fields)
@@ -179,7 +179,7 @@ class TestFlexibleHelperMethods(TestCase):
             "name": "1",
         }
 
-        expected_json_fields = {"label": {"English(EN)": "Yes",}}
+        expected_json_fields = {"label": {"English(EN)": "Yes"}}
 
         self.assertEqual(self.admin.object_fields_to_create, expected_fields)
         self.assertEqual(self.admin.json_fields_to_create, expected_json_fields)
@@ -210,14 +210,14 @@ class TestFlexibleHelperMethods(TestCase):
 
     def test_set_can_add_flag(self):
         cases_to_test = [
-            {"row": [Cell(1, "text", None,), Cell(1, "test_h_c", None,)], "expected": False,},
-            {"row": [Cell(1, "text", None,), Cell(1, "test_i_c", None,)], "expected": False,},
-            {"row": [Cell(1, "start", None,), Cell(1, "start", None,)], "expected": False,},
-            {"row": [Cell(1, "end", None,), Cell(1, "end", None,)], "expected": False,},
-            {"row": [Cell(1, "deviceid", None,), Cell(1, "deviceid", None,),], "expected": False,},
-            {"row": [Cell(1, "end_repeat", None,), Cell(1, "", None,)], "expected": False,},
-            {"row": [Cell(1, "end_group", None,), Cell(1, "", None,)], "expected": False,},
-            {"row": [Cell(1, "begin_group", None,), Cell(1, "test_group", None,),], "expected": True,},
+            {"row": [Cell(1, "text", None,), Cell(1, "test_h_c", None,)], "expected": False},
+            {"row": [Cell(1, "text", None,), Cell(1, "test_i_c", None,)], "expected": False},
+            {"row": [Cell(1, "start", None,), Cell(1, "start", None,)], "expected": False},
+            {"row": [Cell(1, "end", None,), Cell(1, "end", None,)], "expected": False},
+            {"row": [Cell(1, "deviceid", None,), Cell(1, "deviceid", None,)], "expected": False},
+            {"row": [Cell(1, "end_repeat", None,), Cell(1, "", None,)], "expected": False},
+            {"row": [Cell(1, "end_group", None,), Cell(1, "", None,)], "expected": False},
+            {"row": [Cell(1, "begin_group", None,), Cell(1, "test_group", None,)], "expected": True},
         ]
 
         for case in cases_to_test:
@@ -254,9 +254,9 @@ class TestFlexibleHelperMethods(TestCase):
 
     def test_get_field_choice_name(self):
         cases_to_test = [
-            {"row": [Cell(1, "text", None,), Cell(1, "first_name", None,)], "expected": None,},
+            {"row": [Cell(1, "text", None,), Cell(1, "first_name", None,)], "expected": None},
             {
-                "row": [Cell(1, "select_one test_group", None,), Cell(1, "test_group", None,),],
+                "row": [Cell(1, "select_one test_group", None,), Cell(1, "test_group", None,)],
                 "expected": "test_group",
             },
         ]

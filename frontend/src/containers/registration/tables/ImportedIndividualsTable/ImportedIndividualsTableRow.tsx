@@ -1,8 +1,8 @@
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import moment from 'moment';
 import styled from 'styled-components';
+import { TableRow } from '@material-ui/core';
 import {
   HouseholdChoiceDataQuery,
   ImportedIndividualMinimalFragment,
@@ -13,8 +13,8 @@ import {
   decodeIdString,
   sexToCapitalize,
 } from '../../../../utils/utils';
-import { TableRow } from '@material-ui/core';
 import { DedupeResults } from '../../details/DedupeResults';
+import { UniversalMoment } from '../../../../components/UniversalMoment';
 
 interface ImportedIndividualsTableRowProps {
   individual: ImportedIndividualMinimalFragment;
@@ -55,7 +55,7 @@ export function ImportedIndividualsTableRow({
         {relationshipChoicesDict[individual.relationship]}
       </TableCell>
       <TableCell align='left'>
-        {moment(individual.birthDate).format('DD MMM YYYY')}
+        <UniversalMoment>{individual.birthDate}</UniversalMoment>
       </TableCell>
       <TableCell align='left'>{sexToCapitalize(individual.sex)}</TableCell>
       <TableCell align='left'>

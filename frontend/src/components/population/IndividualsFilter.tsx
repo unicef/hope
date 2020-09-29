@@ -80,14 +80,14 @@ export function IndividualsFilter({
         data-cy='filters-search'
       />
       <StyledFormControl variant='outlined' margin='dense'>
-        <InputLabel>Sex</InputLabel>
+        <InputLabel>Gender</InputLabel>
         <Select
           /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
           // @ts-ignore
           onChange={(e) => handleFilterChange(e, 'sex')}
           variant='outlined'
           value={filter.sex || ''}
-          label='Sex'
+          label='Gender'
           InputProps={{
             startAdornment: (
               <StartInputAdornment position='start'>

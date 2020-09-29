@@ -10,7 +10,6 @@ import styled from 'styled-components';
 import WarningIcon from '@material-ui/icons/Warning';
 import { Field, Formik } from 'formik';
 import * as Yup from 'yup';
-import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
 import { ProgrammeAutocomplete } from '../../../shared/ProgrammeAutocomplete';
 import {
   useAllProgramsQuery,
@@ -59,7 +58,11 @@ const useStyles = makeStyles((theme: MiśTheme) => ({
   warning: { color: theme.hctPalette.oragne, marginRight: '10px' },
 }));
 
-export function ApproveCandidateList({ open, setOpen, targetPopulationId }) {
+export function ApproveCandidateList({
+  open,
+  setOpen,
+  targetPopulationId,
+}): React.ReactElement {
   const { data: programs } = useAllProgramsQuery({
     variables: { status: 'ACTIVE' },
   });

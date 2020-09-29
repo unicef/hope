@@ -65,7 +65,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
 
         registration_data_import_second = RegistrationDataImportFactory(business_area=cls.business_area)
         (cls.household, cls.individuals,) = create_imported_household_and_individuals(
-            household_data={"registration_data_import": cls.registration_data_import_datahub,},
+            household_data={"registration_data_import": cls.registration_data_import_datahub},
             individuals_data=[
                 {
                     # DUPLICATE
@@ -410,8 +410,8 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         task = DeduplicateTask()
         task.business_area = self.business_area.slug
         task.deduplicate_individuals(self.registration_data_import)
-        needs_adjudication = Individual.objects.filter(deduplication_status=NEEDS_ADJUDICATION)
-        duplicate = Individual.objects.filter(deduplication_status=DUPLICATE)
+        needs_adjudication = Individual.objects.filter(deduplication_golden_record_status=NEEDS_ADJUDICATION)
+        duplicate = Individual.objects.filter(deduplication_golden_record_status=DUPLICATE)
 
         self.assertEqual(needs_adjudication.count(), 0)
         self.assertEqual(duplicate.count(), 2)

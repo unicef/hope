@@ -345,3 +345,17 @@ def to_dict(instance, fields=None, dict_fields=None):
                         data[main_field_key] = instance_data_dict
 
     return data
+
+
+def build_arg_dict(model_object, mapping_dict):
+    args = {}
+    for key in mapping_dict:
+        args[key] = nested_getattr(model_object, mapping_dict[key], None)
+    return args
+
+
+def build_arg_dict_from_dict(data_dict, mapping_dict):
+    args = {}
+    for key, value in mapping_dict.items():
+        args[key] = data_dict.get(value)
+    return args

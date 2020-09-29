@@ -1,6 +1,6 @@
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
-from household.fixtures import HouseholdFactory, IndividualFactory, create_household
+from household.fixtures import create_household
 from targeting.models import (
     TargetingCriteria,
     TargetingCriteriaRule,
@@ -66,24 +66,24 @@ class TestTargetPopulationQuery(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        (household, individuals) = create_household({"size": 1, "residence_status": "CITIZEN",},)
-        (household, individuals) = create_household({"size": 1, "residence_status": "CITIZEN",},)
+        (household, individuals) = create_household({"size": 1, "residence_status": "CITIZEN"},)
+        (household, individuals) = create_household({"size": 1, "residence_status": "CITIZEN"},)
         cls.household_size_1 = household
         cls.household_residence_status_citizen = cls.household_size_1
-        (household, individuals) = create_household({"size": 2, "residence_status": "REFUGEE",},)
+        (household, individuals) = create_household({"size": 2, "residence_status": "REFUGEE"},)
         cls.household_residence_status_refugee = household
         cls.household_size_2 = cls.household_residence_status_refugee
 
         cls.user = UserFactory.create()
         targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {"field_name": "size", "arguments": [2], "comparision_method": "EQUALS",}
+            {"field_name": "size", "arguments": [2], "comparision_method": "EQUALS"}
         )
         cls.target_population_size_2 = TargetPopulation(
             name="target_population_size_2", created_by=cls.user, candidate_list_targeting_criteria=targeting_criteria,
         )
         cls.target_population_size_2.save()
         targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {"field_name": "residence_status", "arguments": ["REFUGEE"], "comparision_method": "EQUALS",}
+            {"field_name": "residence_status", "arguments": ["REFUGEE"], "comparision_method": "EQUALS"}
         )
         cls.target_population_residence_status = TargetPopulation(
             name="target_population_residence_status",
@@ -93,7 +93,7 @@ class TestTargetPopulationQuery(APITestCase):
         cls.target_population_residence_status.save()
 
         targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {"field_name": "size", "arguments": [1], "comparision_method": "EQUALS",}
+            {"field_name": "size", "arguments": [1], "comparision_method": "EQUALS"}
         )
         cls.target_population_size_1_approved = TargetPopulation(
             name="target_population_size_1_approved",

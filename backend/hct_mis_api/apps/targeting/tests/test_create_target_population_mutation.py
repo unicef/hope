@@ -55,9 +55,9 @@ class TestCreateTargetPopulationMutation(APITestCase):
     def setUpTestData(cls):
         cls.user = UserFactory.create()
         call_command("loadbusinessareas")
-        create_household({"size": 2, "residence_status": "CITIZEN",},)
-        create_household({"size": 3, "residence_status": "CITIZEN",},)
-        create_household({"size": 3, "residence_status": "CITIZEN",},)
+        create_household({"size": 2, "residence_status": "CITIZEN"},)
+        create_household({"size": 3, "residence_status": "CITIZEN"},)
+        create_household({"size": 3, "residence_status": "CITIZEN"},)
 
     def test_create_mutation(self):
         self.snapshot_graphql_request(

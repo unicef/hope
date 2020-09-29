@@ -25,7 +25,7 @@ export function TargetPopulationCore({
   selectedTab = 0,
   status,
   targetPopulation,
-}) {
+}): React.ReactElement {
   if (!candidateList) return null;
   const { rules: candidateListRules } = candidateList;
   const totalNumOfHouseholds =

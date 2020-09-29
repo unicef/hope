@@ -1,10 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
-import moment from 'moment';
 import { Grid, Paper, Typography } from '@material-ui/core';
 import { StatusBox } from '../StatusBox';
 import {
-  decodeIdString,
   formatCurrency,
   paymentRecordStatusToColor,
   verificationRecordsStatusToColor,
@@ -13,6 +11,7 @@ import { LabelizedField } from '../LabelizedField';
 import { PaymentVerificationNode } from '../../__generated__/graphql';
 import { Missing } from '../Missing';
 import { UniversalActivityLogTable } from '../../containers/tables/UniversalActivityLogTable';
+import { UniversalMoment } from '../UniversalMoment';
 
 const Container = styled.div`
   display: flex;
@@ -75,9 +74,11 @@ export function VerificationRecordDetails({
           <Grid item xs={3}>
             <LabelizedField
               label='STATUS DATE'
-              value={moment(
-                paymentVerification.paymentRecord.statusDate,
-              ).format('DD MMM YYYY')}
+              value={
+                <UniversalMoment>
+                  {paymentVerification.paymentRecord.statusDate}
+                </UniversalMoment>
+              }
             />
           </Grid>
           <Grid item xs={3}>
@@ -117,9 +118,11 @@ export function VerificationRecordDetails({
           <Grid item xs={3}>
             <LabelizedField
               label='STATUS DATE'
-              value={moment(paymentVerification.statusDate).format(
-                'DD MMM YYYY',
-              )}
+              value={
+                <UniversalMoment>
+                  {paymentVerification.statusDate}
+                </UniversalMoment>
+              }
             />
           </Grid>
           <Grid item xs={3}>
@@ -138,9 +141,7 @@ export function VerificationRecordDetails({
           <Grid item xs={3}>
             <LabelizedField
               label='HOUSEHOLD ID'
-              value={decodeIdString(
-                paymentVerification.paymentRecord.household.id,
-              )}
+              value={paymentVerification.paymentRecord.household.unicefId}
             />
           </Grid>
           <Grid item xs={3}>
@@ -169,7 +170,7 @@ export function VerificationRecordDetails({
               label='ALT. PHONE NUMBER'
               value={
                 paymentVerification.paymentRecord.household.headOfHousehold
-                  .phoneNoAlternative
+                  .phoneNoAlternative || '-'
               }
             />
           </Grid>
@@ -207,9 +208,11 @@ export function VerificationRecordDetails({
           <Grid item xs={3}>
             <LabelizedField
               label='DELIVERY DATE'
-              value={moment(
-                paymentVerification.paymentRecord.deliveryDate,
-              ).format('DD MMM YYYY')}
+              value={
+                <UniversalMoment>
+                  {paymentVerification.paymentRecord.deliveryDate}
+                </UniversalMoment>
+              }
             />
           </Grid>
           <Grid item xs={3}>
@@ -226,9 +229,11 @@ export function VerificationRecordDetails({
           <Grid item xs={3}>
             <LabelizedField
               label='ENTITLEMENT CARD ISSUE DATE'
-              value={moment(
-                paymentVerification.paymentRecord.entitlementCardIssueDate,
-              ).format('DD MMM YYYY')}
+              value={
+                <UniversalMoment>
+                  {paymentVerification.paymentRecord.entitlementCardIssueDate}
+                </UniversalMoment>
+              }
             />
           </Grid>
           <Grid item xs={3}>

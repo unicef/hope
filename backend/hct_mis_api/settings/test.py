@@ -1,12 +1,6 @@
 from __future__ import absolute_import
 
-import logging
-
-from graphql import GraphQLError
-from graphql.error import GraphQLLocatedError
-
 from .base import *  # noqa: ignore=F403
-
 
 # dev overrides
 DEBUG = True
@@ -21,7 +15,7 @@ ALLOWED_HOSTS = ["localhost", "127.0.0.1", "10.0.2.2", os.getenv("DOMAIN", "")]
 # other
 
 
-CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache", "TIMEOUT": 1800,}}
+CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache", "TIMEOUT": 1800}}
 
 LOGGING = {
     "version": 1,
@@ -33,7 +27,7 @@ LOGGING = {
         },
     },
     "filters": {"require_debug_false": {"()": "django.utils.log.RequireDebugFalse"}},
-    "handlers": {"default": {"level": LOG_LEVEL, "class": "logging.StreamHandler", "formatter": "standard",},},
+    "handlers": {"default": {"level": LOG_LEVEL, "class": "logging.StreamHandler", "formatter": "standard"}},
     "loggers": {
         "": {"handlers": ["default"], "level": "DEBUG", "propagate": True},
         "graphql": {"handlers": ["default"], "level": "CRITICAL", "propagate": True},

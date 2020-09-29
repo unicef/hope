@@ -12,7 +12,6 @@ import {
 import { IndividualVulnerabilities } from '../../components/population/IndividualVunerabilities';
 import { CashPlus } from '../../components/population/CashPlus';
 import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
-import { decodeIdString } from '../../utils/utils';
 
 const Container = styled.div`
   padding: 20px;
@@ -45,9 +44,10 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
   return (
     <div>
       <PageHeader
-        title={`Individual ID: ${decodeIdString(id)}`}
+        title={`Individual ID: ${individual.unicefId}`}
         breadCrumbs={breadCrumbsItems}
         withFlag={individual.sanctionListPossibleMatch}
+        withTriangle={individual.deduplicationGoldenRecordStatus !== 'UNIQUE'}
       />
       <Container>
         <IndividualsBioData individual={individual as IndividualNode} />

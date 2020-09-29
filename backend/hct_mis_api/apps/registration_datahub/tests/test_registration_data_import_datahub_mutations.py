@@ -110,7 +110,7 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.UPLOAD_REGISTRATION_DATA_IMPORT_DATAHUB,
             context={"user": self.user},
-            variables={"file": self.valid_file, "businessAreaSlug": "afghanistan",},
+            variables={"file": self.valid_file, "businessAreaSlug": "afghanistan"},
         )
 
         import_data_obj = ImportData.objects.first()

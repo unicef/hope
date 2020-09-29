@@ -7,7 +7,7 @@ trigger:
   paths:
     exclude:
     -  docs/*
-
+pr: none # we don't do any testing there yet
 resources:
   - repo: self
 
@@ -112,6 +112,7 @@ stages:
                 backend.secret.POSTGRES_CASHASSIST_DATAHUB_USER=$(CASH_ASSIST_REGISTRATION_DATAHUB_POSTGRES_USER),\
                 backend.secret.POSTGRES_CASHASSIST_DATAHUB_PASSWORD=$(CASH_ASSIST_REGISTRATION_DATAHUB_POSTGRES_PASSWORD),\
                 backend.secret.POSTGRES_CASHASSIST_DATAHUB_HOST=$(CASH_ASSIST_REGISTRATION_DATAHUB_POSTGRES_HOST),\
+                backend.secret.EMAIL_HOST=$(EMAIL_HOST),\
                 databases.backend-db.secret.POSTGRES_DB=$(POSTGRES_DB),\
                 databases.backend-db.secret.POSTGRES_USER=$(POSTGRES_USER),\
                 databases.backend-db.secret.POSTGRES_PASSWORD=$(POSTGRES_PASSWORD),\
