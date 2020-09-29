@@ -11,9 +11,11 @@ export function UniversalMoment({
   children,
   withTime,
 }: Props): React.ReactElement {
-  return (
+  return children ? (
     <Moment format={withTime ? DATE_FORMAT_LONG : DATE_FORMAT}>
       {children}
     </Moment>
+  ) : (
+    <>-</>
   );
 }
