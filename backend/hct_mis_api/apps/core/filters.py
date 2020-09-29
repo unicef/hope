@@ -2,7 +2,7 @@ import json
 from datetime import datetime, date, timedelta
 
 from django.forms import Field, IntegerField
-from django_filters import Filter, OrderingFilter
+from django_filters import Filter
 
 
 class RangeField(Field):
@@ -46,7 +46,7 @@ def filter_age(field_name, qs, min, max):
         lookup_expr = "range"
         # min year +1 , day-1
         max_date = date(current.year - min, current.month, current.day,)
-        min_date = date(current.year - max-1, current.month, current.day,)
+        min_date = date(current.year - max - 1, current.month, current.day,)
         min_date = min_date + timedelta(days=1)
         values = (min_date, max_date)
     elif min is not None and max is None:
@@ -56,7 +56,7 @@ def filter_age(field_name, qs, min, max):
     elif min is None and max is not None:
         lookup_expr = "gte"
         # min year -1 , day+1
-        min_date = date(current.year - max - 1, current.month, current.day, )
+        min_date = date(current.year - max - 1, current.month, current.day,)
         min_date = min_date + timedelta(days=1)
         values = min_date
     return qs.filter(**{f"{field_name}__{lookup_expr}": values})
@@ -74,7 +74,7 @@ class AgeRangeFilter(Filter):
                 self.lookup_expr = "range"
                 # min year +1 , day-1
                 max_date = date(current.year - min_value, current.month, current.day,)
-                min_date = date(current.year - max_value-1, current.month, current.day,)
+                min_date = date(current.year - max_value - 1, current.month, current.day,)
                 min_date = min_date + timedelta(days=1)
                 values = (min_date, max_date)
             elif min_value is not None and max_value is None:
@@ -83,8 +83,8 @@ class AgeRangeFilter(Filter):
                 values = max_date
             elif min_value is None and max_value is not None:
                 self.lookup_expr = "gte"
-                #min year -1 , day+1
-                min_date = date(current.year - max_value-1, current.month, current.day,)
+                # min year -1 , day+1
+                min_date = date(current.year - max_value - 1, current.month, current.day,)
                 min_date = min_date + timedelta(days=1)
                 values = min_date
         return super().filter(qs, values)

@@ -10,7 +10,7 @@ from django.contrib.postgres.validators import (
 )
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import Q, Count
+from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
@@ -37,7 +37,7 @@ def get_integer_range(min_range=None, max_range=None):
     return IntegerRangeField(
         default=get_serialized_range,
         blank=True,
-        validators=[RangeMinValueValidator(min_range), RangeMaxValueValidator(max_range),],
+        validators=[RangeMinValueValidator(min_range), RangeMaxValueValidator(max_range)],
     )
 
 
@@ -279,7 +279,7 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
             "negative": False,
             "supported_types": ["INTEGER", "SELECT_ONE", "STRING"],
         },
-        "NOT_EQUALS": {"arguments": 1, "lookup": "", "negative": True, "supported_types": ["INTEGER", "SELECT_ONE"],},
+        "NOT_EQUALS": {"arguments": 1, "lookup": "", "negative": True, "supported_types": ["INTEGER", "SELECT_ONE"]},
         "CONTAINS": {
             "min_arguments": 1,
             "arguments": 1,
@@ -287,11 +287,11 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
             "negative": False,
             "supported_types": ["SELECT_MANY", "STRING"],
         },
-        "NOT_CONTAINS": {"arguments": 1, "lookup": "__icontains", "negative": True, "supported_types": ["STRING"],},
-        "RANGE": {"arguments": 2, "lookup": "__range", "negative": False, "supported_types": ["INTEGER"],},
-        "NOT_IN_RANGE": {"arguments": 2, "lookup": "__range", "negative": True, "supported_types": ["INTEGER"],},
-        "GREATER_THAN": {"arguments": 1, "lookup": "__gt", "negative": False, "supported_types": ["INTEGER"],},
-        "LESS_THAN": {"arguments": 1, "lookup": "__lt", "negative": False, "supported_types": ["INTEGER"],},
+        "NOT_CONTAINS": {"arguments": 1, "lookup": "__icontains", "negative": True, "supported_types": ["STRING"]},
+        "RANGE": {"arguments": 2, "lookup": "__range", "negative": False, "supported_types": ["INTEGER"]},
+        "NOT_IN_RANGE": {"arguments": 2, "lookup": "__range", "negative": True, "supported_types": ["INTEGER"]},
+        "GREATER_THAN": {"arguments": 1, "lookup": "__gt", "negative": False, "supported_types": ["INTEGER"]},
+        "LESS_THAN": {"arguments": 1, "lookup": "__lt", "negative": False, "supported_types": ["INTEGER"]},
     }
 
     COMPARISON_CHOICES = Choices(

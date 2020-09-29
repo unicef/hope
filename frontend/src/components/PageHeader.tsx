@@ -5,6 +5,7 @@ import { useHistory } from 'react-router-dom';
 import ArrowBackRoundedIcon from '@material-ui/icons/ArrowBackRounded';
 import { BreadCrumbs, BreadCrumbsItem } from './BreadCrumbs';
 import { Flag } from './Flag';
+import { FlagTooltip } from './FlagTooltip';
 
 const Wrapper = styled.div`
   box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2),
@@ -60,6 +61,7 @@ interface Props {
   tabs?: React.ReactElement;
   hasInputComponent?: boolean;
   withFlag?: boolean;
+  withTriangle?: boolean;
 }
 
 export function PageHeader({
@@ -69,6 +71,7 @@ export function PageHeader({
   tabs = null,
   hasInputComponent,
   withFlag = false,
+  withTriangle = false,
 }: Props): React.ReactElement {
   const history = useHistory();
   return (
@@ -89,7 +92,8 @@ export function PageHeader({
               <>
                 {breadCrumbs && <BreadCrumbs breadCrumbs={breadCrumbs} />}
                 <Typography variant='h5'>
-                  {title} {withFlag && <Flag />}
+                  {title} {withTriangle && <FlagTooltip />}{' '}
+                  {withFlag && <Flag />}
                 </Typography>
               </>
             )}

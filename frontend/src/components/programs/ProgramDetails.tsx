@@ -1,7 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Grid, Typography } from '@material-ui/core';
-import moment from 'moment';
 import { StatusBox } from '../StatusBox';
 import { choicesToDict, programStatusToColor } from '../../utils/utils';
 import { LabelizedField } from '../LabelizedField';
@@ -10,7 +9,7 @@ import {
   ProgramNode,
 } from '../../__generated__/graphql';
 import { MiśTheme } from '../../theme';
-import { Missing } from '../Missing';
+import { UniversalMoment } from '../UniversalMoment';
 
 const Container = styled.div`
   display: flex;
@@ -93,13 +92,13 @@ export function ProgramDetails({
           <Grid item xs={4}>
             <LabelizedField
               label='START DATE'
-              value={moment(program.startDate).format('DD MMM YYYY')}
+              value={<UniversalMoment>{program.startDate}</UniversalMoment>}
             />
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
               label='END DATE'
-              value={moment(program.endDate).format('DD MMM YYYY')}
+              value={<UniversalMoment>{program.endDate}</UniversalMoment>}
             />
           </Grid>
 

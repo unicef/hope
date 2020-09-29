@@ -17,9 +17,8 @@ import { HouseholdVulnerabilities } from '../../components/population/HouseholdV
 import { LabelizedField } from '../../components/LabelizedField';
 import { HouseholdIndividualsTable } from '../tables/HouseholdIndividualsTable';
 import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
-import { decodeIdString } from '../../utils/utils';
 import { PaymentRecordHouseholdTable } from '../tables/PaymentRecordHouseholdTable';
-import Moment from 'react-moment';
+import { UniversalMoment } from '../../components/UniversalMoment';
 
 const Container = styled.div`
   padding: 20px;
@@ -77,9 +76,10 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
   return (
     <div>
       <PageHeader
-        title={`Household ID: ${decodeIdString(id)}`}
+        title={`Household ID: ${household.unicefId}`}
         breadCrumbs={breadCrumbsItems}
         withFlag={household.sanctionListPossibleMatch}
+        withTriangle={household.hasDuplicates}
       />
       <HouseholdDetails houseHold={household as HouseholdNode} />
       <Container>
@@ -112,9 +112,9 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
             <Grid item xs={3}>
               <LabelizedField label='Registered Date'>
                 <div>
-                  <Moment format='DD/MM/YYYY'>
+                  <UniversalMoment>
                     {household.registrationDataImport.importDate}
-                  </Moment>
+                  </UniversalMoment>
                 </div>
               </LabelizedField>
             </Grid>

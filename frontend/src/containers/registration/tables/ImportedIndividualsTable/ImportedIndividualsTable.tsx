@@ -1,11 +1,11 @@
 import React, { ReactElement, useState } from 'react';
+import { FormControlLabel, Checkbox, Grid, Box } from '@material-ui/core';
 import {
   AllImportedIndividualsQueryVariables,
   ImportedIndividualMinimalFragment,
   useAllImportedIndividualsQuery,
   useHouseholdChoiceDataQuery,
 } from '../../../../__generated__/graphql';
-import { FormControlLabel, Checkbox, Grid, Box } from '@material-ui/core';
 import { UniversalTable } from '../../../tables/UniversalTable';
 import { ImportedIndividualsTableRow } from './ImportedIndividualsTableRow';
 import { headCells } from './ImportedIndividualsTableHeadCells';
@@ -35,10 +35,7 @@ export function ImportedIndividualsTable({
     duplicatesOnly: showDuplicates,
   };
 
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useHouseholdChoiceDataQuery();
+  const { data: choicesData } = useHouseholdChoiceDataQuery();
   return (
     <>
       {showCheckbox && (

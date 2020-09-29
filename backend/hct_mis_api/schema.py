@@ -1,18 +1,29 @@
+import graphene
+from django.forms import MultipleChoiceField
+from graphene_django.debug import DjangoDebug
+from graphene_django.forms.converter import convert_form_field
+
 import account.schema
 import core.schema
 import graphene
 import household.schema
+import payment.mutations
 import payment.schema
 import program.mutations
 import program.schema
 import registration_data.schema
 import registration_datahub.schema
 import registration_datahub.mutations
+import registration_datahub.schema
 import sanction_list.mutations
-import targeting.schema
 import targeting.mutations
-import payment.mutations
-from graphene_django.debug import DjangoDebug
+import targeting.schema
+
+
+# proper multi choice conversion
+@convert_form_field.register(MultipleChoiceField)
+def convert_form_field_to_string_list(field):
+    return graphene.List(graphene.String, description=field.help_text, required=field.required)
 
 
 class Query(

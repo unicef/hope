@@ -22,6 +22,8 @@ from household.models import (
     DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
     DUPLICATE,
     NEEDS_ADJUDICATION,
+    DUPLICATE_IN_BATCH,
+    DEDUPLICATION_BATCH_STATUS_CHOICE,
 )
 from registration_datahub.models import (
     ImportedHousehold,
@@ -31,8 +33,6 @@ from registration_datahub.models import (
     ImportedDocumentType,
     ImportedDocument,
     ImportedIndividualIdentity,
-    DEDUPLICATION_BATCH_STATUS_CHOICE,
-    DUPLICATE_IN_BATCH,
 )
 
 
@@ -185,8 +185,8 @@ class ImportedDocumentNode(DjangoObjectType):
 class ImportedIndividualIdentityNode(DjangoObjectType):
     type = graphene.String(description="Agency type")
 
-    def resolve_type(parrent, info):
-        return parrent.agency.type
+    def resolve_type(parent, info):
+        return parent.agency.type
 
     class Meta:
         model = ImportedIndividualIdentity

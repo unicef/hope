@@ -14,17 +14,16 @@ import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { StatusBox } from '../../components/StatusBox';
 import {
   choicesToDict,
-  decodeIdString,
   populationStatusToColor,
   sexToCapitalize,
 } from '../../utils/utils';
-import Moment from 'react-moment';
+import { UniversalMoment } from '../../components/UniversalMoment';
 
 const headCells: HeadCell<IndividualNode>[] = [
   {
     disablePadding: false,
     label: 'Individual ID',
-    id: 'individualCaId',
+    id: 'unicefId',
     numeric: false,
   },
   {
@@ -59,7 +58,7 @@ const headCells: HeadCell<IndividualNode>[] = [
   },
   {
     disablePadding: false,
-    label: 'Sex',
+    label: 'Gender',
     id: 'sex',
     numeric: false,
   },
@@ -121,7 +120,7 @@ export function HouseholdIndividualsTable({
             role='checkbox'
             key={row.id}
           >
-            <TableCell align='left'>{decodeIdString(row.id)}</TableCell>
+            <TableCell align='left'>{row.unicefId}</TableCell>
             <TableCell align='left'>{row.fullName}</TableCell>
             <TableCell align='left'>
               <StatusContainer>
@@ -136,7 +135,7 @@ export function HouseholdIndividualsTable({
               {relationshipChoicesDict[row.relationship]}
             </TableCell>
             <TableCell align='left'>
-              {<Moment format='DD/MM/YYYY'>{row.birthDate}</Moment> || '-'}
+              {<UniversalMoment>{row.birthDate}</UniversalMoment> || '-'}
             </TableCell>
             <TableCell align='left'>{sexToCapitalize(row.sex)}</TableCell>
           </ClickableTableRow>

@@ -11,12 +11,10 @@ const PaperContainer = styled(Paper)`
   text-align: center;
 `;
 
-export function EmptyTable() {
+export function EmptyTable(): React.ReactElement {
   return (
     <PaperContainer>
-      <Typography variant='h6'>
-        No data
-        </Typography>
+      <Typography variant='h6'>No data</Typography>
     </PaperContainer>
-  )
+  );
 }

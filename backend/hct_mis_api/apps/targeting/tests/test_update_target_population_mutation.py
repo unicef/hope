@@ -2,7 +2,7 @@ import copy
 
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
-from household.fixtures import HouseholdFactory, create_household
+from household.fixtures import create_household
 from household.models import Household
 from targeting.models import (
     TargetingCriteria,
@@ -160,25 +160,25 @@ class TestUpdateTargetPopulationMutation(APITestCase):
     def setUpTestData(cls):
         cls.user = UserFactory.create()
         create_household(
-            {"size": 2, "residence_status": "CITIZEN",}
+            {"size": 2, "residence_status": "CITIZEN"}
         )
         create_household(
-            {"size": 3, "residence_status": "CITIZEN",}
+            {"size": 3, "residence_status": "CITIZEN"}
         )
         create_household(
-            {"size": 3, "residence_status": "CITIZEN",}
+            {"size": 3, "residence_status": "CITIZEN"}
         )
         cls.draft_target_population = TargetPopulation(
             name="draft_target_population",
             candidate_list_targeting_criteria=cls.get_targeting_criteria_for_rule(
-                {"field_name": "size", "arguments": [2], "comparision_method": "EQUALS",}
+                {"field_name": "size", "arguments": [2], "comparision_method": "EQUALS"}
             ),
         )
         cls.draft_target_population.save()
         cls.approved_target_population = TargetPopulation(
             name="approved_target_population",
             candidate_list_targeting_criteria=cls.get_targeting_criteria_for_rule(
-                {"field_name": "size", "arguments": [1], "comparision_method": "GREATER_THAN",}
+                {"field_name": "size", "arguments": [1], "comparision_method": "GREATER_THAN"}
             ),
             status="APPROVED",
         )

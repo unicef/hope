@@ -1,10 +1,10 @@
 from django.db import transaction
-from django.db.models import Q, F, Count
+from django.db.models import Count
 
+from cash_assist_datahub import models as ca_models
 from cash_assist_datahub.models import Session
 from core.models import BusinessArea
 from core.utils import nested_getattr
-from cash_assist_datahub import models as ca_models
 from payment.models import PaymentRecord, ServiceProvider
 from program.models import CashPlan, Program
 from targeting.models import TargetPopulation

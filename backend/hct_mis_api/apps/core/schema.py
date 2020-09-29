@@ -6,15 +6,11 @@ import graphene
 from auditlog.models import LogEntry
 from django.contrib.gis.db.models import GeometryField
 from django.core.exceptions import ObjectDoesNotExist
-from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Q
-from django.utils.encoding import force_text
-from django.utils.functional import Promise
 from django_filters import FilterSet, CharFilter
 from graphene import (
     String,
     DateTime,
-    Scalar,
     relay,
     ConnectionField,
     Connection,
@@ -30,7 +26,6 @@ from graphene_django.converter import convert_django_field
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql import GraphQLError
 
-from account.schema import UserObjectType
 from core.core_fields_attributes import FILTERABLE_CORE_FIELDS_ATTRIBUTES
 from core.extended_connection import ExtendedConnection
 from core.kobo.api import KoboAPI
@@ -59,55 +54,6 @@ class AdminAreaFilter(FilterSet):
 class ChoiceObject(graphene.ObjectType):
     name = String()
     value = String()
-
-
-class LazyEncoder(DjangoJSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, Promise):
-            return force_text(obj)
-        return super(LazyEncoder, self).default(obj)
-
-
-class JSONLazyString(Scalar):
-    """
-    Allows use of a JSON String for input / output from the GraphQL schema.
-
-    Use of this type is *not recommended* as you lose the benefits of having a defined, static
-    schema (one of the key benefits of GraphQL).
-    """
-
-    @staticmethod
-    def serialize(dt):
-        return json.dumps(dt, cls=LazyEncoder)
-
-    @staticmethod
-    def parse_literal(node):
-        if isinstance(node, String):
-            return json.loads(node.value)
-
-    @staticmethod
-    def parse_value(value):
-        return json.loads(value)
-
-
-class LogEntryObject(DjangoObjectType):
-    timestamp = DateTime()
-    changes_display_dict = JSONLazyString()
-    actor = UserObjectType()
-
-    class Meta:
-        model = LogEntry
-        exclude_fields = ("additional_data",)
-
-
-class LogEntryObjectConnection(Connection):
-    total_count = graphene.Int()
-
-    def resolve_total_count(self, info, **kwargs):
-        return self.iterable.count()
-
-    class Meta:
-        node = LogEntryObject
 
 
 class AdminAreaNode(DjangoObjectType):
@@ -319,7 +265,6 @@ class Query(graphene.ObjectType):
     admin_area = relay.Node.Field(AdminAreaNode)
     all_admin_areas = DjangoFilterConnectionField(AdminAreaNode, filterset_class=AdminAreaFilter)
     all_business_areas = DjangoFilterConnectionField(BusinessAreaNode)
-    all_log_entries = ConnectionField(LogEntryObjectConnection, object_id=graphene.String(required=True),)
     all_fields_attributes = graphene.List(
         FieldAttributeNode, flex_field=graphene.Boolean(), description="All field datatype meta.",
     )

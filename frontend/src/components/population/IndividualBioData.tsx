@@ -2,22 +2,19 @@ import React from 'react';
 import styled from 'styled-components';
 import { Grid, Paper, Typography } from '@material-ui/core';
 import { useHistory } from 'react-router-dom';
-import Moment from 'react-moment';
 import { LabelizedField } from '../LabelizedField';
 import {
   IndividualNode,
   useHouseholdChoiceDataQuery,
 } from '../../__generated__/graphql';
 import {
-  decodeIdString,
   getAgeFromDob,
   sexToCapitalize,
   choicesToDict,
 } from '../../utils/utils';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { Missing } from '../Missing';
-import { StatusBox } from '../StatusBox';
 import { LoadingComponent } from '../LoadingComponent';
+import { UniversalMoment } from '../UniversalMoment';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px
@@ -32,10 +29,6 @@ const Title = styled.div`
 const ContentLink = styled.div`
   text-decoration: underline;
   cursor: pointer;
-`;
-const StatusContainer = styled.div`
-  min-width: 120px;
-  max-width: 200px;
 `;
 
 interface IndividualBioDataProps {
@@ -116,7 +109,7 @@ export function IndividualsBioData({
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Sex'>
+          <LabelizedField label='Gender'>
             <div>{sexToCapitalize(individual.sex)}</div>
           </LabelizedField>
         </Grid>
@@ -127,7 +120,7 @@ export function IndividualsBioData({
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Date of Birth'>
-            <Moment format='DD/MM/YYYY'>{birthDate}</Moment>
+            <UniversalMoment>{birthDate}</UniversalMoment>
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
@@ -152,7 +145,7 @@ export function IndividualsBioData({
         <Grid item xs={3}>
           <LabelizedField label='Household ID'>
             <ContentLink onClick={() => openHousehold()}>
-              {decodeIdString(individual.household.id)}
+              {individual.household.unicefId}
             </ContentLink>
           </LabelizedField>
         </Grid>
