@@ -58,6 +58,7 @@ export const AllCashPlans = gql`
           totalDeliveredQuantity
           totalUndeliveredQuantity
           assistanceMeasurement
+          updatedAt
         }
       }
     }
