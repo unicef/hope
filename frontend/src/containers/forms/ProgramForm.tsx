@@ -219,7 +219,7 @@ export function ProgramForm({
                   />
                   <Field
                     name='budget'
-                    label='Budget'
+                    label='Budget (USD)'
                     type='number'
                     fullWidth
                     precision={2}
@@ -242,7 +242,7 @@ export function ProgramForm({
                   />
                   <Field
                     name='populationGoal'
-                    label='Population goal'
+                    label='Population Goal (# of Individuals)'
                     type='number'
                     fullWidth
                     variant='outlined'
