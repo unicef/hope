@@ -29,7 +29,7 @@ class CheckAgainstSanctionListMutation(
 
         AirflowApi.start_dag(
             dag_id="CheckAgainstSanctionList",
-            context={"uploaded_file_id": str(uploaded_file.id), "original_file_name": file.name,},
+            context={"uploaded_file_id": str(uploaded_file.id), "original_file_name": file.name},
         )
 
         return CheckAgainstSanctionListMutation(True, errors)

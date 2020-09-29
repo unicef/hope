@@ -11,7 +11,6 @@ from django.forms import model_to_dict
 from django.utils.functional import cached_property
 
 from core.countries import Countries
-from household.models import Individual
 from sanction_list.models import (
     SanctionListIndividual,
     SanctionListIndividualDocument,
@@ -173,7 +172,7 @@ class LoadSanctionListXMLTask:
         path = "INDIVIDUAL_PLACE_OF_BIRTH/COUNTRY"
         countries = self._get_country_field(individual_tag, path)
         if isinstance(countries, set):
-            return countries.pop()
+            return sorted(list(countries)).pop()
         else:
             return countries
 
@@ -265,6 +264,7 @@ class LoadSanctionListXMLTask:
             "dates_of_birth",
             "created_at",
             "updated_at",
+            # "country_of_birth",
         }
         all_fields = SanctionListIndividual._meta.get_fields(include_parents=False)
 
@@ -303,12 +303,18 @@ class LoadSanctionListXMLTask:
         individuals_to_update = set()
         individuals_reference_numbers = self._get_reference_numbers_list(individuals_from_file)
         for individual in individuals_from_file:
-            fields_dict = model_to_dict(individual, fields=self._get_individual_fields)
-            exists = self._get_existing_individuals(individuals_reference_numbers).filter(**fields_dict).exists()
-            if not exists:
-                obj = SanctionListIndividual.all_objects.get(reference_number=individual.reference_number)
-                individual.id = obj.id
-                individuals_to_update.add(individual)
+            new_individual_data_dict = model_to_dict(individual, fields=self._get_individual_fields)
+            old_individual = (
+                self._get_existing_individuals(individuals_reference_numbers)
+                .filter(reference_number=new_individual_data_dict["reference_number"])
+                .first()
+            )
+            if old_individual:
+                old_individual_data_dict = model_to_dict(old_individual, fields=self._get_individual_fields)
+                if new_individual_data_dict != old_individual_data_dict:
+                    obj = SanctionListIndividual.all_objects.get(reference_number=individual.reference_number)
+                    individual.id = obj.id
+                    individuals_to_update.add(individual)
 
         return individuals_to_update
 
@@ -398,9 +404,18 @@ class LoadSanctionListXMLTask:
         SanctionListIndividual.objects.filter(id__in=individuals_ids_to_delete).delete()
 
         # SanctionListIndividualDocument
-        SanctionListIndividualDocument.objects.all().delete()
         if documents_from_file:
-            SanctionListIndividualDocument.objects.bulk_create(documents_from_file)
+            for single_doc in documents_from_file:
+                doc_obj, created = SanctionListIndividualDocument.objects.get_or_create(
+                    individual=single_doc.individual,
+                    document_number=single_doc.document_number,
+                    type_of_document=single_doc.type_of_document,
+                    date_of_issue=single_doc.date_of_issue,
+                    issuing_country=single_doc.issuing_country,
+                    note=single_doc.note,
+                )
+                if created is True:
+                    individuals_to_check_against_sanction_list.append(doc_obj.individual)
 
         # SanctionListIndividualCountries
         SanctionListIndividualCountries.objects.all().delete()
@@ -419,7 +434,6 @@ class LoadSanctionListXMLTask:
             SanctionListIndividualAliasName.objects.bulk_create(aliases_from_file)
 
         # SanctionListIndividualDateOfBirth
-        SanctionListIndividualDateOfBirth.objects.all().delete()
         if dob_from_file:
             for single_dob in dob_from_file:
                 dob_obj, created = SanctionListIndividualDateOfBirth.objects.get_or_create(
@@ -427,14 +441,14 @@ class LoadSanctionListXMLTask:
                 )
                 if created is True:
                     individuals_to_check_against_sanction_list.append(dob_obj.individual)
-            SanctionListIndividualDateOfBirth.objects.bulk_create(dob_from_file)
 
         individuals_to_check_against_sanction_list.extend(individuals_to_create)
-
         individuals_to_check_against_sanction_list.extend(individuals_to_update)
 
+        # we can rebuild whole search_index because amount of people in sanctions list is low
         call_command(
-            "search_index", "--populate", "--models", "sanction_list.SanctionListIndividual",
+            "search_index", "-f", "--rebuild", "--models", "sanction_list.SanctionListIndividual",
         )
 
-        CheckAgainstSanctionListPreMergeTask.execute(individuals_to_check_against_sanction_list)
+        if individuals_to_check_against_sanction_list:
+            CheckAgainstSanctionListPreMergeTask.execute(individuals_to_check_against_sanction_list)

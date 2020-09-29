@@ -1,6 +1,5 @@
 import styled from 'styled-components';
 import TableCell from '@material-ui/core/TableCell';
-import Moment from 'react-moment';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { CashPlanNode } from '../../../__generated__/graphql';
@@ -8,6 +7,7 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
 import { StatusBox } from '../../../components/StatusBox';
 import { cashPlanStatusToColor } from '../../../utils/utils';
+import { UniversalMoment } from '../../../components/UniversalMoment';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -72,7 +72,7 @@ export function CashPlanTableRow({
         })}
       </TableCell>
       <TableCell align='left'>
-        <Moment format='MM/DD/YYYY'>{cashPlan.dispersionDate}</Moment>
+        <UniversalMoment>{cashPlan.dispersionDate}</UniversalMoment>
       </TableCell>
     </ClickableTableRow>
   );

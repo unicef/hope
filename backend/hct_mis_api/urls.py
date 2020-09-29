@@ -8,6 +8,7 @@ from django.urls import path, include
 from django.views.decorators.csrf import csrf_exempt
 from graphene_file_upload.django import FileUploadGraphQLView
 
+import account.views
 import payment.views
 import registration_datahub.views
 import sanction_list.views
@@ -18,7 +19,6 @@ from core.views import (
     logout_view,
     call_command_view,
 )
-
 
 urlpatterns = [
     path("api/admin/", admin.site.urls),
@@ -32,6 +32,7 @@ urlpatterns = [
     path("api/logout", logout_view),
     path("api/sentry-debug/", trigger_error),
     path("api/download-template", registration_datahub.views.download_template),
+    path("api/download-exported-users/<str:business_area_slug>", account.views.download_exported_users),
     path(
         "api/download-cash-plan-payment-verification/<str:verification_id>",
         payment.views.download_cash_plan_payment_verification,

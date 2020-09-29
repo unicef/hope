@@ -1,12 +1,10 @@
 import logging
-from pprint import pprint
 
 from constance import config
 
 from household.documents import IndividualDocument
-from household.models import Individual
+from household.models import Individual, IDENTIFICATION_TYPE_NATIONAL_ID
 from sanction_list.models import SanctionListIndividual
-
 
 log = logging.getLogger(__name__)
 
@@ -14,6 +12,11 @@ log = logging.getLogger(__name__)
 class CheckAgainstSanctionListPreMergeTask:
     @staticmethod
     def _get_query_dict(individual):
+        documents_numbers = [
+            doc.document_number
+            for doc in individual.documents.all()
+            if doc.type_of_document.title() == "National Identification Number"
+        ]
         query_dict = {
             "query": {
                 "bool": {
@@ -23,6 +26,14 @@ class CheckAgainstSanctionListPreMergeTask:
                                 "queries": [
                                     {"match": {"full_name": {"query": individual.full_name}}},
                                     {"terms": {"birth_date": [dob.date for dob in individual.dates_of_birth.all()]}},
+                                    {"terms": {"documents.number": documents_numbers}},
+                                    {
+                                        "terms": {
+                                            "documents.type": [
+                                                IDENTIFICATION_TYPE_NATIONAL_ID for _ in documents_numbers
+                                            ]
+                                        }
+                                    },
                                 ]
                             }
                         }
@@ -59,3 +70,4 @@ class CheckAgainstSanctionListPreMergeTask:
             log.info([(r.full_name, r.meta.score) for r in results])
 
         Individual.objects.filter(id__in=possible_matches).update(sanction_list_possible_match=True)
+        Individual.objects.exclude(id__in=possible_matches).update(sanction_list_possible_match=False)

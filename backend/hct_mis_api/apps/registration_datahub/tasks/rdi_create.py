@@ -17,7 +17,8 @@ from openpyxl_image_loader import SheetImageLoader
 from core.core_fields_attributes import (
     TYPE_INTEGER,
     TYPE_SELECT_ONE,
-    COLLECTORS_FIELDS, TYPE_DATE,
+    COLLECTORS_FIELDS,
+    TYPE_DATE,
 )
 from core.kobo.api import KoboAPI
 from core.kobo.common import get_field_name, KOBO_FORM_INDIVIDUALS_COLUMN_NAME
@@ -306,7 +307,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 "primary_collector_id": self._handle_collectors,
                 "alternate_collector_id": self._handle_collectors,
             },
-            "households": {"consent_h_c": self._handle_image_field, "hh_geopoint_h_c": self._handle_geopoint_field,},
+            "households": {"consent_h_c": self._handle_image_field, "hh_geopoint_h_c": self._handle_geopoint_field},
         }
 
         complex_types = {
@@ -440,9 +441,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             status=RegistrationDataImport.IN_REVIEW
         )
 
-        DeduplicateTask.deduplicate_imported_individuals(
-            registration_data_import_datahub=registration_data_import
-        )
+        DeduplicateTask.deduplicate_imported_individuals(registration_data_import_datahub=registration_data_import)
 
 
 class RdiKoboCreateTask(RdiBaseCreateTask):
@@ -679,6 +678,4 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             status=RegistrationDataImport.IN_REVIEW
         )
 
-        DeduplicateTask.deduplicate_imported_individuals(
-            registration_data_import_datahub=registration_data_import
-        )
+        DeduplicateTask.deduplicate_imported_individuals(registration_data_import_datahub=registration_data_import)

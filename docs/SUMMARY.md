@@ -74,6 +74,7 @@
   * [Flexible Fields](technical-specification/technical-architecture/flexible-fields.md)
   * [DB Architecture](technical-specification/technical-architecture/db-architecture.md)
   * [\(Offline\) Registration Module App](technical-specification/technical-architecture/offline-capabilities.md)
+  * [Elasticsearch Scoring](technical-specification/technical-architecture/elasticsearch-scoring.md)
   * [ODK Forms and Collection](technical-specification/technical-architecture/odk-forms-and-collection.md)
 * [Development Setup / Process](technical-specification/development-setup/README.md)
   * [HCT-MIS: Testing Strategy](technical-specification/development-setup/testing-strategy.md)
@@ -90,6 +91,7 @@
 * [Kobo Integration](technical-specification/kobo-integration/README.md)
   * [Kobo hosting](technical-specification/kobo-integration/kobo-hosting.md)
   * [Open issues](technical-specification/kobo-integration/open-issues.md)
+* [Deployment](technical-specification/deployment.md)
 
 ## Project Management
 
@@ -100,7 +102,7 @@
   * [Iteration 4](project-management/iterations-deliverables/iteration-4.md)
   * [Iteration 5](project-management/iterations-deliverables/iteration-5.md)
   * [Iteration 6](project-management/iterations-deliverables/iteration-6-draft.md)
-  * [Iteration 7 \[DRAFT\]](project-management/iterations-deliverables/iteration-7-draft.md)
+  * [Iteration 7](project-management/iterations-deliverables/iteration-7.md)
 * [Change Requests](project-management/change-request.md)
 * [Sprint Cadence](project-management/sprint-cadence.md)
 * [CO / User testing](project-management/co-user-testing.md)

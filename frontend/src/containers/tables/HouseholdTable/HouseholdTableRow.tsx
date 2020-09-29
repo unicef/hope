@@ -1,5 +1,4 @@
 import TableCell from '@material-ui/core/TableCell';
-import Moment from 'react-moment';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import {
@@ -8,12 +7,10 @@ import {
 } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
-import {
-  choicesToDict,
-  decodeIdString,
-  formatCurrency,
-} from '../../../utils/utils';
+import { choicesToDict, formatCurrency } from '../../../utils/utils';
 import { Flag } from '../../../components/Flag';
+import { UniversalMoment } from '../../../components/UniversalMoment';
+import { FlagTooltip } from '../../../components/FlagTooltip';
 
 interface HouseHoldTableRowProps {
   household: HouseholdNode;
@@ -26,7 +23,7 @@ export function HouseHoldTableRow({
 }: HouseHoldTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
-  const residanceStatusChoiceDict = choicesToDict(
+  const residenceStatusChoiceDict = choicesToDict(
     choicesData.residenceStatusChoices,
   );
   const handleClick = (): void => {
@@ -38,23 +35,24 @@ export function HouseHoldTableRow({
       hover
       onClick={handleClick}
       role='checkbox'
-      key={household.id}
+      key={household.unicefId}
     >
       <TableCell align='left'>
+        {household.hasDuplicates && <FlagTooltip />}
         {household.sanctionListPossibleMatch && <Flag />}
       </TableCell>
-      <TableCell align='left'>{decodeIdString(household.id)}</TableCell>
+      <TableCell align='left'>{household.unicefId}</TableCell>
       <TableCell align='left'>{household.headOfHousehold.fullName}</TableCell>
       <TableCell align='left'>{household.size}</TableCell>
       <TableCell align='left'>{household.adminArea?.title || '-'}</TableCell>
       <TableCell align='left'>
-        {residanceStatusChoiceDict[household.residenceStatus]}
+        {residenceStatusChoiceDict[household.residenceStatus]}
       </TableCell>
       <TableCell align='right'>
         {formatCurrency(household.totalCashReceived)}
       </TableCell>
       <TableCell align='right'>
-        <Moment format='DD/MM/YYYY'>{household.firstRegistrationDate}</Moment>
+        <UniversalMoment>{household.firstRegistrationDate}</UniversalMoment>
       </TableCell>
     </ClickableTableRow>
   );

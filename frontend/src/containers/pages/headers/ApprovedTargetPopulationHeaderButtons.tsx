@@ -34,10 +34,7 @@ export function ApprovedTargetPopulationHeaderButtons({
 }: ApprovedTargetPopulationHeaderButtonsPropTypes): React.ReactElement {
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openFinalize, setOpenFinalize] = useState(false);
-  console.log(
-    'targetPopulation.program.status',
-    targetPopulation.program.status,
-  );
+
   return (
     <div>
       <IconContainer>

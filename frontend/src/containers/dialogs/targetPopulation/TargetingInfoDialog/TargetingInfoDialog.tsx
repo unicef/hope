@@ -4,13 +4,13 @@ import {
   Dialog,
   DialogContent,
   Tabs,
-  Tab
+  Tab,
 } from '@material-ui/core';
 import { Close } from '@material-ui/icons';
 import styled from 'styled-components';
 import { TabPanel } from '../../../../components/TabPanel';
-import { FlexFieldTab } from './FlexFieldTab';
 import TargetingDiagramImage from '../../../../assets/TargetingDiagramImage.png';
+import { FlexFieldTab } from './FlexFieldTab';
 
 export interface FinalizeTargetPopulationPropTypes {
   open: boolean;
@@ -26,7 +26,7 @@ const DialogWrapper = styled(Dialog)`
       padding: 0;
     }
   }
-`
+`;
 
 const DialogTitleWrapper = styled.div`
   display: flex;
@@ -57,12 +57,9 @@ const StyledTabPanel = styled(TabPanel)`
   }
 `;
 
-export function TargetingInfoDialog({
-  open,
-  setOpen,
-}) {
+export function TargetingInfoDialog({ open, setOpen }): React.ReactElement {
   const [selectedTab, setTab] = useState(0);
-  const changeTab = (event: React.ChangeEvent<{}>, newValue: number) => {
+  const changeTab = (event: React.ChangeEvent<{}>, newValue: number): void => {
     setTab(newValue);
   };
   const HeaderTabs = (
@@ -76,7 +73,7 @@ export function TargetingInfoDialog({
       <Tab label='Flex Field List' />
       <Tab label='Targeting Diagram' />
     </Tabs>
-  )
+  );
   return (
     <DialogWrapper
       open={open}
@@ -86,7 +83,11 @@ export function TargetingInfoDialog({
     >
       <DialogTitleWrapper id='scroll-dialog-title'>
         {HeaderTabs}
-        <IconButton onClick={() => setOpen(false)} color="primary" aria-label="Close Information Modal">
+        <IconButton
+          onClick={() => setOpen(false)}
+          color='primary'
+          aria-label='Close Information Modal'
+        >
           <Close />
         </IconButton>
       </DialogTitleWrapper>
@@ -95,7 +96,7 @@ export function TargetingInfoDialog({
           <FlexFieldTab />
         </StyledTabPanel>
         <TabPanel value={selectedTab} index={1}>
-          <TargetingDiagram src={TargetingDiagramImage} alt="diagram" />
+          <TargetingDiagram src={TargetingDiagramImage} alt='diagram' />
         </TabPanel>
       </StyledDialogContent>
     </DialogWrapper>

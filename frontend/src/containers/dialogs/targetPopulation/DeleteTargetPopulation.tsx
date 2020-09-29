@@ -35,7 +35,11 @@ const DialogDescription = styled.div`
   color: rgba(0, 0, 0, 0.54);
 `;
 
-export function DeleteTargetPopulation({ open, setOpen, targetPopulationId }) {
+export function DeleteTargetPopulation({
+  open,
+  setOpen,
+  targetPopulationId,
+}): React.ReactElement {
   const [mutate] = useDeleteTargetPopulationMutation();
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
@@ -52,9 +56,9 @@ export function DeleteTargetPopulation({ open, setOpen, targetPopulationId }) {
       <Formik
         validationSchema={null}
         initialValues={initialValues}
-        onSubmit={async (values) => {
-          const { data } = await mutate({
-            variables: {input: {targetId: targetPopulationId}},
+        onSubmit={async () => {
+          await mutate({
+            variables: { input: { targetId: targetPopulationId } },
           });
           setOpen(false);
           showMessage('Target Population Deleted', {
@@ -78,7 +82,12 @@ export function DeleteTargetPopulation({ open, setOpen, targetPopulationId }) {
             <DialogFooter>
               <DialogActions>
                 <Button onClick={() => setOpen(false)}>CANCEL</Button>
-                <Button type='submit' color='primary' variant='contained' onClick={submitForm}>
+                <Button
+                  type='submit'
+                  color='primary'
+                  variant='contained'
+                  onClick={submitForm}
+                >
                   Delete
                 </Button>
               </DialogActions>

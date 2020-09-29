@@ -7,6 +7,7 @@ export const CashPlan = gql`
       name
       startDate
       endDate
+      updatedAt
       status
       deliveryType
       fundsCommitment
@@ -34,6 +35,8 @@ export const CashPlan = gql`
             rapidProFlowId
             confidenceInterval
             marginOfError
+            activationDate
+            completionDate
             ageFilter {
               min
               max
