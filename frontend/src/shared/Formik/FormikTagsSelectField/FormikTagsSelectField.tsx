@@ -42,7 +42,7 @@ export const FormikTagsSelectField = ({
               onBlur={onBlur}
               error={isInvalid}
               helperText={isInvalid && form.errors[field.name]}
-              variant='filled'
+              variant='outlined'
               label={label}
             />
           );
