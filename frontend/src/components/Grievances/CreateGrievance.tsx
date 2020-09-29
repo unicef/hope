@@ -10,7 +10,7 @@ import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
-import { LookUpHousehold } from './LookUpHousehold';
+import { LookUpHouseholdIndividual } from './LookUpHouseholdIndividual';
 
 export function CreateGrievance(): React.ReactElement {
   const BoxPadding = styled.div`
@@ -142,7 +142,7 @@ export function CreateGrievance(): React.ReactElement {
                       />
                       <Grid container spacing={3}>
                         <Grid item xs={6}>
-                          <LookUpHousehold />
+                          <LookUpHouseholdIndividual />
                         </Grid>
                       </Grid>
                     </Box>
