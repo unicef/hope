@@ -1996,6 +1996,7 @@ export type Query = {
   userRolesChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   userStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   userPartnerChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  hasAvailableUsersToExport?: Maybe<Scalars['Boolean']>,
   importedHousehold?: Maybe<ImportedHouseholdNode>,
   allImportedHouseholds?: Maybe<ImportedHouseholdNodeConnection>,
   registrationDataImportDatahub?: Maybe<RegistrationDataImportDatahubNode>,
@@ -2274,6 +2275,11 @@ export type QueryAllLogEntriesArgs = {
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>
+};
+
+
+export type QueryHasAvailableUsersToExportArgs = {
+  businessAreaSlug: Scalars['String']
 };
 
 
@@ -2920,6 +2926,7 @@ export type UserNode = Node & {
   dateJoined: Scalars['DateTime'],
   status: UserStatus,
   partner: UserPartner,
+  availableForExport: Scalars['Boolean'],
   userRoles: Array<UserRoleNode>,
   targetPopulations: TargetPopulationNodeConnection,
   approvedTargetPopulations: TargetPopulationNodeConnection,
@@ -3045,6 +3052,7 @@ export type UserObjectType = {
   dateJoined: Scalars['DateTime'],
   status: UserStatus,
   partner: UserPartner,
+  availableForExport: Scalars['Boolean'],
   userRoles: Array<UserRoleNode>,
   targetPopulations: TargetPopulationNodeConnection,
   approvedTargetPopulations: TargetPopulationNodeConnection,
@@ -3918,7 +3926,7 @@ export type AllCashPlansQuery = (
       & Pick<CashPlanNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'CashPlanNode' }
-        & Pick<CashPlanNode, 'id' | 'caId' | 'verificationStatus' | 'assistanceThrough' | 'deliveryType' | 'startDate' | 'endDate' | 'totalPersonsCovered' | 'dispersionDate' | 'assistanceMeasurement' | 'status' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity'>
+        & Pick<CashPlanNode, 'id' | 'caId' | 'verificationStatus' | 'assistanceThrough' | 'deliveryType' | 'startDate' | 'endDate' | 'totalPersonsCovered' | 'dispersionDate' | 'assistanceMeasurement' | 'status' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'updatedAt'>
         & { program: (
           { __typename?: 'ProgramNode' }
           & Pick<ProgramNode, 'id' | 'name'>
@@ -6974,6 +6982,7 @@ export const AllCashPlansDocument = gql`
         totalDeliveredQuantity
         totalUndeliveredQuantity
         assistanceMeasurement
+        updatedAt
       }
     }
   }
@@ -11169,6 +11178,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   userRolesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   userStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   userPartnerChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  hasAvailableUsersToExport?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<QueryHasAvailableUsersToExportArgs, 'businessAreaSlug'>>,
   importedHousehold?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType, RequireFields<QueryImportedHouseholdArgs, 'id'>>,
   allImportedHouseholds?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNodeConnection']>, ParentType, ContextType, QueryAllImportedHouseholdsArgs>,
   registrationDataImportDatahub?: Resolver<Maybe<ResolversTypes['RegistrationDataImportDatahubNode']>, ParentType, ContextType, RequireFields<QueryRegistrationDataImportDatahubArgs, 'id'>>,
@@ -11484,6 +11494,7 @@ export type UserNodeResolvers<ContextType = any, ParentType extends ResolversPar
   dateJoined?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['UserStatus'], ParentType, ContextType>,
   partner?: Resolver<ResolversTypes['UserPartner'], ParentType, ContextType>,
+  availableForExport?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
   targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserNodeTargetPopulationsArgs>,
   approvedTargetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserNodeApprovedTargetPopulationsArgs>,
@@ -11517,6 +11528,7 @@ export type UserObjectTypeResolvers<ContextType = any, ParentType extends Resolv
   dateJoined?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['UserStatus'], ParentType, ContextType>,
   partner?: Resolver<ResolversTypes['UserPartner'], ParentType, ContextType>,
+  availableForExport?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
   targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserObjectTypeTargetPopulationsArgs>,
   approvedTargetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserObjectTypeApprovedTargetPopulationsArgs>,
