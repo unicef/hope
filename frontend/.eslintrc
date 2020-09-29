@@ -15,6 +15,21 @@
     "react/jsx-max-props-per-line": 0,
     "react/destructuring-assignment": 1,
     "react/require-default-props": 1,
-    "spaced-comment": 0
+    "spaced-comment": 0,
+    "no-restricted-syntax": [
+      2,
+      {
+        "selector": "ForInStatement",
+        "message": "for..in loops iterate over the entire prototype chain, which is virtually never what you want. Use Object.{keys,values,entries}, and iterate over the resulting array."
+      },
+      {
+        "selector": "LabeledStatement",
+        "message": "Labels are a form of GOTO; using them makes code confusing and hard to maintain and understand."
+      },
+      {
+        "selector": "WithStatement",
+        "message": "`with` is disallowed in strict mode because it makes code impossible to predict and optimize."
+      }
+    ]
   }
 }

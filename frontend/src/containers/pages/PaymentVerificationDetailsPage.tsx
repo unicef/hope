@@ -28,6 +28,8 @@ import { useDebounce } from '../../hooks/useDebounce';
 import { VerificationRecordsFilters } from '../tables/VerificationRecordsTable/VerificationRecordsFilters';
 import { CreateVerificationPlan } from '../../components/payments/CreateVerificationPlan';
 import { UniversalMoment } from '../../components/UniversalMoment';
+import { usePermissions } from '../../hooks/usePermissions';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 
 const Container = styled.div`
   display: flex;
@@ -78,6 +80,7 @@ const StatusContainer = styled.div`
 `;
 
 export function PaymentVerificationDetailsPage(): React.ReactElement {
+  const permissions = usePermissions();
   const businessArea = useBusinessArea();
   const [filter, setFilter] = useState({
     search: null,
@@ -91,14 +94,12 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
     data: choicesData,
     loading: choicesLoading,
   } = useCashPlanVerificationSamplingChoicesQuery();
-  if (loading || choicesLoading) return null;
+  if (!data || choicesLoading || permissions === null) return null;
 
   if (loading) {
     return <LoadingComponent />;
   }
-  if (!data) {
-    return null;
-  }
+
   const samplingChoicesDict = choicesToDict(
     choicesData.cashPlanVerificationSamplingChoices,
   );
@@ -119,45 +120,62 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
     (cashPlan.bankReconciliationError / cashPlan.paymentRecords.totalCount) *
     100;
 
+  const canCreate =
+    cashPlan.verificationStatus === 'PENDING' &&
+    cashPlan.verifications &&
+    cashPlan.verifications.edges.length === 0;
+
+  const canEditAndActivate =
+    cashPlan.verificationStatus === 'PENDING' &&
+    cashPlan.verifications &&
+    cashPlan.verifications.edges.length !== 0;
+
+  const canFinishAndDiscard =
+    cashPlan.verificationStatus === 'ACTIVE' &&
+    cashPlan.verifications &&
+    cashPlan.verifications.edges.length !== 0;
+
   const toolbar = (
     <PageHeader
       title={`Cash Plan ${decodeIdString(cashPlan.id)}`}
       breadCrumbs={breadCrumbsItems}
     >
       <>
-        {cashPlan.verificationStatus === 'PENDING' &&
-          cashPlan.verifications &&
-          cashPlan.verifications.edges.length === 0 && (
-            <CreateVerificationPlan cashPlanId={cashPlan.id} />
-          )}
-        {cashPlan.verificationStatus === 'PENDING' &&
-          cashPlan.verifications &&
-          cashPlan.verifications.edges.length !== 0 && (
-            <Box alignItems='center' display='flex'>
-              <EditVerificationPlan
-                cashPlanId={cashPlan.id}
-                cashPlanVerificationId={cashPlan.verifications.edges[0].node.id}
-              />
-              <ActivateVerificationPlan
-                cashPlanId={cashPlan.id}
-                cashPlanVerificationId={cashPlan.verifications.edges[0].node.id}
-              />
-            </Box>
-          )}
-        {cashPlan.verificationStatus === 'ACTIVE' &&
-          cashPlan.verifications &&
-          cashPlan.verifications.edges.length !== 0 && (
-            <Box display='flex'>
-              <FinishVerificationPlan
-                cashPlanId={cashPlan.id}
-                cashPlanVerificationId={cashPlan.verifications.edges[0].node.id}
-              />
-              <DiscardVerificationPlan
-                cashPlanId={cashPlan.id}
-                cashPlanVerificationId={cashPlan.verifications.edges[0].node.id}
-              />
-            </Box>
-          )}
+        {canCreate && (
+          <CreateVerificationPlan
+            disabled={
+              !hasPermissions(
+                [PERMISSIONS.RDI_LIST, PERMISSIONS.READ],
+                permissions,
+              )
+            }
+            cashPlanId={cashPlan.id}
+          />
+        )}
+        {canEditAndActivate && (
+          <Box alignItems='center' display='flex'>
+            <EditVerificationPlan
+              cashPlanId={cashPlan.id}
+              cashPlanVerificationId={cashPlan.verifications.edges[0].node.id}
+            />
+            <ActivateVerificationPlan
+              cashPlanId={cashPlan.id}
+              cashPlanVerificationId={cashPlan.verifications.edges[0].node.id}
+            />
+          </Box>
+        )}
+        {canFinishAndDiscard && (
+          <Box display='flex'>
+            <FinishVerificationPlan
+              cashPlanId={cashPlan.id}
+              cashPlanVerificationId={cashPlan.verifications.edges[0].node.id}
+            />
+            <DiscardVerificationPlan
+              cashPlanId={cashPlan.id}
+              cashPlanVerificationId={cashPlan.verifications.edges[0].node.id}
+            />
+          </Box>
+        )}
       </>
     </PageHeader>
   );
@@ -293,6 +311,22 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                   {
                     label: 'NOT RECEIVED',
                     value: verificationPlan.notReceivedCount || '-',
+                  },
+                  {
+                    label: 'ACTIVATION DATE',
+                    value: (
+                      <UniversalMoment>
+                        {verificationPlan.activationDate}
+                      </UniversalMoment>
+                    ),
+                  },
+                  {
+                    label: 'COMPLETION DATE',
+                    value: (
+                      <UniversalMoment>
+                        {verificationPlan.completionDate}
+                      </UniversalMoment>
+                    ),
                   },
                 ].map((el) => (
                   <Grid item xs={3}>

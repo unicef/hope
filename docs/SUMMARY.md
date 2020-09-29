@@ -74,6 +74,7 @@
   * [Flexible Fields](technical-specification/technical-architecture/flexible-fields.md)
   * [DB Architecture](technical-specification/technical-architecture/db-architecture.md)
   * [\(Offline\) Registration Module App](technical-specification/technical-architecture/offline-capabilities.md)
+  * [Elasticsearch Scoring](technical-specification/technical-architecture/elasticsearch-scoring.md)
   * [ODK Forms and Collection](technical-specification/technical-architecture/odk-forms-and-collection.md)
 * [Development Setup / Process](technical-specification/development-setup/README.md)
   * [HCT-MIS: Testing Strategy](technical-specification/development-setup/testing-strategy.md)

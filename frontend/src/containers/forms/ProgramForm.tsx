@@ -167,14 +167,14 @@ export function ProgramForm({
                     type='text'
                     fullWidth
                     required
-                    variant='filled'
+                    variant='outlined'
                     component={FormikTextField}
                   />
                   <Field
                     name='scope'
                     label='CashAssist Scope'
                     fullWidth
-                    variant='filled'
+                    variant='outlined'
                     required
                     choices={data.programScopeChoices}
                     component={FormikSelectField}
@@ -214,7 +214,7 @@ export function ProgramForm({
                     type='text'
                     fullWidth
                     multiline
-                    variant='filled'
+                    variant='outlined'
                     component={FormikTextField}
                   />
                   <Field
@@ -223,7 +223,7 @@ export function ProgramForm({
                     type='number'
                     fullWidth
                     precision={2}
-                    variant='filled'
+                    variant='outlined'
                     component={FormikTextField}
                   />
                   <Field
@@ -237,7 +237,7 @@ export function ProgramForm({
                     label='Administrative Areas of Implementation'
                     type='text'
                     fullWidth
-                    variant='filled'
+                    variant='outlined'
                     component={FormikTextField}
                   />
                   <Field
@@ -245,7 +245,7 @@ export function ProgramForm({
                     label='Population goal'
                     type='number'
                     fullWidth
-                    variant='filled'
+                    variant='outlined'
                     component={FormikTextField}
                   />
                   <Field
@@ -253,7 +253,7 @@ export function ProgramForm({
                     label='Sector'
                     fullWidth
                     required
-                    variant='filled'
+                    variant='outlined'
                     choices={data.programSectorChoices}
                     component={FormikSelectField}
                   />

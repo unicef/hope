@@ -175,6 +175,22 @@ export function targetPopulationStatusToColor(
   }
 }
 
+export function userStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  switch (status) {
+    case 'INVITED':
+      return theme.hctPalette.gray;
+    case 'ACTIVE':
+      return theme.hctPalette.green;
+    case 'INACTIVE':
+      return theme.palette.error.main;
+    default:
+      return theme.palette.error.main;
+  }
+}
+
 export function isAuthenticated(): boolean {
   return Boolean(localStorage.getItem('AUTHENTICATED'));
 }
