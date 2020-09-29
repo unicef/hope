@@ -1,16 +1,8 @@
-import {
-  Avatar,
-  Box,
-  Button,
-  DialogActions,
-  Grid,
-  Typography,
-} from '@material-ui/core';
-import SearchIcon from '@material-ui/icons/Search';
-import * as Yup from 'yup';
-import { Field, Form, Formik } from 'formik';
 import React from 'react';
 import styled from 'styled-components';
+import * as Yup from 'yup';
+import { Field, Formik } from 'formik';
+import { Box, Button, DialogActions, Grid } from '@material-ui/core';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { PageHeader } from '../PageHeader';
 import { BreadCrumbsItem } from '../BreadCrumbs';
@@ -18,6 +10,7 @@ import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
+import { LookUpHousehold } from './LookUpHousehold';
 
 export function CreateGrievance(): React.ReactElement {
   const BoxPadding = styled.div`
@@ -149,12 +142,7 @@ export function CreateGrievance(): React.ReactElement {
                       />
                       <Grid container spacing={3}>
                         <Grid item xs={6}>
-                          <LookUp>
-                            <MarginRightSpan>
-                              <SearchIcon />
-                            </MarginRightSpan>
-                            <span>Look up Household</span>
-                          </LookUp>
+                          <LookUpHousehold />
                         </Grid>
                       </Grid>
                     </Box>
