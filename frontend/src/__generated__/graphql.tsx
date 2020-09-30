@@ -3220,7 +3220,7 @@ export type HouseholdDetailedFragment = (
       { __typename?: 'ProgramNodeEdge' }
       & { node: Maybe<(
         { __typename?: 'ProgramNode' }
-        & Pick<ProgramNode, 'name'>
+        & Pick<ProgramNode, 'id' | 'name'>
       )> }
     )>> }
   ), registrationDataImport: (
@@ -5159,6 +5159,7 @@ export const HouseholdDetailedFragmentDoc = gql`
   programs {
     edges {
       node {
+        id
         name
       }
     }
