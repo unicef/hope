@@ -5,8 +5,16 @@ from graphene import relay, ConnectionField
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
+from account.schema import LogEntryObjectConnection
+from account.permissions import (
+    BaseNodePermissionMixin,
+    hopePermissionClass,
+    PERMISSION_PROGRAM,
+    PERMISSION_READ,
+    DjangoPermissionFilterConnectionField,
+)
 from core.extended_connection import ExtendedConnection
-from core.schema import ChoiceObject, LogEntryObjectConnection
+from core.schema import ChoiceObject
 from core.utils import to_choice_object
 from payment.models import CashPlanPaymentVerification
 from program.models import Program, CashPlan
@@ -20,7 +28,9 @@ class ProgramFilter(FilterSet):
         model = Program
 
 
-class ProgramNode(DjangoObjectType):
+class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
+    # TODO Enable permissions below
+    # permission_classes = (hopePermissionClass(f"{PERMISSION_PROGRAM}.{PERMISSION_READ}"),)
     budget = graphene.Decimal()
     total_entitled_quantity = graphene.Decimal()
     total_delivered_quantity = graphene.Decimal()
@@ -96,7 +106,11 @@ class CashPlanNode(DjangoObjectType):
 
 class Query(graphene.ObjectType):
     program = relay.Node.Field(ProgramNode)
-    all_programs = DjangoFilterConnectionField(ProgramNode, filterset_class=ProgramFilter)
+    all_programs = DjangoPermissionFilterConnectionField(
+        ProgramNode, filterset_class=ProgramFilter,
+        # TODO Enable permissions below
+        # permission_classes=(hopePermissionClass("PERMISSION_PROGRAM.LIST"),)
+    )
     cash_plan = relay.Node.Field(CashPlanNode)
     all_cash_plans = DjangoFilterConnectionField(CashPlanNode, filterset_class=CashPlanFilter)
     program_status_choices = graphene.List(ChoiceObject)
