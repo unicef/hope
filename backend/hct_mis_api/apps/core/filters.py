@@ -1,25 +1,34 @@
 import json
 from datetime import datetime, date, timedelta
 
-from django.forms import Field, IntegerField
+from django.forms import Field, IntegerField, DecimalField
 from django_filters import Filter
 
 
-class RangeField(Field):
+def _clean_data_for_range_field(value, field):
+    if value:
+        clean_data = {}
+        values = json.loads(value)
+        if isinstance(values, dict):
+            for field_name, field_value in values.items():
+                clean_data[field_name] = field().clean(field_value)
+        return clean_data or None
+    else:
+        return None
+
+
+class IntegerRangeField(Field):
     def clean(self, value):
-        if value:
-            clean_data = {}
-            values = json.loads(value)
-            if isinstance(values, dict):
-                for field_name, field_value in values.items():
-                    clean_data[field_name] = IntegerField().clean(field_value)
-            return clean_data or None
-        else:
-            return None
+        return _clean_data_for_range_field(value, IntegerField)
 
 
-class IntegerRangeFilter(Filter):
-    field_class = RangeField
+class DecimalRangeField(Field):
+    def clean(self, value):
+        return _clean_data_for_range_field(value, DecimalField)
+
+
+class BaseRangeFilter(Filter):
+    field_class = None
 
     def filter(self, qs, values):
         if values:
@@ -36,6 +45,14 @@ class IntegerRangeFilter(Filter):
                 values = max_value
 
         return super().filter(qs, values)
+
+
+class IntegerRangeFilter(BaseRangeFilter):
+    field_class = IntegerRangeField
+
+
+class DecimalRangeFilter(BaseRangeFilter):
+    field_class = DecimalRangeField
 
 
 def filter_age(field_name, qs, min, max):
@@ -63,7 +80,7 @@ def filter_age(field_name, qs, min, max):
 
 
 class AgeRangeFilter(Filter):
-    field_class = RangeField
+    field_class = IntegerRangeField
 
     def filter(self, qs, values):
         if values:
