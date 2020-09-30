@@ -40,12 +40,14 @@ class GrievanceTicket(TimeStampedUUIDModel):
         (TYPE_DEDUPLICATION, _("Deduplication")),
     )
     user_modified = models.DateTimeField(
-        _("Modified"), blank=True, help_text=_("Date this ticket was most recently changed."),
+        _("Modified"),
+        blank=True,
+        help_text=_("Date this ticket was most recently changed."),
     )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
-        related_name="assigned_to",
+        related_name="created_tickets",
         blank=True,
         null=True,
         verbose_name=_("Assigned to"),
@@ -53,30 +55,44 @@ class GrievanceTicket(TimeStampedUUIDModel):
     assigned_to = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
-        related_name="assigned_to",
+        related_name="assigned_tickets",
         blank=True,
         null=True,
         verbose_name=_("Assigned to"),
     )
-    status = models.IntegerField(_("Status"), choices=STATUS_CHOICES, default=STATUS_OPEN,)
-    type = models.IntegerField(_("Type"), choices=TYPE_CHOICES,)
+    status = models.IntegerField(
+        _("Status"),
+        choices=STATUS_CHOICES,
+        default=STATUS_OPEN,
+    )
+    type = models.IntegerField(
+        _("Type"),
+        choices=TYPE_CHOICES,
+    )
     description = models.TextField(
-        _("Description"), blank=True, null=True, help_text=_("The content of the customers query."),
+        _("Description"),
+        blank=True,
+        null=True,
+        help_text=_("The content of the customers query."),
     )
     admin = models.CharField(max_length=250)
     area = models.CharField(max_length=250)
     language = models.CharField(max_length=250)
     consent = models.BooleanField(default=False)
+    business_area = models.ForeignKey("core.BusinessArea", "tickets")
 
 
 class TicketNotes(TimeStampedUUIDModel):
     description = models.TextField(
-        _("Description"), blank=True, null=True, help_text=_("The content of the customers query."),
+        _("Description"),
+        blank=True,
+        null=True,
+        help_text=_("The content of the customers query."),
     )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
-        related_name="assigned_to",
+        related_name="ticket_notes",
         blank=True,
         null=True,
         verbose_name=_("Assigned to"),
@@ -84,6 +100,19 @@ class TicketNotes(TimeStampedUUIDModel):
 
 
 class TicketDeduplicationDetails(TimeStampedUUIDModel):
-    ticket = models.OneToOneField(related_name="deduplicated_details")
-    household = models.ForeignKey("household.Household", related_name="ticket_details")
-    duplicated_households = models.ManyToManyField("household.Household", related_name="duplicates_ticket_details")
+    ticket = models.OneToOneField(
+        "grievance.GrievanceTicket", related_name="deduplication_details", on_delete=models.CASCADE
+    )
+    individual = models.ForeignKey(
+        "household.Individual", related_name="ticket_details", null=True, on_delete=models.CASCADE
+    )
+    duplicated_individuals = models.ManyToManyField("household.Individual", related_name="duplicates_ticket_details")
+
+
+class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
+    ticket = models.OneToOneField(
+        "grievance.GrievanceTicket", related_name="payment_verification_details", on_delete=models.CASCADE
+    )
+    payment_verification = models.ForeignKey(
+        "payment.PaymentVerification", related_name="ticket_details", on_delete=models.CASCADE
+    )
