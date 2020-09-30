@@ -6,6 +6,9 @@ from graphene_django.forms.converter import convert_form_field
 import account.schema
 import core.schema
 import graphene
+
+import grievance.schema
+import grievance.mutations
 import household.schema
 import payment.mutations
 import payment.schema
@@ -35,6 +38,7 @@ class Query(
     program.schema.Query,
     core.schema.Query,
     payment.schema.Query,
+    grievance.schema.Query,
     graphene.ObjectType,
 ):
     debug = graphene.Field(DjangoDebug, name="_debug")
@@ -46,6 +50,7 @@ class Mutations(
     program.mutations.Mutations,
     targeting.mutations.Mutations,
     payment.mutations.Mutations,
+    grievance.mutations.Mutations,
     graphene.ObjectType,
 ):
     pass
