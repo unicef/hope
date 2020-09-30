@@ -8,15 +8,11 @@ import graphene
 from auditlog.models import LogEntry
 from django.contrib.gis.db.models import GeometryField
 from django.core.exceptions import ObjectDoesNotExist
-from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Q
-from django.utils.encoding import force_text
-from django.utils.functional import Promise
 from django_filters import FilterSet, CharFilter
 from graphene import (
     String,
     DateTime,
-    Scalar,
     relay,
     ConnectionField,
     Connection,
@@ -32,7 +28,6 @@ from graphene_django.converter import convert_django_field
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql import GraphQLError
 
-from account.schema import UserObjectType
 from core.core_fields_attributes import FILTERABLE_CORE_FIELDS_ATTRIBUTES
 from core.extended_connection import ExtendedConnection
 from core.kobo.api import KoboAPI
@@ -48,9 +43,7 @@ from core.utils import decode_id_string, LazyEvalMethodsDict
 
 
 class AdminAreaFilter(FilterSet):
-    business_area = CharFilter(
-        field_name="admin_area_type__business_area__slug",
-    )
+    business_area = CharFilter(field_name="admin_area_type__business_area__slug",)
 
     class Meta:
         model = AdminArea
@@ -63,55 +56,6 @@ class AdminAreaFilter(FilterSet):
 class ChoiceObject(graphene.ObjectType):
     name = String()
     value = String()
-
-
-class LazyEncoder(DjangoJSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, Promise):
-            return force_text(obj)
-        return super(LazyEncoder, self).default(obj)
-
-
-class JSONLazyString(Scalar):
-    """
-    Allows use of a JSON String for input / output from the GraphQL schema.
-
-    Use of this type is *not recommended* as you lose the benefits of having a defined, static
-    schema (one of the key benefits of GraphQL).
-    """
-
-    @staticmethod
-    def serialize(dt):
-        return json.dumps(dt, cls=LazyEncoder)
-
-    @staticmethod
-    def parse_literal(node):
-        if isinstance(node, String):
-            return json.loads(node.value)
-
-    @staticmethod
-    def parse_value(value):
-        return json.loads(value)
-
-
-class LogEntryObject(DjangoObjectType):
-    timestamp = DateTime()
-    changes_display_dict = JSONLazyString()
-    actor = UserObjectType()
-
-    class Meta:
-        model = LogEntry
-        exclude_fields = ("additional_data",)
-
-
-class LogEntryObjectConnection(Connection):
-    total_count = graphene.Int()
-
-    def resolve_total_count(self, info, **kwargs):
-        return self.iterable.count()
-
-    class Meta:
-        node = LogEntryObject
 
 
 class AdminAreaNode(DjangoObjectType):
@@ -220,10 +164,7 @@ class FieldAttributeNode(graphene.ObjectType):
     is_flex_field = graphene.Boolean()
 
     def resolve_choices(parent, info):
-        if isinstance(
-            _custom_dict_or_attr_resolver("choices", None, parent, info),
-            Iterable,
-        ):
+        if isinstance(_custom_dict_or_attr_resolver("choices", None, parent, info), Iterable,):
             return sorted(parent["choices"], key=itemgetter("value"))
         return parent.choices.order_by("name").all()
 
@@ -251,9 +192,7 @@ class FieldAttributeNode(graphene.ObjectType):
 class GroupAttributeNode(DjangoObjectType):
     label_en = graphene.String()
     flex_attributes = graphene.List(
-        FieldAttributeNode,
-        flex_field=graphene.Boolean(),
-        description="All field datatype meta.",
+        FieldAttributeNode, flex_field=graphene.Boolean(), description="All field datatype meta.",
     )
 
     class Meta:
@@ -328,19 +267,10 @@ class Query(graphene.ObjectType):
     admin_area = relay.Node.Field(AdminAreaNode)
     all_admin_areas = DjangoFilterConnectionField(AdminAreaNode, filterset_class=AdminAreaFilter)
     all_business_areas = DjangoFilterConnectionField(BusinessAreaNode)
-    all_log_entries = ConnectionField(
-        LogEntryObjectConnection,
-        object_id=graphene.String(required=True),
-    )
     all_fields_attributes = graphene.List(
-        FieldAttributeNode,
-        flex_field=graphene.Boolean(),
-        description="All field datatype meta.",
+        FieldAttributeNode, flex_field=graphene.Boolean(), description="All field datatype meta.",
     )
-    all_groups_with_fields = graphene.List(
-        GroupAttributeNode,
-        description="Get all groups that contains flex fields",
-    )
+    all_groups_with_fields = graphene.List(GroupAttributeNode, description="Get all groups that contains flex fields",)
     kobo_project = graphene.Field(
         KoboAssetObject,
         uid=graphene.String(required=True),
@@ -369,10 +299,7 @@ class Query(graphene.ObjectType):
         return resolve_assets(business_area_slug=business_area_slug, uid=uid)
 
     def resolve_all_kobo_projects(self, info, business_area_slug, *args, **kwargs):
-        return resolve_assets(
-            business_area_slug=business_area_slug,
-            only_deployed=kwargs.get("only_deployed", False),
-        )
+        return resolve_assets(business_area_slug=business_area_slug, only_deployed=kwargs.get("only_deployed", False),)
 
     def resolve_all_groups_with_fields(self, info, **kwargs):
         return FlexibleAttributeGroup.objects.distinct().filter(flex_attributes__isnull=False)

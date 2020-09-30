@@ -22,6 +22,7 @@ from registration_datahub.models import (
     ImportedHousehold,
     ImportedIndividualRoleInHousehold,
     ImportedIndividual,
+    DUPLICATE_IN_BATCH,
 )
 from registration_datahub.tasks.deduplicate import DeduplicateTask
 from sanction_list.tasks.check_against_sanction_list_pre_merge import CheckAgainstSanctionListPreMergeTask
@@ -75,6 +76,8 @@ class RdiMergeTask:
         "flex_fields",
         "first_registration_date",
         "last_registration_date",
+        "deduplication_batch_status",
+        "deduplication_batch_results",
     )
 
     def merge_admin_area(
@@ -137,8 +140,12 @@ class RdiMergeTask:
         for imported_individual in imported_individuals:
             values = model_to_dict(imported_individual, fields=self.INDIVIDUAL_FIELDS)
             household = households_dict.get(imported_individual.household.id)
-
-            individual = Individual(**values, household=household, registration_data_import=obj_hct)
+            individual = Individual(
+                **values,
+                household=household,
+                registration_data_import=obj_hct,
+                imported_individual_id=imported_individual.id,
+            )
             individuals_dict[imported_individual.id] = individual
             if imported_individual.relationship == HEAD and household:
                 household.head_of_household = individual
@@ -196,23 +203,33 @@ class RdiMergeTask:
 
         DeduplicateTask.deduplicate_individuals(registration_data_import=obj_hct)
 
-        duplicates = Individual.objects.filter(registration_data_import=obj_hct, deduplication_status=DUPLICATE)
-
-        for individual in duplicates:
-            for duplicate in individual.deduplication_results["duplicates"]:
+        golden_record_duplicates = Individual.objects.filter(
+            registration_data_import=obj_hct, deduplication_golden_record_status=DUPLICATE
+        )
+        for individual in golden_record_duplicates:
+            for duplicate in individual.deduplication_golden_record_results["duplicates"]:
                 # TODO: Grievance
                 print(f"Individual: {individual.id} is duplicate for Individual: {duplicate.get('hit_id')}")
 
         needs_adjudication = Individual.objects.filter(
-            registration_data_import=obj_hct, deduplication_status=NEEDS_ADJUDICATION
+            registration_data_import=obj_hct, deduplication_golden_record_status=NEEDS_ADJUDICATION
         )
         for individual in needs_adjudication:
-            for possible_duplicate in individual.deduplication_results["possible_duplicates"]:
+            for possible_duplicate in individual.deduplication_golden_record_results["possible_duplicates"]:
                 # TODO: Grievance
                 print(
                     f"Individual: {individual.id} is possible duplicate for "
                     f"Individual: {possible_duplicate.get('hit_id')}"
                 )
+        batch_duplicates = Individual.objects.filter(
+            registration_data_import=obj_hct, deduplication_batch_status=DUPLICATE_IN_BATCH
+        )
+        for individual in batch_duplicates:
+            for duplicate in individual.deduplication_golden_record_results["duplicates"]:
+                # TODO: Grievance
+                individual_id = Individual.objects.filter(imported_individual_id=duplicate.get('hit_id')).first()
+                if individual_id:
+                    print(f"Individual: {individual.id} is duplicate for Individual: {individual_id}")
 
         # SANCTION LIST CHECK
         CheckAgainstSanctionListPreMergeTask.execute()
