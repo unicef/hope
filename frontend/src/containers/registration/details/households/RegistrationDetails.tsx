@@ -66,38 +66,42 @@ export function RegistrationDetails({
           </LabelizedField>
         </Grid>
       </Grid>
-      <hr />
-      <Typography variant='h6'>Data Collection</Typography>
-      <Grid container spacing={6}>
-        <Grid item xs={4}>
-          <LabelizedField label='Start time'>
-            <div>
-              <Missing />
-            </div>
-          </LabelizedField>
-        </Grid>
-        <Grid item xs={4}>
-          <LabelizedField label='End time'>
-            <div>
-              <Missing />
-            </div>
-          </LabelizedField>
-        </Grid>
-        <Grid item xs={4}>
-          <LabelizedField label='Device ID'>
-            <div>
-              <Missing />
-            </div>
-          </LabelizedField>
-        </Grid>
-        <Grid item xs={4}>
-          <LabelizedField label='User name'>
-            <div>
-              <Missing />
-            </div>
-          </LabelizedField>
-        </Grid>
-      </Grid>
+      {registrationDataImport.dataSource === 'XLS' ? null : (
+        <>
+          <hr />
+          <Typography variant='h6'>Data Collection</Typography>
+          <Grid container spacing={6}>
+            <Grid item xs={4}>
+              <LabelizedField label='Start time'>
+                <div>
+                  <Missing />
+                </div>
+              </LabelizedField>
+            </Grid>
+            <Grid item xs={4}>
+              <LabelizedField label='End time'>
+                <div>
+                  <Missing />
+                </div>
+              </LabelizedField>
+            </Grid>
+            <Grid item xs={4}>
+              <LabelizedField label='Device ID'>
+                <div>
+                  <Missing />
+                </div>
+              </LabelizedField>
+            </Grid>
+            <Grid item xs={4}>
+              <LabelizedField label='User name'>
+                <div>
+                  <Missing />
+                </div>
+              </LabelizedField>
+            </Grid>
+          </Grid>
+        </>
+      )}
     </Overview>
   );
 }
