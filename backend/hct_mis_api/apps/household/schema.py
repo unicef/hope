@@ -4,7 +4,7 @@ from django_filters import (
     FilterSet,
     OrderingFilter,
     CharFilter,
-    ModelMultipleChoiceFilter,
+    MultipleChoiceFilter,
 )
 from graphene import relay
 from graphene_django import DjangoObjectType
@@ -28,6 +28,7 @@ from household.models import (
     ROLE_NO_ROLE,
     IndividualIdentity,
     DUPLICATE,
+    DUPLICATE_IN_BATCH,
 )
 from registration_datahub.schema import DeduplicationResultNode
 from targeting.models import HouseholdSelection
@@ -83,7 +84,7 @@ class HouseholdFilter(FilterSet):
 class IndividualFilter(FilterSet):
     business_area = CharFilter(field_name="household__business_area__slug",)
     age = AgeRangeFilter(field_name="birth_date")
-    sex = ModelMultipleChoiceFilter(to_field_name="sex", queryset=Individual.objects.all(),)
+    sex = MultipleChoiceFilter(field_name="sex", choices=SEX_CHOICE)
     programme = CharFilter(field_name="household__programs__name")
     search = CharFilter(method="search_filter")
 
@@ -212,7 +213,7 @@ class HouseholdNode(DjangoObjectType):
         )
 
     def resolve_has_duplicates(parent, info):
-        return parent.individuals.filter(deduplication_status=DUPLICATE).exists()
+        return parent.individuals.filter(deduplication_golden_record_status=DUPLICATE).exists()
 
     class Meta:
         model = Household
@@ -230,7 +231,8 @@ class IndividualNode(DjangoObjectType):
     estimated_birth_date = graphene.Boolean(required=False)
     role = graphene.String()
     flex_fields = FlexFieldsScalar()
-    deduplication_results = graphene.List(DeduplicationResultNode)
+    deduplication_golden_record_results = graphene.List(DeduplicationResultNode)
+    deduplication_batch_results = graphene.List(DeduplicationResultNode)
 
     def resolve_role(parent, info):
         role = parent.households_and_roles.first()
@@ -238,10 +240,15 @@ class IndividualNode(DjangoObjectType):
             return role.role
         return ROLE_NO_ROLE
 
-    def resolve_deduplication_results(parent, info):
-        key = "duplicates" if parent.deduplication_status == DUPLICATE else "possible_duplicates"
-        results = parent.deduplication_results.get(key, {})
+    def resolve_deduplication_golden_record_results(parent, info):
+        key = "duplicates" if parent.deduplication_golden_record_status == DUPLICATE else "possible_duplicates"
+        results = parent.deduplication_golden_record_results.get(key, {})
         return encode_ids(results, "Individual", "hit_id")
+
+    def resolve_deduplication_batch_results(parent, info):
+        key = "duplicates" if parent.deduplication_batch_status == DUPLICATE_IN_BATCH else "possible_duplicates"
+        results = parent.deduplication_batch_results.get(key, {})
+        return encode_ids(results, "ImportedIndividual", "hit_id")
 
     class Meta:
         model = Individual
