@@ -101,7 +101,7 @@ function DropzoneField({ onChange, loading }): React.ReactElement {
 }
 
 const validationSchema = Yup.object().shape({
-  name: Yup.string().required('Name Upload is required'),
+  name: Yup.string().required('Title is required'),
 });
 
 export function RegistrationDataImport(): React.ReactElement {
@@ -319,7 +319,7 @@ export function RegistrationDataImport(): React.ReactElement {
                 <Field
                   name='name'
                   fullWidth
-                  label='Name Upload'
+                  label='Title'
                   required
                   variant='outlined'
                   component={FormikTextField}
