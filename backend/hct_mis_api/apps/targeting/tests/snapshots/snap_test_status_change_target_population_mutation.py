@@ -53,3 +53,110 @@ snapshots['TestApproveTargetPopulationMutation::test_approve_target_population 1
         }
     }
 }
+
+snapshots['TestUnapproveTargetPopulationMutation::test_unapprove_fail_target_population 1'] = {
+    'data': {
+        'unapproveTargetPopulation': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 15,
+                    'line': 3
+                }
+            ],
+            'message': "['Only Target Population with status APPROVED can be unapproved']",
+            'path': [
+                'unapproveTargetPopulation'
+            ]
+        }
+    ]
+}
+
+snapshots['TestUnapproveTargetPopulationMutation::test_unapprove_target_population 1'] = {
+    'data': {
+        'unapproveTargetPopulation': {
+            'targetPopulation': {
+                'households': {
+                    'edges': [
+                        {
+                            'node': {
+                                'residenceStatus': 'CITIZEN',
+                                'size': 1
+                            }
+                        },
+                        {
+                            'node': {
+                                'residenceStatus': 'CITIZEN',
+                                'size': 2
+                            }
+                        }
+                    ],
+                    'totalCount': 2
+                },
+                'status': 'DRAFT'
+            }
+        }
+    }
+}
+
+snapshots['TestFinalizeTargetPopulationMutation::test_finalize_fail_target_population 1'] = {
+    'data': {
+        'finalizeTargetPopulation': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 15,
+                    'line': 3
+                }
+            ],
+            'message': "['Only Target Population with status APPROVED can be finalized']",
+            'path': [
+                'finalizeTargetPopulation'
+            ]
+        }
+    ]
+}
+
+snapshots['TestFinalizeTargetPopulationMutation::test_finalize_target_population 1'] = {
+    'data': {
+        'finalizeTargetPopulation': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 15,
+                    'line': 3
+                }
+            ],
+            'message': "['Only Target Population assigned to program with status ACTIVE can be send']",
+            'path': [
+                'finalizeTargetPopulation'
+            ]
+        }
+    ]
+}
+
+snapshots['TestFinalizeTargetPopulationMutation::test_finalize_target_population_with_final_criteria 1'] = {
+    'data': {
+        'finalizeTargetPopulation': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 15,
+                    'line': 3
+                }
+            ],
+            'message': "'NoneType' object has no attribute 'status'",
+            'path': [
+                'finalizeTargetPopulation'
+            ]
+        }
+    ]
+}

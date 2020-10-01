@@ -274,6 +274,8 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
             {"field_name": "residence_status", "arguments": ["CITIZEN"], "comparision_method": "EQUALS"}
         )
+        program = ProgramFactory(business_area=business_area)
+        tp.program = program
         tp.save()
         tp.households.set(cls.households)
         cls.target_population_approved = tp
