@@ -49,7 +49,7 @@ export function RegistrationDetails({
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
-          <LabelizedField label='Intake group name'>
+          <LabelizedField label='Title'>
             <div>{registrationDataImport.name}</div>
           </LabelizedField>
         </Grid>
