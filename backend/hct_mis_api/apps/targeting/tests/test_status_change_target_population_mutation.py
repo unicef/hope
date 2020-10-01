@@ -36,12 +36,17 @@ class TestApproveTargetPopulationMutation(APITestCase):
     @classmethod
     def setUpTestData(cls):
         call_command("loadbusinessareas")
-        cls.program = ProgramFactory.create(status="ACTIVE", business_area=BusinessArea.objects.order_by("?").first(),)
+        business_area = BusinessArea.objects.first()
+        cls.program = ProgramFactory.create(status="ACTIVE", business_area=business_area)
         cls.user = UserFactory.create()
         cls.households = []
-        (household, individuals) = create_household({"size": 1, "residence_status": "CITIZEN"},)
+        (household, individuals) = create_household(
+            {"size": 1, "residence_status": "CITIZEN", "business_area": business_area},
+        )
         cls.household_size_1 = household
-        (household, individuals) = create_household({"size": 2, "residence_status": "CITIZEN"},)
+        (household, individuals) = create_household(
+            {"size": 2, "residence_status": "CITIZEN", "business_area": business_area},
+        )
         cls.household_size_2 = household
         cls.households.append(cls.household_size_1)
         cls.households.append(cls.household_size_2)
