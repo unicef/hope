@@ -1,12 +1,20 @@
 import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
 import { useHistory } from 'react-router-dom';
-import { IndividualNode } from '../../../__generated__/graphql';
+import {
+  IndividualNode,
+  useHouseholdChoiceDataQuery,
+} from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
 import { Flag } from '../../../components/Flag';
-import { getAgeFromDob, sexToCapitalize } from '../../../utils/utils';
+import {
+  choicesToDict,
+  getAgeFromDob,
+  sexToCapitalize,
+} from '../../../utils/utils';
 import { FlagTooltip } from '../../../components/FlagTooltip';
+import { LoadingComponent } from '../../../components/LoadingComponent';
 
 interface IndividualsListTableRowProps {
   individual: IndividualNode;
@@ -17,6 +25,17 @@ export function IndividualsListTableRow({
 }: IndividualsListTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
+  const {
+    data: choicesData,
+    loading: choicesLoading,
+  } = useHouseholdChoiceDataQuery();
+
+  if (choicesLoading) {
+    return <LoadingComponent />;
+  }
+  const relationshipChoicesDict = choicesToDict(
+    choicesData.relationshipChoices,
+  );
   let age: number | string = 'N/A';
   if (individual.birthDate) {
     age = getAgeFromDob(individual.birthDate);
@@ -33,13 +52,18 @@ export function IndividualsListTableRow({
       key={individual.id}
     >
       <TableCell align='left'>
-        {individual.deduplicationGoldenRecordStatus !== 'UNIQUE' && <FlagTooltip />}
+        {individual.deduplicationGoldenRecordStatus !== 'UNIQUE' && (
+          <FlagTooltip />
+        )}
         {individual.sanctionListPossibleMatch && <Flag />}
       </TableCell>
       <TableCell align='left'>{individual.unicefId}</TableCell>
       <TableCell align='left'>{individual.fullName}</TableCell>
       <TableCell align='left'>
         {individual.household ? individual.household.unicefId : ''}
+      </TableCell>
+      <TableCell align='left'>
+        {relationshipChoicesDict[individual.relationship]}
       </TableCell>
       <TableCell align='right'>{age}</TableCell>
       <TableCell align='left'>{sexToCapitalize(individual.sex)}</TableCell>
