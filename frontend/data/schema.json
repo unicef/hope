@@ -744,6 +744,18 @@
             "deprecationReason": null
           },
           {
+            "name": "cashAssistUrlPrefix",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "program",
             "description": null,
             "args": [
@@ -828,6 +840,48 @@
                 "name": "status",
                 "description": null,
                 "type": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "sector",
+                "description": null,
+                "type": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "businessArea",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "search",
+                "description": null,
+                "type": {
                   "kind": "SCALAR",
                   "name": "String",
                   "ofType": null
@@ -835,7 +889,17 @@
                 "defaultValue": null
               },
               {
-                "name": "businessArea",
+                "name": "numberOfHouseholds",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "budget",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -7554,19 +7618,7 @@
             "deprecationReason": null
           },
           {
-            "name": "GENDER",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "HEALTH",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "HIV_AIDS",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -12415,6 +12467,18 @@
                 "name": "Boolean",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "sanctionListLastCheck",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null

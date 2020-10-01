@@ -63,11 +63,11 @@ export function ApproveCandidateList({
   setOpen,
   targetPopulationId,
 }): React.ReactElement {
+  const businessArea = useBusinessArea();
   const { data: programs } = useAllProgramsQuery({
-    variables: { status: 'ACTIVE' },
+    variables: { status: ['ACTIVE'], businessArea },
   });
   const { showMessage } = useSnackbar();
-  const businessArea = useBusinessArea();
   const [mutate, loading] = useApproveTpMutation();
   const classes = useStyles();
   if (!programs) return null;
