@@ -14,1009 +14,148 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': 'No',
+                        'labelEn': "Don't know",
                         'labels': [
                             {
                                 'label': '',
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'No',
+                                'label': "Don't know",
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': '0'
+                        'value': 'don’t_know'
                     },
                     {
-                        'labelEn': 'Yes',
+                        'labelEn': 'Governmental',
                         'labels': [
                             {
                                 'label': '',
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'Yes',
+                                'label': 'Governmental',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': '1'
+                        'value': 'governmental'
+                    },
+                    {
+                        'labelEn': 'NGOs, religious organizations and CBOs',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'NGOs, religious organizations and CBOs',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'ngos'
+                    },
+                    {
+                        'labelEn': 'Other',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Other',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'other'
+                    },
+                    {
+                        'labelEn': 'Other INGO (non UN related)',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Other INGO (non UN related)',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'other_ingo'
+                    },
+                    {
+                        'labelEn': 'Relatives/friends/neighbors',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Relatives/friends/neighbors',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'relatives_friends'
+                    },
+                    {
+                        'labelEn': 'UNHCR',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'UNHCR',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'unhcr'
+                    },
+                    {
+                        'labelEn': 'UNICEF',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'UNICEF',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'unicef'
+                    },
+                    {
+                        'labelEn': 'WFP',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'WFP',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'wfp'
                     }
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': 'Does your family host an unaccompanied child / fosterchild?',
+                'labelEn': 'Did your family get assistance from any of these sources in the last 6 months?',
                 'labels': [
                     {
                         'label': '',
                         'language': 'French(FR)'
                     },
                     {
-                        'label': 'Does your family host an unaccompanied child / fosterchild?',
+                        'label': 'Did your family get assistance from any of these sources in the last 6 months?',
                         'language': 'English(EN)'
                     }
                 ],
-                'name': 'unaccompanied_child_h_f',
-                'required': False,
-                'type': 'SELECT_ONE'
-            },
-            {
-                'associatedWith': 'Household',
-                'choices': [
-                    {
-                        'labelEn': 'No',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'No',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': '0'
-                    },
-                    {
-                        'labelEn': 'Yes',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Yes',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': '1'
-                    }
-                ],
-                'hint': "{'French(FR)': '', 'English(EN)': ''}",
-                'isFlexField': True,
-                'labelEn': 'Has any of your children been ill with cough and fever at any time in the last 2 weeks?',
-                'labels': [
-                    {
-                        'label': '',
-                        'language': 'French(FR)'
-                    },
-                    {
-                        'label': 'Has any of your children been ill with cough and fever at any time in the last 2 weeks?',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'recent_illness_child_h_f',
-                'required': False,
-                'type': 'SELECT_ONE'
-            },
-            {
-                'associatedWith': 'Household',
-                'choices': [
-                    {
-                        'labelEn': 'No',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'No',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': '0'
-                    },
-                    {
-                        'labelEn': 'Yes',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Yes',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': '1'
-                    }
-                ],
-                'hint': "{'French(FR)': '', 'English(EN)': ''}",
-                'isFlexField': True,
-                'labelEn': 'If any child was sick, When he/she had an illness with a cough, did he/she breathe faster than usual with short, rapid breaths or have difficulty breathing?',
-                'labels': [
-                    {
-                        'label': '',
-                        'language': 'French(FR)'
-                    },
-                    {
-                        'label': 'If any child was sick, When he/she had an illness with a cough, did he/she breathe faster than usual with short, rapid breaths or have difficulty breathing?',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'difficulty_breathing_h_f',
-                'required': False,
-                'type': 'SELECT_ONE'
-            },
-            {
-                'associatedWith': 'Household',
-                'choices': [
-                    {
-                        'labelEn': 'No',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'No',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': '0'
-                    },
-                    {
-                        'labelEn': 'Yes',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Yes',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': '1'
-                    }
-                ],
-                'hint': "{'French(FR)': '', 'English(EN)': ''}",
-                'isFlexField': True,
-                'labelEn': 'If above is Yes, did you seek advice or treatment for the illness from any source?',
-                'labels': [
-                    {
-                        'label': '',
-                        'language': 'French(FR)'
-                    },
-                    {
-                        'label': 'If above is Yes, did you seek advice or treatment for the illness from any source?',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'treatment_h_f',
-                'required': False,
-                'type': 'SELECT_ONE'
-            },
-            {
-                'associatedWith': 'Household',
-                'choices': [
-                    {
-                        'labelEn': 'Government Hospital',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Government Hospital',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'governent_health_center'
-                    },
-                    {
-                        'labelEn': 'Government Health Center',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Government Health Center',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'governent_hospital'
-                    },
-                    {
-                        'labelEn': 'Other Private',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Other Private',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'other_private'
-                    },
-                    {
-                        'labelEn': 'Other Public',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Other Public',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'other_public'
-                    },
-                    {
-                        'labelEn': 'Pharmacy',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Pharmacy',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'pharmacy'
-                    },
-                    {
-                        'labelEn': 'Private Doctor',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Private Doctor',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'private_doctor'
-                    },
-                    {
-                        'labelEn': 'Private Hospital/Clinic',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Private Hospital/Clinic',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'private_hospital'
-                    }
-                ],
-                'hint': "{'French(FR)': '', 'English(EN)': ''}",
-                'isFlexField': True,
-                'labelEn': 'Where did you seek advice or treatment?',
-                'labels': [
-                    {
-                        'label': '',
-                        'language': 'French(FR)'
-                    },
-                    {
-                        'label': 'Where did you seek advice or treatment?',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'treatment_facility_h_f',
+                'name': 'assistance_source_h_f',
                 'required': False,
                 'type': 'SELECT_MANY'
-            },
-            {
-                'associatedWith': 'Household',
-                'choices': [
-                ],
-                'hint': "{'French(FR)': '', 'English(EN)': ''}",
-                'isFlexField': True,
-                'labelEn': 'If other, specify',
-                'labels': [
-                    {
-                        'label': '',
-                        'language': 'French(FR)'
-                    },
-                    {
-                        'label': 'If other, specify',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'other_treatment_facility_h_f',
-                'required': False,
-                'type': 'STRING'
-            },
-            {
-                'associatedWith': 'Household',
-                'choices': [
-                    {
-                        'labelEn': 'Accommodation is free / other',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Accommodation is free / other',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'free_accomodation'
-                    },
-                    {
-                        'labelEn': 'Informal settlement',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Informal settlement',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'informal settlement'
-                    },
-                    {
-                        'labelEn': 'Own the place I live in',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Own the place I live in',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'own'
-                    },
-                    {
-                        'labelEn': 'Rent the place I live in with a formal contract',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Rent the place I live in with a formal contract',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'rent_formal_contract'
-                    },
-                    {
-                        'labelEn': 'Rent the place I live in with an informal contract',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Rent the place I live in with an informal contract',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'rent_informal_contract'
-                    }
-                ],
-                'hint': "{'French(FR)': '', 'English(EN)': ''}",
-                'isFlexField': True,
-                'labelEn': 'What is your living situation?',
-                'labels': [
-                    {
-                        'label': '',
-                        'language': 'French(FR)'
-                    },
-                    {
-                        'label': 'What is your living situation?',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'living_situation_h_f',
-                'required': False,
-                'type': 'SELECT_ONE'
-            },
-            {
-                'associatedWith': 'Household',
-                'choices': [
-                ],
-                'hint': "{'French(FR)': '', 'English(EN)': ''}",
-                'isFlexField': True,
-                'labelEn': 'What is the number of rooms in your dwelling excluding kitchen & bathroom?',
-                'labels': [
-                    {
-                        'label': '',
-                        'language': 'French(FR)'
-                    },
-                    {
-                        'label': 'What is the number of rooms in your dwelling excluding kitchen & bathroom?',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'number_of_rooms_h_f',
-                'required': False,
-                'type': 'INTEGER'
-            },
-            {
-                'associatedWith': 'Household',
-                'choices': [
-                ],
-                'hint': "{'French(FR)': '', 'English(EN)': ''}",
-                'isFlexField': True,
-                'labelEn': 'What is the total number of people living in your dwelling?',
-                'labels': [
-                    {
-                        'label': '',
-                        'language': 'French(FR)'
-                    },
-                    {
-                        'label': 'What is the total number of people living in your dwelling?',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'total_dwellers_h_f',
-                'required': False,
-                'type': 'INTEGER'
-            },
-            {
-                'associatedWith': 'Household',
-                'choices': [
-                ],
-                'hint': "{'French(FR)': '', 'English(EN)': ''}",
-                'isFlexField': True,
-                'labelEn': 'If there is more than one bedroom, what is the highest number of individuals living in one room?',
-                'labels': [
-                    {
-                        'label': '',
-                        'language': 'French(FR)'
-                    },
-                    {
-                        'label': 'If there is more than one bedroom, what is the highest number of individuals living in one room?',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'one_room_dwellers_h_f',
-                'required': False,
-                'type': 'INTEGER'
-            },
-            {
-                'associatedWith': 'Household',
-                'choices': [
-                ],
-                'hint': "{'French(FR)': '', 'English(EN)': ''}",
-                'isFlexField': True,
-                'labelEn': 'Total number of households in the same living space?',
-                'labels': [
-                    {
-                        'label': '',
-                        'language': 'French(FR)'
-                    },
-                    {
-                        'label': 'Total number of households in the same living space?',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'total_households_h_f',
-                'required': False,
-                'type': 'INTEGER'
-            },
-            {
-                'associatedWith': 'Household',
-                'choices': [
-                    {
-                        'labelEn': 'Buy bottled water',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Buy bottled water',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'bottle_water'
-                    },
-                    {
-                        'labelEn': 'From piped water',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'From piped water',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'piped_water'
-                    },
-                    {
-                        'labelEn': 'From private vendor',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'From private vendor',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'private_vendor_water'
-                    },
-                    {
-                        'labelEn': 'Collect water from rain water',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Collect water from rain water',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'rain_water'
-                    },
-                    {
-                        'labelEn': 'To buy water from water tank',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'To buy water from water tank',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'water_tank'
-                    },
-                    {
-                        'labelEn': 'Collect water from a well/source directly',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Collect water from a well/source directly',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'well_water'
-                    }
-                ],
-                'hint': "{'French(FR)': '', 'English(EN)': ''}",
-                'isFlexField': True,
-                'labelEn': 'What is your primary source of drinking water?',
-                'labels': [
-                    {
-                        'label': '',
-                        'language': 'French(FR)'
-                    },
-                    {
-                        'label': 'What is your primary source of drinking water?',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'water_source_h_f',
-                'required': False,
-                'type': 'SELECT_ONE'
-            },
-            {
-                'associatedWith': 'Household',
-                'choices': [
-                    {
-                        'labelEn': 'No, everyday our family struggles because of lack of water',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'No, everyday our family struggles because of lack of water',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'insufficientwater'
-                    },
-                    {
-                        'labelEn': 'Yes, somehow It is not always enough, especially in Summer',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Yes, somehow It is not always enough, especially in Summer',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'partiallysufficientwater'
-                    },
-                    {
-                        'labelEn': 'Yes, it is sufficient for our needs',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Yes, it is sufficient for our needs',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'sufficientwater'
-                    }
-                ],
-                'hint': "{'French(FR)': '', 'English(EN)': ''}",
-                'isFlexField': True,
-                'labelEn': 'Is water sufficient for all your uses in the household?',
-                'labels': [
-                    {
-                        'label': '',
-                        'language': 'French(FR)'
-                    },
-                    {
-                        'label': 'Is water sufficient for all your uses in the household?',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'sufficient_water_h_f',
-                'required': False,
-                'type': 'SELECT_ONE'
-            },
-            {
-                'associatedWith': 'Household',
-                'choices': [
-                    {
-                        'labelEn': 'No facility (open defection)',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'No facility (open defection)',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'no_latrine'
-                    },
-                    {
-                        'labelEn': 'No, only my household has access',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'No, only my household has access',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'not_shared'
-                    },
-                    {
-                        'labelEn': 'Yes, with two or more households',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Yes, with two or more households',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'shared_with_one_hh'
-                    },
-                    {
-                        'labelEn': 'Yes, with one other household',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Yes, with one other household',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'shared_with_two_hh'
-                    }
-                ],
-                'hint': "{'French(FR)': '', 'English(EN)': ''}",
-                'isFlexField': True,
-                'labelEn': 'Do you share a latrine?',
-                'labels': [
-                    {
-                        'label': '',
-                        'language': 'French(FR)'
-                    },
-                    {
-                        'label': 'Do you share a latrine?',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'latrine_h_f',
-                'required': False,
-                'type': 'SELECT_ONE'
-            },
-            {
-                'associatedWith': 'Household',
-                'choices': [
-                ],
-                'hint': "{'French(FR)': '', 'English(EN)': ''}",
-                'isFlexField': True,
-                'labelEn': 'Yesterday, how many meals were eaten by your family?',
-                'labels': [
-                    {
-                        'label': '',
-                        'language': 'French(FR)'
-                    },
-                    {
-                        'label': 'Yesterday, how many meals were eaten by your family?',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'meals_yesterday_h_f',
-                'required': False,
-                'type': 'INTEGER'
-            },
-            {
-                'associatedWith': 'Household',
-                'choices': [
-                ],
-                'hint': "{'French(FR)': '', 'English(EN)': ''}",
-                'isFlexField': True,
-                'labelEn': 'In the last 7 days, how many days did you consume the following?',
-                'labels': [
-                    {
-                        'label': '',
-                        'language': 'French(FR)'
-                    },
-                    {
-                        'label': 'In the last 7 days, how many days did you consume the following?',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'food_consumption_h_f',
-                'required': False,
-                'type': 'STRING'
-            },
-            {
-                'associatedWith': 'Household',
-                'choices': [
-                ],
-                'hint': "{'French(FR)': '', 'English(EN)': ''}",
-                'isFlexField': True,
-                'labelEn': 'Cereals, grains, roots & tubers: rice, pasta, bread, bulgur',
-                'labels': [
-                    {
-                        'label': '',
-                        'language': 'French(FR)'
-                    },
-                    {
-                        'label': 'Cereals, grains, roots & tubers: rice, pasta, bread, bulgur',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'cereals_h_f',
-                'required': False,
-                'type': 'INTEGER'
-            },
-            {
-                'associatedWith': 'Household',
-                'choices': [
-                ],
-                'hint': "{'French(FR)': '', 'English(EN)': ''}",
-                'isFlexField': True,
-                'labelEn': 'White tubers & roots (potato, sweet potato)',
-                'labels': [
-                    {
-                        'label': '',
-                        'language': 'French(FR)'
-                    },
-                    {
-                        'label': 'White tubers & roots (potato, sweet potato)',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'tubers_roots_h_f',
-                'required': False,
-                'type': 'INTEGER'
-            },
-            {
-                'associatedWith': 'Household',
-                'choices': [
-                ],
-                'hint': "{'French(FR)': '', 'English(EN)': ''}",
-                'isFlexField': True,
-                'labelEn': 'Vegetables & leaves: spinach, cucumber, eggplant, tomato',
-                'labels': [
-                    {
-                        'label': '',
-                        'language': 'French(FR)'
-                    },
-                    {
-                        'label': 'Vegetables & leaves: spinach, cucumber, eggplant, tomato',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'vegetables_h_f',
-                'required': False,
-                'type': 'INTEGER'
-            },
-            {
-                'associatedWith': 'Household',
-                'choices': [
-                ],
-                'hint': "{'French(FR)': '', 'English(EN)': ''}",
-                'isFlexField': True,
-                'labelEn': 'Fruits: citrus, apple, banana, dates',
-                'labels': [
-                    {
-                        'label': '',
-                        'language': 'French(FR)'
-                    },
-                    {
-                        'label': 'Fruits: citrus, apple, banana, dates',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'fruits_h_f',
-                'required': False,
-                'type': 'INTEGER'
-            },
-            {
-                'associatedWith': 'Household',
-                'choices': [
-                ],
-                'hint': "{'French(FR)': '', 'English(EN)': ''}",
-                'isFlexField': True,
-                'labelEn': 'Meat, fish and eggs: Beef, lamb chicken, liver, kidney, fish including canned tuna, eggs',
-                'labels': [
-                    {
-                        'label': '',
-                        'language': 'French(FR)'
-                    },
-                    {
-                        'label': 'Meat, fish and eggs: Beef, lamb chicken, liver, kidney, fish including canned tuna, eggs',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'meat_fish_h_f',
-                'required': False,
-                'type': 'INTEGER'
-            },
-            {
-                'associatedWith': 'Household',
-                'choices': [
-                ],
-                'hint': "{'French(FR)': '', 'English(EN)': ''}",
-                'isFlexField': True,
-                'labelEn': 'Pulses, nuts & seeds : beans, chickpeas, lentils',
-                'labels': [
-                    {
-                        'label': '',
-                        'language': 'French(FR)'
-                    },
-                    {
-                        'label': 'Pulses, nuts & seeds : beans, chickpeas, lentils',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'pulses_h_f',
-                'required': False,
-                'type': 'INTEGER'
-            },
-            {
-                'associatedWith': 'Household',
-                'choices': [
-                ],
-                'hint': "{'French(FR)': '', 'English(EN)': ''}",
-                'isFlexField': True,
-                'labelEn': 'Milk and dairy products: yoghurt, cheese',
-                'labels': [
-                    {
-                        'label': '',
-                        'language': 'French(FR)'
-                    },
-                    {
-                        'label': 'Milk and dairy products: yoghurt, cheese',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'dairy_h_f',
-                'required': False,
-                'type': 'INTEGER'
-            },
-            {
-                'associatedWith': 'Household',
-                'choices': [
-                ],
-                'hint': "{'French(FR)': '', 'English(EN)': ''}",
-                'isFlexField': True,
-                'labelEn': 'Oil / fat: vegetable oil, palm oil, butter, ghee',
-                'labels': [
-                    {
-                        'label': '',
-                        'language': 'French(FR)'
-                    },
-                    {
-                        'label': 'Oil / fat: vegetable oil, palm oil, butter, ghee',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'oilfat_h_f',
-                'required': False,
-                'type': 'INTEGER'
-            },
-            {
-                'associatedWith': 'Household',
-                'choices': [
-                ],
-                'hint': "{'French(FR)': '', 'English(EN)': ''}",
-                'isFlexField': True,
-                'labelEn': 'Sugar / sweets: honey, cakes, sugary drinks, (this includes sugar used in tea)',
-                'labels': [
-                    {
-                        'label': '',
-                        'language': 'French(FR)'
-                    },
-                    {
-                        'label': 'Sugar / sweets: honey, cakes, sugary drinks, (this includes sugar used in tea)',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'sugarsweet_h_f',
-                'required': False,
-                'type': 'INTEGER'
-            },
-            {
-                'associatedWith': 'Household',
-                'choices': [
-                ],
-                'hint': "{'French(FR)': '', 'English(EN)': ''}",
-                'isFlexField': True,
-                'labelEn': 'Condiments / spices: tea, garlic, tomato sauce including small amount of milk used in tea coffee',
-                'labels': [
-                    {
-                        'label': '',
-                        'language': 'French(FR)'
-                    },
-                    {
-                        'label': 'Condiments / spices: tea, garlic, tomato sauce including small amount of milk used in tea coffee',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'condiments_h_f',
-                'required': False,
-                'type': 'INTEGER'
             },
             {
                 'associatedWith': 'Household',
@@ -1294,149 +433,359 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
             {
                 'associatedWith': 'Household',
                 'choices': [
-                    {
-                        'labelEn': "Don't know",
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': "Don't know",
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'don’t_know'
-                    },
-                    {
-                        'labelEn': 'Governmental',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Governmental',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'governmental'
-                    },
-                    {
-                        'labelEn': 'NGOs, religious organizations and CBOs',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'NGOs, religious organizations and CBOs',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'ngos'
-                    },
-                    {
-                        'labelEn': 'Other',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Other',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'other'
-                    },
-                    {
-                        'labelEn': 'Other INGO (non UN related)',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Other INGO (non UN related)',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'other_ingo'
-                    },
-                    {
-                        'labelEn': 'Relatives/friends/neighbors',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Relatives/friends/neighbors',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'relatives_friends'
-                    },
-                    {
-                        'labelEn': 'UNHCR',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'UNHCR',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'unhcr'
-                    },
-                    {
-                        'labelEn': 'UNICEF',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'UNICEF',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'unicef'
-                    },
-                    {
-                        'labelEn': 'WFP',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'WFP',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'wfp'
-                    }
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': 'Did your family get assistance from any of these sources in the last 6 months?',
+                'labelEn': 'Cereals, grains, roots & tubers: rice, pasta, bread, bulgur',
                 'labels': [
                     {
                         'label': '',
                         'language': 'French(FR)'
                     },
                     {
-                        'label': 'Did your family get assistance from any of these sources in the last 6 months?',
+                        'label': 'Cereals, grains, roots & tubers: rice, pasta, bread, bulgur',
                         'language': 'English(EN)'
                     }
                 ],
-                'name': 'assistance_source_h_f',
+                'name': 'cereals_h_f',
                 'required': False,
-                'type': 'SELECT_MANY'
+                'type': 'INTEGER'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                    {
+                        'labelEn': 'Divorced',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Divorced',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'divorced'
+                    },
+                    {
+                        'labelEn': 'Married',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Married',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'married'
+                    },
+                    {
+                        'labelEn': 'Single',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Single',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'single'
+                    },
+                    {
+                        'labelEn': 'Widowed',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Widowed',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'widowed'
+                    }
+                ],
+                'hint': "{'French(FR)': '', 'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'If member is a child, what is her marital status?',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'If member is a child, what is her marital status?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'child_marital_status_i_f',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                    {
+                        'labelEn': 'Cannot do at all',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Cannot do at all',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'cannot_do'
+                    },
+                    {
+                        'labelEn': 'A lot of difficulty',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'A lot of difficulty',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'lot_difficulty'
+                    },
+                    {
+                        'labelEn': 'Some difficulty',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Some difficulty',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'some_difficulty'
+                    }
+                ],
+                'hint': "{'French(FR)': '', 'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'If member has difficulty communicating, what is the severity?',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'If member has difficulty communicating, what is the severity?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'comms_disability_i_f',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': "{'French(FR)': '', 'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'Condiments / spices: tea, garlic, tomato sauce including small amount of milk used in tea coffee',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'Condiments / spices: tea, garlic, tomato sauce including small amount of milk used in tea coffee',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'condiments_h_f',
+                'required': False,
+                'type': 'INTEGER'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': "{'French(FR)': '', 'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'Milk and dairy products: yoghurt, cheese',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'Milk and dairy products: yoghurt, cheese',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'dairy_h_f',
+                'required': False,
+                'type': 'INTEGER'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                    {
+                        'labelEn': 'No',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'No',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': '0'
+                    },
+                    {
+                        'labelEn': 'Yes',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Yes',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': '1'
+                    }
+                ],
+                'hint': "{'French(FR)': '', 'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'If any child was sick, When he/she had an illness with a cough, did he/she breathe faster than usual with short, rapid breaths or have difficulty breathing?',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'If any child was sick, When he/she had an illness with a cough, did he/she breathe faster than usual with short, rapid breaths or have difficulty breathing?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'difficulty_breathing_h_f',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': "{'French(FR)': '', 'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'In the last 7 days, how many days did you consume the following?',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'In the last 7 days, how many days did you consume the following?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'food_consumption_h_f',
+                'required': False,
+                'type': 'STRING'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': "{'French(FR)': '', 'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'Fruits: citrus, apple, banana, dates',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'Fruits: citrus, apple, banana, dates',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'fruits_h_f',
+                'required': False,
+                'type': 'INTEGER'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                    {
+                        'labelEn': 'Cannot do at all',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Cannot do at all',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'cannot_do'
+                    },
+                    {
+                        'labelEn': 'A lot of difficulty',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'A lot of difficulty',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'lot_difficulty'
+                    },
+                    {
+                        'labelEn': 'Some difficulty',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Some difficulty',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'some_difficulty'
+                    }
+                ],
+                'hint': "{'French(FR)': '', 'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'If member has difficulty hearing, what is the severity?',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'If member has difficulty hearing, what is the severity?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'hearing_disability_i_f',
+                'required': False,
+                'type': 'SELECT_ONE'
             },
             {
                 'associatedWith': 'Individual',
@@ -1444,20 +793,20 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': 'Photo',
+                'labelEn': 'What is the ID number on the document?',
                 'labels': [
                     {
                         'label': '',
                         'language': 'French(FR)'
                     },
                     {
-                        'label': 'Photo',
+                        'label': 'What is the ID number on the document?',
                         'language': 'English(EN)'
                     }
                 ],
-                'name': 'photo_i_f',
+                'name': 'id_no_i_f',
                 'required': False,
-                'type': 'IMAGE'
+                'type': 'STRING'
             },
             {
                 'associatedWith': 'Individual',
@@ -1579,235 +928,235 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'SELECT_ONE'
             },
             {
-                'associatedWith': 'Individual',
+                'associatedWith': 'Household',
                 'choices': [
+                    {
+                        'labelEn': 'No facility (open defection)',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'No facility (open defection)',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'no_latrine'
+                    },
+                    {
+                        'labelEn': 'No, only my household has access',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'No, only my household has access',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'not_shared'
+                    },
+                    {
+                        'labelEn': 'Yes, with two or more households',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Yes, with two or more households',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'shared_with_one_hh'
+                    },
+                    {
+                        'labelEn': 'Yes, with one other household',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Yes, with one other household',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'shared_with_two_hh'
+                    }
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': 'If other, specify',
+                'labelEn': 'Do you share a latrine?',
                 'labels': [
                     {
                         'label': '',
                         'language': 'French(FR)'
                     },
                     {
-                        'label': 'If other, specify',
+                        'label': 'Do you share a latrine?',
                         'language': 'English(EN)'
                     }
                 ],
-                'name': 'other_id_type_i_f',
+                'name': 'latrine_h_f',
                 'required': False,
-                'type': 'STRING'
+                'type': 'SELECT_ONE'
             },
             {
-                'associatedWith': 'Individual',
+                'associatedWith': 'Household',
                 'choices': [
+                    {
+                        'labelEn': 'Accommodation is free / other',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Accommodation is free / other',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'free_accomodation'
+                    },
+                    {
+                        'labelEn': 'Informal settlement',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Informal settlement',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'informal settlement'
+                    },
+                    {
+                        'labelEn': 'Own the place I live in',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Own the place I live in',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'own'
+                    },
+                    {
+                        'labelEn': 'Rent the place I live in with a formal contract',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Rent the place I live in with a formal contract',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'rent_formal_contract'
+                    },
+                    {
+                        'labelEn': 'Rent the place I live in with an informal contract',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Rent the place I live in with an informal contract',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'rent_informal_contract'
+                    }
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': 'What is the ID number on the document?',
+                'labelEn': 'What is your living situation?',
                 'labels': [
                     {
                         'label': '',
                         'language': 'French(FR)'
                     },
                     {
-                        'label': 'What is the ID number on the document?',
+                        'label': 'What is your living situation?',
                         'language': 'English(EN)'
                     }
                 ],
-                'name': 'id_no_i_f',
-                'required': False,
-                'type': 'STRING'
-            },
-            {
-                'associatedWith': 'Individual',
-                'choices': [
-                    {
-                        'labelEn': 'Cannot do at all',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Cannot do at all',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'cannot_do'
-                    },
-                    {
-                        'labelEn': 'A lot of difficulty',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'A lot of difficulty',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'lot_difficulty'
-                    },
-                    {
-                        'labelEn': 'Some difficulty',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Some difficulty',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'some_difficulty'
-                    }
-                ],
-                'hint': "{'French(FR)': '', 'English(EN)': ''}",
-                'isFlexField': True,
-                'labelEn': 'If member has difficulty seeing, what is the severity?',
-                'labels': [
-                    {
-                        'label': '',
-                        'language': 'French(FR)'
-                    },
-                    {
-                        'label': 'If member has difficulty seeing, what is the severity?',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'seeing_disability_i_f',
+                'name': 'living_situation_h_f',
                 'required': False,
                 'type': 'SELECT_ONE'
             },
             {
                 'associatedWith': 'Individual',
                 'choices': [
-                    {
-                        'labelEn': 'Cannot do at all',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Cannot do at all',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'cannot_do'
-                    },
-                    {
-                        'labelEn': 'A lot of difficulty',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'A lot of difficulty',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'lot_difficulty'
-                    },
-                    {
-                        'labelEn': 'Some difficulty',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Some difficulty',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'some_difficulty'
-                    }
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': 'If member has difficulty hearing, what is the severity?',
+                'labelEn': 'If married, age at the time of first marriage?',
                 'labels': [
                     {
                         'label': '',
                         'language': 'French(FR)'
                     },
                     {
-                        'label': 'If member has difficulty hearing, what is the severity?',
+                        'label': 'If married, age at the time of first marriage?',
                         'language': 'English(EN)'
                     }
                 ],
-                'name': 'hearing_disability_i_f',
+                'name': 'marriage_age_i_f',
                 'required': False,
-                'type': 'SELECT_ONE'
+                'type': 'INTEGER'
             },
             {
-                'associatedWith': 'Individual',
+                'associatedWith': 'Household',
                 'choices': [
-                    {
-                        'labelEn': 'Cannot do at all',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Cannot do at all',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'cannot_do'
-                    },
-                    {
-                        'labelEn': 'A lot of difficulty',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'A lot of difficulty',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'lot_difficulty'
-                    },
-                    {
-                        'labelEn': 'Some difficulty',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Some difficulty',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'some_difficulty'
-                    }
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': 'If member has difficulty walking or climbing steps, what is the severity?',
+                'labelEn': 'Yesterday, how many meals were eaten by your family?',
                 'labels': [
                     {
                         'label': '',
                         'language': 'French(FR)'
                     },
                     {
-                        'label': 'If member has difficulty walking or climbing steps, what is the severity?',
+                        'label': 'Yesterday, how many meals were eaten by your family?',
                         'language': 'English(EN)'
                     }
                 ],
-                'name': 'physical_disability_i_f',
+                'name': 'meals_yesterday_h_f',
                 'required': False,
-                'type': 'SELECT_ONE'
+                'type': 'INTEGER'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': "{'French(FR)': '', 'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'Meat, fish and eggs: Beef, lamb chicken, liver, kidney, fish including canned tuna, eggs',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'Meat, fish and eggs: Beef, lamb chicken, liver, kidney, fish including canned tuna, eggs',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'meat_fish_h_f',
+                'required': False,
+                'type': 'INTEGER'
             },
             {
                 'associatedWith': 'Individual',
@@ -1875,226 +1224,282 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
             {
                 'associatedWith': 'Individual',
                 'choices': [
-                    {
-                        'labelEn': 'Cannot do at all',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Cannot do at all',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'cannot_do'
-                    },
-                    {
-                        'labelEn': 'A lot of difficulty',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'A lot of difficulty',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'lot_difficulty'
-                    },
-                    {
-                        'labelEn': 'Some difficulty',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Some difficulty',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'some_difficulty'
-                    }
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': 'Do you have difficulty (with self-care such as) washing all over or dressing',
+                'labelEn': 'How many minutes does it take for the child to go to the nearest available school?',
                 'labels': [
                     {
                         'label': '',
                         'language': 'French(FR)'
                     },
                     {
-                        'label': 'Do you have difficulty (with self-care such as) washing all over or dressing',
+                        'label': 'How many minutes does it take for the child to go to the nearest available school?',
                         'language': 'English(EN)'
                     }
                 ],
-                'name': 'selfcare_disability_i_f',
-                'required': False,
-                'type': 'SELECT_ONE'
-            },
-            {
-                'associatedWith': 'Individual',
-                'choices': [
-                    {
-                        'labelEn': 'Cannot do at all',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Cannot do at all',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'cannot_do'
-                    },
-                    {
-                        'labelEn': 'A lot of difficulty',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'A lot of difficulty',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'lot_difficulty'
-                    },
-                    {
-                        'labelEn': 'Some difficulty',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Some difficulty',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'some_difficulty'
-                    }
-                ],
-                'hint': "{'French(FR)': '', 'English(EN)': ''}",
-                'isFlexField': True,
-                'labelEn': 'If member has difficulty communicating, what is the severity?',
-                'labels': [
-                    {
-                        'label': '',
-                        'language': 'French(FR)'
-                    },
-                    {
-                        'label': 'If member has difficulty communicating, what is the severity?',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'comms_disability_i_f',
-                'required': False,
-                'type': 'SELECT_ONE'
-            },
-            {
-                'associatedWith': 'Individual',
-                'choices': [
-                    {
-                        'labelEn': 'Divorced',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Divorced',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'divorced'
-                    },
-                    {
-                        'labelEn': 'Married',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Married',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'married'
-                    },
-                    {
-                        'labelEn': 'Single',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Single',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'single'
-                    },
-                    {
-                        'labelEn': 'Widowed',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Widowed',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'widowed'
-                    }
-                ],
-                'hint': "{'French(FR)': '', 'English(EN)': ''}",
-                'isFlexField': True,
-                'labelEn': 'If member is a child, what is her marital status?',
-                'labels': [
-                    {
-                        'label': '',
-                        'language': 'French(FR)'
-                    },
-                    {
-                        'label': 'If member is a child, what is her marital status?',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'child_marital_status_i_f',
-                'required': False,
-                'type': 'SELECT_ONE'
-            },
-            {
-                'associatedWith': 'Individual',
-                'choices': [
-                ],
-                'hint': "{'French(FR)': '', 'English(EN)': ''}",
-                'isFlexField': True,
-                'labelEn': 'If married, age at the time of first marriage?',
-                'labels': [
-                    {
-                        'label': '',
-                        'language': 'French(FR)'
-                    },
-                    {
-                        'label': 'If married, age at the time of first marriage?',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'marriage_age_i_f',
+                'name': 'minutes_to_school_i_f',
                 'required': False,
                 'type': 'INTEGER'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': "{'French(FR)': '', 'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'What is the number of rooms in your dwelling excluding kitchen & bathroom?',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'What is the number of rooms in your dwelling excluding kitchen & bathroom?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'number_of_rooms_h_f',
+                'required': False,
+                'type': 'INTEGER'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': "{'French(FR)': '', 'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'Oil / fat: vegetable oil, palm oil, butter, ghee',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'Oil / fat: vegetable oil, palm oil, butter, ghee',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'oilfat_h_f',
+                'required': False,
+                'type': 'INTEGER'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': "{'French(FR)': '', 'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'If there is more than one bedroom, what is the highest number of individuals living in one room?',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'If there is more than one bedroom, what is the highest number of individuals living in one room?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'one_room_dwellers_h_f',
+                'required': False,
+                'type': 'INTEGER'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                ],
+                'hint': "{'French(FR)': '', 'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'If other, specify',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'If other, specify',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'other_id_type_i_f',
+                'required': False,
+                'type': 'STRING'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': "{'French(FR)': '', 'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'If other, specify',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'If other, specify',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'other_treatment_facility_h_f',
+                'required': False,
+                'type': 'STRING'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                ],
+                'hint': "{'French(FR)': '', 'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'Photo',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'Photo',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'photo_i_f',
+                'required': False,
+                'type': 'IMAGE'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                    {
+                        'labelEn': 'Cannot do at all',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Cannot do at all',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'cannot_do'
+                    },
+                    {
+                        'labelEn': 'A lot of difficulty',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'A lot of difficulty',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'lot_difficulty'
+                    },
+                    {
+                        'labelEn': 'Some difficulty',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Some difficulty',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'some_difficulty'
+                    }
+                ],
+                'hint': "{'French(FR)': '', 'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'If member has difficulty walking or climbing steps, what is the severity?',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'If member has difficulty walking or climbing steps, what is the severity?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'physical_disability_i_f',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': "{'French(FR)': '', 'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'Pulses, nuts & seeds : beans, chickpeas, lentils',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'Pulses, nuts & seeds : beans, chickpeas, lentils',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'pulses_h_f',
+                'required': False,
+                'type': 'INTEGER'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                    {
+                        'labelEn': 'No',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'No',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': '0'
+                    },
+                    {
+                        'labelEn': 'Yes',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Yes',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': '1'
+                    }
+                ],
+                'hint': "{'French(FR)': '', 'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'Has any of your children been ill with cough and fever at any time in the last 2 weeks?',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'Has any of your children been ill with cough and fever at any time in the last 2 weeks?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'recent_illness_child_h_f',
+                'required': False,
+                'type': 'SELECT_ONE'
             },
             {
                 'associatedWith': 'Individual',
@@ -2274,6 +1679,622 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
             {
                 'associatedWith': 'Individual',
                 'choices': [
+                    {
+                        'labelEn': 'Cannot do at all',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Cannot do at all',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'cannot_do'
+                    },
+                    {
+                        'labelEn': 'A lot of difficulty',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'A lot of difficulty',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'lot_difficulty'
+                    },
+                    {
+                        'labelEn': 'Some difficulty',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Some difficulty',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'some_difficulty'
+                    }
+                ],
+                'hint': "{'French(FR)': '', 'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'If member has difficulty seeing, what is the severity?',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'If member has difficulty seeing, what is the severity?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'seeing_disability_i_f',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                    {
+                        'labelEn': 'Cannot do at all',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Cannot do at all',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'cannot_do'
+                    },
+                    {
+                        'labelEn': 'A lot of difficulty',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'A lot of difficulty',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'lot_difficulty'
+                    },
+                    {
+                        'labelEn': 'Some difficulty',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Some difficulty',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'some_difficulty'
+                    }
+                ],
+                'hint': "{'French(FR)': '', 'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'Do you have difficulty (with self-care such as) washing all over or dressing',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'Do you have difficulty (with self-care such as) washing all over or dressing',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'selfcare_disability_i_f',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                    {
+                        'labelEn': 'No, everyday our family struggles because of lack of water',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'No, everyday our family struggles because of lack of water',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'insufficientwater'
+                    },
+                    {
+                        'labelEn': 'Yes, somehow It is not always enough, especially in Summer',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Yes, somehow It is not always enough, especially in Summer',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'partiallysufficientwater'
+                    },
+                    {
+                        'labelEn': 'Yes, it is sufficient for our needs',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Yes, it is sufficient for our needs',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'sufficientwater'
+                    }
+                ],
+                'hint': "{'French(FR)': '', 'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'Is water sufficient for all your uses in the household?',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'Is water sufficient for all your uses in the household?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'sufficient_water_h_f',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': "{'French(FR)': '', 'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'Sugar / sweets: honey, cakes, sugary drinks, (this includes sugar used in tea)',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'Sugar / sweets: honey, cakes, sugary drinks, (this includes sugar used in tea)',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'sugarsweet_h_f',
+                'required': False,
+                'type': 'INTEGER'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': "{'French(FR)': '', 'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'What is the total number of people living in your dwelling?',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'What is the total number of people living in your dwelling?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'total_dwellers_h_f',
+                'required': False,
+                'type': 'INTEGER'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': "{'French(FR)': '', 'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'Total number of households in the same living space?',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'Total number of households in the same living space?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'total_households_h_f',
+                'required': False,
+                'type': 'INTEGER'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                    {
+                        'labelEn': 'Government Hospital',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Government Hospital',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'governent_health_center'
+                    },
+                    {
+                        'labelEn': 'Government Health Center',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Government Health Center',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'governent_hospital'
+                    },
+                    {
+                        'labelEn': 'Other Private',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Other Private',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'other_private'
+                    },
+                    {
+                        'labelEn': 'Other Public',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Other Public',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'other_public'
+                    },
+                    {
+                        'labelEn': 'Pharmacy',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Pharmacy',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'pharmacy'
+                    },
+                    {
+                        'labelEn': 'Private Doctor',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Private Doctor',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'private_doctor'
+                    },
+                    {
+                        'labelEn': 'Private Hospital/Clinic',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Private Hospital/Clinic',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'private_hospital'
+                    }
+                ],
+                'hint': "{'French(FR)': '', 'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'Where did you seek advice or treatment?',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'Where did you seek advice or treatment?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'treatment_facility_h_f',
+                'required': False,
+                'type': 'SELECT_MANY'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                    {
+                        'labelEn': 'No',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'No',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': '0'
+                    },
+                    {
+                        'labelEn': 'Yes',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Yes',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': '1'
+                    }
+                ],
+                'hint': "{'French(FR)': '', 'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'If above is Yes, did you seek advice or treatment for the illness from any source?',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'If above is Yes, did you seek advice or treatment for the illness from any source?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'treatment_h_f',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': "{'French(FR)': '', 'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'White tubers & roots (potato, sweet potato)',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'White tubers & roots (potato, sweet potato)',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'tubers_roots_h_f',
+                'required': False,
+                'type': 'INTEGER'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                    {
+                        'labelEn': 'No',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'No',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': '0'
+                    },
+                    {
+                        'labelEn': 'Yes',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Yes',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': '1'
+                    }
+                ],
+                'hint': "{'French(FR)': '', 'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'Does your family host an unaccompanied child / fosterchild?',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'Does your family host an unaccompanied child / fosterchild?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'unaccompanied_child_h_f',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': "{'French(FR)': '', 'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'Vegetables & leaves: spinach, cucumber, eggplant, tomato',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'Vegetables & leaves: spinach, cucumber, eggplant, tomato',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'vegetables_h_f',
+                'required': False,
+                'type': 'INTEGER'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                    {
+                        'labelEn': 'Buy bottled water',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Buy bottled water',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'bottle_water'
+                    },
+                    {
+                        'labelEn': 'From piped water',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'From piped water',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'piped_water'
+                    },
+                    {
+                        'labelEn': 'From private vendor',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'From private vendor',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'private_vendor_water'
+                    },
+                    {
+                        'labelEn': 'Collect water from rain water',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Collect water from rain water',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'rain_water'
+                    },
+                    {
+                        'labelEn': 'To buy water from water tank',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'To buy water from water tank',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'water_tank'
+                    },
+                    {
+                        'labelEn': 'Collect water from a well/source directly',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Collect water from a well/source directly',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'well_water'
+                    }
+                ],
+                'hint': "{'French(FR)': '', 'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'What is your primary source of drinking water?',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'What is your primary source of drinking water?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'water_source_h_f',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
                 ],
                 'hint': "{'French(FR)': '', 'English(EN)': ''}",
                 'isFlexField': True,
@@ -2289,27 +2310,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                     }
                 ],
                 'name': 'years_in_school_i_f',
-                'required': False,
-                'type': 'INTEGER'
-            },
-            {
-                'associatedWith': 'Individual',
-                'choices': [
-                ],
-                'hint': "{'French(FR)': '', 'English(EN)': ''}",
-                'isFlexField': True,
-                'labelEn': 'How many minutes does it take for the child to go to the nearest available school?',
-                'labels': [
-                    {
-                        'label': '',
-                        'language': 'French(FR)'
-                    },
-                    {
-                        'label': 'How many minutes does it take for the child to go to the nearest available school?',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'minutes_to_school_i_f',
                 'required': False,
                 'type': 'INTEGER'
             },
@@ -3441,20 +3441,20 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'IQ'
                     },
                     {
-                        'labelEn': 'Iran (Islamic Republic of',
+                        'labelEn': 'Iran, Islamic Republic of',
                         'labels': [
                             {
-                                'label': 'Iran (Islamic Republic of',
+                                'label': 'Iran, Islamic Republic of',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'IR'
                     },
                     {
-                        'labelEn': 'Iran, Islamic Republic of',
+                        'labelEn': 'Iran (Islamic Republic of',
                         'labels': [
                             {
-                                'label': 'Iran, Islamic Republic of',
+                                'label': 'Iran (Islamic Republic of',
                                 'language': 'English(EN)'
                             }
                         ],
@@ -5908,20 +5908,20 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'IQ'
                     },
                     {
-                        'labelEn': 'Iran (Islamic Republic of',
+                        'labelEn': 'Iran, Islamic Republic of',
                         'labels': [
                             {
-                                'label': 'Iran (Islamic Republic of',
+                                'label': 'Iran, Islamic Republic of',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'IR'
                     },
                     {
-                        'labelEn': 'Iran, Islamic Republic of',
+                        'labelEn': 'Iran (Islamic Republic of',
                         'labels': [
                             {
-                                'label': 'Iran, Islamic Republic of',
+                                'label': 'Iran (Islamic Republic of',
                                 'language': 'English(EN)'
                             }
                         ],

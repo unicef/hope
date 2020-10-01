@@ -10,7 +10,7 @@ def populate_all_indexes():
 
 
 def populate_index(queryset, doc, parallel=False):
-    print(f"Indexing {queryset.count()} {doc}...")
+    # print(f"Indexing {queryset.count()} {doc}...")
     qs = queryset.iterator()
     doc().update(qs, parallel=parallel)
-    print("Done.")
+    # print("Done.")
