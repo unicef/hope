@@ -3441,20 +3441,20 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'IQ'
                     },
                     {
-                        'labelEn': 'Iran (Islamic Republic of',
+                        'labelEn': 'Iran, Islamic Republic of',
                         'labels': [
                             {
-                                'label': 'Iran (Islamic Republic of',
+                                'label': 'Iran, Islamic Republic of',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'IR'
                     },
                     {
-                        'labelEn': 'Iran, Islamic Republic of',
+                        'labelEn': 'Iran (Islamic Republic of',
                         'labels': [
                             {
-                                'label': 'Iran, Islamic Republic of',
+                                'label': 'Iran (Islamic Republic of',
                                 'language': 'English(EN)'
                             }
                         ],
@@ -5908,20 +5908,20 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'IQ'
                     },
                     {
-                        'labelEn': 'Iran (Islamic Republic of',
+                        'labelEn': 'Iran, Islamic Republic of',
                         'labels': [
                             {
-                                'label': 'Iran (Islamic Republic of',
+                                'label': 'Iran, Islamic Republic of',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'IR'
                     },
                     {
-                        'labelEn': 'Iran, Islamic Republic of',
+                        'labelEn': 'Iran (Islamic Republic of',
                         'labels': [
                             {
-                                'label': 'Iran, Islamic Republic of',
+                                'label': 'Iran (Islamic Republic of',
                                 'language': 'English(EN)'
                             }
                         ],
