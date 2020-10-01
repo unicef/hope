@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['TestUpdateTargetPopulationMutation::test_fail_update_draft_mutation_unknown_comparision_method 1'] = {
@@ -108,49 +109,22 @@ snapshots['TestUpdateTargetPopulationMutation::test_fail_update_draft_mutation_w
 
 snapshots['TestUpdateTargetPopulationMutation::test_update_approved_mutation 1'] = {
     'data': {
-        'updateTargetPopulation': {
-            'targetPopulation': {
-                'candidateListTargetingCriteria': {
-                    'rules': [
-                        {
-                            'filters': [
-                                {
-                                    'arguments': [
-                                        1
-                                    ],
-                                    'comparisionMethod': 'GREATER_THAN',
-                                    'fieldName': 'size',
-                                    'isFlexField': False
-                                }
-                            ]
-                        }
-                    ]
-                },
-                'candidateListTotalHouseholds': 3,
-                'candidateListTotalIndividuals': 8,
-                'finalListTargetingCriteria': {
-                    'rules': [
-                        {
-                            'filters': [
-                                {
-                                    'arguments': [
-                                        3
-                                    ],
-                                    'comparisionMethod': 'EQUALS',
-                                    'fieldName': 'size',
-                                    'isFlexField': False
-                                }
-                            ]
-                        }
-                    ]
-                },
-                'finalListTotalHouseholds': 2,
-                'finalListTotalIndividuals': 6,
-                'name': 'approved_target_population',
-                'status': 'APPROVED'
-            }
+        'updateTargetPopulation': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': "'NoneType' object has no attribute 'individual_data_needed'",
+            'path': [
+                'updateTargetPopulation'
+            ]
         }
-    }
+    ]
 }
 
 snapshots['TestUpdateTargetPopulationMutation::test_update_draft_mutation 1'] = {
