@@ -1355,6 +1355,7 @@ export type IndividualNode = Node & {
   deduplicationBatchResults?: Maybe<Array<Maybe<DeduplicationResultNode>>>,
   importedIndividualId?: Maybe<Scalars['UUID']>,
   sanctionListPossibleMatch: Scalars['Boolean'],
+  sanctionListLastCheck?: Maybe<Scalars['DateTime']>,
   pregnant: Scalars['Boolean'],
   representedHouseholds: HouseholdNodeConnection,
   headingHousehold?: Maybe<HouseholdNode>,
@@ -1929,9 +1930,7 @@ export enum ProgramScope {
 export enum ProgramSector {
   ChildProtection = 'CHILD_PROTECTION',
   Education = 'EDUCATION',
-  Gender = 'GENDER',
   Health = 'HEALTH',
-  HivAids = 'HIV_AIDS',
   MultiPurpose = 'MULTI_PURPOSE',
   Nutrition = 'NUTRITION',
   SocialPolicy = 'SOCIAL_POLICY',
@@ -1966,6 +1965,7 @@ export type Query = {
   allGroupsWithFields?: Maybe<Array<Maybe<GroupAttributeNode>>>,
   koboProject?: Maybe<KoboAssetObject>,
   allKoboProjects?: Maybe<KoboAssetObjectConnection>,
+  cashAssistUrlPrefix?: Maybe<Scalars['String']>,
   program?: Maybe<ProgramNode>,
   allPrograms?: Maybe<ProgramNodeConnection>,
   cashPlan?: Maybe<CashPlanNode>,
@@ -2113,8 +2113,12 @@ export type QueryAllProgramsArgs = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   id?: Maybe<Scalars['UUID']>,
-  status?: Maybe<Scalars['String']>,
-  businessArea?: Maybe<Scalars['String']>
+  status?: Maybe<Array<Maybe<Scalars['String']>>>,
+  sector?: Maybe<Array<Maybe<Scalars['String']>>>,
+  businessArea: Scalars['String'],
+  search?: Maybe<Scalars['String']>,
+  numberOfHouseholds?: Maybe<Scalars['String']>,
+  budget?: Maybe<Scalars['String']>
 };
 
 
@@ -3253,7 +3257,7 @@ export type HouseholdDetailedFragment = (
 
 export type IndividualMinimalFragment = (
   { __typename?: 'IndividualNode' }
-  & Pick<IndividualNode, 'id' | 'createdAt' | 'updatedAt' | 'fullName' | 'sex' | 'unicefId' | 'birthDate' | 'maritalStatus' | 'phoneNo' | 'sanctionListPossibleMatch' | 'deduplicationGoldenRecordStatus' | 'role' | 'relationship' | 'status'>
+  & Pick<IndividualNode, 'id' | 'createdAt' | 'updatedAt' | 'fullName' | 'sex' | 'unicefId' | 'birthDate' | 'maritalStatus' | 'phoneNo' | 'sanctionListPossibleMatch' | 'deduplicationGoldenRecordStatus' | 'sanctionListLastCheck' | 'role' | 'relationship' | 'status'>
   & { documents: (
     { __typename?: 'DocumentNodeConnection' }
     & { edges: Array<Maybe<(
@@ -4120,8 +4124,8 @@ export type AllPaymentVerificationsQuery = (
 );
 
 export type AllProgramsQueryVariables = {
-  businessArea?: Maybe<Scalars['String']>,
-  status?: Maybe<Scalars['String']>
+  businessArea: Scalars['String'],
+  status?: Maybe<Array<Maybe<Scalars['String']>>>
 };
 
 
@@ -5115,6 +5119,7 @@ export const IndividualMinimalFragmentDoc = gql`
   phoneNo
   sanctionListPossibleMatch
   deduplicationGoldenRecordStatus
+  sanctionListLastCheck
   role
   relationship
   status
@@ -7434,7 +7439,7 @@ export type AllPaymentVerificationsQueryHookResult = ReturnType<typeof useAllPay
 export type AllPaymentVerificationsLazyQueryHookResult = ReturnType<typeof useAllPaymentVerificationsLazyQuery>;
 export type AllPaymentVerificationsQueryResult = ApolloReactCommon.QueryResult<AllPaymentVerificationsQuery, AllPaymentVerificationsQueryVariables>;
 export const AllProgramsDocument = gql`
-    query AllPrograms($businessArea: String, $status: String) {
+    query AllPrograms($businessArea: String!, $status: [String]) {
   allPrograms(businessArea: $businessArea, status: $status) {
     pageInfo {
       hasNextPage
@@ -7462,7 +7467,7 @@ export const AllProgramsDocument = gql`
   }
 }
     `;
-export type AllProgramsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllProgramsQuery, AllProgramsQueryVariables>, 'query'>;
+export type AllProgramsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllProgramsQuery, AllProgramsQueryVariables>, 'query'> & ({ variables: AllProgramsQueryVariables; skip?: boolean; } | { skip: boolean; });
 
     export const AllProgramsComponent = (props: AllProgramsComponentProps) => (
       <ApolloReactComponents.Query<AllProgramsQuery, AllProgramsQueryVariables> query={AllProgramsDocument} {...props} />
@@ -10880,6 +10885,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   deduplicationBatchResults?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeduplicationResultNode']>>>, ParentType, ContextType>,
   importedIndividualId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
   sanctionListPossibleMatch?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  sanctionListLastCheck?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   pregnant?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   representedHouseholds?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, IndividualNodeRepresentedHouseholdsArgs>,
   headingHousehold?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
@@ -11151,8 +11157,9 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allGroupsWithFields?: Resolver<Maybe<Array<Maybe<ResolversTypes['GroupAttributeNode']>>>, ParentType, ContextType>,
   koboProject?: Resolver<Maybe<ResolversTypes['KoboAssetObject']>, ParentType, ContextType, RequireFields<QueryKoboProjectArgs, 'uid' | 'businessAreaSlug'>>,
   allKoboProjects?: Resolver<Maybe<ResolversTypes['KoboAssetObjectConnection']>, ParentType, ContextType, RequireFields<QueryAllKoboProjectsArgs, 'businessAreaSlug'>>,
+  cashAssistUrlPrefix?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType, RequireFields<QueryProgramArgs, 'id'>>,
-  allPrograms?: Resolver<Maybe<ResolversTypes['ProgramNodeConnection']>, ParentType, ContextType, QueryAllProgramsArgs>,
+  allPrograms?: Resolver<Maybe<ResolversTypes['ProgramNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllProgramsArgs, 'businessArea'>>,
   cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType, RequireFields<QueryCashPlanArgs, 'id'>>,
   allCashPlans?: Resolver<Maybe<ResolversTypes['CashPlanNodeConnection']>, ParentType, ContextType, QueryAllCashPlansArgs>,
   programStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
