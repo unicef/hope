@@ -7,6 +7,7 @@ import {
   DialogTitle,
   Typography,
   Paper,
+  Grid,
 } from '@material-ui/core';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
 import { Field, Form, Formik } from 'formik';
@@ -110,7 +111,7 @@ export function ProgramForm({
     frequencyOfPayments: 'REGULAR',
     sector: '',
     cashPlus: false,
-    individualDataNeeded: false,
+    individualDataNeeded: 'NO',
   };
 
   if (program) {
@@ -119,8 +120,14 @@ export function ProgramForm({
   if (initialValue.budget === 0) {
     initialValue.budget = '0.00';
   }
-  // initialValue.budget =
   if (!data) return null;
+
+  const withoutIndividualDataText =
+    'This programme will use only household and/or head of household details for targeting or entitlement calculation';
+
+  const withIndividualDataText =
+    'This programme will use household member individuals’ details for targeting or entitlement calculation. Setting this flag can reduce the number of households filtered in the target population.';
+
   return (
     <DialogContainer>
       <Dialog
@@ -143,7 +150,12 @@ export function ProgramForm({
           onSubmit={(values) => {
             const newValues = { ...values };
             newValues.budget = Number(values.budget).toFixed(2);
-            return onSubmit(values);
+            if (values.individualDataNeeded === 'YES') {
+              newValues.individualDataNeeded = true;
+            } else if (values.individualDataNeeded === 'NO') {
+              newValues.individualDataNeeded = false;
+            }
+            return onSubmit(newValues);
           }}
           validationSchema={validationSchema}
         >
@@ -159,7 +171,6 @@ export function ProgramForm({
                   To create a new Programme, please complete all required fields
                   on the form below and save.
                 </DialogDescription>
-
                 <Form>
                   <Field
                     name='name'
@@ -268,18 +279,22 @@ export function ProgramForm({
                   <FullWidth>
                     <Field
                       name='individualDataNeeded'
-                      label='Will this programme use individuals’ data for targeting or entitlement calculation? Setting this flag can reduce the number of households filtered in the target population.'
                       disabled={program && program.status === 'ACTIVE'}
-                      color='primary'
-                      component={FormikCheckboxField}
+                      label='Data for targeting or entitlement calculation*'
+                      choices={[
+                        {
+                          name: withoutIndividualDataText,
+                          value: 'NO',
+                        },
+                        {
+                          name: withIndividualDataText,
+                          value: 'YES',
+                        },
+                      ]}
+                      component={FormikRadioGroup}
                     />
                   </FullWidth>
                 </Form>
-                <DialogDescription>
-                  This programme will use Individuals’ data for entitlement
-                  calculation. Hope has the data on all Individuals within the
-                  targeted households and will send this to CashAssist.
-                </DialogDescription>
               </DialogContent>
               <DialogFooter>
                 <DialogActions>{renderSubmit(submitForm)}</DialogActions>
