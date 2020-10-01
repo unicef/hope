@@ -14,6 +14,7 @@ export const individualMinimal = gql`
     sanctionListPossibleMatch
     deduplicationGoldenRecordStatus
     role
+    relationship
     status
     documents {
       edges {

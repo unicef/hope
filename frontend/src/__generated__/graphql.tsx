@@ -3220,7 +3220,7 @@ export type HouseholdDetailedFragment = (
       { __typename?: 'ProgramNodeEdge' }
       & { node: Maybe<(
         { __typename?: 'ProgramNode' }
-        & Pick<ProgramNode, 'name'>
+        & Pick<ProgramNode, 'id' | 'name'>
       )> }
     )>> }
   ), registrationDataImport: (
@@ -3253,7 +3253,7 @@ export type HouseholdDetailedFragment = (
 
 export type IndividualMinimalFragment = (
   { __typename?: 'IndividualNode' }
-  & Pick<IndividualNode, 'id' | 'createdAt' | 'updatedAt' | 'fullName' | 'sex' | 'unicefId' | 'birthDate' | 'maritalStatus' | 'phoneNo' | 'sanctionListPossibleMatch' | 'deduplicationGoldenRecordStatus' | 'role' | 'status'>
+  & Pick<IndividualNode, 'id' | 'createdAt' | 'updatedAt' | 'fullName' | 'sex' | 'unicefId' | 'birthDate' | 'maritalStatus' | 'phoneNo' | 'sanctionListPossibleMatch' | 'deduplicationGoldenRecordStatus' | 'role' | 'relationship' | 'status'>
   & { documents: (
     { __typename?: 'DocumentNodeConnection' }
     & { edges: Array<Maybe<(
@@ -4799,7 +4799,7 @@ export type RegistrationDataImportQuery = (
 
 export type RegistrationMinimalFragment = (
   { __typename?: 'RegistrationDataImportNode' }
-  & Pick<RegistrationDataImportNode, 'id' | 'createdAt' | 'name' | 'status' | 'importDate' | 'dataSource' | 'numberOfHouseholds'>
+  & Pick<RegistrationDataImportNode, 'id' | 'createdAt' | 'name' | 'status' | 'importDate' | 'dataSource' | 'numberOfHouseholds' | 'numberOfIndividuals'>
   & { importedBy: (
     { __typename?: 'UserNode' }
     & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -5116,6 +5116,7 @@ export const IndividualMinimalFragmentDoc = gql`
   sanctionListPossibleMatch
   deduplicationGoldenRecordStatus
   role
+  relationship
   status
   documents {
     edges {
@@ -5158,6 +5159,7 @@ export const HouseholdDetailedFragmentDoc = gql`
   programs {
     edges {
       node {
+        id
         name
       }
     }
@@ -5256,6 +5258,7 @@ export const RegistrationMinimalFragmentDoc = gql`
   }
   dataSource
   numberOfHouseholds
+  numberOfIndividuals
 }
     `;
 export const RegistrationDetailedFragmentDoc = gql`

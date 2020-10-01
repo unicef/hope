@@ -81,7 +81,10 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
         withFlag={household.sanctionListPossibleMatch}
         withTriangle={household.hasDuplicates}
       />
-      <HouseholdDetails houseHold={household as HouseholdNode} />
+      <HouseholdDetails
+        choicesData={choicesData}
+        household={household as HouseholdNode}
+      />
       <Container>
         <HouseholdIndividualsTable
           choicesData={choicesData}
