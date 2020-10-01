@@ -36,9 +36,7 @@ class Program(TimeStampedUUIDModel, AbstractSyncable):
 
     CHILD_PROTECTION = "CHILD_PROTECTION"
     EDUCATION = "EDUCATION"
-    GENDER = "GENDER"
     HEALTH = "HEALTH"
-    HIV_AIDS = "HIV_AIDS"
     MULTI_PURPOSE = "MULTI_PURPOSE"
     NUTRITION = "NUTRITION"
     SOCIAL_POLICY = "SOCIAL_POLICY"
@@ -47,9 +45,7 @@ class Program(TimeStampedUUIDModel, AbstractSyncable):
     SECTOR_CHOICE = (
         (CHILD_PROTECTION, _("Child Protection")),
         (EDUCATION, _("Education")),
-        (GENDER, _("Gender")),
         (HEALTH, _("Health")),
-        (HIV_AIDS, _("HIV / AIDS")),
         (MULTI_PURPOSE, _("Multi Purpose")),
         (NUTRITION, _("Nutrition")),
         (SOCIAL_POLICY, _("Social Policy")),
