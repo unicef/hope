@@ -22,7 +22,7 @@ export const FormikDateField = ({
       {...otherProps}
       name={field.name}
       variant='inline'
-      inputVariant='filled'
+      inputVariant='outlined'
       margin='dense'
       value={formattedValue}
       error={isInvalid}
@@ -36,7 +36,7 @@ export const FormikDateField = ({
       }}
       onChange={(date) => {
         field.onChange({
-          target: { value: date.toISOString(), name: field.name },
+          target: { value: date.format('YYYY-MM-DD'), name: field.name },
         });
       }}
       format={dateFormat}

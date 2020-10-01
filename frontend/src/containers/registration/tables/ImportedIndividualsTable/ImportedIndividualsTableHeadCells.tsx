@@ -22,7 +22,7 @@ export const headCells: HeadCell<ImportedIndividualMinimalFragment>[] = [
   },
   {
     disablePadding: false,
-    label: 'Relationship',
+    label: 'Relationship to HoH',
     id: 'relationship',
     numeric: false,
   },
