@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
@@ -220,7 +221,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'government_health_center'
+                        'value': 'governent_health_center'
                     },
                     {
                         'labelEn': 'Government Health Center',
@@ -3440,20 +3441,20 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'IQ'
                     },
                     {
-                        'labelEn': 'Iran, Islamic Republic of',
+                        'labelEn': 'Iran (Islamic Republic of',
                         'labels': [
                             {
-                                'label': 'Iran, Islamic Republic of',
+                                'label': 'Iran (Islamic Republic of',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'IR'
                     },
                     {
-                        'labelEn': 'Iran (Islamic Republic of',
+                        'labelEn': 'Iran, Islamic Republic of',
                         'labels': [
                             {
-                                'label': 'Iran (Islamic Republic of',
+                                'label': 'Iran, Islamic Republic of',
                                 'language': 'English(EN)'
                             }
                         ],
@@ -5907,20 +5908,20 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'IQ'
                     },
                     {
-                        'labelEn': 'Iran, Islamic Republic of',
+                        'labelEn': 'Iran (Islamic Republic of',
                         'labels': [
                             {
-                                'label': 'Iran, Islamic Republic of',
+                                'label': 'Iran (Islamic Republic of',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'IR'
                     },
                     {
-                        'labelEn': 'Iran (Islamic Republic of',
+                        'labelEn': 'Iran, Islamic Republic of',
                         'labels': [
                             {
-                                'label': 'Iran (Islamic Republic of',
+                                'label': 'Iran, Islamic Republic of',
                                 'language': 'English(EN)'
                             }
                         ],
@@ -7570,53 +7571,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'name': 'relationship',
                 'required': True,
-                'type': 'SELECT_ONE'
-            },
-            {
-                'associatedWith': 'Individual',
-                'choices': [
-                    {
-                        'labelEn': 'Alternate collector',
-                        'labels': [
-                            {
-                                'label': 'Alternate collector',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'ALTERNATE'
-                    },
-                    {
-                        'labelEn': 'None',
-                        'labels': [
-                            {
-                                'label': 'None',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'NO_ROLE'
-                    },
-                    {
-                        'labelEn': 'Primary collector',
-                        'labels': [
-                            {
-                                'label': 'Primary collector',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'PRIMARY'
-                    }
-                ],
-                'hint': '',
-                'isFlexField': False,
-                'labelEn': 'Role',
-                'labels': [
-                    {
-                        'label': 'Role',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'role',
-                'required': False,
                 'type': 'SELECT_ONE'
             },
             {
