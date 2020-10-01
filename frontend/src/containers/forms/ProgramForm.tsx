@@ -179,6 +179,15 @@ export function ProgramForm({
                     choices={data.programScopeChoices}
                     component={FormikSelectField}
                   />
+                  <Field
+                    name='sector'
+                    label='Sector'
+                    fullWidth
+                    required
+                    variant='outlined'
+                    choices={data.programSectorChoices}
+                    component={FormikSelectField}
+                  />
                   <DateFields>
                     <DateField>
                       <Field
@@ -219,7 +228,7 @@ export function ProgramForm({
                   />
                   <Field
                     name='budget'
-                    label='Budget'
+                    label='Budget (USD)'
                     type='number'
                     fullWidth
                     precision={2}
@@ -242,20 +251,11 @@ export function ProgramForm({
                   />
                   <Field
                     name='populationGoal'
-                    label='Population goal'
+                    label='Population Goal (# of Individuals)'
                     type='number'
                     fullWidth
                     variant='outlined'
                     component={FormikTextField}
-                  />
-                  <Field
-                    name='sector'
-                    label='Sector'
-                    fullWidth
-                    required
-                    variant='outlined'
-                    choices={data.programSectorChoices}
-                    component={FormikSelectField}
                   />
                   <FullWidth>
                     <Field
