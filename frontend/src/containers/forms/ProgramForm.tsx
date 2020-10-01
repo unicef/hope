@@ -179,6 +179,15 @@ export function ProgramForm({
                     choices={data.programScopeChoices}
                     component={FormikSelectField}
                   />
+                  <Field
+                    name='sector'
+                    label='Sector'
+                    fullWidth
+                    required
+                    variant='outlined'
+                    choices={data.programSectorChoices}
+                    component={FormikSelectField}
+                  />
                   <DateFields>
                     <DateField>
                       <Field
@@ -247,15 +256,6 @@ export function ProgramForm({
                     fullWidth
                     variant='outlined'
                     component={FormikTextField}
-                  />
-                  <Field
-                    name='sector'
-                    label='Sector'
-                    fullWidth
-                    required
-                    variant='outlined'
-                    choices={data.programSectorChoices}
-                    component={FormikSelectField}
                   />
                   <FullWidth>
                     <Field
