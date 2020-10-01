@@ -31,6 +31,17 @@ class ProgramFilter(FilterSet):
         fields = ("id", "status", "sector", "business_area", "search")
         model = Program
 
+    order_by = OrderingFilter(
+        fields=(
+            "name",
+            "status",
+            "start_date",
+            "sector",
+            "total_number_of_households",
+            "budget",
+        )
+    )
+
     def search_filter(self, qs, name, value):
         values = value.split(" ")
         q_obj = Q()
