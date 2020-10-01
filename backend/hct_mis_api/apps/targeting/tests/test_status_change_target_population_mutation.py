@@ -5,6 +5,7 @@ from core.base_test_case import APITestCase
 from core.models import BusinessArea
 from household.fixtures import create_household
 from program.fixtures import ProgramFactory
+from program.models import Program
 from targeting.models import (
     TargetingCriteria,
     TargetingCriteriaRule,
@@ -274,7 +275,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
             {"field_name": "residence_status", "arguments": ["CITIZEN"], "comparision_method": "EQUALS"}
         )
-        program = ProgramFactory(business_area=business_area)
+        program = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
         tp.program = program
         tp.save()
         tp.households.set(cls.households)
