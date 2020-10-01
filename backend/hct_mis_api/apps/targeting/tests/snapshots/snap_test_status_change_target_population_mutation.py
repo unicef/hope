@@ -123,22 +123,45 @@ snapshots['TestFinalizeTargetPopulationMutation::test_finalize_fail_target_popul
 
 snapshots['TestFinalizeTargetPopulationMutation::test_finalize_target_population 1'] = {
     'data': {
-        'finalizeTargetPopulation': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 15,
-                    'line': 3
-                }
-            ],
-            'message': "['Only Target Population assigned to program with status ACTIVE can be send']",
-            'path': [
-                'finalizeTargetPopulation'
-            ]
+        'finalizeTargetPopulation': {
+            'targetPopulation': {
+                'finalList': {
+                    'edges': [
+                        {
+                            'node': {
+                                'residenceStatus': 'CITIZEN',
+                                'size': 1
+                            }
+                        },
+                        {
+                            'node': {
+                                'residenceStatus': 'CITIZEN',
+                                'size': 2
+                            }
+                        }
+                    ]
+                },
+                'households': {
+                    'edges': [
+                        {
+                            'node': {
+                                'residenceStatus': 'CITIZEN',
+                                'size': 1
+                            }
+                        },
+                        {
+                            'node': {
+                                'residenceStatus': 'CITIZEN',
+                                'size': 2
+                            }
+                        }
+                    ],
+                    'totalCount': 2
+                },
+                'status': 'FINALIZED'
+            }
         }
-    ]
+    }
 }
 
 snapshots['TestFinalizeTargetPopulationMutation::test_finalize_target_population_with_final_criteria 1'] = {
