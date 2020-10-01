@@ -1,5 +1,8 @@
+from django.core.management import call_command
+
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
+from core.models import BusinessArea
 from household.fixtures import create_household
 from targeting.models import (
     TargetingCriteria,
@@ -66,11 +69,17 @@ class TestTargetPopulationQuery(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        (household, individuals) = create_household({"size": 1, "residence_status": "CITIZEN"},)
-        (household, individuals) = create_household({"size": 1, "residence_status": "CITIZEN"},)
+        call_command("loadbusinessareas")
+        business_area = BusinessArea.objects.first()
+        _ = create_household({"size": 1, "residence_status": "CITIZEN", "business_area": business_area},)
+        (household, individuals) = create_household(
+            {"size": 1, "residence_status": "CITIZEN", "business_area": business_area},
+        )
         cls.household_size_1 = household
         cls.household_residence_status_citizen = cls.household_size_1
-        (household, individuals) = create_household({"size": 2, "residence_status": "REFUGEE"},)
+        (household, individuals) = create_household(
+            {"size": 2, "residence_status": "REFUGEE", "business_area": business_area},
+        )
         cls.household_residence_status_refugee = household
         cls.household_size_2 = cls.household_residence_status_refugee
 
