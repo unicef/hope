@@ -2,6 +2,8 @@ import json
 from collections import Iterable
 from operator import itemgetter
 
+from constance import config
+
 import graphene
 from auditlog.models import LogEntry
 from django.contrib.gis.db.models import GeometryField
@@ -281,6 +283,10 @@ class Query(graphene.ObjectType):
         only_deployed=graphene.Boolean(required=False),
         description="All Kobo projects/assets.",
     )
+    cash_assist_url_prefix = graphene.String()
+
+    def resolve_cash_assist_url_prefix(self):
+        return config.CASH_ASSIST_URL_PREFIX
 
     def resolve_all_log_entries(self, info, object_id, **kwargs):
         id = decode_id_string(object_id)
