@@ -56,8 +56,8 @@ const DialogContainer = styled.div`
 `;
 
 const initialValues = {
-  confidenceInterval: 1,
-  marginOfError: 1,
+  confidenceInterval: 95,
+  marginOfError: 5,
   filterAgeMin: 0,
   filterAgeMax: 0,
   filterSex: '',
@@ -214,7 +214,6 @@ export function CreateVerificationPlan({
           >
             CREATE VERIFICATION PLAN
           </ButtonTooltip>
-
           <Dialog
             open={open}
             onClose={() => setOpen(false)}
@@ -253,7 +252,7 @@ export function CreateVerificationPlan({
                     <Field
                       name='excludedAdminAreasFull'
                       choices={mappedAdminAreas}
-                      variant='filled'
+                      variant='outlined'
                       label='Filter Out Administrative Level Areas'
                       component={FormikMultiSelectField}
                     />
@@ -303,7 +302,7 @@ export function CreateVerificationPlan({
                     <Field
                       name='confidenceInterval'
                       label='Confidence Interval'
-                      min={1}
+                      min={90}
                       max={99}
                       component={FormikSliderField}
                       suffix='%'
@@ -311,8 +310,8 @@ export function CreateVerificationPlan({
                     <Field
                       name='marginOfError'
                       label='Margin of Error'
-                      min={1}
-                      max={10}
+                      min={0}
+                      max={9}
                       component={FormikSliderField}
                       suffix='%'
                     />
@@ -339,7 +338,7 @@ export function CreateVerificationPlan({
                         <Field
                           name='excludedAdminAreasRandom'
                           choices={mappedAdminAreas}
-                          variant='filled'
+                          variant='outlined'
                           label='Filter Out Administrative Level Areas'
                           component={FormikMultiSelectField}
                         />
