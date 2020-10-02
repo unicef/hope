@@ -22,7 +22,9 @@ export function CreateProgram(): ReactElement {
           businessAreaSlug: businessArea,
         },
       },
-      refetchQueries: () => [{ query: ALL_PROGRAMS_QUERY }],
+      refetchQueries: () => [
+        { query: ALL_PROGRAMS_QUERY, variables: { businessArea } },
+      ],
     });
     if (!response.errors && response.data.createProgram) {
       showMessage('Programme created.', {
