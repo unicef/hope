@@ -30,7 +30,7 @@ class ProgramFilter(FilterSet):
     business_area = CharFilter(field_name="business_area__slug", required=True)
     search = CharFilter(method="search_filter")
     status = MultipleChoiceFilter(field_name="status", choices=Program.STATUS_CHOICE)
-    sector = MultipleChoiceFilter(field_name="sector", choices=Program.STATUS_CHOICE)
+    sector = MultipleChoiceFilter(field_name="sector", choices=Program.SECTOR_CHOICE)
     number_of_households = IntegerRangeFilter(field_name="households_count")
     budget = DecimalRangeFilter(field_name="budget")
     start_date = DateFilter(field_name="start_date", lookup_expr="gte")
