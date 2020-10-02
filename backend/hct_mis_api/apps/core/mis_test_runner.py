@@ -23,7 +23,10 @@ def create_test_db_and_schemas(creation, verbosity=1, autoclobber=False, seriali
 
         creation.log(
             "%s test database for alias %s..."
-            % (action, creation._get_database_display_str(verbosity, test_database_name),)
+            % (
+                action,
+                creation._get_database_display_str(verbosity, test_database_name),
+            )
         )
 
     # We could skip this call if keepdb is True, but we instead
@@ -82,7 +85,10 @@ def create_fake_test_db(creation, verbosity=1, autoclobber=False, serialize=True
 
         creation.log(
             "%s test database for alias %s..."
-            % (action, creation._get_database_display_str(verbosity, test_database_name),)
+            % (
+                action,
+                creation._get_database_display_str(verbosity, test_database_name),
+            )
         )
 
     # We could skip this call if keepdb is True, but we instead
@@ -126,7 +132,9 @@ def _setup_schema_database(verbosity, interactive, keepdb=False, debug_sql=False
     if parallel > 1:
         for index in range(parallel):
             connection.creation.clone_test_db(
-                suffix=str(index + 1), verbosity=verbosity, keepdb=keepdb,
+                suffix=str(index + 1),
+                verbosity=verbosity,
+                keepdb=keepdb,
             )
     return [old_name]
 
@@ -141,7 +149,11 @@ class PostgresTestRunner(XMLTestRunner):
         old_names = []
         created = False
         for alias in connections:
-            if alias in ("cash_assist_datahub_mis", "cash_assist_datahub_ca", "cash_assist_datahub_erp",):
+            if alias in (
+                "cash_assist_datahub_mis",
+                "cash_assist_datahub_ca",
+                "cash_assist_datahub_erp",
+            ):
 
                 aliases = kwargs.get("aliases")
                 aliases.discard(alias)
@@ -161,6 +173,7 @@ class PostgresTestRunner(XMLTestRunner):
                         keepdb=self.keepdb,
                         serialize=connection.settings_dict.get("TEST", {}).get("SERIALIZE", True),
                     )
+        print(aliases)
         old_names.extend(super().setup_databases(**kwargs))
 
         return old_names
