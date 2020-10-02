@@ -1,7 +1,7 @@
 import json
 from datetime import datetime, date, timedelta
 
-from django.forms import IntegerField, DecimalField
+from django.forms import IntegerField, DecimalField, Field
 from django_filters import Filter
 
 
@@ -17,12 +17,12 @@ def _clean_data_for_range_field(value, field):
         return None
 
 
-class IntegerRangeField(IntegerField):
+class IntegerRangeField(Field):
     def clean(self, value):
         return _clean_data_for_range_field(value, IntegerField)
 
 
-class DecimalRangeField(DecimalField):
+class DecimalRangeField(Field):
     def clean(self, value):
         return _clean_data_for_range_field(value, DecimalField)
 
