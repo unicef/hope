@@ -25,6 +25,7 @@ export function ProgrammesTable({
   const initialVariables: AllProgramsQueryVariables = {
     businessArea,
     status: filter.status,
+    search: filter.search,
   };
 
   const TableWrapper = styled.div`
