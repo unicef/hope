@@ -14,7 +14,19 @@ import { ProgrammesFilters } from '../tables/ProgrammesTable/ProgrammesFilter';
 
 export function ProgramsPage(): React.ReactElement {
   const [filter, setFilter] = useState({
-    status: '',
+    search: '',
+    startDate: null,
+    endDate: null,
+    status: [],
+    sector: [],
+    householdSize: {
+      min: null,
+      max: null,
+    },
+    budget: {
+      min: null,
+      max: null,
+    },
   });
   const debouncedFilter = useDebounce(filter, 500);
   const businessArea = useBusinessArea();
