@@ -85,12 +85,10 @@ stages:
             displayName: "[ACR] Login"
             inputs:
               command: login
-              containerRegistry: $(containerRegistry)
-
+              containerRegistry: $(Docker.registry)
           - task: DownloadSecureFile@1
             inputs:
               secureFile: '.env-django-test'
-
           - task: CmdLine@2
             displayName: "Setup .env and docker-compose.tst.yml"
             inputs:
