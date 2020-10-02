@@ -78,8 +78,8 @@ stages:
       - job: django_tests
         displayName: "[DJANGO TEST]"
         variables:
-          airflow_image: uniappsk8sdevacr.azurecr.io/$(airflowImageRepository):$(Build.BuildId)
-          backend_image: uniappsk8sdevacr.azurecr.io/$(backendImageRepository):$(Build.BuildId)
+          airflow_image: uniappsk8sdevacr.azurecr.io/$(Docker.airflow.repository):$(Build.BuildId)
+          backend_image: uniappsk8sdevacr.azurecr.io/$(Docker.backend.repository):$(Build.BuildId)
         steps:
           - task: Docker@2
             displayName: "[ACR] Login"
@@ -105,9 +105,8 @@ stages:
               action: 'Run a Docker Compose command'
               dockerComposeCommand: 'run backend ./manage.py test  --settings hct_mis_api.settings.test'
               dockerComposeFileArgs: |
-               airflow_image=uniappsk8sdevacr.azurecr.io/$(airflowImageRepository):$(Build.BuildId)
-               frontend_image=uniappsk8sdevacr.azurecr.io/$(frontendImageRepository):$(Build.BuildId)
-               backend_image=uniappsk8sdevacr.azurecr.io/$(backendImageRepository):$(Build.BuildId)
+               airflow_image=uniappsk8sdevacr.azurecr.io/$(Docker.airflow.repository):$(Build.BuildId)
+               backend_image=uniappsk8sdevacr.azurecr.io/$(Docker.backend.repository):$(Build.BuildId)
 
           - task: PublishTestResults@2
             displayName: "Publish Test Result"
