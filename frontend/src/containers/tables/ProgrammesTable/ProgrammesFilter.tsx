@@ -88,41 +88,6 @@ export function ProgrammesFilters({
           />
         </Grid>
         <Grid item xs={2}>
-          <KeyboardDatePicker
-            variant='inline'
-            disableToolbar
-            inputVariant='outlined'
-            margin='dense'
-            label='Start Date'
-            autoOk
-            onChange={(date) =>
-              onFilterChange({
-                ...filter,
-                startDate: moment(date).toISOString(),
-              })
-            }
-            value={filter.startDate || null}
-            format='D MMM YYYY'
-            InputAdornmentProps={{ position: 'end' }}
-          />
-        </Grid>
-        <Grid item xs={2}>
-          <KeyboardDatePicker
-            variant='inline'
-            disableToolbar
-            inputVariant='outlined'
-            margin='dense'
-            label='End Date'
-            autoOk
-            onChange={(date) =>
-              onFilterChange({ ...filter, endDate: moment(date).toISOString() })
-            }
-            value={filter.endDate || null}
-            format='D MMM YYYY'
-            InputAdornmentProps={{ position: 'end' }}
-          />
-        </Grid>
-        <Grid item xs={2}>
           <StyledFormControl variant='outlined' margin='dense'>
             <InputLabel>Status</InputLabel>
             <Select
@@ -145,6 +110,44 @@ export function ProgrammesFilters({
               })}
             </Select>
           </StyledFormControl>
+        </Grid>
+        <Grid item xs={2}>
+          <KeyboardDatePicker
+            variant='inline'
+            disableToolbar
+            inputVariant='outlined'
+            margin='dense'
+            label='Start Date'
+            autoOk
+            onChange={(date) =>
+              onFilterChange({
+                ...filter,
+                startDate: moment(date).format('YYYY-MM-DD'),
+              })
+            }
+            value={filter.startDate || null}
+            format='YYYY-MM-DD'
+            InputAdornmentProps={{ position: 'end' }}
+          />
+        </Grid>
+        <Grid item xs={2}>
+          <KeyboardDatePicker
+            variant='inline'
+            disableToolbar
+            inputVariant='outlined'
+            margin='dense'
+            label='End Date'
+            autoOk
+            onChange={(date) =>
+              onFilterChange({
+                ...filter,
+                endDate: moment(date).format('YYYY-MM-DD'),
+              })
+            }
+            value={filter.endDate || null}
+            format='YYYY-MM-DD'
+            InputAdornmentProps={{ position: 'end' }}
+          />
         </Grid>
         <Grid item xs={2}>
           <StyledFormControl variant='outlined' margin='dense'>
@@ -172,15 +175,15 @@ export function ProgrammesFilters({
         </Grid>
         <Grid item xs={2}>
           <TextContainer
-            value={filter.householdSize.min}
+            value={filter.numberOfHouseholds.min}
             variant='outlined'
             margin='dense'
-            label='Household size'
+            label='Num. of Households'
             onChange={(e) =>
               onFilterChange({
                 ...filter,
-                householdSize: {
-                  ...filter.householdSize,
+                numberOfHouseholds: {
+                  ...filter.numberOfHouseholds,
                   min: e.target.value || undefined,
                 },
               })
@@ -198,15 +201,15 @@ export function ProgrammesFilters({
         <Grid item xs={2}>
           to
           <TextContainer
-            value={filter.householdSize.max}
+            value={filter.numberOfHouseholds.max}
             variant='outlined'
             margin='dense'
-            label='Household size'
+            label='Num. of Households'
             onChange={(e) =>
               onFilterChange({
                 ...filter,
-                householdSize: {
-                  ...filter.householdSize,
+                numberOfHouseholds: {
+                  ...filter.numberOfHouseholds,
                   max: e.target.value || undefined,
                 },
               })

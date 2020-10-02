@@ -4,7 +4,7 @@ import { ProgramNode } from '../../../__generated__/graphql';
 export const headCells: HeadCell<ProgramNode>[] = [
   {
     disablePadding: false,
-    label: 'Programme',
+    label: 'Name',
     id: 'name',
     numeric: false,
   },
@@ -17,37 +17,25 @@ export const headCells: HeadCell<ProgramNode>[] = [
   {
     disablePadding: false,
     label: 'Timeframe',
-    id: 'timeframe',
+    id: 'startDate',
     numeric: false,
-  },
-  {
-    disablePadding: false,
-    label: 'Frequency of Payments',
-    id: 'frequencyOfPayments',
-    numeric: false,
-  },
-  {
-    disablePadding: false,
-    label: 'Budget',
-    id: 'budget',
-    numeric: true,
-  },
-  {
-    disablePadding: false,
-    label: 'Population Goal',
-    id: 'populationGoal',
-    numeric: true,
-  },
-  {
-    disablePadding: false,
-    label: 'No. of Households',
-    id: 'totalNumberOfHouseholds',
-    numeric: true,
   },
   {
     disablePadding: false,
     label: 'Sector',
     id: 'sector',
     numeric: false,
+  },
+  {
+    disablePadding: false,
+    label: 'Num. of Households',
+    id: 'totalNumberOfHouseholds',
+    numeric: true,
+  },
+  {
+    disablePadding: false,
+    label: 'Budget (USD)',
+    id: 'budget',
+    numeric: true,
   },
 ];

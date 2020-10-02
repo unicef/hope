@@ -19,7 +19,7 @@ export function ProgramsPage(): React.ReactElement {
     endDate: null,
     status: [],
     sector: [],
-    householdSize: {
+    numberOfHouseholds: {
       min: null,
       max: null,
     },

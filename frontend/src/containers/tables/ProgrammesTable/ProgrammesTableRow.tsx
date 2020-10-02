@@ -68,14 +68,10 @@ export function ProgrammesTableRow({
         <UniversalMoment>{program.endDate}</UniversalMoment>
       </TableCell>
       <TableCell align='left'>
-        {programFreqOfPayChoiceDict[program.frequencyOfPayments]}
-      </TableCell>
-      <TableCell align='right'>{formatCurrency(program.budget)}</TableCell>
-      <TableCell align='right'>{program.populationGoal}</TableCell>
-      <TableCell align='right'>{program.totalNumberOfHouseholds}</TableCell>
-      <TableCell align='left'>
         {programSectorChoiceDict[program.sector]}
       </TableCell>
+      <TableCell align='right'>{program.totalNumberOfHouseholds}</TableCell>
+      <TableCell align='right'>{formatCurrency(program.budget)}</TableCell>
     </ClickableTableRow>
   );
 }
