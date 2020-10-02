@@ -150,7 +150,7 @@ export function ProgramCard({
               </Grid>
               <Grid className={classes.gridElement} item xs={6}>
                 <LabelizedField
-                  label='no. of households'
+                  label='Num. of households'
                   value={program.totalNumberOfHouseholds}
                 />
               </Grid>

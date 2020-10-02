@@ -2112,13 +2112,15 @@ export type QueryAllProgramsArgs = {
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  id?: Maybe<Scalars['UUID']>,
-  status?: Maybe<Array<Maybe<Scalars['String']>>>,
-  sector?: Maybe<Array<Maybe<Scalars['String']>>>,
   businessArea: Scalars['String'],
   search?: Maybe<Scalars['String']>,
+  status?: Maybe<Array<Maybe<Scalars['String']>>>,
+  sector?: Maybe<Array<Maybe<Scalars['String']>>>,
   numberOfHouseholds?: Maybe<Scalars['String']>,
-  budget?: Maybe<Scalars['String']>
+  budget?: Maybe<Scalars['String']>,
+  startDate?: Maybe<Scalars['Date']>,
+  endDate?: Maybe<Scalars['Date']>,
+  orderBy?: Maybe<Scalars['String']>
 };
 
 
@@ -4124,8 +4126,19 @@ export type AllPaymentVerificationsQuery = (
 );
 
 export type AllProgramsQueryVariables = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  status?: Maybe<Array<Maybe<Scalars['String']>>>,
+  sector?: Maybe<Array<Maybe<Scalars['String']>>>,
   businessArea: Scalars['String'],
-  status?: Maybe<Array<Maybe<Scalars['String']>>>
+  search?: Maybe<Scalars['String']>,
+  numberOfHouseholds?: Maybe<Scalars['String']>,
+  budget?: Maybe<Scalars['String']>,
+  startDate?: Maybe<Scalars['Date']>,
+  endDate?: Maybe<Scalars['Date']>,
+  orderBy?: Maybe<Scalars['String']>
 };
 
 
@@ -4133,6 +4146,7 @@ export type AllProgramsQuery = (
   { __typename?: 'Query' }
   & { allPrograms: Maybe<(
     { __typename?: 'ProgramNodeConnection' }
+    & Pick<ProgramNodeConnection, 'totalCount' | 'edgeCount'>
     & { pageInfo: (
       { __typename?: 'PageInfo' }
       & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'endCursor' | 'startCursor'>
@@ -7439,14 +7453,16 @@ export type AllPaymentVerificationsQueryHookResult = ReturnType<typeof useAllPay
 export type AllPaymentVerificationsLazyQueryHookResult = ReturnType<typeof useAllPaymentVerificationsLazyQuery>;
 export type AllPaymentVerificationsQueryResult = ApolloReactCommon.QueryResult<AllPaymentVerificationsQuery, AllPaymentVerificationsQueryVariables>;
 export const AllProgramsDocument = gql`
-    query AllPrograms($businessArea: String!, $status: [String]) {
-  allPrograms(businessArea: $businessArea, status: $status) {
+    query AllPrograms($before: String, $after: String, $first: Int, $last: Int, $status: [String], $sector: [String], $businessArea: String!, $search: String, $numberOfHouseholds: String, $budget: String, $startDate: Date, $endDate: Date, $orderBy: String) {
+  allPrograms(before: $before, after: $after, first: $first, last: $last, status: $status, sector: $sector, businessArea: $businessArea, search: $search, numberOfHouseholds: $numberOfHouseholds, budget: $budget, orderBy: $orderBy, startDate: $startDate, endDate: $endDate) {
     pageInfo {
       hasNextPage
       hasPreviousPage
       endCursor
       startCursor
     }
+    totalCount
+    edgeCount
     edges {
       node {
         id
@@ -7497,8 +7513,19 @@ export function withAllPrograms<TProps, TChildProps = {}>(operationOptions?: Apo
  * @example
  * const { data, loading, error } = useAllProgramsQuery({
  *   variables: {
- *      businessArea: // value for 'businessArea'
+ *      before: // value for 'before'
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
  *      status: // value for 'status'
+ *      sector: // value for 'sector'
+ *      businessArea: // value for 'businessArea'
+ *      search: // value for 'search'
+ *      numberOfHouseholds: // value for 'numberOfHouseholds'
+ *      budget: // value for 'budget'
+ *      startDate: // value for 'startDate'
+ *      endDate: // value for 'endDate'
+ *      orderBy: // value for 'orderBy'
  *   },
  * });
  */

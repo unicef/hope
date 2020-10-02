@@ -827,11 +827,25 @@
                 "defaultValue": null
               },
               {
-                "name": "id",
+                "name": "businessArea",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "search",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
-                  "name": "UUID",
+                  "name": "String",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -865,21 +879,7 @@
                 "defaultValue": null
               },
               {
-                "name": "businessArea",
-                "description": null,
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "search",
+                "name": "numberOfHouseholds",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -889,21 +889,31 @@
                 "defaultValue": null
               },
               {
-                "name": "numberOfHouseholds",
+                "name": "budget",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
-                  "name": "Int",
+                  "name": "String",
                   "ofType": null
                 },
                 "defaultValue": null
               },
               {
-                "name": "budget",
+                "name": "startDate",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
-                  "name": "Float",
+                  "name": "Date",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "endDate",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Date",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -1942,7 +1952,7 @@
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
-                  "name": "Int",
+                  "name": "String",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -2106,7 +2116,7 @@
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
-                  "name": "Int",
+                  "name": "String",
                   "ofType": null
                 },
                 "defaultValue": null

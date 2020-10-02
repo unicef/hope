@@ -81,7 +81,7 @@ export function RegistrationFilters({
         autoOk
         onChange={(date) => onFilterChange({ ...filter, importDate: date })}
         value={filter.importDate || null}
-        format='D MMM YYYY'
+        format='YYYY-MM-DD'
         InputAdornmentProps={{ position: 'end' }}
       />
       <UsersAutocomplete
