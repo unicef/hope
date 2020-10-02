@@ -13,10 +13,10 @@ description: Change request for Iteration 4 Deliverables
 **September 30th 2020**
 
 * Grouping of questions have been modified and new groups are created, please reflect on the catalog on Targeting. \(as part of previous change requests we had asked to show core fields too, it can be part of that work\)  
-* consent\_h\_c  is now a boolean field 
-* child\_marital\_status\_i\_f is removed 
-* free\_union from marital\_status\_i\_c is removed
-* Column name modifications highlighted in yellow in the XLSForm:
+* `consent_h_c`  is now a **boolean** field 
+* `child_marital_status_i_f` is **removed** 
+* `free_union` from `marital_status_i_c` is **removed**
+* Column name modifications highlighted in **yellow** in the XLSForm:
   * `sex_i_c` is changed to `gender_i_c`
   * `fchild_hoh_i_c`  changed to `child_hoh_h_c`  \(Female child headed household\)
   * `child_hoh_i_c`  changed to `child_hoh_h_c`   \(Child headed household\) 
