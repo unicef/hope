@@ -75,52 +75,52 @@ stages:
   - stage: test
     displayName: TEST
     jobs:
-    - job: django_tests
-      displayName: "[DJANGO TEST]"
-      variables:
-        airflow_image: uniappsk8sdevacr.azurecr.io/$(airflowImageRepository):$(Build.BuildId)
-        backend_image: uniappsk8sdevacr.azurecr.io/$(backendImageRepository):$(Build.BuildId)
-      steps:
-        - task: Docker@2
-          displayName: "[ACR] Login"
-          inputs:
-            command: login
-            containerRegistry: $(containerRegistry)
+      - job: django_tests
+        displayName: "[DJANGO TEST]"
+        variables:
+          airflow_image: uniappsk8sdevacr.azurecr.io/$(airflowImageRepository):$(Build.BuildId)
+          backend_image: uniappsk8sdevacr.azurecr.io/$(backendImageRepository):$(Build.BuildId)
+        steps:
+          - task: Docker@2
+            displayName: "[ACR] Login"
+            inputs:
+              command: login
+              containerRegistry: $(containerRegistry)
 
-        - task: DownloadSecureFile@1
-          inputs:
-            secureFile: '.env-django-test'
+          - task: DownloadSecureFile@1
+            inputs:
+              secureFile: '.env-django-test'
 
-        - task: CmdLine@2
-          displayName: "Setup .env and docker-compose.tst.yml"
-          inputs:
-            script: |
-             mv  $(Agent.TempDirectory)/.env-django-test .env
-             cp .env airflow/config/.env_airflow
+          - task: CmdLine@2
+            displayName: "Setup .env and docker-compose.tst.yml"
+            inputs:
+              script: |
+               mv  $(Agent.TempDirectory)/.env-django-test .env
+               cp .env airflow/config/.env_airflow
 
-        - task: DockerCompose@0
-          displayName: "Run tests"
-          inputs:
-            containerregistrytype: 'Azure Container Registry'
-            azureContainerRegistry: "$(containerRegistry)"
-            dockerComposeFile: '**/docker-compose.yml'
-            action: 'Run a Docker Compose command'
-            dockerComposeCommand: 'run backend ./manage.py test  --settings hct_mis_api.settings.test'
-            dockerComposeFileArgs: |
-             airflow_image=uniappsk8sdevacr.azurecr.io/$(airflowImageRepository):$(Build.BuildId)
-             frontend_image=uniappsk8sdevacr.azurecr.io/$(frontendImageRepository):$(Build.BuildId)
-             backend_image=uniappsk8sdevacr.azurecr.io/$(backendImageRepository):$(Build.BuildId)
+          - task: DockerCompose@0
+            displayName: "Run tests"
+            inputs:
+              containerregistrytype: 'Azure Container Registry'
+              azureContainerRegistry: "$(containerRegistry)"
+              dockerComposeFile: '**/docker-compose.yml'
+              action: 'Run a Docker Compose command'
+              dockerComposeCommand: 'run backend ./manage.py test  --settings hct_mis_api.settings.test'
+              dockerComposeFileArgs: |
+               airflow_image=uniappsk8sdevacr.azurecr.io/$(airflowImageRepository):$(Build.BuildId)
+               frontend_image=uniappsk8sdevacr.azurecr.io/$(frontendImageRepository):$(Build.BuildId)
+               backend_image=uniappsk8sdevacr.azurecr.io/$(backendImageRepository):$(Build.BuildId)
 
-        - task: PublishTestResults@2
-          displayName: "Publish Test Result"
-          condition: always()
-          inputs:
-            testResultsFormat: 'JUnit'
-            testResultsFiles: '*.xml'
-            searchFolder: 'backend/test-results/result.xmldocker-compose'
-            mergeTestResults: true
-            failTaskOnFailedTests: true
-            testRunTitle: 'TEST Results'
+          - task: PublishTestResults@2
+            displayName: "Publish Test Result"
+            condition: always()
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '*.xml'
+              searchFolder: 'backend/test-results/result.xmldocker-compose'
+              mergeTestResults: true
+              failTaskOnFailedTests: true
+              testRunTitle: 'TEST Results'
 
   - stage: deploy
     displayName: DEPLOY
