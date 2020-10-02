@@ -18,7 +18,7 @@ class Command(BaseCommand):
 
     @transaction.atomic
     def handle(self, *args, **options):
-        self.stdout.write(self.style.WARNING("Generate document types for all countries"))
+        # self.stdout.write(self.style.WARNING("Generate document types for all countries"))
         self._generate_document_types_for_all_countries()
 
     def _generate_document_types_for_all_countries(self):
