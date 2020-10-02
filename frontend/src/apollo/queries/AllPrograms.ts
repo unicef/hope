@@ -6,13 +6,14 @@ export const ALL_PROGRAMS_QUERY = gql`
     $after: String
     $first: Int
     $last: Int
-    $id: UUID
     $status: [String]
     $sector: [String]
     $businessArea: String!
     $search: String
-    $numberOfHouseholds: Int
-    $budget: Float
+    $numberOfHouseholds: String
+    $budget: String
+    $startDate: Date
+    $endDate: Date
     $orderBy: String
   ) {
     allPrograms(
@@ -20,7 +21,6 @@ export const ALL_PROGRAMS_QUERY = gql`
       after: $after
       first: $first
       last: $last
-      id: $id
       status: $status
       sector: $sector
       businessArea: $businessArea
@@ -28,6 +28,8 @@ export const ALL_PROGRAMS_QUERY = gql`
       numberOfHouseholds: $numberOfHouseholds
       budget: $budget
       orderBy: $orderBy
+      startDate: $startDate
+      endDate: $endDate
     ) {
       pageInfo {
         hasNextPage
