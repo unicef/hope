@@ -4,6 +4,32 @@ description: Change request for Iteration 4 Deliverables
 
 # Change Requests
 
+## Iteration 7
+
+**------------------------------------------------**
+
+### **Changes in Kobo form**
+
+**September 30th 2020**
+
+* Grouping of questions have been modified and new groups are created, please reflect on the catalog on Targeting. \(as part of previous change requests we had asked to show core fields too, it can be part of that work\)  
+* consent\_h\_c  is now a boolean field 
+* child\_marital\_status\_i\_f is removed 
+* free\_union from marital\_status\_i\_c is removed
+* Column name modifications highlighted in yellow in the XLSForm:
+  * `sex_i_c` is changed to `gender_i_c`
+  * `fchild_hoh_i_c`  changed to `child_hoh_h_c`  \(Female child headed household\)
+  * `child_hoh_i_c`  changed to `child_hoh_h_c`   \(Child headed household\) 
+  * Disability field changes: `observed_disability_i_fis` changed to `observed_disability_i_c` , `seeing_disability_i_f` is changed to `seeing_disability_i_c` and others 
+  * `latrine_h_f` changed to `shared_latrine_h_f` 
+  * `water_source_h_f` changed to `drinking_water_source_h_f` 
+* New fields have been added highlighted in **orange** 
+* There are some changes in choices, highlighted in **orange**
+
+{% file src="../.gitbook/assets/detailed-registration-9.29.xlsx" caption="\(Change Request\) Detailed Registration 9.29.xlsx" %}
+
+
+
 ## Iteration 6
 
 **------------------------------------------------**
