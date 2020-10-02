@@ -433,7 +433,10 @@ CONSTANCE_CONFIG = {
         "positive_integers",
     ),
     # SANCTION LIST
-    "SANCTION_LIST_MATCH_SCORE": (6.0, "Results equal or above this score are considered possible matches",),
+    "SANCTION_LIST_MATCH_SCORE": (
+        6.0,
+        "Results equal or above this score are considered possible matches",
+    ),
     # RAPID PRO
     "RAPID_PRO_PROVIDER": ("tel", "Rapid pro messages provider (telegram/tel)"),
     # CASH ASSIST
@@ -446,3 +449,6 @@ CONSTANCE_DBS = ("default",)
 AZURE_GRAPH_API_BASE_URL = "https://graph.microsoft.com"
 AZURE_GRAPH_API_VERSION = "v1.0"
 AZURE_TOKEN_URL = "https://login.microsoftonline.com/unicef.org/oauth2/token"
+
+TEST_OUTPUT_DIR = "./test-results"
+TEST_OUTPUT_FILE_NAME = "result.xml"

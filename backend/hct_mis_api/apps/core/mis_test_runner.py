@@ -3,6 +3,7 @@ from __future__ import absolute_import
 from django.conf import settings
 from django.db import connections
 from snapshottest.django import TestRunner
+from xmlrunner.extra.djangotestrunner import XMLTestRunner
 
 
 def create_test_db_and_schemas(creation, verbosity=1, autoclobber=False, serialize=True, keepdb=False):
@@ -130,7 +131,7 @@ def _setup_schema_database(verbosity, interactive, keepdb=False, debug_sql=False
     return [old_name]
 
 
-class PostgresTestRunner(TestRunner):
+class PostgresTestRunner(XMLTestRunner):
     def teardown_databases(self, old_config, **kwargs):
         connections["cash_assist_datahub_ca"].close()
         connections["cash_assist_datahub_erp"].close()
