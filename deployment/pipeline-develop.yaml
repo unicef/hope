@@ -103,7 +103,7 @@ stages:
               azureContainerRegistry: "$(containerRegistry)"
               dockerComposeFile: '**/docker-compose.yml'
               action: 'Run a Docker Compose command'
-              dockerComposeCommand: 'run backend ./manage.py test  --settings hct_mis_api.settings.test'
+              dockerComposeCommand: 'run backend ./docker-test-entrypoint.sh'
               dockerComposeFileArgs: |
                airflow_image=uniappsk8sdevacr.azurecr.io/$(Docker.airflow.repository):$(Build.BuildId)
                backend_image=uniappsk8sdevacr.azurecr.io/$(Docker.backend.repository):$(Build.BuildId)
