@@ -234,6 +234,7 @@ class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingMixin):
             if (
                 self.target_population_final
                 and self.target_population_final.status != "DRAFT"
+                and self.target_population_final.program is not None
                 and self.target_population_final.program.individual_data_needed
             ):
                 query &= Q(size__gt=0)
