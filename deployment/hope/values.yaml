@@ -34,10 +34,10 @@ backend:
 
   resources:
     limits:
-      cpu: "4"
+      cpu: "1"
       memory: "1024Mi"
     requests:
-      cpu: "2"
+      cpu: "1"
       memory: "512Mi"
 
     # We usually recommend not to specify default resources and to leave this as a conscious
@@ -94,10 +94,10 @@ frontend:
 
   resources:
     limits:
-      cpu: "4"
+      cpu: "1"
       memory: "2048Mi"
     requests:
-      cpu: "2"
+      cpu: "1"
       memory: "512Mi"
 
   service:
@@ -146,7 +146,7 @@ postgresql:
 
   resources:
     limits:
-      cpu: "2"
+      cpu: "1"
       memory: "1024Mi"
     requests:
       cpu: "1"
@@ -162,7 +162,7 @@ registrationdatahubpostgresql:
 
   resources:
     limits:
-      cpu: "2"
+      cpu: "1"
       memory: "1024Mi"
     requests:
       cpu: "1"
@@ -199,7 +199,7 @@ cashassistdatahubpostgresql:
 
   resources:
     limits:
-      cpu: "2"
+      cpu: "1"
       memory: "1024Mi"
     requests:
       cpu: "1"
@@ -248,10 +248,10 @@ elasticsearch:
 
   resources:
     limits:
-      cpu: "4"
+      cpu: "1"
       memory: "1024Mi"
     requests:
-      cpu: "2"
+      cpu: "1"
       memory: "512Mi"
   externalElasticsearch:
     host: ""
@@ -267,19 +267,19 @@ airflow:
     command: ["airflow", "worker"]
     resources:
       limits:
-        cpu: "4"
+        cpu: "1"
         memory: "1024Mi"
       requests:
-        cpu: "2"
+        cpu: "1"
         memory: "512Mi"
   scheduler:
     command: ["airflow", "scheduler"]
     resources:
       limits:
-        cpu: "4"
+        cpu: "1"
         memory: "1024Mi"
       requests:
-        cpu: "2"
+        cpu: "1"
         memory: "512Mi"
   ingress:
     enabled: true
@@ -301,19 +301,19 @@ airflow:
       command: ["airflow", "worker"]
       resources:
         limits:
-          cpu: "4"
+          cpu: "1"
           memory: "1024Mi"
         requests:
-          cpu: "2"
+          cpu: "1"
           memory: "512Mi"
     scheduler:
       command: ["airflow", "scheduler"]
       resources:
         limits:
-          cpu: "4"
+          cpu: "1"
           memory: "1024Mi"
         requests:
-          cpu: "2"
+          cpu: "1"
           memory: "512Mi"
     image:
       repository: hope/airflow
@@ -333,9 +333,9 @@ airflow:
               path: entrypoint.sh
       resources:
         limits:
-          cpu: "4"
+          cpu: "1"
           memory: "1024Mi"
         requests:
-          cpu: "2"
+          cpu: "1"
           memory: "512Mi"
 
