@@ -93,15 +93,16 @@ stages:
             displayName: "Setup .env and docker-compose.tst.yml"
             inputs:
               script: |
-               mv  $(Agent.TempDirectory)/.env-django-test .env
+               mv deployment/docker-compose.tst.yml docker-compose.tst.yml
+               mv $(Agent.TempDirectory)/.env-django-test .env
                cp .env airflow/config/.env_airflow
 
           - task: DockerCompose@0
             displayName: "Run tests"
             inputs:
               containerregistrytype: 'Azure Container Registry'
-              azureContainerRegistry: "$(containerRegistry)"
-              dockerComposeFile: '**/docker-compose.yml'
+              azureContainerRegistry: $(Docker.registry)
+              dockerComposeFile: '**/docker-compose.tst.yml'
               action: 'Run a Docker Compose command'
               dockerComposeCommand: 'run backend ./docker-test-entrypoint.sh'
               dockerComposeFileArgs: |
