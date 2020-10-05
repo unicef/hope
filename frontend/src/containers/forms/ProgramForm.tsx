@@ -7,7 +7,6 @@ import {
   DialogTitle,
   Typography,
   Paper,
-  Grid,
 } from '@material-ui/core';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
 import { Field, Form, Formik } from 'formik';

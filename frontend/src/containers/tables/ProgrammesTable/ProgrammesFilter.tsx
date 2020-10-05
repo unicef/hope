@@ -10,10 +10,10 @@ import moment from 'moment';
 import React from 'react';
 import styled from 'styled-components';
 import SearchIcon from '@material-ui/icons/Search';
+import { KeyboardDatePicker } from '@material-ui/pickers';
 import { ProgrammeChoiceDataQuery } from '../../../__generated__/graphql';
 import InputLabel from '../../../shared/InputLabel';
 import Select from '../../../shared/Select';
-import { KeyboardDatePicker } from '@material-ui/pickers';
 
 const Container = styled.div`
   display: flex;
