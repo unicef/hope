@@ -11,20 +11,6 @@ volumes:
   data_es_test:
 
 services:
-  proxy:
-    image: unicef/hct-mis-proxy
-    environment:
-      - DJANGO_APPLICATION_SERVICE_HOST=backend
-      - FRONTEND_HOST=host.docker.internal:3000
-    build:
-      context: ./proxy
-      dockerfile: ./Dockerfile
-    ports:
-      - "8082:80"
-    depends_on:
-      - backend
-    volumes:
-      - backend-data:/data
 
   redis:
     restart: always
