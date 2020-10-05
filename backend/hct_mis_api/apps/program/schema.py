@@ -1,7 +1,14 @@
 import graphene
 from django.db.models import Case, When, Value, IntegerField, Q, Sum
 from django.db.models.functions import Coalesce
-from django_filters import FilterSet, OrderingFilter, CharFilter, MultipleChoiceFilter, ModelMultipleChoiceFilter
+from django_filters import (
+    FilterSet,
+    OrderingFilter,
+    CharFilter,
+    MultipleChoiceFilter,
+    ModelMultipleChoiceFilter,
+    DateFilter,
+)
 from graphene import relay, ConnectionField
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
@@ -23,13 +30,28 @@ class ProgramFilter(FilterSet):
     business_area = CharFilter(field_name="business_area__slug", required=True)
     search = CharFilter(method="search_filter")
     status = MultipleChoiceFilter(field_name="status", choices=Program.STATUS_CHOICE)
-    sector = MultipleChoiceFilter(field_name="sector", choices=Program.STATUS_CHOICE)
+    sector = MultipleChoiceFilter(field_name="sector", choices=Program.SECTOR_CHOICE)
     number_of_households = IntegerRangeFilter(field_name="households_count")
     budget = DecimalRangeFilter(field_name="budget")
+    start_date = DateFilter(field_name="start_date", lookup_expr="gte")
+    end_date = DateFilter(field_name="end_date", lookup_expr="lte")
 
     class Meta:
-        fields = ("id", "status", "sector", "business_area", "search")
+        fields = (
+            "business_area",
+            "search",
+            "status",
+            "sector",
+            "number_of_households",
+            "budget",
+            "start_date",
+            "end_date",
+        )
         model = Program
+
+    order_by = OrderingFilter(
+        fields=("name", "status", "start_date", "end_date", "sector", "households_count", "budget")
+    )
 
     def search_filter(self, qs, name, value):
         values = value.split(" ")

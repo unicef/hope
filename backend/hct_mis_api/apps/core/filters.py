@@ -1,7 +1,7 @@
 import json
 from datetime import datetime, date, timedelta
 
-from django.forms import Field, IntegerField, DecimalField
+from django.forms import IntegerField, DecimalField, Field
 from django_filters import Filter
 
 
