@@ -34,11 +34,11 @@ backend:
 
   resources:
     limits:
-      cpu: 4
-      memory: 1024Mi
+      cpu: "4"
+      memory: "1024Mi"
     requests:
-      cpu: 2
-      memory: 512Mi
+      cpu: "2"
+      memory: "512Mi"
 
     # We usually recommend not to specify default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little
@@ -94,11 +94,11 @@ frontend:
 
   resources:
     limits:
-      cpu: 4
-      memory: 2048Mi
+      cpu: "4"
+      memory: "2048Mi"
     requests:
-      cpu: 2
-      memory: 2048Mi
+      cpu: "2"
+      memory: "512Mi"
 
   service:
     type: ClusterIP
@@ -146,11 +146,11 @@ postgresql:
 
   resources:
     limits:
-      cpu: 2
-      memory: 1024Mi
+      cpu: "2"
+      memory: "1024Mi"
     requests:
-      cpu: 1
-      memory: 512Mi
+      cpu: "1"
+      memory: "512Mi"
   image:
     tag: 10.12.0
 
@@ -162,11 +162,11 @@ registrationdatahubpostgresql:
 
   resources:
     limits:
-      cpu: 2
-      memory: 1024Mi
+      cpu: "2"
+      memory: "1024Mi"
     requests:
-      cpu: 1
-      memory: 512Mi
+      cpu: "1"
+      memory: "512Mi"
   # Script for adding postgis
   # Don't modify
   initdbScripts:
@@ -199,11 +199,11 @@ cashassistdatahubpostgresql:
 
   resources:
     limits:
-      cpu: 2
-      memory: 1024Mi
+      cpu: "2"
+      memory: "1024Mi"
     requests:
-      cpu: 1
-      memory: 512Mi
+      cpu: "1"
+      memory: "512Mi"
 
   externalDatabase:
     host: ""
@@ -230,11 +230,11 @@ redis:
 
   resources:
     limits:
-      cpu: 0.5
+      cpu: "0.5"
       memory: 1024Mi
     requests:
-      cpu: 0.5
-      memory: 512Mi
+      cpu: "0.5"
+      memory: "512Mi"
 
 elasticsearch:
   enabled: true
@@ -248,11 +248,11 @@ elasticsearch:
 
   resources:
     limits:
-      cpu: 4
-      memory: 1024Mi
+      cpu: "4"
+      memory: "1024Mi"
     requests:
-      cpu: 2
-      memory: 512Mi
+      cpu: "2"
+      memory: "512Mi"
   externalElasticsearch:
     host: ""
 
@@ -267,20 +267,20 @@ airflow:
     command: ["airflow", "worker"]
     resources:
       limits:
-        cpu: 4
-        memory: 1024Mi
+        cpu: "4"
+        memory: "1024Mi"
       requests:
-        cpu: 2
-        memory: 512Mi
+        cpu: "2"
+        memory: "512Mi"
   scheduler:
     command: ["airflow", "scheduler"]
     resources:
       limits:
-        cpu: 4
-        memory: 1024Mi
+        cpu: "4"
+        memory: "1024Mi"
       requests:
-        cpu: 2
-        memory: 512Mi
+        cpu: "2"
+        memory: "512Mi"
   ingress:
     enabled: true
     hosts:
@@ -301,20 +301,20 @@ airflow:
       command: ["airflow", "worker"]
       resources:
         limits:
-          cpu: 4
-          memory: 1024Mi
+          cpu: "4"
+          memory: "1024Mi"
         requests:
-          cpu: 2
-          memory: 512Mi
+          cpu: "2"
+          memory: "512Mi"
     scheduler:
       command: ["airflow", "scheduler"]
       resources:
         limits:
-          cpu: 4
-          memory: 1024Mi
+          cpu: "4"
+          memory: "1024Mi"
         requests:
-          cpu: 2
-          memory: 512Mi
+          cpu: "2"
+          memory: "512Mi"
     image:
       repository: hope/airflow
       tag: latest
@@ -333,9 +333,9 @@ airflow:
               path: entrypoint.sh
       resources:
         limits:
-          cpu: 4
-          memory: 1024Mi
+          cpu: "4"
+          memory: "1024Mi"
         requests:
-          cpu: 2
-          memory: 512Mi
+          cpu: "2"
+          memory: "512Mi"
 
