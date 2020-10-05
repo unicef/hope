@@ -50,7 +50,7 @@ class ProgramFilter(FilterSet):
         model = Program
 
     order_by = OrderingFilter(
-        fields=("name", "status", "start_date", "end_date", "sector", "total_number_of_households", "budget")
+        fields=("name", "status", "start_date", "end_date", "sector", "households_count", "budget")
     )
 
     def search_filter(self, qs, name, value):
