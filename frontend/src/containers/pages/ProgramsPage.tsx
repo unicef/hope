@@ -60,7 +60,11 @@ export function ProgramsPage(): React.ReactElement {
         onFilterChange={setFilter}
         choicesData={choicesData}
       />
-      <ProgrammesTable choicesData={choicesData} filter={debouncedFilter} />
+      <ProgrammesTable
+        businessArea={businessArea}
+        choicesData={choicesData}
+        filter={debouncedFilter}
+      />
     </div>
   );
 }

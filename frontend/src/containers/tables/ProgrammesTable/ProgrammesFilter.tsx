@@ -65,216 +65,209 @@ export function ProgrammesFilters({
   filter,
   choicesData,
 }: ProgrammesFilterProps): React.ReactElement {
-  console.log(choicesData);
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
+
   return (
     <Container>
-      <Grid container>
-        <Grid item xs={2}>
-          <SearchTextField
-            label='Search'
-            variant='outlined'
-            margin='dense'
-            onChange={(e) => handleFilterChange(e, 'search')}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position='start'>
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-            }}
-            data-cy='filters-search'
-          />
-        </Grid>
-        <Grid item xs={2}>
-          <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>Status</InputLabel>
-            <Select
-              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
-              // @ts-ignore
-              onChange={(e) => handleFilterChange(e, 'status')}
-              variant='outlined'
-              label='Status'
-              value={[...filter.status] || []}
-            >
-              <MenuItem value=''>
-                <em>None</em>
-              </MenuItem>
-              {choicesData.programStatusChoices.map((item) => {
-                return (
-                  <MenuItem key={item.value} value={item.value}>
-                    {item.name}
+      <Grid container alignItems='center' spacing={3}>
+        <Grid item xs={12}>
+          <Grid container alignItems='center' spacing={3}>
+            <Grid item>
+              <SearchTextField
+                label='Search'
+                variant='outlined'
+                margin='dense'
+                onChange={(e) => handleFilterChange(e, 'search')}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position='start'>
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                }}
+                data-cy='filters-search'
+              />
+            </Grid>
+            <Grid item>
+              <StyledFormControl variant='outlined' margin='dense'>
+                <InputLabel>Status</InputLabel>
+                <Select
+                  /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
+                  // @ts-ignore
+                  onChange={(e) => handleFilterChange(e, 'status')}
+                  variant='outlined'
+                  label='Status'
+                  value={filter.status || null}
+                >
+                  <MenuItem value=''>
+                    <em>None</em>
                   </MenuItem>
-                );
-              })}
-            </Select>
-          </StyledFormControl>
-        </Grid>
-        <Grid item xs={2}>
-          <KeyboardDatePicker
-            variant='inline'
-            disableToolbar
-            inputVariant='outlined'
-            margin='dense'
-            label='Start Date'
-            autoOk
-            onChange={(date) =>
-              onFilterChange({
-                ...filter,
-                startDate: moment(date).format('YYYY-MM-DD'),
-              })
-            }
-            value={filter.startDate || null}
-            format='YYYY-MM-DD'
-            InputAdornmentProps={{ position: 'end' }}
-          />
-        </Grid>
-        <Grid item xs={2}>
-          <KeyboardDatePicker
-            variant='inline'
-            disableToolbar
-            inputVariant='outlined'
-            margin='dense'
-            label='End Date'
-            autoOk
-            onChange={(date) =>
-              onFilterChange({
-                ...filter,
-                endDate: moment(date).format('YYYY-MM-DD'),
-              })
-            }
-            value={filter.endDate || null}
-            format='YYYY-MM-DD'
-            InputAdornmentProps={{ position: 'end' }}
-          />
-        </Grid>
-        <Grid item xs={2}>
-          <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>Sector</InputLabel>
-            <Select
-              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
-              // @ts-ignore
-              onChange={(e) => handleFilterChange(e, 'sector')}
-              variant='outlined'
-              label='Sector'
-              value={[...filter.sector] || []}
-            >
-              <MenuItem value=''>
-                <em>None</em>
-              </MenuItem>
-              {choicesData.programSectorChoices.map((item) => {
-                return (
-                  <MenuItem key={item.value} value={item.value}>
-                    {item.name}
+                  {choicesData.programStatusChoices.map((item) => {
+                    return (
+                      <MenuItem key={item.value} value={item.value}>
+                        {item.name}
+                      </MenuItem>
+                    );
+                  })}
+                </Select>
+              </StyledFormControl>
+            </Grid>
+            <Grid item>
+              <KeyboardDatePicker
+                variant='inline'
+                disableToolbar
+                inputVariant='outlined'
+                margin='dense'
+                label='Start Date'
+                autoOk
+                onChange={(date) =>
+                  onFilterChange({
+                    ...filter,
+                    startDate: moment(date).format('YYYY-MM-DD'),
+                  })
+                }
+                value={filter.startDate || null}
+                format='YYYY-MM-DD'
+                InputAdornmentProps={{ position: 'end' }}
+              />
+            </Grid>
+            <Grid item>
+              <KeyboardDatePicker
+                variant='inline'
+                disableToolbar
+                inputVariant='outlined'
+                margin='dense'
+                label='End Date'
+                autoOk
+                onChange={(date) =>
+                  onFilterChange({
+                    ...filter,
+                    endDate: moment(date).format('YYYY-MM-DD'),
+                  })
+                }
+                value={filter.endDate || null}
+                format='YYYY-MM-DD'
+                InputAdornmentProps={{ position: 'end' }}
+              />
+            </Grid>
+            <Grid item>
+              <StyledFormControl variant='outlined' margin='dense'>
+                <InputLabel>Sector</InputLabel>
+                <Select
+                  /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
+                  // @ts-ignore
+                  onChange={(e) => handleFilterChange(e, 'sector')}
+                  variant='outlined'
+                  label='Sector'
+                  value={filter.sector || null}
+                >
+                  <MenuItem value=''>
+                    <em>None</em>
                   </MenuItem>
-                );
-              })}
-            </Select>
-          </StyledFormControl>
+                  {choicesData.programSectorChoices.map((item) => {
+                    return (
+                      <MenuItem key={item.value} value={item.value}>
+                        {item.name}
+                      </MenuItem>
+                    );
+                  })}
+                </Select>
+              </StyledFormControl>
+            </Grid>
+          </Grid>
         </Grid>
-        <Grid item xs={2}>
-          <TextContainer
-            value={filter.numberOfHouseholds.min}
-            variant='outlined'
-            margin='dense'
-            label='Num. of Households'
-            onChange={(e) =>
-              onFilterChange({
-                ...filter,
-                numberOfHouseholds: {
-                  ...filter.numberOfHouseholds,
-                  min: e.target.value || undefined,
-                },
-              })
-            }
-            type='number'
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position='start'>
-                  <GroupIcon />
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Grid>
-        <Grid item xs={2}>
-          to
-          <TextContainer
-            value={filter.numberOfHouseholds.max}
-            variant='outlined'
-            margin='dense'
-            label='Num. of Households'
-            onChange={(e) =>
-              onFilterChange({
-                ...filter,
-                numberOfHouseholds: {
-                  ...filter.numberOfHouseholds,
-                  max: e.target.value || undefined,
-                },
-              })
-            }
-            type='number'
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position='start'>
-                  <GroupIcon />
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Grid>
-        <Grid item xs={2}>
-          <TextContainer
-            value={filter.budget.min}
-            variant='outlined'
-            margin='dense'
-            label='Budget'
-            onChange={(e) =>
-              onFilterChange({
-                ...filter,
-                budget: {
-                  ...filter.budget,
-                  min: e.target.value || undefined,
-                },
-              })
-            }
-            type='number'
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position='start'>
-                  <GroupIcon />
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Grid>
-        <Grid item xs={2}>
-          to
-          <TextContainer
-            id='maxFilter'
-            value={filter.budget.max}
-            variant='outlined'
-            margin='dense'
-            label='Budget'
-            onChange={(e) =>
-              onFilterChange({
-                ...filter,
-                budget: {
-                  ...filter.budget,
-                  max: e.target.value || undefined,
-                },
-              })
-            }
-            type='number'
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position='start'>
-                  <GroupIcon />
-                </InputAdornment>
-              ),
-            }}
-          />
+        <Grid item xs={12}>
+          <Grid container alignItems='center' spacing={3}>
+            <Grid item>
+              <TextContainer
+                value={filter.numberOfHouseholds.min}
+                variant='outlined'
+                margin='dense'
+                label='Num. of Households'
+                onChange={(e) =>
+                  onFilterChange({
+                    ...filter,
+                    numberOfHouseholds: {
+                      ...filter.numberOfHouseholds,
+                      min: e.target.value || undefined,
+                    },
+                  })
+                }
+                type='number'
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position='start'>
+                      <GroupIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+            <Grid item>to</Grid>
+            <Grid item>
+              <TextContainer
+                value={filter.numberOfHouseholds.max}
+                variant='outlined'
+                margin='dense'
+                label='Num. of Households'
+                onChange={(e) =>
+                  onFilterChange({
+                    ...filter,
+                    numberOfHouseholds: {
+                      ...filter.numberOfHouseholds,
+                      max: e.target.value || undefined,
+                    },
+                  })
+                }
+                type='number'
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position='start'>
+                      <GroupIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+            <Grid item>
+              <TextContainer
+                value={filter.budget.min}
+                variant='outlined'
+                margin='dense'
+                label='Budget'
+                onChange={(e) =>
+                  onFilterChange({
+                    ...filter,
+                    budget: {
+                      ...filter.budget,
+                      min: e.target.value || undefined,
+                    },
+                  })
+                }
+                type='number'
+              />
+            </Grid>
+            <Grid item>to</Grid>
+            <Grid item>
+              <TextContainer
+                value={filter.budget.max}
+                variant='outlined'
+                margin='dense'
+                label='Budget'
+                onChange={(e) =>
+                  onFilterChange({
+                    ...filter,
+                    budget: {
+                      ...filter.budget,
+                      max: e.target.value || undefined,
+                    },
+                  })
+                }
+                type='number'
+              />
+            </Grid>
+          </Grid>
         </Grid>
       </Grid>
     </Container>
