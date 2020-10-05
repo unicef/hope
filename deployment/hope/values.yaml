@@ -26,7 +26,8 @@ backend:
     # runAsNonRoot: true
     # runAsUser: 1000
 
-  nodeSelector: {}
+  nodeSelector:
+    agentpool: hope
 
   tolerations: []
 
@@ -86,7 +87,8 @@ frontend:
     # runAsNonRoot: true
     # runAsUser: 1000
 
-  nodeSelector: {}
+  nodeSelector:
+    agentpool: hope
 
   tolerations: []
 
@@ -112,6 +114,7 @@ ingress:
   host: hope-dev.test
   tls: false
   tlsSecret: "aks-unitst-tls"
+
 
 serviceAccount:
   # Specifies whether a service account should be created
@@ -151,6 +154,8 @@ postgresql:
     requests:
       cpu: "1"
       memory: "512Mi"
+  nodeSelector:
+    agentpool: hope
   image:
     tag: 10.12.0
 
@@ -167,6 +172,8 @@ registrationdatahubpostgresql:
     requests:
       cpu: "1"
       memory: "512Mi"
+  nodeSelector:
+    agentpool: hope
   # Script for adding postgis
   # Don't modify
   initdbScripts:
@@ -211,7 +218,8 @@ cashassistdatahubpostgresql:
     name: ""
     user: ""
     password: ""
-
+  nodeSelector:
+    agentpool: hope
   image:
     tag: 10.12.0
 
@@ -227,7 +235,8 @@ redis:
     enabled: false
   image:
     tag: 4.0.14
-
+  nodeSelector:
+    agentpool: hope
   resources:
     limits:
       cpu: "0.5"
@@ -247,6 +256,8 @@ elasticsearch:
       requests:
         cpu: "1"
         memory: "512Mi"
+      nodeSelector:
+        agentpool: hope
   coordinating:
     replicas: 1
     resources:
@@ -256,6 +267,8 @@ elasticsearch:
       requests:
         cpu: "250m"
         memory: "512Mi"
+    nodeSelector:
+      agentpool: hope
   ingset:
     resources:
       limits:
@@ -264,6 +277,8 @@ elasticsearch:
       requests:
         cpu: "250m"
         memory: "512Mi"
+    nodeSelector:
+      agentpool: hope
   metrics:
     resources:
       limits:
@@ -272,6 +287,8 @@ elasticsearch:
       requests:
         cpu: "250m"
         memory: "512Mi"
+    nodeSelector:
+      agentpool: hope
   data:
     replicas: 1
   plugins: "analysis-phonetic"
@@ -282,6 +299,8 @@ elasticsearch:
     requests:
       cpu: "1"
       memory: "512Mi"
+  nodeSelector:
+    agentpool: hope
   externalElasticsearch:
     host: ""
 
@@ -301,6 +320,8 @@ airflow:
       requests:
         cpu: "1"
         memory: "512Mi"
+    nodeSelector:
+      agentpool: hope
   scheduler:
     command: ["airflow", "scheduler"]
     resources:
@@ -310,6 +331,8 @@ airflow:
       requests:
         cpu: "1"
         memory: "512Mi"
+    nodeSelector:
+      agentpool: hope
   ingress:
     enabled: true
     hosts:
@@ -335,6 +358,8 @@ airflow:
         requests:
           cpu: "1"
           memory: "512Mi"
+      nodeSelector:
+        agentpool: hope
     scheduler:
       command: ["airflow", "scheduler"]
       resources:
@@ -344,6 +369,8 @@ airflow:
         requests:
           cpu: "1"
           memory: "512Mi"
+      nodeSelector:
+        agentpool: hope
     image:
       repository: hope/airflow
       tag: latest
@@ -367,4 +394,6 @@ airflow:
         requests:
           cpu: "1"
           memory: "512Mi"
+      nodeSelector:
+        agentpool: hope
 
