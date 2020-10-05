@@ -13,7 +13,9 @@ interface UsersListTableRowProps {
   user: UserNode;
 }
 
-export function UsersListTableRow({ user }: UsersListTableRowProps) {
+export function UsersListTableRow({
+  user,
+}: UsersListTableRowProps): React.ReactElement {
   const [open, setOpen] = useState(false);
 
   const StatusContainer = styled.div`

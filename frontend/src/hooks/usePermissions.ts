@@ -1,7 +1,7 @@
 import { useMeQuery } from '../__generated__/graphql';
 import { useBusinessArea } from './useBusinessArea';
 
-export function usePermissions() {
+export function usePermissions(): string[] {
   const { data, loading } = useMeQuery({
     fetchPolicy: 'cache-and-network',
   });

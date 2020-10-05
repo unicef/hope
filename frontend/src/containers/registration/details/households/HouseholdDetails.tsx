@@ -8,7 +8,7 @@ import {
 } from '../../../../__generated__/graphql';
 import { MiśTheme } from '../../../../theme';
 import { Missing } from '../../../../components/Missing';
-import { choicesToDict, formatCurrency } from '../../../../utils/utils';
+import { choicesToDict } from '../../../../utils/utils';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 
 const Container = styled.div`
