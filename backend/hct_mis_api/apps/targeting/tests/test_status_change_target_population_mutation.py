@@ -5,6 +5,7 @@ from core.base_test_case import APITestCase
 from core.models import BusinessArea
 from household.fixtures import create_household
 from program.fixtures import ProgramFactory
+from program.models import Program
 from targeting.models import (
     TargetingCriteria,
     TargetingCriteriaRule,
@@ -36,12 +37,17 @@ class TestApproveTargetPopulationMutation(APITestCase):
     @classmethod
     def setUpTestData(cls):
         call_command("loadbusinessareas")
-        cls.program = ProgramFactory.create(status="ACTIVE", business_area=BusinessArea.objects.order_by("?").first(),)
+        business_area = BusinessArea.objects.first()
+        cls.program = ProgramFactory.create(status="ACTIVE", business_area=business_area)
         cls.user = UserFactory.create()
         cls.households = []
-        (household, individuals) = create_household({"size": 1, "residence_status": "CITIZEN"},)
+        (household, individuals) = create_household(
+            {"size": 1, "residence_status": "CITIZEN", "business_area": business_area},
+        )
         cls.household_size_1 = household
-        (household, individuals) = create_household({"size": 2, "residence_status": "CITIZEN"},)
+        (household, individuals) = create_household(
+            {"size": 2, "residence_status": "CITIZEN", "business_area": business_area},
+        )
         cls.household_size_2 = household
         cls.households.append(cls.household_size_1)
         cls.households.append(cls.household_size_2)
@@ -130,10 +136,15 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
     def setUpTestData(cls):
         cls.user = UserFactory.create()
         cls.households = []
-
-        (household, individuals) = create_household({"size": 1, "residence_status": "CITIZEN"},)
+        call_command("loadbusinessareas")
+        business_area = BusinessArea.objects.first()
+        (household, individuals) = create_household(
+            {"size": 1, "residence_status": "CITIZEN", "business_area": business_area},
+        )
         cls.household_size_1 = household
-        (household, individuals) = create_household({"size": 2, "residence_status": "CITIZEN"},)
+        (household, individuals) = create_household(
+            {"size": 2, "residence_status": "CITIZEN", "business_area": business_area},
+        )
         cls.household_size_2 = household
         cls.households.append(cls.household_size_1)
         cls.households.append(cls.household_size_2)
@@ -226,10 +237,15 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
     def setUpTestData(cls):
         cls.user = UserFactory.create()
         cls.households = []
-
-        (household, individuals) = create_household({"size": 1, "residence_status": "CITIZEN"},)
+        call_command("loadbusinessareas")
+        business_area = BusinessArea.objects.first()
+        (household, individuals) = create_household(
+            {"size": 1, "residence_status": "CITIZEN", "business_area": business_area},
+        )
         cls.household_size_1 = household
-        (household, individuals) = create_household({"size": 2, "residence_status": "CITIZEN"},)
+        (household, individuals) = create_household(
+            {"size": 2, "residence_status": "CITIZEN", "business_area": business_area},
+        )
         cls.household_size_2 = household
         cls.households.append(cls.household_size_1)
         cls.households.append(cls.household_size_2)
@@ -259,6 +275,8 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
             {"field_name": "residence_status", "arguments": ["CITIZEN"], "comparision_method": "EQUALS"}
         )
+        program = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
+        tp.program = program
         tp.save()
         tp.households.set(cls.households)
         cls.target_population_approved = tp

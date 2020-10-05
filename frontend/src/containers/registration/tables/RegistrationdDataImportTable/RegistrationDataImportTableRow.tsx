@@ -47,7 +47,12 @@ export function RegistrationDataImportTableRow({
         </StatusContainer>
       </TableCell>
       <TableCell align='left'>
-        <UniversalMoment>{registrationDataImport.importDate}</UniversalMoment>
+        <UniversalMoment withTime>
+          {registrationDataImport.importDate}
+        </UniversalMoment>
+      </TableCell>
+      <TableCell align='right'>
+        {registrationDataImport.numberOfIndividuals}
       </TableCell>
       <TableCell align='right'>
         {registrationDataImport.numberOfHouseholds}

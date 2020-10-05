@@ -13,7 +13,9 @@ export const individualMinimal = gql`
     phoneNo
     sanctionListPossibleMatch
     deduplicationGoldenRecordStatus
+    sanctionListLastCheck
     role
+    relationship
     status
     documents {
       edges {

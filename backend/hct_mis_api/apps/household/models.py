@@ -336,6 +336,7 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
     deduplication_batch_results = JSONField(default=dict)
     imported_individual_id = models.UUIDField(null=True)
     sanction_list_possible_match = models.BooleanField(default=False)
+    sanction_list_last_check = models.DateTimeField(null=True, blank=True)
     pregnant = models.BooleanField(default=False)
 
     @property

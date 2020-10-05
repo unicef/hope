@@ -1,6 +1,7 @@
 import logging
 
 from constance import config
+from django.utils import timezone
 
 from household.documents import IndividualDocument
 from household.models import Individual, IDENTIFICATION_TYPE_NATIONAL_ID
@@ -63,11 +64,15 @@ class CheckAgainstSanctionListPreMergeTask:
                 if score >= possible_match_score:
                     possible_matches.add(individual_hit.id)
 
-            log.info(
+            log.debug(
                 f"SANCTION LIST INDIVIDUAL: {individual.full_name} - reference number: {individual.reference_number}"
                 f"Scores: ",
             )
-            log.info([(r.full_name, r.meta.score) for r in results])
+            log.debug([(r.full_name, r.meta.score) for r in results])
 
-        Individual.objects.filter(id__in=possible_matches).update(sanction_list_possible_match=True)
-        Individual.objects.exclude(id__in=possible_matches).update(sanction_list_possible_match=False)
+        Individual.objects.filter(id__in=possible_matches).update(
+            sanction_list_possible_match=True, sanction_list_last_check=timezone.now()
+        )
+        Individual.objects.exclude(id__in=possible_matches).update(
+            sanction_list_possible_match=False, sanction_list_last_check=timezone.now()
+        )

@@ -6,14 +6,17 @@ import django_countries.fields
 
 
 def unmark_sent_tp(apps, schema_editor):
-    TargetPopulation = apps.get_model("targeting", "TargetPopulation")
-    Program = apps.get_model("program", "Program")
-    Household = apps.get_model("household", "Household")
-    TargetPopulation.objects.filter(
-        status="FINALIZED"
-    ).update(sent_to_datahub=False)
-    Household.objects.update(last_sync_at=None)
-    Program.objects.update(last_sync_at=None)
+    try:
+        TargetPopulation = apps.get_model("targeting", "TargetPopulation")
+        Program = apps.get_model("program", "Program")
+        Household = apps.get_model("household", "Household")
+        TargetPopulation.objects.filter(
+            status="FINALIZED"
+        ).update(sent_to_datahub=False)
+        Household.objects.update(last_sync_at=None)
+        Program.objects.update(last_sync_at=None)
+    except:
+        pass
 
 
 class Migration(migrations.Migration):

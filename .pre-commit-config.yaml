@@ -1,0 +1,21 @@
+repos:
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.5.4
+    hooks:
+      - id: isort
+        stages: [commit]
+  - repo: https://github.com/ambv/black
+    rev: stable
+    hooks:
+      - id: black
+        exclude: "migrations|snapshots"
+        stages: [commit]
+  - repo: local
+    hooks:
+      - id: unittest
+        name: unittest
+        entry: "docker-compose run backend python manage.py test --noinput"
+        language: python
+        always_run: true
+        pass_filenames: false
+        stages: [push]

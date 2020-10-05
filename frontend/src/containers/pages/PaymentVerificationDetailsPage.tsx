@@ -142,15 +142,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
     >
       <>
         {canCreate && (
-          <CreateVerificationPlan
-            disabled={
-              !hasPermissions(
-                [PERMISSIONS.RDI_LIST, PERMISSIONS.READ],
-                permissions,
-              )
-            }
-            cashPlanId={cashPlan.id}
-          />
+          <CreateVerificationPlan disabled={false} cashPlanId={cashPlan.id} />
         )}
         {canEditAndActivate && (
           <Box alignItems='center' display='flex'>

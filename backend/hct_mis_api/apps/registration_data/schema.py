@@ -26,7 +26,8 @@ class RegistrationDataImportFilter(FilterSet):
         }
 
     order_by = OrderingFilter(
-        fields=("name", "status", "import_date", "number_of_households", "imported_by__given_name",)
+        fields=("name", "status", "import_date", "number_of_individuals",
+                "number_of_households", "imported_by__given_name",)
     )
 
 

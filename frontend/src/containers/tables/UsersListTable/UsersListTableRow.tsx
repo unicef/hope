@@ -3,8 +3,8 @@ import styled from 'styled-components';
 import TableCell from '@material-ui/core/TableCell';
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
-import { UserNode } from '../../../__generated__/graphql';
 import { Box, Collapse, IconButton, TableRow } from '@material-ui/core';
+import { UserNode } from '../../../__generated__/graphql';
 import { UniversalMoment } from '../../../components/UniversalMoment';
 import { StatusBox } from '../../../components/StatusBox';
 import { userStatusToColor } from '../../../utils/utils';
@@ -13,7 +13,9 @@ interface UsersListTableRowProps {
   user: UserNode;
 }
 
-export function UsersListTableRow({ user }: UsersListTableRowProps) {
+export function UsersListTableRow({
+  user,
+}: UsersListTableRowProps): React.ReactElement {
   const [open, setOpen] = useState(false);
 
   const StatusContainer = styled.div`
