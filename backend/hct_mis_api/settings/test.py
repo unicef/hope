@@ -30,7 +30,11 @@ LOGGING = {
     "handlers": {"default": {"level": LOG_LEVEL, "class": "logging.StreamHandler", "formatter": "standard"}},
     "loggers": {
         "": {"handlers": ["default"], "level": "DEBUG", "propagate": True},
+        "registration_datahub.tasks.deduplicate": {"handlers": ["default"], "level": "INFO", "propagate": True},
+        "sanction_list.tasks.check_against_sanction_list_pre_merge": {"handlers": ["default"], "level": "INFO", "propagate": True},
         "graphql": {"handlers": ["default"], "level": "CRITICAL", "propagate": True},
+        "elasticsearch": {"handlers": ["default"], "level": "CRITICAL", "propagate": True},
+        "elasticsearch-dsl-django": {"handlers": ["default"], "level": "CRITICAL", "propagate": True},
     },
 }
 

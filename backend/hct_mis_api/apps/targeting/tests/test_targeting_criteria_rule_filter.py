@@ -2,6 +2,7 @@ from django.core.exceptions import ValidationError
 from django.core.management import call_command
 from django.test import TestCase
 
+from core.models import BusinessArea
 from household.fixtures import create_household
 from household.models import Household
 from targeting.models import TargetingCriteriaRuleFilter
@@ -10,24 +11,25 @@ from targeting.models import TargetingCriteriaRuleFilter
 class TargetingCriteriaRuleFilterTestCase(TestCase):
     def setUp(self):
         households = []
-
+        call_command("loadbusinessareas")
+        business_area = BusinessArea.objects.first()
         (household, individuals) = create_household(
-            {"size": 1, "residence_status": "CITIZEN"}, {"birth_date": "1970-11-29"},
+            {"size": 1, "residence_status": "CITIZEN", "business_area": business_area}, {"birth_date": "1970-11-29"},
         )
         households.append(household)
         self.household_50_yo = household
         (household, individuals) = create_household(
-            {"size": 1, "residence_status": "CITIZEN"}, {"birth_date": "1991-11-18"},
+            {"size": 1, "residence_status": "CITIZEN", "business_area": business_area}, {"birth_date": "1991-11-18"},
         )
         households.append(household)
         (household, individuals) = create_household(
-            {"size": 1, "residence_status": "CITIZEN"}, {"birth_date": "1991-11-18"},
+            {"size": 1, "residence_status": "CITIZEN", "business_area": business_area}, {"birth_date": "1991-11-18"},
         )
 
         households.append(household)
 
         (household, individuals) = create_household(
-            {"size": 2, "residence_status": "REFUGEE"}, {"birth_date": "1991-11-18"},
+            {"size": 2, "residence_status": "REFUGEE", "business_area": business_area}, {"birth_date": "1991-11-18"},
         )
 
         households.append(household)
@@ -169,6 +171,8 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
 class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
     def setUp(self):
         call_command("loadflexfieldsattributes")
+        call_command("loadbusinessareas")
+        business_area = BusinessArea.objects.first()
         (household, individuals) = create_household(
             {
                 "size": 1,
@@ -177,6 +181,7 @@ class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
                     "treatment_facility_h_f": ["government_health_center", "other_public", "private_doctor"],
                     "other_treatment_facility_h_f": "testing other",
                 },
+                "business_area": business_area,
             }
         )
         self.household_total_households_2 = household
@@ -188,11 +193,12 @@ class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
                     "total_households_h_f": 4,
                     "treatment_facility_h_f": ["government_health_center", "other_public"],
                 },
+                "business_area": business_area,
             }
         )
         self.household_total_households_4 = household
         create_household(
-            {"size": 1, "flex_fields": {"ddd": 3, "treatment_facility_h_f": []}}
+            {"size": 1, "flex_fields": {"ddd": 3, "treatment_facility_h_f": []}, "business_area": business_area}
         )
 
     def test_rule_filter_household_total_households_4(self):

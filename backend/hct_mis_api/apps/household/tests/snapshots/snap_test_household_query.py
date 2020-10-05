@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['TestHouseholdQuery::test_household_filter_by_programme 1'] = {
@@ -56,64 +57,6 @@ snapshots['TestHouseholdQuery::test_household_filter_by_programme 1'] = {
                             ]
                         },
                         'size': 11
-                    }
-                }
-            ]
-        }
-    }
-}
-
-snapshots['TestHouseholdQuery::test_household_query_all 1'] = {
-    'data': {
-        'allHouseholds': {
-            'edges': [
-                {
-                    'node': {
-                        'address': 'Lorem Ipsum',
-                        'countryOrigin': 'Poland',
-                        'size': 1
-                    }
-                },
-                {
-                    'node': {
-                        'address': 'Lorem Ipsum',
-                        'countryOrigin': 'Poland',
-                        'size': 2
-                    }
-                },
-                {
-                    'node': {
-                        'address': 'Lorem Ipsum',
-                        'countryOrigin': 'Poland',
-                        'size': 3
-                    }
-                },
-                {
-                    'node': {
-                        'address': 'Lorem Ipsum',
-                        'countryOrigin': 'Poland',
-                        'size': 4
-                    }
-                },
-                {
-                    'node': {
-                        'address': 'Lorem Ipsum',
-                        'countryOrigin': 'Poland',
-                        'size': 5
-                    }
-                },
-                {
-                    'node': {
-                        'address': 'Lorem Ipsum',
-                        'countryOrigin': 'Poland',
-                        'size': 11
-                    }
-                },
-                {
-                    'node': {
-                        'address': 'Lorem Ipsum',
-                        'countryOrigin': 'Poland',
-                        'size': 14
                     }
                 }
             ]
@@ -245,6 +188,64 @@ snapshots['TestHouseholdQuery::test_household_query_single 1'] = {
             'address': 'Lorem Ipsum',
             'countryOrigin': 'Poland',
             'size': 2
+        }
+    }
+}
+
+snapshots['TestHouseholdQuery::test_household_query_all 1'] = {
+    'data': {
+        'allHouseholds': {
+            'edges': [
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum',
+                        'countryOrigin': 'Poland',
+                        'size': 1
+                    }
+                },
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum',
+                        'countryOrigin': 'Poland',
+                        'size': 2
+                    }
+                },
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum',
+                        'countryOrigin': 'Poland',
+                        'size': 3
+                    }
+                },
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum',
+                        'countryOrigin': 'Poland',
+                        'size': 4
+                    }
+                },
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum',
+                        'countryOrigin': 'Poland',
+                        'size': 5
+                    }
+                },
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum',
+                        'countryOrigin': 'Poland',
+                        'size': 11
+                    }
+                },
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum',
+                        'countryOrigin': 'Poland',
+                        'size': 14
+                    }
+                }
+            ]
         }
     }
 }

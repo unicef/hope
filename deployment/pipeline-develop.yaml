@@ -71,6 +71,55 @@ stages:
                 $(Build.BuildId)
                 dev-latest
 
+
+  - stage: test
+    displayName: TEST
+    jobs:
+      - job: django_tests
+        displayName: "[DJANGO TEST]"
+        variables:
+          airflow_image: uniappsk8sdevacr.azurecr.io/$(Docker.airflow.repository):$(Build.BuildId)
+          backend_image: uniappsk8sdevacr.azurecr.io/$(Docker.backend.repository):$(Build.BuildId)
+        steps:
+          - task: Docker@2
+            displayName: "[ACR] Login"
+            inputs:
+              command: login
+              containerRegistry: $(Docker.registry)
+          - task: DownloadSecureFile@1
+            inputs:
+              secureFile: '.env-django-test'
+          - task: CmdLine@2
+            displayName: "Setup .env and docker-compose.tst.yml"
+            inputs:
+              script: |
+               mv deployment/docker-compose.tst.yml docker-compose.tst.yml
+               mv $(Agent.TempDirectory)/.env-django-test .env
+               cp .env airflow/config/.env_airflow
+
+          - task: DockerCompose@0
+            displayName: "Run tests"
+            inputs:
+              containerregistrytype: 'Azure Container Registry'
+              azureContainerRegistry: $(Docker.registry)
+              dockerComposeFile: '**/docker-compose.tst.yml'
+              action: 'Run a Docker Compose command'
+              dockerComposeCommand: 'run backend ./docker-test-entrypoint.sh'
+              dockerComposeFileArgs: |
+               airflow_image=uniappsk8sdevacr.azurecr.io/$(Docker.airflow.repository):$(Build.BuildId)
+               backend_image=uniappsk8sdevacr.azurecr.io/$(Docker.backend.repository):$(Build.BuildId)
+
+          - task: PublishTestResults@2
+            displayName: "Publish Test Result"
+            condition: always()
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '*.xml'
+              searchFolder: 'backend/test-results/'
+              mergeTestResults: true
+              failTaskOnFailedTests: true
+              testRunTitle: 'TEST Results'
+
   - stage: deploy
     displayName: DEPLOY
     jobs:

@@ -1,5 +1,8 @@
+from django.core.management import call_command
+
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
+from core.models import BusinessArea
 from household.fixtures import create_household
 from targeting.models import (
     TargetPopulation,
@@ -41,15 +44,23 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.households = []
-        (household, individuals) = create_household({"size": 1, "residence_status": "CITIZEN"},)
-        (household, individuals) = create_household({"size": 1, "residence_status": "CITIZEN"},)
+        call_command("loadbusinessareas")
+        business_area = BusinessArea.objects.first()
+        _ = create_household({"size": 1, "residence_status": "CITIZEN", "business_area": business_area},)
+        (household, individuals) = create_household(
+            {"size": 1, "residence_status": "CITIZEN", "business_area": business_area},
+        )
         cls.households.append(household)
-        (household, individuals) = create_household({"size": 1, "residence_status": "IDP"},)
+        (household, individuals) = create_household(
+            {"size": 1, "residence_status": "IDP", "business_area": business_area},
+        )
         cls.household_size_1 = household
         cls.households.append(cls.household_size_1)
         cls.household_residence_status_citizen = cls.household_size_1
 
-        (household, individuals) = create_household({"size": 2, "residence_status": "REFUGEE"},)
+        (household, individuals) = create_household(
+            {"size": 2, "residence_status": "REFUGEE", "business_area": business_area},
+        )
         cls.household_residence_status_refugee = household
         cls.households.append(cls.household_residence_status_refugee)
         cls.household_size_2 = cls.household_residence_status_refugee

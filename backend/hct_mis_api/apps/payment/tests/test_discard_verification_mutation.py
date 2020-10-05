@@ -42,6 +42,7 @@ class TestDiscardVerificationMutation(APITestCase):
             business_area=BusinessArea.objects.first(),
         )
         cash_plan = CashPlanFactory.build(program=program, business_area=BusinessArea.objects.first(),)
+        cash_plan.name = "TEST"
         cash_plan.save()
         cash_plan_payment_verification = CashPlanPaymentVerificationFactory(cash_plan=cash_plan)
         cash_plan_payment_verification.status = CashPlanPaymentVerification.STATUS_ACTIVE
@@ -82,7 +83,7 @@ class TestDiscardVerificationMutation(APITestCase):
         mutation DiscardVerification{{
           discardCashPlanPaymentVerification(cashPlanVerificationId:"{encoded_id}") {{
             cashPlan{{
-                id
+                name
             }}
           }}
         }}

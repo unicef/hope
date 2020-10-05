@@ -30,8 +30,8 @@ from registration_datahub.tasks.deduplicate import DeduplicateTask
 
 @override_config(
     DEDUPLICATION_BATCH_DUPLICATE_SCORE=4.0,
-    DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE=4.0,
-    DEDUPLICATION_GOLDEN_RECORD_DUPLICATE_SCORE=7.0,
+    DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE=3.0,
+    DEDUPLICATION_GOLDEN_RECORD_DUPLICATE_SCORE=4.0,
     DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE=100,
     DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_PERCENTAGE=100,
     DEDUPLICATION_BATCH_DUPLICATES_ALLOWED=10,
@@ -68,7 +68,6 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
             household_data={"registration_data_import": cls.registration_data_import_datahub},
             individuals_data=[
                 {
-                    # DUPLICATE
                     "registration_data_import": cls.registration_data_import_datahub,
                     "given_name": "Test",
                     "full_name": "Test Testowski",
@@ -105,7 +104,6 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
                     "birth_date": "1996-12-12",
                 },
                 {
-                    # DUPLICATE
                     "registration_data_import": cls.registration_data_import_datahub,
                     "given_name": "Tessta",
                     "full_name": "Tessta Testowski",
@@ -118,7 +116,6 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
                     "birth_date": "1997-07-07",
                 },
                 {
-                    # DUPLICATE
                     "registration_data_import": cls.registration_data_import_datahub,
                     "given_name": "Test",
                     "full_name": "Test Testowski",
@@ -143,7 +140,6 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
                     "birth_date": "1997-08-08",
                 },
                 {
-                    # DUPLICATE
                     "registration_data_import": cls.registration_data_import_datahub,
                     "given_name": "Tessta",
                     "full_name": "Tessta Testowski",
@@ -259,26 +255,22 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
             deduplication_golden_record_status=UNIQUE
         )
 
-        self.assertEqual(duplicate_in_golden_record.count(), 5)
+        self.assertEqual(duplicate_in_golden_record.count(), 6)
         self.assertEqual(unique_in_golden_record.count(), 1)
-        self.assertEqual(needs_adjudication_in_golden_record.count(), 1)
+        self.assertEqual(needs_adjudication_in_golden_record.count(), 0)
 
         expected_duplicates_gr = (
+            "Tescik Testowski",
             "Tessta Testowski",
             "Tessta Testowski",
             "Test Example",
             "Test Testowski",
             "Test Testowski",
         )
-        expected_needs_adjudication_gr = ("Tescik Testowski",)
         expected_uniques_gr = ("Tesa Testowski",)
 
         self.assertEqual(
             tuple(duplicate_in_golden_record.values_list("full_name", flat=True)), expected_duplicates_gr,
-        )
-        self.assertEqual(
-            tuple(needs_adjudication_in_golden_record.values_list("full_name", flat=True)),
-            expected_needs_adjudication_gr,
         )
         self.assertEqual(
             tuple(unique_in_golden_record.values_list("full_name", flat=True)), expected_uniques_gr,
@@ -286,7 +278,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
 
 
 @override_config(
-    DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE=4.0, DEDUPLICATION_GOLDEN_RECORD_DUPLICATE_SCORE=7.0,
+    DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE=4.0, DEDUPLICATION_GOLDEN_RECORD_DUPLICATE_SCORE=5.0,
 )
 class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
     multi_db = True
@@ -328,7 +320,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "full_name": "Tesa Testowski",
                     "middle_name": "",
                     "family_name": "Testowski",
-                    "phone_no": "123-123-123",
+                    "phone_no": "453-85-423",
                     "phone_no_alternative": "",
                     "relationship": WIFE_HUSBAND,
                     "sex": FEMALE,
@@ -336,11 +328,11 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                 },
                 {
                     "registration_data_import": cls.registration_data_import,
-                    "given_name": "Tescik",
-                    "full_name": "Tescik Testowski",
+                    "given_name": "Example",
+                    "full_name": "Example Example",
                     "middle_name": "",
-                    "family_name": "Testowski",
-                    "phone_no": "123-123-123",
+                    "family_name": "Example",
+                    "phone_no": "934-25-25-121",
                     "phone_no_alternative": "",
                     "relationship": SON_DAUGHTER,
                     "sex": MALE,
@@ -352,7 +344,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "full_name": "Tessta Testowski",
                     "middle_name": "",
                     "family_name": "Testowski",
-                    "phone_no": "123-123-123",
+                    "phone_no": "363-224-112",
                     "phone_no_alternative": "",
                     "relationship": SON_DAUGHTER,
                     "sex": FEMALE,
@@ -380,23 +372,11 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                 },
                 {
                     "registration_data_import": registration_data_import_second,
-                    "given_name": "Test",
-                    "full_name": "Test Example",
-                    "middle_name": "",
-                    "family_name": "Test Example",
-                    "phone_no": "432-125-765",
-                    "phone_no_alternative": "",
-                    "relationship": SON_DAUGHTER,
-                    "sex": MALE,
-                    "birth_date": "1999-10-10",
-                },
-                {
-                    "registration_data_import": registration_data_import_second,
                     "given_name": "Tessta",
                     "full_name": "Tessta Testowski",
                     "middle_name": "",
                     "family_name": "Testowski",
-                    "phone_no": "123-123-123",
+                    "phone_no": "363-224-112",
                     "phone_no_alternative": "",
                     "relationship": SON_DAUGHTER,
                     "sex": FEMALE,
