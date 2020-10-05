@@ -269,7 +269,10 @@ LOGGING = {
         },
     },
     "filters": {"require_debug_false": {"()": "django.utils.log.RequireDebugFalse"}},
-    "handlers": {"default": {"level": LOG_LEVEL, "class": "logging.StreamHandler", "formatter": "standard"}},
+    "handlers": {
+        "default": {"level": LOG_LEVEL, "class": "logging.StreamHandler", "formatter": "standard"},
+        "file": {"level": LOG_LEVEL, "class": "logging.FileHandler", "filename": "debug.log"},
+    },
     "loggers": {
         "": {"handlers": ["default"], "level": "INFO", "propagate": True},
         "console": {"handlers": ["default"], "level": "DEBUG", "propagate": True},
@@ -279,6 +282,7 @@ LOGGING = {
             "handlers": ["default"],
             "propagate": False,
         },
+        "elasticsearch": {"handlers": ["file"], "level": "CRITICAL", "propagate": True},
     },
 }
 
@@ -429,12 +433,14 @@ CONSTANCE_CONFIG = {
         "positive_integers",
     ),
     # SANCTION LIST
-    "SANCTION_LIST_MATCH_SCORE": (6.0, "Results equal or above this score are considered possible matches",),
+    "SANCTION_LIST_MATCH_SCORE": (
+        6.0,
+        "Results equal or above this score are considered possible matches",
+    ),
     # RAPID PRO
     "RAPID_PRO_PROVIDER": ("tel", "Rapid pro messages provider (telegram/tel)"),
-
     # CASH ASSIST
-    "CASH_ASSIST_URL_PREFIX": ("","Cash Assist base url used to generate url to cash assist"),
+    "CASH_ASSIST_URL_PREFIX": ("", "Cash Assist base url used to generate url to cash assist"),
 }
 
 CONSTANCE_DBS = ("default",)
@@ -443,3 +449,6 @@ CONSTANCE_DBS = ("default",)
 AZURE_GRAPH_API_BASE_URL = "https://graph.microsoft.com"
 AZURE_GRAPH_API_VERSION = "v1.0"
 AZURE_TOKEN_URL = "https://login.microsoftonline.com/unicef.org/oauth2/token"
+
+TEST_OUTPUT_DIR = "./test-results"
+TEST_OUTPUT_FILE_NAME = "result.xml"

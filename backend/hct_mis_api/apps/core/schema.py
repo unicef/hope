@@ -241,7 +241,7 @@ def convert_field_to_geojson(field, registry=None):
 
 def get_fields_attr_generators(flex_field):
     if flex_field is not False:
-        yield from FlexibleAttribute.objects.all()
+        yield from FlexibleAttribute.objects.order_by("name").all()
     if flex_field is not True:
         yield from FILTERABLE_CORE_FIELDS_ATTRIBUTES
 
