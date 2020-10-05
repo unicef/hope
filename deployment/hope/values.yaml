@@ -240,12 +240,41 @@ elasticsearch:
   enabled: true
   master:
     replicas: 1
+    resources:
+      limits:
+        cpu: "1"
+        memory: "1024Mi"
+      requests:
+        cpu: "1"
+        memory: "512Mi"
   coordinating:
     replicas: 1
+    resources:
+      limits:
+        cpu: "250m"
+        memory: "1024Mi"
+      requests:
+        cpu: "250m"
+        memory: "512Mi"
+  ingset:
+    resources:
+      limits:
+        cpu: "250m"
+        memory: "1024Mi"
+      requests:
+        cpu: "250m"
+        memory: "512Mi"
+  metrincs:
+    resources:
+      limits:
+        cpu: "250m"
+        memory: "1024Mi"
+      requests:
+        cpu: "250m"
+        memory: "512Mi"
   data:
     replicas: 1
   plugins: "analysis-phonetic"
-
   resources:
     limits:
       cpu: "1"
