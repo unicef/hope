@@ -10,6 +10,7 @@ import {
   useHouseholdChoiceDataQuery,
 } from '../../__generated__/graphql';
 import { useDebounce } from '../../hooks/useDebounce';
+import { LoadingComponent } from '../../components/LoadingComponent';
 
 const Container = styled.div`
   display: flex;
@@ -32,8 +33,7 @@ export function PopulationHouseholdPage(): React.ReactElement {
   } = useHouseholdChoiceDataQuery({
     variables: { businessArea },
   });
-  if (loading || choicesLoading) return null;
-
+  if (loading || choicesLoading) return <LoadingComponent />;
   const { allPrograms } = data;
   const programs = allPrograms.edges.map((edge) => edge.node);
 

@@ -12,16 +12,16 @@ import { headCells } from './ProgrammesHeadCells';
 import { ProgrammesTableRow } from './ProgrammesTableRow';
 
 interface ProgrammesTableProps {
+  businessArea: string;
   filter;
   choicesData: ProgrammeChoiceDataQuery;
 }
 
 export function ProgrammesTable({
+  businessArea,
   filter,
   choicesData,
 }: ProgrammesTableProps): ReactElement {
-  const businessArea = useBusinessArea();
-
   const initialVariables: AllProgramsQueryVariables = {
     businessArea,
     search: filter.search,
