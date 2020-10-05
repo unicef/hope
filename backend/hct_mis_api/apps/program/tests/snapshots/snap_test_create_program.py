@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['TestCreateProgram::test_create_program_authenticated 1'] = {
@@ -18,7 +19,6 @@ snapshots['TestCreateProgram::test_create_program_authenticated 1'] = {
                 'frequencyOfPayments': 'REGULAR',
                 'name': 'Test',
                 'populationGoal': 150000,
-                'programCaId': '5e0a38c6-7bcb-4b4a-b8e0-311e8c694ae3',
                 'scope': 'UNICEF',
                 'sector': 'EDUCATION',
                 'startDate': '2019-12-20',
@@ -40,7 +40,6 @@ snapshots['TestCreateProgram::test_create_program_invalid_dates 1'] = {
                 'frequencyOfPayments': 'REGULAR',
                 'name': 'Test',
                 'populationGoal': 150000,
-                'programCaId': '5e0a38c6-7bcb-4b4a-b8e0-311e8c694ae3',
                 'scope': 'UNICEF',
                 'sector': 'EDUCATION',
                 'startDate': '2019-12-20',

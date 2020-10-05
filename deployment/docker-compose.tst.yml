@@ -35,7 +35,7 @@ services:
   backend:
     stdin_open: true
     tty: true
-    image: unicef/hct-mis-backend
+    image: ${backend_image}
     env_file:
       - .env
     environment:
@@ -90,7 +90,7 @@ services:
       - ./airflow/config/.env_airflow
 
   airflow_webserver:
-    image: unicef/hct-airflow-webserver
+    image: ${airflow_image}
     build:
       context: ./airflow
       dockerfile: local.Dockerfile
