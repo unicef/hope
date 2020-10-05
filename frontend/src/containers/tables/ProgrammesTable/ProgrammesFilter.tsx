@@ -76,6 +76,7 @@ export function ProgrammesFilters({
             <Grid item>
               <SearchTextField
                 label='Search'
+                value={filter.search}
                 variant='outlined'
                 margin='dense'
                 onChange={(e) => handleFilterChange(e, 'search')}
@@ -86,7 +87,6 @@ export function ProgrammesFilters({
                     </InputAdornment>
                   ),
                 }}
-                data-cy='filters-search'
               />
             </Grid>
             <Grid item>
