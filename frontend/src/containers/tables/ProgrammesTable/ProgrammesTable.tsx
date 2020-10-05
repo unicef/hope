@@ -32,7 +32,6 @@ export function ProgrammesTable({
     numberOfHouseholds: JSON.stringify(filter.numberOfHouseholds),
     budget: JSON.stringify(filter.budget),
   };
-
   const TableWrapper = styled.div`
     padding: 20px;
   `;

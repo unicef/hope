@@ -29,7 +29,7 @@ export const headCells: HeadCell<ProgramNode>[] = [
   {
     disablePadding: false,
     label: 'Num. of Households',
-    id: 'totalNumberOfHouseholds',
+    id: 'householdsCount',
     numeric: true,
   },
   {
