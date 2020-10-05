@@ -177,7 +177,7 @@ export function PaymentFilters({
               })
             }
             value={filter.startDate || null}
-            format='D MMM YYYY'
+            format='YYYY-MM-DD'
             InputAdornmentProps={{ position: 'end' }}
           />
         </Grid>
@@ -193,7 +193,7 @@ export function PaymentFilters({
               onFilterChange({ ...filter, endDate: moment(date).toISOString() })
             }
             value={filter.endDate || null}
-            format='D MMM YYYY'
+            format='YYYY-MM-DD'
             InputAdornmentProps={{ position: 'end' }}
           />
         </Grid>
