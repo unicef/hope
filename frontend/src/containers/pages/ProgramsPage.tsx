@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PageHeader } from '../../components/PageHeader';
-import {
-  useAllProgramsQuery,
-  useProgrammeChoiceDataQuery,
-} from '../../__generated__/graphql';
+import { useProgrammeChoiceDataQuery } from '../../__generated__/graphql';
 import { CreateProgram } from '../dialogs/programs/CreateProgram';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { LoadingComponent } from '../../components/LoadingComponent';
@@ -14,28 +11,21 @@ import { ProgrammesFilters } from '../tables/ProgrammesTable/ProgrammesFilter';
 
 export function ProgramsPage(): React.ReactElement {
   const [filter, setFilter] = useState({
-    search: '',
-    startDate: null,
-    endDate: null,
+    startDate: undefined,
+    endDate: undefined,
     status: [],
     sector: [],
     numberOfHouseholds: {
-      min: null,
-      max: null,
+      min: undefined,
+      max: undefined,
     },
     budget: {
-      min: null,
-      max: null,
+      min: undefined,
+      max: undefined,
     },
   });
   const debouncedFilter = useDebounce(filter, 500);
   const businessArea = useBusinessArea();
-  const { data, loading } = useAllProgramsQuery({
-    variables: {
-      businessArea,
-    },
-    fetchPolicy: 'cache-and-network',
-  });
 
   const {
     data: choicesData,
@@ -48,7 +38,7 @@ export function ProgramsPage(): React.ReactElement {
       <CreateProgram />
     </PageHeader>
   );
-  if (loading || choicesLoading) {
+  if (choicesLoading) {
     return <LoadingComponent />;
   }
 
