@@ -264,7 +264,7 @@ elasticsearch:
       requests:
         cpu: "250m"
         memory: "512Mi"
-  metrincs:
+  metrics:
     resources:
       limits:
         cpu: "250m"
