@@ -99,7 +99,8 @@ class IndividualFilter(FilterSet):
         }
 
     order_by = OrderingFilter(
-        fields=("id", "unicef_id", "full_name", "household__id", "birth_date", "sex", "household__admin_area__title",)
+        fields=("id", "unicef_id", "full_name", "household__id", "birth_date",
+                "sex", "relationship", "household__admin_area__title",)
     )
 
     def search_filter(self, qs, name, value):

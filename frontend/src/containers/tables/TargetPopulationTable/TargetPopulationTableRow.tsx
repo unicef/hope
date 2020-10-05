@@ -49,10 +49,10 @@ export function TargetPopulationTableRow({
         </StatusContainer>
       </TableCell>
       <TableCell align='left'>
-        {targetPopulation.candidateListTotalHouseholds}
+        {targetPopulation.program?.name || '-'}
       </TableCell>
       <TableCell align='left'>
-        {targetPopulation.finalListTotalHouseholds}
+        {targetPopulation.finalListTotalHouseholds || '-'}
       </TableCell>
       <TableCell align='left'>
         <UniversalMoment>{targetPopulation.createdAt}</UniversalMoment>

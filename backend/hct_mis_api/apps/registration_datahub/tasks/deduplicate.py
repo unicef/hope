@@ -189,8 +189,8 @@ class DeduplicateTask:
                 original_individuals_ids_possible_duplicates.append(individual.id)
                 results_core_data["proximity_to_score"] = score - config.DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE
                 results_data["possible_duplicates"].append(results_core_data)
-        log.info(f"INDIVIDUAL {individual}")
-        log.info([(r.full_name, r.meta.score) for r in results])
+        log.debug(f"INDIVIDUAL {individual}")
+        log.debug([(r.full_name, r.meta.score) for r in results])
 
         return (
             duplicates,

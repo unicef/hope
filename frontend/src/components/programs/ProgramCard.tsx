@@ -134,7 +134,7 @@ export function ProgramCard({
               </Grid>
               <Grid className={classes.gridElement} item xs={6}>
                 <LabelizedField
-                  label='Budget'
+                  label='Budget (USD)'
                   value={`${program.budget.toLocaleString('en-US', {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
@@ -144,13 +144,13 @@ export function ProgramCard({
 
               <Grid className={classes.gridElement} item xs={6}>
                 <LabelizedField
-                  label='Population Goal'
+                  label='Population Goal (# of Individuals)'
                   value={program.populationGoal}
                 />
               </Grid>
               <Grid className={classes.gridElement} item xs={6}>
                 <LabelizedField
-                  label='no. of households'
+                  label='Num. of households'
                   value={program.totalNumberOfHouseholds}
                 />
               </Grid>
