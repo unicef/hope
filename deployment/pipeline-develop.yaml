@@ -114,7 +114,7 @@ stages:
             inputs:
               testResultsFormat: 'JUnit'
               testResultsFiles: '*.xml'
-              searchFolder: 'backend/test-results/result.xml'
+              searchFolder: 'backend/test-results/'
               mergeTestResults: true
               failTaskOnFailedTests: true
               testRunTitle: 'TEST Results'
