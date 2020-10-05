@@ -256,8 +256,8 @@ elasticsearch:
       requests:
         cpu: "1"
         memory: "512Mi"
-      nodeSelector:
-        agentpool: hope
+    nodeSelector:
+      agentpool: hope
   coordinating:
     replicas: 1
     resources:
