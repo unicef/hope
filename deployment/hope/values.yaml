@@ -239,10 +239,10 @@ redis:
     agentpool: hope
   resources:
     limits:
-      cpu: "0.5"
+      cpu: "250m"
       memory: "256Mi"
     requests:
-      cpu: "0.5"
+      cpu: "250m"
       memory: "256Mi"
 
 elasticsearch:
@@ -255,7 +255,7 @@ elasticsearch:
         memory: "1024Mi"
       requests:
         cpu: "1"
-        memory: "512Mi"
+        memory: "1024Mi"
     nodeSelector:
       agentpool: hope
   coordinating:
@@ -263,30 +263,40 @@ elasticsearch:
     resources:
       limits:
         cpu: "250m"
-        memory: "1024Mi"
+        memory: "256Mi"
       requests:
         cpu: "250m"
-        memory: "512Mi"
+        memory: "256Mi"
     nodeSelector:
       agentpool: hope
   ingset:
     resources:
       limits:
         cpu: "250m"
-        memory: "1024Mi"
+        memory: "256Mi"
       requests:
         cpu: "250m"
-        memory: "512Mi"
+        memory: "256Mi"
     nodeSelector:
       agentpool: hope
   metrics:
     resources:
       limits:
         cpu: "250m"
-        memory: "1024Mi"
+        memory: "256Mi"
       requests:
         cpu: "250m"
-        memory: "512Mi"
+        memory: "256Mi"
+    nodeSelector:
+      agentpool: hope
+  curator:
+    resources:
+      limits:
+        cpu: "250m"
+        memory: "256Mi"
+      requests:
+        cpu: "250m"
+        memory: "256Mi"
     nodeSelector:
       agentpool: hope
   data:
