@@ -254,6 +254,8 @@ redis:
 
 elasticsearch:
   enabled: true
+  sysctlImage:
+    enabled: false
   master:
     replicas: 1
     resources:
