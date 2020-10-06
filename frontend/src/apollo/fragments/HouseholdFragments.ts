@@ -46,6 +46,7 @@ export const householdDetailed = gql`
     programs {
       edges {
         node {
+          id
           name
         }
       }

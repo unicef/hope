@@ -21,7 +21,9 @@ interface TargetPopulationTableRowProps {
   targetPopulation: TargetPopulationNode;
 }
 
-export function TargetPopulationTableRow({ targetPopulation }) {
+export function TargetPopulationTableRow({
+  targetPopulation,
+}): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
 
@@ -47,10 +49,10 @@ export function TargetPopulationTableRow({ targetPopulation }) {
         </StatusContainer>
       </TableCell>
       <TableCell align='left'>
-        {targetPopulation.candidateListTotalHouseholds}
+        {targetPopulation.program?.name || '-'}
       </TableCell>
       <TableCell align='left'>
-        {targetPopulation.finalListTotalHouseholds}
+        {targetPopulation.finalListTotalHouseholds || '-'}
       </TableCell>
       <TableCell align='left'>
         <UniversalMoment>{targetPopulation.createdAt}</UniversalMoment>

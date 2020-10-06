@@ -191,6 +191,7 @@ class FlexibleAttributeGroup(SoftDeletionTreeModel):
 class FlexibleAttributeChoice(SoftDeletableModel, TimeStampedUUIDModel):
     class Meta:
         unique_together = ["list_name", "name"]
+        ordering = ("name",)
 
     list_name = models.CharField(max_length=255)
     name = models.CharField(max_length=255)

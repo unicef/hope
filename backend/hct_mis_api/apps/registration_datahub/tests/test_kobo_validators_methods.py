@@ -1,8 +1,6 @@
 from operator import itemgetter
 from unittest import TestCase
 
-from registration_datahub.validators import KoboProjectImportDataValidator
-
 
 class TestKoboSaveValidatorsMethods(TestCase):
 
@@ -54,21 +52,21 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 {
                     "mimetype": "image/png",
                     "download_small_url": "https://kc.humanitarianresponse.info/media/small?"
-                                          "media_file=wnosal%2Fattachments%"
-                                          "2Fb83407aca1d647a5bf65a3383ee761d4%2F512ca816-5cab-45a6-a676-1f47cfe7658e"
-                                          "%2Fsignature-17_32_52.png",
+                    "media_file=wnosal%2Fattachments%"
+                    "2Fb83407aca1d647a5bf65a3383ee761d4%2F512ca816-5cab-45a6-a676-1f47cfe7658e"
+                    "%2Fsignature-17_32_52.png",
                     "download_large_url": "https://kc.humanitarianresponse.info/media/large?media_file=wnosal%"
-                                          "2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4"
-                                          "%2F512ca816-5cab-45a6-a676-1f47cfe7658e%2Fsignature-17_32_52.png",
+                    "2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4"
+                    "%2F512ca816-5cab-45a6-a676-1f47cfe7658e%2Fsignature-17_32_52.png",
                     "download_url": "https://kc.humanitarianresponse.info/media/original?media_file=wnosal"
-                                    "%2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4"
-                                    "%2F512ca816-5cab-45a6-a676-1f47cfe7658e%2Fsignature-17_32_52.png",
+                    "%2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4"
+                    "%2F512ca816-5cab-45a6-a676-1f47cfe7658e%2Fsignature-17_32_52.png",
                     "filename": "wnosal/attachments/b83407aca1d647a5bf65a3383ee761d4/"
-                                "512ca816-5cab-45a6-a676-1f47cfe7658e/signature-17_32_52.png",
+                    "512ca816-5cab-45a6-a676-1f47cfe7658e/signature-17_32_52.png",
                     "instance": 101804069,
                     "download_medium_url": "https://kc.humanitarianresponse.info/media/medium?media_file=wnosal"
-                                           "%2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4"
-                                           "%2F512ca816-5cab-45a6-a676-1f47cfe7658e%2Fsignature-17_32_52.png",
+                    "%2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4"
+                    "%2F512ca816-5cab-45a6-a676-1f47cfe7658e%2Fsignature-17_32_52.png",
                     "id": 34814249,
                     "xform": 549831,
                 }
@@ -327,6 +325,11 @@ class TestKoboSaveValidatorsMethods(TestCase):
         }
     ]
 
+    def setUp(self) -> None:
+        from registration_datahub.validators import KoboProjectImportDataValidator
+
+        self.KoboProjectImportDataValidator = KoboProjectImportDataValidator
+
     def test_image_validator(self):
         # test for valid value
         valid_attachments = [
@@ -360,7 +363,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 "xform": 549819,
             }
         ]
-        result = KoboProjectImportDataValidator.image_validator(
+        result = self.KoboProjectImportDataValidator.image_validator(
             "signature-17_10_32.png", "consent_h_c", valid_attachments
         )
         self.assertIsNone(result, None)
@@ -397,19 +400,19 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 "xform": 449127,
             }
         ]
-        result = KoboProjectImportDataValidator.image_validator(
+        result = self.KoboProjectImportDataValidator.image_validator(
             "signature-17_10_32.png", "consent_h_c", invalid_attachments
         )
         expected = "Specified image signature-17_10_32.png for field " "consent_h_c is not in attachments"
         self.assertEqual(result, expected)
 
         # test for empty value
-        result = KoboProjectImportDataValidator.image_validator("signature-17_10_32.png", "consent_h_c", [])
+        result = self.KoboProjectImportDataValidator.image_validator("signature-17_10_32.png", "consent_h_c", [])
         expected = "Specified image signature-17_10_32.png for field " "consent_h_c is not in attachments"
         self.assertEqual(result, expected)
 
         # test invalid file extension
-        result = KoboProjectImportDataValidator.image_validator("signature-17_10_32.txt", "consent_h_c", [])
+        result = self.KoboProjectImportDataValidator.image_validator("signature-17_10_32.txt", "consent_h_c", [])
         expected = "Specified image signature-17_10_32.txt for field " "consent_h_c is not a valid image file"
         self.assertEqual(result, expected)
 
@@ -427,11 +430,19 @@ class TestKoboSaveValidatorsMethods(TestCase):
             None,
         )
         for valid_option in valid_geolocations:
-            self.assertIsNone(KoboProjectImportDataValidator.geopoint_validator(valid_option, "hh_geopoint_h_c",))
+            self.assertIsNone(
+                self.KoboProjectImportDataValidator.geopoint_validator(
+                    valid_option,
+                    "hh_geopoint_h_c",
+                )
+            )
 
         for invalid_option in invalid_geolocations:
             self.assertEqual(
-                KoboProjectImportDataValidator.geopoint_validator(invalid_option, "hh_geopoint_h_c",),
+                self.KoboProjectImportDataValidator.geopoint_validator(
+                    invalid_option,
+                    "hh_geopoint_h_c",
+                ),
                 f"Invalid geopoint {invalid_option} for field hh_geopoint_h_c",
             )
 
@@ -457,7 +468,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
             },
         )
         for data in test_data:
-            result = KoboProjectImportDataValidator.date_validator(*data["args"])
+            result = self.KoboProjectImportDataValidator.date_validator(*data["args"])
             self.assertEqual(result, data["expected"])
 
     def test_get_field_type_error(self):
@@ -506,7 +517,14 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 "expected": {"header": "sex_i_c", "message": "Invalid choice YES for field sex_i_c"},
             },
             # DATE
-            {"args": ("birth_date_i_c", "2020-05-28T17:13:31.590+02:00", attachments,), "expected": None},
+            {
+                "args": (
+                    "birth_date_i_c",
+                    "2020-05-28T17:13:31.590+02:00",
+                    attachments,
+                ),
+                "expected": None,
+            },
             {
                 "args": ("birth_date_i_c", "2020/05/28", attachments),
                 "expected": {
@@ -519,7 +537,11 @@ class TestKoboSaveValidatorsMethods(TestCase):
             # GEOPOINT
             {"args": ("hh_geopoint_h_c", "12.123 13.123", attachments), "expected": None},
             {
-                "args": ("hh_geopoint_h_c", "GeoPoint 12.123, 32.123", attachments,),
+                "args": (
+                    "hh_geopoint_h_c",
+                    "GeoPoint 12.123, 32.123",
+                    attachments,
+                ),
                 "expected": {
                     "header": "hh_geopoint_h_c",
                     "message": "Invalid geopoint GeoPoint 12.123, 32.123 " "for field hh_geopoint_h_c",
@@ -536,14 +558,14 @@ class TestKoboSaveValidatorsMethods(TestCase):
         )
 
         for data in test_data:
-            result = KoboProjectImportDataValidator._get_field_type_error(*data["args"])
+            result = self.KoboProjectImportDataValidator._get_field_type_error(*data["args"])
             self.assertEqual(result, data["expected"])
 
     def test_validate_fields(self):
-        result = KoboProjectImportDataValidator.validate_fields(self.VALID_JSON, "Afghanistan")
+        result = self.KoboProjectImportDataValidator.validate_fields(self.VALID_JSON, "Afghanistan")
         self.assertEqual(result, [])
 
-        result = KoboProjectImportDataValidator.validate_fields(self.INVALID_JSON, "Afghanistan")
+        result = self.KoboProjectImportDataValidator.validate_fields(self.INVALID_JSON, "Afghanistan")
 
         result.sort(key=itemgetter("header"))
 

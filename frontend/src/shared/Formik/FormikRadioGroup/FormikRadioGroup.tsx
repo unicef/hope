@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  Box,
   FormControlLabel,
   Radio,
   RadioGroup,
@@ -9,7 +10,6 @@ import styled from 'styled-components';
 
 const FormLabelContainer = styled.div`
   margin-bottom: ${({ theme }) => theme.spacing(3)}px;
-
   .MuiFormLabel-root {
     color: ${({ theme }) => theme.palette.text.primary};
   }
@@ -20,8 +20,9 @@ const FormLabelContainer = styled.div`
     color: ${({ theme }) => theme.palette.text.primary};
   }
 `;
+
 const StyledFormControl = styled.div`
-  margin-top: ${({ theme }) => theme.spacing(4)}px;
+  margin-top: ${({ theme }) => theme.spacing(6)}px;
   margin-bottom: ${({ theme }) => theme.spacing(2)}px;
 `;
 
@@ -44,12 +45,14 @@ export const FormikRadioGroup = ({
           id={`radioGroup-${field.name}`}
         >
           {otherProps.choices.map((each) => (
-            <FormControlLabel
-              key={each.value}
-              value={each.value}
-              label={each.name}
-              control={<Radio color='primary' />}
-            />
+            <Box mb={3}>
+              <FormControlLabel
+                key={each.value}
+                value={each.value}
+                label={each.name}
+                control={<Radio color='primary' />}
+              />
+            </Box>
           ))}
         </RadioGroup>
       </StyledFormControl>

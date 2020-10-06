@@ -2,7 +2,10 @@ import React from 'react';
 import styled from 'styled-components';
 import { useParams } from 'react-router-dom';
 import { PageHeader } from '../../../../components/PageHeader';
-import { useImportedHouseholdQuery } from '../../../../__generated__/graphql';
+import {
+  useHouseholdChoiceDataQuery,
+  useImportedHouseholdQuery,
+} from '../../../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../../../components/BreadCrumbs';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { decodeIdString } from '../../../../utils/utils';
@@ -26,8 +29,11 @@ export function RegistrationHouseholdDetailsPage(): React.ReactElement {
   const { data, loading } = useImportedHouseholdQuery({
     variables: { id },
   });
-
-  if (loading) return null;
+  const {
+    data: choicesData,
+    loading: choicesLoading,
+  } = useHouseholdChoiceDataQuery();
+  if (loading || choicesLoading) return null;
 
   const { importedHousehold } = data;
   const breadCrumbsItems: BreadCrumbsItem[] = [
@@ -49,7 +55,10 @@ export function RegistrationHouseholdDetailsPage(): React.ReactElement {
         title={`Household ID: ${decodeIdString(id)}`}
         breadCrumbs={breadCrumbsItems}
       />
-      <HouseholdDetails household={importedHousehold} />
+      <HouseholdDetails
+        choicesData={choicesData}
+        household={importedHousehold}
+      />
       <Container>
         <ImportedIndividualsTable
           household={importedHousehold.id}

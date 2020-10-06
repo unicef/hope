@@ -16,6 +16,7 @@ import { LabelizedField } from '../../../../components/LabelizedField';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { LoadingComponent } from '../../../../components/LoadingComponent';
 import { UniversalMoment } from '../../../../components/UniversalMoment';
+import { Missing } from '../../../../components/Missing';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px
@@ -81,6 +82,9 @@ export function RegistrationIndividualsBioData({
       </LabelizedField>
     </Grid>
   ));
+  const BorderBox = styled.div`
+    border-bottom: 1px solid #e1e1e1;
+  `;
 
   return (
     <Overview>
@@ -133,13 +137,15 @@ export function RegistrationIndividualsBioData({
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Phone Number'>
-            <div>{individual.phoneNo}</div>
+          <LabelizedField label='Marital Status'>
+            <div>{maritalStatusChoicesDict[individual.maritalStatus]}</div>
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Alternate Phone Number'>
-            <div>{individual.phoneNoAlternative || '-'}</div>
+          <LabelizedField label='Pregnant'>
+            <div>
+              <div>{individual.pregnant ? 'Yes' : 'No' || '-'}</div>
+            </div>
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
@@ -159,18 +165,25 @@ export function RegistrationIndividualsBioData({
             <div>{relationshipChoicesDict[individual.relationship]}</div>
           </LabelizedField>
         </Grid>
+        {!mappedIndividualDocuments.length &&
+        !mappedIdentities.length ? null : (
+          <Grid item xs={12}>
+            <BorderBox />
+          </Grid>
+        )}
         {mappedIndividualDocuments}
         {mappedIdentities}
+        <Grid item xs={12}>
+          <BorderBox />
+        </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Marital Status'>
-            <div>{maritalStatusChoicesDict[individual.maritalStatus]}</div>
+          <LabelizedField label='Phone Number'>
+            <div>{individual.phoneNo}</div>
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Pregnant'>
-            <div>
-              <div>{individual.pregnant ? 'Yes' : 'No' || '-'}</div>
-            </div>
+          <LabelizedField label='Alternate Phone Number'>
+            <div>{individual.phoneNoAlternative || '-'}</div>
           </LabelizedField>
         </Grid>
       </Grid>

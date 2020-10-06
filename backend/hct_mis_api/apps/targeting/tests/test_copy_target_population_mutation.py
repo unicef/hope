@@ -1,5 +1,8 @@
+from django.core.management import call_command
+
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
+from core.models import BusinessArea
 from core.utils import decode_id_string
 from household.fixtures import create_household
 from targeting.models import (
@@ -58,8 +61,11 @@ class TestCopyTargetPopulationMutation(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = UserFactory.create()
-
-        (household, individuals) = create_household({"size": 1, "residence_status": "CITIZEN"},)
+        call_command("loadbusinessareas")
+        business_area = BusinessArea.objects.first()
+        (household, individuals) = create_household(
+            {"size": 1, "residence_status": "CITIZEN", "business_area": business_area},
+        )
         cls.household = household
         tp = TargetPopulation(name="Original Target Population", status="APPROVED")
 

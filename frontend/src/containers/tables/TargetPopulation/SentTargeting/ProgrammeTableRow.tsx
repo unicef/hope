@@ -10,7 +10,7 @@ interface TargetPopulationHouseholdTableRowProps {
   household: HouseholdNode;
 }
 
-export function ProgrammeTableRow({ household }) {
+export function ProgrammeTableRow({ household }): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
 
