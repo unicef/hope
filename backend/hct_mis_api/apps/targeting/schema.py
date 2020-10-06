@@ -236,14 +236,22 @@ class Query(graphene.ObjectType):
         if target_population_model.status == "APPROVED":
             if targeting_criteria is None:
                 if target_population_model.final_list_targeting_criteria:
-                    return prefetch_selections(
-                        target_population_model.households.filter(
-                            target_population_model.final_list_targeting_criteria.get_query()
-                        ),
-                        target_population_model,
-                    ).distinct()
+                    return (
+                        prefetch_selections(
+                            target_population_model.households.filter(
+                                target_population_model.final_list_targeting_criteria.get_query()
+                            ),
+                            target_population_model,
+                        )
+                        .order_by("created_at")
+                        .distinct()
+                    )
                 else:
-                    return prefetch_selections(target_population_model.households, target_population_model,).all()
+                    return (
+                        prefetch_selections(target_population_model.households, target_population_model,)
+                        .order_by("created_at")
+                        .all()
+                    )
             return (
                 prefetch_selections(
                     target_population_model.households.filter(
@@ -251,15 +259,20 @@ class Query(graphene.ObjectType):
                     ),
                     target_population_model,
                 )
+                .order_by("created_at")
                 .all()
                 .distinct()
             )
-        return target_population_model.final_list.prefetch_related(
-            Prefetch(
-                "selections",
-                queryset=target_models.HouseholdSelection.objects.filter(target_population=target_population_model),
+        return (
+            target_population_model.final_list.order_by("created_at")
+            .prefetch_related(
+                Prefetch(
+                    "selections",
+                    queryset=target_models.HouseholdSelection.objects.filter(target_population=target_population_model),
+                )
             )
-        ).all()
+            .all()
+        )
 
     def resolve_golden_record_by_targeting_criteria(parent, info, targeting_criteria, **kwargs):
         return prefetch_selections(

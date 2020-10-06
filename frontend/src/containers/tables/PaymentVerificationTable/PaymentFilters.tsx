@@ -15,24 +15,7 @@ import {
   ProgramNode,
   useCashPlanVerificationStatusChoicesQuery,
 } from '../../../__generated__/graphql';
-
-const Container = styled.div`
-  display: flex;
-  flex: 1;
-  width: 100%;
-  background-color: #fff;
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
-  flex-direction: row;
-  align-items: center;
-  border-color: #b1b1b5;
-  border-bottom-width: 1px;
-  border-bottom-style: solid;
-
-  && > div {
-    margin: 5px;
-  }
-`;
+import { ContainerWithBorder } from '../../../components/ContainerWithBorder';
 
 const StyledFormControl = styled(FormControl)`
   width: 232px;
@@ -71,7 +54,7 @@ export function PaymentFilters({
   }
 
   return (
-    <Container>
+    <ContainerWithBorder>
       <Grid container spacing={3}>
         <Grid item>
           <SearchTextField
@@ -177,7 +160,7 @@ export function PaymentFilters({
               })
             }
             value={filter.startDate || null}
-            format='D MMM YYYY'
+            format='YYYY-MM-DD'
             InputAdornmentProps={{ position: 'end' }}
           />
         </Grid>
@@ -193,7 +176,7 @@ export function PaymentFilters({
               onFilterChange({ ...filter, endDate: moment(date).toISOString() })
             }
             value={filter.endDate || null}
-            format='D MMM YYYY'
+            format='YYYY-MM-DD'
             InputAdornmentProps={{ position: 'end' }}
           />
         </Grid>
@@ -227,6 +210,6 @@ export function PaymentFilters({
           </StyledFormControl>
         </Grid>
       </Grid>
-    </Container>
+    </ContainerWithBorder>
   );
 }

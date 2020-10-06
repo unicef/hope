@@ -5,29 +5,14 @@ import {
   InputAdornment,
   MenuItem,
   FormControl,
+  Grid,
+  Box,
 } from '@material-ui/core';
 import { Person, Search, Group } from '@material-ui/icons';
 import Select from '../../shared/Select';
 import InputLabel from '../../shared/InputLabel';
 import { TARGETING_STATES } from '../../utils/constants';
-
-const Container = styled.div`
-  display: flex;
-  flex: 1;
-  width: 100%;
-  background-color: #fff;
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
-  flex-direction: row;
-  align-items: center;
-  border-color: #b1b1b5;
-  border-bottom-width: 1px;
-  border-bottom-style: solid;
-
-  && > div {
-    margin: 5px;
-  }
-`;
+import { ContainerWithBorder } from '../ContainerWithBorder';
 
 const TextContainer = styled(TextField)`
   .MuiFilledInput-root {
@@ -80,6 +65,10 @@ const StyledFormControl = styled(FormControl)`
 const StartInputAdornment = styled(InputAdornment)`
   margin-right: 0;
 `;
+const FieldLabel = styled.span`
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.6);
+`;
 
 interface HouseholdFiltersProps {
   //targetPopulations: TargetPopulationNode[],
@@ -94,91 +83,105 @@ export function TargetPopulationFilters({
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
   return (
-    <Container>
-      <TextContainer
-        placeholder='Search'
-        variant='outlined'
-        margin='dense'
-        onChange={(e) => handleFilterChange(e, 'name')}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position='start'>
-              <Search />
-            </InputAdornment>
-          ),
-        }}
-      />
-      <StyledFormControl variant='outlined' margin='dense'>
-        <InputLabel>Status</InputLabel>
-        <Select
-          /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
-          // @ts-ignore
-          onChange={(e) => handleFilterChange(e, 'status')}
-          variant='outlined'
-          label='Programme'
-          InputProps={{
-            startAdornment: (
-              <StartInputAdornment position='start'>
-                <Person />
-              </StartInputAdornment>
-            ),
-          }}
-        >
-          <MenuItem value=''>{TARGETING_STATES.NONE}</MenuItem>
-          <MenuItem value='DRAFT'>{TARGETING_STATES.DRAFT}</MenuItem>
-          <MenuItem value='APPROVED'>{TARGETING_STATES.APPROVED}</MenuItem>
-          <MenuItem value='FINALIZED'>{TARGETING_STATES.FINALIZED}</MenuItem>
-        </Select>
-      </StyledFormControl>
-      <TextContainer
-        id='minFilter'
-        value={filter.numIndividuals.min}
-        variant='outlined'
-        margin='dense'
-        placeholder='Number of Household'
-        onChange={(e) =>
-          onFilterChange({
-            ...filter,
-            numIndividuals: {
-              ...filter.numIndividuals,
-              min: e.target.value || undefined,
-            },
-          })
-        }
-        type='number'
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position='start'>
-              <Group />
-            </InputAdornment>
-          ),
-        }}
-      />
-      to
-      <TextContainer
-        id='maxFilter'
-        value={filter.numIndividuals.max}
-        variant='outlined'
-        margin='dense'
-        placeholder='Number of Household'
-        onChange={(e) =>
-          onFilterChange({
-            ...filter,
-            numIndividuals: {
-              ...filter.numIndividuals,
-              max: e.target.value || undefined,
-            },
-          })
-        }
-        type='number'
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position='start'>
-              <Group />
-            </InputAdornment>
-          ),
-        }}
-      />
-    </Container>
+    <ContainerWithBorder>
+      <Grid container alignItems='flex-end' spacing={3}>
+        <Grid item>
+          <TextContainer
+            placeholder='Search'
+            variant='outlined'
+            margin='dense'
+            onChange={(e) => handleFilterChange(e, 'name')}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position='start'>
+                  <Search />
+                </InputAdornment>
+              ),
+            }}
+          />
+        </Grid>
+        <Grid item>
+          <StyledFormControl variant='outlined' margin='dense'>
+            <InputLabel>Status</InputLabel>
+            <Select
+              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
+              // @ts-ignore
+              onChange={(e) => handleFilterChange(e, 'status')}
+              variant='outlined'
+              label='Programme'
+              InputProps={{
+                startAdornment: (
+                  <StartInputAdornment position='start'>
+                    <Person />
+                  </StartInputAdornment>
+                ),
+              }}
+            >
+              <MenuItem value=''>{TARGETING_STATES.NONE}</MenuItem>
+              <MenuItem value='DRAFT'>{TARGETING_STATES.DRAFT}</MenuItem>
+              <MenuItem value='APPROVED'>{TARGETING_STATES.APPROVED}</MenuItem>
+              <MenuItem value='FINALIZED'>
+                {TARGETING_STATES.FINALIZED}
+              </MenuItem>
+            </Select>
+          </StyledFormControl>
+        </Grid>
+        <Grid item>
+          <Box display='flex' flexDirection='column'>
+            <FieldLabel>Number of Household</FieldLabel>
+            <TextContainer
+              id='minFilter'
+              value={filter.numIndividuals.min}
+              variant='outlined'
+              margin='dense'
+              placeholder='From'
+              onChange={(e) =>
+                onFilterChange({
+                  ...filter,
+                  numIndividuals: {
+                    ...filter.numIndividuals,
+                    min: e.target.value || undefined,
+                  },
+                })
+              }
+              type='number'
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position='start'>
+                    <Group />
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Box>
+        </Grid>
+        <Grid item>
+          <TextContainer
+            id='maxFilter'
+            value={filter.numIndividuals.max}
+            variant='outlined'
+            margin='dense'
+            placeholder='To'
+            onChange={(e) =>
+              onFilterChange({
+                ...filter,
+                numIndividuals: {
+                  ...filter.numIndividuals,
+                  max: e.target.value || undefined,
+                },
+              })
+            }
+            type='number'
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position='start'>
+                  <Group />
+                </InputAdornment>
+              ),
+            }}
+          />
+        </Grid>
+      </Grid>
+    </ContainerWithBorder>
   );
 }

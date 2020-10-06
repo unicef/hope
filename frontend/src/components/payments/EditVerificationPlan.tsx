@@ -83,8 +83,8 @@ export function EditVerificationPlan({
   }, [verification.sampling]);
 
   const initialValues = {
-    confidenceInterval: verification.confidenceInterval * 100 || 1,
-    marginOfError: verification.marginOfError * 100 || 1,
+    confidenceInterval: verification.confidenceInterval * 100 || 95,
+    marginOfError: verification.marginOfError * 100 || 5,
     filterAgeMin: verification.ageFilter?.min || 0,
     filterAgeMax: verification.ageFilter?.max || 0,
     filterSex: verification.sexFilter || '',
@@ -317,7 +317,7 @@ export function EditVerificationPlan({
                     <Field
                       name='confidenceInterval'
                       label='Confidence Interval'
-                      min={1}
+                      min={90}
                       max={99}
                       component={FormikSliderField}
                       suffix='%'
@@ -325,8 +325,8 @@ export function EditVerificationPlan({
                     <Field
                       name='marginOfError'
                       label='Margin of Error'
-                      min={1}
-                      max={10}
+                      min={0}
+                      max={9}
                       component={FormikSliderField}
                       suffix='%'
                     />
