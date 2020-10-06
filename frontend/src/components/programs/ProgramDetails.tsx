@@ -10,24 +10,8 @@ import {
 } from '../../__generated__/graphql';
 import { MiśTheme } from '../../theme';
 import { UniversalMoment } from '../UniversalMoment';
-
-const Container = styled.div`
-  display: flex;
-  flex: 1;
-  width: 100%;
-  background-color: #fff;
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
-  flex-direction: column;
-  border-color: #b1b1b5;
-  border-bottom-width: 1px;
-  border-bottom-style: solid;
-`;
-const OverviewContainer = styled.div`
-  display: flex;
-  align-items: center;
-  flex-direction: row;
-`;
+import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
+import { OverviewContainer } from '../OverviewContainer';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -73,7 +57,7 @@ export function ProgramDetails({
   const programSectorChoicesDict = choicesToDict(programSectorChoices);
   const programScopeChoicesDict = choicesToDict(programScopeChoices);
   return (
-    <Container data-cy='program-details-container'>
+    <ContainerColumnWithBorder data-cy='program-details-container'>
       <Title>
         <Typography variant='h6'>Programme Details</Typography>
       </Title>
@@ -155,6 +139,6 @@ export function ProgramDetails({
           </LabelizedField>
         </NumberOfHouseHolds>
       </OverviewContainer>
-    </Container>
+    </ContainerColumnWithBorder>
   );
 }

@@ -1055,6 +1055,7 @@ type IndividualNode implements Node {
   deduplicationBatchResults: [DeduplicationResultNode]
   importedIndividualId: UUID
   sanctionListPossibleMatch: Boolean!
+  sanctionListLastCheck: DateTime
   pregnant: Boolean!
   representedHouseholds(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   headingHousehold: HouseholdNode
@@ -1389,9 +1390,7 @@ enum ProgramScope {
 enum ProgramSector {
   CHILD_PROTECTION
   EDUCATION
-  GENDER
   HEALTH
-  HIV_AIDS
   MULTI_PURPOSE
   NUTRITION
   SOCIAL_POLICY
@@ -1425,8 +1424,9 @@ type Query {
   allGroupsWithFields: [GroupAttributeNode]
   koboProject(uid: String!, businessAreaSlug: String!): KoboAssetObject
   allKoboProjects(businessAreaSlug: String!, onlyDeployed: Boolean, before: String, after: String, first: Int, last: Int): KoboAssetObjectConnection
+  cashAssistUrlPrefix: String
   program(id: ID!): ProgramNode
-  allPrograms(before: String, after: String, first: Int, last: Int, id: UUID, status: String, businessArea: String): ProgramNodeConnection
+  allPrograms(before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, orderBy: String): ProgramNodeConnection
   cashPlan(id: ID!): CashPlanNode
   allCashPlans(before: String, after: String, first: Int, last: Int, program: ID, verificationStatus: String, assistanceThrough: String, assistanceThrough_Icontains: String, deliveryType: String, startDate: DateTime, startDate_Lte: DateTime, startDate_Gte: DateTime, endDate: DateTime, endDate_Lte: DateTime, endDate_Gte: DateTime, search: String, orderBy: String): CashPlanNodeConnection
   programStatusChoices: [ChoiceObject]

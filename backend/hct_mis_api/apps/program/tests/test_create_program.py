@@ -14,7 +14,6 @@ class TestCreateProgram(APITestCase):
           status
           startDate
           endDate
-          programCaId
           budget
           description
           frequencyOfPayments
@@ -37,7 +36,6 @@ class TestCreateProgram(APITestCase):
                 "name": "Test",
                 "startDate": "2019-12-20",
                 "endDate": "2021-12-20",
-                "programCaId": "5e0a38c6-7bcb-4b4a-b8e0-311e8c694ae3",
                 "budget": 20000000,
                 "description": "my description of program",
                 "frequencyOfPayments": "REGULAR",

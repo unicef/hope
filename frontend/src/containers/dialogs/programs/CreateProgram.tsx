@@ -5,7 +5,6 @@ import { ProgramForm } from '../../forms/ProgramForm';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/AllPrograms';
-import { UniversalMoment } from '../../../components/UniversalMoment';
 
 export function CreateProgram(): ReactElement {
   const [open, setOpen] = useState(false);
@@ -18,12 +17,14 @@ export function CreateProgram(): ReactElement {
       variables: {
         programData: {
           ...values,
-          startDate: <UniversalMoment>{values.startDate}</UniversalMoment>,
-          endDate: <UniversalMoment>{values.endDate}</UniversalMoment>,
+          startDate: values.startDate,
+          endDate: values.endDate,
           businessAreaSlug: businessArea,
         },
       },
-      refetchQueries: () => [{ query: ALL_PROGRAMS_QUERY }],
+      refetchQueries: () => [
+        { query: ALL_PROGRAMS_QUERY, variables: { businessArea } },
+      ],
     });
     if (!response.errors && response.data.createProgram) {
       showMessage('Programme created.', {

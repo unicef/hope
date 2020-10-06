@@ -8,6 +8,8 @@ import { Drawer } from '../components/Drawer/Drawer';
 import { AppBar } from '../components/AppBar';
 import { isAuthenticated } from '../utils/utils';
 import { useSnackbar } from '../hooks/useSnackBar';
+import { GrievanceDetails } from '../components/Grievances/GrievanceDetails';
+import { GrievancesList } from '../components/Grievances/GrievancesList';
 import { DashboardPage } from './pages/DashboardPage';
 import { ProgramsPage } from './pages/ProgramsPage';
 import { ProgramDetailsPage } from './pages/ProgramDetailsPage';
@@ -28,7 +30,7 @@ import { PaymentVerificationPage } from './pages/PaymentVerificationPage';
 import { PaymentVerificationDetailsPage } from './pages/PaymentVerificationDetailsPage';
 import { VerificationRecordDetailsPage } from './pages/VerificationRecordDetailsPage';
 import { UsersList } from './pages/UsersList';
-// import { UsersList } from './pages/UsersList';
+import { CreateGrievance } from '../components/Grievances/CreateGrievance';
 
 const Root = styled.div`
   display: flex;
@@ -98,6 +100,15 @@ export function HomeRouter(): React.ReactElement {
           </Route>
           <Route path='/:businessArea/payment-verification/:id'>
             <PaymentVerificationDetailsPage />
+          </Route>
+          <Route path='/:businessArea/grievance-and-feedback/new-ticket'>
+            <CreateGrievance />
+          </Route>
+          <Route path='/:businessArea/grievance-and-feedback/:id'>
+            <GrievanceDetails />
+          </Route>
+          <Route path='/:businessArea/grievance-and-feedback'>
+            <GrievancesList />
           </Route>
           <Route path='/:businessArea/population/household'>
             <PopulationHouseholdPage />

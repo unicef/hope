@@ -105,7 +105,6 @@ class Countries:
         ("India", "IN", "IND",),
         ("Indonesia", "ID", "IDN",),
         ("Iran, Islamic Republic of", "IR", "IRN",),
-        ("Iran (Islamic Republic of", "IR", "IRN)",),
         ("Iraq", "IQ", "IRQ",),
         ("Ireland", "IE", "IRL",),
         ("Isle of Man", "IM", "IMN",),

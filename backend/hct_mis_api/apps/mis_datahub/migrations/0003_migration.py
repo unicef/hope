@@ -5,17 +5,23 @@ from django.utils import timezone
 
 
 def mark_as_sent(apps, schema_editor):
-    DHProgram = apps.get_model("mis_datahub", "Program")
-    Program = apps.get_model("program", "Program")
-    mis_ids = list(DHProgram.objects.values_list("mis_id", flat=True))
-    Program.objects.filter(id__in=mis_ids).update(last_sync_at=timezone.now())
+    try:
+        DHProgram = apps.get_model("mis_datahub", "Program")
+        Program = apps.get_model("program", "Program")
+        mis_ids = list(DHProgram.objects.values_list("mis_id", flat=True))
+        Program.objects.filter(id__in=mis_ids).update(last_sync_at=timezone.now())
+    except:
+        pass
 
 
 def reverse_mark(apps, schema_editor):
-    DHProgram = apps.get_model("mis_datahub", "Program")
-    Program = apps.get_model("program", "Program")
-    mis_ids = list(DHProgram.objects.values_list("mis_id", flat=True))
-    Program.objects.filter(id__in=mis_ids).update(last_sync_at=None)
+    try:
+        DHProgram = apps.get_model("mis_datahub", "Program")
+        Program = apps.get_model("program", "Program")
+        mis_ids = list(DHProgram.objects.values_list("mis_id", flat=True))
+        Program.objects.filter(id__in=mis_ids).update(last_sync_at=None)
+    except:
+        pass
 
 
 class Migration(migrations.Migration):
