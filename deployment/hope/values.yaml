@@ -230,6 +230,13 @@ redis:
   usePassword: false
   redis:
     usePassword: false
+    resources:
+      limits:
+        cpu: "250m"
+        memory: "256Mi"
+      requests:
+        cpu: "250m"
+        memory: "256Mi"
   cluster:
     slaveCount: 0
     enabled: false
@@ -256,6 +263,17 @@ elasticsearch:
       requests:
         cpu: "1"
         memory: "1024Mi"
+    nodeSelector:
+      agentpool: hope
+  data:
+    replicas: 1
+    resources:
+      limits:
+        cpu: "250m"
+        memory: "256Mi"
+      requests:
+        cpu: "250m"
+        memory: "256Mi"
     nodeSelector:
       agentpool: hope
   coordinating:
@@ -299,8 +317,6 @@ elasticsearch:
         memory: "256Mi"
     nodeSelector:
       agentpool: hope
-  data:
-    replicas: 1
   plugins: "analysis-phonetic"
   resources:
     limits:
@@ -353,9 +369,23 @@ airflow:
     annotations: []
   redis:
     usePassword: false
+    resources:
+      limits:
+        cpu: "250m"
+        memory: "256Mi"
+      requests:
+        cpu: "250m"
+        memory: "256Mi"
   airflow:
     redis:
       usePassword: false
+      resources:
+        limits:
+          cpu: "250m"
+          memory: "256Mi"
+        requests:
+          cpu: "250m"
+          memory: "256Mi"
     baseUrl: airflow.test
     extraEnvVarsCM: hope-airflow-extra
     extraEnvVarsSecret: hope-airflow-extra
