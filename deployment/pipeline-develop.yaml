@@ -96,6 +96,7 @@ stages:
                mv deployment/docker-compose.tst.yml docker-compose.tst.yml
                mv $(Agent.TempDirectory)/.env-django-test .env
                cp .env airflow/config/.env_airflow
+               echo uniappsk8sdevacr.azurecr.io/$(Docker.airflow.repository):$(Build.BuildId)
 
           - task: DockerCompose@0
             displayName: "Run tests"
