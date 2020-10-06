@@ -40,7 +40,6 @@ services:
       - redis
       - cash_assist_datahub_db
       - registration_datahub_db
-      - elasticsearch
       - elasticsearch_test
   db:
     image: mdillon/postgis:9.5-alpine
@@ -74,9 +73,6 @@ services:
 
   airflow_webserver:
     image: ${airflow_image}
-    build:
-      context: ./airflow
-      dockerfile: local.Dockerfile
     ports:
       - "4200:8080"
     env_file:
@@ -106,10 +102,7 @@ services:
       retries: 3
 
   airflow_flower:
-    image: unicef/hct-airflow-flower
-    build:
-      context: ./airflow
-      dockerfile: local.Dockerfile
+    image: ${airflow_image}
     restart: always
     depends_on:
       - airflow_db
@@ -126,10 +119,7 @@ services:
     command: flower
 
   airflow_scheduler:
-    image: unicef/hct-airflow-scheduler
-    build:
-      context: ./airflow
-      dockerfile: local.Dockerfile
+    image: ${airflow_image}
     env_file:
       - ./airflow/config/.env_airflow
     restart: always
@@ -146,10 +136,7 @@ services:
       - airflow_db
 
   airflow_worker:
-    image: unicef/hct-airflow-worker
-    build:
-      context: ./airflow
-      dockerfile: local.Dockerfile
+    image: ${airflow_image}
     env_file:
       - ./airflow/config/.env_airflow
     restart: always
@@ -159,26 +146,6 @@ services:
       - ./backend:/usr/local/airflow/backend
       - backend-data:/usr/local/airflow/data
     command: worker
-
-  elasticsearch:
-    image: unicef/hct-elasticsearch
-    build:
-      context: elasticsearch
-      dockerfile: Dockerfile
-    environment:
-      - node.name=es01
-      - cluster.name=es-docker-cluster
-      - cluster.initial_master_nodes=es01
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    volumes:
-      - data_es:/usr/share/elasticsearch/data
-    ports:
-      - 9200:9200
 
   elasticsearch_test:
     image: unicef/hct-elasticsearch-test
