@@ -12,6 +12,7 @@ from graphql import GraphQLError
 from core.filters import filter_age
 from core.permissions import is_authenticated
 from core.utils import decode_id_string
+from grievance.schema import GrievanceTicketNode
 from household.models import Individual
 from payment.inputs import (
     CreatePaymentVerificationInput,
@@ -26,12 +27,16 @@ from program.models import CashPlan
 from program.schema import CashPlanNode
 
 
-class CreatePaymentVerificationMutation(graphene.Mutation):
+class CreateGrievanceTicketInput(graphene.InputObjectType):
+    pass
 
-    cash_plan = graphene.Field(CashPlanNode)
+
+class CreateGrievanceTicketMutation(graphene.Mutation):
+
+    cash_plan = graphene.Field(GrievanceTicketNode)
 
     class Arguments:
-        input = CreatePaymentVerificationInput(required=True)
+        input = CreateGrievanceTicketInput(required=True)
 
     @staticmethod
     def verify_required_arguments(input, field_name, options):
@@ -68,4 +73,4 @@ class CreatePaymentVerificationMutation(graphene.Mutation):
 
 
 class Mutations(graphene.ObjectType):
-    create_cash_plan_payment_verification = CreatePaymentVerificationMutation.Field()
+    create_grievance_ticket = CreateGrievanceTicketMutation.Field()
