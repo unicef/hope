@@ -26,9 +26,6 @@ services:
       - .env
     environment:
       - REDIS_INSTANCE=redis:6379
-    build:
-      context: ./backend
-      dockerfile: ./Dockerfile
     ports:
       - "8080:8000"
     volumes:
