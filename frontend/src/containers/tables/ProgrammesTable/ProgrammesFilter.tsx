@@ -1,4 +1,5 @@
 import {
+  Box,
   FormControl,
   Grid,
   InputAdornment,
@@ -54,7 +55,10 @@ const SearchTextField = styled(TextField)`
     min-width: 150px;
   }
 `;
-
+const FieldLabel = styled.span`
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.6);
+`;
 interface ProgrammesFilterProps {
   onFilterChange;
   filter;
@@ -178,39 +182,41 @@ export function ProgrammesFilters({
           </Grid>
         </Grid>
         <Grid item xs={12}>
-          <Grid container alignItems='center' spacing={3}>
+          <Grid container alignItems='flex-end' spacing={3}>
             <Grid item>
-              <TextContainer
-                value={filter.numberOfHouseholds.min}
-                variant='outlined'
-                margin='dense'
-                label='Num. of Households'
-                onChange={(e) =>
-                  onFilterChange({
-                    ...filter,
-                    numberOfHouseholds: {
-                      ...filter.numberOfHouseholds,
-                      min: e.target.value || undefined,
-                    },
-                  })
-                }
-                type='number'
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position='start'>
-                      <GroupIcon />
-                    </InputAdornment>
-                  ),
-                }}
-              />
+              <Box display='flex' flexDirection='column'>
+                <FieldLabel>Num. of Households</FieldLabel>
+                <TextContainer
+                  placeholder='From'
+                  value={filter.numberOfHouseholds.min}
+                  variant='outlined'
+                  margin='dense'
+                  onChange={(e) =>
+                    onFilterChange({
+                      ...filter,
+                      numberOfHouseholds: {
+                        ...filter.numberOfHouseholds,
+                        min: e.target.value || undefined,
+                      },
+                    })
+                  }
+                  type='number'
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position='start'>
+                        <GroupIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Box>
             </Grid>
-            <Grid item>to</Grid>
             <Grid item>
               <TextContainer
                 value={filter.numberOfHouseholds.max}
                 variant='outlined'
                 margin='dense'
-                label='Num. of Households'
+                placeholder='To'
                 onChange={(e) =>
                   onFilterChange({
                     ...filter,
@@ -231,30 +237,32 @@ export function ProgrammesFilters({
               />
             </Grid>
             <Grid item>
-              <TextContainer
-                value={filter.budget.min}
-                variant='outlined'
-                margin='dense'
-                label='Budget'
-                onChange={(e) =>
-                  onFilterChange({
-                    ...filter,
-                    budget: {
-                      ...filter.budget,
-                      min: e.target.value || undefined,
-                    },
-                  })
-                }
-                type='number'
-              />
+              <Box display='flex' flexDirection='column'>
+                <FieldLabel>Budget (USD)</FieldLabel>
+                <TextContainer
+                  value={filter.budget.min}
+                  variant='outlined'
+                  margin='dense'
+                  placeholder='From'
+                  onChange={(e) =>
+                    onFilterChange({
+                      ...filter,
+                      budget: {
+                        ...filter.budget,
+                        min: e.target.value || undefined,
+                      },
+                    })
+                  }
+                  type='number'
+                />
+              </Box>
             </Grid>
-            <Grid item>to</Grid>
             <Grid item>
               <TextContainer
                 value={filter.budget.max}
                 variant='outlined'
                 margin='dense'
-                label='Budget'
+                placeholder='To'
                 onChange={(e) =>
                   onFilterChange({
                     ...filter,

@@ -7,22 +7,9 @@ import { LabelizedField } from '../../../components/LabelizedField';
 import { UniversalMoment } from '../../../components/UniversalMoment';
 import { RegistrationDetailedFragment } from '../../../__generated__/graphql';
 import { MiśTheme } from '../../../theme';
+import { ContainerColumnWithBorder } from '../../../components/ContainerColumnWithBorder';
+import { OverviewContainer } from '../../../components/OverviewContainer';
 import { DedupeBox } from './DedupeBox';
-
-const Container = styled.div`
-  width: 100%;
-  background-color: #fff;
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
-  border-color: #b1b1b5;
-  border-bottom-width: 1px;
-  border-bottom-style: solid;
-`;
-const OverviewContainer = styled.div`
-  display: flex;
-  align-items: center;
-  flex-direction: row;
-`;
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -47,6 +34,9 @@ const BigValue = styled.div`
 
 const Error = styled.p`
   color: ${({ theme }: { theme: MiśTheme }) => theme.hctPalette.red};
+`;
+const Title = styled.div`
+  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
 interface RegistrationDetailsProps {
@@ -90,8 +80,10 @@ export function RegistrationDetails({
     },
   ];
   return (
-    <Container>
-      <Typography variant='h6'>Import Details</Typography>
+    <ContainerColumnWithBorder>
+      <Title>
+        <Typography variant='h6'>Import Details</Typography>
+      </Title>
       <OverviewContainer>
         <Grid alignItems='center' container>
           <Grid item xs={4}>
@@ -169,6 +161,6 @@ export function RegistrationDetails({
           )}
         </Grid>
       </OverviewContainer>
-    </Container>
+    </ContainerColumnWithBorder>
   );
 }

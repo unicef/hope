@@ -10,24 +10,7 @@ import { MiśTheme } from '../../../../theme';
 import { Missing } from '../../../../components/Missing';
 import { choicesToDict } from '../../../../utils/utils';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-
-const Container = styled.div`
-  display: flex;
-  flex: 1;
-  width: 100%;
-  background-color: #fff;
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
-  flex-direction: column;
-  align-items: center;
-  border-color: #b1b1b5;
-  border-bottom-width: 1px;
-  border-bottom-style: solid;
-
-  && > div {
-    margin: 5px;
-  }
-`;
+import { ContainerColumnWithBorder } from '../../../../components/ContainerColumnWithBorder';
 
 const Overview = styled.div`
   display: flex;
@@ -59,7 +42,7 @@ export function HouseholdDetails({
     choicesData.residenceStatusChoices,
   );
   return (
-    <Container>
+    <ContainerColumnWithBorder>
       <Title>
         <Typography variant='h6'>Details</Typography>
       </Title>
@@ -111,6 +94,6 @@ export function HouseholdDetails({
           </Grid>
         </Grid>
       </Overview>
-    </Container>
+    </ContainerColumnWithBorder>
   );
 }

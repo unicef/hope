@@ -9,24 +9,7 @@ import InputLabel from '../../../shared/InputLabel';
 import TextField from '../../../shared/TextField';
 import Select from '../../../shared/Select';
 import { UsersAutocomplete } from './UsersAutocomplete';
-
-const Container = styled.div`
-  display: flex;
-  flex: 1;
-  width: 100%;
-  background-color: #fff;
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
-  flex-direction: row;
-  align-items: center;
-  border-color: #b1b1b5;
-  border-bottom-width: 1px;
-  border-bottom-style: solid;
-
-  && > div {
-    margin: 5px;
-  }
-`;
+import { ContainerWithBorder } from '../../../components/ContainerWithBorder';
 
 const StyledFormControl = styled(FormControl)`
   width: 232px;
@@ -57,7 +40,7 @@ export function RegistrationFilters({
   }
 
   return (
-    <Container>
+    <ContainerWithBorder>
       <StyledTextField
         variant='outlined'
         label='Search'
@@ -120,6 +103,6 @@ export function RegistrationFilters({
           })}
         </Select>
       </StyledFormControl>
-    </Container>
+    </ContainerWithBorder>
   );
 }
