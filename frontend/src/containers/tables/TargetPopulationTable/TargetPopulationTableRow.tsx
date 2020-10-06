@@ -21,7 +21,9 @@ interface TargetPopulationTableRowProps {
   targetPopulation: TargetPopulationNode;
 }
 
-export function TargetPopulationTableRow({ targetPopulation }) {
+export function TargetPopulationTableRow({
+  targetPopulation,
+}): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
 
