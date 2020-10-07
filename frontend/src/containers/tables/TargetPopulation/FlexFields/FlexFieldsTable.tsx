@@ -109,20 +109,13 @@ export const FlexFieldsTable = ({
         />
         <TableBody>
           {orderResults().map((row) => (
-            <>
-              <TableRow key={row.id}>
-                <StyledHeaderCell>
-                  <b>{row.labelEn}</b>
-                </StyledHeaderCell>
-              </TableRow>
-              <TableRow>
-                <StyledCell>{row.labelEn}</StyledCell>
-                <TableCell>{row.associatedWith}</TableCell>
-                <TableCell>
-                  {row.isFlexField ? 'Flex field' : 'Core field'}
-                </TableCell>
-              </TableRow>
-            </>
+            <TableRow key={row.id}>
+              <StyledCell>{row.labelEn}</StyledCell>
+              <TableCell>{row.associatedWith}</TableCell>
+              <TableCell>
+                {row.isFlexField ? 'Flex field' : 'Core field'}
+              </TableCell>
+            </TableRow>
           ))}
         </TableBody>
       </Table>
