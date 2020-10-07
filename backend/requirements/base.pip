@@ -11,7 +11,6 @@ social-auth-app-django==3.1.0
 graphene-file-upload==1.2.2
 django-mptt==0.11.0
 django-extensions==2.2.6
-pygraphviz==1.5
 git+https://github.com/Tivix/django-auditlog.git@master#egg=django-auditlog
 elasticsearch-dsl>=7.0.0,<8.0.0
 django-elasticsearch-dsl==7.1.4
@@ -41,4 +40,5 @@ django-cors-headers==3.2.0
 
 # Gunicorn
 gunicorn==20.0.4
-gevent==1.4.0
+gevent==20.9.0
+
