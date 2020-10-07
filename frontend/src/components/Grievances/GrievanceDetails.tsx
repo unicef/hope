@@ -9,8 +9,6 @@ import { LabelizedField } from '../LabelizedField';
 import { Missing } from '../Missing';
 import { OverviewContainer } from '../OverviewContainer';
 import { PageHeader } from '../PageHeader';
-import { StatusBox } from '../StatusBox';
-import { UniversalMoment } from '../UniversalMoment';
 import { Notes } from './Notes';
 import { PastTickets } from './PastTickets';
 
