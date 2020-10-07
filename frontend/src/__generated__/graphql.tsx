@@ -4956,6 +4956,17 @@ export type UploadImportDataXlsxFileMutation = (
   )> }
 );
 
+export type AllFieldsAttributesQueryVariables = {};
+
+
+export type AllFieldsAttributesQuery = (
+  { __typename?: 'Query' }
+  & { allFieldsAttributes: Maybe<Array<Maybe<(
+    { __typename?: 'FieldAttributeNode' }
+    & Pick<FieldAttributeNode, 'id' | 'name' | 'labelEn' | 'associatedWith' | 'isFlexField'>
+  )>>> }
+);
+
 export type CandidateHouseholdsListByTargetingCriteriaQueryVariables = {
   targetPopulation: Scalars['ID'],
   first?: Maybe<Scalars['Int']>,
@@ -9476,6 +9487,59 @@ export function useUploadImportDataXlsxFileMutation(baseOptions?: ApolloReactHoo
 export type UploadImportDataXlsxFileMutationHookResult = ReturnType<typeof useUploadImportDataXlsxFileMutation>;
 export type UploadImportDataXlsxFileMutationResult = ApolloReactCommon.MutationResult<UploadImportDataXlsxFileMutation>;
 export type UploadImportDataXlsxFileMutationOptions = ApolloReactCommon.BaseMutationOptions<UploadImportDataXlsxFileMutation, UploadImportDataXlsxFileMutationVariables>;
+export const AllFieldsAttributesDocument = gql`
+    query AllFieldsAttributes {
+  allFieldsAttributes {
+    id
+    name
+    labelEn
+    associatedWith
+    isFlexField
+  }
+}
+    `;
+export type AllFieldsAttributesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllFieldsAttributesQuery, AllFieldsAttributesQueryVariables>, 'query'>;
+
+    export const AllFieldsAttributesComponent = (props: AllFieldsAttributesComponentProps) => (
+      <ApolloReactComponents.Query<AllFieldsAttributesQuery, AllFieldsAttributesQueryVariables> query={AllFieldsAttributesDocument} {...props} />
+    );
+    
+export type AllFieldsAttributesProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllFieldsAttributesQuery, AllFieldsAttributesQueryVariables> & TChildProps;
+export function withAllFieldsAttributes<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllFieldsAttributesQuery,
+  AllFieldsAttributesQueryVariables,
+  AllFieldsAttributesProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllFieldsAttributesQuery, AllFieldsAttributesQueryVariables, AllFieldsAttributesProps<TChildProps>>(AllFieldsAttributesDocument, {
+      alias: 'allFieldsAttributes',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllFieldsAttributesQuery__
+ *
+ * To run a query within a React component, call `useAllFieldsAttributesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllFieldsAttributesQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllFieldsAttributesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useAllFieldsAttributesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllFieldsAttributesQuery, AllFieldsAttributesQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllFieldsAttributesQuery, AllFieldsAttributesQueryVariables>(AllFieldsAttributesDocument, baseOptions);
+      }
+export function useAllFieldsAttributesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllFieldsAttributesQuery, AllFieldsAttributesQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllFieldsAttributesQuery, AllFieldsAttributesQueryVariables>(AllFieldsAttributesDocument, baseOptions);
+        }
+export type AllFieldsAttributesQueryHookResult = ReturnType<typeof useAllFieldsAttributesQuery>;
+export type AllFieldsAttributesLazyQueryHookResult = ReturnType<typeof useAllFieldsAttributesLazyQuery>;
+export type AllFieldsAttributesQueryResult = ApolloReactCommon.QueryResult<AllFieldsAttributesQuery, AllFieldsAttributesQueryVariables>;
 export const CandidateHouseholdsListByTargetingCriteriaDocument = gql`
     query candidateHouseholdsListByTargetingCriteria($targetPopulation: ID!, $first: Int, $after: String, $before: String, $last: Int, $orderBy: String) {
   candidateHouseholdsListByTargetingCriteria(targetPopulation: $targetPopulation, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy) {
