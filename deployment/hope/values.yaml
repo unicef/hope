@@ -35,11 +35,11 @@ backend:
 
   resources:
     limits:
-      cpu: "1"
-      memory: "1024Mi"
+      cpu: "2"
+      memory: "4Gi"
     requests:
       cpu: "1"
-      memory: "512Mi"
+      memory: "4Gi"
 
     # We usually recommend not to specify default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little
@@ -229,21 +229,32 @@ redis:
   persistence.enabled: true
   usePassword: false
   redis:
+    master:
+      resources:
+        limits:
+          cpu: "250m"
+          memory: "512Mi"
+        requests:
+          cpu: "250m"
+          memory: "256Mi"
+      nodeSelector:
+        agentpool: hope
     usePassword: false
   cluster:
     slaveCount: 0
     enabled: false
   image:
     tag: 4.0.14
-  nodeSelector:
-    agentpool: hope
-  resources:
-    limits:
-      cpu: "0.5"
-      memory: "256Mi"
-    requests:
-      cpu: "0.5"
-      memory: "256Mi"
+  master:
+    resources:
+      limits:
+        cpu: "250m"
+        memory: "512Mi"
+      requests:
+        cpu: "250m"
+        memory: "256Mi"
+    nodeSelector:
+      agentpool: hope
 
 elasticsearch:
   enabled: true
@@ -252,10 +263,42 @@ elasticsearch:
     resources:
       limits:
         cpu: "1"
-        memory: "1024Mi"
+        memory: "3Gi"
       requests:
         cpu: "1"
-        memory: "512Mi"
+        memory: "3Gi"
+    nodeSelector:
+      agentpool: hope
+  volumePermissions:
+    resources:
+      limits:
+        cpu: "250m"
+        memory: "256Mi"
+      requests:
+        cpu: "250m"
+        memory: "256Mi"
+    nodeSelector:
+      agentpool: hope
+  sysctlImage:
+    replicas: 1
+    resources:
+      limits:
+        cpu: "1"
+        memory: "1024Mi"
+      requests:
+        cpu: "750m"
+        memory: "1024Mi"
+    nodeSelector:
+      agentpool: hope
+  data:
+    replicas: 1
+    resources:
+      limits:
+        cpu: "1"
+        memory: "3Gi"
+      requests:
+        cpu: "750m"
+        memory: "3Gi"
     nodeSelector:
       agentpool: hope
   coordinating:
@@ -263,34 +306,42 @@ elasticsearch:
     resources:
       limits:
         cpu: "250m"
-        memory: "1024Mi"
+        memory: "2Gi"
       requests:
         cpu: "250m"
-        memory: "512Mi"
+        memory: "2Gi"
     nodeSelector:
       agentpool: hope
   ingset:
     resources:
       limits:
         cpu: "250m"
-        memory: "1024Mi"
+        memory: "1Gi"
       requests:
         cpu: "250m"
-        memory: "512Mi"
+        memory: "1Gi"
     nodeSelector:
       agentpool: hope
   metrics:
     resources:
       limits:
         cpu: "250m"
-        memory: "1024Mi"
+        memory: "1Gi"
       requests:
         cpu: "250m"
-        memory: "512Mi"
+        memory: "1Gi"
     nodeSelector:
       agentpool: hope
-  data:
-    replicas: 1
+  curator:
+    resources:
+      limits:
+        cpu: "250m"
+        memory: "1Gi"
+      requests:
+        cpu: "250m"
+        memory: "1Gi"
+    nodeSelector:
+      agentpool: hope
   plugins: "analysis-phonetic"
   resources:
     limits:
@@ -316,7 +367,7 @@ airflow:
     resources:
       limits:
         cpu: "1"
-        memory: "1024Mi"
+        memory: "4Gi"
       requests:
         cpu: "1"
         memory: "512Mi"
@@ -326,11 +377,11 @@ airflow:
     command: ["airflow", "scheduler"]
     resources:
       limits:
-        cpu: "1"
-        memory: "1024Mi"
-      requests:
-        cpu: "1"
+        cpu: "500m"
         memory: "512Mi"
+      requests:
+        cpu: "250m"
+        memory: "256Mi"
     nodeSelector:
       agentpool: hope
   ingress:
@@ -343,9 +394,23 @@ airflow:
     annotations: []
   redis:
     usePassword: false
+    resources:
+      limits:
+        cpu: "250m"
+        memory: "256Mi"
+      requests:
+        cpu: "250m"
+        memory: "256Mi"
   airflow:
     redis:
       usePassword: false
+      resources:
+        limits:
+          cpu: "250m"
+          memory: "256Mi"
+        requests:
+          cpu: "250m"
+          memory: "256Mi"
     baseUrl: airflow.test
     extraEnvVarsCM: hope-airflow-extra
     extraEnvVarsSecret: hope-airflow-extra
@@ -354,7 +419,7 @@ airflow:
       resources:
         limits:
           cpu: "1"
-          memory: "1024Mi"
+          memory: "4Gi"
         requests:
           cpu: "1"
           memory: "512Mi"
@@ -364,11 +429,11 @@ airflow:
       command: ["airflow", "scheduler"]
       resources:
         limits:
-          cpu: "1"
-          memory: "1024Mi"
-        requests:
-          cpu: "1"
+          cpu: "500m"
           memory: "512Mi"
+        requests:
+          cpu: "250m"
+          memory: "256Mi"
       nodeSelector:
         agentpool: hope
     image:
@@ -389,10 +454,10 @@ airflow:
               path: entrypoint.sh
       resources:
         limits:
-          cpu: "1"
+          cpu: "750m"
           memory: "1024Mi"
         requests:
-          cpu: "1"
+          cpu: "500m"
           memory: "512Mi"
       nodeSelector:
         agentpool: hope

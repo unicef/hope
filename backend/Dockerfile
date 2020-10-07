@@ -1,8 +1,6 @@
 FROM python:3.7.3
 
-RUN apt-get update && \
-    # fix certificates for easy_install "certificate verify failed"
-    apt-get install --assume-yes --reinstall ca-certificates
+RUN apt-get update
 RUN apt-get install -y --no-install-recommends \
     build-essential \
     libcurl4-openssl-dev \
@@ -15,22 +13,17 @@ RUN apt-get install -y --no-install-recommends \
     libxslt-dev \
     xmlsec1 \
     vim \
-    ntp
-RUN apt-get install -y --no-install-recommends \
-    git-core
-RUN apt-get install -y --no-install-recommends \
+    ntp \
+    git-core \
     python-dev \
-    python-setuptools
-RUN apt-get install -y --no-install-recommends \
+    python-setuptools \
     postgresql-client \
     libpq-dev \
-    python-psycopg2
-RUN apt-get install -y --no-install-recommends \
+    python-psycopg2 \
     python-gdal \
     gdal-bin \
     libgdal-dev \
-    libgdal20 \
-    graphviz
+    libgdal20
 
 RUN pip install --upgrade pip
 

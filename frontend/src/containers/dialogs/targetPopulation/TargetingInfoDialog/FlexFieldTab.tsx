@@ -5,59 +5,22 @@ import {
   TextField,
   MenuItem,
   FormControl,
+  Grid,
 } from '@material-ui/core';
 import { Search } from '@material-ui/icons';
 import { FlexFieldsTable } from '../../../tables/TargetPopulation/FlexFields';
-import { useFlexFieldsQuery } from '../../../../__generated__/graphql';
+import { useAllFieldsAttributesQuery } from '../../../../__generated__/graphql';
 import InputLabel from '../../../../shared/InputLabel';
 import Select from '../../../../shared/Select';
 
 const TextContainer = styled(TextField)`
-  .MuiFilledInput-root {
-    border-radius: 4px;
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number']::-webkit-outer-spin-button {
+    -webkit-appearance: none;
   }
-  && {
-    width: 65%;
-    color: #5f6368;
-    border-bottom: 0;
+  input[type='number'] {
+    -moz-appearance: textfield;
   }
-  .MuiFilledInput-underline:before {
-    border-bottom: 0;
-  }
-  .MuiFilledInput-underline:before {
-    border-bottom: 0;
-  }
-  .MuiFilledInput-underline:hover {
-    border-bottom: 0;
-    border-radius: 4px;
-  }
-  .MuiFilledInput-underline:hover::before {
-    border-bottom: 0;
-  }
-  .MuiFilledInput-underline::before {
-    border-bottom: 0;
-  }
-  .MuiFilledInput-underline::after {
-    border-bottom: 0;
-  }
-  .MuiFilledInput-underline::after:hover {
-    border-bottom: 0;
-  }
-  .MuiSvgIcon-root {
-    color: #5f6368;
-  }
-  .MuiFilledInput-input {
-    padding: 10px 15px 10px;
-  }
-  .MuiInputAdornment-filled.MuiInputAdornment-positionStart:not(.MuiInputAdornment-hiddenLabel) {
-    margin: 0px;
-  }
-`;
-
-const FilterWrapper = styled.div`
-  padding: 20px;
-  display: flex;
-  justify-content: space-between;
 `;
 
 const StyledFormControl = styled(FormControl)`
@@ -66,78 +29,108 @@ const StyledFormControl = styled(FormControl)`
   border-bottom: 0;
 `;
 
+const FilterWrapper = styled.div`
+  padding: 20px;
+`;
+
 export function FlexFieldTab(): React.ReactElement {
-  const { data } = useFlexFieldsQuery();
+  const { data } = useAllFieldsAttributesQuery();
   const [searchValue, setSearchValue] = useState('');
   const [selectOptions, setSelectOptions] = useState([]);
   const [selectedOption, setSelectedOption] = useState('');
+  const [selectedFieldType, setSelectedFieldType] = useState('All');
   useEffect(() => {
     if (data && !selectOptions.length) {
-      const options = data.allGroupsWithFields.reduce(function(
-        accumulator,
-        currentValue,
-      ) {
-        currentValue.flexAttributes.map(function(each) {
-          return !accumulator.includes(each.associatedWith)
-            ? accumulator.push(each.associatedWith)
-            : null;
-        });
-        return accumulator;
-      },
-      []);
-      setSelectOptions(options);
+      const options = data.allFieldsAttributes.map((el) => el.associatedWith);
+      const filteredOptions = options.filter(
+        (item, index) => options.indexOf(item) === index,
+      );
+      setSelectOptions(filteredOptions);
     }
   }, [data, selectOptions]);
   if (!data) {
     return null;
   }
+
   return (
-    <>
-      <FilterWrapper>
-        <TextContainer
-          placeholder='Search'
-          variant='outlined'
-          margin='dense'
-          onChange={(e) => setSearchValue(e.target.value)}
-          value={searchValue}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position='start'>
-                <Search />
-              </InputAdornment>
-            ),
-          }}
-        />
-        {selectOptions.length && (
+    <FilterWrapper>
+      <Grid container spacing={3}>
+        <Grid item>
+          <TextContainer
+            placeholder='Search'
+            variant='outlined'
+            margin='dense'
+            onChange={(e) => setSearchValue(e.target.value)}
+            value={searchValue}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position='start'>
+                  <Search />
+                </InputAdornment>
+              ),
+            }}
+          />
+        </Grid>
+        <Grid item>
+          {selectOptions.length && (
+            <StyledFormControl variant='outlined' margin='dense'>
+              <InputLabel>Type</InputLabel>
+              <Select
+                /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
+                // @ts-ignore
+                onChange={(e) => setSelectedOption(e.target.value)}
+                variant='outlined'
+                label='Type'
+                value={selectedOption}
+              >
+                <MenuItem value=''>
+                  <em>All</em>
+                </MenuItem>
+                {selectOptions.map((type) => {
+                  return (
+                    <MenuItem key={type} value={type}>
+                      {type}
+                    </MenuItem>
+                  );
+                })}
+              </Select>
+            </StyledFormControl>
+          )}
+        </Grid>
+        <Grid item>
           <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>Type</InputLabel>
+            <InputLabel>Field Type</InputLabel>
             <Select
               /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
               // @ts-ignore
-              onChange={(e) => setSelectedOption(e.target.value)}
+              onChange={(e) => setSelectedFieldType(e.target.value)}
               variant='outlined'
-              label='Type'
-              value={selectedOption}
+              label='Field Type'
+              value={selectedFieldType}
             >
-              <MenuItem value=''>
+              <MenuItem value='All'>
                 <em>All</em>
               </MenuItem>
-              {selectOptions.map((type) => {
+              {[
+                { name: 'Flex field', value: 'Flex field' },
+                { name: 'Core field', value: 'Core field' },
+              ].map((el) => {
                 return (
-                  <MenuItem key={type} value={type}>
-                    {type}
+                  <MenuItem key={el.name} value={el.value}>
+                    {el.name}
                   </MenuItem>
                 );
               })}
             </Select>
           </StyledFormControl>
-        )}
-      </FilterWrapper>
+        </Grid>
+      </Grid>
       <FlexFieldsTable
         selectedOption={selectedOption}
         searchValue={searchValue}
-        fields={data.allGroupsWithFields}
+        selectedFieldType={selectedFieldType}
+        fields={data.allFieldsAttributes}
       />
-    </>
+    </FilterWrapper>
   );
 }
