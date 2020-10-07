@@ -36,10 +36,10 @@ backend:
   resources:
     limits:
       cpu: "1"
-      memory: "1024Mi"
+      memory: "3Gi"
     requests:
       cpu: "1"
-      memory: "512Mi"
+      memory: "3Gi"
 
     # We usually recommend not to specify default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little
@@ -229,28 +229,32 @@ redis:
   persistence.enabled: true
   usePassword: false
   redis:
+    master:
+      resources:
+        limits:
+          cpu: "250m"
+          memory: "1Gi"
+        requests:
+          cpu: "250m"
+          memory: "1Gi"
+        nodeSelector:
+          agentpool: hope
     usePassword: false
-    resources:
-      limits:
-        cpu: "250m"
-        memory: "256Mi"
-      requests:
-        cpu: "250m"
-        memory: "256Mi"
   cluster:
     slaveCount: 0
     enabled: false
   image:
     tag: 4.0.14
-  nodeSelector:
-    agentpool: hope
-  resources:
-    limits:
-      cpu: "250m"
-      memory: "256Mi"
-    requests:
-      cpu: "250m"
-      memory: "256Mi"
+  master:
+    resources:
+      limits:
+        cpu: "250m"
+        memory: "1Gi"
+      requests:
+        cpu: "250m"
+        memory: "1Gi"
+      nodeSelector:
+        agentpool: hope
 
 elasticsearch:
   enabled: true
@@ -302,40 +306,40 @@ elasticsearch:
     resources:
       limits:
         cpu: "250m"
-        memory: "256Mi"
+        memory: "2Gi"
       requests:
         cpu: "250m"
-        memory: "256Mi"
+        memory: "2Gi"
     nodeSelector:
       agentpool: hope
   ingset:
     resources:
       limits:
         cpu: "250m"
-        memory: "256Mi"
+        memory: "1Gi"
       requests:
         cpu: "250m"
-        memory: "256Mi"
+        memory: "1Gi"
     nodeSelector:
       agentpool: hope
   metrics:
     resources:
       limits:
         cpu: "250m"
-        memory: "256Mi"
+        memory: "1Gi"
       requests:
         cpu: "250m"
-        memory: "256Mi"
+        memory: "1Gi"
     nodeSelector:
       agentpool: hope
   curator:
     resources:
       limits:
         cpu: "250m"
-        memory: "256Mi"
+        memory: "1Gi"
       requests:
         cpu: "250m"
-        memory: "256Mi"
+        memory: "1Gi"
     nodeSelector:
       agentpool: hope
   plugins: "analysis-phonetic"
