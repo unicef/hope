@@ -36,10 +36,10 @@ backend:
   resources:
     limits:
       cpu: "2"
-      memory: "6Gi"
+      memory: "4Gi"
     requests:
-      cpu: "2"
-      memory: "6Gi"
+      cpu: "1"
+      memory: "4Gi"
 
     # We usually recommend not to specify default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little
@@ -233,10 +233,10 @@ redis:
       resources:
         limits:
           cpu: "250m"
-          memory: "1Gi"
+          memory: "512Mi"
         requests:
           cpu: "250m"
-          memory: "1Gi"
+          memory: "256Mi"
       nodeSelector:
         agentpool: hope
     usePassword: false
@@ -249,10 +249,10 @@ redis:
     resources:
       limits:
         cpu: "250m"
-        memory: "1Gi"
+        memory: "512Mi"
       requests:
         cpu: "250m"
-        memory: "1Gi"
+        memory: "256Mi"
     nodeSelector:
       agentpool: hope
 
@@ -286,7 +286,7 @@ elasticsearch:
         cpu: "1"
         memory: "1024Mi"
       requests:
-        cpu: "1"
+        cpu: "750m"
         memory: "1024Mi"
     nodeSelector:
       agentpool: hope
@@ -297,7 +297,7 @@ elasticsearch:
         cpu: "1"
         memory: "3Gi"
       requests:
-        cpu: "1"
+        cpu: "750m"
         memory: "3Gi"
     nodeSelector:
       agentpool: hope
@@ -367,7 +367,7 @@ airflow:
     resources:
       limits:
         cpu: "1"
-        memory: "1024Mi"
+        memory: "4Gi"
       requests:
         cpu: "1"
         memory: "512Mi"
@@ -377,11 +377,11 @@ airflow:
     command: ["airflow", "scheduler"]
     resources:
       limits:
-        cpu: "1"
-        memory: "1024Mi"
-      requests:
-        cpu: "1"
+        cpu: "500m"
         memory: "512Mi"
+      requests:
+        cpu: "250m"
+        memory: "256Mi"
     nodeSelector:
       agentpool: hope
   ingress:
@@ -419,7 +419,7 @@ airflow:
       resources:
         limits:
           cpu: "1"
-          memory: "1024Mi"
+          memory: "4Gi"
         requests:
           cpu: "1"
           memory: "512Mi"
@@ -429,11 +429,11 @@ airflow:
       command: ["airflow", "scheduler"]
       resources:
         limits:
-          cpu: "1"
-          memory: "1024Mi"
-        requests:
-          cpu: "1"
+          cpu: "500m"
           memory: "512Mi"
+        requests:
+          cpu: "250m"
+          memory: "256Mi"
       nodeSelector:
         agentpool: hope
     image:
@@ -454,10 +454,10 @@ airflow:
               path: entrypoint.sh
       resources:
         limits:
-          cpu: "1"
+          cpu: "750m"
           memory: "1024Mi"
         requests:
-          cpu: "1"
+          cpu: "500m"
           memory: "512Mi"
       nodeSelector:
         agentpool: hope

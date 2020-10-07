@@ -378,7 +378,7 @@ export function targetPopulationStatusMapping(status): string {
   return TARGETING_STATES[status];
 }
 
-export function stableSort(array, comparator): number[] {
+export function stableSort(array, comparator) {
   const stabilizedThis = array.map((el, index) => [el, index]);
   stabilizedThis.sort((a, b) => {
     const order = comparator(a[0], b[0]);
