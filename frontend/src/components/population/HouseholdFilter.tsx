@@ -13,8 +13,8 @@ import {
 import TextField from '../../shared/TextField';
 import InputLabel from '../../shared/InputLabel';
 import Select from '../../shared/Select';
-import { AdminAreasAutocomplete } from './AdminAreaAutocomplete';
 import { ContainerWithBorder } from '../ContainerWithBorder';
+import { AdminAreasAutocomplete } from './AdminAreaAutocomplete';
 
 const TextContainer = styled(TextField)`
   input[type='number']::-webkit-inner-spin-button,

@@ -16,7 +16,6 @@ import { LabelizedField } from '../../../../components/LabelizedField';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { LoadingComponent } from '../../../../components/LoadingComponent';
 import { UniversalMoment } from '../../../../components/UniversalMoment';
-import { Missing } from '../../../../components/Missing';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px
