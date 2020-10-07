@@ -35,10 +35,10 @@ backend:
 
   resources:
     limits:
-      cpu: "4"
+      cpu: "2"
       memory: "6Gi"
     requests:
-      cpu: "4"
+      cpu: "2"
       memory: "6Gi"
 
     # We usually recommend not to specify default resources and to leave this as a conscious
