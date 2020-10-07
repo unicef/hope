@@ -70,7 +70,7 @@ export function TargetingInfoDialog({ open, setOpen }): React.ReactElement {
       indicatorColor='primary'
       textColor='primary'
     >
-      <Tab label='Flex Field List' />
+      <Tab label='Field List' />
       <Tab label='Targeting Diagram' />
     </Tabs>
   );
