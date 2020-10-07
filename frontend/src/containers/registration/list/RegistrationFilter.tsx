@@ -8,8 +8,8 @@ import { useRegistrationChoicesQuery } from '../../../__generated__/graphql';
 import InputLabel from '../../../shared/InputLabel';
 import TextField from '../../../shared/TextField';
 import Select from '../../../shared/Select';
-import { UsersAutocomplete } from './UsersAutocomplete';
 import { ContainerWithBorder } from '../../../components/ContainerWithBorder';
+import { UsersAutocomplete } from './UsersAutocomplete';
 
 const StyledFormControl = styled(FormControl)`
   width: 232px;
