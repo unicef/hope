@@ -1,12 +1,6 @@
-trigger:
-  batch: true
-  branches:
-    include:
-    - develop
-  paths:
-    exclude:
-    -  docs/*
-pr: none
+pr:
+  - master
+  - develop
 resources:
   - repo: self
 
