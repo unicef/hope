@@ -57,20 +57,6 @@ stages:
                 $(Build.BuildId)
                 dev-latest
 
-      - job: build_push_frontend
-        displayName: "[FRONTEND]"
-        steps:
-          - task: Docker@2
-            displayName: Build&Push
-            inputs:
-              command: buildAndPush
-              dockerfile: $(Docker.frontend.filePath)
-              repository: $(Docker.frontend.repository)
-              containerRegistry: $(Docker.registry)
-              tags: |
-                $(Build.BuildId)
-                dev-latest
-
 
   - stage: test
     displayName: TEST
