@@ -237,8 +237,8 @@ redis:
         requests:
           cpu: "250m"
           memory: "1Gi"
-        nodeSelector:
-          agentpool: hope
+      nodeSelector:
+        agentpool: hope
     usePassword: false
   cluster:
     slaveCount: 0
@@ -253,8 +253,8 @@ redis:
       requests:
         cpu: "250m"
         memory: "1Gi"
-      nodeSelector:
-        agentpool: hope
+    nodeSelector:
+      agentpool: hope
 
 elasticsearch:
   enabled: true
