@@ -130,3 +130,4 @@ class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
     payment_verification = models.ForeignKey(
         "payment.PaymentVerification", related_name="ticket_details", on_delete=models.CASCADE
     )
+
