@@ -254,9 +254,28 @@ redis:
 
 elasticsearch:
   enabled: true
-  sysctlImage:
-    enabled: false
   master:
+    replicas: 1
+    resources:
+      limits:
+        cpu: "1"
+        memory: "1024Mi"
+      requests:
+        cpu: "1"
+        memory: "1024Mi"
+    nodeSelector:
+      agentpool: hope
+  volumePermissions:
+    resources:
+      limits:
+        cpu: "250m"
+        memory: "256Mi"
+      requests:
+        cpu: "250m"
+        memory: "256Mi"
+    nodeSelector:
+      agentpool: hope
+  sysctlImage:
     replicas: 1
     resources:
       limits:
