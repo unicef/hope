@@ -259,10 +259,10 @@ elasticsearch:
     resources:
       limits:
         cpu: "1"
-        memory: "1024Mi"
+        memory: "3Gi"
       requests:
         cpu: "1"
-        memory: "1024Mi"
+        memory: "3Gi"
     nodeSelector:
       agentpool: hope
   volumePermissions:
@@ -290,11 +290,11 @@ elasticsearch:
     replicas: 1
     resources:
       limits:
-        cpu: "250m"
-        memory: "256Mi"
+        cpu: "1"
+        memory: "3Gi"
       requests:
-        cpu: "250m"
-        memory: "256Mi"
+        cpu: "1"
+        memory: "3Gi"
     nodeSelector:
       agentpool: hope
   coordinating:
