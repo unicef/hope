@@ -8,6 +8,7 @@ import {
   Typography,
   Button,
   IconButton,
+  Box,
 } from '@material-ui/core';
 import { AddCircleOutline, Delete } from '@material-ui/icons';
 import { Field, Formik, FieldArray } from 'formik';
@@ -66,6 +67,9 @@ const Divider = styled.div`
   position: relative;
 `;
 
+const StyledBox = styled(Box)`
+  width: 100%;
+`;
 const DividerLabel = styled.div`
   position: absolute;
   top: 50%;
@@ -172,102 +176,105 @@ export function TargetCriteriaForm({
         enableReinitialize
       >
         {({ submitForm, values }) => (
-          <>
-            <Dialog
-              open={open}
-              onClose={onClose}
-              scroll='paper'
-              aria-labelledby='form-dialog-title'
-            >
-              <DialogTitleWrapper>
-                <DialogTitle id='scroll-dialog-title' disableTypography>
-                  <Typography variant='h6'>{title}</Typography>
-                </DialogTitle>
-              </DialogTitleWrapper>
-              <DialogContent>
-                <DialogDescription>
-                  Adding criteria below will target any individuals within a
-                  household that meet the filters applied. You may also add
-                  individual sub-criteria to further define an individual.
-                </DialogDescription>
-                <FieldArray
-                  name='filters'
-                  render={(arrayHelpers) => (
-                    <>
-                      {values.filters.map((each, index) => {
-                        return (
-                          //eslint-disable-next-line
-                          <div key={index}>
-                            <FlexWrapper>
-                              <Field
-                                name={`filters[${index}].fieldName`}
-                                label='Choose field type'
-                                required
-                                choices={data.allFieldsAttributes}
-                                index={index}
-                                value={each.fieldName || null}
-                                onChange={(e, object) => {
-                                  if (object) {
-                                    return chooseFieldType(
-                                      object,
-                                      arrayHelpers,
-                                      index,
-                                    );
-                                  }
-                                  return clearField(arrayHelpers, index);
-                                }}
-                                component={CriteriaAutocomplete}
-                              />
-                              {values.filters.length > 1 && (
-                                <IconButton>
-                                  <Delete
-                                    onClick={() => arrayHelpers.remove(index)}
-                                  />
-                                </IconButton>
-                              )}
-                            </FlexWrapper>
-                            {each.fieldName && (
-                              <div data-cy='autocomplete-target-criteria-values'>
-                                {SubField(each, index)}
-                              </div>
+          <FieldArray
+            name='filters'
+            render={(arrayHelpers) => (
+              <>
+                <Dialog
+                  open={open}
+                  onClose={onClose}
+                  scroll='paper'
+                  aria-labelledby='form-dialog-title'
+                >
+                  <DialogTitleWrapper>
+                    <DialogTitle id='scroll-dialog-title' disableTypography>
+                      <Typography variant='h6'>{title}</Typography>
+                    </DialogTitle>
+                  </DialogTitleWrapper>
+                  <DialogContent>
+                    <DialogDescription>
+                      Adding criteria below will target any individuals within a
+                      household that meet the filters applied. You may also add
+                      individual sub-criteria to further define an individual.
+                    </DialogDescription>
+                    {values.filters.map((each, index) => {
+                      return (
+                        //eslint-disable-next-line
+                        <div key={index}>
+                          <FlexWrapper>
+                            <Field
+                              name={`filters[${index}].fieldName`}
+                              label='Choose field type'
+                              required
+                              choices={data.allFieldsAttributes}
+                              index={index}
+                              value={each.fieldName || null}
+                              onChange={(e, object) => {
+                                if (object) {
+                                  return chooseFieldType(
+                                    object,
+                                    arrayHelpers,
+                                    index,
+                                  );
+                                }
+                                return clearField(arrayHelpers, index);
+                              }}
+                              component={CriteriaAutocomplete}
+                            />
+                            {values.filters.length > 1 && (
+                              <IconButton>
+                                <Delete
+                                  onClick={() => arrayHelpers.remove(index)}
+                                />
+                              </IconButton>
                             )}
-                            {(values.filters.length === 1 && index === 0) ||
-                            index === values.filters.length - 1 ? null : (
-                              <Divider>
-                                <DividerLabel>And</DividerLabel>
-                              </Divider>
-                            )}
-                          </div>
-                        );
-                      })}
-                      <AddCriteriaWrapper>
-                        <AddCriteria
-                          onClick={() => arrayHelpers.push({ fieldname: '' })}
-                        >
-                          <AddCircleOutline />
-                          <span>Add Criteria</span>
-                        </AddCriteria>
-                      </AddCriteriaWrapper>
-                    </>
-                  )}
-                />
-              </DialogContent>
-              <DialogFooter>
-                <DialogActions>
-                  <Button onClick={() => onClose()}>Cancel</Button>
-                  <Button
-                    onClick={() => submitForm()}
-                    type='submit'
-                    color='primary'
-                    variant='contained'
-                    data-cy='button-target-population-add-criteria'
-                  >
-                    Save
-                  </Button>
-                </DialogActions>
-              </DialogFooter>
-            </Dialog>
-          </>
+                          </FlexWrapper>
+                          {each.fieldName && (
+                            <div data-cy='autocomplete-target-criteria-values'>
+                              {SubField(each, index)}
+                            </div>
+                          )}
+                          {(values.filters.length === 1 && index === 0) ||
+                          index === values.filters.length - 1 ? null : (
+                            <Divider>
+                              <DividerLabel>And</DividerLabel>
+                            </Divider>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </DialogContent>
+                  <DialogFooter>
+                    <DialogActions>
+                      <StyledBox display='flex' justifyContent='space-between'>
+                        <div>
+                          <Button
+                            color='primary'
+                            variant='outlined'
+                            onClick={() => arrayHelpers.push({ fieldname: '' })}
+                          >
+                            Add Next Criteria
+                          </Button>
+                        </div>
+                        <div>
+                          <Button onClick={() => onClose()}>Cancel</Button>
+                          <Button
+                            onClick={() => submitForm()}
+                            type='submit'
+                            color='primary'
+                            variant='contained'
+                            data-cy='button-target-population-add-criteria'
+                          >
+                            Save
+                          </Button>
+                        </div>
+                      </StyledBox>
+                    </DialogActions>
+                  </DialogFooter>
+                </Dialog>
+              </>
+            )}
+          />
         )}
       </Formik>
     </DialogContainer>
