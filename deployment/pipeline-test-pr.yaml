@@ -24,10 +24,10 @@ stages:
     displayName: BUILD and PUSH
     jobs:
       - job: build_push_backend
-        displayName: "[BACKEND]"
+        displayName: "[Build]"
         steps:
           - task: Docker@2
-            displayName: Build&Push
+            displayName: Build&Push Backend
             inputs:
               command: buildAndPush
               dockerfile: $(Docker.backend.filePath)
@@ -36,12 +36,8 @@ stages:
               tags: |
                 $(Build.BuildId)
                 dev-latest
-
-      - job: build_push_airflow
-        displayName: "[AIRFLOW]"
-        steps:
           - task: Docker@2
-            displayName: Build&Push
+            displayName: Build&Push Airflow
             inputs:
               command: buildAndPush
               dockerfile: $(Docker.airflow.filePath)
