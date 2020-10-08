@@ -26,10 +26,6 @@ export function GrievancesList(): React.ReactElement {
     min-width: 120px;
     max-width: 200px;
   `;
-  const StyledLink = styled(Link)`
-    text-decoration: none;
-    color: #fff;
-  `;
 
   return (
     <>
@@ -38,13 +34,10 @@ export function GrievancesList(): React.ReactElement {
           <Button
             variant='contained'
             color='primary'
-            data-cy='button-grievance-create-new'
+            component={Link}
+            to={`/${businessArea}/grievance-and-feedback/new-ticket`}
           >
-            <StyledLink
-              to={`/${businessArea}/grievance-and-feedback/new-ticket`}
-            >
-              NEW TICKET
-            </StyledLink>
+            NEW TICKET
           </Button>
         </>
       </PageHeader>
