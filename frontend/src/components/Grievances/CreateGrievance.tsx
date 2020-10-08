@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import * as Yup from 'yup';
 import { Field, Formik } from 'formik';
@@ -56,7 +57,9 @@ export function CreateGrievance(): React.ReactElement {
   const MarginRightSpan = styled.span`
     margin-right: 5px;
   `;
-
+  const StyledLink = styled(Link)`
+    text-decoration: none;
+  `;
   const businessArea = useBusinessArea();
 
   const initialValues: { [key: string]: string } = {
@@ -243,8 +246,11 @@ export function CreateGrievance(): React.ReactElement {
 
                   <DialogFooter>
                     <DialogActions>
-                      <Button onClick={() => console.log('cancel')}>
-                        CANCEL
+                      <Button
+                        component={Link}
+                        to={`/${businessArea}/grievance-and-feedback`}
+                      >
+                        Cancel
                       </Button>
                       <Button
                         color='primary'
