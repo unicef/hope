@@ -39,6 +39,7 @@ postgresql:
     agentpool: hope
 
 registrationdatahubpostgresql:resources:
+  resources:
     limits:
       cpu: "500m"
       memory: "256Mi"
