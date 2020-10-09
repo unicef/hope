@@ -5,7 +5,7 @@ from django.test import TestCase
 from core.models import BusinessArea
 from household.fixtures import create_household
 from household.models import Household, Individual, FEMALE, MALE
-from targeting.models import TargetingCriteriaRuleFilter
+from targeting.models import TargetingCriteriaRuleFilter, TargetingCriteria, TargetingCriteriaRule
 
 
 class TestIndividualSubcriteria(TestCase):
@@ -34,5 +34,12 @@ class TestIndividualSubcriteria(TestCase):
 
     def test_all_individuals_are_female(self):
         query = Household.objects.all()
+        tc =TargetingCriteria()
+        tc.save()
+        tcr = TargetingCriteriaRule()
+        tcr.targeting_criteria= tc
+        tcr.save()
+        ruleFilter =TargetingIndividualSubcriteriaRuleFilter(targeting_criteria_rule=tcr)
+
         self.assertEqual(query.count(), 1)
         self.assertEqual(query.first().id, self.household_targeted.id)
