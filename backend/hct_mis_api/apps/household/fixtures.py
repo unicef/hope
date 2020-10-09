@@ -140,6 +140,8 @@ def create_household_and_individuals(household_data=None, individuals_data=None,
     if individuals_data is None:
         individuals_data = {}
     household = HouseholdFactory.build(**household_data, size=len(individuals_data))
+    household.registration_data_import.imported_by.save()
+    household.registration_data_import.save()
     individuals = [IndividualFactory(household=household, **individual_data) for individual_data in individuals_data]
     household.head_of_household = individuals[0]
     household.save()
