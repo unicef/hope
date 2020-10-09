@@ -55,15 +55,24 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
     ca_id = models.CharField(max_length=255, null=True)
     ca_hash_id = models.CharField(max_length=255, null=True)
     created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name="target_populations", null=True,
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="target_populations",
+        null=True,
     )
     approved_at = models.DateTimeField(null=True)
     approved_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name="approved_target_populations", null=True,
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="approved_target_populations",
+        null=True,
     )
     finalized_at = models.DateTimeField(null=True)
     finalized_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name="finalized_target_populations", null=True,
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="finalized_target_populations",
+        null=True,
     )
     business_area = models.ForeignKey("core.BusinessArea", null=True, on_delete=models.CASCADE)
     STATUS_CHOICES = (
@@ -72,14 +81,32 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
         (STATUS_FINALIZED, _("Sent")),
     )
 
-    status = models.CharField(max_length=_MAX_LEN, choices=STATUS_CHOICES, default="DRAFT",)
-    households = models.ManyToManyField(
-        "household.Household", related_name="target_populations", through="HouseholdSelection",
+    status = models.CharField(
+        max_length=_MAX_LEN,
+        choices=STATUS_CHOICES,
+        default="DRAFT",
     )
-    candidate_list_total_households = models.PositiveIntegerField(blank=True, null=True,)
-    candidate_list_total_individuals = models.PositiveIntegerField(blank=True, null=True,)
-    final_list_total_households = models.PositiveIntegerField(blank=True, null=True,)
-    final_list_total_individuals = models.PositiveIntegerField(blank=True, null=True,)
+    households = models.ManyToManyField(
+        "household.Household",
+        related_name="target_populations",
+        through="HouseholdSelection",
+    )
+    candidate_list_total_households = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+    )
+    candidate_list_total_individuals = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+    )
+    final_list_total_households = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+    )
+    final_list_total_individuals = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+    )
     selection_computation_metadata = models.TextField(
         blank=True,
         null=True,
@@ -102,7 +129,11 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
         related_name="target_population_candidate",
     )
     final_list_targeting_criteria = models.OneToOneField(
-        "TargetingCriteria", blank=True, null=True, on_delete=models.SET_NULL, related_name="target_population_final",
+        "TargetingCriteria",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="target_population_final",
     )
     sent_to_datahub = models.BooleanField(
         default=False,
@@ -128,17 +159,25 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
         delta18 = relativedelta(years=+18)
         date18ago = datetime.datetime.now() - delta18
         child_male = Individual.objects.filter(
-            household__id__in=households_ids, birth_date__gt=date18ago, sex="MALE",
+            household__id__in=households_ids,
+            birth_date__gt=date18ago,
+            sex="MALE",
         ).count()
         child_female = Individual.objects.filter(
-            household__id__in=households_ids, birth_date__gt=date18ago, sex="FEMALE",
+            household__id__in=households_ids,
+            birth_date__gt=date18ago,
+            sex="FEMALE",
         ).count()
 
         adult_male = Individual.objects.filter(
-            household__id__in=households_ids, birth_date__lte=date18ago, sex="MALE",
+            household__id__in=households_ids,
+            birth_date__lte=date18ago,
+            sex="MALE",
         ).count()
         adult_female = Individual.objects.filter(
-            household__id__in=households_ids, birth_date__lte=date18ago, sex="FEMALE",
+            household__id__in=households_ids,
+            birth_date__lte=date18ago,
+            sex="FEMALE",
         ).count()
         return {
             "child_male": child_male,
@@ -158,17 +197,25 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
         delta18 = relativedelta(years=+18)
         date18ago = datetime.datetime.now() - delta18
         child_male = Individual.objects.filter(
-            household__id__in=households_ids, birth_date__gt=date18ago, sex="MALE",
+            household__id__in=households_ids,
+            birth_date__gt=date18ago,
+            sex="MALE",
         ).count()
         child_female = Individual.objects.filter(
-            household__id__in=households_ids, birth_date__gt=date18ago, sex="FEMALE",
+            household__id__in=households_ids,
+            birth_date__gt=date18ago,
+            sex="FEMALE",
         ).count()
 
         adult_male = Individual.objects.filter(
-            household__id__in=households_ids, birth_date__lte=date18ago, sex="MALE",
+            household__id__in=households_ids,
+            birth_date__lte=date18ago,
+            sex="MALE",
         ).count()
         adult_female = Individual.objects.filter(
-            household__id__in=households_ids, birth_date__lte=date18ago, sex="FEMALE",
+            household__id__in=households_ids,
+            birth_date__lte=date18ago,
+            sex="FEMALE",
         ).count()
         return {
             "child_male": child_male,
@@ -192,10 +239,18 @@ class HouseholdSelection(TimeStampedUUIDModel):
     candidate list  will have final set to True.
     """
 
-    household = models.ForeignKey("household.Household", on_delete=models.CASCADE, related_name="selections",)
+    household = models.ForeignKey(
+        "household.Household",
+        on_delete=models.CASCADE,
+        related_name="selections",
+    )
     target_population = models.ForeignKey("TargetPopulation", on_delete=models.CASCADE, related_name="selections")
     vulnerability_score = models.DecimalField(
-        blank=True, null=True, decimal_places=3, max_digits=6, help_text="Written by a tool such as Corticon.",
+        blank=True,
+        null=True,
+        decimal_places=3,
+        max_digits=6,
+        help_text="Written by a tool such as Corticon.",
     )
     final = models.BooleanField(
         default=True,
@@ -244,16 +299,34 @@ class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingMixin):
 
 
 class TargetingCriteriaRuleQueryingMixin:
-    def __init__(self, filters=None):
-        if filters is None:
-            return
-        self.filters = filters
+    def __init__(self, filters=None, individual_subcriteria_filters=None):
+        if filters is not None:
+            self.filters = filters
+        if individual_subcriteria_filters is not None:
+            self.individual_subcriteria_filters = individual_subcriteria_filters
+
+    def get_subcriteria_query(self):
+        individuals_query = Q()
+        filters = (
+            self.filters
+            if isinstance(self.individual_subcriteria_filters, list)
+            else self.individual_subcriteria_filters.all()
+        )
+        filtered = False
+        for ruleFilter in filters:
+            filtered = True
+            individuals_query &= ruleFilter.get_query()
+        if not filtered:
+            return Q()
+        households_id = Individual.objects.filter(individuals_query).values_list("household_id", flat=True)
+        return Q(id__in=households_id)
 
     def get_query(self):
         query = Q()
         filters = self.filters if isinstance(self.filters, list) else self.filters.all()
         for ruleFilter in filters:
             query &= ruleFilter.get_query()
+        query &= self.get_subcriteria_query()
         return query
 
 
@@ -262,7 +335,11 @@ class TargetingCriteriaRule(TimeStampedUUIDModel, TargetingCriteriaRuleQueryingM
     This is a set of ANDed Filters.
     """
 
-    targeting_criteria = models.ForeignKey("TargetingCriteria", related_name="rules", on_delete=models.CASCADE,)
+    targeting_criteria = models.ForeignKey(
+        "TargetingCriteria",
+        related_name="rules",
+        on_delete=models.CASCADE,
+    )
 
 
 class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
@@ -305,9 +382,14 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
         ("GREATER_THAN", _("Greater than")),
         ("LESS_THAN", _("Less than")),
     )
-    comparision_method = models.CharField(max_length=20, choices=COMPARISON_CHOICES,)
+    comparision_method = models.CharField(
+        max_length=20,
+        choices=COMPARISON_CHOICES,
+    )
     targeting_criteria_rule = models.ForeignKey(
-        "TargetingCriteriaRule", related_name="filters", on_delete=models.CASCADE,
+        "TargetingCriteriaRule",
+        related_name="filters",
+        on_delete=models.CASCADE,
     )
     is_flex_field = models.BooleanField(default=False)
     field_name = models.CharField(max_length=50)
@@ -374,7 +456,10 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
                 f"There are no Flex Field Attributes associated with this fieldName {self.field_name}"
             )
         lookup = f"{'individuals__' if flex_field_attr.associated_with else ''}flex_fields__{flex_field_attr.name}"
-        return self.get_query_for_lookup(lookup, select_many=flex_field_attr.type == "SELECT_MANY",)
+        return self.get_query_for_lookup(
+            lookup,
+            select_many=flex_field_attr.type == "SELECT_MANY",
+        )
 
     def get_query(self):
         if not self.is_flex_field:
@@ -422,9 +507,14 @@ class TargetingIndividualSubcriteriaRuleFilter(TimeStampedUUIDModel):
         ("GREATER_THAN", _("Greater than")),
         ("LESS_THAN", _("Less than")),
     )
-    comparision_method = models.CharField(max_length=20, choices=COMPARISON_CHOICES,)
+    comparision_method = models.CharField(
+        max_length=20,
+        choices=COMPARISON_CHOICES,
+    )
     targeting_criteria_rule = models.ForeignKey(
-        "TargetingCriteriaRule", related_name="individual_subcriteria_filters", on_delete=models.CASCADE,
+        "TargetingCriteriaRule",
+        related_name="individual_subcriteria_filters",
+        on_delete=models.CASCADE,
     )
     is_flex_field = models.BooleanField(default=False)
     field_name = models.CharField(max_length=50)
@@ -470,7 +560,7 @@ class TargetingIndividualSubcriteriaRuleFilter(TimeStampedUUIDModel):
                 f"There are no Core Field Attributes associated with this fieldName {self.field_name}"
             )
         core_field_attr = core_field_attrs[0]
-        if core_field_attr['associated_with'] != _INDIVIDUAL:
+        if core_field_attr["associated_with"] != _INDIVIDUAL:
             raise ValidationError(
                 f"Only Core Fields associated with individuals can be used inside Individual Subcriteria"
             )
@@ -495,12 +585,15 @@ class TargetingIndividualSubcriteriaRuleFilter(TimeStampedUUIDModel):
             raise ValidationError(
                 f"There are no Flex Field Attributes associated with this fieldName {self.field_name}"
             )
-        if flex_field_attr['associated_with'] != _INDIVIDUAL:
+        if flex_field_attr["associated_with"] != _INDIVIDUAL:
             raise ValidationError(
                 f"Only Flex Fields associated with individuals can be used inside Individual Subcriteria"
             )
         lookup = f"flex_fields__{flex_field_attr.name}"
-        return self.get_query_for_lookup(lookup, select_many=flex_field_attr.type == "SELECT_MANY",)
+        return self.get_query_for_lookup(
+            lookup,
+            select_many=flex_field_attr.type == "SELECT_MANY",
+        )
 
     def get_query(self):
         if not self.is_flex_field:
