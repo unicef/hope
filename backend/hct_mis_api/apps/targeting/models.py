@@ -299,34 +299,22 @@ class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingMixin):
 
 
 class TargetingCriteriaRuleQueryingMixin:
-    def __init__(self, filters=None, individual_subcriteria_filters=None):
+    def __init__(self, filters=None, subcriteria_blocks=None):
         if filters is not None:
             self.filters = filters
-        if individual_subcriteria_filters is not None:
-            self.individual_subcriteria_filters = individual_subcriteria_filters
-
-    def get_subcriteria_query(self):
-        individuals_query = Q()
-        filters = (
-            self.filters
-            if isinstance(self.individual_subcriteria_filters, list)
-            else self.individual_subcriteria_filters.all()
-        )
-        filtered = False
-        for ruleFilter in filters:
-            filtered = True
-            individuals_query &= ruleFilter.get_query()
-        if not filtered:
-            return Q()
-        households_id = Individual.objects.filter(individuals_query).values_list("household_id", flat=True)
-        return Q(id__in=households_id)
+        if subcriteria_blocks is not None:
+            self.subcriteria_blocks = subcriteria_blocks
 
     def get_query(self):
         query = Q()
         filters = self.filters if isinstance(self.filters, list) else self.filters.all()
+        subcriteria_blocks = (
+            self.subcriteria_blocks if isinstance(self.subcriteria_blocks, list) else self.subcriteria_blocks.all()
+        )
         for ruleFilter in filters:
             query &= ruleFilter.get_query()
-        query &= self.get_subcriteria_query()
+        for subcriteria_block in subcriteria_blocks:
+            query &= subcriteria_block.get_query()
         return query
 
 
@@ -339,6 +327,37 @@ class TargetingCriteriaRule(TimeStampedUUIDModel, TargetingCriteriaRuleQueryingM
         "TargetingCriteria",
         related_name="rules",
         on_delete=models.CASCADE,
+    )
+
+
+class TargetingIndividualSubcriteriaRuleFilterBlockMixin:
+    def __init__(self, individual_subcriteria_filters=None):
+        if individual_subcriteria_filters is not None:
+            self.individual_subcriteria_filters = individual_subcriteria_filters
+
+    def get_query(self):
+        individuals_query = Q()
+        filters = (
+            self.individual_subcriteria_filters
+            if isinstance(self.individual_subcriteria_filters, list)
+            else self.individual_subcriteria_filters.all()
+        )
+        filtered = False
+        for ruleFilter in filters:
+            filtered = True
+            individuals_query &= ruleFilter.get_query()
+        if not filtered:
+            return Q()
+        households_id = Individual.objects.filter(individuals_query).values_list("household_id", flat=True)
+        return Q(id__in=households_id)
+
+
+class TargetingIndividualSubcriteriaRuleFilterBlock(
+    TimeStampedUUIDModel,
+    TargetingIndividualSubcriteriaRuleFilterBlockMixin,
+):
+    targeting_criteria_rule = models.ForeignKey(
+        "TargetingCriteriaRule", on_delete=models.CASCADE, related_name="subcriteria_blocks"
     )
 
 
@@ -466,6 +485,8 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
             return self.get_query_for_core_field()
         return self.get_query_for_flex_field()
 
+    def __str__(self):
+        return f"{self.field_name} {self.comparision_method} {self.arguments}"
 
 class TargetingIndividualSubcriteriaRuleFilter(TimeStampedUUIDModel):
     """
@@ -511,8 +532,8 @@ class TargetingIndividualSubcriteriaRuleFilter(TimeStampedUUIDModel):
         max_length=20,
         choices=COMPARISON_CHOICES,
     )
-    targeting_criteria_rule = models.ForeignKey(
-        "TargetingCriteriaRule",
+    subcriteria_block = models.ForeignKey(
+        "TargetingIndividualSubcriteriaRuleFilterBlock",
         related_name="individual_subcriteria_filters",
         on_delete=models.CASCADE,
     )
@@ -599,3 +620,6 @@ class TargetingIndividualSubcriteriaRuleFilter(TimeStampedUUIDModel):
         if not self.is_flex_field:
             return self.get_query_for_core_field()
         return self.get_query_for_flex_field()
+
+    def __str__(self):
+        return f"{self.field_name} {self.comparision_method} {self.arguments}"

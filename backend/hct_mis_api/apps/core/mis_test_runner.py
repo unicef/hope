@@ -173,7 +173,6 @@ class PostgresTestRunner(XMLTestRunner):
                         keepdb=self.keepdb,
                         serialize=connection.settings_dict.get("TEST", {}).get("SERIALIZE", True),
                     )
-        print(aliases)
         old_names.extend(super().setup_databases(**kwargs))
 
         return old_names
