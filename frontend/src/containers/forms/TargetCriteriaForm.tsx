@@ -70,6 +70,10 @@ const Divider = styled.div`
 const StyledBox = styled(Box)`
   width: 100%;
 `;
+
+const AddIcon = styled(AddCircleOutline)`
+  margin-right: 10px;
+`;
 const DividerLabel = styled.div`
   position: absolute;
   top: 50%;
@@ -93,6 +97,10 @@ const DividerLabel = styled.div`
 const FlexWrapper = styled.div`
   display: flex;
   justify-content: space-between;
+`;
+
+const SubcriteriaBox = styled.div`
+  border: 2px solid red;
 `;
 
 const validationSchema = Yup.object().shape({
@@ -126,8 +134,10 @@ export function TargetCriteriaForm({
   };
 
   const chooseFieldType = (value, arrayHelpers, index): void => {
+    console.log('🔴chooseFieldType- value', value);
     const values = {
       isFlexField: value.isFlexField,
+      associatedWith: value.associatedWith,
       fieldAttribute: {
         labelEn: value.labelEn,
         type: value.type,
@@ -162,6 +172,7 @@ export function TargetCriteriaForm({
   };
 
   if (loading) return null;
+  console.log('🔲,allFields', data.allFieldsAttributes);
 
   return (
     <DialogContainer>
@@ -176,105 +187,154 @@ export function TargetCriteriaForm({
         enableReinitialize
       >
         {({ submitForm, values }) => (
-          <FieldArray
-            name='filters'
-            render={(arrayHelpers) => (
-              <>
-                <Dialog
-                  open={open}
-                  onClose={onClose}
-                  scroll='paper'
-                  aria-labelledby='form-dialog-title'
-                >
-                  <DialogTitleWrapper>
-                    <DialogTitle id='scroll-dialog-title' disableTypography>
-                      <Typography variant='h6'>{title}</Typography>
-                    </DialogTitle>
-                  </DialogTitleWrapper>
-                  <DialogContent>
-                    <DialogDescription>
-                      Adding criteria below will target any individuals within a
-                      household that meet the filters applied. You may also add
-                      individual sub-criteria to further define an individual.
-                    </DialogDescription>
-                    {values.filters.map((each, index) => {
-                      return (
-                        //eslint-disable-next-line
-                        <div key={index}>
-                          <FlexWrapper>
-                            <Field
-                              name={`filters[${index}].fieldName`}
-                              label='Choose field type'
-                              required
-                              choices={data.allFieldsAttributes}
-                              index={index}
-                              value={each.fieldName || null}
-                              onChange={(e, object) => {
-                                if (object) {
-                                  return chooseFieldType(
-                                    object,
-                                    arrayHelpers,
-                                    index,
-                                  );
-                                }
-                                return clearField(arrayHelpers, index);
-                              }}
-                              component={CriteriaAutocomplete}
-                            />
-                            {values.filters.length > 1 && (
-                              <IconButton>
-                                <Delete
-                                  onClick={() => arrayHelpers.remove(index)}
-                                />
-                              </IconButton>
+          <>
+            {console.log('🔷VALUES FILTERS', values.filters)}
+            <FieldArray
+              name='filters'
+              render={(arrayHelpers) => (
+                <>
+                  <Dialog
+                    open={open}
+                    onClose={onClose}
+                    scroll='paper'
+                    aria-labelledby='form-dialog-title'
+                  >
+                    <DialogTitleWrapper>
+                      <DialogTitle id='scroll-dialog-title' disableTypography>
+                        <Typography variant='h6'>{title}</Typography>
+                      </DialogTitle>
+                    </DialogTitleWrapper>
+                    <DialogContent>
+                      <DialogDescription>
+                        Adding criteria below will target any individuals within
+                        a household that meet the filters applied. You may also
+                        add individual sub-criteria to further define an
+                        individual.
+                      </DialogDescription>
+                      {values.filters.map((each, index) => {
+                        return (
+                          //eslint-disable-next-line
+                          <div key={index}>
+                            <FlexWrapper>
+                              <Field
+                                name={`filters[${index}].fieldName`}
+                                label='Choose field type'
+                                required
+                                choices={data.allFieldsAttributes}
+                                index={index}
+                                value={each.fieldName || null}
+                                onChange={(e, object) => {
+                                  if (object) {
+                                    return chooseFieldType(
+                                      object,
+                                      arrayHelpers,
+                                      index,
+                                    );
+                                  }
+                                  return clearField(arrayHelpers, index);
+                                }}
+                                component={CriteriaAutocomplete}
+                              />
+                              {values.filters.length > 1 && (
+                                <IconButton>
+                                  <Delete
+                                    onClick={() => arrayHelpers.remove(index)}
+                                  />
+                                </IconButton>
+                              )}
+                            </FlexWrapper>
+                            {console.log('each🧡', each)}
+                            {each.fieldName && (
+                              <div data-cy='autocomplete-target-criteria-values'>
+                                {SubField(each, index)}
+                              </div>
                             )}
-                          </FlexWrapper>
-                          {each.fieldName && (
-                            <div data-cy='autocomplete-target-criteria-values'>
-                              {SubField(each, index)}
-                            </div>
-                          )}
-                          {(values.filters.length === 1 && index === 0) ||
-                          index === values.filters.length - 1 ? null : (
-                            <Divider>
-                              <DividerLabel>And</DividerLabel>
-                            </Divider>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </DialogContent>
-                  <DialogFooter>
-                    <DialogActions>
-                      <StyledBox display='flex' justifyContent='space-between'>
-                        <div>
-                          <Button
-                            color='primary'
-                            variant='outlined'
-                            onClick={() => arrayHelpers.push({ fieldname: '' })}
-                          >
-                            Add Next Criteria
-                          </Button>
-                        </div>
-                        <div>
-                          <Button onClick={() => onClose()}>Cancel</Button>
-                          <Button
-                            onClick={() => submitForm()}
-                            type='submit'
-                            color='primary'
-                            variant='contained'
-                            data-cy='button-target-population-add-criteria'
-                          >
-                            Save
-                          </Button>
-                        </div>
-                      </StyledBox>
-                    </DialogActions>
-                  </DialogFooter>
-                </Dialog>
-              </>
-            )}
-          />
+                            {each.fieldName &&
+                              each.associatedWith !== 'Household' && (
+                                <Button color='primary'>
+                                  <AddIcon /> Add individual sub-criteria
+                                </Button>
+                              )}
+                            <SubcriteriaBox>
+                              <FlexWrapper>
+                                <Field
+                                  name={`filters[${index}].subcriteria[${index}].fieldName`}
+                                  label='Choose field type'
+                                  required
+                                  choices={data.allFieldsAttributes}
+                                  index={index}
+                                  value={
+                                    `${each.subcriteria[index].fieldName}` ||
+                                    null
+                                  }
+                                  onChange={(e, object) => {
+                                    if (object) {
+                                      return chooseFieldType(
+                                        object,
+                                        arrayHelpers,
+                                        index,
+                                      );
+                                    }
+                                    return clearField(arrayHelpers, index);
+                                  }}
+                                  component={CriteriaAutocomplete}
+                                />
+                                {values.filters.length > 1 && (
+                                  <IconButton>
+                                    <Delete
+                                      onClick={() => arrayHelpers.remove(index)}
+                                    />
+                                  </IconButton>
+                                )}
+                              </FlexWrapper>
+                            </SubcriteriaBox>
+                            {(values.filters.length === 1 && index === 0) ||
+                            index === values.filters.length - 1 ? null : (
+                              <Divider>
+                                <DividerLabel>And</DividerLabel>
+                              </Divider>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </DialogContent>
+                    <DialogFooter>
+                      <DialogActions>
+                        <StyledBox
+                          display='flex'
+                          justifyContent='space-between'
+                        >
+                          <div>
+                            <Button
+                              color='primary'
+                              variant='outlined'
+                              onClick={() =>
+                                arrayHelpers.push({ fieldname: '' })
+                              }
+                            >
+                              Add Next Criteria
+                            </Button>
+                          </div>
+                          <div>
+                            <Button onClick={() => onClose()}>Cancel</Button>
+                            <Button
+                              onClick={() => submitForm()}
+                              type='submit'
+                              color='primary'
+                              variant='contained'
+                              data-cy='button-target-population-add-criteria'
+                            >
+                              Save
+                            </Button>
+                          </div>
+                        </StyledBox>
+                      </DialogActions>
+                    </DialogFooter>
+                  </Dialog>
+                </>
+              )}
+            />
+          </>
         )}
       </Formik>
     </DialogContainer>
