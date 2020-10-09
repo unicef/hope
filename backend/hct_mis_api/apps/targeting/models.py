@@ -464,7 +464,7 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
                 f" doesn't have get_query method or lookup field"
             )
         return self.get_query_for_lookup(
-            f"{'individuals__' if core_field_attr['associated_with']==_INDIVIDUAL else ''}{lookup}",
+            f"{'individuals__' if core_field_attr['associated_with'] == _INDIVIDUAL else ''}{lookup}",
             select_many=core_field_attr.get("type") == "SELECT_MANY",
         )
 
@@ -487,6 +487,7 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
 
     def __str__(self):
         return f"{self.field_name} {self.comparision_method} {self.arguments}"
+
 
 class TargetingIndividualSubcriteriaRuleFilter(TimeStampedUUIDModel):
     """
