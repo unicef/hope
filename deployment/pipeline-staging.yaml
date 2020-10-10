@@ -103,6 +103,7 @@ stages:
               overrideValues: "
                 global.env=staging,\
                 global.storageClass=default,\
+                global.init=false,\
                 backend.image=uniappsk8sdevacr.azurecr.io/$(Docker.backend.repository):$(Build.BuildId),\
                 backend.config.STORAGE_AZURE_ACCOUNT_NAME=$(STORAGE_AZURE_ACCOUNT_NAME),\
                 backend.config.AZURE_CLIENT_ID=$(AZURE_CLIENT_ID),\
