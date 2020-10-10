@@ -106,7 +106,7 @@ stages:
                 backend.image=uniappsk8sdevacr.azurecr.io/$(Docker.backend.repository):$(Build.BuildId),\
                 backend.config.STORAGE_AZURE_ACCOUNT_NAME=$(STORAGE_AZURE_ACCOUNT_NAME),\
                 backend.config.AZURE_CLIENT_ID=$(AZURE_CLIENT_ID),\
-                backend.config.POSTGRES_SSL=true,\
+                backend.config.POSTGRES_SSL='true',\
                 backend.secret.SECRET_KEY=$(SECRET_KEY),\
                 backend.secret.STORAGE_AZURE_ACCOUNT_KEY=$(STORAGE_AZURE_ACCOUNT_KEY),\
                 backend.secret.AZURE_CLIENT_SECRET=$(AZURE_CLIENT_SECRET),\
