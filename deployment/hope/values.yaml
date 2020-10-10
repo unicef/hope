@@ -8,6 +8,7 @@ global:
   env: "dev"
   storageClass: "standard"
   imagePullPolicy: Always
+  init: true
 
 backend:
   image: backend:latest
