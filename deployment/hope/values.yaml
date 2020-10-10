@@ -114,7 +114,7 @@ postgresql:
     host: ""
     db: ""
     port: "5432"
-    username: ""
+    user: ""
     password: ""
     airflowName: ""
 
@@ -137,7 +137,8 @@ registrationdatahubpostgresql:
     host: ""
     db: ""
     port: "5432"
-    username: ""
+    user: ""
+    postgresqlDatabase: ""
     password: ""
 
   image:
@@ -160,7 +161,7 @@ cashassistdatahubpostgresql:
     host: ""
     db: ""
     port: "5432"
-    username: ""
+    user: ""
     password: ""
   image:
     tag: 10.12.0
