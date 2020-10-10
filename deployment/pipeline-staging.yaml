@@ -131,7 +131,7 @@ stages:
                 postgresql.externalDatabase.db=$(POSTGRES_DB),\
                 postgresql.externalDatabase.airflowName=$(POSTGRES_DB),\
                 registrationdatahubpostgresql.enabled=false,\
-                registrationdatahubpostgresql.externalDatabase.host=$(REGISTRATION_DATAHUB_POSTGRES_DB_HOST),\
+                registrationdatahubpostgresql.externalDatabase.host=$(REGISTRATION_DATAHUB_POSTGRES_HOST),\
                 registrationdatahubpostgresql.externalDatabase.user=$(REGISTRATION_DATAHUB_POSTGRES_USER),\
                 registrationdatahubpostgresql.externalDatabase.password=$(REGISTRATION_DATAHUB_POSTGRES_PASSWORD),\
                 registrationdatahubpostgresql.externalDatabase.db=$(REGISTRATION_DATAHUB_POSTGRES_DB),\
