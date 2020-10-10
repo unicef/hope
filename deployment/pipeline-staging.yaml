@@ -70,3 +70,74 @@ stages:
               tags: |
                 $(Build.BuildId)
                 dev-latest
+
+  - stage: deploy
+    displayName: DEPLOY
+    jobs:
+      - job: deploy_hope
+        displayName: "[HOPE]"
+        steps:
+          - task: HelmDeploy@0
+            displayName: "[HOPE] Update Chart dependencies"
+            inputs:
+              connectionType: 'Kubernetes Service Connection'
+              kubernetesServiceConnection: $(Kubernetes.serviceConnection)     
+              command: package
+              updatedependency: true
+              chartPath: '**/deployment/hope'
+          - task: HelmDeploy@0
+            displayName: "[HOPE] DEPLOY"
+            inputs:
+              connectionType: 'Kubernetes Service Connection'
+              kubernetesServiceConnection: $(Kubernetes.serviceConnection)
+              namespace: $(Kubernetes.namespace)
+              command: 'upgrade'
+              chartType: 'FilePath'
+              chartPath: '**/deployment/hope'
+              releaseName: 'hope'
+              install: true
+              waitForExecution: false
+              failOnStderr: false
+              arguments: "--timeout 600s"
+              valueFile: '**/deployment/azure-values.yaml'
+              overrideValues: "
+                global.env=staging,\
+                global.storageClass=default,\
+                backend.image=uniappsk8sdevacr.azurecr.io/$(Docker.backend.repository):$(Build.BuildId),\
+                backend.config.STORAGE_AZURE_ACCOUNT_NAME=$(STORAGE_AZURE_ACCOUNT_NAME),\
+                backend.config.AZURE_CLIENT_ID=$(AZURE_CLIENT_ID),\
+                backend.config.POSTGRES_SSL=true,\
+                backend.secret.SECRET_KEY=$(SECRET_KEY),\
+                backend.secret.STORAGE_AZURE_ACCOUNT_KEY=$(STORAGE_AZURE_ACCOUNT_KEY),\
+                backend.secret.AZURE_CLIENT_SECRET=$(AZURE_CLIENT_SECRET),\
+                backend.secret.AZURE_TENANT_KEY=$(AZURE_TENANT_KEY),\
+                backend.secret.SENTRY_DSN=$(SENTRY_DSN),\
+                backend.secret.EMAIL_HOST=$(EMAIL_HOST),\
+                frontend.image=uniappsk8sdevacr.azurecr.io/$(Docker.frontend.repository):$(Build.BuildId),\
+                ingress.host=stg-hope.unitst.org,\
+                ingress.tls=true,\
+                airflow.baseUrl=stg-hope.unitst.org/airflow,\
+                airflow.airflow.baseUrl=stg-hope.unitst.org/airflow,\
+                airflow.airflow.image.repository=uniappsk8sdevacr.azurecr.io/$(Docker.airflow.repository),\
+                airflow.airflow.image.tag=$(Build.BuildId),\
+                airflow.ingress.hosts.0.name=airflow-hope-stg.unitst.org,\
+                airflow.ingress.hosts.0.tls=true,\
+                airflow.ingress.hosts.0.path=/,\
+                airflow.ingress.hosts.0.tlsSecret=aks-unitst-tls,\
+                postgresql.enabled=false,\
+                postgresql.externalDatabase.host=$(POSTGRES_HOST),\
+                postgresql.externalDatabase.username=$(POSTGRES_USER),\
+                postgresql.externalDatabase.password=$(POSTGRES_PASSWORD),\
+                postgresql.externalDatabase.db=$(POSTGRES_DB),\
+                postgresql.externalDatabase.airflowName=$(POSTGRES_DB),\
+                registrationdatahubpostgresql.enabled=false,\
+                registrationdatahubpostgresql.externalDatabase.host=$(REGISTRATION_DATAHUB_POSTGRES_DB_HOST),\
+                registrationdatahubpostgresql.externalDatabase.username=$(REGISTRATION_DATAHUB_POSTGRES_USER),\
+                registrationdatahubpostgresql.externalDatabase.password=$(REGISTRATION_DATAHUB_POSTGRES_PASSWORD),\
+                registrationdatahubpostgresql.externalDatabase.db=$(REGISTRATION_DATAHUB_POSTGRES_DB),\
+                cashassistdatahubpostgresql.enabled=false,\
+                cashassistdatahubpostgresql.externalDatabase.host=$(CASH_ASSIST_DATAHUB_POSTGRES_HOST),\
+                cashassistdatahubpostgresql.externalDatabase.username=$(CASH_ASSIST_DATAHUB_POSTGRES_USER),\
+                cashassistdatahubpostgresql.externalDatabase.password=$(CASH_ASSIST_DATAHUB_POSTGRES_PASSWORD),\
+                cashassistdatahubpostgresql.externalDatabase.db=$(CASH_ASSIST_DATAHUB_POSTGRES_DB),\
+                airflow.externalDatabase.password=$(POSTGRES_PASSWORD),"
