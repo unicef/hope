@@ -21,7 +21,7 @@ variables:
   Docker.frontend.repository: "hope-frontend"
   Docker.airflow.repository: "hope-airflow"
   Docker.registry: "uniappsk8sdevacr"
-  Kubernetes.serviceConnection: "ICTD-HOPE-DEV-uni-apps-aks-dev-ictd-hope-dev-1593457625386"
+  Kubernetes.serviceConnection: "ICTD-HOPE-STG-uni-apps-aks-dev-ictd-hope-stg-1602346345867"
   Kubernetes.namespace: "ictd-hope-stg"
 
 stages:
