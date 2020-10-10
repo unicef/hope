@@ -111,9 +111,8 @@ postgresql:
 
   externalDatabase:
     host: ""
-    port: ""
-    user: ""
-    name: ""
+    port: "5432"
+    username: ""
     password: ""
     airflowName: ""
 
@@ -134,9 +133,8 @@ registrationdatahubpostgresql:
 
   externalDatabase:
     host: ""
-    port: ""
-    user: ""
-    name: ""
+    port: "5432"
+    username: ""
     password: ""
 
   image:
@@ -157,9 +155,8 @@ cashassistdatahubpostgresql:
 
   externalDatabase:
     host: ""
-    port: ""
-    name: ""
-    user: ""
+    port: "5432"
+    username: ""
     password: ""
   image:
     tag: 10.12.0
