@@ -42,6 +42,7 @@ backend:
     POSTGRES_SQL: ""
     AIRFLOW_HOST: "hope-airflow"
     EMAIL_HOST: ""
+    POSTGRES_SSL: ""
 
   secret:
     SECRET_KEY: ""
@@ -111,6 +112,7 @@ postgresql:
 
   externalDatabase:
     host: ""
+    db: ""
     port: "5432"
     username: ""
     password: ""
@@ -133,6 +135,7 @@ registrationdatahubpostgresql:
 
   externalDatabase:
     host: ""
+    db: ""
     port: "5432"
     username: ""
     password: ""
@@ -155,6 +158,7 @@ cashassistdatahubpostgresql:
 
   externalDatabase:
     host: ""
+    db: ""
     port: "5432"
     username: ""
     password: ""
