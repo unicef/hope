@@ -1,0 +1,72 @@
+trigger:
+  batch: true
+  branches:
+    include:
+    - staging
+  paths:
+    exclude:
+    -  docs/*
+pr: none
+resources:
+  - repo: self
+
+variables:
+  # ========================================================================
+  #                          Mandatory variables 
+  # ========================================================================
+  Docker.backend.filePath: "**/backend/Dockerfile"
+  Docker.frontend.filePath: "**/frontend/Dockerfile"
+  Docker.airflow.filePath: "**/airflow/Dockerfile"
+  Docker.backend.repository: "hope-backend"
+  Docker.frontend.repository: "hope-frontend"
+  Docker.airflow.repository: "hope-airflow"
+  Docker.registry: "uniappsk8sdevacr"
+  Kubernetes.serviceConnection: "ICTD-HOPE-DEV-uni-apps-aks-dev-ictd-hope-dev-1593457625386"
+  Kubernetes.namespace: "ictd-hope-stg"
+
+stages:
+  - stage: build_and_push
+    displayName: BUILD and PUSH
+    jobs:
+      - job: build_push_backend
+        displayName: "[BACKEND]"
+        steps:
+          - task: Docker@2
+            displayName: Build&Push
+            inputs:
+              command: buildAndPush
+              dockerfile: $(Docker.backend.filePath)
+              repository: $(Docker.backend.repository)
+              containerRegistry: $(Docker.registry)
+              tags: |
+                $(Build.BuildId)
+                dev-latest
+
+      - job: build_push_airflow
+        displayName: "[AIRFLOW]"
+        steps:
+          - task: Docker@2
+            displayName: Build&Push
+            inputs:
+              command: buildAndPush
+              dockerfile: $(Docker.airflow.filePath)
+              repository: $(Docker.airflow.repository)
+              containerRegistry: $(Docker.registry)
+              buildContext: "$(Build.SourcesDirectory)"
+              tags: |
+                $(Build.BuildId)
+                dev-latest
+
+      - job: build_push_frontend
+        displayName: "[FRONTEND]"
+        steps:
+          - task: Docker@2
+            displayName: Build&Push
+            inputs:
+              command: buildAndPush
+              dockerfile: $(Docker.frontend.filePath)
+              repository: $(Docker.frontend.repository)
+              containerRegistry: $(Docker.registry)
+              tags: |
+                $(Build.BuildId)
+                dev-latest
