@@ -113,7 +113,7 @@ POSTGRES_DB: {{ .Values.postgresql.postgresqlDatabase }}
 POSTGRES_USER: {{ .Values.postgresql.postgresqlUsername }}
 POSTGRES_HOST: {{ template "hope.postgresql.fullname" . }}
 {{- else }}
-POSTGRES_DB: {{ .Values.postgresql.externalDatabase.name }}
+POSTGRES_DB: {{ .Values.postgresql.externalDatabase.db }}
 POSTGRES_USER: {{ .Values.postgresql.externalDatabase.user }}
 POSTGRES_HOST: {{ .Values.postgresql.externalDatabase.host }}
 {{- end -}}
@@ -142,7 +142,7 @@ POSTGRES_PORT: "5432"
 AIRFLOW_DATABASE_PORT: "5432"
 AIRFLOW_POSTGRES_PORT: "5432"
 {{- else }}
-AIRFLOW_DATABASE_NAME: {{ .Values.postgresql.externalDatabase.name }}
+AIRFLOW_DATABASE_NAME: {{ .Values.postgresql.externalDatabase.db }}
 AIRFLOW_DATABASE_USERNAME: {{ .Values.postgresql.externalDatabase.user }}
 AIRFLOW_DATABASE_HOST: {{ .Values.postgresql.externalDatabase.host }}
 POSTGRES_PORT: "5432"
@@ -181,7 +181,7 @@ POSTGRES_REGISTRATION_DATAHUB_DB: {{ .Values.registrationdatahubpostgresql.postg
 POSTGRES_REGISTRATION_DATAHUB_USER: {{ .Values.registrationdatahubpostgresql.postgresqlUsername }}
 POSTGRES_REGISTRATION_DATAHUB_HOST: {{ template "hope.registrationdatahubpostgresql.fullname" .}}
 {{- else }}
-POSTGRES_REGISTRATION_DATAHUB_DB: {{ .Values.registrationdatahubpostgresql.externalDatabase.name }}
+POSTGRES_REGISTRATION_DATAHUB_DB: {{ .Values.registrationdatahubpostgresql.externalDatabase.db }}
 POSTGRES_REGISTRATION_DATAHUB_USER: {{ .Values.registrationdatahubpostgresql.externalDatabase.user }}
 POSTGRES_REGISTRATION_DATAHUB_HOST: {{ .Values.registrationdatahubpostgresql.externalDatabase.host }}
 {{- end -}}
@@ -208,7 +208,7 @@ POSTGRES_CASHASSIST_DATAHUB_DB: {{ .Values.cashassistdatahubpostgresql.postgresq
 POSTGRES_CASHASSIST_DATAHUB_USER: {{ .Values.cashassistdatahubpostgresql.postgresqlUsername }}
 POSTGRES_CASHASSIST_DATAHUB_HOST: {{ template "hope.cashassistdatahubpostgresql.fullname" .}}
 {{- else }}
-POSTGRES_CASHASSIST_DATAHUB_DB: {{ .Values.cashassistdatahubpostgresql.externalDatabase.name }}
+POSTGRES_CASHASSIST_DATAHUB_DB: {{ .Values.cashassistdatahubpostgresql.externalDatabase.db }}
 POSTGRES_CASHASSIST_DATAHUB_USER: {{ .Values.cashassistdatahubpostgresql.externalDatabase.user }}
 POSTGRES_CASHASSIST_DATAHUB_HOST: {{ .Values.cashassistdatahubpostgresql.externalDatabase.host }}
 {{- end -}}
