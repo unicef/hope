@@ -16,7 +16,7 @@ class Command(BaseCommand):
             dest="file",
             action="store",
             nargs="?",
-            default="./data/FlexibleAttributesInit.xls",
+            default="./data/FlexibleAttributesInit.xlsx",
             type=str,
             help="file",
         )
