@@ -111,10 +111,9 @@ const validationSchema = Yup.object().shape({
   ),
 });
 
-interface ProgramFormPropTypes {
+interface TargetCriteriaFormPropTypes {
   criteria?;
-  onSubmit: (values) => Promise<void>;
-  renderSubmit: (submit: () => Promise<void>) => void;
+  addCriteria: (values) => void;
   open: boolean;
   onClose: () => void;
   title: string;
@@ -126,7 +125,7 @@ export function TargetCriteriaForm({
   open,
   onClose,
   title,
-}): React.ReactElement {
+}: TargetCriteriaFormPropTypes): React.ReactElement {
   const { data, loading } = useImportedIndividualFieldsQuery();
   const mappedFilters = mapCriteriasToInitialValues(criteria);
   const initialValue = {
