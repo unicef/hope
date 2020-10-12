@@ -1,6 +1,5 @@
 from collections import defaultdict
 
-import xlrd
 from django.contrib import admin
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -8,14 +7,11 @@ from django.forms import forms
 from django.shortcuts import redirect, render
 from django.urls import path
 from django.utils.html import strip_tags
+
+import xlrd
 from xlrd import XLRDError
 
-from core.models import (
-    BusinessArea,
-    FlexibleAttribute,
-    FlexibleAttributeGroup,
-    FlexibleAttributeChoice,
-)
+from core.models import BusinessArea, FlexibleAttribute, FlexibleAttributeChoice, FlexibleAttributeGroup
 
 
 class XLSImportForm(forms.Form):
@@ -28,7 +24,6 @@ class BusinessAreaAdmin(admin.ModelAdmin):
 
 
 class FlexibleAttributeImporter:
-
     TYPE_CHOICE_MAP = {
         "note": "STRING",
         "image": "IMAGE",
@@ -81,23 +76,28 @@ class FlexibleAttributeImporter:
 
         if any(header_name.startswith(i) for i in self.JSON_MODEL_FIELDS):
             if "::" in header_name:
-                field_name, language = header_name.split("::")
+                label, language = header_name.split("::")
             else:
-                field_name, language = header_name.split(":")
+                label, language = header_name.split(":")
 
-            if field_name in model_fields:
+            if label in model_fields:
                 cleared_value = strip_tags(value).replace("#", "").strip()
 
-                if field_name == "label" and language == "English(EN)":
+                if label == "label" and language == "English(EN)":
                     if isinstance(row[1].value, str):
                         is_index_field = row[1].value.endswith("_index")
                     else:
                         is_index_field = False
-                    # only index fields and group labels can be empty
-                    if not value and not is_index_field and not object_type_to_add == "group":
+                    field_suffix = row[1].value[-4:]
+                    is_not_group = object_type_to_add != "group"
+                    is_empty_and_not_index_field = not value and not is_index_field
+                    is_core_or_flex_field = (
+                        field_suffix in self.CORE_FIELD_SUFFIXES or field_suffix in self.FLEX_FIELD_SUFFIXES
+                    )
+                    if is_not_group and is_empty_and_not_index_field and is_core_or_flex_field:
                         raise ValidationError(f"Survey Sheet: Row {row_number + 1}: " f"English label cannot be empty")
 
-                self.json_fields_to_create[field_name].update({language: cleared_value if value else ""})
+                self.json_fields_to_create[label].update({language: cleared_value if value else ""})
             return
 
         if header_name == "required":
@@ -184,15 +184,20 @@ class FlexibleAttributeImporter:
                 continue
 
             if row[0].value not in choices_assigned_to_fields:
-                raise ValidationError(f"Choices Sheet: Row {row_number + 1}: " f"Choice is not assigned to any field")
+                continue
 
             for cell, header_name in zip(row, choices_headers_map):
                 self._assign_field_values(
-                    cell.value, header_name, "choice", row, row_number,
+                    cell.value,
+                    header_name,
+                    "choice",
+                    row,
+                    row_number,
                 )
 
             obj = FlexibleAttributeChoice.all_objects.filter(
-                list_name=self.object_fields_to_create["list_name"], name=self.object_fields_to_create["name"],
+                list_name=self.object_fields_to_create["list_name"],
+                name=self.object_fields_to_create["name"],
             ).first()
 
             if obj:
@@ -201,10 +206,15 @@ class FlexibleAttributeImporter:
                 obj.save()
                 updated_choices.append(obj)
             else:
-                choice = FlexibleAttributeChoice(**self.object_fields_to_create, **self.json_fields_to_create,)
+                choice = FlexibleAttributeChoice(
+                    **self.object_fields_to_create,
+                    **self.json_fields_to_create,
+                )
                 to_create_choices.append(choice)
 
-        created_choices = FlexibleAttributeChoice.objects.bulk_create(to_create_choices,)
+        created_choices = FlexibleAttributeChoice.objects.bulk_create(
+            to_create_choices,
+        )
 
         choices_to_delete = set(choices_from_db).difference(set(created_choices + updated_choices))
 
@@ -240,13 +250,19 @@ class FlexibleAttributeImporter:
                 value = cell.value
 
                 self._assign_field_values(
-                    value, header_name, object_type_to_add, row, row_number,
+                    value,
+                    header_name,
+                    object_type_to_add,
+                    row,
+                    row_number,
                 )
 
             is_flex_field = any(self.object_fields_to_create["name"].endswith(i) for i in self.FLEX_FIELD_SUFFIXES)
 
             if object_type_to_add == "group":
-                obj = FlexibleAttributeGroup.all_objects.filter(name=self.object_fields_to_create["name"],).first()
+                obj = FlexibleAttributeGroup.all_objects.filter(
+                    name=self.object_fields_to_create["name"],
+                ).first()
 
                 if self.current_group_tree:
                     parent = self.current_group_tree[-1]
@@ -277,7 +293,9 @@ class FlexibleAttributeImporter:
 
             elif object_type_to_add == "attribute" and is_flex_field:
                 choice_name = self._get_field_choice_name(row)
-                obj = FlexibleAttribute.all_objects.filter(name=self.object_fields_to_create["name"],).first()
+                obj = FlexibleAttribute.all_objects.filter(
+                    name=self.object_fields_to_create["name"],
+                ).first()
 
                 if self.current_group_tree:
                     parent = self.current_group_tree[-1]
@@ -299,15 +317,18 @@ class FlexibleAttributeImporter:
                     field = obj
 
                 else:
+                    attribute_suffix = self.object_fields_to_create["name"][-4:]
                     field = FlexibleAttribute.objects.create(
                         group=parent,
-                        associated_with=(0 if self.object_fields_to_create["name"][-4:] == "_h_f" else 1),
+                        associated_with=(0 if attribute_suffix == "_h_f" else 1),
                         **self.object_fields_to_create,
                         **self.json_fields_to_create,
                     )
 
                 if choice_name:
-                    choices = FlexibleAttributeChoice.objects.filter(list_name=choice_name,)
+                    choices = FlexibleAttributeChoice.objects.filter(
+                        list_name=choice_name,
+                    )
                     field.choices.set(choices)
 
                 all_attrs.append(field)
