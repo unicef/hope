@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_by_targeting_criteria_finalized 1'] = {
@@ -44,10 +43,7 @@ snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_b
         'finalHouseholdsListByTargetingCriteria': {
             'edges': [
                 {
-                    'node': {
-                        'residenceStatus': 'CITIZEN',
-                        'size': 1
-                    }
+                    'node': None
                 },
                 {
                     'node': {
@@ -58,7 +54,19 @@ snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_b
             ],
             'totalCount': 2
         }
-    }
+    },
+    'errors': [
+        {
+            'message': 'Expected a value of type "HouseholdResidenceStatus" but received: CITIZEN',
+            'path': [
+                'finalHouseholdsListByTargetingCriteria',
+                'edges',
+                0,
+                'node',
+                'residenceStatus'
+            ]
+        }
+    ]
 }
 
 snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_by_targeting_criteria_size_2_edit 1'] = {
@@ -82,13 +90,22 @@ snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_b
         'finalHouseholdsListByTargetingCriteria': {
             'edges': [
                 {
-                    'node': {
-                        'residenceStatus': 'CITIZEN',
-                        'size': 1
-                    }
+                    'node': None
                 }
             ],
             'totalCount': 1
         }
-    }
+    },
+    'errors': [
+        {
+            'message': 'Expected a value of type "HouseholdResidenceStatus" but received: CITIZEN',
+            'path': [
+                'finalHouseholdsListByTargetingCriteria',
+                'edges',
+                0,
+                'node',
+                'residenceStatus'
+            ]
+        }
+    ]
 }

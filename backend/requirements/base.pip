@@ -19,6 +19,7 @@ scipy==1.5.1
 django-constance[redis]==2.7.0
 admin-extra-urls==2.2.0
 unittest-xml-reporting==3.0.4
+django-multiselectfield==0.1.12
 
 # Tests and Fixtures
 factory-boy==2.12.0
