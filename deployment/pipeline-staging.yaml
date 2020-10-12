@@ -126,6 +126,7 @@ stages:
                 airflow.ingress.hosts.0.path=/,\
                 airflow.ingress.hosts.0.tlsSecret=aks-unitst-tls,\
                 postgresql.enabled=false,\
+                postgresql.postgresqlPassword=$(POSTGRES_PASSWORD),\
                 postgresql.externalDatabase.host=$(POSTGRES_HOST),\
                 postgresql.externalDatabase.user=$(POSTGRES_USER),\
                 postgresql.externalDatabase.password=$(POSTGRES_PASSWORD),\
