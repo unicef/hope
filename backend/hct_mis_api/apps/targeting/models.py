@@ -16,7 +16,7 @@ from model_utils import Choices
 from model_utils.models import SoftDeletableModel
 from psycopg2.extras import NumericRange
 
-from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES, _INDIVIDUAL
+from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES, _INDIVIDUAL, _HOUSEHOLD
 from core.models import FlexibleAttribute
 from household.models import Individual, Household
 from utils.models import TimeStampedUUIDModel
@@ -361,13 +361,8 @@ class TargetingIndividualSubcriteriaRuleFilterBlock(
     )
 
 
-class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
-    """
-    This is one explicit filter like:
-        :Age <> 10-20
-        :Residential Status = Refugee
-        :Residential Status != Refugee
-    """
+
+class TargetingCriteriaFilterMixin:
 
     COMPARISION_ATTRIBUTES = {
         "EQUALS": {
@@ -401,22 +396,9 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
         ("GREATER_THAN", _("Greater than")),
         ("LESS_THAN", _("Less than")),
     )
-    comparision_method = models.CharField(
-        max_length=20,
-        choices=COMPARISON_CHOICES,
-    )
-    targeting_criteria_rule = models.ForeignKey(
-        "TargetingCriteriaRule",
-        related_name="filters",
-        on_delete=models.CASCADE,
-    )
-    is_flex_field = models.BooleanField(default=False)
-    field_name = models.CharField(max_length=50)
-    arguments = JSONField(
-        help_text="""
-            Array of arguments
-            """
-    )
+
+    def get_lookup_prefix(self, associated_with):
+        return "individuals__" if associated_with == _INDIVIDUAL else ""
 
     def get_query_for_lookup(self, lookup, select_many=False):
         comparision_attribute = TargetingCriteriaRuleFilter.COMPARISION_ATTRIBUTES.get(self.comparision_method)
@@ -463,8 +445,9 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
                 f"Core Field Attributes associated with this fieldName {self.field_name}"
                 f" doesn't have get_query method or lookup field"
             )
+        lookup_prefix = self.get_lookup_prefix(core_field_attr['associated_with'])
         return self.get_query_for_lookup(
-            f"{'individuals__' if core_field_attr['associated_with'] == _INDIVIDUAL else ''}{lookup}",
+            f"{lookup_prefix}{lookup}",
             select_many=core_field_attr.get("type") == "SELECT_MANY",
         )
 
@@ -474,7 +457,8 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
             raise ValidationError(
                 f"There are no Flex Field Attributes associated with this fieldName {self.field_name}"
             )
-        lookup = f"{'individuals__' if flex_field_attr.associated_with else ''}flex_fields__{flex_field_attr.name}"
+        lookup_prefix = self.get_lookup_prefix(_INDIVIDUAL if flex_field_attr.associated_with == 1 else _HOUSEHOLD)
+        lookup = f"{lookup_prefix}flex_fields__{flex_field_attr.name}"
         return self.get_query_for_lookup(
             lookup,
             select_many=flex_field_attr.type == "SELECT_MANY",
@@ -489,7 +473,10 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
         return f"{self.field_name} {self.comparision_method} {self.arguments}"
 
 
-class TargetingIndividualSubcriteriaRuleFilter(TimeStampedUUIDModel):
+
+
+
+class TargetingCriteriaRuleFilter(TimeStampedUUIDModel,TargetingCriteriaFilterMixin):
     """
     This is one explicit filter like:
         :Age <> 10-20
@@ -497,41 +484,35 @@ class TargetingIndividualSubcriteriaRuleFilter(TimeStampedUUIDModel):
         :Residential Status != Refugee
     """
 
-    COMPARISION_ATTRIBUTES = {
-        "EQUALS": {
-            "arguments": 1,
-            "lookup": "",
-            "negative": False,
-            "supported_types": ["INTEGER", "SELECT_ONE", "STRING"],
-        },
-        "NOT_EQUALS": {"arguments": 1, "lookup": "", "negative": True, "supported_types": ["INTEGER", "SELECT_ONE"]},
-        "CONTAINS": {
-            "min_arguments": 1,
-            "arguments": 1,
-            "lookup": "__icontains",
-            "negative": False,
-            "supported_types": ["SELECT_MANY", "STRING"],
-        },
-        "NOT_CONTAINS": {"arguments": 1, "lookup": "__icontains", "negative": True, "supported_types": ["STRING"]},
-        "RANGE": {"arguments": 2, "lookup": "__range", "negative": False, "supported_types": ["INTEGER"]},
-        "NOT_IN_RANGE": {"arguments": 2, "lookup": "__range", "negative": True, "supported_types": ["INTEGER"]},
-        "GREATER_THAN": {"arguments": 1, "lookup": "__gt", "negative": False, "supported_types": ["INTEGER"]},
-        "LESS_THAN": {"arguments": 1, "lookup": "__lt", "negative": False, "supported_types": ["INTEGER"]},
-    }
-
-    COMPARISON_CHOICES = Choices(
-        ("EQUALS", _("Equals")),
-        ("NOT_EQUALS", _("Not Equals")),
-        ("CONTAINS", _("Contains")),
-        ("NOT_CONTAINS", _("Does not contain")),
-        ("RANGE", _("In between <>")),
-        ("NOT_IN_RANGE", _("Not in between <>")),
-        ("GREATER_THAN", _("Greater than")),
-        ("LESS_THAN", _("Less than")),
-    )
     comparision_method = models.CharField(
         max_length=20,
-        choices=COMPARISON_CHOICES,
+        choices=TargetingCriteriaFilterMixin.COMPARISON_CHOICES,
+    )
+    targeting_criteria_rule = models.ForeignKey(
+        "TargetingCriteriaRule",
+        related_name="filters",
+        on_delete=models.CASCADE,
+    )
+    is_flex_field = models.BooleanField(default=False)
+    field_name = models.CharField(max_length=50)
+    arguments = JSONField(
+        help_text="""
+            Array of arguments
+            """
+    )
+
+
+
+class TargetingIndividualSubcriteriaRuleFilter(TimeStampedUUIDModel,TargetingCriteriaFilterMixin):
+    """
+    This is one explicit filter like:
+        :Age <> 10-20
+        :Residential Status = Refugee
+        :Residential Status != Refugee
+    """
+    comparision_method = models.CharField(
+        max_length=20,
+        choices=TargetingCriteriaFilterMixin.COMPARISON_CHOICES,
     )
     subcriteria_block = models.ForeignKey(
         "TargetingIndividualSubcriteriaRuleFilterBlock",
@@ -546,81 +527,6 @@ class TargetingIndividualSubcriteriaRuleFilter(TimeStampedUUIDModel):
             """
     )
 
-    def get_query_for_lookup(self, lookup, select_many=False):
-        comparision_attribute = TargetingCriteriaRuleFilter.COMPARISION_ATTRIBUTES.get(self.comparision_method)
-        args_count = comparision_attribute.get("arguments")
-        if self.arguments is None:
-            raise ValidationError(
-                f"{self.field_name} {self.comparision_method} filter query expect {args_count} " f"arguments"
-            )
-        args_input_count = len(self.arguments)
-        if select_many:
-            if args_input_count < 1:
-                raise ValidationError(
-                    f"{self.field_name} SELECT MULTIPLE CONTAINS filter query expect at least 1 argument"
-                )
-        elif args_count != args_input_count:
-            raise ValidationError(
-                f"{self.field_name} {self.comparision_method} filter query expect {args_count} "
-                f"arguments gets {args_input_count}"
-            )
-        argument = self.arguments if args_input_count > 1 else self.arguments[0]
+    def get_lookup_prefix(self, associated_with):
+        return ""
 
-        if select_many:
-            query = Q(**{f"{lookup}__contains": argument})
-        else:
-            query = Q(**{f"{lookup}{comparision_attribute.get('lookup')}": argument})
-        if comparision_attribute.get("negative"):
-            return ~query
-        return query
-
-    def get_query_for_core_field(self):
-        core_fields = CORE_FIELDS_ATTRIBUTES
-        core_field_attrs = [attr for attr in core_fields if attr.get("name") == self.field_name]
-        if len(core_field_attrs) != 1:
-            raise ValidationError(
-                f"There are no Core Field Attributes associated with this fieldName {self.field_name}"
-            )
-        core_field_attr = core_field_attrs[0]
-        if core_field_attr["associated_with"] != _INDIVIDUAL:
-            raise ValidationError(
-                f"Only Core Fields associated with individuals can be used inside Individual Subcriteria"
-            )
-        # TODO Johniak implement age filter
-        get_individual_subcriteria_query = core_field_attr.get("get_individual_subcriteria_query")
-        if get_individual_subcriteria_query:
-            return get_individual_subcriteria_query(self.comparision_method, self.arguments)
-        lookup = core_field_attr.get("lookup")
-        if not lookup:
-            raise ValidationError(
-                f"Core Field Attributes associated with this fieldName {self.field_name}"
-                f" doesn't have get_query method or lookup field"
-            )
-        return self.get_query_for_lookup(
-            f"{lookup}",
-            select_many=core_field_attr.get("type") == "SELECT_MANY",
-        )
-
-    def get_query_for_flex_field(self):
-        flex_field_attr = FlexibleAttribute.objects.get(name=self.field_name)
-        if not flex_field_attr:
-            raise ValidationError(
-                f"There are no Flex Field Attributes associated with this fieldName {self.field_name}"
-            )
-        if flex_field_attr["associated_with"] != _INDIVIDUAL:
-            raise ValidationError(
-                f"Only Flex Fields associated with individuals can be used inside Individual Subcriteria"
-            )
-        lookup = f"flex_fields__{flex_field_attr.name}"
-        return self.get_query_for_lookup(
-            lookup,
-            select_many=flex_field_attr.type == "SELECT_MANY",
-        )
-
-    def get_query(self):
-        if not self.is_flex_field:
-            return self.get_query_for_core_field()
-        return self.get_query_for_flex_field()
-
-    def __str__(self):
-        return f"{self.field_name} {self.comparision_method} {self.arguments}"
