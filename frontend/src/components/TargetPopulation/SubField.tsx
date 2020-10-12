@@ -13,7 +13,7 @@ const InlineField = styled.div`
 `;
 
 export const SubField = (field, index, baseName): React.ReactElement => {
-  console.log('field', field);
+  console.log('field in subfield func', field);
   switch (field.fieldAttribute.type) {
     case 'INTEGER':
       return (
