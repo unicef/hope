@@ -21,6 +21,7 @@ export function CriteriaAutocomplete({
       otherProps.choices.find((choice) => choice.name === field.value) || null;
     setNewValue(optionValue);
   }, [field.value, otherProps.choices]);
+  console.log('field.value', field.value);
   return (
     <StyledAutocomplete<Option>
       {...field}
