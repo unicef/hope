@@ -7,18 +7,19 @@ import {
   DialogTitle,
   Typography,
   Button,
+  IconButton,
   Box,
 } from '@material-ui/core';
-import { AddCircleOutline } from '@material-ui/icons';
-import { Formik, FieldArray } from 'formik';
+import { AddCircleOutline, Delete } from '@material-ui/icons';
+import { Field, Formik, FieldArray } from 'formik';
 import { useImportedIndividualFieldsQuery } from '../../__generated__/graphql';
 import { SubField } from '../../components/TargetPopulation/SubField';
 import {
   formatCriteriaFilters,
   mapCriteriasToInitialValues,
 } from '../../utils/utils';
+import { CriteriaAutocomplete } from '../../components/TargetPopulation/TargetingCriteria/CriteriaAutocomplete';
 import { DialogActions } from '../dialogs/DialogActions';
-import { FieldTypeChooser } from '../../components/TargetPopulation/FieldTypeChooser';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -39,6 +40,25 @@ const DialogFooter = styled.div`
   margin: 0;
   border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
   text-align: right;
+`;
+
+const AddCriteriaWrapper = styled.div`
+  text-align: right;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: ${({ theme }) => theme.spacing(3)}px 0;
+`;
+
+const AddCriteria = styled.div`
+  display: flex;
+  align-items: center;
+  color: #003c8f;
+  text-transform: uppercase;
+  cursor: pointer;
+  svg {
+    margin-right: ${({ theme }) => theme.spacing(2)}px;
+  }
 `;
 
 const Divider = styled.div`
@@ -74,6 +94,11 @@ const DividerLabel = styled.div`
   background-color: #fff;
 `;
 
+const FlexWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
+`;
+
 const SubcriteriaBox = styled.div`
   border: 2px solid red;
 `;
@@ -105,6 +130,43 @@ export function TargetCriteriaForm({
   const mappedFilters = mapCriteriasToInitialValues(criteria);
   const initialValue = {
     filters: mappedFilters,
+  };
+
+  const chooseFieldType = (value, arrayHelpers, index): void => {
+    const values = {
+      isFlexField: value.isFlexField,
+      associatedWith: value.associatedWith,
+      fieldAttribute: {
+        labelEn: value.labelEn,
+        type: value.type,
+        choices: null,
+      },
+      value: null,
+    };
+    switch (value.type) {
+      case 'INTEGER':
+        values.value = { from: '', to: '' };
+        break;
+      case 'SELECT_ONE':
+        values.fieldAttribute.choices = value.choices;
+        break;
+      case 'SELECT_MANY':
+        values.value = [];
+        values.fieldAttribute.choices = value.choices;
+        break;
+      default:
+        values.value = null;
+        break;
+    }
+    arrayHelpers.replace(index, {
+      ...values,
+      fieldName: value.name,
+      type: value.type,
+    });
+  };
+
+  const clearField = (arrayHelpers, index): void => {
+    return arrayHelpers.replace(index, {});
   };
 
   if (loading) return null;
@@ -150,16 +212,34 @@ export function TargetCriteriaForm({
                         return (
                           //eslint-disable-next-line
                           <div key={index}>
-                            <FieldTypeChooser
-                              fieldName={`filters[${index}].fieldName`}
-                              index={index}
-                              choices={data.allFieldsAttributes}
-                              each={each}
-                              arrayHelpers={arrayHelpers}
-                              values={values}
-                              value={each.fieldName || null}
-                              onDeleteCondition={values.filters.length > 1}
-                            />
+                            <FlexWrapper>
+                              <Field
+                                name={`filters[${index}].fieldName`}
+                                label='Choose field type'
+                                required
+                                choices={data.allFieldsAttributes}
+                                index={index}
+                                value={each.fieldName || null}
+                                onChange={(e, object) => {
+                                  if (object) {
+                                    return chooseFieldType(
+                                      object,
+                                      arrayHelpers,
+                                      index,
+                                    );
+                                  }
+                                  return clearField(arrayHelpers, index);
+                                }}
+                                component={CriteriaAutocomplete}
+                              />
+                              {values.filters.length > 1 && (
+                                <IconButton>
+                                  <Delete
+                                    onClick={() => arrayHelpers.remove(index)}
+                                  />
+                                </IconButton>
+                              )}
+                            </FlexWrapper>
                             {each.fieldName && (
                               <div data-cy='autocomplete-target-criteria-values'>
                                 {SubField(each, index, `filters[${index}]`)}
@@ -184,27 +264,50 @@ export function TargetCriteriaForm({
                                                 <div
                                                   key={`filter-${each.fieldName}-subcriteria-${indexSub}`}
                                                 >
-                                                  <FieldTypeChooser
-                                                    fieldName={`filters[${index}].subcriteria[${indexSub}].fieldName`}
-                                                    index={indexSub}
-                                                    choices={
-                                                      data.allFieldsAttributes
-                                                    }
-                                                    each={each}
-                                                    arrayHelpers={
-                                                      subcriteriaArrayHelpers
-                                                    }
-                                                    values={values}
-                                                    value={
-                                                      eachSubcriteria.value ||
-                                                      null
-                                                    }
-                                                    onDeleteCondition={
-                                                      values.filters[index]
-                                                        ?.subcriteria?.length >
-                                                      1
-                                                    }
-                                                  />
+                                                  <FlexWrapper>
+                                                    <Field
+                                                      name={`filters[${index}].subcriteria[${indexSub}].fieldName`}
+                                                      label='Choose field type'
+                                                      required
+                                                      choices={
+                                                        data.allFieldsAttributes
+                                                      }
+                                                      index={indexSub}
+                                                      value={
+                                                        eachSubcriteria.value ||
+                                                        null
+                                                      }
+                                                      onChange={(e, object) => {
+                                                        if (object) {
+                                                          return chooseFieldType(
+                                                            object,
+                                                            subcriteriaArrayHelpers,
+                                                            indexSub,
+                                                          );
+                                                        }
+                                                        return clearField(
+                                                          subcriteriaArrayHelpers,
+                                                          indexSub,
+                                                        );
+                                                      }}
+                                                      component={
+                                                        CriteriaAutocomplete
+                                                      }
+                                                    />
+                                                    {values.filters[index]
+                                                      ?.subcriteria?.length >
+                                                      1 && (
+                                                      <IconButton>
+                                                        <Delete
+                                                          onClick={() =>
+                                                            subcriteriaArrayHelpers.remove(
+                                                              indexSub,
+                                                            )
+                                                          }
+                                                        />
+                                                      </IconButton>
+                                                    )}
+                                                  </FlexWrapper>
                                                   {eachSubcriteria.fieldName && (
                                                     <div data-cy='autocomplete-target-subcriteria-values'>
                                                       {SubField(
@@ -235,6 +338,7 @@ export function TargetCriteriaForm({
                                   </SubcriteriaBox>
                                 </>
                               )}
+
                             {(values.filters.length === 1 && index === 0) ||
                             index === values.filters.length - 1 ? null : (
                               <Divider>
