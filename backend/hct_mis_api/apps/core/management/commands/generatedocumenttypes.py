@@ -27,15 +27,8 @@ class Command(BaseCommand):
                 document_types.append(DocumentType(country=alpha2, label=label, type=doc_type))
                 rdh_document_types.append(RDHDocumentType(country=alpha2, label=label, type=doc_type))
 
-        for document_type in document_types:
-            DocumentType.objects.get_or_create(
-                country=document_type.country, label=document_type.label, type=document_type.type
-            )
-
-        for document_type in rdh_document_types:
-            RDHDocumentType.objects.get_or_create(
-                country=document_type.country, label=document_type.label, type=document_type.type
-            )
+        DocumentType.objects.bulk_create(document_types, ignore_conflicts=True)
+        RDHDocumentType.objects.bulk_create(rdh_document_types, ignore_conflicts=True)
 
         agencies = {
             "UNHCR",
