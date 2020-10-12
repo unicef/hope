@@ -142,9 +142,9 @@ POSTGRES_PORT: "5432"
 AIRFLOW_DATABASE_PORT: "5432"
 AIRFLOW_POSTGRES_PORT: "5432"
 {{- else }}
-AIRFLOW_DATABASE_NAME: {{ .Values.postgresql.externalDatabase.db }}
-AIRFLOW_DATABASE_USERNAME: {{ .Values.postgresql.externalDatabase.user }}
-AIRFLOW_DATABASE_HOST: {{ .Values.postgresql.externalDatabase.host }}
+AIRFLOW_DATABASE_NAME: {{ .Values.postgresql.postgresqlDatabase }}
+AIRFLOW_DATABASE_USERNAME: {{ .Values.postgresql.postgresqlUsername }}
+AIRFLOW_DATABASE_HOST: {{ template "hope.postgresql.fullname" . }}
 POSTGRES_PORT: "5432"
 AIRFLOW_DATABASE_PORT: "5432"
 AIRFLOW_POSTGRES_PORT: "5432"
