@@ -13,7 +13,8 @@ RUN apt-get update -yqq \
         libgdal-dev \
         libgdal20 \
         graphviz \
-        acl
+        acl \
+        wget
 
 ARG AIRFLOW_HOME=/usr/local/airflow
 ENV AIRFLOW_HOME=${AIRFLOW_HOME}
@@ -24,9 +25,11 @@ ENV PATH="/usr/local/airflow/.local/bin:$PATH"
 
 COPY ./airflow/requirements.txt /usr/local/airflow/requirements.txt
 RUN pip install -r requirements.txt
+RUN wget -O /code/psql-cert.crt https://www.digicert.com/CACerts/BaltimoreCyberTrustRoot.crt.pem
 
 ADD ./backend/. /usr/local/airflow/backend
 ADD ./airflow/dags/. /usr/local/airflow/dags
 ADD ./airflow/connectors/. /usr/local/airflow/connectors
 
 COPY ./airflow/config/airflow.cfg /usr/local/airflow/airflow.cfg
+
