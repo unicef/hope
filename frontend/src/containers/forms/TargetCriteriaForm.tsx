@@ -186,7 +186,7 @@ export function TargetCriteriaForm({
       >
         {({ submitForm, values }) => (
           <>
-            {console.log('🔷VALUES FILTERS', values.filters)}
+            {console.log('💛values', values)}
             <FieldArray
               name='filters'
               render={(arrayHelpers) => (
@@ -210,7 +210,6 @@ export function TargetCriteriaForm({
                         individual.
                       </DialogDescription>
                       {values.filters.map((each, index) => {
-                        console.log('each', each);
                         return (
                           //eslint-disable-next-line
                           <div key={index}>
@@ -261,7 +260,6 @@ export function TargetCriteriaForm({
                                             index
                                           ].subcriteria?.map(
                                             (eachSubcriteria, indexSub) => {
-                                              console.log(eachSubcriteria);
                                               return (
                                                 //eslint-disable-next-line
                                                 <div
@@ -281,9 +279,6 @@ export function TargetCriteriaForm({
                                                         null
                                                       }
                                                       onChange={(e, object) => {
-                                                        console.log(
-                                                          subcriteriaArrayHelpers,
-                                                        );
                                                         if (object) {
                                                           return chooseFieldType(
                                                             object,
@@ -317,7 +312,7 @@ export function TargetCriteriaForm({
                                                   {eachSubcriteria.fieldName && (
                                                     <div data-cy='autocomplete-target-subcriteria-values'>
                                                       {SubField(
-                                                        each,
+                                                        eachSubcriteria,
                                                         index,
                                                         `filters[${index}].subcriteria[${indexSub}]`,
                                                       )}
@@ -330,7 +325,7 @@ export function TargetCriteriaForm({
                                           <Button
                                             onClick={() =>
                                               subcriteriaArrayHelpers.push({
-                                                fieldname: '',
+                                                fieldName: '',
                                               })
                                             }
                                             color='primary'
