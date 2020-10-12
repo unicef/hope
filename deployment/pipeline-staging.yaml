@@ -99,7 +99,7 @@ stages:
               waitForExecution: false
               failOnStderr: false
               arguments: "--timeout 600s"
-              valueFile: '**/deployment/azure-values.yaml'
+              valueFile: '**/deployment/azure-stg-values.yaml'
               overrideValues: "
                 global.env=staging,\
                 global.storageClass=default,\
