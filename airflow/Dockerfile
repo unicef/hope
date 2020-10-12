@@ -25,6 +25,8 @@ ENV PATH="/usr/local/airflow/.local/bin:$PATH"
 
 COPY ./airflow/requirements.txt /usr/local/airflow/requirements.txt
 RUN pip install -r requirements.txt
+RUN mkdir /code
+
 RUN wget -O /code/psql-cert.crt https://www.digicert.com/CACerts/BaltimoreCyberTrustRoot.crt.pem
 
 ADD ./backend/. /usr/local/airflow/backend
