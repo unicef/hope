@@ -53,11 +53,11 @@ spec:
       containers:
         - name: {{ .Chart.Name }}-backend-release
           command: ["/bin/sh"]
-          {{- if .Values.global.init -}}
+          {{- if .Values.global.init }}
           args: ["-c", "python3 /code/manage.py collectstatic --noinput && python3 /code/manage.py init"]
           {{- else }}
           args: ["-c", "python3 /code/manage.py collectstatic --noinput && python3 /code/manage.py migratealldb"]
-          {{- end -}}
+          {{- end }}
           securityContext:
             {{- toYaml .Values.backend.securityContext | nindent 12 }}
           image: "{{ .Values.backend.image }}"
