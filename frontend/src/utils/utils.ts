@@ -321,14 +321,13 @@ export function formatCriteriaFilters({ filters }) {
   });
 }
 
-export function mapCriteriasToInitialValues(
-  criteria,
-): {
-  subcriteria: Object[];
-  associatedWith: string;
-  fieldName: string;
-  value: { from: string; to: string };
-}[] {
+export function mapCriteriasToInitialValues(criteria) {
+  // ): {
+  //   subcriteria: Object[];
+  //   associatedWith: string;
+  //   fieldName: string;
+  //   value: { from: string; to: string };
+  // }[] {
   const mappedFilters = [];
   if (criteria.filters) {
     criteria.filters.map((each) => {
