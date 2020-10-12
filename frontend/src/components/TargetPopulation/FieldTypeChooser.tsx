@@ -9,52 +9,49 @@ export const FieldTypeChooser = ({
   fieldName,
   index,
   choices,
-  each,
   arrayHelpers,
-  values,
   value,
-  onDeleteCondition,
+  deleteCondition,
 }): React.ReactElement => {
   const FlexWrapper = styled.div`
     display: flex;
     justify-content: space-between;
   `;
-
-  const chooseFieldType = (fieldValue, helpers, fieldIndex): void => {
-    const fieldProperties = {
-      isFlexField: fieldValue.isFlexField,
-      associatedWith: fieldValue.associatedWith,
+  const chooseFieldType = (object, arrHelpers, idx): void => {
+    const values = {
+      isFlexField: object.isFlexField,
+      associatedWith: object.associatedWith,
       fieldAttribute: {
-        labelEn: fieldValue.labelEn,
-        type: fieldValue.type,
+        labelEn: object.labelEn,
+        type: object.type,
         choices: null,
       },
       value: null,
     };
-    switch (fieldValue.type) {
+    switch (object.type) {
       case 'INTEGER':
-        fieldProperties.value = { from: '', to: '' };
+        values.value = { from: '', to: '' };
         break;
       case 'SELECT_ONE':
-        fieldProperties.fieldAttribute.choices = fieldValue.choices;
+        values.fieldAttribute.choices = object.choices;
         break;
       case 'SELECT_MANY':
-        fieldProperties.value = [];
-        fieldProperties.fieldAttribute.choices = fieldValue.choices;
+        values.value = [];
+        values.fieldAttribute.choices = object.choices;
         break;
       default:
-        fieldProperties.value = null;
+        values.value = null;
         break;
     }
-    helpers.replace(fieldIndex, {
-      ...fieldProperties,
-      fieldName: fieldValue.name,
-      type: fieldValue.type,
+    arrHelpers.replace(idx, {
+      ...values,
+      fieldName: object.name,
+      type: object.type,
     });
   };
 
-  const clearField = (helpers, fieldIndex): void => {
-    return helpers.replace(fieldIndex, {});
+  const clearField = (arrHelpers, idx): void => {
+    return arrHelpers.replace(idx, {});
   };
 
   return (
@@ -74,7 +71,7 @@ export const FieldTypeChooser = ({
         }}
         component={CriteriaAutocomplete}
       />
-      {onDeleteCondition && (
+      {deleteCondition && (
         <IconButton>
           <Delete onClick={() => arrayHelpers.remove(index)} />
         </IconButton>
