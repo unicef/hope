@@ -128,7 +128,7 @@ export function ProgrammesFilters({
                 onChange={(date) =>
                   onFilterChange({
                     ...filter,
-                    startDate: moment(date).format('YYYY-MM-DD'),
+                    startDate: date ? moment(date).format('YYYY-MM-DD') : null,
                   })
                 }
                 value={filter.startDate || null}
@@ -147,7 +147,7 @@ export function ProgrammesFilters({
                 onChange={(date) =>
                   onFilterChange({
                     ...filter,
-                    endDate: moment(date).format('YYYY-MM-DD'),
+                    endDate: date ? moment(date).format('YYYY-MM-DD') : null,
                   })
                 }
                 value={filter.endDate || null}
