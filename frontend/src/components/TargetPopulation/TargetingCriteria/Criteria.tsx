@@ -165,8 +165,8 @@ export function Criteria({
       })}
       {isEdit && (
         <ButtonsContainer>
-          <IconButton>
-            <Edit onClick={editFunction} />
+          <IconButton onClick={editFunction}>
+            <Edit />
           </IconButton>
           {canRemove && (
             <IconButton onClick={removeFunction}>
