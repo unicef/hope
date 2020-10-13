@@ -8,24 +8,8 @@ import { LabelizedField } from './LabelizedField';
 import { StatusBox } from './StatusBox';
 import { Missing } from './Missing';
 import { UniversalMoment } from './UniversalMoment';
-
-const Container = styled.div`
-  display: flex;
-  flex: 1;
-  width: 100%;
-  background-color: #fff;
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
-  flex-direction: column;
-  border-color: #b1b1b5;
-  border-bottom-width: 1px;
-  border-bottom-style: solid;
-`;
-const OverviewContainer = styled.div`
-  display: flex;
-  align-items: center;
-  flex-direction: row;
-`;
+import { ContainerWithBorder } from './ContainerWithBorder';
+import { OverviewContainer } from './OverviewContainer';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -59,7 +43,7 @@ export function CashPlanDetails({
   cashPlan,
 }: CashPlanProps): React.ReactElement {
   return (
-    <Container>
+    <ContainerWithBorder>
       <Title>
         <Typography variant='h6'>Cash Plan Details</Typography>
       </Title>
@@ -126,6 +110,6 @@ export function CashPlanDetails({
           </LabelizedField>
         </NumberOfHouseHolds>
       </OverviewContainer>
-    </Container>
+    </ContainerWithBorder>
   );
 }

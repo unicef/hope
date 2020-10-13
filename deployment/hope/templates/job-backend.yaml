@@ -28,6 +28,8 @@ spec:
               name: {{ include "hope.fullname" . }}-backend
           - configMapRef:
               name: {{ include "hope.fullname" . }}-backend
+          resources:
+            {{- toYaml .Values.backend.resources | nindent 12 }}
       restartPolicy: Never
   backoffLimit: 20
 ---
@@ -61,5 +63,7 @@ spec:
               name: {{ include "hope.fullname" . }}-backend
           - configMapRef:
               name: {{ include "hope.fullname" . }}-backend
+          resources:
+            {{- toYaml .Values.backend.resources | nindent 12 }}
       restartPolicy: Never
   backoffLimit: 20

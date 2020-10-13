@@ -321,7 +321,9 @@ export function formatCriteriaFilters({ filters }) {
   });
 }
 
-export function mapCriteriasToInitialValues(criteria) {
+export function mapCriteriasToInitialValues(
+  criteria,
+): { fieldName: string; value: { from: string; to: string } }[] {
   const mappedFilters = [];
   if (criteria.filters) {
     criteria.filters.map((each) => {
@@ -386,7 +388,7 @@ export function stableSort(array, comparator) {
   return stabilizedThis.map((el) => el[0]);
 }
 
-export function descendingComparator(a, b, orderBy) {
+export function descendingComparator(a, b, orderBy): number {
   if (b[orderBy] < a[orderBy]) {
     return -1;
   }
