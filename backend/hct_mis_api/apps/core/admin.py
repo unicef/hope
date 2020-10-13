@@ -88,14 +88,17 @@ class FlexibleAttributeImporter:
                         is_index_field = row[1].value.endswith("_index")
                     else:
                         is_index_field = False
-                    field_suffix = row[1].value[-4:]
-                    is_not_group = object_type_to_add != "group"
-                    is_empty_and_not_index_field = not value and not is_index_field
-                    is_core_or_flex_field = (
-                        field_suffix in self.CORE_FIELD_SUFFIXES or field_suffix in self.FLEX_FIELD_SUFFIXES
-                    )
-                    if is_not_group and is_empty_and_not_index_field and is_core_or_flex_field:
-                        raise ValidationError(f"Survey Sheet: Row {row_number + 1}: " f"English label cannot be empty")
+
+                    if object_type_to_add == "attribute":
+                        field_suffix = row[1].value[-4:]
+                        is_empty_and_not_index_field = not value and not is_index_field
+                        is_core_or_flex_field = (
+                            field_suffix in self.CORE_FIELD_SUFFIXES or field_suffix in self.FLEX_FIELD_SUFFIXES
+                        )
+                        if is_empty_and_not_index_field and is_core_or_flex_field:
+                            raise ValidationError(f"Survey Sheet: Row {row_number + 1}: English label cannot be empty")
+                    if object_type_to_add == "choice" and not value:
+                        raise ValidationError(f"Choices Sheet: Row {row_number + 1}: English label cannot be empty")
 
                 self.json_fields_to_create[label].update({language: cleared_value if value else ""})
             return
