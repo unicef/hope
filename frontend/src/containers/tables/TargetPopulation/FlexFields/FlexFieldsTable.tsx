@@ -45,13 +45,13 @@ const StyledHeaderCell = styled(TableCell)`
     border-bottom: 0;
   }
 `;
-
 type Order = 'asc' | 'desc';
 
 export const FlexFieldsTable = ({
   fields,
   selectedOption,
   searchValue,
+  selectedFieldType,
 }): ReactElement => {
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('');
@@ -68,39 +68,32 @@ export const FlexFieldsTable = ({
       labelEn: searchValue,
       associatedWith: selectedOption,
     };
-    return fields.map((field) => {
-      if (!searchValue && !selectedOption) {
-        return field;
+    let filteredByFieldType = [];
+    if (selectedFieldType === 'All') {
+      filteredByFieldType = fields;
+    } else if (selectedFieldType === 'Flex field') {
+      filteredByFieldType = fields.filter((el) => el.isFlexField === true);
+    } else if (selectedFieldType === 'Core field') {
+      filteredByFieldType = fields.filter((el) => el.isFlexField === false);
+    }
+    const filteredFields = filteredByFieldType.filter((each) => {
+      //eslint-disable-next-line
+      for (const key in filters) {
+        if (
+          each[key] === undefined ||
+          (each[key] !== filters[key] &&
+            !each[key].toLowerCase().includes(filters[key].toLowerCase()))
+        ) {
+          return false;
+        }
       }
-      return {
-        ...field,
-        flexAttributes: field.flexAttributes.filter((each) => {
-          //eslint-disable-next-line
-          for (const key in filters) {
-            if (
-              each[key] === undefined ||
-              (each[key] !== filters[key] &&
-                !each[key].toLowerCase().includes(filters[key].toLowerCase()))
-            ) {
-              return false;
-            }
-          }
-          return true;
-        }),
-      };
+      return true;
     });
+    return filteredFields;
   };
 
   const orderResults = () => {
-    return filterTable().map((each) => {
-      return {
-        ...each,
-        flexAttributes: stableSort(
-          each.flexAttributes,
-          getComparator(order, orderBy),
-        ),
-      };
-    });
+    return stableSort(filterTable(), getComparator(order, orderBy));
   };
 
   return (
@@ -116,19 +109,13 @@ export const FlexFieldsTable = ({
         />
         <TableBody>
           {orderResults().map((row) => (
-            <>
-              <TableRow key={row.id}>
-                <StyledHeaderCell>
-                  <b>{row.labelEn}</b>
-                </StyledHeaderCell>
-              </TableRow>
-              {row.flexAttributes?.map((attribute) => (
-                <TableRow key={attribute.id}>
-                  <StyledCell>{attribute.labelEn}</StyledCell>
-                  <TableCell>{attribute.associatedWith}</TableCell>
-                </TableRow>
-              ))}
-            </>
+            <TableRow key={row.id}>
+              <StyledCell>{row.labelEn}</StyledCell>
+              <TableCell>{row.associatedWith}</TableCell>
+              <TableCell>
+                {row.isFlexField ? 'Flex field' : 'Core field'}
+              </TableCell>
+            </TableRow>
           ))}
         </TableBody>
       </Table>
