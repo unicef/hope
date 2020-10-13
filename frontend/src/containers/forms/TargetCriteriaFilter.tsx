@@ -1,12 +1,8 @@
 import styled from 'styled-components';
-import { Field } from 'formik';
-import { IconButton } from '@material-ui/core';
-import { Delete } from '@material-ui/icons';
 import React from 'react';
 import { SubField } from '../../components/TargetPopulation/SubField';
-import { CriteriaAutocomplete } from '../../components/TargetPopulation/TargetingCriteria/CriteriaAutocomplete';
 import { ImportedIndividualFieldsQuery } from '../../__generated__/graphql';
-import {FieldChooser} from "../../components/TargetPopulation/FieldChooser";
+import { FieldChooser } from '../../components/TargetPopulation/FieldChooser';
 
 const Divider = styled.div`
   border-top: 1px solid #b1b1b5;
@@ -48,6 +44,8 @@ export function TargetingCriteriaFilter({
   values;
   onClick: () => void;
 }): React.ReactElement {
+  const shouldShowDivider =
+    index + 1 < values.filters.length + values.individualsFiltersBlocks.length;
   return (
     <div>
       <FieldChooser
@@ -55,16 +53,16 @@ export function TargetingCriteriaFilter({
         choices={data.allFieldsAttributes}
         fieldName={each.fieldName}
         onChange={onChange}
-        filters={values.filters}
+        showDelete={values.filters.length > 1}
         onClick={onClick}
+        baseName={`filters[${index}]`}
       />
       {each.fieldName && (
         <div data-cy='autocomplete-target-criteria-values'>
           <SubField field={each} index={index} baseName={`filters[${index}]`} />
         </div>
       )}
-      {(values.filters.length === 1 && index === 0) ||
-      index === values.filters.length - 1 ? null : (
+      {shouldShowDivider && (
         <Divider>
           <DividerLabel>And</DividerLabel>
         </Divider>

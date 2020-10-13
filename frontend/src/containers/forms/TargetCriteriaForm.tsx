@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import * as Yup from 'yup';
 import styled from 'styled-components';
 import {
@@ -19,6 +19,7 @@ import {
   mapCriteriasToInitialValues,
 } from '../../utils/targetingUtils';
 import { TargetingCriteriaFilter } from './TargetCriteriaFilter';
+import { TargetCriteriaFilterBlocks } from './TargetCriteriaFilterBlocks';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -44,6 +45,11 @@ const DialogFooter = styled.div`
 const StyledBox = styled(Box)`
   width: 100%;
 `;
+const MarginButton = styled(Button)`
+  && {
+    margin-left: 10px;
+  }
+`;
 
 const validationSchema = Yup.object().shape({
   filters: Yup.array().of(
@@ -52,13 +58,29 @@ const validationSchema = Yup.object().shape({
     }),
   ),
   individualsFiltersBlocks: Yup.array().of(
-    Yup.array().of(
-      Yup.object().shape({
-        fieldName: Yup.string().required('Label is required'),
-      }),
-    ),
+    Yup.object().shape({
+      individualBlockFilters: Yup.array().of(
+        Yup.object().shape({
+          fieldName: Yup.string().required('Label is required'),
+        }),
+      ),
+    }),
   ),
 });
+interface ArrayFieldWrapperProps {
+  arrayHelpers;
+}
+class ArrayFieldWrapper extends React.Component<ArrayFieldWrapperProps> {
+  getArrayHelpers(): object {
+    const { arrayHelpers } = this.props;
+    return arrayHelpers;
+  }
+
+  render(): React.ReactNode {
+    const { children } = this.props;
+    return children;
+  }
+}
 
 interface TargetCriteriaFormPropTypes {
   criteria?;
@@ -77,6 +99,8 @@ export function TargetCriteriaForm({
 }: TargetCriteriaFormPropTypes): React.ReactElement {
   const { data, loading } = useImportedIndividualFieldsQuery();
   const mappedFilters = mapCriteriasToInitialValues(criteria);
+  const filtersArrayWrapperRef = useRef(null);
+  const individualsFiltersBlocksWrapperRef = useRef(null);
   const initialValue = {
     filters: mappedFilters,
     individualsFiltersBlocks: [],
@@ -97,28 +121,31 @@ export function TargetCriteriaForm({
       >
         {({ submitForm, values }) => (
           <>
-            <FieldArray
-              name='filters'
-              render={(arrayHelpers) => (
-                <>
-                  <Dialog
-                    open={open}
-                    onClose={onClose}
-                    scroll='paper'
-                    aria-labelledby='form-dialog-title'
-                  >
-                    <DialogTitleWrapper>
-                      <DialogTitle id='scroll-dialog-title' disableTypography>
-                        <Typography variant='h6'>{title}</Typography>
-                      </DialogTitle>
-                    </DialogTitleWrapper>
-                    <DialogContent>
-                      <DialogDescription>
-                        Adding criteria below will target any individuals within
-                        a household that meet the filters applied. You may also
-                        add individual sub-criteria to further define an
-                        individual.
-                      </DialogDescription>
+            <Dialog
+              open={open}
+              onClose={onClose}
+              scroll='paper'
+              aria-labelledby='form-dialog-title'
+            >
+              <DialogTitleWrapper>
+                <DialogTitle id='scroll-dialog-title' disableTypography>
+                  <Typography variant='h6'>{title}</Typography>
+                </DialogTitle>
+              </DialogTitleWrapper>
+              <DialogContent>
+                <DialogDescription>
+                  Adding criteria below will target any individuals within a
+                  household that meet the filters applied. You may also add
+                  individual sub-criteria to further define an individual.
+                </DialogDescription>
+
+                <FieldArray
+                  name='filters'
+                  render={(arrayHelpers) => (
+                    <ArrayFieldWrapper
+                      arrayHelpers={arrayHelpers}
+                      ref={filtersArrayWrapperRef}
+                    >
                       {values.filters.map((each, index) => {
                         return (
                           <TargetingCriteriaFilter
@@ -142,46 +169,77 @@ export function TargetCriteriaForm({
                           />
                         );
                       })}
-                      {/*{values.individualsFiltersBlocks.map((each, index) => {*/}
-
-                      {/*})}*/}
-                    </DialogContent>
-                    <DialogFooter>
-                      <DialogActions>
-                        <StyledBox
-                          display='flex'
-                          justifyContent='space-between'
-                        >
-                          <div>
-                            <Button
-                              color='primary'
-                              variant='outlined'
-                              onClick={() =>
-                                arrayHelpers.push({ fieldname: '' })
-                              }
-                            >
-                              Add Next Criteria
-                            </Button>
-                          </div>
-                          <div>
-                            <Button onClick={() => onClose()}>Cancel</Button>
-                            <Button
-                              onClick={() => submitForm()}
-                              type='submit'
-                              color='primary'
-                              variant='contained'
-                              data-cy='button-target-population-add-criteria'
-                            >
-                              Save
-                            </Button>
-                          </div>
-                        </StyledBox>
-                      </DialogActions>
-                    </DialogFooter>
-                  </Dialog>
-                </>
-              )}
-            />
+                    </ArrayFieldWrapper>
+                  )}
+                />
+                <FieldArray
+                  name='individualsFiltersBlocks'
+                  render={(arrayHelpers) => (
+                    <ArrayFieldWrapper
+                      arrayHelpers={arrayHelpers}
+                      ref={individualsFiltersBlocksWrapperRef}
+                    >
+                      {values.individualsFiltersBlocks.map((each, index) => {
+                        return (
+                          <TargetCriteriaFilterBlocks
+                            //eslint-disable-next-line
+                            key={index}
+                            blockIndex={index}
+                            data={data}
+                            values={values}
+                            onClick={() => arrayHelpers.remove(index)}
+                          />
+                        );
+                      })}
+                    </ArrayFieldWrapper>
+                  )}
+                />
+              </DialogContent>
+              <DialogFooter>
+                <DialogActions>
+                  <StyledBox display='flex' justifyContent='space-between'>
+                    <div>
+                      <Button
+                        color='primary'
+                        variant='outlined'
+                        onClick={() =>
+                          filtersArrayWrapperRef.current
+                            .getArrayHelpers()
+                            .push({ fieldname: '' })
+                        }
+                      >
+                        Add Next Criteria
+                      </Button>
+                      <MarginButton
+                        color='primary'
+                        variant='outlined'
+                        onClick={() =>
+                          individualsFiltersBlocksWrapperRef.current
+                            .getArrayHelpers()
+                            .push({
+                              individualBlockFilters: [{ fieldname: '' }],
+                            })
+                        }
+                      >
+                        Add Set of Criteria
+                      </MarginButton>
+                    </div>
+                    <div>
+                      <Button onClick={() => onClose()}>Cancel</Button>
+                      <Button
+                        onClick={() => submitForm()}
+                        type='submit'
+                        color='primary'
+                        variant='contained'
+                        data-cy='button-target-population-add-criteria'
+                      >
+                        Save
+                      </Button>
+                    </div>
+                  </StyledBox>
+                </DialogActions>
+              </DialogFooter>
+            </Dialog>
           </>
         )}
       </Formik>
