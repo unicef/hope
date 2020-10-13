@@ -1,9 +1,10 @@
 import unittest
 from operator import itemgetter
+from pprint import pprint
 from unittest import TestCase
 
 
-@unittest.skip("will fix it later")
+# @unittest.skip("will fix it later")
 class TestKoboSaveValidatorsMethods(TestCase):
 
     VALID_JSON = [
@@ -41,6 +42,11 @@ class TestKoboSaveValidatorsMethods(TestCase):
             "wash_questions/blanket_hhsize": "NaN",
             "household_questions/f_adults_disability_h_c": "0",
             "wash_questions/score_childclothes": "5",
+            "household_questions/org_enumerator_h_c": "UNICEF",
+            "household_questions/org_name_enumerator_h_c": "Test",
+            "household_questions/name_enumerator_h_c": "Test",
+            "household_questions/consent_h_c": "0",
+            "household_questions/consent_sharing_h_c": "UNICEF",
             "household_questions/m_12_17_age_group_h_c": "0",
             "household_questions/f_adults_h_c": "0",
             "household_questions/f_12_17_disability_h_c": "0",
@@ -285,6 +291,11 @@ class TestKoboSaveValidatorsMethods(TestCase):
             "start_h_c": "2020-05-26T12:11:01.475+02:00",
             "formhub/uuid": "59f3ce8716a0487bb2f82b10a4f3e8e3",
             "household_questions/household_location/hh_geopoint_h_c": "33.760882 67.661513 0 0",
+            "household_questions/org_enumerator_h_c": "UNICEF",
+            "household_questions/org_name_enumerator_h_c": "Test",
+            "household_questions/name_enumerator_h_c": "Test",
+            "household_questions/consent_h_c": "0",
+            "household_questions/consent_sharing_h_c": "UNICEF",
             "wash_questions/Agric_tool_h_f": "4",
             "_attachments": [
                 {
@@ -575,6 +586,9 @@ class TestKoboSaveValidatorsMethods(TestCase):
         expected = [
             {"header": "admin1_h_c", "message": "Invalid choice SO25 for field admin1_h_c"},
             {"header": "admin2_h_c", "message": "Invalid choice SO2502 for field admin2_h_c"},
+            {"header": "assistance_h_f", "message": "Invalid choice 0 for field assistance_h_f"},
+            {"header": "breastfed_child_h_f", "message": "Invalid choice 0 for field breastfed_child_h_f"},
+            {"header": "door_light_vent_h_f", "message": "Invalid choice 1 for field door_light_vent_h_f"},
             {"header": "f_0_5_age_group_h_c", "message": "Missing household required field f_0_5_age_group_h_c"},
             {"header": "f_0_5_disability_h_c", "message": "Missing household required field f_0_5_disability_h_c"},
             {"header": "f_12_17_age_group_h_c", "message": "Missing household required field f_12_17_age_group_h_c"},
@@ -603,6 +617,8 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 "header": "first_registration_date_i_c",
                 "message": "Missing individual required field first_registration_date_i_c",
             },
+            {"header": "formal_school_i_f", "message": "Invalid choice 0 for field formal_school_i_f"},
+            {"header": "formal_school_i_f", "message": "Invalid choice 0 for field formal_school_i_f"},
             {"header": "is_only_collector", "message": "Missing individual required field is_only_collector"},
             {"header": "is_only_collector", "message": "Missing individual required field is_only_collector"},
             {"header": "is_only_collector", "message": "Missing individual required field is_only_collector"},
@@ -617,9 +633,19 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 "message": "Missing household required field m_adults_disability_h_c",
             },
             {"header": "m_adults_h_c", "message": "Missing household required field m_adults_h_c"},
-            {"header": "residence_status_h_c", "message": "Invalid choice host for field residence_status_h_c"},
+            {"header": "odor_taste_color_h_f", "message": "Invalid choice 0 for field odor_taste_color_h_f"},
+            {
+                "header": "recent_diarrehea_child_h_f",
+                "message": "Invalid choice 0 for field recent_diarrehea_child_h_f",
+            },
+            {"header": "recent_illness_child_h_f", "message": "Invalid choice 0 for field recent_illness_child_h_f"},
             {"header": "role_i_c", "message": "Only one person can be a primary collector"},
+            {
+                "header": "seat_handrail_for_disabled_h_f",
+                "message": "Invalid choice 0 for field seat_handrail_for_disabled_h_f",
+            },
             {"header": "size_h_c", "message": "Missing household required field size_h_c"},
+            {"header": "unaccompanied_child_h_f", "message": "Invalid choice 0 for field unaccompanied_child_h_f"},
             {"header": "work_status_i_c", "message": "Invalid choice 0 for field work_status_i_c"},
             {"header": "work_status_i_c", "message": "Invalid choice 0 for field work_status_i_c"},
             {"header": "work_status_i_c", "message": "Invalid choice 0 for field work_status_i_c"},
