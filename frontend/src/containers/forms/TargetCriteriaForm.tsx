@@ -233,10 +233,10 @@ export function TargetCriteriaForm({
                                 component={CriteriaAutocomplete}
                               />
                               {values.filters.length > 1 && (
-                                <IconButton>
-                                  <Delete
-                                    onClick={() => arrayHelpers.remove(index)}
-                                  />
+                                <IconButton
+                                  onClick={() => arrayHelpers.remove(index)}
+                                >
+                                  <Delete />
                                 </IconButton>
                               )}
                             </FlexWrapper>
@@ -297,14 +297,14 @@ export function TargetCriteriaForm({
                                                     {values.filters[index]
                                                       ?.subcriteria?.length >
                                                       1 && (
-                                                      <IconButton>
-                                                        <Delete
-                                                          onClick={() =>
-                                                            subcriteriaArrayHelpers.remove(
-                                                              indexSub,
-                                                            )
-                                                          }
-                                                        />
+                                                      <IconButton
+                                                        onClick={() =>
+                                                          subcriteriaArrayHelpers.remove(
+                                                            indexSub,
+                                                          )
+                                                        }
+                                                      >
+                                                        <Delete />
                                                       </IconButton>
                                                     )}
                                                   </FlexWrapper>
