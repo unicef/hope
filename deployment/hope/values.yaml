@@ -26,30 +26,11 @@ backend:
     # runAsNonRoot: true
     # runAsUser: 1000
 
-  nodeSelector: {}
 
   tolerations: []
 
   affinity: {}
 
-  resources:
-    limits:
-      cpu: 4
-      memory: 1024Mi
-    requests:
-      cpu: 2
-      memory: 512Mi
-
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 128Mi
 
   service:
     type: ClusterIP
@@ -86,19 +67,10 @@ frontend:
     # runAsNonRoot: true
     # runAsUser: 1000
 
-  nodeSelector: {}
 
   tolerations: []
 
   affinity: {}
-
-  resources:
-    limits:
-      cpu: 4
-      memory: 2048Mi
-    requests:
-      cpu: 2
-      memory: 2048Mi
 
   service:
     type: ClusterIP
@@ -112,6 +84,7 @@ ingress:
   host: hope-dev.test
   tls: false
   tlsSecret: "aks-unitst-tls"
+
 
 serviceAccount:
   # Specifies whether a service account should be created
@@ -144,13 +117,6 @@ postgresql:
     password: ""
     airflowName: ""
 
-  resources:
-    limits:
-      cpu: 2
-      memory: 1024Mi
-    requests:
-      cpu: 1
-      memory: 512Mi
   image:
     tag: 10.12.0
 
@@ -159,14 +125,6 @@ registrationdatahubpostgresql:
   postgresqlDatabase: registration-datahub-db
   postgresqlUsername: postgres
   postgresqlPassword: ""
-
-  resources:
-    limits:
-      cpu: 2
-      memory: 1024Mi
-    requests:
-      cpu: 1
-      memory: 512Mi
   # Script for adding postgis
   # Don't modify
   initdbScripts:
@@ -197,21 +155,12 @@ cashassistdatahubpostgresql:
       #!/bin/sh
       psql -U postgres cashassist-datahub-hub -c "create extension if not exists postgis;"
 
-  resources:
-    limits:
-      cpu: 2
-      memory: 1024Mi
-    requests:
-      cpu: 1
-      memory: 512Mi
-
   externalDatabase:
     host: ""
     port: ""
     name: ""
     user: ""
     password: ""
-
   image:
     tag: 10.12.0
 
@@ -228,31 +177,13 @@ redis:
   image:
     tag: 4.0.14
 
-  resources:
-    limits:
-      cpu: 0.5
-      memory: 1024Mi
-    requests:
-      cpu: 0.5
-      memory: 512Mi
-
 elasticsearch:
   enabled: true
   master:
     replicas: 1
-  coordinating:
-    replicas: 1
-  data:
+  sysctlImage:
     replicas: 1
   plugins: "analysis-phonetic"
-
-  resources:
-    limits:
-      cpu: 4
-      memory: 1024Mi
-    requests:
-      cpu: 2
-      memory: 512Mi
   externalElasticsearch:
     host: ""
 
@@ -265,22 +196,8 @@ airflow:
   baseUrl: airflow.test
   worker:
     command: ["airflow", "worker"]
-    resources:
-      limits:
-        cpu: 4
-        memory: 1024Mi
-      requests:
-        cpu: 2
-        memory: 512Mi
   scheduler:
     command: ["airflow", "scheduler"]
-    resources:
-      limits:
-        cpu: 4
-        memory: 1024Mi
-      requests:
-        cpu: 2
-        memory: 512Mi
   ingress:
     enabled: true
     hosts:
@@ -299,22 +216,8 @@ airflow:
     extraEnvVarsSecret: hope-airflow-extra
     worker:
       command: ["airflow", "worker"]
-      resources:
-        limits:
-          cpu: 4
-          memory: 1024Mi
-        requests:
-          cpu: 2
-          memory: 512Mi
     scheduler:
       command: ["airflow", "scheduler"]
-      resources:
-        limits:
-          cpu: 4
-          memory: 1024Mi
-        requests:
-          cpu: 2
-          memory: 512Mi
     image:
       repository: hope/airflow
       tag: latest
@@ -331,11 +234,4 @@ airflow:
             items:
             - key: airflow-entrypoint.sh
               path: entrypoint.sh
-      resources:
-        limits:
-          cpu: 4
-          memory: 1024Mi
-        requests:
-          cpu: 2
-          memory: 512Mi
 

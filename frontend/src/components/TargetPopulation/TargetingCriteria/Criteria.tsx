@@ -156,7 +156,7 @@ export function Criteria({
   isEdit,
   canRemove,
   alternative = null,
-}: CriteriaProps) {
+}: CriteriaProps): React.ReactElement {
   return (
     <CriteriaElement alternative={alternative} data-cy='criteria-container'>
       {rules.map((each, index) => {

@@ -3,29 +3,13 @@ import styled from 'styled-components';
 import SearchIcon from '@material-ui/icons/Search';
 import CakeIcon from '@material-ui/icons/Cake';
 import WcIcon from '@material-ui/icons/Wc';
-import { InputAdornment, MenuItem } from '@material-ui/core';
+import { Box, Grid, InputAdornment, MenuItem } from '@material-ui/core';
 import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '../../shared/InputLabel';
 import TextField from '../../shared/TextField';
 import Select from '../../shared/Select';
+import { ContainerWithBorder } from '../ContainerWithBorder';
 
-const Container = styled.div`
-  display: flex;
-  flex: 1;
-  width: 100%;
-  background-color: #fff;
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
-  flex-direction: row;
-  align-items: center;
-  border-color: #b1b1b5;
-  border-bottom-width: 1px;
-  border-bottom-style: solid;
-
-  && > div {
-    margin: 5px;
-  }
-`;
 const TextContainer = styled(TextField)`
   input[type='number']::-webkit-inner-spin-button,
   input[type='number']::-webkit-outer-spin-button {
@@ -51,6 +35,10 @@ const SearchTextField = styled(TextField)`
 const StartInputAdornment = styled(InputAdornment)`
   margin-right: 0;
 `;
+const FieldLabel = styled.span`
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.6);
+`;
 
 interface IndividualsFilterProps {
   onFilterChange;
@@ -63,93 +51,105 @@ export function IndividualsFilter({
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
   return (
-    <Container>
-      <SearchTextField
-        label='Search'
-        variant='outlined'
-        margin='dense'
-        value={filter.text}
-        onChange={(e) => handleFilterChange(e, 'text')}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position='start'>
-              <SearchIcon />
-            </InputAdornment>
-          ),
-        }}
-        data-cy='filters-search'
-      />
-      <StyledFormControl variant='outlined' margin='dense'>
-        <InputLabel>Gender</InputLabel>
-        <Select
-          /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
-          // @ts-ignore
-          onChange={(e) => handleFilterChange(e, 'sex')}
-          variant='outlined'
-          value={filter.sex || ''}
-          label='Gender'
-          InputProps={{
-            startAdornment: (
-              <StartInputAdornment position='start'>
-                <WcIcon />
-              </StartInputAdornment>
-            ),
-          }}
-          SelectDisplayProps={{
-            'data-cy': 'filters-sex',
-          }}
-          MenuProps={{
-            'data-cy': 'filters-sex-options',
-          }}
-        >
-          <MenuItem value=''>
-            <em>None</em>
-          </MenuItem>
-          <MenuItem value='MALE'>Male</MenuItem>
-          <MenuItem value='FEMALE'>Female</MenuItem>
-        </Select>
-      </StyledFormControl>
-      <TextContainer
-        variant='outlined'
-        margin='dense'
-        label='Age'
-        value={filter.age.min}
-        onChange={(e) =>
-          onFilterChange({
-            ...filter,
-            age: { ...filter.age, min: e.target.value || undefined },
-          })
-        }
-        type='number'
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position='start'>
-              <CakeIcon />
-            </InputAdornment>
-          ),
-        }}
-      />
-      to
-      <TextContainer
-        variant='outlined'
-        margin='dense'
-        label='Age'
-        value={filter.age.max}
-        onChange={(e) =>
-          onFilterChange({
-            ...filter,
-            age: { ...filter.age, max: e.target.value || undefined },
-          })
-        }
-        type='number'
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position='start'>
-              <CakeIcon />
-            </InputAdornment>
-          ),
-        }}
-      />
-    </Container>
+    <ContainerWithBorder>
+      <Grid container alignItems='flex-end' spacing={3}>
+        <Grid item>
+          <SearchTextField
+            label='Search'
+            variant='outlined'
+            margin='dense'
+            value={filter.text}
+            onChange={(e) => handleFilterChange(e, 'text')}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position='start'>
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+            }}
+            data-cy='filters-search'
+          />
+        </Grid>
+        <Grid item>
+          <StyledFormControl variant='outlined' margin='dense'>
+            <InputLabel>Gender</InputLabel>
+            <Select
+              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
+              // @ts-ignore
+              onChange={(e) => handleFilterChange(e, 'sex')}
+              variant='outlined'
+              value={filter.sex || ''}
+              label='Gender'
+              InputProps={{
+                startAdornment: (
+                  <StartInputAdornment position='start'>
+                    <WcIcon />
+                  </StartInputAdornment>
+                ),
+              }}
+              SelectDisplayProps={{
+                'data-cy': 'filters-sex',
+              }}
+              MenuProps={{
+                'data-cy': 'filters-sex-options',
+              }}
+            >
+              <MenuItem value=''>
+                <em>None</em>
+              </MenuItem>
+              <MenuItem value='MALE'>Male</MenuItem>
+              <MenuItem value='FEMALE'>Female</MenuItem>
+            </Select>
+          </StyledFormControl>
+        </Grid>
+        <Grid item>
+          <Box display='flex' flexDirection='column'>
+            <FieldLabel>Age</FieldLabel>
+            <TextContainer
+              variant='outlined'
+              margin='dense'
+              placeholder='From'
+              value={filter.age.min}
+              onChange={(e) =>
+                onFilterChange({
+                  ...filter,
+                  age: { ...filter.age, min: e.target.value || undefined },
+                })
+              }
+              type='number'
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position='start'>
+                    <CakeIcon />
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Box>
+        </Grid>
+        <Grid item>
+          <TextContainer
+            variant='outlined'
+            margin='dense'
+            placeholder='To'
+            value={filter.age.max}
+            onChange={(e) =>
+              onFilterChange({
+                ...filter,
+                age: { ...filter.age, max: e.target.value || undefined },
+              })
+            }
+            type='number'
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position='start'>
+                  <CakeIcon />
+                </InputAdornment>
+              ),
+            }}
+          />
+        </Grid>
+      </Grid>
+    </ContainerWithBorder>
   );
 }
