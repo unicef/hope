@@ -200,13 +200,13 @@ class TargetingCriteriaRuleFilterObjectType(graphene.InputObjectType):
     arguments = graphene.List(Arg, required=True)
 
 
-class TargetingIndividualSubcriteriaRuleFilterBlockObjectType(graphene.InputObjectType):
-    individual_subcriteria_filters = graphene.List(TargetingCriteriaRuleFilterObjectType)
+class TargetingIndividualRuleFilterBlockObjectType(graphene.InputObjectType):
+    individual_block_filters = graphene.List(TargetingCriteriaRuleFilterObjectType)
 
 
 class TargetingCriteriaRuleObjectType(graphene.InputObjectType):
     filters = graphene.List(TargetingCriteriaRuleFilterObjectType)
-    subcriteria_blocks = graphene.List(TargetingIndividualSubcriteriaRuleFilterBlockObjectType)
+    individuals_filters_blocks = graphene.List(TargetingIndividualRuleFilterBlockObjectType)
 
 
 class TargetingCriteriaObjectType(graphene.InputObjectType):
@@ -218,16 +218,16 @@ def targeting_criteria_object_type_to_query(targeting_criteria_object_type):
     targeting_criteria_querying = target_models.TargetingCriteriaQueryingMixin([])
     for rule in targeting_criteria_object_type.get("rules", []):
         targeting_criteria_rule_querying = target_models.TargetingCriteriaRuleQueryingMixin(
-            filters=[], subcriteria_blocks=[]
+            filters=[], individuals_filters_blocks=[]
         )
         for filter_dict in rule.get("filters", []):
             targeting_criteria_rule_querying.filters.append(target_models.TargetingCriteriaRuleFilter(**filter_dict))
-        for subcriteria_block_dict in rule.get("filters", []):
-            subcriteria_block = target_models.TargetingIndividualSubcriteriaRuleFilterBlockMixin([])
-            targeting_criteria_rule_querying.subcriteria_blocks.append(subcriteria_block)
-            for individual_subcriteria_filter_dict in subcriteria_block_dict.get("individual_subcriteria_filters", []):
-                subcriteria_block.individual_subcriteria_filters.append(
-                    target_models.TargetingIndividualSubcriteriaRuleFilter(**individual_subcriteria_filter_dict)
+        for individuals_filters_block_dict in rule.get("filters", []):
+            individuals_filters_block = target_models.TargetingIndividualRuleFilterBlockMixin([])
+            targeting_criteria_rule_querying.individuals_filters_blocks.append(individuals_filters_block)
+            for individual_block_filter_dict in individuals_filters_block_dict.get("individual_block_filters", []):
+                individuals_filters_block.individual_block_filters.append(
+                    target_models.TargetingIndividualBlockRuleFilter(**individual_block_filter_dict)
                 )
         targeting_criteria_querying.rules.append(targeting_criteria_rule_querying)
     return targeting_criteria_querying.get_query()

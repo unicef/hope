@@ -299,22 +299,24 @@ class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingMixin):
 
 
 class TargetingCriteriaRuleQueryingMixin:
-    def __init__(self, filters=None, subcriteria_blocks=None):
+    def __init__(self, filters=None, individuals_filters_blocks=None):
         if filters is not None:
             self.filters = filters
-        if subcriteria_blocks is not None:
-            self.subcriteria_blocks = subcriteria_blocks
+        if individuals_filters_blocks is not None:
+            self.individuals_filters_blocks = individuals_filters_blocks
 
     def get_query(self):
         query = Q()
         filters = self.filters if isinstance(self.filters, list) else self.filters.all()
-        subcriteria_blocks = (
-            self.subcriteria_blocks if isinstance(self.subcriteria_blocks, list) else self.subcriteria_blocks.all()
+        individuals_filters_blocks = (
+            self.individuals_filters_blocks
+            if isinstance(self.individuals_filters_blocks, list)
+            else self.individuals_filters_blocks.all()
         )
         for ruleFilter in filters:
             query &= ruleFilter.get_query()
-        for subcriteria_block in subcriteria_blocks:
-            query &= subcriteria_block.get_query()
+        for individuals_filters_block in individuals_filters_blocks:
+            query &= individuals_filters_block.get_query()
         return query
 
 
@@ -330,17 +332,17 @@ class TargetingCriteriaRule(TimeStampedUUIDModel, TargetingCriteriaRuleQueryingM
     )
 
 
-class TargetingIndividualSubcriteriaRuleFilterBlockMixin:
-    def __init__(self, individual_subcriteria_filters=None):
-        if individual_subcriteria_filters is not None:
-            self.individual_subcriteria_filters = individual_subcriteria_filters
+class TargetingIndividualRuleFilterBlockMixin:
+    def __init__(self, individual_block_filters=None):
+        if individual_block_filters is not None:
+            self.individual_block_filters = individual_block_filters
 
     def get_query(self):
         individuals_query = Q()
         filters = (
-            self.individual_subcriteria_filters
-            if isinstance(self.individual_subcriteria_filters, list)
-            else self.individual_subcriteria_filters.all()
+            self.individual_block_filters
+            if isinstance(self.individual_block_filters, list)
+            else self.individual_block_filters.all()
         )
         filtered = False
         for ruleFilter in filters:
@@ -352,14 +354,13 @@ class TargetingIndividualSubcriteriaRuleFilterBlockMixin:
         return Q(id__in=households_id)
 
 
-class TargetingIndividualSubcriteriaRuleFilterBlock(
+class TargetingIndividualRuleFilterBlock(
     TimeStampedUUIDModel,
-    TargetingIndividualSubcriteriaRuleFilterBlockMixin,
+    TargetingIndividualRuleFilterBlockMixin,
 ):
     targeting_criteria_rule = models.ForeignKey(
-        "TargetingCriteriaRule", on_delete=models.CASCADE, related_name="subcriteria_blocks"
+        "TargetingCriteriaRule", on_delete=models.CASCADE, related_name="individuals_filters_blocks"
     )
-
 
 
 class TargetingCriteriaFilterMixin:
@@ -445,7 +446,7 @@ class TargetingCriteriaFilterMixin:
                 f"Core Field Attributes associated with this fieldName {self.field_name}"
                 f" doesn't have get_query method or lookup field"
             )
-        lookup_prefix = self.get_lookup_prefix(core_field_attr['associated_with'])
+        lookup_prefix = self.get_lookup_prefix(core_field_attr["associated_with"])
         return self.get_query_for_lookup(
             f"{lookup_prefix}{lookup}",
             select_many=core_field_attr.get("type") == "SELECT_MANY",
@@ -473,10 +474,7 @@ class TargetingCriteriaFilterMixin:
         return f"{self.field_name} {self.comparision_method} {self.arguments}"
 
 
-
-
-
-class TargetingCriteriaRuleFilter(TimeStampedUUIDModel,TargetingCriteriaFilterMixin):
+class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterMixin):
     """
     This is one explicit filter like:
         :Age <> 10-20
@@ -502,21 +500,21 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel,TargetingCriteriaFilterMi
     )
 
 
-
-class TargetingIndividualSubcriteriaRuleFilter(TimeStampedUUIDModel,TargetingCriteriaFilterMixin):
+class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterMixin):
     """
     This is one explicit filter like:
         :Age <> 10-20
         :Residential Status = Refugee
         :Residential Status != Refugee
     """
+
     comparision_method = models.CharField(
         max_length=20,
         choices=TargetingCriteriaFilterMixin.COMPARISON_CHOICES,
     )
-    subcriteria_block = models.ForeignKey(
-        "TargetingIndividualSubcriteriaRuleFilterBlock",
-        related_name="individual_subcriteria_filters",
+    individuals_filters_block = models.ForeignKey(
+        "TargetingIndividualRuleFilterBlock",
+        related_name="individual_block_filters",
         on_delete=models.CASCADE,
     )
     is_flex_field = models.BooleanField(default=False)
@@ -529,4 +527,3 @@ class TargetingIndividualSubcriteriaRuleFilter(TimeStampedUUIDModel,TargetingCri
 
     def get_lookup_prefix(self, associated_with):
         return ""
-
