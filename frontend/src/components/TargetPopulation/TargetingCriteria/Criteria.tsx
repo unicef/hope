@@ -49,6 +49,13 @@ const MathSign = styled.img`
   vertical-align: middle;
 `;
 
+const CriteriaSetBox = styled.div`
+  border: 1px solid #607cab;
+  border-radius: 3px;
+  padding: 0 ${({ theme }) => theme.spacing(2)}px;
+  margin: ${({ theme }) => theme.spacing(2)}px 0;
+`;
+
 const CriteriaField = ({ field }): React.ReactElement => {
   let fieldElement;
   switch (field.comparisionMethod) {
@@ -142,6 +149,7 @@ const CriteriaField = ({ field }): React.ReactElement => {
 
 interface CriteriaProps {
   rules: [TargetingCriteriaRuleObjectType];
+  individualsFiltersBlocks;
   removeFunction?;
   editFunction?;
   isEdit: boolean;
@@ -156,6 +164,7 @@ export function Criteria({
   isEdit,
   canRemove,
   alternative = null,
+  individualsFiltersBlocks,
 }: CriteriaProps): React.ReactElement {
   return (
     <CriteriaElement alternative={alternative} data-cy='criteria-container'>
@@ -163,10 +172,19 @@ export function Criteria({
         //eslint-disable-next-line
         return <CriteriaField key={index} field={each} />;
       })}
+      {individualsFiltersBlocks.map((item) => {
+        return (
+          <CriteriaSetBox>
+            {item.individualBlockFilters.map((filter) => {
+              return <CriteriaField field={filter} />;
+            })}
+          </CriteriaSetBox>
+        );
+      })}
       {isEdit && (
         <ButtonsContainer>
-          <IconButton>
-            <Edit onClick={editFunction} />
+          <IconButton onClick={editFunction}>
+            <Edit />
           </IconButton>
           {canRemove && (
             <IconButton onClick={removeFunction}>

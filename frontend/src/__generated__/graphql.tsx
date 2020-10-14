@@ -5089,7 +5089,7 @@ export type ImportedIndividualFieldsQuery = (
   { __typename?: 'Query' }
   & { allFieldsAttributes: Maybe<Array<Maybe<(
     { __typename?: 'FieldAttributeNode' }
-    & Pick<FieldAttributeNode, 'isFlexField' | 'id' | 'type' | 'name' | 'labelEn' | 'hint'>
+    & Pick<FieldAttributeNode, 'isFlexField' | 'id' | 'type' | 'name' | 'associatedWith' | 'labelEn' | 'hint'>
     & { labels: Maybe<Array<Maybe<(
       { __typename?: 'LabelNode' }
       & Pick<LabelNode, 'language' | 'label'>
@@ -9825,6 +9825,7 @@ export const ImportedIndividualFieldsDocument = gql`
     id
     type
     name
+    associatedWith
     labels {
       language
       label
