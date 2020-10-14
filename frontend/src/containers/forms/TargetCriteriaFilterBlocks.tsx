@@ -1,11 +1,12 @@
 import styled from 'styled-components';
-import { FieldArray } from 'formik';
-import { Button } from '@material-ui/core';
+import { Field, FieldArray } from 'formik';
+import { Box, Button } from '@material-ui/core';
 import { AddCircleOutline } from '@material-ui/icons';
 import React from 'react';
 import { ImportedIndividualFieldsQuery } from '../../__generated__/graphql';
 import { chooseFieldType, clearField } from '../../utils/targetingUtils';
 import { TargetCriteriaBlockFilter } from './TargetCriteriaBlockFilter';
+import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 
 const Divider = styled.div`
   border-top: 1px solid #e2e2e2;
@@ -37,6 +38,12 @@ const AndDivider = styled.div`
   margin: ${({ theme }) => theme.spacing(10)}px 0;
   position: relative;
 `;
+const ButtonBox = styled.div`
+  width: 300px;
+`;
+const FieldBox = styled.div`
+  margin-left: 10px;
+`;
 const AndDividerLabel = styled.div`
   position: absolute;
   top: 50%;
@@ -64,7 +71,8 @@ const AddIcon = styled(AddCircleOutline)`
   margin-right: 10px;
 `;
 const FilterWrapper = styled.div`
-  padding-left: ${({ theme }) => theme.spacing(5)}px;
+  padding: ${({ theme }) => theme.spacing(3)}px
+    ${({ theme }) => theme.spacing(5)}px;
 `;
 export function TargetCriteriaFilterBlocks({
   blockIndex,
@@ -77,7 +85,6 @@ export function TargetCriteriaFilterBlocks({
   values;
   onClick: () => void;
 }): React.ReactElement {
-
   const shouldShowAndDivider =
     blockIndex + 1 < values.individualsFiltersBlocks.length;
   return (
@@ -121,17 +128,29 @@ export function TargetCriteriaFilterBlocks({
                 );
               })}
             </GrayFiltersBlock>
-            <Button
-              onClick={() =>
-                arrayHelpers.push({
-                  fieldName: '',
-                })
-              }
-              color='primary'
-            >
-              <AddIcon />
-              Add individual sub-criteria
-            </Button>
+            <Box display='flex' flexDirection='column'>
+              <FieldBox>
+                <Field
+                  name={`individualsFiltersBlocks[${blockIndex}].onlyForHoH`}
+                  label='Head of Household'
+                  component={FormikCheckboxField}
+                />
+              </FieldBox>
+
+              <ButtonBox>
+                <Button
+                  onClick={() =>
+                    arrayHelpers.push({
+                      fieldName: '',
+                    })
+                  }
+                  color='primary'
+                >
+                  <AddIcon />
+                  Add individual sub-criteria
+                </Button>
+              </ButtonBox>
+            </Box>
           </div>
         )}
       />
