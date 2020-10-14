@@ -64,7 +64,8 @@ const AddIcon = styled(AddCircleOutline)`
   margin-right: 10px;
 `;
 const FilterWrapper = styled.div`
-  padding-left: ${({ theme }) => theme.spacing(5)}px;
+  padding: ${({ theme }) => theme.spacing(3)}px
+    ${({ theme }) => theme.spacing(5)}px;
 `;
 export function TargetCriteriaFilterBlocks({
   blockIndex,
@@ -77,7 +78,6 @@ export function TargetCriteriaFilterBlocks({
   values;
   onClick: () => void;
 }): React.ReactElement {
-
   const shouldShowAndDivider =
     blockIndex + 1 < values.individualsFiltersBlocks.length;
   return (
