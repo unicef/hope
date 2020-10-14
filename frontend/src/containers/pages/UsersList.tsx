@@ -32,7 +32,7 @@ export function UsersList(): React.ReactElement {
           <Button
             variant='contained'
             color='primary'
-            onClick={() => console.log('SEND TO CASHASSIST')}
+            onClick={() => null}
             data-cy='button-target-population-create-new'
           >
             Send to CashAssist

@@ -5,8 +5,8 @@ import { AddCircleOutline } from '@material-ui/icons';
 import React from 'react';
 import { ImportedIndividualFieldsQuery } from '../../__generated__/graphql';
 import { chooseFieldType, clearField } from '../../utils/targetingUtils';
-import { TargetCriteriaBlockFilter } from './TargetCriteriaBlockFilter';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
+import { TargetCriteriaBlockFilter } from './TargetCriteriaBlockFilter';
 
 const Divider = styled.div`
   border-top: 1px solid #e2e2e2;
