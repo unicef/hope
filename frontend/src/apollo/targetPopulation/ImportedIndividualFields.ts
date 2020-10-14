@@ -7,6 +7,7 @@ export const ImportedIndividualFields = gql`
       id
       type
       name
+      associatedWith
       labels {
         language
         label
