@@ -290,7 +290,7 @@ class TestRdiCreateTask(TestCase):
 
         document = ImportedDocument.objects.first()
         photo = document.photo.name
-        self.assertTrue(photo.startswith("image_") and photo.endswith(".png"))
+        self.assertTrue(photo.startswith("image") and photo.endswith(".png"))
 
     def test_cast_value(self):
         task = self.RdiXlsxCreateTask()
