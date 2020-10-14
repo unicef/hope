@@ -10,10 +10,7 @@ import {
   Typography,
 } from '@material-ui/core';
 import { FieldArray, Formik } from 'formik';
-import {
-  ImportedIndividualFieldsQuery,
-  useImportedIndividualFieldsQuery,
-} from '../../__generated__/graphql';
+import { useImportedIndividualFieldsQuery } from '../../__generated__/graphql';
 import { DialogActions } from '../dialogs/DialogActions';
 import {
   chooseFieldType,

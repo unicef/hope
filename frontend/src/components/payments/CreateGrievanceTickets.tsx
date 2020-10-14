@@ -14,7 +14,6 @@ export function CreateGrievanceTickets({
   grievanceTicketsNumber,
 }: Props): React.ReactElement {
   const [DialogOpen, setDialogOpen] = useState(false);
-  const { showMessage } = useSnackbar();
   const DialogTitleWrapper = styled.div`
     border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
   `;
@@ -30,7 +29,7 @@ export function CreateGrievanceTickets({
     width: 700px;
   `;
 
-  const createGrievanceTickets = () => {
+  const createGrievanceTickets = (): void => {
     console.log('create');
     setDialogOpen(false);
   };
