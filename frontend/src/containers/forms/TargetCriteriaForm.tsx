@@ -16,6 +16,7 @@ import {
   chooseFieldType,
   clearField,
   formatCriteriaFilters,
+  formatCriteriaIndividualsFiltersBlocks,
   mapCriteriasToInitialValues,
 } from '../../utils/targetingUtils';
 import { TargetingCriteriaFilter } from './TargetCriteriaFilter';
@@ -112,8 +113,11 @@ export function TargetCriteriaForm({
       <Formik
         initialValues={initialValue}
         onSubmit={(values, bag) => {
-          const dataToSend = formatCriteriaFilters(values);
-          addCriteria({ filters: dataToSend });
+          const filters = formatCriteriaFilters(values.filters);
+          const individualsFiltersBlocks = formatCriteriaIndividualsFiltersBlocks(
+            values.individualsFiltersBlocks,
+          );
+          addCriteria({ filters, individualsFiltersBlocks });
           return bag.resetForm();
         }}
         validationSchema={validationSchema}
