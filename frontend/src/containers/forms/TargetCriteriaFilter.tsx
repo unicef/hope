@@ -3,6 +3,8 @@ import React from 'react';
 import { SubField } from '../../components/TargetPopulation/SubField';
 import { ImportedIndividualFieldsQuery } from '../../__generated__/graphql';
 import { FieldChooser } from '../../components/TargetPopulation/FieldChooser';
+import { Field } from 'formik';
+import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 
 const Divider = styled.div`
   border-top: 1px solid #b1b1b5;
@@ -60,6 +62,11 @@ export function TargetingCriteriaFilter({
       {each.fieldName && (
         <div data-cy='autocomplete-target-criteria-values'>
           <SubField field={each} index={index} baseName={`filters[${index}]`} />
+          <Field
+            name={`filters[${index}].onlyForHoH`}
+            label='Head of Household'
+            component={FormikCheckboxField}
+          />
         </div>
       )}
       {shouldShowDivider && (
