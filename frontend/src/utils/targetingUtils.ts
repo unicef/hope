@@ -87,7 +87,7 @@ export function mapCriteriasToInitialValues(criteria) {
 
 // TODO Marcin make Type to this function
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function formatCriteriaFilters({ filters }) {
+export function formatCriteriaFilters(filters) {
   return filters.map((each) => {
     let comparisionMethod;
     let values;
@@ -127,4 +127,14 @@ export function formatCriteriaFilters({ filters }) {
       fieldAttribute: each.fieldAttribute,
     };
   });
+}
+
+// TODO Marcin make Type to this function
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export function formatCriteriaIndividualsFiltersBlocks(
+  individualsFiltersBlocks,
+) {
+  return individualsFiltersBlocks.map((block) => ({
+    individualBlockFilters: formatCriteriaFilters(block.individualBlockFilters),
+  }));
 }
