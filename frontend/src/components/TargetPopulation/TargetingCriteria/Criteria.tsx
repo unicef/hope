@@ -14,10 +14,10 @@ const CriteriaElement = styled.div`
   border-radius: 3px;
   font-size: 16px;
   background-color: ${(props) =>
-    props.alternative ? 'transparent' : '#f7faff'};
+  props.alternative ? 'transparent' : '#f7faff'};
   padding: ${({ theme }) => theme.spacing(1)}px
     ${({ theme, alternative }) =>
-      alternative ? theme.spacing(1) : theme.spacing(17)}px
+  alternative ? theme.spacing(1) : theme.spacing(17)}px
     ${({ theme }) => theme.spacing(1)}px ${({ theme }) => theme.spacing(4)}px;
   margin: ${({ theme }) => theme.spacing(2)}px 0;
   p {
@@ -77,8 +77,8 @@ const CriteriaField = ({ field }): React.ReactElement => {
           <span>
             {field.fieldAttribute.choices.length
               ? field.fieldAttribute.choices.find(
-                  (each) => each.value === field.arguments[0],
-                ).labelEn
+                (each) => each.value === field.arguments[0],
+              ).labelEn
               : field.arguments[0]}
           </span>
         </p>
@@ -113,8 +113,8 @@ const CriteriaField = ({ field }): React.ReactElement => {
                   <span>
                     {field.fieldAttribute.choices.length
                       ? field.fieldAttribute.choices.find(
-                          (each) => each.value === argument,
-                        ).labelEn
+                        (each) => each.value === argument,
+                      ).labelEn
                       : field.arguments[0]}
                   </span>
                   {index !== field.arguments.length - 1 && ', '}
@@ -142,6 +142,7 @@ const CriteriaField = ({ field }): React.ReactElement => {
 
 interface CriteriaProps {
   rules: [TargetingCriteriaRuleObjectType];
+  individualsFiltersBlocks;
   removeFunction?;
   editFunction?;
   isEdit: boolean;
@@ -150,18 +151,32 @@ interface CriteriaProps {
 }
 
 export function Criteria({
-  rules,
-  removeFunction = () => null,
-  editFunction = () => null,
-  isEdit,
-  canRemove,
-  alternative = null,
-}: CriteriaProps): React.ReactElement {
+                           rules,
+                           removeFunction = () => null,
+                           editFunction = () => null,
+                           isEdit,
+                           canRemove,
+                           alternative = null,
+                           individualsFiltersBlocks,
+                         }: CriteriaProps): React.ReactElement {
   return (
     <CriteriaElement alternative={alternative} data-cy='criteria-container'>
       {rules.map((each, index) => {
         //eslint-disable-next-line
         return <CriteriaField key={index} field={each} />;
+      })}
+      {individualsFiltersBlocks.map((item) => {
+        return (
+          <ul>
+            {item.individualBlockFilters.map((filter) => {
+              return (
+                <li>
+                  <CriteriaField field={filter} />
+                </li>
+              );
+            })}
+          </ul>
+        );
       })}
       {isEdit && (
         <ButtonsContainer>
