@@ -74,7 +74,21 @@ export function DedupeResults({
     },
   }));
   const classes = useStyles();
-  function createData(hitId, fullName, age, location, score, proximityToScore) {
+  function createData(
+    hitId,
+    fullName,
+    age,
+    location,
+    score,
+    proximityToScore,
+  ): {
+    hitId: number;
+    fullName: string;
+    age: number;
+    location: string;
+    score: number;
+    proximityToScore: number;
+  } {
     return { hitId, fullName, age, location, score, proximityToScore };
   }
   const rows = results.map((result) => {

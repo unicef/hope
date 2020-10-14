@@ -40,7 +40,7 @@ LOGGING = {
 
 # ELASTICSEARCH SETTINGS
 ELASTICSEARCH_DSL = {
-    "default": {"hosts": "elasticsearch:9200"},
+    "default": {"hosts": "elasticsearch_test:9200"},
 }
 
 try:
