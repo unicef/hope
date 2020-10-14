@@ -33,11 +33,10 @@ export const chooseFieldType = (value, arrayHelpers, index): void => {
 export const clearField = (arrayHelpers, index): void => {
   return arrayHelpers.replace(index, {});
 };
-
-export function mapCriteriasToInitialValues(criteria) {
+export function mapFiltersToInitialValues(filters) {
   const mappedFilters = [];
-  if (criteria.filters) {
-    criteria.filters.map((each) => {
+  if (filters) {
+    filters.map((each) => {
       switch (each.comparisionMethod) {
         case 'RANGE':
           return mappedFilters.push({
@@ -83,6 +82,24 @@ export function mapCriteriasToInitialValues(criteria) {
     mappedFilters.push({ fieldName: '' });
   }
   return mappedFilters;
+}
+
+export function mapCriteriaToInitialValues(criteria) {
+  let { filters } = criteria;
+  const individualsFiltersBlocks = criteria.individualsFiltersBlocks || [];
+  if (filters === null) {
+    filters = [{ fieldName: '' }];
+  } else {
+    filters = mapFiltersToInitialValues(filters);
+  }
+  return {
+    filters,
+    individualsFiltersBlocks: individualsFiltersBlocks.map((block) => ({
+      individualBlockFilters: mapFiltersToInitialValues(
+        block.individualBlockFilters,
+      ),
+    })),
+  };
 }
 
 // TODO Marcin make Type to this function

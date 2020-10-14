@@ -17,7 +17,7 @@ import {
   clearField,
   formatCriteriaFilters,
   formatCriteriaIndividualsFiltersBlocks,
-  mapCriteriasToInitialValues,
+  mapCriteriaToInitialValues,
 } from '../../utils/targetingUtils';
 import { TargetingCriteriaFilter } from './TargetCriteriaFilter';
 import { TargetCriteriaFilterBlocks } from './TargetCriteriaFilterBlocks';
@@ -99,13 +99,9 @@ export function TargetCriteriaForm({
   title,
 }: TargetCriteriaFormPropTypes): React.ReactElement {
   const { data, loading } = useImportedIndividualFieldsQuery();
-  const mappedFilters = mapCriteriasToInitialValues(criteria);
   const filtersArrayWrapperRef = useRef(null);
   const individualsFiltersBlocksWrapperRef = useRef(null);
-  const initialValue = {
-    filters: mappedFilters,
-    individualsFiltersBlocks: [],
-  };
+  const initialValue = mapCriteriaToInitialValues(criteria);
   if (loading) return null;
 
   return (
