@@ -7,15 +7,15 @@ from household.models import Household, MALE
 from targeting.models import (
     TargetingCriteria,
     TargetingCriteriaRule,
-    TargetingIndividualSubcriteriaRuleFilter,
-    TargetingIndividualSubcriteriaRuleFilterBlock,
+    TargetingIndividualBlockRuleFilter,
+    TargetingIndividualRuleFilterBlock,
     TargetingCriteriaQueryingMixin,
     TargetingCriteriaRuleQueryingMixin,
-    TargetingIndividualSubcriteriaRuleFilterBlockMixin,
+    TargetingIndividualRuleFilterBlockMixin,
 )
 
 
-class TestIndividualSubcriteria(TestCase):
+class TestIndividualBlockFilter(TestCase):
     def setUp(self):
         call_command("loadflexfieldsattributes")
         call_command("loadbusinessareas")
@@ -42,17 +42,17 @@ class TestIndividualSubcriteria(TestCase):
         tcr = TargetingCriteriaRule()
         tcr.targeting_criteria = tc
         tcr.save()
-        subcriteria_block = TargetingIndividualSubcriteriaRuleFilterBlock(targeting_criteria_rule=tcr)
-        subcriteria_block.save()
-        married_rule_filter = TargetingIndividualSubcriteriaRuleFilter(
-            subcriteria_block=subcriteria_block,
+        individuals_filters_block = TargetingIndividualRuleFilterBlock(targeting_criteria_rule=tcr)
+        individuals_filters_block.save()
+        married_rule_filter = TargetingIndividualBlockRuleFilter(
+            individuals_filters_block=individuals_filters_block,
             comparision_method="EQUALS",
             field_name="marital_status",
             arguments=["MARRIED"],
         )
         married_rule_filter.save()
-        sex_filter = TargetingIndividualSubcriteriaRuleFilter(
-            subcriteria_block=subcriteria_block,
+        sex_filter = TargetingIndividualBlockRuleFilter(
+            individuals_filters_block=individuals_filters_block,
             comparision_method="EQUALS",
             field_name="sex",
             arguments=[MALE],
@@ -64,20 +64,20 @@ class TestIndividualSubcriteria(TestCase):
 
     def test_all_individuals_are_female_on_mixins(self):
         query = Household.objects.all()
-        married_rule_filter = TargetingIndividualSubcriteriaRuleFilter(
+        married_rule_filter = TargetingIndividualBlockRuleFilter(
             comparision_method="EQUALS",
             field_name="marital_status",
             arguments=["MARRIED"],
         )
-        sex_filter = TargetingIndividualSubcriteriaRuleFilter(
+        sex_filter = TargetingIndividualBlockRuleFilter(
             comparision_method="EQUALS",
             field_name="sex",
             arguments=[MALE],
         )
-        subcriteria_block = TargetingIndividualSubcriteriaRuleFilterBlockMixin(
-            individual_subcriteria_filters=[married_rule_filter, sex_filter]
+        individuals_filters_block = TargetingIndividualRuleFilterBlockMixin(
+            individual_block_filters=[married_rule_filter, sex_filter]
         )
-        tcr = TargetingCriteriaRuleQueryingMixin(filters=[], subcriteria_blocks=[subcriteria_block])
+        tcr = TargetingCriteriaRuleQueryingMixin(filters=[], individuals_filters_blocks=[individuals_filters_block])
         tc = TargetingCriteriaQueryingMixin(rules=[tcr])
         query = query.filter(tc.get_query())
         self.assertEqual(query.count(), 1)
