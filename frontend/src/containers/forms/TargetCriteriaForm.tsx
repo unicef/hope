@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as Yup from 'yup';
 import styled from 'styled-components';
 import {
@@ -10,7 +10,10 @@ import {
   Typography,
 } from '@material-ui/core';
 import { FieldArray, Formik } from 'formik';
-import { useImportedIndividualFieldsQuery } from '../../__generated__/graphql';
+import {
+  ImportedIndividualFieldsQuery,
+  useImportedIndividualFieldsQuery,
+} from '../../__generated__/graphql';
 import { DialogActions } from '../dialogs/DialogActions';
 import {
   chooseFieldType,
@@ -102,6 +105,16 @@ export function TargetCriteriaForm({
   const filtersArrayWrapperRef = useRef(null);
   const individualsFiltersBlocksWrapperRef = useRef(null);
   const initialValue = mapCriteriaToInitialValues(criteria);
+  const [individualData, setIndividualData] = useState(null);
+  useEffect(() => {
+    if (loading) return;
+    const filteredData = {
+      allFieldsAttributes: data.allFieldsAttributes.filter(
+        (item) => item.associatedWith === 'Individual',
+      ),
+    };
+    setIndividualData(filteredData);
+  }, [data, loading]);
   if (loading) return null;
 
   return (
@@ -185,7 +198,7 @@ export function TargetCriteriaForm({
                             //eslint-disable-next-line
                             key={index}
                             blockIndex={index}
-                            data={data}
+                            data={individualData}
                             values={values}
                             onClick={() => arrayHelpers.remove(index)}
                           />

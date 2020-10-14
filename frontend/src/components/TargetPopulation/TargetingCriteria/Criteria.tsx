@@ -52,7 +52,7 @@ const MathSign = styled.img`
 const CriteriaSetBox = styled.div`
   border: 1px solid #607cab;
   border-radius: 3px;
-  padding: ${({ theme }) => theme.spacing(2)}px;
+  padding: 0 ${({ theme }) => theme.spacing(2)}px;
   margin: ${({ theme }) => theme.spacing(2)}px 0;
 `;
 
