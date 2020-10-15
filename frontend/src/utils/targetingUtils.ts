@@ -155,3 +155,31 @@ export function formatCriteriaIndividualsFiltersBlocks(
     individualBlockFilters: formatCriteriaFilters(block.individualBlockFilters),
   }));
 }
+
+function mapFilterToVariable(filter) {
+  return {
+    comparisionMethod: filter.comparisionMethod,
+    arguments: filter.arguments,
+    fieldName: filter.fieldName,
+    isFlexField: filter.isFlexField,
+  };
+}
+
+// TODO Marcin make Type to this function
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export function getTargetingCriteriaVariables(values) {
+  return {
+    targetingCriteria: {
+      rules: values.criterias.map((rule) => {
+        return {
+          filters: rule.filters.map(mapFilterToVariable),
+          individualsFiltersBlocks: rule.individualsFiltersBlocks.map(
+            (block) => ({
+              individualBlockFilters: block.individualBlockFilters.map(mapFilterToVariable),
+            }),
+          ),
+        };
+      }),
+    },
+  };
+}
