@@ -2,17 +2,13 @@ import copy
 
 from django.core.management import call_command
 
+from targeting.models import TargetingCriteria, TargetingCriteriaRule, TargetingCriteriaRuleFilter, TargetPopulation
+
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
 from core.models import BusinessArea
 from household.fixtures import create_household
 from household.models import Household
-from targeting.models import (
-    TargetingCriteria,
-    TargetingCriteriaRule,
-    TargetingCriteriaRuleFilter,
-    TargetPopulation,
-)
 
 
 class TestUpdateTargetPopulationMutation(APITestCase):
@@ -164,15 +160,9 @@ class TestUpdateTargetPopulationMutation(APITestCase):
         call_command("loadbusinessareas")
         business_area = BusinessArea.objects.first()
         cls.user = UserFactory.create()
-        create_household(
-            {"size": 2, "residence_status": "CITIZEN", "business_area": business_area}
-        )
-        create_household(
-            {"size": 3, "residence_status": "CITIZEN", "business_area": business_area}
-        )
-        create_household(
-            {"size": 3, "residence_status": "CITIZEN", "business_area": business_area}
-        )
+        create_household({"size": 2, "residence_status": "HOST", "business_area": business_area})
+        create_household({"size": 3, "residence_status": "HOST", "business_area": business_area})
+        create_household({"size": 3, "residence_status": "HOST", "business_area": business_area})
         cls.draft_target_population = TargetPopulation(
             name="draft_target_population",
             candidate_list_targeting_criteria=cls.get_targeting_criteria_for_rule(
