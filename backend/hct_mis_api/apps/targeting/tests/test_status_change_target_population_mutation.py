@@ -1,17 +1,13 @@
 from django.core.management import call_command
 
+from targeting.models import TargetingCriteria, TargetingCriteriaRule, TargetingCriteriaRuleFilter, TargetPopulation
+
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
 from core.models import BusinessArea
 from household.fixtures import create_household
 from program.fixtures import ProgramFactory
 from program.models import Program
-from targeting.models import (
-    TargetingCriteria,
-    TargetingCriteriaRule,
-    TargetingCriteriaRuleFilter,
-    TargetPopulation,
-)
 
 
 class TestApproveTargetPopulationMutation(APITestCase):
@@ -42,11 +38,11 @@ class TestApproveTargetPopulationMutation(APITestCase):
         cls.user = UserFactory.create()
         cls.households = []
         (household, individuals) = create_household(
-            {"size": 1, "residence_status": "CITIZEN", "business_area": business_area},
+            {"size": 1, "residence_status": "HOST", "business_area": business_area},
         )
         cls.household_size_1 = household
         (household, individuals) = create_household(
-            {"size": 2, "residence_status": "CITIZEN", "business_area": business_area},
+            {"size": 2, "residence_status": "HOST", "business_area": business_area},
         )
         cls.household_size_2 = household
         cls.households.append(cls.household_size_1)
@@ -55,15 +51,18 @@ class TestApproveTargetPopulationMutation(APITestCase):
         tp = TargetPopulation(name="Draft Target Population", status="DRAFT")
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {"field_name": "residence_status", "arguments": ["CITIZEN"], "comparision_method": "EQUALS"}
+            {"field_name": "residence_status", "arguments": ["HOST"], "comparision_method": "EQUALS"}
         )
         tp.save()
         cls.target_population_draft = tp
 
-        tp = TargetPopulation(name="Approved Target Population with final filters", status="APPROVED",)
+        tp = TargetPopulation(
+            name="Approved Target Population with final filters",
+            status="APPROVED",
+        )
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {"field_name": "residence_status", "arguments": ["CITIZEN"], "comparision_method": "EQUALS"}
+            {"field_name": "residence_status", "arguments": ["HOST"], "comparision_method": "EQUALS"}
         )
         tp.final_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
             {"field_name": "size", "arguments": [2], "comparision_method": "EQUALS"}
@@ -75,7 +74,7 @@ class TestApproveTargetPopulationMutation(APITestCase):
         tp = TargetPopulation(name="Approved Target Population", status="APPROVED")
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {"field_name": "residence_status", "arguments": ["CITIZEN"], "comparision_method": "EQUALS"}
+            {"field_name": "residence_status", "arguments": ["HOST"], "comparision_method": "EQUALS"}
         )
         tp.save()
         tp.households.set(cls.households)
@@ -106,7 +105,10 @@ class TestApproveTargetPopulationMutation(APITestCase):
             request_string=self.APPROVE_TARGET_MUTATION,
             context={"user": self.user},
             variables={
-                "id": self.id_to_base64(self.target_population_approved_with_final_rule.id, "TargetPopulation",),
+                "id": self.id_to_base64(
+                    self.target_population_approved_with_final_rule.id,
+                    "TargetPopulation",
+                ),
                 "programId": self.id_to_base64(self.program.id, "Program"),
             },
         )
@@ -139,11 +141,11 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
         call_command("loadbusinessareas")
         business_area = BusinessArea.objects.first()
         (household, individuals) = create_household(
-            {"size": 1, "residence_status": "CITIZEN", "business_area": business_area},
+            {"size": 1, "residence_status": "HOST", "business_area": business_area},
         )
         cls.household_size_1 = household
         (household, individuals) = create_household(
-            {"size": 2, "residence_status": "CITIZEN", "business_area": business_area},
+            {"size": 2, "residence_status": "HOST", "business_area": business_area},
         )
         cls.household_size_2 = household
         cls.households.append(cls.household_size_1)
@@ -152,15 +154,18 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
         tp = TargetPopulation(name="Draft Target Population", status="DRAFT")
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {"field_name": "residence_status", "arguments": ["CITIZEN"], "comparision_method": "EQUALS"}
+            {"field_name": "residence_status", "arguments": ["HOST"], "comparision_method": "EQUALS"}
         )
         tp.save()
         cls.target_population_draft = tp
 
-        tp = TargetPopulation(name="Approved Target Population with final filters", status="APPROVED",)
+        tp = TargetPopulation(
+            name="Approved Target Population with final filters",
+            status="APPROVED",
+        )
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {"field_name": "residence_status", "arguments": ["CITIZEN"], "comparision_method": "EQUALS"}
+            {"field_name": "residence_status", "arguments": ["HOST"], "comparision_method": "EQUALS"}
         )
         tp.final_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
             {"field_name": "size", "arguments": [2], "comparision_method": "EQUALS"}
@@ -172,7 +177,7 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
         tp = TargetPopulation(name="Approved Target Population", status="APPROVED")
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {"field_name": "residence_status", "arguments": ["CITIZEN"], "comparision_method": "EQUALS"}
+            {"field_name": "residence_status", "arguments": ["HOST"], "comparision_method": "EQUALS"}
         )
         tp.save()
         tp.households.set(cls.households)
@@ -193,7 +198,10 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
             request_string=self.UNAPPROVE_TARGET_MUTATION,
             context={"user": self.user},
             variables={
-                "id": self.id_to_base64(self.target_population_approved_with_final_rule.id, "TargetPopulation",)
+                "id": self.id_to_base64(
+                    self.target_population_approved_with_final_rule.id,
+                    "TargetPopulation",
+                )
             },
         )
 
@@ -240,11 +248,11 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
         call_command("loadbusinessareas")
         business_area = BusinessArea.objects.first()
         (household, individuals) = create_household(
-            {"size": 1, "residence_status": "CITIZEN", "business_area": business_area},
+            {"size": 1, "residence_status": "HOST", "business_area": business_area},
         )
         cls.household_size_1 = household
         (household, individuals) = create_household(
-            {"size": 2, "residence_status": "CITIZEN", "business_area": business_area},
+            {"size": 2, "residence_status": "HOST", "business_area": business_area},
         )
         cls.household_size_2 = household
         cls.households.append(cls.household_size_1)
@@ -253,15 +261,18 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
         tp = TargetPopulation(name="Draft Target Population", status="DRAFT")
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {"field_name": "residence_status", "arguments": ["CITIZEN"], "comparision_method": "EQUALS"}
+            {"field_name": "residence_status", "arguments": ["HOST"], "comparision_method": "EQUALS"}
         )
         tp.save()
         cls.target_population_draft = tp
 
-        tp = TargetPopulation(name="Approved Target Population with final filters", status="APPROVED",)
+        tp = TargetPopulation(
+            name="Approved Target Population with final filters",
+            status="APPROVED",
+        )
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {"field_name": "residence_status", "arguments": ["CITIZEN"], "comparision_method": "EQUALS"}
+            {"field_name": "residence_status", "arguments": ["HOST"], "comparision_method": "EQUALS"}
         )
         tp.final_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
             {"field_name": "size", "arguments": [2], "comparision_method": "EQUALS"}
@@ -273,7 +284,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
         tp = TargetPopulation(name="Approved Target Population", status="APPROVED")
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {"field_name": "residence_status", "arguments": ["CITIZEN"], "comparision_method": "EQUALS"}
+            {"field_name": "residence_status", "arguments": ["HOST"], "comparision_method": "EQUALS"}
         )
         program = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
         tp.program = program
@@ -296,7 +307,10 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
             request_string=self.FINALIZE_TARGET_MUTATION,
             context={"user": self.user},
             variables={
-                "id": self.id_to_base64(self.target_population_approved_with_final_rule.id, "TargetPopulation",)
+                "id": self.id_to_base64(
+                    self.target_population_approved_with_final_rule.id,
+                    "TargetPopulation",
+                )
             },
         )
 
@@ -311,5 +325,10 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.FINALIZE_TARGET_MUTATION,
             context={"user": self.user},
-            variables={"id": self.id_to_base64(self.target_population_draft.id, "TargetPopulation",)},
+            variables={
+                "id": self.id_to_base64(
+                    self.target_population_draft.id,
+                    "TargetPopulation",
+                )
+            },
         )

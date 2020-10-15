@@ -6,7 +6,7 @@ import sys
 ####
 # Change per project
 ####
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.forms import SelectMultiple
 from django.utils.text import slugify
 
@@ -228,6 +228,7 @@ OTHER_APPS = [
     "constance",
     "auditlog",
     "admin_extra_urls",
+    "multiselectfield",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
