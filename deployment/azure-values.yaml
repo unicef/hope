@@ -3,8 +3,251 @@ ingress:
     kubernetes.io/ingress.class: azure/application-gateway
     appgw.ingress.kubernetes.io/ssl-redirect: "true"
 
+backend:
+  nodeSelector:
+    agentpool: hope
+  resources:
+    limits:
+      cpu: "2"
+      memory: "4Gi"
+    requests:
+      cpu: "1"
+      memory: "4Gi"
+
+frontend:
+  nodeSelector:
+    agentpool: hope
+  resources:
+    limits:
+      cpu: "500m"
+      memory: "256Mi"
+    requests:
+      cpu: "500m"
+      memory: "256Mi"
+
+
+
+postgresql:
+  resources:
+    limits:
+      cpu: "500m"
+      memory: "256Mi"
+    requests:
+      cpu: "500m"
+      memory: "256Mi"
+  nodeSelector:
+    agentpool: hope
+
+registrationdatahubpostgresql:resources:
+  resources:
+    limits:
+      cpu: "500m"
+      memory: "256Mi"
+    requests:
+      cpu: "500m"
+      memory: "256Mi"
+  nodeSelector:
+    agentpool: hope
+
+cashassistdatahubpostgresql:
+  resources:
+    limits:
+      cpu: "500m"
+      memory: "256Mi"
+    requests:
+      cpu: "500m"
+      memory: "256Mi"
+  nodeSelector:
+    agentpool: hope
+
+redis:
+  redis:
+    master:
+      resources:
+        limits:
+          cpu: "250m"
+          memory: "512Mi"
+        requests:
+          cpu: "250m"
+          memory: "256Mi"
+      nodeSelector:
+        agentpool: hope
+  master:
+    resources:
+      limits:
+        cpu: "250m"
+        memory: "512Mi"
+      requests:
+        cpu: "250m"
+        memory: "256Mi"
+    nodeSelector:
+      agentpool: hope
+
+elasticsearch:
+  master:
+    replicas: 1
+    resources:
+      limits:
+        cpu: "1"
+        memory: "3Gi"
+      requests:
+        cpu: "1"
+        memory: "3Gi"
+    nodeSelector:
+      agentpool: hope
+  volumePermissions:
+    resources:
+      limits:
+        cpu: "250m"
+        memory: "256Mi"
+      requests:
+        cpu: "250m"
+        memory: "256Mi"
+    nodeSelector:
+      agentpool: hope
+  sysctlImage:
+    replicas: 1
+    resources:
+      limits:
+        cpu: "1"
+        memory: "1024Mi"
+      requests:
+        cpu: "750m"
+        memory: "1024Mi"
+    nodeSelector:
+      agentpool: hope
+  data:
+    replicas: 1
+    resources:
+      limits:
+        cpu: "1"
+        memory: "3Gi"
+      requests:
+        cpu: "750m"
+        memory: "3Gi"
+    nodeSelector:
+      agentpool: hope
+  coordinating:
+    replicas: 1
+    resources:
+      limits:
+        cpu: "250m"
+        memory: "2Gi"
+      requests:
+        cpu: "250m"
+        memory: "2Gi"
+    nodeSelector:
+      agentpool: hope
+  ingset:
+    resources:
+      limits:
+        cpu: "250m"
+        memory: "1Gi"
+      requests:
+        cpu: "250m"
+        memory: "1Gi"
+    nodeSelector:
+      agentpool: hope
+  metrics:
+    resources:
+      limits:
+        cpu: "250m"
+        memory: "1Gi"
+      requests:
+        cpu: "250m"
+        memory: "1Gi"
+    nodeSelector:
+      agentpool: hope
+  curator:
+    resources:
+      limits:
+        cpu: "250m"
+        memory: "1Gi"
+      requests:
+        cpu: "250m"
+        memory: "1Gi"
+    nodeSelector:
+      agentpool: hope
+  resources:
+    limits:
+      cpu: "1"
+      memory: "1024Mi"
+    requests:
+      cpu: "1"
+      memory: "512Mi"
+  nodeSelector:
+    agentpool: hope
+
 airflow:
   ingress:
     annotations:
       kubernetes.io/ingress.class: azure/application-gateway
       appgw.ingress.kubernetes.io/ssl-redirect: "true"
+  worker:
+    resources:
+      limits:
+        cpu: "1"
+        memory: "4Gi"
+      requests:
+        cpu: "1"
+        memory: "512Mi"
+    nodeSelector:
+      agentpool: hope
+  scheduler:
+    resources:
+      limits:
+        cpu: "500m"
+        memory: "512Mi"
+      requests:
+        cpu: "250m"
+        memory: "256Mi"
+    nodeSelector:
+      agentpool: hope
+  redis:
+    resources:
+      limits:
+        cpu: "250m"
+        memory: "256Mi"
+      requests:
+        cpu: "250m"
+        memory: "256Mi"
+  airflow:
+    redis:
+      resources:
+        limits:
+          cpu: "250m"
+          memory: "256Mi"
+        requests:
+          cpu: "250m"
+          memory: "256Mi"
+    worker:
+      resources:
+        limits:
+          cpu: "1"
+          memory: "4Gi"
+        requests:
+          cpu: "1"
+          memory: "512Mi"
+      nodeSelector:
+        agentpool: hope
+    scheduler:
+      resources:
+        limits:
+          cpu: "500m"
+          memory: "512Mi"
+        requests:
+          cpu: "250m"
+          memory: "256Mi"
+      nodeSelector:
+        agentpool: hope
+    web:
+      resources:
+        limits:
+          cpu: "750m"
+          memory: "1024Mi"
+        requests:
+          cpu: "500m"
+          memory: "512Mi"
+      nodeSelector:
+        agentpool: hope
+
