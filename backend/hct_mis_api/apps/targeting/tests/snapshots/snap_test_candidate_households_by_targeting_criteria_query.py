@@ -11,24 +11,15 @@ snapshots['CandidateListTargetingCriteriaQueryTestCase::test_candidate_household
         'candidateHouseholdsListByTargetingCriteria': {
             'edges': [
                 {
-                    'node': None
+                    'node': {
+                        'residenceStatus': 'HOST',
+                        'size': 1
+                    }
                 }
             ],
             'totalCount': 1
         }
-    },
-    'errors': [
-        {
-            'message': 'Expected a value of type "HouseholdResidenceStatus" but received: CITIZEN',
-            'path': [
-                'candidateHouseholdsListByTargetingCriteria',
-                'edges',
-                0,
-                'node',
-                'residenceStatus'
-            ]
-        }
-    ]
+    }
 }
 
 snapshots['CandidateListTargetingCriteriaQueryTestCase::test_candidate_households_list_by_targeting_criteria_size 1'] = {

@@ -43,7 +43,10 @@ snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_b
         'finalHouseholdsListByTargetingCriteria': {
             'edges': [
                 {
-                    'node': None
+                    'node': {
+                        'residenceStatus': 'HOST',
+                        'size': 1
+                    }
                 },
                 {
                     'node': {
@@ -54,19 +57,7 @@ snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_b
             ],
             'totalCount': 2
         }
-    },
-    'errors': [
-        {
-            'message': 'Expected a value of type "HouseholdResidenceStatus" but received: CITIZEN',
-            'path': [
-                'finalHouseholdsListByTargetingCriteria',
-                'edges',
-                0,
-                'node',
-                'residenceStatus'
-            ]
-        }
-    ]
+    }
 }
 
 snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_by_targeting_criteria_size_2_edit 1'] = {
@@ -90,22 +81,13 @@ snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_b
         'finalHouseholdsListByTargetingCriteria': {
             'edges': [
                 {
-                    'node': None
+                    'node': {
+                        'residenceStatus': 'HOST',
+                        'size': 1
+                    }
                 }
             ],
             'totalCount': 1
         }
-    },
-    'errors': [
-        {
-            'message': 'Expected a value of type "HouseholdResidenceStatus" but received: CITIZEN',
-            'path': [
-                'finalHouseholdsListByTargetingCriteria',
-                'edges',
-                0,
-                'node',
-                'residenceStatus'
-            ]
-        }
-    ]
+    }
 }

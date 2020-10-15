@@ -33,10 +33,16 @@ snapshots['TestApproveTargetPopulationMutation::test_approve_target_population 1
                 'households': {
                     'edges': [
                         {
-                            'node': None
+                            'node': {
+                                'residenceStatus': 'HOST',
+                                'size': 1
+                            }
                         },
                         {
-                            'node': None
+                            'node': {
+                                'residenceStatus': 'HOST',
+                                'size': 2
+                            }
                         }
                     ],
                     'totalCount': 2
@@ -44,33 +50,7 @@ snapshots['TestApproveTargetPopulationMutation::test_approve_target_population 1
                 'status': 'APPROVED'
             }
         }
-    },
-    'errors': [
-        {
-            'message': 'Expected a value of type "HouseholdResidenceStatus" but received: CITIZEN',
-            'path': [
-                'approveTargetPopulation',
-                'targetPopulation',
-                'households',
-                'edges',
-                0,
-                'node',
-                'residenceStatus'
-            ]
-        },
-        {
-            'message': 'Expected a value of type "HouseholdResidenceStatus" but received: CITIZEN',
-            'path': [
-                'approveTargetPopulation',
-                'targetPopulation',
-                'households',
-                'edges',
-                1,
-                'node',
-                'residenceStatus'
-            ]
-        }
-    ]
+    }
 }
 
 snapshots['TestUnapproveTargetPopulationMutation::test_unapprove_fail_target_population 1'] = {
@@ -100,10 +80,16 @@ snapshots['TestUnapproveTargetPopulationMutation::test_unapprove_target_populati
                 'households': {
                     'edges': [
                         {
-                            'node': None
+                            'node': {
+                                'residenceStatus': 'HOST',
+                                'size': 1
+                            }
                         },
                         {
-                            'node': None
+                            'node': {
+                                'residenceStatus': 'HOST',
+                                'size': 2
+                            }
                         }
                     ],
                     'totalCount': 2
@@ -111,33 +97,7 @@ snapshots['TestUnapproveTargetPopulationMutation::test_unapprove_target_populati
                 'status': 'DRAFT'
             }
         }
-    },
-    'errors': [
-        {
-            'message': 'Expected a value of type "HouseholdResidenceStatus" but received: CITIZEN',
-            'path': [
-                'unapproveTargetPopulation',
-                'targetPopulation',
-                'households',
-                'edges',
-                0,
-                'node',
-                'residenceStatus'
-            ]
-        },
-        {
-            'message': 'Expected a value of type "HouseholdResidenceStatus" but received: CITIZEN',
-            'path': [
-                'unapproveTargetPopulation',
-                'targetPopulation',
-                'households',
-                'edges',
-                1,
-                'node',
-                'residenceStatus'
-            ]
-        }
-    ]
+    }
 }
 
 snapshots['TestFinalizeTargetPopulationMutation::test_finalize_fail_target_population 1'] = {
@@ -167,20 +127,32 @@ snapshots['TestFinalizeTargetPopulationMutation::test_finalize_target_population
                 'finalList': {
                     'edges': [
                         {
-                            'node': None
+                            'node': {
+                                'residenceStatus': 'HOST',
+                                'size': 1
+                            }
                         },
                         {
-                            'node': None
+                            'node': {
+                                'residenceStatus': 'HOST',
+                                'size': 2
+                            }
                         }
                     ]
                 },
                 'households': {
                     'edges': [
                         {
-                            'node': None
+                            'node': {
+                                'residenceStatus': 'HOST',
+                                'size': 1
+                            }
                         },
                         {
-                            'node': None
+                            'node': {
+                                'residenceStatus': 'HOST',
+                                'size': 2
+                            }
                         }
                     ],
                     'totalCount': 2
@@ -188,57 +160,7 @@ snapshots['TestFinalizeTargetPopulationMutation::test_finalize_target_population
                 'status': 'FINALIZED'
             }
         }
-    },
-    'errors': [
-        {
-            'message': 'Expected a value of type "HouseholdResidenceStatus" but received: CITIZEN',
-            'path': [
-                'finalizeTargetPopulation',
-                'targetPopulation',
-                'finalList',
-                'edges',
-                0,
-                'node',
-                'residenceStatus'
-            ]
-        },
-        {
-            'message': 'Expected a value of type "HouseholdResidenceStatus" but received: CITIZEN',
-            'path': [
-                'finalizeTargetPopulation',
-                'targetPopulation',
-                'finalList',
-                'edges',
-                1,
-                'node',
-                'residenceStatus'
-            ]
-        },
-        {
-            'message': 'Expected a value of type "HouseholdResidenceStatus" but received: CITIZEN',
-            'path': [
-                'finalizeTargetPopulation',
-                'targetPopulation',
-                'households',
-                'edges',
-                0,
-                'node',
-                'residenceStatus'
-            ]
-        },
-        {
-            'message': 'Expected a value of type "HouseholdResidenceStatus" but received: CITIZEN',
-            'path': [
-                'finalizeTargetPopulation',
-                'targetPopulation',
-                'households',
-                'edges',
-                1,
-                'node',
-                'residenceStatus'
-            ]
-        }
-    ]
+    }
 }
 
 snapshots['TestFinalizeTargetPopulationMutation::test_finalize_target_population_with_final_criteria 1'] = {
