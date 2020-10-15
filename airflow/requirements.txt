@@ -17,6 +17,7 @@ django-elasticsearch-dsl==7.1.4
 scipy==1.5.1
 django-constance[redis]==2.7.0
 admin-extra-urls==2.2.0
+django-multiselectfield==0.1.12
 
 # Etc
 Pillow==7.0.0
