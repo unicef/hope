@@ -128,7 +128,7 @@ export function TargetPopulationFilters({
         </Grid>
         <Grid item>
           <Box display='flex' flexDirection='column'>
-            <FieldLabel>Number of Household</FieldLabel>
+            <FieldLabel>Household Size</FieldLabel>
             <TextContainer
               id='minFilter'
               value={filter.numIndividuals.min}
