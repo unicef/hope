@@ -1,16 +1,17 @@
 from django.core.management import call_command
 
+from targeting.models import (
+    HouseholdSelection,
+    TargetingCriteria,
+    TargetingCriteriaRule,
+    TargetingCriteriaRuleFilter,
+    TargetPopulation,
+)
+
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
 from core.models import BusinessArea
 from household.fixtures import create_household
-from targeting.models import (
-    TargetPopulation,
-    TargetingCriteria,
-    TargetingCriteriaRule,
-    TargetingCriteriaRuleFilter,
-    HouseholdSelection,
-)
 
 
 class FinalListTargetingCriteriaQueryTestCase(APITestCase):
@@ -46,9 +47,11 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
         cls.households = []
         call_command("loadbusinessareas")
         business_area = BusinessArea.objects.first()
-        _ = create_household({"size": 1, "residence_status": "CITIZEN", "business_area": business_area},)
+        _ = create_household(
+            {"size": 1, "residence_status": "HOST", "business_area": business_area},
+        )
         (household, individuals) = create_household(
-            {"size": 1, "residence_status": "CITIZEN", "business_area": business_area},
+            {"size": 1, "residence_status": "HOST", "business_area": business_area},
         )
         cls.households.append(household)
         (household, individuals) = create_household(
@@ -77,7 +80,7 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
         cls.target_population_size_2.households.set(cls.households)
         cls.target_population_size_2.save()
         targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {"field_name": "residence_status", "arguments": ["CITIZEN"], "comparision_method": "EQUALS"}
+            {"field_name": "residence_status", "arguments": ["HOST"], "comparision_method": "EQUALS"}
         )
         cls.target_population_residence_status = TargetPopulation(
             name="target_population_residence_status",
@@ -98,7 +101,9 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
         )
         cls.target_population_size_1_finalized.save()
         HouseholdSelection.objects.create(
-            household=cls.household_size_1, final=True, target_population=cls.target_population_size_1_finalized,
+            household=cls.household_size_1,
+            final=True,
+            target_population=cls.target_population_size_1_finalized,
         )
 
     @staticmethod
@@ -117,11 +122,16 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
             variables={"targetPopulation": self.id_to_base64(self.target_population_size_2.id, "TargetPopulation")},
         )
 
-    def test_final_households_list_by_targeting_criteria_residence_status(self,):
+    def test_final_households_list_by_targeting_criteria_residence_status(
+        self,
+    ):
         self.snapshot_graphql_request(
             request_string=FinalListTargetingCriteriaQueryTestCase.QUERY,
             variables={
-                "targetPopulation": self.id_to_base64(self.target_population_residence_status.id, "TargetPopulation",)
+                "targetPopulation": self.id_to_base64(
+                    self.target_population_residence_status.id,
+                    "TargetPopulation",
+                )
             },
         )
 
@@ -129,24 +139,37 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
         self.snapshot_graphql_request(
             request_string=FinalListTargetingCriteriaQueryTestCase.QUERY,
             variables={
-                "targetPopulation": self.id_to_base64(self.target_population_size_1_finalized.id, "TargetPopulation",)
+                "targetPopulation": self.id_to_base64(
+                    self.target_population_size_1_finalized.id,
+                    "TargetPopulation",
+                )
             },
         )
 
-    def test_final_households_list_by_targeting_criteria_size_1_edit(self,):
+    def test_final_households_list_by_targeting_criteria_size_1_edit(
+        self,
+    ):
         self.snapshot_graphql_request(
             request_string=FinalListTargetingCriteriaQueryTestCase.QUERY,
             variables={
-                "targetPopulation": self.id_to_base64(self.target_population_residence_status.id, "TargetPopulation",),
+                "targetPopulation": self.id_to_base64(
+                    self.target_population_residence_status.id,
+                    "TargetPopulation",
+                ),
                 "targetingCriteria": self.FAMILY_SIZE_1_TARGETING_CRITERIA,
             },
         )
 
-    def test_final_households_list_by_targeting_criteria_size_2_edit(self,):
+    def test_final_households_list_by_targeting_criteria_size_2_edit(
+        self,
+    ):
         self.snapshot_graphql_request(
             request_string=FinalListTargetingCriteriaQueryTestCase.QUERY,
             variables={
-                "targetPopulation": self.id_to_base64(self.target_population_residence_status.id, "TargetPopulation",),
+                "targetPopulation": self.id_to_base64(
+                    self.target_population_residence_status.id,
+                    "TargetPopulation",
+                ),
                 "targetingCriteria": self.FAMILY_SIZE_2_TARGETING_CRITERIA,
             },
         )

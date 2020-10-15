@@ -2,10 +2,11 @@ from django.core.exceptions import ValidationError
 from django.core.management import call_command
 from django.test import TestCase
 
+from targeting.models import TargetingCriteriaRuleFilter
+
 from core.models import BusinessArea
 from household.fixtures import create_household
 from household.models import Household
-from targeting.models import TargetingCriteriaRuleFilter
 
 
 class TargetingCriteriaRuleFilterTestCase(TestCase):
@@ -14,22 +15,26 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         call_command("loadbusinessareas")
         business_area = BusinessArea.objects.first()
         (household, individuals) = create_household(
-            {"size": 1, "residence_status": "CITIZEN", "business_area": business_area}, {"birth_date": "1970-11-29"},
+            {"size": 1, "residence_status": "HOST", "business_area": business_area},
+            {"birth_date": "1970-11-29"},
         )
         households.append(household)
         self.household_50_yo = household
         (household, individuals) = create_household(
-            {"size": 1, "residence_status": "CITIZEN", "business_area": business_area}, {"birth_date": "1991-11-18"},
+            {"size": 1, "residence_status": "HOST", "business_area": business_area},
+            {"birth_date": "1991-11-18"},
         )
         households.append(household)
         (household, individuals) = create_household(
-            {"size": 1, "residence_status": "CITIZEN", "business_area": business_area}, {"birth_date": "1991-11-18"},
+            {"size": 1, "residence_status": "HOST", "business_area": business_area},
+            {"birth_date": "1991-11-18"},
         )
 
         households.append(household)
 
         (household, individuals) = create_household(
-            {"size": 2, "residence_status": "REFUGEE", "business_area": business_area}, {"birth_date": "1991-11-18"},
+            {"size": 2, "residence_status": "REFUGEE", "business_area": business_area},
+            {"birth_date": "1991-11-18"},
         )
 
         households.append(household)
@@ -42,21 +47,32 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         return Household.objects.filter(pk__in=[h.pk for h in self.households])
 
     def test_wrong_arguments_count_validation(self):
-        rule_filter = TargetingCriteriaRuleFilter(comparision_method="EQUALS", field_name="size", arguments=[2, 1],)
+        rule_filter = TargetingCriteriaRuleFilter(
+            comparision_method="EQUALS",
+            field_name="size",
+            arguments=[2, 1],
+        )
         try:
             rule_filter.get_query()
             self.assertTrue(False)
         except ValidationError:
             self.assertTrue(True)
 
-        rule_filter = TargetingCriteriaRuleFilter(comparision_method="EQUALS", field_name="size", arguments=[],)
+        rule_filter = TargetingCriteriaRuleFilter(
+            comparision_method="EQUALS",
+            field_name="size",
+            arguments=[],
+        )
         try:
             rule_filter.get_query()
             self.assertTrue(False)
         except ValidationError:
             self.assertTrue(True)
 
-        rule_filter = TargetingCriteriaRuleFilter(comparision_method="EQUALS", field_name="size",)
+        rule_filter = TargetingCriteriaRuleFilter(
+            comparision_method="EQUALS",
+            field_name="size",
+        )
         try:
             rule_filter.get_query()
             self.assertTrue(False)
@@ -113,14 +129,22 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         self.assertTrue(self.household_size_2.pk in [h.pk for h in queryset])
 
     def test_rule_filter_size_not_equals(self):
-        rule_filter = TargetingCriteriaRuleFilter(comparision_method="NOT_EQUALS", field_name="size", arguments=[2],)
+        rule_filter = TargetingCriteriaRuleFilter(
+            comparision_method="NOT_EQUALS",
+            field_name="size",
+            arguments=[2],
+        )
         query = rule_filter.get_query()
         queryset = self.get_households_queryset().filter(query).distinct()
         self.assertEqual(queryset.count(), 3)
         self.assertTrue(self.household_size_2.pk not in [h.pk for h in queryset])
 
     def test_rule_filter_size_in_range_0_1(self):
-        rule_filter = TargetingCriteriaRuleFilter(comparision_method="RANGE", field_name="size", arguments=[0, 1],)
+        rule_filter = TargetingCriteriaRuleFilter(
+            comparision_method="RANGE",
+            field_name="size",
+            arguments=[0, 1],
+        )
         query = rule_filter.get_query()
         queryset = self.get_households_queryset().filter(query).distinct()
         self.assertEqual(queryset.count(), 3)
@@ -128,7 +152,9 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
 
     def test_rule_filter_size_not_in_range_0_1(self):
         rule_filter = TargetingCriteriaRuleFilter(
-            comparision_method="NOT_IN_RANGE", field_name="size", arguments=[0, 1],
+            comparision_method="NOT_IN_RANGE",
+            field_name="size",
+            arguments=[0, 1],
         )
         query = rule_filter.get_query()
         queryset = self.get_households_queryset().filter(query).distinct()
@@ -136,14 +162,22 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         self.assertTrue(self.household_size_2.pk in [h.pk for h in queryset])
 
     def test_rule_filter_size_gt_1(self):
-        rule_filter = TargetingCriteriaRuleFilter(comparision_method="GREATER_THAN", field_name="size", arguments=[1],)
+        rule_filter = TargetingCriteriaRuleFilter(
+            comparision_method="GREATER_THAN",
+            field_name="size",
+            arguments=[1],
+        )
         query = rule_filter.get_query()
         queryset = self.get_households_queryset().filter(query).distinct()
         self.assertEqual(queryset.count(), 1)
         self.assertTrue(self.household_size_2.pk in [h.pk for h in queryset])
 
     def test_rule_filter_size_lt_2(self):
-        rule_filter = TargetingCriteriaRuleFilter(comparision_method="LESS_THAN", field_name="size", arguments=[2],)
+        rule_filter = TargetingCriteriaRuleFilter(
+            comparision_method="LESS_THAN",
+            field_name="size",
+            arguments=[2],
+        )
         query = rule_filter.get_query()
         queryset = self.get_households_queryset().filter(query).distinct()
         self.assertEqual(queryset.count(), 3)
@@ -151,7 +185,9 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
 
     def test_rule_filter_residence_status_equals(self):
         rule_filter = TargetingCriteriaRuleFilter(
-            comparision_method="EQUALS", field_name="residence_status", arguments=["REFUGEE"],
+            comparision_method="EQUALS",
+            field_name="residence_status",
+            arguments=["REFUGEE"],
         )
         query = rule_filter.get_query()
         queryset = self.get_households_queryset().filter(query).distinct()
@@ -160,7 +196,9 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
 
     def test_rule_filter_residence_status_not_equals(self):
         rule_filter = TargetingCriteriaRuleFilter(
-            comparision_method="NOT_EQUALS", field_name="residence_status", arguments=["REFUGEE"],
+            comparision_method="NOT_EQUALS",
+            field_name="residence_status",
+            arguments=["REFUGEE"],
         )
         query = rule_filter.get_query()
         queryset = self.get_households_queryset().filter(query).distinct()
@@ -203,7 +241,10 @@ class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
 
     def test_rule_filter_household_total_households_4(self):
         rule_filter = TargetingCriteriaRuleFilter(
-            comparision_method="EQUALS", field_name="total_households_h_f", arguments=[4], is_flex_field=True,
+            comparision_method="EQUALS",
+            field_name="total_households_h_f",
+            arguments=[4],
+            is_flex_field=True,
         )
         query = rule_filter.get_query()
         queryset = Household.objects.filter(query)
