@@ -1,6 +1,9 @@
+import time
+
 from django.contrib.gis.geos import Point
 
 import factory.fuzzy
+from faker import Faker
 from pytz import utc
 
 from household.const import NATIONALITIES
@@ -14,22 +17,16 @@ from household.models import (
 )
 from registration_datahub.models import ImportedHousehold, ImportedIndividual, RegistrationDataImportDatahub
 
+faker = Faker()
+
 
 class RegistrationDataImportDatahubFactory(factory.DjangoModelFactory):
     class Meta:
         model = RegistrationDataImportDatahub
+        django_get_or_create = ("name",)
 
-    name = factory.Faker(
-        "sentence",
-        nb_words=6,
-        variable_nb_words=True,
-        ext_word_list=None,
-    )
-    import_date = factory.Faker(
-        "date_time_this_decade",
-        before_now=True,
-        tzinfo=utc,
-    )
+    name = f"{faker.sentence(nb_words=3, variable_nb_words=True, ext_word_list=None)} - {time.time_ns()}"
+    import_date = factory.Faker("date_time_this_decade", before_now=True, tzinfo=utc,)
 
 
 class ImportedHouseholdFactory(factory.DjangoModelFactory):
@@ -39,20 +36,12 @@ class ImportedHouseholdFactory(factory.DjangoModelFactory):
     consent_sign = factory.django.ImageField(color="blue")
     consent = True
     consent_sharing = (UNICEF, HUMANITARIAN_PARTNER)
-    residence_status = factory.fuzzy.FuzzyChoice(
-        RESIDENCE_STATUS_CHOICE,
-        getter=lambda c: c[0],
-    )
+    residence_status = factory.fuzzy.FuzzyChoice(RESIDENCE_STATUS_CHOICE, getter=lambda c: c[0],)
     country = factory.Faker("country_code", representation="alpha-2")
-    country_origin = factory.fuzzy.FuzzyChoice(
-        NATIONALITIES,
-        getter=lambda c: c[0],
-    )
+    country_origin = factory.fuzzy.FuzzyChoice(NATIONALITIES, getter=lambda c: c[0],)
     size = factory.fuzzy.FuzzyInteger(3, 8)
     address = factory.Faker("address")
-    registration_data_import = factory.SubFactory(
-        RegistrationDataImportDatahubFactory,
-    )
+    registration_data_import = factory.SubFactory(RegistrationDataImportDatahubFactory,)
     first_registration_date = factory.Faker("date_this_year", before_today=True, after_today=False)
     last_registration_date = factory.Faker("date_this_year", before_today=True, after_today=False)
     admin1 = ""
@@ -79,10 +68,7 @@ class ImportedHouseholdFactory(factory.DjangoModelFactory):
     end = factory.Faker("date_this_month", before_today=True, after_today=False)
     deviceid = factory.Faker("md5")
     name_enumerator = factory.Faker("name")
-    org_enumerator = factory.fuzzy.FuzzyChoice(
-        ORG_ENUMERATOR_CHOICES,
-        getter=lambda c: c[0],
-    )
+    org_enumerator = factory.fuzzy.FuzzyChoice(ORG_ENUMERATOR_CHOICES, getter=lambda c: c[0],)
     org_name_enumerator = "Partner Organization"
     village = factory.Faker("city")
 
@@ -95,16 +81,10 @@ class ImportedIndividualFactory(factory.DjangoModelFactory):
     given_name = factory.Faker("first_name")
     middle_name = factory.Faker("first_name")
     family_name = factory.Faker("last_name")
-    sex = factory.fuzzy.FuzzyChoice(
-        SEX_CHOICE,
-        getter=lambda c: c[0],
-    )
+    sex = factory.fuzzy.FuzzyChoice(SEX_CHOICE, getter=lambda c: c[0],)
     birth_date = factory.Faker("date_of_birth", tzinfo=utc, minimum_age=16, maximum_age=90)
     estimated_birth_date = factory.fuzzy.FuzzyChoice((True, False))
-    marital_status = factory.fuzzy.FuzzyChoice(
-        MARITAL_STATUS_CHOICE,
-        getter=lambda c: c[0],
-    )
+    marital_status = factory.fuzzy.FuzzyChoice(MARITAL_STATUS_CHOICE, getter=lambda c: c[0],)
     phone_no = factory.Faker("phone_number")
     phone_no_alternative = ""
     registration_data_import = factory.SubFactory(RegistrationDataImportDatahubFactory)
