@@ -38,7 +38,7 @@ postgresql:
   nodeSelector:
     agentpool: hope
 
-registrationdatahubpostgresql:resources:
+registrationdatahubpostgresql:
   resources:
     limits:
       cpu: "500m"
