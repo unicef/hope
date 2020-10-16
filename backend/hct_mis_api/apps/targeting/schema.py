@@ -222,7 +222,7 @@ def targeting_criteria_object_type_to_query(targeting_criteria_object_type):
         )
         for filter_dict in rule.get("filters", []):
             targeting_criteria_rule_querying.filters.append(target_models.TargetingCriteriaRuleFilter(**filter_dict))
-        for individuals_filters_block_dict in rule.get("filters", []):
+        for individuals_filters_block_dict in rule.get("individuals_filters_blocks", []):
             individuals_filters_block = target_models.TargetingIndividualRuleFilterBlockMixin([])
             targeting_criteria_rule_querying.individuals_filters_blocks.append(individuals_filters_block)
             for individual_block_filter_dict in individuals_filters_block_dict.get("individual_block_filters", []):
