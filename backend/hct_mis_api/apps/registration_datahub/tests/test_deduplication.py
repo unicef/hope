@@ -398,4 +398,4 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         duplicate = Individual.objects.filter(deduplication_golden_record_status=DUPLICATE)
 
         self.assertEqual(needs_adjudication.count(), 0)
-        self.assertEqual(duplicate.count(), 4)
+        self.assertEqual(duplicate.count(), 2)

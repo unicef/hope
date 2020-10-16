@@ -23,7 +23,6 @@ faker = Faker()
 class RegistrationDataImportDatahubFactory(factory.DjangoModelFactory):
     class Meta:
         model = RegistrationDataImportDatahub
-        django_get_or_create = ("name",)
 
     factory.LazyFunction(
         lambda: f"{faker.sentence(nb_words=3, variable_nb_words=True, ext_word_list=None)} - {time.time_ns()}"
