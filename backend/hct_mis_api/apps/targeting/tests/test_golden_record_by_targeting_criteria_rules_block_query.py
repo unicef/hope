@@ -14,7 +14,14 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase(APITestCase):
         edges {
           node {
             size
-            residenceStatus
+            individuals{
+                edges{
+                    node{
+                        sex
+                        maritalStatus
+                    }
+                }
+            }
           }
         }
       }
@@ -24,6 +31,7 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase(APITestCase):
         "targetingCriteria": {
             "rules": [
                 {
+                    "filters":[],
                     "individualsFiltersBlocks": [
                         {
                             "individualBlockFilters":[
