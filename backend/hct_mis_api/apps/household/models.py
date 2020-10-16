@@ -181,7 +181,7 @@ DATA_SHARING_CHOICES = (
 class Household(TimeStampedUUIDModel, AbstractSyncable):
     status = models.CharField(max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default="ACTIVE")
 
-    consent_sign = ImageField(validators=[validate_image_file_extension])
+    consent_sign = ImageField(validators=[validate_image_file_extension], blank=True)
     consent = models.BooleanField(default=True)
     consent_sharing = MultiSelectField(choices=DATA_SHARING_CHOICES)
     residence_status = models.CharField(max_length=255, choices=RESIDENCE_STATUS_CHOICE)
