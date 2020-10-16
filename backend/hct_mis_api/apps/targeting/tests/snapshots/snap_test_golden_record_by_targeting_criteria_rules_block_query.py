@@ -9,20 +9,25 @@ snapshots = Snapshot()
 
 snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase::test_golden_record_by_targeting_criteria_size 1'] = {
     'data': {
-        'goldenRecordByTargetingCriteria': None
-    },
-    'errors': [
-        {
-            'locations': [
+        'goldenRecordByTargetingCriteria': {
+            'edges': [
                 {
-                    'column': 7,
-                    'line': 3
+                    'node': {
+                        'individuals': {
+                            'edges': [
+                                {
+                                    'node': {
+                                        'maritalStatus': 'MARRIED',
+                                        'sex': 'MALE'
+                                    }
+                                }
+                            ]
+                        },
+                        'size': 1
+                    }
                 }
             ],
-            'message': "object of type 'NoneType' has no len()",
-            'path': [
-                'goldenRecordByTargetingCriteria'
-            ]
+            'totalCount': 1
         }
-    ]
+    }
 }
