@@ -252,9 +252,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
     def _create_documents(self):
         docs_to_create = []
         for document_data in self.documents.values():
-            doc_type, is_created = ImportedDocumentType.objects.get_or_create(
+            doc_type = ImportedDocumentType.objects.get(
                 country=Country(COUNTRIES_NAME_ALPHA2.get(self.business_area.name.title())),
-                label=document_data["name"],
                 type=document_data["type"],
             )
             photo = document_data.get("photo")
