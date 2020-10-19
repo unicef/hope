@@ -1,7 +1,7 @@
 import graphene
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from django_filters import FilterSet, OrderingFilter, CharFilter
+from django_filters import FilterSet, OrderingFilter, CharFilter, MultipleChoiceFilter
 from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
@@ -49,9 +49,13 @@ class PaymentRecordFilter(FilterSet):
 
 class PaymentVerificationFilter(FilterSet):
     search = CharFilter(method="search_filter")
+    status = MultipleChoiceFilter(field_name="status", choices=PaymentVerification.STATUS_CHOICES)
+    delivery_type = MultipleChoiceFilter(
+        field_name="payment_record__delivery_type", choices=PaymentRecord.DELIVERY_TYPE_CHOICE
+    )
 
     class Meta:
-        fields = ("cash_plan_payment_verification", "status")
+        fields = ("cash_plan_payment_verification", "status", "delivery_type")
         model = PaymentVerification
 
     order_by = OrderingFilter(
@@ -68,14 +72,7 @@ class PaymentVerificationFilter(FilterSet):
     )
 
     def search_filter(self, qs, name, value):
-        values = value.split(" ")
-        q_obj = Q()
-        for value in values:
-            q_obj |= Q(id__icontains=value)
-            q_obj |= Q(received_amount__icontains=value)
-            q_obj |= Q(payment_record__id__icontains=value)
-            q_obj |= Q(payment_record__household__head_of_household__full_name__icontains=value)
-        return qs.filter(q_obj)
+        return qs.filter(cash_plan_payment_verification__cash_plan__id__contains=value)
 
 
 class RapidProFlowResult(graphene.ObjectType):
