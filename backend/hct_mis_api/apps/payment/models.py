@@ -132,9 +132,6 @@ def update_verification_status_in_cash_plan(sender, instance, **kwargs):
 
 
 class PaymentVerification(TimeStampedUUIDModel):
-    class Meta:
-        ordering = ["-updated_at"]
-
     STATUS_PENDING = "PENDING"
     STATUS_RECEIVED = "RECEIVED"
     STATUS_NOT_RECEIVED = "NOT_RECEIVED"
