@@ -8,6 +8,39 @@ description: Change request for Iteration 4 Deliverables
 
 **------------------------------------------------**
 
+### ERP schema - FC table changes **-** [link](https://unicef.visualstudio.com/ICTD-HCT-MIS/_workitems/edit/74079)
+
+1. remove:
+   * session\_id
+   * exchange\_rate
+2. change: 
+   * g\_l\_account to **gl\_account**  and to **char\(10\)**
+   * document\_type to only **char\(2\)**
+   * currency\_code to **char\(5\)**
+   * commitment\_amount\_local to **decimal\(15.2\)**
+   * **commitment\_amount\_usd to decimal\(15.2\)**
+   * total\_open\_amount\_local to **decimal\(15.2\)**
+   * total\_open\_amount\_usd to **decimal\(15.2\)**
+3. add:
+
+   > | id | integer\(\) autoinc |
+   > | :--- | :--- |
+   > | rec\_serial\_number | varchar\(10\) |
+   > | document\_reference | char\(16\) |
+   > | fc\_status | char\(01\) |
+   > | create\_date | datetime |
+   > | created \_by | char\(12\) |
+   > | update\_date | datetime |
+   > | updated\_by | char\(12\) |
+   > | mis\_sync\_flag | bool |
+   > | mis\_sync\_date | datetime |
+   > | ca\_sync\_flag | bool |
+   > | ca\_sync\_date | datetime |
+
+See full details: [Integration data sets - July 26 updated.xlsx](https://unicef.sharepoint.com/:x:/r/teams/EMOPS-HCT-MIS/DocumentLibrary2/Modules%20-%20Components/CashAssist/Integration%20data%20sets%20-%20July%2026%20updated.xlsx?d=w8f70a71e4b074025b585d3a6190f7b8e&csf=1&web=1&e=gfhRuW)
+
+**------------------------------------------------**
+
 ### **Changes in Kobo form**
 
 **September 30th 2020**
