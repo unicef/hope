@@ -1,7 +1,7 @@
 import graphene
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from django_filters import FilterSet, OrderingFilter, CharFilter, MultipleChoiceFilter
+from django_filters import CharFilter, FilterSet, OrderingFilter
 from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
@@ -9,14 +9,9 @@ from graphene_django.filter import DjangoFilterConnectionField
 from core.extended_connection import ExtendedConnection
 from core.filters import filter_age
 from core.schema import ChoiceObject
-from core.utils import to_choice_object, decode_id_string
+from core.utils import decode_id_string, to_choice_object
 from payment.inputs import GetCashplanVerificationSampleSizeInput
-from payment.models import (
-    PaymentRecord,
-    ServiceProvider,
-    CashPlanPaymentVerification,
-    PaymentVerification,
-)
+from payment.models import CashPlanPaymentVerification, PaymentRecord, PaymentVerification, ServiceProvider
 from payment.rapid_pro.api import RapidProAPI
 from payment.utils import get_number_of_samples
 from program.models import CashPlan
@@ -49,13 +44,9 @@ class PaymentRecordFilter(FilterSet):
 
 class PaymentVerificationFilter(FilterSet):
     search = CharFilter(method="search_filter")
-    status = MultipleChoiceFilter(field_name="status", choices=PaymentVerification.STATUS_CHOICES)
-    delivery_type = MultipleChoiceFilter(
-        field_name="payment_record__delivery_type", choices=PaymentRecord.DELIVERY_TYPE_CHOICE
-    )
 
     class Meta:
-        fields = ("cash_plan_payment_verification", "status", "delivery_type")
+        fields = ("cash_plan_payment_verification", "status")
         model = PaymentVerification
 
     order_by = OrderingFilter(
@@ -72,7 +63,14 @@ class PaymentVerificationFilter(FilterSet):
     )
 
     def search_filter(self, qs, name, value):
-        return qs.filter(cash_plan_payment_verification__cash_plan__id__contains=value)
+        values = value.split(" ")
+        q_obj = Q()
+        for value in values:
+            q_obj |= Q(id__icontains=value)
+            q_obj |= Q(received_amount__icontains=value)
+            q_obj |= Q(payment_record__id__icontains=value)
+            q_obj |= Q(payment_record__household__head_of_household__full_name__icontains=value)
+        return qs.filter(q_obj)
 
 
 class RapidProFlowResult(graphene.ObjectType):
