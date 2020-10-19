@@ -10,6 +10,8 @@ description: Change request for Iteration 4 Deliverables
 
 ### ERP schema - FC table changes **-** [link](https://unicef.visualstudio.com/ICTD-HCT-MIS/_workitems/edit/74079)
 
+#### October 13th 2020
+
 1. remove:
    * session\_id
    * exchange\_rate
