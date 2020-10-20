@@ -411,9 +411,6 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
           To see more details please create Verification Plan
         </BottomTitle>
       ) : null}
-      {cashPlan.verificationStatus === 'TRANSACTION_COMPLETED_WITH_ERRORS' ? (
-        <BottomTitle>Transaction completed with errors</BottomTitle>
-      ) : null}
       {cashPlan.verifications?.edges[0]?.node?.id && (
         <TableWrapper>
           <UniversalActivityLogTable

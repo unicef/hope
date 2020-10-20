@@ -10,8 +10,8 @@ export const AllCashPlans = gql`
     $orderBy: String
     $search: String
     $assistanceThrough: String
-    $deliveryType: String
-    $verificationStatus: String
+    $deliveryType: [String]
+    $verificationStatus: [String]
     $startDateGte: DateTime
     $endDateLte: DateTime
   ) {
