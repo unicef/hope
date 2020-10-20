@@ -49,6 +49,7 @@ export function PaymentFilters({
   const {
     data: statusChoicesData,
   } = useCashPlanVerificationStatusChoicesQuery();
+
   if (!statusChoicesData) {
     return null;
   }
@@ -80,7 +81,8 @@ export function PaymentFilters({
               onChange={(e) => handleFilterChange(e, 'verificationStatus')}
               variant='outlined'
               label='Status'
-              value={filter.verificationStatus || ''}
+              multiple
+              value={filter.verificationStatus || []}
             >
               <MenuItem value=''>
                 <em>None</em>
@@ -121,7 +123,8 @@ export function PaymentFilters({
               onChange={(e) => handleFilterChange(e, 'deliveryType')}
               variant='outlined'
               label='Modality'
-              value={filter.deliveryType || ''}
+              multiple
+              value={filter.deliveryType || []}
               InputProps={{
                 startAdornment: (
                   <StartInputAdornment position='start'>
@@ -134,11 +137,11 @@ export function PaymentFilters({
                 <em>None</em>
               </MenuItem>
               {[
-                { name: 'Deposit to Card', id: 1 },
-                { name: 'Cash', id: 2 },
-                { name: 'Transfer', id: 3 },
+                { name: 'Deposit to Card', id: 'DEPOSIT_TO_CARD' },
+                { name: 'Cash', id: 'CASH' },
+                { name: 'Transfer', id: 'TRANSFER' },
               ].map((item) => (
-                <MenuItem key={item.name} value={item.name}>
+                <MenuItem key={item.name} value={item.id}>
                   {item.name}
                 </MenuItem>
               ))}
