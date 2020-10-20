@@ -46,8 +46,7 @@ export function TargetingCriteriaFilter({
   values;
   onClick: () => void;
 }): React.ReactElement {
-  const shouldShowDivider =
-    index + 1 < values.filters.length + values.individualsFiltersBlocks.length;
+  const shouldShowDivider = index + 1 < values.filters.length;
   return (
     <div>
       <FieldChooser
@@ -62,11 +61,13 @@ export function TargetingCriteriaFilter({
       {each.fieldName && (
         <div data-cy='autocomplete-target-criteria-values'>
           <SubField field={each} index={index} baseName={`filters[${index}]`} />
-          <Field
-            name={`filters[${index}].onlyForHoH`}
-            label='Head of Household'
-            component={FormikCheckboxField}
-          />
+          {each.fieldAttribute.associatedWith === 'Individual' && (
+            <Field
+              name={`filters[${index}].headOfHousehold`}
+              label='Head of Household'
+              component={FormikCheckboxField}
+            />
+          )}
         </div>
       )}
       {shouldShowDivider && (
