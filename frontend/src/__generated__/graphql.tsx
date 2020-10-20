@@ -219,6 +219,12 @@ export type BusinessAreaNodeEdge = {
   cursor: Scalars['String'],
 };
 
+export enum CashPlanDeliveryType {
+  Cash = 'CASH',
+  DepositToCard = 'DEPOSIT_TO_CARD',
+  Transfer = 'TRANSFER'
+}
+
 export type CashPlanNode = Node & {
    __typename?: 'CashPlanNode',
   id: Scalars['ID'],
@@ -238,7 +244,7 @@ export type CashPlanNode = Node & {
   coverageUnit: Scalars['String'],
   comments?: Maybe<Scalars['String']>,
   program: ProgramNode,
-  deliveryType: Scalars['String'],
+  deliveryType?: Maybe<CashPlanDeliveryType>,
   assistanceMeasurement: Scalars['String'],
   assistanceThrough: Scalars['String'],
   visionId: Scalars['String'],
@@ -251,7 +257,7 @@ export type CashPlanNode = Node & {
   totalEntitledQuantityRevised: Scalars['Float'],
   totalDeliveredQuantity: Scalars['Float'],
   totalUndeliveredQuantity: Scalars['Float'],
-  verificationStatus: Scalars['String'],
+  verificationStatus: CashPlanVerificationStatus,
   paymentRecords: PaymentRecordNodeConnection,
   verifications: CashPlanPaymentVerificationNodeConnection,
   bankReconciliationSuccess?: Maybe<Scalars['Int']>,
@@ -360,6 +366,12 @@ export enum CashPlanStatus {
   DistributionCompletedWithErrors = 'DISTRIBUTION_COMPLETED_WITH_ERRORS',
   TransactionCompleted = 'TRANSACTION_COMPLETED',
   TransactionCompletedWithErrors = 'TRANSACTION_COMPLETED_WITH_ERRORS'
+}
+
+export enum CashPlanVerificationStatus {
+  Pending = 'PENDING',
+  Active = 'ACTIVE',
+  Finished = 'FINISHED'
 }
 
 export type CheckAgainstSanctionListMutation = {
@@ -2291,10 +2303,8 @@ export type QueryAllCashPlansArgs = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   program?: Maybe<Scalars['ID']>,
-  verificationStatus?: Maybe<Scalars['String']>,
   assistanceThrough?: Maybe<Scalars['String']>,
   assistanceThrough_Icontains?: Maybe<Scalars['String']>,
-  deliveryType?: Maybe<Scalars['String']>,
   startDate?: Maybe<Scalars['DateTime']>,
   startDate_Lte?: Maybe<Scalars['DateTime']>,
   startDate_Gte?: Maybe<Scalars['DateTime']>,
@@ -2302,6 +2312,8 @@ export type QueryAllCashPlansArgs = {
   endDate_Lte?: Maybe<Scalars['DateTime']>,
   endDate_Gte?: Maybe<Scalars['DateTime']>,
   search?: Maybe<Scalars['String']>,
+  deliveryType?: Maybe<Array<Maybe<Scalars['String']>>>,
+  verificationStatus?: Maybe<Array<Maybe<Scalars['String']>>>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -4068,8 +4080,8 @@ export type AllCashPlansQueryVariables = {
   orderBy?: Maybe<Scalars['String']>,
   search?: Maybe<Scalars['String']>,
   assistanceThrough?: Maybe<Scalars['String']>,
-  deliveryType?: Maybe<Scalars['String']>,
-  verificationStatus?: Maybe<Scalars['String']>,
+  deliveryType?: Maybe<Array<Maybe<Scalars['String']>>>,
+  verificationStatus?: Maybe<Array<Maybe<Scalars['String']>>>,
   startDateGte?: Maybe<Scalars['DateTime']>,
   endDateLte?: Maybe<Scalars['DateTime']>
 };
@@ -7142,7 +7154,7 @@ export type AllBusinessAreasQueryHookResult = ReturnType<typeof useAllBusinessAr
 export type AllBusinessAreasLazyQueryHookResult = ReturnType<typeof useAllBusinessAreasLazyQuery>;
 export type AllBusinessAreasQueryResult = ApolloReactCommon.QueryResult<AllBusinessAreasQuery, AllBusinessAreasQueryVariables>;
 export const AllCashPlansDocument = gql`
-    query AllCashPlans($program: ID, $after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $search: String, $assistanceThrough: String, $deliveryType: String, $verificationStatus: String, $startDateGte: DateTime, $endDateLte: DateTime) {
+    query AllCashPlans($program: ID, $after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $search: String, $assistanceThrough: String, $deliveryType: [String], $verificationStatus: [String], $startDateGte: DateTime, $endDateLte: DateTime) {
   allCashPlans(program: $program, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, search: $search, assistanceThrough_Icontains: $assistanceThrough, deliveryType: $deliveryType, verificationStatus: $verificationStatus, startDate_Gte: $startDateGte, endDate_Lte: $endDateLte) {
     pageInfo {
       hasNextPage
@@ -10150,7 +10162,9 @@ export type ResolversTypes = {
   CashPlanNode: ResolverTypeWrapper<CashPlanNode>,
   UUID: ResolverTypeWrapper<Scalars['UUID']>,
   CashPlanStatus: CashPlanStatus,
+  CashPlanDeliveryType: CashPlanDeliveryType,
   Float: ResolverTypeWrapper<Scalars['Float']>,
+  CashPlanVerificationStatus: CashPlanVerificationStatus,
   PaymentRecordNodeConnection: ResolverTypeWrapper<PaymentRecordNodeConnection>,
   PaymentRecordNodeEdge: ResolverTypeWrapper<PaymentRecordNodeEdge>,
   CashPlanPaymentVerificationNodeConnection: ResolverTypeWrapper<CashPlanPaymentVerificationNodeConnection>,
@@ -10371,7 +10385,9 @@ export type ResolversParentTypes = {
   CashPlanNode: CashPlanNode,
   UUID: Scalars['UUID'],
   CashPlanStatus: CashPlanStatus,
+  CashPlanDeliveryType: CashPlanDeliveryType,
   Float: Scalars['Float'],
+  CashPlanVerificationStatus: CashPlanVerificationStatus,
   PaymentRecordNodeConnection: PaymentRecordNodeConnection,
   PaymentRecordNodeEdge: PaymentRecordNodeEdge,
   CashPlanPaymentVerificationNodeConnection: CashPlanPaymentVerificationNodeConnection,
@@ -10653,7 +10669,7 @@ export type CashPlanNodeResolvers<ContextType = any, ParentType extends Resolver
   coverageUnit?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   comments?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   program?: Resolver<ResolversTypes['ProgramNode'], ParentType, ContextType>,
-  deliveryType?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  deliveryType?: Resolver<Maybe<ResolversTypes['CashPlanDeliveryType']>, ParentType, ContextType>,
   assistanceMeasurement?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   assistanceThrough?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   visionId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
@@ -10666,7 +10682,7 @@ export type CashPlanNodeResolvers<ContextType = any, ParentType extends Resolver
   totalEntitledQuantityRevised?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   totalDeliveredQuantity?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   totalUndeliveredQuantity?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
-  verificationStatus?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  verificationStatus?: Resolver<ResolversTypes['CashPlanVerificationStatus'], ParentType, ContextType>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, CashPlanNodePaymentRecordsArgs>,
   verifications?: Resolver<ResolversTypes['CashPlanPaymentVerificationNodeConnection'], ParentType, ContextType, CashPlanNodeVerificationsArgs>,
   bankReconciliationSuccess?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
