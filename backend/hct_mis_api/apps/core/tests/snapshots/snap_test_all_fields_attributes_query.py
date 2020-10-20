@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
@@ -18449,10 +18450,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'SEPARATED'
                     },
                     {
-                        'labelEn': 'SINGLE',
+                        'labelEn': 'Single',
                         'labels': [
                             {
-                                'label': 'SINGLE',
+                                'label': 'Single',
                                 'language': 'English(EN)'
                             }
                         ],

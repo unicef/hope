@@ -10,6 +10,7 @@ import { isAuthenticated } from '../utils/utils';
 import { useSnackbar } from '../hooks/useSnackBar';
 import { GrievanceDetails } from '../components/Grievances/GrievanceDetails';
 import { GrievancesList } from '../components/Grievances/GrievancesList';
+import { CreateGrievance } from '../components/Grievances/CreateGrievance';
 import { DashboardPage } from './pages/DashboardPage';
 import { ProgramsPage } from './pages/ProgramsPage';
 import { ProgramDetailsPage } from './pages/ProgramDetailsPage';
@@ -30,7 +31,6 @@ import { PaymentVerificationPage } from './pages/PaymentVerificationPage';
 import { PaymentVerificationDetailsPage } from './pages/PaymentVerificationDetailsPage';
 import { VerificationRecordDetailsPage } from './pages/VerificationRecordDetailsPage';
 import { UsersList } from './pages/UsersList';
-import { CreateGrievance } from '../components/Grievances/CreateGrievance';
 
 const Root = styled.div`
   display: flex;

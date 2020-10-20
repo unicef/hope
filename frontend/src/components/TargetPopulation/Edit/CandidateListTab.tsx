@@ -43,6 +43,7 @@ export function CandidateListTab({ values }): React.ReactElement {
                       arguments: each.arguments,
                       fieldName: each.fieldName,
                       isFlexField: each.isFlexField,
+                      headOfHousehold: each.headOfHousehold,
                     };
                   }),
                 };
