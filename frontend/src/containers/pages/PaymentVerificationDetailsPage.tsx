@@ -29,7 +29,6 @@ import { VerificationRecordsFilters } from '../tables/VerificationRecordsTable/V
 import { CreateVerificationPlan } from '../../components/payments/CreateVerificationPlan';
 import { UniversalMoment } from '../../components/UniversalMoment';
 import { usePermissions } from '../../hooks/usePermissions';
-import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 
 const Container = styled.div`
   display: flex;

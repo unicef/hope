@@ -31,7 +31,7 @@ SEX_CHOICE = (
     (FEMALE, _("Female")),
 )
 MARITAL_STATUS_CHOICE = (
-    ("SINGLE", _("SINGLE")),
+    ("SINGLE", _("Single")),
     ("MARRIED", _("Married")),
     ("WIDOWED", _("Widowed")),
     ("DIVORCED", _("Divorced")),

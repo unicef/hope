@@ -81,6 +81,7 @@ export function EditTargetPopulation({
                 arguments: each.arguments,
                 fieldName: each.fieldName,
                 isFlexField: each.isFlexField,
+                headOfHousehold: each.headOfHousehold,
               };
             }),
           };
@@ -94,6 +95,7 @@ export function EditTargetPopulation({
                 arguments: each.arguments,
                 fieldName: each.fieldName,
                 isFlexField: each.isFlexField,
+                headOfHousehold: each.headOfHousehold,
               };
             }),
           };

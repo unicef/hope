@@ -1,6 +1,5 @@
 import React from 'react';
 import styled from 'styled-components';
-import { headCells } from './LookUpHouseholdTableHeadCells';
 import { UniversalTable } from '../../../containers/tables/UniversalTable';
 import {
   AllHouseholdsQueryVariables,
@@ -8,7 +7,7 @@ import {
   HouseholdNode,
   useAllHouseholdsQuery,
 } from '../../../__generated__/graphql';
-
+import { headCells } from './LookUpHouseholdTableHeadCells';
 import { LookUpHouseholdTableRow } from './LookUpHouseholdTableRow';
 
 const TableWrapper = styled.div`
