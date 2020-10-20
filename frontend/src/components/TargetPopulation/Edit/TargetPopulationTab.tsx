@@ -38,6 +38,7 @@ export function TargetPopulationTab({
                       arguments: each.arguments,
                       fieldName: each.fieldName,
                       isFlexField: each.isFlexField,
+                      headOfHousehold: each.headOfHousehold,
                     };
                   }),
                 };

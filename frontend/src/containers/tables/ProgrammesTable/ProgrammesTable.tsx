@@ -1,6 +1,5 @@
 import React, { ReactElement } from 'react';
 import styled from 'styled-components';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
   AllProgramsQueryVariables,
   ProgrammeChoiceDataQuery,
