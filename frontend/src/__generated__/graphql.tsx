@@ -2643,6 +2643,7 @@ export type TargetingCriteriaRuleFilterNode = {
   isFlexField: Scalars['Boolean'],
   fieldName: Scalars['String'],
   arguments?: Maybe<Array<Maybe<Scalars['Arg']>>>,
+  headOfHousehold: Scalars['Boolean'],
   fieldAttribute?: Maybe<FieldAttributeNode>,
 };
 
@@ -2651,6 +2652,7 @@ export type TargetingCriteriaRuleFilterObjectType = {
   isFlexField: Scalars['Boolean'],
   fieldName: Scalars['String'],
   arguments: Array<Maybe<Scalars['Arg']>>,
+  headOfHousehold?: Maybe<Scalars['Boolean']>,
 };
 
 export type TargetingCriteriaRuleNode = {
@@ -4534,10 +4536,10 @@ export type TargetPopulationQuery = (
         & Pick<TargetingCriteriaRuleNode, 'id'>
         & { filters: Maybe<Array<Maybe<(
           { __typename?: 'TargetingCriteriaRuleFilterNode' }
-          & Pick<TargetingCriteriaRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod'>
+          & Pick<TargetingCriteriaRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod' | 'headOfHousehold'>
           & { fieldAttribute: Maybe<(
             { __typename?: 'FieldAttributeNode' }
-            & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
+            & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type' | 'associatedWith'>
             & { choices: Maybe<Array<Maybe<(
               { __typename?: 'CoreFieldChoiceObject' }
               & Pick<CoreFieldChoiceObject, 'value' | 'labelEn'>
@@ -8580,10 +8582,12 @@ export const TargetPopulationDocument = gql`
           isFlexField
           arguments
           comparisionMethod
+          headOfHousehold
           fieldAttribute {
             name
             labelEn
             type
+            associatedWith
             choices {
               value
               labelEn
@@ -11460,6 +11464,7 @@ export type TargetingCriteriaRuleFilterNodeResolvers<ContextType = any, ParentTy
   isFlexField?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   fieldName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   arguments?: Resolver<Maybe<Array<Maybe<ResolversTypes['Arg']>>>, ParentType, ContextType>,
+  headOfHousehold?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   fieldAttribute?: Resolver<Maybe<ResolversTypes['FieldAttributeNode']>, ParentType, ContextType>,
 };
 

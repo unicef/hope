@@ -16,11 +16,9 @@ import {
   chooseFieldType,
   clearField,
   formatCriteriaFilters,
-  formatCriteriaIndividualsFiltersBlocks,
   mapCriteriaToInitialValues,
 } from '../../utils/targetingUtils';
 import { TargetingCriteriaFilter } from './TargetCriteriaFilter';
-import { TargetCriteriaFilterBlocks } from './TargetCriteriaFilterBlocks';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -58,15 +56,6 @@ const validationSchema = Yup.object().shape({
       fieldName: Yup.string().required('Label is required'),
     }),
   ),
-  individualsFiltersBlocks: Yup.array().of(
-    Yup.object().shape({
-      individualBlockFilters: Yup.array().of(
-        Yup.object().shape({
-          fieldName: Yup.string().required('Label is required'),
-        }),
-      ),
-    }),
-  ),
 });
 interface ArrayFieldWrapperProps {
   arrayHelpers;
@@ -100,30 +89,17 @@ export function TargetCriteriaForm({
 }: TargetCriteriaFormPropTypes): React.ReactElement {
   const { data, loading } = useImportedIndividualFieldsQuery();
   const filtersArrayWrapperRef = useRef(null);
-  const individualsFiltersBlocksWrapperRef = useRef(null);
   const initialValue = mapCriteriaToInitialValues(criteria);
-  const [individualData, setIndividualData] = useState(null);
-  useEffect(() => {
-    if (loading) return;
-    const filteredData = {
-      allFieldsAttributes: data.allFieldsAttributes.filter(
-        (item) => item.associatedWith === 'Individual',
-      ),
-    };
-    setIndividualData(filteredData);
-  }, [data, loading]);
   if (loading) return null;
 
+  console.log('initialValue', initialValue);
   return (
     <DialogContainer>
       <Formik
         initialValues={initialValue}
         onSubmit={(values, bag) => {
           const filters = formatCriteriaFilters(values.filters);
-          const individualsFiltersBlocks = formatCriteriaIndividualsFiltersBlocks(
-            values.individualsFiltersBlocks,
-          );
-          addCriteria({ filters, individualsFiltersBlocks });
+          addCriteria({ filters });
           return bag.resetForm();
         }}
         validationSchema={validationSchema}
@@ -182,28 +158,6 @@ export function TargetCriteriaForm({
                     </ArrayFieldWrapper>
                   )}
                 />
-                <FieldArray
-                  name='individualsFiltersBlocks'
-                  render={(arrayHelpers) => (
-                    <ArrayFieldWrapper
-                      arrayHelpers={arrayHelpers}
-                      ref={individualsFiltersBlocksWrapperRef}
-                    >
-                      {values.individualsFiltersBlocks.map((each, index) => {
-                        return (
-                          <TargetCriteriaFilterBlocks
-                            //eslint-disable-next-line
-                            key={index}
-                            blockIndex={index}
-                            data={individualData}
-                            values={values}
-                            onClick={() => arrayHelpers.remove(index)}
-                          />
-                        );
-                      })}
-                    </ArrayFieldWrapper>
-                  )}
-                />
               </DialogContent>
               <DialogFooter>
                 <DialogActions>
@@ -220,19 +174,6 @@ export function TargetCriteriaForm({
                       >
                         Add Next Criteria
                       </Button>
-                      <MarginButton
-                        color='primary'
-                        variant='outlined'
-                        onClick={() =>
-                          individualsFiltersBlocksWrapperRef.current
-                            .getArrayHelpers()
-                            .push({
-                              individualBlockFilters: [{ fieldname: '' }],
-                            })
-                        }
-                      >
-                        Add Set of Criteria
-                      </MarginButton>
                     </div>
                     <div>
                       <Button onClick={() => onClose()}>Cancel</Button>
