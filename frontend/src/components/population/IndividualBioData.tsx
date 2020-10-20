@@ -15,7 +15,6 @@ import {
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { LoadingComponent } from '../LoadingComponent';
 import { UniversalMoment } from '../UniversalMoment';
-import { Missing } from '../Missing';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px

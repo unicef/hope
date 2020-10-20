@@ -105,10 +105,13 @@ export function TargetingCriteria({
   };
 
   const addCriteria = (values): void => {
+    const criteria = {
+      filters: [...values.filters],
+    };
     if (criteriaIndex !== null) {
-      helpers.replace(criteriaIndex, { filters: [...values.filters] });
+      helpers.replace(criteriaIndex, criteria);
     } else {
-      helpers.push({ filters: [...values.filters] });
+      helpers.push(criteria);
     }
     return closeModal();
   };
