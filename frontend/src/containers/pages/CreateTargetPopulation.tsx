@@ -73,6 +73,7 @@ export function CreateTargetPopulation(): React.ReactElement {
                         arguments: each.arguments,
                         fieldName: each.fieldName,
                         isFlexField: each.isFlexField,
+                        headOfHousehold: each.headOfHousehold,
                       };
                     }),
                   };
@@ -147,6 +148,7 @@ export function CreateTargetPopulation(): React.ReactElement {
                           arguments: each.arguments,
                           fieldName: each.fieldName,
                           isFlexField: each.isFlexField,
+                          headOfHousehold: each.headOfHousehold,
                         };
                       }),
                     };

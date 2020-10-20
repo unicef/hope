@@ -58,7 +58,7 @@ class ImportedHouseholdIdentity(models.Model):
 
 
 class ImportedHousehold(TimeStampedUUIDModel):
-    consent_sign = ImageField(validators=[validate_image_file_extension])
+    consent_sign = ImageField(validators=[validate_image_file_extension], blank=True)
     consent = models.BooleanField(default=True)
     consent_sharing = MultiSelectField(choices=DATA_SHARING_CHOICES)
     residence_status = models.CharField(max_length=255, choices=RESIDENCE_STATUS_CHOICE)
