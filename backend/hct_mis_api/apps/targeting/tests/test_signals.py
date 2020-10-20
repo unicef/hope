@@ -1,15 +1,11 @@
 from django.core.management import call_command
 
+from targeting.models import TargetingCriteria, TargetingCriteriaRule, TargetingCriteriaRuleFilter, TargetPopulation
+
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
 from core.models import BusinessArea
 from household.fixtures import create_household
-from targeting.models import (
-    TargetingCriteria,
-    TargetingCriteriaRule,
-    TargetingCriteriaRuleFilter,
-    TargetPopulation,
-)
 
 
 class TestTargetPopulationQuery(APITestCase):
@@ -19,11 +15,11 @@ class TestTargetPopulationQuery(APITestCase):
         business_area = BusinessArea.objects.first()
         cls.households = []
         (household, individuals) = create_household(
-            {"size": 1, "residence_status": "CITIZEN", "business_area": business_area},
+            {"size": 1, "residence_status": "HOST", "business_area": business_area},
         )
         cls.household_size_1_citizen = household
         (household, individuals) = create_household(
-            {"size": 1, "residence_status": "CITIZEN", "business_area": business_area},
+            {"size": 1, "residence_status": "HOST", "business_area": business_area},
         )
         household = household
         cls.households.append(household)
@@ -97,7 +93,11 @@ class TestTargetPopulationQuery(APITestCase):
         self.assertEqual(tp.candidate_list_total_individuals, 3)
 
     def test_counts_for_approved(self):
-        tp = TargetPopulation(name="target_population_size_2", created_by=self.user, status="APPROVED",)
+        tp = TargetPopulation(
+            name="target_population_size_2",
+            created_by=self.user,
+            status="APPROVED",
+        )
         tp.save()
         tp.households.add(self.household_size_2)
         tp.refresh_from_db()
@@ -126,7 +126,7 @@ class TestTargetPopulationQuery(APITestCase):
         self.assertEqual(tp.final_list_total_individuals, 2)
 
         targeting_criteria = self.get_targeting_criteria_for_rule(
-            {"field_name": "residence_status", "arguments": ["CITIZEN"], "comparision_method": "EQUALS"}
+            {"field_name": "residence_status", "arguments": ["HOST"], "comparision_method": "EQUALS"}
         )
         tp.final_list_targeting_criteria = targeting_criteria
         tp.save()
@@ -151,7 +151,11 @@ class TestTargetPopulationQuery(APITestCase):
         self.assertEqual(tp.final_list_total_individuals, None)
 
     def test_counts_for_finalized(self):
-        tp = TargetPopulation(name="target_population_size_2", created_by=self.user, status="FINALIZED",)
+        tp = TargetPopulation(
+            name="target_population_size_2",
+            created_by=self.user,
+            status="FINALIZED",
+        )
         tp.save()
         tp.households.add(self.household_size_2)
         tp.refresh_from_db()
