@@ -34,16 +34,11 @@ export function GrievanceDetails(): React.ReactElement {
   const NotesContainer = styled.div`
     padding: 22px;
   `;
-  const PastContainer = styled.div`
-    padding: 22px 22px 22px 0;
-  `;
+
   const Title = styled.div`
     padding-bottom: ${({ theme }) => theme.spacing(8)}px;
   `;
-  const StatusContainer = styled.div`
-    min-width: 120px;
-    max-width: 200px;
-  `;
+
   const FieldsArray: {
     label: string;
     value: React.ReactElement;

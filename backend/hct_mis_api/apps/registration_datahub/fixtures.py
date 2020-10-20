@@ -1,6 +1,9 @@
+import time
+
 from django.contrib.gis.geos import Point
 
 import factory.fuzzy
+from faker import Faker
 from pytz import utc
 
 from household.const import NATIONALITIES
@@ -14,16 +17,15 @@ from household.models import (
 )
 from registration_datahub.models import ImportedHousehold, ImportedIndividual, RegistrationDataImportDatahub
 
+faker = Faker()
+
 
 class RegistrationDataImportDatahubFactory(factory.DjangoModelFactory):
     class Meta:
         model = RegistrationDataImportDatahub
 
-    name = factory.Faker(
-        "sentence",
-        nb_words=6,
-        variable_nb_words=True,
-        ext_word_list=None,
+    factory.LazyFunction(
+        lambda: f"{faker.sentence(nb_words=3, variable_nb_words=True, ext_word_list=None)} - {time.time_ns()}"
     )
     import_date = factory.Faker(
         "date_time_this_decade",
