@@ -107,7 +107,6 @@ export function TargetingCriteria({
   const addCriteria = (values): void => {
     const criteria = {
       filters: [...values.filters],
-      individualsFiltersBlocks: [...values.individualsFiltersBlocks],
     };
     if (criteriaIndex !== null) {
       helpers.replace(criteriaIndex, criteria);
@@ -155,9 +154,6 @@ export function TargetingCriteria({
                         key={criteria.id || index}
                         isEdit={false}
                         canRemove={candidateListRules.length > 1}
-                        individualsFiltersBlocks={
-                          criteria.individualsFiltersBlocks || []
-                        }
                         rules={criteria.filters}
                         alternative={showAdditionalCriterias}
                       />
@@ -183,9 +179,6 @@ export function TargetingCriteria({
                           key={criteria.id || index}
                           isEdit={isEdit}
                           canRemove={targetPopulationRules.length > 1}
-                          individualsFiltersBlocks={
-                            criteria.individualsFiltersBlocks || []
-                          }
                           rules={criteria.filters}
                           editFunction={() => editCriteria(criteria, index)}
                           removeFunction={() => helpers.remove(index)}
@@ -221,9 +214,6 @@ export function TargetingCriteria({
                       isEdit={isEdit}
                       canRemove={candidateListRules.length > 1}
                       rules={criteria.filters}
-                      individualsFiltersBlocks={
-                        criteria.individualsFiltersBlocks || []
-                      }
                       editFunction={() => editCriteria(criteria, index)}
                       removeFunction={() => helpers.remove(index)}
                     />

@@ -6,6 +6,7 @@ export const chooseFieldType = (value, arrayHelpers, index): void => {
       labelEn: value.labelEn,
       type: value.type,
       choices: null,
+      associatedWith: value.associatedWith,
     },
     value: null,
   };
@@ -86,7 +87,6 @@ export function mapFiltersToInitialValues(filters) {
 
 export function mapCriteriaToInitialValues(criteria) {
   let { filters } = criteria;
-  const individualsFiltersBlocks = criteria.individualsFiltersBlocks || [];
   if (filters === null) {
     filters = [{ fieldName: '' }];
   } else {
@@ -94,11 +94,6 @@ export function mapCriteriaToInitialValues(criteria) {
   }
   return {
     filters,
-    individualsFiltersBlocks: individualsFiltersBlocks.map((block) => ({
-      individualBlockFilters: mapFiltersToInitialValues(
-        block.individualBlockFilters,
-      ),
-    })),
   };
 }
 
@@ -142,16 +137,7 @@ export function formatCriteriaFilters(filters) {
       fieldName: each.fieldName,
       isFlexField: each.isFlexField,
       fieldAttribute: each.fieldAttribute,
+      headOfHousehold: Boolean(each.headOfHousehold),
     };
   });
-}
-
-// TODO Marcin make Type to this function
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function formatCriteriaIndividualsFiltersBlocks(
-  individualsFiltersBlocks,
-) {
-  return individualsFiltersBlocks.map((block) => ({
-    individualBlockFilters: formatCriteriaFilters(block.individualBlockFilters),
-  }));
 }
