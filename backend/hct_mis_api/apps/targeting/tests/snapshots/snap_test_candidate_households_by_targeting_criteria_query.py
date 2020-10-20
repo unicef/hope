@@ -12,7 +12,7 @@ snapshots['CandidateListTargetingCriteriaQueryTestCase::test_candidate_household
             'edges': [
                 {
                     'node': {
-                        'residenceStatus': 'CITIZEN',
+                        'residenceStatus': 'HOST',
                         'size': 1
                     }
                 }
