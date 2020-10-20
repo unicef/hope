@@ -181,6 +181,9 @@ class RegistrationDataImportDatahub(TimeStampedUUIDModel):
     import_done = models.CharField(max_length=15, choices=IMPORT_DONE_CHOICES, default=NOT_STARTED)
     business_area_slug = models.CharField(max_length=250, blank=True)
 
+    class Meta:
+        ordering = ("name",)
+
     def __str__(self):
         return self.name
 
