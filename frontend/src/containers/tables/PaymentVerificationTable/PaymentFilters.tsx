@@ -136,12 +136,8 @@ export function PaymentFilters({
               <MenuItem value=''>
                 <em>None</em>
               </MenuItem>
-              {[
-                { name: 'Deposit to Card', id: 'DEPOSIT_TO_CARD' },
-                { name: 'Cash', id: 'CASH' },
-                { name: 'Transfer', id: 'TRANSFER' },
-              ].map((item) => (
-                <MenuItem key={item.name} value={item.id}>
+              {statusChoicesData.paymentRecordDeliveryTypeChoices.map((item) => (
+                <MenuItem key={item.name} value={item.value}>
                   {item.name}
                 </MenuItem>
               ))}

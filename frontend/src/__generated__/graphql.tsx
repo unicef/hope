@@ -4002,6 +4002,9 @@ export type CashPlanVerificationStatusChoicesQuery = (
   & { cashPlanVerificationStatusChoices: Maybe<Array<Maybe<(
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, paymentRecordDeliveryTypeChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
   )>>> }
 );
 
@@ -6882,6 +6885,10 @@ export type UpdateTpMutationOptions = ApolloReactCommon.BaseMutationOptions<Upda
 export const CashPlanVerificationStatusChoicesDocument = gql`
     query cashPlanVerificationStatusChoices {
   cashPlanVerificationStatusChoices {
+    name
+    value
+  }
+  paymentRecordDeliveryTypeChoices {
     name
     value
   }
