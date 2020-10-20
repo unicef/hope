@@ -49,6 +49,13 @@ const MathSign = styled.img`
   vertical-align: middle;
 `;
 
+const CriteriaSetBox = styled.div`
+  border: 1px solid #607cab;
+  border-radius: 3px;
+  padding: 0 ${({ theme }) => theme.spacing(2)}px;
+  margin: ${({ theme }) => theme.spacing(2)}px 0;
+`;
+
 const CriteriaField = ({ field }): React.ReactElement => {
   let fieldElement;
   switch (field.comparisionMethod) {
@@ -165,8 +172,8 @@ export function Criteria({
       })}
       {isEdit && (
         <ButtonsContainer>
-          <IconButton>
-            <Edit onClick={editFunction} />
+          <IconButton onClick={editFunction}>
+            <Edit />
           </IconButton>
           {canRemove && (
             <IconButton onClick={removeFunction}>

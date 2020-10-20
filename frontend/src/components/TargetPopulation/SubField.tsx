@@ -12,14 +12,14 @@ const InlineField = styled.div`
   width: 48%;
 `;
 
-export const SubField = (field, index): React.ReactElement => {
+export const SubField = ({field, index, baseName}): React.ReactElement => {
   switch (field.fieldAttribute.type) {
     case 'INTEGER':
       return (
         <FlexWrapper>
           <InlineField>
             <Field
-              name={`filters[${index}].value.from`}
+              name={`${baseName}.value.from`}
               label={`${field.fieldAttribute.labelEn} from`}
               type='number'
               variant='outlined'
@@ -29,7 +29,7 @@ export const SubField = (field, index): React.ReactElement => {
           </InlineField>
           <InlineField>
             <Field
-              name={`filters[${index}].value.to`}
+              name={`${baseName}.value.to`}
               label={`${field.fieldAttribute.labelEn} to`}
               type='number'
               variant='outlined'
@@ -42,7 +42,7 @@ export const SubField = (field, index): React.ReactElement => {
     case 'SELECT_ONE':
       return (
         <Field
-          name={`filters[${index}].value`}
+          name={`${baseName}.value`}
           label={`${field.fieldAttribute.labelEn}`}
           choices={field.fieldAttribute.choices}
           index={index}
@@ -52,7 +52,7 @@ export const SubField = (field, index): React.ReactElement => {
     case 'SELECT_MANY':
       return (
         <Field
-          name={`filters[${index}].value`}
+          name={`${baseName}.value`}
           label={`${field.fieldAttribute.labelEn}`}
           choices={field.fieldAttribute.choices}
           index={index}
@@ -63,7 +63,7 @@ export const SubField = (field, index): React.ReactElement => {
     case 'STRING':
       return (
         <Field
-          name={`filters[${index}].value`}
+          name={`${baseName}.value`}
           label={`${field.fieldAttribute.labelEn}`}
           fullWidth
           variant='outlined'

@@ -39,10 +39,12 @@ export const TargetPopulation = gql`
             isFlexField
             arguments
             comparisionMethod
+            headOfHousehold
             fieldAttribute {
               name
               labelEn
               type
+              associatedWith
               choices {
                 value
                 labelEn
