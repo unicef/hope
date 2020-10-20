@@ -1746,6 +1746,7 @@ type TargetingCriteriaRuleFilterNode {
   isFlexField: Boolean!
   fieldName: String!
   arguments: [Arg]
+  headOfHousehold: Boolean!
   fieldAttribute: FieldAttributeNode
 }
 
@@ -1754,6 +1755,7 @@ input TargetingCriteriaRuleFilterObjectType {
   isFlexField: Boolean!
   fieldName: String!
   arguments: [Arg]!
+  headOfHousehold: Boolean
 }
 
 type TargetingCriteriaRuleNode {
