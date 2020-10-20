@@ -1,5 +1,8 @@
 from functools import reduce
 
+from django.core.exceptions import ValidationError
+from django.db.models import Q
+
 from core.countries import Countries
 from core.models import AdminArea
 from core.utils import LazyEvalMethodsDict, age_to_birth_date_query
@@ -37,6 +40,23 @@ FILTERABLE_TYPES = [
     TYPE_SELECT_ONE,
     TYPE_SELECT_MANY,
 ]
+
+
+def country_generic_query(comparision_method, args, lookup):
+    query = Q(**{lookup: Countries.get_country_value(args[0])})
+    if comparision_method == "EQUALS":
+        return query
+    elif comparision_method == "NOT_EQUALS":
+        return ~query
+    raise ValidationError(f"Country filter query does not support {comparision_method} type")
+
+
+def country_query(comparision_method, args):
+    return country_generic_query(comparision_method, args, "country")
+
+def country_origin_query(comparision_method, args):
+    return country_generic_query(comparision_method, args, "country_origin")
+
 
 CORE_FIELDS_ATTRIBUTES = [
     {
@@ -95,6 +115,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "required": False,
         "label": {"English(EN)": "Country origin"},
         "hint": "country origin",
+        "get_query": country_origin_query,
         "choices": Countries.get_choices(output_code="alpha3"),
         "custom_validate_choices": Countries.is_valid_country_choice,
         "custom_cast_value": Countries.get_country_value,
@@ -109,6 +130,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "required": False,
         "label": {"English(EN)": "Country"},
         "hint": "",
+        "get_query": country_query,
         "choices": Countries.get_choices(output_code="alpha3"),
         "custom_validate_choices": Countries.is_valid_country_choice,
         "custom_cast_value": Countries.get_country_value,

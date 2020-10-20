@@ -219,6 +219,12 @@ export type BusinessAreaNodeEdge = {
   cursor: Scalars['String'],
 };
 
+export enum CashPlanDeliveryType {
+  Cash = 'CASH',
+  DepositToCard = 'DEPOSIT_TO_CARD',
+  Transfer = 'TRANSFER'
+}
+
 export type CashPlanNode = Node & {
    __typename?: 'CashPlanNode',
   id: Scalars['ID'],
@@ -238,7 +244,7 @@ export type CashPlanNode = Node & {
   coverageUnit: Scalars['String'],
   comments?: Maybe<Scalars['String']>,
   program: ProgramNode,
-  deliveryType: Scalars['String'],
+  deliveryType?: Maybe<CashPlanDeliveryType>,
   assistanceMeasurement: Scalars['String'],
   assistanceThrough: Scalars['String'],
   visionId: Scalars['String'],
@@ -251,7 +257,7 @@ export type CashPlanNode = Node & {
   totalEntitledQuantityRevised: Scalars['Float'],
   totalDeliveredQuantity: Scalars['Float'],
   totalUndeliveredQuantity: Scalars['Float'],
-  verificationStatus: Scalars['String'],
+  verificationStatus: CashPlanVerificationStatus,
   paymentRecords: PaymentRecordNodeConnection,
   verifications: CashPlanPaymentVerificationNodeConnection,
   bankReconciliationSuccess?: Maybe<Scalars['Int']>,
@@ -360,6 +366,12 @@ export enum CashPlanStatus {
   DistributionCompletedWithErrors = 'DISTRIBUTION_COMPLETED_WITH_ERRORS',
   TransactionCompleted = 'TRANSACTION_COMPLETED',
   TransactionCompletedWithErrors = 'TRANSACTION_COMPLETED_WITH_ERRORS'
+}
+
+export enum CashPlanVerificationStatus {
+  Pending = 'PENDING',
+  Active = 'ACTIVE',
+  Finished = 'FINISHED'
 }
 
 export type CheckAgainstSanctionListMutation = {
@@ -640,6 +652,13 @@ export type GroupAttributeNodeFlexAttributesArgs = {
   flexField?: Maybe<Scalars['Boolean']>
 };
 
+export enum HouseholdConsentSharing {
+  Unicef = 'UNICEF',
+  HumanitarianPartner = 'HUMANITARIAN_PARTNER',
+  PrivatePartner = 'PRIVATE_PARTNER',
+  GovernmentPartner = 'GOVERNMENT_PARTNER'
+}
+
 export type HouseholdNode = Node & {
    __typename?: 'HouseholdNode',
   id: Scalars['ID'],
@@ -647,7 +666,9 @@ export type HouseholdNode = Node & {
   updatedAt: Scalars['DateTime'],
   lastSyncAt?: Maybe<Scalars['DateTime']>,
   status: HouseholdStatus,
-  consent: Scalars['String'],
+  consentSign: Scalars['String'],
+  consent: Scalars['Boolean'],
+  consentSharing: HouseholdConsentSharing,
   residenceStatus: HouseholdResidenceStatus,
   countryOrigin?: Maybe<Scalars['String']>,
   country?: Maybe<Scalars['String']>,
@@ -680,8 +701,17 @@ export type HouseholdNode = Node & {
   firstRegistrationDate: Scalars['Date'],
   lastRegistrationDate: Scalars['Date'],
   headOfHousehold: IndividualNode,
+  fchildHoh: Scalars['Boolean'],
+  childHoh: Scalars['Boolean'],
   unicefId: Scalars['String'],
   businessArea: UserBusinessAreaNode,
+  start?: Maybe<Scalars['DateTime']>,
+  end?: Maybe<Scalars['DateTime']>,
+  deviceid: Scalars['String'],
+  nameEnumerator: Scalars['String'],
+  orgEnumerator: HouseholdOrgEnumerator,
+  orgNameEnumerator: Scalars['String'],
+  village: Scalars['String'],
   individualsAndRoles: Array<IndividualRoleInHouseholdNode>,
   individuals: IndividualNodeConnection,
   paymentRecords: PaymentRecordNodeConnection,
@@ -767,12 +797,17 @@ export type HouseholdNodeEdge = {
   cursor: Scalars['String'],
 };
 
+export enum HouseholdOrgEnumerator {
+  Unicef = 'UNICEF',
+  Partner = 'PARTNER'
+}
+
 export enum HouseholdResidenceStatus {
-  Refugee = 'REFUGEE',
-  Migrant = 'MIGRANT',
-  Citizen = 'CITIZEN',
   Idp = 'IDP',
-  Other = 'OTHER'
+  Refugee = 'REFUGEE',
+  OthersOfConcern = 'OTHERS_OF_CONCERN',
+  Host = 'HOST',
+  NonHost = 'NON_HOST'
 }
 
 export type HouseholdSelection = {
@@ -1113,12 +1148,21 @@ export enum ImportedDocumentTypeType {
   Other = 'OTHER'
 }
 
+export enum ImportedHouseholdConsentSharing {
+  Unicef = 'UNICEF',
+  HumanitarianPartner = 'HUMANITARIAN_PARTNER',
+  PrivatePartner = 'PRIVATE_PARTNER',
+  GovernmentPartner = 'GOVERNMENT_PARTNER'
+}
+
 export type ImportedHouseholdNode = Node & {
    __typename?: 'ImportedHouseholdNode',
   id: Scalars['ID'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
-  consent: Scalars['String'],
+  consentSign: Scalars['String'],
+  consent: Scalars['Boolean'],
+  consentSharing: ImportedHouseholdConsentSharing,
   residenceStatus: ImportedHouseholdResidenceStatus,
   countryOrigin?: Maybe<Scalars['String']>,
   size: Scalars['Int'],
@@ -1145,11 +1189,20 @@ export type ImportedHouseholdNode = Node & {
   maleAgeGroup1217DisabledCount: Scalars['Int'],
   maleAdultsDisabledCount: Scalars['Int'],
   headOfHousehold?: Maybe<ImportedIndividualNode>,
+  fchildHoh: Scalars['Boolean'],
+  childHoh: Scalars['Boolean'],
   registrationDataImport: RegistrationDataImportDatahubNode,
   firstRegistrationDate: Scalars['Date'],
   lastRegistrationDate: Scalars['Date'],
   returnee: Scalars['Boolean'],
   flexFields: Scalars['JSONString'],
+  start?: Maybe<Scalars['DateTime']>,
+  end?: Maybe<Scalars['DateTime']>,
+  deviceid: Scalars['String'],
+  nameEnumerator: Scalars['String'],
+  orgEnumerator: ImportedHouseholdOrgEnumerator,
+  orgNameEnumerator: Scalars['String'],
+  village: Scalars['String'],
   individuals: ImportedIndividualNodeConnection,
   hasDuplicates?: Maybe<Scalars['Boolean']>,
 };
@@ -1176,12 +1229,23 @@ export type ImportedHouseholdNodeEdge = {
   cursor: Scalars['String'],
 };
 
+export enum ImportedHouseholdOrgEnumerator {
+  Unicef = 'UNICEF',
+  Partner = 'PARTNER'
+}
+
 export enum ImportedHouseholdResidenceStatus {
-  Refugee = 'REFUGEE',
-  Migrant = 'MIGRANT',
-  Citizen = 'CITIZEN',
   Idp = 'IDP',
-  Other = 'OTHER'
+  Refugee = 'REFUGEE',
+  OthersOfConcern = 'OTHERS_OF_CONCERN',
+  Host = 'HOST',
+  NonHost = 'NON_HOST'
+}
+
+export enum ImportedIndividualCommsDisability {
+  SomeDifficulty = 'SOME_DIFFICULTY',
+  LotDifficulty = 'LOT_DIFFICULTY',
+  CannotDo = 'CANNOT_DO'
 }
 
 export enum ImportedIndividualDeduplicationBatchStatus {
@@ -1198,6 +1262,12 @@ export enum ImportedIndividualDeduplicationGoldenRecordStatus {
   NotProcessed = 'NOT_PROCESSED'
 }
 
+export enum ImportedIndividualHearingDisability {
+  SomeDifficulty = 'SOME_DIFFICULTY',
+  LotDifficulty = 'LOT_DIFFICULTY',
+  CannotDo = 'CANNOT_DO'
+}
+
 export type ImportedIndividualIdentityNode = {
    __typename?: 'ImportedIndividualIdentityNode',
   id: Scalars['ID'],
@@ -1209,9 +1279,15 @@ export type ImportedIndividualIdentityNode = {
 export enum ImportedIndividualMaritalStatus {
   Single = 'SINGLE',
   Married = 'MARRIED',
-  Widow = 'WIDOW',
+  Widowed = 'WIDOWED',
   Divorced = 'DIVORCED',
   Separated = 'SEPARATED'
+}
+
+export enum ImportedIndividualMemoryDisability {
+  SomeDifficulty = 'SOME_DIFFICULTY',
+  LotDifficulty = 'LOT_DIFFICULTY',
+  CannotDo = 'CANNOT_DO'
 }
 
 export type ImportedIndividualNode = Node & {
@@ -1244,6 +1320,15 @@ export type ImportedIndividualNode = Node & {
   deduplicationGoldenRecordResults?: Maybe<Array<Maybe<DeduplicationResultNode>>>,
   flexFields: Scalars['JSONString'],
   pregnant: Scalars['Boolean'],
+  observedDisability: ImportedIndividualObservedDisability,
+  seeingDisability?: Maybe<ImportedIndividualSeeingDisability>,
+  hearingDisability?: Maybe<ImportedIndividualHearingDisability>,
+  physicalDisability?: Maybe<ImportedIndividualPhysicalDisability>,
+  memoryDisability?: Maybe<ImportedIndividualMemoryDisability>,
+  selfcareDisability?: Maybe<ImportedIndividualSelfcareDisability>,
+  commsDisability?: Maybe<ImportedIndividualCommsDisability>,
+  whoAnswersPhone: Scalars['String'],
+  whoAnswersAltPhone: Scalars['String'],
   importedhousehold?: Maybe<ImportedHouseholdNode>,
   documents: ImportedDocumentNodeConnection,
   identities: Array<ImportedIndividualIdentityNode>,
@@ -1272,6 +1357,34 @@ export type ImportedIndividualNodeEdge = {
   cursor: Scalars['String'],
 };
 
+export enum ImportedIndividualObservedDisability {
+  None = 'NONE',
+  Seeing = 'SEEING',
+  Hearing = 'HEARING',
+  Walking = 'WALKING',
+  Memory = 'MEMORY',
+  SelfCare = 'SELF_CARE',
+  Communicating = 'COMMUNICATING'
+}
+
+export enum ImportedIndividualPhysicalDisability {
+  SomeDifficulty = 'SOME_DIFFICULTY',
+  LotDifficulty = 'LOT_DIFFICULTY',
+  CannotDo = 'CANNOT_DO'
+}
+
+export enum ImportedIndividualSeeingDisability {
+  SomeDifficulty = 'SOME_DIFFICULTY',
+  LotDifficulty = 'LOT_DIFFICULTY',
+  CannotDo = 'CANNOT_DO'
+}
+
+export enum ImportedIndividualSelfcareDisability {
+  SomeDifficulty = 'SOME_DIFFICULTY',
+  LotDifficulty = 'LOT_DIFFICULTY',
+  CannotDo = 'CANNOT_DO'
+}
+
 export enum ImportedIndividualSex {
   Male = 'MALE',
   Female = 'FEMALE'
@@ -1289,6 +1402,12 @@ export type ImportXlsxCashPlanVerification = {
   errors?: Maybe<Array<Maybe<XlsxErrorNode>>>,
 };
 
+export enum IndividualCommsDisability {
+  SomeDifficulty = 'SOME_DIFFICULTY',
+  LotDifficulty = 'LOT_DIFFICULTY',
+  CannotDo = 'CANNOT_DO'
+}
+
 export enum IndividualDeduplicationBatchStatus {
   SimilarInBatch = 'SIMILAR_IN_BATCH',
   DuplicateInBatch = 'DUPLICATE_IN_BATCH',
@@ -1303,6 +1422,12 @@ export enum IndividualDeduplicationGoldenRecordStatus {
   NotProcessed = 'NOT_PROCESSED'
 }
 
+export enum IndividualHearingDisability {
+  SomeDifficulty = 'SOME_DIFFICULTY',
+  LotDifficulty = 'LOT_DIFFICULTY',
+  CannotDo = 'CANNOT_DO'
+}
+
 export type IndividualIdentityNode = {
    __typename?: 'IndividualIdentityNode',
   id: Scalars['ID'],
@@ -1314,9 +1439,15 @@ export type IndividualIdentityNode = {
 export enum IndividualMaritalStatus {
   Single = 'SINGLE',
   Married = 'MARRIED',
-  Widow = 'WIDOW',
+  Widowed = 'WIDOWED',
   Divorced = 'DIVORCED',
   Separated = 'SEPARATED'
+}
+
+export enum IndividualMemoryDisability {
+  SomeDifficulty = 'SOME_DIFFICULTY',
+  LotDifficulty = 'LOT_DIFFICULTY',
+  CannotDo = 'CANNOT_DO'
 }
 
 export type IndividualNode = Node & {
@@ -1357,6 +1488,15 @@ export type IndividualNode = Node & {
   sanctionListPossibleMatch: Scalars['Boolean'],
   sanctionListLastCheck?: Maybe<Scalars['DateTime']>,
   pregnant: Scalars['Boolean'],
+  observedDisability: IndividualObservedDisability,
+  seeingDisability?: Maybe<IndividualSeeingDisability>,
+  hearingDisability?: Maybe<IndividualHearingDisability>,
+  physicalDisability?: Maybe<IndividualPhysicalDisability>,
+  memoryDisability?: Maybe<IndividualMemoryDisability>,
+  selfcareDisability?: Maybe<IndividualSelfcareDisability>,
+  commsDisability?: Maybe<IndividualCommsDisability>,
+  whoAnswersPhone: Scalars['String'],
+  whoAnswersAltPhone: Scalars['String'],
   representedHouseholds: HouseholdNodeConnection,
   headingHousehold?: Maybe<HouseholdNode>,
   documents: DocumentNodeConnection,
@@ -1395,6 +1535,22 @@ export type IndividualNodeEdge = {
   cursor: Scalars['String'],
 };
 
+export enum IndividualObservedDisability {
+  None = 'NONE',
+  Seeing = 'SEEING',
+  Hearing = 'HEARING',
+  Walking = 'WALKING',
+  Memory = 'MEMORY',
+  SelfCare = 'SELF_CARE',
+  Communicating = 'COMMUNICATING'
+}
+
+export enum IndividualPhysicalDisability {
+  SomeDifficulty = 'SOME_DIFFICULTY',
+  LotDifficulty = 'LOT_DIFFICULTY',
+  CannotDo = 'CANNOT_DO'
+}
+
 export enum IndividualRelationship {
   NonBeneficiary = 'NON_BENEFICIARY',
   Head = 'HEAD',
@@ -1427,6 +1583,18 @@ export enum IndividualRoleInHouseholdRole {
   Primary = 'PRIMARY',
   Alternate = 'ALTERNATE',
   NoRole = 'NO_ROLE'
+}
+
+export enum IndividualSeeingDisability {
+  SomeDifficulty = 'SOME_DIFFICULTY',
+  LotDifficulty = 'LOT_DIFFICULTY',
+  CannotDo = 'CANNOT_DO'
+}
+
+export enum IndividualSelfcareDisability {
+  SomeDifficulty = 'SOME_DIFFICULTY',
+  LotDifficulty = 'LOT_DIFFICULTY',
+  CannotDo = 'CANNOT_DO'
 }
 
 export enum IndividualSex {
@@ -2135,10 +2303,8 @@ export type QueryAllCashPlansArgs = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   program?: Maybe<Scalars['ID']>,
-  verificationStatus?: Maybe<Scalars['String']>,
   assistanceThrough?: Maybe<Scalars['String']>,
   assistanceThrough_Icontains?: Maybe<Scalars['String']>,
-  deliveryType?: Maybe<Scalars['String']>,
   startDate?: Maybe<Scalars['DateTime']>,
   startDate_Lte?: Maybe<Scalars['DateTime']>,
   startDate_Gte?: Maybe<Scalars['DateTime']>,
@@ -2146,6 +2312,8 @@ export type QueryAllCashPlansArgs = {
   endDate_Lte?: Maybe<Scalars['DateTime']>,
   endDate_Gte?: Maybe<Scalars['DateTime']>,
   search?: Maybe<Scalars['String']>,
+  deliveryType?: Maybe<Array<Maybe<Scalars['String']>>>,
+  verificationStatus?: Maybe<Array<Maybe<Scalars['String']>>>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -3193,7 +3361,7 @@ export type XlsxRowErrorNode = {
 
 export type HouseholdMinimalFragment = (
   { __typename?: 'HouseholdNode' }
-  & Pick<HouseholdNode, 'id' | 'createdAt' | 'residenceStatus' | 'size' | 'totalCashReceived' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'status' | 'sanctionListPossibleMatch' | 'hasDuplicates' | 'unicefId' | 'address'>
+  & Pick<HouseholdNode, 'id' | 'createdAt' | 'residenceStatus' | 'size' | 'totalCashReceived' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'status' | 'sanctionListPossibleMatch' | 'hasDuplicates' | 'unicefId' | 'geopoint' | 'village' | 'address'>
   & { headOfHousehold: (
     { __typename?: 'IndividualNode' }
     & Pick<IndividualNode, 'id' | 'fullName'>
@@ -3912,8 +4080,8 @@ export type AllCashPlansQueryVariables = {
   orderBy?: Maybe<Scalars['String']>,
   search?: Maybe<Scalars['String']>,
   assistanceThrough?: Maybe<Scalars['String']>,
-  deliveryType?: Maybe<Scalars['String']>,
-  verificationStatus?: Maybe<Scalars['String']>,
+  deliveryType?: Maybe<Array<Maybe<Scalars['String']>>>,
+  verificationStatus?: Maybe<Array<Maybe<Scalars['String']>>>,
   startDateGte?: Maybe<Scalars['DateTime']>,
   endDateLte?: Maybe<Scalars['DateTime']>
 };
@@ -5117,6 +5285,8 @@ export const HouseholdMinimalFragmentDoc = gql`
   sanctionListPossibleMatch
   hasDuplicates
   unicefId
+  geopoint
+  village
   headOfHousehold {
     id
     fullName
@@ -6984,7 +7154,7 @@ export type AllBusinessAreasQueryHookResult = ReturnType<typeof useAllBusinessAr
 export type AllBusinessAreasLazyQueryHookResult = ReturnType<typeof useAllBusinessAreasLazyQuery>;
 export type AllBusinessAreasQueryResult = ApolloReactCommon.QueryResult<AllBusinessAreasQuery, AllBusinessAreasQueryVariables>;
 export const AllCashPlansDocument = gql`
-    query AllCashPlans($program: ID, $after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $search: String, $assistanceThrough: String, $deliveryType: String, $verificationStatus: String, $startDateGte: DateTime, $endDateLte: DateTime) {
+    query AllCashPlans($program: ID, $after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $search: String, $assistanceThrough: String, $deliveryType: [String], $verificationStatus: [String], $startDateGte: DateTime, $endDateLte: DateTime) {
   allCashPlans(program: $program, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, search: $search, assistanceThrough_Icontains: $assistanceThrough, deliveryType: $deliveryType, verificationStatus: $verificationStatus, startDate_Gte: $startDateGte, endDate_Lte: $endDateLte) {
     pageInfo {
       hasNextPage
@@ -9973,6 +10143,7 @@ export type ResolversTypes = {
   HouseholdNodeEdge: ResolverTypeWrapper<HouseholdNodeEdge>,
   HouseholdNode: ResolverTypeWrapper<HouseholdNode>,
   HouseholdStatus: HouseholdStatus,
+  HouseholdConsentSharing: HouseholdConsentSharing,
   HouseholdResidenceStatus: HouseholdResidenceStatus,
   AdminAreaNode: ResolverTypeWrapper<AdminAreaNode>,
   AdminAreaNodeConnection: ResolverTypeWrapper<AdminAreaNodeConnection>,
@@ -9991,7 +10162,9 @@ export type ResolversTypes = {
   CashPlanNode: ResolverTypeWrapper<CashPlanNode>,
   UUID: ResolverTypeWrapper<Scalars['UUID']>,
   CashPlanStatus: CashPlanStatus,
+  CashPlanDeliveryType: CashPlanDeliveryType,
   Float: ResolverTypeWrapper<Scalars['Float']>,
+  CashPlanVerificationStatus: CashPlanVerificationStatus,
   PaymentRecordNodeConnection: ResolverTypeWrapper<PaymentRecordNodeConnection>,
   PaymentRecordNodeEdge: ResolverTypeWrapper<PaymentRecordNodeEdge>,
   CashPlanPaymentVerificationNodeConnection: ResolverTypeWrapper<CashPlanPaymentVerificationNodeConnection>,
@@ -10028,6 +10201,13 @@ export type ResolversTypes = {
   IndividualDeduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus,
   IndividualDeduplicationBatchStatus: IndividualDeduplicationBatchStatus,
   DeduplicationResultNode: ResolverTypeWrapper<DeduplicationResultNode>,
+  IndividualObservedDisability: IndividualObservedDisability,
+  IndividualSeeingDisability: IndividualSeeingDisability,
+  IndividualHearingDisability: IndividualHearingDisability,
+  IndividualPhysicalDisability: IndividualPhysicalDisability,
+  IndividualMemoryDisability: IndividualMemoryDisability,
+  IndividualSelfcareDisability: IndividualSelfcareDisability,
+  IndividualCommsDisability: IndividualCommsDisability,
   DocumentNodeConnection: ResolverTypeWrapper<DocumentNodeConnection>,
   DocumentNodeEdge: ResolverTypeWrapper<DocumentNodeEdge>,
   DocumentNode: ResolverTypeWrapper<DocumentNode>,
@@ -10056,6 +10236,7 @@ export type ResolversTypes = {
   LogEntryAction: LogEntryAction,
   JSONLazyString: ResolverTypeWrapper<Scalars['JSONLazyString']>,
   GeoJSON: ResolverTypeWrapper<Scalars['GeoJSON']>,
+  HouseholdOrgEnumerator: HouseholdOrgEnumerator,
   ServiceProviderNodeConnection: ResolverTypeWrapper<ServiceProviderNodeConnection>,
   ServiceProviderNodeEdge: ResolverTypeWrapper<ServiceProviderNodeEdge>,
   ServiceProviderNode: ResolverTypeWrapper<ServiceProviderNode>,
@@ -10086,6 +10267,7 @@ export type ResolversTypes = {
   UserNodeConnection: ResolverTypeWrapper<UserNodeConnection>,
   UserNodeEdge: ResolverTypeWrapper<UserNodeEdge>,
   ImportedHouseholdNode: ResolverTypeWrapper<ImportedHouseholdNode>,
+  ImportedHouseholdConsentSharing: ImportedHouseholdConsentSharing,
   ImportedHouseholdResidenceStatus: ImportedHouseholdResidenceStatus,
   ImportedIndividualNode: ResolverTypeWrapper<ImportedIndividualNode>,
   ImportedIndividualSex: ImportedIndividualSex,
@@ -10101,6 +10283,13 @@ export type ResolversTypes = {
   ImportedIndividualWorkStatus: ImportedIndividualWorkStatus,
   ImportedIndividualDeduplicationBatchStatus: ImportedIndividualDeduplicationBatchStatus,
   ImportedIndividualDeduplicationGoldenRecordStatus: ImportedIndividualDeduplicationGoldenRecordStatus,
+  ImportedIndividualObservedDisability: ImportedIndividualObservedDisability,
+  ImportedIndividualSeeingDisability: ImportedIndividualSeeingDisability,
+  ImportedIndividualHearingDisability: ImportedIndividualHearingDisability,
+  ImportedIndividualPhysicalDisability: ImportedIndividualPhysicalDisability,
+  ImportedIndividualMemoryDisability: ImportedIndividualMemoryDisability,
+  ImportedIndividualSelfcareDisability: ImportedIndividualSelfcareDisability,
+  ImportedIndividualCommsDisability: ImportedIndividualCommsDisability,
   ImportedDocumentNodeConnection: ResolverTypeWrapper<ImportedDocumentNodeConnection>,
   ImportedDocumentNodeEdge: ResolverTypeWrapper<ImportedDocumentNodeEdge>,
   ImportedDocumentNode: ResolverTypeWrapper<ImportedDocumentNode>,
@@ -10108,6 +10297,7 @@ export type ResolversTypes = {
   ImportedDocumentTypeCountry: ImportedDocumentTypeCountry,
   ImportedDocumentTypeType: ImportedDocumentTypeType,
   ImportedIndividualIdentityNode: ResolverTypeWrapper<ImportedIndividualIdentityNode>,
+  ImportedHouseholdOrgEnumerator: ImportedHouseholdOrgEnumerator,
   RegistrationDataImportDatahubNodeConnection: ResolverTypeWrapper<RegistrationDataImportDatahubNodeConnection>,
   RegistrationDataImportDatahubNodeEdge: ResolverTypeWrapper<RegistrationDataImportDatahubNodeEdge>,
   DjangoDebug: ResolverTypeWrapper<DjangoDebug>,
@@ -10176,6 +10366,7 @@ export type ResolversParentTypes = {
   HouseholdNodeEdge: HouseholdNodeEdge,
   HouseholdNode: HouseholdNode,
   HouseholdStatus: HouseholdStatus,
+  HouseholdConsentSharing: HouseholdConsentSharing,
   HouseholdResidenceStatus: HouseholdResidenceStatus,
   AdminAreaNode: AdminAreaNode,
   AdminAreaNodeConnection: AdminAreaNodeConnection,
@@ -10194,7 +10385,9 @@ export type ResolversParentTypes = {
   CashPlanNode: CashPlanNode,
   UUID: Scalars['UUID'],
   CashPlanStatus: CashPlanStatus,
+  CashPlanDeliveryType: CashPlanDeliveryType,
   Float: Scalars['Float'],
+  CashPlanVerificationStatus: CashPlanVerificationStatus,
   PaymentRecordNodeConnection: PaymentRecordNodeConnection,
   PaymentRecordNodeEdge: PaymentRecordNodeEdge,
   CashPlanPaymentVerificationNodeConnection: CashPlanPaymentVerificationNodeConnection,
@@ -10231,6 +10424,13 @@ export type ResolversParentTypes = {
   IndividualDeduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus,
   IndividualDeduplicationBatchStatus: IndividualDeduplicationBatchStatus,
   DeduplicationResultNode: DeduplicationResultNode,
+  IndividualObservedDisability: IndividualObservedDisability,
+  IndividualSeeingDisability: IndividualSeeingDisability,
+  IndividualHearingDisability: IndividualHearingDisability,
+  IndividualPhysicalDisability: IndividualPhysicalDisability,
+  IndividualMemoryDisability: IndividualMemoryDisability,
+  IndividualSelfcareDisability: IndividualSelfcareDisability,
+  IndividualCommsDisability: IndividualCommsDisability,
   DocumentNodeConnection: DocumentNodeConnection,
   DocumentNodeEdge: DocumentNodeEdge,
   DocumentNode: DocumentNode,
@@ -10259,6 +10459,7 @@ export type ResolversParentTypes = {
   LogEntryAction: LogEntryAction,
   JSONLazyString: Scalars['JSONLazyString'],
   GeoJSON: Scalars['GeoJSON'],
+  HouseholdOrgEnumerator: HouseholdOrgEnumerator,
   ServiceProviderNodeConnection: ServiceProviderNodeConnection,
   ServiceProviderNodeEdge: ServiceProviderNodeEdge,
   ServiceProviderNode: ServiceProviderNode,
@@ -10289,6 +10490,7 @@ export type ResolversParentTypes = {
   UserNodeConnection: UserNodeConnection,
   UserNodeEdge: UserNodeEdge,
   ImportedHouseholdNode: ImportedHouseholdNode,
+  ImportedHouseholdConsentSharing: ImportedHouseholdConsentSharing,
   ImportedHouseholdResidenceStatus: ImportedHouseholdResidenceStatus,
   ImportedIndividualNode: ImportedIndividualNode,
   ImportedIndividualSex: ImportedIndividualSex,
@@ -10304,6 +10506,13 @@ export type ResolversParentTypes = {
   ImportedIndividualWorkStatus: ImportedIndividualWorkStatus,
   ImportedIndividualDeduplicationBatchStatus: ImportedIndividualDeduplicationBatchStatus,
   ImportedIndividualDeduplicationGoldenRecordStatus: ImportedIndividualDeduplicationGoldenRecordStatus,
+  ImportedIndividualObservedDisability: ImportedIndividualObservedDisability,
+  ImportedIndividualSeeingDisability: ImportedIndividualSeeingDisability,
+  ImportedIndividualHearingDisability: ImportedIndividualHearingDisability,
+  ImportedIndividualPhysicalDisability: ImportedIndividualPhysicalDisability,
+  ImportedIndividualMemoryDisability: ImportedIndividualMemoryDisability,
+  ImportedIndividualSelfcareDisability: ImportedIndividualSelfcareDisability,
+  ImportedIndividualCommsDisability: ImportedIndividualCommsDisability,
   ImportedDocumentNodeConnection: ImportedDocumentNodeConnection,
   ImportedDocumentNodeEdge: ImportedDocumentNodeEdge,
   ImportedDocumentNode: ImportedDocumentNode,
@@ -10311,6 +10520,7 @@ export type ResolversParentTypes = {
   ImportedDocumentTypeCountry: ImportedDocumentTypeCountry,
   ImportedDocumentTypeType: ImportedDocumentTypeType,
   ImportedIndividualIdentityNode: ImportedIndividualIdentityNode,
+  ImportedHouseholdOrgEnumerator: ImportedHouseholdOrgEnumerator,
   RegistrationDataImportDatahubNodeConnection: RegistrationDataImportDatahubNodeConnection,
   RegistrationDataImportDatahubNodeEdge: RegistrationDataImportDatahubNodeEdge,
   DjangoDebug: DjangoDebug,
@@ -10459,7 +10669,7 @@ export type CashPlanNodeResolvers<ContextType = any, ParentType extends Resolver
   coverageUnit?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   comments?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   program?: Resolver<ResolversTypes['ProgramNode'], ParentType, ContextType>,
-  deliveryType?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  deliveryType?: Resolver<Maybe<ResolversTypes['CashPlanDeliveryType']>, ParentType, ContextType>,
   assistanceMeasurement?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   assistanceThrough?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   visionId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
@@ -10472,7 +10682,7 @@ export type CashPlanNodeResolvers<ContextType = any, ParentType extends Resolver
   totalEntitledQuantityRevised?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   totalDeliveredQuantity?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   totalUndeliveredQuantity?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
-  verificationStatus?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  verificationStatus?: Resolver<ResolversTypes['CashPlanVerificationStatus'], ParentType, ContextType>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, CashPlanNodePaymentRecordsArgs>,
   verifications?: Resolver<ResolversTypes['CashPlanPaymentVerificationNodeConnection'], ParentType, ContextType, CashPlanNodeVerificationsArgs>,
   bankReconciliationSuccess?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
@@ -10711,7 +10921,9 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   status?: Resolver<ResolversTypes['HouseholdStatus'], ParentType, ContextType>,
-  consent?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  consentSign?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  consent?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  consentSharing?: Resolver<ResolversTypes['HouseholdConsentSharing'], ParentType, ContextType>,
   residenceStatus?: Resolver<ResolversTypes['HouseholdResidenceStatus'], ParentType, ContextType>,
   countryOrigin?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
@@ -10744,8 +10956,17 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   firstRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   lastRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   headOfHousehold?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
+  fchildHoh?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  childHoh?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   unicefId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
+  start?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  end?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  deviceid?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  nameEnumerator?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  orgEnumerator?: Resolver<ResolversTypes['HouseholdOrgEnumerator'], ParentType, ContextType>,
+  orgNameEnumerator?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  village?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   individualsAndRoles?: Resolver<Array<ResolversTypes['IndividualRoleInHouseholdNode']>, ParentType, ContextType>,
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, HouseholdNodeIndividualsArgs>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, HouseholdNodePaymentRecordsArgs>,
@@ -10827,7 +11048,9 @@ export type ImportedHouseholdNodeResolvers<ContextType = any, ParentType extends
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  consent?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  consentSign?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  consent?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  consentSharing?: Resolver<ResolversTypes['ImportedHouseholdConsentSharing'], ParentType, ContextType>,
   residenceStatus?: Resolver<ResolversTypes['ImportedHouseholdResidenceStatus'], ParentType, ContextType>,
   countryOrigin?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   size?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
@@ -10854,11 +11077,20 @@ export type ImportedHouseholdNodeResolvers<ContextType = any, ParentType extends
   maleAgeGroup1217DisabledCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   maleAdultsDisabledCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   headOfHousehold?: Resolver<Maybe<ResolversTypes['ImportedIndividualNode']>, ParentType, ContextType>,
+  fchildHoh?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  childHoh?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   registrationDataImport?: Resolver<ResolversTypes['RegistrationDataImportDatahubNode'], ParentType, ContextType>,
   firstRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   lastRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   returnee?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   flexFields?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
+  start?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  end?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  deviceid?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  nameEnumerator?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  orgEnumerator?: Resolver<ResolversTypes['ImportedHouseholdOrgEnumerator'], ParentType, ContextType>,
+  orgNameEnumerator?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  village?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   individuals?: Resolver<ResolversTypes['ImportedIndividualNodeConnection'], ParentType, ContextType, ImportedHouseholdNodeIndividualsArgs>,
   hasDuplicates?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
@@ -10911,6 +11143,15 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   deduplicationGoldenRecordResults?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeduplicationResultNode']>>>, ParentType, ContextType>,
   flexFields?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   pregnant?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  observedDisability?: Resolver<ResolversTypes['ImportedIndividualObservedDisability'], ParentType, ContextType>,
+  seeingDisability?: Resolver<Maybe<ResolversTypes['ImportedIndividualSeeingDisability']>, ParentType, ContextType>,
+  hearingDisability?: Resolver<Maybe<ResolversTypes['ImportedIndividualHearingDisability']>, ParentType, ContextType>,
+  physicalDisability?: Resolver<Maybe<ResolversTypes['ImportedIndividualPhysicalDisability']>, ParentType, ContextType>,
+  memoryDisability?: Resolver<Maybe<ResolversTypes['ImportedIndividualMemoryDisability']>, ParentType, ContextType>,
+  selfcareDisability?: Resolver<Maybe<ResolversTypes['ImportedIndividualSelfcareDisability']>, ParentType, ContextType>,
+  commsDisability?: Resolver<Maybe<ResolversTypes['ImportedIndividualCommsDisability']>, ParentType, ContextType>,
+  whoAnswersPhone?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  whoAnswersAltPhone?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   importedhousehold?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['ImportedDocumentNodeConnection'], ParentType, ContextType, ImportedIndividualNodeDocumentsArgs>,
   identities?: Resolver<Array<ResolversTypes['ImportedIndividualIdentityNode']>, ParentType, ContextType>,
@@ -10978,6 +11219,15 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   sanctionListPossibleMatch?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   sanctionListLastCheck?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   pregnant?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  observedDisability?: Resolver<ResolversTypes['IndividualObservedDisability'], ParentType, ContextType>,
+  seeingDisability?: Resolver<Maybe<ResolversTypes['IndividualSeeingDisability']>, ParentType, ContextType>,
+  hearingDisability?: Resolver<Maybe<ResolversTypes['IndividualHearingDisability']>, ParentType, ContextType>,
+  physicalDisability?: Resolver<Maybe<ResolversTypes['IndividualPhysicalDisability']>, ParentType, ContextType>,
+  memoryDisability?: Resolver<Maybe<ResolversTypes['IndividualMemoryDisability']>, ParentType, ContextType>,
+  selfcareDisability?: Resolver<Maybe<ResolversTypes['IndividualSelfcareDisability']>, ParentType, ContextType>,
+  commsDisability?: Resolver<Maybe<ResolversTypes['IndividualCommsDisability']>, ParentType, ContextType>,
+  whoAnswersPhone?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  whoAnswersAltPhone?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   representedHouseholds?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, IndividualNodeRepresentedHouseholdsArgs>,
   headingHousehold?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, IndividualNodeDocumentsArgs>,

@@ -86,6 +86,12 @@ type BusinessAreaNodeEdge {
   cursor: String!
 }
 
+enum CashPlanDeliveryType {
+  CASH
+  DEPOSIT_TO_CARD
+  TRANSFER
+}
+
 type CashPlanNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -104,7 +110,7 @@ type CashPlanNode implements Node {
   coverageUnit: String!
   comments: String
   program: ProgramNode!
-  deliveryType: String!
+  deliveryType: CashPlanDeliveryType
   assistanceMeasurement: String!
   assistanceThrough: String!
   visionId: String!
@@ -117,7 +123,7 @@ type CashPlanNode implements Node {
   totalEntitledQuantityRevised: Float!
   totalDeliveredQuantity: Float!
   totalUndeliveredQuantity: Float!
-  verificationStatus: String!
+  verificationStatus: CashPlanVerificationStatus!
   paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
   verifications(before: String, after: String, first: Int, last: Int): CashPlanPaymentVerificationNodeConnection!
   bankReconciliationSuccess: Int
@@ -195,6 +201,12 @@ enum CashPlanStatus {
   DISTRIBUTION_COMPLETED_WITH_ERRORS
   TRANSACTION_COMPLETED
   TRANSACTION_COMPLETED_WITH_ERRORS
+}
+
+enum CashPlanVerificationStatus {
+  PENDING
+  ACTIVE
+  FINISHED
 }
 
 type CheckAgainstSanctionListMutation {
@@ -442,13 +454,22 @@ type GroupAttributeNode {
   labelEn: String
 }
 
+enum HouseholdConsentSharing {
+  UNICEF
+  HUMANITARIAN_PARTNER
+  PRIVATE_PARTNER
+  GOVERNMENT_PARTNER
+}
+
 type HouseholdNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
   lastSyncAt: DateTime
   status: HouseholdStatus!
-  consent: String!
+  consentSign: String!
+  consent: Boolean!
+  consentSharing: HouseholdConsentSharing!
   residenceStatus: HouseholdResidenceStatus!
   countryOrigin: String
   country: String
@@ -481,8 +502,17 @@ type HouseholdNode implements Node {
   firstRegistrationDate: Date!
   lastRegistrationDate: Date!
   headOfHousehold: IndividualNode!
+  fchildHoh: Boolean!
+  childHoh: Boolean!
   unicefId: String!
   businessArea: UserBusinessAreaNode!
+  start: DateTime
+  end: DateTime
+  deviceid: String!
+  nameEnumerator: String!
+  orgEnumerator: HouseholdOrgEnumerator!
+  orgNameEnumerator: String!
+  village: String!
   individualsAndRoles: [IndividualRoleInHouseholdNode!]!
   individuals(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
@@ -507,12 +537,17 @@ type HouseholdNodeEdge {
   cursor: String!
 }
 
+enum HouseholdOrgEnumerator {
+  UNICEF
+  PARTNER
+}
+
 enum HouseholdResidenceStatus {
-  REFUGEE
-  MIGRANT
-  CITIZEN
   IDP
-  OTHER
+  REFUGEE
+  OTHERS_OF_CONCERN
+  HOST
+  NON_HOST
 }
 
 type HouseholdSelection {
@@ -844,11 +879,20 @@ enum ImportedDocumentTypeType {
   OTHER
 }
 
+enum ImportedHouseholdConsentSharing {
+  UNICEF
+  HUMANITARIAN_PARTNER
+  PRIVATE_PARTNER
+  GOVERNMENT_PARTNER
+}
+
 type ImportedHouseholdNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  consent: String!
+  consentSign: String!
+  consent: Boolean!
+  consentSharing: ImportedHouseholdConsentSharing!
   residenceStatus: ImportedHouseholdResidenceStatus!
   countryOrigin: String
   size: Int!
@@ -875,11 +919,20 @@ type ImportedHouseholdNode implements Node {
   maleAgeGroup1217DisabledCount: Int!
   maleAdultsDisabledCount: Int!
   headOfHousehold: ImportedIndividualNode
+  fchildHoh: Boolean!
+  childHoh: Boolean!
   registrationDataImport: RegistrationDataImportDatahubNode!
   firstRegistrationDate: Date!
   lastRegistrationDate: Date!
   returnee: Boolean!
   flexFields: JSONString!
+  start: DateTime
+  end: DateTime
+  deviceid: String!
+  nameEnumerator: String!
+  orgEnumerator: ImportedHouseholdOrgEnumerator!
+  orgNameEnumerator: String!
+  village: String!
   individuals(before: String, after: String, first: Int, last: Int): ImportedIndividualNodeConnection!
   hasDuplicates: Boolean
 }
@@ -896,12 +949,23 @@ type ImportedHouseholdNodeEdge {
   cursor: String!
 }
 
+enum ImportedHouseholdOrgEnumerator {
+  UNICEF
+  PARTNER
+}
+
 enum ImportedHouseholdResidenceStatus {
-  REFUGEE
-  MIGRANT
-  CITIZEN
   IDP
-  OTHER
+  REFUGEE
+  OTHERS_OF_CONCERN
+  HOST
+  NON_HOST
+}
+
+enum ImportedIndividualCommsDisability {
+  SOME_DIFFICULTY
+  LOT_DIFFICULTY
+  CANNOT_DO
 }
 
 enum ImportedIndividualDeduplicationBatchStatus {
@@ -918,6 +982,12 @@ enum ImportedIndividualDeduplicationGoldenRecordStatus {
   NOT_PROCESSED
 }
 
+enum ImportedIndividualHearingDisability {
+  SOME_DIFFICULTY
+  LOT_DIFFICULTY
+  CANNOT_DO
+}
+
 type ImportedIndividualIdentityNode {
   id: ID!
   individual: ImportedIndividualNode!
@@ -928,9 +998,15 @@ type ImportedIndividualIdentityNode {
 enum ImportedIndividualMaritalStatus {
   SINGLE
   MARRIED
-  WIDOW
+  WIDOWED
   DIVORCED
   SEPARATED
+}
+
+enum ImportedIndividualMemoryDisability {
+  SOME_DIFFICULTY
+  LOT_DIFFICULTY
+  CANNOT_DO
 }
 
 type ImportedIndividualNode implements Node {
@@ -962,6 +1038,15 @@ type ImportedIndividualNode implements Node {
   deduplicationGoldenRecordResults: [DeduplicationResultNode]
   flexFields: JSONString!
   pregnant: Boolean!
+  observedDisability: ImportedIndividualObservedDisability!
+  seeingDisability: ImportedIndividualSeeingDisability
+  hearingDisability: ImportedIndividualHearingDisability
+  physicalDisability: ImportedIndividualPhysicalDisability
+  memoryDisability: ImportedIndividualMemoryDisability
+  selfcareDisability: ImportedIndividualSelfcareDisability
+  commsDisability: ImportedIndividualCommsDisability
+  whoAnswersPhone: String!
+  whoAnswersAltPhone: String!
   importedhousehold: ImportedHouseholdNode
   documents(before: String, after: String, first: Int, last: Int): ImportedDocumentNodeConnection!
   identities: [ImportedIndividualIdentityNode!]!
@@ -980,6 +1065,34 @@ type ImportedIndividualNodeEdge {
   cursor: String!
 }
 
+enum ImportedIndividualObservedDisability {
+  NONE
+  SEEING
+  HEARING
+  WALKING
+  MEMORY
+  SELF_CARE
+  COMMUNICATING
+}
+
+enum ImportedIndividualPhysicalDisability {
+  SOME_DIFFICULTY
+  LOT_DIFFICULTY
+  CANNOT_DO
+}
+
+enum ImportedIndividualSeeingDisability {
+  SOME_DIFFICULTY
+  LOT_DIFFICULTY
+  CANNOT_DO
+}
+
+enum ImportedIndividualSelfcareDisability {
+  SOME_DIFFICULTY
+  LOT_DIFFICULTY
+  CANNOT_DO
+}
+
 enum ImportedIndividualSex {
   MALE
   FEMALE
@@ -989,6 +1102,12 @@ enum ImportedIndividualWorkStatus {
   YES
   NO
   NOT_PROVIDED
+}
+
+enum IndividualCommsDisability {
+  SOME_DIFFICULTY
+  LOT_DIFFICULTY
+  CANNOT_DO
 }
 
 enum IndividualDeduplicationBatchStatus {
@@ -1005,6 +1124,12 @@ enum IndividualDeduplicationGoldenRecordStatus {
   NOT_PROCESSED
 }
 
+enum IndividualHearingDisability {
+  SOME_DIFFICULTY
+  LOT_DIFFICULTY
+  CANNOT_DO
+}
+
 type IndividualIdentityNode {
   id: ID!
   individual: IndividualNode!
@@ -1015,9 +1140,15 @@ type IndividualIdentityNode {
 enum IndividualMaritalStatus {
   SINGLE
   MARRIED
-  WIDOW
+  WIDOWED
   DIVORCED
   SEPARATED
+}
+
+enum IndividualMemoryDisability {
+  SOME_DIFFICULTY
+  LOT_DIFFICULTY
+  CANNOT_DO
 }
 
 type IndividualNode implements Node {
@@ -1057,6 +1188,15 @@ type IndividualNode implements Node {
   sanctionListPossibleMatch: Boolean!
   sanctionListLastCheck: DateTime
   pregnant: Boolean!
+  observedDisability: IndividualObservedDisability!
+  seeingDisability: IndividualSeeingDisability
+  hearingDisability: IndividualHearingDisability
+  physicalDisability: IndividualPhysicalDisability
+  memoryDisability: IndividualMemoryDisability
+  selfcareDisability: IndividualSelfcareDisability
+  commsDisability: IndividualCommsDisability
+  whoAnswersPhone: String!
+  whoAnswersAltPhone: String!
   representedHouseholds(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   headingHousehold: HouseholdNode
   documents(before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
@@ -1075,6 +1215,22 @@ type IndividualNodeConnection {
 type IndividualNodeEdge {
   node: IndividualNode
   cursor: String!
+}
+
+enum IndividualObservedDisability {
+  NONE
+  SEEING
+  HEARING
+  WALKING
+  MEMORY
+  SELF_CARE
+  COMMUNICATING
+}
+
+enum IndividualPhysicalDisability {
+  SOME_DIFFICULTY
+  LOT_DIFFICULTY
+  CANNOT_DO
 }
 
 enum IndividualRelationship {
@@ -1108,6 +1264,18 @@ enum IndividualRoleInHouseholdRole {
   PRIMARY
   ALTERNATE
   NO_ROLE
+}
+
+enum IndividualSeeingDisability {
+  SOME_DIFFICULTY
+  LOT_DIFFICULTY
+  CANNOT_DO
+}
+
+enum IndividualSelfcareDisability {
+  SOME_DIFFICULTY
+  LOT_DIFFICULTY
+  CANNOT_DO
 }
 
 enum IndividualSex {
@@ -1428,7 +1596,7 @@ type Query {
   program(id: ID!): ProgramNode
   allPrograms(before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, orderBy: String): ProgramNodeConnection
   cashPlan(id: ID!): CashPlanNode
-  allCashPlans(before: String, after: String, first: Int, last: Int, program: ID, verificationStatus: String, assistanceThrough: String, assistanceThrough_Icontains: String, deliveryType: String, startDate: DateTime, startDate_Lte: DateTime, startDate_Gte: DateTime, endDate: DateTime, endDate_Lte: DateTime, endDate_Gte: DateTime, search: String, orderBy: String): CashPlanNodeConnection
+  allCashPlans(before: String, after: String, first: Int, last: Int, program: ID, assistanceThrough: String, assistanceThrough_Icontains: String, startDate: DateTime, startDate_Lte: DateTime, startDate_Gte: DateTime, endDate: DateTime, endDate_Lte: DateTime, endDate_Gte: DateTime, search: String, deliveryType: [String], verificationStatus: [String], orderBy: String): CashPlanNodeConnection
   programStatusChoices: [ChoiceObject]
   programFrequencyOfPaymentsChoices: [ChoiceObject]
   programSectorChoices: [ChoiceObject]

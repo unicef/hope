@@ -15,6 +15,7 @@ import { KeyboardDatePicker } from '@material-ui/pickers';
 import { ProgrammeChoiceDataQuery } from '../../../__generated__/graphql';
 import InputLabel from '../../../shared/InputLabel';
 import Select from '../../../shared/Select';
+import { FieldLabel } from '../../../components/FieldLabel';
 
 const Container = styled.div`
   display: flex;
@@ -55,10 +56,7 @@ const SearchTextField = styled(TextField)`
     min-width: 150px;
   }
 `;
-const FieldLabel = styled.span`
-  font-size: 12px;
-  color: rgba(0, 0, 0, 0.6);
-`;
+
 interface ProgrammesFilterProps {
   onFilterChange;
   filter;
