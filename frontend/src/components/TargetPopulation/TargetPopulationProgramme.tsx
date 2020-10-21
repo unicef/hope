@@ -1,12 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Box, Grid, Paper, Typography } from '@material-ui/core';
-import { LabelizedField } from '../LabelizedField';
-import { ProgramNode, TargetPopulationNode, useAllProgramsQuery } from '../../__generated__/graphql';
-import { UniversalMoment } from '../UniversalMoment';
-import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
-import { OverviewContainer } from '../OverviewContainer';
+import { Box, Paper, Typography } from '@material-ui/core';
 import { Field } from 'formik';
+import { ProgramNode, TargetPopulationNode, useAllProgramsQuery } from '../../__generated__/graphql';
+import { OverviewContainer } from '../OverviewContainer';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { LoadingComponent } from '../LoadingComponent';
@@ -33,10 +30,6 @@ export function TargetPopulationProgramme({
   targetPopulation,
 }: TargetPopulationProgrammeProps): React.ReactElement {
   const {
-    createdBy,
-    finalizedBy,
-    approvedAt,
-    finalizedAt,
     program,
   } = targetPopulation;
 
@@ -49,9 +42,8 @@ export function TargetPopulationProgramme({
 
   const { allPrograms } = data;
   const programs = allPrograms.edges.map((edge) => edge.node);
-  const programName = program?.name ? program.name : '-';
   return (
-    <PaperContainer data-cy='target-population-details-container'>
+    <PaperContainer data-cy='target-population-program-container'>
       <Title>
         <Typography variant='h6'>Programme</Typography>
       </Title>
@@ -59,7 +51,7 @@ export function TargetPopulationProgramme({
         <Box display="flex" flexDirection="column">
         <GreyText>Selected programme that the Target Population is created for</GreyText>
         <Field
-              name='programme'
+              name='programmeName'
               label='Programme'
               fullWidth
               variant='outlined'

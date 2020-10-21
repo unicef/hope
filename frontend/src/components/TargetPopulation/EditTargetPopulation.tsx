@@ -1,9 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Button, Tabs, Tab } from '@material-ui/core';
-import { Formik, Form, Field } from 'formik';
+import { Button } from '@material-ui/core';
+import { Formik, Form } from 'formik';
 import { PageHeader } from '../PageHeader';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { BreadCrumbsItem } from '../BreadCrumbs';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import {
@@ -32,7 +31,7 @@ export function EditTargetPopulation({
 }: EditTargetPopulationProps): React.ReactElement {
   const initialValues = {
     id: targetPopulation.id,
-    name: targetPopulation.name || '',
+    programmeName: targetPopulation.name || '',
     criterias: targetPopulationCriterias.rules || [],
     candidateListCriterias:
       targetPopulation.candidateListTargetingCriteria?.rules || [],
@@ -97,7 +96,7 @@ export function EditTargetPopulation({
           variables: {
             input: {
               id: values.id,
-              ...(targetPopulation.status === 'DRAFT' && { name: values.name }),
+              ...(targetPopulation.status === 'DRAFT' && { name: values.programmeName }),
               targetingCriteria: {
                 rules: mapRules(targetPopulation.status, values),
               },
@@ -114,25 +113,12 @@ export function EditTargetPopulation({
       {({ submitForm, values }) => (
         <Form>
           <PageHeader
-            title={
-              isTitleEditable() ? (
-                <Field
-                  name='name'
-                  label='Programme Name'
-                  type='text'
-                  fullWidth
-                  required
-                  component={FormikTextField}
-                />
-              ) : (
-                values.name
-              )
-            }
+            title={values.programmeName}
             breadCrumbs={breadCrumbsItems}
             hasInputComponent
           >
             <>
-              {values.name && (
+              {values.programmeName && (
                 <ButtonContainer>
                   <Button
                     variant='outlined'
@@ -149,7 +135,7 @@ export function EditTargetPopulation({
                   color='primary'
                   type='submit'
                   onClick={submitForm}
-                  disabled={!values.name}
+                  disabled={!values.programmeName}
                 >
                   Save
                 </Button>
