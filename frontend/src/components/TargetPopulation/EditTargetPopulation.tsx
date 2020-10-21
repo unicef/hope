@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import { useParams } from 'react-router-dom';
 import { Button } from '@material-ui/core';
 import { Formik, Form } from 'formik';
 import { PageHeader } from '../PageHeader';
@@ -12,6 +13,7 @@ import {
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { CandidateListTab } from './Edit/CandidateListTab';
 import { TargetPopulationProgramme } from './TargetPopulationProgramme';
+import { TARGET_POPULATION_QUERY } from '../../apollo/queries/TargetPopulation';
 
 
 const ButtonContainer = styled.span`
@@ -40,6 +42,8 @@ export function EditTargetPopulation({
   };
   const [mutate] = useUpdateTpMutation();
   const { showMessage } = useSnackbar();
+  const { id } = useParams();
+
   const businessArea = useBusinessArea();
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -102,6 +106,14 @@ export function EditTargetPopulation({
               },
             },
           },
+          refetchQueries: [
+            {
+              query: TARGET_POPULATION_QUERY,
+              variables: {
+                id
+              },
+            },
+          ],
         });
         cancelEdit();
         showMessage('Target Population Updated', {

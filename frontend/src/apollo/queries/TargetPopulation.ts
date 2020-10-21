@@ -1,6 +1,6 @@
 import { gql } from 'apollo-boost';
 
-export const TargetPopulation = gql`
+export const TARGET_POPULATION_QUERY = gql`
   query targetPopulation($id: ID!) {
     targetPopulation(id: $id) {
       id
