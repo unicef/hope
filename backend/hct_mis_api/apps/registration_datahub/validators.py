@@ -56,7 +56,6 @@ class XLSXValidator(BaseValidator):
         # loading workbook to check if it is in fact true .xlsx file
         try:
             wb = load_workbook(xlsx_file, data_only=True)
-            cls.WB = wb
         except BadZipfile:
             return [{"row_number": 1, "header": f"{xlsx_file.name}", "message": "Invalid .xlsx file"}]
 
@@ -445,7 +444,6 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
         # loading workbook to check if it is in fact true .xlsx file
         try:
             wb = load_workbook(xlsx_file, data_only=True)
-            cls.WB = wb
         except BadZipfile:
             return [{"row_number": 1, "header": f"{xlsx_file.name}", "message": "Invalid .xlsx file"}]
 
@@ -453,11 +451,8 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
 
     @classmethod
     def validate_file_with_template(cls, *args, **kwargs):
-        if cls.WB is None:
-            xlsx_file = kwargs.get("file")
-            wb = openpyxl.load_workbook(xlsx_file, data_only=True)
-        else:
-            wb = cls.WB
+        xlsx_file = kwargs.get("file")
+        wb = openpyxl.load_workbook(xlsx_file, data_only=True)
 
         errors = []
         core_fields = {**cls.CORE_FIELDS}
@@ -490,11 +485,8 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
 
     @classmethod
     def validate_household_rows(cls, *args, **kwargs):
-        if cls.WB is None:
-            xlsx_file = kwargs.get("file")
-            wb = openpyxl.load_workbook(xlsx_file, data_only=True)
-        else:
-            wb = cls.WB
+        xlsx_file = kwargs.get("file")
+        wb = openpyxl.load_workbook(xlsx_file, data_only=True)
         household_sheet = wb["Households"]
         cls.image_loader = SheetImageLoader(household_sheet)
         cls.BUSINESS_AREA_SLUG = kwargs.get("business_area_slug")
@@ -505,11 +497,8 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
 
     @classmethod
     def validate_individuals_rows(cls, *args, **kwargs):
-        if cls.WB is None:
-            xlsx_file = kwargs.get("file")
-            wb = openpyxl.load_workbook(xlsx_file, data_only=True)
-        else:
-            wb = cls.WB
+        xlsx_file = kwargs.get("file")
+        wb = openpyxl.load_workbook(xlsx_file, data_only=True)
         individuals_sheet = wb["Individuals"]
         cls.image_loader = SheetImageLoader(individuals_sheet)
 
@@ -563,11 +552,8 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
 
     @classmethod
     def validate_collectors(cls, *args, **kwargs):
-        if cls.WB is None:
-            xlsx_file = kwargs.get("file")
-            wb = openpyxl.load_workbook(xlsx_file, data_only=True)
-        else:
-            wb = cls.WB
+        xlsx_file = kwargs.get("file")
+        wb = openpyxl.load_workbook(xlsx_file, data_only=True)
 
         errors = []
 

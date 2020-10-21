@@ -63,7 +63,7 @@ class TestCopyTargetPopulationMutation(APITestCase):
             {"size": 1, "residence_status": "HOST", "business_area": business_area},
         )
         cls.household = household
-        tp = TargetPopulation(name="Original Target Population", status="APPROVED")
+        tp = TargetPopulation(name="Original Target Population", status=TargetPopulation.STATUS_APPROVED)
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
             {"field_name": "size", "arguments": [1], "comparision_method": "EQUALS"}
@@ -74,7 +74,7 @@ class TestCopyTargetPopulationMutation(APITestCase):
         tp.save()
         tp.households.add(cls.household)
         cls.target_population = tp
-        cls.empty_target_population_1 = TargetPopulation(name="emptyTargetPopulation1", status="APPROVED")
+        cls.empty_target_population_1 = TargetPopulation(name="emptyTargetPopulation1", status=TargetPopulation.STATUS_APPROVED)
         cls.empty_target_population_1.save()
 
     @staticmethod

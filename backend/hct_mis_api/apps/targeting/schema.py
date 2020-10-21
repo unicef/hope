@@ -256,7 +256,7 @@ class Query(graphene.ObjectType):
     def resolve_candidate_households_list_by_targeting_criteria(parent, info, target_population, **kwargs):
         target_population_id = decode_id_string(target_population)
         target_population_model = target_models.TargetPopulation.objects.get(pk=target_population_id)
-        if target_population_model.status == "DRAFT":
+        if target_population_model.status == target_models.TargetPopulation.STATUS_DRAFT:
             return prefetch_selections(
                 Household.objects.filter(target_population_model.candidate_list_targeting_criteria.get_query()),
             ).distinct()
@@ -267,9 +267,9 @@ class Query(graphene.ObjectType):
     ):
         target_population_id = decode_id_string(target_population)
         target_population_model = target_models.TargetPopulation.objects.get(pk=target_population_id)
-        if target_population_model.status == "DRAFT":
+        if target_population_model.status == target_models.TargetPopulation.STATUS_DRAFT:
             return []
-        if target_population_model.status == "APPROVED":
+        if target_population_model.status == target_models.TargetPopulation.STATUS_APPROVED:
             if targeting_criteria is None:
                 if target_population_model.final_list_targeting_criteria:
                     return (
