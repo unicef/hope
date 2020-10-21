@@ -6,7 +6,7 @@ from social_core.pipeline import social_auth
 from social_core.pipeline import user as social_core_user
 
 from account.microsoft_graph import MicrosoftGraphAPI
-from account.models import UserRole, Role
+from account.models import UserRole, Role, ACTIVE
 from core.models import BusinessArea
 
 logger = logging.getLogger("console")
@@ -31,6 +31,7 @@ def user_details(strategy, details, backend, user=None, *args, **kwargs):
         user.first_name = details.get("first_name")
         user.last_name = details.get("last_name")
         user.username = details["email"]
+        user.status = ACTIVE
         user.save()
 
     return social_core_user.user_details(strategy, details, backend, user, *args, **kwargs)
@@ -54,6 +55,7 @@ def create_user(strategy, details, backend, user=None, *args, **kwargs):
         username=details["email"],
         first_name=details.get("first_name"),
         last_name=details.get("last_name"),
+        status=ACTIVE,
     )
     ms_graph = MicrosoftGraphAPI()
     user_data = ms_graph.get_user_data(details["email"])
