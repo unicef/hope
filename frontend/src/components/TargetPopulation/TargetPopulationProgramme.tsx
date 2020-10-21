@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { Box, Paper, Typography } from '@material-ui/core';
 import { Field } from 'formik';
-import { ProgramNode, TargetPopulationNode, useAllProgramsQuery } from '../../__generated__/graphql';
+import { useAllProgramsQuery } from '../../__generated__/graphql';
 import { OverviewContainer } from '../OverviewContainer';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
@@ -22,26 +22,18 @@ const PaperContainer = styled(Paper)`
   border-bottom: 1px solid rgba(224, 224, 224, 1);
 `;
 
-interface TargetPopulationProgrammeProps {
-  targetPopulation: TargetPopulationNode;
-}
 
-export function TargetPopulationProgramme({
-  targetPopulation,
-}: TargetPopulationProgrammeProps): React.ReactElement {
-  const {
-    program,
-  } = targetPopulation;
+
+export function TargetPopulationProgramme(): React.ReactElement {
 
   const businessArea = useBusinessArea();
-
   const { data, loading } = useAllProgramsQuery({
     variables: { businessArea },
   });
   if (loading) return <LoadingComponent />;
 
   const { allPrograms } = data;
-  const programs = allPrograms.edges.map((edge) => edge.node);
+  const mappedPrograms = allPrograms.edges.map((edge) => ({name: edge.node.name, value: edge.node}));
   return (
     <PaperContainer data-cy='target-population-program-container'>
       <Title>
@@ -51,12 +43,12 @@ export function TargetPopulationProgramme({
         <Box display="flex" flexDirection="column">
         <GreyText>Selected programme that the Target Population is created for</GreyText>
         <Field
-              name='programmeName'
+              name='program'
               label='Programme'
               fullWidth
               variant='outlined'
               required
-              choices={programs as ProgramNode[]}
+              choices={mappedPrograms}
               component={FormikSelectField}
         />
         </Box>

@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { useParams } from 'react-router-dom';
 import { Button } from '@material-ui/core';
-import { Formik, Form } from 'formik';
+import { Formik, Form, Field } from 'formik';
 import { PageHeader } from '../PageHeader';
 import { BreadCrumbsItem } from '../BreadCrumbs';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
@@ -14,6 +14,7 @@ import { useSnackbar } from '../../hooks/useSnackBar';
 import { CandidateListTab } from './Edit/CandidateListTab';
 import { TargetPopulationProgramme } from './TargetPopulationProgramme';
 import { TARGET_POPULATION_QUERY } from '../../apollo/queries/TargetPopulation';
+import { FormikTextField } from '../../shared/Formik/FormikTextField';
 
 
 const ButtonContainer = styled.span`
@@ -33,7 +34,8 @@ export function EditTargetPopulation({
 }: EditTargetPopulationProps): React.ReactElement {
   const initialValues = {
     id: targetPopulation.id,
-    programmeName: targetPopulation.name || '',
+    name: targetPopulation.name || '',
+    programId: '',
     criterias: targetPopulationCriterias.rules || [],
     candidateListCriterias:
       targetPopulation.candidateListTargetingCriteria?.rules || [],
@@ -100,7 +102,7 @@ export function EditTargetPopulation({
           variables: {
             input: {
               id: values.id,
-              ...(targetPopulation.status === 'DRAFT' && { name: values.programmeName }),
+              ...(targetPopulation.status === 'DRAFT' && { name: values.name }),
               targetingCriteria: {
                 rules: mapRules(targetPopulation.status, values),
               },
@@ -125,12 +127,24 @@ export function EditTargetPopulation({
       {({ submitForm, values }) => (
         <Form>
           <PageHeader
-            title={values.programmeName}
+            title={
+              isTitleEditable() ? (
+                <Field
+                  name='name'
+                  label='Enter Target Population Name'
+                  type='text'
+                  fullWidth
+                  required
+                  component={FormikTextField}
+                />
+              ) : (
+                values.name
+              )}
             breadCrumbs={breadCrumbsItems}
             hasInputComponent
           >
             <>
-              {values.programmeName && (
+              {values.name && (
                 <ButtonContainer>
                   <Button
                     variant='outlined'
@@ -147,14 +161,14 @@ export function EditTargetPopulation({
                   color='primary'
                   type='submit'
                   onClick={submitForm}
-                  disabled={!values.programmeName}
+                  disabled={!values.name}
                 >
                   Save
                 </Button>
               </ButtonContainer>
             </>
           </PageHeader>
-          <TargetPopulationProgramme targetPopulation={targetPopulation} />
+          <TargetPopulationProgramme/>
           <CandidateListTab values={values} />
         </Form>
       )}

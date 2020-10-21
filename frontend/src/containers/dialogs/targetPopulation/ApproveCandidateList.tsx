@@ -86,7 +86,7 @@ export function ApproveCandidateList({
         initialValues={{ program: null }}
         onSubmit={(values) => {
           mutate({
-            variables: { id: targetPopulationId, programId: values.program.id },
+            variables: { id: targetPopulationId},
           }).then(() => {
             setOpen(false);
             showMessage('Programme Population Approved', {

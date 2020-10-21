@@ -273,6 +273,7 @@ input CreateTargetPopulationInput {
   name: String!
   targetingCriteria: TargetingCriteriaObjectType!
   businessAreaSlug: String!
+  programId: ID!
 }
 
 type CreateTargetPopulationMutation {
@@ -1366,7 +1367,7 @@ type Mutations {
   updateTargetPopulation(input: UpdateTargetPopulationInput!): UpdateTargetPopulationMutation
   copyTargetPopulation(input: CopyTargetPopulationMutationInput!): CopyTargetPopulationMutationPayload
   deleteTargetPopulation(input: DeleteTargetPopulationMutationInput!): DeleteTargetPopulationMutationPayload
-  approveTargetPopulation(id: ID!, programId: ID!): ApproveTargetPopulationMutation
+  approveTargetPopulation(id: ID!): ApproveTargetPopulationMutation
   unapproveTargetPopulation(id: ID!): UnapproveTargetPopulationMutation
   finalizeTargetPopulation(id: ID!): FinalizeTargetPopulationMutation
   createProgram(programData: CreateProgramInput!): CreateProgram

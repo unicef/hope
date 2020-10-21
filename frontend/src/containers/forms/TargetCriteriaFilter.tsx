@@ -38,6 +38,7 @@ export function TargetingCriteriaFilter({
   onChange,
   values,
   onClick,
+  selectedProgram
 }: {
   index: number;
   data: ImportedIndividualFieldsQuery;
@@ -45,8 +46,12 @@ export function TargetingCriteriaFilter({
   onChange: (e, object) => void;
   values;
   onClick: () => void;
+  selectedProgram?
 }): React.ReactElement {
   const shouldShowDivider = index + 1 < values.filters.length;
+
+  console.log('selected Program in filter', selectedProgram)
+  console.log('checked if selected program flag is false')
   return (
     <div>
       <FieldChooser

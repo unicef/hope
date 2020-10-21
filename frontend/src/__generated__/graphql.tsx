@@ -445,6 +445,7 @@ export type CreateTargetPopulationInput = {
   name: Scalars['String'],
   targetingCriteria: TargetingCriteriaObjectType,
   businessAreaSlug: Scalars['String'],
+  programId: Scalars['ID'],
 };
 
 export type CreateTargetPopulationMutation = {
@@ -1776,8 +1777,7 @@ export type MutationsDeleteTargetPopulationArgs = {
 
 
 export type MutationsApproveTargetPopulationArgs = {
-  id: Scalars['ID'],
-  programId: Scalars['ID']
+  id: Scalars['ID']
 };
 
 
@@ -3495,8 +3495,7 @@ export type ActivateCashPlanPaymentVerificationMutation = (
 );
 
 export type ApproveTpMutationVariables = {
-  id: Scalars['ID'],
-  programId: Scalars['ID']
+  id: Scalars['ID']
 };
 
 
@@ -5637,8 +5636,8 @@ export type ActivateCashPlanPaymentVerificationMutationHookResult = ReturnType<t
 export type ActivateCashPlanPaymentVerificationMutationResult = ApolloReactCommon.MutationResult<ActivateCashPlanPaymentVerificationMutation>;
 export type ActivateCashPlanPaymentVerificationMutationOptions = ApolloReactCommon.BaseMutationOptions<ActivateCashPlanPaymentVerificationMutation, ActivateCashPlanPaymentVerificationMutationVariables>;
 export const ApproveTpDocument = gql`
-    mutation ApproveTP($id: ID!, $programId: ID!) {
-  approveTargetPopulation(id: $id, programId: $programId) {
+    mutation ApproveTP($id: ID!) {
+  approveTargetPopulation(id: $id) {
     targetPopulation {
       id
       name
@@ -5766,7 +5765,6 @@ export function withApproveTp<TProps, TChildProps = {}>(operationOptions?: Apoll
  * const [approveTpMutation, { data, loading, error }] = useApproveTpMutation({
  *   variables: {
  *      id: // value for 'id'
- *      programId: // value for 'programId'
  *   },
  * });
  */
@@ -11327,7 +11325,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   updateTargetPopulation?: Resolver<Maybe<ResolversTypes['UpdateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateTargetPopulationArgs, 'input'>>,
   copyTargetPopulation?: Resolver<Maybe<ResolversTypes['CopyTargetPopulationMutationPayload']>, ParentType, ContextType, RequireFields<MutationsCopyTargetPopulationArgs, 'input'>>,
   deleteTargetPopulation?: Resolver<Maybe<ResolversTypes['DeleteTargetPopulationMutationPayload']>, ParentType, ContextType, RequireFields<MutationsDeleteTargetPopulationArgs, 'input'>>,
-  approveTargetPopulation?: Resolver<Maybe<ResolversTypes['ApproveTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsApproveTargetPopulationArgs, 'id' | 'programId'>>,
+  approveTargetPopulation?: Resolver<Maybe<ResolversTypes['ApproveTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsApproveTargetPopulationArgs, 'id'>>,
   unapproveTargetPopulation?: Resolver<Maybe<ResolversTypes['UnapproveTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsUnapproveTargetPopulationArgs, 'id'>>,
   finalizeTargetPopulation?: Resolver<Maybe<ResolversTypes['FinalizeTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsFinalizeTargetPopulationArgs, 'id'>>,
   createProgram?: Resolver<Maybe<ResolversTypes['CreateProgram']>, ParentType, ContextType, RequireFields<MutationsCreateProgramArgs, 'programData'>>,

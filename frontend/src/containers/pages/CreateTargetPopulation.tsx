@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Button, Typography, Paper, Tabs, Tab } from '@material-ui/core';
+import { Button, Typography, Paper } from '@material-ui/core';
 import { Field, Form, Formik, FieldArray } from 'formik';
 import { PageHeader } from '../../components/PageHeader';
 import { TargetingCriteria } from '../../components/TargetPopulation/TargetingCriteria';
@@ -11,6 +11,7 @@ import { useSnackbar } from '../../hooks/useSnackBar';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
 import { CreateTable } from '../tables/TargetPopulation/Create';
+import { TargetPopulationProgramme } from '../../components/TargetPopulation/TargetPopulationProgramme';
 
 const PaperContainer = styled(Paper)`
   display: flex;
@@ -32,6 +33,7 @@ const Label = styled.p`
 export function CreateTargetPopulation(): React.ReactElement {
   const initialValues = {
     name: '',
+    program: null,
     criterias: [],
   };
   const [mutate] = useCreateTpMutation();
@@ -43,17 +45,6 @@ export function CreateTargetPopulation(): React.ReactElement {
       to: `/${businessArea}/target-population/`,
     },
   ];
-  const tabs = (
-    <Tabs
-      value={0}
-      aria-label='tabs'
-      indicatorColor='primary'
-      textColor='primary'
-    >
-      <Tab label='Programme Population' />
-      <Tab label='Target Population' disabled />
-    </Tabs>
-  );
   return (
     <Formik
       initialValues={initialValues}
@@ -63,6 +54,7 @@ export function CreateTargetPopulation(): React.ReactElement {
             input: {
               name: values.name,
               businessAreaSlug: businessArea,
+              programId: values.program.id,
               targetingCriteria: {
                 rules: values.criterias.map((rule) => {
                   return {
@@ -108,7 +100,6 @@ export function CreateTargetPopulation(): React.ReactElement {
               />
             }
             breadCrumbs={breadCrumbsItems}
-            tabs={tabs}
             hasInputComponent
           >
             <>
@@ -125,6 +116,7 @@ export function CreateTargetPopulation(): React.ReactElement {
               </ButtonContainer>
             </>
           </PageHeader>
+          <TargetPopulationProgramme  />
           <FieldArray
             name='criterias'
             render={(arrayHelpers) => (
@@ -132,6 +124,7 @@ export function CreateTargetPopulation(): React.ReactElement {
                 helpers={arrayHelpers}
                 candidateListRules={values.criterias}
                 isEdit
+                selectedProgram={values.program}
               />
             )}
           />

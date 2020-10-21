@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Tabs, Tab } from '@material-ui/core';
-import { TabPanel } from '../../components/TabPanel';
 import {
   useTargetPopulationQuery,
   TargetPopulationNode,
@@ -10,7 +8,6 @@ import { EditTargetPopulation } from '../../components/TargetPopulation/EditTarg
 import { TargetPopulationCore } from '../../components/TargetPopulation/TargetPopulationCore';
 import { TargetPopulationDetails } from '../../components/TargetPopulation/TargetPopulationDetails';
 import { TargetPopulationPageHeader } from './headers/TargetPopulationPageHeader';
-import { TargetPopulationProgramme } from '../../components/TargetPopulation/TargetPopulationProgramme';
 
 export function TargetPopulationDetailsPage(): React.ReactElement {
 

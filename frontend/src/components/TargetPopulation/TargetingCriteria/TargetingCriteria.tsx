@@ -75,12 +75,14 @@ interface TargetingCriteriaProps {
   targetPopulationRules?;
   isEdit?: boolean;
   helpers?;
+  selectedProgram?;
 }
 
 export function TargetingCriteria({
   candidateListRules,
   isEdit = false,
   helpers,
+  selectedProgram
 }: TargetingCriteriaProps): React.ReactElement {
   const { t } = useTranslation();
   const [isOpen, setOpen] = useState(false);
@@ -133,6 +135,7 @@ export function TargetingCriteria({
                 open={isOpen}
                 onClose={() => closeModal()}
                 addCriteria={addCriteria}
+                selectedProgram={selectedProgram}
               />
             </>
           )}

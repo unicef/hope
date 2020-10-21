@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, {useRef} from 'react';
 import * as Yup from 'yup';
 import styled from 'styled-components';
 import {
@@ -44,11 +44,6 @@ const DialogFooter = styled.div`
 const StyledBox = styled(Box)`
   width: 100%;
 `;
-const MarginButton = styled(Button)`
-  && {
-    margin-left: 10px;
-  }
-`;
 
 const validationSchema = Yup.object().shape({
   filters: Yup.array().of(
@@ -78,6 +73,7 @@ interface TargetCriteriaFormPropTypes {
   open: boolean;
   onClose: () => void;
   title: string;
+  selectedProgram?;
 }
 
 export function TargetCriteriaForm({
@@ -86,13 +82,13 @@ export function TargetCriteriaForm({
   open,
   onClose,
   title,
+  selectedProgram
 }: TargetCriteriaFormPropTypes): React.ReactElement {
   const { data, loading } = useImportedIndividualFieldsQuery();
   const filtersArrayWrapperRef = useRef(null);
   const initialValue = mapCriteriaToInitialValues(criteria);
   if (loading) return null;
 
-  console.log('initialValue', initialValue);
   return (
     <DialogContainer>
       <Formik
@@ -105,7 +101,7 @@ export function TargetCriteriaForm({
         validationSchema={validationSchema}
         enableReinitialize
       >
-        {({ submitForm, values }) => (
+        {({ submitForm, values}) => (
           <>
             <Dialog
               open={open}
@@ -152,6 +148,7 @@ export function TargetCriteriaForm({
                             }}
                             values={values}
                             onClick={() => arrayHelpers.remove(index)}
+                            selectedProgram={selectedProgram}
                           />
                         );
                       })}
