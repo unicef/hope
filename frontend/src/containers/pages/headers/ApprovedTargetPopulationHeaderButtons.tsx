@@ -23,13 +23,11 @@ const ButtonContainer = styled.span`
 
 export interface ApprovedTargetPopulationHeaderButtonsPropTypes {
   targetPopulation: TargetPopulationNode;
-  selectedTab: number;
   setEditState: Function;
 }
 
 export function ApprovedTargetPopulationHeaderButtons({
   targetPopulation,
-  selectedTab,
   setEditState,
 }: ApprovedTargetPopulationHeaderButtonsPropTypes): React.ReactElement {
   const [openDuplicate, setOpenDuplicate] = useState(false);
@@ -42,7 +40,6 @@ export function ApprovedTargetPopulationHeaderButtons({
           <FileCopy />
         </Button>
       </IconContainer>
-      {selectedTab !== 0 && (
         <ButtonContainer>
           <Button
             variant='outlined'
@@ -53,7 +50,6 @@ export function ApprovedTargetPopulationHeaderButtons({
             Edit
           </Button>
         </ButtonContainer>
-      )}
       <ButtonContainer>
         <Tooltip
           title={

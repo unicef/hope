@@ -26,15 +26,11 @@ const StatusWrapper = styled.div`
 export interface ProgramDetailsPageHeaderPropTypes {
   setEditState: Function;
   targetPopulation: TargetPopulationNode;
-  tabs: React.ReactElement;
-  selectedTab: number;
 }
 
 export function TargetPopulationPageHeader({
   targetPopulation,
   setEditState,
-  tabs,
-  selectedTab,
 }: ProgramDetailsPageHeaderPropTypes): React.ReactElement {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
@@ -59,7 +55,6 @@ export function TargetPopulationPageHeader({
       buttons = (
         <ApprovedTargetPopulationHeaderButtons
           targetPopulation={targetPopulation}
-          selectedTab={selectedTab}
           setEditState={setEditState}
         />
       );
@@ -88,7 +83,6 @@ export function TargetPopulationPageHeader({
           </HeaderWrapper>
         }
         breadCrumbs={breadCrumbsItems}
-        tabs={tabs}
       >
         {buttons}
       </PageHeader>

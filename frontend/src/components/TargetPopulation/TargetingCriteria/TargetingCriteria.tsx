@@ -71,7 +71,6 @@ const AddCriteria = styled.div`
 `;
 
 interface TargetingCriteriaProps {
-  selectedTab?: number;
   candidateListRules?;
   targetPopulationRules?;
   isEdit?: boolean;
@@ -79,9 +78,7 @@ interface TargetingCriteriaProps {
 }
 
 export function TargetingCriteria({
-  selectedTab,
   candidateListRules,
-  targetPopulationRules = [],
   isEdit = false,
   helpers,
 }: TargetingCriteriaProps): React.ReactElement {
@@ -89,7 +86,6 @@ export function TargetingCriteria({
   const [isOpen, setOpen] = useState(false);
   const [criteriaIndex, setIndex] = useState(null);
   const [criteriaObject, setCriteria] = useState({});
-  const showAdditionalCriterias = selectedTab > 0;
   const openModal = (criteria): void => {
     setCriteria(criteria);
     setOpen(true);
@@ -141,68 +137,6 @@ export function TargetingCriteria({
             </>
           )}
         </Title>
-
-        {showAdditionalCriterias ? (
-          <>
-            <ContentWrapper>
-              {candidateListRules.length &&
-                candidateListRules.map((criteria, index) => {
-                  return (
-                    <>
-                      <Criteria
-                        //eslint-disable-next-line
-                        key={criteria.id || index}
-                        isEdit={false}
-                        canRemove={candidateListRules.length > 1}
-                        rules={criteria.filters}
-                        alternative={showAdditionalCriterias}
-                      />
-
-                      {index === candidateListRules.length - 1 ||
-                      (candidateListRules.length === 1 &&
-                        index === 0) ? null : (
-                        <Divider>
-                          <DividerLabel>Or</DividerLabel>
-                        </Divider>
-                      )}
-                    </>
-                  );
-                })}
-            </ContentWrapper>
-            <ContentWrapper>
-              {targetPopulationRules.length
-                ? targetPopulationRules.map((criteria, index) => {
-                    return (
-                      <>
-                        <Criteria
-                          //eslint-disable-next-line
-                          key={criteria.id || index}
-                          isEdit={isEdit}
-                          canRemove={targetPopulationRules.length > 1}
-                          rules={criteria.filters}
-                          editFunction={() => editCriteria(criteria, index)}
-                          removeFunction={() => helpers.remove(index)}
-                        />
-
-                        {index === targetPopulationRules.length - 1 ||
-                        (targetPopulationRules.length === 1 &&
-                          index === 0) ? null : (
-                          <Divider>
-                            <DividerLabel>Or</DividerLabel>
-                          </Divider>
-                        )}
-                      </>
-                    );
-                  })
-                : isEdit && (
-                    <AddCriteria onClick={() => setOpen(true)}>
-                      <AddCircleOutline />
-                      <p>Add Criteria</p>
-                    </AddCriteria>
-                  )}
-            </ContentWrapper>
-          </>
-        ) : (
           <ContentWrapper>
             {candidateListRules.length ? (
               candidateListRules.map((criteria, index) => {
@@ -237,7 +171,6 @@ export function TargetingCriteria({
               </AddCriteria>
             )}
           </ContentWrapper>
-        )}
       </PaperContainer>
     </div>
   );

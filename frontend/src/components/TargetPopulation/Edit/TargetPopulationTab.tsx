@@ -7,7 +7,6 @@ import { useFinalHouseholdsListByTargetingCriteriaQuery } from '../../../__gener
 
 export function TargetPopulationTab({
   values,
-  selectedTab,
 }): React.ReactElement {
   return (
     <>
@@ -18,7 +17,6 @@ export function TargetPopulationTab({
             helpers={arrayHelpers}
             candidateListRules={values.candidateListCriterias}
             targetPopulationRules={values.targetPopulationCriterias}
-            selectedTab={selectedTab}
             isEdit
           />
         )}

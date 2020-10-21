@@ -11,10 +11,9 @@ import {
   useUpdateTpMutation,
 } from '../../__generated__/graphql';
 import { useSnackbar } from '../../hooks/useSnackBar';
-import { TabPanel } from '../TabPanel';
 import { CandidateListTab } from './Edit/CandidateListTab';
-import { TargetPopulationTab } from './Edit/TargetPopulationTab';
-import { TargetPopulationDetails } from './TargetPopulationDetails';
+import { TargetPopulationProgramme } from './TargetPopulationProgramme';
+
 
 const ButtonContainer = styled.span`
   margin: 0 ${({ theme }) => theme.spacing(2)}px;
@@ -23,14 +22,12 @@ const ButtonContainer = styled.span`
 interface EditTargetPopulationProps {
   targetPopulationCriterias?;
   cancelEdit?;
-  selectedTab?: number;
   targetPopulation?;
 }
 
 export function EditTargetPopulation({
   targetPopulationCriterias,
   cancelEdit,
-  selectedTab = 0,
   targetPopulation,
 }: EditTargetPopulationProps): React.ReactElement {
   const initialValues = {
@@ -51,17 +48,7 @@ export function EditTargetPopulation({
       to: `/${businessArea}/target-population/`,
     },
   ];
-  const tabs = (
-    <Tabs
-      value={selectedTab}
-      aria-label='tabs'
-      indicatorColor='primary'
-      textColor='primary'
-    >
-      <Tab label='Programme Population' disabled={selectedTab !== 0} />
-      <Tab label='Target Population' disabled={selectedTab !== 1} />
-    </Tabs>
-  );
+
   const isTitleEditable = (): boolean => {
     switch (targetPopulation.status) {
       case 'APPROVED':
@@ -141,7 +128,6 @@ export function EditTargetPopulation({
                 values.name
               )
             }
-            tabs={tabs}
             breadCrumbs={breadCrumbsItems}
             hasInputComponent
           >
@@ -170,13 +156,8 @@ export function EditTargetPopulation({
               </ButtonContainer>
             </>
           </PageHeader>
-          <TabPanel value={selectedTab} index={0}>
-            <CandidateListTab values={values} />
-          </TabPanel>
-          <TabPanel value={selectedTab} index={1}>
-            <TargetPopulationDetails targetPopulation={targetPopulation} />
-            <TargetPopulationTab values={values} selectedTab={selectedTab} />
-          </TabPanel>
+          <TargetPopulationProgramme targetPopulation={targetPopulation} />
+          <CandidateListTab values={values} />
         </Form>
       )}
     </Formik>
