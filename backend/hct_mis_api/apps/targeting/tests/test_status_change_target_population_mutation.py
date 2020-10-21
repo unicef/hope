@@ -48,7 +48,7 @@ class TestApproveTargetPopulationMutation(APITestCase):
         cls.households.append(cls.household_size_1)
         cls.households.append(cls.household_size_2)
 
-        tp = TargetPopulation(name="Draft Target Population", status="DRAFT")
+        tp = TargetPopulation(name="Draft Target Population", status=TargetPopulation.STATUS_DRAFT)
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
             {"field_name": "residence_status", "arguments": ["HOST"], "comparision_method": "EQUALS"}
@@ -58,7 +58,7 @@ class TestApproveTargetPopulationMutation(APITestCase):
 
         tp = TargetPopulation(
             name="Approved Target Population with final filters",
-            status="APPROVED",
+            status=TargetPopulation.STATUS_APPROVED,
         )
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
@@ -71,7 +71,7 @@ class TestApproveTargetPopulationMutation(APITestCase):
         tp.households.set(cls.households)
         cls.target_population_approved_with_final_rule = tp
 
-        tp = TargetPopulation(name="Approved Target Population", status="APPROVED")
+        tp = TargetPopulation(name="Approved Target Population", status=TargetPopulation.STATUS_APPROVED)
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
             {"field_name": "residence_status", "arguments": ["HOST"], "comparision_method": "EQUALS"}
@@ -151,7 +151,7 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
         cls.households.append(cls.household_size_1)
         cls.households.append(cls.household_size_2)
 
-        tp = TargetPopulation(name="Draft Target Population", status="DRAFT")
+        tp = TargetPopulation(name="Draft Target Population", status=TargetPopulation.STATUS_DRAFT)
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
             {"field_name": "residence_status", "arguments": ["HOST"], "comparision_method": "EQUALS"}
@@ -161,7 +161,7 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
 
         tp = TargetPopulation(
             name="Approved Target Population with final filters",
-            status="APPROVED",
+            status=TargetPopulation.STATUS_APPROVED,
         )
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
@@ -174,7 +174,7 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
         tp.households.set(cls.households)
         cls.target_population_approved_with_final_rule = tp
 
-        tp = TargetPopulation(name="Approved Target Population", status="APPROVED")
+        tp = TargetPopulation(name="Approved Target Population", status=TargetPopulation.STATUS_APPROVED)
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
             {"field_name": "residence_status", "arguments": ["HOST"], "comparision_method": "EQUALS"}
@@ -258,7 +258,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
         cls.households.append(cls.household_size_1)
         cls.households.append(cls.household_size_2)
 
-        tp = TargetPopulation(name="Draft Target Population", status="DRAFT")
+        tp = TargetPopulation(name="Draft Target Population", status=TargetPopulation.STATUS_DRAFT)
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
             {"field_name": "residence_status", "arguments": ["HOST"], "comparision_method": "EQUALS"}
@@ -268,7 +268,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
 
         tp = TargetPopulation(
             name="Approved Target Population with final filters",
-            status="APPROVED",
+            status=TargetPopulation.STATUS_APPROVED,
         )
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
@@ -281,7 +281,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
         tp.households.set(cls.households)
         cls.target_population_approved_with_final_rule = tp
 
-        tp = TargetPopulation(name="Approved Target Population", status="APPROVED")
+        tp = TargetPopulation(name="Approved Target Population", status=TargetPopulation.STATUS_APPROVED)
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
             {"field_name": "residence_status", "arguments": ["HOST"], "comparision_method": "EQUALS"}

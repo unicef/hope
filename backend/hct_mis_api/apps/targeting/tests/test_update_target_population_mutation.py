@@ -175,7 +175,7 @@ class TestUpdateTargetPopulationMutation(APITestCase):
             candidate_list_targeting_criteria=cls.get_targeting_criteria_for_rule(
                 {"field_name": "size", "arguments": [1], "comparision_method": "GREATER_THAN"}
             ),
-            status="APPROVED",
+            status=TargetPopulation.STATUS_APPROVED,
         )
         cls.approved_target_population.save()
         cls.approved_target_population.households.set(Household.objects.all())

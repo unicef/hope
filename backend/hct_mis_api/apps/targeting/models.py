@@ -84,7 +84,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
     status = models.CharField(
         max_length=_MAX_LEN,
         choices=STATUS_CHOICES,
-        default="DRAFT",
+        default=STATUS_DRAFT,
     )
     households = models.ManyToManyField(
         "household.Household",
@@ -144,13 +144,13 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
 
     @property
     def final_list(self):
-        if self.status == "DRAFT":
+        if self.status == TargetPopulation.STATUS_DRAFT:
             return []
         return self.households.filter(selections__final=True).order_by("created_at").distinct()
 
     @property
     def candidate_stats(self):
-        if self.status == "DRAFT":
+        if self.status == TargetPopulation.STATUS_DRAFT:
             households_ids = Household.objects.filter(self.candidate_list_targeting_criteria.get_query()).values_list(
                 "id"
             )
@@ -188,7 +188,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
 
     @property
     def final_stats(self):
-        if self.status == "Draft":
+        if self.status == TargetPopulation.STATUS_DRAFT:
             return None
         elif self.status == TargetPopulation.STATUS_APPROVED:
             households_ids = self.households.filter(self.final_list_targeting_criteria.get_query()).values_list("id")
@@ -288,7 +288,7 @@ class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingMixin):
         try:
             if (
                 self.target_population_final
-                and self.target_population_final.status != "DRAFT"
+                and self.target_population_final.status != TargetPopulation.STATUS_DRAFT
                 and self.target_population_final.program is not None
                 and self.target_population_final.program.individual_data_needed
             ):

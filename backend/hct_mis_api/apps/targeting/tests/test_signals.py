@@ -59,7 +59,7 @@ class TestTargetPopulationQuery(APITestCase):
             name="target_population_size_2",
             created_by=self.user,
             candidate_list_targeting_criteria=targeting_criteria,
-            status="DRAFT",
+            status=TargetPopulation.STATUS_DRAFT,
         )
         tp.save()
 
@@ -77,7 +77,7 @@ class TestTargetPopulationQuery(APITestCase):
             name="target_population_size_2",
             created_by=self.user,
             candidate_list_targeting_criteria=targeting_criteria,
-            status="DRAFT",
+            status=TargetPopulation.STATUS_DRAFT,
         )
         tp.save()
 
@@ -96,7 +96,7 @@ class TestTargetPopulationQuery(APITestCase):
         tp = TargetPopulation(
             name="target_population_size_2",
             created_by=self.user,
-            status="APPROVED",
+            status=TargetPopulation.STATUS_APPROVED,
         )
         tp.save()
         tp.households.add(self.household_size_2)
@@ -113,7 +113,7 @@ class TestTargetPopulationQuery(APITestCase):
         tp = TargetPopulation(
             name="target_population_size_2",
             created_by=self.user,
-            status="APPROVED",
+            status=TargetPopulation.STATUS_APPROVED,
             candidate_list_targeting_criteria=targeting_criteria,
         )
         tp.save()
@@ -154,7 +154,7 @@ class TestTargetPopulationQuery(APITestCase):
         tp = TargetPopulation(
             name="target_population_size_2",
             created_by=self.user,
-            status="FINALIZED",
+            status=TargetPopulation.STATUS_FINALIZED,
         )
         tp.save()
         tp.households.add(self.household_size_2)

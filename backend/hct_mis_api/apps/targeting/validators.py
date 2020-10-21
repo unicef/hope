@@ -4,7 +4,7 @@ from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES_DICTIONARY
 from core.models import FlexibleAttribute
 from core.utils import get_attr_value
 from core.validators import BaseValidator
-from targeting.models import TargetingCriteriaRuleFilter
+from targeting.models import TargetingCriteriaRuleFilter, TargetPopulation
 
 
 class TargetValidator(BaseValidator):
@@ -12,28 +12,28 @@ class TargetValidator(BaseValidator):
 
     @staticmethod
     def validate_is_finalized(target_status):
-        if target_status == "FINALIZED":
+        if target_status == TargetPopulation.STATUS_FINALIZED:
             raise ValidationError("Target Population has been finalized. Cannot change.")
 
 
 class ApproveTargetPopulationValidator:
     @staticmethod
     def validate(target_population):
-        if target_population.status != "DRAFT":
+        if target_population.status != TargetPopulation.STATUS_DRAFT:
             raise ValidationError("Only Target Population with status DRAFT can be approved")
 
 
 class UnapproveTargetPopulationValidator:
     @staticmethod
     def validate(target_population):
-        if target_population.status != "APPROVED":
+        if target_population.status != TargetPopulation.STATUS_APPROVED:
             raise ValidationError("Only Target Population with status APPROVED can be unapproved")
 
 
 class FinalizeTargetPopulationValidator:
     @staticmethod
     def validate(target_population):
-        if target_population.status != "APPROVED":
+        if target_population.status != TargetPopulation.STATUS_APPROVED:
             raise ValidationError("Only Target Population with status APPROVED can be finalized")
         if target_population.program.status != "ACTIVE":
             raise ValidationError("Only Target Population assigned to program with status ACTIVE can be send")
