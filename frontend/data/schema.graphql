@@ -1967,6 +1967,7 @@ input UpdateTargetPopulationInput {
   id: ID!
   name: String
   targetingCriteria: TargetingCriteriaObjectType
+  programId: ID
 }
 
 type UpdateTargetPopulationMutation {

@@ -2947,6 +2947,7 @@ export type UpdateTargetPopulationInput = {
   id: Scalars['ID'],
   name?: Maybe<Scalars['String']>,
   targetingCriteria?: Maybe<TargetingCriteriaObjectType>,
+  programId?: Maybe<Scalars['ID']>,
 };
 
 export type UpdateTargetPopulationMutation = {

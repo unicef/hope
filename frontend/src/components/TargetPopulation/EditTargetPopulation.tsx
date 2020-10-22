@@ -35,7 +35,7 @@ export function EditTargetPopulation({
   const initialValues = {
     id: targetPopulation.id,
     name: targetPopulation.name || '',
-    programId: '',
+    program: null,
     criterias: targetPopulationCriterias.rules || [],
     candidateListCriterias:
       targetPopulation.candidateListTargetingCriteria?.rules || [],
@@ -102,6 +102,7 @@ export function EditTargetPopulation({
           variables: {
             input: {
               id: values.id,
+              programId: values.program.id,
               ...(targetPopulation.status === 'DRAFT' && { name: values.name }),
               targetingCriteria: {
                 rules: mapRules(targetPopulation.status, values),
