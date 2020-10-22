@@ -1,6 +1,8 @@
-export const chooseFieldType = (value, arrayHelpers, index): void => {
+export const chooseFieldType = (value, arrayHelpers, index, individualDataNeeded): void => {
+  const headOfHousehold = !individualDataNeeded && value.associatedWith === 'Individual'
   const values = {
     isFlexField: value.isFlexField,
+    headOfHousehold,
     associatedWith: value.associatedWith,
     fieldAttribute: {
       labelEn: value.labelEn,

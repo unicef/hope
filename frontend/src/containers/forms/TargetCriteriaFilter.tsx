@@ -50,8 +50,6 @@ export function TargetingCriteriaFilter({
 }): React.ReactElement {
   const shouldShowDivider = index + 1 < values.filters.length;
 
-  console.log('selected Program in filter', selectedProgram)
-  console.log('checked if selected program flag is false')
   return (
     <div>
       <FieldChooser
@@ -70,6 +68,7 @@ export function TargetingCriteriaFilter({
             <Field
               name={`filters[${index}].headOfHousehold`}
               label='Head of Household'
+              disabled={!selectedProgram.individualDataNeeded }
               component={FormikCheckboxField}
             />
           )}

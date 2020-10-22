@@ -86,8 +86,8 @@ export function TargetCriteriaForm({
 }: TargetCriteriaFormPropTypes): React.ReactElement {
   const { data, loading } = useImportedIndividualFieldsQuery();
   const filtersArrayWrapperRef = useRef(null);
-  const initialValue = mapCriteriaToInitialValues(criteria);
   if (loading) return null;
+  const initialValue = mapCriteriaToInitialValues(criteria);
 
   return (
     <DialogContainer>
@@ -142,6 +142,7 @@ export function TargetCriteriaForm({
                                   object,
                                   arrayHelpers,
                                   index,
+                                  selectedProgram.individualDataNeeded
                                 );
                               }
                               return clearField(arrayHelpers, index);
@@ -166,7 +167,7 @@ export function TargetCriteriaForm({
                         onClick={() =>
                           filtersArrayWrapperRef.current
                             .getArrayHelpers()
-                            .push({ fieldname: '' })
+                            .push({ fieldname: ''})
                         }
                       >
                         Add Next Criteria
