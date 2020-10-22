@@ -1,7 +1,10 @@
 import styled from 'styled-components';
 import React from 'react';
 import { SubField } from '../../components/TargetPopulation/SubField';
-import { ImportedIndividualFieldsQuery } from '../../__generated__/graphql';
+import {
+  AllProgramsQuery,
+  ImportedIndividualFieldsQuery,
+} from '../../__generated__/graphql';
 import { FieldChooser } from '../../components/TargetPopulation/FieldChooser';
 import { Field } from 'formik';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
@@ -38,7 +41,7 @@ export function TargetingCriteriaFilter({
   onChange,
   values,
   onClick,
-  selectedProgram
+  selectedProgram,
 }: {
   index: number;
   data: ImportedIndividualFieldsQuery;
@@ -46,7 +49,7 @@ export function TargetingCriteriaFilter({
   onChange: (e, object) => void;
   values;
   onClick: () => void;
-  selectedProgram?
+  selectedProgram?: AllProgramsQuery['allPrograms']['edges'][number]['node'];
 }): React.ReactElement {
   const shouldShowDivider = index + 1 < values.filters.length;
 
@@ -68,7 +71,7 @@ export function TargetingCriteriaFilter({
             <Field
               name={`filters[${index}].headOfHousehold`}
               label='Head of Household'
-              disabled={!selectedProgram.individualDataNeeded }
+              disabled={!selectedProgram.individualDataNeeded}
               component={FormikCheckboxField}
             />
           )}

@@ -6,7 +6,10 @@ import styled from 'styled-components';
 import { TargetPopulationHouseholdTable } from '../../../containers/tables/TargetPopulationHouseholdTable';
 import { TargetingCriteria } from '../TargetingCriteria';
 import { Results } from '../Results';
-import { useGoldenRecordByTargetingCriteriaQuery } from '../../../__generated__/graphql';
+import {
+  AllProgramsQuery,
+  useGoldenRecordByTargetingCriteriaQuery,
+} from '../../../__generated__/graphql';
 
 const PaperContainer = styled(Paper)`
   display: flex;
@@ -17,7 +20,13 @@ const PaperContainer = styled(Paper)`
   border-bottom: 1px solid rgba(224, 224, 224, 1);
 `;
 
-export function CandidateListTab({ values }): React.ReactElement {
+export function CandidateListTab({
+  values,
+  allPrograms,
+}: {
+  allPrograms: AllProgramsQuery;
+  values;
+}): React.ReactElement {
   return (
     <>
       <FieldArray
@@ -27,6 +36,11 @@ export function CandidateListTab({ values }): React.ReactElement {
             helpers={arrayHelpers}
             candidateListRules={values.candidateListCriterias}
             isEdit
+            selectedProgram={
+              allPrograms?.allPrograms?.edges.find(
+                (el) => el.node.id === values.program,
+              ).node
+            }
           />
         )}
       />

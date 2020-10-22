@@ -35,7 +35,7 @@ export function EditTargetPopulation({
   const initialValues = {
     id: targetPopulation.id,
     name: targetPopulation.name || '',
-    program: targetPopulation.program.id,
+    program: targetPopulation.program?.id || '',
     criterias: targetPopulationCriterias.rules || [],
     candidateListCriterias:
       targetPopulation.candidateListTargetingCriteria?.rules || [],
@@ -181,7 +181,7 @@ export function EditTargetPopulation({
             allPrograms={allProgramsData}
             loading={loadingPrograms}
           />
-          <CandidateListTab values={values} />
+          <CandidateListTab allPrograms={allProgramsData} values={values} />
         </Form>
       )}
     </Formik>

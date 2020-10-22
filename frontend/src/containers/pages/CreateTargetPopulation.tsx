@@ -16,7 +16,6 @@ import { BreadCrumbsItem } from '../../components/BreadCrumbs';
 import { CreateTable } from '../tables/TargetPopulation/Create';
 import { TargetPopulationProgramme } from '../../components/TargetPopulation/TargetPopulationProgramme';
 import { TargetingCriteriaDisabled } from '../../components/TargetPopulation/TargetingCriteria/TargetingCriteriaDisabled';
-import { LoadingComponent } from '../../components/LoadingComponent';
 
 const PaperContainer = styled(Paper)`
   display: flex;

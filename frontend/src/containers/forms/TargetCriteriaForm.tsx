@@ -1,4 +1,4 @@
-import React, {useRef} from 'react';
+import React, { useRef } from 'react';
 import * as Yup from 'yup';
 import styled from 'styled-components';
 import {
@@ -82,13 +82,12 @@ export function TargetCriteriaForm({
   open,
   onClose,
   title,
-  selectedProgram
+  selectedProgram,
 }: TargetCriteriaFormPropTypes): React.ReactElement {
   const { data, loading } = useImportedIndividualFieldsQuery();
   const filtersArrayWrapperRef = useRef(null);
   if (loading) return null;
   const initialValue = mapCriteriaToInitialValues(criteria);
-
   return (
     <DialogContainer>
       <Formik
@@ -101,7 +100,7 @@ export function TargetCriteriaForm({
         validationSchema={validationSchema}
         enableReinitialize
       >
-        {({ submitForm, values}) => (
+        {({ submitForm, values }) => (
           <>
             <Dialog
               open={open}
@@ -142,7 +141,7 @@ export function TargetCriteriaForm({
                                   object,
                                   arrayHelpers,
                                   index,
-                                  selectedProgram.individualDataNeeded
+                                  selectedProgram.individualDataNeeded,
                                 );
                               }
                               return clearField(arrayHelpers, index);
@@ -167,7 +166,7 @@ export function TargetCriteriaForm({
                         onClick={() =>
                           filtersArrayWrapperRef.current
                             .getArrayHelpers()
-                            .push({ fieldname: ''})
+                            .push({ fieldname: '' })
                         }
                       >
                         Add Next Criteria
