@@ -6,6 +6,7 @@ import { useDebounce } from '../../hooks/useDebounce';
 import { PageHeader } from '../../components/PageHeader';
 import { UsersListTable } from '../tables/UsersListTable';
 import { UsersListFilters } from '../../components/UserManagement/UsersListFilters';
+import {useBusinessArea} from "../../hooks/useBusinessArea";
 
 const Container = styled.div`
   && {
@@ -16,6 +17,7 @@ const Container = styled.div`
 `;
 
 export function UsersList(): React.ReactElement {
+  const businessArea = useBusinessArea();
   const { t } = useTranslation();
   const [filter, setFilter] = useState({
     search: '',
@@ -33,9 +35,11 @@ export function UsersList(): React.ReactElement {
             variant='contained'
             color='primary'
             onClick={() => null}
+            component="a"
+            href={`/api/download-exported-users/${businessArea}`}
             data-cy='button-target-population-create-new'
           >
-            Send to CashAssist
+            Export
           </Button>
         </>
       </PageHeader>
