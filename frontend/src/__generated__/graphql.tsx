@@ -4675,7 +4675,7 @@ export type TargetPopulationQuery = (
       & Pick<UserNode, 'firstName' | 'lastName'>
     )>, program: Maybe<(
       { __typename?: 'ProgramNode' }
-      & Pick<ProgramNode, 'id' | 'name' | 'status'>
+      & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'populationGoal' | 'sector' | 'totalNumberOfHouseholds' | 'individualDataNeeded'>
     )>, createdBy: Maybe<(
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'firstName' | 'lastName'>
@@ -8717,7 +8717,17 @@ export const TargetPopulationDocument = gql`
     program {
       id
       name
+      startDate
+      endDate
       status
+      caId
+      description
+      budget
+      frequencyOfPayments
+      populationGoal
+      sector
+      totalNumberOfHouseholds
+      individualDataNeeded
     }
     createdBy {
       firstName

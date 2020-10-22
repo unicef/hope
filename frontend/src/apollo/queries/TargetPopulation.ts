@@ -19,7 +19,17 @@ export const TARGET_POPULATION_QUERY = gql`
       program {
         id
         name
+        startDate
+        endDate
         status
+        caId
+        description
+        budget
+        frequencyOfPayments
+        populationGoal
+        sector
+        totalNumberOfHouseholds
+        individualDataNeeded
       }
       createdBy {
         firstName

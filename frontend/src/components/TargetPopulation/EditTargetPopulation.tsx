@@ -8,6 +8,7 @@ import { BreadCrumbsItem } from '../BreadCrumbs';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import {
   TargetingCriteriaRuleObjectType,
+  useAllProgramsQuery,
   useUpdateTpMutation,
 } from '../../__generated__/graphql';
 import { useSnackbar } from '../../hooks/useSnackBar';
@@ -15,7 +16,6 @@ import { CandidateListTab } from './Edit/CandidateListTab';
 import { TargetPopulationProgramme } from './TargetPopulationProgramme';
 import { TARGET_POPULATION_QUERY } from '../../apollo/queries/TargetPopulation';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
-
 
 const ButtonContainer = styled.span`
   margin: 0 ${({ theme }) => theme.spacing(2)}px;
@@ -35,7 +35,7 @@ export function EditTargetPopulation({
   const initialValues = {
     id: targetPopulation.id,
     name: targetPopulation.name || '',
-    program: null,
+    program: targetPopulation.program.id,
     criterias: targetPopulationCriterias.rules || [],
     candidateListCriterias:
       targetPopulation.candidateListTargetingCriteria?.rules || [],
@@ -53,6 +53,13 @@ export function EditTargetPopulation({
       to: `/${businessArea}/target-population/`,
     },
   ];
+
+  const {
+    data: allProgramsData,
+    loading: loadingPrograms,
+  } = useAllProgramsQuery({
+    variables: { businessArea },
+  });
 
   const isTitleEditable = (): boolean => {
     switch (targetPopulation.status) {
@@ -102,7 +109,7 @@ export function EditTargetPopulation({
           variables: {
             input: {
               id: values.id,
-              programId: values.program.id,
+              programId: values.program,
               ...(targetPopulation.status === 'DRAFT' && { name: values.name }),
               targetingCriteria: {
                 rules: mapRules(targetPopulation.status, values),
@@ -113,7 +120,7 @@ export function EditTargetPopulation({
             {
               query: TARGET_POPULATION_QUERY,
               variables: {
-                id
+                id,
               },
             },
           ],
@@ -140,7 +147,8 @@ export function EditTargetPopulation({
                 />
               ) : (
                 values.name
-              )}
+              )
+            }
             breadCrumbs={breadCrumbsItems}
             hasInputComponent
           >
@@ -169,7 +177,10 @@ export function EditTargetPopulation({
               </ButtonContainer>
             </>
           </PageHeader>
-          <TargetPopulationProgramme/>
+          <TargetPopulationProgramme
+            allPrograms={allProgramsData}
+            loading={loadingPrograms}
+          />
           <CandidateListTab values={values} />
         </Form>
       )}

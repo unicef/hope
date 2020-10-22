@@ -6,12 +6,17 @@ import { PageHeader } from '../../components/PageHeader';
 import { TargetingCriteria } from '../../components/TargetPopulation/TargetingCriteria';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { Results } from '../../components/TargetPopulation/Results';
-import { useCreateTpMutation } from '../../__generated__/graphql';
+import {
+  useAllProgramsQuery,
+  useCreateTpMutation,
+} from '../../__generated__/graphql';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
 import { CreateTable } from '../tables/TargetPopulation/Create';
 import { TargetPopulationProgramme } from '../../components/TargetPopulation/TargetPopulationProgramme';
+import { TargetingCriteriaDisabled } from '../../components/TargetPopulation/TargetingCriteria/TargetingCriteriaDisabled';
+import { LoadingComponent } from '../../components/LoadingComponent';
 
 const PaperContainer = styled(Paper)`
   display: flex;
@@ -45,6 +50,13 @@ export function CreateTargetPopulation(): React.ReactElement {
       to: `/${businessArea}/target-population/`,
     },
   ];
+  const {
+    data: allProgramsData,
+    loading: loadingPrograms,
+  } = useAllProgramsQuery({
+    variables: { businessArea },
+  });
+
   return (
     <Formik
       initialValues={initialValues}
@@ -54,7 +66,7 @@ export function CreateTargetPopulation(): React.ReactElement {
             input: {
               name: values.name,
               businessAreaSlug: businessArea,
-              programId: values.program.id,
+              programId: values.program,
               targetingCriteria: {
                 rules: values.criterias.map((rule) => {
                   return {
@@ -116,18 +128,29 @@ export function CreateTargetPopulation(): React.ReactElement {
               </ButtonContainer>
             </>
           </PageHeader>
-          <TargetPopulationProgramme  />
-          <FieldArray
-            name='criterias'
-            render={(arrayHelpers) => (
-              <TargetingCriteria
-                helpers={arrayHelpers}
-                candidateListRules={values.criterias}
-                isEdit
-                selectedProgram={values.program}
-              />
-            )}
+          <TargetPopulationProgramme
+            allPrograms={allProgramsData}
+            loading={loadingPrograms}
           />
+          {values.program ? (
+            <FieldArray
+              name='criterias'
+              render={(arrayHelpers) => (
+                <TargetingCriteria
+                  helpers={arrayHelpers}
+                  candidateListRules={values.criterias}
+                  isEdit
+                  selectedProgram={
+                    allProgramsData.allPrograms.edges.find(
+                      (el) => el.node.id === values.program,
+                    ).node
+                  }
+                />
+              )}
+            />
+          ) : (
+            <TargetingCriteriaDisabled />
+          )}
           <Results />
           {values.criterias.length ? (
             <CreateTable
