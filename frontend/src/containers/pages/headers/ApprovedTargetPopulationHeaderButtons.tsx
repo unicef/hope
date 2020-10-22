@@ -38,7 +38,6 @@ export function ApprovedTargetPopulationHeaderButtons({
   const { showMessage } = useSnackbar();
   const [mutate] = useUnapproveTpMutation();
 
-  console.log('targetPopulation', targetPopulation);
   return (
     <div>
       <IconContainer>
