@@ -66,6 +66,7 @@ class UpdateTargetPopulationInput(graphene.InputObjectType):
     id = graphene.ID(required=True)
     name = graphene.String()
     targeting_criteria = TargetingCriteriaObjectType()
+    program_id = graphene.ID()
 
 
 class CreateTargetPopulationInput(graphene.InputObjectType):
@@ -123,12 +124,16 @@ class UpdateTargetPopulationMutation(graphene.Mutation):
         id = input.get("id")
         target_population = cls.get_object(id)
         name = input.get("name")
+        program_id_encoded = input.get("program_id")
         if target_population.status == TargetPopulation.STATUS_APPROVED and name:
             raise ValidationError("Name can't be changed when Target Population is in APPROVED status")
         if target_population.status == TargetPopulation.STATUS_FINALIZED:
             raise ValidationError("Finalized Target Population can't be changed")
         if name:
             target_population.name = name
+        if program_id_encoded:
+            program = get_object_or_404(Program, pk=decode_id_string(program_id_encoded))
+            target_population.program = program
         targeting_criteria_input = input.get("targeting_criteria")
         TargetingCriteriaInputValidator.validate(targeting_criteria_input)
         if targeting_criteria_input:
@@ -214,17 +219,20 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
         target_population.finalized_by = user
         target_population.finalized_at = timezone.now()
         if target_population.final_list_targeting_criteria:
-            """Gets all households from candidate list which 
+            """Gets all households from candidate list which
             don't meet final_list_targeting_criteria and set them (HouseholdSelection m2m model)
              final=False (final list is candidate list filtered by final=True"""
             households_ids_queryset = target_population.households.filter(
                 ~Q(target_population.final_list_targeting_criteria.get_query())
             ).values_list("id")
             HouseholdSelection.objects.filter(
-                household__id__in=households_ids_queryset, target_population=target_population,
+                household__id__in=households_ids_queryset,
+                target_population=target_population,
             ).update(final=False)
         target_population.save()
-        AirflowApi.start_dag(dag_id="SendTargetPopulation",)
+        AirflowApi.start_dag(
+            dag_id="SendTargetPopulation",
+        )
         return cls(target_population=target_population)
 
 
