@@ -3849,6 +3849,89 @@ export type RerunDedupeMutation = (
   )> }
 );
 
+export type UnapproveTpMutationVariables = {
+  id: Scalars['ID']
+};
+
+
+export type UnapproveTpMutation = (
+  { __typename?: 'Mutations' }
+  & { unapproveTargetPopulation: Maybe<(
+    { __typename?: 'UnapproveTargetPopulationMutation' }
+    & { targetPopulation: Maybe<(
+      { __typename?: 'TargetPopulationNode' }
+      & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'candidateListTotalHouseholds' | 'candidateListTotalIndividuals' | 'finalListTotalHouseholds' | 'finalListTotalIndividuals' | 'approvedAt' | 'finalizedAt'>
+      & { finalizedBy: Maybe<(
+        { __typename?: 'UserNode' }
+        & Pick<UserNode, 'firstName' | 'lastName'>
+      )>, program: Maybe<(
+        { __typename?: 'ProgramNode' }
+        & Pick<ProgramNode, 'id' | 'name'>
+      )>, candidateListTargetingCriteria: Maybe<(
+        { __typename?: 'TargetingCriteriaNode' }
+        & { targetPopulationCandidate: Maybe<(
+          { __typename?: 'TargetPopulationNode' }
+          & { createdBy: Maybe<(
+            { __typename?: 'UserNode' }
+            & Pick<UserNode, 'firstName' | 'lastName'>
+          )>, program: Maybe<(
+            { __typename?: 'ProgramNode' }
+            & Pick<ProgramNode, 'id' | 'name'>
+          )> }
+        )>, rules: Maybe<Array<Maybe<(
+          { __typename?: 'TargetingCriteriaRuleNode' }
+          & Pick<TargetingCriteriaRuleNode, 'id'>
+          & { filters: Maybe<Array<Maybe<(
+            { __typename?: 'TargetingCriteriaRuleFilterNode' }
+            & Pick<TargetingCriteriaRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod'>
+            & { fieldAttribute: Maybe<(
+              { __typename?: 'FieldAttributeNode' }
+              & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
+              & { choices: Maybe<Array<Maybe<(
+                { __typename?: 'CoreFieldChoiceObject' }
+                & Pick<CoreFieldChoiceObject, 'value' | 'labelEn'>
+              )>>> }
+            )> }
+          )>>> }
+        )>>> }
+      )>, finalListTargetingCriteria: Maybe<(
+        { __typename?: 'TargetingCriteriaNode' }
+        & { targetPopulationFinal: Maybe<(
+          { __typename?: 'TargetPopulationNode' }
+          & { createdBy: Maybe<(
+            { __typename?: 'UserNode' }
+            & Pick<UserNode, 'firstName' | 'lastName'>
+          )>, program: Maybe<(
+            { __typename?: 'ProgramNode' }
+            & Pick<ProgramNode, 'id' | 'name'>
+          )> }
+        )>, rules: Maybe<Array<Maybe<(
+          { __typename?: 'TargetingCriteriaRuleNode' }
+          & Pick<TargetingCriteriaRuleNode, 'id'>
+          & { filters: Maybe<Array<Maybe<(
+            { __typename?: 'TargetingCriteriaRuleFilterNode' }
+            & Pick<TargetingCriteriaRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod'>
+            & { fieldAttribute: Maybe<(
+              { __typename?: 'FieldAttributeNode' }
+              & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
+              & { choices: Maybe<Array<Maybe<(
+                { __typename?: 'CoreFieldChoiceObject' }
+                & Pick<CoreFieldChoiceObject, 'value' | 'labelEn'>
+              )>>> }
+            )> }
+          )>>> }
+        )>>> }
+      )>, candidateStats: Maybe<(
+        { __typename?: 'StatsObjectType' }
+        & Pick<StatsObjectType, 'childMale' | 'childFemale' | 'adultMale' | 'adultFemale'>
+      )>, finalStats: Maybe<(
+        { __typename?: 'StatsObjectType' }
+        & Pick<StatsObjectType, 'childMale' | 'childFemale' | 'adultMale' | 'adultFemale'>
+      )> }
+    )> }
+  )> }
+);
+
 export type UpdatePaymentVerificationReceivedAndReceivedAmountMutationVariables = {
   paymentVerificationId: Scalars['ID'],
   receivedAmount: Scalars['Decimal'],
@@ -6551,6 +6634,145 @@ export function useRerunDedupeMutation(baseOptions?: ApolloReactHooks.MutationHo
 export type RerunDedupeMutationHookResult = ReturnType<typeof useRerunDedupeMutation>;
 export type RerunDedupeMutationResult = ApolloReactCommon.MutationResult<RerunDedupeMutation>;
 export type RerunDedupeMutationOptions = ApolloReactCommon.BaseMutationOptions<RerunDedupeMutation, RerunDedupeMutationVariables>;
+export const UnapproveTpDocument = gql`
+    mutation UnapproveTP($id: ID!) {
+  unapproveTargetPopulation(id: $id) {
+    targetPopulation {
+      id
+      name
+      status
+      candidateListTotalHouseholds
+      candidateListTotalIndividuals
+      finalListTotalHouseholds
+      finalListTotalIndividuals
+      approvedAt
+      finalizedAt
+      finalizedBy {
+        firstName
+        lastName
+      }
+      program {
+        id
+        name
+      }
+      candidateListTargetingCriteria {
+        targetPopulationCandidate {
+          createdBy {
+            firstName
+            lastName
+          }
+          program {
+            id
+            name
+          }
+        }
+        rules {
+          id
+          filters {
+            fieldName
+            isFlexField
+            arguments
+            comparisionMethod
+            fieldAttribute {
+              name
+              labelEn
+              type
+              choices {
+                value
+                labelEn
+              }
+            }
+          }
+        }
+      }
+      finalListTargetingCriteria {
+        targetPopulationFinal {
+          createdBy {
+            firstName
+            lastName
+          }
+          program {
+            id
+            name
+          }
+        }
+        rules {
+          id
+          filters {
+            fieldName
+            isFlexField
+            arguments
+            comparisionMethod
+            fieldAttribute {
+              name
+              labelEn
+              type
+              choices {
+                value
+                labelEn
+              }
+            }
+          }
+        }
+      }
+      candidateStats {
+        childMale
+        childFemale
+        adultMale
+        adultFemale
+      }
+      finalStats {
+        childMale
+        childFemale
+        adultMale
+        adultFemale
+      }
+    }
+  }
+}
+    `;
+export type UnapproveTpMutationFn = ApolloReactCommon.MutationFunction<UnapproveTpMutation, UnapproveTpMutationVariables>;
+export type UnapproveTpComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<UnapproveTpMutation, UnapproveTpMutationVariables>, 'mutation'>;
+
+    export const UnapproveTpComponent = (props: UnapproveTpComponentProps) => (
+      <ApolloReactComponents.Mutation<UnapproveTpMutation, UnapproveTpMutationVariables> mutation={UnapproveTpDocument} {...props} />
+    );
+    
+export type UnapproveTpProps<TChildProps = {}> = ApolloReactHoc.MutateProps<UnapproveTpMutation, UnapproveTpMutationVariables> & TChildProps;
+export function withUnapproveTp<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  UnapproveTpMutation,
+  UnapproveTpMutationVariables,
+  UnapproveTpProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, UnapproveTpMutation, UnapproveTpMutationVariables, UnapproveTpProps<TChildProps>>(UnapproveTpDocument, {
+      alias: 'unapproveTp',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useUnapproveTpMutation__
+ *
+ * To run a mutation, you first call `useUnapproveTpMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUnapproveTpMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [unapproveTpMutation, { data, loading, error }] = useUnapproveTpMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useUnapproveTpMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UnapproveTpMutation, UnapproveTpMutationVariables>) {
+        return ApolloReactHooks.useMutation<UnapproveTpMutation, UnapproveTpMutationVariables>(UnapproveTpDocument, baseOptions);
+      }
+export type UnapproveTpMutationHookResult = ReturnType<typeof useUnapproveTpMutation>;
+export type UnapproveTpMutationResult = ApolloReactCommon.MutationResult<UnapproveTpMutation>;
+export type UnapproveTpMutationOptions = ApolloReactCommon.BaseMutationOptions<UnapproveTpMutation, UnapproveTpMutationVariables>;
 export const UpdatePaymentVerificationReceivedAndReceivedAmountDocument = gql`
     mutation updatePaymentVerificationReceivedAndReceivedAmount($paymentVerificationId: ID!, $receivedAmount: Decimal!, $received: Boolean!) {
   updatePaymentVerificationReceivedAndReceivedAmount(paymentVerificationId: $paymentVerificationId, receivedAmount: $receivedAmount, received: $received) {

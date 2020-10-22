@@ -66,7 +66,7 @@ export function InProgressTargetPopulationHeaderButtons({
           onClick={() => setOpenApprove(true)}
           data-cy='button-target-population-close'
         >
-          Close
+          Lock
         </Button>
       </ButtonContainer>
       <DuplicateTargetPopulation

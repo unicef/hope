@@ -6,7 +6,10 @@ import { PageHeader } from '../../../components/PageHeader';
 import { BreadCrumbsItem } from '../../../components/BreadCrumbs';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { StatusBox } from '../../../components/StatusBox';
-import { targetPopulationStatusToColor, targetPopulationStatusMapping } from '../../../utils/utils';
+import {
+  targetPopulationStatusToColor,
+  targetPopulationStatusMapping,
+} from '../../../utils/utils';
 import { InProgressTargetPopulationHeaderButtons } from './InProgressTargetPopulationHeaderButtons';
 import { FinalizedTargetPopulationHeaderButtons } from './FinalizedTargetPopulationHeaderButtons';
 import { ApprovedTargetPopulationHeaderButtons } from './ApprovedTargetPopulationHeaderButtons';
@@ -55,11 +58,11 @@ export function TargetPopulationPageHeader({
       buttons = (
         <ApprovedTargetPopulationHeaderButtons
           targetPopulation={targetPopulation}
-          setEditState={setEditState}
         />
       );
       break;
-    default: //FINALIZED
+    default:
+      //FINALIZED
       buttons = (
         <FinalizedTargetPopulationHeaderButtons
           targetPopulation={targetPopulation}

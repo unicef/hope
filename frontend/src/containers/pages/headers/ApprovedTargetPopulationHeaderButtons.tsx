@@ -2,9 +2,14 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Button, Tooltip } from '@material-ui/core';
 import { FileCopy, EditRounded } from '@material-ui/icons';
-import { TargetPopulationNode } from '../../../__generated__/graphql';
+import {
+  TargetPopulationNode,
+  useUnapproveTpMutation,
+} from '../../../__generated__/graphql';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 import { FinalizeTargetPopulation } from '../../dialogs/targetPopulation/FinalizeTargetPopulation';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useSnackbar } from '../../../hooks/useSnackBar';
 
 const IconContainer = styled.span`
   button {
@@ -23,16 +28,17 @@ const ButtonContainer = styled.span`
 
 export interface ApprovedTargetPopulationHeaderButtonsPropTypes {
   targetPopulation: TargetPopulationNode;
-  setEditState: Function;
 }
 
 export function ApprovedTargetPopulationHeaderButtons({
   targetPopulation,
-  setEditState,
 }: ApprovedTargetPopulationHeaderButtonsPropTypes): React.ReactElement {
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openFinalize, setOpenFinalize] = useState(false);
+  const { showMessage } = useSnackbar();
+  const [mutate] = useUnapproveTpMutation();
 
+  console.log('targetPopulation', targetPopulation);
   return (
     <div>
       <IconContainer>
@@ -40,16 +46,22 @@ export function ApprovedTargetPopulationHeaderButtons({
           <FileCopy />
         </Button>
       </IconContainer>
-        <ButtonContainer>
-          <Button
-            variant='outlined'
-            color='primary'
-            startIcon={<EditRounded />}
-            onClick={() => setEditState(true)}
-          >
-            Edit
-          </Button>
-        </ButtonContainer>
+      <ButtonContainer>
+        <Button
+          color='primary'
+          variant='outlined'
+          onClick={() => {
+            mutate({
+              variables: { id: targetPopulation.id },
+            }).then(() => {
+              showMessage('Target Population Unlocked');
+            });
+          }}
+          data-cy='button-target-population-unlocked'
+        >
+          Unlock
+        </Button>
+      </ButtonContainer>
       <ButtonContainer>
         <Tooltip
           title={
