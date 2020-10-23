@@ -28,7 +28,6 @@ interface VerificationRecordsTableRowProps {
 export function VerificationRecordsTableRow({
   record,
   selected,
-  checkboxClickHandler,
 }): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
@@ -36,22 +35,9 @@ export function VerificationRecordsTableRow({
     const path = `/${businessArea}/verification-records/${record.id}`;
     history.push(path);
   };
-  const isSelected = (name: string): boolean => selected.indexOf(name) !== -1;
-
-  const isItemSelected = isSelected(record.paymentRecord.id);
 
   return (
     <TableRow hover role='checkbox' key={record.id}>
-      <TableCell padding='checkbox'>
-        <Checkbox
-          color='primary'
-          onClick={(event) =>
-            checkboxClickHandler(event, record.paymentRecord.id)
-          }
-          checked={isItemSelected}
-          inputProps={{ 'aria-labelledby': record.id }}
-        />
-      </TableCell>
       <TableCell onClick={() => handleClick()} align='left'>
         <Pointer>{decodeIdString(record.paymentRecord.id)}</Pointer>
       </TableCell>
@@ -74,6 +60,13 @@ export function VerificationRecordsTableRow({
       </TableCell>
       <TableCell align='right'>
         {formatCurrency(record.receivedAmount)}
+      </TableCell>
+      <TableCell align='left'>
+        {record.paymentRecord.household.headOfHousehold.phoneNo}
+      </TableCell>
+      <TableCell align='left'>
+        {record.paymentRecord.household.headOfHousehold.phoneNoAlternative ||
+          '-'}
       </TableCell>
     </TableRow>
   );
