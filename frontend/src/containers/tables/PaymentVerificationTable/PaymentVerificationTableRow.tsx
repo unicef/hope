@@ -2,7 +2,7 @@ import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import {AllCashPlansQuery, AllCashPlansQueryResult, CashPlanNode} from '../../../__generated__/graphql';
+import { AllCashPlansQuery } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
 import {
@@ -18,7 +18,7 @@ const StatusContainer = styled.div`
   max-width: 200px;
 `;
 interface PaymentVerificationTableRowProps {
-  plan: AllCashPlansQuery["allCashPlans"]["edges"][number]["node"];
+  plan: AllCashPlansQuery['allCashPlans']['edges'][number]['node'];
 }
 
 export function PaymentVerificationTableRow({
