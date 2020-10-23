@@ -1,27 +1,11 @@
 import graphene
-from django.db.models import Q
-from django.shortcuts import get_object_or_404
-from django_filters import FilterSet, OrderingFilter, CharFilter
+from django_filters import FilterSet, CharFilter
 from graphene import relay
 from graphene_django import DjangoObjectType
-from graphene_django.filter import DjangoFilterConnectionField
 
 from account.permissions import BaseNodePermissionMixin, DjangoPermissionFilterConnectionField
 from core.extended_connection import ExtendedConnection
-from core.filters import filter_age
-from core.schema import ChoiceObject
-from core.utils import to_choice_object, decode_id_string
-from grievance.models import GrievanceTicket, TicketNotes, TicketDeduplicationDetails, TicketPaymentVerificationDetails
-from payment.inputs import GetCashplanVerificationSampleSizeInput
-from payment.models import (
-    PaymentRecord,
-    ServiceProvider,
-    CashPlanPaymentVerification,
-    PaymentVerification,
-)
-from payment.rapid_pro.api import RapidProAPI
-from payment.utils import get_number_of_samples
-from program.models import CashPlan
+from grievance.models import GrievanceTicket, TicketNotes, TicketSensitiveDetails, TicketComplaintDetails
 
 
 class GrievanceTicketFilter(FilterSet):
@@ -46,16 +30,16 @@ class TicketNoteNode(BaseNodePermissionMixin, DjangoObjectType):
         connection_class = ExtendedConnection
 
 
-class TicketDeduplicationDetailsNode(BaseNodePermissionMixin, DjangoObjectType):
+class TicketComplaintDetailsNode(BaseNodePermissionMixin, DjangoObjectType):
     class Meta:
-        model = TicketDeduplicationDetails
+        model = TicketComplaintDetails
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
 
-class TicketPaymentVerificationDetailsNode(BaseNodePermissionMixin, DjangoObjectType):
+class TicketSensitiveDetailsNode(BaseNodePermissionMixin, DjangoObjectType):
     class Meta:
-        model = TicketPaymentVerificationDetails
+        model = TicketSensitiveDetails
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
