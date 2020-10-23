@@ -5,7 +5,8 @@ from social_core.exceptions import InvalidEmail
 from social_core.pipeline import social_auth
 from social_core.pipeline import user as social_core_user
 
-from account.models import UserRole, Role
+from account.microsoft_graph import MicrosoftGraphAPI
+from account.models import UserRole, Role, ACTIVE
 from core.models import BusinessArea
 
 logger = logging.getLogger("console")
@@ -30,6 +31,7 @@ def user_details(strategy, details, backend, user=None, *args, **kwargs):
         user.first_name = details.get("first_name")
         user.last_name = details.get("last_name")
         user.username = details["email"]
+        user.status = ACTIVE
         user.save()
 
     return social_core_user.user_details(strategy, details, backend, user, *args, **kwargs)
@@ -53,13 +55,19 @@ def create_user(strategy, details, backend, user=None, *args, **kwargs):
         username=details["email"],
         first_name=details.get("first_name"),
         last_name=details.get("last_name"),
+        status=ACTIVE,
     )
-    guest_user_role_afghanistan = UserRole()
-    guest_user_role_afghanistan.role = Role.objects.filter(name="Guest").first()
-    guest_user_role_afghanistan.business_area = BusinessArea.objects.first()
+    ms_graph = MicrosoftGraphAPI()
+    user_data = ms_graph.get_user_data(details["email"])
+    business_area_code = user_data.get("extension_f4805b4021f643d0aa596e1367d432f1_unicefBusinessAreaCode")
+
     user.set_unusable_password()
     user.save()
-    guest_user_role_afghanistan.user = user
-    guest_user_role_afghanistan.save()
+    if business_area_code:
+        guest_user_role = UserRole()
+        guest_user_role.role = Role.objects.filter(name="Guest").first()
+        guest_user_role.business_area = BusinessArea.objects.get(code=business_area_code)
+        guest_user_role.user = user
+        guest_user_role.save()
 
     return {"is_new": True, "user": user}

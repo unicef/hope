@@ -40,11 +40,6 @@ const StyledCell = styled(TableCell)`
   width: 70%;
 `;
 
-const StyledHeaderCell = styled(TableCell)`
-  && {
-    border-bottom: 0;
-  }
-`;
 type Order = 'asc' | 'desc';
 
 export const FlexFieldsTable = ({
