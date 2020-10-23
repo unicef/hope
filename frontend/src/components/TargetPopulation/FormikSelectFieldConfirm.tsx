@@ -17,11 +17,6 @@ export const FormikSelectFieldConfirm = ({
   allPrograms,
   ...otherProps
 }): React.ReactElement => {
-  console.log(form);
-  console.log('allPrograms', allPrograms);
-  console.log('choices', otherProps.choices);
-
-  // const shouldDeleteCriterias = other
   const isInvalid = form.errors[field.name] && form.touched[field.name];
   return (
     <ConfirmationDialog title={confirmTitle} content={confirmContent}>
