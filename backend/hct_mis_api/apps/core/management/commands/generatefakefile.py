@@ -1,19 +1,20 @@
 import datetime
 import random
 
-from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.core.management import BaseCommand
+
+from dateutil.relativedelta import relativedelta
 from faker import Faker
 from openpyxl.drawing.image import Image
 
 from core.core_fields_attributes import (
     COLLECTORS_FIELDS,
-    TYPE_SELECT_ONE,
     TYPE_BOOL,
     TYPE_DATE,
-    TYPE_INTEGER,
     TYPE_GEOPOINT,
+    TYPE_INTEGER,
+    TYPE_SELECT_ONE,
     TYPE_STRING,
 )
 from core.utils import get_combined_attributes
@@ -138,7 +139,7 @@ class Command(BaseCommand):
                         "unhcr_id_photo_i_c",
                         "national_passport_i_c",
                         "national_passport_photo_i_c",
-                        "national_id_i_c",
+                        "national_id_no_i_c",
                         "national_id_photo_i_c",
                         "scope_id_no_i_c",
                         "scope_id_photo_i_c",

@@ -221,8 +221,8 @@ def age_to_birth_date_range_query(field_name, age_min, age_max):
     return Q(**query_dict)
 
 
-def age_to_birth_date_query(comparision_method, args):
-    field_name = "individuals__birth_date"
+def age_to_birth_date_query(comparision_method, args, rule_filter):
+    field_name = f"{'individuals' if rule_filter.head_of_household else 'head_of_household'}__birth_date"
     comparision_method_args_count = {
         "RANGE": 2,
         "NOT_IN_RANGE": 2,
