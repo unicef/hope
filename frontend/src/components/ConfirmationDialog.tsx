@@ -4,17 +4,16 @@ import {
   Button,
   DialogContent,
   DialogTitle,
-  Box,
   DialogActions,
 } from '@material-ui/core';
 import { Dialog } from '../containers/dialogs/Dialog';
 
 interface ConfirmationDialogProps {
-  onClose;
-  onSubmit;
-  children;
-  title;
-  content;
+  onClose?;
+  onSubmit?;
+  children?;
+  title?;
+  content?;
 }
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -32,21 +31,23 @@ const DialogContainer = styled.div`
 `;
 
 class ConfirmationDialog extends React.Component<ConfirmationDialogProps> {
+  //eslint-disable-next-line
   state = {
     open: false,
-    loading: false,
     callback: null,
   };
+
   show = (callback) => (event, ...restProps) => {
     if (event) {
       event.preventDefault();
-      event = {
+
+      const eventToPass = {
         ...event,
         target: { ...event.target, value: event.target.value },
       };
       this.setState({
         open: true,
-        callback: () => callback(event, ...restProps),
+        callback: () => callback(eventToPass, ...restProps),
       });
     } else {
       this.setState({
@@ -55,6 +56,7 @@ class ConfirmationDialog extends React.Component<ConfirmationDialogProps> {
       });
     }
   };
+
   hide = () => {
     this.setState({
       open: false,
@@ -62,15 +64,14 @@ class ConfirmationDialog extends React.Component<ConfirmationDialogProps> {
     });
     if (this.props.onClose) this.props.onClose();
   };
+
   confirm = async () => {
-    this.setState({ loading: true });
     let result = null;
     if (!this.props.onSubmit) {
       result = await this.state.callback();
     } else {
       result = await this.props.onSubmit();
     }
-    this.setState({ loading: false });
     this.hide();
     return result;
   };
@@ -82,7 +83,7 @@ class ConfirmationDialog extends React.Component<ConfirmationDialogProps> {
         {this.props.children(this.show)}
         <Dialog
           open={this.state.open}
-          onClose={() => this.hide}
+          onClose={() => this.hide()}
           scroll='paper'
           aria-labelledby='form-dialog-title'
         >
@@ -94,7 +95,7 @@ class ConfirmationDialog extends React.Component<ConfirmationDialogProps> {
           </DialogContent>
           <DialogFooter>
             <DialogActions>
-              <Button onClick={() => this.hide}>CANCEL</Button>
+              <Button onClick={() => this.hide()}>CANCEL</Button>
               <Button
                 type='submit'
                 color='primary'
@@ -111,5 +112,5 @@ class ConfirmationDialog extends React.Component<ConfirmationDialogProps> {
     );
   }
 }
-
+//eslint-disable-next-line
 export default ConfirmationDialog;

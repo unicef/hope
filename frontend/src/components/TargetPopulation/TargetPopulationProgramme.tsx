@@ -5,8 +5,8 @@ import { Field } from 'formik';
 import { AllProgramsQuery } from '../../__generated__/graphql';
 import { OverviewContainer } from '../OverviewContainer';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { LoadingComponent } from '../LoadingComponent';
+import { FormikSelectFieldConfirm } from './FormikSelectFieldConfirm';
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(3)}px;
@@ -29,13 +29,20 @@ export function TargetPopulationProgramme({
   allPrograms: AllProgramsQuery;
   loading: boolean;
 }): React.ReactElement {
-  const businessArea = useBusinessArea();
   if (loading) return <LoadingComponent />;
 
   const mappedPrograms = allPrograms.allPrograms.edges.map((edge) => ({
     name: edge.node.name,
     value: edge.node.id,
   }));
+
+  const confirmTitle = <span>Programme Change</span>;
+  const confirmContent = (
+    <span>
+      Are you sure you want to change the programme ? <br /> Changing the
+      programme may result in deleting your current Targeting Criteria.
+    </span>
+  );
 
   return (
     <PaperContainer data-cy='target-population-program-container'>
@@ -53,8 +60,12 @@ export function TargetPopulationProgramme({
             fullWidth
             variant='outlined'
             required
+            allPrograms={allPrograms.allPrograms.edges}
             choices={mappedPrograms}
-            component={FormikSelectField}
+            withConfirm
+            confirmTitle={confirmTitle}
+            confirmContent={confirmContent}
+            component={FormikSelectFieldConfirm}
           />
         </Box>
       </OverviewContainer>
