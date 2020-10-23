@@ -20,7 +20,7 @@ from core.utils import build_arg_dict_from_dict
 @admin.register(User)
 class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
 
-    list_display = ("username", "email", "first_name")
+    list_display = ("username", "email", "first_name", "last_name", "status")
     fieldsets = (
         (None, {"fields": ("username", "password")}),
         (
@@ -43,6 +43,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
     @link()
     def load_ad_users(self, request):
         from account.forms import LoadUsersForm
+
         opts = self.model._meta
         ctx = {
             "opts": opts,
@@ -76,6 +77,10 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
                         user_data = ms_graph.get_user_data(email)
                         user_args = build_arg_dict_from_dict(user_data, DJANGO_USER_MAP)
                         user = User(**user_args)
+                        if user.first_name is None:
+                            user.first_name = ""
+                        if user.last_name is None:
+                            user.last_name = ""
                         user.set_unusable_password()
                         users_to_bulk_create.append(user)
                         users_role_to_bulk_create.append(UserRole(role=role, business_area=business_area, user=user))
