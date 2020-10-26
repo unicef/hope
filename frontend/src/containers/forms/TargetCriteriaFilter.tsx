@@ -45,7 +45,7 @@ export function TargetingCriteriaFilter({
   onClick: () => void;
 }): React.ReactElement {
   const shouldShowDivider =
-    index + 1 < values.filters.length + values.individualsFiltersBlocks.length;
+    index + 1 < values.filters.length;
   return (
     <div>
       <FieldChooser
@@ -53,7 +53,7 @@ export function TargetingCriteriaFilter({
         choices={data.allFieldsAttributes}
         fieldName={each.fieldName}
         onChange={onChange}
-        showDelete={values.filters.length > 1}
+        showDelete
         onDelete={onClick}
         baseName={`filters[${index}]`}
       />

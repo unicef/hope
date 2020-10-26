@@ -24,15 +24,48 @@ import {
 } from '../../utils/targetingUtils';
 import { TargetingCriteriaFilter } from './TargetCriteriaFilter';
 import { TargetCriteriaFilterBlocks } from './TargetCriteriaFilterBlocks';
+import {AddCircleOutline} from "@material-ui/icons";
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
 `;
 
+const AndDividerLabel = styled.div`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: #253b46;
+  text-transform: uppercase;
+  padding: 5px;
+  border: 1px solid #b1b1b5;
+  border-radius: 50%;
+  background-color: #fff;
+`;
+const AndDivider = styled.div`
+  border-top: 1px solid #b1b1b5;
+  margin: ${({ theme }) => theme.spacing(10)}px 0;
+  position: relative;
+`;
+
+
 const DialogDescription = styled.div`
   margin: 20px 0;
   font-size: 14px;
   color: rgba(0, 0, 0, 0.54);
+`;
+const AddIcon = styled(AddCircleOutline)`
+  margin-right: 10px;
+`;
+const ButtonBox = styled.div`
+  width: 300px;
 `;
 const DialogError = styled.div`
   margin: 20px 0;
@@ -170,6 +203,8 @@ export function TargetCriteriaForm({
               onClose={onClose}
               scroll='paper'
               aria-labelledby='form-dialog-title'
+              fullWidth
+              maxWidth="md"
             >
               <DialogTitleWrapper>
                 <DialogTitle id='scroll-dialog-title' disableTypography>
@@ -177,11 +212,6 @@ export function TargetCriteriaForm({
                 </DialogTitle>
               </DialogTitleWrapper>
               <DialogContent>
-                <DialogDescription>
-                  Adding criteria below will target any individuals within a
-                  household that meet the filters applied. You may also add
-                  individual sub-criteria to further define an individual.
-                </DialogDescription>
                 {// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
                 // @ts-ignore
                 errors.nonFieldErrors && (
@@ -196,6 +226,9 @@ export function TargetCriteriaForm({
                   </DialogError>
                 )}
 
+                <DialogDescription>
+                  All rules defined below have to be true for the entire household.
+                </DialogDescription>
                 <FieldArray
                   name='filters'
                   render={(arrayHelpers) => (
@@ -229,6 +262,28 @@ export function TargetCriteriaForm({
                     </ArrayFieldWrapper>
                   )}
                 />
+                <Box display='flex' flexDirection='column'>
+
+                  <ButtonBox>
+                    <Button
+                      onClick={() =>
+                        filtersArrayWrapperRef.current
+                          .getArrayHelpers()
+                          .push({ fieldName: '' })
+                      }
+                      color='primary'
+                    >
+                      <AddIcon />
+                      ADD HOUSEHOLD RULE
+                    </Button>
+                  </ButtonBox>
+                </Box>
+                <AndDivider>
+                  <AndDividerLabel>And</AndDividerLabel>
+                </AndDivider>
+                {/*<DialogDescription>*/}
+
+                {/*</DialogDescription>*/}
                 <FieldArray
                   name='individualsFiltersBlocks'
                   render={(arrayHelpers) => (
@@ -251,36 +306,28 @@ export function TargetCriteriaForm({
                     </ArrayFieldWrapper>
                   )}
                 />
+                <Box display='flex' flexDirection='column'>
+
+                  <ButtonBox>
+                    <Button
+                      onClick={() =>
+                        individualsFiltersBlocksWrapperRef.current
+                          .getArrayHelpers()
+                          .push({
+                            individualBlockFilters: [{ fieldName: '' }],
+                          })
+                      }
+                      color='primary'
+                    >
+                      <AddIcon />
+                      ADD INDIVIDUAL RULE GROUP
+                    </Button>
+                  </ButtonBox>
+                </Box>
               </DialogContent>
               <DialogFooter>
                 <DialogActions>
-                  <StyledBox display='flex' justifyContent='space-between'>
-                    <div>
-                      <Button
-                        color='primary'
-                        variant='outlined'
-                        onClick={() =>
-                          filtersArrayWrapperRef.current
-                            .getArrayHelpers()
-                            .push({ fieldName: '' })
-                        }
-                      >
-                        Add Next Criteria
-                      </Button>
-                      <MarginButton
-                        color='primary'
-                        variant='outlined'
-                        onClick={() =>
-                          individualsFiltersBlocksWrapperRef.current
-                            .getArrayHelpers()
-                            .push({
-                              individualBlockFilters: [{ fieldName: '' }],
-                            })
-                        }
-                      >
-                        Add Set of Criteria
-                      </MarginButton>
-                    </div>
+                  <StyledBox display='flex' justifyContent='flex-end'>
                     <div>
                       <Button
                         onClick={() => {

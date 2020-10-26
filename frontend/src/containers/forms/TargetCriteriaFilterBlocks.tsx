@@ -66,6 +66,7 @@ const AndDividerLabel = styled.div`
 const GrayFiltersBlock = styled.div`
   border: 1px solid #e0e0e0;
   border-radius: 3px;
+  margin-bottom: 20px;
 `;
 const AddIcon = styled(AddCircleOutline)`
   margin-right: 10px;
@@ -136,23 +137,26 @@ export function TargetCriteriaFilterBlocks({
                   </>
                 );
               })}
-            </GrayFiltersBlock>
-            <Box display='flex' flexDirection='column'>
-
-              <ButtonBox>
+              <Box display='flex' justifyContent='center'>
                 <Button
+                  color='primary'
+                  variant='outlined'
+                  startIcon={<AddCircleOutline />}
                   onClick={() =>
                     arrayHelpers.push({
                       fieldName: '',
                     })
                   }
-                  color='primary'
+                  style={{
+                    position: 'relative',
+                    top: 18,
+                    backgroundColor: '#fff',
+                  }}
                 >
-                  <AddIcon />
-                  Add individual sub-criteria
+                  Add Set of Criteria
                 </Button>
-              </ButtonBox>
-            </Box>
+              </Box>
+            </GrayFiltersBlock>
           </div>
         )}
       />
