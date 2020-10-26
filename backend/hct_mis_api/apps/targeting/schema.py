@@ -229,6 +229,7 @@ class TargetingCriteriaRuleFilterObjectType(graphene.InputObjectType):
     is_flex_field = graphene.Boolean(required=True)
     field_name = graphene.String(required=True)
     arguments = graphene.List(Arg, required=True)
+    head_of_household = graphene.Boolean(required=False)
 
 
 class TargetingIndividualRuleFilterBlockObjectType(graphene.InputObjectType):

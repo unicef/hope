@@ -30,7 +30,6 @@ export function UsersAutocomplete({
   const businessArea = useBusinessArea();
   const debouncedInputText = useDebounce(inputValue, 500);
   const [newValue, setNewValue] = useState();
-  console.log('debouncedInputText', debouncedInputText);
   const { data, loading } = useAllUsersQuery({
     variables: {
       first: 100,

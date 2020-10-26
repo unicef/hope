@@ -8,7 +8,6 @@ from io import BytesIO
 from pathlib import Path
 from unittest import mock
 
-from PIL import Image
 from django.conf import settings
 from django.contrib.gis.geos import Point
 from django.core.files import File
@@ -16,20 +15,19 @@ from django.core.management import call_command
 from django.db.models.fields.files import ImageFieldFile
 from django.forms import model_to_dict
 from django.test import TestCase
-from django_countries.fields import Country
 
-from core.models import BusinessArea, AdminArea, AdminAreaType
+from django_countries.fields import Country
+from PIL import Image
+
+from core.models import AdminArea, AdminAreaType, BusinessArea
 from registration_data.fixtures import RegistrationDataImportFactory
-from registration_datahub.fixtures import (
-    RegistrationDataImportDatahubFactory,
-    ImportedIndividualFactory,
-)
+from registration_datahub.fixtures import ImportedIndividualFactory, RegistrationDataImportDatahubFactory
 from registration_datahub.models import (
     ImportData,
+    ImportedDocument,
+    ImportedDocumentType,
     ImportedHousehold,
     ImportedIndividual,
-    ImportedDocumentType,
-    ImportedDocument,
 )
 
 
@@ -55,10 +53,7 @@ class TestRdiCreateTask(TestCase):
     @classmethod
     def setUpTestData(cls):
         call_command("loadbusinessareas")
-        from registration_datahub.tasks.rdi_create import (
-            RdiXlsxCreateTask,
-            RdiKoboCreateTask,
-        )
+        from registration_datahub.tasks.rdi_create import RdiKoboCreateTask, RdiXlsxCreateTask
 
         cls.RdiXlsxCreateTask = RdiXlsxCreateTask
         cls.RdiKoboCreateTask = RdiKoboCreateTask
@@ -85,7 +80,6 @@ class TestRdiCreateTask(TestCase):
         cls.registration_data_import.save()
         cls.business_area = BusinessArea.objects.first()
 
-    @unittest.skip("wojtek will fix it")
     def test_execute(self):
         task = self.RdiXlsxCreateTask()
         task.execute(
@@ -117,7 +111,7 @@ class TestRdiCreateTask(TestCase):
         household_data = {
             "residence_status": "REFUGEE",
             "country": "AF",
-            "flex_fields": {"unaccompanied_child_h_f": 1},
+            "flex_fields": {},
         }
         household = matching_individuals.first().household
         household_obj_data = model_to_dict(household, ("residence_status", "country", "flex_fields"))
@@ -266,7 +260,6 @@ class TestRdiCreateTask(TestCase):
         result = task._handle_geopoint_field(valid_geopoint)
         self.assertEqual(result, expected)
 
-    @unittest.skip("wojtek will fix that")
     def test_create_documents(self):
         task = self.RdiXlsxCreateTask()
         individual = ImportedIndividualFactory()
@@ -297,7 +290,7 @@ class TestRdiCreateTask(TestCase):
 
         document = ImportedDocument.objects.first()
         photo = document.photo.name
-        self.assertTrue(photo.startswith("image_") and photo.endswith(".png"))
+        self.assertTrue(photo.startswith("image") and photo.endswith(".png"))
 
     def test_cast_value(self):
         task = self.RdiXlsxCreateTask()
@@ -316,14 +309,14 @@ class TestRdiCreateTask(TestCase):
         result = task._cast_value(12.0, "size_h_c")
         self.assertEqual(result, 12)
 
-        # SELECT_ONE - header: sex_i_c
-        result = task._cast_value("male", "sex_i_c")
+        # SELECT_ONE - header: gender_i_c
+        result = task._cast_value("male", "gender_i_c")
         self.assertEqual(result, "MALE")
 
-        result = task._cast_value("Male", "sex_i_c")
+        result = task._cast_value("Male", "gender_i_c")
         self.assertEqual(result, "MALE")
 
-        result = task._cast_value("MALE", "sex_i_c")
+        result = task._cast_value("MALE", "gender_i_c")
         self.assertEqual(result, "MALE")
 
 
@@ -339,10 +332,7 @@ class TestRdiKoboCreateTask(TestCase):
     @classmethod
     def setUpTestData(cls):
         call_command("loadbusinessareas")
-        from registration_datahub.tasks.rdi_create import (
-            RdiXlsxCreateTask,
-            RdiKoboCreateTask,
-        )
+        from registration_datahub.tasks.rdi_create import RdiKoboCreateTask, RdiXlsxCreateTask
 
         cls.RdiXlsxCreateTask = RdiXlsxCreateTask
         cls.RdiKoboCreateTask = RdiKoboCreateTask
@@ -644,7 +634,7 @@ class TestRdiKoboCreateTask(TestCase):
                     "individual_questions/relationship_i_c": "head",
                     "individual_questions/individual_vulnerabilities/work_status_i_c": "YES",
                     "individual_questions/more_information/drivers_license_no_i_c": "ASD12367432Q",
-                    "individual_questions/sex_i_c": "male",
+                    "individual_questions/gender_i_c": "male",
                     "individual_questions/individual_vulnerabilities/disability_i_c": "not disabled",
                     "individual_questions/more_information/birth_certificate_no_i_c": "89671532",
                     "individual_questions/birth_date_i_c": "1955-07-28",
@@ -731,7 +721,7 @@ class TestRdiKoboCreateTask(TestCase):
             "food_security_questions/cereals_tuber_score_h_f": "NaN",
             "_validation_status": {},
             "_uuid": "84366d01-770a-42f0-b0f8-d498e35dd9e8",
-            "consent/consent_h_c": "signature-11_53_11.png",
+            "consent/consent_sign_h_c": "signature-11_53_11.png",
             "household_questions/household_location/country_h_c": "POL",
             "household_questions/group_cu1lc89/f_6_11_disability_h_c": "0",
             "_submitted_by": None,

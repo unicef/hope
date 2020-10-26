@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['TestApproveTargetPopulationMutation::test_approve_fail_target_population 1'] = {
@@ -35,13 +34,13 @@ snapshots['TestApproveTargetPopulationMutation::test_approve_target_population 1
                     'edges': [
                         {
                             'node': {
-                                'residenceStatus': 'CITIZEN',
+                                'residenceStatus': 'HOST',
                                 'size': 1
                             }
                         },
                         {
                             'node': {
-                                'residenceStatus': 'CITIZEN',
+                                'residenceStatus': 'HOST',
                                 'size': 2
                             }
                         }
@@ -82,13 +81,13 @@ snapshots['TestUnapproveTargetPopulationMutation::test_unapprove_target_populati
                     'edges': [
                         {
                             'node': {
-                                'residenceStatus': 'CITIZEN',
+                                'residenceStatus': 'HOST',
                                 'size': 1
                             }
                         },
                         {
                             'node': {
-                                'residenceStatus': 'CITIZEN',
+                                'residenceStatus': 'HOST',
                                 'size': 2
                             }
                         }
@@ -129,13 +128,13 @@ snapshots['TestFinalizeTargetPopulationMutation::test_finalize_target_population
                     'edges': [
                         {
                             'node': {
-                                'residenceStatus': 'CITIZEN',
+                                'residenceStatus': 'HOST',
                                 'size': 1
                             }
                         },
                         {
                             'node': {
-                                'residenceStatus': 'CITIZEN',
+                                'residenceStatus': 'HOST',
                                 'size': 2
                             }
                         }
@@ -145,13 +144,13 @@ snapshots['TestFinalizeTargetPopulationMutation::test_finalize_target_population
                     'edges': [
                         {
                             'node': {
-                                'residenceStatus': 'CITIZEN',
+                                'residenceStatus': 'HOST',
                                 'size': 1
                             }
                         },
                         {
                             'node': {
-                                'residenceStatus': 'CITIZEN',
+                                'residenceStatus': 'HOST',
                                 'size': 2
                             }
                         }
