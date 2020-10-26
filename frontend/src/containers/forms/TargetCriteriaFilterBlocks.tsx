@@ -138,13 +138,6 @@ export function TargetCriteriaFilterBlocks({
               })}
             </GrayFiltersBlock>
             <Box display='flex' flexDirection='column'>
-              <FieldBox>
-                <Field
-                  name={`individualsFiltersBlocks[${blockIndex}].onlyForHoH`}
-                  label='Head of Household'
-                  component={FormikCheckboxField}
-                />
-              </FieldBox>
 
               <ButtonBox>
                 <Button
