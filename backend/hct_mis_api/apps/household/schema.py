@@ -5,6 +5,8 @@ from django_filters import (
     OrderingFilter,
     CharFilter,
     MultipleChoiceFilter,
+    DateRangeFilter,
+    ModelMultipleChoiceFilter,
 )
 from graphene import relay
 from graphene_django import DjangoObjectType
@@ -12,6 +14,7 @@ from graphene_django.filter import DjangoFilterConnectionField
 
 from core.extended_connection import ExtendedConnection
 from core.filters import AgeRangeFilter, IntegerRangeFilter
+from core.models import AdminArea
 from core.schema import ChoiceObject
 from core.utils import to_choice_object, encode_ids
 from household.models import (
@@ -28,7 +31,7 @@ from household.models import (
     ROLE_NO_ROLE,
     IndividualIdentity,
     DUPLICATE,
-    DUPLICATE_IN_BATCH,
+    DUPLICATE_IN_BATCH, INDIVIDUAL_HOUSEHOLD_STATUS,
 )
 from registration_datahub.schema import DeduplicationResultNode
 from targeting.models import HouseholdSelection
@@ -38,6 +41,10 @@ class HouseholdFilter(FilterSet):
     business_area = CharFilter(field_name="business_area__slug")
     size = IntegerRangeFilter(field_name="size")
     search = CharFilter(method="search_filter")
+    last_registration_date = DateRangeFilter(field_name="last_registration_date")
+    admin2 = ModelMultipleChoiceFilter(
+        field_name="admin_area", queryset=AdminArea.objects.filter(admin_area_type__admin_level=2)
+    )
 
     class Meta:
         model = Household
@@ -78,6 +85,7 @@ class HouseholdFilter(FilterSet):
             q_obj |= Q(head_of_household__given_name__icontains=value)
             q_obj |= Q(head_of_household__family_name__icontains=value)
             q_obj |= Q(unicef_id__icontains=value)
+            q_obj |= Q(id__icontains=value)
         return qs.filter(q_obj)
 
 
@@ -87,10 +95,16 @@ class IndividualFilter(FilterSet):
     sex = MultipleChoiceFilter(field_name="sex", choices=SEX_CHOICE)
     programme = CharFilter(field_name="household__programs__name")
     search = CharFilter(method="search_filter")
+    last_registration_date = DateRangeFilter(field_name="last_registration_date")
+    admin2 = ModelMultipleChoiceFilter(
+        field_name="household__admin_area", queryset=AdminArea.objects.filter(admin_area_type__admin_level=2)
+    )
+    status = MultipleChoiceFilter(field_name="status", choices=INDIVIDUAL_HOUSEHOLD_STATUS)
 
     class Meta:
         model = Individual
         fields = {
+            "household__id": ["exact"],
             "programme": ["exact", "icontains"],
             "business_area": ["exact"],
             "full_name": ["exact", "icontains"],
@@ -99,8 +113,16 @@ class IndividualFilter(FilterSet):
         }
 
     order_by = OrderingFilter(
-        fields=("id", "unicef_id", "full_name", "household__id", "birth_date",
-                "sex", "relationship", "household__admin_area__title",)
+        fields=(
+            "id",
+            "unicef_id",
+            "full_name",
+            "household__id",
+            "birth_date",
+            "sex",
+            "relationship",
+            "household__admin_area__title",
+        )
     )
 
     def search_filter(self, qs, name, value):
