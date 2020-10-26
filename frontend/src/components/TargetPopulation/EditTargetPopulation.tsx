@@ -1,18 +1,21 @@
 import React from 'react';
 import styled from 'styled-components';
-import {useParams} from 'react-router-dom';
-import {Button} from '@material-ui/core';
-import {Field, Form, Formik} from 'formik';
-import {PageHeader} from '../PageHeader';
-import {FormikTextField} from '../../shared/Formik/FormikTextField';
-import {BreadCrumbsItem} from '../BreadCrumbs';
-import {useBusinessArea} from '../../hooks/useBusinessArea';
-import {useAllProgramsQuery, useUpdateTpMutation,} from '../../__generated__/graphql';
-import {useSnackbar} from '../../hooks/useSnackBar';
-import {CandidateListTab} from './Edit/CandidateListTab';
-import {TargetPopulationProgramme} from './TargetPopulationProgramme';
-import {TARGET_POPULATION_QUERY} from '../../apollo/queries/TargetPopulation';
-import {getTargetingCriteriaVariables} from '../../utils/targetingUtils';
+import { useParams } from 'react-router-dom';
+import { Button } from '@material-ui/core';
+import { Field, Form, Formik } from 'formik';
+import { PageHeader } from '../PageHeader';
+import { FormikTextField } from '../../shared/Formik/FormikTextField';
+import { BreadCrumbsItem } from '../BreadCrumbs';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
+import {
+  useAllProgramsQuery,
+  useUpdateTpMutation,
+} from '../../__generated__/graphql';
+import { useSnackbar } from '../../hooks/useSnackBar';
+import { CandidateListTab } from './Edit/CandidateListTab';
+import { TargetPopulationProgramme } from './TargetPopulationProgramme';
+import { TARGET_POPULATION_QUERY } from '../../apollo/queries/TargetPopulation';
+import { getTargetingCriteriaVariables } from '../../utils/targetingUtils';
 
 const ButtonContainer = styled.span`
   margin: 0 ${({ theme }) => theme.spacing(2)}px;
@@ -142,6 +145,7 @@ export function EditTargetPopulation({
           <TargetPopulationProgramme
             allPrograms={allProgramsData}
             loading={loadingPrograms}
+            program={values.program}
           />
           <CandidateListTab allPrograms={allProgramsData} values={values} />
         </Form>
