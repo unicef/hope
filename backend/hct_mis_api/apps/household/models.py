@@ -1,31 +1,27 @@
 import re
 from datetime import date
 
-from dateutil.relativedelta import relativedelta
-from django.contrib.gis.db.models import PointField, QuerySet
+from django.contrib.gis.db.models import PointField
 from django.contrib.postgres.fields import JSONField
-from django.core.validators import (
-    validate_image_file_extension,
-    MinLengthValidator,
-    MaxLengthValidator,
-)
+from django.core.validators import MaxLengthValidator, MinLengthValidator, validate_image_file_extension
 from django.db import models
-from django.db.models import Sum, Q
 from django.utils.translation import ugettext_lazy as _
+
+from dateutil.relativedelta import relativedelta
 from django_countries.fields import CountryField
 from model_utils import Choices
-from model_utils.fields import UUIDField
+from multiselectfield import MultiSelectField
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
 
-from utils.models import TimeStampedUUIDModel, AbstractSyncable
+from utils.models import AbstractSyncable, TimeStampedUUIDModel
 
 RESIDENCE_STATUS_CHOICE = (
-    ("REFUGEE", _("Refugee")),
-    ("MIGRANT", _("Migrant")),
-    ("CITIZEN", _("Citizen")),
-    ("IDP", _("IDP")),
-    ("OTHER", _("Other")),
+    ("IDP", _("Displaced  |  Internally Displaced People")),
+    ("REFUGEE", _("Displaced  |  Refugee / Asylum Seeker")),
+    ("OTHERS_OF_CONCERN", _("Displaced  |  Others of Concern")),
+    ("HOST", _("Non-displaced  |   Host")),
+    ("NON_HOST", _("Non-displaced  |   Non-host")),
 )
 # INDIVIDUALS
 MALE = "MALE"
@@ -35,22 +31,29 @@ SEX_CHOICE = (
     (FEMALE, _("Female")),
 )
 MARITAL_STATUS_CHOICE = (
-    ("SINGLE", _("SINGLE")),
+    ("SINGLE", _("Single")),
     ("MARRIED", _("Married")),
-    ("WIDOW", _("Widow")),
+    ("WIDOWED", _("Widowed")),
     ("DIVORCED", _("Divorced")),
     ("SEPARATED", _("Separated")),
 )
 
+NONE = "NONE"
+SEEING = "SEEING"
+HEARING = "HEARING"
+WALKING = "WALKING"
+MEMORY = "MEMORY"
+SELF_CARE = "SELF_CARE"
+COMMUNICATING = "COMMUNICATING"
 DISABILITY_CHOICE = (
-    ("NO", _("No")),
-    ("SEEING", _("Difficulty seeing (even if wearing glasses)")),
-    ("HEARING", _("Difficulty hearing (even if using a hearing aid)")),
-    ("WALKING", _("Difficulty walking or climbing steps")),
-    ("MEMORY", _("Difficulty remembering or concentrating")),
-    ("SELF_CARE", _("Difficulty with self care (washing, dressing)")),
+    (NONE, _("None")),
+    (SEEING, _("Difficulty seeing (even if wearing glasses)")),
+    (HEARING, _("Difficulty hearing (even if using a hearing aid)")),
+    (WALKING, _("Difficulty walking or climbing steps")),
+    (MEMORY, _("Difficulty remembering or concentrating")),
+    (SELF_CARE, _("Difficulty with self care (washing, dressing)")),
     (
-        "COMMUNICATING",
+        COMMUNICATING,
         _("Difficulty communicating " "(e.g understanding or being understood)"),
     ),
 )
@@ -150,30 +153,38 @@ DEDUPLICATION_BATCH_STATUS_CHOICE = (
     (UNIQUE_IN_BATCH, "Unique in batch"),
     (NOT_PROCESSED, "Not Processed"),
 )
-
-
-class HouseholdManager(models.Manager):
-    def _filter_or_exclude(self, negate, *args, **kwargs):
-        if args or kwargs:
-            assert self.query.can_filter(), "Cannot filter a query once a slice has been taken."
-        clone = self._chain()
-        if negate:
-            clone.query._add_q(~Q(*args, **kwargs))
-        else:
-            clone.query._add_q(~Q(*args, **kwargs), self.used_aliases)
-        return clone
-
-
+SOME_DIFFICULTY = "SOME_DIFFICULTY"
+LOT_DIFFICULTY = "LOT_DIFFICULTY"
+CANNOT_DO = "CANNOT_DO"
+SEVERITY_OF_DISABILITY_CHOICES = (
+    (SOME_DIFFICULTY, "Some difficulty"),
+    (LOT_DIFFICULTY, "A lot of difficulty"),
+    (CANNOT_DO, "Cannot do at all"),
+)
+UNICEF = "UNICEF"
+PARTNER = "PARTNER"
+ORG_ENUMERATOR_CHOICES = (
+    (UNICEF, "UNICEF"),
+    (PARTNER, "Partner"),
+)
+HUMANITARIAN_PARTNER = "HUMANITARIAN_PARTNER"
+PRIVATE_PARTNER = "PRIVATE_PARTNER"
+GOVERNMENT_PARTNER = "GOVERNMENT_PARTNER"
+DATA_SHARING_CHOICES = (
+    (UNICEF, "UNICEF"),
+    (HUMANITARIAN_PARTNER, "Humanitarian partners"),
+    (PRIVATE_PARTNER, "Private partners"),
+    (GOVERNMENT_PARTNER, "Government partners"),
+)
 
 
 class Household(TimeStampedUUIDModel, AbstractSyncable):
     status = models.CharField(max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default="ACTIVE")
 
-    consent = ImageField(validators=[validate_image_file_extension])
-    residence_status = models.CharField(
-        max_length=255,
-        choices=RESIDENCE_STATUS_CHOICE,
-    )
+    consent_sign = ImageField(validators=[validate_image_file_extension], blank=True)
+    consent = models.BooleanField(default=True)
+    consent_sharing = MultiSelectField(choices=DATA_SHARING_CHOICES)
+    residence_status = models.CharField(max_length=255, choices=RESIDENCE_STATUS_CHOICE)
     country_origin = CountryField(blank=True)
     country = CountryField(blank=True)
 
@@ -223,13 +234,19 @@ class Household(TimeStampedUUIDModel, AbstractSyncable):
     flex_fields = JSONField(default=dict)
     first_registration_date = models.DateField()
     last_registration_date = models.DateField()
-    head_of_household = models.OneToOneField(
-        "Individual",
-        related_name="heading_household",
-        on_delete=models.CASCADE,
-    )
+    head_of_household = models.OneToOneField("Individual", related_name="heading_household", on_delete=models.CASCADE)
+    fchild_hoh = models.BooleanField(default=False)
+    child_hoh = models.BooleanField(default=False)
     unicef_id = models.CharField(max_length=250, blank=True)
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
+
+    start = models.DateTimeField(blank=True, null=True)
+    end = models.DateTimeField(blank=True, null=True)
+    deviceid = models.CharField(max_length=250, blank=True)
+    name_enumerator = models.CharField(max_length=250)
+    org_enumerator = models.CharField(max_length=250, choices=ORG_ENUMERATOR_CHOICES)
+    org_name_enumerator = models.CharField(max_length=250)
+    village = models.CharField(max_length=250, blank=True)
 
     @property
     def sanction_list_possible_match(self):
@@ -237,11 +254,10 @@ class Household(TimeStampedUUIDModel, AbstractSyncable):
 
     @property
     def total_cash_received(self):
-        return self.payment_records.filter().aggregate(Sum("delivered_quantity")).get("delivered_quantity__sum")
+        return self.payment_records.filter().aggregate(models.Sum("delivered_quantity")).get("delivered_quantity__sum")
 
     def __str__(self):
         return f"Household ID: {self.id}"
-
 
 
 class DocumentValidator(TimeStampedUUIDModel):
@@ -386,9 +402,7 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
         related_name="individuals",
         on_delete=models.CASCADE,
     )
-    disability = models.BooleanField(
-        default=False,
-    )
+    disability = models.BooleanField(default=False)
     work_status = models.CharField(
         max_length=20,
         choices=WORK_STATUS_CHOICE,
@@ -417,6 +431,15 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
     sanction_list_possible_match = models.BooleanField(default=False)
     sanction_list_last_check = models.DateTimeField(null=True, blank=True)
     pregnant = models.BooleanField(default=False)
+    observed_disability = MultiSelectField(choices=DISABILITY_CHOICE, default=NONE)
+    seeing_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
+    hearing_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
+    physical_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
+    memory_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
+    selfcare_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
+    comms_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
+    who_answers_phone = models.CharField(max_length=150, blank=True)
+    who_answers_alt_phone = models.CharField(max_length=150, blank=True)
 
     @property
     def age(self):

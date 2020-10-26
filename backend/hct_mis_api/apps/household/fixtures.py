@@ -5,18 +5,21 @@ from factory import fuzzy
 from pytz import utc
 
 from household.models import (
-    Household,
-    EntitlementCard,
-    Individual,
-    SEX_CHOICE,
+    HUMANITARIAN_PARTNER,
     MARITAL_STATUS_CHOICE,
-    RESIDENCE_STATUS_CHOICE,
+    ORG_ENUMERATOR_CHOICES,
     RELATIONSHIP_CHOICE,
-    DocumentType,
-    Document,
-    IndividualRoleInHousehold,
-    ROLE_PRIMARY,
+    RESIDENCE_STATUS_CHOICE,
     ROLE_ALTERNATE,
+    ROLE_PRIMARY,
+    SEX_CHOICE,
+    UNICEF,
+    Document,
+    DocumentType,
+    EntitlementCard,
+    Household,
+    Individual,
+    IndividualRoleInHousehold,
 )
 from registration_data.fixtures import RegistrationDataImportFactory
 
@@ -51,17 +54,34 @@ class HouseholdFactory(factory.DjangoModelFactory):
     class Meta:
         model = Household
 
-    consent = factory.django.ImageField(color="blue")
-    residence_status = factory.fuzzy.FuzzyChoice(RESIDENCE_STATUS_CHOICE, getter=lambda c: c[0],)
+    consent_sign = factory.django.ImageField(color="blue")
+    consent = True
+    consent_sharing = (UNICEF, HUMANITARIAN_PARTNER)
+    residence_status = factory.fuzzy.FuzzyChoice(
+        RESIDENCE_STATUS_CHOICE,
+        getter=lambda c: c[0],
+    )
     country_origin = factory.Faker("country_code")
     country = factory.Faker("country_code")
     size = factory.fuzzy.FuzzyInteger(3, 8)
     address = factory.Faker("address")
-    registration_data_import = factory.SubFactory(RegistrationDataImportFactory,)
+    registration_data_import = factory.SubFactory(
+        RegistrationDataImportFactory,
+    )
     first_registration_date = factory.Faker("date_this_year", before_today=True, after_today=False)
     last_registration_date = factory.Faker("date_this_year", before_today=True, after_today=False)
     flex_fields = factory.LazyAttribute(flex_field_households)
     business_area = factory.LazyAttribute(lambda o: o.registration_data_import.business_area)
+    start = factory.Faker("date_this_month", before_today=True, after_today=False)
+    end = factory.Faker("date_this_month", before_today=True, after_today=False)
+    deviceid = factory.Faker("md5")
+    name_enumerator = factory.Faker("name")
+    org_enumerator = factory.fuzzy.FuzzyChoice(
+        ORG_ENUMERATOR_CHOICES,
+        getter=lambda c: c[0],
+    )
+    org_name_enumerator = "Partner Organization"
+    village = factory.Faker("city")
 
 
 class DocumentFactory(factory.DjangoModelFactory):
@@ -80,15 +100,21 @@ class IndividualFactory(factory.DjangoModelFactory):
     given_name = factory.Faker("first_name")
     middle_name = factory.Faker("first_name")
     family_name = factory.Faker("last_name")
-    sex = factory.fuzzy.FuzzyChoice(SEX_CHOICE, getter=lambda c: c[0],)
+    sex = factory.fuzzy.FuzzyChoice(
+        SEX_CHOICE,
+        getter=lambda c: c[0],
+    )
     birth_date = factory.Faker("date_of_birth", tzinfo=utc, minimum_age=16, maximum_age=90)
-    marital_status = factory.fuzzy.FuzzyChoice(MARITAL_STATUS_CHOICE, getter=lambda c: c[0],)
+    marital_status = factory.fuzzy.FuzzyChoice(
+        MARITAL_STATUS_CHOICE,
+        getter=lambda c: c[0],
+    )
     phone_no = factory.Faker("phone_number")
     phone_no_alternative = ""
     relationship = factory.fuzzy.FuzzyChoice([value for value, label in RELATIONSHIP_CHOICE[1:] if value != "HEAD"])
     household = factory.SubFactory(HouseholdFactory)
     registration_data_import = factory.SubFactory(RegistrationDataImportFactory)
-    disability = factory.fuzzy.FuzzyChoice([True, False])
+    disability = False
     flex_fields = factory.LazyAttribute(flex_field_individual)
     first_registration_date = factory.Faker("date_this_year", before_today=True, after_today=False)
     last_registration_date = factory.Faker("date_this_year", before_today=True, after_today=False)
@@ -99,7 +125,10 @@ class EntitlementCardFactory(factory.DjangoModelFactory):
         model = EntitlementCard
 
     card_number = factory.Faker("credit_card_number")
-    status = fuzzy.FuzzyChoice(EntitlementCard.STATUS_CHOICE, getter=lambda c: c[0],)
+    status = fuzzy.FuzzyChoice(
+        EntitlementCard.STATUS_CHOICE,
+        getter=lambda c: c[0],
+    )
     card_type = factory.Faker("credit_card_provider")
     current_card_size = "Lorem"
     card_custodian = factory.Faker("name")

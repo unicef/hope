@@ -16,9 +16,10 @@ from model_utils import Choices
 from model_utils.models import SoftDeletableModel
 from psycopg2.extras import NumericRange
 
-from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES, _INDIVIDUAL, _HOUSEHOLD
+
+from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES, _INDIVIDUAL, TYPE_SELECT_MANY, _HOUSEHOLD
 from core.models import FlexibleAttribute
-from household.models import Individual, Household
+from household.models import Individual, Household, MALE, FEMALE
 from utils.models import TimeStampedUUIDModel
 
 _MAX_LEN = 256
@@ -161,23 +162,23 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
         child_male = Individual.objects.filter(
             household__id__in=households_ids,
             birth_date__gt=date18ago,
-            sex="MALE",
+            sex=MALE,
         ).count()
         child_female = Individual.objects.filter(
             household__id__in=households_ids,
             birth_date__gt=date18ago,
-            sex="FEMALE",
+            sex=FEMALE,
         ).count()
 
         adult_male = Individual.objects.filter(
             household__id__in=households_ids,
             birth_date__lte=date18ago,
-            sex="MALE",
+            sex=MALE,
         ).count()
         adult_female = Individual.objects.filter(
             household__id__in=households_ids,
             birth_date__lte=date18ago,
-            sex="FEMALE",
+            sex=FEMALE,
         ).count()
         return {
             "child_male": child_male,
@@ -199,23 +200,23 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
         child_male = Individual.objects.filter(
             household__id__in=households_ids,
             birth_date__gt=date18ago,
-            sex="MALE",
+            sex=MALE,
         ).count()
         child_female = Individual.objects.filter(
             household__id__in=households_ids,
             birth_date__gt=date18ago,
-            sex="FEMALE",
+            sex=FEMALE,
         ).count()
 
         adult_male = Individual.objects.filter(
             household__id__in=households_ids,
             birth_date__lte=date18ago,
-            sex="MALE",
+            sex=MALE,
         ).count()
         adult_female = Individual.objects.filter(
             household__id__in=households_ids,
             birth_date__lte=date18ago,
-            sex="FEMALE",
+            sex=FEMALE,
         ).count()
         return {
             "child_male": child_male,
@@ -451,20 +452,20 @@ class TargetingCriteriaFilterMixin:
         lookup_prefix = self.get_lookup_prefix(core_field_attr["associated_with"])
         return self.get_query_for_lookup(
             f"{lookup_prefix}{lookup}",
-            select_many=core_field_attr.get("type") == "SELECT_MANY",
+            select_many=core_field_attr.get("type") == TYPE_SELECT_MANY,
         )
 
     def get_query_for_flex_field(self):
         flex_field_attr = FlexibleAttribute.objects.get(name=self.field_name)
         if not flex_field_attr:
             raise ValidationError(
-                f"There are no Flex Field Attributes associated with this fieldName {self.field_name}"
+                f"There are no Core Field Attributes associated with this fieldName {self.field_name}"
             )
         lookup_prefix = self.get_lookup_prefix(_INDIVIDUAL if flex_field_attr.associated_with == 1 else _HOUSEHOLD)
         lookup = f"{lookup_prefix}flex_fields__{flex_field_attr.name}"
         return self.get_query_for_lookup(
             lookup,
-            select_many=flex_field_attr.type == "SELECT_MANY",
+            select_many=flex_field_attr.type == TYPE_SELECT_MANY,
         )
 
     def get_query(self):

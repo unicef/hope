@@ -1,5 +1,5 @@
 import re
-from collections import defaultdict, Counter
+from collections import Counter, defaultdict
 from datetime import datetime
 from operator import itemgetter
 from pathlib import Path
@@ -14,19 +14,17 @@ from openpyxl import load_workbook
 from openpyxl_image_loader import SheetImageLoader
 
 from core.core_fields_attributes import (
-    CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY,
     COLLECTORS_FIELDS,
+    CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY,
     KOBO_COLLECTOR_FIELD,
+    TYPE_SELECT_MANY,
+    TYPE_SELECT_ONE,
 )
 from core.kobo.common import KOBO_FORM_INDIVIDUALS_COLUMN_NAME, get_field_name
 from core.models import BusinessArea
-from core.utils import (
-    serialize_flex_attributes,
-    get_combined_attributes,
-    rename_dict_keys,
-)
+from core.utils import get_combined_attributes, rename_dict_keys, serialize_flex_attributes
 from core.validators import BaseValidator
-from household.models import IndividualIdentity, ROLE_PRIMARY, ROLE_ALTERNATE
+from household.models import ROLE_ALTERNATE, ROLE_PRIMARY, IndividualIdentity
 from registration_datahub.models import ImportedIndividualIdentity
 from registration_datahub.tasks.utils import collectors_str_ids_to_list
 
@@ -58,7 +56,6 @@ class XLSXValidator(BaseValidator):
         # loading workbook to check if it is in fact true .xlsx file
         try:
             wb = load_workbook(xlsx_file, data_only=True)
-            cls.WB = wb
         except BadZipfile:
             return [{"row_number": 1, "header": f"{xlsx_file.name}", "message": "Invalid .xlsx file"}]
 
@@ -145,12 +142,14 @@ class ImportDataValidator(BaseValidator):
             ident_obj = []
             if imp_ident_obj:
                 imp_ident_obj = ImportedIndividualIdentity.objects.filter(
-                    agency=values["agency"], document_number__in=values["numbers"],
+                    agency=values["agency"],
+                    document_number__in=values["numbers"],
                 )
 
             if ident_obj:
                 ident_obj = IndividualIdentity.objects.filter(
-                    agency=values["agency"], document_number__in=values["numbers"],
+                    agency=values["agency"],
+                    document_number__in=values["numbers"],
                 )
 
             for obj in imp_ident_obj:
@@ -264,7 +263,7 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
 
         choice_type = cls.ALL_FIELDS[header]["type"]
 
-        if choice_type == "SELECT_ONE":
+        if choice_type == TYPE_SELECT_ONE:
             if isinstance(value, str):
                 return value.strip() in choices
             else:
@@ -273,7 +272,7 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
                     return str_value in choices
             return False
 
-        elif choice_type == "SELECT_MANY":
+        elif choice_type == TYPE_SELECT_MANY:
             if isinstance(value, str):
                 selected_choices = value.split(",")
             else:
@@ -296,11 +295,15 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
         if isinstance(value, bool):
             return True
 
-        if cls.string_validator(value, header):
-            value = value.capitalize()
+        if not cls.required_validator(value, header):
+            return True
 
-            if value in ("True", "False"):
-                return True
+        if value is None:
+            return False
+
+        value = value.capitalize()
+        if value in ("True", "False"):
+            return True
 
     @classmethod
     def required_validator(cls, value, header, *args, **kwargs):
@@ -388,9 +391,7 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
                         f"{field_type.replace('_', ' ').lower()} "
                         f"of field {header.value}"
                     )
-                    invalid_rows.append(
-                        {"row_number": cell.row, "header": header.value, "message": message}
-                    )
+                    invalid_rows.append({"row_number": cell.row, "header": header.value, "message": message})
 
                 if header.value in documents_numbers:
                     if header.value == "other_id_type_i_c":
@@ -414,17 +415,13 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
         for household_id, count in head_of_household_count.items():
             if count == 0:
                 message = f"Sheet: Individuals, Household with id: {household_id}, " "has to have a head of household"
-                invalid_rows.append(
-                    {"row_number": 0, "header": "relationship_i_c", "message": message}
-                )
+                invalid_rows.append({"row_number": 0, "header": "relationship_i_c", "message": message})
             elif count > 1:
                 message = (
                     "Sheet: Individuals, There are multiple head of "
                     f"households for household with id: {household_id}"
                 )
-                invalid_rows.append(
-                    {"row_number": 0, "header": "relationship_i_c", "message": message}
-                )
+                invalid_rows.append({"row_number": 0, "header": "relationship_i_c", "message": message})
 
         invalid_doc_rows = []
         invalid_ident_rows = []
@@ -447,7 +444,6 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
         # loading workbook to check if it is in fact true .xlsx file
         try:
             wb = load_workbook(xlsx_file, data_only=True)
-            cls.WB = wb
         except BadZipfile:
             return [{"row_number": 1, "header": f"{xlsx_file.name}", "message": "Invalid .xlsx file"}]
 
@@ -455,11 +451,8 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
 
     @classmethod
     def validate_file_with_template(cls, *args, **kwargs):
-        if cls.WB is None:
-            xlsx_file = kwargs.get("file")
-            wb = openpyxl.load_workbook(xlsx_file, data_only=True)
-        else:
-            wb = cls.WB
+        xlsx_file = kwargs.get("file")
+        wb = openpyxl.load_workbook(xlsx_file, data_only=True)
 
         errors = []
         core_fields = {**cls.CORE_FIELDS}
@@ -492,11 +485,8 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
 
     @classmethod
     def validate_household_rows(cls, *args, **kwargs):
-        if cls.WB is None:
-            xlsx_file = kwargs.get("file")
-            wb = openpyxl.load_workbook(xlsx_file, data_only=True)
-        else:
-            wb = cls.WB
+        xlsx_file = kwargs.get("file")
+        wb = openpyxl.load_workbook(xlsx_file, data_only=True)
         household_sheet = wb["Households"]
         cls.image_loader = SheetImageLoader(household_sheet)
         cls.BUSINESS_AREA_SLUG = kwargs.get("business_area_slug")
@@ -507,11 +497,8 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
 
     @classmethod
     def validate_individuals_rows(cls, *args, **kwargs):
-        if cls.WB is None:
-            xlsx_file = kwargs.get("file")
-            wb = openpyxl.load_workbook(xlsx_file, data_only=True)
-        else:
-            wb = cls.WB
+        xlsx_file = kwargs.get("file")
+        wb = openpyxl.load_workbook(xlsx_file, data_only=True)
         individuals_sheet = wb["Individuals"]
         cls.image_loader = SheetImageLoader(individuals_sheet)
 
@@ -565,11 +552,8 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
 
     @classmethod
     def validate_collectors(cls, *args, **kwargs):
-        if cls.WB is None:
-            xlsx_file = kwargs.get("file")
-            wb = openpyxl.load_workbook(xlsx_file, data_only=True)
-        else:
-            wb = cls.WB
+        xlsx_file = kwargs.get("file")
+        wb = openpyxl.load_workbook(xlsx_file, data_only=True)
 
         errors = []
 
@@ -588,7 +572,11 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
 
         errors.extend(cls.collector_column_validator("primary_collector_id", primary_collectors_data, household_ids))
         errors.extend(
-            cls.collector_column_validator("alternate_collector_id", alternate_collectors_data, household_ids,)
+            cls.collector_column_validator(
+                "alternate_collector_id",
+                alternate_collectors_data,
+                household_ids,
+            )
         )
 
         return errors
@@ -931,9 +919,7 @@ class KoboProjectImportDataValidator(ImportDataValidator):
                             {"header": "relationship_i_c", "message": "Only one person can " "be a head of household"}
                         )
                     if primary_collector_counter == 0:
-                        errors.append(
-                            {"header": "role_i_c", "message": "Household must have a " "primary collector"}
-                        )
+                        errors.append({"header": "role_i_c", "message": "Household must have a " "primary collector"})
                     if primary_collector_counter > 1:
                         errors.append(
                             {"header": "role_i_c", "message": "Only one person can " "be a primary collector"}
