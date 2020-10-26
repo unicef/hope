@@ -18,6 +18,8 @@ from targeting.models import (
     TargetingCriteria,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
+    TargetingIndividualRuleFilterBlock,
+    TargetingIndividualBlockRuleFilter,
 )
 from targeting.schema import TargetPopulationNode, TargetingCriteriaObjectType
 from targeting.validators import (
@@ -74,6 +76,26 @@ class CreateTargetPopulationInput(graphene.InputObjectType):
     business_area_slug = graphene.String(required=True)
 
 
+def from_input_to_targeting_criteria(targeting_criteria_input):
+    targeting_criteria = TargetingCriteria()
+    targeting_criteria.save()
+    for rule_input in targeting_criteria_input.get("rules"):
+        rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)
+        rule.save()
+        for filter_input in rule_input.get("filters", []):
+            rule_filter = TargetingCriteriaRuleFilter(targeting_criteria_rule=rule, **filter_input)
+            rule_filter.save()
+        for block_input in rule_input.get("individuals_filters_blocks", []):
+            block = TargetingIndividualRuleFilterBlock(targeting_criteria_rule=rule)
+            block.save()
+            for individual_block_filters_input in block_input.get("individual_block_filters"):
+                individual_block_filters = TargetingIndividualBlockRuleFilter(
+                    individuals_filters_block=block, **individual_block_filters_input
+                )
+                individual_block_filters.save()
+    return targeting_criteria
+
+
 class CreateTargetPopulationMutation(graphene.Mutation):
     target_population = graphene.Field(TargetPopulationNode)
 
@@ -90,14 +112,7 @@ class CreateTargetPopulationMutation(graphene.Mutation):
         targeting_criteria_input = input.get("targeting_criteria")
         business_area = BusinessArea.objects.get(slug=input.pop("business_area_slug"))
         TargetingCriteriaInputValidator.validate(targeting_criteria_input)
-        targeting_criteria = TargetingCriteria()
-        targeting_criteria.save()
-        for rule_input in targeting_criteria_input.get("rules"):
-            rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)
-            rule.save()
-            for filter_input in rule_input.get("filters"):
-                rule_filter = TargetingCriteriaRuleFilter(targeting_criteria_rule=rule, **filter_input)
-                rule_filter.save()
+        targeting_criteria = from_input_to_targeting_criteria(targeting_criteria_input)
         target_population = TargetPopulation(name=input.get("name"), created_by=user, business_area=business_area)
         target_population.candidate_list_targeting_criteria = targeting_criteria
         target_population.save()
@@ -127,14 +142,7 @@ class UpdateTargetPopulationMutation(graphene.Mutation):
         targeting_criteria_input = input.get("targeting_criteria")
         TargetingCriteriaInputValidator.validate(targeting_criteria_input)
         if targeting_criteria_input:
-            targeting_criteria = TargetingCriteria()
-            targeting_criteria.save()
-            for rule_input in targeting_criteria_input.get("rules"):
-                rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)
-                rule.save()
-                for filter_input in rule_input.get("filters"):
-                    rule_filter = TargetingCriteriaRuleFilter(targeting_criteria_rule=rule, **filter_input)
-                    rule_filter.save()
+            targeting_criteria = from_input_to_targeting_criteria(targeting_criteria_input)
             if target_population.status == "DRAFT":
                 if target_population.candidate_list_targeting_criteria:
                     target_population.candidate_list_targeting_criteria.delete()
@@ -214,17 +222,20 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
         target_population.finalized_by = user
         target_population.finalized_at = timezone.now()
         if target_population.final_list_targeting_criteria:
-            """Gets all households from candidate list which 
+            """Gets all households from candidate list which
             don't meet final_list_targeting_criteria and set them (HouseholdSelection m2m model)
              final=False (final list is candidate list filtered by final=True"""
             households_ids_queryset = target_population.households.filter(
                 ~Q(target_population.final_list_targeting_criteria.get_query())
             ).values_list("id")
             HouseholdSelection.objects.filter(
-                household__id__in=households_ids_queryset, target_population=target_population,
+                household__id__in=households_ids_queryset,
+                target_population=target_population,
             ).update(final=False)
         target_population.save()
-        AirflowApi.start_dag(dag_id="SendTargetPopulation",)
+        AirflowApi.start_dag(
+            dag_id="SendTargetPopulation",
+        )
         return cls(target_population=target_population)
 
 

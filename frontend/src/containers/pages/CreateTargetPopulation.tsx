@@ -1,17 +1,17 @@
 import React from 'react';
 import styled from 'styled-components';
-import {Button, Paper, Tab, Tabs, Typography} from '@material-ui/core';
-import {Field, FieldArray, Form, Formik} from 'formik';
-import {PageHeader} from '../../components/PageHeader';
-import {TargetingCriteria} from '../../components/TargetPopulation/TargetingCriteria';
-import {FormikTextField} from '../../shared/Formik/FormikTextField';
-import {Results} from '../../components/TargetPopulation/Results';
-import {useCreateTpMutation} from '../../__generated__/graphql';
-import {useSnackbar} from '../../hooks/useSnackBar';
-import {useBusinessArea} from '../../hooks/useBusinessArea';
-import {BreadCrumbsItem} from '../../components/BreadCrumbs';
-import {CreateTable} from '../tables/TargetPopulation/Create';
-import {getTargetingCriteriaVariables} from "../../utils/targetingUtils";
+import { Button, Paper, Tab, Tabs, Typography } from '@material-ui/core';
+import { Field, FieldArray, Form, Formik } from 'formik';
+import { PageHeader } from '../../components/PageHeader';
+import { TargetingCriteria } from '../../components/TargetPopulation/TargetingCriteria';
+import { FormikTextField } from '../../shared/Formik/FormikTextField';
+import { Results } from '../../components/TargetPopulation/Results';
+import { useCreateTpMutation } from '../../__generated__/graphql';
+import { useSnackbar } from '../../hooks/useSnackBar';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { BreadCrumbsItem } from '../../components/BreadCrumbs';
+import { CreateTable } from '../tables/TargetPopulation/Create';
+import { getTargetingCriteriaVariables } from '../../utils/targetingUtils';
 
 const PaperContainer = styled(Paper)`
   display: flex;
@@ -64,21 +64,7 @@ export function CreateTargetPopulation(): React.ReactElement {
             input: {
               name: values.name,
               businessAreaSlug: businessArea,
-              targetingCriteria: {
-                rules: values.criterias.map((rule) => {
-                  return {
-                    ...rule,
-                    filters: rule.filters.map((each) => {
-                      return {
-                        comparisionMethod: each.comparisionMethod,
-                        arguments: each.arguments,
-                        fieldName: each.fieldName,
-                        isFlexField: each.isFlexField,
-                      };
-                    }),
-                  };
-                }),
-              },
+              ...getTargetingCriteriaVariables(values),
             },
           },
         }).then(
@@ -137,9 +123,7 @@ export function CreateTargetPopulation(): React.ReactElement {
           />
           <Results />
           {values.criterias.length ? (
-            <CreateTable
-              variables={getTargetingCriteriaVariables(values)}
-            />
+            <CreateTable variables={getTargetingCriteriaVariables(values)} />
           ) : (
             <PaperContainer>
               <Typography variant='h6'>

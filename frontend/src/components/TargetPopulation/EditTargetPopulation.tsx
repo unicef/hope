@@ -15,6 +15,7 @@ import { TabPanel } from '../TabPanel';
 import { CandidateListTab } from './Edit/CandidateListTab';
 import { TargetPopulationTab } from './Edit/TargetPopulationTab';
 import { TargetPopulationDetails } from './TargetPopulationDetails';
+import { getTargetingCriteriaVariables } from '../../utils/targetingUtils';
 
 const ButtonContainer = styled.span`
   margin: 0 ${({ theme }) => theme.spacing(2)}px;
@@ -70,36 +71,6 @@ export function EditTargetPopulation({
         return true;
     }
   };
-  const mapRules = (status, values): TargetingCriteriaRuleObjectType[] => {
-    switch (status) {
-      case 'DRAFT':
-        return values.candidateListCriterias.map((rule) => {
-          return {
-            filters: rule.filters.map((each) => {
-              return {
-                comparisionMethod: each.comparisionMethod,
-                arguments: each.arguments,
-                fieldName: each.fieldName,
-                isFlexField: each.isFlexField,
-              };
-            }),
-          };
-        });
-      default:
-        return values.targetPopulationCriterias.map((rule) => {
-          return {
-            filters: rule.filters.map((each) => {
-              return {
-                comparisionMethod: each.comparisionMethod,
-                arguments: each.arguments,
-                fieldName: each.fieldName,
-                isFlexField: each.isFlexField,
-              };
-            }),
-          };
-        });
-    }
-  };
   return (
     <Formik
       initialValues={initialValues}
@@ -109,9 +80,9 @@ export function EditTargetPopulation({
             input: {
               id: values.id,
               ...(targetPopulation.status === 'DRAFT' && { name: values.name }),
-              targetingCriteria: {
-                rules: mapRules(targetPopulation.status, values),
-              },
+              ...getTargetingCriteriaVariables({
+                criterias: values.candidateListCriterias,
+              }),
             },
           },
         });

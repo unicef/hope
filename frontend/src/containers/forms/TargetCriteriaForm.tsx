@@ -34,6 +34,11 @@ const DialogDescription = styled.div`
   font-size: 14px;
   color: rgba(0, 0, 0, 0.54);
 `;
+const DialogError = styled.div`
+  margin: 20px 0;
+  font-size: 14px;
+  color: ${({ theme }) => theme.palette.error.dark};
+`;
 
 const DialogContainer = styled.div`
   position: absolute;
@@ -58,14 +63,14 @@ const MarginButton = styled(Button)`
 const validationSchema = Yup.object().shape({
   filters: Yup.array().of(
     Yup.object().shape({
-      fieldName: Yup.string().required('Label is required'),
+      fieldName: Yup.string().required('FieldType is required'),
     }),
   ),
   individualsFiltersBlocks: Yup.array().of(
     Yup.object().shape({
       individualBlockFilters: Yup.array().of(
         Yup.object().shape({
-          fieldName: Yup.string().required('Label is required'),
+          fieldName: Yup.string().required('Field Type is required'),
         }),
       ),
     }),
@@ -106,15 +111,40 @@ export function TargetCriteriaForm({
   const individualsFiltersBlocksWrapperRef = useRef(null);
   const initialValue = mapCriteriaToInitialValues(criteria);
   const [individualData, setIndividualData] = useState(null);
+  const [householdData, setHouseholdData] = useState(null);
   useEffect(() => {
     if (loading) return;
-    const filteredData = {
+    const filteredIndividualData = {
       allFieldsAttributes: data.allFieldsAttributes.filter(
         (item) => item.associatedWith === 'Individual',
       ),
     };
-    setIndividualData(filteredData);
+    setIndividualData(filteredIndividualData);
+
+    const filteredHouseholdData = {
+      allFieldsAttributes: data.allFieldsAttributes.filter(
+        (item) => item.associatedWith === 'Household',
+      ),
+    };
+    setHouseholdData(filteredHouseholdData);
   }, [data, loading]);
+  const validate = ({ filters, individualsFiltersBlocks }) => {
+    const errors: { nonFieldErrors?: string[] } = {};
+    if (filters.length + individualsFiltersBlocks.length === 0) {
+      errors.nonFieldErrors = [
+        'You need to add at least one household filter or an individual block filter.',
+      ];
+    } else if (
+      individualsFiltersBlocks.filter(
+        (block) => block.individualBlockFilters.length === 0,
+      ).length > 0
+    ) {
+      errors.nonFieldErrors = [
+        'You need to add at least one household filter or an individual block filter.',
+      ];
+    }
+    return errors;
+  };
   if (loading) return null;
 
   return (
@@ -129,10 +159,11 @@ export function TargetCriteriaForm({
           addCriteria({ filters, individualsFiltersBlocks });
           return bag.resetForm();
         }}
+        validate={validate}
         validationSchema={validationSchema}
         enableReinitialize
       >
-        {({ submitForm, values }) => (
+        {({ submitForm, values, resetForm, errors }) => (
           <>
             <Dialog
               open={open}
@@ -151,6 +182,19 @@ export function TargetCriteriaForm({
                   household that meet the filters applied. You may also add
                   individual sub-criteria to further define an individual.
                 </DialogDescription>
+                {// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+                // @ts-ignore
+                errors.nonFieldErrors && (
+                  <DialogError>
+                    <ul>
+                      {// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+                      // @ts-ignore
+                      errors.nonFieldErrors.map((message) => (
+                        <li>{message}</li>
+                      ))}
+                    </ul>
+                  </DialogError>
+                )}
 
                 <FieldArray
                   name='filters'
@@ -165,7 +209,7 @@ export function TargetCriteriaForm({
                             //eslint-disable-next-line
                             key={index}
                             index={index}
-                            data={data}
+                            data={householdData}
                             each={each}
                             onChange={(e, object) => {
                               if (object) {
@@ -200,7 +244,7 @@ export function TargetCriteriaForm({
                             blockIndex={index}
                             data={individualData}
                             values={values}
-                            onClick={() => arrayHelpers.remove(index)}
+                            onDelete={() => arrayHelpers.remove(index)}
                           />
                         );
                       })}
@@ -218,7 +262,7 @@ export function TargetCriteriaForm({
                         onClick={() =>
                           filtersArrayWrapperRef.current
                             .getArrayHelpers()
-                            .push({ fieldname: '' })
+                            .push({ fieldName: '' })
                         }
                       >
                         Add Next Criteria
@@ -230,7 +274,7 @@ export function TargetCriteriaForm({
                           individualsFiltersBlocksWrapperRef.current
                             .getArrayHelpers()
                             .push({
-                              individualBlockFilters: [{ fieldname: '' }],
+                              individualBlockFilters: [{ fieldName: '' }],
                             })
                         }
                       >
@@ -238,7 +282,14 @@ export function TargetCriteriaForm({
                       </MarginButton>
                     </div>
                     <div>
-                      <Button onClick={() => onClose()}>Cancel</Button>
+                      <Button
+                        onClick={() => {
+                          resetForm();
+                          onClose();
+                        }}
+                      >
+                        Cancel
+                      </Button>
                       <Button
                         onClick={() => submitForm()}
                         type='submit'

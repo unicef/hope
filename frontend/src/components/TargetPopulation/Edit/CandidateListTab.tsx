@@ -7,6 +7,7 @@ import { TargetPopulationHouseholdTable } from '../../../containers/tables/Targe
 import { TargetingCriteria } from '../TargetingCriteria';
 import { Results } from '../Results';
 import { useGoldenRecordByTargetingCriteriaQuery } from '../../../__generated__/graphql';
+import { getTargetingCriteriaVariables } from '../../../utils/targetingUtils';
 
 const PaperContainer = styled(Paper)`
   display: flex;
@@ -34,20 +35,9 @@ export function CandidateListTab({ values }): React.ReactElement {
       {values.candidateListCriterias.length ? (
         <TargetPopulationHouseholdTable
           variables={{
-            targetingCriteria: {
-              rules: values.candidateListCriterias.map((rule) => {
-                return {
-                  filters: rule.filters.map((each) => {
-                    return {
-                      comparisionMethod: each.comparisionMethod,
-                      arguments: each.arguments,
-                      fieldName: each.fieldName,
-                      isFlexField: each.isFlexField,
-                    };
-                  }),
-                };
-              }),
-            },
+            ...getTargetingCriteriaVariables({
+              criterias: values.candidateListCriterias,
+            }),
           }}
           query={useGoldenRecordByTargetingCriteriaQuery}
           queryObjectName='goldenRecordByTargetingCriteria'
