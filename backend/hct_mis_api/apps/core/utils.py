@@ -359,3 +359,13 @@ def build_arg_dict_from_dict(data_dict, mapping_dict):
     for key, value in mapping_dict.items():
         args[key] = data_dict.get(value)
     return args
+
+
+def is_valid_uuid(uuid_str):
+    from uuid import UUID
+
+    try:
+        UUID(uuid_str, version=4)
+        return True
+    except ValueError:
+        return False

@@ -8,7 +8,7 @@ from grievance.schema import GrievanceTicketNode
 
 
 class CreateGrievanceTicketInput(graphene.InputObjectType):
-    pass
+    description = graphene.String()
 
 
 class CreateGrievanceTicketMutation(graphene.Mutation):

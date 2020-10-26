@@ -97,7 +97,7 @@ class GrievanceTicket(TimeStampedUUIDModel):
     )
     status = models.IntegerField(verbose_name=_("Status"), choices=STATUS_CHOICES, default=STATUS_OPEN)
     category = models.IntegerField(verbose_name=_("Category"), choices=CATEGORY_CHOICES)
-    issue_type = models.IntegerField(verbose_name=_("Type"), null=True)
+    issue_type = models.IntegerField(verbose_name=_("Type"), null=True, blank=True)
     description = models.TextField(
         verbose_name=_("Description"), blank=True, help_text=_("The content of the customers query."),
     )
@@ -108,11 +108,14 @@ class GrievanceTicket(TimeStampedUUIDModel):
     business_area = models.ForeignKey("core.BusinessArea", related_name="tickets", on_delete=models.CASCADE)
     linked_tickets = models.ManyToManyField(to="GrievanceTicket", through="GrievanceTicketThrough")
 
+    class Meta:
+        ordering = ("status", "created_at",)
+
     def clean(self):
         issue_types = self.ISSUE_TYPES_CHOICES.get(self.category)
         should_contain_issue_types = bool(issue_types)
         has_invalid_issue_type = should_contain_issue_types is True and self.issue_type not in issue_types
-        has_issue_type_for_category_without_issue_types = has_invalid_issue_type is False and self.issue_type
+        has_issue_type_for_category_without_issue_types = bool(has_invalid_issue_type is False and self.issue_type)
         if has_invalid_issue_type or has_issue_type_for_category_without_issue_types:
             raise ValidationError({"issue_type": "Invalid issue type for selected category"})
 
@@ -148,6 +151,8 @@ class TicketComplaintDetails(TimeStampedUUIDModel):
     ticket = models.OneToOneField(
         "grievance.GrievanceTicket", related_name="complaint_ticket_details", on_delete=models.CASCADE
     )
+    # TODO: looks like this should be ManyToManyField ->
+    #  "Multiple records can be selected and linked" ~ PaymentRecord lookup user story
     payment_record = models.ForeignKey(
         "payment.PaymentRecord", related_name="complaint_ticket_details", on_delete=models.CASCADE, null=True,
     )
@@ -163,6 +168,8 @@ class TicketSensitiveDetails(TimeStampedUUIDModel):
     ticket = models.OneToOneField(
         "grievance.GrievanceTicket", related_name="sensitive_ticket_details", on_delete=models.CASCADE
     )
+    # TODO: looks like this should be ManyToManyField ->
+    #  "Multiple records can be selected and linked" ~ PaymentRecord lookup user story
     payment_record = models.ForeignKey(
         "payment.PaymentRecord", related_name="sensitive_ticket_details", on_delete=models.CASCADE, null=True,
     )
