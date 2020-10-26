@@ -442,13 +442,22 @@ type GroupAttributeNode {
   labelEn: String
 }
 
+enum HouseholdConsentSharing {
+  UNICEF
+  HUMANITARIAN_PARTNER
+  PRIVATE_PARTNER
+  GOVERNMENT_PARTNER
+}
+
 type HouseholdNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
   lastSyncAt: DateTime
   status: HouseholdStatus!
-  consent: String!
+  consentSign: String!
+  consent: Boolean!
+  consentSharing: HouseholdConsentSharing!
   residenceStatus: HouseholdResidenceStatus!
   countryOrigin: String
   country: String
@@ -481,8 +490,17 @@ type HouseholdNode implements Node {
   firstRegistrationDate: Date!
   lastRegistrationDate: Date!
   headOfHousehold: IndividualNode!
+  fchildHoh: Boolean!
+  childHoh: Boolean!
   unicefId: String!
   businessArea: UserBusinessAreaNode!
+  start: DateTime
+  end: DateTime
+  deviceid: String!
+  nameEnumerator: String!
+  orgEnumerator: HouseholdOrgEnumerator!
+  orgNameEnumerator: String!
+  village: String!
   individualsAndRoles: [IndividualRoleInHouseholdNode!]!
   individuals(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
@@ -507,12 +525,17 @@ type HouseholdNodeEdge {
   cursor: String!
 }
 
+enum HouseholdOrgEnumerator {
+  UNICEF
+  PARTNER
+}
+
 enum HouseholdResidenceStatus {
-  REFUGEE
-  MIGRANT
-  CITIZEN
   IDP
-  OTHER
+  REFUGEE
+  OTHERS_OF_CONCERN
+  HOST
+  NON_HOST
 }
 
 type HouseholdSelection {
@@ -844,11 +867,20 @@ enum ImportedDocumentTypeType {
   OTHER
 }
 
+enum ImportedHouseholdConsentSharing {
+  UNICEF
+  HUMANITARIAN_PARTNER
+  PRIVATE_PARTNER
+  GOVERNMENT_PARTNER
+}
+
 type ImportedHouseholdNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  consent: String!
+  consentSign: String!
+  consent: Boolean!
+  consentSharing: ImportedHouseholdConsentSharing!
   residenceStatus: ImportedHouseholdResidenceStatus!
   countryOrigin: String
   size: Int!
@@ -875,11 +907,20 @@ type ImportedHouseholdNode implements Node {
   maleAgeGroup1217DisabledCount: Int!
   maleAdultsDisabledCount: Int!
   headOfHousehold: ImportedIndividualNode
+  fchildHoh: Boolean!
+  childHoh: Boolean!
   registrationDataImport: RegistrationDataImportDatahubNode!
   firstRegistrationDate: Date!
   lastRegistrationDate: Date!
   returnee: Boolean!
   flexFields: JSONString!
+  start: DateTime
+  end: DateTime
+  deviceid: String!
+  nameEnumerator: String!
+  orgEnumerator: ImportedHouseholdOrgEnumerator!
+  orgNameEnumerator: String!
+  village: String!
   individuals(before: String, after: String, first: Int, last: Int): ImportedIndividualNodeConnection!
   hasDuplicates: Boolean
 }
@@ -896,12 +937,23 @@ type ImportedHouseholdNodeEdge {
   cursor: String!
 }
 
+enum ImportedHouseholdOrgEnumerator {
+  UNICEF
+  PARTNER
+}
+
 enum ImportedHouseholdResidenceStatus {
-  REFUGEE
-  MIGRANT
-  CITIZEN
   IDP
-  OTHER
+  REFUGEE
+  OTHERS_OF_CONCERN
+  HOST
+  NON_HOST
+}
+
+enum ImportedIndividualCommsDisability {
+  SOME_DIFFICULTY
+  LOT_DIFFICULTY
+  CANNOT_DO
 }
 
 enum ImportedIndividualDeduplicationBatchStatus {
@@ -918,6 +970,12 @@ enum ImportedIndividualDeduplicationGoldenRecordStatus {
   NOT_PROCESSED
 }
 
+enum ImportedIndividualHearingDisability {
+  SOME_DIFFICULTY
+  LOT_DIFFICULTY
+  CANNOT_DO
+}
+
 type ImportedIndividualIdentityNode {
   id: ID!
   individual: ImportedIndividualNode!
@@ -928,9 +986,15 @@ type ImportedIndividualIdentityNode {
 enum ImportedIndividualMaritalStatus {
   SINGLE
   MARRIED
-  WIDOW
+  WIDOWED
   DIVORCED
   SEPARATED
+}
+
+enum ImportedIndividualMemoryDisability {
+  SOME_DIFFICULTY
+  LOT_DIFFICULTY
+  CANNOT_DO
 }
 
 type ImportedIndividualNode implements Node {
@@ -962,6 +1026,15 @@ type ImportedIndividualNode implements Node {
   deduplicationGoldenRecordResults: [DeduplicationResultNode]
   flexFields: JSONString!
   pregnant: Boolean!
+  observedDisability: ImportedIndividualObservedDisability!
+  seeingDisability: ImportedIndividualSeeingDisability
+  hearingDisability: ImportedIndividualHearingDisability
+  physicalDisability: ImportedIndividualPhysicalDisability
+  memoryDisability: ImportedIndividualMemoryDisability
+  selfcareDisability: ImportedIndividualSelfcareDisability
+  commsDisability: ImportedIndividualCommsDisability
+  whoAnswersPhone: String!
+  whoAnswersAltPhone: String!
   importedhousehold: ImportedHouseholdNode
   documents(before: String, after: String, first: Int, last: Int): ImportedDocumentNodeConnection!
   identities: [ImportedIndividualIdentityNode!]!
@@ -980,6 +1053,34 @@ type ImportedIndividualNodeEdge {
   cursor: String!
 }
 
+enum ImportedIndividualObservedDisability {
+  NONE
+  SEEING
+  HEARING
+  WALKING
+  MEMORY
+  SELF_CARE
+  COMMUNICATING
+}
+
+enum ImportedIndividualPhysicalDisability {
+  SOME_DIFFICULTY
+  LOT_DIFFICULTY
+  CANNOT_DO
+}
+
+enum ImportedIndividualSeeingDisability {
+  SOME_DIFFICULTY
+  LOT_DIFFICULTY
+  CANNOT_DO
+}
+
+enum ImportedIndividualSelfcareDisability {
+  SOME_DIFFICULTY
+  LOT_DIFFICULTY
+  CANNOT_DO
+}
+
 enum ImportedIndividualSex {
   MALE
   FEMALE
@@ -989,6 +1090,12 @@ enum ImportedIndividualWorkStatus {
   YES
   NO
   NOT_PROVIDED
+}
+
+enum IndividualCommsDisability {
+  SOME_DIFFICULTY
+  LOT_DIFFICULTY
+  CANNOT_DO
 }
 
 enum IndividualDeduplicationBatchStatus {
@@ -1005,6 +1112,12 @@ enum IndividualDeduplicationGoldenRecordStatus {
   NOT_PROCESSED
 }
 
+enum IndividualHearingDisability {
+  SOME_DIFFICULTY
+  LOT_DIFFICULTY
+  CANNOT_DO
+}
+
 type IndividualIdentityNode {
   id: ID!
   individual: IndividualNode!
@@ -1015,9 +1128,15 @@ type IndividualIdentityNode {
 enum IndividualMaritalStatus {
   SINGLE
   MARRIED
-  WIDOW
+  WIDOWED
   DIVORCED
   SEPARATED
+}
+
+enum IndividualMemoryDisability {
+  SOME_DIFFICULTY
+  LOT_DIFFICULTY
+  CANNOT_DO
 }
 
 type IndividualNode implements Node {
@@ -1057,6 +1176,15 @@ type IndividualNode implements Node {
   sanctionListPossibleMatch: Boolean!
   sanctionListLastCheck: DateTime
   pregnant: Boolean!
+  observedDisability: IndividualObservedDisability!
+  seeingDisability: IndividualSeeingDisability
+  hearingDisability: IndividualHearingDisability
+  physicalDisability: IndividualPhysicalDisability
+  memoryDisability: IndividualMemoryDisability
+  selfcareDisability: IndividualSelfcareDisability
+  commsDisability: IndividualCommsDisability
+  whoAnswersPhone: String!
+  whoAnswersAltPhone: String!
   representedHouseholds(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   headingHousehold: HouseholdNode
   documents(before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
@@ -1075,6 +1203,22 @@ type IndividualNodeConnection {
 type IndividualNodeEdge {
   node: IndividualNode
   cursor: String!
+}
+
+enum IndividualObservedDisability {
+  NONE
+  SEEING
+  HEARING
+  WALKING
+  MEMORY
+  SELF_CARE
+  COMMUNICATING
+}
+
+enum IndividualPhysicalDisability {
+  SOME_DIFFICULTY
+  LOT_DIFFICULTY
+  CANNOT_DO
 }
 
 enum IndividualRelationship {
@@ -1108,6 +1252,18 @@ enum IndividualRoleInHouseholdRole {
   PRIMARY
   ALTERNATE
   NO_ROLE
+}
+
+enum IndividualSeeingDisability {
+  SOME_DIFFICULTY
+  LOT_DIFFICULTY
+  CANNOT_DO
+}
+
+enum IndividualSelfcareDisability {
+  SOME_DIFFICULTY
+  LOT_DIFFICULTY
+  CANNOT_DO
 }
 
 enum IndividualSex {
@@ -1754,6 +1910,7 @@ input TargetingCriteriaRuleFilterObjectType {
   isFlexField: Boolean!
   fieldName: String!
   arguments: [Arg]!
+  headOfHousehold: Boolean
 }
 
 type TargetingCriteriaRuleNode {
@@ -1770,12 +1927,35 @@ input TargetingCriteriaRuleObjectType {
   individualsFiltersBlocks: [TargetingIndividualRuleFilterBlockObjectType]
 }
 
+enum TargetingIndividualBlockRuleFilterComparisionMethod {
+  EQUALS
+  NOT_EQUALS
+  CONTAINS
+  NOT_CONTAINS
+  RANGE
+  NOT_IN_RANGE
+  GREATER_THAN
+  LESS_THAN
+}
+
+type TargetingIndividualBlockRuleFilterNode {
+  id: UUID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  comparisionMethod: TargetingIndividualBlockRuleFilterComparisionMethod!
+  individualsFiltersBlock: TargetingIndividualRuleFilterBlockNode!
+  isFlexField: Boolean!
+  fieldName: String!
+  arguments: [Arg]
+  fieldAttribute: FieldAttributeNode
+}
+
 type TargetingIndividualRuleFilterBlockNode {
   id: UUID!
   createdAt: DateTime!
   updatedAt: DateTime!
   targetingCriteriaRule: TargetingCriteriaRuleNode!
-  individualBlockFilters: [TargetingCriteriaRuleFilterNode]
+  individualBlockFilters: [TargetingIndividualBlockRuleFilterNode]
 }
 
 input TargetingIndividualRuleFilterBlockObjectType {

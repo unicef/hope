@@ -5,8 +5,8 @@ import os
 import xmlrunner
 from django.conf import settings
 from django.db import connections
+
 from snapshottest.django import TestRunner
-from xmlrunner.extra.djangotestrunner import XMLTestRunner
 
 
 def create_test_db_and_schemas(creation, verbosity=1, autoclobber=False, serialize=True, keepdb=False):

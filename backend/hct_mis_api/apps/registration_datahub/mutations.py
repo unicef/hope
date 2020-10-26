@@ -206,6 +206,7 @@ class UploadImportDataXLSXFile(
     def mutate(cls, root, info, file, business_area_slug):
         errors = cls.validate(file=file, business_area_slug=business_area_slug)
 
+
         if errors:
             errors.sort(key=operator.itemgetter("row_number", "header"))
             return UploadImportDataXLSXFile(None, errors)

@@ -37,16 +37,10 @@ export function ProgrammesTableRow({
     history.push(path);
   };
 
-  const programFreqOfPayChoiceDict = choicesToDict(
-    choicesData.programFrequencyOfPaymentsChoices,
-  );
-  const programScopeChoiceDict = choicesToDict(choicesData.programScopeChoices);
   const programSectorChoiceDict = choicesToDict(
     choicesData.programSectorChoices,
   );
-  const programStatusChoiceDict = choicesToDict(
-    choicesData.programStatusChoices,
-  );
+
   return (
     <ClickableTableRow
       hover

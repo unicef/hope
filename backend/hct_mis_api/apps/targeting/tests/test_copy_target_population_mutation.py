@@ -1,16 +1,12 @@
 from django.core.management import call_command
 
+from targeting.models import TargetingCriteria, TargetingCriteriaRule, TargetingCriteriaRuleFilter, TargetPopulation
+
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
 from core.models import BusinessArea
 from core.utils import decode_id_string
 from household.fixtures import create_household
-from targeting.models import (
-    TargetingCriteria,
-    TargetingCriteriaRule,
-    TargetingCriteriaRuleFilter,
-    TargetPopulation,
-)
 
 
 class TestCopyTargetPopulationMutation(APITestCase):
@@ -64,7 +60,7 @@ class TestCopyTargetPopulationMutation(APITestCase):
         call_command("loadbusinessareas")
         business_area = BusinessArea.objects.first()
         (household, individuals) = create_household(
-            {"size": 1, "residence_status": "CITIZEN", "business_area": business_area},
+            {"size": 1, "residence_status": "HOST", "business_area": business_area},
         )
         cls.household = household
         tp = TargetPopulation(name="Original Target Population", status="APPROVED")
@@ -129,12 +125,14 @@ class TestCopyTargetPopulationMutation(APITestCase):
         rule_copy = target_population_copy.candidate_list_targeting_criteria.rules.first()
         rule = self.target_population.candidate_list_targeting_criteria.rules.first()
         self.assertNotEqual(
-            rule_copy.id, rule.id,
+            rule_copy.id,
+            rule.id,
         )
         filter_copy = rule_copy.filters.first()
         filter = rule.filters.first()
         self.assertNotEqual(
-            filter_copy.id, filter.id,
+            filter_copy.id,
+            filter.id,
         )
 
     def test_copy_empty_target_1(self):
@@ -144,7 +142,10 @@ class TestCopyTargetPopulationMutation(APITestCase):
             variables={
                 "input": {
                     "targetPopulationData": {
-                        "id": self.id_to_base64(self.empty_target_population_1.id, "TargetPopulation",),
+                        "id": self.id_to_base64(
+                            self.empty_target_population_1.id,
+                            "TargetPopulation",
+                        ),
                         "name": "test_copy_empty_target_1",
                     }
                 }
