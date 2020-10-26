@@ -313,8 +313,10 @@ class TargetingCriteriaRuleQueryingMixin:
             if isinstance(self.individuals_filters_blocks, list)
             else self.individuals_filters_blocks.all()
         )
+        # Thats household filters
         for ruleFilter in filters:
             query &= ruleFilter.get_query()
+        # filter individual block
         for individuals_filters_block in individuals_filters_blocks:
             query &= individuals_filters_block.get_query()
         return query
@@ -473,7 +475,7 @@ class TargetingCriteriaFilterMixin:
     def __str__(self):
         return f"{self.field_name} {self.comparision_method} {self.arguments}"
 
-
+# TODO It should be household only
 class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterMixin):
     """
     This is one explicit filter like:

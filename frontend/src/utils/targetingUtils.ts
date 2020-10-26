@@ -85,15 +85,10 @@ export function mapFiltersToInitialValues(filters) {
 }
 
 export function mapCriteriaToInitialValues(criteria) {
-  let { filters } = criteria;
+  const filters = criteria.filters || [];
   const individualsFiltersBlocks = criteria.individualsFiltersBlocks || [];
-  if (filters === null) {
-    filters = [{ fieldName: '' }];
-  } else {
-    filters = mapFiltersToInitialValues(filters);
-  }
   return {
-    filters,
+    filters: mapFiltersToInitialValues(filters),
     individualsFiltersBlocks: individualsFiltersBlocks.map((block) => ({
       individualBlockFilters: mapFiltersToInitialValues(
         block.individualBlockFilters,
@@ -175,7 +170,9 @@ export function getTargetingCriteriaVariables(values) {
           filters: rule.filters.map(mapFilterToVariable),
           individualsFiltersBlocks: rule.individualsFiltersBlocks.map(
             (block) => ({
-              individualBlockFilters: block.individualBlockFilters.map(mapFilterToVariable),
+              individualBlockFilters: block.individualBlockFilters.map(
+                mapFilterToVariable,
+              ),
             }),
           ),
         };

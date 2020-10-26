@@ -1761,11 +1761,25 @@ type TargetingCriteriaRuleNode {
   createdAt: DateTime!
   updatedAt: DateTime!
   targetingCriteria: TargetingCriteriaNode!
+  individualsFiltersBlocks: [TargetingIndividualRuleFilterBlockNode]
   filters: [TargetingCriteriaRuleFilterNode]
 }
 
 input TargetingCriteriaRuleObjectType {
   filters: [TargetingCriteriaRuleFilterObjectType]
+  individualsFiltersBlocks: [TargetingIndividualRuleFilterBlockObjectType]
+}
+
+type TargetingIndividualRuleFilterBlockNode {
+  id: UUID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  targetingCriteriaRule: TargetingCriteriaRuleNode!
+  individualBlockFilters: [TargetingCriteriaRuleFilterNode]
+}
+
+input TargetingIndividualRuleFilterBlockObjectType {
+  individualBlockFilters: [TargetingCriteriaRuleFilterObjectType]
 }
 
 scalar UUID

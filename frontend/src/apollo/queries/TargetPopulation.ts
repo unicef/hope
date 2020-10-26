@@ -34,6 +34,23 @@ export const TargetPopulation = gql`
         }
         rules {
           id
+          individualsFiltersBlocks{
+            individualBlockFilters{
+              fieldName
+              isFlexField
+              arguments
+              comparisionMethod
+              fieldAttribute {
+                name
+                labelEn
+                type
+                choices {
+                  value
+                  labelEn
+                }
+              }
+            }
+          }
           filters {
             fieldName
             isFlexField

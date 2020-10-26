@@ -2659,11 +2659,26 @@ export type TargetingCriteriaRuleNode = {
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
   targetingCriteria: TargetingCriteriaNode,
+  individualsFiltersBlocks?: Maybe<Array<Maybe<TargetingIndividualRuleFilterBlockNode>>>,
   filters?: Maybe<Array<Maybe<TargetingCriteriaRuleFilterNode>>>,
 };
 
 export type TargetingCriteriaRuleObjectType = {
   filters?: Maybe<Array<Maybe<TargetingCriteriaRuleFilterObjectType>>>,
+  individualsFiltersBlocks?: Maybe<Array<Maybe<TargetingIndividualRuleFilterBlockObjectType>>>,
+};
+
+export type TargetingIndividualRuleFilterBlockNode = {
+   __typename?: 'TargetingIndividualRuleFilterBlockNode',
+  id: Scalars['UUID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  targetingCriteriaRule: TargetingCriteriaRuleNode,
+  individualBlockFilters?: Maybe<Array<Maybe<TargetingCriteriaRuleFilterNode>>>,
+};
+
+export type TargetingIndividualRuleFilterBlockObjectType = {
+  individualBlockFilters?: Maybe<Array<Maybe<TargetingCriteriaRuleFilterObjectType>>>,
 };
 
 export type TargetPopulationNode = Node & {
@@ -4532,7 +4547,21 @@ export type TargetPopulationQuery = (
       )>, rules: Maybe<Array<Maybe<(
         { __typename?: 'TargetingCriteriaRuleNode' }
         & Pick<TargetingCriteriaRuleNode, 'id'>
-        & { filters: Maybe<Array<Maybe<(
+        & { individualsFiltersBlocks: Maybe<Array<Maybe<(
+          { __typename?: 'TargetingIndividualRuleFilterBlockNode' }
+          & { individualBlockFilters: Maybe<Array<Maybe<(
+            { __typename?: 'TargetingCriteriaRuleFilterNode' }
+            & Pick<TargetingCriteriaRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod'>
+            & { fieldAttribute: Maybe<(
+              { __typename?: 'FieldAttributeNode' }
+              & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
+              & { choices: Maybe<Array<Maybe<(
+                { __typename?: 'CoreFieldChoiceObject' }
+                & Pick<CoreFieldChoiceObject, 'value' | 'labelEn'>
+              )>>> }
+            )> }
+          )>>> }
+        )>>>, filters: Maybe<Array<Maybe<(
           { __typename?: 'TargetingCriteriaRuleFilterNode' }
           & Pick<TargetingCriteriaRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod'>
           & { fieldAttribute: Maybe<(
@@ -8575,6 +8604,23 @@ export const TargetPopulationDocument = gql`
       }
       rules {
         id
+        individualsFiltersBlocks {
+          individualBlockFilters {
+            fieldName
+            isFlexField
+            arguments
+            comparisionMethod
+            fieldAttribute {
+              name
+              labelEn
+              type
+              choices {
+                value
+                labelEn
+              }
+            }
+          }
+        }
         filters {
           fieldName
           isFlexField
@@ -10043,6 +10089,7 @@ export type ResolversTypes = {
   TargetPopulationStatus: TargetPopulationStatus,
   TargetingCriteriaNode: ResolverTypeWrapper<TargetingCriteriaNode>,
   TargetingCriteriaRuleNode: ResolverTypeWrapper<TargetingCriteriaRuleNode>,
+  TargetingIndividualRuleFilterBlockNode: ResolverTypeWrapper<TargetingIndividualRuleFilterBlockNode>,
   TargetingCriteriaRuleFilterNode: ResolverTypeWrapper<TargetingCriteriaRuleFilterNode>,
   TargetingCriteriaRuleFilterComparisionMethod: TargetingCriteriaRuleFilterComparisionMethod,
   Arg: ResolverTypeWrapper<Scalars['Arg']>,
@@ -10083,6 +10130,7 @@ export type ResolversTypes = {
   TargetingCriteriaObjectType: TargetingCriteriaObjectType,
   TargetingCriteriaRuleObjectType: TargetingCriteriaRuleObjectType,
   TargetingCriteriaRuleFilterObjectType: TargetingCriteriaRuleFilterObjectType,
+  TargetingIndividualRuleFilterBlockObjectType: TargetingIndividualRuleFilterBlockObjectType,
   UserObjectType: ResolverTypeWrapper<UserObjectType>,
   UserNodeConnection: ResolverTypeWrapper<UserNodeConnection>,
   UserNodeEdge: ResolverTypeWrapper<UserNodeEdge>,
@@ -10246,6 +10294,7 @@ export type ResolversParentTypes = {
   TargetPopulationStatus: TargetPopulationStatus,
   TargetingCriteriaNode: TargetingCriteriaNode,
   TargetingCriteriaRuleNode: TargetingCriteriaRuleNode,
+  TargetingIndividualRuleFilterBlockNode: TargetingIndividualRuleFilterBlockNode,
   TargetingCriteriaRuleFilterNode: TargetingCriteriaRuleFilterNode,
   TargetingCriteriaRuleFilterComparisionMethod: TargetingCriteriaRuleFilterComparisionMethod,
   Arg: Scalars['Arg'],
@@ -10286,6 +10335,7 @@ export type ResolversParentTypes = {
   TargetingCriteriaObjectType: TargetingCriteriaObjectType,
   TargetingCriteriaRuleObjectType: TargetingCriteriaRuleObjectType,
   TargetingCriteriaRuleFilterObjectType: TargetingCriteriaRuleFilterObjectType,
+  TargetingIndividualRuleFilterBlockObjectType: TargetingIndividualRuleFilterBlockObjectType,
   UserObjectType: UserObjectType,
   UserNodeConnection: UserNodeConnection,
   UserNodeEdge: UserNodeEdge,
@@ -11468,7 +11518,16 @@ export type TargetingCriteriaRuleNodeResolvers<ContextType = any, ParentType ext
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   targetingCriteria?: Resolver<ResolversTypes['TargetingCriteriaNode'], ParentType, ContextType>,
+  individualsFiltersBlocks?: Resolver<Maybe<Array<Maybe<ResolversTypes['TargetingIndividualRuleFilterBlockNode']>>>, ParentType, ContextType>,
   filters?: Resolver<Maybe<Array<Maybe<ResolversTypes['TargetingCriteriaRuleFilterNode']>>>, ParentType, ContextType>,
+};
+
+export type TargetingIndividualRuleFilterBlockNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetingIndividualRuleFilterBlockNode'] = ResolversParentTypes['TargetingIndividualRuleFilterBlockNode']> = {
+  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  targetingCriteriaRule?: Resolver<ResolversTypes['TargetingCriteriaRuleNode'], ParentType, ContextType>,
+  individualBlockFilters?: Resolver<Maybe<Array<Maybe<ResolversTypes['TargetingCriteriaRuleFilterNode']>>>, ParentType, ContextType>,
 };
 
 export type TargetPopulationNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetPopulationNode'] = ResolversParentTypes['TargetPopulationNode']> = {
@@ -11776,6 +11835,7 @@ export type Resolvers<ContextType = any> = {
   TargetingCriteriaNode?: TargetingCriteriaNodeResolvers<ContextType>,
   TargetingCriteriaRuleFilterNode?: TargetingCriteriaRuleFilterNodeResolvers<ContextType>,
   TargetingCriteriaRuleNode?: TargetingCriteriaRuleNodeResolvers<ContextType>,
+  TargetingIndividualRuleFilterBlockNode?: TargetingIndividualRuleFilterBlockNodeResolvers<ContextType>,
   TargetPopulationNode?: TargetPopulationNodeResolvers<ContextType>,
   TargetPopulationNodeConnection?: TargetPopulationNodeConnectionResolvers<ContextType>,
   TargetPopulationNodeEdge?: TargetPopulationNodeEdgeResolvers<ContextType>,

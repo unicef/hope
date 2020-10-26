@@ -78,12 +78,12 @@ export function TargetCriteriaFilterBlocks({
   blockIndex,
   data,
   values,
-  onClick,
+  onDelete,
 }: {
   blockIndex: number;
   data: ImportedIndividualFieldsQuery;
   values;
-  onClick: () => void;
+  onDelete: () => void;
 }): React.ReactElement {
   const shouldShowAndDivider =
     blockIndex + 1 < values.individualsFiltersBlocks.length;
@@ -116,7 +116,16 @@ export function TargetCriteriaFilterBlocks({
                           }
                           return clearField(arrayHelpers, index);
                         }}
-                        onClick={onClick}
+                        onDelete={() => {
+                          if (
+                            values.individualsFiltersBlocks[blockIndex]
+                              .individualBlockFilters.length === 1
+                          ) {
+                            onDelete();
+                            return;
+                          }
+                          arrayHelpers.remove(index);
+                        }}
                       />
                     </FilterWrapper>
                     {shouldShowDivider && (

@@ -148,8 +148,39 @@ class TargetingCriteriaRuleFilterNode(DjangoObjectType):
         model = target_models.TargetingCriteriaRuleFilter
 
 
+class TargetingIndividualBlockRuleFilterNode(DjangoObjectType):
+    arguments = graphene.List(Arg)
+    field_attribute = graphene.Field(FieldAttributeNode)
+
+    def resolve_arguments(self, info):
+        return self.arguments
+
+    def resolve_field_attribute(parent, info):
+        if parent.is_flex_field:
+            return FlexibleAttribute.objects.get(name=parent.field_name)
+        else:
+            return CORE_FIELDS_ATTRIBUTES_DICTIONARY.get(parent.field_name)
+
+    class Meta:
+        model = target_models.TargetingIndividualBlockRuleFilter
+
+
+class TargetingIndividualRuleFilterBlockNode(DjangoObjectType):
+    individual_block_filters = graphene.List(TargetingIndividualBlockRuleFilterNode)
+
+    def resolve_individual_block_filters(self, info):
+        return self.individual_block_filters.all()
+
+    class Meta:
+        model = target_models.TargetingIndividualRuleFilterBlock
+
+
 class TargetingCriteriaRuleNode(DjangoObjectType):
     filters = graphene.List(TargetingCriteriaRuleFilterNode)
+    individuals_filters_blocks = graphene.List(TargetingIndividualRuleFilterBlockNode)
+
+    def resolve_individuals_filters_blocks(self, info):
+        return self.individuals_filters_blocks.all()
 
     def resolve_filters(self, info):
         return self.filters.all()

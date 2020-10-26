@@ -54,7 +54,7 @@ export function TargetingCriteriaFilter({
         fieldName={each.fieldName}
         onChange={onChange}
         showDelete={values.filters.length > 1}
-        onClick={onClick}
+        onDelete={onClick}
         baseName={`filters[${index}]`}
       />
       {each.fieldName && (
