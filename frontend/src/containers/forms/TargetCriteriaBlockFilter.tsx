@@ -9,14 +9,14 @@ export function TargetCriteriaBlockFilter({
   data,
   each,
   onChange,
-  onClick,
+  onDelete,
 }: {
   blockIndex: number;
   index: number;
   data: ImportedIndividualFieldsQuery;
   each;
   onChange: (e, object) => void;
-  onClick: () => void;
+  onDelete: () => void;
 }): React.ReactElement {
   return (
     <div>
@@ -25,7 +25,7 @@ export function TargetCriteriaBlockFilter({
         choices={data.allFieldsAttributes}
         fieldName={each.fieldName}
         onChange={onChange}
-        onClick={onClick}
+        onDelete={onDelete}
         showDelete
         baseName={`individualsFiltersBlocks[${blockIndex}].individualBlockFilters[${index}]`}
       />

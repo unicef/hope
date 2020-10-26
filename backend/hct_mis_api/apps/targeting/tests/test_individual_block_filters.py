@@ -3,7 +3,7 @@ from django.test import TestCase
 
 from core.models import BusinessArea
 from household.fixtures import create_household_and_individuals
-from household.models import Household, MALE
+from household.models import Household, MALE, FEMALE
 from targeting.models import (
     TargetingCriteria,
     TargetingCriteriaRule,
@@ -11,7 +11,8 @@ from targeting.models import (
     TargetingIndividualRuleFilterBlock,
     TargetingCriteriaQueryingMixin,
     TargetingCriteriaRuleQueryingMixin,
-    TargetingIndividualRuleFilterBlockMixin, TargetingCriteriaRuleFilter,
+    TargetingIndividualRuleFilterBlockMixin,
+    TargetingCriteriaRuleFilter,
 )
 
 
@@ -26,14 +27,14 @@ class TestIndividualBlockFilter(TestCase):
             },
             [{"sex": "MALE", "marital_status": "MARRIED"}],
         )
-        self.household_targeted = household
+        self.household_1_indiv = household
         (household, individuals) = create_household_and_individuals(
             {
                 "business_area": business_area,
             },
             [{"sex": "MALE", "marital_status": "SINGLE"}, {"sex": "FEMALE", "marital_status": "MARRIED"}],
         )
-        self.not_targeted_household = household
+        self.household_2_indiv = household
 
     def test_all_individuals_are_female(self):
         query = Household.objects.all()
@@ -60,7 +61,7 @@ class TestIndividualBlockFilter(TestCase):
         sex_filter.save()
         query = query.filter(tc.get_query())
         self.assertEqual(query.count(), 1)
-        self.assertEqual(query.first().id, self.household_targeted.id)
+        self.assertEqual(query.first().id, self.household_1_indiv.id)
 
     def test_all_individuals_are_female_on_mixins(self):
         query = Household.objects.all()
@@ -81,44 +82,40 @@ class TestIndividualBlockFilter(TestCase):
         tc = TargetingCriteriaQueryingMixin(rules=[tcr])
         query = query.filter(tc.get_query())
         self.assertEqual(query.count(), 1)
-        self.assertEqual(query.first().id, self.household_targeted.id)
+        self.assertEqual(query.first().id, self.household_1_indiv.id)
 
-    def test_all_individuals_are_female_on_mixins2(self):
-        import ipdb;ipdb.set_trace()
+    def test_two_separate_blocks_on_mixins(self):
         query = Household.objects.all()
-        married_rule_filter = TargetingCriteriaRuleFilter(
+        married_rule_filter = TargetingIndividualBlockRuleFilter(
             comparision_method="EQUALS",
             field_name="marital_status",
             arguments=["MARRIED"],
         )
-        sex_filter = TargetingCriteriaRuleFilter(
+        single_rule_filter = TargetingIndividualBlockRuleFilter(
+            comparision_method="EQUALS",
+            field_name="marital_status",
+            arguments=["SINGLE"],
+        )
+        male_sex_filter = TargetingIndividualBlockRuleFilter(
             comparision_method="EQUALS",
             field_name="sex",
             arguments=[MALE],
         )
-        tcr = TargetingCriteriaRuleQueryingMixin(filters=[married_rule_filter,sex_filter],individuals_filters_blocks=[])
+        female_sex_filter = TargetingIndividualBlockRuleFilter(
+            comparision_method="EQUALS",
+            field_name="sex",
+            arguments=[FEMALE],
+        )
+        individuals_filters_block1 = TargetingIndividualRuleFilterBlockMixin(
+            individual_block_filters=[married_rule_filter, female_sex_filter]
+        )
+        individuals_filters_block2 = TargetingIndividualRuleFilterBlockMixin(
+            individual_block_filters=[single_rule_filter, male_sex_filter]
+        )
+        tcr = TargetingCriteriaRuleQueryingMixin(
+            filters=[], individuals_filters_blocks=[individuals_filters_block1, individuals_filters_block2]
+        )
         tc = TargetingCriteriaQueryingMixin(rules=[tcr])
         query = query.filter(tc.get_query())
         self.assertEqual(query.count(), 1)
-        self.assertEqual(query.first().id, self.household_targeted.id)
-
-
-
-# 'SELECT * FROM "household_household" INNER JOIN "household_individual" ON ("household_household"."id" = "household_individual"."household_id") INNER JOIN "household_individual" T3 ON ("household_household"."id" = T3."household_id") WHERE ("household_individual"."marital_status" = MARRIED AND T3."sex" = MALE)'
-# 'SELECT * FROM "household_household" INNER JOIN "household_individual" ON ("household_household"."id" = "household_individual"."household_id") INNER JOIN "household_individual" T3 ON ("household_household"."id" = T3."household_id") WHERE ("household_individual"."marital_status" = MARRIED AND "household_individual"."sex" = MALE)
-
-# '
-#
-# Household.objects.filter(individuals__marital_status="MARRIED").filter(individuals__sex="MALE")
-# wiesz ze to dziala inaczej
-# niz
-# to
-# Household.objects.select_related('individuals').filter(individuals__marital_status="MARRIED").filter(individuals__sex="MALE").filter(individuals__sex="MALE")
-# Household.objects.filter(individuals__marital_status="MARRIED", individuals__sex="MALE")
-# Household.objects.filter(Q(individuals__marital_status="MARRIED")&Q(individuals__sex="MALE"))
-# Household.objects.filter(Q(individuals__marital_status="MARRIED",individuals__sex="MALE"))
-# Household.objects.filter(Q(individuals__marital_status="MARRIED",individuals__sex="MALE"))
-# 'SELECT * FROM "household_household" WHERE ("household_household"."residence_status" = IDP AND "household_household"."size" = 3)'
-# 'SELECT * FROM "household_household" WHERE ("household_household"."residence_status" = IDP AND "household_household"."size" = 3)'
-
-# Household.objects.filter(Q(individuals__marital_status="MARRIED")&Q(individuals__sex="MALE"))
+        self.assertEqual(query.first().id, self.household_2_indiv.id)
