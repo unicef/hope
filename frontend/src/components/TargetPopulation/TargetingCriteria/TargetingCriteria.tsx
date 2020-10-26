@@ -134,7 +134,7 @@ export function TargetingCriteria({
               )}
               <TargetCriteriaForm
                 criteria={criteriaObject}
-                title='Add targeting criteria'
+                title='Add Filter'
                 open={isOpen}
                 onClose={() => closeModal()}
                 addCriteria={addCriteria}
