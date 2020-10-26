@@ -151,8 +151,6 @@ class TicketComplaintDetails(TimeStampedUUIDModel):
     ticket = models.OneToOneField(
         "grievance.GrievanceTicket", related_name="complaint_ticket_details", on_delete=models.CASCADE
     )
-    # TODO: looks like this should be ManyToManyField ->
-    #  "Multiple records can be selected and linked" ~ PaymentRecord lookup user story
     payment_record = models.ForeignKey(
         "payment.PaymentRecord", related_name="complaint_ticket_details", on_delete=models.CASCADE, null=True,
     )
@@ -168,8 +166,6 @@ class TicketSensitiveDetails(TimeStampedUUIDModel):
     ticket = models.OneToOneField(
         "grievance.GrievanceTicket", related_name="sensitive_ticket_details", on_delete=models.CASCADE
     )
-    # TODO: looks like this should be ManyToManyField ->
-    #  "Multiple records can be selected and linked" ~ PaymentRecord lookup user story
     payment_record = models.ForeignKey(
         "payment.PaymentRecord", related_name="sensitive_ticket_details", on_delete=models.CASCADE, null=True,
     )
