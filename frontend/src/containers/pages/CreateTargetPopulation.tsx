@@ -6,12 +6,17 @@ import { PageHeader } from '../../components/PageHeader';
 import { TargetingCriteria } from '../../components/TargetPopulation/TargetingCriteria';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { Results } from '../../components/TargetPopulation/Results';
-import { useCreateTpMutation } from '../../__generated__/graphql';
+import {
+  useCreateTpMutation,
+  useAllProgramsQuery,
+} from '../../__generated__/graphql';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
 import { CreateTable } from '../tables/TargetPopulation/Create';
 import { getTargetingCriteriaVariables } from '../../utils/targetingUtils';
+import { TargetPopulationProgramme } from '../../components/TargetPopulation/TargetPopulationProgramme';
+import { TargetingCriteriaDisabled } from '../../components/TargetPopulation/TargetingCriteria/TargetingCriteriaDisabled';
 
 const PaperContainer = styled(Paper)`
   display: flex;
@@ -34,6 +39,7 @@ export function CreateTargetPopulation(): React.ReactElement {
   const initialValues = {
     name: '',
     criterias: [],
+    program: null,
   };
   const [mutate] = useCreateTpMutation();
   const { showMessage } = useSnackbar();
@@ -44,17 +50,13 @@ export function CreateTargetPopulation(): React.ReactElement {
       to: `/${businessArea}/target-population/`,
     },
   ];
-  const tabs = (
-    <Tabs
-      value={0}
-      aria-label='tabs'
-      indicatorColor='primary'
-      textColor='primary'
-    >
-      <Tab label='Programme Population' />
-      <Tab label='Target Population' disabled />
-    </Tabs>
-  );
+  const {
+    data: allProgramsData,
+    loading: loadingPrograms,
+  } = useAllProgramsQuery({
+    variables: { businessArea, status: ['ACTIVE'] },
+  });
+
   return (
     <Formik
       initialValues={initialValues}
@@ -62,6 +64,7 @@ export function CreateTargetPopulation(): React.ReactElement {
         mutate({
           variables: {
             input: {
+              programId: values.program,
               name: values.name,
               businessAreaSlug: businessArea,
               ...getTargetingCriteriaVariables(values),
@@ -94,7 +97,6 @@ export function CreateTargetPopulation(): React.ReactElement {
               />
             }
             breadCrumbs={breadCrumbsItems}
-            tabs={tabs}
             hasInputComponent
           >
             <>
@@ -111,16 +113,24 @@ export function CreateTargetPopulation(): React.ReactElement {
               </ButtonContainer>
             </>
           </PageHeader>
-          <FieldArray
-            name='criterias'
-            render={(arrayHelpers) => (
-              <TargetingCriteria
-                helpers={arrayHelpers}
-                candidateListRules={values.criterias}
-                isEdit
-              />
-            )}
+          <TargetPopulationProgramme
+            allPrograms={allProgramsData}
+            loading={loadingPrograms}
           />
+          {values.program ? (
+            <FieldArray
+              name='criterias'
+              render={(arrayHelpers) => (
+                <TargetingCriteria
+                  helpers={arrayHelpers}
+                  candidateListRules={values.criterias}
+                  isEdit
+                />
+              )}
+            />
+          ) : (
+            <TargetingCriteriaDisabled />
+          )}
           <Results />
           {values.criterias.length ? (
             <CreateTable variables={getTargetingCriteriaVariables(values)} />

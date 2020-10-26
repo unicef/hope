@@ -75,7 +75,7 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
             name="target_population_size_2",
             created_by=cls.user,
             final_list_targeting_criteria=targeting_criteria,
-            status="APPROVED",
+            status=TargetPopulation.STATUS_APPROVED,
         )
         cls.target_population_size_2.households.set(cls.households)
         cls.target_population_size_2.save()
@@ -86,7 +86,7 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
             name="target_population_residence_status",
             created_by=cls.user,
             final_list_targeting_criteria=targeting_criteria,
-            status="APPROVED",
+            status=TargetPopulation.STATUS_APPROVED,
         )
         cls.target_population_residence_status.households.set(cls.households)
         cls.target_population_residence_status.save()
@@ -97,7 +97,7 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
             name="target_population_size_1_finalized",
             created_by=cls.user,
             final_list_targeting_criteria=targeting_criteria,
-            status="FINALIZED",
+            status=TargetPopulation.STATUS_FINALIZED,
         )
         cls.target_population_size_1_finalized.save()
         HouseholdSelection.objects.create(
