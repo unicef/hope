@@ -116,6 +116,7 @@ export function CreateTargetPopulation(): React.ReactElement {
           <TargetPopulationProgramme
             allPrograms={allProgramsData}
             loading={loadingPrograms}
+            program={values.program}
           />
           {values.program ? (
             <FieldArray

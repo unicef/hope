@@ -26,11 +26,9 @@ const DialogFooter = styled.div`
   text-align: right;
 `;
 
-const DialogContainer = styled.div`
-  width: 700px;
-`;
-
-export class ConfirmationDialog extends React.Component<ConfirmationDialogProps> {
+export class ConfirmationDialog extends React.Component<
+  ConfirmationDialogProps
+> {
   //eslint-disable-next-line
   state = {
     open: false,
@@ -90,9 +88,7 @@ export class ConfirmationDialog extends React.Component<ConfirmationDialogProps>
           <DialogTitleWrapper>
             <DialogTitle id='scroll-dialog-title'>{title}</DialogTitle>
           </DialogTitleWrapper>
-          <DialogContent>
-            <DialogContainer>{content}</DialogContainer>
-          </DialogContent>
+          <DialogContent>{content}</DialogContent>
           <DialogFooter>
             <DialogActions>
               <Button onClick={() => this.hide()}>CANCEL</Button>

@@ -4,9 +4,9 @@ import { Box, Paper, Typography } from '@material-ui/core';
 import { Field } from 'formik';
 import { AllProgramsQuery } from '../../__generated__/graphql';
 import { OverviewContainer } from '../OverviewContainer';
-import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { LoadingComponent } from '../LoadingComponent';
 import { FormikSelectFieldConfirm } from './FormikSelectFieldConfirm';
+import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(3)}px;
@@ -23,11 +23,13 @@ const PaperContainer = styled(Paper)`
 `;
 
 export function TargetPopulationProgramme({
-                                            allPrograms,
-                                            loading,
-                                          }: {
+  allPrograms,
+  loading,
+  program,
+}: {
   allPrograms: AllProgramsQuery;
   loading: boolean;
+  program: string;
 }): React.ReactElement {
   if (loading) return <LoadingComponent />;
 
@@ -40,7 +42,7 @@ export function TargetPopulationProgramme({
   const confirmContent = (
     <span>
       Are you sure you want to change the programme ? <br /> Changing the
-      programme may result in deleting your current Targeting Criteria.
+      programme will result in deleting your current Targeting Criteria.
     </span>
   );
 
@@ -62,10 +64,9 @@ export function TargetPopulationProgramme({
             required
             allPrograms={allPrograms.allPrograms.edges}
             choices={mappedPrograms}
-            withConfirm
             confirmTitle={confirmTitle}
             confirmContent={confirmContent}
-            component={FormikSelectFieldConfirm}
+            component={program ? FormikSelectFieldConfirm : FormikSelectField}
           />
         </Box>
       </OverviewContainer>
