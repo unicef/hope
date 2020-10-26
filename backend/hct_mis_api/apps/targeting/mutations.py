@@ -68,12 +68,14 @@ class UpdateTargetPopulationInput(graphene.InputObjectType):
     id = graphene.ID(required=True)
     name = graphene.String()
     targeting_criteria = TargetingCriteriaObjectType()
+    program_id = graphene.ID()
 
 
 class CreateTargetPopulationInput(graphene.InputObjectType):
     name = graphene.String(required=True)
     targeting_criteria = TargetingCriteriaObjectType(required=True)
     business_area_slug = graphene.String(required=True)
+    program_id = graphene.ID(required=True)
 
 
 def from_input_to_targeting_criteria(targeting_criteria_input):
@@ -108,13 +110,16 @@ class CreateTargetPopulationMutation(graphene.Mutation):
     def mutate(cls, root, info, **kwargs):
         user = info.context.user
         input = kwargs.pop("input")
-
+        program = get_object_or_404(Program, pk=decode_id_string(input.get("program_id")))
+        if program.status != Program.ACTIVE:
+            raise ValidationError("Only Active program can be assigned to Targeting")
         targeting_criteria_input = input.get("targeting_criteria")
         business_area = BusinessArea.objects.get(slug=input.pop("business_area_slug"))
         TargetingCriteriaInputValidator.validate(targeting_criteria_input)
         targeting_criteria = from_input_to_targeting_criteria(targeting_criteria_input)
         target_population = TargetPopulation(name=input.get("name"), created_by=user, business_area=business_area)
         target_population.candidate_list_targeting_criteria = targeting_criteria
+        target_population.program = program
         target_population.save()
         return cls(target_population=target_population)
 
@@ -133,21 +138,25 @@ class UpdateTargetPopulationMutation(graphene.Mutation):
         id = input.get("id")
         target_population = cls.get_object(id)
         name = input.get("name")
-        if target_population.status == "APPROVED" and name:
+        program_id_encoded = input.get("program_id")
+        if target_population.status == TargetPopulation.STATUS_APPROVED and name:
             raise ValidationError("Name can't be changed when Target Population is in APPROVED status")
-        if target_population.status == "FINALIZED":
+        if target_population.status == TargetPopulation.STATUS_FINALIZED:
             raise ValidationError("Finalized Target Population can't be changed")
         if name:
             target_population.name = name
+        if program_id_encoded:
+            program = get_object_or_404(Program, pk=decode_id_string(program_id_encoded))
+            target_population.program = program
         targeting_criteria_input = input.get("targeting_criteria")
         TargetingCriteriaInputValidator.validate(targeting_criteria_input)
         if targeting_criteria_input:
             targeting_criteria = from_input_to_targeting_criteria(targeting_criteria_input)
-            if target_population.status == "DRAFT":
+            if target_population.status == TargetPopulation.STATUS_DRAFT:
                 if target_population.candidate_list_targeting_criteria:
                     target_population.candidate_list_targeting_criteria.delete()
                 target_population.candidate_list_targeting_criteria = targeting_criteria
-            elif target_population.status == "APPROVED":
+            elif target_population.status == TargetPopulation.STATUS_APPROVED:
                 if target_population.final_list_targeting_criteria:
                     target_population.final_list_targeting_criteria.delete()
                 target_population.final_list_targeting_criteria = targeting_criteria
@@ -169,22 +178,17 @@ class ApproveTargetPopulationMutation(ValidatedMutation):
 
     class Arguments:
         id = graphene.ID(required=True)
-        program_id = graphene.ID(required=True)
 
     @classmethod
     @transaction.atomic
     def validated_mutate(cls, root, info, **kwargs):
         user = info.context.user
-        program = get_object_or_404(Program, pk=decode_id_string(kwargs.get("program_id")))
-        if program.status != "ACTIVE":
-            raise ValidationError("Only Active program can be assigned to Targeting")
         target_population = kwargs.get("model_object")
-        target_population.status = "APPROVED"
+        target_population.status = TargetPopulation.STATUS_APPROVED
         target_population.approved_by = user
         target_population.approved_at = timezone.now()
         households = Household.objects.filter(target_population.candidate_list_targeting_criteria.get_query())
         target_population.households.set(households)
-        target_population.program = program
         target_population.save()
         return cls(target_population=target_population)
 
@@ -200,7 +204,7 @@ class UnapproveTargetPopulationMutation(ValidatedMutation):
     @classmethod
     def validated_mutate(cls, root, info, **kwargs):
         target_population = kwargs.get("model_object")
-        target_population.status = "DRAFT"
+        target_population.status = TargetPopulation.STATUS_DRAFT
         target_population.save()
         return cls(target_population=target_population)
 
@@ -218,7 +222,7 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
     def validated_mutate(cls, root, info, **kwargs):
         user = info.context.user
         target_population = kwargs.get("model_object")
-        target_population.status = "FINALIZED"
+        TargetPopulation.STATUS_FINALIZED
         target_population.finalized_by = user
         target_population.finalized_at = timezone.now()
         if target_population.final_list_targeting_criteria:
@@ -258,7 +262,7 @@ class CopyTargetPopulationMutation(graphene.relay.ClientIDMutation, TargetValida
             name=name,
             created_by=user,
             business_area=target_population.business_area,
-            status="DRAFT",
+            status=TargetPopulation.STATUS_DRAFT,
             candidate_list_total_households=target_population.candidate_list_total_households,
             candidate_list_total_individuals=target_population.candidate_list_total_individuals,
         )

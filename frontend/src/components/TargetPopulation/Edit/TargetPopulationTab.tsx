@@ -18,7 +18,6 @@ export function TargetPopulationTab({
             helpers={arrayHelpers}
             candidateListRules={values.candidateListCriterias}
             targetPopulationRules={values.targetPopulationCriterias}
-            selectedTab={selectedTab}
             isEdit
           />
         )}
