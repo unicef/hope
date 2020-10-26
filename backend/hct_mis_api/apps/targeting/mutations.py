@@ -222,7 +222,7 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
     def validated_mutate(cls, root, info, **kwargs):
         user = info.context.user
         target_population = kwargs.get("model_object")
-        TargetPopulation.STATUS_FINALIZED
+        target_population.status = TargetPopulation.STATUS_FINALIZED
         target_population.finalized_by = user
         target_population.finalized_at = timezone.now()
         if target_population.final_list_targeting_criteria:
