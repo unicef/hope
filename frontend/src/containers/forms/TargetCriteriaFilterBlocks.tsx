@@ -153,7 +153,7 @@ export function TargetCriteriaFilterBlocks({
                     backgroundColor: '#fff',
                   }}
                 >
-                  Add Set of Criteria
+                  Add Next Rule
                 </Button>
               </Box>
             </GrayFiltersBlock>
