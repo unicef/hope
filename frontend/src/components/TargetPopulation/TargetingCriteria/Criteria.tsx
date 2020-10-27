@@ -149,6 +149,7 @@ const CriteriaField = ({ field }): React.ReactElement => {
 
 interface CriteriaProps {
   rules: [TargetingCriteriaRuleObjectType];
+  individualsFiltersBlocks;
   removeFunction?;
   editFunction?;
   isEdit: boolean;
@@ -163,12 +164,22 @@ export function Criteria({
   isEdit,
   canRemove,
   alternative = null,
+  individualsFiltersBlocks,
 }: CriteriaProps): React.ReactElement {
   return (
     <CriteriaElement alternative={alternative} data-cy='criteria-container'>
       {rules.map((each, index) => {
         //eslint-disable-next-line
         return <CriteriaField key={index} field={each} />;
+      })}
+      {individualsFiltersBlocks.map((item) => {
+        return (
+          <CriteriaSetBox>
+            {item.individualBlockFilters.map((filter) => {
+              return <CriteriaField field={filter} />;
+            })}
+          </CriteriaSetBox>
+        );
       })}
       {isEdit && (
         <ButtonsContainer>

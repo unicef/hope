@@ -6,7 +6,6 @@ export const chooseFieldType = (value, arrayHelpers, index): void => {
       labelEn: value.labelEn,
       type: value.type,
       choices: null,
-      associatedWith: value.associatedWith,
     },
     value: null,
   };
@@ -86,14 +85,15 @@ export function mapFiltersToInitialValues(filters) {
 }
 
 export function mapCriteriaToInitialValues(criteria) {
-  let { filters } = criteria;
-  if (filters === null) {
-    filters = [{ fieldName: '' }];
-  } else {
-    filters = mapFiltersToInitialValues(filters);
-  }
+  const filters = criteria.filters || [];
+  const individualsFiltersBlocks = criteria.individualsFiltersBlocks || [];
   return {
-    filters,
+    filters: mapFiltersToInitialValues(filters),
+    individualsFiltersBlocks: individualsFiltersBlocks.map((block) => ({
+      individualBlockFilters: mapFiltersToInitialValues(
+        block.individualBlockFilters,
+      ),
+    })),
   };
 }
 
@@ -137,7 +137,46 @@ export function formatCriteriaFilters(filters) {
       fieldName: each.fieldName,
       isFlexField: each.isFlexField,
       fieldAttribute: each.fieldAttribute,
-      headOfHousehold: Boolean(each.headOfHousehold),
     };
   });
+}
+
+// TODO Marcin make Type to this function
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export function formatCriteriaIndividualsFiltersBlocks(
+  individualsFiltersBlocks,
+) {
+  return individualsFiltersBlocks.map((block) => ({
+    individualBlockFilters: formatCriteriaFilters(block.individualBlockFilters),
+  }));
+}
+
+function mapFilterToVariable(filter) {
+  return {
+    comparisionMethod: filter.comparisionMethod,
+    arguments: filter.arguments,
+    fieldName: filter.fieldName,
+    isFlexField: filter.isFlexField,
+  };
+}
+
+// TODO Marcin make Type to this function
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export function getTargetingCriteriaVariables(values) {
+  return {
+    targetingCriteria: {
+      rules: values.criterias.map((rule) => {
+        return {
+          filters: rule.filters.map(mapFilterToVariable),
+          individualsFiltersBlocks: rule.individualsFiltersBlocks.map(
+            (block) => ({
+              individualBlockFilters: block.individualBlockFilters.map(
+                mapFilterToVariable,
+              ),
+            }),
+          ),
+        };
+      }),
+    },
+  };
 }
