@@ -13,7 +13,7 @@ from targeting.models import (
 
 
 def calculate_candidate_counts(target_population):
-    if target_population.status == "DRAFT":
+    if target_population.status == TargetPopulation.STATUS_DRAFT:
         if target_population.candidate_list_targeting_criteria is None:
             return
         households = Household.objects.filter(
@@ -28,11 +28,11 @@ def calculate_candidate_counts(target_population):
 
 
 def calculate_final_counts(target_population):
-    if target_population.status == "DRAFT":
+    if target_population.status == TargetPopulation.STATUS_DRAFT:
         target_population.final_list_total_households = None
         target_population.final_list_total_individuals = None
         return
-    elif target_population.status == "APPROVED":
+    elif target_population.status == TargetPopulation.STATUS_APPROVED:
         if target_population.final_list_targeting_criteria is None:
             households = target_population.households
         else:

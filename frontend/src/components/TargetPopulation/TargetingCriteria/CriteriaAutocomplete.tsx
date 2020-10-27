@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { TextField, Paper } from '@material-ui/core';
 import styled from 'styled-components';
+import get from 'lodash/get';
 
 const StyledAutocomplete = styled(Autocomplete)`
   width: 100%;
@@ -21,6 +22,10 @@ export function CriteriaAutocomplete({
       otherProps.choices.find((choice) => choice.name === field.value) || null;
     setNewValue(optionValue);
   }, [field.value, otherProps.choices]);
+
+  const isInvalid =
+    get(otherProps.form.errors, field.name) &&
+    get(otherProps.form.touched, field.name);
   return (
     <StyledAutocomplete<Option>
       {...field}
@@ -47,6 +52,8 @@ export function CriteriaAutocomplete({
           variant='outlined'
           margin='dense'
           fullWidth
+          helperText={isInvalid && get(otherProps.form.errors, field.name)}
+          error={isInvalid}
           InputProps={{
             ...params.InputProps,
           }}
