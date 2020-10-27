@@ -13,7 +13,7 @@ const FlexWrapper = styled.div`
 export function FieldChooser({
   onChange,
   fieldName,
-  onClick,
+  onDelete,
   index,
   choices,
   baseName,
@@ -23,7 +23,7 @@ export function FieldChooser({
   choices;
   fieldName: string;
   onChange: (e, object) => void;
-  onClick: () => void;
+  onDelete: () => void;
   baseName: string;
   showDelete: boolean;
 }): React.ReactElement {
@@ -40,7 +40,7 @@ export function FieldChooser({
         component={CriteriaAutocomplete}
       />
       {showDelete && (
-        <IconButton onClick={onClick}>
+        <IconButton onClick={onDelete}>
           <Delete />
         </IconButton>
       )}
