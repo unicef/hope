@@ -12,7 +12,7 @@ from household.models import (
     IndividualRoleInHousehold,
     Agency,
     DUPLICATE,
-    NEEDS_ADJUDICATION,
+    NEEDS_ADJUDICATION, HouseholdIdentity,
 )
 from household.models import Household
 from household.models import Individual
@@ -100,16 +100,19 @@ class RdiMergeTask:
     def _prepare_households(self, imported_households, obj_hct):
         households_dict = {}
         business_area = obj_hct.business_area
+        household_identities_to_create = []
         for imported_household in imported_households:
             household = Household(
                 **model_to_dict(imported_household, fields=self.HOUSEHOLD_FIELDS),
                 registration_data_import=obj_hct,
                 business_area=business_area,
             )
+            hh_identities = self._prepare_household_identities(imported_household, household)
+            household_identities_to_create.extend(hh_identities)
             self.merge_admin_area(imported_household, household)
             households_dict[imported_household.id] = household
 
-        return households_dict
+        return households_dict, household_identities_to_create
 
     def _prepare_individual_documents_and_identities(self, imported_individual, individual):
         documents_to_create = []
@@ -132,6 +135,19 @@ class RdiMergeTask:
             identities_to_create.append(identity)
 
         return documents_to_create, identities_to_create
+
+    def _prepare_household_identities(self, imported_household, household):
+        identities_to_create = []
+        for imported_identity in imported_household.identities.all():
+            agency, _ = Agency.objects.get_or_create(
+                type=imported_identity.agency.type, label=imported_identity.agency.label,
+            )
+            identity = HouseholdIdentity(
+                agency=agency, document_number=imported_identity.document_number, household=household,
+            )
+            identities_to_create.append(identity)
+
+        return identities_to_create
 
     def _prepare_individuals(self, imported_individuals, households_dict, obj_hct):
         individuals_dict = {}
@@ -185,7 +201,7 @@ class RdiMergeTask:
             household__in=imported_households, individual__in=imported_individuals,
         )
 
-        households_dict = self._prepare_households(imported_households, obj_hct)
+        households_dict, household_identities_to_create = self._prepare_households(imported_households, obj_hct)
         (individuals_dict, documents_to_create, identities_to_create,) = self._prepare_individuals(
             imported_individuals, households_dict, obj_hct
         )
@@ -193,6 +209,7 @@ class RdiMergeTask:
         roles_to_create = self._prepare_roles(imported_roles, households_dict, individuals_dict)
 
         Household.objects.bulk_create(households_dict.values())
+        HouseholdIdentity.objects.bulk_create(household_identities_to_create)
         Individual.objects.bulk_create(individuals_dict.values())
         Document.objects.bulk_create(documents_to_create)
         IndividualIdentity.objects.bulk_create(identities_to_create)
