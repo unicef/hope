@@ -20,31 +20,24 @@ const Label = styled.p`
 
 export function TargetPopulationCore({
   candidateList,
-  targetPopulationList = null,
   id,
   status,
   targetPopulation,
 }): React.ReactElement {
   if (!candidateList) return null;
   const { rules: candidateListRules } = candidateList;
-  const totalNumOfHouseholds = targetPopulation.candidateListTotalHouseholds
-  const totalNumOfIndividuals = targetPopulation.candidateListTotalIndividuals
+  const totalNumOfHouseholds = targetPopulation.candidateListTotalHouseholds;
+  const totalNumOfIndividuals = targetPopulation.candidateListTotalIndividuals;
   return (
     <>
-      <TargetingCriteria
-        candidateListRules={candidateListRules}
-        targetPopulationRules={targetPopulationList?.rules}
-      />
+      <TargetingCriteria candidateListRules={candidateListRules} />
       <Results
         resultsData={targetPopulation.candidateStats}
         totalNumOfHouseholds={totalNumOfHouseholds}
         totalNumOfIndividuals={totalNumOfIndividuals}
       />
       {candidateListRules.length ? (
-        <TargetingHouseholds
-          id={id}
-          status={status}
-        />
+        <TargetingHouseholds id={id} status={status} />
       ) : (
         <PaperContainer>
           <Typography variant='h6'>

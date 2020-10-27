@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
-import { Typography, Paper, Button } from '@material-ui/core';
+import { Typography, Paper } from '@material-ui/core';
 import { AddCircleOutline } from '@material-ui/icons';
 
 const PaperContainer = styled(Paper)`
