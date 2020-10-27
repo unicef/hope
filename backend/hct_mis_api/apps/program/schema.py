@@ -1,29 +1,25 @@
 import graphene
-from django.db.models import Case, When, Value, IntegerField, Q, Sum
+from django.db.models import Case, IntegerField, Q, Sum, Value, When
 from django.db.models.functions import Coalesce
 from django_filters import (
-    FilterSet,
-    OrderingFilter,
     CharFilter,
-    MultipleChoiceFilter,
-    ModelMultipleChoiceFilter,
     DateFilter,
+    FilterSet,
+    MultipleChoiceFilter,
+    OrderingFilter,
 )
-from graphene import relay, ConnectionField
+from graphene import ConnectionField, relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
-from account.permissions import (
-    BaseNodePermissionMixin,
-    DjangoPermissionFilterConnectionField,
-)
+from account.permissions import BaseNodePermissionMixin, DjangoPermissionFilterConnectionField
 from account.schema import LogEntryObjectConnection
 from core.extended_connection import ExtendedConnection
-from core.filters import IntegerRangeFilter, DecimalRangeFilter
+from core.filters import DecimalRangeFilter, IntegerRangeFilter
 from core.schema import ChoiceObject
 from core.utils import to_choice_object
-from payment.models import CashPlanPaymentVerification
-from program.models import Program, CashPlan
+from payment.models import CashPlanPaymentVerification, PaymentRecord
+from program.models import CashPlan, Program
 
 
 class ProgramFilter(FilterSet):
@@ -89,13 +85,15 @@ class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
 
 class CashPlanFilter(FilterSet):
     search = CharFilter(method="search_filter")
+    delivery_type = MultipleChoiceFilter(field_name="delivery_type", choices=PaymentRecord.DELIVERY_TYPE_CHOICE)
+    verification_status = MultipleChoiceFilter(
+        field_name="verification_status", choices=CashPlanPaymentVerification.STATUS_CHOICES
+    )
 
     class Meta:
         fields = {
             "program": ["exact"],
-            "verification_status": ["exact"],
             "assistance_through": ["exact", "icontains"],
-            "delivery_type": ["exact"],
             "start_date": ["exact", "lte", "gte"],
             "end_date": ["exact", "lte", "gte"],
         }
@@ -190,4 +188,4 @@ class Query(graphene.ObjectType):
                 When(verification_status=CashPlanPaymentVerification.STATUS_FINISHED, then=Value(3)),
                 output_field=IntegerField(),
             )
-        ).order_by("custom_order")
+        ).order_by("-updated_at", "custom_order")

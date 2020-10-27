@@ -1,7 +1,7 @@
 import graphene
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from django_filters import FilterSet, OrderingFilter, CharFilter
+from django_filters import CharFilter, FilterSet, OrderingFilter
 from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
@@ -9,14 +9,9 @@ from graphene_django.filter import DjangoFilterConnectionField
 from core.extended_connection import ExtendedConnection
 from core.filters import filter_age
 from core.schema import ChoiceObject
-from core.utils import to_choice_object, decode_id_string
+from core.utils import decode_id_string, to_choice_object
 from payment.inputs import GetCashplanVerificationSampleSizeInput
-from payment.models import (
-    PaymentRecord,
-    ServiceProvider,
-    CashPlanPaymentVerification,
-    PaymentVerification,
-)
+from payment.models import CashPlanPaymentVerification, PaymentRecord, PaymentVerification, ServiceProvider
 from payment.rapid_pro.api import RapidProAPI
 from payment.utils import get_number_of_samples
 from program.models import CashPlan
