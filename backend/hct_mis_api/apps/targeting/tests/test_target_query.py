@@ -113,7 +113,7 @@ class TestTargetPopulationQuery(APITestCase):
             name="target_population_size_1_approved",
             created_by=cls.user,
             candidate_list_targeting_criteria=targeting_criteria,
-            status="APPROVED",
+            status=TargetPopulation.STATUS_APPROVED,
         )
         cls.target_population_size_1_approved.save()
         HouseholdSelection.objects.create(
