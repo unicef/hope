@@ -28,9 +28,9 @@ export interface InProgressTargetPopulationHeaderButtonsPropTypes {
 }
 
 export function InProgressTargetPopulationHeaderButtons({
-  targetPopulation,
-  setEditState,
-}: InProgressTargetPopulationHeaderButtonsPropTypes): React.ReactElement {
+                                                          targetPopulation,
+                                                          setEditState,
+                                                        }: InProgressTargetPopulationHeaderButtonsPropTypes): React.ReactElement {
   const [openApprove, setOpenApprove] = useState(false);
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
@@ -66,7 +66,7 @@ export function InProgressTargetPopulationHeaderButtons({
           onClick={() => setOpenApprove(true)}
           data-cy='button-target-population-close'
         >
-          Close
+          Lock
         </Button>
       </ButtonContainer>
       <DuplicateTargetPopulation
