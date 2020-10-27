@@ -285,6 +285,7 @@ input CreateTargetPopulationInput {
   name: String!
   targetingCriteria: TargetingCriteriaObjectType!
   businessAreaSlug: String!
+  programId: ID!
 }
 
 type CreateTargetPopulationMutation {
@@ -1378,7 +1379,7 @@ type Mutations {
   updateTargetPopulation(input: UpdateTargetPopulationInput!): UpdateTargetPopulationMutation
   copyTargetPopulation(input: CopyTargetPopulationMutationInput!): CopyTargetPopulationMutationPayload
   deleteTargetPopulation(input: DeleteTargetPopulationMutationInput!): DeleteTargetPopulationMutationPayload
-  approveTargetPopulation(id: ID!, programId: ID!): ApproveTargetPopulationMutation
+  approveTargetPopulation(id: ID!): ApproveTargetPopulationMutation
   unapproveTargetPopulation(id: ID!): UnapproveTargetPopulationMutation
   finalizeTargetPopulation(id: ID!): FinalizeTargetPopulationMutation
   createProgram(programData: CreateProgramInput!): CreateProgram
@@ -1914,7 +1915,6 @@ type TargetingCriteriaRuleFilterNode {
   isFlexField: Boolean!
   fieldName: String!
   arguments: [Arg]
-  headOfHousehold: Boolean!
   fieldAttribute: FieldAttributeNode
 }
 
@@ -1931,11 +1931,48 @@ type TargetingCriteriaRuleNode {
   createdAt: DateTime!
   updatedAt: DateTime!
   targetingCriteria: TargetingCriteriaNode!
+  individualsFiltersBlocks: [TargetingIndividualRuleFilterBlockNode]
   filters: [TargetingCriteriaRuleFilterNode]
 }
 
 input TargetingCriteriaRuleObjectType {
   filters: [TargetingCriteriaRuleFilterObjectType]
+  individualsFiltersBlocks: [TargetingIndividualRuleFilterBlockObjectType]
+}
+
+enum TargetingIndividualBlockRuleFilterComparisionMethod {
+  EQUALS
+  NOT_EQUALS
+  CONTAINS
+  NOT_CONTAINS
+  RANGE
+  NOT_IN_RANGE
+  GREATER_THAN
+  LESS_THAN
+}
+
+type TargetingIndividualBlockRuleFilterNode {
+  id: UUID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  comparisionMethod: TargetingIndividualBlockRuleFilterComparisionMethod!
+  individualsFiltersBlock: TargetingIndividualRuleFilterBlockNode!
+  isFlexField: Boolean!
+  fieldName: String!
+  arguments: [Arg]
+  fieldAttribute: FieldAttributeNode
+}
+
+type TargetingIndividualRuleFilterBlockNode {
+  id: UUID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  targetingCriteriaRule: TargetingCriteriaRuleNode!
+  individualBlockFilters: [TargetingIndividualBlockRuleFilterNode]
+}
+
+input TargetingIndividualRuleFilterBlockObjectType {
+  individualBlockFilters: [TargetingCriteriaRuleFilterObjectType]
 }
 
 scalar UUID
@@ -1978,6 +2015,7 @@ input UpdateTargetPopulationInput {
   id: ID!
   name: String
   targetingCriteria: TargetingCriteriaObjectType
+  programId: ID
 }
 
 type UpdateTargetPopulationMutation {
