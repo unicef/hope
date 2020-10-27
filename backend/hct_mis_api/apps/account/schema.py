@@ -12,7 +12,7 @@ from django_filters import FilterSet, OrderingFilter, CharFilter, MultipleChoice
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
-from account.models import USER_PARTNER_CHOICES, USER_STATUS_CHOICES, Role, UserRole
+from account.models import USER_PARTNER_CHOICES, USER_STATUS_CHOICES, Role, UserRole, User
 from core.extended_connection import ExtendedConnection
 from core.models import BusinessArea
 from core.schema import ChoiceObject, BusinessAreaNode
@@ -97,7 +97,6 @@ class UserObjectType(DjangoObjectType):
     def resolve_business_areas(self, info):
         return BusinessArea.objects.filter(user_roles__user=self).distinct()
 
-
     class Meta:
         model = get_user_model()
         exclude = ("password",)
@@ -175,6 +174,9 @@ class Query(graphene.ObjectType):
     user_partner_choices = graphene.List(ChoiceObject)
     has_available_users_to_export = graphene.Boolean(business_area_slug=graphene.String(required=True))
 
+    def resolve_all_users(self, info, **kwargs):
+        return User.objects.all().distinct()
+
     def resolve_me(self, info, **kwargs):
         if not info.context.user.is_authenticated:
             raise PermissionDenied("Permission Denied: User is not authenticated.")
@@ -190,6 +192,9 @@ class Query(graphene.ObjectType):
         return to_choice_object(USER_PARTNER_CHOICES)
 
     def resolve_has_available_users_to_export(self, info, business_area_slug, **kwargs):
-        return get_user_model().objects.prefetch_related("user_roles").filter(
-            available_for_export=True, is_superuser=False, user_roles__business_area__slug=business_area_slug
-        ).exists()
+        return (
+            get_user_model()
+            .objects.prefetch_related("user_roles")
+            .filter(available_for_export=True, is_superuser=False, user_roles__business_area__slug=business_area_slug)
+            .exists()
+        )
