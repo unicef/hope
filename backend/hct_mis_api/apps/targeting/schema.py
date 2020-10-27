@@ -148,8 +148,39 @@ class TargetingCriteriaRuleFilterNode(DjangoObjectType):
         model = target_models.TargetingCriteriaRuleFilter
 
 
+class TargetingIndividualBlockRuleFilterNode(DjangoObjectType):
+    arguments = graphene.List(Arg)
+    field_attribute = graphene.Field(FieldAttributeNode)
+
+    def resolve_arguments(self, info):
+        return self.arguments
+
+    def resolve_field_attribute(parent, info):
+        if parent.is_flex_field:
+            return FlexibleAttribute.objects.get(name=parent.field_name)
+        else:
+            return CORE_FIELDS_ATTRIBUTES_DICTIONARY.get(parent.field_name)
+
+    class Meta:
+        model = target_models.TargetingIndividualBlockRuleFilter
+
+
+class TargetingIndividualRuleFilterBlockNode(DjangoObjectType):
+    individual_block_filters = graphene.List(TargetingIndividualBlockRuleFilterNode)
+
+    def resolve_individual_block_filters(self, info):
+        return self.individual_block_filters.all()
+
+    class Meta:
+        model = target_models.TargetingIndividualRuleFilterBlock
+
+
 class TargetingCriteriaRuleNode(DjangoObjectType):
     filters = graphene.List(TargetingCriteriaRuleFilterNode)
+    individuals_filters_blocks = graphene.List(TargetingIndividualRuleFilterBlockNode)
+
+    def resolve_individuals_filters_blocks(self, info):
+        return self.individuals_filters_blocks.all()
 
     def resolve_filters(self, info):
         return self.filters.all()
@@ -201,8 +232,13 @@ class TargetingCriteriaRuleFilterObjectType(graphene.InputObjectType):
     head_of_household = graphene.Boolean(required=False)
 
 
+class TargetingIndividualRuleFilterBlockObjectType(graphene.InputObjectType):
+    individual_block_filters = graphene.List(TargetingCriteriaRuleFilterObjectType)
+
+
 class TargetingCriteriaRuleObjectType(graphene.InputObjectType):
     filters = graphene.List(TargetingCriteriaRuleFilterObjectType)
+    individuals_filters_blocks = graphene.List(TargetingIndividualRuleFilterBlockObjectType)
 
 
 class TargetingCriteriaObjectType(graphene.InputObjectType):
@@ -213,9 +249,18 @@ def targeting_criteria_object_type_to_query(targeting_criteria_object_type):
     TargetingCriteriaInputValidator.validate(targeting_criteria_object_type)
     targeting_criteria_querying = target_models.TargetingCriteriaQueryingMixin([])
     for rule in targeting_criteria_object_type.get("rules", []):
-        targeting_criteria_rule_querying = target_models.TargetingCriteriaRuleQueryingMixin([])
+        targeting_criteria_rule_querying = target_models.TargetingCriteriaRuleQueryingMixin(
+            filters=[], individuals_filters_blocks=[]
+        )
         for filter_dict in rule.get("filters", []):
             targeting_criteria_rule_querying.filters.append(target_models.TargetingCriteriaRuleFilter(**filter_dict))
+        for individuals_filters_block_dict in rule.get("individuals_filters_blocks", []):
+            individuals_filters_block = target_models.TargetingIndividualRuleFilterBlockMixin([])
+            targeting_criteria_rule_querying.individuals_filters_blocks.append(individuals_filters_block)
+            for individual_block_filter_dict in individuals_filters_block_dict.get("individual_block_filters", []):
+                individuals_filters_block.individual_block_filters.append(
+                    target_models.TargetingIndividualBlockRuleFilter(**individual_block_filter_dict)
+                )
         targeting_criteria_querying.rules.append(targeting_criteria_rule_querying)
     return targeting_criteria_querying.get_query()
 
@@ -256,7 +301,7 @@ class Query(graphene.ObjectType):
     def resolve_candidate_households_list_by_targeting_criteria(parent, info, target_population, **kwargs):
         target_population_id = decode_id_string(target_population)
         target_population_model = target_models.TargetPopulation.objects.get(pk=target_population_id)
-        if target_population_model.status == "DRAFT":
+        if target_population_model.status == target_models.TargetPopulation.STATUS_DRAFT:
             return prefetch_selections(
                 Household.objects.filter(target_population_model.candidate_list_targeting_criteria.get_query()),
             ).distinct()
@@ -267,9 +312,9 @@ class Query(graphene.ObjectType):
     ):
         target_population_id = decode_id_string(target_population)
         target_population_model = target_models.TargetPopulation.objects.get(pk=target_population_id)
-        if target_population_model.status == "DRAFT":
+        if target_population_model.status == target_models.TargetPopulation.STATUS_DRAFT:
             return []
-        if target_population_model.status == "APPROVED":
+        if target_population_model.status == target_models.TargetPopulation.STATUS_APPROVED:
             if targeting_criteria is None:
                 if target_population_model.final_list_targeting_criteria:
                     return (
