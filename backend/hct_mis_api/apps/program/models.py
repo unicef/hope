@@ -1,19 +1,17 @@
 from decimal import Decimal
 
-from auditlog.models import AuditlogHistoryField
-from auditlog.registry import auditlog
-from django.core.validators import (
-    MinValueValidator,
-    MinLengthValidator,
-    MaxLengthValidator,
-)
+from django.core.validators import MaxLengthValidator, MinLengthValidator, MinValueValidator
 from django.db import models
 from django.db.models import Sum
 from django.db.models.functions import Coalesce
 from django.utils.translation import ugettext_lazy as _
 
+from auditlog.models import AuditlogHistoryField
+from auditlog.registry import auditlog
+
 from cash_assist_datahub.models import PaymentRecord
-from utils.models import TimeStampedUUIDModel, AbstractSyncable
+from payment.models import CashPlanPaymentVerification
+from utils.models import AbstractSyncable, TimeStampedUUIDModel
 
 
 class Program(TimeStampedUUIDModel, AbstractSyncable):
@@ -110,7 +108,7 @@ class CashPlan(TimeStampedUUIDModel):
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     ca_id = models.CharField(max_length=255, null=True)
     ca_hash_id = models.UUIDField(unique=True, null=True)
-    status = models.CharField(max_length=255, choices=STATUS_CHOICE,)
+    status = models.CharField(max_length=255, choices=STATUS_CHOICE)
     status_date = models.DateTimeField()
     name = models.CharField(max_length=255)
     distribution_level = models.CharField(max_length=255)
@@ -121,7 +119,7 @@ class CashPlan(TimeStampedUUIDModel):
     coverage_unit = models.CharField(max_length=255)
     comments = models.CharField(max_length=255, null=True)
     program = models.ForeignKey("program.Program", on_delete=models.CASCADE, related_name="cash_plans")
-    delivery_type = models.CharField(max_length=255)
+    delivery_type = models.CharField(choices=PaymentRecord.DELIVERY_TYPE_CHOICE, max_length=20, blank=True)
     assistance_measurement = models.CharField(max_length=255)
     assistance_through = models.CharField(max_length=255)
     vision_id = models.CharField(max_length=255)
@@ -142,7 +140,11 @@ class CashPlan(TimeStampedUUIDModel):
     total_undelivered_quantity = models.DecimalField(
         decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))],
     )
-    verification_status = models.CharField(max_length=200, default="PENDING")
+    verification_status = models.CharField(
+        max_length=10,
+        default=CashPlanPaymentVerification.STATUS_PENDING,
+        choices=CashPlanPaymentVerification.STATUS_CHOICES,
+    )
 
     @property
     def payment_records_count(self):
