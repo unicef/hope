@@ -9,11 +9,9 @@ import {
   DialogTitle,
   Typography,
 } from '@material-ui/core';
+import { AddCircleOutline } from '@material-ui/icons';
 import { FieldArray, Formik } from 'formik';
-import {
-  ImportedIndividualFieldsQuery,
-  useImportedIndividualFieldsQuery,
-} from '../../__generated__/graphql';
+import { useImportedIndividualFieldsQuery } from '../../__generated__/graphql';
 import { DialogActions } from '../dialogs/DialogActions';
 import {
   chooseFieldType,
@@ -24,7 +22,6 @@ import {
 } from '../../utils/targetingUtils';
 import { TargetingCriteriaFilter } from './TargetCriteriaFilter';
 import { TargetCriteriaFilterBlocks } from './TargetCriteriaFilterBlocks';
-import {AddCircleOutline} from "@material-ui/icons";
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -54,7 +51,6 @@ const AndDivider = styled.div`
   margin: ${({ theme }) => theme.spacing(10)}px 0;
   position: relative;
 `;
-
 
 const DialogDescription = styled.div`
   margin: 20px 0;
@@ -87,16 +83,11 @@ const DialogFooter = styled.div`
 const StyledBox = styled(Box)`
   width: 100%;
 `;
-const MarginButton = styled(Button)`
-  && {
-    margin-left: 10px;
-  }
-`;
 
 const validationSchema = Yup.object().shape({
   filters: Yup.array().of(
     Yup.object().shape({
-      fieldName: Yup.string().required('FieldType is required'),
+      fieldName: Yup.string().required('Field Type is required'),
     }),
   ),
   individualsFiltersBlocks: Yup.array().of(
@@ -161,7 +152,10 @@ export function TargetCriteriaForm({
     };
     setHouseholdData(filteredHouseholdData);
   }, [data, loading]);
-  const validate = ({ filters, individualsFiltersBlocks }) => {
+  const validate = ({
+    filters,
+    individualsFiltersBlocks,
+  }): { nonFieldErrors?: string[] } => {
     const errors: { nonFieldErrors?: string[] } = {};
     if (filters.length + individualsFiltersBlocks.length === 0) {
       errors.nonFieldErrors = [
@@ -204,7 +198,7 @@ export function TargetCriteriaForm({
               scroll='paper'
               aria-labelledby='form-dialog-title'
               fullWidth
-              maxWidth="md"
+              maxWidth='md'
             >
               <DialogTitleWrapper>
                 <DialogTitle id='scroll-dialog-title' disableTypography>
@@ -227,7 +221,8 @@ export function TargetCriteriaForm({
                 )}
 
                 <DialogDescription>
-                  All rules defined below have to be true for the entire household.
+                  All rules defined below have to be true for the entire
+                  household.
                 </DialogDescription>
                 <FieldArray
                   name='filters'
@@ -263,7 +258,6 @@ export function TargetCriteriaForm({
                   )}
                 />
                 <Box display='flex' flexDirection='column'>
-
                   <ButtonBox>
                     <Button
                       onClick={() =>
@@ -307,7 +301,6 @@ export function TargetCriteriaForm({
                   )}
                 />
                 <Box display='flex' flexDirection='column'>
-
                   <ButtonBox>
                     <Button
                       onClick={() =>

@@ -5,10 +5,7 @@ import { TargetingCriteria } from '../TargetingCriteria';
 import { Results } from '../Results';
 import { useFinalHouseholdsListByTargetingCriteriaQuery } from '../../../__generated__/graphql';
 
-export function TargetPopulationTab({
-  values,
-  selectedTab,
-}): React.ReactElement {
+export function TargetPopulationTab({ values }): React.ReactElement {
   return (
     <>
       <FieldArray
@@ -17,7 +14,6 @@ export function TargetPopulationTab({
           <TargetingCriteria
             helpers={arrayHelpers}
             candidateListRules={values.candidateListCriterias}
-            targetPopulationRules={values.targetPopulationCriterias}
             isEdit
           />
         )}

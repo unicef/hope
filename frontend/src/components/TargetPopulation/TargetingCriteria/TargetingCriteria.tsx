@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { Typography, Paper, Button } from '@material-ui/core';
 import { AddCircleOutline } from '@material-ui/icons';
 import { TargetCriteriaForm } from '../../../containers/forms/TargetCriteriaForm';
-import { Criteria } from './Criteria';
 import { AllProgramsQuery } from '../../../__generated__/graphql';
+import { Criteria } from './Criteria';
 
 const PaperContainer = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(3)}px
@@ -73,7 +73,6 @@ const AddCriteria = styled.div`
 
 interface TargetingCriteriaProps {
   candidateListRules?;
-  targetPopulationRules?;
   isEdit?: boolean;
   helpers?;
   selectedProgram?: AllProgramsQuery['allPrograms']['edges'][number]['node'];
@@ -81,10 +80,8 @@ interface TargetingCriteriaProps {
 
 export function TargetingCriteria({
   candidateListRules,
-  targetPopulationRules = [],
   isEdit = false,
   helpers,
-  selectedProgram,
 }: TargetingCriteriaProps): React.ReactElement {
   const { t } = useTranslation();
   const [isOpen, setOpen] = useState(false);
