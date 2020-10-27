@@ -41,6 +41,8 @@ export const AllPaymentVerifications = gql`
               headOfHousehold {
                 id
                 fullName
+                phoneNo
+                phoneNoAlternative
               }
             }
           }
