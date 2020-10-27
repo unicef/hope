@@ -3390,7 +3390,7 @@ export type XlsxRowErrorNode = {
 
 export type HouseholdMinimalFragment = (
   { __typename?: 'HouseholdNode' }
-  & Pick<HouseholdNode, 'id' | 'createdAt' | 'residenceStatus' | 'size' | 'totalCashReceived' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'status' | 'sanctionListPossibleMatch' | 'hasDuplicates' | 'unicefId' | 'address'>
+  & Pick<HouseholdNode, 'id' | 'createdAt' | 'residenceStatus' | 'size' | 'totalCashReceived' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'status' | 'sanctionListPossibleMatch' | 'hasDuplicates' | 'unicefId' | 'geopoint' | 'village' | 'address'>
   & { headOfHousehold: (
     { __typename?: 'IndividualNode' }
     & Pick<IndividualNode, 'id' | 'fullName'>
@@ -4395,7 +4395,7 @@ export type AllPaymentVerificationsQuery = (
             & Pick<HouseholdNode, 'unicefId' | 'id'>
             & { headOfHousehold: (
               { __typename?: 'IndividualNode' }
-              & Pick<IndividualNode, 'id' | 'fullName'>
+              & Pick<IndividualNode, 'id' | 'fullName' | 'phoneNo' | 'phoneNoAlternative'>
             ) }
           ) }
         ) }
@@ -5410,6 +5410,8 @@ export const HouseholdMinimalFragmentDoc = gql`
   sanctionListPossibleMatch
   hasDuplicates
   unicefId
+  geopoint
+  village
   headOfHousehold {
     id
     fullName
@@ -7834,6 +7836,8 @@ export const AllPaymentVerificationsDocument = gql`
             headOfHousehold {
               id
               fullName
+              phoneNo
+              phoneNoAlternative
             }
           }
         }
