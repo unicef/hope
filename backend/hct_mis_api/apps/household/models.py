@@ -309,7 +309,7 @@ class HouseholdIdentity(models.Model):
     )
 
     def __str__(self):
-        return f"{self.agency} {self.individual} {self.document_number}"
+        return f"{self.agency} {self.household} {self.document_number}"
 
 
 class IndividualIdentity(models.Model):
