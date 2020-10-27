@@ -83,9 +83,16 @@ class TargetingCriteriaRuleFilterInputValidator:
 class TargetingCriteriaRuleInputValidator:
     @staticmethod
     def validate(rule):
+        total_len = 0
         filters = rule.get("filters")
-        if len(filters) < 1:
-            raise ValidationError("There should be at least 1 filter in rules")
+        individuals_filters_blocks = rule.get("individuals_filters_blocks")
+        if filters is not None:
+            total_len += len(filters)
+        if individuals_filters_blocks is not None:
+            total_len += len(individuals_filters_blocks)
+
+        if total_len < 1:
+            raise ValidationError("There should be at least 1 filter or block in rules")
         for rule_filter in filters:
             TargetingCriteriaRuleFilterInputValidator.validate(rule_filter)
 

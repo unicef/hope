@@ -1,20 +1,21 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Button, Tabs, Tab } from '@material-ui/core';
-import { Formik, Form, Field } from 'formik';
+import { useParams } from 'react-router-dom';
+import { Button } from '@material-ui/core';
+import { Field, Form, Formik } from 'formik';
 import { PageHeader } from '../PageHeader';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { BreadCrumbsItem } from '../BreadCrumbs';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import {
-  TargetingCriteriaRuleObjectType,
+  useAllProgramsQuery,
   useUpdateTpMutation,
 } from '../../__generated__/graphql';
 import { useSnackbar } from '../../hooks/useSnackBar';
-import { TabPanel } from '../TabPanel';
 import { CandidateListTab } from './Edit/CandidateListTab';
-import { TargetPopulationTab } from './Edit/TargetPopulationTab';
-import { TargetPopulationDetails } from './TargetPopulationDetails';
+import { TargetPopulationProgramme } from './TargetPopulationProgramme';
+import { TARGET_POPULATION_QUERY } from '../../apollo/queries/TargetPopulation';
+import { getTargetingCriteriaVariables } from '../../utils/targetingUtils';
 
 const ButtonContainer = styled.span`
   margin: 0 ${({ theme }) => theme.spacing(2)}px;
@@ -23,19 +24,18 @@ const ButtonContainer = styled.span`
 interface EditTargetPopulationProps {
   targetPopulationCriterias?;
   cancelEdit?;
-  selectedTab?: number;
   targetPopulation?;
 }
 
 export function EditTargetPopulation({
   targetPopulationCriterias,
   cancelEdit,
-  selectedTab = 0,
   targetPopulation,
 }: EditTargetPopulationProps): React.ReactElement {
   const initialValues = {
     id: targetPopulation.id,
     name: targetPopulation.name || '',
+    program: targetPopulation.program?.id || '',
     criterias: targetPopulationCriterias.rules || [],
     candidateListCriterias:
       targetPopulation.candidateListTargetingCriteria?.rules || [],
@@ -44,6 +44,7 @@ export function EditTargetPopulation({
   };
   const [mutate] = useUpdateTpMutation();
   const { showMessage } = useSnackbar();
+  const { id } = useParams();
   const businessArea = useBusinessArea();
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -51,55 +52,18 @@ export function EditTargetPopulation({
       to: `/${businessArea}/target-population/`,
     },
   ];
-  const tabs = (
-    <Tabs
-      value={selectedTab}
-      aria-label='tabs'
-      indicatorColor='primary'
-      textColor='primary'
-    >
-      <Tab label='Programme Population' disabled={selectedTab !== 0} />
-      <Tab label='Target Population' disabled={selectedTab !== 1} />
-    </Tabs>
-  );
+  const {
+    data: allProgramsData,
+    loading: loadingPrograms,
+  } = useAllProgramsQuery({
+    variables: { businessArea, status: ['ACTIVE'] },
+  });
   const isTitleEditable = (): boolean => {
     switch (targetPopulation.status) {
       case 'APPROVED':
         return false;
       default:
         return true;
-    }
-  };
-  const mapRules = (status, values): TargetingCriteriaRuleObjectType[] => {
-    switch (status) {
-      case 'DRAFT':
-        return values.candidateListCriterias.map((rule) => {
-          return {
-            filters: rule.filters.map((each) => {
-              return {
-                comparisionMethod: each.comparisionMethod,
-                arguments: each.arguments,
-                fieldName: each.fieldName,
-                isFlexField: each.isFlexField,
-                headOfHousehold: each.headOfHousehold,
-              };
-            }),
-          };
-        });
-      default:
-        return values.targetPopulationCriterias.map((rule) => {
-          return {
-            filters: rule.filters.map((each) => {
-              return {
-                comparisionMethod: each.comparisionMethod,
-                arguments: each.arguments,
-                fieldName: each.fieldName,
-                isFlexField: each.isFlexField,
-                headOfHousehold: each.headOfHousehold,
-              };
-            }),
-          };
-        });
     }
   };
   return (
@@ -110,12 +74,21 @@ export function EditTargetPopulation({
           variables: {
             input: {
               id: values.id,
+              programId: values.program,
               ...(targetPopulation.status === 'DRAFT' && { name: values.name }),
-              targetingCriteria: {
-                rules: mapRules(targetPopulation.status, values),
-              },
+              ...getTargetingCriteriaVariables({
+                criterias: values.candidateListCriterias,
+              }),
             },
           },
+          refetchQueries: [
+            {
+              query: TARGET_POPULATION_QUERY,
+              variables: {
+                id,
+              },
+            },
+          ],
         });
         cancelEdit();
         showMessage('Target Population Updated', {
@@ -131,7 +104,7 @@ export function EditTargetPopulation({
               isTitleEditable() ? (
                 <Field
                   name='name'
-                  label='Programme Name'
+                  label='Enter Target Population Name'
                   type='text'
                   fullWidth
                   required
@@ -141,7 +114,6 @@ export function EditTargetPopulation({
                 values.name
               )
             }
-            tabs={tabs}
             breadCrumbs={breadCrumbsItems}
             hasInputComponent
           >
@@ -170,13 +142,12 @@ export function EditTargetPopulation({
               </ButtonContainer>
             </>
           </PageHeader>
-          <TabPanel value={selectedTab} index={0}>
-            <CandidateListTab values={values} />
-          </TabPanel>
-          <TabPanel value={selectedTab} index={1}>
-            <TargetPopulationDetails targetPopulation={targetPopulation} />
-            <TargetPopulationTab values={values} selectedTab={selectedTab} />
-          </TabPanel>
+          <TargetPopulationProgramme
+            allPrograms={allProgramsData}
+            loading={loadingPrograms}
+            program={values.program}
+          />
+          <CandidateListTab allPrograms={allProgramsData} values={values} />
         </Form>
       )}
     </Formik>

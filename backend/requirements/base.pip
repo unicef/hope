@@ -1,5 +1,5 @@
 # Django packages
-Django==2.2.8
+Django==2.2.16
 django_compressor==2.3
 django-storages[azure]==1.8
 django-countries==5.5
