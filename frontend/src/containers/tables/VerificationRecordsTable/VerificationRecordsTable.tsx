@@ -38,7 +38,6 @@ export function VerificationRecordsTable({
   const { showMessage } = useSnackbar();
   const [open, setOpenImport] = useState(false);
   const [fileToImport, setFileToImport] = useState(null);
-  const [selected, setSelected] = useState([]);
 
   const { t } = useTranslation();
 
@@ -167,9 +166,7 @@ export function VerificationRecordsTable({
         query={useAllPaymentVerificationsQuery}
         queriedObjectName='allPaymentVerifications'
         initialVariables={initialVariables}
-        renderRow={(row) => (
-          <VerificationRecordsTableRow selected={selected} record={row} />
-        )}
+        renderRow={(row) => <VerificationRecordsTableRow record={row} />}
       />
       <Dialog
         open={open}
