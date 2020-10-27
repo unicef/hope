@@ -86,6 +86,12 @@ type BusinessAreaNodeEdge {
   cursor: String!
 }
 
+enum CashPlanDeliveryType {
+  CASH
+  DEPOSIT_TO_CARD
+  TRANSFER
+}
+
 type CashPlanNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -104,7 +110,7 @@ type CashPlanNode implements Node {
   coverageUnit: String!
   comments: String
   program: ProgramNode!
-  deliveryType: String!
+  deliveryType: CashPlanDeliveryType
   assistanceMeasurement: String!
   assistanceThrough: String!
   visionId: String!
@@ -117,7 +123,7 @@ type CashPlanNode implements Node {
   totalEntitledQuantityRevised: Float!
   totalDeliveredQuantity: Float!
   totalUndeliveredQuantity: Float!
-  verificationStatus: String!
+  verificationStatus: CashPlanVerificationStatus!
   paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
   verifications(before: String, after: String, first: Int, last: Int): CashPlanPaymentVerificationNodeConnection!
   bankReconciliationSuccess: Int
@@ -195,6 +201,12 @@ enum CashPlanStatus {
   DISTRIBUTION_COMPLETED_WITH_ERRORS
   TRANSACTION_COMPLETED
   TRANSACTION_COMPLETED_WITH_ERRORS
+}
+
+enum CashPlanVerificationStatus {
+  PENDING
+  ACTIVE
+  FINISHED
 }
 
 type CheckAgainstSanctionListMutation {
@@ -1585,7 +1597,7 @@ type Query {
   program(id: ID!): ProgramNode
   allPrograms(before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, orderBy: String): ProgramNodeConnection
   cashPlan(id: ID!): CashPlanNode
-  allCashPlans(before: String, after: String, first: Int, last: Int, program: ID, verificationStatus: String, assistanceThrough: String, assistanceThrough_Icontains: String, deliveryType: String, startDate: DateTime, startDate_Lte: DateTime, startDate_Gte: DateTime, endDate: DateTime, endDate_Lte: DateTime, endDate_Gte: DateTime, search: String, orderBy: String): CashPlanNodeConnection
+  allCashPlans(before: String, after: String, first: Int, last: Int, program: ID, assistanceThrough: String, assistanceThrough_Icontains: String, startDate: DateTime, startDate_Lte: DateTime, startDate_Gte: DateTime, endDate: DateTime, endDate_Lte: DateTime, endDate_Gte: DateTime, search: String, deliveryType: [String], verificationStatus: [String], orderBy: String): CashPlanNodeConnection
   programStatusChoices: [ChoiceObject]
   programFrequencyOfPaymentsChoices: [ChoiceObject]
   programSectorChoices: [ChoiceObject]

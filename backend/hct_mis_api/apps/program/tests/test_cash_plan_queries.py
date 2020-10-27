@@ -3,6 +3,7 @@ from datetime import datetime
 from django.core.management import call_command
 
 from account.fixtures import UserFactory
+from cash_assist_datahub.models import PaymentRecord
 from core.base_test_case import APITestCase
 from core.models import BusinessArea
 from program.fixtures import CashPlanFactory, ProgramFactory
@@ -84,7 +85,7 @@ class TestCashPlanQueries(APITestCase):
                 "total_delivered_quantity": 53477453.27,
                 "total_entitled_quantity": 56657648.82,
                 "total_undelivered_quantity": 55497021.04,
-                "delivery_type": "Deposit to Card",
+                "delivery_type": PaymentRecord.DELIVERY_TYPE_DEPOSIT_TO_CARD,
                 "assistance_through": "Cairo Amman Bank",
             },
             {
@@ -103,7 +104,7 @@ class TestCashPlanQueries(APITestCase):
                 "total_delivered_quantity": 41935107.03,
                 "total_entitled_quantity": 38204833.92,
                 "total_undelivered_quantity": 63098825.46,
-                "delivery_type": "Deposit to Card",
+                "delivery_type": PaymentRecord.DELIVERY_TYPE_DEPOSIT_TO_CARD,
                 "assistance_through": "Cairo Amman Bank",
             },
         ]
