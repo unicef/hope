@@ -12,6 +12,8 @@ import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 import { LookUpHouseholdIndividual } from './LookUpHouseholdIndividual';
+import { Consent } from './Consent';
+import { LookUpSection } from './LookUpSection';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -47,11 +49,6 @@ const LookUp = styled.div`
   padding: 25px;
   font-weight: 500;
   cursor: pointer;
-`;
-
-const Consent = styled.p`
-  font-size: 14px;
-  color: #585858;
 `;
 const MarginRightSpan = styled.span`
   margin-right: 5px;
@@ -129,26 +126,14 @@ export function CreateGrievance(): React.ReactElement {
                   </Grid>
                   <BoxWithBorders>
                     <Box display='flex' flexDirection='column'>
-                      <Consent>
-                        Do you give your consent to UNICEF and its partners to
-                        view, edit and update your personal details and, if
-                        applicable, that of your household and dependants the
-                        purpose of the integrity UNICEFs beneficiary management
-                        system? Do you declare that the information you have
-                        provided is true and correct to the best of your
-                        knowledge?
-                      </Consent>
+                      <Consent />
                       <Field
                         name='receivedConsent'
                         label='Received Consent*'
                         color='primary'
                         component={FormikCheckboxField}
                       />
-                      <Grid container spacing={3}>
-                        <Grid item xs={6}>
-                          <LookUpHouseholdIndividual />
-                        </Grid>
-                      </Grid>
+                      <LookUpSection category={values.category} />
                     </Box>
                   </BoxWithBorders>
                   <BoxWithBorderBottom>
