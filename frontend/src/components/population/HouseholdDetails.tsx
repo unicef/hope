@@ -112,7 +112,7 @@ export function HouseholdDetails({
             <Grid item xs={3}>
               <LabelizedField label='Village'>
                 <div>
-                  <Missing />
+                  <div>{household.village || '-'}</div>
                 </div>
               </LabelizedField>
             </Grid>
@@ -128,9 +128,7 @@ export function HouseholdDetails({
             </Grid>
             <Grid item xs={6}>
               <LabelizedField label='Geolocation'>
-                <div>
-                  <Missing />
-                </div>
+                <div>{household.geopoint || '-'}</div>
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>

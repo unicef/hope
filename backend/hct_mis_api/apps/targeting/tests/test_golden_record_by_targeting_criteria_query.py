@@ -88,7 +88,7 @@ class GoldenRecordTargetingCriteriaQueryTestCase(APITestCase):
         call_command("loadbusinessareas")
         business_area = BusinessArea.objects.first()
         (household, individuals) = create_household(
-            {"size": 1, "residence_status": "CITIZEN", "business_area": business_area},
+            {"size": 1, "residence_status": "HOST", "business_area": business_area},
         )
         cls.household_size_1 = household
         cls.household_residence_status_citizen = cls.household_size_1

@@ -16,9 +16,10 @@ from model_utils import Choices
 from model_utils.models import SoftDeletableModel
 from psycopg2.extras import NumericRange
 
-from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES, _INDIVIDUAL
+
+from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES, _INDIVIDUAL, TYPE_SELECT_MANY, _HOUSEHOLD
 from core.models import FlexibleAttribute
-from household.models import Individual, Household
+from household.models import Individual, Household, MALE, FEMALE
 from utils.models import TimeStampedUUIDModel
 
 _MAX_LEN = 256
@@ -55,15 +56,24 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
     ca_id = models.CharField(max_length=255, null=True)
     ca_hash_id = models.CharField(max_length=255, null=True)
     created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name="target_populations", null=True,
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="target_populations",
+        null=True,
     )
     approved_at = models.DateTimeField(null=True)
     approved_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name="approved_target_populations", null=True,
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="approved_target_populations",
+        null=True,
     )
     finalized_at = models.DateTimeField(null=True)
     finalized_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name="finalized_target_populations", null=True,
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="finalized_target_populations",
+        null=True,
     )
     business_area = models.ForeignKey("core.BusinessArea", null=True, on_delete=models.CASCADE)
     STATUS_CHOICES = (
@@ -72,14 +82,32 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
         (STATUS_FINALIZED, _("Sent")),
     )
 
-    status = models.CharField(max_length=_MAX_LEN, choices=STATUS_CHOICES, default="DRAFT",)
-    households = models.ManyToManyField(
-        "household.Household", related_name="target_populations", through="HouseholdSelection",
+    status = models.CharField(
+        max_length=_MAX_LEN,
+        choices=STATUS_CHOICES,
+        default=STATUS_DRAFT,
     )
-    candidate_list_total_households = models.PositiveIntegerField(blank=True, null=True,)
-    candidate_list_total_individuals = models.PositiveIntegerField(blank=True, null=True,)
-    final_list_total_households = models.PositiveIntegerField(blank=True, null=True,)
-    final_list_total_individuals = models.PositiveIntegerField(blank=True, null=True,)
+    households = models.ManyToManyField(
+        "household.Household",
+        related_name="target_populations",
+        through="HouseholdSelection",
+    )
+    candidate_list_total_households = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+    )
+    candidate_list_total_individuals = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+    )
+    final_list_total_households = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+    )
+    final_list_total_individuals = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+    )
     selection_computation_metadata = models.TextField(
         blank=True,
         null=True,
@@ -102,7 +130,11 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
         related_name="target_population_candidate",
     )
     final_list_targeting_criteria = models.OneToOneField(
-        "TargetingCriteria", blank=True, null=True, on_delete=models.SET_NULL, related_name="target_population_final",
+        "TargetingCriteria",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="target_population_final",
     )
     sent_to_datahub = models.BooleanField(
         default=False,
@@ -113,13 +145,13 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
 
     @property
     def final_list(self):
-        if self.status == "DRAFT":
+        if self.status == TargetPopulation.STATUS_DRAFT:
             return []
         return self.households.filter(selections__final=True).order_by("created_at").distinct()
 
     @property
     def candidate_stats(self):
-        if self.status == "DRAFT":
+        if self.status == TargetPopulation.STATUS_DRAFT:
             households_ids = Household.objects.filter(self.candidate_list_targeting_criteria.get_query()).values_list(
                 "id"
             )
@@ -128,17 +160,25 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
         delta18 = relativedelta(years=+18)
         date18ago = datetime.datetime.now() - delta18
         child_male = Individual.objects.filter(
-            household__id__in=households_ids, birth_date__gt=date18ago, sex="MALE",
+            household__id__in=households_ids,
+            birth_date__gt=date18ago,
+            sex=MALE,
         ).count()
         child_female = Individual.objects.filter(
-            household__id__in=households_ids, birth_date__gt=date18ago, sex="FEMALE",
+            household__id__in=households_ids,
+            birth_date__gt=date18ago,
+            sex=FEMALE,
         ).count()
 
         adult_male = Individual.objects.filter(
-            household__id__in=households_ids, birth_date__lte=date18ago, sex="MALE",
+            household__id__in=households_ids,
+            birth_date__lte=date18ago,
+            sex=MALE,
         ).count()
         adult_female = Individual.objects.filter(
-            household__id__in=households_ids, birth_date__lte=date18ago, sex="FEMALE",
+            household__id__in=households_ids,
+            birth_date__lte=date18ago,
+            sex=FEMALE,
         ).count()
         return {
             "child_male": child_male,
@@ -149,7 +189,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
 
     @property
     def final_stats(self):
-        if self.status == "Draft":
+        if self.status == TargetPopulation.STATUS_DRAFT:
             return None
         elif self.status == TargetPopulation.STATUS_APPROVED:
             households_ids = self.households.filter(self.final_list_targeting_criteria.get_query()).values_list("id")
@@ -158,17 +198,25 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
         delta18 = relativedelta(years=+18)
         date18ago = datetime.datetime.now() - delta18
         child_male = Individual.objects.filter(
-            household__id__in=households_ids, birth_date__gt=date18ago, sex="MALE",
+            household__id__in=households_ids,
+            birth_date__gt=date18ago,
+            sex=MALE,
         ).count()
         child_female = Individual.objects.filter(
-            household__id__in=households_ids, birth_date__gt=date18ago, sex="FEMALE",
+            household__id__in=households_ids,
+            birth_date__gt=date18ago,
+            sex=FEMALE,
         ).count()
 
         adult_male = Individual.objects.filter(
-            household__id__in=households_ids, birth_date__lte=date18ago, sex="MALE",
+            household__id__in=households_ids,
+            birth_date__lte=date18ago,
+            sex=MALE,
         ).count()
         adult_female = Individual.objects.filter(
-            household__id__in=households_ids, birth_date__lte=date18ago, sex="FEMALE",
+            household__id__in=households_ids,
+            birth_date__lte=date18ago,
+            sex=FEMALE,
         ).count()
         return {
             "child_male": child_male,
@@ -192,10 +240,18 @@ class HouseholdSelection(TimeStampedUUIDModel):
     candidate list  will have final set to True.
     """
 
-    household = models.ForeignKey("household.Household", on_delete=models.CASCADE, related_name="selections",)
+    household = models.ForeignKey(
+        "household.Household",
+        on_delete=models.CASCADE,
+        related_name="selections",
+    )
     target_population = models.ForeignKey("TargetPopulation", on_delete=models.CASCADE, related_name="selections")
     vulnerability_score = models.DecimalField(
-        blank=True, null=True, decimal_places=3, max_digits=6, help_text="Written by a tool such as Corticon.",
+        blank=True,
+        null=True,
+        decimal_places=3,
+        max_digits=6,
+        help_text="Written by a tool such as Corticon.",
     )
     final = models.BooleanField(
         default=True,
@@ -233,7 +289,7 @@ class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingMixin):
         try:
             if (
                 self.target_population_final
-                and self.target_population_final.status != "DRAFT"
+                and self.target_population_final.status != TargetPopulation.STATUS_DRAFT
                 and self.target_population_final.program is not None
                 and self.target_population_final.program.individual_data_needed
             ):
@@ -244,16 +300,26 @@ class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingMixin):
 
 
 class TargetingCriteriaRuleQueryingMixin:
-    def __init__(self, filters=None):
-        if filters is None:
-            return
-        self.filters = filters
+    def __init__(self, filters=None, individuals_filters_blocks=None):
+        if filters is not None:
+            self.filters = filters
+        if individuals_filters_blocks is not None:
+            self.individuals_filters_blocks = individuals_filters_blocks
 
     def get_query(self):
         query = Q()
         filters = self.filters if isinstance(self.filters, list) else self.filters.all()
+        individuals_filters_blocks = (
+            self.individuals_filters_blocks
+            if isinstance(self.individuals_filters_blocks, list)
+            else self.individuals_filters_blocks.all()
+        )
+        # Thats household filters
         for ruleFilter in filters:
             query &= ruleFilter.get_query()
+        # filter individual block
+        for individuals_filters_block in individuals_filters_blocks:
+            query &= individuals_filters_block.get_query()
         return query
 
 
@@ -262,16 +328,45 @@ class TargetingCriteriaRule(TimeStampedUUIDModel, TargetingCriteriaRuleQueryingM
     This is a set of ANDed Filters.
     """
 
-    targeting_criteria = models.ForeignKey("TargetingCriteria", related_name="rules", on_delete=models.CASCADE,)
+    targeting_criteria = models.ForeignKey(
+        "TargetingCriteria",
+        related_name="rules",
+        on_delete=models.CASCADE,
+    )
 
 
-class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
-    """
-    This is one explicit filter like:
-        :Age <> 10-20
-        :Residential Status = Refugee
-        :Residential Status != Refugee
-    """
+class TargetingIndividualRuleFilterBlockMixin:
+    def __init__(self, individual_block_filters=None):
+        if individual_block_filters is not None:
+            self.individual_block_filters = individual_block_filters
+
+    def get_query(self):
+        individuals_query = Q()
+        filters = (
+            self.individual_block_filters
+            if isinstance(self.individual_block_filters, list)
+            else self.individual_block_filters.all()
+        )
+        filtered = False
+        for ruleFilter in filters:
+            filtered = True
+            individuals_query &= ruleFilter.get_query()
+        if not filtered:
+            return Q()
+        households_id = Individual.objects.filter(individuals_query).values_list("household_id", flat=True)
+        return Q(id__in=households_id)
+
+
+class TargetingIndividualRuleFilterBlock(
+    TimeStampedUUIDModel,
+    TargetingIndividualRuleFilterBlockMixin,
+):
+    targeting_criteria_rule = models.ForeignKey(
+        "TargetingCriteriaRule", on_delete=models.CASCADE, related_name="individuals_filters_blocks"
+    )
+
+
+class TargetingCriteriaFilterMixin:
 
     COMPARISION_ATTRIBUTES = {
         "EQUALS": {
@@ -305,17 +400,9 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
         ("GREATER_THAN", _("Greater than")),
         ("LESS_THAN", _("Less than")),
     )
-    comparision_method = models.CharField(max_length=20, choices=COMPARISON_CHOICES,)
-    targeting_criteria_rule = models.ForeignKey(
-        "TargetingCriteriaRule", related_name="filters", on_delete=models.CASCADE,
-    )
-    is_flex_field = models.BooleanField(default=False)
-    field_name = models.CharField(max_length=50)
-    arguments = JSONField(
-        help_text="""
-            Array of arguments
-            """
-    )
+
+    def get_lookup_prefix(self, associated_with):
+        return "individuals__" if associated_with == _INDIVIDUAL else ""
 
     def get_query_for_lookup(self, lookup, select_many=False):
         comparision_attribute = TargetingCriteriaRuleFilter.COMPARISION_ATTRIBUTES.get(self.comparision_method)
@@ -362,9 +449,10 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
                 f"Core Field Attributes associated with this fieldName {self.field_name}"
                 f" doesn't have get_query method or lookup field"
             )
+        lookup_prefix = self.get_lookup_prefix(core_field_attr["associated_with"])
         return self.get_query_for_lookup(
-            f"{'individuals__' if core_field_attr['associated_with']==_INDIVIDUAL else ''}{lookup}",
-            select_many=core_field_attr.get("type") == "SELECT_MANY",
+            f"{lookup_prefix}{lookup}",
+            select_many=core_field_attr.get("type") == TYPE_SELECT_MANY,
         )
 
     def get_query_for_flex_field(self):
@@ -373,10 +461,72 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel):
             raise ValidationError(
                 f"There are no Core Field Attributes associated with this fieldName {self.field_name}"
             )
-        lookup = f"{'individuals__' if flex_field_attr.associated_with else ''}flex_fields__{flex_field_attr.name}"
-        return self.get_query_for_lookup(lookup, select_many=flex_field_attr.type == "SELECT_MANY",)
+        lookup_prefix = self.get_lookup_prefix(_INDIVIDUAL if flex_field_attr.associated_with == 1 else _HOUSEHOLD)
+        lookup = f"{lookup_prefix}flex_fields__{flex_field_attr.name}"
+        return self.get_query_for_lookup(
+            lookup,
+            select_many=flex_field_attr.type == TYPE_SELECT_MANY,
+        )
 
     def get_query(self):
         if not self.is_flex_field:
             return self.get_query_for_core_field()
         return self.get_query_for_flex_field()
+
+    def __str__(self):
+        return f"{self.field_name} {self.comparision_method} {self.arguments}"
+
+# TODO It should be household only
+class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterMixin):
+    """
+    This is one explicit filter like:
+        :Age <> 10-20
+        :Residential Status = Refugee
+        :Residential Status != Refugee
+    """
+
+    comparision_method = models.CharField(
+        max_length=20,
+        choices=TargetingCriteriaFilterMixin.COMPARISON_CHOICES,
+    )
+    targeting_criteria_rule = models.ForeignKey(
+        "TargetingCriteriaRule",
+        related_name="filters",
+        on_delete=models.CASCADE,
+    )
+    is_flex_field = models.BooleanField(default=False)
+    field_name = models.CharField(max_length=50)
+    arguments = JSONField(
+        help_text="""
+            Array of arguments
+            """
+    )
+
+
+class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterMixin):
+    """
+    This is one explicit filter like:
+        :Age <> 10-20
+        :Residential Status = Refugee
+        :Residential Status != Refugee
+    """
+
+    comparision_method = models.CharField(
+        max_length=20,
+        choices=TargetingCriteriaFilterMixin.COMPARISON_CHOICES,
+    )
+    individuals_filters_block = models.ForeignKey(
+        "TargetingIndividualRuleFilterBlock",
+        related_name="individual_block_filters",
+        on_delete=models.CASCADE,
+    )
+    is_flex_field = models.BooleanField(default=False)
+    field_name = models.CharField(max_length=50)
+    arguments = JSONField(
+        help_text="""
+            Array of arguments
+            """
+    )
+
+    def get_lookup_prefix(self, associated_with):
+        return ""
