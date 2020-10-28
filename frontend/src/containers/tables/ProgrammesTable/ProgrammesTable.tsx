@@ -1,6 +1,5 @@
 import React, { ReactElement } from 'react';
 import styled from 'styled-components';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
   AllProgramsQueryVariables,
   ProgrammeChoiceDataQuery,
@@ -10,6 +9,11 @@ import {
 import { UniversalTable } from '../UniversalTable';
 import { headCells } from './ProgrammesHeadCells';
 import { ProgrammesTableRow } from './ProgrammesTableRow';
+
+
+const TableWrapper = styled.div`
+    padding: 20px;
+  `;
 
 interface ProgrammesTableProps {
   businessArea: string;
@@ -32,9 +36,6 @@ export function ProgrammesTable({
     numberOfHouseholds: JSON.stringify(filter.numberOfHouseholds),
     budget: JSON.stringify(filter.budget),
   };
-  const TableWrapper = styled.div`
-    padding: 20px;
-  `;
   return (
     <TableWrapper>
       <UniversalTable<ProgramNode, AllProgramsQueryVariables>

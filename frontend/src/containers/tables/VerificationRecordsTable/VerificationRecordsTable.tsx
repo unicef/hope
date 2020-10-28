@@ -17,7 +17,6 @@ import { useSnackbar } from '../../../hooks/useSnackBar';
 import { Dialog } from '../../dialogs/Dialog';
 import { DialogActions } from '../../dialogs/DialogActions';
 import { DropzoneField } from '../../../components/DropzoneField';
-import { CreateGrievanceTickets } from '../../../components/payments/CreateGrievanceTickets';
 import { headCells } from './VerificationRecordsHeadCells';
 import { VerificationRecordsTableRow } from './VerificationRecordsTableRow';
 import { ImportErrors } from './errors/ImportErrors';
@@ -39,7 +38,6 @@ export function VerificationRecordsTable({
   const { showMessage } = useSnackbar();
   const [open, setOpenImport] = useState(false);
   const [fileToImport, setFileToImport] = useState(null);
-  const [selected, setSelected] = useState([]);
 
   const { t } = useTranslation();
 
@@ -90,14 +88,7 @@ export function VerificationRecordsTable({
       }
     }
   };
-  const grievanceButton = (
-    <Box mr={3}>
-      <CreateGrievanceTickets
-        grievanceTicketsNumber={selected.length}
-        disabled={selected.length === 0}
-      />
-    </Box>
-  );
+
   const exportButton =
     verificationMethod === 'XLSX' ? (
       <Box mr={3}>
@@ -163,35 +154,6 @@ export function VerificationRecordsTable({
     </>
   );
 
-  const handleCheckboxClick = (event, name): void => {
-    const selectedIndex = selected.indexOf(name);
-    let newSelected = [];
-
-    if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1),
-      );
-    }
-
-    setSelected(newSelected);
-  };
-
-  const handleSelectAllCheckboxesClick = (event, rows): void => {
-    if (event.target.checked) {
-      const newSelecteds = rows.map((row) => row.paymentRecord.id);
-      setSelected(newSelecteds);
-      return;
-    }
-    setSelected([]);
-  };
-  const numSelected = selected.length;
   return (
     <>
       <UniversalTable<
@@ -199,20 +161,12 @@ export function VerificationRecordsTable({
         AllPaymentVerificationsQueryVariables
       >
         title='Verification Records'
-        actions={[grievanceButton, exportButton, importButton]}
+        actions={[exportButton, importButton]}
         headCells={headCells}
-        onSelectAllClick={handleSelectAllCheckboxesClick}
         query={useAllPaymentVerificationsQuery}
         queriedObjectName='allPaymentVerifications'
         initialVariables={initialVariables}
-        numSelected={numSelected}
-        renderRow={(row) => (
-          <VerificationRecordsTableRow
-            checkboxClickHandler={handleCheckboxClick}
-            selected={selected}
-            record={row}
-          />
-        )}
+        renderRow={(row) => <VerificationRecordsTableRow record={row} />}
       />
       <Dialog
         open={open}

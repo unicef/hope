@@ -4,27 +4,22 @@ from core.base_test_case import BaseElasticSearchTestCase
 from core.models import BusinessArea
 from household.fixtures import create_household_and_individuals
 from household.models import (
-    HEAD,
-    WIFE_HUSBAND,
-    SON_DAUGHTER,
-    MALE,
-    FEMALE,
-    Individual,
-    NEEDS_ADJUDICATION,
     DUPLICATE,
+    FEMALE,
+    HEAD,
+    MALE,
+    NEEDS_ADJUDICATION,
+    SON_DAUGHTER,
     UNIQUE,
+    WIFE_HUSBAND,
+    Individual,
 )
 from registration_data.fixtures import RegistrationDataImportFactory
 from registration_datahub.fixtures import (
     RegistrationDataImportDatahubFactory,
     create_imported_household_and_individuals,
 )
-from registration_datahub.models import (
-    ImportData,
-    ImportedIndividual,
-    DUPLICATE_IN_BATCH,
-    UNIQUE_IN_BATCH,
-)
+from registration_datahub.models import DUPLICATE_IN_BATCH, UNIQUE_IN_BATCH, ImportData, ImportedIndividual
 from registration_datahub.tasks.deduplicate import DeduplicateTask
 
 
@@ -44,7 +39,9 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
     def setUpTestData(cls):
         super().setUpTestData()
         import_data = ImportData.objects.create(
-            file="test_file/new_reg_data_import.xlsx", number_of_households=10, number_of_individuals=100,
+            file="test_file/new_reg_data_import.xlsx",
+            number_of_households=10,
+            number_of_individuals=100,
         )
         cls.business_area = BusinessArea.objects.create(
             code="0060",
@@ -55,10 +52,12 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
             has_data_sharing_agreement=True,
         )
         cls.registration_data_import_datahub = RegistrationDataImportDatahubFactory(
-            import_data=import_data, business_area_slug=cls.business_area.slug,
+            import_data=import_data,
+            business_area_slug=cls.business_area.slug,
         )
         rdi = RegistrationDataImportFactory(
-            datahub_id=cls.registration_data_import_datahub.id, business_area=cls.business_area,
+            datahub_id=cls.registration_data_import_datahub.id,
+            business_area=cls.business_area,
         )
         cls.registration_data_import_datahub.hct_id = rdi.id
         cls.registration_data_import_datahub.save()
@@ -239,10 +238,12 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
             "Test Example",
         )
         self.assertEqual(
-            tuple(duplicate_in_batch.values_list("full_name", flat=True)), expected_duplicates,
+            tuple(duplicate_in_batch.values_list("full_name", flat=True)),
+            expected_duplicates,
         )
         self.assertEqual(
-            tuple(unique_in_batch.values_list("full_name", flat=True)), expected_uniques,
+            tuple(unique_in_batch.values_list("full_name", flat=True)),
+            expected_uniques,
         )
 
         duplicate_in_golden_record = ImportedIndividual.objects.order_by("full_name").filter(
@@ -270,15 +271,18 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
         expected_uniques_gr = ("Tesa Testowski",)
 
         self.assertEqual(
-            tuple(duplicate_in_golden_record.values_list("full_name", flat=True)), expected_duplicates_gr,
+            tuple(duplicate_in_golden_record.values_list("full_name", flat=True)),
+            expected_duplicates_gr,
         )
         self.assertEqual(
-            tuple(unique_in_golden_record.values_list("full_name", flat=True)), expected_uniques_gr,
+            tuple(unique_in_golden_record.values_list("full_name", flat=True)),
+            expected_uniques_gr,
         )
 
 
 @override_config(
-    DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE=4.0, DEDUPLICATION_GOLDEN_RECORD_DUPLICATE_SCORE=5.0,
+    DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE=4.0,
+    DEDUPLICATION_GOLDEN_RECORD_DUPLICATE_SCORE=5.0,
 )
 class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
     multi_db = True
