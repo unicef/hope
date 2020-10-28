@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Q
+from django.db.models.functions import Lower
 from django.utils.encoding import force_text
 from django.utils.functional import Promise
 from django_filters import FilterSet, OrderingFilter, CharFilter, MultipleChoiceFilter
@@ -16,7 +17,7 @@ from account.models import USER_PARTNER_CHOICES, USER_STATUS_CHOICES, Role, User
 from core.extended_connection import ExtendedConnection
 from core.models import BusinessArea
 from core.schema import ChoiceObject, BusinessAreaNode
-from core.utils import to_choice_object
+from core.utils import to_choice_object, CustomOrderingFilter
 
 
 def permissions_resolver(user_roles):
@@ -43,7 +44,7 @@ class UsersFilter(FilterSet):
             "roles": ["exact"],
         }
 
-    order_by = OrderingFilter(fields=("first_name", "last_name", "last_login", "status", "partner", "email"))
+    order_by = CustomOrderingFilter(fields=(Lower("first_name"), Lower("last_name"), "last_login", "status", "partner", "email"))
 
     def search_filter(self, qs, name, value):
         values = value.split(" ")

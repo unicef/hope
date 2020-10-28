@@ -4446,6 +4446,7 @@ export type AllProgramsQuery = (
       & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'endCursor' | 'startCursor'>
     ), edges: Array<Maybe<(
       { __typename?: 'ProgramNodeEdge' }
+      & Pick<ProgramNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'ProgramNode' }
         & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'populationGoal' | 'sector' | 'totalNumberOfHouseholds' | 'individualDataNeeded'>
@@ -7929,6 +7930,7 @@ export const AllProgramsDocument = gql`
     totalCount
     edgeCount
     edges {
+      cursor
       node {
         id
         name

@@ -40,6 +40,7 @@ export const ALL_PROGRAMS_QUERY = gql`
       totalCount
       edgeCount
       edges {
+        cursor
         node {
           id
           name
