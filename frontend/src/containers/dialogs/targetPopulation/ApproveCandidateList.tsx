@@ -35,10 +35,10 @@ const DialogDescription = styled.div`
 `;
 
 export function ApproveCandidateList({
-                                       open,
-                                       setOpen,
-                                       targetPopulationId,
-                                     }): React.ReactElement {
+  open,
+  setOpen,
+  targetPopulationId,
+}): React.ReactElement {
   const businessArea = useBusinessArea();
 
   const { showMessage } = useSnackbar();
