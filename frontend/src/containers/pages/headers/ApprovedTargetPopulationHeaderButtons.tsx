@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Button, Tooltip } from '@material-ui/core';
-import { FileCopy, EditRounded } from '@material-ui/icons';
+import { FileCopy } from '@material-ui/icons';
 import {
   TargetPopulationNode,
   useUnapproveTpMutation,
 } from '../../../__generated__/graphql';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 import { FinalizeTargetPopulation } from '../../dialogs/targetPopulation/FinalizeTargetPopulation';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 
 const IconContainer = styled.span`
@@ -31,8 +30,8 @@ export interface ApprovedTargetPopulationHeaderButtonsPropTypes {
 }
 
 export function ApprovedTargetPopulationHeaderButtons({
-                                                        targetPopulation,
-                                                      }: ApprovedTargetPopulationHeaderButtonsPropTypes): React.ReactElement {
+  targetPopulation,
+}: ApprovedTargetPopulationHeaderButtonsPropTypes): React.ReactElement {
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openFinalize, setOpenFinalize] = useState(false);
   const { showMessage } = useSnackbar();

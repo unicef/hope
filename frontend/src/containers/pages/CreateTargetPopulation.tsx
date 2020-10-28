@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Button, Paper, Tab, Tabs, Typography } from '@material-ui/core';
+import { Button, Paper, Typography } from '@material-ui/core';
 import { Field, FieldArray, Form, Formik } from 'formik';
 import { PageHeader } from '../../components/PageHeader';
 import { TargetingCriteria } from '../../components/TargetPopulation/TargetingCriteria';
@@ -105,7 +105,7 @@ export function CreateTargetPopulation(): React.ReactElement {
                   variant='contained'
                   color='primary'
                   onClick={submitForm}
-                  disabled={!values.name || !values.criterias.length}
+                  disabled={values.criterias?.length === 0 || !values.name}
                   data-cy='button-target-population-create'
                 >
                   Save
