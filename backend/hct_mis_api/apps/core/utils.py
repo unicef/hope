@@ -408,11 +408,12 @@ class CustomOrderingFilter(OrderingFilter):
 
         new_fields = []
         self.lower_dict = {}
+
         for field in fields:
             field_name = field
             if isinstance(field, Lower):
                 field_name = field.source_expressions[0].name
-                new_fields.append(field_name)
+            new_fields.append(field_name)
             self.lower_dict[field_name] = field
 
         return OrderedDict([(f, f) if isinstance(f, (str, Lower)) else f for f in new_fields])
