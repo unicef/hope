@@ -5,8 +5,8 @@ import { Field } from 'formik';
 import { AllProgramsQuery } from '../../__generated__/graphql';
 import { OverviewContainer } from '../OverviewContainer';
 import { LoadingComponent } from '../LoadingComponent';
-import { FormikSelectFieldConfirm } from './FormikSelectFieldConfirm';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
+import { FormikSelectFieldConfirm } from './FormikSelectFieldConfirm';
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(3)}px;
@@ -62,7 +62,6 @@ export function TargetPopulationProgramme({
             fullWidth
             variant='outlined'
             required
-            allPrograms={allPrograms.allPrograms.edges}
             choices={mappedPrograms}
             confirmTitle={confirmTitle}
             confirmContent={confirmContent}

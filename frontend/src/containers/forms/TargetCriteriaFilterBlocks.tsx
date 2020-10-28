@@ -1,12 +1,11 @@
 import styled from 'styled-components';
-import { Field, FieldArray } from 'formik';
+import { FieldArray } from 'formik';
 import { Box, Button } from '@material-ui/core';
 import { AddCircleOutline } from '@material-ui/icons';
 import React from 'react';
 import { ImportedIndividualFieldsQuery } from '../../__generated__/graphql';
 import { chooseFieldType, clearField } from '../../utils/targetingUtils';
 import { TargetCriteriaBlockFilter } from './TargetCriteriaBlockFilter';
-import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 
 const Divider = styled.div`
   border-top: 1px solid #e2e2e2;
@@ -38,12 +37,7 @@ const AndDivider = styled.div`
   margin: ${({ theme }) => theme.spacing(10)}px 0;
   position: relative;
 `;
-const ButtonBox = styled.div`
-  width: 300px;
-`;
-const FieldBox = styled.div`
-  margin-left: 10px;
-`;
+
 const AndDividerLabel = styled.div`
   position: absolute;
   top: 50%;
@@ -68,9 +62,7 @@ const GrayFiltersBlock = styled.div`
   border-radius: 3px;
   margin-bottom: 20px;
 `;
-const AddIcon = styled(AddCircleOutline)`
-  margin-right: 10px;
-`;
+
 const FilterWrapper = styled.div`
   padding: ${({ theme }) => theme.spacing(3)}px
     ${({ theme }) => theme.spacing(5)}px;
