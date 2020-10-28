@@ -10,6 +10,7 @@ from django.forms import model_to_dict
 from django.template.defaultfilters import slugify
 from django.utils.itercompat import is_iterable
 from django_filters import OrderingFilter
+from django_filters.constants import EMPTY_VALUES
 
 
 class CaseInsensitiveTuple(tuple):
@@ -365,6 +366,26 @@ def build_arg_dict_from_dict(data_dict, mapping_dict):
 
 
 class CustomOrderingFilter(OrderingFilter):
+    def filter(self, qs, value):
+        if value in EMPTY_VALUES:
+            return qs
+
+        ordering = [self.get_ordering_value(param) for param in value]
+        new_ordering = []
+        for field in ordering:
+            field_name = field
+            desc = False
+            if field.startswith("-"):
+                field_name = field[1:]
+                desc = True
+            if isinstance(self.lower_dict.get(field_name),Lower):
+                lower_field = self.lower_dict.get(field_name)
+                if desc:
+                    lower_field = lower_field.desc()
+                new_ordering.append(lower_field)
+            else:
+                new_ordering.append(field)
+        return qs.order_by(*new_ordering)
 
     def normalize_fields(self, fields):
         """
@@ -379,7 +400,9 @@ class CustomOrderingFilter(OrderingFilter):
 
         # fields is an iterable of field names
         assert all(
-            isinstance(field, (str, Lower)) or is_iterable(field) and len(field) == 2  # may need to be wrapped in parens
+            isinstance(field, (str, Lower))
+            or is_iterable(field)
+            and len(field) == 2  # may need to be wrapped in parens
             for field in fields
         ), "'fields' must contain strings or (field name, param name) pairs."
 
