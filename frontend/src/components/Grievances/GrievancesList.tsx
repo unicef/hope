@@ -9,23 +9,23 @@ import { OverviewContainer } from '../OverviewContainer';
 import { PageHeader } from '../PageHeader';
 import { StatusBox } from '../StatusBox';
 
+const ListContainer = styled.div`
+  padding: 22px;
+`;
+const Title = styled.div`
+  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
+`;
+const StatusContainer = styled.div`
+  min-width: 120px;
+  max-width: 200px;
+`;
+
 export function GrievancesList(): React.ReactElement {
   const { id } = useParams();
   // const { data, loading } = useGrievancesQuery({
   //   variables: { id },
   // });
   const businessArea = useBusinessArea();
-
-  const ListContainer = styled.div`
-    padding: 22px;
-  `;
-  const Title = styled.div`
-    padding-bottom: ${({ theme }) => theme.spacing(8)}px;
-  `;
-  const StatusContainer = styled.div`
-    min-width: 120px;
-    max-width: 200px;
-  `;
 
   return (
     <>

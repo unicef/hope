@@ -13,53 +13,54 @@ import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 import { LookUpHouseholdIndividual } from './LookUpHouseholdIndividual';
 
-export function CreateGrievance(): React.ReactElement {
-  const BoxPadding = styled.div`
-    padding: 15px 0;
-  `;
-  const NewTicket = styled.div`
-    padding: 20px;
-  `;
-  const DialogFooter = styled.div`
-    padding: 12px 16px;
-    margin: 0;
-    border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-    text-align: right;
-  `;
-  const BoxWithBorderBottom = styled.div`
-    border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-    padding: 15px 0;
-  `;
-  const BoxWithBorders = styled.div`
-    border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-    border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-    padding: 15px 0;
-  `;
-  const LookUp = styled.div`
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 10px;
-    border: 1.5px solid #043e91;
-    border-radius: 5px;
-    color: #033f91;
-    font-size: 16px;
-    text-align: center;
-    padding: 25px;
-    font-weight: 500;
-    cursor: pointer;
-  `;
+const BoxPadding = styled.div`
+  padding: 15px 0;
+`;
+const NewTicket = styled.div`
+  padding: 20px;
+`;
+const DialogFooter = styled.div`
+  padding: 12px 16px;
+  margin: 0;
+  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
+  text-align: right;
+`;
+const BoxWithBorderBottom = styled.div`
+  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
+  padding: 15px 0;
+`;
+const BoxWithBorders = styled.div`
+  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
+  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
+  padding: 15px 0;
+`;
+const LookUp = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10px;
+  border: 1.5px solid #043e91;
+  border-radius: 5px;
+  color: #033f91;
+  font-size: 16px;
+  text-align: center;
+  padding: 25px;
+  font-weight: 500;
+  cursor: pointer;
+`;
 
-  const Consent = styled.p`
-    font-size: 14px;
-    color: #585858;
-  `;
-  const MarginRightSpan = styled.span`
-    margin-right: 5px;
-  `;
-  const StyledLink = styled(Link)`
-    text-decoration: none;
-  `;
+const Consent = styled.p`
+  font-size: 14px;
+  color: #585858;
+`;
+const MarginRightSpan = styled.span`
+  margin-right: 5px;
+`;
+const StyledLink = styled(Link)`
+  text-decoration: none;
+`;
+
+export function CreateGrievance(): React.ReactElement {
   const businessArea = useBusinessArea();
 
   const initialValues: { [key: string]: string } = {

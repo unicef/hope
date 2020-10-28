@@ -16,6 +16,21 @@ export interface Props {
   cashPlanVerificationId: string;
   cashPlanId: string;
 }
+const DialogTitleWrapper = styled.div`
+  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
+`;
+
+const DialogFooter = styled.div`
+  padding: 12px 16px;
+  margin: 0;
+  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
+  text-align: right;
+`;
+
+const DialogContainer = styled.div`
+  width: 700px;
+`;
+
 export function FinishVerificationPlan({
   cashPlanVerificationId,
   cashPlanId,
@@ -51,20 +66,6 @@ export function FinishVerificationPlan({
     }
     showMessage('Verification plan has been finished');
   };
-  const DialogTitleWrapper = styled.div`
-    border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  `;
-
-  const DialogFooter = styled.div`
-    padding: 12px 16px;
-    margin: 0;
-    border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-    text-align: right;
-  `;
-
-  const DialogContainer = styled.div`
-    width: 700px;
-  `;
 
   const beneficiariesPercent = (): number => {
     if (verificationPlan?.respondedCount && verificationPlan?.sampleSize !== 0)
