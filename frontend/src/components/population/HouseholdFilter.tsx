@@ -14,6 +14,7 @@ import TextField from '../../shared/TextField';
 import InputLabel from '../../shared/InputLabel';
 import Select from '../../shared/Select';
 import { ContainerWithBorder } from '../ContainerWithBorder';
+import { FieldLabel } from '../FieldLabel';
 import { AdminAreasAutocomplete } from './AdminAreaAutocomplete';
 
 const TextContainer = styled(TextField)`
@@ -40,10 +41,6 @@ const SearchTextField = styled(TextField)`
 
 const StartInputAdornment = styled(InputAdornment)`
   margin-right: 0;
-`;
-const FieldLabel = styled.span`
-  font-size: 12px;
-  color: rgba(0, 0, 0, 0.6);
 `;
 
 interface HouseholdFiltersProps {
