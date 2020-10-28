@@ -29,7 +29,6 @@ import { VerificationRecordsFilters } from '../tables/VerificationRecordsTable/V
 import { CreateVerificationPlan } from '../../components/payments/CreateVerificationPlan';
 import { UniversalMoment } from '../../components/UniversalMoment';
 import { usePermissions } from '../../hooks/usePermissions';
-import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 
 const Container = styled.div`
   display: flex;
@@ -410,9 +409,6 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
         <BottomTitle>
           To see more details please create Verification Plan
         </BottomTitle>
-      ) : null}
-      {cashPlan.verificationStatus === 'TRANSACTION_COMPLETED_WITH_ERRORS' ? (
-        <BottomTitle>Transaction completed with errors</BottomTitle>
       ) : null}
       {cashPlan.verifications?.edges[0]?.node?.id && (
         <TableWrapper>

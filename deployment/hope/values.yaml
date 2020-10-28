@@ -8,6 +8,7 @@ global:
   env: "dev"
   storageClass: "standard"
   imagePullPolicy: Always
+  init: true
 
 backend:
   image: backend:latest
@@ -26,31 +27,11 @@ backend:
     # runAsNonRoot: true
     # runAsUser: 1000
 
-  nodeSelector:
-    agentpool: hope
 
   tolerations: []
 
   affinity: {}
 
-  resources:
-    limits:
-      cpu: "2"
-      memory: "4Gi"
-    requests:
-      cpu: "1"
-      memory: "4Gi"
-
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 128Mi
 
   service:
     type: ClusterIP
@@ -62,6 +43,7 @@ backend:
     POSTGRES_SQL: ""
     AIRFLOW_HOST: "hope-airflow"
     EMAIL_HOST: ""
+    POSTGRES_SSL: ""
 
   secret:
     SECRET_KEY: ""
@@ -87,20 +69,10 @@ frontend:
     # runAsNonRoot: true
     # runAsUser: 1000
 
-  nodeSelector:
-    agentpool: hope
 
   tolerations: []
 
   affinity: {}
-
-  resources:
-    limits:
-      cpu: "500m"
-      memory: "256Mi"
-    requests:
-      cpu: "500m"
-      memory: "256Mi"
 
   service:
     type: ClusterIP
@@ -141,21 +113,12 @@ postgresql:
 
   externalDatabase:
     host: ""
-    port: ""
+    db: ""
+    port: "5432"
     user: ""
-    name: ""
     password: ""
     airflowName: ""
 
-  resources:
-    limits:
-      cpu: "500m"
-      memory: "256Mi"
-    requests:
-      cpu: "500m"
-      memory: "256Mi"
-  nodeSelector:
-    agentpool: hope
   image:
     tag: 10.12.0
 
@@ -164,16 +127,6 @@ registrationdatahubpostgresql:
   postgresqlDatabase: registration-datahub-db
   postgresqlUsername: postgres
   postgresqlPassword: ""
-
-  resources:
-    limits:
-      cpu: "500m"
-      memory: "256Mi"
-    requests:
-      cpu: "500m"
-      memory: "256Mi"
-  nodeSelector:
-    agentpool: hope
   # Script for adding postgis
   # Don't modify
   initdbScripts:
@@ -183,9 +136,10 @@ registrationdatahubpostgresql:
 
   externalDatabase:
     host: ""
-    port: ""
+    db: ""
+    port: "5432"
     user: ""
-    name: ""
+    postgresqlDatabase: ""
     password: ""
 
   image:
@@ -204,22 +158,12 @@ cashassistdatahubpostgresql:
       #!/bin/sh
       psql -U postgres cashassist-datahub-hub -c "create extension if not exists postgis;"
 
-  resources:
-    limits:
-      cpu: "500m"
-      memory: "256Mi"
-    requests:
-      cpu: "500m"
-      memory: "256Mi"
-
   externalDatabase:
     host: ""
-    port: ""
-    name: ""
+    db: ""
+    port: "5432"
     user: ""
     password: ""
-  nodeSelector:
-    agentpool: hope
   image:
     tag: 10.12.0
 
@@ -229,129 +173,20 @@ redis:
   persistence.enabled: true
   usePassword: false
   redis:
-    master:
-      resources:
-        limits:
-          cpu: "250m"
-          memory: "512Mi"
-        requests:
-          cpu: "250m"
-          memory: "256Mi"
-      nodeSelector:
-        agentpool: hope
     usePassword: false
   cluster:
     slaveCount: 0
     enabled: false
   image:
     tag: 4.0.14
-  master:
-    resources:
-      limits:
-        cpu: "250m"
-        memory: "512Mi"
-      requests:
-        cpu: "250m"
-        memory: "256Mi"
-    nodeSelector:
-      agentpool: hope
 
 elasticsearch:
   enabled: true
   master:
     replicas: 1
-    resources:
-      limits:
-        cpu: "1"
-        memory: "3Gi"
-      requests:
-        cpu: "1"
-        memory: "3Gi"
-    nodeSelector:
-      agentpool: hope
-  volumePermissions:
-    resources:
-      limits:
-        cpu: "250m"
-        memory: "256Mi"
-      requests:
-        cpu: "250m"
-        memory: "256Mi"
-    nodeSelector:
-      agentpool: hope
   sysctlImage:
     replicas: 1
-    resources:
-      limits:
-        cpu: "1"
-        memory: "1024Mi"
-      requests:
-        cpu: "750m"
-        memory: "1024Mi"
-    nodeSelector:
-      agentpool: hope
-  data:
-    replicas: 1
-    resources:
-      limits:
-        cpu: "1"
-        memory: "3Gi"
-      requests:
-        cpu: "750m"
-        memory: "3Gi"
-    nodeSelector:
-      agentpool: hope
-  coordinating:
-    replicas: 1
-    resources:
-      limits:
-        cpu: "250m"
-        memory: "2Gi"
-      requests:
-        cpu: "250m"
-        memory: "2Gi"
-    nodeSelector:
-      agentpool: hope
-  ingset:
-    resources:
-      limits:
-        cpu: "250m"
-        memory: "1Gi"
-      requests:
-        cpu: "250m"
-        memory: "1Gi"
-    nodeSelector:
-      agentpool: hope
-  metrics:
-    resources:
-      limits:
-        cpu: "250m"
-        memory: "1Gi"
-      requests:
-        cpu: "250m"
-        memory: "1Gi"
-    nodeSelector:
-      agentpool: hope
-  curator:
-    resources:
-      limits:
-        cpu: "250m"
-        memory: "1Gi"
-      requests:
-        cpu: "250m"
-        memory: "1Gi"
-    nodeSelector:
-      agentpool: hope
   plugins: "analysis-phonetic"
-  resources:
-    limits:
-      cpu: "1"
-      memory: "1024Mi"
-    requests:
-      cpu: "1"
-      memory: "512Mi"
-  nodeSelector:
-    agentpool: hope
   externalElasticsearch:
     host: ""
 
@@ -364,26 +199,8 @@ airflow:
   baseUrl: airflow.test
   worker:
     command: ["airflow", "worker"]
-    resources:
-      limits:
-        cpu: "1"
-        memory: "4Gi"
-      requests:
-        cpu: "1"
-        memory: "512Mi"
-    nodeSelector:
-      agentpool: hope
   scheduler:
     command: ["airflow", "scheduler"]
-    resources:
-      limits:
-        cpu: "500m"
-        memory: "512Mi"
-      requests:
-        cpu: "250m"
-        memory: "256Mi"
-    nodeSelector:
-      agentpool: hope
   ingress:
     enabled: true
     hosts:
@@ -394,48 +211,16 @@ airflow:
     annotations: []
   redis:
     usePassword: false
-    resources:
-      limits:
-        cpu: "250m"
-        memory: "256Mi"
-      requests:
-        cpu: "250m"
-        memory: "256Mi"
   airflow:
     redis:
       usePassword: false
-      resources:
-        limits:
-          cpu: "250m"
-          memory: "256Mi"
-        requests:
-          cpu: "250m"
-          memory: "256Mi"
     baseUrl: airflow.test
     extraEnvVarsCM: hope-airflow-extra
     extraEnvVarsSecret: hope-airflow-extra
     worker:
       command: ["airflow", "worker"]
-      resources:
-        limits:
-          cpu: "1"
-          memory: "4Gi"
-        requests:
-          cpu: "1"
-          memory: "512Mi"
-      nodeSelector:
-        agentpool: hope
     scheduler:
       command: ["airflow", "scheduler"]
-      resources:
-        limits:
-          cpu: "500m"
-          memory: "512Mi"
-        requests:
-          cpu: "250m"
-          memory: "256Mi"
-      nodeSelector:
-        agentpool: hope
     image:
       repository: hope/airflow
       tag: latest
@@ -452,13 +237,4 @@ airflow:
             items:
             - key: airflow-entrypoint.sh
               path: entrypoint.sh
-      resources:
-        limits:
-          cpu: "750m"
-          memory: "1024Mi"
-        requests:
-          cpu: "500m"
-          memory: "512Mi"
-      nodeSelector:
-        agentpool: hope
 

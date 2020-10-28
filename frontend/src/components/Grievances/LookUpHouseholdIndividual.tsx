@@ -11,7 +11,6 @@ import {
   Tabs,
 } from '@material-ui/core';
 import { TabPanel } from '../TabPanel';
-
 import { useDebounce } from '../../hooks/useDebounce';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import {
@@ -149,7 +148,7 @@ export const LookUpHouseholdIndividual = (): React.ReactElement => {
               type='submit'
               color='primary'
               variant='contained'
-              onClick={() => console.log('lookup')}
+              onClick={() => null}
               data-cy='button-submit'
             >
               SAVE
