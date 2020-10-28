@@ -2,10 +2,11 @@ import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import {AllCashPlansQuery, AllCashPlansQueryResult, CashPlanNode} from '../../../__generated__/graphql';
+import {AllCashPlansQuery, useCashPlanVerificationStatusChoicesQuery} from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
 import {
+  choicesToDict,
   decodeIdString,
   formatCurrency,
   paymentVerificationStatusToColor,
@@ -18,7 +19,7 @@ const StatusContainer = styled.div`
   max-width: 200px;
 `;
 interface PaymentVerificationTableRowProps {
-  plan: AllCashPlansQuery["allCashPlans"]["edges"][number]["node"];
+  plan: AllCashPlansQuery['allCashPlans']['edges'][number]['node'];
 }
 
 export function PaymentVerificationTableRow({
@@ -30,6 +31,17 @@ export function PaymentVerificationTableRow({
     const path = `/${businessArea}/payment-verification/${plan.id}`;
     history.push(path);
   };
+  const {
+    data: statusChoicesData,
+  } = useCashPlanVerificationStatusChoicesQuery();
+
+  if (!statusChoicesData) {
+    return null;
+  }
+  const deliveryTypeChoicesDict = choicesToDict(
+    statusChoicesData.paymentRecordDeliveryTypeChoices,
+  );
+
   return (
     <ClickableTableRow
       hover
@@ -47,7 +59,7 @@ export function PaymentVerificationTableRow({
         </StatusContainer>
       </TableCell>
       <TableCell align='left'>{plan.assistanceThrough}</TableCell>
-      <TableCell align='left'>{plan.deliveryType}</TableCell>
+      <TableCell align='left'>{deliveryTypeChoicesDict[plan.deliveryType]}</TableCell>
       <TableCell align='right'>
         {formatCurrency(plan.totalDeliveredQuantity)}
       </TableCell>

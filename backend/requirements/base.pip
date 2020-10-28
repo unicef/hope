@@ -1,5 +1,5 @@
 # Django packages
-Django==2.2.8
+Django==2.2.16
 django_compressor==2.3
 django-storages[azure]==1.8
 django-countries==5.5
@@ -18,6 +18,7 @@ scipy==1.5.1
 django-constance[redis]==2.7.0
 admin-extra-urls==2.2.0
 unittest-xml-reporting==3.0.4
+django-multiselectfield==0.1.12
 
 # Tests and Fixtures
 factory-boy==2.12.0

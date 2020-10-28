@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Typography, Paper, Button } from '@material-ui/core';
 import { AddCircleOutline } from '@material-ui/icons';
 import { TargetCriteriaForm } from '../../../containers/forms/TargetCriteriaForm';
+import { AllProgramsQuery } from '../../../__generated__/graphql';
 import { Criteria } from './Criteria';
 
 const PaperContainer = styled(Paper)`
@@ -71,17 +72,14 @@ const AddCriteria = styled.div`
 `;
 
 interface TargetingCriteriaProps {
-  selectedTab?: number;
   candidateListRules?;
-  targetPopulationRules?;
   isEdit?: boolean;
   helpers?;
+  selectedProgram?: AllProgramsQuery['allPrograms']['edges'][number]['node'];
 }
 
 export function TargetingCriteria({
-  selectedTab,
   candidateListRules,
-  targetPopulationRules = [],
   isEdit = false,
   helpers,
 }: TargetingCriteriaProps): React.ReactElement {
@@ -89,7 +87,6 @@ export function TargetingCriteria({
   const [isOpen, setOpen] = useState(false);
   const [criteriaIndex, setIndex] = useState(null);
   const [criteriaObject, setCriteria] = useState({});
-  const showAdditionalCriterias = selectedTab > 0;
   const openModal = (criteria): void => {
     setCriteria(criteria);
     setOpen(true);
@@ -105,10 +102,14 @@ export function TargetingCriteria({
   };
 
   const addCriteria = (values): void => {
+    const criteria = {
+      filters: [...values.filters],
+      individualsFiltersBlocks: [...values.individualsFiltersBlocks],
+    };
     if (criteriaIndex !== null) {
-      helpers.replace(criteriaIndex, { filters: [...values.filters] });
+      helpers.replace(criteriaIndex, criteria);
     } else {
-      helpers.push({ filters: [...values.filters] });
+      helpers.push(criteria);
     }
     return closeModal();
   };
@@ -130,7 +131,7 @@ export function TargetingCriteria({
               )}
               <TargetCriteriaForm
                 criteria={criteriaObject}
-                title='Add targeting criteria'
+                title='Add Filter'
                 open={isOpen}
                 onClose={() => closeModal()}
                 addCriteria={addCriteria}
@@ -138,103 +139,43 @@ export function TargetingCriteria({
             </>
           )}
         </Title>
+        <ContentWrapper>
+          {candidateListRules.length ? (
+            candidateListRules.map((criteria, index) => {
+              return (
+                <>
+                  <Criteria
+                    //eslint-disable-next-line
+                    key={criteria.id || index}
+                    isEdit={isEdit}
+                    canRemove={candidateListRules.length > 1}
+                    rules={criteria.filters}
+                    individualsFiltersBlocks={
+                      criteria.individualsFiltersBlocks || []
+                    }
+                    editFunction={() => editCriteria(criteria, index)}
+                    removeFunction={() => helpers.remove(index)}
+                  />
 
-        {showAdditionalCriterias ? (
-          <>
-            <ContentWrapper>
-              {candidateListRules.length &&
-                candidateListRules.map((criteria, index) => {
-                  return (
-                    <>
-                      <Criteria
-                        //eslint-disable-next-line
-                        key={criteria.id || index}
-                        isEdit={false}
-                        canRemove={candidateListRules.length > 1}
-                        rules={criteria.filters}
-                        alternative={showAdditionalCriterias}
-                      />
-
-                      {index === candidateListRules.length - 1 ||
-                      (candidateListRules.length === 1 &&
-                        index === 0) ? null : (
-                        <Divider>
-                          <DividerLabel>Or</DividerLabel>
-                        </Divider>
-                      )}
-                    </>
-                  );
-                })}
-            </ContentWrapper>
-            <ContentWrapper>
-              {targetPopulationRules.length
-                ? targetPopulationRules.map((criteria, index) => {
-                    return (
-                      <>
-                        <Criteria
-                          //eslint-disable-next-line
-                          key={criteria.id || index}
-                          isEdit={isEdit}
-                          canRemove={targetPopulationRules.length > 1}
-                          rules={criteria.filters}
-                          editFunction={() => editCriteria(criteria, index)}
-                          removeFunction={() => helpers.remove(index)}
-                        />
-
-                        {index === targetPopulationRules.length - 1 ||
-                        (targetPopulationRules.length === 1 &&
-                          index === 0) ? null : (
-                          <Divider>
-                            <DividerLabel>Or</DividerLabel>
-                          </Divider>
-                        )}
-                      </>
-                    );
-                  })
-                : isEdit && (
-                    <AddCriteria onClick={() => setOpen(true)}>
-                      <AddCircleOutline />
-                      <p>Add Criteria</p>
-                    </AddCriteria>
+                  {index === candidateListRules.length - 1 ||
+                  (candidateListRules.length === 1 && index === 0) ? null : (
+                    <Divider>
+                      <DividerLabel>Or</DividerLabel>
+                    </Divider>
                   )}
-            </ContentWrapper>
-          </>
-        ) : (
-          <ContentWrapper>
-            {candidateListRules.length ? (
-              candidateListRules.map((criteria, index) => {
-                return (
-                  <>
-                    <Criteria
-                      //eslint-disable-next-line
-                      key={criteria.id || index}
-                      isEdit={isEdit}
-                      canRemove={candidateListRules.length > 1}
-                      rules={criteria.filters}
-                      editFunction={() => editCriteria(criteria, index)}
-                      removeFunction={() => helpers.remove(index)}
-                    />
-
-                    {index === candidateListRules.length - 1 ||
-                    (candidateListRules.length === 1 && index === 0) ? null : (
-                      <Divider>
-                        <DividerLabel>Or</DividerLabel>
-                      </Divider>
-                    )}
-                  </>
-                );
-              })
-            ) : (
-              <AddCriteria
-                onClick={() => setOpen(true)}
-                data-cy='button-target-population-add-criteria'
-              >
-                <AddCircleOutline />
-                <p>Add Criteria</p>
-              </AddCriteria>
-            )}
-          </ContentWrapper>
-        )}
+                </>
+              );
+            })
+          ) : (
+            <AddCriteria
+              onClick={() => setOpen(true)}
+              data-cy='button-target-population-add-criteria'
+            >
+              <AddCircleOutline />
+              <p>Add Criteria</p>
+            </AddCriteria>
+          )}
+        </ContentWrapper>
       </PaperContainer>
     </div>
   );
