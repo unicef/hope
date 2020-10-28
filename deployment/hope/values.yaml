@@ -8,6 +8,7 @@ global:
   env: "dev"
   storageClass: "standard"
   imagePullPolicy: Always
+  init: true
 
 backend:
   image: backend:latest
@@ -42,6 +43,7 @@ backend:
     POSTGRES_SQL: ""
     AIRFLOW_HOST: "hope-airflow"
     EMAIL_HOST: ""
+    POSTGRES_SSL: ""
 
   secret:
     SECRET_KEY: ""
@@ -111,9 +113,9 @@ postgresql:
 
   externalDatabase:
     host: ""
-    port: ""
+    db: ""
+    port: "5432"
     user: ""
-    name: ""
     password: ""
     airflowName: ""
 
@@ -134,9 +136,10 @@ registrationdatahubpostgresql:
 
   externalDatabase:
     host: ""
-    port: ""
+    db: ""
+    port: "5432"
     user: ""
-    name: ""
+    postgresqlDatabase: ""
     password: ""
 
   image:
@@ -157,8 +160,8 @@ cashassistdatahubpostgresql:
 
   externalDatabase:
     host: ""
-    port: ""
-    name: ""
+    db: ""
+    port: "5432"
     user: ""
     password: ""
   image:
