@@ -9,6 +9,7 @@ import InputLabel from '../../shared/InputLabel';
 import TextField from '../../shared/TextField';
 import Select from '../../shared/Select';
 import { ContainerWithBorder } from '../ContainerWithBorder';
+import { FieldLabel } from '../FieldLabel';
 
 const TextContainer = styled(TextField)`
   input[type='number']::-webkit-inner-spin-button,
@@ -35,10 +36,7 @@ const SearchTextField = styled(TextField)`
 const StartInputAdornment = styled(InputAdornment)`
   margin-right: 0;
 `;
-const FieldLabel = styled.span`
-  font-size: 12px;
-  color: rgba(0, 0, 0, 0.6);
-`;
+
 
 interface IndividualsFilterProps {
   onFilterChange;

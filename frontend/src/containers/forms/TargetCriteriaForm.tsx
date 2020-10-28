@@ -1,72 +1,33 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as Yup from 'yup';
 import styled from 'styled-components';
 import {
+  Box,
+  Button,
   Dialog,
   DialogContent,
   DialogTitle,
   Typography,
-  Button,
-  IconButton,
 } from '@material-ui/core';
-import { AddCircleOutline, Delete } from '@material-ui/icons';
-import { Field, Formik, FieldArray } from 'formik';
+import { AddCircleOutline } from '@material-ui/icons';
+import { FieldArray, Formik } from 'formik';
 import { useImportedIndividualFieldsQuery } from '../../__generated__/graphql';
-import { SubField } from '../../components/TargetPopulation/SubField';
-import {
-  formatCriteriaFilters,
-  mapCriteriasToInitialValues,
-} from '../../utils/utils';
-import { CriteriaAutocomplete } from '../../components/TargetPopulation/TargetingCriteria/CriteriaAutocomplete';
 import { DialogActions } from '../dialogs/DialogActions';
+import {
+  chooseFieldType,
+  clearField,
+  formatCriteriaFilters,
+  formatCriteriaIndividualsFiltersBlocks,
+  mapCriteriaToInitialValues,
+} from '../../utils/targetingUtils';
+import { TargetingCriteriaFilter } from './TargetCriteriaFilter';
+import { TargetCriteriaFilterBlocks } from './TargetCriteriaFilterBlocks';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
 `;
 
-const DialogDescription = styled.div`
-  margin: 20px 0;
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.54);
-`;
-
-const DialogContainer = styled.div`
-  position: absolute;
-`;
-
-const DialogFooter = styled.div`
-  padding: 12px 16px;
-  margin: 0;
-  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  text-align: right;
-`;
-
-const AddCriteriaWrapper = styled.div`
-  text-align: right;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding: ${({ theme }) => theme.spacing(3)}px 0;
-`;
-
-const AddCriteria = styled.div`
-  display: flex;
-  align-items: center;
-  color: #003c8f;
-  text-transform: uppercase;
-  cursor: pointer;
-  svg {
-    margin-right: ${({ theme }) => theme.spacing(2)}px;
-  }
-`;
-
-const Divider = styled.div`
-  border-top: 1px solid #b1b1b5;
-  margin: ${({ theme }) => theme.spacing(10)}px 0;
-  position: relative;
-`;
-
-const DividerLabel = styled.div`
+const AndDividerLabel = styled.div`
   position: absolute;
   top: 50%;
   left: 50%;
@@ -85,24 +46,78 @@ const DividerLabel = styled.div`
   border-radius: 50%;
   background-color: #fff;
 `;
+const AndDivider = styled.div`
+  border-top: 1px solid #b1b1b5;
+  margin: ${({ theme }) => theme.spacing(10)}px 0;
+  position: relative;
+`;
 
-const FlexWrapper = styled.div`
-  display: flex;
-  justify-content: space-between;
+const DialogDescription = styled.div`
+  margin: 20px 0;
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.54);
+`;
+const AddIcon = styled(AddCircleOutline)`
+  margin-right: 10px;
+`;
+const ButtonBox = styled.div`
+  width: 300px;
+`;
+const DialogError = styled.div`
+  margin: 20px 0;
+  font-size: 14px;
+  color: ${({ theme }) => theme.palette.error.dark};
+`;
+
+const DialogContainer = styled.div`
+  position: absolute;
+`;
+
+const DialogFooter = styled.div`
+  padding: 12px 16px;
+  margin: 0;
+  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
+  text-align: right;
+`;
+
+const StyledBox = styled(Box)`
+  width: 100%;
 `;
 
 const validationSchema = Yup.object().shape({
   filters: Yup.array().of(
     Yup.object().shape({
-      fieldName: Yup.string().required('Label is required'),
+      fieldName: Yup.string().required('Field Type is required'),
+    }),
+  ),
+  individualsFiltersBlocks: Yup.array().of(
+    Yup.object().shape({
+      individualBlockFilters: Yup.array().of(
+        Yup.object().shape({
+          fieldName: Yup.string().required('Field Type is required'),
+        }),
+      ),
     }),
   ),
 });
+interface ArrayFieldWrapperProps {
+  arrayHelpers;
+}
+class ArrayFieldWrapper extends React.Component<ArrayFieldWrapperProps> {
+  getArrayHelpers(): object {
+    const { arrayHelpers } = this.props;
+    return arrayHelpers;
+  }
 
-interface ProgramFormPropTypes {
+  render(): React.ReactNode {
+    const { children } = this.props;
+    return children;
+  }
+}
+
+interface TargetCriteriaFormPropTypes {
   criteria?;
-  onSubmit: (values) => Promise<void>;
-  renderSubmit: (submit: () => Promise<void>) => void;
+  addCriteria: (values) => void;
   open: boolean;
   onClose: () => void;
   title: string;
@@ -114,49 +129,49 @@ export function TargetCriteriaForm({
   open,
   onClose,
   title,
-}): React.ReactElement {
+}: TargetCriteriaFormPropTypes): React.ReactElement {
   const { data, loading } = useImportedIndividualFieldsQuery();
-  const mappedFilters = mapCriteriasToInitialValues(criteria);
-  const initialValue = {
-    filters: mappedFilters,
-  };
-
-  const chooseFieldType = (value, arrayHelpers, index): void => {
-    const values = {
-      isFlexField: value.isFlexField,
-      fieldAttribute: {
-        labelEn: value.labelEn,
-        type: value.type,
-        choices: null,
-      },
-      value: null,
+  const filtersArrayWrapperRef = useRef(null);
+  const individualsFiltersBlocksWrapperRef = useRef(null);
+  const initialValue = mapCriteriaToInitialValues(criteria);
+  const [individualData, setIndividualData] = useState(null);
+  const [householdData, setHouseholdData] = useState(null);
+  useEffect(() => {
+    if (loading) return;
+    const filteredIndividualData = {
+      allFieldsAttributes: data.allFieldsAttributes.filter(
+        (item) => item.associatedWith === 'Individual',
+      ),
     };
-    switch (value.type) {
-      case 'INTEGER':
-        values.value = { from: '', to: '' };
-        break;
-      case 'SELECT_ONE':
-        values.fieldAttribute.choices = value.choices;
-        break;
-      case 'SELECT_MANY':
-        values.value = [];
-        values.fieldAttribute.choices = value.choices;
-        break;
-      default:
-        values.value = null;
-        break;
+    setIndividualData(filteredIndividualData);
+
+    const filteredHouseholdData = {
+      allFieldsAttributes: data.allFieldsAttributes.filter(
+        (item) => item.associatedWith === 'Household',
+      ),
+    };
+    setHouseholdData(filteredHouseholdData);
+  }, [data, loading]);
+  const validate = ({
+    filters,
+    individualsFiltersBlocks,
+  }): { nonFieldErrors?: string[] } => {
+    const errors: { nonFieldErrors?: string[] } = {};
+    if (filters.length + individualsFiltersBlocks.length === 0) {
+      errors.nonFieldErrors = [
+        'You need to add at least one household filter or an individual block filter.',
+      ];
+    } else if (
+      individualsFiltersBlocks.filter(
+        (block) => block.individualBlockFilters.length === 0,
+      ).length > 0
+    ) {
+      errors.nonFieldErrors = [
+        'You need to add at least one household filter or an individual block filter.',
+      ];
     }
-    arrayHelpers.replace(index, {
-      ...values,
-      fieldName: value.name,
-      type: value.type,
-    });
+    return errors;
   };
-
-  const clearField = (arrayHelpers, index): void => {
-    return arrayHelpers.replace(index, {});
-  };
-
   if (loading) return null;
 
   return (
@@ -164,20 +179,26 @@ export function TargetCriteriaForm({
       <Formik
         initialValues={initialValue}
         onSubmit={(values, bag) => {
-          const dataToSend = formatCriteriaFilters(values);
-          addCriteria({ filters: dataToSend });
+          const filters = formatCriteriaFilters(values.filters);
+          const individualsFiltersBlocks = formatCriteriaIndividualsFiltersBlocks(
+            values.individualsFiltersBlocks,
+          );
+          addCriteria({ filters, individualsFiltersBlocks });
           return bag.resetForm();
         }}
+        validate={validate}
         validationSchema={validationSchema}
         enableReinitialize
       >
-        {({ submitForm, values }) => (
+        {({ submitForm, values, resetForm, errors }) => (
           <>
             <Dialog
               open={open}
               onClose={onClose}
               scroll='paper'
               aria-labelledby='form-dialog-title'
+              fullWidth
+              maxWidth='md'
             >
               <DialogTitleWrapper>
                 <DialogTitle id='scroll-dialog-title' disableTypography>
@@ -185,85 +206,141 @@ export function TargetCriteriaForm({
                 </DialogTitle>
               </DialogTitleWrapper>
               <DialogContent>
+                {// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+                // @ts-ignore
+                errors.nonFieldErrors && (
+                  <DialogError>
+                    <ul>
+                      {// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+                      // @ts-ignore
+                      errors.nonFieldErrors.map((message) => (
+                        <li>{message}</li>
+                      ))}
+                    </ul>
+                  </DialogError>
+                )}
+
                 <DialogDescription>
-                  Adding criteria below will target any individuals within a
-                  household that meet the filters applied. You may also add
-                  individual sub-criteria to further define an individual.
+                  All rules defined below have to be true for the entire
+                  household.
                 </DialogDescription>
                 <FieldArray
                   name='filters'
                   render={(arrayHelpers) => (
-                    <>
+                    <ArrayFieldWrapper
+                      arrayHelpers={arrayHelpers}
+                      ref={filtersArrayWrapperRef}
+                    >
                       {values.filters.map((each, index) => {
                         return (
-                          //eslint-disable-next-line
-                          <div key={index}>
-                            <FlexWrapper>
-                              <Field
-                                name={`filters[${index}].fieldName`}
-                                label='Choose field type'
-                                required
-                                choices={data.allFieldsAttributes}
-                                index={index}
-                                value={each.fieldName || null}
-                                onChange={(e, object) => {
-                                  if (object) {
-                                    return chooseFieldType(
-                                      object,
-                                      arrayHelpers,
-                                      index,
-                                    );
-                                  }
-                                  return clearField(arrayHelpers, index);
-                                }}
-                                component={CriteriaAutocomplete}
-                              />
-                              {values.filters.length > 1 && (
-                                <IconButton>
-                                  <Delete
-                                    onClick={() => arrayHelpers.remove(index)}
-                                  />
-                                </IconButton>
-                              )}
-                            </FlexWrapper>
-                            {each.fieldName && (
-                              <div data-cy='autocomplete-target-criteria-values'>
-                                {SubField(each, index)}
-                              </div>
-                            )}
-                            {(values.filters.length === 1 && index === 0) ||
-                            index === values.filters.length - 1 ? null : (
-                              <Divider>
-                                <DividerLabel>And</DividerLabel>
-                              </Divider>
-                            )}
-                          </div>
+                          <TargetingCriteriaFilter
+                            //eslint-disable-next-line
+                            key={index}
+                            index={index}
+                            data={householdData}
+                            each={each}
+                            onChange={(e, object) => {
+                              if (object) {
+                                return chooseFieldType(
+                                  object,
+                                  arrayHelpers,
+                                  index,
+                                );
+                              }
+                              return clearField(arrayHelpers, index);
+                            }}
+                            values={values}
+                            onClick={() => arrayHelpers.remove(index)}
+                          />
                         );
                       })}
-                      <AddCriteriaWrapper>
-                        <AddCriteria
-                          onClick={() => arrayHelpers.push({ fieldname: '' })}
-                        >
-                          <AddCircleOutline />
-                          <span>Add Criteria</span>
-                        </AddCriteria>
-                      </AddCriteriaWrapper>
-                    </>
+                    </ArrayFieldWrapper>
                   )}
                 />
+                <Box display='flex' flexDirection='column'>
+                  <ButtonBox>
+                    <Button
+                      onClick={() =>
+                        filtersArrayWrapperRef.current
+                          .getArrayHelpers()
+                          .push({ fieldName: '' })
+                      }
+                      color='primary'
+                    >
+                      <AddIcon />
+                      ADD HOUSEHOLD RULE
+                    </Button>
+                  </ButtonBox>
+                </Box>
+                <AndDivider>
+                  <AndDividerLabel>And</AndDividerLabel>
+                </AndDivider>
+                {/*<DialogDescription>*/}
+
+                {/*</DialogDescription>*/}
+                <FieldArray
+                  name='individualsFiltersBlocks'
+                  render={(arrayHelpers) => (
+                    <ArrayFieldWrapper
+                      arrayHelpers={arrayHelpers}
+                      ref={individualsFiltersBlocksWrapperRef}
+                    >
+                      {values.individualsFiltersBlocks.map((each, index) => {
+                        return (
+                          <TargetCriteriaFilterBlocks
+                            //eslint-disable-next-line
+                            key={index}
+                            blockIndex={index}
+                            data={individualData}
+                            values={values}
+                            onDelete={() => arrayHelpers.remove(index)}
+                          />
+                        );
+                      })}
+                    </ArrayFieldWrapper>
+                  )}
+                />
+                <Box display='flex' flexDirection='column'>
+                  <ButtonBox>
+                    <Button
+                      onClick={() =>
+                        individualsFiltersBlocksWrapperRef.current
+                          .getArrayHelpers()
+                          .push({
+                            individualBlockFilters: [{ fieldName: '' }],
+                          })
+                      }
+                      color='primary'
+                    >
+                      <AddIcon />
+                      ADD INDIVIDUAL RULE GROUP
+                    </Button>
+                  </ButtonBox>
+                </Box>
               </DialogContent>
               <DialogFooter>
                 <DialogActions>
-                  <Button onClick={() => onClose()}>Cancel</Button>
-                  <Button
-                    onClick={() => submitForm()}
-                    type='submit'
-                    color='primary'
-                    variant='contained'
-                    data-cy='button-target-population-add-criteria'
-                  >
-                    Save
-                  </Button>
+                  <StyledBox display='flex' justifyContent='flex-end'>
+                    <div>
+                      <Button
+                        onClick={() => {
+                          resetForm();
+                          onClose();
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={() => submitForm()}
+                        type='submit'
+                        color='primary'
+                        variant='contained'
+                        data-cy='button-target-population-add-criteria'
+                      >
+                        Save
+                      </Button>
+                    </div>
+                  </StyledBox>
                 </DialogActions>
               </DialogFooter>
             </Dialog>

@@ -19,9 +19,10 @@ export function PaymentVerificationPage(): React.ReactElement {
 
   const [filter, setFilter] = useState({
     search: '',
+    verificationStatus: null,
     program: '',
     assistanceThrough: '',
-    deliveryType: '',
+    deliveryType: null,
     startDate: null,
     endDate: null,
   });

@@ -13,6 +13,7 @@ import Select from '../../shared/Select';
 import InputLabel from '../../shared/InputLabel';
 import { TARGETING_STATES } from '../../utils/constants';
 import { ContainerWithBorder } from '../ContainerWithBorder';
+import { FieldLabel } from '../FieldLabel';
 
 const TextContainer = styled(TextField)`
   .MuiFilledInput-root {
@@ -64,10 +65,6 @@ const StyledFormControl = styled(FormControl)`
 
 const StartInputAdornment = styled(InputAdornment)`
   margin-right: 0;
-`;
-const FieldLabel = styled.span`
-  font-size: 12px;
-  color: rgba(0, 0, 0, 0.6);
 `;
 
 interface HouseholdFiltersProps {
@@ -128,7 +125,7 @@ export function TargetPopulationFilters({
         </Grid>
         <Grid item>
           <Box display='flex' flexDirection='column'>
-            <FieldLabel>Number of Household</FieldLabel>
+            <FieldLabel>Household Size</FieldLabel>
             <TextContainer
               id='minFilter'
               value={filter.numIndividuals.min}

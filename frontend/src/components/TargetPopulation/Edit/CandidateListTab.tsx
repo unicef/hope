@@ -6,7 +6,11 @@ import styled from 'styled-components';
 import { TargetPopulationHouseholdTable } from '../../../containers/tables/TargetPopulationHouseholdTable';
 import { TargetingCriteria } from '../TargetingCriteria';
 import { Results } from '../Results';
-import { useGoldenRecordByTargetingCriteriaQuery } from '../../../__generated__/graphql';
+import {
+  AllProgramsQuery,
+  useGoldenRecordByTargetingCriteriaQuery,
+} from '../../../__generated__/graphql';
+import { getTargetingCriteriaVariables } from '../../../utils/targetingUtils';
 
 const PaperContainer = styled(Paper)`
   display: flex;
@@ -17,7 +21,13 @@ const PaperContainer = styled(Paper)`
   border-bottom: 1px solid rgba(224, 224, 224, 1);
 `;
 
-export function CandidateListTab({ values }): React.ReactElement {
+export function CandidateListTab({
+  values,
+  allPrograms,
+}: {
+  allPrograms: AllProgramsQuery;
+  values;
+}): React.ReactElement {
   return (
     <>
       <FieldArray
@@ -27,6 +37,11 @@ export function CandidateListTab({ values }): React.ReactElement {
             helpers={arrayHelpers}
             candidateListRules={values.candidateListCriterias}
             isEdit
+            selectedProgram={
+              allPrograms?.allPrograms?.edges.find(
+                (el) => el.node.id === values.program,
+              ).node
+            }
           />
         )}
       />
@@ -34,20 +49,9 @@ export function CandidateListTab({ values }): React.ReactElement {
       {values.candidateListCriterias.length ? (
         <TargetPopulationHouseholdTable
           variables={{
-            targetingCriteria: {
-              rules: values.candidateListCriterias.map((rule) => {
-                return {
-                  filters: rule.filters.map((each) => {
-                    return {
-                      comparisionMethod: each.comparisionMethod,
-                      arguments: each.arguments,
-                      fieldName: each.fieldName,
-                      isFlexField: each.isFlexField,
-                    };
-                  }),
-                };
-              }),
-            },
+            ...getTargetingCriteriaVariables({
+              criterias: values.candidateListCriterias,
+            }),
           }}
           query={useGoldenRecordByTargetingCriteriaQuery}
           queryObjectName='goldenRecordByTargetingCriteria'
