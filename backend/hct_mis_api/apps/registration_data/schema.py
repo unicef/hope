@@ -1,11 +1,12 @@
 import graphene
+from django.db.models.functions import Lower
 from django_filters import FilterSet, OrderingFilter, DateFilter, CharFilter
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
 from core.extended_connection import ExtendedConnection
 from core.schema import ChoiceObject
-from core.utils import get_count_and_percentage
+from core.utils import get_count_and_percentage, CustomOrderingFilter
 from household.models import DUPLICATE, NEEDS_ADJUDICATION, UNIQUE, DUPLICATE_IN_BATCH
 from registration_data.models import RegistrationDataImport
 from registration_datahub.models import UNIQUE_IN_BATCH
@@ -25,9 +26,9 @@ class RegistrationDataImportFilter(FilterSet):
             "business_area": ["exact"],
         }
 
-    order_by = OrderingFilter(
-        fields=("name", "status", "import_date", "number_of_individuals",
-                "number_of_households", "imported_by__given_name",)
+    order_by = CustomOrderingFilter(
+        fields=(Lower("name"), "status", "import_date", "number_of_individuals",
+                "number_of_households", Lower("imported_by__given_name"),)
     )
 
 

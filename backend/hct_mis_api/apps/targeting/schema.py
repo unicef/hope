@@ -1,6 +1,7 @@
 import django_filters
 import graphene
 from django.db.models import Q, Prefetch
+from django.db.models.functions import Lower
 from django_filters import FilterSet, CharFilter
 from graphene import relay, Scalar
 from graphene_django import DjangoObjectType, DjangoConnectionField
@@ -11,19 +12,19 @@ from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES_DICTIONARY
 from core.filters import IntegerFilter
 from core.models import FlexibleAttribute
 from core.schema import ExtendedConnection, FieldAttributeNode, ChoiceObject
-from core.utils import decode_id_string
+from core.utils import decode_id_string, CustomOrderingFilter
 from household.models import Household
 from household.schema import HouseholdNode
 from targeting.validators import TargetingCriteriaInputValidator
 
 
 class HouseholdFilter(FilterSet):
-    order_by = django_filters.OrderingFilter(
+    order_by = CustomOrderingFilter(
         fields=(
             "id",
-            "head_of_household__full_name",
+            Lower("head_of_household__full_name"),
             "size",
-            "admin_area__title",
+            Lower("admin_area__title"),
             "updated_at",
         )
     )
@@ -97,9 +98,9 @@ class TargetPopulationFilter(django_filters.FilterSet):
             target_models.models.DateTimeField: {"filter_class": django_filters.DateTimeFilter},
         }
 
-    order_by = django_filters.OrderingFilter(
+    order_by = CustomOrderingFilter(
         fields=(
-            "name",
+            Lower("name"),
             "created_at",
             "created_by",
             "updated_at",
