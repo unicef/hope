@@ -1,6 +1,6 @@
 import graphene
 from django.db.models import Case, IntegerField, Q, Sum, Value, When
-from django.db.models.functions import Coalesce
+from django.db.models.functions import Coalesce, Lower
 from django_filters import (
     CharFilter,
     DateFilter,
@@ -17,7 +17,7 @@ from account.schema import LogEntryObjectConnection
 from core.extended_connection import ExtendedConnection
 from core.filters import DecimalRangeFilter, IntegerRangeFilter
 from core.schema import ChoiceObject
-from core.utils import to_choice_object
+from core.utils import to_choice_object, CustomOrderingFilter
 from payment.models import CashPlanPaymentVerification, PaymentRecord
 from program.models import CashPlan, Program
 
@@ -45,8 +45,8 @@ class ProgramFilter(FilterSet):
         )
         model = Program
 
-    order_by = OrderingFilter(
-        fields=("name", "status", "start_date", "end_date", "sector", "households_count", "budget")
+    order_by = CustomOrderingFilter(
+        fields=(Lower("name"), "status", "start_date", "end_date", "sector", "households_count", "budget")
     )
 
     def search_filter(self, qs, name, value):
