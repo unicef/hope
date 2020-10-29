@@ -28,6 +28,7 @@ export const LookUpPaymentRecords = gql`
       edges {
         cursor
         node {
+          id
           caId
           verifications {
             edges {
