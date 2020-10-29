@@ -1,6 +1,7 @@
 import { Grid } from '@material-ui/core';
 import React from 'react';
 import { LookUpHouseholdIndividual } from './LookUpHouseholdIndividual';
+import { LookUpPaymentRecord } from './LookUpPaymentRecord';
 
 export const LookUpSection = ({ category }): React.ReactElement => {
   const LookUpForCategory = () => {
@@ -16,7 +17,16 @@ export const LookUpSection = ({ category }): React.ReactElement => {
       case 'Negative Feedback':
         return <div>Negative Feedback</div>;
       case 'Grievance Complaint':
-        return <div>Grievance Complaint</div>;
+        return (
+          <Grid container spacing={3}>
+            <Grid item xs={6}>
+              <LookUpHouseholdIndividual />
+            </Grid>
+            <Grid item xs={6}>
+              <LookUpPaymentRecord />
+            </Grid>
+          </Grid>
+        );
       case 'Payment Verification Issue':
         return <div>Payment Verification Issue</div>;
       case 'Referral':
