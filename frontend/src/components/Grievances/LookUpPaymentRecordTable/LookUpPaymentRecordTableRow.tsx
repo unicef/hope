@@ -14,6 +14,7 @@ import { ClickableTableRow } from '../../table/ClickableTableRow';
 import { StatusBox } from '../../StatusBox';
 import { UniversalMoment } from '../../UniversalMoment';
 import { Missing } from '../../Missing';
+import { Checkbox } from '@material-ui/core';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -23,11 +24,15 @@ const StatusContainer = styled.div`
 interface LookUpPaymentRecordTableRowProps {
   paymentRecord: PaymentRecordNode;
   openInNewTab: boolean;
+  selected: Array<string>;
+  checkboxClickHandler;
 }
 
 export function LookUpPaymentRecordTableRow({
   paymentRecord,
   openInNewTab,
+  selected,
+  checkboxClickHandler,
 }: LookUpPaymentRecordTableRowProps): React.ReactElement {
   const businessArea = useBusinessArea();
   const history = useHistory();
@@ -39,14 +44,21 @@ export function LookUpPaymentRecordTableRow({
       history.push(path);
     }
   };
+  const isSelected = (name: string): boolean => selected.includes(name);
+  const isItemSelected = isSelected(paymentRecord.id);
   return (
-    <ClickableTableRow
-      hover
-      onClick={handleClick}
-      role='checkbox'
-      key={paymentRecord.id}
-    >
-      <TableCell align='left'>{paymentRecord.caId}</TableCell>
+    <ClickableTableRow hover role='checkbox' key={paymentRecord.id}>
+      <TableCell padding='checkbox'>
+        <Checkbox
+          color='primary'
+          onClick={(event) => checkboxClickHandler(event, paymentRecord.id)}
+          checked={isItemSelected}
+          inputProps={{ 'aria-labelledby': paymentRecord.id }}
+        />
+      </TableCell>
+      <TableCell onClick={handleClick} align='left'>
+        {paymentRecord.id}
+      </TableCell>
       <TableCell align='left'>
         <StatusContainer>
           <StatusBox

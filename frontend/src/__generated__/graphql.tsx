@@ -4654,7 +4654,7 @@ export type LookUpPaymentRecordsQuery = (
       & Pick<PaymentRecordNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'PaymentRecordNode' }
-        & Pick<PaymentRecordNode, 'caId' | 'deliveredQuantity'>
+        & Pick<PaymentRecordNode, 'id' | 'caId' | 'deliveredQuantity'>
         & { verifications: (
           { __typename?: 'PaymentVerificationNodeConnection' }
           & { edges: Array<Maybe<(
@@ -8546,6 +8546,7 @@ export const LookUpPaymentRecordsDocument = gql`
     edges {
       cursor
       node {
+        id
         caId
         verifications {
           edges {
