@@ -50,7 +50,6 @@ export function LookUpPaymentRecordTable({
     setSelected([]);
   };
   const numSelected = selected.length;
-  console.log('selected', selected);
   return (
     <UniversalTable<PaymentRecordNode, LookUpPaymentRecordsQueryVariables>
       headCells={headCells}
