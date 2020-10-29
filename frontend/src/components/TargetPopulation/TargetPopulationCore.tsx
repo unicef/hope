@@ -34,6 +34,7 @@ export function TargetPopulationCore({
       <TargetingCriteria
         candidateListRules={candidateListRules}
         targetPopulationRules={targetPopulationList?.rules}
+        targetPopulation={targetPopulation}
       />
       <Results
         resultsData={targetPopulation.candidateStats}

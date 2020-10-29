@@ -41,6 +41,7 @@ export function TargetPopulationDetailsPage(): React.ReactElement {
           />
           {(status === 'APPROVED' || status === 'FINALIZED') && (
             <TargetPopulationDetails targetPopulation={targetPopulation} />
+
           )}
             <TargetPopulationCore
               id={targetPopulation.id}

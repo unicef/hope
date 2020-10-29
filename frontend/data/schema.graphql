@@ -1382,6 +1382,7 @@ type Mutations {
   approveTargetPopulation(id: ID!): ApproveTargetPopulationMutation
   unapproveTargetPopulation(id: ID!): UnapproveTargetPopulationMutation
   finalizeTargetPopulation(id: ID!): FinalizeTargetPopulationMutation
+  setSteficonRuleOnTargetPopulation(input: SetSteficonRuleOnTargetPopulationMutationInput!): SetSteficonRuleOnTargetPopulationMutationPayload
   createProgram(programData: CreateProgramInput!): CreateProgram
   updateProgram(programData: UpdateProgramInput): UpdateProgram
   deleteProgram(programId: String!): DeleteProgram
@@ -1573,6 +1574,7 @@ enum ProgramStatus {
 }
 
 type Query {
+  allSteficonRules(before: String, after: String, first: Int, last: Int, enabled: Boolean, deprecated: Boolean): SteficonRuleNodeConnection
   paymentRecord(id: ID!): PaymentRecordNode
   paymentRecordVerification(id: ID!): PaymentVerificationNode
   allPaymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID, orderBy: String): PaymentRecordNodeConnection
@@ -1793,6 +1795,12 @@ type RoleNode {
   userRoles: [UserRoleNode!]!
 }
 
+enum RuleLanguage {
+  JINJA2
+  INTERNAL
+  PYTHON
+}
+
 type SaveKoboProjectImportDataMutation {
   importData: ImportDataNode
   errors: [KoboErrorNode]
@@ -1823,11 +1831,46 @@ type ServiceProviderNodeEdge {
   cursor: String!
 }
 
+input SetSteficonRuleOnTargetPopulationMutationInput {
+  targetId: ID!
+  steficonRuleId: ID!
+  clientMutationId: String
+}
+
+type SetSteficonRuleOnTargetPopulationMutationPayload {
+  targetPopulation: TargetPopulationNode
+  clientMutationId: String
+}
+
 type StatsObjectType {
   childMale: Int
   childFemale: Int
   adultMale: Int
   adultFemale: Int
+}
+
+type SteficonRuleNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+  definition: String!
+  enabled: Boolean!
+  deprecated: Boolean!
+  language: RuleLanguage!
+  targetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, orderBy: String): TargetPopulationNodeConnection!
+}
+
+type SteficonRuleNodeConnection {
+  pageInfo: PageInfo!
+  edges: [SteficonRuleNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type SteficonRuleNodeEdge {
+  node: SteficonRuleNode
+  cursor: String!
 }
 
 type TargetPopulationNode implements Node {
@@ -1855,6 +1898,9 @@ type TargetPopulationNode implements Node {
   candidateListTargetingCriteria: TargetingCriteriaNode
   finalListTargetingCriteria: TargetingCriteriaNode
   sentToDatahub: Boolean!
+  steficonRule: SteficonRuleNode
+  vulnerabilityScoreMin: Float
+  vulnerabilityScoreMax: Float
   paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
   selections: [HouseholdSelection!]!
   totalHouseholds: Int
@@ -2016,6 +2062,8 @@ input UpdateTargetPopulationInput {
   name: String
   targetingCriteria: TargetingCriteriaObjectType
   programId: ID
+  vulnerabilityScoreMin: Decimal
+  vulnerabilityScoreMax: Decimal
 }
 
 type UpdateTargetPopulationMutation {

@@ -19,10 +19,10 @@ export type Scalars = {
   Date: any,
   Decimal: any,
   UUID: any,
-  FlexFieldsScalar: any,
-  Arg: any,
   JSONLazyString: any,
+  FlexFieldsScalar: any,
   GeoJSON: any,
+  Arg: any,
   JSONString: any,
   Upload: any,
 };
@@ -1709,6 +1709,7 @@ export type Mutations = {
   approveTargetPopulation?: Maybe<ApproveTargetPopulationMutation>,
   unapproveTargetPopulation?: Maybe<UnapproveTargetPopulationMutation>,
   finalizeTargetPopulation?: Maybe<FinalizeTargetPopulationMutation>,
+  setSteficonRuleOnTargetPopulation?: Maybe<SetSteficonRuleOnTargetPopulationMutationPayload>,
   createProgram?: Maybe<CreateProgram>,
   updateProgram?: Maybe<UpdateProgram>,
   deleteProgram?: Maybe<DeleteProgram>,
@@ -1800,6 +1801,11 @@ export type MutationsUnapproveTargetPopulationArgs = {
 
 export type MutationsFinalizeTargetPopulationArgs = {
   id: Scalars['ID']
+};
+
+
+export type MutationsSetSteficonRuleOnTargetPopulationArgs = {
+  input: SetSteficonRuleOnTargetPopulationMutationInput
 };
 
 
@@ -2113,6 +2119,7 @@ export enum ProgramStatus {
 
 export type Query = {
    __typename?: 'Query',
+  allSteficonRules?: Maybe<SteficonRuleNodeConnection>,
   paymentRecord?: Maybe<PaymentRecordNode>,
   paymentRecordVerification?: Maybe<PaymentVerificationNode>,
   allPaymentRecords?: Maybe<PaymentRecordNodeConnection>,
@@ -2178,6 +2185,16 @@ export type Query = {
   allRegistrationDataImports?: Maybe<RegistrationDataImportNodeConnection>,
   registrationDataStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   _debug?: Maybe<DjangoDebug>,
+};
+
+
+export type QueryAllSteficonRulesArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  enabled?: Maybe<Scalars['Boolean']>,
+  deprecated?: Maybe<Scalars['Boolean']>
 };
 
 
@@ -2724,6 +2741,12 @@ export type RoleNode = {
   userRoles: Array<UserRoleNode>,
 };
 
+export enum RuleLanguage {
+  Jinja2 = 'JINJA2',
+  Internal = 'INTERNAL',
+  Python = 'PYTHON'
+}
+
 export type SaveKoboProjectImportDataMutation = {
    __typename?: 'SaveKoboProjectImportDataMutation',
   importData?: Maybe<ImportDataNode>,
@@ -2768,12 +2791,75 @@ export type ServiceProviderNodeEdge = {
   cursor: Scalars['String'],
 };
 
+export type SetSteficonRuleOnTargetPopulationMutationInput = {
+  targetId: Scalars['ID'],
+  steficonRuleId: Scalars['ID'],
+  clientMutationId?: Maybe<Scalars['String']>,
+};
+
+export type SetSteficonRuleOnTargetPopulationMutationPayload = {
+   __typename?: 'SetSteficonRuleOnTargetPopulationMutationPayload',
+  targetPopulation?: Maybe<TargetPopulationNode>,
+  clientMutationId?: Maybe<Scalars['String']>,
+};
+
 export type StatsObjectType = {
    __typename?: 'StatsObjectType',
   childMale?: Maybe<Scalars['Int']>,
   childFemale?: Maybe<Scalars['Int']>,
   adultMale?: Maybe<Scalars['Int']>,
   adultFemale?: Maybe<Scalars['Int']>,
+};
+
+export type SteficonRuleNode = Node & {
+   __typename?: 'SteficonRuleNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  name: Scalars['String'],
+  definition: Scalars['String'],
+  enabled: Scalars['Boolean'],
+  deprecated: Scalars['Boolean'],
+  language: RuleLanguage,
+  targetPopulations: TargetPopulationNodeConnection,
+};
+
+
+export type SteficonRuleNodeTargetPopulationsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>,
+  createdByName?: Maybe<Scalars['String']>,
+  createdAt?: Maybe<Scalars['DateTime']>,
+  updatedAt?: Maybe<Scalars['DateTime']>,
+  status?: Maybe<Scalars['String']>,
+  households?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  candidateListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividualsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
+  finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  businessArea?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+export type SteficonRuleNodeConnection = {
+   __typename?: 'SteficonRuleNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<SteficonRuleNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type SteficonRuleNodeEdge = {
+   __typename?: 'SteficonRuleNodeEdge',
+  node?: Maybe<SteficonRuleNode>,
+  cursor: Scalars['String'],
 };
 
 export type TargetingCriteriaNode = {
@@ -2900,6 +2986,9 @@ export type TargetPopulationNode = Node & {
   candidateListTargetingCriteria?: Maybe<TargetingCriteriaNode>,
   finalListTargetingCriteria?: Maybe<TargetingCriteriaNode>,
   sentToDatahub: Scalars['Boolean'],
+  steficonRule?: Maybe<SteficonRuleNode>,
+  vulnerabilityScoreMin?: Maybe<Scalars['Float']>,
+  vulnerabilityScoreMax?: Maybe<Scalars['Float']>,
   paymentRecords: PaymentRecordNodeConnection,
   selections: Array<HouseholdSelection>,
   totalHouseholds?: Maybe<Scalars['Int']>,
@@ -2998,6 +3087,8 @@ export type UpdateTargetPopulationInput = {
   name?: Maybe<Scalars['String']>,
   targetingCriteria?: Maybe<TargetingCriteriaObjectType>,
   programId?: Maybe<Scalars['ID']>,
+  vulnerabilityScoreMin?: Maybe<Scalars['Decimal']>,
+  vulnerabilityScoreMax?: Maybe<Scalars['Decimal']>,
 };
 
 export type UpdateTargetPopulationMutation = {
@@ -3529,6 +3620,101 @@ export type IndividualDetailedFragment = (
   & IndividualMinimalFragment
 );
 
+export type TargetPopulationMinimalFragment = (
+  { __typename?: 'TargetPopulationNode' }
+  & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'createdAt' | 'updatedAt' | 'candidateListTotalHouseholds' | 'finalListTotalHouseholds'>
+  & { createdBy: Maybe<(
+    { __typename?: 'UserNode' }
+    & Pick<UserNode, 'firstName' | 'lastName'>
+  )> }
+);
+
+export type TargetPopulationDetailedFragment = (
+  { __typename?: 'TargetPopulationNode' }
+  & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'candidateListTotalHouseholds' | 'candidateListTotalIndividuals' | 'finalListTotalHouseholds' | 'finalListTotalIndividuals' | 'vulnerabilityScoreMin' | 'vulnerabilityScoreMax' | 'approvedAt' | 'finalizedAt'>
+  & { steficonRule: Maybe<(
+    { __typename?: 'SteficonRuleNode' }
+    & Pick<SteficonRuleNode, 'id' | 'name'>
+  )>, finalizedBy: Maybe<(
+    { __typename?: 'UserNode' }
+    & Pick<UserNode, 'firstName' | 'lastName'>
+  )>, program: Maybe<(
+    { __typename?: 'ProgramNode' }
+    & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'populationGoal' | 'sector' | 'totalNumberOfHouseholds' | 'individualDataNeeded'>
+  )>, createdBy: Maybe<(
+    { __typename?: 'UserNode' }
+    & Pick<UserNode, 'firstName' | 'lastName'>
+  )>, candidateListTargetingCriteria: Maybe<(
+    { __typename?: 'TargetingCriteriaNode' }
+    & { targetPopulationCandidate: Maybe<(
+      { __typename?: 'TargetPopulationNode' }
+      & { createdBy: Maybe<(
+        { __typename?: 'UserNode' }
+        & Pick<UserNode, 'firstName' | 'lastName'>
+      )> }
+    )>, rules: Maybe<Array<Maybe<(
+      { __typename?: 'TargetingCriteriaRuleNode' }
+      & Pick<TargetingCriteriaRuleNode, 'id'>
+      & { individualsFiltersBlocks: Maybe<Array<Maybe<(
+        { __typename?: 'TargetingIndividualRuleFilterBlockNode' }
+        & { individualBlockFilters: Maybe<Array<Maybe<(
+          { __typename?: 'TargetingIndividualBlockRuleFilterNode' }
+          & Pick<TargetingIndividualBlockRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod'>
+          & { fieldAttribute: Maybe<(
+            { __typename?: 'FieldAttributeNode' }
+            & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
+            & { choices: Maybe<Array<Maybe<(
+              { __typename?: 'CoreFieldChoiceObject' }
+              & Pick<CoreFieldChoiceObject, 'value' | 'labelEn'>
+            )>>> }
+          )> }
+        )>>> }
+      )>>>, filters: Maybe<Array<Maybe<(
+        { __typename?: 'TargetingCriteriaRuleFilterNode' }
+        & Pick<TargetingCriteriaRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod'>
+        & { fieldAttribute: Maybe<(
+          { __typename?: 'FieldAttributeNode' }
+          & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
+          & { choices: Maybe<Array<Maybe<(
+            { __typename?: 'CoreFieldChoiceObject' }
+            & Pick<CoreFieldChoiceObject, 'value' | 'labelEn'>
+          )>>> }
+        )> }
+      )>>> }
+    )>>> }
+  )>, finalListTargetingCriteria: Maybe<(
+    { __typename?: 'TargetingCriteriaNode' }
+    & { targetPopulationFinal: Maybe<(
+      { __typename?: 'TargetPopulationNode' }
+      & { createdBy: Maybe<(
+        { __typename?: 'UserNode' }
+        & Pick<UserNode, 'firstName' | 'lastName'>
+      )> }
+    )>, rules: Maybe<Array<Maybe<(
+      { __typename?: 'TargetingCriteriaRuleNode' }
+      & Pick<TargetingCriteriaRuleNode, 'id'>
+      & { filters: Maybe<Array<Maybe<(
+        { __typename?: 'TargetingCriteriaRuleFilterNode' }
+        & Pick<TargetingCriteriaRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod'>
+        & { fieldAttribute: Maybe<(
+          { __typename?: 'FieldAttributeNode' }
+          & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
+          & { choices: Maybe<Array<Maybe<(
+            { __typename?: 'CoreFieldChoiceObject' }
+            & Pick<CoreFieldChoiceObject, 'value' | 'labelEn'>
+          )>>> }
+        )> }
+      )>>> }
+    )>>> }
+  )>, candidateStats: Maybe<(
+    { __typename?: 'StatsObjectType' }
+    & Pick<StatsObjectType, 'childMale' | 'childFemale' | 'adultMale' | 'adultFemale'>
+  )>, finalStats: Maybe<(
+    { __typename?: 'StatsObjectType' }
+    & Pick<StatsObjectType, 'childMale' | 'childFemale' | 'adultMale' | 'adultFemale'>
+  )> }
+);
+
 export type ActivateCashPlanPaymentVerificationMutationVariables = {
   cashPlanVerificationId: Scalars['ID']
 };
@@ -3556,74 +3742,7 @@ export type ApproveTpMutation = (
     { __typename?: 'ApproveTargetPopulationMutation' }
     & { targetPopulation: Maybe<(
       { __typename?: 'TargetPopulationNode' }
-      & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'candidateListTotalHouseholds' | 'candidateListTotalIndividuals' | 'finalListTotalHouseholds' | 'finalListTotalIndividuals' | 'approvedAt' | 'finalizedAt'>
-      & { finalizedBy: Maybe<(
-        { __typename?: 'UserNode' }
-        & Pick<UserNode, 'firstName' | 'lastName'>
-      )>, program: Maybe<(
-        { __typename?: 'ProgramNode' }
-        & Pick<ProgramNode, 'id' | 'name'>
-      )>, candidateListTargetingCriteria: Maybe<(
-        { __typename?: 'TargetingCriteriaNode' }
-        & { targetPopulationCandidate: Maybe<(
-          { __typename?: 'TargetPopulationNode' }
-          & { createdBy: Maybe<(
-            { __typename?: 'UserNode' }
-            & Pick<UserNode, 'firstName' | 'lastName'>
-          )>, program: Maybe<(
-            { __typename?: 'ProgramNode' }
-            & Pick<ProgramNode, 'id' | 'name'>
-          )> }
-        )>, rules: Maybe<Array<Maybe<(
-          { __typename?: 'TargetingCriteriaRuleNode' }
-          & Pick<TargetingCriteriaRuleNode, 'id'>
-          & { filters: Maybe<Array<Maybe<(
-            { __typename?: 'TargetingCriteriaRuleFilterNode' }
-            & Pick<TargetingCriteriaRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod'>
-            & { fieldAttribute: Maybe<(
-              { __typename?: 'FieldAttributeNode' }
-              & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
-              & { choices: Maybe<Array<Maybe<(
-                { __typename?: 'CoreFieldChoiceObject' }
-                & Pick<CoreFieldChoiceObject, 'value' | 'labelEn'>
-              )>>> }
-            )> }
-          )>>> }
-        )>>> }
-      )>, finalListTargetingCriteria: Maybe<(
-        { __typename?: 'TargetingCriteriaNode' }
-        & { targetPopulationFinal: Maybe<(
-          { __typename?: 'TargetPopulationNode' }
-          & { createdBy: Maybe<(
-            { __typename?: 'UserNode' }
-            & Pick<UserNode, 'firstName' | 'lastName'>
-          )>, program: Maybe<(
-            { __typename?: 'ProgramNode' }
-            & Pick<ProgramNode, 'id' | 'name'>
-          )> }
-        )>, rules: Maybe<Array<Maybe<(
-          { __typename?: 'TargetingCriteriaRuleNode' }
-          & Pick<TargetingCriteriaRuleNode, 'id'>
-          & { filters: Maybe<Array<Maybe<(
-            { __typename?: 'TargetingCriteriaRuleFilterNode' }
-            & Pick<TargetingCriteriaRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod'>
-            & { fieldAttribute: Maybe<(
-              { __typename?: 'FieldAttributeNode' }
-              & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
-              & { choices: Maybe<Array<Maybe<(
-                { __typename?: 'CoreFieldChoiceObject' }
-                & Pick<CoreFieldChoiceObject, 'value' | 'labelEn'>
-              )>>> }
-            )> }
-          )>>> }
-        )>>> }
-      )>, candidateStats: Maybe<(
-        { __typename?: 'StatsObjectType' }
-        & Pick<StatsObjectType, 'childMale' | 'childFemale' | 'adultMale' | 'adultFemale'>
-      )>, finalStats: Maybe<(
-        { __typename?: 'StatsObjectType' }
-        & Pick<StatsObjectType, 'childMale' | 'childFemale' | 'adultMale' | 'adultFemale'>
-      )> }
+      & TargetPopulationDetailedFragment
     )> }
   )> }
 );
@@ -3778,74 +3897,7 @@ export type FinalizeTpMutation = (
     { __typename?: 'FinalizeTargetPopulationMutation' }
     & { targetPopulation: Maybe<(
       { __typename?: 'TargetPopulationNode' }
-      & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'candidateListTotalHouseholds' | 'candidateListTotalIndividuals' | 'finalListTotalHouseholds' | 'finalListTotalIndividuals' | 'approvedAt' | 'finalizedAt'>
-      & { finalizedBy: Maybe<(
-        { __typename?: 'UserNode' }
-        & Pick<UserNode, 'firstName' | 'lastName'>
-      )>, program: Maybe<(
-        { __typename?: 'ProgramNode' }
-        & Pick<ProgramNode, 'id' | 'name'>
-      )>, candidateListTargetingCriteria: Maybe<(
-        { __typename?: 'TargetingCriteriaNode' }
-        & { targetPopulationCandidate: Maybe<(
-          { __typename?: 'TargetPopulationNode' }
-          & { createdBy: Maybe<(
-            { __typename?: 'UserNode' }
-            & Pick<UserNode, 'firstName' | 'lastName'>
-          )>, program: Maybe<(
-            { __typename?: 'ProgramNode' }
-            & Pick<ProgramNode, 'id' | 'name'>
-          )> }
-        )>, rules: Maybe<Array<Maybe<(
-          { __typename?: 'TargetingCriteriaRuleNode' }
-          & Pick<TargetingCriteriaRuleNode, 'id'>
-          & { filters: Maybe<Array<Maybe<(
-            { __typename?: 'TargetingCriteriaRuleFilterNode' }
-            & Pick<TargetingCriteriaRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod'>
-            & { fieldAttribute: Maybe<(
-              { __typename?: 'FieldAttributeNode' }
-              & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
-              & { choices: Maybe<Array<Maybe<(
-                { __typename?: 'CoreFieldChoiceObject' }
-                & Pick<CoreFieldChoiceObject, 'value' | 'labelEn'>
-              )>>> }
-            )> }
-          )>>> }
-        )>>> }
-      )>, finalListTargetingCriteria: Maybe<(
-        { __typename?: 'TargetingCriteriaNode' }
-        & { targetPopulationFinal: Maybe<(
-          { __typename?: 'TargetPopulationNode' }
-          & { createdBy: Maybe<(
-            { __typename?: 'UserNode' }
-            & Pick<UserNode, 'firstName' | 'lastName'>
-          )>, program: Maybe<(
-            { __typename?: 'ProgramNode' }
-            & Pick<ProgramNode, 'id' | 'name'>
-          )> }
-        )>, rules: Maybe<Array<Maybe<(
-          { __typename?: 'TargetingCriteriaRuleNode' }
-          & Pick<TargetingCriteriaRuleNode, 'id'>
-          & { filters: Maybe<Array<Maybe<(
-            { __typename?: 'TargetingCriteriaRuleFilterNode' }
-            & Pick<TargetingCriteriaRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod'>
-            & { fieldAttribute: Maybe<(
-              { __typename?: 'FieldAttributeNode' }
-              & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
-              & { choices: Maybe<Array<Maybe<(
-                { __typename?: 'CoreFieldChoiceObject' }
-                & Pick<CoreFieldChoiceObject, 'value' | 'labelEn'>
-              )>>> }
-            )> }
-          )>>> }
-        )>>> }
-      )>, candidateStats: Maybe<(
-        { __typename?: 'StatsObjectType' }
-        & Pick<StatsObjectType, 'childMale' | 'childFemale' | 'adultMale' | 'adultFemale'>
-      )>, finalStats: Maybe<(
-        { __typename?: 'StatsObjectType' }
-        & Pick<StatsObjectType, 'childMale' | 'childFemale' | 'adultMale' | 'adultFemale'>
-      )> }
+      & TargetPopulationDetailedFragment
     )> }
   )> }
 );
@@ -3899,6 +3951,22 @@ export type RerunDedupeMutation = (
   )> }
 );
 
+export type SetSteficonRuleOnTargetPopulationMutationVariables = {
+  input: SetSteficonRuleOnTargetPopulationMutationInput
+};
+
+
+export type SetSteficonRuleOnTargetPopulationMutation = (
+  { __typename?: 'Mutations' }
+  & { setSteficonRuleOnTargetPopulation: Maybe<(
+    { __typename?: 'SetSteficonRuleOnTargetPopulationMutationPayload' }
+    & { targetPopulation: Maybe<(
+      { __typename?: 'TargetPopulationNode' }
+      & TargetPopulationDetailedFragment
+    )> }
+  )> }
+);
+
 export type UnapproveTpMutationVariables = {
   id: Scalars['ID']
 };
@@ -3910,74 +3978,7 @@ export type UnapproveTpMutation = (
     { __typename?: 'UnapproveTargetPopulationMutation' }
     & { targetPopulation: Maybe<(
       { __typename?: 'TargetPopulationNode' }
-      & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'candidateListTotalHouseholds' | 'candidateListTotalIndividuals' | 'finalListTotalHouseholds' | 'finalListTotalIndividuals' | 'approvedAt' | 'finalizedAt'>
-      & { finalizedBy: Maybe<(
-        { __typename?: 'UserNode' }
-        & Pick<UserNode, 'firstName' | 'lastName'>
-      )>, program: Maybe<(
-        { __typename?: 'ProgramNode' }
-        & Pick<ProgramNode, 'id' | 'name'>
-      )>, candidateListTargetingCriteria: Maybe<(
-        { __typename?: 'TargetingCriteriaNode' }
-        & { targetPopulationCandidate: Maybe<(
-          { __typename?: 'TargetPopulationNode' }
-          & { createdBy: Maybe<(
-            { __typename?: 'UserNode' }
-            & Pick<UserNode, 'firstName' | 'lastName'>
-          )>, program: Maybe<(
-            { __typename?: 'ProgramNode' }
-            & Pick<ProgramNode, 'id' | 'name'>
-          )> }
-        )>, rules: Maybe<Array<Maybe<(
-          { __typename?: 'TargetingCriteriaRuleNode' }
-          & Pick<TargetingCriteriaRuleNode, 'id'>
-          & { filters: Maybe<Array<Maybe<(
-            { __typename?: 'TargetingCriteriaRuleFilterNode' }
-            & Pick<TargetingCriteriaRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod'>
-            & { fieldAttribute: Maybe<(
-              { __typename?: 'FieldAttributeNode' }
-              & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
-              & { choices: Maybe<Array<Maybe<(
-                { __typename?: 'CoreFieldChoiceObject' }
-                & Pick<CoreFieldChoiceObject, 'value' | 'labelEn'>
-              )>>> }
-            )> }
-          )>>> }
-        )>>> }
-      )>, finalListTargetingCriteria: Maybe<(
-        { __typename?: 'TargetingCriteriaNode' }
-        & { targetPopulationFinal: Maybe<(
-          { __typename?: 'TargetPopulationNode' }
-          & { createdBy: Maybe<(
-            { __typename?: 'UserNode' }
-            & Pick<UserNode, 'firstName' | 'lastName'>
-          )>, program: Maybe<(
-            { __typename?: 'ProgramNode' }
-            & Pick<ProgramNode, 'id' | 'name'>
-          )> }
-        )>, rules: Maybe<Array<Maybe<(
-          { __typename?: 'TargetingCriteriaRuleNode' }
-          & Pick<TargetingCriteriaRuleNode, 'id'>
-          & { filters: Maybe<Array<Maybe<(
-            { __typename?: 'TargetingCriteriaRuleFilterNode' }
-            & Pick<TargetingCriteriaRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod'>
-            & { fieldAttribute: Maybe<(
-              { __typename?: 'FieldAttributeNode' }
-              & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
-              & { choices: Maybe<Array<Maybe<(
-                { __typename?: 'CoreFieldChoiceObject' }
-                & Pick<CoreFieldChoiceObject, 'value' | 'labelEn'>
-              )>>> }
-            )> }
-          )>>> }
-        )>>> }
-      )>, candidateStats: Maybe<(
-        { __typename?: 'StatsObjectType' }
-        & Pick<StatsObjectType, 'childMale' | 'childFemale' | 'adultMale' | 'adultFemale'>
-      )>, finalStats: Maybe<(
-        { __typename?: 'StatsObjectType' }
-        & Pick<StatsObjectType, 'childMale' | 'childFemale' | 'adultMale' | 'adultFemale'>
-      )> }
+      & TargetPopulationDetailedFragment
     )> }
   )> }
 );
@@ -4045,74 +4046,7 @@ export type UpdateTpMutation = (
     { __typename?: 'UpdateTargetPopulationMutation' }
     & { targetPopulation: Maybe<(
       { __typename?: 'TargetPopulationNode' }
-      & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'candidateListTotalHouseholds' | 'candidateListTotalIndividuals' | 'finalListTotalHouseholds' | 'finalListTotalIndividuals' | 'approvedAt' | 'finalizedAt'>
-      & { finalizedBy: Maybe<(
-        { __typename?: 'UserNode' }
-        & Pick<UserNode, 'firstName' | 'lastName'>
-      )>, program: Maybe<(
-        { __typename?: 'ProgramNode' }
-        & Pick<ProgramNode, 'id' | 'name'>
-      )>, candidateListTargetingCriteria: Maybe<(
-        { __typename?: 'TargetingCriteriaNode' }
-        & { targetPopulationCandidate: Maybe<(
-          { __typename?: 'TargetPopulationNode' }
-          & { createdBy: Maybe<(
-            { __typename?: 'UserNode' }
-            & Pick<UserNode, 'firstName' | 'lastName'>
-          )>, program: Maybe<(
-            { __typename?: 'ProgramNode' }
-            & Pick<ProgramNode, 'id' | 'name'>
-          )> }
-        )>, rules: Maybe<Array<Maybe<(
-          { __typename?: 'TargetingCriteriaRuleNode' }
-          & Pick<TargetingCriteriaRuleNode, 'id'>
-          & { filters: Maybe<Array<Maybe<(
-            { __typename?: 'TargetingCriteriaRuleFilterNode' }
-            & Pick<TargetingCriteriaRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod'>
-            & { fieldAttribute: Maybe<(
-              { __typename?: 'FieldAttributeNode' }
-              & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
-              & { choices: Maybe<Array<Maybe<(
-                { __typename?: 'CoreFieldChoiceObject' }
-                & Pick<CoreFieldChoiceObject, 'value' | 'labelEn'>
-              )>>> }
-            )> }
-          )>>> }
-        )>>> }
-      )>, finalListTargetingCriteria: Maybe<(
-        { __typename?: 'TargetingCriteriaNode' }
-        & { targetPopulationFinal: Maybe<(
-          { __typename?: 'TargetPopulationNode' }
-          & { createdBy: Maybe<(
-            { __typename?: 'UserNode' }
-            & Pick<UserNode, 'firstName' | 'lastName'>
-          )>, program: Maybe<(
-            { __typename?: 'ProgramNode' }
-            & Pick<ProgramNode, 'id' | 'name'>
-          )> }
-        )>, rules: Maybe<Array<Maybe<(
-          { __typename?: 'TargetingCriteriaRuleNode' }
-          & Pick<TargetingCriteriaRuleNode, 'id'>
-          & { filters: Maybe<Array<Maybe<(
-            { __typename?: 'TargetingCriteriaRuleFilterNode' }
-            & Pick<TargetingCriteriaRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod'>
-            & { fieldAttribute: Maybe<(
-              { __typename?: 'FieldAttributeNode' }
-              & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
-              & { choices: Maybe<Array<Maybe<(
-                { __typename?: 'CoreFieldChoiceObject' }
-                & Pick<CoreFieldChoiceObject, 'value' | 'labelEn'>
-              )>>> }
-            )> }
-          )>>> }
-        )>>> }
-      )>, candidateStats: Maybe<(
-        { __typename?: 'StatsObjectType' }
-        & Pick<StatsObjectType, 'childMale' | 'childFemale' | 'adultMale' | 'adultFemale'>
-      )>, finalStats: Maybe<(
-        { __typename?: 'StatsObjectType' }
-        & Pick<StatsObjectType, 'childMale' | 'childFemale' | 'adultMale' | 'adultFemale'>
-      )> }
+      & TargetPopulationDetailedFragment
     )> }
   )> }
 );
@@ -4467,6 +4401,23 @@ export type AllRapidProFlowsQuery = (
   )>>> }
 );
 
+export type AllSteficonRulesQueryVariables = {};
+
+
+export type AllSteficonRulesQuery = (
+  { __typename?: 'Query' }
+  & { allSteficonRules: Maybe<(
+    { __typename?: 'SteficonRuleNodeConnection' }
+    & { edges: Array<Maybe<(
+      { __typename?: 'SteficonRuleNodeEdge' }
+      & { node: Maybe<(
+        { __typename?: 'SteficonRuleNode' }
+        & Pick<SteficonRuleNode, 'id' | 'name'>
+      )> }
+    )>> }
+  )> }
+);
+
 export type AllTargetPopulationsQueryVariables = {
   after?: Maybe<Scalars['String']>,
   before?: Maybe<Scalars['String']>,
@@ -4491,11 +4442,7 @@ export type AllTargetPopulationsQuery = (
       & Pick<TargetPopulationNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'TargetPopulationNode' }
-        & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'createdAt' | 'updatedAt' | 'candidateListTotalHouseholds' | 'finalListTotalHouseholds'>
-        & { createdBy: Maybe<(
-          { __typename?: 'UserNode' }
-          & Pick<UserNode, 'firstName' | 'lastName'>
-        )> }
+        & TargetPopulationMinimalFragment
       )> }
     )>> }
   )> }
@@ -4805,85 +4752,7 @@ export type TargetPopulationQuery = (
   { __typename?: 'Query' }
   & { targetPopulation: Maybe<(
     { __typename?: 'TargetPopulationNode' }
-    & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'candidateListTotalHouseholds' | 'candidateListTotalIndividuals' | 'finalListTotalHouseholds' | 'finalListTotalIndividuals' | 'approvedAt' | 'finalizedAt'>
-    & { finalizedBy: Maybe<(
-      { __typename?: 'UserNode' }
-      & Pick<UserNode, 'firstName' | 'lastName'>
-    )>, program: Maybe<(
-      { __typename?: 'ProgramNode' }
-      & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'populationGoal' | 'sector' | 'totalNumberOfHouseholds' | 'individualDataNeeded'>
-    )>, createdBy: Maybe<(
-      { __typename?: 'UserNode' }
-      & Pick<UserNode, 'firstName' | 'lastName'>
-    )>, candidateListTargetingCriteria: Maybe<(
-      { __typename?: 'TargetingCriteriaNode' }
-      & { targetPopulationCandidate: Maybe<(
-        { __typename?: 'TargetPopulationNode' }
-        & { createdBy: Maybe<(
-          { __typename?: 'UserNode' }
-          & Pick<UserNode, 'firstName' | 'lastName'>
-        )> }
-      )>, rules: Maybe<Array<Maybe<(
-        { __typename?: 'TargetingCriteriaRuleNode' }
-        & Pick<TargetingCriteriaRuleNode, 'id'>
-        & { individualsFiltersBlocks: Maybe<Array<Maybe<(
-          { __typename?: 'TargetingIndividualRuleFilterBlockNode' }
-          & { individualBlockFilters: Maybe<Array<Maybe<(
-            { __typename?: 'TargetingIndividualBlockRuleFilterNode' }
-            & Pick<TargetingIndividualBlockRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod'>
-            & { fieldAttribute: Maybe<(
-              { __typename?: 'FieldAttributeNode' }
-              & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
-              & { choices: Maybe<Array<Maybe<(
-                { __typename?: 'CoreFieldChoiceObject' }
-                & Pick<CoreFieldChoiceObject, 'value' | 'labelEn'>
-              )>>> }
-            )> }
-          )>>> }
-        )>>>, filters: Maybe<Array<Maybe<(
-          { __typename?: 'TargetingCriteriaRuleFilterNode' }
-          & Pick<TargetingCriteriaRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod'>
-          & { fieldAttribute: Maybe<(
-            { __typename?: 'FieldAttributeNode' }
-            & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
-            & { choices: Maybe<Array<Maybe<(
-              { __typename?: 'CoreFieldChoiceObject' }
-              & Pick<CoreFieldChoiceObject, 'value' | 'labelEn'>
-            )>>> }
-          )> }
-        )>>> }
-      )>>> }
-    )>, finalListTargetingCriteria: Maybe<(
-      { __typename?: 'TargetingCriteriaNode' }
-      & { targetPopulationFinal: Maybe<(
-        { __typename?: 'TargetPopulationNode' }
-        & { createdBy: Maybe<(
-          { __typename?: 'UserNode' }
-          & Pick<UserNode, 'firstName' | 'lastName'>
-        )> }
-      )>, rules: Maybe<Array<Maybe<(
-        { __typename?: 'TargetingCriteriaRuleNode' }
-        & Pick<TargetingCriteriaRuleNode, 'id'>
-        & { filters: Maybe<Array<Maybe<(
-          { __typename?: 'TargetingCriteriaRuleFilterNode' }
-          & Pick<TargetingCriteriaRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod'>
-          & { fieldAttribute: Maybe<(
-            { __typename?: 'FieldAttributeNode' }
-            & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
-            & { choices: Maybe<Array<Maybe<(
-              { __typename?: 'CoreFieldChoiceObject' }
-              & Pick<CoreFieldChoiceObject, 'value' | 'labelEn'>
-            )>>> }
-          )> }
-        )>>> }
-      )>>> }
-    )>, candidateStats: Maybe<(
-      { __typename?: 'StatsObjectType' }
-      & Pick<StatsObjectType, 'childMale' | 'childFemale' | 'adultMale' | 'adultFemale'>
-    )>, finalStats: Maybe<(
-      { __typename?: 'StatsObjectType' }
-      & Pick<StatsObjectType, 'childMale' | 'childFemale' | 'adultMale' | 'adultFemale'>
-    )> }
+    & TargetPopulationDetailedFragment
   )> }
 );
 
@@ -5583,6 +5452,144 @@ export const IndividualDetailedFragmentDoc = gql`
   flexFields
 }
     ${IndividualMinimalFragmentDoc}`;
+export const TargetPopulationMinimalFragmentDoc = gql`
+    fragment targetPopulationMinimal on TargetPopulationNode {
+  id
+  name
+  status
+  createdAt
+  updatedAt
+  candidateListTotalHouseholds
+  finalListTotalHouseholds
+  createdBy {
+    firstName
+    lastName
+  }
+}
+    `;
+export const TargetPopulationDetailedFragmentDoc = gql`
+    fragment targetPopulationDetailed on TargetPopulationNode {
+  id
+  name
+  status
+  candidateListTotalHouseholds
+  candidateListTotalIndividuals
+  finalListTotalHouseholds
+  finalListTotalIndividuals
+  steficonRule {
+    id
+    name
+  }
+  vulnerabilityScoreMin
+  vulnerabilityScoreMax
+  approvedAt
+  finalizedAt
+  finalizedBy {
+    firstName
+    lastName
+  }
+  program {
+    id
+    name
+    startDate
+    endDate
+    status
+    caId
+    description
+    budget
+    frequencyOfPayments
+    populationGoal
+    sector
+    totalNumberOfHouseholds
+    individualDataNeeded
+  }
+  createdBy {
+    firstName
+    lastName
+  }
+  candidateListTargetingCriteria {
+    targetPopulationCandidate {
+      createdBy {
+        firstName
+        lastName
+      }
+    }
+    rules {
+      id
+      individualsFiltersBlocks {
+        individualBlockFilters {
+          fieldName
+          isFlexField
+          arguments
+          comparisionMethod
+          fieldAttribute {
+            name
+            labelEn
+            type
+            choices {
+              value
+              labelEn
+            }
+          }
+        }
+      }
+      filters {
+        fieldName
+        isFlexField
+        arguments
+        comparisionMethod
+        fieldAttribute {
+          name
+          labelEn
+          type
+          choices {
+            value
+            labelEn
+          }
+        }
+      }
+    }
+  }
+  finalListTargetingCriteria {
+    targetPopulationFinal {
+      createdBy {
+        firstName
+        lastName
+      }
+    }
+    rules {
+      id
+      filters {
+        fieldName
+        isFlexField
+        arguments
+        comparisionMethod
+        fieldAttribute {
+          name
+          labelEn
+          type
+          choices {
+            value
+            labelEn
+          }
+        }
+      }
+    }
+  }
+  candidateStats {
+    childMale
+    childFemale
+    adultMale
+    adultFemale
+  }
+  finalStats {
+    childMale
+    childFemale
+    adultMale
+    adultFemale
+  }
+}
+    `;
 export const RegistrationMinimalFragmentDoc = gql`
     fragment registrationMinimal on RegistrationDataImportNode {
   id
@@ -5792,99 +5799,11 @@ export const ApproveTpDocument = gql`
     mutation ApproveTP($id: ID!) {
   approveTargetPopulation(id: $id) {
     targetPopulation {
-      id
-      name
-      status
-      candidateListTotalHouseholds
-      candidateListTotalIndividuals
-      finalListTotalHouseholds
-      finalListTotalIndividuals
-      approvedAt
-      finalizedAt
-      finalizedBy {
-        firstName
-        lastName
-      }
-      program {
-        id
-        name
-      }
-      candidateListTargetingCriteria {
-        targetPopulationCandidate {
-          createdBy {
-            firstName
-            lastName
-          }
-          program {
-            id
-            name
-          }
-        }
-        rules {
-          id
-          filters {
-            fieldName
-            isFlexField
-            arguments
-            comparisionMethod
-            fieldAttribute {
-              name
-              labelEn
-              type
-              choices {
-                value
-                labelEn
-              }
-            }
-          }
-        }
-      }
-      finalListTargetingCriteria {
-        targetPopulationFinal {
-          createdBy {
-            firstName
-            lastName
-          }
-          program {
-            id
-            name
-          }
-        }
-        rules {
-          id
-          filters {
-            fieldName
-            isFlexField
-            arguments
-            comparisionMethod
-            fieldAttribute {
-              name
-              labelEn
-              type
-              choices {
-                value
-                labelEn
-              }
-            }
-          }
-        }
-      }
-      candidateStats {
-        childMale
-        childFemale
-        adultMale
-        adultFemale
-      }
-      finalStats {
-        childMale
-        childFemale
-        adultMale
-        adultFemale
-      }
+      ...targetPopulationDetailed
     }
   }
 }
-    `;
+    ${TargetPopulationDetailedFragmentDoc}`;
 export type ApproveTpMutationFn = ApolloReactCommon.MutationFunction<ApproveTpMutation, ApproveTpMutationVariables>;
 export type ApproveTpComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ApproveTpMutation, ApproveTpMutationVariables>, 'mutation'>;
 
@@ -6409,99 +6328,11 @@ export const FinalizeTpDocument = gql`
     mutation FinalizeTP($id: ID!) {
   finalizeTargetPopulation(id: $id) {
     targetPopulation {
-      id
-      name
-      status
-      candidateListTotalHouseholds
-      candidateListTotalIndividuals
-      finalListTotalHouseholds
-      finalListTotalIndividuals
-      approvedAt
-      finalizedAt
-      finalizedBy {
-        firstName
-        lastName
-      }
-      program {
-        id
-        name
-      }
-      candidateListTargetingCriteria {
-        targetPopulationCandidate {
-          createdBy {
-            firstName
-            lastName
-          }
-          program {
-            id
-            name
-          }
-        }
-        rules {
-          id
-          filters {
-            fieldName
-            isFlexField
-            arguments
-            comparisionMethod
-            fieldAttribute {
-              name
-              labelEn
-              type
-              choices {
-                value
-                labelEn
-              }
-            }
-          }
-        }
-      }
-      finalListTargetingCriteria {
-        targetPopulationFinal {
-          createdBy {
-            firstName
-            lastName
-          }
-          program {
-            id
-            name
-          }
-        }
-        rules {
-          id
-          filters {
-            fieldName
-            isFlexField
-            arguments
-            comparisionMethod
-            fieldAttribute {
-              name
-              labelEn
-              type
-              choices {
-                value
-                labelEn
-              }
-            }
-          }
-        }
-      }
-      candidateStats {
-        childMale
-        childFemale
-        adultMale
-        adultFemale
-      }
-      finalStats {
-        childMale
-        childFemale
-        adultMale
-        adultFemale
-      }
+      ...targetPopulationDetailed
     }
   }
 }
-    `;
+    ${TargetPopulationDetailedFragmentDoc}`;
 export type FinalizeTpMutationFn = ApolloReactCommon.MutationFunction<FinalizeTpMutation, FinalizeTpMutationVariables>;
 export type FinalizeTpComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<FinalizeTpMutation, FinalizeTpMutationVariables>, 'mutation'>;
 
@@ -6703,103 +6534,66 @@ export function useRerunDedupeMutation(baseOptions?: ApolloReactHooks.MutationHo
 export type RerunDedupeMutationHookResult = ReturnType<typeof useRerunDedupeMutation>;
 export type RerunDedupeMutationResult = ApolloReactCommon.MutationResult<RerunDedupeMutation>;
 export type RerunDedupeMutationOptions = ApolloReactCommon.BaseMutationOptions<RerunDedupeMutation, RerunDedupeMutationVariables>;
+export const SetSteficonRuleOnTargetPopulationDocument = gql`
+    mutation setSteficonRuleOnTargetPopulation($input: SetSteficonRuleOnTargetPopulationMutationInput!) {
+  setSteficonRuleOnTargetPopulation(input: $input) {
+    targetPopulation {
+      ...targetPopulationDetailed
+    }
+  }
+}
+    ${TargetPopulationDetailedFragmentDoc}`;
+export type SetSteficonRuleOnTargetPopulationMutationFn = ApolloReactCommon.MutationFunction<SetSteficonRuleOnTargetPopulationMutation, SetSteficonRuleOnTargetPopulationMutationVariables>;
+export type SetSteficonRuleOnTargetPopulationComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<SetSteficonRuleOnTargetPopulationMutation, SetSteficonRuleOnTargetPopulationMutationVariables>, 'mutation'>;
+
+    export const SetSteficonRuleOnTargetPopulationComponent = (props: SetSteficonRuleOnTargetPopulationComponentProps) => (
+      <ApolloReactComponents.Mutation<SetSteficonRuleOnTargetPopulationMutation, SetSteficonRuleOnTargetPopulationMutationVariables> mutation={SetSteficonRuleOnTargetPopulationDocument} {...props} />
+    );
+    
+export type SetSteficonRuleOnTargetPopulationProps<TChildProps = {}> = ApolloReactHoc.MutateProps<SetSteficonRuleOnTargetPopulationMutation, SetSteficonRuleOnTargetPopulationMutationVariables> & TChildProps;
+export function withSetSteficonRuleOnTargetPopulation<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  SetSteficonRuleOnTargetPopulationMutation,
+  SetSteficonRuleOnTargetPopulationMutationVariables,
+  SetSteficonRuleOnTargetPopulationProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, SetSteficonRuleOnTargetPopulationMutation, SetSteficonRuleOnTargetPopulationMutationVariables, SetSteficonRuleOnTargetPopulationProps<TChildProps>>(SetSteficonRuleOnTargetPopulationDocument, {
+      alias: 'setSteficonRuleOnTargetPopulation',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useSetSteficonRuleOnTargetPopulationMutation__
+ *
+ * To run a mutation, you first call `useSetSteficonRuleOnTargetPopulationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSetSteficonRuleOnTargetPopulationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [setSteficonRuleOnTargetPopulationMutation, { data, loading, error }] = useSetSteficonRuleOnTargetPopulationMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useSetSteficonRuleOnTargetPopulationMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<SetSteficonRuleOnTargetPopulationMutation, SetSteficonRuleOnTargetPopulationMutationVariables>) {
+        return ApolloReactHooks.useMutation<SetSteficonRuleOnTargetPopulationMutation, SetSteficonRuleOnTargetPopulationMutationVariables>(SetSteficonRuleOnTargetPopulationDocument, baseOptions);
+      }
+export type SetSteficonRuleOnTargetPopulationMutationHookResult = ReturnType<typeof useSetSteficonRuleOnTargetPopulationMutation>;
+export type SetSteficonRuleOnTargetPopulationMutationResult = ApolloReactCommon.MutationResult<SetSteficonRuleOnTargetPopulationMutation>;
+export type SetSteficonRuleOnTargetPopulationMutationOptions = ApolloReactCommon.BaseMutationOptions<SetSteficonRuleOnTargetPopulationMutation, SetSteficonRuleOnTargetPopulationMutationVariables>;
 export const UnapproveTpDocument = gql`
     mutation UnapproveTP($id: ID!) {
   unapproveTargetPopulation(id: $id) {
     targetPopulation {
-      id
-      name
-      status
-      candidateListTotalHouseholds
-      candidateListTotalIndividuals
-      finalListTotalHouseholds
-      finalListTotalIndividuals
-      approvedAt
-      finalizedAt
-      finalizedBy {
-        firstName
-        lastName
-      }
-      program {
-        id
-        name
-      }
-      candidateListTargetingCriteria {
-        targetPopulationCandidate {
-          createdBy {
-            firstName
-            lastName
-          }
-          program {
-            id
-            name
-          }
-        }
-        rules {
-          id
-          filters {
-            fieldName
-            isFlexField
-            arguments
-            comparisionMethod
-            fieldAttribute {
-              name
-              labelEn
-              type
-              choices {
-                value
-                labelEn
-              }
-            }
-          }
-        }
-      }
-      finalListTargetingCriteria {
-        targetPopulationFinal {
-          createdBy {
-            firstName
-            lastName
-          }
-          program {
-            id
-            name
-          }
-        }
-        rules {
-          id
-          filters {
-            fieldName
-            isFlexField
-            arguments
-            comparisionMethod
-            fieldAttribute {
-              name
-              labelEn
-              type
-              choices {
-                value
-                labelEn
-              }
-            }
-          }
-        }
-      }
-      candidateStats {
-        childMale
-        childFemale
-        adultMale
-        adultFemale
-      }
-      finalStats {
-        childMale
-        childFemale
-        adultMale
-        adultFemale
-      }
+      ...targetPopulationDetailed
     }
   }
 }
-    `;
+    ${TargetPopulationDetailedFragmentDoc}`;
 export type UnapproveTpMutationFn = ApolloReactCommon.MutationFunction<UnapproveTpMutation, UnapproveTpMutationVariables>;
 export type UnapproveTpComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<UnapproveTpMutation, UnapproveTpMutationVariables>, 'mutation'>;
 
@@ -7022,99 +6816,11 @@ export const UpdateTpDocument = gql`
     mutation UpdateTP($input: UpdateTargetPopulationInput!) {
   updateTargetPopulation(input: $input) {
     targetPopulation {
-      id
-      name
-      status
-      candidateListTotalHouseholds
-      candidateListTotalIndividuals
-      finalListTotalHouseholds
-      finalListTotalIndividuals
-      approvedAt
-      finalizedAt
-      finalizedBy {
-        firstName
-        lastName
-      }
-      program {
-        id
-        name
-      }
-      candidateListTargetingCriteria {
-        targetPopulationCandidate {
-          createdBy {
-            firstName
-            lastName
-          }
-          program {
-            id
-            name
-          }
-        }
-        rules {
-          id
-          filters {
-            fieldName
-            isFlexField
-            arguments
-            comparisionMethod
-            fieldAttribute {
-              name
-              labelEn
-              type
-              choices {
-                value
-                labelEn
-              }
-            }
-          }
-        }
-      }
-      finalListTargetingCriteria {
-        targetPopulationFinal {
-          createdBy {
-            firstName
-            lastName
-          }
-          program {
-            id
-            name
-          }
-        }
-        rules {
-          id
-          filters {
-            fieldName
-            isFlexField
-            arguments
-            comparisionMethod
-            fieldAttribute {
-              name
-              labelEn
-              type
-              choices {
-                value
-                labelEn
-              }
-            }
-          }
-        }
-      }
-      candidateStats {
-        childMale
-        childFemale
-        adultMale
-        adultFemale
-      }
-      finalStats {
-        childMale
-        childFemale
-        adultMale
-        adultFemale
-      }
+      ...targetPopulationDetailed
     }
   }
 }
-    `;
+    ${TargetPopulationDetailedFragmentDoc}`;
 export type UpdateTpMutationFn = ApolloReactCommon.MutationFunction<UpdateTpMutation, UpdateTpMutationVariables>;
 export type UpdateTpComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<UpdateTpMutation, UpdateTpMutationVariables>, 'mutation'>;
 
@@ -8054,22 +7760,66 @@ export function useAllRapidProFlowsLazyQuery(baseOptions?: ApolloReactHooks.Lazy
 export type AllRapidProFlowsQueryHookResult = ReturnType<typeof useAllRapidProFlowsQuery>;
 export type AllRapidProFlowsLazyQueryHookResult = ReturnType<typeof useAllRapidProFlowsLazyQuery>;
 export type AllRapidProFlowsQueryResult = ApolloReactCommon.QueryResult<AllRapidProFlowsQuery, AllRapidProFlowsQueryVariables>;
+export const AllSteficonRulesDocument = gql`
+    query AllSteficonRules {
+  allSteficonRules {
+    edges {
+      node {
+        id
+        name
+      }
+    }
+  }
+}
+    `;
+export type AllSteficonRulesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllSteficonRulesQuery, AllSteficonRulesQueryVariables>, 'query'>;
+
+    export const AllSteficonRulesComponent = (props: AllSteficonRulesComponentProps) => (
+      <ApolloReactComponents.Query<AllSteficonRulesQuery, AllSteficonRulesQueryVariables> query={AllSteficonRulesDocument} {...props} />
+    );
+    
+export type AllSteficonRulesProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllSteficonRulesQuery, AllSteficonRulesQueryVariables> & TChildProps;
+export function withAllSteficonRules<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllSteficonRulesQuery,
+  AllSteficonRulesQueryVariables,
+  AllSteficonRulesProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllSteficonRulesQuery, AllSteficonRulesQueryVariables, AllSteficonRulesProps<TChildProps>>(AllSteficonRulesDocument, {
+      alias: 'allSteficonRules',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllSteficonRulesQuery__
+ *
+ * To run a query within a React component, call `useAllSteficonRulesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllSteficonRulesQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllSteficonRulesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useAllSteficonRulesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllSteficonRulesQuery, AllSteficonRulesQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllSteficonRulesQuery, AllSteficonRulesQueryVariables>(AllSteficonRulesDocument, baseOptions);
+      }
+export function useAllSteficonRulesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllSteficonRulesQuery, AllSteficonRulesQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllSteficonRulesQuery, AllSteficonRulesQueryVariables>(AllSteficonRulesDocument, baseOptions);
+        }
+export type AllSteficonRulesQueryHookResult = ReturnType<typeof useAllSteficonRulesQuery>;
+export type AllSteficonRulesLazyQueryHookResult = ReturnType<typeof useAllSteficonRulesLazyQuery>;
+export type AllSteficonRulesQueryResult = ApolloReactCommon.QueryResult<AllSteficonRulesQuery, AllSteficonRulesQueryVariables>;
 export const AllTargetPopulationsDocument = gql`
     query AllTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String, $candidateListTotalHouseholdsMin: Int, $candidateListTotalHouseholdsMax: Int, $businessArea: String) {
   allTargetPopulation(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name: $name, status: $status, candidateListTotalHouseholdsMin: $candidateListTotalHouseholdsMin, candidateListTotalHouseholdsMax: $candidateListTotalHouseholdsMax, businessArea: $businessArea) {
     edges {
       node {
-        id
-        name
-        status
-        createdAt
-        updatedAt
-        candidateListTotalHouseholds
-        finalListTotalHouseholds
-        createdBy {
-          firstName
-          lastName
-        }
+        ...targetPopulationMinimal
       }
       cursor
     }
@@ -8077,7 +7827,7 @@ export const AllTargetPopulationsDocument = gql`
     edgeCount
   }
 }
-    `;
+    ${TargetPopulationMinimalFragmentDoc}`;
 export type AllTargetPopulationsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>, 'query'>;
 
     export const AllTargetPopulationsComponent = (props: AllTargetPopulationsComponentProps) => (
@@ -8998,122 +8748,10 @@ export type SampleSizeQueryResult = ApolloReactCommon.QueryResult<SampleSizeQuer
 export const TargetPopulationDocument = gql`
     query targetPopulation($id: ID!) {
   targetPopulation(id: $id) {
-    id
-    name
-    status
-    candidateListTotalHouseholds
-    candidateListTotalIndividuals
-    finalListTotalHouseholds
-    finalListTotalIndividuals
-    approvedAt
-    finalizedAt
-    finalizedBy {
-      firstName
-      lastName
-    }
-    program {
-      id
-      name
-      startDate
-      endDate
-      status
-      caId
-      description
-      budget
-      frequencyOfPayments
-      populationGoal
-      sector
-      totalNumberOfHouseholds
-      individualDataNeeded
-    }
-    createdBy {
-      firstName
-      lastName
-    }
-    candidateListTargetingCriteria {
-      targetPopulationCandidate {
-        createdBy {
-          firstName
-          lastName
-        }
-      }
-      rules {
-        id
-        individualsFiltersBlocks {
-          individualBlockFilters {
-            fieldName
-            isFlexField
-            arguments
-            comparisionMethod
-            fieldAttribute {
-              name
-              labelEn
-              type
-              choices {
-                value
-                labelEn
-              }
-            }
-          }
-        }
-        filters {
-          fieldName
-          isFlexField
-          arguments
-          comparisionMethod
-          fieldAttribute {
-            name
-            labelEn
-            type
-            choices {
-              value
-              labelEn
-            }
-          }
-        }
-      }
-    }
-    finalListTargetingCriteria {
-      targetPopulationFinal {
-        createdBy {
-          firstName
-          lastName
-        }
-      }
-      rules {
-        id
-        filters {
-          fieldName
-          isFlexField
-          arguments
-          comparisionMethod
-          fieldAttribute {
-            name
-            labelEn
-            type
-            choices {
-              value
-              labelEn
-            }
-          }
-        }
-      }
-    }
-    candidateStats {
-      childMale
-      childFemale
-      adultMale
-      adultFemale
-    }
-    finalStats {
-      childMale
-      childFemale
-      adultMale
-      adultFemale
-    }
+    ...targetPopulationDetailed
   }
 }
-    `;
+    ${TargetPopulationDetailedFragmentDoc}`;
 export type TargetPopulationComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<TargetPopulationQuery, TargetPopulationQueryVariables>, 'query'> & ({ variables: TargetPopulationQueryVariables; skip?: boolean; } | { skip: boolean; });
 
     export const TargetPopulationComponent = (props: TargetPopulationComponentProps) => (
@@ -10440,18 +10078,26 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
   Query: ResolverTypeWrapper<{}>,
-  ID: ResolverTypeWrapper<Scalars['ID']>,
-  PaymentRecordNode: ResolverTypeWrapper<PaymentRecordNode>,
-  Node: ResolverTypeWrapper<Node>,
-  DateTime: ResolverTypeWrapper<Scalars['DateTime']>,
-  UserBusinessAreaNode: ResolverTypeWrapper<UserBusinessAreaNode>,
   String: ResolverTypeWrapper<Scalars['String']>,
-  Boolean: ResolverTypeWrapper<Scalars['Boolean']>,
-  UserRoleNode: ResolverTypeWrapper<UserRoleNode>,
-  RoleNode: ResolverTypeWrapper<RoleNode>,
   Int: ResolverTypeWrapper<Scalars['Int']>,
-  HouseholdNodeConnection: ResolverTypeWrapper<HouseholdNodeConnection>,
+  Boolean: ResolverTypeWrapper<Scalars['Boolean']>,
+  SteficonRuleNodeConnection: ResolverTypeWrapper<SteficonRuleNodeConnection>,
   PageInfo: ResolverTypeWrapper<PageInfo>,
+  SteficonRuleNodeEdge: ResolverTypeWrapper<SteficonRuleNodeEdge>,
+  SteficonRuleNode: ResolverTypeWrapper<SteficonRuleNode>,
+  Node: ResolverTypeWrapper<Node>,
+  ID: ResolverTypeWrapper<Scalars['ID']>,
+  DateTime: ResolverTypeWrapper<Scalars['DateTime']>,
+  RuleLanguage: RuleLanguage,
+  TargetPopulationNodeConnection: ResolverTypeWrapper<TargetPopulationNodeConnection>,
+  TargetPopulationNodeEdge: ResolverTypeWrapper<TargetPopulationNodeEdge>,
+  TargetPopulationNode: ResolverTypeWrapper<TargetPopulationNode>,
+  UserNode: ResolverTypeWrapper<UserNode>,
+  UserStatus: UserStatus,
+  UserPartner: UserPartner,
+  UserRoleNode: ResolverTypeWrapper<UserRoleNode>,
+  UserBusinessAreaNode: ResolverTypeWrapper<UserBusinessAreaNode>,
+  HouseholdNodeConnection: ResolverTypeWrapper<HouseholdNodeConnection>,
   HouseholdNodeEdge: ResolverTypeWrapper<HouseholdNodeEdge>,
   HouseholdNode: ResolverTypeWrapper<HouseholdNode>,
   HouseholdStatus: HouseholdStatus,
@@ -10479,28 +10125,27 @@ export type ResolversTypes = {
   CashPlanVerificationStatus: CashPlanVerificationStatus,
   PaymentRecordNodeConnection: ResolverTypeWrapper<PaymentRecordNodeConnection>,
   PaymentRecordNodeEdge: ResolverTypeWrapper<PaymentRecordNodeEdge>,
-  CashPlanPaymentVerificationNodeConnection: ResolverTypeWrapper<CashPlanPaymentVerificationNodeConnection>,
-  CashPlanPaymentVerificationNodeEdge: ResolverTypeWrapper<CashPlanPaymentVerificationNodeEdge>,
+  PaymentRecordNode: ResolverTypeWrapper<PaymentRecordNode>,
+  PaymentRecordStatus: PaymentRecordStatus,
+  PaymentRecordEntitlementCardStatus: PaymentRecordEntitlementCardStatus,
+  PaymentRecordDeliveryType: PaymentRecordDeliveryType,
+  ServiceProviderNode: ResolverTypeWrapper<ServiceProviderNode>,
+  PaymentVerificationNodeConnection: ResolverTypeWrapper<PaymentVerificationNodeConnection>,
+  PaymentVerificationNodeEdge: ResolverTypeWrapper<PaymentVerificationNodeEdge>,
+  PaymentVerificationNode: ResolverTypeWrapper<PaymentVerificationNode>,
   CashPlanPaymentVerificationNode: ResolverTypeWrapper<CashPlanPaymentVerificationNode>,
   CashPlanPaymentVerificationStatus: CashPlanPaymentVerificationStatus,
   CashPlanPaymentVerificationSampling: CashPlanPaymentVerificationSampling,
   CashPlanPaymentVerificationVerificationMethod: CashPlanPaymentVerificationVerificationMethod,
   AgeFilterObject: ResolverTypeWrapper<AgeFilterObject>,
-  PaymentVerificationNodeConnection: ResolverTypeWrapper<PaymentVerificationNodeConnection>,
-  PaymentVerificationNodeEdge: ResolverTypeWrapper<PaymentVerificationNodeEdge>,
-  PaymentVerificationNode: ResolverTypeWrapper<PaymentVerificationNode>,
   PaymentVerificationStatus: PaymentVerificationStatus,
-  TargetPopulationNodeConnection: ResolverTypeWrapper<TargetPopulationNodeConnection>,
-  TargetPopulationNodeEdge: ResolverTypeWrapper<TargetPopulationNodeEdge>,
-  TargetPopulationNode: ResolverTypeWrapper<TargetPopulationNode>,
-  UserNode: ResolverTypeWrapper<UserNode>,
-  UserStatus: UserStatus,
-  UserPartner: UserPartner,
-  RegistrationDataImportNodeConnection: ResolverTypeWrapper<RegistrationDataImportNodeConnection>,
-  RegistrationDataImportNodeEdge: ResolverTypeWrapper<RegistrationDataImportNodeEdge>,
-  RegistrationDataImportNode: ResolverTypeWrapper<RegistrationDataImportNode>,
-  RegistrationDataImportStatus: RegistrationDataImportStatus,
-  RegistrationDataImportDataSource: RegistrationDataImportDataSource,
+  CashPlanPaymentVerificationNodeConnection: ResolverTypeWrapper<CashPlanPaymentVerificationNodeConnection>,
+  CashPlanPaymentVerificationNodeEdge: ResolverTypeWrapper<CashPlanPaymentVerificationNodeEdge>,
+  LogEntryObjectConnection: ResolverTypeWrapper<LogEntryObjectConnection>,
+  LogEntryObjectEdge: ResolverTypeWrapper<LogEntryObjectEdge>,
+  LogEntryObject: ResolverTypeWrapper<LogEntryObject>,
+  LogEntryAction: LogEntryAction,
+  JSONLazyString: ResolverTypeWrapper<Scalars['JSONLazyString']>,
   IndividualNodeConnection: ResolverTypeWrapper<IndividualNodeConnection>,
   IndividualNodeEdge: ResolverTypeWrapper<IndividualNodeEdge>,
   IndividualNode: ResolverTypeWrapper<IndividualNode>,
@@ -10508,6 +10153,10 @@ export type ResolversTypes = {
   IndividualSex: IndividualSex,
   IndividualMaritalStatus: IndividualMaritalStatus,
   IndividualRelationship: IndividualRelationship,
+  RegistrationDataImportNode: ResolverTypeWrapper<RegistrationDataImportNode>,
+  RegistrationDataImportStatus: RegistrationDataImportStatus,
+  RegistrationDataImportDataSource: RegistrationDataImportDataSource,
+  CountAndPercentageNode: ResolverTypeWrapper<CountAndPercentageNode>,
   IndividualWorkStatus: IndividualWorkStatus,
   FlexFieldsScalar: ResolverTypeWrapper<Scalars['FlexFieldsScalar']>,
   IndividualDeduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus,
@@ -10528,7 +10177,14 @@ export type ResolversTypes = {
   IndividualIdentityNode: ResolverTypeWrapper<IndividualIdentityNode>,
   IndividualRoleInHouseholdNode: ResolverTypeWrapper<IndividualRoleInHouseholdNode>,
   IndividualRoleInHouseholdRole: IndividualRoleInHouseholdRole,
-  CountAndPercentageNode: ResolverTypeWrapper<CountAndPercentageNode>,
+  GeoJSON: ResolverTypeWrapper<Scalars['GeoJSON']>,
+  HouseholdOrgEnumerator: HouseholdOrgEnumerator,
+  HouseholdSelection: ResolverTypeWrapper<HouseholdSelection>,
+  ServiceProviderNodeConnection: ResolverTypeWrapper<ServiceProviderNodeConnection>,
+  ServiceProviderNodeEdge: ResolverTypeWrapper<ServiceProviderNodeEdge>,
+  RegistrationDataImportNodeConnection: ResolverTypeWrapper<RegistrationDataImportNodeConnection>,
+  RegistrationDataImportNodeEdge: ResolverTypeWrapper<RegistrationDataImportNodeEdge>,
+  RoleNode: ResolverTypeWrapper<RoleNode>,
   UserBusinessAreaNodeConnection: ResolverTypeWrapper<UserBusinessAreaNodeConnection>,
   UserBusinessAreaNodeEdge: ResolverTypeWrapper<UserBusinessAreaNodeEdge>,
   TargetPopulationStatus: TargetPopulationStatus,
@@ -10543,21 +10199,7 @@ export type ResolversTypes = {
   CoreFieldChoiceObject: ResolverTypeWrapper<CoreFieldChoiceObject>,
   TargetingCriteriaRuleFilterNode: ResolverTypeWrapper<TargetingCriteriaRuleFilterNode>,
   TargetingCriteriaRuleFilterComparisionMethod: TargetingCriteriaRuleFilterComparisionMethod,
-  HouseholdSelection: ResolverTypeWrapper<HouseholdSelection>,
   StatsObjectType: ResolverTypeWrapper<StatsObjectType>,
-  LogEntryObjectConnection: ResolverTypeWrapper<LogEntryObjectConnection>,
-  LogEntryObjectEdge: ResolverTypeWrapper<LogEntryObjectEdge>,
-  LogEntryObject: ResolverTypeWrapper<LogEntryObject>,
-  LogEntryAction: LogEntryAction,
-  JSONLazyString: ResolverTypeWrapper<Scalars['JSONLazyString']>,
-  GeoJSON: ResolverTypeWrapper<Scalars['GeoJSON']>,
-  HouseholdOrgEnumerator: HouseholdOrgEnumerator,
-  ServiceProviderNodeConnection: ResolverTypeWrapper<ServiceProviderNodeConnection>,
-  ServiceProviderNodeEdge: ResolverTypeWrapper<ServiceProviderNodeEdge>,
-  ServiceProviderNode: ResolverTypeWrapper<ServiceProviderNode>,
-  PaymentRecordStatus: PaymentRecordStatus,
-  PaymentRecordEntitlementCardStatus: PaymentRecordEntitlementCardStatus,
-  PaymentRecordDeliveryType: PaymentRecordDeliveryType,
   ChoiceObject: ResolverTypeWrapper<ChoiceObject>,
   RapidProFlow: ResolverTypeWrapper<RapidProFlow>,
   RapidProFlowRun: ResolverTypeWrapper<RapidProFlowRun>,
@@ -10645,6 +10287,8 @@ export type ResolversTypes = {
   ApproveTargetPopulationMutation: ResolverTypeWrapper<ApproveTargetPopulationMutation>,
   UnapproveTargetPopulationMutation: ResolverTypeWrapper<UnapproveTargetPopulationMutation>,
   FinalizeTargetPopulationMutation: ResolverTypeWrapper<FinalizeTargetPopulationMutation>,
+  SetSteficonRuleOnTargetPopulationMutationInput: SetSteficonRuleOnTargetPopulationMutationInput,
+  SetSteficonRuleOnTargetPopulationMutationPayload: ResolverTypeWrapper<SetSteficonRuleOnTargetPopulationMutationPayload>,
   CreateProgramInput: CreateProgramInput,
   CreateProgram: ResolverTypeWrapper<CreateProgram>,
   UpdateProgramInput: UpdateProgramInput,
@@ -10667,18 +10311,26 @@ export type ResolversTypes = {
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
   Query: {},
-  ID: Scalars['ID'],
-  PaymentRecordNode: PaymentRecordNode,
-  Node: Node,
-  DateTime: Scalars['DateTime'],
-  UserBusinessAreaNode: UserBusinessAreaNode,
   String: Scalars['String'],
-  Boolean: Scalars['Boolean'],
-  UserRoleNode: UserRoleNode,
-  RoleNode: RoleNode,
   Int: Scalars['Int'],
-  HouseholdNodeConnection: HouseholdNodeConnection,
+  Boolean: Scalars['Boolean'],
+  SteficonRuleNodeConnection: SteficonRuleNodeConnection,
   PageInfo: PageInfo,
+  SteficonRuleNodeEdge: SteficonRuleNodeEdge,
+  SteficonRuleNode: SteficonRuleNode,
+  Node: Node,
+  ID: Scalars['ID'],
+  DateTime: Scalars['DateTime'],
+  RuleLanguage: RuleLanguage,
+  TargetPopulationNodeConnection: TargetPopulationNodeConnection,
+  TargetPopulationNodeEdge: TargetPopulationNodeEdge,
+  TargetPopulationNode: TargetPopulationNode,
+  UserNode: UserNode,
+  UserStatus: UserStatus,
+  UserPartner: UserPartner,
+  UserRoleNode: UserRoleNode,
+  UserBusinessAreaNode: UserBusinessAreaNode,
+  HouseholdNodeConnection: HouseholdNodeConnection,
   HouseholdNodeEdge: HouseholdNodeEdge,
   HouseholdNode: HouseholdNode,
   HouseholdStatus: HouseholdStatus,
@@ -10706,28 +10358,27 @@ export type ResolversParentTypes = {
   CashPlanVerificationStatus: CashPlanVerificationStatus,
   PaymentRecordNodeConnection: PaymentRecordNodeConnection,
   PaymentRecordNodeEdge: PaymentRecordNodeEdge,
-  CashPlanPaymentVerificationNodeConnection: CashPlanPaymentVerificationNodeConnection,
-  CashPlanPaymentVerificationNodeEdge: CashPlanPaymentVerificationNodeEdge,
+  PaymentRecordNode: PaymentRecordNode,
+  PaymentRecordStatus: PaymentRecordStatus,
+  PaymentRecordEntitlementCardStatus: PaymentRecordEntitlementCardStatus,
+  PaymentRecordDeliveryType: PaymentRecordDeliveryType,
+  ServiceProviderNode: ServiceProviderNode,
+  PaymentVerificationNodeConnection: PaymentVerificationNodeConnection,
+  PaymentVerificationNodeEdge: PaymentVerificationNodeEdge,
+  PaymentVerificationNode: PaymentVerificationNode,
   CashPlanPaymentVerificationNode: CashPlanPaymentVerificationNode,
   CashPlanPaymentVerificationStatus: CashPlanPaymentVerificationStatus,
   CashPlanPaymentVerificationSampling: CashPlanPaymentVerificationSampling,
   CashPlanPaymentVerificationVerificationMethod: CashPlanPaymentVerificationVerificationMethod,
   AgeFilterObject: AgeFilterObject,
-  PaymentVerificationNodeConnection: PaymentVerificationNodeConnection,
-  PaymentVerificationNodeEdge: PaymentVerificationNodeEdge,
-  PaymentVerificationNode: PaymentVerificationNode,
   PaymentVerificationStatus: PaymentVerificationStatus,
-  TargetPopulationNodeConnection: TargetPopulationNodeConnection,
-  TargetPopulationNodeEdge: TargetPopulationNodeEdge,
-  TargetPopulationNode: TargetPopulationNode,
-  UserNode: UserNode,
-  UserStatus: UserStatus,
-  UserPartner: UserPartner,
-  RegistrationDataImportNodeConnection: RegistrationDataImportNodeConnection,
-  RegistrationDataImportNodeEdge: RegistrationDataImportNodeEdge,
-  RegistrationDataImportNode: RegistrationDataImportNode,
-  RegistrationDataImportStatus: RegistrationDataImportStatus,
-  RegistrationDataImportDataSource: RegistrationDataImportDataSource,
+  CashPlanPaymentVerificationNodeConnection: CashPlanPaymentVerificationNodeConnection,
+  CashPlanPaymentVerificationNodeEdge: CashPlanPaymentVerificationNodeEdge,
+  LogEntryObjectConnection: LogEntryObjectConnection,
+  LogEntryObjectEdge: LogEntryObjectEdge,
+  LogEntryObject: LogEntryObject,
+  LogEntryAction: LogEntryAction,
+  JSONLazyString: Scalars['JSONLazyString'],
   IndividualNodeConnection: IndividualNodeConnection,
   IndividualNodeEdge: IndividualNodeEdge,
   IndividualNode: IndividualNode,
@@ -10735,6 +10386,10 @@ export type ResolversParentTypes = {
   IndividualSex: IndividualSex,
   IndividualMaritalStatus: IndividualMaritalStatus,
   IndividualRelationship: IndividualRelationship,
+  RegistrationDataImportNode: RegistrationDataImportNode,
+  RegistrationDataImportStatus: RegistrationDataImportStatus,
+  RegistrationDataImportDataSource: RegistrationDataImportDataSource,
+  CountAndPercentageNode: CountAndPercentageNode,
   IndividualWorkStatus: IndividualWorkStatus,
   FlexFieldsScalar: Scalars['FlexFieldsScalar'],
   IndividualDeduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus,
@@ -10755,7 +10410,14 @@ export type ResolversParentTypes = {
   IndividualIdentityNode: IndividualIdentityNode,
   IndividualRoleInHouseholdNode: IndividualRoleInHouseholdNode,
   IndividualRoleInHouseholdRole: IndividualRoleInHouseholdRole,
-  CountAndPercentageNode: CountAndPercentageNode,
+  GeoJSON: Scalars['GeoJSON'],
+  HouseholdOrgEnumerator: HouseholdOrgEnumerator,
+  HouseholdSelection: HouseholdSelection,
+  ServiceProviderNodeConnection: ServiceProviderNodeConnection,
+  ServiceProviderNodeEdge: ServiceProviderNodeEdge,
+  RegistrationDataImportNodeConnection: RegistrationDataImportNodeConnection,
+  RegistrationDataImportNodeEdge: RegistrationDataImportNodeEdge,
+  RoleNode: RoleNode,
   UserBusinessAreaNodeConnection: UserBusinessAreaNodeConnection,
   UserBusinessAreaNodeEdge: UserBusinessAreaNodeEdge,
   TargetPopulationStatus: TargetPopulationStatus,
@@ -10770,21 +10432,7 @@ export type ResolversParentTypes = {
   CoreFieldChoiceObject: CoreFieldChoiceObject,
   TargetingCriteriaRuleFilterNode: TargetingCriteriaRuleFilterNode,
   TargetingCriteriaRuleFilterComparisionMethod: TargetingCriteriaRuleFilterComparisionMethod,
-  HouseholdSelection: HouseholdSelection,
   StatsObjectType: StatsObjectType,
-  LogEntryObjectConnection: LogEntryObjectConnection,
-  LogEntryObjectEdge: LogEntryObjectEdge,
-  LogEntryObject: LogEntryObject,
-  LogEntryAction: LogEntryAction,
-  JSONLazyString: Scalars['JSONLazyString'],
-  GeoJSON: Scalars['GeoJSON'],
-  HouseholdOrgEnumerator: HouseholdOrgEnumerator,
-  ServiceProviderNodeConnection: ServiceProviderNodeConnection,
-  ServiceProviderNodeEdge: ServiceProviderNodeEdge,
-  ServiceProviderNode: ServiceProviderNode,
-  PaymentRecordStatus: PaymentRecordStatus,
-  PaymentRecordEntitlementCardStatus: PaymentRecordEntitlementCardStatus,
-  PaymentRecordDeliveryType: PaymentRecordDeliveryType,
   ChoiceObject: ChoiceObject,
   RapidProFlow: RapidProFlow,
   RapidProFlowRun: RapidProFlowRun,
@@ -10872,6 +10520,8 @@ export type ResolversParentTypes = {
   ApproveTargetPopulationMutation: ApproveTargetPopulationMutation,
   UnapproveTargetPopulationMutation: UnapproveTargetPopulationMutation,
   FinalizeTargetPopulationMutation: FinalizeTargetPopulationMutation,
+  SetSteficonRuleOnTargetPopulationMutationInput: SetSteficonRuleOnTargetPopulationMutationInput,
+  SetSteficonRuleOnTargetPopulationMutationPayload: SetSteficonRuleOnTargetPopulationMutationPayload,
   CreateProgramInput: CreateProgramInput,
   CreateProgram: CreateProgram,
   UpdateProgramInput: UpdateProgramInput,
@@ -11663,6 +11313,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   approveTargetPopulation?: Resolver<Maybe<ResolversTypes['ApproveTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsApproveTargetPopulationArgs, 'id'>>,
   unapproveTargetPopulation?: Resolver<Maybe<ResolversTypes['UnapproveTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsUnapproveTargetPopulationArgs, 'id'>>,
   finalizeTargetPopulation?: Resolver<Maybe<ResolversTypes['FinalizeTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsFinalizeTargetPopulationArgs, 'id'>>,
+  setSteficonRuleOnTargetPopulation?: Resolver<Maybe<ResolversTypes['SetSteficonRuleOnTargetPopulationMutationPayload']>, ParentType, ContextType, RequireFields<MutationsSetSteficonRuleOnTargetPopulationArgs, 'input'>>,
   createProgram?: Resolver<Maybe<ResolversTypes['CreateProgram']>, ParentType, ContextType, RequireFields<MutationsCreateProgramArgs, 'programData'>>,
   updateProgram?: Resolver<Maybe<ResolversTypes['UpdateProgram']>, ParentType, ContextType, MutationsUpdateProgramArgs>,
   deleteProgram?: Resolver<Maybe<ResolversTypes['DeleteProgram']>, ParentType, ContextType, RequireFields<MutationsDeleteProgramArgs, 'programId'>>,
@@ -11677,7 +11328,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'PaymentRecordNode' | 'UserBusinessAreaNode' | 'HouseholdNode' | 'AdminAreaNode' | 'ProgramNode' | 'CashPlanNode' | 'CashPlanPaymentVerificationNode' | 'PaymentVerificationNode' | 'TargetPopulationNode' | 'UserNode' | 'RegistrationDataImportNode' | 'IndividualNode' | 'DocumentNode' | 'ServiceProviderNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'ImportedDocumentNode', ParentType, ContextType>,
+  __resolveType: TypeResolveFn<'SteficonRuleNode' | 'TargetPopulationNode' | 'UserNode' | 'UserBusinessAreaNode' | 'HouseholdNode' | 'AdminAreaNode' | 'ProgramNode' | 'CashPlanNode' | 'PaymentRecordNode' | 'ServiceProviderNode' | 'PaymentVerificationNode' | 'CashPlanPaymentVerificationNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'DocumentNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'ImportedDocumentNode', ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
 };
 
@@ -11798,6 +11449,7 @@ export type ProgramNodeEdgeResolvers<ContextType = any, ParentType extends Resol
 };
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
+  allSteficonRules?: Resolver<Maybe<ResolversTypes['SteficonRuleNodeConnection']>, ParentType, ContextType, QueryAllSteficonRulesArgs>,
   paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType, RequireFields<QueryPaymentRecordArgs, 'id'>>,
   paymentRecordVerification?: Resolver<Maybe<ResolversTypes['PaymentVerificationNode']>, ParentType, ContextType, RequireFields<QueryPaymentRecordVerificationArgs, 'id'>>,
   allPaymentRecords?: Resolver<Maybe<ResolversTypes['PaymentRecordNodeConnection']>, ParentType, ContextType, QueryAllPaymentRecordsArgs>,
@@ -12004,11 +11656,40 @@ export type ServiceProviderNodeEdgeResolvers<ContextType = any, ParentType exten
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
 };
 
+export type SetSteficonRuleOnTargetPopulationMutationPayloadResolvers<ContextType = any, ParentType extends ResolversParentTypes['SetSteficonRuleOnTargetPopulationMutationPayload'] = ResolversParentTypes['SetSteficonRuleOnTargetPopulationMutationPayload']> = {
+  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
+  clientMutationId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
 export type StatsObjectTypeResolvers<ContextType = any, ParentType extends ResolversParentTypes['StatsObjectType'] = ResolversParentTypes['StatsObjectType']> = {
   childMale?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   childFemale?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   adultMale?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   adultFemale?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type SteficonRuleNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SteficonRuleNode'] = ResolversParentTypes['SteficonRuleNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  definition?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  enabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  deprecated?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  language?: Resolver<ResolversTypes['RuleLanguage'], ParentType, ContextType>,
+  targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, SteficonRuleNodeTargetPopulationsArgs>,
+};
+
+export type SteficonRuleNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['SteficonRuleNodeConnection'] = ResolversParentTypes['SteficonRuleNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['SteficonRuleNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type SteficonRuleNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SteficonRuleNodeEdge'] = ResolversParentTypes['SteficonRuleNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['SteficonRuleNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
 };
 
 export type TargetingCriteriaNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetingCriteriaNode'] = ResolversParentTypes['TargetingCriteriaNode']> = {
@@ -12086,6 +11767,9 @@ export type TargetPopulationNodeResolvers<ContextType = any, ParentType extends 
   candidateListTargetingCriteria?: Resolver<Maybe<ResolversTypes['TargetingCriteriaNode']>, ParentType, ContextType>,
   finalListTargetingCriteria?: Resolver<Maybe<ResolversTypes['TargetingCriteriaNode']>, ParentType, ContextType>,
   sentToDatahub?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  steficonRule?: Resolver<Maybe<ResolversTypes['SteficonRuleNode']>, ParentType, ContextType>,
+  vulnerabilityScoreMin?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  vulnerabilityScoreMax?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, TargetPopulationNodePaymentRecordsArgs>,
   selections?: Resolver<Array<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
   totalHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
@@ -12362,7 +12046,11 @@ export type Resolvers<ContextType = any> = {
   ServiceProviderNode?: ServiceProviderNodeResolvers<ContextType>,
   ServiceProviderNodeConnection?: ServiceProviderNodeConnectionResolvers<ContextType>,
   ServiceProviderNodeEdge?: ServiceProviderNodeEdgeResolvers<ContextType>,
+  SetSteficonRuleOnTargetPopulationMutationPayload?: SetSteficonRuleOnTargetPopulationMutationPayloadResolvers<ContextType>,
   StatsObjectType?: StatsObjectTypeResolvers<ContextType>,
+  SteficonRuleNode?: SteficonRuleNodeResolvers<ContextType>,
+  SteficonRuleNodeConnection?: SteficonRuleNodeConnectionResolvers<ContextType>,
+  SteficonRuleNodeEdge?: SteficonRuleNodeEdgeResolvers<ContextType>,
   TargetingCriteriaNode?: TargetingCriteriaNodeResolvers<ContextType>,
   TargetingCriteriaRuleFilterNode?: TargetingCriteriaRuleFilterNodeResolvers<ContextType>,
   TargetingCriteriaRuleNode?: TargetingCriteriaRuleNodeResolvers<ContextType>,
