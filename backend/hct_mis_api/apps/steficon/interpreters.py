@@ -1,13 +1,13 @@
 from decimal import Decimal
-from unittest.mock import Mock
 
 from django.core.exceptions import ValidationError
 from django.utils.functional import cached_property
 from django.utils.module_loading import import_string
+from jinja2 import Environment
 
+from household.models import Household
 from steficon.score import Score
 from steficon.templatetags import engine
-from household.models import Household
 
 
 class Interpreter:
@@ -20,8 +20,9 @@ class Interpreter:
         except Exception as e:
             raise ValidationError(e)
 
+
 class PythonFunction(Interpreter):
-    label = 'internal'
+    label = "internal"
 
     @cached_property
     def code(self):
@@ -31,25 +32,24 @@ class PythonFunction(Interpreter):
         return self.code(**context)
 
 
-
 class PythonExec(Interpreter):
-    label = 'Python'
+    label = "Python"
 
     @cached_property
     def code(self):
-        return compile(self.init_string, "<code>", mode='exec')
+        return compile(self.init_string, "<code>", mode="exec")
 
     def execute(self, **context):
-        gl = {'__builtins__': {}}
+        gl = {"__builtins__": {}}
         pts = Score()
         locals_ = dict(context)
-        locals_['pts'] = pts
+        locals_["pts"] = pts
         exec(self.code, gl, locals_)
         return pts.total()
 
     def validate(self):
         errors = []
-        for forbidden in ['__import__', 'delete', 'save', 'eval', 'exec']:
+        for forbidden in ["__import__", "delete", "save", "eval", "exec"]:
             if forbidden in self.init_string:
                 errors.append("Code contains an invalid statement '%s'" % forbidden)
         if errors:
@@ -58,17 +58,17 @@ class PythonExec(Interpreter):
         return super().validate()
 
 
-from jinja2 import Template, Environment
-
-
 # from jinja2 import environment
+
 
 def get_env(**options) -> Environment:
     env = Environment(**options)
-    env.filters.update({
-        'adults': engine.adults
-        # 'url': reverse,
-    })
+    env.filters.update(
+        {
+            "adults": engine.adults
+            # 'url': reverse,
+        }
+    )
     return env
 
 
@@ -77,8 +77,9 @@ def get_env(**options) -> Environment:
 # environment.DEFAULT_FILTERS['urlencode'] = urlencode
 # environment.DEFAULT_FILTERS['slugify'] = slugify
 
+
 class Jinja(Interpreter):
-    label = 'Jinja2'
+    label = "Jinja2"
 
     @cached_property
     def code(self):
@@ -86,7 +87,7 @@ class Jinja(Interpreter):
 
     def execute(self, **context):
         pts = Score()
-        context['pts'] = pts
+        context["pts"] = pts
         output = self.code.render(**context)
         return Decimal(output.strip())
 

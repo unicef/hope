@@ -15,7 +15,7 @@ from steficon.interpreters import mapping
 from steficon.models import Rule
 from steficon.score import Score
 from household.models import Household
-from targeting.models import TargetPopulation
+from targeting.models import TargetPopulation, HouseholdSelection
 
 
 @register(Rule)
@@ -49,12 +49,13 @@ class RuleAdmin(ExtraUrlMixin, ModelAdmin):
         interpreter = mapping[rule.language](rule.definition)
 
         i = 0
-        for tp in TargetPopulation.objects.all():
+
+        for selection in HouseholdSelection.objects.all():
             i += 1
-            value = interpreter.execute(hh=tp.household)
-            tp.vulnerability_score = value
-            tp.save(update_fields=['vulnerability_score'])
-        self.message_user(request, "%s scores calculated" % i)
+            value = interpreter.execute(hh=selection.household)
+            selection.vulnerability_score = value
+            selection.save(update_fields=['vulnerability_score'])
+        self.message_user(request, f"{i} scores calculated")
 
     @link()
     def preview(self, request):

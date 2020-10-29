@@ -18,7 +18,13 @@
         "name": "Node",
         "possibleTypes": [
           {
-            "name": "PaymentRecordNode"
+            "name": "SteficonRuleNode"
+          },
+          {
+            "name": "TargetPopulationNode"
+          },
+          {
+            "name": "UserNode"
           },
           {
             "name": "UserBusinessAreaNode"
@@ -36,28 +42,25 @@
             "name": "CashPlanNode"
           },
           {
-            "name": "CashPlanPaymentVerificationNode"
+            "name": "PaymentRecordNode"
+          },
+          {
+            "name": "ServiceProviderNode"
           },
           {
             "name": "PaymentVerificationNode"
           },
           {
-            "name": "TargetPopulationNode"
-          },
-          {
-            "name": "UserNode"
-          },
-          {
-            "name": "RegistrationDataImportNode"
+            "name": "CashPlanPaymentVerificationNode"
           },
           {
             "name": "IndividualNode"
           },
           {
-            "name": "DocumentNode"
+            "name": "RegistrationDataImportNode"
           },
           {
-            "name": "ServiceProviderNode"
+            "name": "DocumentNode"
           },
           {
             "name": "BusinessAreaNode"
