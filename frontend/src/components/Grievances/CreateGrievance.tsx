@@ -11,7 +11,6 @@ import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
-import { LookUpHouseholdIndividual } from './LookUpHouseholdIndividual';
 import { Consent } from './Consent';
 import { LookUpSection } from './LookUpSection';
 

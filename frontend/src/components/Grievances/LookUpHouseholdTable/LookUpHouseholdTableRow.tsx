@@ -1,3 +1,4 @@
+import { Radio } from '@material-ui/core';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
@@ -7,17 +8,22 @@ import {
   HouseholdChoiceDataQuery,
   HouseholdNode,
 } from '../../../__generated__/graphql';
+import { Pointer } from '../../Pointer';
 import { ClickableTableRow } from '../../table/ClickableTableRow';
 import { UniversalMoment } from '../../UniversalMoment';
 
 interface LookUpHouseholdTableRowProps {
   household: HouseholdNode;
   choicesData: HouseholdChoiceDataQuery;
+  radioChangeHandler: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  selectedHousehold: string;
 }
 
 export function LookUpHouseholdTableRow({
   household,
   choicesData,
+  radioChangeHandler,
+  selectedHousehold,
 }: LookUpHouseholdTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
@@ -29,13 +35,20 @@ export function LookUpHouseholdTableRow({
     history.push(path);
   };
   return (
-    <ClickableTableRow
-      hover
-      onClick={handleClick}
-      role='checkbox'
-      key={household.unicefId}
-    >
-      <TableCell align='left'>{household.unicefId}</TableCell>
+    <ClickableTableRow hover role='checkbox' key={household.unicefId}>
+      <TableCell padding='checkbox'>
+        <Radio
+          color='primary'
+          checked={selectedHousehold === household.unicefId}
+          onChange={radioChangeHandler}
+          value={household.unicefId}
+          name='radio-button-household'
+          inputProps={{ 'aria-label': household.unicefId }}
+        />
+      </TableCell>
+      <TableCell onClick={handleClick} align='left'>
+        <Pointer>{household.unicefId}</Pointer>
+      </TableCell>
       <TableCell align='left'>{household.headOfHousehold.fullName}</TableCell>
       <TableCell align='left'>{household.size}</TableCell>
       <TableCell align='left'>{household.adminArea?.title || '-'}</TableCell>
