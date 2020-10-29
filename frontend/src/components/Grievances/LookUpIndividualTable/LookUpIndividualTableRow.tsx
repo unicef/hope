@@ -5,13 +5,19 @@ import { IndividualNode } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { getAgeFromDob, sexToCapitalize } from '../../../utils/utils';
 import { ClickableTableRow } from '../../table/ClickableTableRow';
+import { Pointer } from '../../Pointer';
+import { Radio } from '@material-ui/core';
 
 interface LookUpIndividualTableRowProps {
   individual: IndividualNode;
+  radioChangeHandler: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  selectedIndividual: string;
 }
 
 export function LookUpIndividualTableRow({
   individual,
+  radioChangeHandler,
+  selectedIndividual,
 }: LookUpIndividualTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
@@ -24,13 +30,20 @@ export function LookUpIndividualTableRow({
     history.push(path);
   };
   return (
-    <ClickableTableRow
-      hover
-      onClick={handleClick}
-      role='checkbox'
-      key={individual.id}
-    >
-      <TableCell align='left'>{individual.unicefId}</TableCell>
+    <ClickableTableRow hover role='checkbox' key={individual.id}>
+      <TableCell padding='checkbox'>
+        <Radio
+          color='primary'
+          checked={selectedIndividual === individual.unicefId}
+          onChange={radioChangeHandler}
+          value={individual.unicefId}
+          name='radio-button-household'
+          inputProps={{ 'aria-label': individual.unicefId }}
+        />
+      </TableCell>
+      <TableCell onClick={handleClick} align='left'>
+        <Pointer>{individual.unicefId}</Pointer>
+      </TableCell>
       <TableCell align='left'>{individual.fullName}</TableCell>
       <TableCell align='left'>
         {individual.household ? individual.household.unicefId : ''}
