@@ -36,26 +36,6 @@ const BoxWithBorders = styled.div`
   border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
   padding: 15px 0;
 `;
-const LookUp = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 10px;
-  border: 1.5px solid #043e91;
-  border-radius: 5px;
-  color: #033f91;
-  font-size: 16px;
-  text-align: center;
-  padding: 25px;
-  font-weight: 500;
-  cursor: pointer;
-`;
-const MarginRightSpan = styled.span`
-  margin-right: 5px;
-`;
-const StyledLink = styled(Link)`
-  text-decoration: none;
-`;
 
 export function CreateGrievance(): React.ReactElement {
   const businessArea = useBusinessArea();
@@ -95,7 +75,7 @@ export function CreateGrievance(): React.ReactElement {
                       <Field
                         name='category'
                         label='Category*'
-                        variant='filled'
+                        variant='outlined'
                         choices={[
                           {
                             value: 'Positive Feedback',
@@ -142,7 +122,7 @@ export function CreateGrievance(): React.ReactElement {
                         <Field
                           name='assignedTo'
                           label='Assigned to'
-                          variant='filled'
+                          variant='outlined'
                           choices={[
                             {
                               value: 'User1',
@@ -169,7 +149,7 @@ export function CreateGrievance(): React.ReactElement {
                           name='Description'
                           multiline
                           fullWidth
-                          variant='filled'
+                          variant='outlined'
                           label='Description'
                           component={FormikTextField}
                         />
@@ -178,7 +158,7 @@ export function CreateGrievance(): React.ReactElement {
                         <Field
                           name='administrativeLevel2'
                           label='Administrative Level 2'
-                          variant='filled'
+                          variant='outlined'
                           choices={[
                             {
                               value: 'Admin1',
@@ -200,7 +180,7 @@ export function CreateGrievance(): React.ReactElement {
                         <Field
                           name='area'
                           fullWidth
-                          variant='filled'
+                          variant='outlined'
                           label='Area / Village / Pay point'
                           component={FormikTextField}
                         />
@@ -209,7 +189,7 @@ export function CreateGrievance(): React.ReactElement {
                         <Field
                           name='languagesSpoken'
                           label='Languages Spoken'
-                          variant='filled'
+                          variant='outlined'
                           choices={[
                             {
                               value: 'English',
