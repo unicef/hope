@@ -3,9 +3,10 @@ from django.db import models
 
 # Create your models here.
 from steficon.interpreters import interpreters
+from utils.models import TimeStampedUUIDModel
 
 
-class Rule(models.Model):
+class Rule(TimeStampedUUIDModel):
     LANGUAGES = ([a.label.lower(), a.label] for a in interpreters)
     name = models.CharField(max_length=100, unique=True)
     definition = models.TextField(blank=True)
