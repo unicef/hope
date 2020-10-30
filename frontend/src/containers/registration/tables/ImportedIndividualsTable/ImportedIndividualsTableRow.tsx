@@ -20,6 +20,9 @@ interface ImportedIndividualsTableRowProps {
   individual: ImportedIndividualMinimalFragment;
   choices: HouseholdChoiceDataQuery;
 }
+const Pointer = styled.span`
+  cursor: pointer;
+`;
 
 export function ImportedIndividualsTableRow({
   individual,
@@ -37,9 +40,6 @@ export function ImportedIndividualsTableRow({
     choices.deduplicationGoldenRecordStatusChoices,
   );
 
-  const Pointer = styled.span`
-    cursor: pointer;
-  `;
   const handleClick = (): void => {
     const path = `/${businessArea}/registration-data-import/individual/${individual.id}`;
     history.push(path);

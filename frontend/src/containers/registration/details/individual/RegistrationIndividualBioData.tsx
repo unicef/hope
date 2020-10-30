@@ -31,6 +31,9 @@ const ContentLink = styled.div`
   text-decoration: underline;
   cursor: pointer;
 `;
+const BorderBox = styled.div`
+  border-bottom: 1px solid #e1e1e1;
+`;
 
 interface RegistrationIndividualBioDataProps {
   individual: ImportedIndividualDetailedFragment;
@@ -81,9 +84,6 @@ export function RegistrationIndividualsBioData({
       </LabelizedField>
     </Grid>
   ));
-  const BorderBox = styled.div`
-    border-bottom: 1px solid #e1e1e1;
-  `;
 
   return (
     <Overview>

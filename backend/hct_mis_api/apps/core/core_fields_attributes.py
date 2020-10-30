@@ -825,33 +825,6 @@ CORE_FIELDS_ATTRIBUTES = [
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "pregnant_i_c",
     },
-]
-
-HOUSEHOLD_ID_FIELDS = [
-    {
-        "id": "746b3d2d-19c5-4b91-ad37-d230e1d33eb5",
-        "type": TYPE_ID,
-        "name": "household_id",
-        "lookup": "household_id",
-        "required": False,
-        "label": {"English(EN)": "Household ID"},
-        "hint": "",
-        "choices": [],
-        "associated_with": _HOUSEHOLD,
-        "xlsx_field": "household_id",
-    },
-    {
-        "id": "1079bfd0-fc51-41ab-aa10-667e6b2034b9",
-        "type": TYPE_ID,
-        "name": "household_id",
-        "lookup": "household_id",
-        "required": False,
-        "label": {"English(EN)": "Household ID"},
-        "hint": "",
-        "choices": [],
-        "associated_with": _INDIVIDUAL,
-        "xlsx_field": "household_id",
-    },
     {
         "id": "dca6748f-7831-4fa1-b5c8-e708a456656b",
         "type": TYPE_SELECT_ONE,
@@ -1105,6 +1078,33 @@ HOUSEHOLD_ID_FIELDS = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "who_answers_alt_phone_i_c",
+    },
+]
+
+HOUSEHOLD_ID_FIELDS = [
+    {
+        "id": "746b3d2d-19c5-4b91-ad37-d230e1d33eb5",
+        "type": TYPE_ID,
+        "name": "household_id",
+        "lookup": "household_id",
+        "required": False,
+        "label": {"English(EN)": "Household ID"},
+        "hint": "",
+        "choices": [],
+        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "household_id",
+    },
+    {
+        "id": "1079bfd0-fc51-41ab-aa10-667e6b2034b9",
+        "type": TYPE_ID,
+        "name": "household_id",
+        "lookup": "household_id",
+        "required": False,
+        "label": {"English(EN)": "Household ID"},
+        "hint": "",
+        "choices": [],
+        "associated_with": _INDIVIDUAL,
+        "xlsx_field": "household_id",
     },
 ]
 
