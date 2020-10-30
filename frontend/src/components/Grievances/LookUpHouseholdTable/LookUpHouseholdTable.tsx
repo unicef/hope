@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { UniversalTable } from '../../../containers/tables/UniversalTable';
 import {
@@ -35,7 +35,10 @@ export const LookUpHouseholdTable = ({
   if (filter.program) {
     initialVariables.programs = [filter.program];
   }
-
+  const [selectedHousehold, setSelectedHousehold] = useState('');
+  const handleRadioChange = (event) => {
+    setSelectedHousehold(event.target.value);
+  };
   return (
     <TableWrapper>
       <UniversalTable<HouseholdNode, AllHouseholdsQueryVariables>
@@ -48,6 +51,8 @@ export const LookUpHouseholdTable = ({
           <LookUpHouseholdTableRow
             key={row.id}
             household={row}
+            radioChangeHandler={handleRadioChange}
+            selectedHousehold={selectedHousehold}
             choicesData={choicesData}
           />
         )}
