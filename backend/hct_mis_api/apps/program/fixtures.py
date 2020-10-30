@@ -6,6 +6,7 @@ from factory import fuzzy
 from pytz import utc
 
 from core.fixtures import AdminAreaFactory
+from payment.models import PaymentRecord
 from program.models import Program, CashPlan
 
 
@@ -55,7 +56,7 @@ class CashPlanFactory(factory.DjangoModelFactory):
     coverage_duration = factory.fuzzy.FuzzyInteger(1, 4)
     coverage_unit = factory.Faker("random_element", elements=["Day(s)", "Week(s)", "Month(s)", "Year(s)"],)
     comments = factory.Faker("sentence", nb_words=6, variable_nb_words=True, ext_word_list=None,)
-    delivery_type = factory.Faker("random_element", elements=["Deposit to Card", "Transfer", "Cash"])
+    delivery_type = fuzzy.FuzzyChoice(PaymentRecord.DELIVERY_TYPE_CHOICE, getter=lambda c: c[0],)
     assistance_measurement = factory.Faker("currency_name")
     assistance_through = factory.Faker("random_element", elements=["ING", "Bank of America", "mBank"])
     vision_id = factory.Faker("uuid4")
