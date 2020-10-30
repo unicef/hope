@@ -9,31 +9,31 @@ export interface Props {
   disabled: boolean;
   grievanceTicketsNumber: number;
 }
+const DialogTitleWrapper = styled.div`
+  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
+`;
+
+const DialogFooter = styled.div`
+  padding: 12px 16px;
+  margin: 0;
+  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
+  text-align: right;
+`;
+
+const DialogContainer = styled.div`
+  width: 700px;
+`;
+
 export function CreateGrievanceTickets({
   disabled,
   grievanceTicketsNumber,
 }: Props): React.ReactElement {
   const [DialogOpen, setDialogOpen] = useState(false);
-  const DialogTitleWrapper = styled.div`
-    border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  `;
-
-  const DialogFooter = styled.div`
-    padding: 12px 16px;
-    margin: 0;
-    border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-    text-align: right;
-  `;
-
-  const DialogContainer = styled.div`
-    width: 700px;
-  `;
 
   const createGrievanceTickets = (): void => {
     console.log('create');
     setDialogOpen(false);
   };
-
   return (
     <>
       <Button

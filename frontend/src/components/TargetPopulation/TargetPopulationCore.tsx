@@ -20,48 +20,24 @@ const Label = styled.p`
 
 export function TargetPopulationCore({
   candidateList,
-  targetPopulationList = null,
   id,
-  selectedTab = 0,
   status,
   targetPopulation,
 }): React.ReactElement {
   if (!candidateList) return null;
   const { rules: candidateListRules } = candidateList;
-  const totalNumOfHouseholds =
-    selectedTab === 0
-      ? targetPopulation.candidateListTotalHouseholds
-      : targetPopulation.finalListTotalHouseholds;
-  const totalNumOfIndividuals =
-    selectedTab === 0
-      ? targetPopulation.candidateListTotalIndividuals
-      : targetPopulation.finalListTotalIndividuals;
+  const totalNumOfHouseholds = targetPopulation.candidateListTotalHouseholds;
+  const totalNumOfIndividuals = targetPopulation.candidateListTotalIndividuals;
   return (
     <>
-      <TargetingCriteria
-        selectedTab={selectedTab}
-        candidateListRules={candidateListRules}
-        targetPopulationRules={targetPopulationList?.rules}
-      />
+      <TargetingCriteria candidateListRules={candidateListRules} />
       <Results
-        resultsData={
-          selectedTab === 0
-            ? targetPopulation.candidateStats
-            : targetPopulation.finalStats
-        }
+        resultsData={targetPopulation.candidateStats}
         totalNumOfHouseholds={totalNumOfHouseholds}
         totalNumOfIndividuals={totalNumOfIndividuals}
       />
       {candidateListRules.length ? (
-        <TargetingHouseholds
-          id={id}
-          status={status}
-          selectedTab={selectedTab}
-          candidateListTotalHouseholds={
-            targetPopulation.candidateListTotalHouseholds
-          }
-          finalListTotalHouseholds={targetPopulation.finalListTotalHouseholds}
-        />
+        <TargetingHouseholds id={id} status={status} />
       ) : (
         <PaperContainer>
           <Typography variant='h6'>

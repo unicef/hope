@@ -9,6 +9,14 @@ import { UniversalMoment } from '../../../components/UniversalMoment';
 import { StatusBox } from '../../../components/StatusBox';
 import { userStatusToColor } from '../../../utils/utils';
 
+const StatusContainer = styled.div`
+  min-width: 120px;
+  max-width: 200px;
+`;
+
+const GreyText = styled.p`
+  color: #959698;
+`;
 interface UsersListTableRowProps {
   user: UserNode;
 }
@@ -18,14 +26,6 @@ export function UsersListTableRow({
 }: UsersListTableRowProps): React.ReactElement {
   const [open, setOpen] = useState(false);
 
-  const StatusContainer = styled.div`
-    min-width: 120px;
-    max-width: 200px;
-  `;
-
-  const GreyText = styled.p`
-    color: #959698;
-  `;
   const mappedRoles = user?.userRoles?.map((el) => (
     <p>
       {el.businessArea.name} / {el.role.name}

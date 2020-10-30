@@ -9,27 +9,23 @@ import { OverviewContainer } from '../OverviewContainer';
 import { PageHeader } from '../PageHeader';
 import { StatusBox } from '../StatusBox';
 
+const ListContainer = styled.div`
+  padding: 22px;
+`;
+const Title = styled.div`
+  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
+`;
+const StatusContainer = styled.div`
+  min-width: 120px;
+  max-width: 200px;
+`;
+
 export function GrievancesList(): React.ReactElement {
   const { id } = useParams();
   // const { data, loading } = useGrievancesQuery({
   //   variables: { id },
   // });
   const businessArea = useBusinessArea();
-
-  const ListContainer = styled.div`
-    padding: 22px;
-  `;
-  const Title = styled.div`
-    padding-bottom: ${({ theme }) => theme.spacing(8)}px;
-  `;
-  const StatusContainer = styled.div`
-    min-width: 120px;
-    max-width: 200px;
-  `;
-  const StyledLink = styled(Link)`
-    text-decoration: none;
-    color: #fff;
-  `;
 
   return (
     <>
@@ -38,13 +34,10 @@ export function GrievancesList(): React.ReactElement {
           <Button
             variant='contained'
             color='primary'
-            data-cy='button-grievance-create-new'
+            component={Link}
+            to={`/${businessArea}/grievance-and-feedback/new-ticket`}
           >
-            <StyledLink
-              to={`/${businessArea}/grievance-and-feedback/new-ticket`}
-            >
-              NEW TICKET
-            </StyledLink>
+            NEW TICKET
           </Button>
         </>
       </PageHeader>
