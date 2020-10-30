@@ -12,6 +12,14 @@ import { PageHeader } from '../PageHeader';
 import { Notes } from './Notes';
 import { PastTickets } from './PastTickets';
 
+const NotesContainer = styled.div`
+  padding: 22px;
+`;
+
+const Title = styled.div`
+  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
+`;
+
 export function GrievanceDetails(): React.ReactElement {
   const { id } = useParams();
   // const { data, loading } = useGrievancesQuery({
@@ -31,13 +39,6 @@ export function GrievanceDetails(): React.ReactElement {
       to: `/${businessArea}/grievance-and-feedback/`,
     },
   ];
-  const NotesContainer = styled.div`
-    padding: 22px;
-  `;
-
-  const Title = styled.div`
-    padding-bottom: ${({ theme }) => theme.spacing(8)}px;
-  `;
 
   const FieldsArray: {
     label: string;
