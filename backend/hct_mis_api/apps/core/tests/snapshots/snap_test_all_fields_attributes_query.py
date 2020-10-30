@@ -18975,6 +18975,652 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'name': 'male_adults_disabled_count',
                 'required': True,
                 'type': 'INTEGER'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                    {
+                        'labelEn': 'No',
+                        'labels': [
+                            {
+                                'label': 'No',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'NO'
+                    },
+                    {
+                        'labelEn': 'Not provided',
+                        'labels': [
+                            {
+                                'label': 'Not provided',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'NOT_PROVIDED'
+                    },
+                    {
+                        'labelEn': 'Yes',
+                        'labels': [
+                            {
+                                'label': 'Yes',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'YES'
+                    }
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'Does the individual work?',
+                'labels': [
+                    {
+                        'label': 'Does the individual work?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'work_status',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                    {
+                        'labelEn': 'Difficulty communicating (e.g understanding or being understood)',
+                        'labels': [
+                            {
+                                'label': 'Difficulty communicating (e.g understanding or being understood)',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'COMMUNICATING'
+                    },
+                    {
+                        'labelEn': 'Difficulty hearing (even if using a hearing aid)',
+                        'labels': [
+                            {
+                                'label': 'Difficulty hearing (even if using a hearing aid)',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'HEARING'
+                    },
+                    {
+                        'labelEn': 'Difficulty remembering or concentrating',
+                        'labels': [
+                            {
+                                'label': 'Difficulty remembering or concentrating',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MEMORY'
+                    },
+                    {
+                        'labelEn': 'None',
+                        'labels': [
+                            {
+                                'label': 'None',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'NONE'
+                    },
+                    {
+                        'labelEn': 'Difficulty seeing (even if wearing glasses)',
+                        'labels': [
+                            {
+                                'label': 'Difficulty seeing (even if wearing glasses)',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SEEING'
+                    },
+                    {
+                        'labelEn': 'Difficulty with self care (washing, dressing)',
+                        'labels': [
+                            {
+                                'label': 'Difficulty with self care (washing, dressing)',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SELF_CARE'
+                    },
+                    {
+                        'labelEn': 'Difficulty walking or climbing steps',
+                        'labels': [
+                            {
+                                'label': 'Difficulty walking or climbing steps',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'WALKING'
+                    }
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'Does the individual have disability?',
+                'labels': [
+                    {
+                        'label': 'Does the individual have disability?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'observed_disability',
+                'required': False,
+                'type': 'SELECT_MANY'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                    {
+                        'labelEn': 'Cannot do at all',
+                        'labels': [
+                            {
+                                'label': 'Cannot do at all',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'CANNOT_DO'
+                    },
+                    {
+                        'labelEn': 'A lot of difficulty',
+                        'labels': [
+                            {
+                                'label': 'A lot of difficulty',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'LOT_DIFFICULTY'
+                    },
+                    {
+                        'labelEn': 'Some difficulty',
+                        'labels': [
+                            {
+                                'label': 'Some difficulty',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SOME_DIFFICULTY'
+                    }
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'If the individual has difficulty seeing, what is the severity?',
+                'labels': [
+                    {
+                        'label': 'If the individual has difficulty seeing, what is the severity?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'seeing_disability',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                    {
+                        'labelEn': 'Cannot do at all',
+                        'labels': [
+                            {
+                                'label': 'Cannot do at all',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'CANNOT_DO'
+                    },
+                    {
+                        'labelEn': 'A lot of difficulty',
+                        'labels': [
+                            {
+                                'label': 'A lot of difficulty',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'LOT_DIFFICULTY'
+                    },
+                    {
+                        'labelEn': 'Some difficulty',
+                        'labels': [
+                            {
+                                'label': 'Some difficulty',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SOME_DIFFICULTY'
+                    }
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'If the individual has difficulty hearing, what is the severity?',
+                'labels': [
+                    {
+                        'label': 'If the individual has difficulty hearing, what is the severity?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'hearing_disability',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                    {
+                        'labelEn': 'Cannot do at all',
+                        'labels': [
+                            {
+                                'label': 'Cannot do at all',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'CANNOT_DO'
+                    },
+                    {
+                        'labelEn': 'A lot of difficulty',
+                        'labels': [
+                            {
+                                'label': 'A lot of difficulty',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'LOT_DIFFICULTY'
+                    },
+                    {
+                        'labelEn': 'Some difficulty',
+                        'labels': [
+                            {
+                                'label': 'Some difficulty',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SOME_DIFFICULTY'
+                    }
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'If the individual has difficulty walking or climbing steps, what is the severity?',
+                'labels': [
+                    {
+                        'label': 'If the individual has difficulty walking or climbing steps, what is the severity?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'physical_disability',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                    {
+                        'labelEn': 'Cannot do at all',
+                        'labels': [
+                            {
+                                'label': 'Cannot do at all',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'CANNOT_DO'
+                    },
+                    {
+                        'labelEn': 'A lot of difficulty',
+                        'labels': [
+                            {
+                                'label': 'A lot of difficulty',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'LOT_DIFFICULTY'
+                    },
+                    {
+                        'labelEn': 'Some difficulty',
+                        'labels': [
+                            {
+                                'label': 'Some difficulty',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SOME_DIFFICULTY'
+                    }
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'If the individual has difficulty remembering or concentrating, what is the severity?',
+                'labels': [
+                    {
+                        'label': 'If the individual has difficulty remembering or concentrating, what is the severity?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'memory_disability',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                    {
+                        'labelEn': 'Cannot do at all',
+                        'labels': [
+                            {
+                                'label': 'Cannot do at all',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'CANNOT_DO'
+                    },
+                    {
+                        'labelEn': 'A lot of difficulty',
+                        'labels': [
+                            {
+                                'label': 'A lot of difficulty',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'LOT_DIFFICULTY'
+                    },
+                    {
+                        'labelEn': 'Some difficulty',
+                        'labels': [
+                            {
+                                'label': 'Some difficulty',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SOME_DIFFICULTY'
+                    }
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'Do you have difficulty (with self-care such as) washing all over or dressing',
+                'labels': [
+                    {
+                        'label': 'Do you have difficulty (with self-care such as) washing all over or dressing',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'selfcare_disability',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                    {
+                        'labelEn': 'Cannot do at all',
+                        'labels': [
+                            {
+                                'label': 'Cannot do at all',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'CANNOT_DO'
+                    },
+                    {
+                        'labelEn': 'A lot of difficulty',
+                        'labels': [
+                            {
+                                'label': 'A lot of difficulty',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'LOT_DIFFICULTY'
+                    },
+                    {
+                        'labelEn': 'Some difficulty',
+                        'labels': [
+                            {
+                                'label': 'Some difficulty',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SOME_DIFFICULTY'
+                    }
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'If the individual has difficulty communicating, what is the severity?',
+                'labels': [
+                    {
+                        'label': 'If the individual has difficulty communicating, what is the severity?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'comms_disability',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'Village',
+                'labels': [
+                    {
+                        'label': 'Village',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'village',
+                'required': False,
+                'type': 'STRING'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'Data collection start date',
+                'labels': [
+                    {
+                        'label': 'Data collection start date',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'start',
+                'required': False,
+                'type': 'STRING'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'Data collection end date',
+                'labels': [
+                    {
+                        'label': 'Data collection end date',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'end',
+                'required': False,
+                'type': 'STRING'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'Device ID',
+                'labels': [
+                    {
+                        'label': 'Device ID',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'deviceid',
+                'required': False,
+                'type': 'STRING'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'Name of the enumerator',
+                'labels': [
+                    {
+                        'label': 'Name of the enumerator',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'name_enumerator',
+                'required': True,
+                'type': 'STRING'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                    {
+                        'labelEn': 'Partner',
+                        'labels': [
+                            {
+                                'label': 'Partner',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'PARTNER'
+                    },
+                    {
+                        'labelEn': 'UNICEF',
+                        'labels': [
+                            {
+                                'label': 'UNICEF',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UNICEF'
+                    }
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'Organization of the enumerator',
+                'labels': [
+                    {
+                        'label': 'Organization of the enumerator',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'org_enumerator',
+                'required': True,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                    {
+                        'labelEn': 'Government partners',
+                        'labels': [
+                            {
+                                'label': 'Government partners',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'GOVERNMENT_PARTNER'
+                    },
+                    {
+                        'labelEn': 'Humanitarian partners',
+                        'labels': [
+                            {
+                                'label': 'Humanitarian partners',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'HUMANITARIAN_PARTNER'
+                    },
+                    {
+                        'labelEn': 'Private partners',
+                        'labels': [
+                            {
+                                'label': 'Private partners',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'PRIVATE_PARTNER'
+                    },
+                    {
+                        'labelEn': 'UNICEF',
+                        'labels': [
+                            {
+                                'label': 'UNICEF',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UNICEF'
+                    }
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'Which organizations may we share your information with?',
+                'labels': [
+                    {
+                        'label': 'Which organizations may we share your information with?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'consent_sharing',
+                'required': True,
+                'type': 'SELECT_MANY'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'Name of partner organization',
+                'labels': [
+                    {
+                        'label': 'Name of partner organization',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'org_name_enumerator',
+                'required': True,
+                'type': 'STRING'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'Who answers this phone?',
+                'labels': [
+                    {
+                        'label': 'Who answers this phone?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'who_answers_phone',
+                'required': False,
+                'type': 'STRING'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'Who answers this phone?',
+                'labels': [
+                    {
+                        'label': 'Who answers this phone?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'who_answers_alt_phone',
+                'required': False,
+                'type': 'STRING'
             }
         ]
     }
