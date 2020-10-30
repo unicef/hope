@@ -24,6 +24,7 @@ import {
 } from '../../../__generated__/graphql';
 import { CashPlan } from '../../../apollo/queries/CashPlan';
 import { TARGET_POPULATION_QUERY } from '../../../apollo/queries/TargetPopulation';
+import { CandidateHouseholdsListByTargetingCriteria } from '../../../apollo/targetPopulation/CandidateHouseholdListByTargetingCriteria';
 
 const PaperContainer = styled(Paper)`
   margin: ${({ theme }) => theme.spacing(5)}px;
@@ -164,7 +165,7 @@ function VulnerabilityScoreComponent({
 }: {
   targetPopulation: TargetPopulationQuery['targetPopulation'];
 }): React.ReactElement {
-  const [setSteficonRule] = useSetSteficonRuleOnTargetPopulationMutation({
+  const options = {
     refetchQueries: () => [
       {
         query: TARGET_POPULATION_QUERY,
@@ -172,18 +173,20 @@ function VulnerabilityScoreComponent({
           id: targetPopulation?.id,
         },
       },
-    ],
-  });
-  const [updateTargetPopulation] = useUpdateTpMutation({
-    refetchQueries: () => [
       {
-        query: TARGET_POPULATION_QUERY,
+        query: CandidateHouseholdsListByTargetingCriteria,
         variables: {
-          id: targetPopulation?.id,
+          targetPopulation: targetPopulation?.id,
+          first: 10,
+          orderBy: null
         },
       },
     ],
-  });
+  };
+  const [setSteficonRule] = useSetSteficonRuleOnTargetPopulationMutation(
+    options,
+  );
+  const [updateTargetPopulation] = useUpdateTpMutation(options);
   const [vulnerabilityScoreMinValue, setVulnerabilityScoreMinValue] = useState(
     targetPopulation?.vulnerabilityScoreMin,
   );
