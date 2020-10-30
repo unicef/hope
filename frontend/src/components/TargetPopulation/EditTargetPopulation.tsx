@@ -12,10 +12,10 @@ import {
   useUpdateTpMutation,
 } from '../../__generated__/graphql';
 import { useSnackbar } from '../../hooks/useSnackBar';
-import { CandidateListTab } from './Edit/CandidateListTab';
-import { TargetPopulationProgramme } from './TargetPopulationProgramme';
 import { TARGET_POPULATION_QUERY } from '../../apollo/queries/TargetPopulation';
 import { getTargetingCriteriaVariables } from '../../utils/targetingUtils';
+import { CandidateListTab } from './Edit/CandidateListTab';
+import { TargetPopulationProgramme } from './TargetPopulationProgramme';
 
 const ButtonContainer = styled.span`
   margin: 0 ${({ theme }) => theme.spacing(2)}px;
@@ -66,9 +66,21 @@ export function EditTargetPopulation({
         return true;
     }
   };
+
+  const handleValidate = (values): { candidateListCriterias?: string } => {
+    const { candidateListCriterias } = values;
+    const errors: { candidateListCriterias?: string } = {};
+    if (!candidateListCriterias.length) {
+      errors.candidateListCriterias =
+        'You need to select at least one targeting criteria';
+    }
+    return errors;
+  };
+
   return (
     <Formik
       initialValues={initialValues}
+      validate={handleValidate}
       onSubmit={async (values) => {
         await mutate({
           variables: {
@@ -135,7 +147,11 @@ export function EditTargetPopulation({
                   color='primary'
                   type='submit'
                   onClick={submitForm}
-                  disabled={!values.name}
+                  disabled={
+                    values.criterias?.length +
+                      values.candidateListCriterias?.length ===
+                      0 || !values.name
+                  }
                 >
                   Save
                 </Button>

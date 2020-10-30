@@ -113,7 +113,7 @@ POSTGRES_DB: {{ .Values.postgresql.postgresqlDatabase }}
 POSTGRES_USER: {{ .Values.postgresql.postgresqlUsername }}
 POSTGRES_HOST: {{ template "hope.postgresql.fullname" . }}
 {{- else }}
-POSTGRES_DB: {{ .Values.postgresql.externalDatabase.name }}
+POSTGRES_DB: {{ .Values.postgresql.externalDatabase.db }}
 POSTGRES_USER: {{ .Values.postgresql.externalDatabase.user }}
 POSTGRES_HOST: {{ .Values.postgresql.externalDatabase.host }}
 {{- end -}}
@@ -142,9 +142,9 @@ POSTGRES_PORT: "5432"
 AIRFLOW_DATABASE_PORT: "5432"
 AIRFLOW_POSTGRES_PORT: "5432"
 {{- else }}
-AIRFLOW_DATABASE_NAME: {{ .Values.postgresql.externalDatabase.name }}
-AIRFLOW_DATABASE_USERNAME: {{ .Values.postgresql.externalDatabase.user }}
-AIRFLOW_DATABASE_HOST: {{ .Values.postgresql.externalDatabase.host }}
+AIRFLOW_DATABASE_NAME: {{ .Values.postgresql.postgresqlDatabase }}
+AIRFLOW_DATABASE_USERNAME: {{ .Values.postgresql.postgresqlUsername }}
+AIRFLOW_DATABASE_HOST: {{ template "hope.postgresql.fullname" . }}
 POSTGRES_PORT: "5432"
 AIRFLOW_DATABASE_PORT: "5432"
 AIRFLOW_POSTGRES_PORT: "5432"
@@ -163,9 +163,10 @@ AIRFLOW_DATABASE_PASSWORD: {{ .Values.postgresql.postgresqlPassword | b64enc | q
 AIRFLOW__CORE__SQL_ALCHEMY_CONN: {{ $temp | b64enc | quote }}
 AIRFLOW__CELERY__RESULT_BACKEND: {{ $tempWorker | b64enc | quote }}
 {{- else }}
-{{- $temp :=  printf "postgresql+psycopg2://%s:%s@%s:5432/%s" .Values.postgresql.externalDatabase.user .Values.postgresql.externalDatabase.host .Values.postgresql.externalDatabase.host .Values.postgresql.externalDatabase.airflowName }}
-{{- $tempWorker :=  printf "db+postgresql://%s:%s@%s:5432/%s" .Values.postgresql.externalDatabase.user .Values.postgresql.externalDatabase.host .Values.postgresql.externalDatabase.host .Values.postgresql.externalDatabase.airflowName }}
-AIRFLOW_DATABASE_PASSWORD: {{ .Values.postgresql.externalDatabase.password | b64enc | quote }}
+{{- $fullName := include "hope.postgresql.fullname" . -}}
+{{- $temp :=  printf "postgresql+psycopg2://%s:%s@%s:5432/%s" .Values.postgresql.postgresqlUsername .Values.postgresql.postgresqlPassword $fullName .Values.postgresql.postgresqlAirflowDatabase }}
+{{- $tempWorker :=  printf "db+postgresql://%s:%s@%s:5432/%s" .Values.postgresql.postgresqlUsername .Values.postgresql.postgresqlPassword $fullName .Values.postgresql.postgresqlAirflowDatabase }}
+AIRFLOW_DATABASE_PASSWORD: {{ .Values.postgresql.postgresqlPassword | b64enc | quote }}
 AIRFLOW__CORE__SQL_ALCHEMY_CONN: {{ $temp | b64enc | quote }}
 AIRFLOW__CELERY__RESULT_BACKEND: {{ $tempWorker | b64enc | quote }}
 {{- end -}}
@@ -181,7 +182,7 @@ POSTGRES_REGISTRATION_DATAHUB_DB: {{ .Values.registrationdatahubpostgresql.postg
 POSTGRES_REGISTRATION_DATAHUB_USER: {{ .Values.registrationdatahubpostgresql.postgresqlUsername }}
 POSTGRES_REGISTRATION_DATAHUB_HOST: {{ template "hope.registrationdatahubpostgresql.fullname" .}}
 {{- else }}
-POSTGRES_REGISTRATION_DATAHUB_DB: {{ .Values.registrationdatahubpostgresql.externalDatabase.name }}
+POSTGRES_REGISTRATION_DATAHUB_DB: {{ .Values.registrationdatahubpostgresql.externalDatabase.db }}
 POSTGRES_REGISTRATION_DATAHUB_USER: {{ .Values.registrationdatahubpostgresql.externalDatabase.user }}
 POSTGRES_REGISTRATION_DATAHUB_HOST: {{ .Values.registrationdatahubpostgresql.externalDatabase.host }}
 {{- end -}}
@@ -208,7 +209,7 @@ POSTGRES_CASHASSIST_DATAHUB_DB: {{ .Values.cashassistdatahubpostgresql.postgresq
 POSTGRES_CASHASSIST_DATAHUB_USER: {{ .Values.cashassistdatahubpostgresql.postgresqlUsername }}
 POSTGRES_CASHASSIST_DATAHUB_HOST: {{ template "hope.cashassistdatahubpostgresql.fullname" .}}
 {{- else }}
-POSTGRES_CASHASSIST_DATAHUB_DB: {{ .Values.cashassistdatahubpostgresql.externalDatabase.name }}
+POSTGRES_CASHASSIST_DATAHUB_DB: {{ .Values.cashassistdatahubpostgresql.externalDatabase.db }}
 POSTGRES_CASHASSIST_DATAHUB_USER: {{ .Values.cashassistdatahubpostgresql.externalDatabase.user }}
 POSTGRES_CASHASSIST_DATAHUB_HOST: {{ .Values.cashassistdatahubpostgresql.externalDatabase.host }}
 {{- end -}}

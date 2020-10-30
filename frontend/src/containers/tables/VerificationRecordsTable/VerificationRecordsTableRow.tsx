@@ -2,7 +2,7 @@ import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import { Checkbox, TableRow } from '@material-ui/core';
+import { TableRow } from '@material-ui/core';
 import { PaymentVerificationNodeEdge } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
@@ -25,10 +25,7 @@ interface VerificationRecordsTableRowProps {
   checkboxClickHandler: () => void;
 }
 
-export function VerificationRecordsTableRow({
-  record,
-  selected,
-}): React.ReactElement {
+export function VerificationRecordsTableRow({ record }): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
   const handleClick = (): void => {
