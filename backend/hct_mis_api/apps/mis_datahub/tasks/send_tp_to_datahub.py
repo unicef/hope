@@ -74,7 +74,7 @@ class SendTPToDatahubTask:
 
     @staticmethod
     def remove_duplicated_households(households_to_create):
-        households_to_create_deduped_dict = {household.id: household for household in households_to_create}
+        households_to_create_deduped_dict = {household.mis_id: household for household in households_to_create}
         households_to_create_deduped = [value for key, value in households_to_create_deduped_dict.items()]
         return households_to_create_deduped
 
@@ -120,12 +120,7 @@ class SendTPToDatahubTask:
         household_ids = households.values_list("id", flat=True)
 
         for household in households:
-            dh_households, dh_individuals = self.send_household(
-                household,
-                program,
-                dh_session,
-                household_ids,
-            )
+            dh_households, dh_individuals = self.send_household(household, program, dh_session, household_ids,)
             for dh_household in dh_households:
                 dh_household.session = dh_session
                 households_to_bulk_create.append(dh_household)
@@ -143,7 +138,6 @@ class SendTPToDatahubTask:
         target_population.sent_to_datahub = True
         target_population.save()
         households.update(last_sync_at=timezone.now())
-
 
     def build_arg_dict(self, model_object, mapping_dict):
         args = {}
@@ -169,10 +163,7 @@ class SendTPToDatahubTask:
 
         for document in individual.documents.all():
             dh_document_args = self.build_arg_dict(document, SendTPToDatahubTask.MAPPING_DOCUMENT_DICT)
-            dh_document, _ = dh_mis_models.Document.objects.get_or_create(
-                **dh_document_args,
-                session=dh_session,
-            )
+            dh_document, _ = dh_mis_models.Document.objects.get_or_create(**dh_document_args, session=dh_session,)
 
         dh_individual.unhcr_id = self.get_unhcr_individual_id(individual)
         roles = individual.households_and_roles.filter(household__id__in=household_ids)
@@ -197,7 +188,9 @@ class SendTPToDatahubTask:
         head_of_household = household.head_of_household
         collectors_ids = list(household.representatives.values_list("id", flat=True))
         collectors_household_ids = list(
-            household.representatives.values_list("household_id", flat=True).distinct("household_id")
+            household.representatives.exclude(household_id__in=household_ids)
+            .values_list("household_id", flat=True)
+            .distinct("household_id")
         )
         collectors_households = Household.objects.filter(id__in=collectors_household_ids)
         for collectors_household in collectors_households:
@@ -212,12 +205,7 @@ class SendTPToDatahubTask:
             individuals = household.individuals.all()
             for individual in individuals:
                 if self.should_send_individual(individual, household):
-                    dh_individual = self.send_individual(
-                        individual,
-                        dh_household,
-                        dh_session,
-                        household_ids,
-                    )
+                    dh_individual = self.send_individual(individual, dh_household, dh_session, household_ids,)
                     dh_individual.session = dh_session
                     individuals_to_create.append(dh_individual)
         else:
@@ -233,12 +221,7 @@ class SendTPToDatahubTask:
             )
             for individual in individuals:
                 if self.should_send_individual(individual, household):
-                    dh_individual = self.send_individual(
-                        individual,
-                        dh_household,
-                        dh_session,
-                        household_ids,
-                    )
+                    dh_individual = self.send_individual(individual, dh_household, dh_session, household_ids,)
                     dh_individual.session = dh_session
                     individuals_to_create.append(dh_individual)
         individuals.update(last_sync_at=timezone.now())

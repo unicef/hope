@@ -1,12 +1,16 @@
 import datetime as dt
 import re
-from collections import MutableMapping
+from collections import MutableMapping, OrderedDict
 from typing import List
 
 from django.core.exceptions import ValidationError
 from django.db.models import Q, F, Model
+from django.db.models.functions import Lower
 from django.forms import model_to_dict
 from django.template.defaultfilters import slugify
+from django.utils.itercompat import is_iterable
+from django_filters import OrderingFilter
+from django_filters.constants import EMPTY_VALUES
 
 
 class CaseInsensitiveTuple(tuple):
@@ -221,8 +225,8 @@ def age_to_birth_date_range_query(field_name, age_min, age_max):
     return Q(**query_dict)
 
 
-def age_to_birth_date_query(comparision_method, args, rule_filter):
-    field_name = f"{'individuals' if rule_filter.head_of_household else 'head_of_household'}__birth_date"
+def age_to_birth_date_query(comparision_method, args):
+    field_name = "individuals__birth_date"
     comparision_method_args_count = {
         "RANGE": 2,
         "NOT_IN_RANGE": 2,
@@ -367,6 +371,60 @@ def build_arg_dict_from_dict(data_dict, mapping_dict):
     for key, value in mapping_dict.items():
         args[key] = data_dict.get(value)
     return args
+
+
+class CustomOrderingFilter(OrderingFilter):
+    def filter(self, qs, value):
+        if value in EMPTY_VALUES:
+            return qs
+
+        ordering = [self.get_ordering_value(param) for param in value]
+        new_ordering = []
+        for field in ordering:
+            field_name = field
+            desc = False
+            if field.startswith("-"):
+                field_name = field[1:]
+                desc = True
+            if isinstance(self.lower_dict.get(field_name),Lower):
+                lower_field = self.lower_dict.get(field_name)
+                if desc:
+                    lower_field = lower_field.desc()
+                new_ordering.append(lower_field)
+            else:
+                new_ordering.append(field)
+        return qs.order_by(*new_ordering)
+
+    def normalize_fields(self, fields):
+        """
+        Normalize the fields into an ordered map of {field name: param name}
+        """
+        # fields is a mapping, copy into new OrderedDict
+        if isinstance(fields, dict):
+            return OrderedDict(fields)
+
+        # convert iterable of values => iterable of pairs (field name, param name)
+        assert is_iterable(fields), "'fields' must be an iterable (e.g., a list, tuple, or mapping)."
+
+        # fields is an iterable of field names
+        assert all(
+            isinstance(field, (str, Lower))
+            or is_iterable(field)
+            and len(field) == 2  # may need to be wrapped in parens
+            for field in fields
+        ), "'fields' must contain strings or (field name, param name) pairs."
+
+        new_fields = []
+        self.lower_dict = {}
+
+        for field in fields:
+            field_name = field
+            if isinstance(field, Lower):
+                field_name = field.source_expressions[0].name
+            new_fields.append(field_name)
+            self.lower_dict[field_name] = field
+
+        return OrderedDict([(f, f) if isinstance(f, (str, Lower)) else f for f in new_fields])
 
 
 def is_valid_uuid(uuid_str):

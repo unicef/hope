@@ -13,6 +13,10 @@ import { useCheckAgainstSanctionListUploadMutation } from '../../__generated__/g
 import { DropzoneField } from '../../components/DropzoneField';
 import { PageHeader } from '../../components/PageHeader';
 
+const ButtonsContainer = styled.div`
+  width: 500px;
+`;
+
 export function SanctionList(): React.ReactElement {
   const [snackbarShow, setSnackbarShow] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
@@ -42,10 +46,6 @@ export function SanctionList(): React.ReactElement {
     }
     setFileToImport(null);
   };
-
-  const ButtonsContainer = styled.div`
-    width: 500px;
-  `;
 
   let importFile = null;
   importFile = (

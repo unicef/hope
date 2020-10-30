@@ -1,6 +1,6 @@
 import { gql } from 'apollo-boost';
 
-export const TargetPopulation = gql`
+export const TARGET_POPULATION_QUERY = gql`
   query targetPopulation($id: ID!) {
     targetPopulation(id: $id) {
       id
@@ -19,7 +19,17 @@ export const TargetPopulation = gql`
       program {
         id
         name
-        status
+        startDate
+        endDate
+        status          
+        caId
+        description
+        budget
+        frequencyOfPayments
+        populationGoal
+        sector
+        totalNumberOfHouseholds
+        individualDataNeeded
       }
       createdBy {
         firstName
@@ -34,17 +44,32 @@ export const TargetPopulation = gql`
         }
         rules {
           id
+          individualsFiltersBlocks{
+            individualBlockFilters{
+              fieldName
+              isFlexField
+              arguments
+              comparisionMethod
+              fieldAttribute {
+                name
+                labelEn
+                type
+                choices {
+                  value
+                  labelEn
+                }
+              }
+            }
+          }
           filters {
             fieldName
             isFlexField
             arguments
             comparisionMethod
-            headOfHousehold
             fieldAttribute {
               name
               labelEn
               type
-              associatedWith
               choices {
                 value
                 labelEn

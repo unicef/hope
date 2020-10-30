@@ -1,5 +1,6 @@
 import graphene
 from django.db.models import Sum, Q, Prefetch
+from django.db.models.functions import Lower
 from django_filters import (
     FilterSet,
     OrderingFilter,
@@ -16,7 +17,7 @@ from core.extended_connection import ExtendedConnection
 from core.filters import AgeRangeFilter, IntegerRangeFilter
 from core.models import AdminArea
 from core.schema import ChoiceObject
-from core.utils import to_choice_object, encode_ids
+from core.utils import to_choice_object, encode_ids, CustomOrderingFilter
 from household.models import (
     Household,
     Individual,
@@ -31,7 +32,8 @@ from household.models import (
     ROLE_NO_ROLE,
     IndividualIdentity,
     DUPLICATE,
-    DUPLICATE_IN_BATCH, INDIVIDUAL_HOUSEHOLD_STATUS,
+    DUPLICATE_IN_BATCH,
+    INDIVIDUAL_HOUSEHOLD_STATUS,
 )
 from registration_datahub.schema import DeduplicationResultNode
 from targeting.models import HouseholdSelection
@@ -60,7 +62,7 @@ class HouseholdFilter(FilterSet):
             "residence_status": ["exact"],
         }
 
-    order_by = OrderingFilter(
+    order_by = CustomOrderingFilter(
         fields=(
             "age",
             "sex",
@@ -69,10 +71,10 @@ class HouseholdFilter(FilterSet):
             "unicef_id",
             "household_ca_id",
             "size",
-            "head_of_household__full_name",
-            "admin_area__title",
+            Lower("head_of_household__full_name"),
+            Lower("admin_area__title"),
             "residence_status",
-            "registration_data_import__name",
+            Lower("registration_data_import__name"),
             "total_cash",
             "registration_date",
         )
@@ -112,16 +114,16 @@ class IndividualFilter(FilterSet):
             "sex": ["exact"],
         }
 
-    order_by = OrderingFilter(
+    order_by = CustomOrderingFilter(
         fields=(
             "id",
             "unicef_id",
-            "full_name",
+            Lower("full_name"),
             "household__id",
             "birth_date",
             "sex",
             "relationship",
-            "household__admin_area__title",
+            Lower("household__admin_area__title"),
         )
     )
 
