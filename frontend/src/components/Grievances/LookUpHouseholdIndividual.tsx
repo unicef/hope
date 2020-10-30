@@ -60,7 +60,13 @@ export const LookUpHouseholdIndividual = (): React.ReactElement => {
   const [lookUpDialogOpen, setLookUpDialogOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
   const [filterHousehold, setFilterHousehold] = useState({
+    search: '',
+    program: '',
+    startDate: null,
+    endDate: null,
+    residenceStatus: '',
     householdSize: { min: undefined, max: undefined },
+    adminArea: '',
   });
   const [filterIndividual, setFilterIndividual] = useState({
     sex: '',

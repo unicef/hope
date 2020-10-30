@@ -4630,6 +4630,54 @@ export type IndividualQuery = (
   )> }
 );
 
+export type LookUpHouseholdsQueryVariables = {
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  businessArea?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>,
+  familySize?: Maybe<Scalars['String']>,
+  programs?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  headOfHouseholdFullNameIcontains?: Maybe<Scalars['String']>,
+  adminArea?: Maybe<Scalars['ID']>,
+  search?: Maybe<Scalars['String']>,
+  residenceStatus?: Maybe<Scalars['String']>
+};
+
+
+export type LookUpHouseholdsQuery = (
+  { __typename?: 'Query' }
+  & { allHouseholds: Maybe<(
+    { __typename?: 'HouseholdNodeConnection' }
+    & Pick<HouseholdNodeConnection, 'totalCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'startCursor' | 'endCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'HouseholdNodeEdge' }
+      & Pick<HouseholdNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'HouseholdNode' }
+        & Pick<HouseholdNode, 'id' | 'unicefId' | 'size' | 'firstRegistrationDate' | 'lastRegistrationDate'>
+        & { headOfHousehold: (
+          { __typename?: 'IndividualNode' }
+          & Pick<IndividualNode, 'id' | 'fullName'>
+        ), programs: (
+          { __typename?: 'ProgramNodeConnection' }
+          & { edges: Array<Maybe<(
+            { __typename?: 'ProgramNodeEdge' }
+            & { node: Maybe<(
+              { __typename?: 'ProgramNode' }
+              & Pick<ProgramNode, 'id' | 'name'>
+            )> }
+          )>> }
+        ) }
+      )> }
+    )>> }
+  )> }
+);
+
 export type LookUpPaymentRecordsQueryVariables = {
   cashPlan?: Maybe<Scalars['ID']>,
   household?: Maybe<Scalars['ID']>,
@@ -8534,6 +8582,95 @@ export function useIndividualLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryH
 export type IndividualQueryHookResult = ReturnType<typeof useIndividualQuery>;
 export type IndividualLazyQueryHookResult = ReturnType<typeof useIndividualLazyQuery>;
 export type IndividualQueryResult = ApolloReactCommon.QueryResult<IndividualQuery, IndividualQueryVariables>;
+export const LookUpHouseholdsDocument = gql`
+    query LookUpHouseholds($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $programs: [ID], $headOfHouseholdFullNameIcontains: String, $adminArea: ID, $search: String, $residenceStatus: String) {
+  allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, size: $familySize, orderBy: $orderBy, programs: $programs, headOfHousehold_FullName_Icontains: $headOfHouseholdFullNameIcontains, adminArea: $adminArea, search: $search, residenceStatus: $residenceStatus) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+    totalCount
+    edges {
+      cursor
+      node {
+        id
+        unicefId
+        headOfHousehold {
+          id
+          fullName
+        }
+        size
+        programs {
+          edges {
+            node {
+              id
+              name
+            }
+          }
+        }
+        firstRegistrationDate
+        lastRegistrationDate
+      }
+    }
+  }
+}
+    `;
+export type LookUpHouseholdsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<LookUpHouseholdsQuery, LookUpHouseholdsQueryVariables>, 'query'>;
+
+    export const LookUpHouseholdsComponent = (props: LookUpHouseholdsComponentProps) => (
+      <ApolloReactComponents.Query<LookUpHouseholdsQuery, LookUpHouseholdsQueryVariables> query={LookUpHouseholdsDocument} {...props} />
+    );
+    
+export type LookUpHouseholdsProps<TChildProps = {}> = ApolloReactHoc.DataProps<LookUpHouseholdsQuery, LookUpHouseholdsQueryVariables> & TChildProps;
+export function withLookUpHouseholds<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  LookUpHouseholdsQuery,
+  LookUpHouseholdsQueryVariables,
+  LookUpHouseholdsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, LookUpHouseholdsQuery, LookUpHouseholdsQueryVariables, LookUpHouseholdsProps<TChildProps>>(LookUpHouseholdsDocument, {
+      alias: 'lookUpHouseholds',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useLookUpHouseholdsQuery__
+ *
+ * To run a query within a React component, call `useLookUpHouseholdsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useLookUpHouseholdsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useLookUpHouseholdsQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      businessArea: // value for 'businessArea'
+ *      orderBy: // value for 'orderBy'
+ *      familySize: // value for 'familySize'
+ *      programs: // value for 'programs'
+ *      headOfHouseholdFullNameIcontains: // value for 'headOfHouseholdFullNameIcontains'
+ *      adminArea: // value for 'adminArea'
+ *      search: // value for 'search'
+ *      residenceStatus: // value for 'residenceStatus'
+ *   },
+ * });
+ */
+export function useLookUpHouseholdsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<LookUpHouseholdsQuery, LookUpHouseholdsQueryVariables>) {
+        return ApolloReactHooks.useQuery<LookUpHouseholdsQuery, LookUpHouseholdsQueryVariables>(LookUpHouseholdsDocument, baseOptions);
+      }
+export function useLookUpHouseholdsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<LookUpHouseholdsQuery, LookUpHouseholdsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<LookUpHouseholdsQuery, LookUpHouseholdsQueryVariables>(LookUpHouseholdsDocument, baseOptions);
+        }
+export type LookUpHouseholdsQueryHookResult = ReturnType<typeof useLookUpHouseholdsQuery>;
+export type LookUpHouseholdsLazyQueryHookResult = ReturnType<typeof useLookUpHouseholdsLazyQuery>;
+export type LookUpHouseholdsQueryResult = ApolloReactCommon.QueryResult<LookUpHouseholdsQuery, LookUpHouseholdsQueryVariables>;
 export const LookUpPaymentRecordsDocument = gql`
     query LookUpPaymentRecords($cashPlan: ID, $household: ID, $after: String, $before: String, $orderBy: String, $first: Int, $last: Int) {
   allPaymentRecords(cashPlan: $cashPlan, household: $household, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy) {
