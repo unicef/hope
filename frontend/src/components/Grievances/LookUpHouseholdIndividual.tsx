@@ -23,6 +23,39 @@ import { LookUpHouseholdTable } from './LookUpHouseholdTable/LookUpHouseholdTabl
 import { LookUpIndividualFilters } from './LookUpIndividualTable/LookUpIndividualFilters';
 import { LookUpIndividualTable } from './LookUpIndividualTable/LookUpIndividualTable';
 
+const LookUp = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10px;
+  border: 1.5px solid #043e91;
+  border-radius: 5px;
+  color: #033f91;
+  font-size: 16px;
+  text-align: center;
+  padding: 25px;
+  font-weight: 500;
+  cursor: pointer;
+`;
+const MarginRightSpan = styled.span`
+  margin-right: 5px;
+`;
+const DialogFooter = styled.div`
+  padding: 12px 16px;
+  margin: 0;
+  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
+  text-align: right;
+`;
+const DialogTitleWrapper = styled.div`
+  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
+`;
+
+const StyledTabs = styled(Tabs)`
+  && {
+    max-width: 500px;
+  }
+`;
+
 export const LookUpHouseholdIndividual = (): React.ReactElement => {
   const [lookUpDialogOpen, setLookUpDialogOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
@@ -49,39 +82,6 @@ export const LookUpHouseholdIndividual = (): React.ReactElement => {
 
   const { allPrograms } = data;
   const programs = allPrograms.edges.map((edge) => edge.node);
-
-  const LookUp = styled.div`
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 10px;
-    border: 1.5px solid #043e91;
-    border-radius: 5px;
-    color: #033f91;
-    font-size: 16px;
-    text-align: center;
-    padding: 25px;
-    font-weight: 500;
-    cursor: pointer;
-  `;
-  const MarginRightSpan = styled.span`
-    margin-right: 5px;
-  `;
-  const DialogFooter = styled.div`
-    padding: 12px 16px;
-    margin: 0;
-    border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-    text-align: right;
-  `;
-  const DialogTitleWrapper = styled.div`
-    border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  `;
-
-  const StyledTabs = styled(Tabs)`
-    && {
-      max-width: 500px;
-    }
-  `;
 
   return (
     <>

@@ -13,7 +13,6 @@ export const FormikSelectFieldConfirm = ({
   form,
   confirmContent,
   confirmTitle,
-  allPrograms,
   ...otherProps
 }): React.ReactElement => {
   const isInvalid = form.errors[field.name] && form.touched[field.name];
@@ -34,6 +33,7 @@ export const FormikSelectFieldConfirm = ({
             value={field.value || otherProps.value}
             onChange={confirm((e) => {
               form.setFieldValue(field.name, e.target.value);
+              form.setFieldValue('candidateListCriterias', []);
               form.setFieldValue('criterias', []);
             })}
             id={`textField-${field.name}`}

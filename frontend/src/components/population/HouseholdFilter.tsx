@@ -14,8 +14,8 @@ import TextField from '../../shared/TextField';
 import InputLabel from '../../shared/InputLabel';
 import Select from '../../shared/Select';
 import { ContainerWithBorder } from '../ContainerWithBorder';
-import { AdminAreasAutocomplete } from './AdminAreaAutocomplete';
 import { FieldLabel } from '../FieldLabel';
+import { AdminAreasAutocomplete } from './AdminAreaAutocomplete';
 
 const TextContainer = styled(TextField)`
   input[type='number']::-webkit-inner-spin-button,
@@ -42,7 +42,6 @@ const SearchTextField = styled(TextField)`
 const StartInputAdornment = styled(InputAdornment)`
   margin-right: 0;
 `;
-
 
 interface HouseholdFiltersProps {
   onFilterChange;
