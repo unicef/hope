@@ -12,7 +12,6 @@ import SearchIcon from '@material-ui/icons/Search';
 import GroupIcon from '@material-ui/icons/Group';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
 import FormControl from '@material-ui/core/FormControl';
-import AssignmentIndRoundedIcon from '@material-ui/icons/AssignmentIndRounded';
 import {
   HouseholdChoiceDataQuery,
   ProgramNode,
@@ -135,26 +134,23 @@ export function LookUpHouseholdFilters({
           </Box>
         </Grid>
         <Grid item>
-          <Box display='flex' flexDirection='column'>
-            <FieldLabel>Registration Date</FieldLabel>
-            <KeyboardDatePicker
-              variant='inline'
-              disableToolbar
-              inputVariant='outlined'
-              margin='dense'
-              placeholder='To'
-              autoOk
-              onChange={(date) =>
-                onFilterChange({
-                  ...filter,
-                  endDate: date ? moment(date).format('YYYY-MM-DD') : null,
-                })
-              }
-              value={filter.endDate || null}
-              format='YYYY-MM-DD'
-              InputAdornmentProps={{ position: 'end' }}
-            />
-          </Box>
+          <KeyboardDatePicker
+            variant='inline'
+            disableToolbar
+            inputVariant='outlined'
+            margin='dense'
+            placeholder='To'
+            autoOk
+            onChange={(date) =>
+              onFilterChange({
+                ...filter,
+                endDate: date ? moment(date).format('YYYY-MM-DD') : null,
+              })
+            }
+            value={filter.endDate || null}
+            format='YYYY-MM-DD'
+            InputAdornmentProps={{ position: 'end' }}
+          />
         </Grid>
         <Grid item>
           <StyledFormControl variant='outlined' margin='dense'>
