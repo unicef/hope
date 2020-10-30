@@ -69,8 +69,13 @@ export const LookUpHouseholdIndividual = (): React.ReactElement => {
     adminArea: '',
   });
   const [filterIndividual, setFilterIndividual] = useState({
+    search: '',
+    program: '',
+    startDate: null,
+    endDate: null,
+    residenceStatus: '',
+    adminArea: '',
     sex: '',
-    age: { min: undefined, max: undefined },
   });
   const debouncedFilterHousehold = useDebounce(filterHousehold, 500);
   const debouncedFilterIndividual = useDebounce(filterIndividual, 500);
@@ -138,8 +143,10 @@ export const LookUpHouseholdIndividual = (): React.ReactElement => {
           </TabPanel>
           <TabPanel value={selectedTab} index={1}>
             <LookUpIndividualFilters
+              programs={programs as ProgramNode[]}
               filter={debouncedFilterIndividual}
               onFilterChange={setFilterIndividual}
+              choicesData={choicesData}
             />
             <LookUpIndividualTable
               filter={debouncedFilterIndividual}

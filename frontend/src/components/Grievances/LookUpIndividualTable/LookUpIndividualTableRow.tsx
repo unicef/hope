@@ -7,6 +7,7 @@ import { getAgeFromDob, sexToCapitalize } from '../../../utils/utils';
 import { ClickableTableRow } from '../../table/ClickableTableRow';
 import { Pointer } from '../../Pointer';
 import { Radio } from '@material-ui/core';
+import { UniversalMoment } from '../../UniversalMoment';
 
 interface LookUpIndividualTableRowProps {
   individual: IndividualNode;
@@ -28,6 +29,12 @@ export function LookUpIndividualTableRow({
   const handleClick = (): void => {
     const path = `/${businessArea}/population/individuals/${individual.id}`;
     history.push(path);
+  };
+  const renderPrograms = (): string => {
+    const programNames = individual?.household?.programs?.edges?.map(
+      (edge) => edge.node.name,
+    );
+    return programNames?.length ? programNames.join(', ') : '-';
   };
   return (
     <ClickableTableRow hover role='checkbox' key={individual.id}>
@@ -52,6 +59,10 @@ export function LookUpIndividualTableRow({
       <TableCell align='left'>{sexToCapitalize(individual.sex)}</TableCell>
       <TableCell align='left'>
         {individual.household?.adminArea?.title}
+      </TableCell>
+      <TableCell align='left'>{renderPrograms()}</TableCell>
+      <TableCell align='left'>
+        <UniversalMoment>{individual.lastRegistrationDate}</UniversalMoment>
       </TableCell>
     </ClickableTableRow>
   );
