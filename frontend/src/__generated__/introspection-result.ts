@@ -18,22 +18,43 @@
         "name": "Node",
         "possibleTypes": [
           {
-            "name": "PaymentRecordNode"
+            "name": "GrievanceTicketNode"
+          },
+          {
+            "name": "UserNode"
           },
           {
             "name": "UserBusinessAreaNode"
           },
           {
-            "name": "HouseholdNode"
+            "name": "AdminAreaTypeNode"
           },
           {
             "name": "AdminAreaNode"
           },
           {
-            "name": "ProgramNode"
+            "name": "HouseholdNode"
+          },
+          {
+            "name": "IndividualNode"
+          },
+          {
+            "name": "RegistrationDataImportNode"
+          },
+          {
+            "name": "TicketComplaintDetailsNode"
+          },
+          {
+            "name": "PaymentRecordNode"
           },
           {
             "name": "CashPlanNode"
+          },
+          {
+            "name": "ProgramNode"
+          },
+          {
+            "name": "TargetPopulationNode"
           },
           {
             "name": "CashPlanPaymentVerificationNode"
@@ -42,22 +63,16 @@
             "name": "PaymentVerificationNode"
           },
           {
-            "name": "TargetPopulationNode"
+            "name": "ServiceProviderNode"
           },
           {
-            "name": "UserNode"
-          },
-          {
-            "name": "RegistrationDataImportNode"
-          },
-          {
-            "name": "IndividualNode"
+            "name": "TicketSensitiveDetailsNode"
           },
           {
             "name": "DocumentNode"
           },
           {
-            "name": "ServiceProviderNode"
+            "name": "TicketNoteNode"
           },
           {
             "name": "BusinessAreaNode"
