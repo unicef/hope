@@ -293,6 +293,14 @@ def nested_getattr(obj, attr, default=raise_attribute_error):
         raise
 
 
+def nested_dict_get(dictionary, path):
+    import functools
+
+    return functools.reduce(
+        lambda d, key: d.get(key, None) if isinstance(d, dict) else None, path.split("."), dictionary
+    )
+
+
 def get_count_and_percentage(input_list, all_items_list):
     count = len(input_list)
     all_items_count = len(all_items_list) or 1
@@ -417,3 +425,13 @@ class CustomOrderingFilter(OrderingFilter):
             self.lower_dict[field_name] = field
 
         return OrderedDict([(f, f) if isinstance(f, (str, Lower)) else f for f in new_fields])
+
+
+def is_valid_uuid(uuid_str):
+    from uuid import UUID
+
+    try:
+        UUID(uuid_str, version=4)
+        return True
+    except ValueError:
+        return False
