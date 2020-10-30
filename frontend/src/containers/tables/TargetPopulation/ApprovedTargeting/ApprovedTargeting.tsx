@@ -1,12 +1,9 @@
 import React, { ReactElement } from 'react';
 import styled from 'styled-components';
-import {
-  useCandidateHouseholdsListByTargetingCriteriaQuery,
-} from '../../../../__generated__/graphql';
+import { useCandidateHouseholdsListByTargetingCriteriaQuery } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../UniversalTable';
 import { ProgrammeTableRow } from '../SentTargeting/ProgrammeTableRow';
 import { headCells as programmeHeadCells } from '../SentTargeting/ProgrammeHeadCells';
-
 
 const TableWrapper = styled.div`
   padding: 20px;
@@ -19,10 +16,9 @@ interface TargetPopulationHouseholdProps {
 }
 
 export const ApprovedTargetPopulationTable = ({
-                                                id,
-                                                variables,
-
-                                              }: TargetPopulationHouseholdProps): ReactElement => {
+  id,
+  variables,
+}: TargetPopulationHouseholdProps): ReactElement => {
   const initialVariables = {
     ...(id && { targetPopulation: id }),
     ...variables,

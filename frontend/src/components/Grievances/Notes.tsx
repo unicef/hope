@@ -8,21 +8,21 @@ import { UniversalMoment } from '../UniversalMoment';
 import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
 import { OverviewContainerColumn } from '../OverviewContainerColumn';
 
-export function Notes(): React.ReactElement {
-  const Title = styled.div`
-    padding-bottom: ${({ theme }) => theme.spacing(8)}px;
-  `;
-  const Name = styled.span`
-    font-size: 16px;
-  `;
-  const Date = styled.span`
-    font-size: 12px;
-    color: #848484;
-  `;
-  const DescMargin = styled.div`
-    margin-bottom: 35px;
-  `;
+const Title = styled.div`
+  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
+`;
+const Name = styled.span`
+  font-size: 16px;
+`;
+const Date = styled.span`
+  font-size: 12px;
+  color: #848484;
+`;
+const DescMargin = styled.div`
+  margin-bottom: 35px;
+`;
 
+export function Notes(): React.ReactElement {
   const note = (
     avatar: string,
     name: string,
