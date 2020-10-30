@@ -292,7 +292,9 @@ def nested_getattr(obj, attr, default=raise_attribute_error):
 def nested_dict_get(dictionary, path):
     import functools
 
-    return functools.reduce(lambda d, key: d.get(key, None) if isinstance(d, dict) else None, path.split("."), dictionary)
+    return functools.reduce(
+        lambda d, key: d.get(key, None) if isinstance(d, dict) else None, path.split("."), dictionary
+    )
 
 
 def get_count_and_percentage(input_list, all_items_list):
