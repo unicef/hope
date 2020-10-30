@@ -35,12 +35,14 @@ class GrievanceTicket(TimeStampedUUIDModel):
     ISSUE_TYPE_SEXUAL_HARASSMENT = 11
     ISSUE_TYPE_MISCELLANEOUS = 12
 
-    ISSUE_TYPE_DATA_CHANGE_DATA_UPDATE = 1
-    ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL = 2
-    ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL = 3
+    ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE = 1
+    ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE = 2
+    ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL = 3
+    ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL = 4
     ISSUE_TYPES_CHOICES = {
         CATEGORY_DATA_CHANGE: {
-            ISSUE_TYPE_DATA_CHANGE_DATA_UPDATE: _("Data Update"),
+            ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE: _("Household Data Update"),
+            ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE: _("Individual Data Update"),
             ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL: _("Add Individual"),
             ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: _("Delete Individual"),
         },
@@ -101,8 +103,8 @@ class GrievanceTicket(TimeStampedUUIDModel):
     description = models.TextField(
         verbose_name=_("Description"), blank=True, help_text=_("The content of the customers query."),
     )
-    admin = models.CharField(max_length=250)
-    area = models.CharField(max_length=250)
+    admin = models.CharField(max_length=250, blank=True)
+    area = models.CharField(max_length=250, blank=True)
     language = models.TextField()
     consent = models.BooleanField(default=True)
     business_area = models.ForeignKey("core.BusinessArea", related_name="tickets", on_delete=models.CASCADE)
