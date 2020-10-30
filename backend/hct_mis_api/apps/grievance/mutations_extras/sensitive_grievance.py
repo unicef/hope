@@ -1,10 +1,12 @@
 import graphene
 
+from household.schema import HouseholdNode, IndividualNode
+
 
 class SensitiveGrievanceTicketExtras(graphene.InputObjectType):
-    household = graphene.ID()
-    individual = graphene.ID()
-    payment_record = graphene.ID()
+    household = graphene.GlobalID(node=HouseholdNode)
+    individual = graphene.GlobalID(node=IndividualNode)
+    payment_record = graphene.GlobalID()
 
 
 def save_sensitive_grievance_extras(root, info, input, grievance_ticket, extras, **kwargs):

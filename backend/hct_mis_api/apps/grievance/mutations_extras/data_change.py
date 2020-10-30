@@ -1,19 +1,21 @@
 import graphene
 
+from household.schema import HouseholdNode, IndividualNode
+
 
 class HouseholdDataUpdateIssueTypeExtras(graphene.InputObjectType):
-    household = graphene.ID(required=True)
-    individual = graphene.ID()
+    household = graphene.GlobalID(node=HouseholdNode, required=True)
+    individual = graphene.GlobalID(node=IndividualNode)
 
 
 class IndividualDataUpdateIssueTypeExtras(graphene.InputObjectType):
-    individual = graphene.ID(required=True)
-    household = graphene.ID()
+    individual = graphene.GlobalID(node=IndividualNode, required=True)
+    household = graphene.GlobalID(node=HouseholdNode)
 
 
 class IndividualDeleteIssueTypeExtras(graphene.InputObjectType):
-    individual = graphene.ID(required=True)
-    household = graphene.ID()
+    individual = graphene.GlobalID(node=IndividualNode, required=True)
+    household = graphene.GlobalID(node=HouseholdNode)
 
 
 class AddIndividualIssueTypeExtras(graphene.InputObjectType):

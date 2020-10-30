@@ -5,8 +5,10 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from graphql import GraphQLError
 
+from account.schema import UserNode
 from core.models import BusinessArea
 from core.permissions import is_authenticated
+from core.schema import BusinessAreaNode
 from core.utils import nested_dict_get
 from grievance.mutations_extras.main import CreateGrievanceTicketExtrasInput
 from grievance.models import GrievanceTicket
@@ -16,15 +18,15 @@ from grievance.schema import GrievanceTicketNode
 
 class CreateGrievanceTicketInput(graphene.InputObjectType):
     description = graphene.String(required=True)
-    assigned_to = graphene.ID(required=True)
+    assigned_to = graphene.GlobalID(node=UserNode, required=True)
     category = graphene.Int(required=True)
     issue_type = graphene.Int()
     admin = graphene.String()
     area = graphene.String()
     language = graphene.String(required=True)
     consent = graphene.Boolean(required=True)
-    business_area = graphene.String(required=True)
-    linked_tickets = graphene.List(graphene.String)
+    business_area = graphene.GlobalID(node=BusinessAreaNode, required=True)
+    linked_tickets = graphene.List(graphene.ID)
     extras = CreateGrievanceTicketExtrasInput()
 
 
