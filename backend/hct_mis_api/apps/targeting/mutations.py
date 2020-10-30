@@ -333,7 +333,7 @@ class SetSteficonRuleOnTargetPopulationMutation(graphene.relay.ClientIDMutation,
             node=TargetPopulationNode,
         )
         steficon_rule_id = graphene.GlobalID(
-            required=True,
+            required=False,
             node=SteficonRuleNode,
         )
 
@@ -342,15 +342,25 @@ class SetSteficonRuleOnTargetPopulationMutation(graphene.relay.ClientIDMutation,
     def mutate_and_get_payload(cls, _root, _info, **kwargs):
         target_id = utils.decode_id_string(kwargs["target_id"])
         target_population = TargetPopulation.objects.get(id=target_id)
-        steficon_rule_id = utils.decode_id_string(kwargs["steficon_rule_id"])
-        steficon_rule = get_object_or_404(Rule, id=steficon_rule_id)
-        target_population.steficon_rule = steficon_rule
-        target_population.save()
-        interpreter = mapping[steficon_rule.language](steficon_rule.definition)
-        for selection in HouseholdSelection.objects.filter(target_population=target_population):
-            value = interpreter.execute(hh=selection.household)
-            selection.vulnerability_score = value
-            selection.save(update_fields=["vulnerability_score"])
+        encoded_steficon_rule_id = kwargs["steficon_rule_id"]
+        if encoded_steficon_rule_id is not None:
+            steficon_rule_id = utils.decode_id_string(encoded_steficon_rule_id)
+            steficon_rule = get_object_or_404(Rule, id=steficon_rule_id)
+            target_population.steficon_rule = steficon_rule
+            target_population.save()
+            interpreter = mapping[steficon_rule.language](steficon_rule.definition)
+            for selection in HouseholdSelection.objects.filter(target_population=target_population):
+                value = interpreter.execute(hh=selection.household)
+                selection.vulnerability_score = value
+                selection.save(update_fields=["vulnerability_score"])
+        else:
+            for selection in HouseholdSelection.objects.filter(target_population=target_population):
+                target_population.steficon_rule = None
+                selection.vulnerability_score = None
+                target_population.vulnerability_score_min = None
+                target_population.vulnerability_score_max = None
+                target_population.save()
+                selection.save(update_fields=["vulnerability_score"])
         return SetSteficonRuleOnTargetPopulationMutation(target_population=target_population)
 
 
