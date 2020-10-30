@@ -64,7 +64,7 @@ export function AdminAreasAutocomplete({
       renderInput={(params) => (
         <TextField
           {...params}
-          label='Location'
+          label='Administrative Level 2'
           variant='outlined'
           margin='dense'
           value={inputValue}

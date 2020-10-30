@@ -21,6 +21,7 @@ import {
   DeduplicationResultNode,
 } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { Pointer } from '../../../components/Pointer';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -47,9 +48,6 @@ const Error = styled.span`
 const Bold = styled.span`
   font-weight: bold;
   font-size: 16px;
-`;
-const Pointer = styled.span`
-  cursor: pointer;
 `;
 
 interface DedupeResultsProps {
