@@ -184,7 +184,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
                 "id"
             )
         else:
-            households_ids = self.households.values_list("id")
+            households_ids = self.vulnerability_score_filtered_households.values_list("id")
         delta18 = relativedelta(years=+18)
         date18ago = datetime.datetime.now() - delta18
         child_male = Individual.objects.filter(
@@ -220,7 +220,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
         if self.status == TargetPopulation.STATUS_DRAFT:
             return None
         elif self.status == TargetPopulation.STATUS_APPROVED:
-            households_ids = self.households.filter(self.final_list_targeting_criteria.get_query()).values_list("id")
+            households_ids = self.vulnerability_score_filtered_households.filter(self.final_list_targeting_criteria.get_query()).values_list("id")
         else:
             households_ids = self.final_list.values_list("id")
         delta18 = relativedelta(years=+18)
