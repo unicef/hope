@@ -60,7 +60,7 @@ export function LookUpHouseholdTableRow({
         <Missing />
       </TableCell>
       <TableCell align='left'>{renderPrograms()}</TableCell>
-      <TableCell align='right'>
+      <TableCell align='left'>
         <UniversalMoment>{household.lastRegistrationDate}</UniversalMoment>
       </TableCell>
     </ClickableTableRow>
