@@ -11,7 +11,8 @@ import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
-import { LookUpHouseholdIndividual } from './LookUpHouseholdIndividual';
+import { Consent } from './Consent';
+import { LookUpSection } from './LookUpSection';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -33,31 +34,6 @@ const BoxWithBorders = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
   border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
   padding: 15px 0;
-`;
-const LookUp = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 10px;
-  border: 1.5px solid #043e91;
-  border-radius: 5px;
-  color: #033f91;
-  font-size: 16px;
-  text-align: center;
-  padding: 25px;
-  font-weight: 500;
-  cursor: pointer;
-`;
-
-const Consent = styled.p`
-  font-size: 14px;
-  color: #585858;
-`;
-const MarginRightSpan = styled.span`
-  margin-right: 5px;
-`;
-const StyledLink = styled(Link)`
-  text-decoration: none;
 `;
 
 export function CreateGrievance(): React.ReactElement {
@@ -98,7 +74,7 @@ export function CreateGrievance(): React.ReactElement {
                       <Field
                         name='category'
                         label='Category*'
-                        variant='filled'
+                        variant='outlined'
                         choices={[
                           {
                             value: 'Positive Feedback',
@@ -129,26 +105,14 @@ export function CreateGrievance(): React.ReactElement {
                   </Grid>
                   <BoxWithBorders>
                     <Box display='flex' flexDirection='column'>
-                      <Consent>
-                        Do you give your consent to UNICEF and its partners to
-                        view, edit and update your personal details and, if
-                        applicable, that of your household and dependants the
-                        purpose of the integrity UNICEFs beneficiary management
-                        system? Do you declare that the information you have
-                        provided is true and correct to the best of your
-                        knowledge?
-                      </Consent>
+                      <Consent />
                       <Field
                         name='receivedConsent'
                         label='Received Consent*'
                         color='primary'
                         component={FormikCheckboxField}
                       />
-                      <Grid container spacing={3}>
-                        <Grid item xs={6}>
-                          <LookUpHouseholdIndividual />
-                        </Grid>
-                      </Grid>
+                      <LookUpSection category={values.category} />
                     </Box>
                   </BoxWithBorders>
                   <BoxWithBorderBottom>
@@ -157,7 +121,7 @@ export function CreateGrievance(): React.ReactElement {
                         <Field
                           name='assignedTo'
                           label='Assigned to'
-                          variant='filled'
+                          variant='outlined'
                           choices={[
                             {
                               value: 'User1',
@@ -184,7 +148,7 @@ export function CreateGrievance(): React.ReactElement {
                           name='Description'
                           multiline
                           fullWidth
-                          variant='filled'
+                          variant='outlined'
                           label='Description'
                           component={FormikTextField}
                         />
@@ -193,7 +157,7 @@ export function CreateGrievance(): React.ReactElement {
                         <Field
                           name='administrativeLevel2'
                           label='Administrative Level 2'
-                          variant='filled'
+                          variant='outlined'
                           choices={[
                             {
                               value: 'Admin1',
@@ -215,7 +179,7 @@ export function CreateGrievance(): React.ReactElement {
                         <Field
                           name='area'
                           fullWidth
-                          variant='filled'
+                          variant='outlined'
                           label='Area / Village / Pay point'
                           component={FormikTextField}
                         />
@@ -224,7 +188,7 @@ export function CreateGrievance(): React.ReactElement {
                         <Field
                           name='languagesSpoken'
                           label='Languages Spoken'
-                          variant='filled'
+                          variant='outlined'
                           choices={[
                             {
                               value: 'English',

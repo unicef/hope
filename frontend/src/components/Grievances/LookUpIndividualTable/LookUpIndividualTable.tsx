@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { UniversalTable } from '../../../containers/tables/UniversalTable';
 import {
@@ -22,6 +22,10 @@ export const LookUpIndividualTable = ({
   businessArea,
   filter,
 }: LookUpIndividualTableProps): React.ReactElement => {
+  const [selectedIndividual, setSelectedIndividual] = useState('');
+  const handleRadioChange = (event) => {
+    setSelectedIndividual(event.target.value);
+  };
   const initialVariables = {
     age: JSON.stringify(filter.age),
     businessArea,
@@ -38,7 +42,12 @@ export const LookUpIndividualTable = ({
         queriedObjectName='allIndividuals'
         initialVariables={initialVariables}
         renderRow={(row) => (
-          <LookUpIndividualTableRow key={row.id} individual={row} />
+          <LookUpIndividualTableRow
+            radioChangeHandler={handleRadioChange}
+            selectedIndividual={selectedIndividual}
+            key={row.id}
+            individual={row}
+          />
         )}
       />
     </TableWrapper>
