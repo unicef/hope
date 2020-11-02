@@ -47,7 +47,7 @@ export const headCells: HeadCell<HouseholdNode>[] = [
   {
     disablePadding: false,
     label: 'Registration Date',
-    id: 'last-registration-date',
+    id: 'last_registration_date',
     numeric: false,
     dataCy: 'household-last-registration-date',
   },
