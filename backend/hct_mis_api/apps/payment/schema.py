@@ -45,7 +45,7 @@ class PaymentRecordFilter(FilterSet):
         )
     )
 
-    def search_individual(self, qs, name, value):
+    def individual_filter(self, qs, name, value):
         if is_valid_uuid(value):
             return qs.exclude(household__individuals_and_roles__role=ROLE_NO_ROLE)
         return qs
