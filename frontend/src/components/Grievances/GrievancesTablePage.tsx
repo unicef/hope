@@ -15,7 +15,7 @@ const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
-export function GrievancesList(): React.ReactElement {
+export function GrievancesTablePage(): React.ReactElement {
   const businessArea = useBusinessArea();
 
   return (
