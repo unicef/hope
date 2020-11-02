@@ -3,18 +3,15 @@ from django.db.models import Sum, Q, Prefetch
 from django.db.models.functions import Lower
 from django_filters import (
     FilterSet,
-    OrderingFilter,
     CharFilter,
     MultipleChoiceFilter,
-    DateRangeFilter,
     ModelMultipleChoiceFilter,
 )
 from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
-
 from core.extended_connection import ExtendedConnection
-from core.filters import AgeRangeFilter, IntegerRangeFilter
+from core.filters import AgeRangeFilter, IntegerRangeFilter, DateRangeFilter
 from core.models import AdminArea
 from core.schema import ChoiceObject
 from core.utils import to_choice_object, encode_ids, CustomOrderingFilter

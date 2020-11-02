@@ -61,12 +61,12 @@ export const LookUpHouseholdIndividual = (): React.ReactElement => {
   const [selectedTab, setSelectedTab] = useState(0);
   const [filterHousehold, setFilterHousehold] = useState({
     search: '',
-    program: '',
-    startDate: null,
+    programs: [],
+    lastRegistrationDate: { min: undefined, max: undefined },
     endDate: null,
     residenceStatus: '',
-    householdSize: { min: undefined, max: undefined },
-    adminArea: '',
+    size: { min: undefined, max: undefined },
+    admin2: '',
   });
   const [filterIndividual, setFilterIndividual] = useState({
     search: '',
