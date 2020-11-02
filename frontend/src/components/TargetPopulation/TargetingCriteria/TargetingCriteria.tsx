@@ -1,30 +1,24 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import styled from 'styled-components';
-import { useTranslation } from 'react-i18next';
-import { Typography, Paper, Button } from '@material-ui/core';
-import { AddCircleOutline } from '@material-ui/icons';
-import { TargetCriteriaForm } from '../../../containers/forms/TargetCriteriaForm';
-import { AllProgramsQuery } from '../../../__generated__/graphql';
-import { Criteria } from './Criteria';
+import {useTranslation} from 'react-i18next';
+import {Button, Paper, Typography,} from '@material-ui/core';
+import {AddCircleOutline} from '@material-ui/icons';
+import {TargetCriteriaForm} from '../../../containers/forms/TargetCriteriaForm';
+import {AllProgramsQuery, TargetPopulationQuery,} from '../../../__generated__/graphql';
+import {Criteria} from './Criteria';
+import {ContentWrapper, VulnerabilityScoreComponent} from "./VulnerabilityScoreComponent";
 
 const PaperContainer = styled(Paper)`
-  padding: ${({ theme }) => theme.spacing(3)}px
-    ${({ theme }) => theme.spacing(4)}px;
   margin: ${({ theme }) => theme.spacing(5)}px;
   border-bottom: 1px solid rgba(224, 224, 224, 1);
 `;
 
 const Title = styled.div`
-  padding-bottom: ${({ theme }) => theme.spacing(4)}px;
+  padding: ${({ theme }) => theme.spacing(3)}px
+    ${({ theme }) => theme.spacing(4)}px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-`;
-
-const ContentWrapper = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  padding: ${({ theme }) => theme.spacing(4)}px 0;
 `;
 
 const Divider = styled.div`
@@ -76,12 +70,15 @@ interface TargetingCriteriaProps {
   isEdit?: boolean;
   helpers?;
   selectedProgram?: AllProgramsQuery['allPrograms']['edges'][number]['node'];
+  targetPopulation?: TargetPopulationQuery['targetPopulation'];
 }
 
 export function TargetingCriteria({
   candidateListRules,
   isEdit = false,
   helpers,
+  selectedProgram,
+  targetPopulation,
 }: TargetingCriteriaProps): React.ReactElement {
   const { t } = useTranslation();
   const [isOpen, setOpen] = useState(false);
@@ -176,6 +173,7 @@ export function TargetingCriteria({
             </AddCriteria>
           )}
         </ContentWrapper>
+        <VulnerabilityScoreComponent targetPopulation={targetPopulation} />
       </PaperContainer>
     </div>
   );
