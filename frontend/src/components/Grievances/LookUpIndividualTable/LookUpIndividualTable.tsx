@@ -27,10 +27,13 @@ export const LookUpIndividualTable = ({
     setSelectedIndividual(event.target.value);
   };
   const initialVariables = {
-    age: JSON.stringify(filter.age),
     businessArea,
+    search: filter.search,
+    programme: filter.programme,
+    lastRegistrationDate: JSON.stringify(filter.lastRegistrationDate),
+    status: filter.status,
+    admin2: filter.admin2,
     sex: [filter.sex],
-    search: filter.text,
   };
 
   return (

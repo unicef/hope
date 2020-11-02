@@ -36,6 +36,12 @@ export function LookUpIndividualTableRow({
     );
     return programNames?.length ? programNames.join(', ') : '-';
   };
+  const renderAdminLevel2 = (): string => {
+    if (individual?.household?.adminArea?.adminAreaType?.adminLevel === 2) {
+      return individual?.household?.adminArea?.title;
+    }
+    return '-';
+  };
   return (
     <ClickableTableRow hover role='checkbox' key={individual.id}>
       <TableCell padding='checkbox'>
@@ -57,9 +63,7 @@ export function LookUpIndividualTableRow({
       </TableCell>
       <TableCell align='right'>{age}</TableCell>
       <TableCell align='left'>{sexToCapitalize(individual.sex)}</TableCell>
-      <TableCell align='left'>
-        {individual.household?.adminArea?.title}
-      </TableCell>
+      <TableCell align='left'>{renderAdminLevel2()}</TableCell>
       <TableCell align='left'>{renderPrograms()}</TableCell>
       <TableCell align='left'>
         <UniversalMoment>{individual.lastRegistrationDate}</UniversalMoment>
