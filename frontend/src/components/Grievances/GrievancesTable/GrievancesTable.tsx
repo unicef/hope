@@ -28,6 +28,7 @@ export const GrievancesTable = ({
     <TableWrapper>
       <UniversalTable<GrievanceTicketNode, AllGrievanceTicketQueryVariables>
         headCells={headCells}
+        title='Grievance and Feedback List'
         rowsPerPageOptions={[10, 15, 20]}
         query={useAllGrievanceTicketQuery}
         queriedObjectName='allGrievanceTicket'
