@@ -24,7 +24,6 @@ export function LookUpHouseholdTableRow({
   household,
   radioChangeHandler,
   selectedHousehold,
-  choicesData,
 }: LookUpHouseholdTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();

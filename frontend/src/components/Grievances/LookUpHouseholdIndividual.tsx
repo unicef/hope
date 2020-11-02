@@ -63,7 +63,6 @@ export const LookUpHouseholdIndividual = (): React.ReactElement => {
     search: '',
     programs: [],
     lastRegistrationDate: { min: undefined, max: undefined },
-    endDate: null,
     residenceStatus: '',
     size: { min: undefined, max: undefined },
     admin2: '',
@@ -71,10 +70,9 @@ export const LookUpHouseholdIndividual = (): React.ReactElement => {
   const [filterIndividual, setFilterIndividual] = useState({
     search: '',
     program: '',
-    startDate: null,
-    endDate: null,
+    lastRegistrationDate: { min: undefined, max: undefined },
     residenceStatus: '',
-    adminArea: '',
+    admin2: '',
     sex: '',
   });
   const debouncedFilterHousehold = useDebounce(filterHousehold, 500);

@@ -20,6 +20,7 @@ import { FieldLabel } from '../../FieldLabel';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import { HouseholdChoiceDataQuery } from '../../../__generated__/graphql';
 import { AdminAreasAutocomplete } from '../../population/AdminAreaAutocomplete';
+import { Missing } from '../../Missing';
 
 const StyledFormControl = styled(FormControl)`
   width: 232px;
@@ -59,7 +60,7 @@ export function LookUpIndividualFilters({
             label='Search'
             variant='outlined'
             margin='dense'
-            value={filter.text}
+            value={filter.search}
             onChange={(e) => handleFilterChange(e, 'search')}
             InputProps={{
               startAdornment: (
@@ -72,15 +73,16 @@ export function LookUpIndividualFilters({
           />
         </Grid>
         <Grid item>
+          <Missing />
           <StyledFormControl variant='outlined' margin='dense'>
             <InputLabel>Programme</InputLabel>
             <Select
               /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
               // @ts-ignore
-              onChange={(e) => handleFilterChange(e, 'program')}
+              onChange={(e) => handleFilterChange(e, 'programme')}
               variant='outlined'
               label='Programme'
-              value={filter.program || ''}
+              value={filter.programme || ''}
               InputProps={{
                 startAdornment: (
                   <StartInputAdornment position='start'>
@@ -113,10 +115,13 @@ export function LookUpIndividualFilters({
               onChange={(date) =>
                 onFilterChange({
                   ...filter,
-                  startDate: date ? moment(date).format('YYYY-MM-DD') : null,
+                  lastRegistrationDate: {
+                    ...filter.lastRegistrationDate,
+                    min: date ? moment(date).format('YYYY-MM-DD') : null,
+                  },
                 })
               }
-              value={filter.startDate || null}
+              value={filter.lastRegistrationDate.min || null}
               format='YYYY-MM-DD'
               InputAdornmentProps={{ position: 'end' }}
             />
@@ -133,10 +138,13 @@ export function LookUpIndividualFilters({
             onChange={(date) =>
               onFilterChange({
                 ...filter,
-                endDate: date ? moment(date).format('YYYY-MM-DD') : null,
+                lastRegistrationDate: {
+                  ...filter.lastRegistrationDate,
+                  max: date ? moment(date).format('YYYY-MM-DD') : null,
+                },
               })
             }
-            value={filter.endDate || null}
+            value={filter.lastRegistrationDate.max || null}
             format='YYYY-MM-DD'
             InputAdornmentProps={{ position: 'end' }}
           />
@@ -148,14 +156,18 @@ export function LookUpIndividualFilters({
               /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
               // @ts-ignore
               onChange={(e) => handleFilterChange(e, 'status')}
+              multiple
               variant='outlined'
               label='Status'
-              value={filter.residenceStatus || null}
+              value={filter.status || []}
             >
               <MenuItem value=''>
                 <em>None</em>
               </MenuItem>
-              {choicesData.residenceStatusChoices.map((item) => {
+              {[
+                { value: 'ACTIVE', name: 'Active' },
+                { value: 'INACTIVE', name: 'Inactive' },
+              ].map((item) => {
                 return (
                   <MenuItem key={item.value} value={item.value}>
                     {item.name}
@@ -166,14 +178,15 @@ export function LookUpIndividualFilters({
           </StyledFormControl>
         </Grid>
         <Grid item>
+          <Missing />
           <AdminAreasAutocomplete
-            value={filter.adminArea}
+            value={filter.admin2}
             onChange={(e, option) => {
               if (!option) {
-                onFilterChange({ ...filter, adminArea: undefined });
+                onFilterChange({ ...filter, admin2: undefined });
                 return;
               }
-              onFilterChange({ ...filter, adminArea: option.node.id });
+              onFilterChange({ ...filter, admin2: option.node.id });
             }}
           />
         </Grid>
