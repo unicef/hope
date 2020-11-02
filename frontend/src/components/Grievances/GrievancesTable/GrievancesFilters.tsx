@@ -1,42 +1,13 @@
 import React from 'react';
 import styled from 'styled-components';
 import moment from 'moment';
-import {
-  Box,
-  Grid,
-  InputAdornment,
-  MenuItem,
-  TextField,
-} from '@material-ui/core';
+import { Box, Grid, InputAdornment, TextField } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
-import GroupIcon from '@material-ui/icons/Group';
-import FlashOnIcon from '@material-ui/icons/FlashOn';
-import FormControl from '@material-ui/core/FormControl';
-import {
-  HouseholdChoiceDataQuery,
-  ProgramNode,
-} from '../../../__generated__/graphql';
 import { ContainerWithBorder } from '../../ContainerWithBorder';
-import InputLabel from '../../../shared/InputLabel';
-import Select from '../../../shared/Select';
 import { AdminAreasAutocomplete } from '../../population/AdminAreaAutocomplete';
 import { FieldLabel } from '../../FieldLabel';
 import { KeyboardDatePicker } from '@material-ui/pickers';
-
-const TextContainer = styled(TextField)`
-  input[type='number']::-webkit-inner-spin-button,
-  input[type='number']::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-  }
-  input[type='number'] {
-    -moz-appearance: textfield;
-  }
-`;
-const StyledFormControl = styled(FormControl)`
-  width: 232px;
-  color: #5f6368;
-  border-bottom: 0;
-`;
+import { Missing } from '../../Missing';
 
 const SearchTextField = styled(TextField)`
   flex: 1;
@@ -45,21 +16,13 @@ const SearchTextField = styled(TextField)`
   }
 `;
 
-const StartInputAdornment = styled(InputAdornment)`
-  margin-right: 0;
-`;
-
 interface GrievancesFiltersProps {
   onFilterChange;
   filter;
-  programs: ProgramNode[];
-  choicesData: HouseholdChoiceDataQuery;
 }
 export function GrievancesFilters({
   onFilterChange,
   filter,
-  programs,
-  choicesData,
 }: GrievancesFiltersProps): React.ReactElement {
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
@@ -83,51 +46,31 @@ export function GrievancesFilters({
           />
         </Grid>
         <Grid item>
-          <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>Programme</InputLabel>
-            <Select
-              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
-              // @ts-ignore
-              onChange={(e) => handleFilterChange(e, 'program')}
-              variant='outlined'
-              label='Programme'
-              value={filter.program || ''}
-              InputProps={{
-                startAdornment: (
-                  <StartInputAdornment position='start'>
-                    <FlashOnIcon />
-                  </StartInputAdornment>
-                ),
-              }}
-            >
-              <MenuItem value=''>
-                <em>None</em>
-              </MenuItem>
-              {programs.map((program) => (
-                <MenuItem key={program.id} value={program.id}>
-                  {program.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </StyledFormControl>
+          Status <Missing />
+        </Grid>
+        <Grid item>
+          FSP <Missing />
         </Grid>
         <Grid item>
           <Box display='flex' flexDirection='column'>
-            <FieldLabel>Registration Date</FieldLabel>
+            <FieldLabel>Creation Date</FieldLabel>
             <KeyboardDatePicker
               variant='inline'
               disableToolbar
               inputVariant='outlined'
               margin='dense'
-              placeholder='From'
+              label='From'
               autoOk
               onChange={(date) =>
                 onFilterChange({
                   ...filter,
-                  startDate: date ? moment(date).format('YYYY-MM-DD') : null,
+                  createdAtRange: {
+                    ...filter.createdAtRange,
+                    min: moment(date).toISOString(),
+                  },
                 })
               }
-              value={filter.startDate || null}
+              value={filter.createdAtRange.min || null}
               format='YYYY-MM-DD'
               InputAdornmentProps={{ position: 'end' }}
             />
@@ -139,112 +82,33 @@ export function GrievancesFilters({
             disableToolbar
             inputVariant='outlined'
             margin='dense'
-            placeholder='To'
+            label='To'
             autoOk
             onChange={(date) =>
               onFilterChange({
                 ...filter,
-                endDate: date ? moment(date).format('YYYY-MM-DD') : null,
+                createdAtRange: {
+                  ...filter.createdAtRange,
+                  max: moment(date).toISOString(),
+                },
               })
             }
-            value={filter.endDate || null}
+            value={filter.createdAtRange.max || null}
             format='YYYY-MM-DD'
             InputAdornmentProps={{ position: 'end' }}
           />
-        </Grid>
-        <Grid item>
-          <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>Status</InputLabel>
-            <Select
-              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
-              // @ts-ignore
-              onChange={(e) => handleFilterChange(e, 'status')}
-              variant='outlined'
-              label='Status'
-              value={filter.residenceStatus || null}
-            >
-              <MenuItem value=''>
-                <em>None</em>
-              </MenuItem>
-              {choicesData.residenceStatusChoices.map((item) => {
-                return (
-                  <MenuItem key={item.value} value={item.value}>
-                    {item.name}
-                  </MenuItem>
-                );
-              })}
-            </Select>
-          </StyledFormControl>
         </Grid>
         <Grid item>
           <AdminAreasAutocomplete
             value={filter.adminArea}
             onChange={(e, option) => {
               if (!option) {
-                onFilterChange({ ...filter, adminArea: undefined });
+                onFilterChange({ ...filter, admin: undefined });
                 return;
               }
-              onFilterChange({ ...filter, adminArea: option.node.id });
+              onFilterChange({ ...filter, admin: option.node.id });
             }}
           />
-        </Grid>
-        <Grid item>
-          <Box display='flex' flexDirection='column'>
-            <FieldLabel>Household Size</FieldLabel>
-            <TextContainer
-              id='minFilter'
-              value={filter.householdSize.min}
-              variant='outlined'
-              margin='dense'
-              placeholder='From'
-              onChange={(e) =>
-                onFilterChange({
-                  ...filter,
-                  householdSize: {
-                    ...filter.householdSize,
-                    min: e.target.value || undefined,
-                  },
-                })
-              }
-              type='number'
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position='start'>
-                    <GroupIcon />
-                  </InputAdornment>
-                ),
-              }}
-            />
-          </Box>
-        </Grid>
-        <Grid item>
-          <Box display='flex' flexDirection='column'>
-            <FieldLabel>Household Size</FieldLabel>
-            <TextContainer
-              id='maxFilter'
-              value={filter.householdSize.max}
-              variant='outlined'
-              margin='dense'
-              placeholder='To'
-              onChange={(e) =>
-                onFilterChange({
-                  ...filter,
-                  householdSize: {
-                    ...filter.householdSize,
-                    max: e.target.value || undefined,
-                  },
-                })
-              }
-              type='number'
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position='start'>
-                    <GroupIcon />
-                  </InputAdornment>
-                ),
-              }}
-            />
-          </Box>
         </Grid>
       </Grid>
     </ContainerWithBorder>
