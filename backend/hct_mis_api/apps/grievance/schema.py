@@ -1,6 +1,6 @@
 import graphene
 from django.db.models import Q
-from django_filters import FilterSet, CharFilter, MultipleChoiceFilter, ModelMultipleChoiceFilter, OrderingFilter
+from django_filters import FilterSet, CharFilter, ModelMultipleChoiceFilter, OrderingFilter, TypedMultipleChoiceFilter
 from graphene import relay
 from graphene_django import DjangoObjectType
 
@@ -27,7 +27,7 @@ class GrievanceTicketFilter(FilterSet):
 
     business_area = CharFilter(field_name="business_area__slug", required=True)
     search = CharFilter(method="search_filter")
-    status = MultipleChoiceFilter(field_name="status", choices=GrievanceTicket.STATUS_CHOICES)
+    status = TypedMultipleChoiceFilter(field_name="status", choices=GrievanceTicket.STATUS_CHOICES, coerce=int)
     fsp = ModelMultipleChoiceFilter(method="fsp_filter", queryset=ServiceProvider.objects.all())
     admin = ModelMultipleChoiceFilter(
         field_name="admin", method="admin_filter", queryset=AdminArea.objects.filter(admin_area_type__admin_level=2)
@@ -72,6 +72,7 @@ class GrievanceTicketFilter(FilterSet):
 class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     class Meta:
         model = GrievanceTicket
+        convert_choices_to_enum = False
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
