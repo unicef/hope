@@ -14,7 +14,7 @@ def _clean_data_for_range_field(value, field):
             for field_name, field_value in values.items():
                 field_instance = field()
                 if isinstance(field_instance, (DateTimeField, DateField)):
-                    field_value = parse(value, fuzzy=True)
+                    field_value = parse(field_value, fuzzy=True)
                 clean_data[field_name] = field_instance.clean(field_value)
         return clean_data or None
     else:
