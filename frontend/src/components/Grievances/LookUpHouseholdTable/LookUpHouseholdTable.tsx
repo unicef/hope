@@ -27,10 +27,12 @@ export const LookUpHouseholdTable = ({
 }: LookUpHouseholdTableProps): React.ReactElement => {
   const initialVariables: AllHouseholdsQueryVariables = {
     businessArea,
-    familySize: JSON.stringify(filter.householdSize),
-    search: filter.text,
-    adminArea: filter.adminArea,
+    search: filter.search,
+    programs: filter.programs,
+    lastRegistrationDate: JSON.stringify(filter.lastRegistrationDate),
     residenceStatus: filter.residenceStatus,
+    admin2: filter.admin2,
+    familySize: JSON.stringify(filter.size),
   };
   if (filter.program) {
     initialVariables.programs = [filter.program];

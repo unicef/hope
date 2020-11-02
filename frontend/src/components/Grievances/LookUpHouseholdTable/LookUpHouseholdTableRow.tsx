@@ -39,6 +39,12 @@ export function LookUpHouseholdTableRow({
     );
     return programNames?.length ? programNames.join(', ') : '-';
   };
+  const renderAdminLevel2 = (): string => {
+    if (household?.adminArea?.adminAreaType?.adminLevel === 2) {
+      return household?.adminArea?.title;
+    }
+    return '-';
+  };
   return (
     <ClickableTableRow hover role='checkbox' key={household.unicefId}>
       <TableCell padding='checkbox'>
@@ -56,9 +62,7 @@ export function LookUpHouseholdTableRow({
       </TableCell>
       <TableCell align='left'>{household.headOfHousehold.fullName}</TableCell>
       <TableCell align='left'>{household.size}</TableCell>
-      <TableCell align='left'>
-        <Missing />
-      </TableCell>
+      <TableCell align='left'>{renderAdminLevel2()}</TableCell>
       <TableCell align='left'>{renderPrograms()}</TableCell>
       <TableCell align='left'>
         <UniversalMoment>{household.lastRegistrationDate}</UniversalMoment>
