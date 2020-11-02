@@ -37,7 +37,7 @@ from core.models import (
     BusinessArea,
     FlexibleAttribute,
     FlexibleAttributeChoice,
-    FlexibleAttributeGroup,
+    FlexibleAttributeGroup, AdminAreaType,
 )
 from core.utils import decode_id_string, LazyEvalMethodsDict
 
@@ -63,6 +63,13 @@ class AdminAreaNode(DjangoObjectType):
         model = AdminArea
         exclude_fields = ["geom", "point"]
         filter_fields = ["title"]
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
+class AdminAreaTypeNode(DjangoObjectType):
+    class Meta:
+        model = AdminAreaType
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 

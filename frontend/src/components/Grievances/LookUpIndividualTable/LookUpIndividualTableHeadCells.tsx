@@ -4,6 +4,13 @@ import { HeadCell } from '../../table/EnhancedTableHead';
 export const headCells: HeadCell<IndividualNode>[] = [
   {
     disablePadding: false,
+    label: '',
+    id: 'radio',
+    numeric: false,
+    dataCy: 'radio-id',
+  },
+  {
+    disablePadding: false,
     label: 'Individual ID',
     id: 'unicefId',
     numeric: false,
@@ -11,7 +18,7 @@ export const headCells: HeadCell<IndividualNode>[] = [
   },
   {
     disablePadding: false,
-    label: 'Individual',
+    label: 'Full Name',
     id: 'fullName',
     numeric: false,
     dataCy: 'individual-name',
@@ -39,8 +46,22 @@ export const headCells: HeadCell<IndividualNode>[] = [
   },
   {
     disablePadding: false,
-    label: 'Location',
+    label: 'Admin Level 2',
     id: 'household__admin_area__title',
+    numeric: false,
+    dataCy: 'individual-location',
+  },
+  {
+    disablePadding: false,
+    label: 'Programme',
+    id: 'household__programme',
+    numeric: false,
+    dataCy: 'individual-programme',
+  },
+  {
+    disablePadding: false,
+    label: 'Registration Date',
+    id: 'individual__last-registraton-date',
     numeric: false,
     dataCy: 'individual-location',
   },
