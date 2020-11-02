@@ -4661,9 +4661,15 @@ export type AllCashPlansQuery = (
 export type AllGrievanceTicketQueryVariables = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
-  businessArea: Scalars['String'],
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
+  id?: Maybe<Scalars['UUID']>,
+  category?: Maybe<Scalars['String']>,
+  businessArea: Scalars['String'],
+  search?: Maybe<Scalars['String']>,
+  status?: Maybe<Array<Maybe<Scalars['String']>>>,
+  fsp?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  createdAtRange?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -8121,8 +8127,8 @@ export type AllCashPlansQueryHookResult = ReturnType<typeof useAllCashPlansQuery
 export type AllCashPlansLazyQueryHookResult = ReturnType<typeof useAllCashPlansLazyQuery>;
 export type AllCashPlansQueryResult = ApolloReactCommon.QueryResult<AllCashPlansQuery, AllCashPlansQueryVariables>;
 export const AllGrievanceTicketDocument = gql`
-    query AllGrievanceTicket($before: String, $after: String, $businessArea: String!, $first: Int, $last: Int, $orderBy: String) {
-  allGrievanceTicket(before: $before, after: $after, first: $first, last: $last, orderBy: $orderBy, businessArea: $businessArea) {
+    query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $businessArea: String!, $search: String, $status: [String], $fsp: [ID], $createdAtRange: String, $orderBy: String) {
+  allGrievanceTicket(before: $before, after: $after, first: $first, last: $last, id: $id, category: $category, businessArea: $businessArea, search: $search, status: $status, fsp: $fsp, createdAtRange: $createdAtRange, orderBy: $orderBy) {
     totalCount
     pageInfo {
       startCursor
@@ -8133,12 +8139,12 @@ export const AllGrievanceTicketDocument = gql`
       node {
         id
         status
-        category
         assignedTo {
           id
           firstName
           lastName
         }
+        category
         createdAt
         userModified
       }
@@ -8178,9 +8184,15 @@ export function withAllGrievanceTicket<TProps, TChildProps = {}>(operationOption
  *   variables: {
  *      before: // value for 'before'
  *      after: // value for 'after'
- *      businessArea: // value for 'businessArea'
  *      first: // value for 'first'
  *      last: // value for 'last'
+ *      id: // value for 'id'
+ *      category: // value for 'category'
+ *      businessArea: // value for 'businessArea'
+ *      search: // value for 'search'
+ *      status: // value for 'status'
+ *      fsp: // value for 'fsp'
+ *      createdAtRange: // value for 'createdAtRange'
  *      orderBy: // value for 'orderBy'
  *   },
  * });
