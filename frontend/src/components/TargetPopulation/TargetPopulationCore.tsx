@@ -30,7 +30,10 @@ export function TargetPopulationCore({
   const totalNumOfIndividuals = targetPopulation.candidateListTotalIndividuals;
   return (
     <>
-      <TargetingCriteria candidateListRules={candidateListRules} />
+      <TargetingCriteria
+        candidateListRules={candidateListRules}
+        targetPopulation={targetPopulation}
+      />
       <Results
         resultsData={targetPopulation.candidateStats}
         totalNumOfHouseholds={totalNumOfHouseholds}
