@@ -4,9 +4,15 @@ export const AllGrievanceTicket = gql`
   query AllGrievanceTicket(
     $before: String
     $after: String
-    $businessArea: String!
     $first: Int
     $last: Int
+    $id: UUID
+    $category: String
+    $businessArea: String!
+    $search: String
+    $status: [String]
+    $fsp: [ID]
+    $createdAtRange: String
     $orderBy: String
   ) {
     allGrievanceTicket(
@@ -14,8 +20,14 @@ export const AllGrievanceTicket = gql`
       after: $after
       first: $first
       last: $last
-      orderBy: $orderBy
+      id: $id
+      category: $category
       businessArea: $businessArea
+      search: $search
+      status: $status
+      fsp: $fsp
+      createdAtRange: $createdAtRange
+      orderBy: $orderBy
     ) {
       totalCount
       pageInfo {
@@ -27,12 +39,12 @@ export const AllGrievanceTicket = gql`
         node {
           id
           status
-          category
           assignedTo {
             id
             firstName
             lastName
           }
+          category
           createdAt
           userModified
         }
