@@ -74,6 +74,7 @@ class HouseholdFilter(FilterSet):
             Lower("registration_data_import__name"),
             "total_cash",
             "registration_date",
+            "last_registration_date"
         )
     )
 

@@ -22,6 +22,7 @@ import Select from '../../../shared/Select';
 import { AdminAreasAutocomplete } from '../../population/AdminAreaAutocomplete';
 import { FieldLabel } from '../../FieldLabel';
 import { KeyboardDatePicker } from '@material-ui/pickers';
+import { Missing } from '../../Missing';
 
 const TextContainer = styled(TextField)`
   input[type='number']::-webkit-inner-spin-button,
@@ -184,6 +185,7 @@ export function LookUpHouseholdFilters({
           </StyledFormControl>
         </Grid>
         <Grid item>
+          <Missing />
           <AdminAreasAutocomplete
             value={filter.admin2}
             onChange={(e, option) => {
