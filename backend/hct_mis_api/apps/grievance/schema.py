@@ -8,6 +8,8 @@ from account.permissions import BaseNodePermissionMixin, DjangoPermissionFilterC
 from core.extended_connection import ExtendedConnection
 from core.filters import DateTimeRangeFilter
 from core.models import AdminArea
+from core.schema import ChoiceObject
+from core.utils import to_choice_object, choices_to_dict
 from grievance.models import GrievanceTicket, TicketNotes, TicketSensitiveDetails, TicketComplaintDetails
 from payment.models import ServiceProvider
 
@@ -99,6 +101,15 @@ class TicketSensitiveDetailsNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
+class IssueTypesObject(graphene.ObjectType):
+    category = graphene.String()
+    label = graphene.String()
+    sub_categories = graphene.List(ChoiceObject)
+
+    def resolve_sub_categories(self, info):
+        return [{"name": value, "value": key} for key, value in self.get("sub_categories").items()]
+
+
 class Query(graphene.ObjectType):
     grievance_ticket = relay.Node.Field(GrievanceTicketNode)
     all_grievance_ticket = DjangoPermissionFilterConnectionField(
@@ -107,3 +118,26 @@ class Query(graphene.ObjectType):
         # TODO Enable permissions below
         # permission_classes=(hopePermissionClass("PERMISSION_PROGRAM.LIST"),)
     )
+    grievance_ticket_status_choices = graphene.List(ChoiceObject)
+    grievance_ticket_category_choices = graphene.List(ChoiceObject)
+    grievance_ticket_issue_type_choices = graphene.List(IssueTypesObject)
+
+    def resolve_grievance_ticket_status_choices(self, info, **kwargs):
+        return to_choice_object(GrievanceTicket.STATUS_CHOICES)
+
+    def resolve_grievance_ticket_category_choices(self, info, **kwargs):
+        return to_choice_object(GrievanceTicket.CATEGORY_CHOICES)
+
+    def resolve_grievance_ticket_issue_type_choices(self, info, **kwargs):
+        categories = choices_to_dict(GrievanceTicket.CATEGORY_CHOICES)
+        print(categories)
+        Subs = []
+        for (key, value) in GrievanceTicket.ISSUE_TYPES_CHOICES.items():
+            Subs.append(
+                {
+                    "category": key,
+                    "label": categories[key],
+                    "sub_categories": value,
+                }
+            )
+        return Subs
