@@ -18,10 +18,7 @@
         "name": "Node",
         "possibleTypes": [
           {
-            "name": "SteficonRuleNode"
-          },
-          {
-            "name": "TargetPopulationNode"
+            "name": "GrievanceTicketNode"
           },
           {
             "name": "UserNode"
@@ -30,28 +27,13 @@
             "name": "UserBusinessAreaNode"
           },
           {
-            "name": "HouseholdNode"
+            "name": "AdminAreaTypeNode"
           },
           {
             "name": "AdminAreaNode"
           },
           {
-            "name": "ProgramNode"
-          },
-          {
-            "name": "CashPlanNode"
-          },
-          {
-            "name": "PaymentRecordNode"
-          },
-          {
-            "name": "ServiceProviderNode"
-          },
-          {
-            "name": "PaymentVerificationNode"
-          },
-          {
-            "name": "CashPlanPaymentVerificationNode"
+            "name": "HouseholdNode"
           },
           {
             "name": "IndividualNode"
@@ -60,7 +42,40 @@
             "name": "RegistrationDataImportNode"
           },
           {
+            "name": "TicketComplaintDetailsNode"
+          },
+          {
+            "name": "PaymentRecordNode"
+          },
+          {
+            "name": "CashPlanNode"
+          },
+          {
+            "name": "ProgramNode"
+          },
+          {
+            "name": "TargetPopulationNode"
+          },
+          {
+            "name": "SteficonRuleNode"
+          },
+          {
+            "name": "CashPlanPaymentVerificationNode"
+          },
+          {
+            "name": "PaymentVerificationNode"
+          },
+          {
+            "name": "ServiceProviderNode"
+          },
+          {
+            "name": "TicketSensitiveDetailsNode"
+          },
+          {
             "name": "DocumentNode"
+          },
+          {
+            "name": "TicketNoteNode"
           },
           {
             "name": "BusinessAreaNode"
