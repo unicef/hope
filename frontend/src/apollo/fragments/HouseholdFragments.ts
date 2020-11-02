@@ -16,6 +16,7 @@ export const householdMinimal = gql`
     geopoint
     village
     adminArea {
+      id
       title
       adminAreaType {
         adminLevel
@@ -26,12 +27,16 @@ export const householdMinimal = gql`
       fullName
     }
     address
-    adminArea {
-      id
-      title
-    }
     individuals {
       totalCount
+    }
+    programs {
+      edges {
+        node {
+          id
+          name
+        }
+      }
     }
   }
 `;
