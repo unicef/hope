@@ -18,20 +18,22 @@ interface LookUpHouseholdTableProps {
   businessArea: string;
   filter;
   choicesData: HouseholdChoiceDataQuery;
+  setFieldValue;
 }
 
 export const LookUpHouseholdTable = ({
   businessArea,
   filter,
   choicesData,
+  setFieldValue,
 }: LookUpHouseholdTableProps): React.ReactElement => {
   const initialVariables: AllHouseholdsQueryVariables = {
     businessArea,
     search: filter.search,
-    programs: filter.programs,
+    programs: [filter.programs],
     lastRegistrationDate: JSON.stringify(filter.lastRegistrationDate),
     residenceStatus: filter.residenceStatus,
-    admin2: filter.admin2,
+    admin2: [filter.admin2],
     familySize: JSON.stringify(filter.size),
   };
   if (filter.program) {
@@ -40,6 +42,7 @@ export const LookUpHouseholdTable = ({
   const [selectedHousehold, setSelectedHousehold] = useState('');
   const handleRadioChange = (event) => {
     setSelectedHousehold(event.target.value);
+    setFieldValue('selectedHousehold', event.target.value);
   };
   return (
     <TableWrapper>

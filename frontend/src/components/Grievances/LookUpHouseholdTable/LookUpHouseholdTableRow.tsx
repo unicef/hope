@@ -3,7 +3,6 @@ import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { choicesToDict, formatCurrency } from '../../../utils/utils';
 import {
   HouseholdChoiceDataQuery,
   HouseholdNode,
