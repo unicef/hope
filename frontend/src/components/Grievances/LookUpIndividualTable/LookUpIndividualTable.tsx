@@ -17,14 +17,18 @@ interface LookUpIndividualTableProps {
   filter;
   businessArea?: string;
   setFieldValue;
+  initialValues;
 }
 
 export const LookUpIndividualTable = ({
   businessArea,
   filter,
   setFieldValue,
+  initialValues,
 }: LookUpIndividualTableProps): React.ReactElement => {
-  const [selectedIndividual, setSelectedIndividual] = useState('');
+  const [selectedIndividual, setSelectedIndividual] = useState(
+    initialValues.selectedIndividual,
+  );
   const handleRadioChange = (event) => {
     setSelectedIndividual(event.target.value);
     setFieldValue('selectedIndividual', event.target.value);
