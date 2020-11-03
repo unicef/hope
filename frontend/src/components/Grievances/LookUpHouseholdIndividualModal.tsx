@@ -133,6 +133,7 @@ export const LookUpHouseholdIndividualModal = ({
                   businessArea={businessArea}
                   choicesData={choicesData}
                   setFieldValue={setFieldValue}
+                  initialValues={initialValues}
                 />
               </TabPanel>
               <TabPanel value={selectedTab} index={1}>
@@ -146,6 +147,7 @@ export const LookUpHouseholdIndividualModal = ({
                   filter={debouncedFilterIndividual}
                   businessArea={businessArea}
                   setFieldValue={setFieldValue}
+                  initialValues={initialValues}
                 />
               </TabPanel>
             </DialogContent>
