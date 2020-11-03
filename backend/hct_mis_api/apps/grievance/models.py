@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
 from django.db import models
 
@@ -35,10 +36,10 @@ class GrievanceTicket(TimeStampedUUIDModel):
     ISSUE_TYPE_SEXUAL_HARASSMENT = 11
     ISSUE_TYPE_MISCELLANEOUS = 12
 
-    ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE = 1
-    ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE = 2
-    ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL = 3
-    ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL = 4
+    ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE = 13
+    ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE = 14
+    ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL = 15
+    ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL = 16
     ISSUE_TYPES_CHOICES = {
         CATEGORY_DATA_CHANGE: {
             ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE: _("Household Data Update"),
@@ -81,7 +82,10 @@ class GrievanceTicket(TimeStampedUUIDModel):
     )
 
     user_modified = models.DateTimeField(
-        verbose_name=_("Modified"), null=True, blank=True, help_text=_("Date this ticket was most recently changed."),
+        verbose_name=_("Modified"),
+        null=True,
+        blank=True,
+        help_text=_("Date this ticket was most recently changed."),
     )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -101,7 +105,9 @@ class GrievanceTicket(TimeStampedUUIDModel):
     category = models.IntegerField(verbose_name=_("Category"), choices=CATEGORY_CHOICES)
     issue_type = models.IntegerField(verbose_name=_("Type"), null=True, blank=True)
     description = models.TextField(
-        verbose_name=_("Description"), blank=True, help_text=_("The content of the customers query."),
+        verbose_name=_("Description"),
+        blank=True,
+        help_text=_("The content of the customers query."),
     )
     admin = models.CharField(max_length=250, blank=True)
     area = models.CharField(max_length=250, blank=True)
@@ -111,13 +117,16 @@ class GrievanceTicket(TimeStampedUUIDModel):
     linked_tickets = models.ManyToManyField(to="GrievanceTicket", through="GrievanceTicketThrough")
 
     class Meta:
-        ordering = ("status", "created_at",)
+        ordering = (
+            "status",
+            "created_at",
+        )
 
     def clean(self):
         issue_types = self.ISSUE_TYPES_CHOICES.get(self.category)
         should_contain_issue_types = bool(issue_types)
         has_invalid_issue_type = should_contain_issue_types is True and self.issue_type not in issue_types
-        has_issue_type_for_category_without_issue_types = bool(has_invalid_issue_type is False and self.issue_type)
+        has_issue_type_for_category_without_issue_types = bool(should_contain_issue_types is False and self.issue_type)
         if has_invalid_issue_type or has_issue_type_for_category_without_issue_types:
             raise ValidationError({"issue_type": "Invalid issue type for selected category"})
 
@@ -137,7 +146,10 @@ class GrievanceTicketThrough(TimeStampedUUIDModel):
 
 class TicketNotes(TimeStampedUUIDModel):
     description = models.TextField(
-        verbose_name=_("Description"), blank=True, null=True, help_text=_("The content of the customers query."),
+        verbose_name=_("Description"),
+        blank=True,
+        null=True,
+        help_text=_("The content of the customers query."),
     )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -154,13 +166,22 @@ class TicketComplaintDetails(TimeStampedUUIDModel):
         "grievance.GrievanceTicket", related_name="complaint_ticket_details", on_delete=models.CASCADE
     )
     payment_record = models.ForeignKey(
-        "payment.PaymentRecord", related_name="complaint_ticket_details", on_delete=models.CASCADE, null=True,
+        "payment.PaymentRecord",
+        related_name="complaint_ticket_details",
+        on_delete=models.CASCADE,
+        null=True,
     )
     household = models.ForeignKey(
-        "household.Household", related_name="complaint_ticket_details", on_delete=models.CASCADE, null=True,
+        "household.Household",
+        related_name="complaint_ticket_details",
+        on_delete=models.CASCADE,
+        null=True,
     )
     individual = models.ForeignKey(
-        "household.Individual", related_name="complaint_ticket_details", on_delete=models.CASCADE, null=True,
+        "household.Individual",
+        related_name="complaint_ticket_details",
+        on_delete=models.CASCADE,
+        null=True,
     )
 
 
@@ -169,11 +190,33 @@ class TicketSensitiveDetails(TimeStampedUUIDModel):
         "grievance.GrievanceTicket", related_name="sensitive_ticket_details", on_delete=models.CASCADE
     )
     payment_record = models.ForeignKey(
-        "payment.PaymentRecord", related_name="sensitive_ticket_details", on_delete=models.CASCADE, null=True,
+        "payment.PaymentRecord",
+        related_name="sensitive_ticket_details",
+        on_delete=models.CASCADE,
+        null=True,
     )
     household = models.ForeignKey(
-        "household.Household", related_name="sensitive_ticket_details", on_delete=models.CASCADE, null=True,
+        "household.Household",
+        related_name="sensitive_ticket_details",
+        on_delete=models.CASCADE,
+        null=True,
     )
     individual = models.ForeignKey(
-        "household.Individual", related_name="sensitive_ticket_details", on_delete=models.CASCADE, null=True,
+        "household.Individual",
+        related_name="sensitive_ticket_details",
+        on_delete=models.CASCADE,
+        null=True,
     )
+
+
+class TicketIndividualDataUpdateDetails(TimeStampedUUIDModel):
+    ticket = models.OneToOneField(
+        "grievance.GrievanceTicket", related_name="individual_data_update_ticket_details", on_delete=models.CASCADE
+    )
+    individual = models.ForeignKey(
+        "household.Individual",
+        related_name="individual_data_update_ticket_details",
+        on_delete=models.CASCADE,
+        null=True,
+    )
+    individual_data = JSONField(null=True)
