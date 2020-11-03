@@ -8,7 +8,9 @@ export function DefaultRoute(): React.ReactElement {
     return null;
   }
   if (data.me.businessAreas.edges.length < 1) {
-    return <div>You dont have any business area assigned to your account</div>;
+    return (
+      <div>You don&apos;t have any business area assigned to your account.</div>
+    );
   }
   return <Redirect to={`/${data.me.businessAreas.edges[0].node.slug}/`} />;
 }

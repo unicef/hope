@@ -4696,6 +4696,7 @@ export type AllGrievanceTicketQueryVariables = {
   status?: Maybe<Array<Maybe<Scalars['String']>>>,
   fsp?: Maybe<Array<Maybe<Scalars['ID']>>>,
   createdAtRange?: Maybe<Scalars['String']>,
+  admin?: Maybe<Array<Maybe<Scalars['ID']>>>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -8087,8 +8088,8 @@ export type AllCashPlansQueryHookResult = ReturnType<typeof useAllCashPlansQuery
 export type AllCashPlansLazyQueryHookResult = ReturnType<typeof useAllCashPlansLazyQuery>;
 export type AllCashPlansQueryResult = ApolloReactCommon.QueryResult<AllCashPlansQuery, AllCashPlansQueryVariables>;
 export const AllGrievanceTicketDocument = gql`
-    query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $businessArea: String!, $search: String, $status: [String], $fsp: [ID], $createdAtRange: String, $orderBy: String) {
-  allGrievanceTicket(before: $before, after: $after, first: $first, last: $last, id: $id, category: $category, businessArea: $businessArea, search: $search, status: $status, fsp: $fsp, createdAtRange: $createdAtRange, orderBy: $orderBy) {
+    query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $businessArea: String!, $search: String, $status: [String], $fsp: [ID], $createdAtRange: String, $admin: [ID], $orderBy: String) {
+  allGrievanceTicket(before: $before, after: $after, first: $first, last: $last, id: $id, category: $category, businessArea: $businessArea, search: $search, status: $status, fsp: $fsp, createdAtRange: $createdAtRange, orderBy: $orderBy, admin: $admin) {
     totalCount
     pageInfo {
       startCursor
@@ -8153,6 +8154,7 @@ export function withAllGrievanceTicket<TProps, TChildProps = {}>(operationOption
  *      status: // value for 'status'
  *      fsp: // value for 'fsp'
  *      createdAtRange: // value for 'createdAtRange'
+ *      admin: // value for 'admin'
  *      orderBy: // value for 'orderBy'
  *   },
  * });

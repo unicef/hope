@@ -3,14 +3,17 @@ import React from 'react';
 import { LookUpHouseholdIndividual } from './LookUpHouseholdIndividual';
 import { LookUpPaymentRecord } from './LookUpPaymentRecord';
 
-export const LookUpSection = ({ category }): React.ReactElement => {
+export const LookUpSection = ({
+  category,
+  setFieldValue,
+}): React.ReactElement => {
   const LookUpForCategory = () => {
     switch (category) {
       case 'Positive Feedback':
         return (
           <Grid container spacing={3}>
             <Grid item xs={6}>
-              <LookUpHouseholdIndividual />
+              <LookUpHouseholdIndividual setFieldValue={setFieldValue} />
             </Grid>
           </Grid>
         );
@@ -20,7 +23,7 @@ export const LookUpSection = ({ category }): React.ReactElement => {
         return (
           <Grid container spacing={3}>
             <Grid item xs={6}>
-              <LookUpHouseholdIndividual />
+              <LookUpHouseholdIndividual setFieldValue={setFieldValue} />
             </Grid>
             <Grid item xs={6}>
               <LookUpPaymentRecord />

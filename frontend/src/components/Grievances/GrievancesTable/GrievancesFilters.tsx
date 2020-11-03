@@ -100,7 +100,7 @@ export function GrievancesFilters({
         </Grid>
         <Grid item>
           <AdminAreasAutocomplete
-            value={filter.adminArea}
+            value={filter.admin}
             onChange={(e, option) => {
               if (!option) {
                 onFilterChange({ ...filter, admin: undefined });

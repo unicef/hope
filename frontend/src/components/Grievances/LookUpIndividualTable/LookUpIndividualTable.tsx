@@ -16,23 +16,26 @@ const TableWrapper = styled.div`
 interface LookUpIndividualTableProps {
   filter;
   businessArea?: string;
+  setFieldValue;
 }
 
 export const LookUpIndividualTable = ({
   businessArea,
   filter,
+  setFieldValue,
 }: LookUpIndividualTableProps): React.ReactElement => {
   const [selectedIndividual, setSelectedIndividual] = useState('');
   const handleRadioChange = (event) => {
     setSelectedIndividual(event.target.value);
+    setFieldValue('selectedIndividual', event.target.value);
   };
   const initialVariables = {
     businessArea,
     search: filter.search,
     programme: filter.programme,
     lastRegistrationDate: JSON.stringify(filter.lastRegistrationDate),
-    status: filter.status,
-    admin2: filter.admin2,
+    status: [filter.status],
+    admin2: [filter.admin2],
     sex: [filter.sex],
   };
 
