@@ -1,6 +1,5 @@
 import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
-import { useHistory } from 'react-router-dom';
 import { IndividualNode } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { getAgeFromDob, sexToCapitalize } from '../../../utils/utils';
@@ -20,7 +19,6 @@ export function LookUpIndividualTableRow({
   radioChangeHandler,
   selectedIndividual,
 }: LookUpIndividualTableRowProps): React.ReactElement {
-  const history = useHistory();
   const businessArea = useBusinessArea();
   let age: number | string = 'N/A';
   if (individual.birthDate) {
@@ -28,7 +26,10 @@ export function LookUpIndividualTableRow({
   }
   const handleClick = (): void => {
     const path = `/${businessArea}/population/individuals/${individual.id}`;
-    history.push(path);
+    const win = window.open(path, '_blank');
+    if (win != null) {
+      win.focus();
+    }
   };
   const renderPrograms = (): string => {
     const programNames = individual?.household?.programs?.edges?.map(
