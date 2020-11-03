@@ -4,6 +4,7 @@ from grievance.mutations_extras.data_change import (
     HouseholdDataUpdateIssueTypeExtras,
     IndividualDataUpdateIssueTypeExtras,
     IndividualDeleteIssueTypeExtras,
+    AddIndividualIssueTypeExtras,
 )
 from grievance.mutations_extras.grievance_complaint import GrievanceComplaintTicketExtras
 from grievance.mutations_extras.sensitive_grievance import SensitiveGrievanceTicketExtras
@@ -13,6 +14,7 @@ class IssueTypeExtrasInput(graphene.InputObjectType):
     household_data_update_issue_type_extras = HouseholdDataUpdateIssueTypeExtras()
     individual_data_update_issue_type_extras = IndividualDataUpdateIssueTypeExtras()
     individual_delete_issue_type_extras = IndividualDeleteIssueTypeExtras()
+    add_individual_issue_type_extras = AddIndividualIssueTypeExtras()
 
 
 class CategoryExtrasInput(graphene.InputObjectType):
