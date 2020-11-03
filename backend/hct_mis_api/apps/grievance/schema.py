@@ -37,7 +37,12 @@ class GrievanceTicketFilter(FilterSet):
     created_at_range = DateTimeRangeFilter(field_name="created_at")
 
     class Meta:
-        fields = ("id", "category")
+        fields = {
+            "id": ["exact", "icontains"],
+            "category": ["exact"],
+            "area": ["exact", "icontains"],
+            "assigned_to": ["exact"],
+        }
         model = GrievanceTicket
 
     order_by = OrderingFilter(
@@ -131,14 +136,7 @@ class Query(graphene.ObjectType):
 
     def resolve_grievance_ticket_issue_type_choices(self, info, **kwargs):
         categories = choices_to_dict(GrievanceTicket.CATEGORY_CHOICES)
-        print(categories)
-        Subs = []
-        for (key, value) in GrievanceTicket.ISSUE_TYPES_CHOICES.items():
-            Subs.append(
-                {
-                    "category": key,
-                    "label": categories[key],
-                    "sub_categories": value,
-                }
-            )
-        return Subs
+        return [
+            {"category": key, "label": categories[key], "sub_categories": value}
+            for (key, value) in GrievanceTicket.ISSUE_TYPES_CHOICES.items()
+        ]
