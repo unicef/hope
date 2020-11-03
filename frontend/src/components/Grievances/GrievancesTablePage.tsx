@@ -34,7 +34,7 @@ export function GrievancesTablePage(): React.ReactElement {
         </>
       </PageHeader>
       <GrievancesFilters filter={debouncedFilter} onFilterChange={setFilter} />
-      <GrievancesTable businessArea={businessArea} />
+      <GrievancesTable filter={debouncedFilter} businessArea={businessArea} />
     </>
   );
 }

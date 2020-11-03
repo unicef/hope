@@ -40,11 +40,13 @@ export function CreateGrievance(): React.ReactElement {
   const businessArea = useBusinessArea();
 
   const initialValues: { [key: string]: string } = {
-    newNote: '',
+    selectedHousehold: '',
+    selectedIndividual: '',
   };
 
   const validationSchema = Yup.object().shape({
-    newNote: Yup.string().required('Note cannot be empty'),
+    selectedHousehold: Yup.string().required('Household has to be selected'),
+    selectedIndividual: Yup.string().required('Individual has to be selected'),
   });
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
@@ -62,7 +64,7 @@ export function CreateGrievance(): React.ReactElement {
       }}
       validationSchema={validationSchema}
     >
-      {({ submitForm, values }) => (
+      {({ submitForm, values, setValues, setFieldValue }) => (
         <>
           <PageHeader title='New Ticket' breadCrumbs={breadCrumbsItems} />
           <Grid container spacing={3}>
@@ -112,7 +114,10 @@ export function CreateGrievance(): React.ReactElement {
                         color='primary'
                         component={FormikCheckboxField}
                       />
-                      <LookUpSection category={values.category} />
+                      <LookUpSection
+                        category={values.category}
+                        setFieldValue={setFieldValue}
+                      />
                     </Box>
                   </BoxWithBorders>
                   <BoxWithBorderBottom>
@@ -220,7 +225,7 @@ export function CreateGrievance(): React.ReactElement {
                       <Button
                         color='primary'
                         variant='contained'
-                        onClick={() => console.log('save')}
+                        onClick={submitForm}
                       >
                         Save
                       </Button>

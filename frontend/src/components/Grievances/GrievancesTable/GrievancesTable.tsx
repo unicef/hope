@@ -15,13 +15,20 @@ const TableWrapper = styled.div`
 
 interface GrievancesTableProps {
   businessArea: string;
+  filter;
 }
 
 export const GrievancesTable = ({
   businessArea,
+  filter,
 }: GrievancesTableProps): React.ReactElement => {
   const initialVariables: AllGrievanceTicketQueryVariables = {
     businessArea,
+    search: filter.search,
+    // status: [filter.status],
+    // fsp: [filter.fsp],
+    createdAtRange: JSON.stringify(filter.createdAtRange),
+    admin: [filter.admin],
   };
 
   return (

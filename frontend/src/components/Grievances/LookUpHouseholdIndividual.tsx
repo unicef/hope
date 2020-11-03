@@ -56,7 +56,9 @@ const StyledTabs = styled(Tabs)`
   }
 `;
 
-export const LookUpHouseholdIndividual = (): React.ReactElement => {
+export const LookUpHouseholdIndividual = ({
+  setFieldValue,
+}): React.ReactElement => {
   const [lookUpDialogOpen, setLookUpDialogOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
   const [filterHousehold, setFilterHousehold] = useState({
@@ -137,6 +139,7 @@ export const LookUpHouseholdIndividual = (): React.ReactElement => {
               filter={debouncedFilterHousehold}
               businessArea={businessArea}
               choicesData={choicesData}
+              setFieldValue={setFieldValue}
             />
           </TabPanel>
           <TabPanel value={selectedTab} index={1}>
@@ -149,6 +152,7 @@ export const LookUpHouseholdIndividual = (): React.ReactElement => {
             <LookUpIndividualTable
               filter={debouncedFilterIndividual}
               businessArea={businessArea}
+              setFieldValue={setFieldValue}
             />
           </TabPanel>
         </DialogContent>
@@ -159,7 +163,7 @@ export const LookUpHouseholdIndividual = (): React.ReactElement => {
               type='submit'
               color='primary'
               variant='contained'
-              onClick={() => null}
+              onClick={() => setLookUpDialogOpen(false)}
               data-cy='button-submit'
             >
               SAVE

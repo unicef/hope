@@ -13,6 +13,7 @@ export const AllGrievanceTicket = gql`
     $status: [String]
     $fsp: [ID]
     $createdAtRange: String
+    $admin: [ID]
     $orderBy: String
   ) {
     allGrievanceTicket(
@@ -28,6 +29,7 @@ export const AllGrievanceTicket = gql`
       fsp: $fsp
       createdAtRange: $createdAtRange
       orderBy: $orderBy
+      admin: $admin
     ) {
       totalCount
       pageInfo {
