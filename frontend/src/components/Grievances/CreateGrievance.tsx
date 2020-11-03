@@ -116,7 +116,8 @@ export function CreateGrievance(): React.ReactElement {
                       />
                       <LookUpSection
                         category={values.category}
-                        setFieldValue={setFieldValue}
+                        values={values}
+                        onValueChange={setFieldValue}
                       />
                     </Box>
                   </BoxWithBorders>

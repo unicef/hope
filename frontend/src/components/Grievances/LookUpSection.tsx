@@ -1,11 +1,12 @@
-import { Grid } from '@material-ui/core';
+import { Box, Grid } from '@material-ui/core';
 import React from 'react';
 import { LookUpHouseholdIndividual } from './LookUpHouseholdIndividual';
 import { LookUpPaymentRecord } from './LookUpPaymentRecord';
 
 export const LookUpSection = ({
   category,
-  setFieldValue,
+  onValueChange,
+  values,
 }): React.ReactElement => {
   const LookUpForCategory = () => {
     switch (category) {
@@ -13,7 +14,10 @@ export const LookUpSection = ({
         return (
           <Grid container spacing={3}>
             <Grid item xs={6}>
-              <LookUpHouseholdIndividual setFieldValue={setFieldValue} />
+              <LookUpHouseholdIndividual
+                values={values}
+                onValueChange={onValueChange}
+              />
             </Grid>
           </Grid>
         );
@@ -21,14 +25,17 @@ export const LookUpSection = ({
         return <div>Negative Feedback</div>;
       case 'Grievance Complaint':
         return (
-          <Grid container spacing={3}>
-            <Grid item xs={6}>
-              <LookUpHouseholdIndividual setFieldValue={setFieldValue} />
-            </Grid>
-            <Grid item xs={6}>
+          <Box display='flex' alignItems='center'>
+            <Box p={3}>
+              <LookUpHouseholdIndividual
+                values={values}
+                onValueChange={onValueChange}
+              />
+            </Box>
+            <Box p={3}>
               <LookUpPaymentRecord />
-            </Grid>
-          </Grid>
+            </Box>
+          </Box>
         );
       case 'Payment Verification Issue':
         return <div>Payment Verification Issue</div>;
