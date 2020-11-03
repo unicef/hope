@@ -103,7 +103,7 @@ class CreateGrievanceTicketMutation(graphene.Mutation):
             ],
         },
         GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL: {
-            "required": [],
+            "required": ['extras.issue_type.add_individual_issue_type_extras'],
             "not_allowed": [
                 "household_data_update_issue_type_extras",
                 "individual_data_update_issue_type_extras",

@@ -15,7 +15,7 @@ from grievance.models import (
     TicketNotes,
     TicketSensitiveDetails,
     TicketComplaintDetails,
-    TicketIndividualDataUpdateDetails,
+    TicketIndividualDataUpdateDetails, TicketAddIndividualDetails,
 )
 from payment.models import ServiceProvider
 from utils.schema import Arg
@@ -111,8 +111,19 @@ class TicketSensitiveDetailsNode(DjangoObjectType):
 
 class TicketIndividualDataUpdateDetailsNode(DjangoObjectType):
     individual_data = Arg()
+
     class Meta:
         model = TicketIndividualDataUpdateDetails
+        exclude = ("ticket",)
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
+class TicketAddIndividualDetailsNode(DjangoObjectType):
+    individual_data = Arg()
+
+    class Meta:
+        model = TicketAddIndividualDetails
         exclude = ("ticket",)
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection

@@ -220,3 +220,16 @@ class TicketIndividualDataUpdateDetails(TimeStampedUUIDModel):
         null=True,
     )
     individual_data = JSONField(null=True)
+
+
+class TicketAddIndividualDetails(TimeStampedUUIDModel):
+    ticket = models.OneToOneField(
+        "grievance.GrievanceTicket", related_name="add_individual_ticket_details", on_delete=models.CASCADE
+    )
+    household = models.ForeignKey(
+        "household.Household",
+        related_name="add_individual_ticket_details",
+        on_delete=models.CASCADE,
+        null=True,
+    )
+    individual_data = JSONField(null=True)
