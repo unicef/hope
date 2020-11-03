@@ -26,7 +26,7 @@ export function LookUpIndividualTableRow({
   }
   const handleClick = (): void => {
     const path = `/${businessArea}/population/individuals/${individual.id}`;
-    const win = window.open(path, '_blank');
+    const win = window.open(path, '_blank rel=noopener');
     if (win != null) {
       win.focus();
     }
