@@ -10,6 +10,7 @@ import {
   Tab,
   Tabs,
 } from '@material-ui/core';
+import { Field, Formik } from 'formik';
 import { TabPanel } from '../TabPanel';
 import { useDebounce } from '../../hooks/useDebounce';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
@@ -18,12 +19,11 @@ import {
   useAllProgramsQuery,
   useHouseholdChoiceDataQuery,
 } from '../../__generated__/graphql';
+import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 import { LookUpHouseholdFilters } from './LookUpHouseholdTable/LookUpHouseholdFilters';
 import { LookUpHouseholdTable } from './LookUpHouseholdTable/LookUpHouseholdTable';
 import { LookUpIndividualFilters } from './LookUpIndividualTable/LookUpIndividualFilters';
 import { LookUpIndividualTable } from './LookUpIndividualTable/LookUpIndividualTable';
-import { Field, Formik } from 'formik';
-import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 
 const DialogFooter = styled.div`
   padding: 12px 16px;

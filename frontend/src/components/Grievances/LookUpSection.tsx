@@ -1,4 +1,4 @@
-import { Box, Grid } from '@material-ui/core';
+import { Box } from '@material-ui/core';
 import React from 'react';
 import { LookUpHouseholdIndividual } from './LookUpHouseholdIndividual';
 import { LookUpPaymentRecord } from './LookUpPaymentRecord';
@@ -8,8 +8,7 @@ export const LookUpSection = ({
   onValueChange,
   values,
 }): React.ReactElement => {
-  const LookUpForCategory = () => {
-    console.log(category);
+  const LookUpForCategory = (): React.ReactElement => {
     switch (category) {
       case '1':
         return <div>Payment Verification</div>;
