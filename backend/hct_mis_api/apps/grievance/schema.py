@@ -15,7 +15,7 @@ from grievance.models import (
     TicketNotes,
     TicketSensitiveDetails,
     TicketComplaintDetails,
-    TicketIndividualDataUpdateDetails, TicketAddIndividualDetails,
+    TicketIndividualDataUpdateDetails, TicketAddIndividualDetails, TicketDeleteIndividualDetails,
 )
 from payment.models import ServiceProvider
 from utils.schema import Arg
@@ -128,6 +128,14 @@ class TicketAddIndividualDetailsNode(DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
+class TicketDeleteIndividualDetailsNode(DjangoObjectType):
+    individual_data = Arg()
+
+    class Meta:
+        model = TicketDeleteIndividualDetails
+        exclude = ("ticket",)
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
 
 class IssueTypesObject(graphene.ObjectType):
     category = graphene.String()
