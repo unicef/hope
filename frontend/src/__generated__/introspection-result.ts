@@ -1,101 +1,102 @@
-
-      export interface IntrospectionResultData {
-        __schema: {
-          types: {
-            kind: string;
-            name: string;
-            possibleTypes: {
-              name: string;
-            }[];
-          }[];
-        };
-      }
-      const result: IntrospectionResultData = {
-  "__schema": {
-    "types": [
+export interface IntrospectionResultData {
+  __schema: {
+    types: {
+      kind: string;
+      name: string;
+      possibleTypes: {
+        name: string;
+      }[];
+    }[];
+  };
+}
+const result: IntrospectionResultData = {
+  __schema: {
+    types: [
       {
-        "kind": "INTERFACE",
-        "name": "Node",
-        "possibleTypes": [
+        kind: 'INTERFACE',
+        name: 'Node',
+        possibleTypes: [
           {
-            "name": "GrievanceTicketNode"
+            name: 'GrievanceTicketNode',
           },
           {
-            "name": "UserNode"
+            name: 'UserNode',
           },
           {
-            "name": "UserBusinessAreaNode"
+            name: 'UserBusinessAreaNode',
           },
           {
-            "name": "AdminAreaTypeNode"
+            name: 'AdminAreaTypeNode',
           },
           {
-            "name": "AdminAreaNode"
+            name: 'AdminAreaNode',
           },
           {
-            "name": "HouseholdNode"
+            name: 'HouseholdNode',
           },
           {
-            "name": "IndividualNode"
+            name: 'IndividualNode',
           },
           {
-            "name": "RegistrationDataImportNode"
+            name: 'RegistrationDataImportNode',
           },
           {
-            "name": "TicketComplaintDetailsNode"
+            name: 'TicketComplaintDetailsNode',
           },
           {
-            "name": "PaymentRecordNode"
+            name: 'PaymentRecordNode',
           },
           {
-            "name": "CashPlanNode"
+            name: 'CashPlanNode',
           },
           {
-            "name": "ProgramNode"
+            name: 'ProgramNode',
           },
           {
-            "name": "TargetPopulationNode"
+            name: 'TargetPopulationNode',
           },
           {
-            "name": "CashPlanPaymentVerificationNode"
+            name: 'SteficonRuleNode',
           },
           {
-            "name": "PaymentVerificationNode"
+            name: 'CashPlanPaymentVerificationNode',
           },
           {
-            "name": "ServiceProviderNode"
+            name: 'PaymentVerificationNode',
           },
           {
-            "name": "TicketSensitiveDetailsNode"
+            name: 'ServiceProviderNode',
           },
           {
-            "name": "DocumentNode"
+            name: 'TicketSensitiveDetailsNode',
           },
           {
-            "name": "TicketNoteNode"
+            name: 'DocumentNode',
           },
           {
-            "name": "BusinessAreaNode"
+            name: 'TicketNoteNode',
           },
           {
-            "name": "ImportedHouseholdNode"
+            name: 'BusinessAreaNode',
           },
           {
-            "name": "ImportedIndividualNode"
+            name: 'ImportedHouseholdNode',
           },
           {
-            "name": "RegistrationDataImportDatahubNode"
+            name: 'ImportedIndividualNode',
           },
           {
-            "name": "ImportDataNode"
+            name: 'RegistrationDataImportDatahubNode',
           },
           {
-            "name": "ImportedDocumentNode"
-          }
-        ]
-      }
-    ]
-  }
+            name: 'ImportDataNode',
+          },
+          {
+            name: 'ImportedDocumentNode',
+          },
+        ],
+      },
+    ],
+  },
 };
-      export default result;
-    
+export default result;

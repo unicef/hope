@@ -21,6 +21,7 @@ import registration_datahub.schema
 import sanction_list.mutations
 import targeting.mutations
 import targeting.schema
+import steficon.schema
 
 
 # proper multi choice conversion
@@ -38,6 +39,7 @@ class Query(
     program.schema.Query,
     core.schema.Query,
     payment.schema.Query,
+    steficon.schema.Query,
     grievance.schema.Query,
     graphene.ObjectType,
 ):
