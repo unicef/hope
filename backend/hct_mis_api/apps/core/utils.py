@@ -7,6 +7,7 @@ from django.core.exceptions import ValidationError
 from django.db.models import Q, F, Model
 from django.db.models.functions import Lower
 from django.forms import model_to_dict
+from django.shortcuts import get_object_or_404
 from django.template.defaultfilters import slugify
 from django.utils.itercompat import is_iterable
 from django_filters import OrderingFilter
@@ -439,3 +440,9 @@ def is_valid_uuid(uuid_str):
 
 def choices_to_dict(choices):
     return {value: name for value, name in choices}
+
+
+def decode_and_get_object(encoded_id, model, required):
+    if required is True or encoded_id is not None:
+        decoded_id = decode_id_string(encoded_id)
+        return get_object_or_404(model, id=decoded_id)
