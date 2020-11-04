@@ -32,7 +32,7 @@ class TestDeleteProgram(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.DELETE_PROGRAM_MUTATION,
             context={"user": self.user},
-            variables={"programId": self.id_to_base64(program_draft.id, "Program")},
+            variables={"programId": self.id_to_base64(program_draft.id, "ProgramNode")},
         )
 
     def test_delete_active_program(self):
@@ -43,5 +43,5 @@ class TestDeleteProgram(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.DELETE_PROGRAM_MUTATION,
             context={"user": self.user},
-            variables={"programId": self.id_to_base64(program_active.id, "Program")},
+            variables={"programId": self.id_to_base64(program_active.id, "ProgramNode")},
         )

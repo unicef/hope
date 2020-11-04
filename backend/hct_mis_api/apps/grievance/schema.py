@@ -10,8 +10,15 @@ from core.filters import DateTimeRangeFilter
 from core.models import AdminArea
 from core.schema import ChoiceObject
 from core.utils import to_choice_object, choices_to_dict
-from grievance.models import GrievanceTicket, TicketNotes, TicketSensitiveDetails, TicketComplaintDetails
+from grievance.models import (
+    GrievanceTicket,
+    TicketNotes,
+    TicketSensitiveDetails,
+    TicketComplaintDetails,
+    TicketIndividualDataUpdateDetails, TicketAddIndividualDetails,
+)
 from payment.models import ServiceProvider
+from utils.schema import Arg
 
 
 class GrievanceTicketFilter(FilterSet):
@@ -102,6 +109,26 @@ class TicketComplaintDetailsNode(DjangoObjectType):
 class TicketSensitiveDetailsNode(DjangoObjectType):
     class Meta:
         model = TicketSensitiveDetails
+        exclude = ("ticket",)
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
+class TicketIndividualDataUpdateDetailsNode(DjangoObjectType):
+    individual_data = Arg()
+
+    class Meta:
+        model = TicketIndividualDataUpdateDetails
+        exclude = ("ticket",)
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
+class TicketAddIndividualDetailsNode(DjangoObjectType):
+    individual_data = Arg()
+
+    class Meta:
+        model = TicketAddIndividualDetails
         exclude = ("ticket",)
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
