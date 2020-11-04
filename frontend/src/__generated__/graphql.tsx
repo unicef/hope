@@ -485,11 +485,6 @@ export type CreateGrievanceTicketInput = {
   extras?: Maybe<CreateGrievanceTicketExtrasInput>;
 };
 
-export type CreateGrievanceTicketMutation = {
-  __typename?: 'CreateGrievanceTicketMutation';
-  grievanceTickets?: Maybe<Array<Maybe<GrievanceTicketNode>>>;
-};
-
 export type CreatePaymentVerificationInput = {
   cashPlanId: Scalars['ID'];
   sampling: Scalars['String'];
@@ -712,17 +707,6 @@ export type GrievanceComplaintTicketExtras = {
   paymentRecord: Scalars['ID'];
 };
 
-export enum GrievanceTicketCategory {
-  A_1 = 'A_1',
-  A_2 = 'A_2',
-  A_3 = 'A_3',
-  A_4 = 'A_4',
-  A_5 = 'A_5',
-  A_6 = 'A_6',
-  A_7 = 'A_7',
-  A_8 = 'A_8',
-}
-
 export type GrievanceTicketNode = Node & {
   __typename?: 'GrievanceTicketNode';
   id: Scalars['ID'];
@@ -731,8 +715,8 @@ export type GrievanceTicketNode = Node & {
   userModified?: Maybe<Scalars['DateTime']>;
   createdBy?: Maybe<UserNode>;
   assignedTo?: Maybe<UserNode>;
-  status: GrievanceTicketStatus;
-  category: GrievanceTicketCategory;
+  status: Scalars['Int'];
+  category: Scalars['Int'];
   issueType?: Maybe<Scalars['Int']>;
   description: Scalars['String'];
   admin: Scalars['String'];
@@ -773,14 +757,6 @@ export type GrievanceTicketNodeEdge = {
   node?: Maybe<GrievanceTicketNode>;
   cursor: Scalars['String'];
 };
-
-export enum GrievanceTicketStatus {
-  A_1 = 'A_1',
-  A_2 = 'A_2',
-  A_3 = 'A_3',
-  A_4 = 'A_4',
-  A_5 = 'A_5',
-}
 
 export type GroupAttributeNode = {
   __typename?: 'GroupAttributeNode';
@@ -1809,6 +1785,13 @@ export type IssueTypeExtrasInput = {
   individualDeleteIssueTypeExtras?: Maybe<IndividualDeleteIssueTypeExtras>;
 };
 
+export type IssueTypesObject = {
+  __typename?: 'IssueTypesObject';
+  category?: Maybe<Scalars['String']>;
+  label?: Maybe<Scalars['String']>;
+  subCategories?: Maybe<Array<Maybe<ChoiceObject>>>;
+};
+
 export type KoboAssetObject = {
   __typename?: 'KoboAssetObject';
   id?: Maybe<Scalars['String']>;
@@ -2312,6 +2295,9 @@ export type Query = {
   __typename?: 'Query';
   grievanceTicket?: Maybe<GrievanceTicketNode>;
   allGrievanceTicket?: Maybe<GrievanceTicketNodeConnection>;
+  grievanceTicketStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
+  grievanceTicketCategoryChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
+  grievanceTicketIssueTypeChoices?: Maybe<Array<Maybe<IssueTypesObject>>>;
   allSteficonRules?: Maybe<SteficonRuleNodeConnection>;
   paymentRecord?: Maybe<PaymentRecordNode>;
   paymentRecordVerification?: Maybe<PaymentVerificationNode>;
@@ -2394,7 +2380,11 @@ export type QueryAllGrievanceTicketArgs = {
   first?: Maybe<Scalars['Int']>;
   last?: Maybe<Scalars['Int']>;
   id?: Maybe<Scalars['UUID']>;
+  id_Icontains?: Maybe<Scalars['UUID']>;
   category?: Maybe<Scalars['String']>;
+  area?: Maybe<Scalars['String']>;
+  area_Icontains?: Maybe<Scalars['String']>;
+  assignedTo?: Maybe<Scalars['ID']>;
   businessArea: Scalars['String'];
   search?: Maybe<Scalars['String']>;
   status?: Maybe<Array<Maybe<Scalars['String']>>>;
@@ -3687,27 +3677,6 @@ export type UserObjectTypeTargetPopulationsArgs = {
   after?: Maybe<Scalars['String']>;
   first?: Maybe<Scalars['Int']>;
   last?: Maybe<Scalars['Int']>;
-};
-
-export type UserObjectTypeAssignedTicketsArgs = {
-  before?: Maybe<Scalars['String']>;
-  after?: Maybe<Scalars['String']>;
-  first?: Maybe<Scalars['Int']>;
-  last?: Maybe<Scalars['Int']>;
-};
-
-export type UserObjectTypeTicketNotesArgs = {
-  before?: Maybe<Scalars['String']>;
-  after?: Maybe<Scalars['String']>;
-  first?: Maybe<Scalars['Int']>;
-  last?: Maybe<Scalars['Int']>;
-};
-
-export type UserObjectTypeTargetPopulationsArgs = {
-  before?: Maybe<Scalars['String']>;
-  after?: Maybe<Scalars['String']>;
-  first?: Maybe<Scalars['Int']>;
-  last?: Maybe<Scalars['Int']>;
   name?: Maybe<Scalars['String']>;
   createdByName?: Maybe<Scalars['String']>;
   createdAt?: Maybe<Scalars['DateTime']>;
@@ -4397,13 +4366,11 @@ export type CreateCashPlanPaymentVerificationMutation = {
   >;
 };
 
-export type CreateGrievanceTicketMutationMutationVariables = {
+export type CreateGrievanceTicketMutationVariables = {
   input: CreateGrievanceTicketInput;
 };
 
-export type CreateGrievanceTicketMutationMutation = {
-  __typename?: 'Mutations';
-} & {
+export type CreateGrievanceTicketMutation = { __typename?: 'Mutations' } & {
   createGrievanceTicket: Maybe<
     { __typename?: 'CreateGrievanceTicketMutation' } & {
       grievanceTickets: Maybe<
@@ -5478,6 +5445,46 @@ export type CashPlanQuery = { __typename?: 'Query' } & {
           'totalCount' | 'edgeCount'
         >;
       }
+  >;
+};
+
+export type GrievancesChoiceDataQueryVariables = {};
+
+export type GrievancesChoiceDataQuery = { __typename?: 'Query' } & {
+  grievanceTicketStatusChoices: Maybe<
+    Array<
+      Maybe<
+        { __typename?: 'ChoiceObject' } & Pick<ChoiceObject, 'name' | 'value'>
+      >
+    >
+  >;
+  grievanceTicketCategoryChoices: Maybe<
+    Array<
+      Maybe<
+        { __typename?: 'ChoiceObject' } & Pick<ChoiceObject, 'name' | 'value'>
+      >
+    >
+  >;
+  grievanceTicketIssueTypeChoices: Maybe<
+    Array<
+      Maybe<
+        { __typename?: 'IssueTypesObject' } & Pick<
+          IssueTypesObject,
+          'category' | 'label'
+        > & {
+            subCategories: Maybe<
+              Array<
+                Maybe<
+                  { __typename?: 'ChoiceObject' } & Pick<
+                    ChoiceObject,
+                    'name' | 'value'
+                  >
+                >
+              >
+            >;
+          }
+      >
+    >
   >;
 };
 
@@ -7540,8 +7547,8 @@ export type CreateCashPlanPaymentVerificationMutationOptions = ApolloReactCommon
   CreateCashPlanPaymentVerificationMutation,
   CreateCashPlanPaymentVerificationMutationVariables
 >;
-export const CreateGrievanceTicketMutationDocument = gql`
-  mutation createGrievanceTicketMutation($input: CreateGrievanceTicketInput!) {
+export const CreateGrievanceTicketDocument = gql`
+  mutation createGrievanceTicket($input: CreateGrievanceTicketInput!) {
     createGrievanceTicket(input: $input) {
       grievanceTickets {
         id
@@ -7549,93 +7556,93 @@ export const CreateGrievanceTicketMutationDocument = gql`
     }
   }
 `;
-export type CreateGrievanceTicketMutationMutationFn = ApolloReactCommon.MutationFunction<
-  CreateGrievanceTicketMutationMutation,
-  CreateGrievanceTicketMutationMutationVariables
+export type CreateGrievanceTicketMutationFn = ApolloReactCommon.MutationFunction<
+  CreateGrievanceTicketMutation,
+  CreateGrievanceTicketMutationVariables
 >;
-export type CreateGrievanceTicketMutationComponentProps = Omit<
+export type CreateGrievanceTicketComponentProps = Omit<
   ApolloReactComponents.MutationComponentOptions<
-    CreateGrievanceTicketMutationMutation,
-    CreateGrievanceTicketMutationMutationVariables
+    CreateGrievanceTicketMutation,
+    CreateGrievanceTicketMutationVariables
   >,
   'mutation'
 >;
 
-export const CreateGrievanceTicketMutationComponent = (
-  props: CreateGrievanceTicketMutationComponentProps,
+export const CreateGrievanceTicketComponent = (
+  props: CreateGrievanceTicketComponentProps,
 ) => (
   <ApolloReactComponents.Mutation<
-    CreateGrievanceTicketMutationMutation,
-    CreateGrievanceTicketMutationMutationVariables
+    CreateGrievanceTicketMutation,
+    CreateGrievanceTicketMutationVariables
   >
-    mutation={CreateGrievanceTicketMutationDocument}
+    mutation={CreateGrievanceTicketDocument}
     {...props}
   />
 );
 
-export type CreateGrievanceTicketMutationProps<
+export type CreateGrievanceTicketProps<
   TChildProps = {}
 > = ApolloReactHoc.MutateProps<
-  CreateGrievanceTicketMutationMutation,
-  CreateGrievanceTicketMutationMutationVariables
+  CreateGrievanceTicketMutation,
+  CreateGrievanceTicketMutationVariables
 > &
   TChildProps;
-export function withCreateGrievanceTicketMutation<TProps, TChildProps = {}>(
+export function withCreateGrievanceTicket<TProps, TChildProps = {}>(
   operationOptions?: ApolloReactHoc.OperationOption<
     TProps,
-    CreateGrievanceTicketMutationMutation,
-    CreateGrievanceTicketMutationMutationVariables,
-    CreateGrievanceTicketMutationProps<TChildProps>
+    CreateGrievanceTicketMutation,
+    CreateGrievanceTicketMutationVariables,
+    CreateGrievanceTicketProps<TChildProps>
   >,
 ) {
   return ApolloReactHoc.withMutation<
     TProps,
-    CreateGrievanceTicketMutationMutation,
-    CreateGrievanceTicketMutationMutationVariables,
-    CreateGrievanceTicketMutationProps<TChildProps>
-  >(CreateGrievanceTicketMutationDocument, {
-    alias: 'createGrievanceTicketMutation',
+    CreateGrievanceTicketMutation,
+    CreateGrievanceTicketMutationVariables,
+    CreateGrievanceTicketProps<TChildProps>
+  >(CreateGrievanceTicketDocument, {
+    alias: 'createGrievanceTicket',
     ...operationOptions,
   });
 }
 
 /**
- * __useCreateGrievanceTicketMutationMutation__
+ * __useCreateGrievanceTicketMutation__
  *
- * To run a mutation, you first call `useCreateGrievanceTicketMutationMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useCreateGrievanceTicketMutationMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useCreateGrievanceTicketMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateGrievanceTicketMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [createGrievanceTicketMutationMutation, { data, loading, error }] = useCreateGrievanceTicketMutationMutation({
+ * const [createGrievanceTicketMutation, { data, loading, error }] = useCreateGrievanceTicketMutation({
  *   variables: {
  *      input: // value for 'input'
  *   },
  * });
  */
-export function useCreateGrievanceTicketMutationMutation(
+export function useCreateGrievanceTicketMutation(
   baseOptions?: ApolloReactHooks.MutationHookOptions<
-    CreateGrievanceTicketMutationMutation,
-    CreateGrievanceTicketMutationMutationVariables
+    CreateGrievanceTicketMutation,
+    CreateGrievanceTicketMutationVariables
   >,
 ) {
   return ApolloReactHooks.useMutation<
-    CreateGrievanceTicketMutationMutation,
-    CreateGrievanceTicketMutationMutationVariables
-  >(CreateGrievanceTicketMutationDocument, baseOptions);
+    CreateGrievanceTicketMutation,
+    CreateGrievanceTicketMutationVariables
+  >(CreateGrievanceTicketDocument, baseOptions);
 }
-export type CreateGrievanceTicketMutationMutationHookResult = ReturnType<
-  typeof useCreateGrievanceTicketMutationMutation
+export type CreateGrievanceTicketMutationHookResult = ReturnType<
+  typeof useCreateGrievanceTicketMutation
 >;
-export type CreateGrievanceTicketMutationMutationResult = ApolloReactCommon.MutationResult<
-  CreateGrievanceTicketMutationMutation
+export type CreateGrievanceTicketMutationResult = ApolloReactCommon.MutationResult<
+  CreateGrievanceTicketMutation
 >;
-export type CreateGrievanceTicketMutationMutationOptions = ApolloReactCommon.BaseMutationOptions<
-  CreateGrievanceTicketMutationMutation,
-  CreateGrievanceTicketMutationMutationVariables
+export type CreateGrievanceTicketMutationOptions = ApolloReactCommon.BaseMutationOptions<
+  CreateGrievanceTicketMutation,
+  CreateGrievanceTicketMutationVariables
 >;
 export const CreateProgramDocument = gql`
   mutation CreateProgram($programData: CreateProgramInput!) {
@@ -11742,6 +11749,119 @@ export type CashPlanQueryResult = ApolloReactCommon.QueryResult<
   CashPlanQuery,
   CashPlanQueryVariables
 >;
+export const GrievancesChoiceDataDocument = gql`
+  query GrievancesChoiceData {
+    grievanceTicketStatusChoices {
+      name
+      value
+    }
+    grievanceTicketCategoryChoices {
+      name
+      value
+    }
+    grievanceTicketIssueTypeChoices {
+      category
+      label
+      subCategories {
+        name
+        value
+      }
+    }
+  }
+`;
+export type GrievancesChoiceDataComponentProps = Omit<
+  ApolloReactComponents.QueryComponentOptions<
+    GrievancesChoiceDataQuery,
+    GrievancesChoiceDataQueryVariables
+  >,
+  'query'
+>;
+
+export const GrievancesChoiceDataComponent = (
+  props: GrievancesChoiceDataComponentProps,
+) => (
+  <ApolloReactComponents.Query<
+    GrievancesChoiceDataQuery,
+    GrievancesChoiceDataQueryVariables
+  >
+    query={GrievancesChoiceDataDocument}
+    {...props}
+  />
+);
+
+export type GrievancesChoiceDataProps<
+  TChildProps = {}
+> = ApolloReactHoc.DataProps<
+  GrievancesChoiceDataQuery,
+  GrievancesChoiceDataQueryVariables
+> &
+  TChildProps;
+export function withGrievancesChoiceData<TProps, TChildProps = {}>(
+  operationOptions?: ApolloReactHoc.OperationOption<
+    TProps,
+    GrievancesChoiceDataQuery,
+    GrievancesChoiceDataQueryVariables,
+    GrievancesChoiceDataProps<TChildProps>
+  >,
+) {
+  return ApolloReactHoc.withQuery<
+    TProps,
+    GrievancesChoiceDataQuery,
+    GrievancesChoiceDataQueryVariables,
+    GrievancesChoiceDataProps<TChildProps>
+  >(GrievancesChoiceDataDocument, {
+    alias: 'grievancesChoiceData',
+    ...operationOptions,
+  });
+}
+
+/**
+ * __useGrievancesChoiceDataQuery__
+ *
+ * To run a query within a React component, call `useGrievancesChoiceDataQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGrievancesChoiceDataQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGrievancesChoiceDataQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGrievancesChoiceDataQuery(
+  baseOptions?: ApolloReactHooks.QueryHookOptions<
+    GrievancesChoiceDataQuery,
+    GrievancesChoiceDataQueryVariables
+  >,
+) {
+  return ApolloReactHooks.useQuery<
+    GrievancesChoiceDataQuery,
+    GrievancesChoiceDataQueryVariables
+  >(GrievancesChoiceDataDocument, baseOptions);
+}
+export function useGrievancesChoiceDataLazyQuery(
+  baseOptions?: ApolloReactHooks.LazyQueryHookOptions<
+    GrievancesChoiceDataQuery,
+    GrievancesChoiceDataQueryVariables
+  >,
+) {
+  return ApolloReactHooks.useLazyQuery<
+    GrievancesChoiceDataQuery,
+    GrievancesChoiceDataQueryVariables
+  >(GrievancesChoiceDataDocument, baseOptions);
+}
+export type GrievancesChoiceDataQueryHookResult = ReturnType<
+  typeof useGrievancesChoiceDataQuery
+>;
+export type GrievancesChoiceDataLazyQueryHookResult = ReturnType<
+  typeof useGrievancesChoiceDataLazyQuery
+>;
+export type GrievancesChoiceDataQueryResult = ApolloReactCommon.QueryResult<
+  GrievancesChoiceDataQuery,
+  GrievancesChoiceDataQueryVariables
+>;
 export const HouseholdDocument = gql`
   query Household($id: ID!) {
     household(id: $id) {
@@ -15711,11 +15831,10 @@ export type ResolversTypes = {
     UserBusinessAreaNodeConnection
   >;
   UserBusinessAreaNodeEdge: ResolverTypeWrapper<UserBusinessAreaNodeEdge>;
-  GrievanceTicketStatus: GrievanceTicketStatus;
-  GrievanceTicketCategory: GrievanceTicketCategory;
+  ChoiceObject: ResolverTypeWrapper<ChoiceObject>;
+  IssueTypesObject: ResolverTypeWrapper<IssueTypesObject>;
   SteficonRuleNodeConnection: ResolverTypeWrapper<SteficonRuleNodeConnection>;
   SteficonRuleNodeEdge: ResolverTypeWrapper<SteficonRuleNodeEdge>;
-  ChoiceObject: ResolverTypeWrapper<ChoiceObject>;
   RapidProFlow: ResolverTypeWrapper<RapidProFlow>;
   RapidProFlowRun: ResolverTypeWrapper<RapidProFlowRun>;
   RapidProFlowResult: ResolverTypeWrapper<RapidProFlowResult>;
@@ -16035,11 +16154,10 @@ export type ResolversParentTypes = {
   TicketNoteNode: TicketNoteNode;
   UserBusinessAreaNodeConnection: UserBusinessAreaNodeConnection;
   UserBusinessAreaNodeEdge: UserBusinessAreaNodeEdge;
-  GrievanceTicketStatus: GrievanceTicketStatus;
-  GrievanceTicketCategory: GrievanceTicketCategory;
+  ChoiceObject: ChoiceObject;
+  IssueTypesObject: IssueTypesObject;
   SteficonRuleNodeConnection: SteficonRuleNodeConnection;
   SteficonRuleNodeEdge: SteficonRuleNodeEdge;
-  ChoiceObject: ChoiceObject;
   RapidProFlow: RapidProFlow;
   RapidProFlowRun: RapidProFlowRun;
   RapidProFlowResult: RapidProFlowResult;
@@ -17077,16 +17195,8 @@ export type GrievanceTicketNodeResolvers<
     ParentType,
     ContextType
   >;
-  status?: Resolver<
-    ResolversTypes['GrievanceTicketStatus'],
-    ParentType,
-    ContextType
-  >;
-  category?: Resolver<
-    ResolversTypes['GrievanceTicketCategory'],
-    ParentType,
-    ContextType
-  >;
+  status?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  category?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   issueType?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   admin?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -18223,6 +18333,19 @@ export type IndividualRoleInHouseholdNodeResolvers<
   >;
 };
 
+export type IssueTypesObjectResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['IssueTypesObject'] = ResolversParentTypes['IssueTypesObject']
+> = {
+  category?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  label?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  subCategories?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+};
+
 export interface JsonLazyStringScalarConfig
   extends GraphQLScalarTypeConfig<ResolversTypes['JSONLazyString'], any> {
   name: 'JSONLazyString';
@@ -18965,6 +19088,21 @@ export type QueryResolvers<
     ParentType,
     ContextType,
     RequireFields<QueryAllGrievanceTicketArgs, 'businessArea'>
+  >;
+  grievanceTicketStatusChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  grievanceTicketCategoryChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  grievanceTicketIssueTypeChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['IssueTypesObject']>>>,
+    ParentType,
+    ContextType
   >;
   allSteficonRules?: Resolver<
     Maybe<ResolversTypes['SteficonRuleNodeConnection']>,
@@ -20766,6 +20904,7 @@ export type Resolvers<ContextType = any> = {
   IndividualRoleInHouseholdNode?: IndividualRoleInHouseholdNodeResolvers<
     ContextType
   >;
+  IssueTypesObject?: IssueTypesObjectResolvers<ContextType>;
   JSONLazyString?: GraphQLScalarType;
   JSONString?: GraphQLScalarType;
   KoboAssetObject?: KoboAssetObjectResolvers<ContextType>;
