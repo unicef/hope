@@ -13,6 +13,14 @@ import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 import { Consent } from './Consent';
 import { LookUpSection } from './LookUpSection';
+import {
+  useAllIndividualsQuery,
+  useCreateGrievanceTicketMutation,
+  useGrievancesChoiceDataQuery,
+} from '../../__generated__/graphql';
+import { LoadingComponent } from '../LoadingComponent';
+import { useSnackbar } from '../../hooks/useSnackBar';
+import { AdminAreasAutocomplete } from '../population/AdminAreaAutocomplete';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -38,13 +46,27 @@ const BoxWithBorders = styled.div`
 
 export function CreateGrievance(): React.ReactElement {
   const businessArea = useBusinessArea();
+  const { showMessage } = useSnackbar();
 
-  const initialValues: { [key: string]: string } = {
-    newNote: '',
+  const initialValues = {
+    description: '',
+    assignedTo: '',
+    category: null,
+    language: '',
+    consent: false,
+    selectedHousehold: '',
+    selectedIndividual: '',
+    identityVerified: false,
   };
 
   const validationSchema = Yup.object().shape({
-    newNote: Yup.string().required('Note cannot be empty'),
+    description: Yup.string().required('Description is required'),
+    assignedTo: Yup.string().required('Assigned To is required'),
+    category: Yup.number().required('Category is required'),
+    language: Yup.string().required('Language is required'),
+    consent: Yup.boolean().required('Consent is required'),
+    selectedHousehold: Yup.string().required('Household has to be selected'),
+    selectedIndividual: Yup.string().required('Individual has to be selected'),
   });
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
@@ -53,16 +75,59 @@ export function CreateGrievance(): React.ReactElement {
       to: `/${businessArea}/grievance-and-feedback/`,
     },
   ];
+  const {
+    data: individualsData,
+    loading: individualsDataLoading,
+  } = useAllIndividualsQuery();
+
+  const {
+    data: choicesData,
+    loading: choicesLoading,
+  } = useGrievancesChoiceDataQuery();
+  const [mutate] = useCreateGrievanceTicketMutation();
+
+  if (!choicesData || !individualsData) return null;
+  if (individualsDataLoading || choicesLoading) {
+    return <LoadingComponent />;
+  }
+
+  const mappedIndividuals = individualsData.allIndividuals.edges.map(
+    (edge) => ({
+      name: edge.node.fullName,
+      value: edge.node.id,
+    }),
+  );
 
   return (
     <Formik
       initialValues={initialValues}
       onSubmit={(values) => {
-        console.log(values);
+        mutate({
+          variables: {
+            input: {
+              businessArea,
+              description: values.description,
+              assignedTo: values.assignedTo,
+              category: parseInt(values.category, 10),
+              consent: values.consent,
+              language: values.language,
+            },
+          },
+        }).then(
+          (res) => {
+            return showMessage('Grievance Ticket created.', {
+              pathname: `/${businessArea}/grievance-and-feedback/${res.data.createGrievanceTicket.grievanceTickets[0].id}`,
+              historyMethod: 'push',
+            });
+          },
+          () => {
+            return showMessage('Something went wrong.');
+          },
+        );
       }}
       validationSchema={validationSchema}
     >
-      {({ submitForm, values }) => (
+      {({ submitForm, values, setFieldValue }) => (
         <>
           <PageHeader title='New Ticket' breadCrumbs={breadCrumbsItems} />
           <Grid container spacing={3}>
@@ -75,30 +140,7 @@ export function CreateGrievance(): React.ReactElement {
                         name='category'
                         label='Category*'
                         variant='outlined'
-                        choices={[
-                          {
-                            value: 'Positive Feedback',
-                            name: 'Positive Feedback',
-                          },
-                          {
-                            value: 'Negative Feedback',
-                            name: 'Negative Feedback',
-                          },
-                          {
-                            value: 'Grievance Complaint',
-                            name: 'Grievance Complaint',
-                          },
-                          {
-                            value: 'Payment Verification Issue',
-                            name: 'Payment Verification Issue',
-                          },
-                          { value: 'Referral', name: 'Referral' },
-                          { value: 'Data Change', name: 'Data Change' },
-                          {
-                            value: 'Sensitive Grievance',
-                            name: 'Sensitive Grievance',
-                          },
-                        ]}
+                        choices={choicesData.grievanceTicketCategoryChoices}
                         component={FormikSelectField}
                       />
                     </Grid>
@@ -112,7 +154,11 @@ export function CreateGrievance(): React.ReactElement {
                         color='primary'
                         component={FormikCheckboxField}
                       />
-                      <LookUpSection category={values.category} />
+                      <LookUpSection
+                        category={values.category}
+                        values={values}
+                        onValueChange={setFieldValue}
+                      />
                     </Box>
                   </BoxWithBorders>
                   <BoxWithBorderBottom>
@@ -120,22 +166,9 @@ export function CreateGrievance(): React.ReactElement {
                       <Grid item xs={6}>
                         <Field
                           name='assignedTo'
-                          label='Assigned to'
+                          label='Assigned to*'
                           variant='outlined'
-                          choices={[
-                            {
-                              value: 'User1',
-                              name: 'User1',
-                            },
-                            {
-                              value: 'User2',
-                              name: 'User2',
-                            },
-                            {
-                              value: 'User3',
-                              name: 'User3',
-                            },
-                          ]}
+                          choices={mappedIndividuals}
                           component={FormikSelectField}
                         />
                       </Grid>
@@ -145,7 +178,7 @@ export function CreateGrievance(): React.ReactElement {
                     <Grid container spacing={3}>
                       <Grid item xs={12}>
                         <Field
-                          name='Description'
+                          name='Description*'
                           multiline
                           fullWidth
                           variant='outlined'
@@ -155,24 +188,10 @@ export function CreateGrievance(): React.ReactElement {
                       </Grid>
                       <Grid item xs={6}>
                         <Field
-                          name='administrativeLevel2'
+                          name='admin'
                           label='Administrative Level 2'
                           variant='outlined'
-                          choices={[
-                            {
-                              value: 'Admin1',
-                              name: 'Admin1',
-                            },
-                            {
-                              value: 'Admin2',
-                              name: 'Admin2',
-                            },
-                            {
-                              value: 'Admin3',
-                              name: 'Admin3',
-                            },
-                          ]}
-                          component={FormikSelectField}
+                          component={AdminAreasAutocomplete}
                         />
                       </Grid>
                       <Grid item xs={6}>
@@ -186,24 +205,12 @@ export function CreateGrievance(): React.ReactElement {
                       </Grid>
                       <Grid item xs={6}>
                         <Field
-                          name='languagesSpoken'
-                          label='Languages Spoken'
+                          name='language'
+                          multiline
+                          fullWidth
                           variant='outlined'
-                          choices={[
-                            {
-                              value: 'English',
-                              name: 'English',
-                            },
-                            {
-                              value: 'French',
-                              name: 'French',
-                            },
-                            {
-                              value: 'Spanish',
-                              name: 'Spanish',
-                            },
-                          ]}
-                          component={FormikSelectField}
+                          label='Languages Spoken'
+                          component={FormikTextField}
                         />
                       </Grid>
                     </Grid>
@@ -220,7 +227,7 @@ export function CreateGrievance(): React.ReactElement {
                       <Button
                         color='primary'
                         variant='contained'
-                        onClick={() => console.log('save')}
+                        onClick={submitForm}
                       >
                         Save
                       </Button>
