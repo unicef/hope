@@ -127,7 +127,7 @@ export function CreateGrievance(): React.ReactElement {
                       <Grid item xs={6}>
                         <Field
                           name='assignedTo'
-                          label='Assigned to'
+                          label='Assigned to*'
                           variant='outlined'
                           choices={[
                             {
@@ -152,7 +152,7 @@ export function CreateGrievance(): React.ReactElement {
                     <Grid container spacing={3}>
                       <Grid item xs={12}>
                         <Field
-                          name='Description'
+                          name='Description*'
                           multiline
                           fullWidth
                           variant='outlined'
@@ -194,23 +194,11 @@ export function CreateGrievance(): React.ReactElement {
                       <Grid item xs={6}>
                         <Field
                           name='languagesSpoken'
-                          label='Languages Spoken'
+                          multiline
+                          fullWidth
                           variant='outlined'
-                          choices={[
-                            {
-                              value: 'English',
-                              name: 'English',
-                            },
-                            {
-                              value: 'French',
-                              name: 'French',
-                            },
-                            {
-                              value: 'Spanish',
-                              name: 'Spanish',
-                            },
-                          ]}
-                          component={FormikSelectField}
+                          label='Languages Spoken'
+                          component={FormikTextField}
                         />
                       </Grid>
                     </Grid>
