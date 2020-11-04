@@ -64,7 +64,7 @@ export function CreateGrievance(): React.ReactElement {
       }}
       validationSchema={validationSchema}
     >
-      {({ submitForm, values, setValues, setFieldValue }) => (
+      {({ submitForm, values, setFieldValue }) => (
         <>
           <PageHeader title='New Ticket' breadCrumbs={breadCrumbsItems} />
           <Grid container spacing={3}>

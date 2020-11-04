@@ -2,6 +2,7 @@ import { Radio } from '@material-ui/core';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { decodeIdString } from '../../../utils/utils';
 import {
   HouseholdChoiceDataQuery,
   HouseholdNode,
@@ -43,16 +44,17 @@ export function LookUpHouseholdTableRow({
     }
     return '-';
   };
+
   return (
-    <ClickableTableRow hover role='checkbox' key={household.unicefId}>
+    <ClickableTableRow hover role='checkbox' key={household.id}>
       <TableCell padding='checkbox'>
         <Radio
           color='primary'
-          checked={selectedHousehold === household.unicefId}
+          checked={selectedHousehold === household.id}
           onChange={radioChangeHandler}
-          value={household.unicefId}
+          value={household.id}
           name='radio-button-household'
-          inputProps={{ 'aria-label': household.unicefId }}
+          inputProps={{ 'aria-label': household.id }}
         />
       </TableCell>
       <TableCell onClick={handleClick} align='left'>

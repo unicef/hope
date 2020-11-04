@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { UniversalTable } from '../../../containers/tables/UniversalTable';
+import { decodeIdString } from '../../../utils/utils';
 import {
   AllIndividualsQueryVariables,
   IndividualNode,
@@ -18,6 +19,7 @@ interface LookUpIndividualTableProps {
   businessArea?: string;
   setFieldValue;
   initialValues;
+  valuesInner;
 }
 
 export const LookUpIndividualTable = ({
@@ -25,6 +27,7 @@ export const LookUpIndividualTable = ({
   filter,
   setFieldValue,
   initialValues,
+  valuesInner,
 }: LookUpIndividualTableProps): React.ReactElement => {
   const [selectedIndividual, setSelectedIndividual] = useState(
     initialValues.selectedIndividual,
@@ -33,6 +36,7 @@ export const LookUpIndividualTable = ({
     setSelectedIndividual(event.target.value);
     setFieldValue('selectedIndividual', event.target.value);
   };
+
   const initialVariables = {
     businessArea,
     search: filter.search,
@@ -41,6 +45,9 @@ export const LookUpIndividualTable = ({
     status: [filter.status],
     admin2: [filter.admin2],
     sex: [filter.sex],
+    householdId: valuesInner.selectedHousehold
+      ? decodeIdString(valuesInner.selectedHousehold)
+      : '',
   };
 
   return (
