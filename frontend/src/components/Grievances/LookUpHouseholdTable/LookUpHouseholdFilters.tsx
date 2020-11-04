@@ -12,6 +12,7 @@ import SearchIcon from '@material-ui/icons/Search';
 import GroupIcon from '@material-ui/icons/Group';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
 import FormControl from '@material-ui/core/FormControl';
+import { KeyboardDatePicker } from '@material-ui/pickers';
 import {
   HouseholdChoiceDataQuery,
   ProgramNode,
@@ -21,7 +22,6 @@ import InputLabel from '../../../shared/InputLabel';
 import Select from '../../../shared/Select';
 import { AdminAreasAutocomplete } from '../../population/AdminAreaAutocomplete';
 import { FieldLabel } from '../../FieldLabel';
-import { KeyboardDatePicker } from '@material-ui/pickers';
 import { Missing } from '../../Missing';
 
 const TextContainer = styled(TextField)`

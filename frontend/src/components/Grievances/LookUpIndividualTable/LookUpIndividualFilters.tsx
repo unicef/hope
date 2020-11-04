@@ -2,7 +2,6 @@ import React from 'react';
 import styled from 'styled-components';
 import moment from 'moment';
 import SearchIcon from '@material-ui/icons/Search';
-import CakeIcon from '@material-ui/icons/Cake';
 import WcIcon from '@material-ui/icons/Wc';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
 import {
@@ -12,12 +11,12 @@ import {
   MenuItem,
   TextField,
 } from '@material-ui/core';
+import { KeyboardDatePicker } from '@material-ui/pickers';
 import FormControl from '@material-ui/core/FormControl';
 import { ContainerWithBorder } from '../../ContainerWithBorder';
 import InputLabel from '../../../shared/InputLabel';
 import Select from '../../../shared/Select';
 import { FieldLabel } from '../../FieldLabel';
-import { KeyboardDatePicker } from '@material-ui/pickers';
 import { HouseholdChoiceDataQuery } from '../../../__generated__/graphql';
 import { AdminAreasAutocomplete } from '../../population/AdminAreaAutocomplete';
 import { Missing } from '../../Missing';

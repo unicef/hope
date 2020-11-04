@@ -2,7 +2,6 @@ import { Radio } from '@material-ui/core';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { decodeIdString } from '../../../utils/utils';
 import {
   HouseholdChoiceDataQuery,
   HouseholdNode,
