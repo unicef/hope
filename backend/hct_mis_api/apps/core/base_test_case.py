@@ -36,7 +36,7 @@ class APITestCase(SnapshotTestTestCase):
 
     @staticmethod
     def id_to_base64(id, name):
-        return base64.b64encode(f"{name}Node:{str(id)}".encode("utf-8")).decode()
+        return base64.b64encode(f"{name}:{str(id)}".encode("utf-8")).decode()
 
     @staticmethod
     def __set_context_files(context, files):

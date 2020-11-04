@@ -119,7 +119,7 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
     def test_final_households_list_by_targeting_criteria_size(self):
         self.snapshot_graphql_request(
             request_string=FinalListTargetingCriteriaQueryTestCase.QUERY,
-            variables={"targetPopulation": self.id_to_base64(self.target_population_size_2.id, "TargetPopulation")},
+            variables={"targetPopulation": self.id_to_base64(self.target_population_size_2.id, "TargetPopulationNode")},
         )
 
     def test_final_households_list_by_targeting_criteria_residence_status(
@@ -130,7 +130,7 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
             variables={
                 "targetPopulation": self.id_to_base64(
                     self.target_population_residence_status.id,
-                    "TargetPopulation",
+                    "TargetPopulationNode",
                 )
             },
         )
@@ -141,7 +141,7 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
             variables={
                 "targetPopulation": self.id_to_base64(
                     self.target_population_size_1_finalized.id,
-                    "TargetPopulation",
+                    "TargetPopulationNode",
                 )
             },
         )
@@ -154,7 +154,7 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
             variables={
                 "targetPopulation": self.id_to_base64(
                     self.target_population_residence_status.id,
-                    "TargetPopulation",
+                    "TargetPopulationNode",
                 ),
                 "targetingCriteria": self.FAMILY_SIZE_1_TARGETING_CRITERIA,
             },
@@ -168,7 +168,7 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
             variables={
                 "targetPopulation": self.id_to_base64(
                     self.target_population_residence_status.id,
-                    "TargetPopulation",
+                    "TargetPopulationNode",
                 ),
                 "targetingCriteria": self.FAMILY_SIZE_2_TARGETING_CRITERIA,
             },
