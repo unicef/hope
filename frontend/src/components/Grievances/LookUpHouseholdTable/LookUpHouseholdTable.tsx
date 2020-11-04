@@ -47,6 +47,7 @@ export const LookUpHouseholdTable = ({
   const handleRadioChange = (event) => {
     setSelectedHousehold(event.target.value);
     setFieldValue('selectedHousehold', event.target.value);
+    setFieldValue('selectedIndividual', '');
   };
   return (
     <TableWrapper>

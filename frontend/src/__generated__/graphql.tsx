@@ -4789,7 +4789,8 @@ export type AllIndividualsQueryVariables = {
   search?: Maybe<Scalars['String']>,
   programme?: Maybe<Scalars['String']>,
   status?: Maybe<Array<Maybe<Scalars['String']>>>,
-  lastRegistrationDate?: Maybe<Scalars['String']>
+  lastRegistrationDate?: Maybe<Scalars['String']>,
+  householdId?: Maybe<Scalars['UUID']>
 };
 
 
@@ -8311,8 +8312,8 @@ export type AllHouseholdsQueryHookResult = ReturnType<typeof useAllHouseholdsQue
 export type AllHouseholdsLazyQueryHookResult = ReturnType<typeof useAllHouseholdsLazyQuery>;
 export type AllHouseholdsQueryResult = ApolloReactCommon.QueryResult<AllHouseholdsQuery, AllHouseholdsQueryVariables>;
 export const AllIndividualsDocument = gql`
-    query AllIndividuals($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $programme: String, $status: [String], $lastRegistrationDate: String) {
-  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Icontains: $fullNameContains, sex: $sex, age: $age, orderBy: $orderBy, search: $search, programme: $programme, status: $status, lastRegistrationDate: $lastRegistrationDate) {
+    query AllIndividuals($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $programme: String, $status: [String], $lastRegistrationDate: String, $householdId: UUID) {
+  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Icontains: $fullNameContains, sex: $sex, age: $age, orderBy: $orderBy, search: $search, programme: $programme, status: $status, lastRegistrationDate: $lastRegistrationDate, household_Id: $householdId) {
     totalCount
     pageInfo {
       startCursor
@@ -8369,6 +8370,7 @@ export function withAllIndividuals<TProps, TChildProps = {}>(operationOptions?: 
  *      programme: // value for 'programme'
  *      status: // value for 'status'
  *      lastRegistrationDate: // value for 'lastRegistrationDate'
+ *      householdId: // value for 'householdId'
  *   },
  * });
  */
