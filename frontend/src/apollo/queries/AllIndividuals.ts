@@ -11,6 +11,10 @@ export const AllIndividuals = gql`
     $age: String
     $orderBy: String
     $search: String
+    $programme: String
+    $status: [String]
+    $lastRegistrationDate: String
+    $householdId: UUID
   ) {
     allIndividuals(
       before: $before
@@ -22,6 +26,10 @@ export const AllIndividuals = gql`
       age: $age
       orderBy: $orderBy
       search: $search
+      programme: $programme
+      status: $status
+      lastRegistrationDate: $lastRegistrationDate
+      household_Id: $householdId
     ) {
       totalCount
       pageInfo {
