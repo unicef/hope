@@ -9,20 +9,17 @@ snapshots = Snapshot()
 
 snapshots['TestGrievanceCreateFeedbackTicketQuery::test_create_positive_feedback_ticket 1'] = {
     'data': {
-        'createGrievanceTicket': None
-    },
-    'errors': [
-        {
-            'locations': [
+        'createGrievanceTicket': {
+            'grievanceTickets': [
                 {
-                    'column': 7,
-                    'line': 3
+                    'admin': 'City Test',
+                    'category': 7,
+                    'consent': True,
+                    'description': 'Test Feedback',
+                    'language': 'Polish, English',
+                    'status': 1
                 }
-            ],
-            'message': "'utf-8' codec can't decode byte 0xd7 in position 1: invalid continuation byte",
-            'path': [
-                'createGrievanceTicket'
             ]
         }
-    ]
+    }
 }
