@@ -21,7 +21,7 @@ export const FormikSelectField = ({
           {...field}
           {...otherProps}
           name={field.name}
-          value={field.value || otherProps.value}
+          value={field.value || otherProps.value || ''}
           id={`textField-${field.name}`}
           error={isInvalid}
           SelectDisplayProps={{ 'data-cy': `select-${field.name}` }}

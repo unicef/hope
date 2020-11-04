@@ -9,21 +9,15 @@ export const LookUpSection = ({
   values,
 }): React.ReactElement => {
   const LookUpForCategory = () => {
+    console.log(category);
     switch (category) {
-      case 'Positive Feedback':
-        return (
-          <Grid container spacing={3}>
-            <Grid item xs={6}>
-              <LookUpHouseholdIndividual
-                values={values}
-                onValueChange={onValueChange}
-              />
-            </Grid>
-          </Grid>
-        );
-      case 'Negative Feedback':
-        return <div>Negative Feedback</div>;
-      case 'Grievance Complaint':
+      case '1':
+        return <div>Payment Verification</div>;
+      case '2':
+        return <div>Data Change</div>;
+      case '3':
+        return <div>Sensitive Grievance</div>;
+      case '4':
         return (
           <Box display='flex' alignItems='center'>
             <Box p={3}>
@@ -37,6 +31,15 @@ export const LookUpSection = ({
             </Box>
           </Box>
         );
+      case '5':
+        return <div>Negative Feedback</div>;
+      case '6':
+        return <div>Referral</div>;
+      case '7':
+        return <div>Positive Feedback</div>;
+      case '8':
+        return <div>Deduplication</div>;
+
       case 'Payment Verification Issue':
         return <div>Payment Verification Issue</div>;
       case 'Referral':
