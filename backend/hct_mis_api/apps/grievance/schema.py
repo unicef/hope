@@ -1,6 +1,6 @@
 import graphene
 from django.db.models import Q
-from django_filters import FilterSet, CharFilter, MultipleChoiceFilter, ModelMultipleChoiceFilter, OrderingFilter
+from django_filters import FilterSet, CharFilter, ModelMultipleChoiceFilter, OrderingFilter, TypedMultipleChoiceFilter
 from graphene import relay
 from graphene_django import DjangoObjectType
 
@@ -8,6 +8,8 @@ from account.permissions import BaseNodePermissionMixin, DjangoPermissionFilterC
 from core.extended_connection import ExtendedConnection
 from core.filters import DateTimeRangeFilter
 from core.models import AdminArea
+from core.schema import ChoiceObject
+from core.utils import to_choice_object, choices_to_dict
 from grievance.models import GrievanceTicket, TicketNotes, TicketSensitiveDetails, TicketComplaintDetails
 from payment.models import ServiceProvider
 
@@ -27,7 +29,7 @@ class GrievanceTicketFilter(FilterSet):
 
     business_area = CharFilter(field_name="business_area__slug", required=True)
     search = CharFilter(method="search_filter")
-    status = MultipleChoiceFilter(field_name="status", choices=GrievanceTicket.STATUS_CHOICES)
+    status = TypedMultipleChoiceFilter(field_name="status", choices=GrievanceTicket.STATUS_CHOICES, coerce=int)
     fsp = ModelMultipleChoiceFilter(method="fsp_filter", queryset=ServiceProvider.objects.all())
     admin = ModelMultipleChoiceFilter(
         field_name="admin", method="admin_filter", queryset=AdminArea.objects.filter(admin_area_type__admin_level=2)
@@ -35,7 +37,12 @@ class GrievanceTicketFilter(FilterSet):
     created_at_range = DateTimeRangeFilter(field_name="created_at")
 
     class Meta:
-        fields = ("id", "category")
+        fields = {
+            "id": ["exact", "icontains"],
+            "category": ["exact"],
+            "area": ["exact", "icontains"],
+            "assigned_to": ["exact"],
+        }
         model = GrievanceTicket
 
     order_by = OrderingFilter(
@@ -72,6 +79,7 @@ class GrievanceTicketFilter(FilterSet):
 class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     class Meta:
         model = GrievanceTicket
+        convert_choices_to_enum = False
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
@@ -99,6 +107,15 @@ class TicketSensitiveDetailsNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
+class IssueTypesObject(graphene.ObjectType):
+    category = graphene.String()
+    label = graphene.String()
+    sub_categories = graphene.List(ChoiceObject)
+
+    def resolve_sub_categories(self, info):
+        return [{"name": value, "value": key} for key, value in self.get("sub_categories").items()]
+
+
 class Query(graphene.ObjectType):
     grievance_ticket = relay.Node.Field(GrievanceTicketNode)
     all_grievance_ticket = DjangoPermissionFilterConnectionField(
@@ -107,3 +124,19 @@ class Query(graphene.ObjectType):
         # TODO Enable permissions below
         # permission_classes=(hopePermissionClass("PERMISSION_PROGRAM.LIST"),)
     )
+    grievance_ticket_status_choices = graphene.List(ChoiceObject)
+    grievance_ticket_category_choices = graphene.List(ChoiceObject)
+    grievance_ticket_issue_type_choices = graphene.List(IssueTypesObject)
+
+    def resolve_grievance_ticket_status_choices(self, info, **kwargs):
+        return to_choice_object(GrievanceTicket.STATUS_CHOICES)
+
+    def resolve_grievance_ticket_category_choices(self, info, **kwargs):
+        return to_choice_object(GrievanceTicket.CATEGORY_CHOICES)
+
+    def resolve_grievance_ticket_issue_type_choices(self, info, **kwargs):
+        categories = choices_to_dict(GrievanceTicket.CATEGORY_CHOICES)
+        return [
+            {"category": key, "label": categories[key], "sub_categories": value}
+            for (key, value) in GrievanceTicket.ISSUE_TYPES_CHOICES.items()
+        ]

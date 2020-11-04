@@ -386,7 +386,7 @@ class CustomOrderingFilter(OrderingFilter):
             if field.startswith("-"):
                 field_name = field[1:]
                 desc = True
-            if isinstance(self.lower_dict.get(field_name),Lower):
+            if isinstance(self.lower_dict.get(field_name), Lower):
                 lower_field = self.lower_dict.get(field_name)
                 if desc:
                     lower_field = lower_field.desc()
@@ -435,3 +435,7 @@ def is_valid_uuid(uuid_str):
         return True
     except ValueError:
         return False
+
+
+def choices_to_dict(choices):
+    return {value: name for value, name in choices}

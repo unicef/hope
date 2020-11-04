@@ -27,17 +27,7 @@ export const AllTargetPopulations = gql`
     ) {
       edges {
         node {
-          id
-          name
-          status
-          createdAt
-          updatedAt
-          candidateListTotalHouseholds
-          finalListTotalHouseholds
-          createdBy {
-            firstName
-            lastName
-          }
+          ...targetPopulationMinimal
         }
         cursor
       }

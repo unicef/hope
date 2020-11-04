@@ -12,6 +12,9 @@ from core.permissions import is_authenticated
 from core.utils import decode_id_string
 from household.models import Household
 from program.models import Program
+from steficon.interpreters import mapping
+from steficon.models import Rule
+from steficon.schema import SteficonRuleNode
 from targeting.models import (
     TargetPopulation,
     HouseholdSelection,
@@ -69,6 +72,8 @@ class UpdateTargetPopulationInput(graphene.InputObjectType):
     name = graphene.String()
     targeting_criteria = TargetingCriteriaObjectType()
     program_id = graphene.ID()
+    vulnerability_score_min = graphene.Decimal()
+    vulnerability_score_max = graphene.Decimal()
 
 
 class CreateTargetPopulationInput(graphene.InputObjectType):
@@ -139,6 +144,19 @@ class UpdateTargetPopulationMutation(graphene.Mutation):
         target_population = cls.get_object(id)
         name = input.get("name")
         program_id_encoded = input.get("program_id")
+        vulnerability_score_min = input.get("vulnerability_score_min")
+        vulnerability_score_max = input.get("vulnerability_score_max")
+        if target_population.status != TargetPopulation.STATUS_APPROVED and (
+            vulnerability_score_min is not None or vulnerability_score_max is not None
+        ):
+            raise ValidationError(
+                "You can only set vulnerability_score_min and vulnerability_score_max on APPROVED Target Population"
+            )
+        if vulnerability_score_min is not None:
+            target_population.vulnerability_score_min = vulnerability_score_min
+        if vulnerability_score_max is not None:
+            target_population.vulnerability_score_max = vulnerability_score_max
+
         if target_population.status == TargetPopulation.STATUS_APPROVED and name:
             raise ValidationError("Name can't be changed when Target Population is in APPROVED status")
         if target_population.status == TargetPopulation.STATUS_FINALIZED:
@@ -149,7 +167,8 @@ class UpdateTargetPopulationMutation(graphene.Mutation):
             program = get_object_or_404(Program, pk=decode_id_string(program_id_encoded))
             target_population.program = program
         targeting_criteria_input = input.get("targeting_criteria")
-        TargetingCriteriaInputValidator.validate(targeting_criteria_input)
+        if targeting_criteria_input is not None:
+            TargetingCriteriaInputValidator.validate(targeting_criteria_input)
         if targeting_criteria_input:
             targeting_criteria = from_input_to_targeting_criteria(targeting_criteria_input)
             if target_population.status == TargetPopulation.STATUS_DRAFT:
@@ -305,6 +324,46 @@ class DeleteTargetPopulationMutation(graphene.relay.ClientIDMutation, TargetVali
         return DeleteTargetPopulationMutation(ok=True)
 
 
+class SetSteficonRuleOnTargetPopulationMutation(graphene.relay.ClientIDMutation, TargetValidator):
+    target_population = graphene.Field(TargetPopulationNode)
+
+    class Input:
+        target_id = graphene.GlobalID(
+            required=True,
+            node=TargetPopulationNode,
+        )
+        steficon_rule_id = graphene.GlobalID(
+            required=False,
+            node=SteficonRuleNode,
+        )
+
+    @classmethod
+    @is_authenticated
+    def mutate_and_get_payload(cls, _root, _info, **kwargs):
+        target_id = utils.decode_id_string(kwargs["target_id"])
+        target_population = TargetPopulation.objects.get(id=target_id)
+        encoded_steficon_rule_id = kwargs["steficon_rule_id"]
+        if encoded_steficon_rule_id is not None:
+            steficon_rule_id = utils.decode_id_string(encoded_steficon_rule_id)
+            steficon_rule = get_object_or_404(Rule, id=steficon_rule_id)
+            target_population.steficon_rule = steficon_rule
+            target_population.save()
+            interpreter = mapping[steficon_rule.language](steficon_rule.definition)
+            for selection in HouseholdSelection.objects.filter(target_population=target_population):
+                value = interpreter.execute(hh=selection.household)
+                selection.vulnerability_score = value
+                selection.save(update_fields=["vulnerability_score"])
+        else:
+            for selection in HouseholdSelection.objects.filter(target_population=target_population):
+                target_population.steficon_rule = None
+                selection.vulnerability_score = None
+                target_population.vulnerability_score_min = None
+                target_population.vulnerability_score_max = None
+                target_population.save()
+                selection.save(update_fields=["vulnerability_score"])
+        return SetSteficonRuleOnTargetPopulationMutation(target_population=target_population)
+
+
 class Mutations(graphene.ObjectType):
     create_target_population = CreateTargetPopulationMutation.Field()
     update_target_population = UpdateTargetPopulationMutation.Field()
@@ -313,3 +372,4 @@ class Mutations(graphene.ObjectType):
     approve_target_population = ApproveTargetPopulationMutation.Field()
     unapprove_target_population = UnapproveTargetPopulationMutation.Field()
     finalize_target_population = FinalizeTargetPopulationMutation.Field()
+    set_steficon_rule_on_target_population = SetSteficonRuleOnTargetPopulationMutation.Field()
