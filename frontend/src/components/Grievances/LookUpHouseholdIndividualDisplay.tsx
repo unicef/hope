@@ -1,8 +1,9 @@
-import { Box, Button, Grid } from '@material-ui/core';
+import { Box, Grid } from '@material-ui/core';
 import React from 'react';
 import styled from 'styled-components';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
+import { useHouseholdQuery } from '../../__generated__/graphql';
 
 const StyledBox = styled.div`
   border: 1.5px solid #043e91;
@@ -21,9 +22,11 @@ const BlueText = styled.span`
 const LightGrey = styled.span`
   color: #949494;
   margin-right: 10px;
+  cursor: pointer;
 `;
 const DarkGrey = styled.span`
   color: #757575;
+  cursor: pointer;
 `;
 
 export const LookUpHouseholdIndividualDisplay = ({
@@ -35,6 +38,15 @@ export const LookUpHouseholdIndividualDisplay = ({
     onValueChange('selectedHousehold', '');
     onValueChange('selectedIndividual', '');
   };
+
+  const { data, loading } = useHouseholdQuery({
+    variables: {
+      id: values.selectedHousehold,
+    },
+  });
+
+  if (loading) return null;
+  const { household } = data;
   return (
     <StyledBox>
       <Grid container>
@@ -42,7 +54,7 @@ export const LookUpHouseholdIndividualDisplay = ({
           <Box display='flex' flexDirection='column'>
             <span>
               Household ID:
-              <BlueText>{values.selectedHousehold || '-'}</BlueText>
+              <BlueText>{household?.unicefId || '-'}</BlueText>
             </span>
             <span>
               Individual ID:

@@ -79,18 +79,20 @@ export const LookUpHouseholdIndividualModal = ({
   const { allPrograms } = data;
   const programs = allPrograms.edges.map((edge) => edge.node);
 
+  const handleCancel = (): void => {
+    setLookUpDialogOpen(false);
+    setSelectedTab(0);
+  };
   return (
     <Formik
       initialValues={initialValues}
       onSubmit={(values) => {
-        console.log('val', values);
         onValueChange('selectedHousehold', values.selectedHousehold);
         onValueChange('selectedIndividual', values.selectedIndividual);
         setLookUpDialogOpen(false);
       }}
-      // validationSchema={validationSchema}
     >
-      {({ submitForm, values, setValues, setFieldValue }) => (
+      {({ submitForm, setFieldValue, values }) => (
         <>
           <Dialog
             maxWidth='lg'
@@ -148,14 +150,13 @@ export const LookUpHouseholdIndividualModal = ({
                   businessArea={businessArea}
                   setFieldValue={setFieldValue}
                   initialValues={initialValues}
+                  valuesInner={values}
                 />
               </TabPanel>
             </DialogContent>
             <DialogFooter>
               <DialogActions>
-                <Button onClick={() => setLookUpDialogOpen(false)}>
-                  CANCEL
-                </Button>
+                <Button onClick={() => handleCancel()}>CANCEL</Button>
                 <Button
                   type='submit'
                   color='primary'
