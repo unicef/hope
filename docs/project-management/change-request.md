@@ -6,6 +6,86 @@ description: Change request for Iteration 4 Deliverables
 
 ## Iteration 7
 
+### **Targeting - Details View - Columns**
+
+{% embed url="https://unicef.visualstudio.com/ICTD-HCT-MIS/\_workitems/edit/75647" %}
+
+**------------------------------------------------**
+
+### Change of copy in the Targeting
+
+{% embed url="https://unicef.visualstudio.com/ICTD-HCT-MIS/\_workitems/edit/75651" %}
+
+**------------------------------------------------**
+
+### Activity log - change copy
+
+{% embed url="https://unicef.visualstudio.com/ICTD-HCT-MIS/\_workitems/edit/75639" %}
+
+**------------------------------------------------**
+
+### **Chages to PV list view**
+
+{% embed url="https://unicef.visualstudio.com/ICTD-HCT-MIS/\_workitems/edit/73205" %}
+
+**------------------------------------------------**
+
+### Add fields to household details
+
+{% embed url="https://unicef.visualstudio.com/ICTD-HCT-MIS/\_workitems/edit/73178" %}
+
+**------------------------------------------------**
+
+### Ability to archive/remove a Target Population
+
+{% embed url="https://unicef.visualstudio.com/ICTD-HCT-MIS/\_workitems/edit/60538" %}
+
+**------------------------------------------------**
+
+### Move “Programme\(s\) Enrolled” and “Total Cash Received”
+
+{% embed url="https://unicef.visualstudio.com/ICTD-HCT-MIS/\_workitems/edit/73176" %}
+
+**------------------------------------------------**
+
+### Data related to Location should be grouped together
+
+{% embed url="https://unicef.visualstudio.com/ICTD-HCT-MIS/\_workitems/edit/73177" %}
+
+**------------------------------------------------**
+
+### **Household composition**
+
+{% embed url="https://unicef.visualstudio.com/ICTD-HCT-MIS/\_workitems/edit/73180" %}
+
+**------------------------------------------------**
+
+### **Copy change**
+
+{% embed url="https://unicef.visualstudio.com/ICTD-HCT-MIS/\_workitems/edit/75461" %}
+
+**------------------------------------------------**
+
+### **Change location to Administrative level 2**
+
+{% embed url="https://unicef.visualstudio.com/ICTD-HCT-MIS/\_workitems/edit/75460" %}
+
+{% embed url="https://unicef.visualstudio.com/ICTD-HCT-MIS/\_workitems/edit/75305" %}
+
+{% embed url="https://unicef.visualstudio.com/ICTD-HCT-MIS/\_workitems/edit/75303" %}
+
+**------------------------------------------------**
+
+### Allow local users to login
+
+{% embed url="https://unicef.visualstudio.com/ICTD-HCT-MIS/\_workitems/edit/75616" %}
+
+**------------------------------------------------**
+
+### ERP schema updates
+
+{% embed url="https://unicef.visualstudio.com/ICTD-HCT-MIS/\_workitems/edit/75526" %}
+
 **------------------------------------------------**
 
 ### ERP schema - **DP** table changes **-** [link](https://unicef.visualstudio.com/ICTD-HCT-MIS/_workitems/edit/74080)
