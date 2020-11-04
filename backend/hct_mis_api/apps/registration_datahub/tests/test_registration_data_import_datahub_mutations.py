@@ -128,7 +128,7 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
             context={"user": self.user},
             variables={
                 "registrationDataImportData": {
-                    "importDataId": self.id_to_base64(import_data_obj.id, "ImportData"),
+                    "importDataId": self.id_to_base64(import_data_obj.id, "ImportDataNode"),
                     "name": "New Import of Data 123",
                     "businessAreaSlug": "afghanistan",
                 }

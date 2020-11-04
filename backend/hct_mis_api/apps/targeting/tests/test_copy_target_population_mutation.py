@@ -94,7 +94,7 @@ class TestCopyTargetPopulationMutation(APITestCase):
             variables={
                 "input": {
                     "targetPopulationData": {
-                        "id": self.id_to_base64(self.target_population.id, "TargetPopulation"),
+                        "id": self.id_to_base64(self.target_population.id, "TargetPopulationNode"),
                         "name": "Test New Copy Name",
                     }
                 }
@@ -107,7 +107,7 @@ class TestCopyTargetPopulationMutation(APITestCase):
             variables={
                 "input": {
                     "targetPopulationData": {
-                        "id": self.id_to_base64(self.target_population.id, "TargetPopulation"),
+                        "id": self.id_to_base64(self.target_population.id, "TargetPopulationNode"),
                         "name": "Test New Copy Name 1",
                     }
                 }
@@ -144,7 +144,7 @@ class TestCopyTargetPopulationMutation(APITestCase):
                     "targetPopulationData": {
                         "id": self.id_to_base64(
                             self.empty_target_population_1.id,
-                            "TargetPopulation",
+                            "TargetPopulationNode",
                         ),
                         "name": "test_copy_empty_target_1",
                     }
