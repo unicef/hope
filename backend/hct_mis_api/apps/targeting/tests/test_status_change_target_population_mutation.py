@@ -93,7 +93,7 @@ class TestApproveTargetPopulationMutation(APITestCase):
             request_string=self.APPROVE_TARGET_MUTATION,
             context={"user": self.user},
             variables={
-                "id": self.id_to_base64(self.target_population_draft.id, "TargetPopulation"),
+                "id": self.id_to_base64(self.target_population_draft.id, "TargetPopulationNode"),
             },
         )
 
@@ -104,7 +104,7 @@ class TestApproveTargetPopulationMutation(APITestCase):
             variables={
                 "id": self.id_to_base64(
                     self.target_population_approved_with_final_rule.id,
-                    "TargetPopulation",
+                    "TargetPopulationNode",
                 )
             },
         )
@@ -196,7 +196,7 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
             variables={
                 "id": self.id_to_base64(
                     self.target_population_approved_with_final_rule.id,
-                    "TargetPopulation",
+                    "TargetPopulationNode",
                 )
             },
         )
@@ -205,7 +205,7 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.UNAPPROVE_TARGET_MUTATION,
             context={"user": self.user},
-            variables={"id": self.id_to_base64(self.target_population_draft.id, "TargetPopulation")},
+            variables={"id": self.id_to_base64(self.target_population_draft.id, "TargetPopulationNode")},
         )
 
 
@@ -305,7 +305,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
             variables={
                 "id": self.id_to_base64(
                     self.target_population_approved_with_final_rule.id,
-                    "TargetPopulation",
+                    "TargetPopulationNode",
                 )
             },
         )
@@ -314,7 +314,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.FINALIZE_TARGET_MUTATION,
             context={"user": self.user},
-            variables={"id": self.id_to_base64(self.target_population_approved.id, "TargetPopulation")},
+            variables={"id": self.id_to_base64(self.target_population_approved.id, "TargetPopulationNode")},
         )
 
     def test_finalize_fail_target_population(self):
@@ -324,7 +324,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
             variables={
                 "id": self.id_to_base64(
                     self.target_population_draft.id,
-                    "TargetPopulation",
+                    "TargetPopulationNode",
                 )
             },
         )
