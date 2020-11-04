@@ -45,7 +45,7 @@ class TestUpdateProgram(APITestCase):
             context={"user": user},
             variables={
                 "programData": {
-                    "id": self.id_to_base64(program.id, "Program"),
+                    "id": self.id_to_base64(program.id, "ProgramNode"),
                     "name": "updated name",
                     "status": "ACTIVE",
                 }
