@@ -4,6 +4,7 @@ from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
 from core.fixtures import AdminAreaTypeFactory, AdminAreaFactory
 from core.models import BusinessArea
+from grievance.models import GrievanceTicket
 
 
 class TestGrievanceCreateFeedbackTicketQuery(APITestCase):
@@ -27,15 +28,19 @@ class TestGrievanceCreateFeedbackTicketQuery(APITestCase):
         call_command("loadbusinessareas")
         self.user = UserFactory.create()
         self.business_area = BusinessArea.objects.get(slug="afghanistan")
-        area_type = AdminAreaTypeFactory(name="Admin type one", admin_level=2, business_area=self.business_area,)
+        area_type = AdminAreaTypeFactory(
+            name="Admin type one",
+            admin_level=2,
+            business_area=self.business_area,
+        )
         self.admin_area = AdminAreaFactory(title="City Test", admin_area_type=area_type)
 
     def test_create_positive_feedback_ticket(self):
         input_data = {
             "input": {
                 "description": "Test Feedback",
-                "assignedTo": self.user.id,
-                "category": 7,
+                "assignedTo": self.id_to_base64(self.user.id, "UserNode"),
+                "category": GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
                 "admin": self.admin_area.title,
                 "language": "Polish, English",
                 "consent": True,
@@ -44,5 +49,7 @@ class TestGrievanceCreateFeedbackTicketQuery(APITestCase):
         }
 
         self.snapshot_graphql_request(
-            request_string=self.CREATE_GRIEVANCE_MUTATION, context={"user": self.user}, variables=input_data,
+            request_string=self.CREATE_GRIEVANCE_MUTATION,
+            context={"user": self.user},
+            variables=input_data,
         )

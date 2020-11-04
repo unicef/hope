@@ -135,5 +135,5 @@ class TestImportedIndividualQuery(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.IMPORTED_INDIVIDUAL_QUERY,
             context={"user": self.user},
-            variables={"id": self.id_to_base64(self.individuals[0].id, "ImportedIndividual",)},
+            variables={"id": self.id_to_base64(self.individuals[0].id, "ImportedIndividualNode",)},
         )
