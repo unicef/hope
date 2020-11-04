@@ -48,7 +48,7 @@ export const LookUpIndividualTable = ({
     sex: [filter.sex],
     householdId: valuesInner.selectedHousehold
       ? decodeIdString(valuesInner.selectedHousehold)
-      : '',
+      : null,
   };
 
   return (
