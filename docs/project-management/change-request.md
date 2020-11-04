@@ -6,6 +6,8 @@ description: Change request for Iteration 4 Deliverables
 
 ## Iteration 7
 
+
+
 ### **Targeting - Details View - Columns**
 
 {% embed url="https://unicef.visualstudio.com/ICTD-HCT-MIS/\_workitems/edit/75647" %}
@@ -85,6 +87,8 @@ description: Change request for Iteration 4 Deliverables
 ### ERP schema updates
 
 {% embed url="https://unicef.visualstudio.com/ICTD-HCT-MIS/\_workitems/edit/75526" %}
+
+{% embed url="https://unicef.visualstudio.com/ICTD-HCT-MIS/\_workitems/edit/75653/" %}
 
 **------------------------------------------------**
 
