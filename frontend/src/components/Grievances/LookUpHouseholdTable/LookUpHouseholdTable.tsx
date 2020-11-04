@@ -48,6 +48,7 @@ export const LookUpHouseholdTable = ({
     setSelectedHousehold(event.target.value);
     setFieldValue('selectedHousehold', event.target.value);
     setFieldValue('selectedIndividual', '');
+    setFieldValue('identityVerified', false);
   };
   return (
     <TableWrapper>
