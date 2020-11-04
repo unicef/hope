@@ -7,6 +7,39 @@ type ActivateCashPlanVerificationMutation {
   cashPlan: CashPlanNode
 }
 
+input AddIndividualDataObjectType {
+  fullName: String!
+  givenName: String!
+  middleName: String
+  familyName: String!
+  sex: String!
+  birthDate: Date
+  estimatedBirthDate: Boolean
+  maritalStatus: String
+  phoneNo: String
+  phoneNoAlternative: String
+  relationship: String
+  disability: Boolean
+  workStatus: String
+  enrolledInNutritionProgramme: Boolean
+  administrationOfRutf: Boolean
+  pregnant: Boolean
+  observedDisability: [String]
+  seeingDisability: String
+  hearingDisability: String
+  physicalDisability: String
+  memoryDisability: String
+  selfcareDisability: String
+  commsDisability: String
+  whoAnswersPhone: String
+  whoAnswersAltPhone: String
+}
+
+input AddIndividualIssueTypeExtras {
+  household: ID!
+  individualData: AddIndividualDataObjectType!
+}
+
 type AdminAreaNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -507,17 +540,6 @@ input GrievanceComplaintTicketExtras {
   paymentRecord: ID!
 }
 
-enum GrievanceTicketCategory {
-  A_1
-  A_2
-  A_3
-  A_4
-  A_5
-  A_6
-  A_7
-  A_8
-}
-
 type GrievanceTicketNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -525,8 +547,8 @@ type GrievanceTicketNode implements Node {
   userModified: DateTime
   createdBy: UserNode
   assignedTo: UserNode
-  status: GrievanceTicketStatus!
-  category: GrievanceTicketCategory!
+  status: Int!
+  category: Int!
   issueType: Int
   description: String!
   admin: String!
@@ -538,6 +560,8 @@ type GrievanceTicketNode implements Node {
   grievanceticketSet(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   complaintTicketDetails: TicketComplaintDetailsNode
   sensitiveTicketDetails: TicketSensitiveDetailsNode
+  individualDataUpdateTicketDetails: TicketIndividualDataUpdateDetailsNode
+  addIndividualTicketDetails: TicketAddIndividualDetailsNode
 }
 
 type GrievanceTicketNodeConnection {
@@ -550,14 +574,6 @@ type GrievanceTicketNodeConnection {
 type GrievanceTicketNodeEdge {
   node: GrievanceTicketNode
   cursor: String!
-}
-
-enum GrievanceTicketStatus {
-  A_1
-  A_2
-  A_3
-  A_4
-  A_5
 }
 
 type GroupAttributeNode {
@@ -634,6 +650,7 @@ type HouseholdNode implements Node {
   village: String!
   complaintTicketDetails(before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
   sensitiveTicketDetails(before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
+  addIndividualTicketDetails(before: String, after: String, first: Int, last: Int): TicketAddIndividualDetailsNodeConnection!
   individualsAndRoles: [IndividualRoleInHouseholdNode!]!
   individuals(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
@@ -1233,7 +1250,7 @@ enum IndividualCommsDisability {
 
 input IndividualDataUpdateIssueTypeExtras {
   individual: ID!
-  household: ID!
+  individualData: IndividualUpdateDataObjectType!
 }
 
 enum IndividualDeduplicationBatchStatus {
@@ -1252,7 +1269,6 @@ enum IndividualDeduplicationGoldenRecordStatus {
 
 input IndividualDeleteIssueTypeExtras {
   individual: ID!
-  household: ID!
 }
 
 enum IndividualHearingDisability {
@@ -1330,6 +1346,7 @@ type IndividualNode implements Node {
   whoAnswersAltPhone: String!
   complaintTicketDetails(before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
   sensitiveTicketDetails(before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
+  individualDataUpdateTicketDetails(before: String, after: String, first: Int, last: Int): TicketIndividualDataUpdateDetailsNodeConnection!
   representedHouseholds(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   headingHousehold: HouseholdNode
   documents(before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
@@ -1421,6 +1438,35 @@ enum IndividualStatus {
   INACTIVE
 }
 
+input IndividualUpdateDataObjectType {
+  status: String
+  fullName: String
+  givenName: String
+  middleName: String
+  familyName: String
+  sex: String
+  birthDate: Date
+  estimatedBirthDate: Boolean
+  maritalStatus: String
+  phoneNo: String
+  phoneNoAlternative: String
+  relationship: String
+  disability: Boolean
+  workStatus: String
+  enrolledInNutritionProgramme: Boolean
+  administrationOfRutf: Boolean
+  pregnant: Boolean
+  observedDisability: [String]
+  seeingDisability: String
+  hearingDisability: String
+  physicalDisability: String
+  memoryDisability: String
+  selfcareDisability: String
+  commsDisability: String
+  whoAnswersPhone: String
+  whoAnswersAltPhone: String
+}
+
 enum IndividualWorkStatus {
   YES
   NO
@@ -1431,6 +1477,13 @@ input IssueTypeExtrasInput {
   householdDataUpdateIssueTypeExtras: HouseholdDataUpdateIssueTypeExtras
   individualDataUpdateIssueTypeExtras: IndividualDataUpdateIssueTypeExtras
   individualDeleteIssueTypeExtras: IndividualDeleteIssueTypeExtras
+  addIndividualIssueTypeExtras: AddIndividualIssueTypeExtras
+}
+
+type IssueTypesObject {
+  category: String
+  label: String
+  subCategories: [ChoiceObject]
 }
 
 scalar JSONLazyString
@@ -1716,7 +1769,10 @@ enum ProgramStatus {
 
 type Query {
   grievanceTicket(id: ID!): GrievanceTicketNode
-  allGrievanceTicket(before: String, after: String, first: Int, last: Int, id: UUID, category: String, businessArea: String!, search: String, status: [String], fsp: [ID], admin: [ID], createdAtRange: String, orderBy: String): GrievanceTicketNodeConnection
+  allGrievanceTicket(before: String, after: String, first: Int, last: Int, id: UUID, id_Icontains: UUID, category: String, area: String, area_Icontains: String, assignedTo: ID, businessArea: String!, search: String, status: [String], fsp: [ID], admin: [ID], createdAtRange: String, orderBy: String): GrievanceTicketNodeConnection
+  grievanceTicketStatusChoices: [ChoiceObject]
+  grievanceTicketCategoryChoices: [ChoiceObject]
+  grievanceTicketIssueTypeChoices: [IssueTypesObject]
   allSteficonRules(before: String, after: String, first: Int, last: Int, enabled: Boolean, deprecated: Boolean): SteficonRuleNodeConnection
   paymentRecord(id: ID!): PaymentRecordNode
   paymentRecordVerification(id: ID!): PaymentVerificationNode
@@ -2170,6 +2226,26 @@ input TargetingIndividualRuleFilterBlockObjectType {
   individualBlockFilters: [TargetingCriteriaRuleFilterObjectType]
 }
 
+type TicketAddIndividualDetailsNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  household: HouseholdNode
+  individualData: Arg
+}
+
+type TicketAddIndividualDetailsNodeConnection {
+  pageInfo: PageInfo!
+  edges: [TicketAddIndividualDetailsNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type TicketAddIndividualDetailsNodeEdge {
+  node: TicketAddIndividualDetailsNode
+  cursor: String!
+}
+
 type TicketComplaintDetailsNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -2188,6 +2264,26 @@ type TicketComplaintDetailsNodeConnection {
 
 type TicketComplaintDetailsNodeEdge {
   node: TicketComplaintDetailsNode
+  cursor: String!
+}
+
+type TicketIndividualDataUpdateDetailsNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  individual: IndividualNode
+  individualData: Arg
+}
+
+type TicketIndividualDataUpdateDetailsNodeConnection {
+  pageInfo: PageInfo!
+  edges: [TicketIndividualDataUpdateDetailsNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type TicketIndividualDataUpdateDetailsNodeEdge {
+  node: TicketIndividualDataUpdateDetailsNode
   cursor: String!
 }
 
