@@ -10,7 +10,7 @@ export const headCells: HeadCell<TargetPopulationNode>[] = [
   },
   {
     disablePadding: false,
-    label: 'Final List',
+    label: 'Score',
     id: 'status',
     numeric: false,
   },
