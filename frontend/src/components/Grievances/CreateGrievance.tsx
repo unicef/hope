@@ -39,9 +39,10 @@ const BoxWithBorders = styled.div`
 export function CreateGrievance(): React.ReactElement {
   const businessArea = useBusinessArea();
 
-  const initialValues: { [key: string]: string } = {
+  const initialValues: { [key: string]: string | boolean } = {
     selectedHousehold: '',
     selectedIndividual: '',
+    identityVerified: false,
   };
 
   const validationSchema = Yup.object().shape({

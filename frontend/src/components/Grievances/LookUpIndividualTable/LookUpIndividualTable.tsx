@@ -35,6 +35,7 @@ export const LookUpIndividualTable = ({
   const handleRadioChange = (event) => {
     setSelectedIndividual(event.target.value);
     setFieldValue('selectedIndividual', event.target.value);
+    setFieldValue('identityVerified', false);
   };
 
   const initialVariables = {

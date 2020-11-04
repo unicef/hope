@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import {
+  Box,
   Button,
   Dialog,
   DialogActions,
@@ -21,7 +22,8 @@ import { LookUpHouseholdFilters } from './LookUpHouseholdTable/LookUpHouseholdFi
 import { LookUpHouseholdTable } from './LookUpHouseholdTable/LookUpHouseholdTable';
 import { LookUpIndividualFilters } from './LookUpIndividualTable/LookUpIndividualFilters';
 import { LookUpIndividualTable } from './LookUpIndividualTable/LookUpIndividualTable';
-import { Formik } from 'formik';
+import { Field, Formik } from 'formik';
+import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 
 const DialogFooter = styled.div`
   padding: 12px 16px;
@@ -156,16 +158,26 @@ export const LookUpHouseholdIndividualModal = ({
             </DialogContent>
             <DialogFooter>
               <DialogActions>
-                <Button onClick={() => handleCancel()}>CANCEL</Button>
-                <Button
-                  type='submit'
-                  color='primary'
-                  variant='contained'
-                  onClick={submitForm}
-                  data-cy='button-submit'
-                >
-                  SAVE
-                </Button>
+                <Box display='flex'>
+                  <Box mr={1}>
+                    <Field
+                      name='identityVerified'
+                      label='Identity Verified*'
+                      component={FormikCheckboxField}
+                    />
+                  </Box>
+                  <Button onClick={() => handleCancel()}>CANCEL</Button>
+                  <Button
+                    type='submit'
+                    color='primary'
+                    variant='contained'
+                    onClick={submitForm}
+                    disabled={values.identityVerified === false}
+                    data-cy='button-submit'
+                  >
+                    SAVE
+                  </Button>
+                </Box>
               </DialogActions>
             </DialogFooter>
           </Dialog>
