@@ -169,7 +169,7 @@ class TestGrievanceQuery(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.GRIEVANCE_QUERY,
             context={"user": self.user},
-            variables={"id": self.id_to_base64(gt_id, "GrievanceTicket")},
+            variables={"id": self.id_to_base64(gt_id, "GrievanceTicketNode")},
         )
 
     def test_grievance_list_filtered_by_admin2(self):

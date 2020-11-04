@@ -46,5 +46,5 @@ class TestImportedHouseholdQuery(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.IMPORTED_HOUSEHOLD_QUERY,
             context={"user": self.user},
-            variables={"id": self.id_to_base64(self.households[0].id, "ImportedHousehold")},
+            variables={"id": self.id_to_base64(self.households[0].id, "ImportedHouseholdNode")},
         )
