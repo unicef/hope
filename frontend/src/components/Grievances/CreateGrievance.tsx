@@ -102,7 +102,6 @@ export function CreateGrievance(): React.ReactElement {
     <Formik
       initialValues={initialValues}
       onSubmit={(values) => {
-        console.log(values);
         mutate({
           variables: {
             input: {

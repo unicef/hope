@@ -3,10 +3,10 @@ import styled from 'styled-components';
 import moment from 'moment';
 import { Box, Grid, InputAdornment, TextField } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
+import { KeyboardDatePicker } from '@material-ui/pickers';
 import { ContainerWithBorder } from '../../ContainerWithBorder';
 import { AdminAreasAutocomplete } from '../../population/AdminAreaAutocomplete';
 import { FieldLabel } from '../../FieldLabel';
-import { KeyboardDatePicker } from '@material-ui/pickers';
 import { Missing } from '../../Missing';
 
 const SearchTextField = styled(TextField)`

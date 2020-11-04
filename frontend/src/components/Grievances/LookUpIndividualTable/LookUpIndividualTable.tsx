@@ -32,7 +32,7 @@ export const LookUpIndividualTable = ({
   const [selectedIndividual, setSelectedIndividual] = useState(
     initialValues.selectedIndividual,
   );
-  const handleRadioChange = (event) => {
+  const handleRadioChange = (event): void => {
     setSelectedIndividual(event.target.value);
     setFieldValue('selectedIndividual', event.target.value);
     setFieldValue('identityVerified', false);

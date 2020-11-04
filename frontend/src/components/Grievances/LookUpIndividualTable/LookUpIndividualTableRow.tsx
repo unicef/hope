@@ -1,11 +1,11 @@
 import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
+import { Radio } from '@material-ui/core';
 import { IndividualNode } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { getAgeFromDob, sexToCapitalize } from '../../../utils/utils';
 import { ClickableTableRow } from '../../table/ClickableTableRow';
 import { Pointer } from '../../Pointer';
-import { Radio } from '@material-ui/core';
 import { UniversalMoment } from '../../UniversalMoment';
 
 interface LookUpIndividualTableRowProps {
