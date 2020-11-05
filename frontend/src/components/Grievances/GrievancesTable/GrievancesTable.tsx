@@ -25,8 +25,8 @@ export const GrievancesTable = ({
   const initialVariables: AllGrievanceTicketQueryVariables = {
     businessArea,
     search: filter.search,
-    // status: [filter.status],
-    // fsp: [filter.fsp],
+    status: [filter.status],
+    fsp: [filter.fsp],
     createdAtRange: JSON.stringify(filter.createdAtRange),
     admin: [filter.admin],
   };
