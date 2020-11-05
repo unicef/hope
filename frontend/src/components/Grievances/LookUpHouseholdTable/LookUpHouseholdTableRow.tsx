@@ -1,14 +1,11 @@
 import { Radio } from '@material-ui/core';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { choicesToDict, formatCurrency } from '../../../utils/utils';
 import {
   HouseholdChoiceDataQuery,
   HouseholdNode,
 } from '../../../__generated__/graphql';
-import { Missing } from '../../Missing';
 import { Pointer } from '../../Pointer';
 import { ClickableTableRow } from '../../table/ClickableTableRow';
 import { UniversalMoment } from '../../UniversalMoment';
@@ -24,14 +21,15 @@ export function LookUpHouseholdTableRow({
   household,
   radioChangeHandler,
   selectedHousehold,
-  choicesData,
 }: LookUpHouseholdTableRowProps): React.ReactElement {
-  const history = useHistory();
   const businessArea = useBusinessArea();
 
   const handleClick = (): void => {
     const path = `/${businessArea}/population/household/${household.id}`;
-    history.push(path);
+    const win = window.open(path, '_blank rel=noopener');
+    if (win != null) {
+      win.focus();
+    }
   };
   const renderPrograms = (): string => {
     const programNames = household.programs?.edges?.map(
@@ -39,16 +37,23 @@ export function LookUpHouseholdTableRow({
     );
     return programNames?.length ? programNames.join(', ') : '-';
   };
+  const renderAdminLevel2 = (): string => {
+    if (household?.adminArea?.adminAreaType?.adminLevel === 2) {
+      return household?.adminArea?.title;
+    }
+    return '-';
+  };
+
   return (
-    <ClickableTableRow hover role='checkbox' key={household.unicefId}>
+    <ClickableTableRow hover role='checkbox' key={household.id}>
       <TableCell padding='checkbox'>
         <Radio
           color='primary'
-          checked={selectedHousehold === household.unicefId}
+          checked={selectedHousehold === household.id}
           onChange={radioChangeHandler}
-          value={household.unicefId}
+          value={household.id}
           name='radio-button-household'
-          inputProps={{ 'aria-label': household.unicefId }}
+          inputProps={{ 'aria-label': household.id }}
         />
       </TableCell>
       <TableCell onClick={handleClick} align='left'>
@@ -56,9 +61,7 @@ export function LookUpHouseholdTableRow({
       </TableCell>
       <TableCell align='left'>{household.headOfHousehold.fullName}</TableCell>
       <TableCell align='left'>{household.size}</TableCell>
-      <TableCell align='left'>
-        <Missing />
-      </TableCell>
+      <TableCell align='left'>{renderAdminLevel2()}</TableCell>
       <TableCell align='left'>{renderPrograms()}</TableCell>
       <TableCell align='left'>
         <UniversalMoment>{household.lastRegistrationDate}</UniversalMoment>

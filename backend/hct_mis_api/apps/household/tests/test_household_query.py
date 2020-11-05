@@ -136,7 +136,7 @@ class TestHouseholdQuery(APITestCase):
     def test_household_filter_by_programme(self):
         self.snapshot_graphql_request(
             request_string=self.ALL_HOUSEHOLD_FILTER_PROGRAMS_QUERY,
-            variables={"programs": [self.id_to_base64(self.program_one.id, "Program")]},
+            variables={"programs": [self.id_to_base64(self.program_one.id, "ProgramNode")]},
             context={"user": self.user},
         )
 
@@ -144,5 +144,5 @@ class TestHouseholdQuery(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.HOUSEHOLD_QUERY,
             context={"user": self.user},
-            variables={"id": self.id_to_base64(self.households[0].id, "Household")},
+            variables={"id": self.id_to_base64(self.households[0].id, "HouseholdNode")},
         )
