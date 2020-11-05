@@ -1,13 +1,24 @@
 import React from 'react';
 import styled from 'styled-components';
 import moment from 'moment';
-import { Box, Grid, InputAdornment, TextField } from '@material-ui/core';
+import {
+  Box,
+  FormControl,
+  Grid,
+  InputAdornment,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+} from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
+import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import { ContainerWithBorder } from '../../ContainerWithBorder';
 import { AdminAreasAutocomplete } from '../../population/AdminAreaAutocomplete';
 import { FieldLabel } from '../../FieldLabel';
 import { Missing } from '../../Missing';
+import { GrievancesChoiceDataQuery } from '../../../__generated__/graphql';
 
 const SearchTextField = styled(TextField)`
   flex: 1;
@@ -15,14 +26,21 @@ const SearchTextField = styled(TextField)`
     min-width: 150px;
   }
 `;
+const StyledFormControl = styled(FormControl)`
+  width: 232px;
+  color: #5f6368;
+  border-bottom: 0;
+`;
 
 interface GrievancesFiltersProps {
   onFilterChange;
   filter;
+  choicesData: GrievancesChoiceDataQuery;
 }
 export function GrievancesFilters({
   onFilterChange,
   filter,
+  choicesData,
 }: GrievancesFiltersProps): React.ReactElement {
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
@@ -46,10 +64,43 @@ export function GrievancesFilters({
           />
         </Grid>
         <Grid item>
-          Status <Missing />
+          <StyledFormControl variant='outlined' margin='dense'>
+            <InputLabel>Status</InputLabel>
+            <Select
+              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
+              // @ts-ignore
+              onChange={(e) => handleFilterChange(e, 'status')}
+              variant='outlined'
+              label='Status'
+              value={filter.status || null}
+            >
+              <MenuItem value=''>
+                <em>None</em>
+              </MenuItem>
+              {choicesData.grievanceTicketStatusChoices.map((item) => {
+                return (
+                  <MenuItem key={item.value} value={item.value}>
+                    {item.name}
+                  </MenuItem>
+                );
+              })}
+            </Select>
+          </StyledFormControl>
         </Grid>
         <Grid item>
-          FSP <Missing />
+          <SearchTextField
+            label='FSP'
+            variant='outlined'
+            margin='dense'
+            onChange={(e) => handleFilterChange(e, 'fsp')}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position='start'>
+                  <AccountBalanceIcon />
+                </InputAdornment>
+              ),
+            }}
+          />
         </Grid>
         <Grid item>
           <Box display='flex' flexDirection='column'>
