@@ -4452,12 +4452,12 @@ export type CreateCashPlanPaymentVerificationMutation = (
   )> }
 );
 
-export type CreateGrievanceTicketMutationVariables = {
+export type CreateGrievanceMutationVariables = {
   input: CreateGrievanceTicketInput
 };
 
 
-export type CreateGrievanceTicketMutation = (
+export type CreateGrievanceMutation = (
   { __typename?: 'Mutations' }
   & { createGrievanceTicket: Maybe<(
     { __typename?: 'CreateGrievanceTicketMutation' }
@@ -6779,8 +6779,8 @@ export function useCreateCashPlanPaymentVerificationMutation(baseOptions?: Apoll
 export type CreateCashPlanPaymentVerificationMutationHookResult = ReturnType<typeof useCreateCashPlanPaymentVerificationMutation>;
 export type CreateCashPlanPaymentVerificationMutationResult = ApolloReactCommon.MutationResult<CreateCashPlanPaymentVerificationMutation>;
 export type CreateCashPlanPaymentVerificationMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateCashPlanPaymentVerificationMutation, CreateCashPlanPaymentVerificationMutationVariables>;
-export const CreateGrievanceTicketDocument = gql`
-    mutation createGrievanceTicket($input: CreateGrievanceTicketInput!) {
+export const CreateGrievanceDocument = gql`
+    mutation CreateGrievance($input: CreateGrievanceTicketInput!) {
   createGrievanceTicket(input: $input) {
     grievanceTickets {
       id
@@ -6788,48 +6788,48 @@ export const CreateGrievanceTicketDocument = gql`
   }
 }
     `;
-export type CreateGrievanceTicketMutationFn = ApolloReactCommon.MutationFunction<CreateGrievanceTicketMutation, CreateGrievanceTicketMutationVariables>;
-export type CreateGrievanceTicketComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<CreateGrievanceTicketMutation, CreateGrievanceTicketMutationVariables>, 'mutation'>;
+export type CreateGrievanceMutationFn = ApolloReactCommon.MutationFunction<CreateGrievanceMutation, CreateGrievanceMutationVariables>;
+export type CreateGrievanceComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<CreateGrievanceMutation, CreateGrievanceMutationVariables>, 'mutation'>;
 
-    export const CreateGrievanceTicketComponent = (props: CreateGrievanceTicketComponentProps) => (
-      <ApolloReactComponents.Mutation<CreateGrievanceTicketMutation, CreateGrievanceTicketMutationVariables> mutation={CreateGrievanceTicketDocument} {...props} />
+    export const CreateGrievanceComponent = (props: CreateGrievanceComponentProps) => (
+      <ApolloReactComponents.Mutation<CreateGrievanceMutation, CreateGrievanceMutationVariables> mutation={CreateGrievanceDocument} {...props} />
     );
     
-export type CreateGrievanceTicketProps<TChildProps = {}> = ApolloReactHoc.MutateProps<CreateGrievanceTicketMutation, CreateGrievanceTicketMutationVariables> & TChildProps;
-export function withCreateGrievanceTicket<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+export type CreateGrievanceProps<TChildProps = {}> = ApolloReactHoc.MutateProps<CreateGrievanceMutation, CreateGrievanceMutationVariables> & TChildProps;
+export function withCreateGrievance<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
   TProps,
-  CreateGrievanceTicketMutation,
-  CreateGrievanceTicketMutationVariables,
-  CreateGrievanceTicketProps<TChildProps>>) {
-    return ApolloReactHoc.withMutation<TProps, CreateGrievanceTicketMutation, CreateGrievanceTicketMutationVariables, CreateGrievanceTicketProps<TChildProps>>(CreateGrievanceTicketDocument, {
-      alias: 'createGrievanceTicket',
+  CreateGrievanceMutation,
+  CreateGrievanceMutationVariables,
+  CreateGrievanceProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, CreateGrievanceMutation, CreateGrievanceMutationVariables, CreateGrievanceProps<TChildProps>>(CreateGrievanceDocument, {
+      alias: 'createGrievance',
       ...operationOptions
     });
 };
 
 /**
- * __useCreateGrievanceTicketMutation__
+ * __useCreateGrievanceMutation__
  *
- * To run a mutation, you first call `useCreateGrievanceTicketMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useCreateGrievanceTicketMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useCreateGrievanceMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateGrievanceMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [createGrievanceTicketMutation, { data, loading, error }] = useCreateGrievanceTicketMutation({
+ * const [createGrievanceMutation, { data, loading, error }] = useCreateGrievanceMutation({
  *   variables: {
  *      input: // value for 'input'
  *   },
  * });
  */
-export function useCreateGrievanceTicketMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateGrievanceTicketMutation, CreateGrievanceTicketMutationVariables>) {
-        return ApolloReactHooks.useMutation<CreateGrievanceTicketMutation, CreateGrievanceTicketMutationVariables>(CreateGrievanceTicketDocument, baseOptions);
+export function useCreateGrievanceMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateGrievanceMutation, CreateGrievanceMutationVariables>) {
+        return ApolloReactHooks.useMutation<CreateGrievanceMutation, CreateGrievanceMutationVariables>(CreateGrievanceDocument, baseOptions);
       }
-export type CreateGrievanceTicketMutationHookResult = ReturnType<typeof useCreateGrievanceTicketMutation>;
-export type CreateGrievanceTicketMutationResult = ApolloReactCommon.MutationResult<CreateGrievanceTicketMutation>;
-export type CreateGrievanceTicketMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateGrievanceTicketMutation, CreateGrievanceTicketMutationVariables>;
+export type CreateGrievanceMutationHookResult = ReturnType<typeof useCreateGrievanceMutation>;
+export type CreateGrievanceMutationResult = ApolloReactCommon.MutationResult<CreateGrievanceMutation>;
+export type CreateGrievanceMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateGrievanceMutation, CreateGrievanceMutationVariables>;
 export const CreateProgramDocument = gql`
     mutation CreateProgram($programData: CreateProgramInput!) {
   createProgram(programData: $programData) {
