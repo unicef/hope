@@ -46,7 +46,7 @@ def arguments_resolver(obj):
 
 
 class TargetingCriteriaRuleFilterFactory(factory.DjangoModelFactory):
-    field_name = factory.fuzzy.FuzzyChoice(["age", "size", "residence_status"],)
+    field_name = factory.fuzzy.FuzzyChoice([ "size", "residence_status"],)
     comparision_method = factory.LazyAttribute(comparision_method_resolver)
     arguments = factory.LazyAttribute(arguments_resolver)
 
