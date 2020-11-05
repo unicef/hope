@@ -15,7 +15,8 @@ from grievance.models import (
     TicketNotes,
     TicketSensitiveDetails,
     TicketComplaintDetails,
-    TicketIndividualDataUpdateDetails, TicketAddIndividualDetails,
+    TicketIndividualDataUpdateDetails, TicketAddIndividualDetails, TicketDeleteIndividualDetails,
+    TicketHouseholdDataUpdateDetails,
 )
 from payment.models import ServiceProvider
 from utils.schema import Arg
@@ -133,6 +134,23 @@ class TicketAddIndividualDetailsNode(DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
+class TicketDeleteIndividualDetailsNode(DjangoObjectType):
+    individual_data = Arg()
+
+    class Meta:
+        model = TicketDeleteIndividualDetails
+        exclude = ("ticket",)
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+class TicketHouseholdDataUpdateDetailsNode(DjangoObjectType):
+    household_data = Arg()
+
+    class Meta:
+        model = TicketHouseholdDataUpdateDetails
+        exclude = ("ticket",)
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
 
 class IssueTypesObject(graphene.ObjectType):
     category = graphene.String()
@@ -141,6 +159,8 @@ class IssueTypesObject(graphene.ObjectType):
 
     def resolve_sub_categories(self, info):
         return [{"name": value, "value": key} for key, value in self.get("sub_categories").items()]
+
+
 
 
 class Query(graphene.ObjectType):
