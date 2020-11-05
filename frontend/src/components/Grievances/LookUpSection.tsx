@@ -1,32 +1,44 @@
-import { Grid } from '@material-ui/core';
+import { Box } from '@material-ui/core';
 import React from 'react';
 import { LookUpHouseholdIndividual } from './LookUpHouseholdIndividual';
 import { LookUpPaymentRecord } from './LookUpPaymentRecord';
 
-export const LookUpSection = ({ category }): React.ReactElement => {
-  const LookUpForCategory = () => {
+export const LookUpSection = ({
+  category,
+  onValueChange,
+  values,
+}): React.ReactElement => {
+  const LookUpForCategory = (): React.ReactElement => {
     switch (category) {
-      case 'Positive Feedback':
+      case '1':
+        return <div>Payment Verification</div>;
+      case '2':
+        return <div>Data Change</div>;
+      case '3':
+        return <div>Sensitive Grievance</div>;
+      case '4':
         return (
-          <Grid container spacing={3}>
-            <Grid item xs={6}>
-              <LookUpHouseholdIndividual />
-            </Grid>
-          </Grid>
-        );
-      case 'Negative Feedback':
-        return <div>Negative Feedback</div>;
-      case 'Grievance Complaint':
-        return (
-          <Grid container spacing={3}>
-            <Grid item xs={6}>
-              <LookUpHouseholdIndividual />
-            </Grid>
-            <Grid item xs={6}>
+          <Box display='flex' alignItems='center'>
+            <Box p={3}>
+              <LookUpHouseholdIndividual
+                values={values}
+                onValueChange={onValueChange}
+              />
+            </Box>
+            <Box p={3}>
               <LookUpPaymentRecord />
-            </Grid>
-          </Grid>
+            </Box>
+          </Box>
         );
+      case '5':
+        return <div>Negative Feedback</div>;
+      case '6':
+        return <div>Referral</div>;
+      case '7':
+        return <div>Positive Feedback</div>;
+      case '8':
+        return <div>Deduplication</div>;
+
       case 'Payment Verification Issue':
         return <div>Payment Verification Issue</div>;
       case 'Referral':

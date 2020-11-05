@@ -148,7 +148,7 @@ class TestTargetPopulationQuery(APITestCase):
             variables={
                 "id": self.id_to_base64(
                     self.target_population_size_1_approved.id,
-                    "TargetPopulation",
+                    "TargetPopulationNode",
                 )
             },
         )
@@ -159,7 +159,7 @@ class TestTargetPopulationQuery(APITestCase):
             variables={
                 "id": self.id_to_base64(
                     self.target_population_residence_status.id,
-                    "TargetPopulation",
+                    "TargetPopulationNode",
                 )
             },
         )
