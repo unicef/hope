@@ -756,9 +756,9 @@ export type GetCashplanVerificationSampleSizeObject = {
 };
 
 export type GrievanceComplaintTicketExtras = {
-  household: Scalars['ID'],
-  individual: Scalars['ID'],
-  paymentRecord: Scalars['ID'],
+  household?: Maybe<Scalars['ID']>,
+  individual?: Maybe<Scalars['ID']>,
+  paymentRecord?: Maybe<Scalars['ID']>,
 };
 
 export type GrievanceTicketNode = Node & {
@@ -3104,9 +3104,9 @@ export type SaveKoboProjectImportDataMutation = {
 };
 
 export type SensitiveGrievanceTicketExtras = {
-  household: Scalars['ID'],
-  individual: Scalars['ID'],
-  paymentRecord: Scalars['ID'],
+  household?: Maybe<Scalars['ID']>,
+  individual?: Maybe<Scalars['ID']>,
+  paymentRecord?: Maybe<Scalars['ID']>,
 };
 
 export type ServiceProviderNode = Node & {
@@ -4039,15 +4039,28 @@ export type XlsxRowErrorNode = {
 export type HouseholdMinimalFragment = (
   { __typename?: 'HouseholdNode' }
   & Pick<HouseholdNode, 'id' | 'createdAt' | 'residenceStatus' | 'size' | 'totalCashReceived' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'status' | 'sanctionListPossibleMatch' | 'hasDuplicates' | 'unicefId' | 'geopoint' | 'village' | 'address'>
-  & { headOfHousehold: (
-    { __typename?: 'IndividualNode' }
-    & Pick<IndividualNode, 'id' | 'fullName'>
-  ), adminArea: Maybe<(
+  & { adminArea: Maybe<(
     { __typename?: 'AdminAreaNode' }
     & Pick<AdminAreaNode, 'id' | 'title'>
-  )>, individuals: (
+    & { adminAreaType: (
+      { __typename?: 'AdminAreaTypeNode' }
+      & Pick<AdminAreaTypeNode, 'adminLevel'>
+    ) }
+  )>, headOfHousehold: (
+    { __typename?: 'IndividualNode' }
+    & Pick<IndividualNode, 'id' | 'fullName'>
+  ), individuals: (
     { __typename?: 'IndividualNodeConnection' }
     & Pick<IndividualNodeConnection, 'totalCount'>
+  ), programs: (
+    { __typename?: 'ProgramNodeConnection' }
+    & { edges: Array<Maybe<(
+      { __typename?: 'ProgramNodeEdge' }
+      & { node: Maybe<(
+        { __typename?: 'ProgramNode' }
+        & Pick<ProgramNode, 'id' | 'name'>
+      )> }
+    )>> }
   ) }
 );
 
@@ -4104,7 +4117,7 @@ export type HouseholdDetailedFragment = (
 
 export type IndividualMinimalFragment = (
   { __typename?: 'IndividualNode' }
-  & Pick<IndividualNode, 'id' | 'createdAt' | 'updatedAt' | 'fullName' | 'sex' | 'unicefId' | 'birthDate' | 'maritalStatus' | 'phoneNo' | 'sanctionListPossibleMatch' | 'deduplicationGoldenRecordStatus' | 'sanctionListLastCheck' | 'role' | 'relationship' | 'status'>
+  & Pick<IndividualNode, 'id' | 'lastRegistrationDate' | 'createdAt' | 'updatedAt' | 'fullName' | 'sex' | 'unicefId' | 'birthDate' | 'maritalStatus' | 'phoneNo' | 'sanctionListPossibleMatch' | 'deduplicationGoldenRecordStatus' | 'sanctionListLastCheck' | 'role' | 'relationship' | 'status'>
   & { documents: (
     { __typename?: 'DocumentNodeConnection' }
     & { edges: Array<Maybe<(
@@ -4124,7 +4137,20 @@ export type IndividualMinimalFragment = (
     & { adminArea: Maybe<(
       { __typename?: 'AdminAreaNode' }
       & Pick<AdminAreaNode, 'id' | 'title'>
-    )> }
+      & { adminAreaType: (
+        { __typename?: 'AdminAreaTypeNode' }
+        & Pick<AdminAreaTypeNode, 'adminLevel'>
+      ) }
+    )>, programs: (
+      { __typename?: 'ProgramNodeConnection' }
+      & { edges: Array<Maybe<(
+        { __typename?: 'ProgramNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'ProgramNode' }
+          & Pick<ProgramNode, 'id' | 'name'>
+        )> }
+      )>> }
+    ) }
   )> }
 );
 
@@ -4321,6 +4347,22 @@ export type CreateCashPlanPaymentVerificationMutation = (
       { __typename?: 'CashPlanNode' }
       & Pick<CashPlanNode, 'id'>
     )> }
+  )> }
+);
+
+export type CreateGrievanceTicketMutationVariables = {
+  input: CreateGrievanceTicketInput
+};
+
+
+export type CreateGrievanceTicketMutation = (
+  { __typename?: 'Mutations' }
+  & { createGrievanceTicket: Maybe<(
+    { __typename?: 'CreateGrievanceTicketMutation' }
+    & { grievanceTickets: Maybe<Array<Maybe<(
+      { __typename?: 'GrievanceTicketNode' }
+      & Pick<GrievanceTicketNode, 'id'>
+    )>>> }
   )> }
 );
 
@@ -4715,6 +4757,46 @@ export type AllCashPlansQuery = (
   )> }
 );
 
+export type AllGrievanceTicketQueryVariables = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  id?: Maybe<Scalars['UUID']>,
+  category?: Maybe<Scalars['String']>,
+  businessArea: Scalars['String'],
+  search?: Maybe<Scalars['String']>,
+  status?: Maybe<Array<Maybe<Scalars['String']>>>,
+  fsp?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  createdAtRange?: Maybe<Scalars['String']>,
+  admin?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type AllGrievanceTicketQuery = (
+  { __typename?: 'Query' }
+  & { allGrievanceTicket: Maybe<(
+    { __typename?: 'GrievanceTicketNodeConnection' }
+    & Pick<GrievanceTicketNodeConnection, 'totalCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'startCursor' | 'endCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'GrievanceTicketNodeEdge' }
+      & Pick<GrievanceTicketNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'GrievanceTicketNode' }
+        & Pick<GrievanceTicketNode, 'id' | 'status' | 'category' | 'createdAt' | 'userModified'>
+        & { assignedTo: Maybe<(
+          { __typename?: 'UserNode' }
+          & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
+        )> }
+      )> }
+    )>> }
+  )> }
+);
+
 export type AllHouseholdsQueryVariables = {
   after?: Maybe<Scalars['String']>,
   before?: Maybe<Scalars['String']>,
@@ -4727,7 +4809,9 @@ export type AllHouseholdsQueryVariables = {
   headOfHouseholdFullNameIcontains?: Maybe<Scalars['String']>,
   adminArea?: Maybe<Scalars['ID']>,
   search?: Maybe<Scalars['String']>,
-  residenceStatus?: Maybe<Scalars['String']>
+  residenceStatus?: Maybe<Scalars['String']>,
+  lastRegistrationDate?: Maybe<Scalars['String']>,
+  admin2?: Maybe<Array<Maybe<Scalars['ID']>>>
 };
 
 
@@ -4759,7 +4843,11 @@ export type AllIndividualsQueryVariables = {
   sex?: Maybe<Array<Maybe<Scalars['String']>>>,
   age?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>,
-  search?: Maybe<Scalars['String']>
+  search?: Maybe<Scalars['String']>,
+  programme?: Maybe<Scalars['String']>,
+  status?: Maybe<Array<Maybe<Scalars['String']>>>,
+  lastRegistrationDate?: Maybe<Scalars['String']>,
+  householdId?: Maybe<Scalars['UUID']>
 };
 
 
@@ -5070,6 +5158,27 @@ export type CashPlanQuery = (
   )> }
 );
 
+export type GrievancesChoiceDataQueryVariables = {};
+
+
+export type GrievancesChoiceDataQuery = (
+  { __typename?: 'Query' }
+  & { grievanceTicketStatusChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, grievanceTicketCategoryChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, grievanceTicketIssueTypeChoices: Maybe<Array<Maybe<(
+    { __typename?: 'IssueTypesObject' }
+    & Pick<IssueTypesObject, 'category' | 'label'>
+    & { subCategories: Maybe<Array<Maybe<(
+      { __typename?: 'ChoiceObject' }
+      & Pick<ChoiceObject, 'name' | 'value'>
+    )>>> }
+  )>>> }
+);
+
 export type HouseholdQueryVariables = {
   id: Scalars['ID']
 };
@@ -5119,100 +5228,6 @@ export type IndividualQuery = (
   & { individual: Maybe<(
     { __typename?: 'IndividualNode' }
     & IndividualDetailedFragment
-  )> }
-);
-
-export type LookUpHouseholdsQueryVariables = {
-  after?: Maybe<Scalars['String']>,
-  before?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>,
-  businessArea?: Maybe<Scalars['String']>,
-  orderBy?: Maybe<Scalars['String']>,
-  familySize?: Maybe<Scalars['String']>,
-  programs?: Maybe<Array<Maybe<Scalars['ID']>>>,
-  headOfHouseholdFullNameIcontains?: Maybe<Scalars['String']>,
-  adminArea?: Maybe<Scalars['ID']>,
-  search?: Maybe<Scalars['String']>,
-  residenceStatus?: Maybe<Scalars['String']>
-};
-
-
-export type LookUpHouseholdsQuery = (
-  { __typename?: 'Query' }
-  & { allHouseholds: Maybe<(
-    { __typename?: 'HouseholdNodeConnection' }
-    & Pick<HouseholdNodeConnection, 'totalCount'>
-    & { pageInfo: (
-      { __typename?: 'PageInfo' }
-      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'startCursor' | 'endCursor'>
-    ), edges: Array<Maybe<(
-      { __typename?: 'HouseholdNodeEdge' }
-      & Pick<HouseholdNodeEdge, 'cursor'>
-      & { node: Maybe<(
-        { __typename?: 'HouseholdNode' }
-        & Pick<HouseholdNode, 'id' | 'unicefId' | 'size' | 'firstRegistrationDate' | 'lastRegistrationDate'>
-        & { headOfHousehold: (
-          { __typename?: 'IndividualNode' }
-          & Pick<IndividualNode, 'id' | 'fullName'>
-        ), programs: (
-          { __typename?: 'ProgramNodeConnection' }
-          & { edges: Array<Maybe<(
-            { __typename?: 'ProgramNodeEdge' }
-            & { node: Maybe<(
-              { __typename?: 'ProgramNode' }
-              & Pick<ProgramNode, 'id' | 'name'>
-            )> }
-          )>> }
-        ) }
-      )> }
-    )>> }
-  )> }
-);
-
-export type LookUpIndividualsQueryVariables = {
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>,
-  fullNameContains?: Maybe<Scalars['String']>,
-  sex?: Maybe<Array<Maybe<Scalars['String']>>>,
-  age?: Maybe<Scalars['String']>,
-  orderBy?: Maybe<Scalars['String']>,
-  search?: Maybe<Scalars['String']>
-};
-
-
-export type LookUpIndividualsQuery = (
-  { __typename?: 'Query' }
-  & { allIndividuals: Maybe<(
-    { __typename?: 'IndividualNodeConnection' }
-    & Pick<IndividualNodeConnection, 'totalCount'>
-    & { pageInfo: (
-      { __typename?: 'PageInfo' }
-      & Pick<PageInfo, 'startCursor' | 'endCursor'>
-    ), edges: Array<Maybe<(
-      { __typename?: 'IndividualNodeEdge' }
-      & Pick<IndividualNodeEdge, 'cursor'>
-      & { node: Maybe<(
-        { __typename?: 'IndividualNode' }
-        & Pick<IndividualNode, 'id' | 'unicefId' | 'fullName' | 'birthDate' | 'sex' | 'lastRegistrationDate'>
-        & { household: Maybe<(
-          { __typename?: 'HouseholdNode' }
-          & Pick<HouseholdNode, 'id'>
-          & { programs: (
-            { __typename?: 'ProgramNodeConnection' }
-            & { edges: Array<Maybe<(
-              { __typename?: 'ProgramNodeEdge' }
-              & { node: Maybe<(
-                { __typename?: 'ProgramNode' }
-                & Pick<ProgramNode, 'id' | 'name'>
-              )> }
-            )>> }
-          ) }
-        )> }
-      )> }
-    )>> }
   )> }
 );
 
@@ -5985,23 +6000,35 @@ export const HouseholdMinimalFragmentDoc = gql`
   unicefId
   geopoint
   village
+  adminArea {
+    id
+    title
+    adminAreaType {
+      adminLevel
+    }
+  }
   headOfHousehold {
     id
     fullName
   }
   address
-  adminArea {
-    id
-    title
-  }
   individuals {
     totalCount
+  }
+  programs {
+    edges {
+      node {
+        id
+        name
+      }
+    }
   }
 }
     `;
 export const IndividualMinimalFragmentDoc = gql`
     fragment individualMinimal on IndividualNode {
   id
+  lastRegistrationDate
   createdAt
   updatedAt
   fullName
@@ -6035,6 +6062,17 @@ export const IndividualMinimalFragmentDoc = gql`
     adminArea {
       id
       title
+      adminAreaType {
+        adminLevel
+      }
+    }
+    programs {
+      edges {
+        node {
+          id
+          name
+        }
+      }
     }
   }
 }
@@ -6639,6 +6677,57 @@ export function useCreateCashPlanPaymentVerificationMutation(baseOptions?: Apoll
 export type CreateCashPlanPaymentVerificationMutationHookResult = ReturnType<typeof useCreateCashPlanPaymentVerificationMutation>;
 export type CreateCashPlanPaymentVerificationMutationResult = ApolloReactCommon.MutationResult<CreateCashPlanPaymentVerificationMutation>;
 export type CreateCashPlanPaymentVerificationMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateCashPlanPaymentVerificationMutation, CreateCashPlanPaymentVerificationMutationVariables>;
+export const CreateGrievanceTicketDocument = gql`
+    mutation createGrievanceTicket($input: CreateGrievanceTicketInput!) {
+  createGrievanceTicket(input: $input) {
+    grievanceTickets {
+      id
+    }
+  }
+}
+    `;
+export type CreateGrievanceTicketMutationFn = ApolloReactCommon.MutationFunction<CreateGrievanceTicketMutation, CreateGrievanceTicketMutationVariables>;
+export type CreateGrievanceTicketComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<CreateGrievanceTicketMutation, CreateGrievanceTicketMutationVariables>, 'mutation'>;
+
+    export const CreateGrievanceTicketComponent = (props: CreateGrievanceTicketComponentProps) => (
+      <ApolloReactComponents.Mutation<CreateGrievanceTicketMutation, CreateGrievanceTicketMutationVariables> mutation={CreateGrievanceTicketDocument} {...props} />
+    );
+    
+export type CreateGrievanceTicketProps<TChildProps = {}> = ApolloReactHoc.MutateProps<CreateGrievanceTicketMutation, CreateGrievanceTicketMutationVariables> & TChildProps;
+export function withCreateGrievanceTicket<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CreateGrievanceTicketMutation,
+  CreateGrievanceTicketMutationVariables,
+  CreateGrievanceTicketProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, CreateGrievanceTicketMutation, CreateGrievanceTicketMutationVariables, CreateGrievanceTicketProps<TChildProps>>(CreateGrievanceTicketDocument, {
+      alias: 'createGrievanceTicket',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCreateGrievanceTicketMutation__
+ *
+ * To run a mutation, you first call `useCreateGrievanceTicketMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateGrievanceTicketMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createGrievanceTicketMutation, { data, loading, error }] = useCreateGrievanceTicketMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateGrievanceTicketMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateGrievanceTicketMutation, CreateGrievanceTicketMutationVariables>) {
+        return ApolloReactHooks.useMutation<CreateGrievanceTicketMutation, CreateGrievanceTicketMutationVariables>(CreateGrievanceTicketDocument, baseOptions);
+      }
+export type CreateGrievanceTicketMutationHookResult = ReturnType<typeof useCreateGrievanceTicketMutation>;
+export type CreateGrievanceTicketMutationResult = ApolloReactCommon.MutationResult<CreateGrievanceTicketMutation>;
+export type CreateGrievanceTicketMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateGrievanceTicketMutation, CreateGrievanceTicketMutationVariables>;
 export const CreateProgramDocument = gql`
     mutation CreateProgram($programData: CreateProgramInput!) {
   createProgram(programData: $programData) {
@@ -7922,9 +8011,90 @@ export function useAllCashPlansLazyQuery(baseOptions?: ApolloReactHooks.LazyQuer
 export type AllCashPlansQueryHookResult = ReturnType<typeof useAllCashPlansQuery>;
 export type AllCashPlansLazyQueryHookResult = ReturnType<typeof useAllCashPlansLazyQuery>;
 export type AllCashPlansQueryResult = ApolloReactCommon.QueryResult<AllCashPlansQuery, AllCashPlansQueryVariables>;
+export const AllGrievanceTicketDocument = gql`
+    query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $businessArea: String!, $search: String, $status: [String], $fsp: [ID], $createdAtRange: String, $admin: [ID], $orderBy: String) {
+  allGrievanceTicket(before: $before, after: $after, first: $first, last: $last, id: $id, category: $category, businessArea: $businessArea, search: $search, status: $status, fsp: $fsp, createdAtRange: $createdAtRange, orderBy: $orderBy, admin: $admin) {
+    totalCount
+    pageInfo {
+      startCursor
+      endCursor
+    }
+    edges {
+      cursor
+      node {
+        id
+        status
+        assignedTo {
+          id
+          firstName
+          lastName
+        }
+        category
+        createdAt
+        userModified
+      }
+    }
+  }
+}
+    `;
+export type AllGrievanceTicketComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllGrievanceTicketQuery, AllGrievanceTicketQueryVariables>, 'query'> & ({ variables: AllGrievanceTicketQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const AllGrievanceTicketComponent = (props: AllGrievanceTicketComponentProps) => (
+      <ApolloReactComponents.Query<AllGrievanceTicketQuery, AllGrievanceTicketQueryVariables> query={AllGrievanceTicketDocument} {...props} />
+    );
+    
+export type AllGrievanceTicketProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllGrievanceTicketQuery, AllGrievanceTicketQueryVariables> & TChildProps;
+export function withAllGrievanceTicket<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllGrievanceTicketQuery,
+  AllGrievanceTicketQueryVariables,
+  AllGrievanceTicketProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllGrievanceTicketQuery, AllGrievanceTicketQueryVariables, AllGrievanceTicketProps<TChildProps>>(AllGrievanceTicketDocument, {
+      alias: 'allGrievanceTicket',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllGrievanceTicketQuery__
+ *
+ * To run a query within a React component, call `useAllGrievanceTicketQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllGrievanceTicketQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllGrievanceTicketQuery({
+ *   variables: {
+ *      before: // value for 'before'
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      id: // value for 'id'
+ *      category: // value for 'category'
+ *      businessArea: // value for 'businessArea'
+ *      search: // value for 'search'
+ *      status: // value for 'status'
+ *      fsp: // value for 'fsp'
+ *      createdAtRange: // value for 'createdAtRange'
+ *      admin: // value for 'admin'
+ *      orderBy: // value for 'orderBy'
+ *   },
+ * });
+ */
+export function useAllGrievanceTicketQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllGrievanceTicketQuery, AllGrievanceTicketQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllGrievanceTicketQuery, AllGrievanceTicketQueryVariables>(AllGrievanceTicketDocument, baseOptions);
+      }
+export function useAllGrievanceTicketLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllGrievanceTicketQuery, AllGrievanceTicketQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllGrievanceTicketQuery, AllGrievanceTicketQueryVariables>(AllGrievanceTicketDocument, baseOptions);
+        }
+export type AllGrievanceTicketQueryHookResult = ReturnType<typeof useAllGrievanceTicketQuery>;
+export type AllGrievanceTicketLazyQueryHookResult = ReturnType<typeof useAllGrievanceTicketLazyQuery>;
+export type AllGrievanceTicketQueryResult = ApolloReactCommon.QueryResult<AllGrievanceTicketQuery, AllGrievanceTicketQueryVariables>;
 export const AllHouseholdsDocument = gql`
-    query AllHouseholds($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $programs: [ID], $headOfHouseholdFullNameIcontains: String, $adminArea: ID, $search: String, $residenceStatus: String) {
-  allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, size: $familySize, orderBy: $orderBy, programs: $programs, headOfHousehold_FullName_Icontains: $headOfHouseholdFullNameIcontains, adminArea: $adminArea, search: $search, residenceStatus: $residenceStatus) {
+    query AllHouseholds($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $programs: [ID], $headOfHouseholdFullNameIcontains: String, $adminArea: ID, $search: String, $residenceStatus: String, $lastRegistrationDate: String, $admin2: [ID]) {
+  allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, size: $familySize, orderBy: $orderBy, programs: $programs, headOfHousehold_FullName_Icontains: $headOfHouseholdFullNameIcontains, adminArea: $adminArea, search: $search, residenceStatus: $residenceStatus, lastRegistrationDate: $lastRegistrationDate, admin2: $admin2) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -7983,6 +8153,8 @@ export function withAllHouseholds<TProps, TChildProps = {}>(operationOptions?: A
  *      adminArea: // value for 'adminArea'
  *      search: // value for 'search'
  *      residenceStatus: // value for 'residenceStatus'
+ *      lastRegistrationDate: // value for 'lastRegistrationDate'
+ *      admin2: // value for 'admin2'
  *   },
  * });
  */
@@ -7996,8 +8168,8 @@ export type AllHouseholdsQueryHookResult = ReturnType<typeof useAllHouseholdsQue
 export type AllHouseholdsLazyQueryHookResult = ReturnType<typeof useAllHouseholdsLazyQuery>;
 export type AllHouseholdsQueryResult = ApolloReactCommon.QueryResult<AllHouseholdsQuery, AllHouseholdsQueryVariables>;
 export const AllIndividualsDocument = gql`
-    query AllIndividuals($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String) {
-  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Icontains: $fullNameContains, sex: $sex, age: $age, orderBy: $orderBy, search: $search) {
+    query AllIndividuals($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $programme: String, $status: [String], $lastRegistrationDate: String, $householdId: UUID) {
+  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Icontains: $fullNameContains, sex: $sex, age: $age, orderBy: $orderBy, search: $search, programme: $programme, status: $status, lastRegistrationDate: $lastRegistrationDate, household_Id: $householdId) {
     totalCount
     pageInfo {
       startCursor
@@ -8051,6 +8223,10 @@ export function withAllIndividuals<TProps, TChildProps = {}>(operationOptions?: 
  *      age: // value for 'age'
  *      orderBy: // value for 'orderBy'
  *      search: // value for 'search'
+ *      programme: // value for 'programme'
+ *      status: // value for 'status'
+ *      lastRegistrationDate: // value for 'lastRegistrationDate'
+ *      householdId: // value for 'householdId'
  *   },
  * });
  */
@@ -8759,6 +8935,68 @@ export function useCashPlanLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHoo
 export type CashPlanQueryHookResult = ReturnType<typeof useCashPlanQuery>;
 export type CashPlanLazyQueryHookResult = ReturnType<typeof useCashPlanLazyQuery>;
 export type CashPlanQueryResult = ApolloReactCommon.QueryResult<CashPlanQuery, CashPlanQueryVariables>;
+export const GrievancesChoiceDataDocument = gql`
+    query GrievancesChoiceData {
+  grievanceTicketStatusChoices {
+    name
+    value
+  }
+  grievanceTicketCategoryChoices {
+    name
+    value
+  }
+  grievanceTicketIssueTypeChoices {
+    category
+    label
+    subCategories {
+      name
+      value
+    }
+  }
+}
+    `;
+export type GrievancesChoiceDataComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<GrievancesChoiceDataQuery, GrievancesChoiceDataQueryVariables>, 'query'>;
+
+    export const GrievancesChoiceDataComponent = (props: GrievancesChoiceDataComponentProps) => (
+      <ApolloReactComponents.Query<GrievancesChoiceDataQuery, GrievancesChoiceDataQueryVariables> query={GrievancesChoiceDataDocument} {...props} />
+    );
+    
+export type GrievancesChoiceDataProps<TChildProps = {}> = ApolloReactHoc.DataProps<GrievancesChoiceDataQuery, GrievancesChoiceDataQueryVariables> & TChildProps;
+export function withGrievancesChoiceData<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  GrievancesChoiceDataQuery,
+  GrievancesChoiceDataQueryVariables,
+  GrievancesChoiceDataProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, GrievancesChoiceDataQuery, GrievancesChoiceDataQueryVariables, GrievancesChoiceDataProps<TChildProps>>(GrievancesChoiceDataDocument, {
+      alias: 'grievancesChoiceData',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useGrievancesChoiceDataQuery__
+ *
+ * To run a query within a React component, call `useGrievancesChoiceDataQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGrievancesChoiceDataQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGrievancesChoiceDataQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGrievancesChoiceDataQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GrievancesChoiceDataQuery, GrievancesChoiceDataQueryVariables>) {
+        return ApolloReactHooks.useQuery<GrievancesChoiceDataQuery, GrievancesChoiceDataQueryVariables>(GrievancesChoiceDataDocument, baseOptions);
+      }
+export function useGrievancesChoiceDataLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GrievancesChoiceDataQuery, GrievancesChoiceDataQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<GrievancesChoiceDataQuery, GrievancesChoiceDataQueryVariables>(GrievancesChoiceDataDocument, baseOptions);
+        }
+export type GrievancesChoiceDataQueryHookResult = ReturnType<typeof useGrievancesChoiceDataQuery>;
+export type GrievancesChoiceDataLazyQueryHookResult = ReturnType<typeof useGrievancesChoiceDataLazyQuery>;
+export type GrievancesChoiceDataQueryResult = ApolloReactCommon.QueryResult<GrievancesChoiceDataQuery, GrievancesChoiceDataQueryVariables>;
 export const HouseholdDocument = gql`
     query Household($id: ID!) {
   household(id: $id) {
@@ -8929,179 +9167,6 @@ export function useIndividualLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryH
 export type IndividualQueryHookResult = ReturnType<typeof useIndividualQuery>;
 export type IndividualLazyQueryHookResult = ReturnType<typeof useIndividualLazyQuery>;
 export type IndividualQueryResult = ApolloReactCommon.QueryResult<IndividualQuery, IndividualQueryVariables>;
-export const LookUpHouseholdsDocument = gql`
-    query LookUpHouseholds($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $programs: [ID], $headOfHouseholdFullNameIcontains: String, $adminArea: ID, $search: String, $residenceStatus: String) {
-  allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, size: $familySize, orderBy: $orderBy, programs: $programs, headOfHousehold_FullName_Icontains: $headOfHouseholdFullNameIcontains, adminArea: $adminArea, search: $search, residenceStatus: $residenceStatus) {
-    pageInfo {
-      hasNextPage
-      hasPreviousPage
-      startCursor
-      endCursor
-    }
-    totalCount
-    edges {
-      cursor
-      node {
-        id
-        unicefId
-        headOfHousehold {
-          id
-          fullName
-        }
-        size
-        programs {
-          edges {
-            node {
-              id
-              name
-            }
-          }
-        }
-        firstRegistrationDate
-        lastRegistrationDate
-      }
-    }
-  }
-}
-    `;
-export type LookUpHouseholdsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<LookUpHouseholdsQuery, LookUpHouseholdsQueryVariables>, 'query'>;
-
-    export const LookUpHouseholdsComponent = (props: LookUpHouseholdsComponentProps) => (
-      <ApolloReactComponents.Query<LookUpHouseholdsQuery, LookUpHouseholdsQueryVariables> query={LookUpHouseholdsDocument} {...props} />
-    );
-    
-export type LookUpHouseholdsProps<TChildProps = {}> = ApolloReactHoc.DataProps<LookUpHouseholdsQuery, LookUpHouseholdsQueryVariables> & TChildProps;
-export function withLookUpHouseholds<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
-  TProps,
-  LookUpHouseholdsQuery,
-  LookUpHouseholdsQueryVariables,
-  LookUpHouseholdsProps<TChildProps>>) {
-    return ApolloReactHoc.withQuery<TProps, LookUpHouseholdsQuery, LookUpHouseholdsQueryVariables, LookUpHouseholdsProps<TChildProps>>(LookUpHouseholdsDocument, {
-      alias: 'lookUpHouseholds',
-      ...operationOptions
-    });
-};
-
-/**
- * __useLookUpHouseholdsQuery__
- *
- * To run a query within a React component, call `useLookUpHouseholdsQuery` and pass it any options that fit your needs.
- * When your component renders, `useLookUpHouseholdsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useLookUpHouseholdsQuery({
- *   variables: {
- *      after: // value for 'after'
- *      before: // value for 'before'
- *      first: // value for 'first'
- *      last: // value for 'last'
- *      businessArea: // value for 'businessArea'
- *      orderBy: // value for 'orderBy'
- *      familySize: // value for 'familySize'
- *      programs: // value for 'programs'
- *      headOfHouseholdFullNameIcontains: // value for 'headOfHouseholdFullNameIcontains'
- *      adminArea: // value for 'adminArea'
- *      search: // value for 'search'
- *      residenceStatus: // value for 'residenceStatus'
- *   },
- * });
- */
-export function useLookUpHouseholdsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<LookUpHouseholdsQuery, LookUpHouseholdsQueryVariables>) {
-        return ApolloReactHooks.useQuery<LookUpHouseholdsQuery, LookUpHouseholdsQueryVariables>(LookUpHouseholdsDocument, baseOptions);
-      }
-export function useLookUpHouseholdsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<LookUpHouseholdsQuery, LookUpHouseholdsQueryVariables>) {
-          return ApolloReactHooks.useLazyQuery<LookUpHouseholdsQuery, LookUpHouseholdsQueryVariables>(LookUpHouseholdsDocument, baseOptions);
-        }
-export type LookUpHouseholdsQueryHookResult = ReturnType<typeof useLookUpHouseholdsQuery>;
-export type LookUpHouseholdsLazyQueryHookResult = ReturnType<typeof useLookUpHouseholdsLazyQuery>;
-export type LookUpHouseholdsQueryResult = ApolloReactCommon.QueryResult<LookUpHouseholdsQuery, LookUpHouseholdsQueryVariables>;
-export const LookUpIndividualsDocument = gql`
-    query LookUpIndividuals($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String) {
-  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Icontains: $fullNameContains, sex: $sex, age: $age, orderBy: $orderBy, search: $search) {
-    totalCount
-    pageInfo {
-      startCursor
-      endCursor
-    }
-    edges {
-      cursor
-      node {
-        id
-        unicefId
-        fullName
-        household {
-          id
-          programs {
-            edges {
-              node {
-                id
-                name
-              }
-            }
-          }
-        }
-        birthDate
-        sex
-        lastRegistrationDate
-      }
-    }
-  }
-}
-    `;
-export type LookUpIndividualsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<LookUpIndividualsQuery, LookUpIndividualsQueryVariables>, 'query'>;
-
-    export const LookUpIndividualsComponent = (props: LookUpIndividualsComponentProps) => (
-      <ApolloReactComponents.Query<LookUpIndividualsQuery, LookUpIndividualsQueryVariables> query={LookUpIndividualsDocument} {...props} />
-    );
-    
-export type LookUpIndividualsProps<TChildProps = {}> = ApolloReactHoc.DataProps<LookUpIndividualsQuery, LookUpIndividualsQueryVariables> & TChildProps;
-export function withLookUpIndividuals<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
-  TProps,
-  LookUpIndividualsQuery,
-  LookUpIndividualsQueryVariables,
-  LookUpIndividualsProps<TChildProps>>) {
-    return ApolloReactHoc.withQuery<TProps, LookUpIndividualsQuery, LookUpIndividualsQueryVariables, LookUpIndividualsProps<TChildProps>>(LookUpIndividualsDocument, {
-      alias: 'lookUpIndividuals',
-      ...operationOptions
-    });
-};
-
-/**
- * __useLookUpIndividualsQuery__
- *
- * To run a query within a React component, call `useLookUpIndividualsQuery` and pass it any options that fit your needs.
- * When your component renders, `useLookUpIndividualsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useLookUpIndividualsQuery({
- *   variables: {
- *      before: // value for 'before'
- *      after: // value for 'after'
- *      first: // value for 'first'
- *      last: // value for 'last'
- *      fullNameContains: // value for 'fullNameContains'
- *      sex: // value for 'sex'
- *      age: // value for 'age'
- *      orderBy: // value for 'orderBy'
- *      search: // value for 'search'
- *   },
- * });
- */
-export function useLookUpIndividualsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<LookUpIndividualsQuery, LookUpIndividualsQueryVariables>) {
-        return ApolloReactHooks.useQuery<LookUpIndividualsQuery, LookUpIndividualsQueryVariables>(LookUpIndividualsDocument, baseOptions);
-      }
-export function useLookUpIndividualsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<LookUpIndividualsQuery, LookUpIndividualsQueryVariables>) {
-          return ApolloReactHooks.useLazyQuery<LookUpIndividualsQuery, LookUpIndividualsQueryVariables>(LookUpIndividualsDocument, baseOptions);
-        }
-export type LookUpIndividualsQueryHookResult = ReturnType<typeof useLookUpIndividualsQuery>;
-export type LookUpIndividualsLazyQueryHookResult = ReturnType<typeof useLookUpIndividualsLazyQuery>;
-export type LookUpIndividualsQueryResult = ApolloReactCommon.QueryResult<LookUpIndividualsQuery, LookUpIndividualsQueryVariables>;
 export const LookUpPaymentRecordsDocument = gql`
     query LookUpPaymentRecords($cashPlan: ID, $household: ID, $after: String, $before: String, $orderBy: String, $first: Int, $last: Int) {
   allPaymentRecords(cashPlan: $cashPlan, household: $household, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy) {

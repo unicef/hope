@@ -1,12 +1,11 @@
 import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
-import { useHistory } from 'react-router-dom';
+import { Radio } from '@material-ui/core';
 import { IndividualNode } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { getAgeFromDob, sexToCapitalize } from '../../../utils/utils';
 import { ClickableTableRow } from '../../table/ClickableTableRow';
 import { Pointer } from '../../Pointer';
-import { Radio } from '@material-ui/core';
 import { UniversalMoment } from '../../UniversalMoment';
 
 interface LookUpIndividualTableRowProps {
@@ -20,7 +19,6 @@ export function LookUpIndividualTableRow({
   radioChangeHandler,
   selectedIndividual,
 }: LookUpIndividualTableRowProps): React.ReactElement {
-  const history = useHistory();
   const businessArea = useBusinessArea();
   let age: number | string = 'N/A';
   if (individual.birthDate) {
@@ -28,13 +26,22 @@ export function LookUpIndividualTableRow({
   }
   const handleClick = (): void => {
     const path = `/${businessArea}/population/individuals/${individual.id}`;
-    history.push(path);
+    const win = window.open(path, '_blank rel=noopener');
+    if (win != null) {
+      win.focus();
+    }
   };
   const renderPrograms = (): string => {
     const programNames = individual?.household?.programs?.edges?.map(
       (edge) => edge.node.name,
     );
     return programNames?.length ? programNames.join(', ') : '-';
+  };
+  const renderAdminLevel2 = (): string => {
+    if (individual?.household?.adminArea?.adminAreaType?.adminLevel === 2) {
+      return individual?.household?.adminArea?.title;
+    }
+    return '-';
   };
   return (
     <ClickableTableRow hover role='checkbox' key={individual.id}>
@@ -57,9 +64,7 @@ export function LookUpIndividualTableRow({
       </TableCell>
       <TableCell align='right'>{age}</TableCell>
       <TableCell align='left'>{sexToCapitalize(individual.sex)}</TableCell>
-      <TableCell align='left'>
-        {individual.household?.adminArea?.title}
-      </TableCell>
+      <TableCell align='left'>{renderAdminLevel2()}</TableCell>
       <TableCell align='left'>{renderPrograms()}</TableCell>
       <TableCell align='left'>
         <UniversalMoment>{individual.lastRegistrationDate}</UniversalMoment>

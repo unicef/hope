@@ -3,6 +3,7 @@ import { gql } from 'apollo-boost';
 export const individualMinimal = gql`
   fragment individualMinimal on IndividualNode {
     id
+    lastRegistrationDate
     createdAt
     updatedAt
     fullName
@@ -37,6 +38,17 @@ export const individualMinimal = gql`
       adminArea {
         id
         title
+        adminAreaType {
+          adminLevel
+        }
+      }
+      programs {
+        edges {
+          node {
+            id
+            name
+          }
+        }
       }
     }
   }

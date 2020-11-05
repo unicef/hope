@@ -535,9 +535,9 @@ type GetCashplanVerificationSampleSizeObject {
 }
 
 input GrievanceComplaintTicketExtras {
-  household: ID!
-  individual: ID!
-  paymentRecord: ID!
+  household: ID
+  individual: ID
+  paymentRecord: ID
 }
 
 type GrievanceTicketNode implements Node {
@@ -2006,9 +2006,9 @@ type SaveKoboProjectImportDataMutation {
 }
 
 input SensitiveGrievanceTicketExtras {
-  household: ID!
-  individual: ID!
-  paymentRecord: ID!
+  household: ID
+  individual: ID
+  paymentRecord: ID
 }
 
 type ServiceProviderNode implements Node {

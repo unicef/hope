@@ -1,7 +1,6 @@
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import styled from 'styled-components';
 import { TableRow } from '@material-ui/core';
 import {
   HouseholdChoiceDataQuery,
