@@ -209,6 +209,19 @@ class TicketSensitiveDetails(TimeStampedUUIDModel):
     )
 
 
+class TicketHouseholdDataUpdateDetails(TimeStampedUUIDModel):
+    ticket = models.OneToOneField(
+        "grievance.GrievanceTicket", related_name="household_data_update_ticket_details", on_delete=models.CASCADE
+    )
+    household = models.ForeignKey(
+        "household.Household",
+        related_name="household_data_update_ticket_details",
+        on_delete=models.CASCADE,
+        null=True,
+    )
+    household_data = JSONField(null=True)
+
+
 class TicketIndividualDataUpdateDetails(TimeStampedUUIDModel):
     ticket = models.OneToOneField(
         "grievance.GrievanceTicket", related_name="individual_data_update_ticket_details", on_delete=models.CASCADE
@@ -233,3 +246,15 @@ class TicketAddIndividualDetails(TimeStampedUUIDModel):
         null=True,
     )
     individual_data = JSONField(null=True)
+
+
+class TicketDeleteIndividualDetails(TimeStampedUUIDModel):
+    ticket = models.OneToOneField(
+        "grievance.GrievanceTicket", related_name="delete_individual_ticket_details", on_delete=models.CASCADE
+    )
+    individual = models.ForeignKey(
+        "household.Individual",
+        related_name="delete_individual_ticket_details",
+        on_delete=models.CASCADE,
+        null=True,
+    )
