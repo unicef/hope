@@ -1,40 +1,36 @@
-import graphene
-from django.db.models import Sum, Q, Prefetch
+from django.db.models import Prefetch, Q, Sum
 from django.db.models.functions import Lower
-from django_filters import (
-    FilterSet,
-    CharFilter,
-    MultipleChoiceFilter,
-    ModelMultipleChoiceFilter,
-)
+
+import graphene
+from django_filters import CharFilter, FilterSet, ModelMultipleChoiceFilter, MultipleChoiceFilter
 from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
+from targeting.models import HouseholdSelection
 
 from core.extended_connection import ExtendedConnection
-from core.filters import AgeRangeFilter, IntegerRangeFilter, DateRangeFilter
+from core.filters import AgeRangeFilter, DateRangeFilter, IntegerRangeFilter
 from core.models import AdminArea
 from core.schema import ChoiceObject
-from core.utils import to_choice_object, encode_ids, CustomOrderingFilter
+from core.utils import CustomOrderingFilter, encode_ids, to_choice_object
 from household.models import (
-    Household,
-    Individual,
-    Document,
-    DocumentType,
-    RESIDENCE_STATUS_CHOICE,
-    RELATIONSHIP_CHOICE,
-    ROLE_CHOICE,
-    MARITAL_STATUS_CHOICE,
-    SEX_CHOICE,
-    IndividualRoleInHousehold,
-    ROLE_NO_ROLE,
-    IndividualIdentity,
     DUPLICATE,
     DUPLICATE_IN_BATCH,
     INDIVIDUAL_HOUSEHOLD_STATUS,
+    MARITAL_STATUS_CHOICE,
+    RELATIONSHIP_CHOICE,
+    RESIDENCE_STATUS_CHOICE,
+    ROLE_CHOICE,
+    ROLE_NO_ROLE,
+    SEX_CHOICE,
+    Document,
+    DocumentType,
+    Household,
+    Individual,
+    IndividualIdentity,
+    IndividualRoleInHousehold,
 )
 from registration_datahub.schema import DeduplicationResultNode
-from targeting.models import HouseholdSelection
 
 
 class HouseholdFilter(FilterSet):
@@ -91,7 +87,9 @@ class HouseholdFilter(FilterSet):
 
 
 class IndividualFilter(FilterSet):
-    business_area = CharFilter(field_name="household__business_area__slug",)
+    business_area = CharFilter(
+        field_name="household__business_area__slug",
+    )
     age = AgeRangeFilter(field_name="birth_date")
     sex = MultipleChoiceFilter(field_name="sex", choices=SEX_CHOICE)
     programme = CharFilter(field_name="household__programs__name")
@@ -235,7 +233,10 @@ class HouseholdNode(DjangoObjectType):
         collectors_ids = list(parent.representatives.values_list("id", flat=True))
         ids = list(set(individuals_ids + collectors_ids))
         return Individual.objects.filter(id__in=ids).prefetch_related(
-            Prefetch("households_and_roles", queryset=IndividualRoleInHousehold.objects.filter(household=parent.id),)
+            Prefetch(
+                "households_and_roles",
+                queryset=IndividualRoleInHousehold.objects.filter(household=parent.id),
+            )
         )
 
     def resolve_has_duplicates(parent, info):
@@ -285,9 +286,15 @@ class IndividualNode(DjangoObjectType):
 
 class Query(graphene.ObjectType):
     household = relay.Node.Field(HouseholdNode)
-    all_households = DjangoFilterConnectionField(HouseholdNode, filterset_class=HouseholdFilter,)
+    all_households = DjangoFilterConnectionField(
+        HouseholdNode,
+        filterset_class=HouseholdFilter,
+    )
     individual = relay.Node.Field(IndividualNode)
-    all_individuals = DjangoFilterConnectionField(IndividualNode, filterset_class=IndividualFilter,)
+    all_individuals = DjangoFilterConnectionField(
+        IndividualNode,
+        filterset_class=IndividualFilter,
+    )
     residence_status_choices = graphene.List(ChoiceObject)
     sex_choices = graphene.List(ChoiceObject)
     marital_status_choices = graphene.List(ChoiceObject)
