@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['TestRegistrationDataImportQuery::test_registration_data_import_datahub_query_all 1'] = {
@@ -13,9 +14,9 @@ snapshots['TestRegistrationDataImportQuery::test_registration_data_import_datahu
                 {
                     'node': {
                         'dataSource': 'XLS',
-                        'name': 'Lorem Ipsum',
-                        'numberOfHouseholds': 54,
-                        'numberOfIndividuals': 123,
+                        'name': 'Lorem Ipsum 3',
+                        'numberOfHouseholds': 184,
+                        'numberOfIndividuals': 423,
                         'status': 'IN_REVIEW'
                     }
                 },
@@ -31,9 +32,9 @@ snapshots['TestRegistrationDataImportQuery::test_registration_data_import_datahu
                 {
                     'node': {
                         'dataSource': 'XLS',
-                        'name': 'Lorem Ipsum 3',
-                        'numberOfHouseholds': 184,
-                        'numberOfIndividuals': 423,
+                        'name': 'Lorem Ipsum',
+                        'numberOfHouseholds': 54,
+                        'numberOfIndividuals': 123,
                         'status': 'IN_REVIEW'
                     }
                 }

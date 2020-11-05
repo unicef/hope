@@ -8,7 +8,7 @@ class TestRegistrationDataImportQuery(APITestCase):
 
     ALL_REGISTRATION_DATA_IMPORT_DATAHUB_QUERY = """
     query AllRegistrationDataImports {
-      allRegistrationDataImports {
+      allRegistrationDataImports(orderBy: "-name") {
         edges {
           node {
             name
