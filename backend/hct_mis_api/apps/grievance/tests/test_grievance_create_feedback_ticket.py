@@ -4,6 +4,7 @@ from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
 from core.fixtures import AdminAreaTypeFactory, AdminAreaFactory
 from core.models import BusinessArea
+from grievance.models import GrievanceTicket
 
 
 class TestGrievanceCreateFeedbackTicketQuery(APITestCase):
@@ -39,7 +40,7 @@ class TestGrievanceCreateFeedbackTicketQuery(APITestCase):
             "input": {
                 "description": "Test Feedback",
                 "assignedTo": self.id_to_base64(self.user.id, "UserNode"),
-                "category": 7,
+                "category": GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
                 "admin": self.admin_area.title,
                 "language": "Polish, English",
                 "consent": True,

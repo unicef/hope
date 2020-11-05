@@ -11,9 +11,11 @@ from core.permissions import is_authenticated
 from core.schema import BusinessAreaNode
 from core.utils import nested_dict_get, decode_id_string
 from grievance.mutations_extras.data_change import save_data_change_extras
+from grievance.mutations_extras.grievance_complaint import save_grievance_complaint_extras
 from grievance.mutations_extras.main import CreateGrievanceTicketExtrasInput
 from grievance.models import GrievanceTicket
 from grievance.mutations_extras.payment_verification import save_payment_verification_extras
+from grievance.mutations_extras.sensitive_grievance import save_sensitive_grievance_extras
 from grievance.schema import GrievanceTicketNode
 
 
@@ -147,6 +149,8 @@ class CreateGrievanceTicketMutation(graphene.Mutation):
         save_extra_methods = {
             GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION: save_payment_verification_extras,
             GrievanceTicket.CATEGORY_DATA_CHANGE: save_data_change_extras,
+            GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT: save_grievance_complaint_extras,
+            GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE: save_sensitive_grievance_extras,
         }
         save_extra_method = save_extra_methods.get(category)
         grievances = [grievance_ticket]
@@ -161,7 +165,7 @@ class CreateGrievanceTicketMutation(graphene.Mutation):
         assigned_to_id = decode_id_string(arg("assigned_to"))
         linked_tickets = arg("linked_tickets", [])
         business_area_slug = arg("business_area")
-        extras = arg("extras")
+        extras = arg("extras", {})
         cls._remove_parsed_data_fields(input, ("linked_tickets", "extras", "business_area", "assigned_to"))
         business_area = get_object_or_404(BusinessArea, slug=business_area_slug)
         assigned_to = get_object_or_404(get_user_model(), id=assigned_to_id)

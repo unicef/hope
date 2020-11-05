@@ -12,6 +12,7 @@ import SearchIcon from '@material-ui/icons/Search';
 import GroupIcon from '@material-ui/icons/Group';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
 import FormControl from '@material-ui/core/FormControl';
+import { KeyboardDatePicker } from '@material-ui/pickers';
 import {
   HouseholdChoiceDataQuery,
   ProgramNode,
@@ -21,7 +22,7 @@ import InputLabel from '../../../shared/InputLabel';
 import Select from '../../../shared/Select';
 import { AdminAreasAutocomplete } from '../../population/AdminAreaAutocomplete';
 import { FieldLabel } from '../../FieldLabel';
-import { KeyboardDatePicker } from '@material-ui/pickers';
+import { Missing } from '../../Missing';
 
 const TextContainer = styled(TextField)`
   input[type='number']::-webkit-inner-spin-button,
@@ -88,10 +89,11 @@ export function LookUpHouseholdFilters({
             <Select
               /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
               // @ts-ignore
-              onChange={(e) => handleFilterChange(e, 'program')}
+              onChange={(e) => handleFilterChange(e, 'programs')}
               variant='outlined'
               label='Programme'
-              value={filter.program || ''}
+              multiple
+              value={filter.programs || []}
               InputProps={{
                 startAdornment: (
                   <StartInputAdornment position='start'>
@@ -124,10 +126,13 @@ export function LookUpHouseholdFilters({
               onChange={(date) =>
                 onFilterChange({
                   ...filter,
-                  startDate: date ? moment(date).format('YYYY-MM-DD') : null,
+                  lastRegistrationDate: {
+                    ...filter.lastRegistrationDate,
+                    min: date ? moment(date).format('YYYY-MM-DD') : null,
+                  },
                 })
               }
-              value={filter.startDate || null}
+              value={filter.lastRegistrationDate.min || null}
               format='YYYY-MM-DD'
               InputAdornmentProps={{ position: 'end' }}
             />
@@ -144,10 +149,13 @@ export function LookUpHouseholdFilters({
             onChange={(date) =>
               onFilterChange({
                 ...filter,
-                endDate: date ? moment(date).format('YYYY-MM-DD') : null,
+                lastRegistrationDate: {
+                  ...filter.lastRegistrationDate,
+                  max: date ? moment(date).format('YYYY-MM-DD') : null,
+                },
               })
             }
-            value={filter.endDate || null}
+            value={filter.lastRegistrationDate.max || null}
             format='YYYY-MM-DD'
             InputAdornmentProps={{ position: 'end' }}
           />
@@ -158,7 +166,7 @@ export function LookUpHouseholdFilters({
             <Select
               /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
               // @ts-ignore
-              onChange={(e) => handleFilterChange(e, 'status')}
+              onChange={(e) => handleFilterChange(e, 'residenceStatus')}
               variant='outlined'
               label='Status'
               value={filter.residenceStatus || null}
@@ -177,14 +185,15 @@ export function LookUpHouseholdFilters({
           </StyledFormControl>
         </Grid>
         <Grid item>
+          <Missing />
           <AdminAreasAutocomplete
-            value={filter.adminArea}
+            value={filter.admin2}
             onChange={(e, option) => {
               if (!option) {
-                onFilterChange({ ...filter, adminArea: undefined });
+                onFilterChange({ ...filter, admin2: undefined });
                 return;
               }
-              onFilterChange({ ...filter, adminArea: option.node.id });
+              onFilterChange({ ...filter, admin2: option.node.id });
             }}
           />
         </Grid>
@@ -193,15 +202,15 @@ export function LookUpHouseholdFilters({
             <FieldLabel>Household Size</FieldLabel>
             <TextContainer
               id='minFilter'
-              value={filter.householdSize.min}
+              value={filter.size.min}
               variant='outlined'
               margin='dense'
               placeholder='From'
               onChange={(e) =>
                 onFilterChange({
                   ...filter,
-                  householdSize: {
-                    ...filter.householdSize,
+                  size: {
+                    ...filter.size,
                     min: e.target.value || undefined,
                   },
                 })
@@ -222,15 +231,15 @@ export function LookUpHouseholdFilters({
             <FieldLabel>Household Size</FieldLabel>
             <TextContainer
               id='maxFilter'
-              value={filter.householdSize.max}
+              value={filter.size.max}
               variant='outlined'
               margin='dense'
               placeholder='To'
               onChange={(e) =>
                 onFilterChange({
                   ...filter,
-                  householdSize: {
-                    ...filter.householdSize,
+                  size: {
+                    ...filter.size,
                     max: e.target.value || undefined,
                   },
                 })

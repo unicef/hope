@@ -157,7 +157,7 @@ export function HouseholdDetails({
       </Container>
       <OverviewPaper>
         <Title>
-          <Typography variant='h6'>Title (?)</Typography>
+          <Typography variant='h6'>Benefits</Typography>
         </Title>
         <Grid container>
           <Grid item xs={4}>

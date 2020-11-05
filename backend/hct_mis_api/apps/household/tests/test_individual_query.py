@@ -133,7 +133,7 @@ class TestIndividualQuery(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.INDIVIDUAL_QUERY,
             context={"user": self.user},
-            variables={"id": self.id_to_base64(self.individuals[0].id, "Individual")},
+            variables={"id": self.id_to_base64(self.individuals[0].id, "IndividualNode")},
         )
 
     def test_individual_programme_filter(self):

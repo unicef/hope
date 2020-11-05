@@ -47,5 +47,5 @@ class TestRegistrationDataImportDatahubQuery(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.REGISTRATION_DATA_IMPORT_DATAHUB_QUERY,
             context={"user": self.user},
-            variables={"id": self.id_to_base64(self.data[0].id, "RegistrationDataImportDatahub",)},
+            variables={"id": self.id_to_base64(self.data[0].id, "RegistrationDataImportDatahubNode",)},
         )
