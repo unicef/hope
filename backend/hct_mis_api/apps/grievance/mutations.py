@@ -89,7 +89,7 @@ class CreateGrievanceTicketMutation(graphene.Mutation):
 
     ISSUE_TYPE_OPTIONS = {
         GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE: {
-            "required": [],
+            "required": ["extras.issue_type.household_data_update_issue_type_extras"],
             "not_allowed": [
                 "individual_data_update_issue_type_extras",
                 "individual_delete_issue_type_extras",
