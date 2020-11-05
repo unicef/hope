@@ -782,8 +782,10 @@ export type GrievanceTicketNode = Node & {
   grievanceticketSet: GrievanceTicketNodeConnection,
   complaintTicketDetails?: Maybe<TicketComplaintDetailsNode>,
   sensitiveTicketDetails?: Maybe<TicketSensitiveDetailsNode>,
+  householdDataUpdateTicketDetails?: Maybe<TicketHouseholdDataUpdateDetailsNode>,
   individualDataUpdateTicketDetails?: Maybe<TicketIndividualDataUpdateDetailsNode>,
   addIndividualTicketDetails?: Maybe<TicketAddIndividualDetailsNode>,
+  deleteIndividualTicketDetails?: Maybe<TicketDeleteIndividualDetailsNode>,
 };
 
 
@@ -839,7 +841,7 @@ export enum HouseholdConsentSharing {
 
 export type HouseholdDataUpdateIssueTypeExtras = {
   household: Scalars['ID'],
-  individual: Scalars['ID'],
+  householdData?: Maybe<HouseholdUpdateDataObjectType>,
 };
 
 export type HouseholdNode = Node & {
@@ -897,6 +899,7 @@ export type HouseholdNode = Node & {
   village: Scalars['String'],
   complaintTicketDetails: TicketComplaintDetailsNodeConnection,
   sensitiveTicketDetails: TicketSensitiveDetailsNodeConnection,
+  householdDataUpdateTicketDetails: TicketHouseholdDataUpdateDetailsNodeConnection,
   addIndividualTicketDetails: TicketAddIndividualDetailsNodeConnection,
   individualsAndRoles: Array<IndividualRoleInHouseholdNode>,
   individuals: IndividualNodeConnection,
@@ -936,6 +939,14 @@ export type HouseholdNodeComplaintTicketDetailsArgs = {
 
 
 export type HouseholdNodeSensitiveTicketDetailsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type HouseholdNodeHouseholdDataUpdateTicketDetailsArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -1035,6 +1046,42 @@ export enum HouseholdStatus {
   Active = 'ACTIVE',
   Inactive = 'INACTIVE'
 }
+
+export type HouseholdUpdateDataObjectType = {
+  status?: Maybe<Scalars['String']>,
+  consent?: Maybe<Scalars['Boolean']>,
+  residenceStatus?: Maybe<Scalars['String']>,
+  countryOrigin?: Maybe<Scalars['String']>,
+  country?: Maybe<Scalars['String']>,
+  size?: Maybe<Scalars['Int']>,
+  address?: Maybe<Scalars['String']>,
+  femaleAgeGroup05Count?: Maybe<Scalars['Int']>,
+  femaleAgeGroup611Count?: Maybe<Scalars['Int']>,
+  femaleAgeGroup1217Count?: Maybe<Scalars['Int']>,
+  femaleAdultsCount?: Maybe<Scalars['Int']>,
+  pregnantCount?: Maybe<Scalars['Int']>,
+  maleAgeGroup05Count?: Maybe<Scalars['Int']>,
+  maleAgeGroup611Count?: Maybe<Scalars['Int']>,
+  maleAgeGroup1217Count?: Maybe<Scalars['Int']>,
+  maleAdultsCount?: Maybe<Scalars['Int']>,
+  femaleAgeGroup05DisabledCount?: Maybe<Scalars['Int']>,
+  femaleAgeGroup611DisabledCount?: Maybe<Scalars['Int']>,
+  femaleAgeGroup1217DisabledCount?: Maybe<Scalars['Int']>,
+  femaleAdultsDisabledCount?: Maybe<Scalars['Int']>,
+  maleAgeGroup05DisabledCount?: Maybe<Scalars['Int']>,
+  maleAgeGroup611DisabledCount?: Maybe<Scalars['Int']>,
+  maleAgeGroup1217DisabledCount?: Maybe<Scalars['Int']>,
+  maleAdultsDisabledCount?: Maybe<Scalars['Int']>,
+  returnee?: Maybe<Scalars['Boolean']>,
+  fchildHoh?: Maybe<Scalars['Boolean']>,
+  childHoh?: Maybe<Scalars['Boolean']>,
+  start?: Maybe<Scalars['DateTime']>,
+  end?: Maybe<Scalars['DateTime']>,
+  nameEnumerator?: Maybe<Scalars['String']>,
+  orgEnumerator?: Maybe<Scalars['String']>,
+  orgNameEnumerator?: Maybe<Scalars['String']>,
+  village?: Maybe<Scalars['String']>,
+};
 
 export enum ImportDataDataType {
   Xlsx = 'XLSX',
@@ -1719,6 +1766,7 @@ export type IndividualNode = Node & {
   complaintTicketDetails: TicketComplaintDetailsNodeConnection,
   sensitiveTicketDetails: TicketSensitiveDetailsNodeConnection,
   individualDataUpdateTicketDetails: TicketIndividualDataUpdateDetailsNodeConnection,
+  deleteIndividualTicketDetails: TicketDeleteIndividualDetailsNodeConnection,
   representedHouseholds: HouseholdNodeConnection,
   headingHousehold?: Maybe<HouseholdNode>,
   documents: DocumentNodeConnection,
@@ -1745,6 +1793,14 @@ export type IndividualNodeSensitiveTicketDetailsArgs = {
 
 
 export type IndividualNodeIndividualDataUpdateTicketDetailsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type IndividualNodeDeleteIndividualTicketDetailsArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -3444,6 +3500,52 @@ export type TicketComplaintDetailsNodeConnection = {
 export type TicketComplaintDetailsNodeEdge = {
    __typename?: 'TicketComplaintDetailsNodeEdge',
   node?: Maybe<TicketComplaintDetailsNode>,
+  cursor: Scalars['String'],
+};
+
+export type TicketDeleteIndividualDetailsNode = Node & {
+   __typename?: 'TicketDeleteIndividualDetailsNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  individual?: Maybe<IndividualNode>,
+  individualData?: Maybe<Scalars['Arg']>,
+};
+
+export type TicketDeleteIndividualDetailsNodeConnection = {
+   __typename?: 'TicketDeleteIndividualDetailsNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<TicketDeleteIndividualDetailsNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type TicketDeleteIndividualDetailsNodeEdge = {
+   __typename?: 'TicketDeleteIndividualDetailsNodeEdge',
+  node?: Maybe<TicketDeleteIndividualDetailsNode>,
+  cursor: Scalars['String'],
+};
+
+export type TicketHouseholdDataUpdateDetailsNode = Node & {
+   __typename?: 'TicketHouseholdDataUpdateDetailsNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  household?: Maybe<HouseholdNode>,
+  householdData?: Maybe<Scalars['Arg']>,
+};
+
+export type TicketHouseholdDataUpdateDetailsNodeConnection = {
+   __typename?: 'TicketHouseholdDataUpdateDetailsNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<TicketHouseholdDataUpdateDetailsNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type TicketHouseholdDataUpdateDetailsNodeEdge = {
+   __typename?: 'TicketHouseholdDataUpdateDetailsNodeEdge',
+  node?: Maybe<TicketHouseholdDataUpdateDetailsNode>,
   cursor: Scalars['String'],
 };
 
@@ -11208,6 +11310,9 @@ export type ResolversTypes = {
   TicketIndividualDataUpdateDetailsNodeConnection: ResolverTypeWrapper<TicketIndividualDataUpdateDetailsNodeConnection>,
   TicketIndividualDataUpdateDetailsNodeEdge: ResolverTypeWrapper<TicketIndividualDataUpdateDetailsNodeEdge>,
   TicketIndividualDataUpdateDetailsNode: ResolverTypeWrapper<TicketIndividualDataUpdateDetailsNode>,
+  TicketDeleteIndividualDetailsNodeConnection: ResolverTypeWrapper<TicketDeleteIndividualDetailsNodeConnection>,
+  TicketDeleteIndividualDetailsNodeEdge: ResolverTypeWrapper<TicketDeleteIndividualDetailsNodeEdge>,
+  TicketDeleteIndividualDetailsNode: ResolverTypeWrapper<TicketDeleteIndividualDetailsNode>,
   DocumentNodeConnection: ResolverTypeWrapper<DocumentNodeConnection>,
   DocumentNodeEdge: ResolverTypeWrapper<DocumentNodeEdge>,
   DocumentNode: ResolverTypeWrapper<DocumentNode>,
@@ -11220,6 +11325,9 @@ export type ResolversTypes = {
   ProgramNodeConnection: ResolverTypeWrapper<ProgramNodeConnection>,
   ProgramNodeEdge: ResolverTypeWrapper<ProgramNodeEdge>,
   HouseholdOrgEnumerator: HouseholdOrgEnumerator,
+  TicketHouseholdDataUpdateDetailsNodeConnection: ResolverTypeWrapper<TicketHouseholdDataUpdateDetailsNodeConnection>,
+  TicketHouseholdDataUpdateDetailsNodeEdge: ResolverTypeWrapper<TicketHouseholdDataUpdateDetailsNodeEdge>,
+  TicketHouseholdDataUpdateDetailsNode: ResolverTypeWrapper<TicketHouseholdDataUpdateDetailsNode>,
   TicketAddIndividualDetailsNodeConnection: ResolverTypeWrapper<TicketAddIndividualDetailsNodeConnection>,
   TicketAddIndividualDetailsNodeEdge: ResolverTypeWrapper<TicketAddIndividualDetailsNodeEdge>,
   TicketAddIndividualDetailsNode: ResolverTypeWrapper<TicketAddIndividualDetailsNode>,
@@ -11306,6 +11414,7 @@ export type ResolversTypes = {
   GrievanceComplaintTicketExtras: GrievanceComplaintTicketExtras,
   IssueTypeExtrasInput: IssueTypeExtrasInput,
   HouseholdDataUpdateIssueTypeExtras: HouseholdDataUpdateIssueTypeExtras,
+  HouseholdUpdateDataObjectType: HouseholdUpdateDataObjectType,
   IndividualDataUpdateIssueTypeExtras: IndividualDataUpdateIssueTypeExtras,
   IndividualUpdateDataObjectType: IndividualUpdateDataObjectType,
   IndividualDeleteIssueTypeExtras: IndividualDeleteIssueTypeExtras,
@@ -11476,6 +11585,9 @@ export type ResolversParentTypes = {
   TicketIndividualDataUpdateDetailsNodeConnection: TicketIndividualDataUpdateDetailsNodeConnection,
   TicketIndividualDataUpdateDetailsNodeEdge: TicketIndividualDataUpdateDetailsNodeEdge,
   TicketIndividualDataUpdateDetailsNode: TicketIndividualDataUpdateDetailsNode,
+  TicketDeleteIndividualDetailsNodeConnection: TicketDeleteIndividualDetailsNodeConnection,
+  TicketDeleteIndividualDetailsNodeEdge: TicketDeleteIndividualDetailsNodeEdge,
+  TicketDeleteIndividualDetailsNode: TicketDeleteIndividualDetailsNode,
   DocumentNodeConnection: DocumentNodeConnection,
   DocumentNodeEdge: DocumentNodeEdge,
   DocumentNode: DocumentNode,
@@ -11488,6 +11600,9 @@ export type ResolversParentTypes = {
   ProgramNodeConnection: ProgramNodeConnection,
   ProgramNodeEdge: ProgramNodeEdge,
   HouseholdOrgEnumerator: HouseholdOrgEnumerator,
+  TicketHouseholdDataUpdateDetailsNodeConnection: TicketHouseholdDataUpdateDetailsNodeConnection,
+  TicketHouseholdDataUpdateDetailsNodeEdge: TicketHouseholdDataUpdateDetailsNodeEdge,
+  TicketHouseholdDataUpdateDetailsNode: TicketHouseholdDataUpdateDetailsNode,
   TicketAddIndividualDetailsNodeConnection: TicketAddIndividualDetailsNodeConnection,
   TicketAddIndividualDetailsNodeEdge: TicketAddIndividualDetailsNodeEdge,
   TicketAddIndividualDetailsNode: TicketAddIndividualDetailsNode,
@@ -11574,6 +11689,7 @@ export type ResolversParentTypes = {
   GrievanceComplaintTicketExtras: GrievanceComplaintTicketExtras,
   IssueTypeExtrasInput: IssueTypeExtrasInput,
   HouseholdDataUpdateIssueTypeExtras: HouseholdDataUpdateIssueTypeExtras,
+  HouseholdUpdateDataObjectType: HouseholdUpdateDataObjectType,
   IndividualDataUpdateIssueTypeExtras: IndividualDataUpdateIssueTypeExtras,
   IndividualUpdateDataObjectType: IndividualUpdateDataObjectType,
   IndividualDeleteIssueTypeExtras: IndividualDeleteIssueTypeExtras,
@@ -12013,8 +12129,10 @@ export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends R
   grievanceticketSet?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, GrievanceTicketNodeGrievanceticketSetArgs>,
   complaintTicketDetails?: Resolver<Maybe<ResolversTypes['TicketComplaintDetailsNode']>, ParentType, ContextType>,
   sensitiveTicketDetails?: Resolver<Maybe<ResolversTypes['TicketSensitiveDetailsNode']>, ParentType, ContextType>,
+  householdDataUpdateTicketDetails?: Resolver<Maybe<ResolversTypes['TicketHouseholdDataUpdateDetailsNode']>, ParentType, ContextType>,
   individualDataUpdateTicketDetails?: Resolver<Maybe<ResolversTypes['TicketIndividualDataUpdateDetailsNode']>, ParentType, ContextType>,
   addIndividualTicketDetails?: Resolver<Maybe<ResolversTypes['TicketAddIndividualDetailsNode']>, ParentType, ContextType>,
+  deleteIndividualTicketDetails?: Resolver<Maybe<ResolversTypes['TicketDeleteIndividualDetailsNode']>, ParentType, ContextType>,
 };
 
 export type GrievanceTicketNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['GrievanceTicketNodeConnection'] = ResolversParentTypes['GrievanceTicketNodeConnection']> = {
@@ -12091,6 +12209,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   village?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   complaintTicketDetails?: Resolver<ResolversTypes['TicketComplaintDetailsNodeConnection'], ParentType, ContextType, HouseholdNodeComplaintTicketDetailsArgs>,
   sensitiveTicketDetails?: Resolver<ResolversTypes['TicketSensitiveDetailsNodeConnection'], ParentType, ContextType, HouseholdNodeSensitiveTicketDetailsArgs>,
+  householdDataUpdateTicketDetails?: Resolver<ResolversTypes['TicketHouseholdDataUpdateDetailsNodeConnection'], ParentType, ContextType, HouseholdNodeHouseholdDataUpdateTicketDetailsArgs>,
   addIndividualTicketDetails?: Resolver<ResolversTypes['TicketAddIndividualDetailsNodeConnection'], ParentType, ContextType, HouseholdNodeAddIndividualTicketDetailsArgs>,
   individualsAndRoles?: Resolver<Array<ResolversTypes['IndividualRoleInHouseholdNode']>, ParentType, ContextType>,
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, HouseholdNodeIndividualsArgs>,
@@ -12356,6 +12475,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   complaintTicketDetails?: Resolver<ResolversTypes['TicketComplaintDetailsNodeConnection'], ParentType, ContextType, IndividualNodeComplaintTicketDetailsArgs>,
   sensitiveTicketDetails?: Resolver<ResolversTypes['TicketSensitiveDetailsNodeConnection'], ParentType, ContextType, IndividualNodeSensitiveTicketDetailsArgs>,
   individualDataUpdateTicketDetails?: Resolver<ResolversTypes['TicketIndividualDataUpdateDetailsNodeConnection'], ParentType, ContextType, IndividualNodeIndividualDataUpdateTicketDetailsArgs>,
+  deleteIndividualTicketDetails?: Resolver<ResolversTypes['TicketDeleteIndividualDetailsNodeConnection'], ParentType, ContextType, IndividualNodeDeleteIndividualTicketDetailsArgs>,
   representedHouseholds?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, IndividualNodeRepresentedHouseholdsArgs>,
   headingHousehold?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, IndividualNodeDocumentsArgs>,
@@ -12493,7 +12613,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'GrievanceTicketNode' | 'UserNode' | 'UserBusinessAreaNode' | 'AdminAreaTypeNode' | 'AdminAreaNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'TicketComplaintDetailsNode' | 'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'TargetPopulationNode' | 'SteficonRuleNode' | 'CashPlanPaymentVerificationNode' | 'PaymentVerificationNode' | 'ServiceProviderNode' | 'TicketSensitiveDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'DocumentNode' | 'TicketAddIndividualDetailsNode' | 'TicketNoteNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'ImportedDocumentNode', ParentType, ContextType>,
+  __resolveType: TypeResolveFn<'GrievanceTicketNode' | 'UserNode' | 'UserBusinessAreaNode' | 'AdminAreaTypeNode' | 'AdminAreaNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'TicketComplaintDetailsNode' | 'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'TargetPopulationNode' | 'SteficonRuleNode' | 'CashPlanPaymentVerificationNode' | 'PaymentVerificationNode' | 'ServiceProviderNode' | 'TicketSensitiveDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'DocumentNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketNoteNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'ImportedDocumentNode', ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
 };
 
@@ -13004,6 +13124,46 @@ export type TicketComplaintDetailsNodeEdgeResolvers<ContextType = any, ParentTyp
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
 };
 
+export type TicketDeleteIndividualDetailsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketDeleteIndividualDetailsNode'] = ResolversParentTypes['TicketDeleteIndividualDetailsNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
+  individualData?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
+};
+
+export type TicketDeleteIndividualDetailsNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketDeleteIndividualDetailsNodeConnection'] = ResolversParentTypes['TicketDeleteIndividualDetailsNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['TicketDeleteIndividualDetailsNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type TicketDeleteIndividualDetailsNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketDeleteIndividualDetailsNodeEdge'] = ResolversParentTypes['TicketDeleteIndividualDetailsNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['TicketDeleteIndividualDetailsNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type TicketHouseholdDataUpdateDetailsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketHouseholdDataUpdateDetailsNode'] = ResolversParentTypes['TicketHouseholdDataUpdateDetailsNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
+  householdData?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
+};
+
+export type TicketHouseholdDataUpdateDetailsNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketHouseholdDataUpdateDetailsNodeConnection'] = ResolversParentTypes['TicketHouseholdDataUpdateDetailsNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['TicketHouseholdDataUpdateDetailsNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type TicketHouseholdDataUpdateDetailsNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketHouseholdDataUpdateDetailsNodeEdge'] = ResolversParentTypes['TicketHouseholdDataUpdateDetailsNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['TicketHouseholdDataUpdateDetailsNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
 export type TicketIndividualDataUpdateDetailsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketIndividualDataUpdateDetailsNode'] = ResolversParentTypes['TicketIndividualDataUpdateDetailsNode']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
@@ -13355,6 +13515,12 @@ export type Resolvers<ContextType = any> = {
   TicketComplaintDetailsNode?: TicketComplaintDetailsNodeResolvers<ContextType>,
   TicketComplaintDetailsNodeConnection?: TicketComplaintDetailsNodeConnectionResolvers<ContextType>,
   TicketComplaintDetailsNodeEdge?: TicketComplaintDetailsNodeEdgeResolvers<ContextType>,
+  TicketDeleteIndividualDetailsNode?: TicketDeleteIndividualDetailsNodeResolvers<ContextType>,
+  TicketDeleteIndividualDetailsNodeConnection?: TicketDeleteIndividualDetailsNodeConnectionResolvers<ContextType>,
+  TicketDeleteIndividualDetailsNodeEdge?: TicketDeleteIndividualDetailsNodeEdgeResolvers<ContextType>,
+  TicketHouseholdDataUpdateDetailsNode?: TicketHouseholdDataUpdateDetailsNodeResolvers<ContextType>,
+  TicketHouseholdDataUpdateDetailsNodeConnection?: TicketHouseholdDataUpdateDetailsNodeConnectionResolvers<ContextType>,
+  TicketHouseholdDataUpdateDetailsNodeEdge?: TicketHouseholdDataUpdateDetailsNodeEdgeResolvers<ContextType>,
   TicketIndividualDataUpdateDetailsNode?: TicketIndividualDataUpdateDetailsNodeResolvers<ContextType>,
   TicketIndividualDataUpdateDetailsNodeConnection?: TicketIndividualDataUpdateDetailsNodeConnectionResolvers<ContextType>,
   TicketIndividualDataUpdateDetailsNodeEdge?: TicketIndividualDataUpdateDetailsNodeEdgeResolvers<ContextType>,

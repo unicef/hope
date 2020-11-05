@@ -560,8 +560,10 @@ type GrievanceTicketNode implements Node {
   grievanceticketSet(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   complaintTicketDetails: TicketComplaintDetailsNode
   sensitiveTicketDetails: TicketSensitiveDetailsNode
+  householdDataUpdateTicketDetails: TicketHouseholdDataUpdateDetailsNode
   individualDataUpdateTicketDetails: TicketIndividualDataUpdateDetailsNode
   addIndividualTicketDetails: TicketAddIndividualDetailsNode
+  deleteIndividualTicketDetails: TicketDeleteIndividualDetailsNode
 }
 
 type GrievanceTicketNodeConnection {
@@ -593,7 +595,7 @@ enum HouseholdConsentSharing {
 
 input HouseholdDataUpdateIssueTypeExtras {
   household: ID!
-  individual: ID!
+  householdData: HouseholdUpdateDataObjectType
 }
 
 type HouseholdNode implements Node {
@@ -650,6 +652,7 @@ type HouseholdNode implements Node {
   village: String!
   complaintTicketDetails(before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
   sensitiveTicketDetails(before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
+  householdDataUpdateTicketDetails(before: String, after: String, first: Int, last: Int): TicketHouseholdDataUpdateDetailsNodeConnection!
   addIndividualTicketDetails(before: String, after: String, first: Int, last: Int): TicketAddIndividualDetailsNodeConnection!
   individualsAndRoles: [IndividualRoleInHouseholdNode!]!
   individuals(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
@@ -701,6 +704,42 @@ type HouseholdSelection {
 enum HouseholdStatus {
   ACTIVE
   INACTIVE
+}
+
+input HouseholdUpdateDataObjectType {
+  status: String
+  consent: Boolean
+  residenceStatus: String
+  countryOrigin: String
+  country: String
+  size: Int
+  address: String
+  femaleAgeGroup05Count: Int
+  femaleAgeGroup611Count: Int
+  femaleAgeGroup1217Count: Int
+  femaleAdultsCount: Int
+  pregnantCount: Int
+  maleAgeGroup05Count: Int
+  maleAgeGroup611Count: Int
+  maleAgeGroup1217Count: Int
+  maleAdultsCount: Int
+  femaleAgeGroup05DisabledCount: Int
+  femaleAgeGroup611DisabledCount: Int
+  femaleAgeGroup1217DisabledCount: Int
+  femaleAdultsDisabledCount: Int
+  maleAgeGroup05DisabledCount: Int
+  maleAgeGroup611DisabledCount: Int
+  maleAgeGroup1217DisabledCount: Int
+  maleAdultsDisabledCount: Int
+  returnee: Boolean
+  fchildHoh: Boolean
+  childHoh: Boolean
+  start: DateTime
+  end: DateTime
+  nameEnumerator: String
+  orgEnumerator: String
+  orgNameEnumerator: String
+  village: String
 }
 
 enum ImportDataDataType {
@@ -1347,6 +1386,7 @@ type IndividualNode implements Node {
   complaintTicketDetails(before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
   sensitiveTicketDetails(before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
   individualDataUpdateTicketDetails(before: String, after: String, first: Int, last: Int): TicketIndividualDataUpdateDetailsNodeConnection!
+  deleteIndividualTicketDetails(before: String, after: String, first: Int, last: Int): TicketDeleteIndividualDetailsNodeConnection!
   representedHouseholds(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   headingHousehold: HouseholdNode
   documents(before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
@@ -2264,6 +2304,46 @@ type TicketComplaintDetailsNodeConnection {
 
 type TicketComplaintDetailsNodeEdge {
   node: TicketComplaintDetailsNode
+  cursor: String!
+}
+
+type TicketDeleteIndividualDetailsNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  individual: IndividualNode
+  individualData: Arg
+}
+
+type TicketDeleteIndividualDetailsNodeConnection {
+  pageInfo: PageInfo!
+  edges: [TicketDeleteIndividualDetailsNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type TicketDeleteIndividualDetailsNodeEdge {
+  node: TicketDeleteIndividualDetailsNode
+  cursor: String!
+}
+
+type TicketHouseholdDataUpdateDetailsNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  household: HouseholdNode
+  householdData: Arg
+}
+
+type TicketHouseholdDataUpdateDetailsNodeConnection {
+  pageInfo: PageInfo!
+  edges: [TicketHouseholdDataUpdateDetailsNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type TicketHouseholdDataUpdateDetailsNodeEdge {
+  node: TicketHouseholdDataUpdateDetailsNode
   cursor: String!
 }
 
