@@ -9,7 +9,7 @@ import { AppBar } from '../components/AppBar';
 import { isAuthenticated } from '../utils/utils';
 import { useSnackbar } from '../hooks/useSnackBar';
 import { GrievanceDetails } from '../components/Grievances/GrievanceDetails';
-import { GrievancesList } from '../components/Grievances/GrievancesList';
+import { GrievancesTablePage } from '../components/Grievances/GrievancesTablePage';
 import { CreateGrievance } from '../components/Grievances/CreateGrievance';
 import { DashboardPage } from './pages/DashboardPage';
 import { ProgramsPage } from './pages/ProgramsPage';
@@ -108,7 +108,7 @@ export function HomeRouter(): React.ReactElement {
             <GrievanceDetails />
           </Route>
           <Route path='/:businessArea/grievance-and-feedback'>
-            <GrievancesList />
+            <GrievancesTablePage />
           </Route>
           <Route path='/:businessArea/population/household'>
             <PopulationHouseholdPage />

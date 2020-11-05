@@ -507,17 +507,6 @@ input GrievanceComplaintTicketExtras {
   paymentRecord: ID!
 }
 
-enum GrievanceTicketCategory {
-  A_1
-  A_2
-  A_3
-  A_4
-  A_5
-  A_6
-  A_7
-  A_8
-}
-
 type GrievanceTicketNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -525,8 +514,8 @@ type GrievanceTicketNode implements Node {
   userModified: DateTime
   createdBy: UserNode
   assignedTo: UserNode
-  status: GrievanceTicketStatus!
-  category: GrievanceTicketCategory!
+  status: Int!
+  category: Int!
   issueType: Int
   description: String!
   admin: String!
@@ -550,14 +539,6 @@ type GrievanceTicketNodeConnection {
 type GrievanceTicketNodeEdge {
   node: GrievanceTicketNode
   cursor: String!
-}
-
-enum GrievanceTicketStatus {
-  A_1
-  A_2
-  A_3
-  A_4
-  A_5
 }
 
 type GroupAttributeNode {
@@ -1433,6 +1414,12 @@ input IssueTypeExtrasInput {
   individualDeleteIssueTypeExtras: IndividualDeleteIssueTypeExtras
 }
 
+type IssueTypesObject {
+  category: String
+  label: String
+  subCategories: [ChoiceObject]
+}
+
 scalar JSONLazyString
 
 scalar JSONString
@@ -1716,7 +1703,10 @@ enum ProgramStatus {
 
 type Query {
   grievanceTicket(id: ID!): GrievanceTicketNode
-  allGrievanceTicket(before: String, after: String, first: Int, last: Int, id: UUID, category: String, businessArea: String!, search: String, status: [String], fsp: [ID], admin: [ID], createdAtRange: String, orderBy: String): GrievanceTicketNodeConnection
+  allGrievanceTicket(before: String, after: String, first: Int, last: Int, id: UUID, id_Icontains: UUID, category: String, area: String, area_Icontains: String, assignedTo: ID, businessArea: String!, search: String, status: [String], fsp: [ID], admin: [ID], createdAtRange: String, orderBy: String): GrievanceTicketNodeConnection
+  grievanceTicketStatusChoices: [ChoiceObject]
+  grievanceTicketCategoryChoices: [ChoiceObject]
+  grievanceTicketIssueTypeChoices: [IssueTypesObject]
   allSteficonRules(before: String, after: String, first: Int, last: Int, enabled: Boolean, deprecated: Boolean): SteficonRuleNodeConnection
   paymentRecord(id: ID!): PaymentRecordNode
   paymentRecordVerification(id: ID!): PaymentVerificationNode

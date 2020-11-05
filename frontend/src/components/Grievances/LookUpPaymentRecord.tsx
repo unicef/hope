@@ -14,7 +14,6 @@ const LookUp = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 10px;
   border: 1.5px solid #043e91;
   border-radius: 5px;
   color: #033f91;
