@@ -9,17 +9,19 @@ import { headCells } from './LookUpPaymentRecordTableHeadCells';
 import { LookUpPaymentRecordTableRow } from './LookUpPaymentRecordTableRow';
 
 interface LookUpPaymentRecordTableProps {
-  cashPlanId: string;
   openInNewTab?: boolean;
+  setFieldValue;
+  initialValues;
 }
 export function LookUpPaymentRecordTable({
-  cashPlanId,
   openInNewTab = false,
+  setFieldValue,
+  initialValues,
 }: LookUpPaymentRecordTableProps): ReactElement {
-  const initialVariables = {
-    cashPlan: cashPlanId,
-  };
-  const [selected, setSelected] = useState([]);
+  const initialVariables = {};
+  const [selected, setSelected] = useState(
+    initialValues.selectedPaymentRecords,
+  );
 
   const handleCheckboxClick = (event, name): void => {
     const selectedIndex = selected.indexOf(name);
@@ -39,15 +41,19 @@ export function LookUpPaymentRecordTable({
     }
 
     setSelected(newSelected);
+    setFieldValue('selectedPaymentRecords', newSelected);
   };
 
   const handleSelectAllCheckboxesClick = (event, rows): void => {
     if (event.target.checked) {
       const newSelecteds = rows.map((row) => row.id);
       setSelected(newSelecteds);
+      setFieldValue('selectedPaymentRecords', newSelecteds);
+
       return;
     }
     setSelected([]);
+    setFieldValue('selectedPaymentRecords', []);
   };
   const numSelected = selected.length;
   return (
