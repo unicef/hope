@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { UniversalTable } from '../../../containers/tables/UniversalTable';
 import {
@@ -16,11 +16,15 @@ const TableWrapper = styled.div`
 interface LookUpRelatedTicketsTableProps {
   businessArea: string;
   filter;
+  setFieldValue;
+  initialValues;
 }
 
 export const LookUpRelatedTicketsTable = ({
   businessArea,
   filter,
+  setFieldValue,
+  initialValues,
 }: LookUpRelatedTicketsTableProps): React.ReactElement => {
   const initialVariables: AllGrievanceTicketQueryVariables = {
     businessArea,
@@ -30,6 +34,43 @@ export const LookUpRelatedTicketsTable = ({
     createdAtRange: JSON.stringify(filter.createdAtRange),
     admin: [filter.admin],
   };
+  const [selected, setSelected] = useState(
+    initialValues.selectedRelatedTickets,
+  );
+
+  const handleCheckboxClick = (event, name): void => {
+    const selectedIndex = selected.indexOf(name);
+    let newSelected = [];
+
+    if (selectedIndex === -1) {
+      newSelected = newSelected.concat(selected, name);
+    } else if (selectedIndex === 0) {
+      newSelected = newSelected.concat(selected.slice(1));
+    } else if (selectedIndex === selected.length - 1) {
+      newSelected = newSelected.concat(selected.slice(0, -1));
+    } else if (selectedIndex > 0) {
+      newSelected = newSelected.concat(
+        selected.slice(0, selectedIndex),
+        selected.slice(selectedIndex + 1),
+      );
+    }
+
+    setSelected(newSelected);
+    setFieldValue('selectedRelatedTickets', newSelected);
+  };
+
+  const handleSelectAllCheckboxesClick = (event, rows): void => {
+    if (event.target.checked) {
+      const newSelecteds = rows.map((row) => row.id);
+      setSelected(newSelecteds);
+      setFieldValue('selectedRelatedTickets', newSelecteds);
+
+      return;
+    }
+    setSelected([]);
+    setFieldValue('selectedRelatedTickets', []);
+  };
+  const numSelected = selected.length;
 
   return (
     <TableWrapper>
@@ -39,8 +80,15 @@ export const LookUpRelatedTicketsTable = ({
         query={useAllGrievanceTicketQuery}
         queriedObjectName='allGrievanceTicket'
         initialVariables={initialVariables}
+        onSelectAllClick={handleSelectAllCheckboxesClick}
+        numSelected={numSelected}
         renderRow={(row) => (
-          <LookUpRelatedTicketsTableRow key={row.id} ticket={row} />
+          <LookUpRelatedTicketsTableRow
+            key={row.id}
+            ticket={row}
+            checkboxClickHandler={handleCheckboxClick}
+            selected={selected}
+          />
         )}
       />
     </TableWrapper>

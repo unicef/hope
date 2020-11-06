@@ -49,7 +49,6 @@ export function LookUpPaymentRecordTable({
       const newSelecteds = rows.map((row) => row.id);
       setSelected(newSelecteds);
       setFieldValue('selectedPaymentRecords', newSelecteds);
-
       return;
     }
     setSelected([]);

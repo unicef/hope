@@ -4,6 +4,13 @@ import { GrievanceTicketNode } from '../../../__generated__/graphql';
 export const headCells: HeadCell<GrievanceTicketNode>[] = [
   {
     disablePadding: false,
+    label: '',
+    id: 'checkbox',
+    numeric: false,
+    dataCy: 'ticket-id-checkbox',
+  },
+  {
+    disablePadding: false,
     label: 'Ticket Id',
     id: 'id',
     numeric: false,
