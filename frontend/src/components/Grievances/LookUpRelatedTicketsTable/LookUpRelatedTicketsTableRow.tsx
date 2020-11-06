@@ -7,7 +7,7 @@ import { ClickableTableRow } from '../../table/ClickableTableRow';
 import { StatusBox } from '../../StatusBox';
 import { cashPlanStatusToColor } from '../../../utils/utils';
 import { Missing } from '../../Missing';
-import { UniversalMoment } from '../../UniversalMoment';
+import { Checkbox } from '@material-ui/core';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -16,10 +16,14 @@ const StatusContainer = styled.div`
 
 interface LookUpRelatedTicketsTableRowProps {
   ticket;
+  selected: Array<string>;
+  checkboxClickHandler;
 }
 
 export function LookUpRelatedTicketsTableRow({
   ticket,
+  selected,
+  checkboxClickHandler,
 }: LookUpRelatedTicketsTableRowProps): React.ReactElement {
   const businessArea = useBusinessArea();
   const handleClick = (): void => {
@@ -29,15 +33,21 @@ export function LookUpRelatedTicketsTableRow({
       win.focus();
     }
   };
-
+  const isSelected = (name: string): boolean => selected.includes(name);
+  const isItemSelected = isSelected(ticket.id);
   return (
-    <ClickableTableRow
-      hover
-      onClick={handleClick}
-      role='checkbox'
-      key={ticket.id}
-    >
-      <TableCell align='left'>{ticket.id}</TableCell>
+    <ClickableTableRow hover role='checkbox' key={ticket.id}>
+      <TableCell padding='checkbox'>
+        <Checkbox
+          color='primary'
+          onClick={(event) => checkboxClickHandler(event, ticket.id)}
+          checked={isItemSelected}
+          inputProps={{ 'aria-labelledby': ticket.id }}
+        />
+      </TableCell>
+      <TableCell onClick={handleClick} align='left'>
+        <Pointer>{ticket.id}</Pointer>
+      </TableCell>
       <TableCell align='left'>
         <StatusContainer>
           <StatusBox
