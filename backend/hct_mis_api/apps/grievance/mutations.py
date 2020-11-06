@@ -224,29 +224,29 @@ POSSIBLE_FEEDBACK_STATUS_FLOW = {
 
 
 class GrievanceStatusChangeMutation(graphene.Mutation):
-    grievance_ticket = GrievanceTicketNode
+    grievance_ticket = graphene.Field(GrievanceTicketNode)
 
     class Arguments:
-        grievance_ticket = graphene.GlobalID(node=GrievanceTicketNode)
-        status = graphene.String()
+        grievance_ticket_id = graphene.Argument(graphene.ID)
+        status = graphene.Int()
 
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, input, **kwargs):
-        grievance_ticket_encoded_id = input.get("grievance_ticket")
-        new_status = input.get("status")
-        grievance_ticket_id = decode_id_string(grievance_ticket_encoded_id)
+    def mutate(cls, root, info, grievance_ticket_id, status, **kwargs):
+        grievance_ticket_id = decode_id_string(grievance_ticket_id)
         grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
+        if grievance_ticket.status == status:
+            return cls(grievance_ticket)
         status_flow = POSSIBLE_STATUS_FLOW
         if grievance_ticket.category in (
             GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
             GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
         ):
             status_flow = POSSIBLE_FEEDBACK_STATUS_FLOW
-        if new_status not in status_flow:
+        if status not in status_flow[grievance_ticket.status]:
             raise GraphQLError("New status is incorrect")
-        grievance_ticket.status = new_status
+        grievance_ticket.status = status
         grievance_ticket.save()
         grievance_ticket.refresh_from_db()
         return cls(grievance_ticket=grievance_ticket)
