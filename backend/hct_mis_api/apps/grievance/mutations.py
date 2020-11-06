@@ -235,18 +235,19 @@ class GrievanceStatusChangeMutation(graphene.Mutation):
     @transaction.atomic
     def mutate(cls, root, info, input, **kwargs):
         grievance_ticket_encoded_id = input.get("grievance_ticket")
+        new_status = input.get("status")
         grievance_ticket_id = decode_id_string(grievance_ticket_encoded_id)
         grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
         status_flow = POSSIBLE_STATUS_FLOW
-        new_status = input.get("status")
-        if (
-            grievance_ticket.category == GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK
-            or grievance_ticket.category == GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK
-        ):
+        if grievance_ticket.category in [
+            GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
+            GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+        ]:
             status_flow = POSSIBLE_FEEDBACK_STATUS_FLOW
         if new_status not in status_flow:
             raise GraphQLError("New status is incorrect")
         grievance_ticket.status = new_status
+        grievance_ticket.save()
         grievance_ticket.refresh_from_db()
         return cls(grievance_ticket=grievance_ticket)
 
