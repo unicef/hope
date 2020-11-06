@@ -142,13 +142,22 @@ def create_household(household_args=None, individual_args=None):
     if individual_args is None:
         individual_args = {}
     household = HouseholdFactory.build(**household_args)
-    individuals = IndividualFactory.create_batch(household.size, household=household, **individual_args)
-    individuals[0].relationship = "HEAD"
-    individuals[0].save()
+    individuals = IndividualFactory.create_batch(household.size, household=None, **individual_args)
+
     household.head_of_household = individuals[0]
     household.registration_data_import.imported_by.save()
     household.registration_data_import.save()
     household.save()
+
+    individuals_to_update = []
+    for index, individual in enumerate(individuals):
+        if index == 0:
+            individual.relationship = "HEAD"
+        individual.household = household
+        individuals_to_update.append(individual)
+
+    Individual.objects.bulk_update(individuals_to_update, ("relationship", "household"))
+
     primary_collector, alternate_collector = IndividualFactory.create_batch(
         2, household=None, relationship="NON_BENEFICIARY"
     )
@@ -160,6 +169,7 @@ def create_household(household_args=None, individual_args=None):
         individual=alternate_collector, household=household, role=ROLE_ALTERNATE
     )
     alternate_collector_irh.save()
+
     return household, individuals
 
 
