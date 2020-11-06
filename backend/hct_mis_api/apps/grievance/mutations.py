@@ -105,7 +105,7 @@ class CreateGrievanceTicketMutation(graphene.Mutation):
             ],
         },
         GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL: {
-            "required": ['extras.issue_type.add_individual_issue_type_extras'],
+            "required": ["extras.issue_type.add_individual_issue_type_extras"],
             "not_allowed": [
                 "household_data_update_issue_type_extras",
                 "individual_data_update_issue_type_extras",
@@ -197,5 +197,60 @@ class CreateGrievanceTicketMutation(graphene.Mutation):
             data_dict.pop(field, None)
 
 
+POSSIBLE_STATUS_FLOW = {
+    GrievanceTicket.STATUS_NEW: [GrievanceTicket.STATUS_ASSIGNED],
+    GrievanceTicket.STATUS_ASSIGNED: [GrievanceTicket.STATUS_IN_PROGRESS],
+    GrievanceTicket.STATUS_IN_PROGRESS: [GrievanceTicket.STATUS_ON_HOLD, GrievanceTicket.STATUS_FOR_APPROVAL],
+    GrievanceTicket.STATUS_ON_HOLD: [GrievanceTicket.STATUS_IN_PROGRESS, GrievanceTicket.STATUS_FOR_APPROVAL],
+    GrievanceTicket.STATUS_FOR_APPROVAL: [GrievanceTicket.STATUS_IN_PROGRESS, GrievanceTicket.STATUS_CLOSED],
+    GrievanceTicket.STATUS_CLOSED: [],
+}
+POSSIBLE_FEEDBACK_STATUS_FLOW = {
+    GrievanceTicket.STATUS_NEW: [GrievanceTicket.STATUS_ASSIGNED],
+    GrievanceTicket.STATUS_ASSIGNED: [GrievanceTicket.STATUS_IN_PROGRESS],
+    GrievanceTicket.STATUS_IN_PROGRESS: [
+        GrievanceTicket.STATUS_ON_HOLD,
+        GrievanceTicket.STATUS_FOR_APPROVAL,
+        GrievanceTicket.STATUS_CLOSED,
+    ],
+    GrievanceTicket.STATUS_ON_HOLD: [
+        GrievanceTicket.STATUS_IN_PROGRESS,
+        GrievanceTicket.STATUS_FOR_APPROVAL,
+        GrievanceTicket.STATUS_CLOSED,
+    ],
+    GrievanceTicket.STATUS_FOR_APPROVAL: [GrievanceTicket.STATUS_IN_PROGRESS, GrievanceTicket.STATUS_CLOSED],
+    GrievanceTicket.STATUS_CLOSED: [],
+}
+
+
+class GrievanceStatusChangeMutation(graphene.Mutation):
+    grievance_ticket = GrievanceTicketNode
+
+    class Arguments:
+        grievance_ticket = graphene.GlobalID(node=GrievanceTicketNode)
+        status = graphene.String()
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root, info, input, **kwargs):
+        grievance_ticket_encoded_id = input.get("grievance_ticket")
+        grievance_ticket_id = decode_id_string(grievance_ticket_encoded_id)
+        grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
+        status_flow = POSSIBLE_STATUS_FLOW
+        new_status = input.get("status")
+        if (
+            grievance_ticket.category == GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK
+            or grievance_ticket.category == GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK
+        ):
+            status_flow = POSSIBLE_FEEDBACK_STATUS_FLOW
+        if new_status not in status_flow:
+            raise GraphQLError("New status is incorrect")
+        grievance_ticket.status = new_status
+        grievance_ticket.refresh_from_db()
+        return cls(grievance_ticket=grievance_ticket)
+
+
 class Mutations(graphene.ObjectType):
     create_grievance_ticket = CreateGrievanceTicketMutation.Field()
+    grievance_status_change = GrievanceStatusChangeMutation.Field()

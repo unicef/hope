@@ -8,11 +8,12 @@ from django.utils.translation import ugettext_lazy as _
 
 
 class GrievanceTicket(TimeStampedUUIDModel):
-    STATUS_OPEN = 1
-    STATUS_REOPENED = 2
-    STATUS_RESOLVED = 3
-    STATUS_CLOSED = 4
-    STATUS_DUPLICATE = 5
+    STATUS_NEW = 1
+    STATUS_ASSIGNED = 2
+    STATUS_IN_PROGRESS = 3
+    STATUS_ON_HOLD = 4
+    STATUS_FOR_APPROVAL = 5
+    STATUS_CLOSED = 6
 
     CATEGORY_PAYMENT_VERIFICATION = 1
     CATEGORY_DATA_CHANGE = 2
@@ -63,11 +64,12 @@ class GrievanceTicket(TimeStampedUUIDModel):
         },
     }
     STATUS_CHOICES = (
-        (STATUS_OPEN, _("Open")),
-        (STATUS_REOPENED, _("Reopened")),
-        (STATUS_RESOLVED, _("Resolved")),
+        (STATUS_NEW, _("New")),
+        (STATUS_ASSIGNED, _("Assigned")),
+        (STATUS_IN_PROGRESS, _("In Progress")),
+        (STATUS_ON_HOLD, _("On Hold")),
+        (STATUS_FOR_APPROVAL, _("For Approval")),
         (STATUS_CLOSED, _("Closed")),
-        (STATUS_DUPLICATE, _("Duplicate")),
     )
 
     CATEGORY_CHOICES = (
@@ -101,7 +103,7 @@ class GrievanceTicket(TimeStampedUUIDModel):
         null=True,
         verbose_name=_("Assigned to"),
     )
-    status = models.IntegerField(verbose_name=_("Status"), choices=STATUS_CHOICES, default=STATUS_OPEN)
+    status = models.IntegerField(verbose_name=_("Status"), choices=STATUS_CHOICES, default=STATUS_NEW)
     category = models.IntegerField(verbose_name=_("Category"), choices=CATEGORY_CHOICES)
     issue_type = models.IntegerField(verbose_name=_("Type"), null=True, blank=True)
     description = models.TextField(
