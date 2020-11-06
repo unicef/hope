@@ -56,17 +56,21 @@ export function CreateGrievance(): React.ReactElement {
     consent: false,
     selectedHousehold: '',
     selectedIndividual: '',
+    selectedPaymentRecords: [],
     identityVerified: false,
   };
 
   const validationSchema = Yup.object().shape({
     description: Yup.string().required('Description is required'),
     assignedTo: Yup.string().required('Assigned To is required'),
-    category: Yup.number().required('Category is required'),
+    category: Yup.string()
+      .required('Category is required')
+      .nullable(),
     language: Yup.string().required('Language is required'),
-    consent: Yup.boolean().required('Consent is required'),
-    selectedHousehold: Yup.string().required('Household has to be selected'),
-    selectedIndividual: Yup.string().required('Individual has to be selected'),
+    consent: Yup.bool().oneOf([true], 'Consent is required'),
+    // selectedHousehold: Yup.string().required('Household has to be selected'),
+    // selectedIndividual: Yup.string().required('Individual has to be selected'),
+    // selectedPaymentRecords: Yup.array.of(Yup.string()),
   });
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
@@ -78,7 +82,11 @@ export function CreateGrievance(): React.ReactElement {
   const {
     data: individualsData,
     loading: individualsDataLoading,
-  } = useAllIndividualsQuery();
+  } = useAllIndividualsQuery({
+    variables: {
+      first: 20,
+    },
+  });
 
   const {
     data: choicesData,
@@ -149,7 +157,7 @@ export function CreateGrievance(): React.ReactElement {
                     <Box display='flex' flexDirection='column'>
                       <Consent />
                       <Field
-                        name='receivedConsent'
+                        name='consent'
                         label='Received Consent*'
                         color='primary'
                         component={FormikCheckboxField}
@@ -178,11 +186,11 @@ export function CreateGrievance(): React.ReactElement {
                     <Grid container spacing={3}>
                       <Grid item xs={12}>
                         <Field
-                          name='Description*'
+                          name='description'
                           multiline
                           fullWidth
                           variant='outlined'
-                          label='Description'
+                          label='Description*'
                           component={FormikTextField}
                         />
                       </Grid>

@@ -57,18 +57,24 @@ export function LookUpPaymentRecordTableRow({
         />
       </TableCell>
       <TableCell onClick={handleClick} align='left'>
-        {paymentRecord.id}
+        {decodeIdString(paymentRecord.id)}
       </TableCell>
       <TableCell align='left'>
-        <StatusContainer>
-          <StatusBox
-            status={paymentRecord.verifications?.edges[0]?.node.status || ''}
-            statusToColor={verificationRecordsStatusToColor}
-          />
-        </StatusContainer>
+        {paymentRecord.verifications?.edges[0]?.node.status ? (
+          <StatusContainer>
+            <StatusBox
+              status={paymentRecord.verifications?.edges[0]?.node.status}
+              statusToColor={verificationRecordsStatusToColor}
+            />
+          </StatusContainer>
+        ) : (
+          '-'
+        )}
       </TableCell>
       <TableCell align='left'>{paymentRecord.cashPlan.name}</TableCell>
-      <TableCell align='right'>{paymentRecord.deliveredQuantity}</TableCell>
+      <TableCell align='right'>
+        {formatCurrency(paymentRecord.deliveredQuantity)}
+      </TableCell>
       <TableCell align='right'>
         <Missing />
       </TableCell>
