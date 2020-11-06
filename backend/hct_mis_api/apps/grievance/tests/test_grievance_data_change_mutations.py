@@ -28,6 +28,12 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
           sensitiveTicketDetails{
             id
           }
+          householdDataUpdateTicketDetails{
+            household{
+              id
+            }
+            householdData
+          }
           addIndividualTicketDetails{
             household{
               id
@@ -166,6 +172,59 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                 "givenName": "Test",
                                 "fullName": "Test Test",
                                 "sex": "MALE",
+                            },
+                        }
+                    }
+                },
+            }
+        }
+        self.snapshot_graphql_request(
+            request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
+            context={"user": self.user},
+            variables=variables,
+        )
+
+    def test_grievance_delete_individual_data_change(self):
+        variables = {
+            "input": {
+                "description": "Test",
+                "businessArea": "afghanistan",
+                "assignedTo": self.id_to_base64(self.user.id, "UserNode"),
+                "issueType": 15,
+                "category": 2,
+                "consent": True,
+                "language": "PL",
+                "extras": {
+                    "issueType": {
+                        "individualDeleteIssueTypeExtras": {
+                            "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
+                        }
+                    }
+                },
+            }
+        }
+        self.snapshot_graphql_request(
+            request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
+            context={"user": self.user},
+            variables=variables,
+        )
+
+    def test_grievance_update_household_data_change(self):
+        variables = {
+            "input": {
+                "description": "Test",
+                "businessArea": "afghanistan",
+                "assignedTo": self.id_to_base64(self.user.id, "UserNode"),
+                "issueType": 13,
+                "category": GrievanceTicket.CATEGORY_DATA_CHANGE,
+                "consent": True,
+                "language": "PL",
+                "extras": {
+                    "issueType": {
+                        "householdDataUpdateIssueTypeExtras": {
+                            "household": self.id_to_base64(self.household_one.id, "HouseholdNode"),
+                            "householdData": {
+                                "femaleAgeGroup611Count": 14,
                             },
                         }
                     }
