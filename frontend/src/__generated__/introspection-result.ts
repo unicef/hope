@@ -72,7 +72,19 @@
             "name": "TicketSensitiveDetailsNode"
           },
           {
+            "name": "TicketIndividualDataUpdateDetailsNode"
+          },
+          {
+            "name": "TicketDeleteIndividualDetailsNode"
+          },
+          {
             "name": "DocumentNode"
+          },
+          {
+            "name": "TicketHouseholdDataUpdateDetailsNode"
+          },
+          {
+            "name": "TicketAddIndividualDetailsNode"
           },
           {
             "name": "TicketNoteNode"
