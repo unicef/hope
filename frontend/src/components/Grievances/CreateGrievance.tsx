@@ -57,6 +57,7 @@ export function CreateGrievance(): React.ReactElement {
     selectedHousehold: '',
     selectedIndividual: '',
     selectedPaymentRecords: [],
+    selectedRelatedTickets: [],
     identityVerified: false,
   };
 
@@ -71,6 +72,7 @@ export function CreateGrievance(): React.ReactElement {
     // selectedHousehold: Yup.string().required('Household has to be selected'),
     // selectedIndividual: Yup.string().required('Individual has to be selected'),
     // selectedPaymentRecords: Yup.array.of(Yup.string()),
+    // selectedRelatedTickets: Yup.array.of(Yup.string()),
   });
 
   const breadCrumbsItems: BreadCrumbsItem[] = [

@@ -95,93 +95,88 @@ export const LookUpHouseholdIndividualModal = ({
       }}
     >
       {({ submitForm, setFieldValue, values }) => (
-        <>
-          <Dialog
-            maxWidth='lg'
-            fullWidth
-            open={lookUpDialogOpen}
-            onClose={() => setLookUpDialogOpen(false)}
-            scroll='paper'
-            aria-labelledby='form-dialog-title'
-          >
-            <DialogTitleWrapper>
-              <DialogTitle id='scroll-dialog-title'>
-                <StyledTabs
-                  value={selectedTab}
-                  onChange={(
-                    event: React.ChangeEvent<{}>,
-                    newValue: number,
-                  ) => {
-                    setSelectedTab(newValue);
-                  }}
-                  indicatorColor='primary'
-                  textColor='primary'
-                  variant='fullWidth'
-                  aria-label='look up tabs'
-                >
-                  <Tab label='LOOK UP HOUSEHOLD' />
-                  <Tab label='LOOK UP INDIVIDUAL' />
-                </StyledTabs>
-              </DialogTitle>
-            </DialogTitleWrapper>
-            <DialogContent>
-              <TabPanel value={selectedTab} index={0}>
-                <LookUpHouseholdFilters
-                  programs={programs as ProgramNode[]}
-                  filter={debouncedFilterHousehold}
-                  onFilterChange={setFilterHousehold}
-                  choicesData={choicesData}
-                />
-                <LookUpHouseholdTable
-                  filter={debouncedFilterHousehold}
-                  businessArea={businessArea}
-                  choicesData={choicesData}
-                  setFieldValue={setFieldValue}
-                  initialValues={initialValues}
-                />
-              </TabPanel>
-              <TabPanel value={selectedTab} index={1}>
-                <LookUpIndividualFilters
-                  programs={programs as ProgramNode[]}
-                  filter={debouncedFilterIndividual}
-                  onFilterChange={setFilterIndividual}
-                  choicesData={choicesData}
-                />
-                <LookUpIndividualTable
-                  filter={debouncedFilterIndividual}
-                  businessArea={businessArea}
-                  setFieldValue={setFieldValue}
-                  initialValues={initialValues}
-                  valuesInner={values}
-                />
-              </TabPanel>
-            </DialogContent>
-            <DialogFooter>
-              <DialogActions>
-                <Box display='flex'>
-                  <Box mr={1}>
-                    <Field
-                      name='identityVerified'
-                      label='Identity Verified*'
-                      component={FormikCheckboxField}
-                    />
-                  </Box>
-                  <Button onClick={() => handleCancel()}>CANCEL</Button>
-                  <Button
-                    type='submit'
-                    color='primary'
-                    variant='contained'
-                    onClick={submitForm}
-                    disabled={values.identityVerified === false}
-                    data-cy='button-submit'
-                  >
-                    SAVE
-                  </Button>
+        <Dialog
+          maxWidth='lg'
+          fullWidth
+          open={lookUpDialogOpen}
+          onClose={() => setLookUpDialogOpen(false)}
+          scroll='paper'
+          aria-labelledby='form-dialog-title'
+        >
+          <DialogTitleWrapper>
+            <DialogTitle id='scroll-dialog-title'>
+              <StyledTabs
+                value={selectedTab}
+                onChange={(event: React.ChangeEvent<{}>, newValue: number) => {
+                  setSelectedTab(newValue);
+                }}
+                indicatorColor='primary'
+                textColor='primary'
+                variant='fullWidth'
+                aria-label='look up tabs'
+              >
+                <Tab label='LOOK UP HOUSEHOLD' />
+                <Tab label='LOOK UP INDIVIDUAL' />
+              </StyledTabs>
+            </DialogTitle>
+          </DialogTitleWrapper>
+          <DialogContent>
+            <TabPanel value={selectedTab} index={0}>
+              <LookUpHouseholdFilters
+                programs={programs as ProgramNode[]}
+                filter={debouncedFilterHousehold}
+                onFilterChange={setFilterHousehold}
+                choicesData={choicesData}
+              />
+              <LookUpHouseholdTable
+                filter={debouncedFilterHousehold}
+                businessArea={businessArea}
+                choicesData={choicesData}
+                setFieldValue={setFieldValue}
+                initialValues={initialValues}
+              />
+            </TabPanel>
+            <TabPanel value={selectedTab} index={1}>
+              <LookUpIndividualFilters
+                programs={programs as ProgramNode[]}
+                filter={debouncedFilterIndividual}
+                onFilterChange={setFilterIndividual}
+                choicesData={choicesData}
+              />
+              <LookUpIndividualTable
+                filter={debouncedFilterIndividual}
+                businessArea={businessArea}
+                setFieldValue={setFieldValue}
+                initialValues={initialValues}
+                valuesInner={values}
+              />
+            </TabPanel>
+          </DialogContent>
+          <DialogFooter>
+            <DialogActions>
+              <Box display='flex'>
+                <Box mr={1}>
+                  <Field
+                    name='identityVerified'
+                    label='Identity Verified*'
+                    component={FormikCheckboxField}
+                  />
                 </Box>
-              </DialogActions>
-            </DialogFooter>
-          </Dialog>
-        </>
+                <Button onClick={() => handleCancel()}>CANCEL</Button>
+                <Button
+                  type='submit'
+                  color='primary'
+                  variant='contained'
+                  onClick={submitForm}
+                  disabled={values.identityVerified === false}
+                  data-cy='button-submit'
+                >
+                  SAVE
+                </Button>
+              </Box>
+            </DialogActions>
+          </DialogFooter>
+        </Dialog>
       )}
     </Formik>
   );

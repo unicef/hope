@@ -15,6 +15,7 @@ import { StatusBox } from '../../StatusBox';
 import { UniversalMoment } from '../../UniversalMoment';
 import { Missing } from '../../Missing';
 import { Checkbox } from '@material-ui/core';
+import { Pointer } from '../../Pointer';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -57,7 +58,7 @@ export function LookUpPaymentRecordTableRow({
         />
       </TableCell>
       <TableCell onClick={handleClick} align='left'>
-        {decodeIdString(paymentRecord.id)}
+        <Pointer>{decodeIdString(paymentRecord.id)}</Pointer>
       </TableCell>
       <TableCell align='left'>
         {paymentRecord.verifications?.edges[0]?.node.status ? (

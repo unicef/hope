@@ -29,18 +29,18 @@ const DarkGrey = styled.span`
   cursor: pointer;
 `;
 
-export const LookUpPaymentRecordDisplay = ({
+export const LookUpRelatedTicketsDisplay = ({
   values,
   setLookUpDialogOpen,
   onValueChange,
 }): React.ReactElement => {
   const handleRemove = (): void => {
-    onValueChange('selectedPaymentRecords', []);
+    onValueChange('selectedRelatedTickets', '');
   };
-  const renderPaymentRecords = (): React.ReactElement => {
-    if (values.selectedPaymentRecords.length) {
-      return values.selectedPaymentRecords.map((record) => (
-        <BlueText>{decodeIdString(record)}</BlueText>
+  const renderRelatedTickets = (): React.ReactElement => {
+    if (values.selectedRelatedTickets.length) {
+      return values.selectedRelatedTickets.map((ticket) => (
+        <BlueText>{decodeIdString(ticket)}</BlueText>
       ));
     }
     return <BlueText>-</BlueText>;
@@ -50,8 +50,8 @@ export const LookUpPaymentRecordDisplay = ({
       <Grid container>
         <Grid item>
           <Box display='flex' flexDirection='column'>
-            Payment ID:
-            {renderPaymentRecords()}
+            Ticket ID:
+            {renderRelatedTickets()}
           </Box>
         </Grid>
         <Grid item>

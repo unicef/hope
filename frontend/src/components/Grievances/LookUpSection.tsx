@@ -2,7 +2,7 @@ import { Box, Grid } from '@material-ui/core';
 import React from 'react';
 import { LookUpHouseholdIndividual } from './LookUpHouseholdIndividual/LookUpHouseholdIndividual';
 import { LookUpPaymentRecord } from './LookUpPaymentRecord/LookUpPaymentRecord';
-import { LookUpRelatedTickets } from './LookUpRelatedTickets';
+import { LookUpRelatedTickets } from './LookUpRelatedTickets/LookUpRelatedTickets';
 
 export const LookUpSection = ({
   category,
@@ -29,7 +29,10 @@ export const LookUpSection = ({
             <Grid container>
               <Grid item xs={6}>
                 <Box p={3}>
-                  <LookUpRelatedTickets />
+                  <LookUpRelatedTickets
+                    values={values}
+                    onValueChange={onValueChange}
+                  />
                 </Box>
               </Grid>
             </Grid>
@@ -57,7 +60,10 @@ export const LookUpSection = ({
             <Grid container>
               <Grid item xs={6}>
                 <Box p={3}>
-                  <LookUpRelatedTickets />
+                  <LookUpRelatedTickets
+                    values={values}
+                    onValueChange={onValueChange}
+                  />
                 </Box>
               </Grid>
             </Grid>
@@ -85,7 +91,10 @@ export const LookUpSection = ({
             <Grid container>
               <Grid item xs={6}>
                 <Box p={3}>
-                  <LookUpRelatedTickets />
+                  <LookUpRelatedTickets
+                    values={values}
+                    onValueChange={onValueChange}
+                  />
                 </Box>
               </Grid>
             </Grid>
@@ -96,7 +105,10 @@ export const LookUpSection = ({
           <Grid container>
             <Grid item xs={6}>
               <Box p={3}>
-                <LookUpRelatedTickets />
+                <LookUpRelatedTickets
+                  values={values}
+                  onValueChange={onValueChange}
+                />
               </Box>
             </Grid>
           </Grid>
@@ -106,7 +118,10 @@ export const LookUpSection = ({
           <Grid container>
             <Grid item xs={6}>
               <Box p={3}>
-                <LookUpRelatedTickets />
+                <LookUpRelatedTickets
+                  values={values}
+                  onValueChange={onValueChange}
+                />
               </Box>
             </Grid>
           </Grid>
@@ -116,7 +131,10 @@ export const LookUpSection = ({
           <Grid container>
             <Grid item xs={6}>
               <Box p={3}>
-                <LookUpRelatedTickets />
+                <LookUpRelatedTickets
+                  values={values}
+                  onValueChange={onValueChange}
+                />
               </Box>
             </Grid>
           </Grid>
