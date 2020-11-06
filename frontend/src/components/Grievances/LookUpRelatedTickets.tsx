@@ -8,24 +8,14 @@ import {
   DialogContent,
   DialogTitle,
 } from '@material-ui/core';
-import { LookUpPaymentRecordTable } from './LookUpPaymentRecordTable/LookUpPaymentRecordTable';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { useDebounce } from '../../hooks/useDebounce';
+import { useGrievancesChoiceDataQuery } from '../../__generated__/graphql';
+import { LookUpRelatedTicketsFilters } from './LookUpRelatedTicketsTable/LookUpRelatedTicketsFilters';
+import { LookUpRelatedTicketsTable } from './LookUpRelatedTicketsTable/LookUpRelatedTicketsTable';
+import { LoadingComponent } from '../LoadingComponent';
+import { LookUpButton } from './LookUpButton';
 
-const LookUp = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1.5px solid #043e91;
-  border-radius: 5px;
-  color: #033f91;
-  font-size: 16px;
-  text-align: center;
-  padding: 25px;
-  font-weight: 500;
-  cursor: pointer;
-`;
-const MarginRightSpan = styled.span`
-  margin-right: 5px;
-`;
 const DialogFooter = styled.div`
   padding: 12px 16px;
   margin: 0;
@@ -36,17 +26,32 @@ const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
 `;
 
-export const LookUpPaymentRecord = (): React.ReactElement => {
+export const LookUpRelatedTickets = (): React.ReactElement => {
   const [lookUpDialogOpen, setLookUpDialogOpen] = useState(false);
+  const businessArea = useBusinessArea();
 
+  const [filter, setFilter] = useState({
+    search: '',
+    status: '',
+    fsp: '',
+    createdAtRange: '',
+    admin: '',
+  });
+  const debouncedFilter = useDebounce(filter, 500);
+  const {
+    data: choicesData,
+    loading: choicesLoading,
+  } = useGrievancesChoiceDataQuery();
+  if (!choicesData) return null;
+  if (choicesLoading) {
+    return <LoadingComponent />;
+  }
   return (
     <>
-      <LookUp onClick={() => setLookUpDialogOpen(true)}>
-        <MarginRightSpan>
-          <SearchIcon />
-        </MarginRightSpan>
-        <span>Look up Payment Record</span>
-      </LookUp>
+      <LookUpButton
+        title='Look up Related Tickets'
+        handleClick={() => setLookUpDialogOpen(true)}
+      />
       <Dialog
         maxWidth='lg'
         fullWidth
@@ -57,11 +62,19 @@ export const LookUpPaymentRecord = (): React.ReactElement => {
       >
         <DialogTitleWrapper>
           <DialogTitle id='scroll-dialog-title'>
-            Look up Payment Record
+            Look up Related Tickets
           </DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
-          <LookUpPaymentRecordTable cashPlanId='Q2FzaFBsYW5Ob2RlOmUwNzUzNWE1LWEzZGMtNDVjZi05MzVhLWQzNWJmZmY0YTFlZQ==' />
+          <LookUpRelatedTicketsFilters
+            choicesData={choicesData}
+            filter={debouncedFilter}
+            onFilterChange={setFilter}
+          />
+          <LookUpRelatedTicketsTable
+            filter={debouncedFilter}
+            businessArea={businessArea}
+          />
         </DialogContent>
         <DialogFooter>
           <DialogActions>
