@@ -31,13 +31,12 @@ class TestAlreadyExistingFilterTickets(APITestCase):
         issueType: $issueType, 
         household: $household, 
         individual: $individual, 
-        paymentRecord: $paymentRecord
+        paymentRecord: $paymentRecord,
+        orderBy: "area"
       ) {
         edges {
           node {
-            status
             category
-            area
             sensitiveTicketDetails {
               household {
                 size

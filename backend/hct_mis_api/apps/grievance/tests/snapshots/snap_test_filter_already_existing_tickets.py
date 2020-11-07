@@ -13,7 +13,6 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_pay
             'edges': [
                 {
                     'node': {
-                        'area': 'Body win lead investment out they beyond imagine.',
                         'category': 3,
                         'sensitiveTicketDetails': {
                             'household': {
@@ -25,8 +24,7 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_pay
                             'paymentRecord': {
                                 'fullName': 'John Doe'
                             }
-                        },
-                        'status': 1
+                        }
                     }
                 }
             ]
@@ -40,7 +38,6 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_hou
             'edges': [
                 {
                     'node': {
-                        'area': 'Economy recently often them writer trip.',
                         'category': 3,
                         'sensitiveTicketDetails': {
                             'household': {
@@ -52,31 +49,11 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_hou
                             'paymentRecord': {
                                 'fullName': 'John Doe'
                             }
-                        },
-                        'status': 4
+                        }
                     }
                 },
                 {
                     'node': {
-                        'area': 'Land trial reflect answer old which company.',
-                        'category': 3,
-                        'sensitiveTicketDetails': {
-                            'household': {
-                                'size': 1
-                            },
-                            'individual': {
-                                'fullName': 'John Doe'
-                            },
-                            'paymentRecord': {
-                                'fullName': 'John Doe'
-                            }
-                        },
-                        'status': 4
-                    }
-                },
-                {
-                    'node': {
-                        'area': 'People act step store.',
                         'category': 3,
                         'sensitiveTicketDetails': {
                             'household': {
@@ -86,8 +63,23 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_hou
                                 'fullName': 'John Doe'
                             },
                             'paymentRecord': None
-                        },
-                        'status': 5
+                        }
+                    }
+                },
+                {
+                    'node': {
+                        'category': 3,
+                        'sensitiveTicketDetails': {
+                            'household': {
+                                'size': 1
+                            },
+                            'individual': {
+                                'fullName': 'John Doe'
+                            },
+                            'paymentRecord': {
+                                'fullName': 'John Doe'
+                            }
+                        }
                     }
                 }
             ]
@@ -101,7 +93,22 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_ind
             'edges': [
                 {
                     'node': {
-                        'area': 'Unit other prepare mention word institution.',
+                        'category': 3,
+                        'sensitiveTicketDetails': {
+                            'household': {
+                                'size': 1
+                            },
+                            'individual': {
+                                'fullName': 'John Doe'
+                            },
+                            'paymentRecord': {
+                                'fullName': 'John Doe'
+                            }
+                        }
+                    }
+                },
+                {
+                    'node': {
                         'category': 3,
                         'sensitiveTicketDetails': {
                             'household': {
@@ -111,13 +118,11 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_ind
                                 'fullName': 'John Doe'
                             },
                             'paymentRecord': None
-                        },
-                        'status': 1
+                        }
                     }
                 },
                 {
                     'node': {
-                        'area': 'During improve choose draw peace against course.',
                         'category': 3,
                         'sensitiveTicketDetails': {
                             'household': {
@@ -129,26 +134,7 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_ind
                             'paymentRecord': {
                                 'fullName': 'John Doe'
                             }
-                        },
-                        'status': 2
-                    }
-                },
-                {
-                    'node': {
-                        'area': 'Piece while name including color.',
-                        'category': 3,
-                        'sensitiveTicketDetails': {
-                            'household': {
-                                'size': 1
-                            },
-                            'individual': {
-                                'fullName': 'John Doe'
-                            },
-                            'paymentRecord': {
-                                'fullName': 'John Doe'
-                            }
-                        },
-                        'status': 3
+                        }
                     }
                 }
             ]
@@ -162,7 +148,6 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_two
             'edges': [
                 {
                     'node': {
-                        'area': 'Attorney language member instead.',
                         'category': 3,
                         'sensitiveTicketDetails': {
                             'household': {
@@ -174,13 +159,11 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_two
                             'paymentRecord': {
                                 'fullName': 'John Doe'
                             }
-                        },
-                        'status': 5
+                        }
                     }
                 },
                 {
                     'node': {
-                        'area': 'Of sport full plan customer throw.',
                         'category': 3,
                         'sensitiveTicketDetails': {
                             'household': {
@@ -192,8 +175,7 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_two
                             'paymentRecord': {
                                 'fullName': 'John Doe'
                             }
-                        },
-                        'status': 5
+                        }
                     }
                 }
             ]
