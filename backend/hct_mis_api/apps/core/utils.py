@@ -227,7 +227,7 @@ def age_to_birth_date_range_query(field_name, age_min, age_max):
 
 
 def age_to_birth_date_query(comparision_method, args):
-    field_name = "individuals__birth_date"
+    field_name = "birth_date"
     comparision_method_args_count = {
         "RANGE": 2,
         "NOT_IN_RANGE": 2,

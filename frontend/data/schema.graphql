@@ -7,6 +7,39 @@ type ActivateCashPlanVerificationMutation {
   cashPlan: CashPlanNode
 }
 
+input AddIndividualDataObjectType {
+  fullName: String!
+  givenName: String!
+  middleName: String
+  familyName: String!
+  sex: String!
+  birthDate: Date
+  estimatedBirthDate: Boolean
+  maritalStatus: String
+  phoneNo: String
+  phoneNoAlternative: String
+  relationship: String
+  disability: Boolean
+  workStatus: String
+  enrolledInNutritionProgramme: Boolean
+  administrationOfRutf: Boolean
+  pregnant: Boolean
+  observedDisability: [String]
+  seeingDisability: String
+  hearingDisability: String
+  physicalDisability: String
+  memoryDisability: String
+  selfcareDisability: String
+  commsDisability: String
+  whoAnswersPhone: String
+  whoAnswersAltPhone: String
+}
+
+input AddIndividualIssueTypeExtras {
+  household: ID!
+  individualData: AddIndividualDataObjectType!
+}
+
 type AdminAreaNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -502,9 +535,9 @@ type GetCashplanVerificationSampleSizeObject {
 }
 
 input GrievanceComplaintTicketExtras {
-  household: ID!
-  individual: ID!
-  paymentRecord: ID!
+  household: ID
+  individual: ID
+  paymentRecord: ID
 }
 
 type GrievanceTicketNode implements Node {
@@ -527,6 +560,10 @@ type GrievanceTicketNode implements Node {
   grievanceticketSet(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   complaintTicketDetails: TicketComplaintDetailsNode
   sensitiveTicketDetails: TicketSensitiveDetailsNode
+  householdDataUpdateTicketDetails: TicketHouseholdDataUpdateDetailsNode
+  individualDataUpdateTicketDetails: TicketIndividualDataUpdateDetailsNode
+  addIndividualTicketDetails: TicketAddIndividualDetailsNode
+  deleteIndividualTicketDetails: TicketDeleteIndividualDetailsNode
 }
 
 type GrievanceTicketNodeConnection {
@@ -558,7 +595,7 @@ enum HouseholdConsentSharing {
 
 input HouseholdDataUpdateIssueTypeExtras {
   household: ID!
-  individual: ID!
+  householdData: HouseholdUpdateDataObjectType
 }
 
 type HouseholdNode implements Node {
@@ -615,6 +652,8 @@ type HouseholdNode implements Node {
   village: String!
   complaintTicketDetails(before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
   sensitiveTicketDetails(before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
+  householdDataUpdateTicketDetails(before: String, after: String, first: Int, last: Int): TicketHouseholdDataUpdateDetailsNodeConnection!
+  addIndividualTicketDetails(before: String, after: String, first: Int, last: Int): TicketAddIndividualDetailsNodeConnection!
   individualsAndRoles: [IndividualRoleInHouseholdNode!]!
   individuals(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
@@ -665,6 +704,42 @@ type HouseholdSelection {
 enum HouseholdStatus {
   ACTIVE
   INACTIVE
+}
+
+input HouseholdUpdateDataObjectType {
+  status: String
+  consent: Boolean
+  residenceStatus: String
+  countryOrigin: String
+  country: String
+  size: Int
+  address: String
+  femaleAgeGroup05Count: Int
+  femaleAgeGroup611Count: Int
+  femaleAgeGroup1217Count: Int
+  femaleAdultsCount: Int
+  pregnantCount: Int
+  maleAgeGroup05Count: Int
+  maleAgeGroup611Count: Int
+  maleAgeGroup1217Count: Int
+  maleAdultsCount: Int
+  femaleAgeGroup05DisabledCount: Int
+  femaleAgeGroup611DisabledCount: Int
+  femaleAgeGroup1217DisabledCount: Int
+  femaleAdultsDisabledCount: Int
+  maleAgeGroup05DisabledCount: Int
+  maleAgeGroup611DisabledCount: Int
+  maleAgeGroup1217DisabledCount: Int
+  maleAdultsDisabledCount: Int
+  returnee: Boolean
+  fchildHoh: Boolean
+  childHoh: Boolean
+  start: DateTime
+  end: DateTime
+  nameEnumerator: String
+  orgEnumerator: String
+  orgNameEnumerator: String
+  village: String
 }
 
 enum ImportDataDataType {
@@ -1214,7 +1289,7 @@ enum IndividualCommsDisability {
 
 input IndividualDataUpdateIssueTypeExtras {
   individual: ID!
-  household: ID!
+  individualData: IndividualUpdateDataObjectType!
 }
 
 enum IndividualDeduplicationBatchStatus {
@@ -1233,7 +1308,6 @@ enum IndividualDeduplicationGoldenRecordStatus {
 
 input IndividualDeleteIssueTypeExtras {
   individual: ID!
-  household: ID!
 }
 
 enum IndividualHearingDisability {
@@ -1311,6 +1385,8 @@ type IndividualNode implements Node {
   whoAnswersAltPhone: String!
   complaintTicketDetails(before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
   sensitiveTicketDetails(before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
+  individualDataUpdateTicketDetails(before: String, after: String, first: Int, last: Int): TicketIndividualDataUpdateDetailsNodeConnection!
+  deleteIndividualTicketDetails(before: String, after: String, first: Int, last: Int): TicketDeleteIndividualDetailsNodeConnection!
   representedHouseholds(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   headingHousehold: HouseholdNode
   documents(before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
@@ -1402,6 +1478,35 @@ enum IndividualStatus {
   INACTIVE
 }
 
+input IndividualUpdateDataObjectType {
+  status: String
+  fullName: String
+  givenName: String
+  middleName: String
+  familyName: String
+  sex: String
+  birthDate: Date
+  estimatedBirthDate: Boolean
+  maritalStatus: String
+  phoneNo: String
+  phoneNoAlternative: String
+  relationship: String
+  disability: Boolean
+  workStatus: String
+  enrolledInNutritionProgramme: Boolean
+  administrationOfRutf: Boolean
+  pregnant: Boolean
+  observedDisability: [String]
+  seeingDisability: String
+  hearingDisability: String
+  physicalDisability: String
+  memoryDisability: String
+  selfcareDisability: String
+  commsDisability: String
+  whoAnswersPhone: String
+  whoAnswersAltPhone: String
+}
+
 enum IndividualWorkStatus {
   YES
   NO
@@ -1412,6 +1517,7 @@ input IssueTypeExtrasInput {
   householdDataUpdateIssueTypeExtras: HouseholdDataUpdateIssueTypeExtras
   individualDataUpdateIssueTypeExtras: IndividualDataUpdateIssueTypeExtras
   individualDeleteIssueTypeExtras: IndividualDeleteIssueTypeExtras
+  addIndividualIssueTypeExtras: AddIndividualIssueTypeExtras
 }
 
 type IssueTypesObject {
@@ -1940,9 +2046,9 @@ type SaveKoboProjectImportDataMutation {
 }
 
 input SensitiveGrievanceTicketExtras {
-  household: ID!
-  individual: ID!
-  paymentRecord: ID!
+  household: ID
+  individual: ID
+  paymentRecord: ID
 }
 
 type ServiceProviderNode implements Node {
@@ -2160,6 +2266,26 @@ input TargetingIndividualRuleFilterBlockObjectType {
   individualBlockFilters: [TargetingCriteriaRuleFilterObjectType]
 }
 
+type TicketAddIndividualDetailsNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  household: HouseholdNode
+  individualData: Arg
+}
+
+type TicketAddIndividualDetailsNodeConnection {
+  pageInfo: PageInfo!
+  edges: [TicketAddIndividualDetailsNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type TicketAddIndividualDetailsNodeEdge {
+  node: TicketAddIndividualDetailsNode
+  cursor: String!
+}
+
 type TicketComplaintDetailsNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -2178,6 +2304,66 @@ type TicketComplaintDetailsNodeConnection {
 
 type TicketComplaintDetailsNodeEdge {
   node: TicketComplaintDetailsNode
+  cursor: String!
+}
+
+type TicketDeleteIndividualDetailsNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  individual: IndividualNode
+  individualData: Arg
+}
+
+type TicketDeleteIndividualDetailsNodeConnection {
+  pageInfo: PageInfo!
+  edges: [TicketDeleteIndividualDetailsNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type TicketDeleteIndividualDetailsNodeEdge {
+  node: TicketDeleteIndividualDetailsNode
+  cursor: String!
+}
+
+type TicketHouseholdDataUpdateDetailsNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  household: HouseholdNode
+  householdData: Arg
+}
+
+type TicketHouseholdDataUpdateDetailsNodeConnection {
+  pageInfo: PageInfo!
+  edges: [TicketHouseholdDataUpdateDetailsNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type TicketHouseholdDataUpdateDetailsNodeEdge {
+  node: TicketHouseholdDataUpdateDetailsNode
+  cursor: String!
+}
+
+type TicketIndividualDataUpdateDetailsNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  individual: IndividualNode
+  individualData: Arg
+}
+
+type TicketIndividualDataUpdateDetailsNodeConnection {
+  pageInfo: PageInfo!
+  edges: [TicketIndividualDataUpdateDetailsNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type TicketIndividualDataUpdateDetailsNodeEdge {
+  node: TicketIndividualDataUpdateDetailsNode
   cursor: String!
 }
 

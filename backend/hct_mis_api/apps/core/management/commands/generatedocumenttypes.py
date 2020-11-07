@@ -18,7 +18,7 @@ class Command(BaseCommand):
 
     def _generate_document_types_for_all_countries(self):
         identification_type_choice = tuple(
-            (doc_type, label) for doc_type, label in IDENTIFICATION_TYPE_CHOICE if doc_type != "OTHER"
+            (doc_type, label) for doc_type, label in IDENTIFICATION_TYPE_CHOICE
         )
         document_types = []
         rdh_document_types = []

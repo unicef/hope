@@ -91,7 +91,7 @@ class CreateGrievanceTicketMutation(graphene.Mutation):
 
     ISSUE_TYPE_OPTIONS = {
         GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE: {
-            "required": [],
+            "required": ["extras.issue_type.household_data_update_issue_type_extras"],
             "not_allowed": [
                 "individual_data_update_issue_type_extras",
                 "individual_delete_issue_type_extras",
@@ -105,7 +105,7 @@ class CreateGrievanceTicketMutation(graphene.Mutation):
             ],
         },
         GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL: {
-            "required": ['extras.issue_type.add_individual_issue_type_extras'],
+            "required": ["extras.issue_type.add_individual_issue_type_extras"],
             "not_allowed": [
                 "household_data_update_issue_type_extras",
                 "individual_data_update_issue_type_extras",
@@ -113,7 +113,7 @@ class CreateGrievanceTicketMutation(graphene.Mutation):
             ],
         },
         GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: {
-            "required": [],
+            "required": ["extras.issue_type.individual_delete_issue_type_extras"],
             "not_allowed": [
                 "household_data_update_issue_type_extras",
                 "individual_data_update_issue_type_extras",
@@ -197,5 +197,61 @@ class CreateGrievanceTicketMutation(graphene.Mutation):
             data_dict.pop(field, None)
 
 
+POSSIBLE_STATUS_FLOW = {
+    GrievanceTicket.STATUS_NEW: (GrievanceTicket.STATUS_ASSIGNED,),
+    GrievanceTicket.STATUS_ASSIGNED: (GrievanceTicket.STATUS_IN_PROGRESS,),
+    GrievanceTicket.STATUS_IN_PROGRESS: (GrievanceTicket.STATUS_ON_HOLD, GrievanceTicket.STATUS_FOR_APPROVAL),
+    GrievanceTicket.STATUS_ON_HOLD: (GrievanceTicket.STATUS_IN_PROGRESS, GrievanceTicket.STATUS_FOR_APPROVAL),
+    GrievanceTicket.STATUS_FOR_APPROVAL: (GrievanceTicket.STATUS_IN_PROGRESS, GrievanceTicket.STATUS_CLOSED),
+    GrievanceTicket.STATUS_CLOSED: tuple(),
+}
+POSSIBLE_FEEDBACK_STATUS_FLOW = {
+    GrievanceTicket.STATUS_NEW: (GrievanceTicket.STATUS_ASSIGNED,),
+    GrievanceTicket.STATUS_ASSIGNED: (GrievanceTicket.STATUS_IN_PROGRESS,),
+    GrievanceTicket.STATUS_IN_PROGRESS: (
+        GrievanceTicket.STATUS_ON_HOLD,
+        GrievanceTicket.STATUS_FOR_APPROVAL,
+        GrievanceTicket.STATUS_CLOSED,
+    ),
+    GrievanceTicket.STATUS_ON_HOLD: (
+        GrievanceTicket.STATUS_IN_PROGRESS,
+        GrievanceTicket.STATUS_FOR_APPROVAL,
+        GrievanceTicket.STATUS_CLOSED,
+    ),
+    GrievanceTicket.STATUS_FOR_APPROVAL: (GrievanceTicket.STATUS_IN_PROGRESS, GrievanceTicket.STATUS_CLOSED),
+    GrievanceTicket.STATUS_CLOSED: tuple(),
+}
+
+
+class GrievanceStatusChangeMutation(graphene.Mutation):
+    grievance_ticket = graphene.Field(GrievanceTicketNode)
+
+    class Arguments:
+        grievance_ticket_id = graphene.Argument(graphene.ID)
+        status = graphene.Int()
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root, info, grievance_ticket_id, status, **kwargs):
+        grievance_ticket_id = decode_id_string(grievance_ticket_id)
+        grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
+        if grievance_ticket.status == status:
+            return cls(grievance_ticket)
+        status_flow = POSSIBLE_STATUS_FLOW
+        if grievance_ticket.category in (
+            GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
+            GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+        ):
+            status_flow = POSSIBLE_FEEDBACK_STATUS_FLOW
+        if status not in status_flow[grievance_ticket.status]:
+            raise GraphQLError("New status is incorrect")
+        grievance_ticket.status = status
+        grievance_ticket.save()
+        grievance_ticket.refresh_from_db()
+        return cls(grievance_ticket=grievance_ticket)
+
+
 class Mutations(graphene.ObjectType):
     create_grievance_ticket = CreateGrievanceTicketMutation.Field()
+    grievance_status_change = GrievanceStatusChangeMutation.Field()
