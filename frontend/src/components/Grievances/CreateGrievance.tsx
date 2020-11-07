@@ -15,7 +15,7 @@ import { Consent } from './Consent';
 import { LookUpSection } from './LookUpSection';
 import {
   useAllIndividualsQuery,
-  useCreateGrievanceTicketMutation,
+  useCreateGrievanceMutation,
   useGrievancesChoiceDataQuery,
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../LoadingComponent';
@@ -94,7 +94,7 @@ export function CreateGrievance(): React.ReactElement {
     data: choicesData,
     loading: choicesLoading,
   } = useGrievancesChoiceDataQuery();
-  const [mutate] = useCreateGrievanceTicketMutation();
+  const [mutate] = useCreateGrievanceMutation();
 
   if (!choicesData || !individualsData) return null;
   if (individualsDataLoading || choicesLoading) {

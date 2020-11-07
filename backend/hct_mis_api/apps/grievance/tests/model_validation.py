@@ -12,7 +12,7 @@ class TestGrievanceModelValidation(TestCase):
         call_command("loadbusinessareas")
 
         cls.base_model_data = {
-            "status": GrievanceTicket.STATUS_OPEN,
+            "status": GrievanceTicket.STATUS_NEW,
             "description": "test description",
             "admin": "test admin",
             "area": "test area",
