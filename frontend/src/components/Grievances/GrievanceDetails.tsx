@@ -11,6 +11,7 @@ import { OverviewContainer } from '../OverviewContainer';
 import { PageHeader } from '../PageHeader';
 import { Notes } from './Notes';
 import { PastTickets } from './PastTickets';
+import {decodeIdString} from "../../utils/utils";
 
 const NotesContainer = styled.div`
   padding: 22px;
@@ -72,7 +73,7 @@ export function GrievanceDetails(): React.ReactElement {
 
   return (
     <div>
-      <PageHeader title={`Ticket #${id}`} breadCrumbs={breadCrumbsItems} />
+      <PageHeader title={`Ticket #${decodeIdString(id)}`} breadCrumbs={breadCrumbsItems} />
       <Grid container>
         <Grid item xs={12}>
           <ContainerColumnWithBorder>

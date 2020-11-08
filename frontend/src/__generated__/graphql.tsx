@@ -761,6 +761,11 @@ export type GrievanceComplaintTicketExtras = {
   paymentRecord?: Maybe<Scalars['ID']>,
 };
 
+export type GrievanceStatusChangeMutation = {
+   __typename?: 'GrievanceStatusChangeMutation',
+  grievanceTicket?: Maybe<GrievanceTicketNode>,
+};
+
 export type GrievanceTicketNode = Node & {
    __typename?: 'GrievanceTicketNode',
   id: Scalars['ID'],
@@ -2039,6 +2044,7 @@ export type MergeRegistrationDataImportMutation = {
 export type Mutations = {
    __typename?: 'Mutations',
   createGrievanceTicket?: Maybe<CreateGrievanceTicketMutation>,
+  grievanceStatusChange?: Maybe<GrievanceStatusChangeMutation>,
   createCashPlanPaymentVerification?: Maybe<CreatePaymentVerificationMutation>,
   editCashPlanPaymentVerification?: Maybe<EditPaymentVerificationMutation>,
   importXlsxCashPlanVerification?: Maybe<ImportXlsxCashPlanVerification>,
@@ -2071,6 +2077,12 @@ export type Mutations = {
 
 export type MutationsCreateGrievanceTicketArgs = {
   input: CreateGrievanceTicketInput
+};
+
+
+export type MutationsGrievanceStatusChangeArgs = {
+  grievanceTicketId?: Maybe<Scalars['ID']>,
+  status?: Maybe<Scalars['Int']>
 };
 
 
@@ -4892,7 +4904,7 @@ export type AllGrievanceTicketQuery = (
         & Pick<GrievanceTicketNode, 'id' | 'status' | 'category' | 'createdAt' | 'userModified'>
         & { assignedTo: Maybe<(
           { __typename?: 'UserNode' }
-          & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
+          & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
         )> }
       )> }
     )>> }
@@ -8130,6 +8142,7 @@ export const AllGrievanceTicketDocument = gql`
           id
           firstName
           lastName
+          email
         }
         category
         createdAt
@@ -11421,6 +11434,7 @@ export type ResolversTypes = {
   AddIndividualIssueTypeExtras: AddIndividualIssueTypeExtras,
   AddIndividualDataObjectType: AddIndividualDataObjectType,
   CreateGrievanceTicketMutation: ResolverTypeWrapper<CreateGrievanceTicketMutation>,
+  GrievanceStatusChangeMutation: ResolverTypeWrapper<GrievanceStatusChangeMutation>,
   CreatePaymentVerificationInput: CreatePaymentVerificationInput,
   RapidProArguments: RapidProArguments,
   CreatePaymentVerificationMutation: ResolverTypeWrapper<CreatePaymentVerificationMutation>,
@@ -11696,6 +11710,7 @@ export type ResolversParentTypes = {
   AddIndividualIssueTypeExtras: AddIndividualIssueTypeExtras,
   AddIndividualDataObjectType: AddIndividualDataObjectType,
   CreateGrievanceTicketMutation: CreateGrievanceTicketMutation,
+  GrievanceStatusChangeMutation: GrievanceStatusChangeMutation,
   CreatePaymentVerificationInput: CreatePaymentVerificationInput,
   RapidProArguments: RapidProArguments,
   CreatePaymentVerificationMutation: CreatePaymentVerificationMutation,
@@ -12107,6 +12122,10 @@ export interface GeoJsonScalarConfig extends GraphQLScalarTypeConfig<ResolversTy
 export type GetCashplanVerificationSampleSizeObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['GetCashplanVerificationSampleSizeObject'] = ResolversParentTypes['GetCashplanVerificationSampleSizeObject']> = {
   paymentRecordCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   sampleSize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type GrievanceStatusChangeMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['GrievanceStatusChangeMutation'] = ResolversParentTypes['GrievanceStatusChangeMutation']> = {
+  grievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType>,
 };
 
 export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['GrievanceTicketNode'] = ResolversParentTypes['GrievanceTicketNode']> = {
@@ -12583,6 +12602,7 @@ export type MergeRegistrationDataImportMutationResolvers<ContextType = any, Pare
 
 export type MutationsResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutations'] = ResolversParentTypes['Mutations']> = {
   createGrievanceTicket?: Resolver<Maybe<ResolversTypes['CreateGrievanceTicketMutation']>, ParentType, ContextType, RequireFields<MutationsCreateGrievanceTicketArgs, 'input'>>,
+  grievanceStatusChange?: Resolver<Maybe<ResolversTypes['GrievanceStatusChangeMutation']>, ParentType, ContextType, MutationsGrievanceStatusChangeArgs>,
   createCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['CreatePaymentVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsCreateCashPlanPaymentVerificationArgs, 'input'>>,
   editCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['EditPaymentVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsEditCashPlanPaymentVerificationArgs, 'input'>>,
   importXlsxCashPlanVerification?: Resolver<Maybe<ResolversTypes['ImportXlsxCashPlanVerification']>, ParentType, ContextType, RequireFields<MutationsImportXlsxCashPlanVerificationArgs, 'cashPlanVerificationId' | 'file'>>,
@@ -13428,6 +13448,7 @@ export type Resolvers<ContextType = any> = {
   FlexFieldsScalar?: GraphQLScalarType,
   GeoJSON?: GraphQLScalarType,
   GetCashplanVerificationSampleSizeObject?: GetCashplanVerificationSampleSizeObjectResolvers<ContextType>,
+  GrievanceStatusChangeMutation?: GrievanceStatusChangeMutationResolvers<ContextType>,
   GrievanceTicketNode?: GrievanceTicketNodeResolvers<ContextType>,
   GrievanceTicketNodeConnection?: GrievanceTicketNodeConnectionResolvers<ContextType>,
   GrievanceTicketNodeEdge?: GrievanceTicketNodeEdgeResolvers<ContextType>,
