@@ -29069,6 +29069,39 @@
             "deprecationReason": null
           },
           {
+            "name": "grievanceStatusChange",
+            "description": null,
+            "args": [
+              {
+                "name": "grievanceTicketId",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "status",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "GrievanceStatusChangeMutation",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "createCashPlanPaymentVerification",
             "description": null,
             "args": [
@@ -31289,6 +31322,29 @@
                 "name": "GrievanceTicketNode",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "GrievanceStatusChangeMutation",
+        "description": null,
+        "fields": [
+          {
+            "name": "grievanceTicket",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "GrievanceTicketNode",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
