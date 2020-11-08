@@ -6,9 +6,13 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { Pointer } from '../../Pointer';
 import { ClickableTableRow } from '../../table/ClickableTableRow';
 import { StatusBox } from '../../StatusBox';
-import { cashPlanStatusToColor } from '../../../utils/utils';
+import { cashPlanStatusToColor, decodeIdString } from '../../../utils/utils';
 import { Missing } from '../../Missing';
 import { UniversalMoment } from '../../UniversalMoment';
+import {
+  AllGrievanceTicketQuery,
+  GrievancesChoiceDataQuery,
+} from '../../../__generated__/graphql';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -16,11 +20,13 @@ const StatusContainer = styled.div`
 `;
 
 interface GrievancesTableRowProps {
-  ticket;
+  ticket: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'];
+  statusChoices: { [id: number]: string };
 }
 
 export function GrievancesTableRow({
   ticket,
+  statusChoices,
 }: GrievancesTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
@@ -29,7 +35,7 @@ export function GrievancesTableRow({
     const path = `/${businessArea}/grievance-and-feedback/${ticket.id}`;
     history.push(path);
   };
-
+  console.log('ticket', ticket);
   return (
     <ClickableTableRow
       hover
@@ -37,16 +43,20 @@ export function GrievancesTableRow({
       role='checkbox'
       key={ticket.id}
     >
-      <TableCell align='left'>{ticket.id}</TableCell>
+      <TableCell align='left'>{decodeIdString(ticket.id)}</TableCell>
       <TableCell align='left'>
         <StatusContainer>
           <StatusBox
-            status={ticket.status}
+            status={statusChoices[ticket.status]}
             statusToColor={cashPlanStatusToColor}
           />
         </StatusContainer>
       </TableCell>
-      <TableCell align='left'>{`${ticket.assignedTo.firstName} ${ticket.assignedTo.lastName}`}</TableCell>
+      <TableCell align='left'>
+        {ticket.assignedTo.firstName
+          ? `${ticket.assignedTo.firstName} ${ticket.assignedTo.lastName}`
+          : ticket.assignedTo.email}
+      </TableCell>
       <TableCell align='left'>{ticket.category}</TableCell>
       <TableCell align='left'>
         <Missing />

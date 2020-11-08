@@ -15,6 +15,7 @@ import { Consent } from './Consent';
 import { LookUpSection } from './LookUpSection';
 import {
   useAllIndividualsQuery,
+  useAllUsersQuery,
   useCreateGrievanceMutation,
   useGrievancesChoiceDataQuery,
 } from '../../__generated__/graphql';
@@ -81,14 +82,15 @@ export function CreateGrievance(): React.ReactElement {
       to: `/${businessArea}/grievance-and-feedback/`,
     },
   ];
-  const {
-    data: individualsData,
-    loading: individualsDataLoading,
-  } = useAllIndividualsQuery({
-    variables: {
-      first: 20,
-    },
-  });
+  // const {
+  //   data: individualsData,
+  //   loading: individualsDataLoading,
+  // } = useAllIndividualsQuery({
+  //   variables: {
+  //     first: 20,
+  //   },
+  // });
+  const { data: userData, loading: userDataLoading } = useAllUsersQuery({variables:{businessArea}});
 
   const {
     data: choicesData,
@@ -96,17 +98,17 @@ export function CreateGrievance(): React.ReactElement {
   } = useGrievancesChoiceDataQuery();
   const [mutate] = useCreateGrievanceMutation();
 
-  if (!choicesData || !individualsData) return null;
-  if (individualsDataLoading || choicesLoading) {
+  if (userDataLoading || choicesLoading) {
     return <LoadingComponent />;
   }
+  if (!choicesData || !userData) return null;
 
-  const mappedIndividuals = individualsData.allIndividuals.edges.map(
-    (edge) => ({
-      name: edge.node.fullName,
-      value: edge.node.id,
-    }),
-  );
+  const mappedIndividuals = userData.allUsers.edges.map((edge) => ({
+    name: edge.node.firstName
+      ? `${edge.node.firstName} ${edge.node.lastName}`
+      : edge.node.email,
+    value: edge.node.id,
+  }));
 
   return (
     <Formik
