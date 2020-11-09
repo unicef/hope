@@ -3,7 +3,7 @@ import React from 'react';
 import styled from 'styled-components';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { useHouseholdQuery } from '../../__generated__/graphql';
+import { decodeIdString } from '../../../utils/utils';
 
 const StyledBox = styled.div`
   border: 1.5px solid #043e91;
@@ -29,37 +29,29 @@ const DarkGrey = styled.span`
   cursor: pointer;
 `;
 
-export const LookUpHouseholdIndividualDisplay = ({
+export const LookUpPaymentRecordDisplay = ({
   values,
   setLookUpDialogOpen,
   onValueChange,
 }): React.ReactElement => {
   const handleRemove = (): void => {
-    onValueChange('selectedHousehold', '');
-    onValueChange('selectedIndividual', '');
+    onValueChange('selectedPaymentRecords', []);
   };
-
-  const { data, loading } = useHouseholdQuery({
-    variables: {
-      id: values.selectedHousehold,
-    },
-  });
-
-  if (loading) return null;
-  const { household } = data;
+  const renderPaymentRecords = (): React.ReactElement => {
+    if (values.selectedPaymentRecords.length) {
+      return values.selectedPaymentRecords.map((record) => (
+        <BlueText>{decodeIdString(record)}</BlueText>
+      ));
+    }
+    return <BlueText>-</BlueText>;
+  };
   return (
     <StyledBox>
       <Grid container>
         <Grid item>
           <Box display='flex' flexDirection='column'>
-            <span>
-              Household ID:
-              <BlueText>{household?.unicefId || '-'}</BlueText>
-            </span>
-            <span>
-              Individual ID:
-              <BlueText>{values.selectedIndividual || '-'}</BlueText>
-            </span>
+            Payment ID:
+            {renderPaymentRecords()}
           </Box>
         </Grid>
         <Grid item>

@@ -3,6 +3,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
 import { LabelizedField } from '../LabelizedField';
+import { Missing } from '../Missing';
 import { OverviewContainer } from '../OverviewContainer';
 
 const PastContainer = styled.div`
@@ -19,7 +20,9 @@ export function PastTickets({ tickets }): React.ReactElement {
     <PastContainer>
       <ContainerColumnWithBorder>
         <Title>
-          <Typography variant='h6'>Past tickets</Typography>
+          <Typography variant='h6'>
+            Past tickets <Missing />
+          </Typography>
         </Title>
         <OverviewContainer>
           <LabelizedField label='TICKET ID'>
