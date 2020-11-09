@@ -540,6 +540,10 @@ input GrievanceComplaintTicketExtras {
   paymentRecord: ID
 }
 
+type GrievanceStatusChangeMutation {
+  grievanceTicket: GrievanceTicketNode
+}
+
 type GrievanceTicketNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -1599,6 +1603,7 @@ type MergeRegistrationDataImportMutation {
 
 type Mutations {
   createGrievanceTicket(input: CreateGrievanceTicketInput!): CreateGrievanceTicketMutation
+  grievanceStatusChange(grievanceTicketId: ID, status: Int): GrievanceStatusChangeMutation
   createCashPlanPaymentVerification(input: CreatePaymentVerificationInput!): CreatePaymentVerificationMutation
   editCashPlanPaymentVerification(input: EditCashPlanPaymentVerificationInput!): EditPaymentVerificationMutation
   importXlsxCashPlanVerification(cashPlanVerificationId: ID!, file: Upload!): ImportXlsxCashPlanVerification

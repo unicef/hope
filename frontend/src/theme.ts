@@ -36,11 +36,13 @@ export const theme = {
   },
   hctPalette: {
     oragne: '#FC942A',
+    blue: '#D8E1EE',
     green: '#10CB16',
     gray: '#4E606A',
     lightGray: '#d8d8d8',
     lighterGray: '#e4e4e4',
     red: '#EF4343',
+    brown: '#D9D1CE',
   },
   hctTypography: {
     fontFamily: FONT,
