@@ -192,6 +192,33 @@ export function userStatusToColor(
       return theme.palette.error.main;
   }
 }
+export function grievanceTicketStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  switch (status) {
+    //new
+    case '1':
+      return theme.hctPalette.oragne;
+    //assigned
+    case '2':
+      return theme.hctPalette.blue;
+    //in progress
+    case '3':
+      return theme.hctPalette.green;
+    //on hold
+    case '4':
+      return theme.palette.error.main;
+    //for approval
+    case '5':
+      return theme.hctPalette.brown;
+    //closed
+    case '6':
+      return theme.hctPalette.gray;
+    default:
+      return theme.palette.error.main;
+  }
+}
 
 export function isAuthenticated(): boolean {
   return Boolean(localStorage.getItem('AUTHENTICATED'));
