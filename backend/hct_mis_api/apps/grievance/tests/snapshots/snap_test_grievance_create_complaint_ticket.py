@@ -27,8 +27,7 @@ snapshots['TestGrievanceCreateComplaintTicketQuery::test_create_complaint_ticket
                     },
                     'consent': True,
                     'description': 'Test Feedback',
-                    'language': 'Polish, English',
-                    'status': 1
+                    'language': 'Polish, English'
                 }
             ]
         }
@@ -49,8 +48,7 @@ snapshots['TestGrievanceCreateComplaintTicketQuery::test_create_complaint_ticket
                     },
                     'consent': True,
                     'description': 'Test Feedback',
-                    'language': 'Polish, English',
-                    'status': 1
+                    'language': 'Polish, English'
                 }
             ]
         }
@@ -75,8 +73,7 @@ snapshots['TestGrievanceCreateComplaintTicketQuery::test_create_complaint_ticket
                     },
                     'consent': True,
                     'description': 'Test Feedback',
-                    'language': 'Polish, English',
-                    'status': 1
+                    'language': 'Polish, English'
                 }
             ]
         }
@@ -101,8 +98,7 @@ snapshots['TestGrievanceCreateComplaintTicketQuery::test_create_complaint_ticket
                     },
                     'consent': True,
                     'description': 'Test Feedback',
-                    'language': 'Polish, English',
-                    'status': 1
+                    'language': 'Polish, English'
                 }
             ]
         }
@@ -127,8 +123,7 @@ snapshots['TestGrievanceCreateComplaintTicketQuery::test_create_complaint_ticket
                     },
                     'consent': True,
                     'description': 'Test Feedback',
-                    'language': 'Polish, English',
-                    'status': 1
+                    'language': 'Polish, English'
                 }
             ]
         }
