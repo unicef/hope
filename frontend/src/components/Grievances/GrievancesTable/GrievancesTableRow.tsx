@@ -3,16 +3,15 @@ import styled from 'styled-components';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { Pointer } from '../../Pointer';
 import { ClickableTableRow } from '../../table/ClickableTableRow';
 import { StatusBox } from '../../StatusBox';
-import { cashPlanStatusToColor, decodeIdString } from '../../../utils/utils';
+import {
+  decodeIdString,
+  grievanceTicketStatusToColor,
+} from '../../../utils/utils';
 import { Missing } from '../../Missing';
 import { UniversalMoment } from '../../UniversalMoment';
-import {
-  AllGrievanceTicketQuery,
-  GrievancesChoiceDataQuery,
-} from '../../../__generated__/graphql';
+import { AllGrievanceTicketQuery } from '../../../__generated__/graphql';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -35,7 +34,6 @@ export function GrievancesTableRow({
     const path = `/${businessArea}/grievance-and-feedback/${ticket.id}`;
     history.push(path);
   };
-  console.log('ticket', ticket);
   return (
     <ClickableTableRow
       hover
@@ -48,7 +46,7 @@ export function GrievancesTableRow({
         <StatusContainer>
           <StatusBox
             status={statusChoices[ticket.status]}
-            statusToColor={cashPlanStatusToColor}
+            statusToColor={grievanceTicketStatusToColor}
           />
         </StatusContainer>
       </TableCell>
