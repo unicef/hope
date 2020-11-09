@@ -10,6 +10,8 @@ from cash_assist_datahub import fixtures as cash_assist_datahub_fixtures
 from cash_assist_datahub.models import Session, Programme
 from core.fixtures import AdminAreaFactory, AdminAreaTypeFactory
 from core.models import BusinessArea, AdminArea
+from grievance.fixtures import GrievanceTicketFactory, SensitiveGrievanceTicketWithoutExtrasFactory, \
+    GrievanceComplaintTicketWithoutExtrasFactory
 from household.elasticsearch_utils import rebuild_search_index
 from household.fixtures import (
     EntitlementCardFactory,
@@ -140,9 +142,31 @@ class Command(BaseCommand):
 
                 household.programs.add(program)
 
-                PaymentRecordFactory(
+                payment_record = PaymentRecordFactory(
                     cash_plan=cash_plan, household=household, target_population=target_population,
                 )
+
+                should_create_grievance = random.choice((True, False))
+                if should_create_grievance:
+                    grievance_type = random.choice(("feedback", "sensitive", "complaint"))
+                    should_contain_payment_record = random.choice((True, False))
+
+                    switch_dict = {
+                        "feedback": lambda: GrievanceTicketFactory(),
+                        "sensitive": lambda: SensitiveGrievanceTicketWithoutExtrasFactory(
+                            household=household,
+                            individual=random.choice(individuals),
+                            payment_record=payment_record if should_contain_payment_record else None,
+                        ),
+                        "complaint": lambda: GrievanceComplaintTicketWithoutExtrasFactory(
+                            household=household,
+                            individual=random.choice(individuals),
+                            payment_record=payment_record if should_contain_payment_record else None,
+                        ),
+                    }
+
+                    grievance_ticket = switch_dict.get(grievance_type)()
+
                 EntitlementCardFactory(household=household)
         CashPlanPaymentVerificationFactory.create_batch(1)
         PaymentVerificationFactory.create_batch(100)

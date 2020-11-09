@@ -15,7 +15,6 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
     mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
       createGrievanceTicket(input: $input) {
         grievanceTickets{
-          status
           category
           issueType
           admin

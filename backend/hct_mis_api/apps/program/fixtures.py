@@ -6,6 +6,7 @@ from factory import fuzzy
 from pytz import utc
 
 from core.fixtures import AdminAreaFactory
+from core.models import BusinessArea
 from payment.models import PaymentRecord
 from program.models import Program, CashPlan
 
@@ -14,6 +15,7 @@ class ProgramFactory(factory.DjangoModelFactory):
     class Meta:
         model = Program
 
+    business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
     name = factory.Faker("sentence", nb_words=6, variable_nb_words=True, ext_word_list=None,)
     status = fuzzy.FuzzyChoice(Program.STATUS_CHOICE, getter=lambda c: c[0],)
     start_date = factory.Faker("date_time_this_decade", before_now=False, after_now=True, tzinfo=utc,)
@@ -45,6 +47,7 @@ class CashPlanFactory(factory.DjangoModelFactory):
     class Meta:
         model = CashPlan
 
+    business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
     program = factory.SubFactory(ProgramFactory)
     status_date = factory.Faker("date_time_this_decade", before_now=False, after_now=True, tzinfo=utc,)
     status = fuzzy.FuzzyChoice(CashPlan.STATUS_CHOICE, getter=lambda c: c[0],)
