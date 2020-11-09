@@ -32,7 +32,8 @@ from registration_datahub.models import (
     ImportedIndividual,
     ImportedIndividualIdentity,
     ImportedIndividualRoleInHousehold,
-    RegistrationDataImportDatahub, ImportedHouseholdIdentity,
+    RegistrationDataImportDatahub,
+    ImportedHouseholdIdentity,
 )
 from registration_datahub.tasks.deduplicate import DeduplicateTask
 from registration_datahub.tasks.utils import collectors_str_ids_to_list
@@ -204,13 +205,13 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
         agency = ImportedAgency.objects.get(type="WFP" if header == "scope_id_no_i_c" else "UNHCR")
 
-        identities_data = self.identities.get(f"individual_{row_num}")
+        identities_data = self.identities.get(f"individual_{row_num}_{agency.type}")
 
         if identities_data:
             identities_data["number"] = value
             identities_data["agency"] = agency
 
-        self.identities[f"individual_{row_num}"] = {
+        self.identities[f"individual_{row_num}_{agency.type}"] = {
             "individual": individual,
             "number": value,
             "agency": agency,
@@ -235,11 +236,13 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             "agency": agency,
         }
 
-    def _handle_identity_photo(self, cell, row_num, individual, *args, **kwargs):
+    def _handle_identity_photo(self, cell, row_num, header, individual, *args, **kwargs):
         if not self.image_loader.image_in(cell.coordinate):
             return
 
-        identity_data = self.identities.get(f"individual_{row_num}")
+        agency_type = "WFP" if "scope_id" in header else "UNHCR"
+
+        identity_data = self.identities.get(f"individual_{row_num}_{agency_type}")
 
         image = self.image_loader.get(cell.coordinate)
         file_name = f"{cell.coordinate}-{timezone.now()}.jpg"
@@ -252,7 +255,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         if identity_data:
             identity_data["photo"] = file
         else:
-            self.identities[f"individual_{row_num}"] = {
+            self.identities[f"individual_{row_num}_{agency_type}"] = {
                 "individual": individual,
                 "photo": file_name,
             }
@@ -328,11 +331,13 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 "electoral_card_no_i_c": self._handle_document_fields,
                 "electoral_card_photo_i_c": self._handle_document_photo_fields,
                 "unhcr_id_no_i_c": self._handle_identity_fields,
-                "national_id_no_ic": self._handle_document_fields,
-                "national_id_photo_ic": self._handle_document_photo_fields,
+                "unhcr_id_photo_i_c": self._handle_identity_photo,
+                "national_id_no_i_c": self._handle_document_fields,
+                "national_id_photo_i_c": self._handle_document_photo_fields,
                 "national_passport_i_c": self._handle_document_fields,
                 "national_passport_photo_i_c": self._handle_document_photo_fields,
                 "scope_id_no_i_c": self._handle_identity_fields,
+                "scope_id_photo_i_c": self._handle_identity_photo,
                 "other_id_type_i_c": self._handle_document_fields,
                 "other_id_no_i_c": self._handle_document_fields,
                 "other_id_photo_i_c": self._handle_document_photo_fields,
@@ -532,9 +537,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         "other_id_photo_i_c",
     }
 
-    HOUSEHOLD_IDENTITIES_FIELDS = (
-        "unhcr_id_h_c",
-    )
+    HOUSEHOLD_IDENTITIES_FIELDS = ("unhcr_id_h_c",)
 
     reduced_submissions = None
     business_area = None
