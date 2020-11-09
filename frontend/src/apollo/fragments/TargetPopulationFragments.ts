@@ -9,6 +9,9 @@ export const targetPopulationMinimal = gql`
     updatedAt
     candidateListTotalHouseholds
     finalListTotalHouseholds
+    program {
+      name
+    }
     createdBy {
       firstName
       lastName
