@@ -18,9 +18,9 @@ import {
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../LoadingComponent';
 import { useSnackbar } from '../../hooks/useSnackBar';
-import { AdminAreasAutocomplete } from '../population/AdminAreaAutocomplete';
 import { Consent } from './Consent';
 import { LookUpSection } from './LookUpSection';
+import { FormikAdminAreaAutocomplete } from '../../shared/Formik/FormikAdminAreaAutocomplete';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -54,6 +54,8 @@ export function CreateGrievance(): React.ReactElement {
     category: null,
     language: '',
     consent: false,
+    admin: '',
+    area: '',
     selectedHousehold: '',
     selectedIndividual: '',
     selectedPaymentRecords: [],
@@ -67,6 +69,8 @@ export function CreateGrievance(): React.ReactElement {
     category: Yup.string()
       .required('Category is required')
       .nullable(),
+    admin: Yup.string(),
+    area: Yup.string(),
     language: Yup.string().required('Language is required'),
     consent: Yup.bool().oneOf([true], 'Consent is required'),
     // selectedHousehold: Yup.string().required('Household has to be selected'),
@@ -117,6 +121,8 @@ export function CreateGrievance(): React.ReactElement {
               category: parseInt(values.category, 10),
               consent: values.consent,
               language: values.language,
+              admin: values.admin,
+              area: values.area,
             },
           },
         }).then(
@@ -197,7 +203,7 @@ export function CreateGrievance(): React.ReactElement {
                           name='admin'
                           label='Administrative Level 2'
                           variant='outlined'
-                          component={AdminAreasAutocomplete}
+                          component={FormikAdminAreaAutocomplete}
                         />
                       </Grid>
                       <Grid item xs={6}>
