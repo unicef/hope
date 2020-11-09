@@ -58,7 +58,6 @@ class Individual(SessionModel):
     unicef_id = models.CharField(max_length=255, null=True)
     household_mis_id = models.UUIDField(null=True)
     status = models.CharField(max_length=50, choices=STATUS_CHOICE, null=True,)
-    national_id_number = models.CharField(max_length=255, null=True)
     full_name = models.CharField(max_length=255)
     family_name = models.CharField(max_length=255, null=True)
     given_name = models.CharField(max_length=255, null=True)
