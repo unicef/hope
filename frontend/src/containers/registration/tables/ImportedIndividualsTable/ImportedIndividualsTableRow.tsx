@@ -1,7 +1,6 @@
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import styled from 'styled-components';
 import { TableRow } from '@material-ui/core';
 import {
   HouseholdChoiceDataQuery,
@@ -15,14 +14,12 @@ import {
 } from '../../../../utils/utils';
 import { DedupeResults } from '../../details/DedupeResults';
 import { UniversalMoment } from '../../../../components/UniversalMoment';
+import { Pointer } from '../../../../components/Pointer';
 
 interface ImportedIndividualsTableRowProps {
   individual: ImportedIndividualMinimalFragment;
   choices: HouseholdChoiceDataQuery;
 }
-const Pointer = styled.span`
-  cursor: pointer;
-`;
 
 export function ImportedIndividualsTableRow({
   individual,

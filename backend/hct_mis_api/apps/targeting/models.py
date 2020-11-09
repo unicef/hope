@@ -142,12 +142,40 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
             Flag set when TP is processed by airflow task
             """,
     )
+    steficon_rule = models.ForeignKey(
+        "steficon.Rule", null=True, on_delete=models.SET_NULL, related_name="target_populations"
+    )
+    vulnerability_score_min = models.DecimalField(
+        null=True,
+        decimal_places=3,
+        max_digits=6,
+        help_text="Written by a tool such as Corticon.",
+    )
+    vulnerability_score_max = models.DecimalField(
+        null=True,
+        decimal_places=3,
+        max_digits=6,
+        help_text="Written by a tool such as Corticon.",
+    )
+
+    @property
+    def vulnerability_score_filtered_households(self):
+        queryset = self.households
+        if self.vulnerability_score_max is not None:
+            queryset = queryset.filter(selections__vulnerability_score__lte=self.vulnerability_score_max)
+        if self.vulnerability_score_min is not None:
+            queryset = queryset.filter(selections__vulnerability_score__gte=self.vulnerability_score_min)
+        return queryset.distinct()
 
     @property
     def final_list(self):
         if self.status == TargetPopulation.STATUS_DRAFT:
             return []
-        return self.households.filter(selections__final=True).order_by("created_at").distinct()
+        return (
+            self.vulnerability_score_filtered_households.filter(selections__final=True)
+            .order_by("created_at")
+            .distinct()
+        )
 
     @property
     def candidate_stats(self):
@@ -156,7 +184,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
                 "id"
             )
         else:
-            households_ids = self.households.values_list("id")
+            households_ids = self.vulnerability_score_filtered_households.values_list("id")
         delta18 = relativedelta(years=+18)
         date18ago = datetime.datetime.now() - delta18
         child_male = Individual.objects.filter(
@@ -192,7 +220,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
         if self.status == TargetPopulation.STATUS_DRAFT:
             return None
         elif self.status == TargetPopulation.STATUS_APPROVED:
-            households_ids = self.households.filter(self.final_list_targeting_criteria.get_query()).values_list("id")
+            households_ids = self.vulnerability_score_filtered_households.filter(self.final_list_targeting_criteria.get_query()).values_list("id")
         else:
             households_ids = self.final_list.values_list("id")
         delta18 = relativedelta(years=+18)
@@ -475,6 +503,7 @@ class TargetingCriteriaFilterMixin:
 
     def __str__(self):
         return f"{self.field_name} {self.comparision_method} {self.arguments}"
+
 
 # TODO It should be household only
 class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterMixin):

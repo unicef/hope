@@ -7,6 +7,7 @@ from django.core.exceptions import ValidationError
 from django.db.models import Q, F, Model
 from django.db.models.functions import Lower
 from django.forms import model_to_dict
+from django.shortcuts import get_object_or_404
 from django.template.defaultfilters import slugify
 from django.utils.itercompat import is_iterable
 from django_filters import OrderingFilter
@@ -226,7 +227,7 @@ def age_to_birth_date_range_query(field_name, age_min, age_max):
 
 
 def age_to_birth_date_query(comparision_method, args):
-    field_name = "individuals__birth_date"
+    field_name = "birth_date"
     comparision_method_args_count = {
         "RANGE": 2,
         "NOT_IN_RANGE": 2,
@@ -291,6 +292,14 @@ def nested_getattr(obj, attr, default=raise_attribute_error):
         if default != raise_attribute_error:
             return default
         raise
+
+
+def nested_dict_get(dictionary, path):
+    import functools
+
+    return functools.reduce(
+        lambda d, key: d.get(key, None) if isinstance(d, dict) else None, path.split("."), dictionary
+    )
 
 
 def get_count_and_percentage(input_list, all_items_list):
@@ -378,7 +387,7 @@ class CustomOrderingFilter(OrderingFilter):
             if field.startswith("-"):
                 field_name = field[1:]
                 desc = True
-            if isinstance(self.lower_dict.get(field_name),Lower):
+            if isinstance(self.lower_dict.get(field_name), Lower):
                 lower_field = self.lower_dict.get(field_name)
                 if desc:
                     lower_field = lower_field.desc()
@@ -417,3 +426,23 @@ class CustomOrderingFilter(OrderingFilter):
             self.lower_dict[field_name] = field
 
         return OrderedDict([(f, f) if isinstance(f, (str, Lower)) else f for f in new_fields])
+
+
+def is_valid_uuid(uuid_str):
+    from uuid import UUID
+
+    try:
+        UUID(uuid_str, version=4)
+        return True
+    except ValueError:
+        return False
+
+
+def choices_to_dict(choices):
+    return {value: name for value, name in choices}
+
+
+def decode_and_get_object(encoded_id, model, required):
+    if required is True or encoded_id is not None:
+        decoded_id = decode_id_string(encoded_id)
+        return get_object_or_404(model, id=decoded_id)

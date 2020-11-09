@@ -26,7 +26,9 @@ export function ProgrammeTableRow({ household }): React.ReactElement {
       key={household.id}
     >
       <TableCell align='left'>{decodeIdString(household.id)}</TableCell>
-      <TableCell align='left'>-</TableCell>
+      <TableCell align='left'>
+        {household.selection.vulnerabilityScore || '-'}
+      </TableCell>
       <TableCell align='left'>{`${household.headOfHousehold.givenName} ${household.headOfHousehold.familyName}`}</TableCell>
       <TableCell align='left'>{household.size}</TableCell>
       <TableCell align='left'>-</TableCell>

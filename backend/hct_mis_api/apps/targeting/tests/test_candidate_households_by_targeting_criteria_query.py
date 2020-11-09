@@ -108,7 +108,7 @@ class CandidateListTargetingCriteriaQueryTestCase(APITestCase):
     def test_candidate_households_list_by_targeting_criteria_size(self):
         self.snapshot_graphql_request(
             request_string=CandidateListTargetingCriteriaQueryTestCase.QUERY,
-            variables={"targetPopulation": self.id_to_base64(self.target_population_size_2.id, "TargetPopulation")},
+            variables={"targetPopulation": self.id_to_base64(self.target_population_size_2.id, "TargetPopulationNode")},
         )
 
     def test_candidate_households_list_by_targeting_criteria_residence_status(
@@ -119,7 +119,7 @@ class CandidateListTargetingCriteriaQueryTestCase(APITestCase):
             variables={
                 "targetPopulation": self.id_to_base64(
                     self.target_population_residence_status.id,
-                    "TargetPopulation",
+                    "TargetPopulationNode",
                 )
             },
         )
@@ -130,7 +130,7 @@ class CandidateListTargetingCriteriaQueryTestCase(APITestCase):
             variables={
                 "targetPopulation": self.id_to_base64(
                     self.target_population_size_1_approved.id,
-                    "TargetPopulation",
+                    "TargetPopulationNode",
                 )
             },
         )
@@ -138,5 +138,5 @@ class CandidateListTargetingCriteriaQueryTestCase(APITestCase):
     def test_candidate_households_list_by_targeting_criteria_first_10(self):
         self.snapshot_graphql_request(
             request_string=CandidateListTargetingCriteriaQueryTestCase.QUERY_FIRST_10,
-            variables={"targetPopulation": self.id_to_base64(self.target_population_size_2.id, "TargetPopulation")},
+            variables={"targetPopulation": self.id_to_base64(self.target_population_size_2.id, "TargetPopulationNode")},
         )

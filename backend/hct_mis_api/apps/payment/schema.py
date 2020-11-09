@@ -10,7 +10,8 @@ from graphene_django.filter import DjangoFilterConnectionField
 from core.extended_connection import ExtendedConnection
 from core.filters import filter_age
 from core.schema import ChoiceObject
-from core.utils import decode_id_string, to_choice_object, CustomOrderingFilter
+from core.utils import to_choice_object, decode_id_string, is_valid_uuid, CustomOrderingFilter
+from household.models import ROLE_NO_ROLE
 from payment.inputs import GetCashplanVerificationSampleSizeInput
 from payment.models import CashPlanPaymentVerification, PaymentRecord, PaymentVerification, ServiceProvider
 from payment.rapid_pro.api import RapidProAPI
@@ -19,6 +20,8 @@ from program.models import CashPlan
 
 
 class PaymentRecordFilter(FilterSet):
+    individual = CharFilter(method="individual_filter")
+
     class Meta:
         fields = (
             "cash_plan",
@@ -41,6 +44,11 @@ class PaymentRecordFilter(FilterSet):
             "entitlement__delivery_date",
         )
     )
+
+    def individual_filter(self, qs, name, value):
+        if is_valid_uuid(value):
+            return qs.exclude(household__individuals_and_roles__role=ROLE_NO_ROLE)
+        return qs
 
 
 class PaymentVerificationFilter(FilterSet):

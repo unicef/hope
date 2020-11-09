@@ -1,52 +1,70 @@
+import { Radio } from '@material-ui/core';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { choicesToDict, formatCurrency } from '../../../utils/utils';
 import {
   HouseholdChoiceDataQuery,
   HouseholdNode,
 } from '../../../__generated__/graphql';
+import { Pointer } from '../../Pointer';
 import { ClickableTableRow } from '../../table/ClickableTableRow';
 import { UniversalMoment } from '../../UniversalMoment';
 
 interface LookUpHouseholdTableRowProps {
   household: HouseholdNode;
+  radioChangeHandler: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  selectedHousehold: string;
   choicesData: HouseholdChoiceDataQuery;
 }
 
 export function LookUpHouseholdTableRow({
   household,
-  choicesData,
+  radioChangeHandler,
+  selectedHousehold,
 }: LookUpHouseholdTableRowProps): React.ReactElement {
-  const history = useHistory();
   const businessArea = useBusinessArea();
-  const residenceStatusChoiceDict = choicesToDict(
-    choicesData.residenceStatusChoices,
-  );
+
   const handleClick = (): void => {
     const path = `/${businessArea}/population/household/${household.id}`;
-    history.push(path);
+    const win = window.open(path, '_blank rel=noopener');
+    if (win != null) {
+      win.focus();
+    }
   };
+  const renderPrograms = (): string => {
+    const programNames = household.programs?.edges?.map(
+      (edge) => edge.node.name,
+    );
+    return programNames?.length ? programNames.join(', ') : '-';
+  };
+  const renderAdminLevel2 = (): string => {
+    if (household?.adminArea?.adminAreaType?.adminLevel === 2) {
+      return household?.adminArea?.title;
+    }
+    return '-';
+  };
+
   return (
-    <ClickableTableRow
-      hover
-      onClick={handleClick}
-      role='checkbox'
-      key={household.unicefId}
-    >
-      <TableCell align='left'>{household.unicefId}</TableCell>
+    <ClickableTableRow hover role='checkbox' key={household.id}>
+      <TableCell padding='checkbox'>
+        <Radio
+          color='primary'
+          checked={selectedHousehold === household.id}
+          onChange={radioChangeHandler}
+          value={household.id}
+          name='radio-button-household'
+          inputProps={{ 'aria-label': household.id }}
+        />
+      </TableCell>
+      <TableCell onClick={handleClick} align='left'>
+        <Pointer>{household.unicefId}</Pointer>
+      </TableCell>
       <TableCell align='left'>{household.headOfHousehold.fullName}</TableCell>
       <TableCell align='left'>{household.size}</TableCell>
-      <TableCell align='left'>{household.adminArea?.title || '-'}</TableCell>
+      <TableCell align='left'>{renderAdminLevel2()}</TableCell>
+      <TableCell align='left'>{renderPrograms()}</TableCell>
       <TableCell align='left'>
-        {residenceStatusChoiceDict[household.residenceStatus]}
-      </TableCell>
-      <TableCell align='right'>
-        {formatCurrency(household.totalCashReceived)}
-      </TableCell>
-      <TableCell align='right'>
-        <UniversalMoment>{household.firstRegistrationDate}</UniversalMoment>
+        <UniversalMoment>{household.lastRegistrationDate}</UniversalMoment>
       </TableCell>
     </ClickableTableRow>
   );

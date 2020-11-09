@@ -1,23 +1,25 @@
 import React from 'react';
 import styled from 'styled-components';
+import moment from 'moment';
 import SearchIcon from '@material-ui/icons/Search';
-import CakeIcon from '@material-ui/icons/Cake';
 import WcIcon from '@material-ui/icons/Wc';
-import { InputAdornment, MenuItem, TextField } from '@material-ui/core';
+import FlashOnIcon from '@material-ui/icons/FlashOn';
+import {
+  Box,
+  Grid,
+  InputAdornment,
+  MenuItem,
+  TextField,
+} from '@material-ui/core';
+import { KeyboardDatePicker } from '@material-ui/pickers';
 import FormControl from '@material-ui/core/FormControl';
 import { ContainerWithBorder } from '../../ContainerWithBorder';
 import InputLabel from '../../../shared/InputLabel';
 import Select from '../../../shared/Select';
-
-const TextContainer = styled(TextField)`
-  input[type='number']::-webkit-inner-spin-button,
-  input[type='number']::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-  }
-  input[type='number'] {
-    -moz-appearance: textfield;
-  }
-`;
+import { FieldLabel } from '../../FieldLabel';
+import { HouseholdChoiceDataQuery } from '../../../__generated__/graphql';
+import { AdminAreasAutocomplete } from '../../population/AdminAreaAutocomplete';
+import { Missing } from '../../Missing';
 
 const StyledFormControl = styled(FormControl)`
   width: 232px;
@@ -38,101 +40,188 @@ const StartInputAdornment = styled(InputAdornment)`
 interface LookUpIndividualFiltersProps {
   onFilterChange;
   filter;
+  programs;
+  choicesData: HouseholdChoiceDataQuery;
 }
 export function LookUpIndividualFilters({
   onFilterChange,
   filter,
+  programs,
+  choicesData,
 }: LookUpIndividualFiltersProps): React.ReactElement {
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
   return (
     <ContainerWithBorder>
-      <SearchTextField
-        label='Search'
-        variant='outlined'
-        margin='dense'
-        value={filter.text}
-        onChange={(e) => handleFilterChange(e, 'text')}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position='start'>
-              <SearchIcon />
-            </InputAdornment>
-          ),
-        }}
-        data-cy='filters-search'
-      />
-      <StyledFormControl variant='outlined' margin='dense'>
-        <InputLabel>Gender</InputLabel>
-        <Select
-          /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
-          // @ts-ignore
-          onChange={(e) => handleFilterChange(e, 'sex')}
-          variant='outlined'
-          value={filter.sex || ''}
-          label='Gender'
-          InputProps={{
-            startAdornment: (
-              <StartInputAdornment position='start'>
-                <WcIcon />
-              </StartInputAdornment>
-            ),
-          }}
-          SelectDisplayProps={{
-            'data-cy': 'filters-sex',
-          }}
-          MenuProps={{
-            'data-cy': 'filters-sex-options',
-          }}
-        >
-          <MenuItem value=''>
-            <em>None</em>
-          </MenuItem>
-          <MenuItem value='MALE'>Male</MenuItem>
-          <MenuItem value='FEMALE'>Female</MenuItem>
-        </Select>
-      </StyledFormControl>
-      <TextContainer
-        variant='outlined'
-        margin='dense'
-        label='Age'
-        value={filter.age.min}
-        onChange={(e) =>
-          onFilterChange({
-            ...filter,
-            age: { ...filter.age, min: e.target.value || undefined },
-          })
-        }
-        type='number'
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position='start'>
-              <CakeIcon />
-            </InputAdornment>
-          ),
-        }}
-      />
-      to
-      <TextContainer
-        variant='outlined'
-        margin='dense'
-        label='Age'
-        value={filter.age.max}
-        onChange={(e) =>
-          onFilterChange({
-            ...filter,
-            age: { ...filter.age, max: e.target.value || undefined },
-          })
-        }
-        type='number'
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position='start'>
-              <CakeIcon />
-            </InputAdornment>
-          ),
-        }}
-      />
+      <Grid container alignItems='flex-end' spacing={3}>
+        <Grid item>
+          <SearchTextField
+            label='Search'
+            variant='outlined'
+            margin='dense'
+            value={filter.search}
+            onChange={(e) => handleFilterChange(e, 'search')}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position='start'>
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+            }}
+            data-cy='filters-search'
+          />
+        </Grid>
+        <Grid item>
+          <Missing />
+          <StyledFormControl variant='outlined' margin='dense'>
+            <InputLabel>Programme</InputLabel>
+            <Select
+              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
+              // @ts-ignore
+              onChange={(e) => handleFilterChange(e, 'programme')}
+              variant='outlined'
+              label='Programme'
+              value={filter.programme || ''}
+              InputProps={{
+                startAdornment: (
+                  <StartInputAdornment position='start'>
+                    <FlashOnIcon />
+                  </StartInputAdornment>
+                ),
+              }}
+            >
+              <MenuItem value=''>
+                <em>None</em>
+              </MenuItem>
+              {programs.map((program) => (
+                <MenuItem key={program.id} value={program.id}>
+                  {program.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </StyledFormControl>
+        </Grid>
+        <Grid item>
+          <Box display='flex' flexDirection='column'>
+            <FieldLabel>Registration Date</FieldLabel>
+            <KeyboardDatePicker
+              variant='inline'
+              disableToolbar
+              inputVariant='outlined'
+              margin='dense'
+              placeholder='From'
+              autoOk
+              onChange={(date) =>
+                onFilterChange({
+                  ...filter,
+                  lastRegistrationDate: {
+                    ...filter.lastRegistrationDate,
+                    min: date ? moment(date).format('YYYY-MM-DD') : null,
+                  },
+                })
+              }
+              value={filter.lastRegistrationDate.min || null}
+              format='YYYY-MM-DD'
+              InputAdornmentProps={{ position: 'end' }}
+            />
+          </Box>
+        </Grid>
+        <Grid item>
+          <KeyboardDatePicker
+            variant='inline'
+            disableToolbar
+            inputVariant='outlined'
+            margin='dense'
+            placeholder='To'
+            autoOk
+            onChange={(date) =>
+              onFilterChange({
+                ...filter,
+                lastRegistrationDate: {
+                  ...filter.lastRegistrationDate,
+                  max: date ? moment(date).format('YYYY-MM-DD') : null,
+                },
+              })
+            }
+            value={filter.lastRegistrationDate.max || null}
+            format='YYYY-MM-DD'
+            InputAdornmentProps={{ position: 'end' }}
+          />
+        </Grid>
+        <Grid item>
+          <StyledFormControl variant='outlined' margin='dense'>
+            <InputLabel>Status</InputLabel>
+            <Select
+              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
+              // @ts-ignore
+              onChange={(e) => handleFilterChange(e, 'status')}
+              multiple
+              variant='outlined'
+              label='Status'
+              value={filter.status || []}
+            >
+              <MenuItem value=''>
+                <em>None</em>
+              </MenuItem>
+              {[
+                { value: 'ACTIVE', name: 'Active' },
+                { value: 'INACTIVE', name: 'Inactive' },
+              ].map((item) => {
+                return (
+                  <MenuItem key={item.value} value={item.value}>
+                    {item.name}
+                  </MenuItem>
+                );
+              })}
+            </Select>
+          </StyledFormControl>
+        </Grid>
+        <Grid item>
+          <Missing />
+          <AdminAreasAutocomplete
+            value={filter.admin2}
+            onChange={(e, option) => {
+              if (!option) {
+                onFilterChange({ ...filter, admin2: undefined });
+                return;
+              }
+              onFilterChange({ ...filter, admin2: option.node.id });
+            }}
+          />
+        </Grid>
+        <Grid item>
+          <StyledFormControl variant='outlined' margin='dense'>
+            <InputLabel>Gender</InputLabel>
+            <Select
+              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
+              // @ts-ignore
+              onChange={(e) => handleFilterChange(e, 'sex')}
+              variant='outlined'
+              value={filter.sex || ''}
+              label='Gender'
+              InputProps={{
+                startAdornment: (
+                  <StartInputAdornment position='start'>
+                    <WcIcon />
+                  </StartInputAdornment>
+                ),
+              }}
+              SelectDisplayProps={{
+                'data-cy': 'filters-sex',
+              }}
+              MenuProps={{
+                'data-cy': 'filters-sex-options',
+              }}
+            >
+              <MenuItem value=''>
+                <em>None</em>
+              </MenuItem>
+              <MenuItem value='MALE'>Male</MenuItem>
+              <MenuItem value='FEMALE'>Female</MenuItem>
+            </Select>
+          </StyledFormControl>
+        </Grid>
+      </Grid>
     </ContainerWithBorder>
   );
 }
