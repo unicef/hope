@@ -11,16 +11,16 @@ import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
-import { Consent } from './Consent';
-import { LookUpSection } from './LookUpSection';
 import {
-  useAllIndividualsQuery,
+  useAllUsersQuery,
   useCreateGrievanceMutation,
   useGrievancesChoiceDataQuery,
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../LoadingComponent';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { AdminAreasAutocomplete } from '../population/AdminAreaAutocomplete';
+import { Consent } from './Consent';
+import { LookUpSection } from './LookUpSection';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -56,17 +56,23 @@ export function CreateGrievance(): React.ReactElement {
     consent: false,
     selectedHousehold: '',
     selectedIndividual: '',
+    selectedPaymentRecords: [],
+    selectedRelatedTickets: [],
     identityVerified: false,
   };
 
   const validationSchema = Yup.object().shape({
     description: Yup.string().required('Description is required'),
     assignedTo: Yup.string().required('Assigned To is required'),
-    category: Yup.number().required('Category is required'),
+    category: Yup.string()
+      .required('Category is required')
+      .nullable(),
     language: Yup.string().required('Language is required'),
-    consent: Yup.boolean().required('Consent is required'),
-    selectedHousehold: Yup.string().required('Household has to be selected'),
-    selectedIndividual: Yup.string().required('Individual has to be selected'),
+    consent: Yup.bool().oneOf([true], 'Consent is required'),
+    // selectedHousehold: Yup.string().required('Household has to be selected'),
+    // selectedIndividual: Yup.string().required('Individual has to be selected'),
+    // selectedPaymentRecords: Yup.array.of(Yup.string()),
+    // selectedRelatedTickets: Yup.array.of(Yup.string()),
   });
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
@@ -75,10 +81,10 @@ export function CreateGrievance(): React.ReactElement {
       to: `/${businessArea}/grievance-and-feedback/`,
     },
   ];
-  const {
-    data: individualsData,
-    loading: individualsDataLoading,
-  } = useAllIndividualsQuery();
+
+  const { data: userData, loading: userDataLoading } = useAllUsersQuery({
+    variables: { businessArea },
+  });
 
   const {
     data: choicesData,
@@ -86,17 +92,17 @@ export function CreateGrievance(): React.ReactElement {
   } = useGrievancesChoiceDataQuery();
   const [mutate] = useCreateGrievanceMutation();
 
-  if (!choicesData || !individualsData) return null;
-  if (individualsDataLoading || choicesLoading) {
+  if (userDataLoading || choicesLoading) {
     return <LoadingComponent />;
   }
+  if (!choicesData || !userData) return null;
 
-  const mappedIndividuals = individualsData.allIndividuals.edges.map(
-    (edge) => ({
-      name: edge.node.fullName,
-      value: edge.node.id,
-    }),
-  );
+  const mappedIndividuals = userData.allUsers.edges.map((edge) => ({
+    name: edge.node.firstName
+      ? `${edge.node.firstName} ${edge.node.lastName}`
+      : edge.node.email,
+    value: edge.node.id,
+  }));
 
   return (
     <Formik
@@ -149,7 +155,7 @@ export function CreateGrievance(): React.ReactElement {
                     <Box display='flex' flexDirection='column'>
                       <Consent />
                       <Field
-                        name='receivedConsent'
+                        name='consent'
                         label='Received Consent*'
                         color='primary'
                         component={FormikCheckboxField}
@@ -178,11 +184,11 @@ export function CreateGrievance(): React.ReactElement {
                     <Grid container spacing={3}>
                       <Grid item xs={12}>
                         <Field
-                          name='Description*'
+                          name='description'
                           multiline
                           fullWidth
                           variant='outlined'
-                          label='Description'
+                          label='Description*'
                           component={FormikTextField}
                         />
                       </Grid>

@@ -2,19 +2,18 @@ import styled from 'styled-components';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import { Checkbox } from '@material-ui/core';
 import { PaymentRecordNode } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
   decodeIdString,
   formatCurrency,
-  paymentRecordStatusToColor,
   verificationRecordsStatusToColor,
 } from '../../../utils/utils';
 import { ClickableTableRow } from '../../table/ClickableTableRow';
 import { StatusBox } from '../../StatusBox';
-import { UniversalMoment } from '../../UniversalMoment';
 import { Missing } from '../../Missing';
-import { Checkbox } from '@material-ui/core';
+import { Pointer } from '../../Pointer';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -25,7 +24,10 @@ interface LookUpPaymentRecordTableRowProps {
   paymentRecord: PaymentRecordNode;
   openInNewTab: boolean;
   selected: Array<string>;
-  checkboxClickHandler;
+  checkboxClickHandler: (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+    number,
+  ) => void;
 }
 
 export function LookUpPaymentRecordTableRow({
@@ -57,18 +59,24 @@ export function LookUpPaymentRecordTableRow({
         />
       </TableCell>
       <TableCell onClick={handleClick} align='left'>
-        {paymentRecord.id}
+        <Pointer>{decodeIdString(paymentRecord.id)}</Pointer>
       </TableCell>
       <TableCell align='left'>
-        <StatusContainer>
-          <StatusBox
-            status={paymentRecord.verifications?.edges[0]?.node.status || ''}
-            statusToColor={verificationRecordsStatusToColor}
-          />
-        </StatusContainer>
+        {paymentRecord.verifications?.edges[0]?.node.status ? (
+          <StatusContainer>
+            <StatusBox
+              status={paymentRecord.verifications?.edges[0]?.node.status}
+              statusToColor={verificationRecordsStatusToColor}
+            />
+          </StatusContainer>
+        ) : (
+          '-'
+        )}
       </TableCell>
       <TableCell align='left'>{paymentRecord.cashPlan.name}</TableCell>
-      <TableCell align='right'>{paymentRecord.deliveredQuantity}</TableCell>
+      <TableCell align='right'>
+        {formatCurrency(paymentRecord.deliveredQuantity)}
+      </TableCell>
       <TableCell align='right'>
         <Missing />
       </TableCell>
