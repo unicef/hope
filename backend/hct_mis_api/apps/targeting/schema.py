@@ -2,8 +2,8 @@ import django_filters
 import graphene
 from django.db.models import Q, Prefetch
 from django.db.models.functions import Lower
-from django_filters import FilterSet, CharFilter
-from graphene import relay, Scalar
+from django_filters import FilterSet, CharFilter, ModelMultipleChoiceFilter
+from graphene import relay
 from graphene_django import DjangoObjectType, DjangoConnectionField
 from graphene_django.filter import DjangoFilterConnectionField
 
@@ -15,19 +15,14 @@ from core.schema import ExtendedConnection, FieldAttributeNode, ChoiceObject
 from core.utils import decode_id_string, CustomOrderingFilter
 from household.models import Household
 from household.schema import HouseholdNode
+from program.models import Program
 from targeting.validators import TargetingCriteriaInputValidator
 from utils.schema import Arg
 
 
 class HouseholdFilter(FilterSet):
     order_by = CustomOrderingFilter(
-        fields=(
-            "id",
-            Lower("head_of_household__full_name"),
-            "size",
-            Lower("admin_area__title"),
-            "updated_at",
-        )
+        fields=("id", Lower("head_of_household__full_name"), "size", Lower("admin_area__title"), "updated_at",)
     )
 
 
@@ -40,39 +35,24 @@ class TargetPopulationFilter(django_filters.FilterSet):
     name = django_filters.CharFilter(field_name="name", lookup_expr="icontains")
     created_by_name = django_filters.CharFilter(field_name="created_by", method="filter_created_by_name")
     candidate_list_total_households_min = IntegerFilter(
-        field_name="candidate_list_total_households",
-        lookup_expr="gte",
+        field_name="candidate_list_total_households", lookup_expr="gte",
     )
     candidate_list_total_households_max = IntegerFilter(
-        field_name="candidate_list_total_households",
-        lookup_expr="lte",
+        field_name="candidate_list_total_households", lookup_expr="lte",
     )
     candidate_list_total_individuals_min = IntegerFilter(
-        field_name="candidate_list_total_individuals",
-        lookup_expr="gte",
+        field_name="candidate_list_total_individuals", lookup_expr="gte",
     )
     candidate_list_total_individuals_max = IntegerFilter(
-        field_name="candidate_list_total_individuals",
-        lookup_expr="lte",
+        field_name="candidate_list_total_individuals", lookup_expr="lte",
     )
 
-    final_list_total_households_min = IntegerFilter(
-        field_name="final_list_total_households",
-        lookup_expr="gte",
-    )
-    final_list_total_households_max = IntegerFilter(
-        field_name="final_list_total_households",
-        lookup_expr="lte",
-    )
-    final_list_total_individuals_min = IntegerFilter(
-        field_name="final_list_total_individuals",
-        lookup_expr="gte",
-    )
-    final_list_total_individuals_max = IntegerFilter(
-        field_name="final_list_total_individuals",
-        lookup_expr="lte",
-    )
+    final_list_total_households_min = IntegerFilter(field_name="final_list_total_households", lookup_expr="gte",)
+    final_list_total_households_max = IntegerFilter(field_name="final_list_total_households", lookup_expr="lte",)
+    final_list_total_individuals_min = IntegerFilter(field_name="final_list_total_individuals", lookup_expr="gte",)
+    final_list_total_individuals_max = IntegerFilter(field_name="final_list_total_individuals", lookup_expr="lte",)
     business_area = CharFilter(field_name="business_area__slug")
+    program = ModelMultipleChoiceFilter(field_name="program", to_field_name="id", queryset=Program.objects.all())
 
     @staticmethod
     def filter_created_by_name(queryset, model_field, value):
@@ -110,9 +90,6 @@ class TargetPopulationFilter(django_filters.FilterSet):
             "total_family_size",
         )
     )
-
-
-
 
 
 class TargetingCriteriaRuleFilterNode(DjangoObjectType):
@@ -252,8 +229,7 @@ def targeting_criteria_object_type_to_query(targeting_criteria_object_type):
 def prefetch_selections(qs, target_population=None):
     return qs.prefetch_related(
         Prefetch(
-            "selections",
-            queryset=target_models.HouseholdSelection.objects.filter(target_population=target_population),
+            "selections", queryset=target_models.HouseholdSelection.objects.filter(target_population=target_population),
         )
     )
 
@@ -262,14 +238,10 @@ class Query(graphene.ObjectType):
     target_population = relay.Node.Field(TargetPopulationNode)
     all_target_population = DjangoFilterConnectionField(TargetPopulationNode)
     golden_record_by_targeting_criteria = DjangoFilterConnectionField(
-        HouseholdNode,
-        targeting_criteria=TargetingCriteriaObjectType(required=True),
-        filterset_class=HouseholdFilter,
+        HouseholdNode, targeting_criteria=TargetingCriteriaObjectType(required=True), filterset_class=HouseholdFilter,
     )
     candidate_households_list_by_targeting_criteria = DjangoFilterConnectionField(
-        HouseholdNode,
-        target_population=graphene.Argument(graphene.ID, required=True),
-        filterset_class=HouseholdFilter,
+        HouseholdNode, target_population=graphene.Argument(graphene.ID, required=True), filterset_class=HouseholdFilter,
     )
     final_households_list_by_targeting_criteria = DjangoFilterConnectionField(
         HouseholdNode,
@@ -289,7 +261,9 @@ class Query(graphene.ObjectType):
             return prefetch_selections(
                 Household.objects.filter(target_population_model.candidate_list_targeting_criteria.get_query()),
             ).distinct()
-        return prefetch_selections(target_population_model.vulnerability_score_filtered_households, target_population_model).all()
+        return prefetch_selections(
+            target_population_model.vulnerability_score_filtered_households, target_population_model
+        ).all()
 
     def resolve_final_households_list_by_targeting_criteria(
         parent, info, target_population, targeting_criteria=None, **kwargs
@@ -313,10 +287,7 @@ class Query(graphene.ObjectType):
                     )
                 else:
                     return (
-                        prefetch_selections(
-                            target_population_model.households,
-                            target_population_model,
-                        )
+                        prefetch_selections(target_population_model.households, target_population_model,)
                         .order_by("created_at")
                         .all()
                     )

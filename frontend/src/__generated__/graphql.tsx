@@ -281,6 +281,7 @@ export type BusinessAreaNodeTargetpopulationSetArgs = {
   finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
   finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -1005,6 +1006,7 @@ export type HouseholdNodeTargetPopulationsArgs = {
   finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
   finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -2451,6 +2453,7 @@ export type ProgramNodeTargetpopulationSetArgs = {
   finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
   finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -2501,6 +2504,7 @@ export type Query = {
    __typename?: 'Query',
   grievanceTicket?: Maybe<GrievanceTicketNode>,
   allGrievanceTicket?: Maybe<GrievanceTicketNodeConnection>,
+  existingGrievanceTickets?: Maybe<GrievanceTicketNodeConnection>,
   grievanceTicketStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   grievanceTicketCategoryChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   grievanceTicketIssueTypeChoices?: Maybe<Array<Maybe<IssueTypesObject>>>,
@@ -2595,6 +2599,22 @@ export type QueryAllGrievanceTicketArgs = {
   fsp?: Maybe<Array<Maybe<Scalars['ID']>>>,
   admin?: Maybe<Array<Maybe<Scalars['ID']>>>,
   createdAtRange?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type QueryExistingGrievanceTicketsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  id?: Maybe<Scalars['UUID']>,
+  businessArea: Scalars['String'],
+  category: Scalars['String'],
+  issueType?: Maybe<Scalars['String']>,
+  household?: Maybe<Scalars['ID']>,
+  individual?: Maybe<Scalars['ID']>,
+  paymentRecord?: Maybe<Array<Maybe<Scalars['ID']>>>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -2772,6 +2792,7 @@ export type QueryAllTargetPopulationArgs = {
   finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
   finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -3269,6 +3290,7 @@ export type SteficonRuleNodeTargetPopulationsArgs = {
   finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
   finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -3798,6 +3820,7 @@ export type UserBusinessAreaNodeTargetpopulationSetArgs = {
   finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
   finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -3894,6 +3917,7 @@ export type UserNodeTargetPopulationsArgs = {
   finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
   finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -3918,6 +3942,7 @@ export type UserNodeApprovedTargetPopulationsArgs = {
   finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
   finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -3942,6 +3967,7 @@ export type UserNodeFinalizedTargetPopulationsArgs = {
   finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
   finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -4047,6 +4073,7 @@ export type UserObjectTypeTargetPopulationsArgs = {
   finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
   finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -4071,6 +4098,7 @@ export type UserObjectTypeApprovedTargetPopulationsArgs = {
   finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
   finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -4095,6 +4123,7 @@ export type UserObjectTypeFinalizedTargetPopulationsArgs = {
   finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
   finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -4308,7 +4337,10 @@ export type IndividualDetailedFragment = (
 export type TargetPopulationMinimalFragment = (
   { __typename?: 'TargetPopulationNode' }
   & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'createdAt' | 'updatedAt' | 'candidateListTotalHouseholds' | 'finalListTotalHouseholds'>
-  & { createdBy: Maybe<(
+  & { program: Maybe<(
+    { __typename?: 'ProgramNode' }
+    & Pick<ProgramNode, 'name'>
+  )>, createdBy: Maybe<(
     { __typename?: 'UserNode' }
     & Pick<UserNode, 'firstName' | 'lastName'>
   )> }
@@ -5176,7 +5208,8 @@ export type AllTargetPopulationsQueryVariables = {
   status?: Maybe<Scalars['String']>,
   candidateListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
   candidateListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
-  businessArea?: Maybe<Scalars['String']>
+  businessArea?: Maybe<Scalars['String']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>
 };
 
 
@@ -6322,6 +6355,9 @@ export const TargetPopulationMinimalFragmentDoc = gql`
   updatedAt
   candidateListTotalHouseholds
   finalListTotalHouseholds
+  program {
+    name
+  }
   createdBy {
     firstName
     lastName
@@ -8816,8 +8852,8 @@ export type AllSteficonRulesQueryHookResult = ReturnType<typeof useAllSteficonRu
 export type AllSteficonRulesLazyQueryHookResult = ReturnType<typeof useAllSteficonRulesLazyQuery>;
 export type AllSteficonRulesQueryResult = ApolloReactCommon.QueryResult<AllSteficonRulesQuery, AllSteficonRulesQueryVariables>;
 export const AllTargetPopulationsDocument = gql`
-    query AllTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String, $candidateListTotalHouseholdsMin: Int, $candidateListTotalHouseholdsMax: Int, $businessArea: String) {
-  allTargetPopulation(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name: $name, status: $status, candidateListTotalHouseholdsMin: $candidateListTotalHouseholdsMin, candidateListTotalHouseholdsMax: $candidateListTotalHouseholdsMax, businessArea: $businessArea) {
+    query AllTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String, $candidateListTotalHouseholdsMin: Int, $candidateListTotalHouseholdsMax: Int, $businessArea: String, $program: [ID]) {
+  allTargetPopulation(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name: $name, status: $status, candidateListTotalHouseholdsMin: $candidateListTotalHouseholdsMin, candidateListTotalHouseholdsMax: $candidateListTotalHouseholdsMax, businessArea: $businessArea, program: $program) {
     edges {
       node {
         ...targetPopulationMinimal
@@ -8869,6 +8905,7 @@ export function withAllTargetPopulations<TProps, TChildProps = {}>(operationOpti
  *      candidateListTotalHouseholdsMin: // value for 'candidateListTotalHouseholdsMin'
  *      candidateListTotalHouseholdsMax: // value for 'candidateListTotalHouseholdsMax'
  *      businessArea: // value for 'businessArea'
+ *      program: // value for 'program'
  *   },
  * });
  */
@@ -12847,6 +12884,7 @@ export type ProgramNodeEdgeResolvers<ContextType = any, ParentType extends Resol
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   grievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType, RequireFields<QueryGrievanceTicketArgs, 'id'>>,
   allGrievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllGrievanceTicketArgs, 'businessArea'>>,
+  existingGrievanceTickets?: Resolver<Maybe<ResolversTypes['GrievanceTicketNodeConnection']>, ParentType, ContextType, RequireFields<QueryExistingGrievanceTicketsArgs, 'businessArea' | 'category'>>,
   grievanceTicketStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   grievanceTicketCategoryChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   grievanceTicketIssueTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['IssueTypesObject']>>>, ParentType, ContextType>,
