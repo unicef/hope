@@ -4,6 +4,13 @@ import { HouseholdNode } from '../../../__generated__/graphql';
 export const headCells: HeadCell<HouseholdNode>[] = [
   {
     disablePadding: false,
+    label: '',
+    id: 'radio',
+    numeric: false,
+    dataCy: 'radio-id',
+  },
+  {
+    disablePadding: false,
     label: 'Household Id',
     id: 'unicefId',
     numeric: false,
@@ -14,7 +21,7 @@ export const headCells: HeadCell<HouseholdNode>[] = [
     label: 'Head of Household',
     id: 'head_of_household__full_name',
     numeric: false,
-    dataCy: 'household-head-name',
+    dataCy: 'household-full-name',
   },
   {
     disablePadding: false,
@@ -25,30 +32,23 @@ export const headCells: HeadCell<HouseholdNode>[] = [
   },
   {
     disablePadding: false,
-    label: 'Location',
+    label: 'Admin Level 2',
     id: 'admin_area__title',
     numeric: false,
-    dataCy: 'household-location',
+    dataCy: 'household-admin-level-2',
   },
   {
     disablePadding: false,
-    label: 'Residence Status',
-    id: 'residenceStatus',
+    label: 'Programme',
+    id: 'program__id',
     numeric: false,
-    dataCy: 'household-residence-status',
-  },
-  {
-    disablePadding: false,
-    label: 'Total Cash Received',
-    id: 'totalCash',
-    numeric: true,
-    dataCy: 'household-total-cash-received',
+    dataCy: 'household-programme-id',
   },
   {
     disablePadding: false,
     label: 'Registration Date',
-    id: 'firstRegistrationDate',
-    numeric: true,
-    dataCy: 'household-registration-date',
+    id: 'last_registration_date',
+    numeric: false,
+    dataCy: 'household-last-registration-date',
   },
 ];

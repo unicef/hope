@@ -8,7 +8,7 @@ class TestRegistrationDataImportQuery(APITestCase):
 
     ALL_REGISTRATION_DATA_IMPORT_DATAHUB_QUERY = """
     query AllRegistrationDataImports {
-      allRegistrationDataImports {
+      allRegistrationDataImports(orderBy: "-name") {
         edges {
           node {
             name
@@ -74,5 +74,5 @@ class TestRegistrationDataImportQuery(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.REGISTRATION_DATA_IMPORT_DATAHUB_QUERY,
             context={"user": self.user},
-            variables={"id": self.id_to_base64(self.data[0].id, "RegistrationDataImport",)},
+            variables={"id": self.id_to_base64(self.data[0].id, "RegistrationDataImportNode",)},
         )

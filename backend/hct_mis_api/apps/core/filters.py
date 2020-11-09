@@ -1,7 +1,8 @@
 import json
 from datetime import datetime, date, timedelta
 
-from django.forms import IntegerField, DecimalField, Field
+from dateutil.parser import parse
+from django.forms import IntegerField, DecimalField, Field, DateTimeField, DateField
 from django_filters import Filter
 
 
@@ -11,7 +12,10 @@ def _clean_data_for_range_field(value, field):
         values = json.loads(value)
         if isinstance(values, dict):
             for field_name, field_value in values.items():
-                clean_data[field_name] = field().clean(field_value)
+                field_instance = field()
+                if isinstance(field_instance, (DateTimeField, DateField)):
+                    field_value = parse(field_value, fuzzy=True)
+                clean_data[field_name] = field_instance.clean(field_value)
         return clean_data or None
     else:
         return None
@@ -25,6 +29,16 @@ class IntegerRangeField(Field):
 class DecimalRangeField(Field):
     def clean(self, value):
         return _clean_data_for_range_field(value, DecimalField)
+
+
+class DateTimeRangeField(Field):
+    def clean(self, value):
+        return _clean_data_for_range_field(value, DateTimeField)
+
+
+class DateRangeField(Field):
+    def clean(self, value):
+        return _clean_data_for_range_field(value, DateField)
 
 
 class BaseRangeFilter(Filter):
@@ -49,6 +63,14 @@ class BaseRangeFilter(Filter):
 
 class IntegerRangeFilter(BaseRangeFilter):
     field_class = IntegerRangeField
+
+
+class DateTimeRangeFilter(BaseRangeFilter):
+    field_class = DateTimeRangeField
+
+
+class DateRangeFilter(BaseRangeFilter):
+    field_class = DateRangeField
 
 
 class DecimalRangeFilter(BaseRangeFilter):

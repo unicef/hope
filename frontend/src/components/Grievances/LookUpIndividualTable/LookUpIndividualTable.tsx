@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { UniversalTable } from '../../../containers/tables/UniversalTable';
+import { decodeIdString } from '../../../utils/utils';
 import {
   AllIndividualsQueryVariables,
   IndividualNode,
@@ -16,17 +17,38 @@ const TableWrapper = styled.div`
 interface LookUpIndividualTableProps {
   filter;
   businessArea?: string;
+  setFieldValue;
+  initialValues;
+  valuesInner;
 }
 
 export const LookUpIndividualTable = ({
   businessArea,
   filter,
+  setFieldValue,
+  initialValues,
+  valuesInner,
 }: LookUpIndividualTableProps): React.ReactElement => {
+  const [selectedIndividual, setSelectedIndividual] = useState(
+    initialValues.selectedIndividual,
+  );
+  const handleRadioChange = (event): void => {
+    setSelectedIndividual(event.target.value);
+    setFieldValue('selectedIndividual', event.target.value);
+    setFieldValue('identityVerified', false);
+  };
+
   const initialVariables = {
-    age: JSON.stringify(filter.age),
     businessArea,
+    search: filter.search,
+    programme: filter.programme,
+    lastRegistrationDate: JSON.stringify(filter.lastRegistrationDate),
+    status: [filter.status],
+    admin2: [filter.admin2],
     sex: [filter.sex],
-    search: filter.text,
+    householdId: valuesInner.selectedHousehold
+      ? decodeIdString(valuesInner.selectedHousehold)
+      : null,
   };
 
   return (
@@ -38,7 +60,12 @@ export const LookUpIndividualTable = ({
         queriedObjectName='allIndividuals'
         initialVariables={initialVariables}
         renderRow={(row) => (
-          <LookUpIndividualTableRow key={row.id} individual={row} />
+          <LookUpIndividualTableRow
+            radioChangeHandler={handleRadioChange}
+            selectedIndividual={selectedIndividual}
+            key={row.id}
+            individual={row}
+          />
         )}
       />
     </TableWrapper>

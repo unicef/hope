@@ -15,17 +15,28 @@ export const householdMinimal = gql`
     unicefId
     geopoint
     village
+    adminArea {
+      id
+      title
+      adminAreaType {
+        adminLevel
+      }
+    }
     headOfHousehold {
       id
       fullName
     }
     address
-    adminArea {
-      id
-      title
-    }
     individuals {
       totalCount
+    }
+    programs {
+      edges {
+        node {
+          id
+          name
+        }
+      }
     }
   }
 `;

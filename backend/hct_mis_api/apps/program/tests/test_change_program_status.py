@@ -33,7 +33,7 @@ class TestChangeProgramStatus(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
             context={"user": self.user},
-            variables={"programData": {"id": self.id_to_base64(program.id, "Program"), "status": "ACTIVE"}},
+            variables={"programData": {"id": self.id_to_base64(program.id, "ProgramNode"), "status": "ACTIVE"}},
         )
 
     def test_active_to_finished(self):
@@ -42,7 +42,7 @@ class TestChangeProgramStatus(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
             context={"user": self.user},
-            variables={"programData": {"id": self.id_to_base64(program.id, "Program"), "status": "FINISHED"}},
+            variables={"programData": {"id": self.id_to_base64(program.id, "ProgramNode"), "status": "FINISHED"}},
         )
 
     def test_finished_to_active(self):
@@ -51,7 +51,7 @@ class TestChangeProgramStatus(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
             context={"user": self.user},
-            variables={"programData": {"id": self.id_to_base64(program.id, "Program"), "status": "ACTIVE"}},
+            variables={"programData": {"id": self.id_to_base64(program.id, "ProgramNode"), "status": "ACTIVE"}},
         )
 
     def test_draft_to_finished(self):
@@ -60,7 +60,7 @@ class TestChangeProgramStatus(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
             context={"user": self.user},
-            variables={"programData": {"id": self.id_to_base64(program.id, "Program"), "status": "FINISHED"}},
+            variables={"programData": {"id": self.id_to_base64(program.id, "ProgramNode"), "status": "FINISHED"}},
         )
 
     def test_active_to_draft(self):
@@ -69,7 +69,7 @@ class TestChangeProgramStatus(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
             context={"user": self.user},
-            variables={"programData": {"id": self.id_to_base64(program.id, "Program"), "status": "DRAFT"}},
+            variables={"programData": {"id": self.id_to_base64(program.id, "ProgramNode"), "status": "DRAFT"}},
         )
 
     def test_finished_to_draft(self):
@@ -78,5 +78,5 @@ class TestChangeProgramStatus(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
             context={"user": self.user},
-            variables={"programData": {"id": self.id_to_base64(program.id, "Program"), "status": "DRAFT"}},
+            variables={"programData": {"id": self.id_to_base64(program.id, "ProgramNode"), "status": "DRAFT"}},
         )
