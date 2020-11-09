@@ -7,7 +7,8 @@ from core.models import BusinessArea
 from grievance.fixtures import (
     GrievanceTicketFactory,
     GrievanceComplaintTicketFactory,
-    SensitiveGrievanceTicketWithoutExtrasFactory, SensitiveGrievanceTicketFactory,
+    SensitiveGrievanceTicketWithoutExtrasFactory,
+    SensitiveGrievanceTicketFactory,
 )
 from grievance.models import GrievanceTicket
 from household.fixtures import create_household
@@ -32,11 +33,13 @@ class TestAlreadyExistingFilterTickets(APITestCase):
         household: $household, 
         individual: $individual, 
         paymentRecord: $paymentRecord,
-        orderBy: "area"
+        orderBy: "id"
       ) {
         edges {
           node {
+            id
             category
+            issueType
             sensitiveTicketDetails {
               household {
                 size
@@ -79,13 +82,35 @@ class TestAlreadyExistingFilterTickets(APITestCase):
             business_area=self.business_area,
             cash_plan=cash_plan,
         )
-        GrievanceTicketFactory.create_batch(5)
-        self.ticket = SensitiveGrievanceTicketWithoutExtrasFactory(
-            household=self.household, individual=self.individuals[0], payment_record=self.payment_record
+        grievance_1 = GrievanceTicketFactory(
+            id="0fdbf2fc-e94e-4c64-acce-6e7edd4bbd87",
+            category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_DATA_BREACH,
         )
-        SensitiveGrievanceTicketWithoutExtrasFactory(household=self.household, individual=self.individuals[0])
+        grievance_2 = GrievanceTicketFactory(
+            id="12398c71-81ef-4e24-964d-f77e853971ab",
+            category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_DATA_BREACH,
+        )
+        grievance_3 = GrievanceTicketFactory(
+            id="c98d0373-1b20-48eb-8b87-7237477ed782",
+            category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_DATA_BREACH,
+        )
+        self.ticket = SensitiveGrievanceTicketWithoutExtrasFactory(
+            household=self.household,
+            individual=self.individuals[0],
+            payment_record=self.payment_record,
+            ticket=grievance_1,
+        )
         SensitiveGrievanceTicketWithoutExtrasFactory(
-            household=self.household, individual=self.individuals[0], payment_record=self.payment_record2
+            household=self.household, individual=self.individuals[0], ticket=grievance_2,
+        )
+        SensitiveGrievanceTicketWithoutExtrasFactory(
+            household=self.household,
+            individual=self.individuals[0],
+            payment_record=self.payment_record2,
+            ticket=grievance_3,
         )
         GrievanceComplaintTicketFactory.create_batch(5)
         SensitiveGrievanceTicketFactory.create_batch(5)
@@ -95,8 +120,8 @@ class TestAlreadyExistingFilterTickets(APITestCase):
             "businessArea": "afghanistan",
             "category": str(GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE),
             "issueType": str(self.ticket.ticket.issue_type),
-            "household": self.ticket.household.id,
-            "individual": self.ticket.individual.id,
+            "household": self.household.id,
+            "individual": self.individuals[0].id,
             "paymentRecord": [self.payment_record.id],
         }
 
@@ -109,8 +134,8 @@ class TestAlreadyExistingFilterTickets(APITestCase):
             "businessArea": "afghanistan",
             "category": str(GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE),
             "issueType": str(self.ticket.ticket.issue_type),
-            "household": self.ticket.household.id,
-            "individual": self.ticket.individual.id,
+            "household": self.household.id,
+            "individual": self.individuals[0].id,
             "paymentRecord": [self.payment_record.id, self.payment_record2.id],
         }
 
@@ -123,8 +148,8 @@ class TestAlreadyExistingFilterTickets(APITestCase):
             "businessArea": "afghanistan",
             "category": str(GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE),
             "issueType": str(self.ticket.ticket.issue_type),
-            "household": self.ticket.household.id,
-            "individual": self.ticket.individual.id,
+            "household": self.household.id,
+            "individual": self.individuals[0].id,
         }
 
         self.snapshot_graphql_request(
@@ -136,7 +161,7 @@ class TestAlreadyExistingFilterTickets(APITestCase):
             "businessArea": "afghanistan",
             "category": str(GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE),
             "issueType": self.ticket.ticket.issue_type,
-            "individual": self.ticket.individual.id,
+            "individual": self.individuals[0].id,
         }
 
         self.snapshot_graphql_request(
