@@ -43,4 +43,4 @@ class ProgramAdmin(admin.ModelAdmin):
 
 @admin.register(Document)
 class DocumentAdmin(admin.ModelAdmin):
-    pass
+    list_display = ("type", "number")
