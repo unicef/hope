@@ -32,6 +32,9 @@ export const CandidateHouseholdsListByTargetingCriteria = gql`
           }
           updatedAt
           address
+          selection{
+            vulnerabilityScore
+          }
         }
         cursor
       }

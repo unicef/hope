@@ -34,6 +34,9 @@ export const FinalHouseholdsListByTargetingCriteria = gql`
           }
           updatedAt
           address
+          selection{
+            vulnerabilityScore
+          }
         }
         cursor
       }

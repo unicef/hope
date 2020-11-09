@@ -14,6 +14,8 @@ export const AllHouseholds = gql`
     $adminArea: ID
     $search: String
     $residenceStatus: String
+    $lastRegistrationDate: String
+    $admin2: [ID]
   ) {
     allHouseholds(
       after: $after
@@ -28,6 +30,8 @@ export const AllHouseholds = gql`
       adminArea: $adminArea
       search: $search
       residenceStatus: $residenceStatus
+      lastRegistrationDate: $lastRegistrationDate
+      admin2: $admin2
     ) {
       pageInfo {
         hasNextPage
