@@ -1,8 +1,9 @@
 import TableCell from '@material-ui/core/TableCell';
 import styled from 'styled-components';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { Checkbox } from '@material-ui/core';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { Pointer } from '../../Pointer';
 import { ClickableTableRow } from '../../table/ClickableTableRow';
 import { StatusBox } from '../../StatusBox';
 import {
@@ -11,7 +12,6 @@ import {
   renderUserName,
 } from '../../../utils/utils';
 import { Missing } from '../../Missing';
-import { UniversalMoment } from '../../UniversalMoment';
 import { AllGrievanceTicketQuery } from '../../../__generated__/graphql';
 
 const StatusContainer = styled.div`
@@ -19,32 +19,48 @@ const StatusContainer = styled.div`
   max-width: 200px;
 `;
 
-interface GrievancesTableRowProps {
+interface LookUpRelatedTicketsTableRowProps {
   ticket: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'];
+  selected: Array<string>;
+  checkboxClickHandler: (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+    number,
+  ) => void;
   statusChoices: { [id: number]: string };
   categoryChoices: { [id: number]: string };
 }
 
-export function GrievancesTableRow({
+export function LookUpRelatedTicketsTableRow({
   ticket,
+  selected,
+  checkboxClickHandler,
   statusChoices,
   categoryChoices,
-}: GrievancesTableRowProps): React.ReactElement {
-  const history = useHistory();
+}: LookUpRelatedTicketsTableRowProps): React.ReactElement {
   const businessArea = useBusinessArea();
-
   const handleClick = (): void => {
     const path = `/${businessArea}/grievance-and-feedback/${ticket.id}`;
-    history.push(path);
+    const win = window.open(path, '_blank rel=noopener');
+    if (win != null) {
+      win.focus();
+    }
   };
+  const isSelected = (name: string): boolean => selected.includes(name);
+  const isItemSelected = isSelected(ticket.id);
+
   return (
-    <ClickableTableRow
-      hover
-      onClick={handleClick}
-      role='checkbox'
-      key={ticket.id}
-    >
-      <TableCell align='left'>{decodeIdString(ticket.id)}</TableCell>
+    <ClickableTableRow hover role='checkbox' key={ticket.id}>
+      <TableCell padding='checkbox'>
+        <Checkbox
+          color='primary'
+          onClick={(event) => checkboxClickHandler(event, ticket.id)}
+          checked={isItemSelected}
+          inputProps={{ 'aria-labelledby': ticket.id }}
+        />
+      </TableCell>
+      <TableCell onClick={handleClick} align='left'>
+        <Pointer>{decodeIdString(ticket.id)}</Pointer>
+      </TableCell>
       <TableCell align='left'>
         <StatusContainer>
           <StatusBox
@@ -53,16 +69,13 @@ export function GrievancesTableRow({
           />
         </StatusContainer>
       </TableCell>
-      <TableCell align='left'>{renderUserName(ticket.assignedTo)}</TableCell>
       <TableCell align='left'>{categoryChoices[ticket.category]}</TableCell>
       <TableCell align='left'>
         <Missing />
       </TableCell>
+      <TableCell align='left'>{renderUserName(ticket.assignedTo)}</TableCell>
       <TableCell align='left'>
-        <UniversalMoment>{ticket.createdAt}</UniversalMoment>
-      </TableCell>
-      <TableCell align='left'>
-        <UniversalMoment>{ticket.userModified}</UniversalMoment>
+        <Missing />
       </TableCell>
     </ClickableTableRow>
   );
