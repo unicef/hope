@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useDebounce } from '../../hooks/useDebounce';
+import { useGrievancesChoiceDataQuery } from '../../__generated__/graphql';
+import { LoadingComponent } from '../LoadingComponent';
 import { PageHeader } from '../PageHeader';
 import { GrievancesFilters } from './GrievancesTable/GrievancesFilters';
 import { GrievancesTable } from './GrievancesTable/GrievancesTable';
@@ -12,13 +14,20 @@ export function GrievancesTablePage(): React.ReactElement {
 
   const [filter, setFilter] = useState({
     search: '',
-    status: [],
-    fsp: [],
+    status: '',
+    fsp: '',
     createdAtRange: '',
     admin: '',
   });
   const debouncedFilter = useDebounce(filter, 500);
-
+  const {
+    data: choicesData,
+    loading: choicesLoading,
+  } = useGrievancesChoiceDataQuery();
+  if (!choicesData) return null;
+  if (choicesLoading) {
+    return <LoadingComponent />;
+  }
   return (
     <>
       <PageHeader title='Grievance and Feedback'>
@@ -33,7 +42,11 @@ export function GrievancesTablePage(): React.ReactElement {
           </Button>
         </>
       </PageHeader>
-      <GrievancesFilters filter={debouncedFilter} onFilterChange={setFilter} />
+      <GrievancesFilters
+        choicesData={choicesData}
+        filter={debouncedFilter}
+        onFilterChange={setFilter}
+      />
       <GrievancesTable filter={debouncedFilter} businessArea={businessArea} />
     </>
   );

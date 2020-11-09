@@ -106,9 +106,9 @@ class TestGrievanceQuery(APITestCase):
         self.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_type=area_type)
 
         created_at_dates_to_set = {
-            GrievanceTicket.STATUS_OPEN: datetime(year=2020, month=3, day=12),
-            GrievanceTicket.STATUS_CLOSED: datetime(year=2020, month=7, day=12),
-            GrievanceTicket.STATUS_RESOLVED: datetime(year=2020, month=8, day=22),
+            GrievanceTicket.STATUS_NEW: datetime(year=2020, month=3, day=12),
+            GrievanceTicket.STATUS_ON_HOLD: datetime(year=2020, month=7, day=12),
+            GrievanceTicket.STATUS_IN_PROGRESS: datetime(year=2020, month=8, day=22),
         }
 
         grievances_to_create = (
@@ -120,7 +120,7 @@ class TestGrievanceQuery(APITestCase):
                     "consent": True,
                     "description": "Just random description",
                     "category": GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
-                    "status": GrievanceTicket.STATUS_OPEN,
+                    "status": GrievanceTicket.STATUS_NEW,
                     "created_by": self.user,
                     "assigned_to": self.user,
                 }
@@ -133,7 +133,7 @@ class TestGrievanceQuery(APITestCase):
                     "consent": True,
                     "description": "Just random description",
                     "category": GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
-                    "status": GrievanceTicket.STATUS_CLOSED,
+                    "status": GrievanceTicket.STATUS_ON_HOLD,
                     "created_by": self.user,
                     "assigned_to": self.user,
                 }
@@ -146,7 +146,7 @@ class TestGrievanceQuery(APITestCase):
                     "consent": True,
                     "description": "Just random description",
                     "category": GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
-                    "status": GrievanceTicket.STATUS_RESOLVED,
+                    "status": GrievanceTicket.STATUS_IN_PROGRESS,
                     "created_by": self.user,
                     "assigned_to": self.user,
                 }
@@ -165,7 +165,7 @@ class TestGrievanceQuery(APITestCase):
         )
 
     def test_grievance_query_single(self):
-        gt_id = GrievanceTicket.objects.get(status=GrievanceTicket.STATUS_RESOLVED).id
+        gt_id = GrievanceTicket.objects.get(status=GrievanceTicket.STATUS_IN_PROGRESS).id
         self.snapshot_graphql_request(
             request_string=self.GRIEVANCE_QUERY,
             context={"user": self.user},
@@ -190,5 +190,5 @@ class TestGrievanceQuery(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_STATUS,
             context={"user": self.user},
-            variables={"status": [str(GrievanceTicket.STATUS_RESOLVED)]},
+            variables={"status": [str(GrievanceTicket.STATUS_IN_PROGRESS)]},
         )
