@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
+import { LookUpButton } from '../LookUpButton';
 import { LookUpHouseholdIndividualDisplay } from './LookUpHouseholdIndividualDisplay';
 import { LookUpHouseholdIndividualModal } from './LookUpHouseholdIndividualModal';
-import { LookUpButton } from '../LookUpButton';
 
 export const LookUpHouseholdIndividual = ({
   onValueChange,

@@ -11,10 +11,7 @@ import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
-import { Consent } from './Consent';
-import { LookUpSection } from './LookUpSection';
 import {
-  useAllIndividualsQuery,
   useAllUsersQuery,
   useCreateGrievanceMutation,
   useGrievancesChoiceDataQuery,
@@ -22,6 +19,8 @@ import {
 import { LoadingComponent } from '../LoadingComponent';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { AdminAreasAutocomplete } from '../population/AdminAreaAutocomplete';
+import { Consent } from './Consent';
+import { LookUpSection } from './LookUpSection';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -82,15 +81,10 @@ export function CreateGrievance(): React.ReactElement {
       to: `/${businessArea}/grievance-and-feedback/`,
     },
   ];
-  // const {
-  //   data: individualsData,
-  //   loading: individualsDataLoading,
-  // } = useAllIndividualsQuery({
-  //   variables: {
-  //     first: 20,
-  //   },
-  // });
-  const { data: userData, loading: userDataLoading } = useAllUsersQuery({variables:{businessArea}});
+
+  const { data: userData, loading: userDataLoading } = useAllUsersQuery({
+    variables: { businessArea },
+  });
 
   const {
     data: choicesData,

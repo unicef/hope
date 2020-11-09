@@ -1,10 +1,10 @@
 import React from 'react';
 import styled from 'styled-components';
 import { UniversalTable } from '../../../containers/tables/UniversalTable';
+import { reduceChoices } from '../../../utils/utils';
 import {
   AllGrievanceTicketQuery,
   AllGrievanceTicketQueryVariables,
-  GrievanceTicketNode,
   useAllGrievanceTicketQuery,
   useGrievancesChoiceDataQuery,
 } from '../../../__generated__/graphql';
@@ -42,17 +42,18 @@ export const GrievancesTable = ({
   }
   const statusChoices: {
     [id: number]: string;
-  } = choicesData.grievanceTicketStatusChoices.reduce(
-    (previousValue, currentValue) => {
-      // eslint-disable-next-line no-param-reassign
-      previousValue[currentValue.value] = currentValue.name;
-      return previousValue;
-    },
-    {},
-  );
+  } = reduceChoices(choicesData.grievanceTicketStatusChoices);
+
+  const categoryChoices: {
+    [id: number]: string;
+  } = reduceChoices(choicesData.grievanceTicketCategoryChoices);
+
   return (
     <TableWrapper>
-      <UniversalTable<AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'], AllGrievanceTicketQueryVariables>
+      <UniversalTable<
+        AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'],
+        AllGrievanceTicketQueryVariables
+      >
         headCells={headCells}
         title='Grievance and Feedback List'
         rowsPerPageOptions={[10, 15, 20]}
@@ -60,7 +61,12 @@ export const GrievancesTable = ({
         queriedObjectName='allGrievanceTicket'
         initialVariables={initialVariables}
         renderRow={(row) => (
-          <GrievancesTableRow key={row.id} ticket={row} statusChoices={statusChoices} />
+          <GrievancesTableRow
+            key={row.id}
+            ticket={row}
+            statusChoices={statusChoices}
+            categoryChoices={categoryChoices}
+          />
         )}
       />
     </TableWrapper>

@@ -334,3 +334,17 @@ export function getComparator(order, orderBy) {
     ? (a, b) => descendingComparator(a, b, orderBy)
     : (a, b) => -descendingComparator(a, b, orderBy);
 }
+
+export function reduceChoices(choices): { [id: number]: string } {
+  return choices.reduce((previousValue, currentValue) => {
+    // eslint-disable-next-line no-param-reassign
+    previousValue[currentValue.value] = currentValue.name;
+    return previousValue;
+  }, {});
+}
+
+export function renderUserName(user) {
+  return user?.firstName
+    ? `${user.firstName} ${user.lastName}`
+    : `${user.email}`;
+}

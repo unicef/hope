@@ -1,14 +1,9 @@
 import { HeadCell } from '../../table/EnhancedTableHead';
-import { GrievanceTicketNode } from '../../../__generated__/graphql';
+import { AllGrievanceTicketQuery } from '../../../__generated__/graphql';
 
-export const headCells: HeadCell<GrievanceTicketNode>[] = [
-  {
-    disablePadding: false,
-    label: '',
-    id: 'checkbox',
-    numeric: false,
-    dataCy: 'ticket-id-checkbox',
-  },
+export const headCells: HeadCell<
+  AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node']
+>[] = [
   {
     disablePadding: false,
     label: 'Ticket Id',
