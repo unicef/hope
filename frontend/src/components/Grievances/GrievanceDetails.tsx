@@ -9,6 +9,19 @@ import { LabelizedField } from '../LabelizedField';
 import { Missing } from '../Missing';
 import { OverviewContainer } from '../OverviewContainer';
 import { PageHeader } from '../PageHeader';
+import {
+  decodeIdString,
+  grievanceTicketStatusToColor,
+  reduceChoices,
+  renderUserName,
+} from '../../utils/utils';
+import { LoadingComponent } from '../LoadingComponent';
+import {
+  useGrievancesChoiceDataQuery,
+  useGrievanceTicketQuery,
+} from '../../__generated__/graphql';
+import { StatusBox } from '../StatusBox';
+import { UniversalMoment } from '../UniversalMoment';
 import { Notes } from './Notes';
 import { PastTickets } from './PastTickets';
 
@@ -20,19 +33,32 @@ const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
+const StatusContainer = styled.div`
+  min-width: 120px;
+  max-width: 200px;
+`;
+
 export function GrievanceDetails(): React.ReactElement {
   const { id } = useParams();
-  // const { data, loading } = useGrievancesQuery({
-  //   variables: { id },
-  // });
+  const { data, loading } = useGrievanceTicketQuery({
+    variables: { id },
+  });
   const businessArea = useBusinessArea();
-  // if (loading) {
-  //   return <LoadingComponent />;
-  // }
 
-  // if (!data) {
-  //   return null;
-  // }
+  const {
+    data: choicesData,
+    loading: choicesLoading,
+  } = useGrievancesChoiceDataQuery();
+  if (choicesLoading) {
+    return null;
+  }
+  if (loading || choicesLoading) {
+    return <LoadingComponent />;
+  }
+
+  if (!data || !choicesData) {
+    return null;
+  }
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: 'Grievance and Feedback',
@@ -40,21 +66,66 @@ export function GrievanceDetails(): React.ReactElement {
     },
   ];
 
+  const statusChoices: {
+    [id: number]: string;
+  } = reduceChoices(choicesData.grievanceTicketStatusChoices);
+
+  const categoryChoices: {
+    [id: number]: string;
+  } = reduceChoices(choicesData.grievanceTicketCategoryChoices);
+
+  const ticket = data.grievanceTicket;
+
   const FieldsArray: {
     label: string;
     value: React.ReactElement;
     size: boolean | 3 | 6 | 8 | 11 | 'auto' | 1 | 2 | 4 | 5 | 7 | 9 | 10 | 12;
   }[] = [
-    { label: 'STATUS', value: <Missing />, size: 3 },
-    { label: 'CATEGORY', value: <Missing />, size: 3 },
+    {
+      label: 'STATUS',
+      value: (
+        <StatusContainer>
+          <StatusBox
+            status={statusChoices[ticket.status]}
+            statusToColor={grievanceTicketStatusToColor}
+          />
+        </StatusContainer>
+      ),
+      size: 3,
+    },
+    {
+      label: 'CATEGORY',
+      value: <span>{categoryChoices[ticket.category]}</span>,
+      size: 3,
+    },
     { label: 'HOUSEHOLD ID', value: <Missing />, size: 3 },
     { label: 'PAYMENT ID', value: <Missing />, size: 3 },
-    { label: 'CONSENT', value: <Missing />, size: 3 },
-    { label: 'CREATED BY', value: <Missing />, size: 3 },
-    { label: 'DATE CREATED', value: <Missing />, size: 3 },
-    { label: 'LAST MODIFIED DATE', value: <Missing />, size: 3 },
-    { label: 'DESCRIPTION', value: <Missing />, size: 6 },
-    { label: 'ASSIGNED TO', value: <Missing />, size: 6 },
+    {
+      label: 'CONSENT',
+      value: <span>{ticket.consent ? 'Yes' : 'No'}</span>,
+      size: 3,
+    },
+    {
+      label: 'CREATED BY',
+      value: <span>{renderUserName(ticket.createdBy)}</span>,
+      size: 3,
+    },
+    {
+      label: 'DATE CREATED',
+      value: <UniversalMoment>{ticket.createdAt}</UniversalMoment>,
+      size: 3,
+    },
+    {
+      label: 'LAST MODIFIED DATE',
+      value: <UniversalMoment>{ticket.updatedAt}</UniversalMoment>,
+      size: 3,
+    },
+    { label: 'DESCRIPTION', value: <span>{ticket.description}</span>, size: 6 },
+    {
+      label: 'ASSIGNED TO',
+      value: <span>{renderUserName(ticket.assignedTo)}</span>,
+      size: 6,
+    },
     { label: 'ADMIN 2', value: <Missing />, size: 3 },
     {
       label: 'AREA / VILLAGE / PAY POINT',
@@ -63,7 +134,7 @@ export function GrievanceDetails(): React.ReactElement {
     },
     {
       label: 'LANGUAGES SPOKEN',
-      value: <Missing />,
+      value: <span>{ticket.language}</span>,
       size: 3,
     },
   ];
@@ -72,7 +143,10 @@ export function GrievanceDetails(): React.ReactElement {
 
   return (
     <div>
-      <PageHeader title={`Ticket #${id}`} breadCrumbs={breadCrumbsItems} />
+      <PageHeader
+        title={`Ticket #${decodeIdString(id)}`}
+        breadCrumbs={breadCrumbsItems}
+      />
       <Grid container>
         <Grid item xs={12}>
           <ContainerColumnWithBorder>
