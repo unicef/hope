@@ -42,3 +42,15 @@ snapshots['TestRegistrationDataImportQuery::test_registration_data_import_datahu
         }
     }
 }
+
+snapshots['TestRegistrationDataImportQuery::test_registration_data_import_datahub_query_single 1'] = {
+    'data': {
+        'registrationDataImport': {
+            'dataSource': 'XLS',
+            'name': 'Lorem Ipsum',
+            'numberOfHouseholds': 54,
+            'numberOfIndividuals': 123,
+            'status': 'IN_REVIEW'
+        }
+    }
+}
