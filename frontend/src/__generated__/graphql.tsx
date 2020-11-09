@@ -761,6 +761,11 @@ export type GrievanceComplaintTicketExtras = {
   paymentRecord?: Maybe<Scalars['ID']>,
 };
 
+export type GrievanceStatusChangeMutation = {
+   __typename?: 'GrievanceStatusChangeMutation',
+  grievanceTicket?: Maybe<GrievanceTicketNode>,
+};
+
 export type GrievanceTicketNode = Node & {
    __typename?: 'GrievanceTicketNode',
   id: Scalars['ID'],
@@ -2039,6 +2044,7 @@ export type MergeRegistrationDataImportMutation = {
 export type Mutations = {
    __typename?: 'Mutations',
   createGrievanceTicket?: Maybe<CreateGrievanceTicketMutation>,
+  grievanceStatusChange?: Maybe<GrievanceStatusChangeMutation>,
   createCashPlanPaymentVerification?: Maybe<CreatePaymentVerificationMutation>,
   editCashPlanPaymentVerification?: Maybe<EditPaymentVerificationMutation>,
   importXlsxCashPlanVerification?: Maybe<ImportXlsxCashPlanVerification>,
@@ -2071,6 +2077,12 @@ export type Mutations = {
 
 export type MutationsCreateGrievanceTicketArgs = {
   input: CreateGrievanceTicketInput
+};
+
+
+export type MutationsGrievanceStatusChangeArgs = {
+  grievanceTicketId?: Maybe<Scalars['ID']>,
+  status?: Maybe<Scalars['Int']>
 };
 
 
@@ -4892,7 +4904,7 @@ export type AllGrievanceTicketQuery = (
         & Pick<GrievanceTicketNode, 'id' | 'status' | 'category' | 'createdAt' | 'userModified'>
         & { assignedTo: Maybe<(
           { __typename?: 'UserNode' }
-          & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
+          & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
         )> }
       )> }
     )>> }
@@ -5257,6 +5269,26 @@ export type CashPlanQuery = (
       { __typename?: 'PaymentRecordNodeConnection' }
       & Pick<PaymentRecordNodeConnection, 'totalCount' | 'edgeCount'>
     ) }
+  )> }
+);
+
+export type GrievanceTicketQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type GrievanceTicketQuery = (
+  { __typename?: 'Query' }
+  & { grievanceTicket: Maybe<(
+    { __typename?: 'GrievanceTicketNode' }
+    & Pick<GrievanceTicketNode, 'id' | 'status' | 'category' | 'consent' | 'createdAt' | 'updatedAt' | 'description' | 'language'>
+    & { createdBy: Maybe<(
+      { __typename?: 'UserNode' }
+      & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
+    )>, assignedTo: Maybe<(
+      { __typename?: 'UserNode' }
+      & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
+    )> }
   )> }
 );
 
@@ -8130,6 +8162,7 @@ export const AllGrievanceTicketDocument = gql`
           id
           firstName
           lastName
+          email
         }
         category
         createdAt
@@ -9037,6 +9070,75 @@ export function useCashPlanLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHoo
 export type CashPlanQueryHookResult = ReturnType<typeof useCashPlanQuery>;
 export type CashPlanLazyQueryHookResult = ReturnType<typeof useCashPlanLazyQuery>;
 export type CashPlanQueryResult = ApolloReactCommon.QueryResult<CashPlanQuery, CashPlanQueryVariables>;
+export const GrievanceTicketDocument = gql`
+    query GrievanceTicket($id: ID!) {
+  grievanceTicket(id: $id) {
+    id
+    status
+    category
+    consent
+    createdBy {
+      id
+      firstName
+      lastName
+      email
+    }
+    createdAt
+    updatedAt
+    description
+    language
+    assignedTo {
+      id
+      firstName
+      lastName
+      email
+    }
+  }
+}
+    `;
+export type GrievanceTicketComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<GrievanceTicketQuery, GrievanceTicketQueryVariables>, 'query'> & ({ variables: GrievanceTicketQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const GrievanceTicketComponent = (props: GrievanceTicketComponentProps) => (
+      <ApolloReactComponents.Query<GrievanceTicketQuery, GrievanceTicketQueryVariables> query={GrievanceTicketDocument} {...props} />
+    );
+    
+export type GrievanceTicketProps<TChildProps = {}> = ApolloReactHoc.DataProps<GrievanceTicketQuery, GrievanceTicketQueryVariables> & TChildProps;
+export function withGrievanceTicket<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  GrievanceTicketQuery,
+  GrievanceTicketQueryVariables,
+  GrievanceTicketProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, GrievanceTicketQuery, GrievanceTicketQueryVariables, GrievanceTicketProps<TChildProps>>(GrievanceTicketDocument, {
+      alias: 'grievanceTicket',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useGrievanceTicketQuery__
+ *
+ * To run a query within a React component, call `useGrievanceTicketQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGrievanceTicketQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGrievanceTicketQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useGrievanceTicketQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GrievanceTicketQuery, GrievanceTicketQueryVariables>) {
+        return ApolloReactHooks.useQuery<GrievanceTicketQuery, GrievanceTicketQueryVariables>(GrievanceTicketDocument, baseOptions);
+      }
+export function useGrievanceTicketLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GrievanceTicketQuery, GrievanceTicketQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<GrievanceTicketQuery, GrievanceTicketQueryVariables>(GrievanceTicketDocument, baseOptions);
+        }
+export type GrievanceTicketQueryHookResult = ReturnType<typeof useGrievanceTicketQuery>;
+export type GrievanceTicketLazyQueryHookResult = ReturnType<typeof useGrievanceTicketLazyQuery>;
+export type GrievanceTicketQueryResult = ApolloReactCommon.QueryResult<GrievanceTicketQuery, GrievanceTicketQueryVariables>;
 export const GrievancesChoiceDataDocument = gql`
     query GrievancesChoiceData {
   grievanceTicketStatusChoices {
@@ -11421,6 +11523,7 @@ export type ResolversTypes = {
   AddIndividualIssueTypeExtras: AddIndividualIssueTypeExtras,
   AddIndividualDataObjectType: AddIndividualDataObjectType,
   CreateGrievanceTicketMutation: ResolverTypeWrapper<CreateGrievanceTicketMutation>,
+  GrievanceStatusChangeMutation: ResolverTypeWrapper<GrievanceStatusChangeMutation>,
   CreatePaymentVerificationInput: CreatePaymentVerificationInput,
   RapidProArguments: RapidProArguments,
   CreatePaymentVerificationMutation: ResolverTypeWrapper<CreatePaymentVerificationMutation>,
@@ -11696,6 +11799,7 @@ export type ResolversParentTypes = {
   AddIndividualIssueTypeExtras: AddIndividualIssueTypeExtras,
   AddIndividualDataObjectType: AddIndividualDataObjectType,
   CreateGrievanceTicketMutation: CreateGrievanceTicketMutation,
+  GrievanceStatusChangeMutation: GrievanceStatusChangeMutation,
   CreatePaymentVerificationInput: CreatePaymentVerificationInput,
   RapidProArguments: RapidProArguments,
   CreatePaymentVerificationMutation: CreatePaymentVerificationMutation,
@@ -12107,6 +12211,10 @@ export interface GeoJsonScalarConfig extends GraphQLScalarTypeConfig<ResolversTy
 export type GetCashplanVerificationSampleSizeObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['GetCashplanVerificationSampleSizeObject'] = ResolversParentTypes['GetCashplanVerificationSampleSizeObject']> = {
   paymentRecordCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   sampleSize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type GrievanceStatusChangeMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['GrievanceStatusChangeMutation'] = ResolversParentTypes['GrievanceStatusChangeMutation']> = {
+  grievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType>,
 };
 
 export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['GrievanceTicketNode'] = ResolversParentTypes['GrievanceTicketNode']> = {
@@ -12583,6 +12691,7 @@ export type MergeRegistrationDataImportMutationResolvers<ContextType = any, Pare
 
 export type MutationsResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutations'] = ResolversParentTypes['Mutations']> = {
   createGrievanceTicket?: Resolver<Maybe<ResolversTypes['CreateGrievanceTicketMutation']>, ParentType, ContextType, RequireFields<MutationsCreateGrievanceTicketArgs, 'input'>>,
+  grievanceStatusChange?: Resolver<Maybe<ResolversTypes['GrievanceStatusChangeMutation']>, ParentType, ContextType, MutationsGrievanceStatusChangeArgs>,
   createCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['CreatePaymentVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsCreateCashPlanPaymentVerificationArgs, 'input'>>,
   editCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['EditPaymentVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsEditCashPlanPaymentVerificationArgs, 'input'>>,
   importXlsxCashPlanVerification?: Resolver<Maybe<ResolversTypes['ImportXlsxCashPlanVerification']>, ParentType, ContextType, RequireFields<MutationsImportXlsxCashPlanVerificationArgs, 'cashPlanVerificationId' | 'file'>>,
@@ -13428,6 +13537,7 @@ export type Resolvers<ContextType = any> = {
   FlexFieldsScalar?: GraphQLScalarType,
   GeoJSON?: GraphQLScalarType,
   GetCashplanVerificationSampleSizeObject?: GetCashplanVerificationSampleSizeObjectResolvers<ContextType>,
+  GrievanceStatusChangeMutation?: GrievanceStatusChangeMutationResolvers<ContextType>,
   GrievanceTicketNode?: GrievanceTicketNodeResolvers<ContextType>,
   GrievanceTicketNodeConnection?: GrievanceTicketNodeConnectionResolvers<ContextType>,
   GrievanceTicketNodeEdge?: GrievanceTicketNodeEdgeResolvers<ContextType>,

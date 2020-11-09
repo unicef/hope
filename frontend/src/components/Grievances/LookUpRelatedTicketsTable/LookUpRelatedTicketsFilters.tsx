@@ -31,16 +31,16 @@ const StyledFormControl = styled(FormControl)`
   border-bottom: 0;
 `;
 
-interface GrievancesFiltersProps {
+interface LookUpRelatedTicketsFiltersProps {
   onFilterChange;
   filter;
   choicesData: GrievancesChoiceDataQuery;
 }
-export function GrievancesFilters({
+export function LookUpRelatedTicketsFilters({
   onFilterChange,
   filter,
   choicesData,
-}: GrievancesFiltersProps): React.ReactElement {
+}: LookUpRelatedTicketsFiltersProps): React.ReactElement {
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
   return (
