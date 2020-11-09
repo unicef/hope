@@ -7,6 +7,7 @@ import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { UniversalMoment } from '../UniversalMoment';
 import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
 import { OverviewContainerColumn } from '../OverviewContainerColumn';
+import { Missing } from '../Missing';
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
@@ -86,6 +87,7 @@ export function Notes(): React.ReactElement {
         <ContainerColumnWithBorder>
           <Title>
             <Typography variant='h6'>Notes</Typography>
+            <Missing />
           </Title>
           <OverviewContainerColumn>
             {mappedNotes}
