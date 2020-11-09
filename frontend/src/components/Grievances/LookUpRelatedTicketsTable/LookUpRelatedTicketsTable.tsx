@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { UniversalTable } from '../../../containers/tables/UniversalTable';
+import { reduceChoices } from '../../../utils/utils';
 import {
+  AllGrievanceTicketQuery,
   AllGrievanceTicketQueryVariables,
-  GrievanceTicketNode,
   useAllGrievanceTicketQuery,
+  useGrievancesChoiceDataQuery,
 } from '../../../__generated__/graphql';
 import { headCells } from './LookUpRelatedTicketsHeadCells';
 import { LookUpRelatedTicketsTableRow } from './LookUpRelatedTicketsTableRow';
@@ -37,6 +39,20 @@ export const LookUpRelatedTicketsTable = ({
   const [selected, setSelected] = useState(
     initialValues.selectedRelatedTickets,
   );
+  const {
+    data: choicesData,
+    loading: choicesLoading,
+  } = useGrievancesChoiceDataQuery();
+  if (choicesLoading) {
+    return null;
+  }
+  const statusChoices: {
+    [id: number]: string;
+  } = reduceChoices(choicesData.grievanceTicketStatusChoices);
+
+  const categoryChoices: {
+    [id: number]: string;
+  } = reduceChoices(choicesData.grievanceTicketCategoryChoices);
 
   const handleCheckboxClick = (event, name): void => {
     const selectedIndex = selected.indexOf(name);
@@ -74,7 +90,10 @@ export const LookUpRelatedTicketsTable = ({
 
   return (
     <TableWrapper>
-      <UniversalTable<GrievanceTicketNode, AllGrievanceTicketQueryVariables>
+      <UniversalTable<
+        AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'],
+        AllGrievanceTicketQueryVariables
+      >
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}
         query={useAllGrievanceTicketQuery}
@@ -86,6 +105,8 @@ export const LookUpRelatedTicketsTable = ({
           <LookUpRelatedTicketsTableRow
             key={row.id}
             ticket={row}
+            statusChoices={statusChoices}
+            categoryChoices={categoryChoices}
             checkboxClickHandler={handleCheckboxClick}
             selected={selected}
           />

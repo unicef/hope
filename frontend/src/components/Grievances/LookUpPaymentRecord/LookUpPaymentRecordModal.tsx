@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
+import { Formik } from 'formik';
 import {
   Button,
   Dialog,
@@ -8,8 +9,6 @@ import {
   DialogTitle,
 } from '@material-ui/core';
 import { LookUpPaymentRecordTable } from '../LookUpPaymentRecordTable/LookUpPaymentRecordTable';
-import { LookUpButton } from '../LookUpButton';
-import { Formik } from 'formik';
 
 const DialogFooter = styled.div`
   padding: 12px 16px;
@@ -35,7 +34,7 @@ export const LookUpPaymentRecordModal = ({
         setLookUpDialogOpen(false);
       }}
     >
-      {({ submitForm, setFieldValue, values }) => (
+      {({ submitForm, setFieldValue }) => (
         <>
           <Dialog
             maxWidth='lg'
