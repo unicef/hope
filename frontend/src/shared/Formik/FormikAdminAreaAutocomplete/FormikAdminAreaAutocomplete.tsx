@@ -8,8 +8,9 @@ export const FormikAdminAreaAutocomplete = ({
   const handleChange = (e, option): void => {
     if (!option) {
       form.setFieldValue(field.name, undefined);
+    } else {
+      form.setFieldValue(field.name, option.node.title);
     }
-    form.setFieldValue(field.name, option.node.id);
   };
   return (
     <>
