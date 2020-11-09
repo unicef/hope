@@ -5272,6 +5272,26 @@ export type CashPlanQuery = (
   )> }
 );
 
+export type GrievanceTicketQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type GrievanceTicketQuery = (
+  { __typename?: 'Query' }
+  & { grievanceTicket: Maybe<(
+    { __typename?: 'GrievanceTicketNode' }
+    & Pick<GrievanceTicketNode, 'id' | 'status' | 'category' | 'consent' | 'createdAt' | 'updatedAt' | 'description' | 'language'>
+    & { createdBy: Maybe<(
+      { __typename?: 'UserNode' }
+      & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
+    )>, assignedTo: Maybe<(
+      { __typename?: 'UserNode' }
+      & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
+    )> }
+  )> }
+);
+
 export type GrievancesChoiceDataQueryVariables = {};
 
 
@@ -9050,6 +9070,75 @@ export function useCashPlanLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHoo
 export type CashPlanQueryHookResult = ReturnType<typeof useCashPlanQuery>;
 export type CashPlanLazyQueryHookResult = ReturnType<typeof useCashPlanLazyQuery>;
 export type CashPlanQueryResult = ApolloReactCommon.QueryResult<CashPlanQuery, CashPlanQueryVariables>;
+export const GrievanceTicketDocument = gql`
+    query GrievanceTicket($id: ID!) {
+  grievanceTicket(id: $id) {
+    id
+    status
+    category
+    consent
+    createdBy {
+      id
+      firstName
+      lastName
+      email
+    }
+    createdAt
+    updatedAt
+    description
+    language
+    assignedTo {
+      id
+      firstName
+      lastName
+      email
+    }
+  }
+}
+    `;
+export type GrievanceTicketComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<GrievanceTicketQuery, GrievanceTicketQueryVariables>, 'query'> & ({ variables: GrievanceTicketQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const GrievanceTicketComponent = (props: GrievanceTicketComponentProps) => (
+      <ApolloReactComponents.Query<GrievanceTicketQuery, GrievanceTicketQueryVariables> query={GrievanceTicketDocument} {...props} />
+    );
+    
+export type GrievanceTicketProps<TChildProps = {}> = ApolloReactHoc.DataProps<GrievanceTicketQuery, GrievanceTicketQueryVariables> & TChildProps;
+export function withGrievanceTicket<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  GrievanceTicketQuery,
+  GrievanceTicketQueryVariables,
+  GrievanceTicketProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, GrievanceTicketQuery, GrievanceTicketQueryVariables, GrievanceTicketProps<TChildProps>>(GrievanceTicketDocument, {
+      alias: 'grievanceTicket',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useGrievanceTicketQuery__
+ *
+ * To run a query within a React component, call `useGrievanceTicketQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGrievanceTicketQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGrievanceTicketQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useGrievanceTicketQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GrievanceTicketQuery, GrievanceTicketQueryVariables>) {
+        return ApolloReactHooks.useQuery<GrievanceTicketQuery, GrievanceTicketQueryVariables>(GrievanceTicketDocument, baseOptions);
+      }
+export function useGrievanceTicketLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GrievanceTicketQuery, GrievanceTicketQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<GrievanceTicketQuery, GrievanceTicketQueryVariables>(GrievanceTicketDocument, baseOptions);
+        }
+export type GrievanceTicketQueryHookResult = ReturnType<typeof useGrievanceTicketQuery>;
+export type GrievanceTicketLazyQueryHookResult = ReturnType<typeof useGrievanceTicketLazyQuery>;
+export type GrievanceTicketQueryResult = ApolloReactCommon.QueryResult<GrievanceTicketQuery, GrievanceTicketQueryVariables>;
 export const GrievancesChoiceDataDocument = gql`
     query GrievancesChoiceData {
   grievanceTicketStatusChoices {

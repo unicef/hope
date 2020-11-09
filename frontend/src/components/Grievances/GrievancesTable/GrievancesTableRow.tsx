@@ -8,6 +8,7 @@ import { StatusBox } from '../../StatusBox';
 import {
   decodeIdString,
   grievanceTicketStatusToColor,
+  renderUserName,
 } from '../../../utils/utils';
 import { Missing } from '../../Missing';
 import { UniversalMoment } from '../../UniversalMoment';
@@ -21,11 +22,13 @@ const StatusContainer = styled.div`
 interface GrievancesTableRowProps {
   ticket: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'];
   statusChoices: { [id: number]: string };
+  categoryChoices: { [id: number]: string };
 }
 
 export function GrievancesTableRow({
   ticket,
   statusChoices,
+  categoryChoices,
 }: GrievancesTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
@@ -50,12 +53,8 @@ export function GrievancesTableRow({
           />
         </StatusContainer>
       </TableCell>
-      <TableCell align='left'>
-        {ticket.assignedTo.firstName
-          ? `${ticket.assignedTo.firstName} ${ticket.assignedTo.lastName}`
-          : ticket.assignedTo.email}
-      </TableCell>
-      <TableCell align='left'>{ticket.category}</TableCell>
+      <TableCell align='left'>{renderUserName(ticket.assignedTo)}</TableCell>
+      <TableCell align='left'>{categoryChoices[ticket.category]}</TableCell>
       <TableCell align='left'>
         <Missing />
       </TableCell>

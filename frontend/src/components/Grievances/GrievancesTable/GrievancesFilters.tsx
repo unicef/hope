@@ -17,7 +17,6 @@ import { KeyboardDatePicker } from '@material-ui/pickers';
 import { ContainerWithBorder } from '../../ContainerWithBorder';
 import { AdminAreasAutocomplete } from '../../population/AdminAreaAutocomplete';
 import { FieldLabel } from '../../FieldLabel';
-import { Missing } from '../../Missing';
 import { GrievancesChoiceDataQuery } from '../../../__generated__/graphql';
 
 const SearchTextField = styled(TextField)`

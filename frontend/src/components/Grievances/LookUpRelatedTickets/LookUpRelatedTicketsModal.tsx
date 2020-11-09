@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import SearchIcon from '@material-ui/icons/Search';
 import styled from 'styled-components';
 import {
   Button,
@@ -8,14 +7,13 @@ import {
   DialogContent,
   DialogTitle,
 } from '@material-ui/core';
+import { Formik } from 'formik';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { useGrievancesChoiceDataQuery } from '../../../__generated__/graphql';
 import { LookUpRelatedTicketsFilters } from '../LookUpRelatedTicketsTable/LookUpRelatedTicketsFilters';
 import { LookUpRelatedTicketsTable } from '../LookUpRelatedTicketsTable/LookUpRelatedTicketsTable';
 import { LoadingComponent } from '../../LoadingComponent';
-import { LookUpButton } from '../LookUpButton';
-import { Formik } from 'formik';
 
 const DialogFooter = styled.div`
   padding: 12px 16px;
@@ -59,7 +57,7 @@ export const LookUpRelatedTicketsModal = ({
         setLookUpDialogOpen(false);
       }}
     >
-      {({ submitForm, setFieldValue, values }) => (
+      {({ submitForm, setFieldValue }) => (
         <Dialog
           maxWidth='lg'
           fullWidth

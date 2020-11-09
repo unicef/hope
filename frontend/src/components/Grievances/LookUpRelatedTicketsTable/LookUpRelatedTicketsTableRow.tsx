@@ -1,13 +1,18 @@
 import TableCell from '@material-ui/core/TableCell';
 import styled from 'styled-components';
 import React from 'react';
+import { Checkbox } from '@material-ui/core';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { Pointer } from '../../Pointer';
 import { ClickableTableRow } from '../../table/ClickableTableRow';
 import { StatusBox } from '../../StatusBox';
-import { cashPlanStatusToColor } from '../../../utils/utils';
+import {
+  decodeIdString,
+  grievanceTicketStatusToColor,
+  renderUserName,
+} from '../../../utils/utils';
 import { Missing } from '../../Missing';
-import { Checkbox } from '@material-ui/core';
+import { AllGrievanceTicketQuery } from '../../../__generated__/graphql';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -15,15 +20,22 @@ const StatusContainer = styled.div`
 `;
 
 interface LookUpRelatedTicketsTableRowProps {
-  ticket;
+  ticket: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'];
   selected: Array<string>;
-  checkboxClickHandler;
+  checkboxClickHandler: (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+    number,
+  ) => void;
+  statusChoices: { [id: number]: string };
+  categoryChoices: { [id: number]: string };
 }
 
 export function LookUpRelatedTicketsTableRow({
   ticket,
   selected,
   checkboxClickHandler,
+  statusChoices,
+  categoryChoices,
 }: LookUpRelatedTicketsTableRowProps): React.ReactElement {
   const businessArea = useBusinessArea();
   const handleClick = (): void => {
@@ -35,6 +47,7 @@ export function LookUpRelatedTicketsTableRow({
   };
   const isSelected = (name: string): boolean => selected.includes(name);
   const isItemSelected = isSelected(ticket.id);
+
   return (
     <ClickableTableRow hover role='checkbox' key={ticket.id}>
       <TableCell padding='checkbox'>
@@ -46,21 +59,21 @@ export function LookUpRelatedTicketsTableRow({
         />
       </TableCell>
       <TableCell onClick={handleClick} align='left'>
-        <Pointer>{ticket.id}</Pointer>
+        <Pointer>{decodeIdString(ticket.id)}</Pointer>
       </TableCell>
       <TableCell align='left'>
         <StatusContainer>
           <StatusBox
-            status={ticket.status}
-            statusToColor={cashPlanStatusToColor}
+            status={statusChoices[ticket.status]}
+            statusToColor={grievanceTicketStatusToColor}
           />
         </StatusContainer>
       </TableCell>
-      <TableCell align='left'>{ticket.category}</TableCell>
+      <TableCell align='left'>{categoryChoices[ticket.category]}</TableCell>
       <TableCell align='left'>
         <Missing />
       </TableCell>
-      <TableCell align='left'>{`${ticket.assignedTo.firstName} ${ticket.assignedTo.lastName}`}</TableCell>
+      <TableCell align='left'>{renderUserName(ticket.assignedTo)}</TableCell>
       <TableCell align='left'>
         <Missing />
       </TableCell>

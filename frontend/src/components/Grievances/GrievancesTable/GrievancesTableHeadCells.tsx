@@ -1,7 +1,9 @@
 import { HeadCell } from '../../table/EnhancedTableHead';
-import {AllGrievanceTicketQuery, GrievanceTicketNode} from '../../../__generated__/graphql';
+import { AllGrievanceTicketQuery } from '../../../__generated__/graphql';
 
-export const headCells: HeadCell<AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node']>[] = [
+export const headCells: HeadCell<
+  AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node']
+>[] = [
   {
     disablePadding: false,
     label: 'Ticket Id',
