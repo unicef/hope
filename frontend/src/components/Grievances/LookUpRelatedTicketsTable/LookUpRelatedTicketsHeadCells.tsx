@@ -20,13 +20,6 @@ export const headCells: HeadCell<
   },
   {
     disablePadding: false,
-    label: 'Assigned to',
-    id: 'assignedTo',
-    numeric: false,
-    dataCy: 'assignedTo',
-  },
-  {
-    disablePadding: false,
     label: 'Category',
     id: 'category',
     numeric: false,
@@ -41,16 +34,17 @@ export const headCells: HeadCell<
   },
   {
     disablePadding: false,
-    label: 'Creation date',
-    id: 'createdAt',
+    label: 'Assigned to',
+    id: 'assignedTo',
     numeric: false,
-    dataCy: 'createdAt',
+    dataCy: 'assignedTo',
   },
+
   {
     disablePadding: false,
-    label: 'Last modified date',
-    id: 'userModified',
+    label: 'Administrative Level 2',
+    id: 'admin',
     numeric: false,
-    dataCy: 'userModified',
+    dataCy: 'admin',
   },
 ];
