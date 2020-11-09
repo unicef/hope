@@ -215,12 +215,21 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
             "adult_female": adult_female,
         }
 
+    def get_criteria_string(self):
+        return self.candidate_list_targeting_criteria.get_criteria_string()
+
+    @property
+    def targeting_criteria_string(self):
+        return self.get_criteria_string()
+
     @property
     def final_stats(self):
         if self.status == TargetPopulation.STATUS_DRAFT:
             return None
         elif self.status == TargetPopulation.STATUS_APPROVED:
-            households_ids = self.vulnerability_score_filtered_households.filter(self.final_list_targeting_criteria.get_query()).values_list("id")
+            households_ids = self.vulnerability_score_filtered_households.filter(
+                self.final_list_targeting_criteria.get_query()
+            ).values_list("id")
         else:
             households_ids = self.final_list.values_list("id")
         delta18 = relativedelta(years=+18)
@@ -297,6 +306,11 @@ class TargetingCriteriaQueryingMixin:
             return
         self.rules = rules
 
+    def get_criteria_string(self):
+        rules = self.rules if isinstance(self.rules, list) else self.rules.all()
+        rules_string = [x.get_criteria_string() for x in rules]
+        return " OR ".join(rules_string).strip()
+
     def get_query(self):
         query = Q()
         rules = self.rules if isinstance(self.rules, list) else self.rules.all()
@@ -334,6 +348,22 @@ class TargetingCriteriaRuleQueryingMixin:
         if individuals_filters_blocks is not None:
             self.individuals_filters_blocks = individuals_filters_blocks
 
+    def get_criteria_string(self):
+        filters = self.filters if isinstance(self.filters, list) else self.filters.all()
+        filters_strings = [x.get_criteria_string() for x in filters]
+        individuals_filters_blocks = (
+            self.individuals_filters_blocks
+            if isinstance(self.individuals_filters_blocks, list)
+            else self.individuals_filters_blocks.all()
+        )
+        individuals_filters_blocks_strings = [x.get_criteria_string() for x in individuals_filters_blocks]
+        all_strings = []
+        if len(filters_strings):
+            all_strings.append(f"H({' AND '.join(filters_strings).strip()})")
+        if len(individuals_filters_blocks_strings):
+            all_strings.append(f"I({' AND '.join(individuals_filters_blocks_strings).strip()})")
+        return " AND ".join(all_strings).strip()
+
     def get_query(self):
         query = Q()
         filters = self.filters if isinstance(self.filters, list) else self.filters.all()
@@ -367,6 +397,15 @@ class TargetingIndividualRuleFilterBlockMixin:
     def __init__(self, individual_block_filters=None):
         if individual_block_filters is not None:
             self.individual_block_filters = individual_block_filters
+
+    def get_criteria_string(self):
+        filters = (
+            self.individual_block_filters
+            if isinstance(self.individual_block_filters, list)
+            else self.individual_block_filters.all()
+        )
+        filters_string = [x.get_criteria_string() for x in filters]
+        return f"({' AND '.join(filters_string).strip()})"
 
     def get_query(self):
         individuals_query = Q()
@@ -428,6 +467,9 @@ class TargetingCriteriaFilterMixin:
         ("GREATER_THAN", _("Greater than")),
         ("LESS_THAN", _("Less than")),
     )
+
+    def get_criteria_string(self):
+        return f"{{{self.field_name} {self.comparision_method} ({','.join([str(x) for x in self.arguments])})}}"
 
     def get_lookup_prefix(self, associated_with):
         return "individuals__" if associated_with == _INDIVIDUAL else ""

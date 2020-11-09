@@ -28,8 +28,7 @@ snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket
                         'paymentRecord': {
                             'fullName': 'John Doe'
                         }
-                    },
-                    'status': 1
+                    }
                 }
             ]
         }
@@ -51,8 +50,7 @@ snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket
                         'household': None,
                         'individual': None,
                         'paymentRecord': None
-                    },
-                    'status': 1
+                    }
                 }
             ]
         }
@@ -78,8 +76,7 @@ snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket
                         'paymentRecord': {
                             'fullName': 'John Doe'
                         }
-                    },
-                    'status': 1
+                    }
                 }
             ]
         }
@@ -105,8 +102,7 @@ snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket
                         'paymentRecord': {
                             'fullName': 'John Doe'
                         }
-                    },
-                    'status': 1
+                    }
                 }
             ]
         }
@@ -132,8 +128,7 @@ snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket
                             'fullName': 'John Doe'
                         },
                         'paymentRecord': None
-                    },
-                    'status': 1
+                    }
                 }
             ]
         }

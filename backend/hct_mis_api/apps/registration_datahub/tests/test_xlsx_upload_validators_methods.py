@@ -1,11 +1,9 @@
 import operator
-from pprint import pprint
 from unittest import TestCase, mock
 
+import openpyxl
 from django.conf import settings
 from django.core.management import call_command
-
-import openpyxl
 from openpyxl_image_loader import SheetImageLoader
 
 
@@ -134,10 +132,7 @@ class TestXLSXValidatorsMethods(TestCase):
             self.assertFalse(self.UploadXLSXValidator.choice_validator(value, header))
 
     def test_rows_validator_too_many_head_of_households(self):
-        wb = openpyxl.load_workbook(
-            f"{self.FILES_DIR_PATH}/error-xlsx.xlsx",
-            data_only=True,
-        )
+        wb = openpyxl.load_workbook(f"{self.FILES_DIR_PATH}/error-xlsx.xlsx", data_only=True,)
         result = self.UploadXLSXValidator.rows_validator(wb["Individuals"])
         expected = [
             {
@@ -151,15 +146,9 @@ class TestXLSXValidatorsMethods(TestCase):
 
     def test_rows_validator(self):
 
-        wb = openpyxl.load_workbook(
-            f"{self.FILES_DIR_PATH}/invalid_rows.xlsx",
-            data_only=True,
-        )
+        wb = openpyxl.load_workbook(f"{self.FILES_DIR_PATH}/invalid_rows.xlsx", data_only=True,)
 
-        wb_valid = openpyxl.load_workbook(
-            f"{self.FILES_DIR_PATH}/new_reg_data_import.xlsx",
-            data_only=True,
-        )
+        wb_valid = openpyxl.load_workbook(f"{self.FILES_DIR_PATH}/new_reg_data_import.xlsx", data_only=True,)
         self.UploadXLSXValidator.image_loader = SheetImageLoader(wb["Individuals"])
 
         sheets_and_expected_values = (
@@ -282,18 +271,9 @@ class TestXLSXValidatorsMethods(TestCase):
                     },
                 ],
             ),
-            (
-                wb["Individuals"],
-                [],
-            ),
-            (
-                wb_valid["Households"],
-                [],
-            ),
-            (
-                wb_valid["Individuals"],
-                [],
-            ),
+            (wb["Individuals"], [],),
+            (wb_valid["Households"], [],),
+            (wb_valid["Individuals"], [],),
         )
 
         for sheet, expected_values in sheets_and_expected_values:
@@ -308,10 +288,7 @@ class TestXLSXValidatorsMethods(TestCase):
                 f"{self.FILES_DIR_PATH}/" f"image.png",
                 [{"row_number": 1, "message": "Only .xlsx files are accepted for import"}],
             ),
-            (
-                f"{self.FILES_DIR_PATH}/" f"not_excel_file.xlsx",
-                [{"row_number": 1, "message": "Invalid .xlsx file"}],
-            ),
+            (f"{self.FILES_DIR_PATH}/" f"not_excel_file.xlsx", [{"row_number": 1, "message": "Invalid .xlsx file"}],),
         )
 
         for file_path, expected_values in files_to_test:
@@ -329,25 +306,19 @@ class TestXLSXValidatorsMethods(TestCase):
 
     def test_required_validator(self):
         with mock.patch.dict(
-            "registration_datahub.validators.UploadXLSXValidator.ALL_FIELDS",
-            {"test": {"required": True}},
-            clear=True,
+            "registration_datahub.validators.UploadXLSXValidator.ALL_FIELDS", {"test": {"required": True}}, clear=True,
         ):
             result = self.UploadXLSXValidator.required_validator(value="tak", header="test")
             self.assertTrue(result)
 
         with mock.patch.dict(
-            "registration_datahub.validators.UploadXLSXValidator.ALL_FIELDS",
-            {"test": {"required": True}},
-            clear=True,
+            "registration_datahub.validators.UploadXLSXValidator.ALL_FIELDS", {"test": {"required": True}}, clear=True,
         ):
             result = self.UploadXLSXValidator.required_validator(value="", header="test")
             self.assertFalse(result)
 
         with mock.patch.dict(
-            "registration_datahub.validators.UploadXLSXValidator.ALL_FIELDS",
-            {"test": {"required": False}},
-            clear=True,
+            "registration_datahub.validators.UploadXLSXValidator.ALL_FIELDS", {"test": {"required": False}}, clear=True,
         ):
             result = self.UploadXLSXValidator.required_validator(value="", header="test")
             self.assertTrue(result)
