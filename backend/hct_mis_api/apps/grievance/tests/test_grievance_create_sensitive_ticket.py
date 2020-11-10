@@ -56,6 +56,12 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
             business_area=self.business_area,
             cash_plan=cash_plan,
         )
+        self.second_payment_record = PaymentRecordFactory(
+            household=self.household,
+            full_name=f"{self.individuals[0].full_name} second Individual",
+            business_area=self.business_area,
+            cash_plan=cash_plan,
+        )
 
     def test_create_sensitive_ticket(self):
         input_data = {
@@ -73,7 +79,7 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
                         "sensitiveGrievanceTicketExtras": {
                             "household": self.id_to_base64(self.household.id, "HouseholdNode"),
                             "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
-                            "paymentRecord": self.id_to_base64(self.payment_record.id, "PaymentRecordNode"),
+                            "paymentRecord": [self.id_to_base64(self.payment_record.id, "PaymentRecordNode")],
                         }
                     }
                 },
@@ -100,7 +106,7 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
                         "grievanceComplaintTicketExtras": {
                             "household": self.id_to_base64(self.household.id, "HouseholdNode"),
                             "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
-                            "paymentRecord": self.id_to_base64(self.payment_record.id, "PaymentRecordNode"),
+                            "paymentRecord": [self.id_to_base64(self.payment_record.id, "PaymentRecordNode")],
                         }
                     }
                 },
@@ -126,7 +132,37 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
                         "sensitiveGrievanceTicketExtras": {
                             "household": self.id_to_base64(self.household.id, "HouseholdNode"),
                             "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
-                            "paymentRecord": self.id_to_base64(self.payment_record.id, "PaymentRecordNode"),
+                            "paymentRecord": [self.id_to_base64(self.payment_record.id, "PaymentRecordNode")],
+                        }
+                    }
+                },
+            }
+        }
+
+        self.snapshot_graphql_request(
+            request_string=self.CREATE_GRIEVANCE_MUTATION, context={"user": self.user}, variables=input_data,
+        )
+
+    def test_create_sensitive_ticket_with_two_payment_records(self):
+        input_data = {
+            "input": {
+                "description": "Test Feedback",
+                "assignedTo": self.id_to_base64(self.user.id, "UserNode"),
+                "category": GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+                "issueType": GrievanceTicket.ISSUE_TYPE_MISCELLANEOUS,
+                "admin": self.admin_area.title,
+                "language": "Polish, English",
+                "consent": True,
+                "businessArea": "afghanistan",
+                "extras": {
+                    "category": {
+                        "sensitiveGrievanceTicketExtras": {
+                            "household": self.id_to_base64(self.household.id, "HouseholdNode"),
+                            "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
+                            "paymentRecord": [
+                                self.id_to_base64(self.payment_record.id, "PaymentRecordNode"),
+                                self.id_to_base64(self.second_payment_record.id, "PaymentRecordNode"),
+                            ],
                         }
                     }
                 },
@@ -178,7 +214,7 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
                     "category": {
                         "sensitiveGrievanceTicketExtras": {
                             "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
-                            "paymentRecord": self.id_to_base64(self.payment_record.id, "PaymentRecordNode"),
+                            "paymentRecord": [self.id_to_base64(self.payment_record.id, "PaymentRecordNode")],
                         }
                     }
                 },
@@ -204,7 +240,7 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
                     "category": {
                         "sensitiveGrievanceTicketExtras": {
                             "household": self.id_to_base64(self.household.id, "HouseholdNode"),
-                            "paymentRecord": self.id_to_base64(self.payment_record.id, "PaymentRecordNode"),
+                            "paymentRecord": [self.id_to_base64(self.payment_record.id, "PaymentRecordNode")],
                         }
                     }
                 },
