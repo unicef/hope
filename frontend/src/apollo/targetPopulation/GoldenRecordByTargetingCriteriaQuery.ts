@@ -20,6 +20,7 @@ export const GoldenRecordByTargetingCriteria = gql`
       edges {
         node {
           id
+          unicefId
           headOfHousehold {
             id
             givenName
