@@ -41,7 +41,7 @@ export const LookUpIndividualTable = ({
   const initialVariables = {
     businessArea,
     search: filter.search,
-    programme: filter.programme,
+    programs: [decodeIdString(filter.programs)],
     lastRegistrationDate: JSON.stringify(filter.lastRegistrationDate),
     status: [filter.status],
     admin2: [decodeIdString(filter.admin2)],
