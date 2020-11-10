@@ -216,7 +216,10 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
         }
 
     def get_criteria_string(self):
-        return self.candidate_list_targeting_criteria.get_criteria_string()
+        try:
+            return self.candidate_list_targeting_criteria.get_criteria_string()
+        except:
+            return ""
 
     @property
     def targeting_criteria_string(self):
