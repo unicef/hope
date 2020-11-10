@@ -142,9 +142,12 @@ class GrievanceTicketThrough(TimeStampedUUIDModel):
     )
 
 
-class TicketNotes(TimeStampedUUIDModel):
+class TicketNote(TimeStampedUUIDModel):
     description = models.TextField(
-        verbose_name=_("Description"), blank=True, null=True, help_text=_("The content of the customers query."),
+        verbose_name=_("Description"), help_text=_("The content of the customers query."),
+    )
+    ticket = models.ForeignKey(
+        "grievance.GrievanceTicket", related_name="ticket_notes", on_delete=models.CASCADE
     )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -152,7 +155,7 @@ class TicketNotes(TimeStampedUUIDModel):
         related_name="ticket_notes",
         blank=True,
         null=True,
-        verbose_name=_("Assigned to"),
+        verbose_name=_("Created by"),
     )
 
 
