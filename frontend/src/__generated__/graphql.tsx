@@ -6029,7 +6029,7 @@ export type CandidateHouseholdsListByTargetingCriteriaQuery = (
       & Pick<HouseholdNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'HouseholdNode' }
-        & Pick<HouseholdNode, 'id' | 'size' | 'updatedAt' | 'address'>
+        & Pick<HouseholdNode, 'id' | 'unicefId' | 'size' | 'updatedAt' | 'address'>
         & { headOfHousehold: (
           { __typename?: 'IndividualNode' }
           & Pick<IndividualNode, 'id' | 'givenName' | 'familyName'>
@@ -6066,7 +6066,7 @@ export type FinalHouseholdsListByTargetingCriteriaQuery = (
       & Pick<HouseholdNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'HouseholdNode' }
-        & Pick<HouseholdNode, 'id' | 'size' | 'updatedAt' | 'address'>
+        & Pick<HouseholdNode, 'id' | 'unicefId' | 'size' | 'updatedAt' | 'address'>
         & { headOfHousehold: (
           { __typename?: 'IndividualNode' }
           & Pick<IndividualNode, 'id' | 'givenName' | 'familyName'>
@@ -6117,7 +6117,7 @@ export type GoldenRecordByTargetingCriteriaQuery = (
       & Pick<HouseholdNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'HouseholdNode' }
-        & Pick<HouseholdNode, 'id' | 'size' | 'updatedAt' | 'address'>
+        & Pick<HouseholdNode, 'id' | 'unicefId' | 'size' | 'updatedAt' | 'address'>
         & { headOfHousehold: (
           { __typename?: 'IndividualNode' }
           & Pick<IndividualNode, 'id' | 'givenName' | 'familyName'>
@@ -10920,6 +10920,7 @@ export const CandidateHouseholdsListByTargetingCriteriaDocument = gql`
     edges {
       node {
         id
+        unicefId
         headOfHousehold {
           id
           givenName
@@ -10997,6 +10998,7 @@ export const FinalHouseholdsListByTargetingCriteriaDocument = gql`
     edges {
       node {
         id
+        unicefId
         headOfHousehold {
           id
           givenName
@@ -11130,6 +11132,7 @@ export const GoldenRecordByTargetingCriteriaDocument = gql`
     edges {
       node {
         id
+        unicefId
         headOfHousehold {
           id
           givenName
