@@ -10,6 +10,7 @@ export const targetPopulationMinimal = gql`
     candidateListTotalHouseholds
     finalListTotalHouseholds
     program {
+      id
       name
     }
     createdBy {
@@ -55,12 +56,14 @@ export const targetPopulationDetailed = gql`
       individualDataNeeded
     }
     createdBy {
+      id
       firstName
       lastName
     }
     candidateListTargetingCriteria {
       targetPopulationCandidate {
         createdBy {
+          id
           firstName
           lastName
         }
@@ -104,6 +107,7 @@ export const targetPopulationDetailed = gql`
     finalListTargetingCriteria {
       targetPopulationFinal {
         createdBy {
+          id
           firstName
           lastName
         }
