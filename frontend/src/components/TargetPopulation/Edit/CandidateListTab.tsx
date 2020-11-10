@@ -40,7 +40,7 @@ export function CandidateListTab({
             selectedProgram={
               allPrograms?.allPrograms?.edges.find(
                 (el) => el.node.id === values.program,
-              ).node
+              )?.node
             }
           />
         )}
