@@ -25,15 +25,13 @@ export function ProgrammeTableRow({ household }): React.ReactElement {
       role='checkbox'
       key={household.id}
     >
-      <TableCell align='left'>{decodeIdString(household.id)}</TableCell>
-      <TableCell align='left'>
-        {household.selection.vulnerabilityScore || '-'}
-      </TableCell>
+      <TableCell align='left'>{household.unicefId}</TableCell>
       <TableCell align='left'>{`${household.headOfHousehold.givenName} ${household.headOfHousehold.familyName}`}</TableCell>
       <TableCell align='left'>{household.size}</TableCell>
-      <TableCell align='left'>-</TableCell>
-      <TableCell align='left'>{household.address}</TableCell>
-      <TableCell align='left'>{household.adminArea?.title}</TableCell>
+      <TableCell align='left'>{household.adminArea?.title||'-'}</TableCell>
+      <TableCell align='left'>
+        {household.selection?.vulnerabilityScore || '-'}
+      </TableCell>
     </ClickableTableRow>
   );
 }
