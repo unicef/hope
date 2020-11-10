@@ -27,6 +27,7 @@ class HouseholdFilter(FilterSet):
             "size",
             Lower("admin_area__title"),
             "updated_at",
+            "unicef_id",
         )
     )
 
@@ -110,9 +111,6 @@ class TargetPopulationFilter(django_filters.FilterSet):
             "total_family_size",
         )
     )
-
-
-
 
 
 class TargetingCriteriaRuleFilterNode(DjangoObjectType):
@@ -289,7 +287,9 @@ class Query(graphene.ObjectType):
             return prefetch_selections(
                 Household.objects.filter(target_population_model.candidate_list_targeting_criteria.get_query()),
             ).distinct()
-        return prefetch_selections(target_population_model.vulnerability_score_filtered_households, target_population_model).all()
+        return prefetch_selections(
+            target_population_model.vulnerability_score_filtered_households, target_population_model
+        ).all()
 
     def resolve_final_households_list_by_targeting_criteria(
         parent, info, target_population, targeting_criteria=None, **kwargs

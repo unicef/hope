@@ -5,13 +5,7 @@ export const headCells: HeadCell<TargetPopulationNode>[] = [
   {
     disablePadding: false,
     label: 'Id',
-    id: 'id',
-    numeric: false,
-  },
-  {
-    disablePadding: false,
-    label: 'Score',
-    id: 'status',
+    id: 'unicef_id',
     numeric: false,
   },
   {
@@ -28,20 +22,14 @@ export const headCells: HeadCell<TargetPopulationNode>[] = [
   },
   {
     disablePadding: false,
-    label: 'Administrative Level',
-    id: 'adminLevel',
-    numeric: false,
-  },
-  {
-    disablePadding: false,
-    label: 'Location',
+    label: 'Administrative Level 2',
     id: 'admin_area__title',
     numeric: false,
   },
   {
     disablePadding: false,
-    label: 'Last Inspection',
-    id: 'lastEditedAt',
+    label: 'Score',
+    id: 'household_selection__vulnerability_score',
     numeric: false,
   },
 ];
