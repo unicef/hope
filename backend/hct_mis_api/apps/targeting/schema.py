@@ -22,7 +22,14 @@ from utils.schema import Arg
 
 class HouseholdFilter(FilterSet):
     order_by = CustomOrderingFilter(
-        fields=("id", Lower("head_of_household__full_name"), "size", Lower("admin_area__title"), "updated_at",)
+        fields=(
+            "id",
+            Lower("head_of_household__full_name"),
+            "size",
+            Lower("admin_area__title"),
+            "updated_at",
+            "unicef_id",
+        )
     )
 
 
