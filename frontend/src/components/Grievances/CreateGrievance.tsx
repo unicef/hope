@@ -21,6 +21,7 @@ import { useSnackbar } from '../../hooks/useSnackBar';
 import { Consent } from './Consent';
 import { LookUpSection } from './LookUpSection';
 import { FormikAdminAreaAutocomplete } from '../../shared/Formik/FormikAdminAreaAutocomplete';
+import { GRIEVANCE_CATEGORIES } from '../../utils/constants';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -73,10 +74,14 @@ export function CreateGrievance(): React.ReactElement {
     area: Yup.string(),
     language: Yup.string().required('Language is required'),
     consent: Yup.bool().oneOf([true], 'Consent is required'),
-    // selectedHousehold: Yup.string().required('Household has to be selected'),
-    // selectedIndividual: Yup.string().required('Individual has to be selected'),
-    // selectedPaymentRecords: Yup.array.of(Yup.string()),
-    // selectedRelatedTickets: Yup.array.of(Yup.string()),
+    selectedHousehold: Yup.string(),
+    selectedIndividual: Yup.string().required('Individual has to be selected'),
+    selectedPaymentRecords: Yup.array()
+      .of(Yup.string())
+      .nullable(),
+    selectedRelatedTickets: Yup.array()
+      .of(Yup.string())
+      .nullable(),
   });
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
@@ -108,25 +113,84 @@ export function CreateGrievance(): React.ReactElement {
     value: edge.node.id,
   }));
 
+  const prepareVariables = (category: string, values) => {
+    const requiredVariables = {
+      businessArea,
+      description: values.description,
+      assignedTo: values.assignedTo,
+      category: parseInt(values.category, 10),
+      consent: values.consent,
+      language: values.language,
+      admin: values.admin,
+      area: values.area,
+    };
+
+    if (
+      category ===
+      (GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK ||
+        GRIEVANCE_CATEGORIES.POSITIVE_FEEDBACK ||
+        GRIEVANCE_CATEGORIES.REFERRAL)
+    ) {
+      return {
+        variables: {
+          input: {
+            ...requiredVariables,
+            linkedTickets: values.selectedRelatedTickets,
+          },
+        },
+      };
+    }
+    if (category === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT) {
+      return {
+        variables: {
+          input: {
+            ...requiredVariables,
+            extras: {
+              category: {
+                grievanceComplaintTicketExtras: {
+                  household: values.selectedHousehold,
+                  individual: values.selectedIndividual,
+                  paymentRecord: values.selectedPaymentRecords,
+                },
+              },
+            },
+          },
+        },
+      };
+    }
+    if (category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE) {
+      return {
+        variables: {
+          input: {
+            ...requiredVariables,
+            extras: {
+              category: {
+                sensitiveGrievanceTicketExtras: {
+                  household: values.selectedHousehold,
+                  individual: values.selectedIndividual,
+                  paymentRecord: values.selectedPaymentRecords,
+                },
+              },
+            },
+          },
+        },
+      };
+    }
+    return {
+      variables: {
+        input: {
+          ...requiredVariables,
+          linkedTickets: values.selectedRelatedTickets,
+        },
+      },
+    };
+  };
+
   return (
     <Formik
       initialValues={initialValues}
       onSubmit={(values) => {
-        mutate({
-          variables: {
-            input: {
-              businessArea,
-              description: values.description,
-              assignedTo: values.assignedTo,
-              category: parseInt(values.category, 10),
-              consent: values.consent,
-              language: values.language,
-              admin: values.admin,
-              area: values.area,
-              linkedTickets: values.selectedRelatedTickets,
-            },
-          },
-        }).then(
+        mutate(prepareVariables(values.category, values)).then(
           (res) => {
             return showMessage('Grievance Ticket created.', {
               pathname: `/${businessArea}/grievance-and-feedback/${res.data.createGrievanceTicket.grievanceTickets[0].id}`,
