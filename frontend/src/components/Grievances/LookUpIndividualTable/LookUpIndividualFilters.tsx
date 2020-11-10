@@ -72,16 +72,16 @@ export function LookUpIndividualFilters({
           />
         </Grid>
         <Grid item>
-          <Missing />
           <StyledFormControl variant='outlined' margin='dense'>
             <InputLabel>Programme</InputLabel>
             <Select
               /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
               // @ts-ignore
-              onChange={(e) => handleFilterChange(e, 'programme')}
+              onChange={(e) => handleFilterChange(e, 'programs')}
               variant='outlined'
+              multiple
               label='Programme'
-              value={filter.programme || ''}
+              value={filter.programs || []}
               InputProps={{
                 startAdornment: (
                   <StartInputAdornment position='start'>
