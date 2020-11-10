@@ -129,3 +129,48 @@ snapshots['TestGrievanceCreateComplaintTicketQuery::test_create_complaint_ticket
         }
     }
 }
+
+snapshots['TestGrievanceCreateComplaintTicketQuery::test_create_complaint_ticket_with_two_payment_records 1'] = {
+    'data': {
+        'createGrievanceTicket': {
+            'grievanceTickets': [
+                {
+                    'admin': 'City Test',
+                    'category': 4,
+                    'complaintTicketDetails': {
+                        'household': {
+                            'size': 1
+                        },
+                        'individual': {
+                            'fullName': 'John Doe'
+                        },
+                        'paymentRecord': {
+                            'fullName': 'John Doe second Individual'
+                        }
+                    },
+                    'consent': True,
+                    'description': 'Test Feedback',
+                    'language': 'Polish, English'
+                },
+                {
+                    'admin': 'City Test',
+                    'category': 4,
+                    'complaintTicketDetails': {
+                        'household': {
+                            'size': 1
+                        },
+                        'individual': {
+                            'fullName': 'John Doe'
+                        },
+                        'paymentRecord': {
+                            'fullName': 'John Doe second Individual'
+                        }
+                    },
+                    'consent': True,
+                    'description': 'Test Feedback',
+                    'language': 'Polish, English'
+                }
+            ]
+        }
+    }
+}
