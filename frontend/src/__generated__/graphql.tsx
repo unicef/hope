@@ -281,6 +281,7 @@ export type BusinessAreaNodeTargetpopulationSetArgs = {
   finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
   finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -1005,6 +1006,7 @@ export type HouseholdNodeTargetPopulationsArgs = {
   finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
   finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -2451,6 +2453,7 @@ export type ProgramNodeTargetpopulationSetArgs = {
   finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
   finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -2789,6 +2792,7 @@ export type QueryAllTargetPopulationArgs = {
   finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
   finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -3286,6 +3290,7 @@ export type SteficonRuleNodeTargetPopulationsArgs = {
   finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
   finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -3815,6 +3820,7 @@ export type UserBusinessAreaNodeTargetpopulationSetArgs = {
   finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
   finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -3911,6 +3917,7 @@ export type UserNodeTargetPopulationsArgs = {
   finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
   finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -3935,6 +3942,7 @@ export type UserNodeApprovedTargetPopulationsArgs = {
   finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
   finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -3959,6 +3967,7 @@ export type UserNodeFinalizedTargetPopulationsArgs = {
   finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
   finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -4064,6 +4073,7 @@ export type UserObjectTypeTargetPopulationsArgs = {
   finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
   finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -4088,6 +4098,7 @@ export type UserObjectTypeApprovedTargetPopulationsArgs = {
   finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
   finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -4112,6 +4123,7 @@ export type UserObjectTypeFinalizedTargetPopulationsArgs = {
   finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
   finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -4325,7 +4337,10 @@ export type IndividualDetailedFragment = (
 export type TargetPopulationMinimalFragment = (
   { __typename?: 'TargetPopulationNode' }
   & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'createdAt' | 'updatedAt' | 'candidateListTotalHouseholds' | 'finalListTotalHouseholds'>
-  & { createdBy: Maybe<(
+  & { program: Maybe<(
+    { __typename?: 'ProgramNode' }
+    & Pick<ProgramNode, 'id' | 'name'>
+  )>, createdBy: Maybe<(
     { __typename?: 'UserNode' }
     & Pick<UserNode, 'firstName' | 'lastName'>
   )> }
@@ -4345,14 +4360,14 @@ export type TargetPopulationDetailedFragment = (
     & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'populationGoal' | 'sector' | 'totalNumberOfHouseholds' | 'individualDataNeeded'>
   )>, createdBy: Maybe<(
     { __typename?: 'UserNode' }
-    & Pick<UserNode, 'firstName' | 'lastName'>
+    & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
   )>, candidateListTargetingCriteria: Maybe<(
     { __typename?: 'TargetingCriteriaNode' }
     & { targetPopulationCandidate: Maybe<(
       { __typename?: 'TargetPopulationNode' }
       & { createdBy: Maybe<(
         { __typename?: 'UserNode' }
-        & Pick<UserNode, 'firstName' | 'lastName'>
+        & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
       )> }
     )>, rules: Maybe<Array<Maybe<(
       { __typename?: 'TargetingCriteriaRuleNode' }
@@ -4390,7 +4405,7 @@ export type TargetPopulationDetailedFragment = (
       { __typename?: 'TargetPopulationNode' }
       & { createdBy: Maybe<(
         { __typename?: 'UserNode' }
-        & Pick<UserNode, 'firstName' | 'lastName'>
+        & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
       )> }
     )>, rules: Maybe<Array<Maybe<(
       { __typename?: 'TargetingCriteriaRuleNode' }
@@ -5193,7 +5208,8 @@ export type AllTargetPopulationsQueryVariables = {
   status?: Maybe<Scalars['String']>,
   candidateListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
   candidateListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
-  businessArea?: Maybe<Scalars['String']>
+  businessArea?: Maybe<Scalars['String']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>
 };
 
 
@@ -6339,6 +6355,10 @@ export const TargetPopulationMinimalFragmentDoc = gql`
   updatedAt
   candidateListTotalHouseholds
   finalListTotalHouseholds
+  program {
+    id
+    name
+  }
   createdBy {
     firstName
     lastName
@@ -6382,12 +6402,14 @@ export const TargetPopulationDetailedFragmentDoc = gql`
     individualDataNeeded
   }
   createdBy {
+    id
     firstName
     lastName
   }
   candidateListTargetingCriteria {
     targetPopulationCandidate {
       createdBy {
+        id
         firstName
         lastName
       }
@@ -6431,6 +6453,7 @@ export const TargetPopulationDetailedFragmentDoc = gql`
   finalListTargetingCriteria {
     targetPopulationFinal {
       createdBy {
+        id
         firstName
         lastName
       }
@@ -8833,8 +8856,8 @@ export type AllSteficonRulesQueryHookResult = ReturnType<typeof useAllSteficonRu
 export type AllSteficonRulesLazyQueryHookResult = ReturnType<typeof useAllSteficonRulesLazyQuery>;
 export type AllSteficonRulesQueryResult = ApolloReactCommon.QueryResult<AllSteficonRulesQuery, AllSteficonRulesQueryVariables>;
 export const AllTargetPopulationsDocument = gql`
-    query AllTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String, $candidateListTotalHouseholdsMin: Int, $candidateListTotalHouseholdsMax: Int, $businessArea: String) {
-  allTargetPopulation(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name: $name, status: $status, candidateListTotalHouseholdsMin: $candidateListTotalHouseholdsMin, candidateListTotalHouseholdsMax: $candidateListTotalHouseholdsMax, businessArea: $businessArea) {
+    query AllTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String, $candidateListTotalHouseholdsMin: Int, $candidateListTotalHouseholdsMax: Int, $businessArea: String, $program: [ID]) {
+  allTargetPopulation(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name: $name, status: $status, candidateListTotalHouseholdsMin: $candidateListTotalHouseholdsMin, candidateListTotalHouseholdsMax: $candidateListTotalHouseholdsMax, businessArea: $businessArea, program: $program) {
     edges {
       node {
         ...targetPopulationMinimal
@@ -8886,6 +8909,7 @@ export function withAllTargetPopulations<TProps, TChildProps = {}>(operationOpti
  *      candidateListTotalHouseholdsMin: // value for 'candidateListTotalHouseholdsMin'
  *      candidateListTotalHouseholdsMax: // value for 'candidateListTotalHouseholdsMax'
  *      businessArea: // value for 'businessArea'
+ *      program: // value for 'program'
  *   },
  * });
  */

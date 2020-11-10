@@ -14,6 +14,8 @@ import InputLabel from '../../shared/InputLabel';
 import { TARGETING_STATES } from '../../utils/constants';
 import { ContainerWithBorder } from '../ContainerWithBorder';
 import { FieldLabel } from '../FieldLabel';
+import FlashOnIcon from "@material-ui/icons/FlashOn";
+import {ProgramNode} from "../../__generated__/graphql";
 
 const TextContainer = styled(TextField)`
   .MuiFilledInput-root {
@@ -67,16 +69,18 @@ const StartInputAdornment = styled(InputAdornment)`
   margin-right: 0;
 `;
 
-interface HouseholdFiltersProps {
+interface TargetPopulationFiltersProps {
   //targetPopulations: TargetPopulationNode[],
   onFilterChange;
   filter;
+  programs: ProgramNode[];
 }
 export function TargetPopulationFilters({
   // targetPopulations,
   onFilterChange,
   filter,
-}: HouseholdFiltersProps): React.ReactElement {
+  programs,
+}: TargetPopulationFiltersProps): React.ReactElement {
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
   return (
@@ -120,6 +124,35 @@ export function TargetPopulationFilters({
               <MenuItem value='FINALIZED'>
                 {TARGETING_STATES.FINALIZED}
               </MenuItem>
+            </Select>
+          </StyledFormControl>
+        </Grid>
+          <Grid item>
+          <StyledFormControl variant='outlined' margin='dense'>
+            <InputLabel>Programme</InputLabel>
+            <Select
+              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
+              // @ts-ignore
+              onChange={(e) => handleFilterChange(e, 'program')}
+              variant='outlined'
+              label='Programme'
+              value={filter.program || ''}
+              InputProps={{
+                startAdornment: (
+                  <StartInputAdornment position='start'>
+                    <FlashOnIcon />
+                  </StartInputAdornment>
+                ),
+              }}
+            >
+              <MenuItem value=''>
+                <em>None</em>
+              </MenuItem>
+              {programs.map((program) => (
+                <MenuItem key={program.id} value={program.id}>
+                  {program.name}
+                </MenuItem>
+              ))}
             </Select>
           </StyledFormControl>
         </Grid>
