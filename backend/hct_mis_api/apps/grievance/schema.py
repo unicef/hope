@@ -1,5 +1,3 @@
-from collections import Iterable
-
 import graphene
 from django.db import models
 from django.db.models import Q
@@ -11,6 +9,7 @@ from django_filters import (
     TypedMultipleChoiceFilter,
     ChoiceFilter,
     ModelChoiceFilter,
+    UUIDFilter,
 )
 from graphene import relay
 from graphene_django import DjangoObjectType
@@ -23,7 +22,7 @@ from core.schema import ChoiceObject
 from core.utils import to_choice_object, choices_to_dict
 from grievance.models import (
     GrievanceTicket,
-    TicketNotes,
+    TicketNote,
     TicketSensitiveDetails,
     TicketComplaintDetails,
     TicketDeleteIndividualDetails,
@@ -164,6 +163,14 @@ class ExistingGrievanceTicketFilter(FilterSet):
         return queryset
 
 
+class TicketNoteFilter(FilterSet):
+    ticket = UUIDFilter(field_name="ticket", required=True)
+
+    class Meta:
+        fields = ("id",)
+        model = TicketNote
+
+
 class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     class Meta:
         model = GrievanceTicket
@@ -174,7 +181,8 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
 
 class TicketNoteNode(DjangoObjectType):
     class Meta:
-        model = TicketNotes
+        model = TicketNote
+        exclude = ("ticket",)
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
@@ -258,6 +266,7 @@ class Query(graphene.ObjectType):
         # TODO Enable permissions below
         # permission_classes=(hopePermissionClass("PERMISSION_PROGRAM.LIST"),))
     )
+    all_ticket_notes = DjangoPermissionFilterConnectionField(TicketNoteNode, filterset_class=TicketNoteFilter,)
     grievance_ticket_status_choices = graphene.List(ChoiceObject)
     grievance_ticket_category_choices = graphene.List(ChoiceObject)
     grievance_ticket_issue_type_choices = graphene.List(IssueTypesObject)
