@@ -20,6 +20,7 @@ export const CandidateHouseholdsListByTargetingCriteria = gql`
       edges {
         node {
           id
+          unicefId
           headOfHousehold {
             id
             givenName
