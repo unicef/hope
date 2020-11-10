@@ -48,11 +48,11 @@ export function LookUpIndividualTableRow({
       <TableCell padding='checkbox'>
         <Radio
           color='primary'
-          checked={selectedIndividual === individual.unicefId}
+          checked={selectedIndividual === individual.id}
           onChange={radioChangeHandler}
-          value={individual.unicefId}
+          value={individual.id}
           name='radio-button-household'
-          inputProps={{ 'aria-label': individual.unicefId }}
+          inputProps={{ 'aria-label': individual.id }}
         />
       </TableCell>
       <TableCell onClick={handleClick} align='left'>
