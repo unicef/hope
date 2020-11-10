@@ -31,7 +31,9 @@ from grievance.models import (
     TicketHouseholdDataUpdateDetails,
 )
 from household.models import Household, Individual
+from household.schema import HouseholdNode, IndividualNode
 from payment.models import ServiceProvider, PaymentRecord
+from payment.schema import PaymentRecordNode
 from utils.schema import Arg
 
 
@@ -102,13 +104,6 @@ class GrievanceTicketFilter(FilterSet):
 
 
 class ExistingGrievanceTicketFilter(FilterSet):
-    SEARCH_TICKET_TYPES_LOOKUPS = {
-        "complaint_ticket_details": ("individual", "household", "payment_record",),
-        "sensitive_ticket_details": ("individual", "household", "payment_record",),
-        "individual_data_update_ticket_details": ("individual",),
-        "add_individual_ticket_details": ("household",),
-    }
-
     business_area = CharFilter(field_name="business_area__slug", required=True)
     category = ChoiceFilter(field_name="category", required=True, choices=GrievanceTicket.CATEGORY_CHOICES)
     issue_type = ChoiceFilter(field_name="issue_type", choices=GrievanceTicket.ALL_ISSUE_TYPES)
@@ -123,7 +118,7 @@ class ExistingGrievanceTicketFilter(FilterSet):
     order_by = OrderingFilter(fields=("id",))
 
     def prepare_ticket_filters(self, lookup, obj):
-        types_and_lookups = self.SEARCH_TICKET_TYPES_LOOKUPS
+        types_and_lookups = GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS
         ticket_types = types_and_lookups.keys()
 
         q_obj = Q()
@@ -172,11 +167,32 @@ class TicketNoteFilter(FilterSet):
 
 
 class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
+    household = graphene.Field(HouseholdNode)
+    individual = graphene.Field(IndividualNode)
+    payment_record = graphene.Field(PaymentRecordNode)
+
+    @staticmethod
+    def _search_for_lookup(grievance_ticket_obj, lookup_name):
+        for field, lookups in GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS.items():
+            extras_field = getattr(grievance_ticket_obj, field, {})
+            obj = getattr(extras_field, lookup_name, None)
+            if obj is not None:
+                return obj
+
     class Meta:
         model = GrievanceTicket
         convert_choices_to_enum = False
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
+
+    def resolve_household(grievance_ticket, info):
+        return GrievanceTicketNode._search_for_lookup(grievance_ticket, "household")
+
+    def resolve_individual(grievance_ticket, info):
+        return GrievanceTicketNode._search_for_lookup(grievance_ticket, "individual")
+
+    def resolve_payment_record(grievance_ticket, info):
+        return GrievanceTicketNode._search_for_lookup(grievance_ticket, "payment_record")
 
 
 class TicketNoteNode(DjangoObjectType):
