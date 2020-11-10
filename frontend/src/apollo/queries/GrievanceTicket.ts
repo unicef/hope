@@ -17,6 +17,8 @@ export const GrievanceTicket = gql`
       updatedAt
       description
       language
+      admin
+      area
       assignedTo {
         id
         firstName

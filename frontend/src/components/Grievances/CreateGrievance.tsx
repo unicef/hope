@@ -18,9 +18,10 @@ import {
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../LoadingComponent';
 import { useSnackbar } from '../../hooks/useSnackBar';
-import { AdminAreasAutocomplete } from '../population/AdminAreaAutocomplete';
 import { Consent } from './Consent';
 import { LookUpSection } from './LookUpSection';
+import { FormikAdminAreaAutocomplete } from '../../shared/Formik/FormikAdminAreaAutocomplete';
+import { GRIEVANCE_CATEGORIES } from '../../utils/constants';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -54,11 +55,14 @@ export function CreateGrievance(): React.ReactElement {
     category: null,
     language: '',
     consent: false,
+    admin: '',
+    area: '',
     selectedHousehold: '',
     selectedIndividual: '',
     selectedPaymentRecords: [],
     selectedRelatedTickets: [],
     identityVerified: false,
+    issueType: null,
   };
 
   const validationSchema = Yup.object().shape({
@@ -67,12 +71,18 @@ export function CreateGrievance(): React.ReactElement {
     category: Yup.string()
       .required('Category is required')
       .nullable(),
+    admin: Yup.string(),
+    area: Yup.string(),
     language: Yup.string().required('Language is required'),
     consent: Yup.bool().oneOf([true], 'Consent is required'),
-    // selectedHousehold: Yup.string().required('Household has to be selected'),
-    // selectedIndividual: Yup.string().required('Individual has to be selected'),
-    // selectedPaymentRecords: Yup.array.of(Yup.string()),
-    // selectedRelatedTickets: Yup.array.of(Yup.string()),
+    selectedHousehold: Yup.string(),
+    selectedIndividual: Yup.string(),
+    selectedPaymentRecords: Yup.array()
+      .of(Yup.string())
+      .nullable(),
+    selectedRelatedTickets: Yup.array()
+      .of(Yup.string())
+      .nullable(),
   });
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
@@ -90,6 +100,7 @@ export function CreateGrievance(): React.ReactElement {
     data: choicesData,
     loading: choicesLoading,
   } = useGrievancesChoiceDataQuery();
+
   const [mutate] = useCreateGrievanceMutation();
 
   if (userDataLoading || choicesLoading) {
@@ -104,22 +115,95 @@ export function CreateGrievance(): React.ReactElement {
     value: edge.node.id,
   }));
 
+  const issueTypeDict = choicesData.grievanceTicketIssueTypeChoices.reduce(
+    (prev, curr) => {
+      // eslint-disable-next-line no-param-reassign
+      prev[curr.category] = curr;
+      return prev;
+    },
+    {},
+  );
+  const prepareVariables = (category: string, values) => {
+    const requiredVariables = {
+      businessArea,
+      description: values.description,
+      assignedTo: values.assignedTo,
+      category: parseInt(values.category, 10),
+      consent: values.consent,
+      language: values.language,
+      admin: values.admin,
+      area: values.area,
+      issueType: values.issueType,
+    };
+
+    if (
+      category ===
+      (GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK ||
+        GRIEVANCE_CATEGORIES.POSITIVE_FEEDBACK ||
+        GRIEVANCE_CATEGORIES.REFERRAL)
+    ) {
+      return {
+        variables: {
+          input: {
+            ...requiredVariables,
+            linkedTickets: values.selectedRelatedTickets,
+          },
+        },
+      };
+    }
+    if (category === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT) {
+      return {
+        variables: {
+          input: {
+            ...requiredVariables,
+            linkedTickets: values.selectedRelatedTickets,
+            extras: {
+              category: {
+                grievanceComplaintTicketExtras: {
+                  household: values.selectedHousehold,
+                  individual: values.selectedIndividual,
+                  paymentRecord: values.selectedPaymentRecords,
+                },
+              },
+            },
+          },
+        },
+      };
+    }
+    if (category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE) {
+      return {
+        variables: {
+          input: {
+            ...requiredVariables,
+            linkedTickets: values.selectedRelatedTickets,
+            extras: {
+              category: {
+                sensitiveGrievanceTicketExtras: {
+                  household: values.selectedHousehold,
+                  individual: values.selectedIndividual,
+                  paymentRecord: values.selectedPaymentRecords,
+                },
+              },
+            },
+          },
+        },
+      };
+    }
+    return {
+      variables: {
+        input: {
+          ...requiredVariables,
+          linkedTickets: values.selectedRelatedTickets,
+        },
+      },
+    };
+  };
+
   return (
     <Formik
       initialValues={initialValues}
       onSubmit={(values) => {
-        mutate({
-          variables: {
-            input: {
-              businessArea,
-              description: values.description,
-              assignedTo: values.assignedTo,
-              category: parseInt(values.category, 10),
-              consent: values.consent,
-              language: values.language,
-            },
-          },
-        }).then(
+        mutate(prepareVariables(values.category, values)).then(
           (res) => {
             return showMessage('Grievance Ticket created.', {
               pathname: `/${businessArea}/grievance-and-feedback/${res.data.createGrievanceTicket.grievanceTickets[0].id}`,
@@ -150,6 +234,18 @@ export function CreateGrievance(): React.ReactElement {
                         component={FormikSelectField}
                       />
                     </Grid>
+                    {values.category ===
+                      GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE && (
+                      <Grid item xs={6}>
+                        <Field
+                          name='issueType'
+                          label='Issue Type*'
+                          variant='outlined'
+                          choices={issueTypeDict[values.category].subCategories}
+                          component={FormikSelectField}
+                        />
+                      </Grid>
+                    )}
                   </Grid>
                   <BoxWithBorders>
                     <Box display='flex' flexDirection='column'>
@@ -197,7 +293,7 @@ export function CreateGrievance(): React.ReactElement {
                           name='admin'
                           label='Administrative Level 2'
                           variant='outlined'
-                          component={AdminAreasAutocomplete}
+                          component={FormikAdminAreaAutocomplete}
                         />
                       </Grid>
                       <Grid item xs={6}>
