@@ -177,7 +177,6 @@ export function LookUpIndividualFilters({
           </StyledFormControl>
         </Grid>
         <Grid item>
-          <Missing />
           <AdminAreasAutocomplete
             value={filter.admin2}
             onChange={(e, option) => {
