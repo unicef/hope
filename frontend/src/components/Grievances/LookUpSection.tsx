@@ -1,5 +1,6 @@
 import { Box, Grid } from '@material-ui/core';
 import React from 'react';
+import { GRIEVANCE_CATEGORIES } from '../../utils/constants';
 import { LookUpHouseholdIndividual } from './LookUpHouseholdIndividual/LookUpHouseholdIndividual';
 import { LookUpPaymentRecord } from './LookUpPaymentRecord/LookUpPaymentRecord';
 import { LookUpRelatedTickets } from './LookUpRelatedTickets/LookUpRelatedTickets';
@@ -11,9 +12,9 @@ export const LookUpSection = ({
 }): React.ReactElement => {
   const LookUpForCategory = (): React.ReactElement => {
     switch (category) {
-      case '1':
+      case GRIEVANCE_CATEGORIES.PAYMENT_VERIFICATION:
         return <div>Payment Verification</div>;
-      case '2':
+      case GRIEVANCE_CATEGORIES.DATA_CHANGE:
         return (
           <Grid container alignItems='center'>
             <Grid container>
@@ -38,7 +39,7 @@ export const LookUpSection = ({
             </Grid>
           </Grid>
         );
-      case '3':
+      case GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE:
         return (
           <Grid container alignItems='center'>
             <Grid item xs={6}>
@@ -69,7 +70,7 @@ export const LookUpSection = ({
             </Grid>
           </Grid>
         );
-      case '4':
+      case GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT:
         return (
           <Grid container alignItems='center'>
             <Grid item xs={6}>
@@ -100,7 +101,7 @@ export const LookUpSection = ({
             </Grid>
           </Grid>
         );
-      case '5':
+      case GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK:
         return (
           <Grid container>
             <Grid item xs={6}>
@@ -113,7 +114,7 @@ export const LookUpSection = ({
             </Grid>
           </Grid>
         );
-      case '6':
+      case GRIEVANCE_CATEGORIES.REFERRAL:
         return (
           <Grid container>
             <Grid item xs={6}>
@@ -126,7 +127,7 @@ export const LookUpSection = ({
             </Grid>
           </Grid>
         );
-      case '7':
+      case GRIEVANCE_CATEGORIES.POSITIVE_FEEDBACK:
         return (
           <Grid container>
             <Grid item xs={6}>
@@ -139,10 +140,10 @@ export const LookUpSection = ({
             </Grid>
           </Grid>
         );
-      case '8':
+      case GRIEVANCE_CATEGORIES.DEDUPLICATION:
         return <div>Deduplication</div>;
       default:
-        return <div>Other category of the ticket</div>;
+        return <div />;
     }
   };
   return LookUpForCategory();
