@@ -50,6 +50,7 @@ export const AllGrievanceTicket = gql`
           category
           createdAt
           userModified
+          admin
         }
       }
     }
