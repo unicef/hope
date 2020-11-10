@@ -11,7 +11,7 @@ export const AllIndividuals = gql`
     $age: String
     $orderBy: String
     $search: String
-    $programme: String
+    $programs: [ID]
     $status: [String]
     $lastRegistrationDate: String
     $householdId: UUID
@@ -26,7 +26,7 @@ export const AllIndividuals = gql`
       age: $age
       orderBy: $orderBy
       search: $search
-      programme: $programme
+      programs: $programs
       status: $status
       lastRegistrationDate: $lastRegistrationDate
       household_Id: $householdId
