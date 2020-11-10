@@ -6,7 +6,7 @@ from pytz import utc
 
 from account.fixtures import UserFactory
 from core.models import BusinessArea, AdminAreaType
-from grievance.models import GrievanceTicket, TicketSensitiveDetails, TicketComplaintDetails
+from grievance.models import GrievanceTicket, TicketSensitiveDetails, TicketComplaintDetails, TicketNote
 from household.fixtures import create_household
 from payment.fixtures import PaymentRecordFactory
 
@@ -24,7 +24,7 @@ class GrievanceTicketFactory(factory.DjangoModelFactory):
             GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
             GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
             GrievanceTicket.CATEGORY_REFERRAL,
-         )
+        )
     )
     description = factory.Faker("sentence", nb_words=6, variable_nb_words=True, ext_word_list=None)
     admin = factory.LazyAttribute(
@@ -107,3 +107,21 @@ class GrievanceComplaintTicketWithoutExtrasFactory(factory.DjangoModelFactory):
     household = None
     individual = None
     payment_record = None
+
+
+class TicketNoteFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = TicketNote
+
+    ticket = factory.SubFactory(
+        GrievanceTicketFactory,
+        category=random.choice(
+            (
+                GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
+                GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+                GrievanceTicket.CATEGORY_REFERRAL,
+            )
+        ),
+    )
+    description = factory.Faker("sentence", nb_words=6, variable_nb_words=True, ext_word_list=None)
+    created_by = factory.SubFactory(UserFactory)
