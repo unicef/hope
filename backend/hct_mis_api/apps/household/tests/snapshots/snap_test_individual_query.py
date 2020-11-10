@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['TestIndividualQuery::test_individual_programme_filter 1'] = {
@@ -12,9 +13,9 @@ snapshots['TestIndividualQuery::test_individual_programme_filter 1'] = {
             'edges': [
                 {
                     'node': {
-                        'birthDate': '1969-11-29',
-                        'familyName': 'Franklin',
-                        'givenName': 'Jenna',
+                        'birthDate': '1943-07-30',
+                        'familyName': 'Butler',
+                        'givenName': 'Benjamin',
                         'household': {
                             'programs': {
                                 'edges': [
@@ -26,7 +27,26 @@ snapshots['TestIndividualQuery::test_individual_programme_filter 1'] = {
                                 ]
                             }
                         },
-                        'phoneNo': '001-296-358-5428-607'
+                        'phoneNo': '(953)682-4596'
+                    }
+                },
+                {
+                    'node': {
+                        'birthDate': '1946-02-15',
+                        'familyName': 'Ford',
+                        'givenName': 'Robin',
+                        'household': {
+                            'programs': {
+                                'edges': [
+                                    {
+                                        'node': {
+                                            'name': 'Test program ONE'
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        'phoneNo': '+18663567905'
                     }
                 },
                 {
@@ -50,9 +70,28 @@ snapshots['TestIndividualQuery::test_individual_programme_filter 1'] = {
                 },
                 {
                     'node': {
-                        'birthDate': '1943-07-30',
-                        'familyName': 'Butler',
-                        'givenName': 'Benjamin',
+                        'birthDate': '1973-03-23',
+                        'familyName': 'Torres',
+                        'givenName': 'Eric',
+                        'household': {
+                            'programs': {
+                                'edges': [
+                                    {
+                                        'node': {
+                                            'name': 'Test program ONE'
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        'phoneNo': '+12282315473'
+                    }
+                },
+                {
+                    'node': {
+                        'birthDate': '1969-11-29',
+                        'familyName': 'Franklin',
+                        'givenName': 'Jenna',
                         'household': {
                             'programs': {
                                 'edges': [
@@ -64,7 +103,7 @@ snapshots['TestIndividualQuery::test_individual_programme_filter 1'] = {
                                 ]
                             }
                         },
-                        'phoneNo': '(953)682-4596'
+                        'phoneNo': '001-296-358-5428-607'
                     }
                 }
             ]

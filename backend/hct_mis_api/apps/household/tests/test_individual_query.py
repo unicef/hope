@@ -28,7 +28,7 @@ class TestIndividualQuery(APITestCase):
     """
     ALL_INDIVIDUALS_BY_PROGRAMME_QUERY = """
     query AllIndividuals {
-      allIndividuals(programme: "Test program TWO") {
+      allIndividuals(programs: "Test program TWO") {
         edges {
           node {
             givenName
