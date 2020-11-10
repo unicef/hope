@@ -4339,7 +4339,7 @@ export type TargetPopulationMinimalFragment = (
   & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'createdAt' | 'updatedAt' | 'candidateListTotalHouseholds' | 'finalListTotalHouseholds'>
   & { program: Maybe<(
     { __typename?: 'ProgramNode' }
-    & Pick<ProgramNode, 'name'>
+    & Pick<ProgramNode, 'id' | 'name'>
   )>, createdBy: Maybe<(
     { __typename?: 'UserNode' }
     & Pick<UserNode, 'firstName' | 'lastName'>
@@ -4360,14 +4360,14 @@ export type TargetPopulationDetailedFragment = (
     & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'populationGoal' | 'sector' | 'totalNumberOfHouseholds' | 'individualDataNeeded'>
   )>, createdBy: Maybe<(
     { __typename?: 'UserNode' }
-    & Pick<UserNode, 'firstName' | 'lastName'>
+    & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
   )>, candidateListTargetingCriteria: Maybe<(
     { __typename?: 'TargetingCriteriaNode' }
     & { targetPopulationCandidate: Maybe<(
       { __typename?: 'TargetPopulationNode' }
       & { createdBy: Maybe<(
         { __typename?: 'UserNode' }
-        & Pick<UserNode, 'firstName' | 'lastName'>
+        & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
       )> }
     )>, rules: Maybe<Array<Maybe<(
       { __typename?: 'TargetingCriteriaRuleNode' }
@@ -4405,7 +4405,7 @@ export type TargetPopulationDetailedFragment = (
       { __typename?: 'TargetPopulationNode' }
       & { createdBy: Maybe<(
         { __typename?: 'UserNode' }
-        & Pick<UserNode, 'firstName' | 'lastName'>
+        & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
       )> }
     )>, rules: Maybe<Array<Maybe<(
       { __typename?: 'TargetingCriteriaRuleNode' }
@@ -6356,6 +6356,7 @@ export const TargetPopulationMinimalFragmentDoc = gql`
   candidateListTotalHouseholds
   finalListTotalHouseholds
   program {
+    id
     name
   }
   createdBy {
@@ -6401,12 +6402,14 @@ export const TargetPopulationDetailedFragmentDoc = gql`
     individualDataNeeded
   }
   createdBy {
+    id
     firstName
     lastName
   }
   candidateListTargetingCriteria {
     targetPopulationCandidate {
       createdBy {
+        id
         firstName
         lastName
       }
@@ -6450,6 +6453,7 @@ export const TargetPopulationDetailedFragmentDoc = gql`
   finalListTargetingCriteria {
     targetPopulationFinal {
       createdBy {
+        id
         firstName
         lastName
       }
