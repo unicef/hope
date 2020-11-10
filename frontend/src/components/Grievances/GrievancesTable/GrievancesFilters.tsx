@@ -116,7 +116,9 @@ export function GrievancesFilters({
                   ...filter,
                   createdAtRange: {
                     ...filter.createdAtRange,
-                    min: moment(date).toISOString(),
+                    min: moment(date)
+                      .set({ hour: 0, minute: 0 })
+                      .toISOString(),
                   },
                 })
               }
@@ -139,7 +141,9 @@ export function GrievancesFilters({
                 ...filter,
                 createdAtRange: {
                   ...filter.createdAtRange,
-                  max: moment(date).toISOString(),
+                  max: moment(date)
+                    .set({ hour: 23, minute: 59 })
+                    .toISOString(),
                 },
               })
             }
