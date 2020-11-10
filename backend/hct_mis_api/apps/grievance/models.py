@@ -84,6 +84,13 @@ class GrievanceTicket(TimeStampedUUIDModel):
         (CATEGORY_DEDUPLICATION, _("Deduplication")),
     )
 
+    SEARCH_TICKET_TYPES_LOOKUPS = {
+        "complaint_ticket_details": ("individual", "household", "payment_record",),
+        "sensitive_ticket_details": ("individual", "household", "payment_record",),
+        "individual_data_update_ticket_details": ("individual",),
+        "add_individual_ticket_details": ("household",),
+    }
+
     user_modified = models.DateTimeField(
         verbose_name=_("Modified"), null=True, blank=True, help_text=_("Date this ticket was most recently changed."),
     )
