@@ -74,9 +74,7 @@ export function LookUpRelatedTicketsTableRow({
         <Missing />
       </TableCell>
       <TableCell align='left'>{renderUserName(ticket.assignedTo)}</TableCell>
-      <TableCell align='left'>
-        <Missing />
-      </TableCell>
+      <TableCell align='left'>{ticket.admin}</TableCell>
     </ClickableTableRow>
   );
 }
