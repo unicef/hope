@@ -62,6 +62,7 @@ export function CreateGrievance(): React.ReactElement {
     selectedPaymentRecords: [],
     selectedRelatedTickets: [],
     identityVerified: false,
+    issueType: null,
   };
 
   const validationSchema = Yup.object().shape({
@@ -75,7 +76,7 @@ export function CreateGrievance(): React.ReactElement {
     language: Yup.string().required('Language is required'),
     consent: Yup.bool().oneOf([true], 'Consent is required'),
     selectedHousehold: Yup.string(),
-    selectedIndividual: Yup.string().required('Individual has to be selected'),
+    selectedIndividual: Yup.string(),
     selectedPaymentRecords: Yup.array()
       .of(Yup.string())
       .nullable(),
@@ -99,6 +100,7 @@ export function CreateGrievance(): React.ReactElement {
     data: choicesData,
     loading: choicesLoading,
   } = useGrievancesChoiceDataQuery();
+
   const [mutate] = useCreateGrievanceMutation();
 
   if (userDataLoading || choicesLoading) {
@@ -113,6 +115,14 @@ export function CreateGrievance(): React.ReactElement {
     value: edge.node.id,
   }));
 
+  const issueTypeDict = choicesData.grievanceTicketIssueTypeChoices.reduce(
+    (prev, curr) => {
+      // eslint-disable-next-line no-param-reassign
+      prev[curr.category] = curr;
+      return prev;
+    },
+    {},
+  );
   const prepareVariables = (category: string, values) => {
     const requiredVariables = {
       businessArea,
@@ -123,6 +133,7 @@ export function CreateGrievance(): React.ReactElement {
       language: values.language,
       admin: values.admin,
       area: values.area,
+      issueType: values.issueType,
     };
 
     if (
@@ -145,6 +156,7 @@ export function CreateGrievance(): React.ReactElement {
         variables: {
           input: {
             ...requiredVariables,
+            linkedTickets: values.selectedRelatedTickets,
             extras: {
               category: {
                 grievanceComplaintTicketExtras: {
@@ -163,6 +175,7 @@ export function CreateGrievance(): React.ReactElement {
         variables: {
           input: {
             ...requiredVariables,
+            linkedTickets: values.selectedRelatedTickets,
             extras: {
               category: {
                 sensitiveGrievanceTicketExtras: {
@@ -221,6 +234,18 @@ export function CreateGrievance(): React.ReactElement {
                         component={FormikSelectField}
                       />
                     </Grid>
+                    {values.category ===
+                      GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE && (
+                      <Grid item xs={6}>
+                        <Field
+                          name='issueType'
+                          label='Issue Type*'
+                          variant='outlined'
+                          choices={issueTypeDict[values.category].subCategories}
+                          component={FormikSelectField}
+                        />
+                      </Grid>
+                    )}
                   </Grid>
                   <BoxWithBorders>
                     <Box display='flex' flexDirection='column'>

@@ -537,7 +537,7 @@ type GetCashplanVerificationSampleSizeObject {
 input GrievanceComplaintTicketExtras {
   household: ID
   individual: ID
-  paymentRecord: ID
+  paymentRecord: [ID]
 }
 
 type GrievanceStatusChangeMutation {
@@ -2054,7 +2054,7 @@ type SaveKoboProjectImportDataMutation {
 input SensitiveGrievanceTicketExtras {
   household: ID
   individual: ID
-  paymentRecord: ID
+  paymentRecord: [ID]
 }
 
 type ServiceProviderNode implements Node {
