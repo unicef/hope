@@ -4,12 +4,32 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['TestIndividualQuery::test_individual_programme_filter 1'] = {
     'data': {
         'allIndividuals': {
             'edges': [
+                {
+                    'node': {
+                        'birthDate': '1943-07-30',
+                        'familyName': 'Butler',
+                        'givenName': 'Benjamin',
+                        'household': {
+                            'programs': {
+                                'edges': [
+                                    {
+                                        'node': {
+                                            'name': 'Test program TWO'
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        'phoneNo': '(953)682-4596'
+                    }
+                },
                 {
                     'node': {
                         'birthDate': '1969-11-29',
@@ -46,25 +66,6 @@ snapshots['TestIndividualQuery::test_individual_programme_filter 1'] = {
                             }
                         },
                         'phoneNo': '(548)313-1700-902'
-                    }
-                },
-                {
-                    'node': {
-                        'birthDate': '1943-07-30',
-                        'familyName': 'Butler',
-                        'givenName': 'Benjamin',
-                        'household': {
-                            'programs': {
-                                'edges': [
-                                    {
-                                        'node': {
-                                            'name': 'Test program TWO'
-                                        }
-                                    }
-                                ]
-                            }
-                        },
-                        'phoneNo': '(953)682-4596'
                     }
                 }
             ]
