@@ -758,7 +758,7 @@ export type GetCashplanVerificationSampleSizeObject = {
 export type GrievanceComplaintTicketExtras = {
   household?: Maybe<Scalars['ID']>,
   individual?: Maybe<Scalars['ID']>,
-  paymentRecord?: Maybe<Scalars['ID']>,
+  paymentRecord?: Maybe<Array<Maybe<Scalars['ID']>>>,
 };
 
 export type GrievanceStatusChangeMutation = {
@@ -3191,7 +3191,7 @@ export type SaveKoboProjectImportDataMutation = {
 export type SensitiveGrievanceTicketExtras = {
   household?: Maybe<Scalars['ID']>,
   individual?: Maybe<Scalars['ID']>,
-  paymentRecord?: Maybe<Scalars['ID']>,
+  paymentRecord?: Maybe<Array<Maybe<Scalars['ID']>>>,
 };
 
 export type ServiceProviderNode = Node & {
