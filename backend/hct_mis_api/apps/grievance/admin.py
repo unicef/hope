@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from grievance.models import (
     GrievanceTicket,
-    TicketNotes,
+    TicketNote,
     TicketComplaintDetails,
     TicketSensitiveDetails,
     TicketHouseholdDataUpdateDetails,
@@ -17,8 +17,8 @@ class GrievanceTicketAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(TicketNotes)
-class TicketNotesAdmin(admin.ModelAdmin):
+@admin.register(TicketNote)
+class TicketNoteAdmin(admin.ModelAdmin):
     pass
 
 
