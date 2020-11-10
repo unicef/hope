@@ -123,6 +123,7 @@ export function CreateGrievance(): React.ReactElement {
               language: values.language,
               admin: values.admin,
               area: values.area,
+              linkedTickets: values.selectedRelatedTickets,
             },
           },
         }).then(
