@@ -1,6 +1,16 @@
 import graphene
+from django.db import models
 from django.db.models import Q
-from django_filters import FilterSet, CharFilter, ModelMultipleChoiceFilter, OrderingFilter, TypedMultipleChoiceFilter
+from django_filters import (
+    FilterSet,
+    CharFilter,
+    ModelMultipleChoiceFilter,
+    OrderingFilter,
+    TypedMultipleChoiceFilter,
+    ChoiceFilter,
+    ModelChoiceFilter,
+    UUIDFilter,
+)
 from graphene import relay
 from graphene_django import DjangoObjectType
 
@@ -12,13 +22,18 @@ from core.schema import ChoiceObject
 from core.utils import to_choice_object, choices_to_dict
 from grievance.models import (
     GrievanceTicket,
-    TicketNotes,
+    TicketNote,
     TicketSensitiveDetails,
     TicketComplaintDetails,
-    TicketIndividualDataUpdateDetails, TicketAddIndividualDetails, TicketDeleteIndividualDetails,
+    TicketDeleteIndividualDetails,
+    TicketIndividualDataUpdateDetails,
+    TicketAddIndividualDetails,
     TicketHouseholdDataUpdateDetails,
 )
-from payment.models import ServiceProvider
+from household.models import Household, Individual
+from household.schema import HouseholdNode, IndividualNode
+from payment.models import ServiceProvider, PaymentRecord
+from payment.schema import PaymentRecordNode
 from utils.schema import Arg
 
 
@@ -32,6 +47,10 @@ class GrievanceTicketFilter(FilterSet):
             "individual": ("full_name", "id", "phone_no", "phone_no_alternative"),
             "household": ("id",),
         },
+        "individual_data_update_ticket_details": {
+            "individual": ("full_name", "id", "phone_no", "phone_no_alternative"),
+        },
+        "add_individual_ticket_details": {"household": ("id",)},
     }
     TICKET_TYPES_WITH_FSP = ("complaint_ticket_details", "sensitive_ticket_details")
 
@@ -84,17 +103,102 @@ class GrievanceTicketFilter(FilterSet):
         return qs
 
 
+class ExistingGrievanceTicketFilter(FilterSet):
+    business_area = CharFilter(field_name="business_area__slug", required=True)
+    category = ChoiceFilter(field_name="category", required=True, choices=GrievanceTicket.CATEGORY_CHOICES)
+    issue_type = ChoiceFilter(field_name="issue_type", choices=GrievanceTicket.ALL_ISSUE_TYPES)
+    household = ModelChoiceFilter(queryset=Household.objects.all())
+    individual = ModelChoiceFilter(queryset=Individual.objects.all())
+    payment_record = ModelMultipleChoiceFilter(queryset=PaymentRecord.objects.all())
+
+    class Meta:
+        fields = ("id",)
+        model = GrievanceTicket
+
+    order_by = OrderingFilter(fields=("id",))
+
+    def prepare_ticket_filters(self, lookup, obj):
+        types_and_lookups = GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS
+        ticket_types = types_and_lookups.keys()
+
+        q_obj = Q()
+        for ticket_type in ticket_types:
+            has_lookup = lookup in types_and_lookups[ticket_type]
+            if has_lookup:
+                q_obj |= Q(**{f"{ticket_type}__{lookup}": obj})
+
+        return q_obj
+
+    def filter_queryset(self, queryset):
+        cleaned_data = self.form.cleaned_data
+
+        payment_record_objects = cleaned_data.pop("payment_record")
+        household_object = cleaned_data.pop("household")
+        individual_object = cleaned_data.pop("individual")
+
+        for name, value in cleaned_data.items():
+            queryset = self.filters[name].filter(queryset, value)
+            assert isinstance(queryset, models.QuerySet), (
+                "Expected '%s.%s' to return a QuerySet, but got a %s instead."
+                % (type(self).__name__, name, type(queryset).__name__)
+            )
+
+        if payment_record_objects:
+            q_obj = Q()
+            for payment_record in payment_record_objects:
+                q_obj |= self.prepare_ticket_filters("payment_record", payment_record)
+            return queryset.filter(q_obj)
+        elif household_object:
+            q_obj = self.prepare_ticket_filters("household", household_object)
+            return queryset.filter(q_obj)
+        elif individual_object:
+            q_obj = self.prepare_ticket_filters("individual", individual_object)
+            return queryset.filter(q_obj)
+
+        return queryset
+
+
+class TicketNoteFilter(FilterSet):
+    ticket = UUIDFilter(field_name="ticket", required=True)
+
+    class Meta:
+        fields = ("id",)
+        model = TicketNote
+
+
 class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
+    household = graphene.Field(HouseholdNode)
+    individual = graphene.Field(IndividualNode)
+    payment_record = graphene.Field(PaymentRecordNode)
+
+    @staticmethod
+    def _search_for_lookup(grievance_ticket_obj, lookup_name):
+        for field, lookups in GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS.items():
+            extras_field = getattr(grievance_ticket_obj, field, {})
+            obj = getattr(extras_field, lookup_name, None)
+            if obj is not None:
+                return obj
+
     class Meta:
         model = GrievanceTicket
         convert_choices_to_enum = False
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
+    def resolve_household(grievance_ticket, info):
+        return GrievanceTicketNode._search_for_lookup(grievance_ticket, "household")
+
+    def resolve_individual(grievance_ticket, info):
+        return GrievanceTicketNode._search_for_lookup(grievance_ticket, "individual")
+
+    def resolve_payment_record(grievance_ticket, info):
+        return GrievanceTicketNode._search_for_lookup(grievance_ticket, "payment_record")
+
 
 class TicketNoteNode(DjangoObjectType):
     class Meta:
-        model = TicketNotes
+        model = TicketNote
+        exclude = ("ticket",)
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
@@ -134,6 +238,7 @@ class TicketAddIndividualDetailsNode(DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
+
 class TicketDeleteIndividualDetailsNode(DjangoObjectType):
     individual_data = Arg()
 
@@ -142,6 +247,7 @@ class TicketDeleteIndividualDetailsNode(DjangoObjectType):
         exclude = ("ticket",)
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
+
 
 class TicketHouseholdDataUpdateDetailsNode(DjangoObjectType):
     household_data = Arg()
@@ -152,6 +258,7 @@ class TicketHouseholdDataUpdateDetailsNode(DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
+
 class IssueTypesObject(graphene.ObjectType):
     category = graphene.String()
     label = graphene.String()
@@ -159,8 +266,6 @@ class IssueTypesObject(graphene.ObjectType):
 
     def resolve_sub_categories(self, info):
         return [{"name": value, "value": key} for key, value in self.get("sub_categories").items()]
-
-
 
 
 class Query(graphene.ObjectType):
@@ -171,6 +276,13 @@ class Query(graphene.ObjectType):
         # TODO Enable permissions below
         # permission_classes=(hopePermissionClass("PERMISSION_PROGRAM.LIST"),)
     )
+    existing_grievance_tickets = DjangoPermissionFilterConnectionField(
+        GrievanceTicketNode,
+        filterset_class=ExistingGrievanceTicketFilter,
+        # TODO Enable permissions below
+        # permission_classes=(hopePermissionClass("PERMISSION_PROGRAM.LIST"),))
+    )
+    all_ticket_notes = DjangoPermissionFilterConnectionField(TicketNoteNode, filterset_class=TicketNoteFilter,)
     grievance_ticket_status_choices = graphene.List(ChoiceObject)
     grievance_ticket_category_choices = graphene.List(ChoiceObject)
     grievance_ticket_issue_type_choices = graphene.List(IssueTypesObject)

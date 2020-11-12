@@ -1,12 +1,8 @@
-import unittest
 from operator import itemgetter
-from pprint import pprint
 from unittest import TestCase
 
 
-# @unittest.skip("will fix it later")
 class TestKoboSaveValidatorsMethods(TestCase):
-
     VALID_JSON = [
         {
             "_notes": [],
@@ -443,19 +439,11 @@ class TestKoboSaveValidatorsMethods(TestCase):
             None,
         )
         for valid_option in valid_geolocations:
-            self.assertIsNone(
-                self.KoboProjectImportDataValidator.geopoint_validator(
-                    valid_option,
-                    "hh_geopoint_h_c",
-                )
-            )
+            self.assertIsNone(self.KoboProjectImportDataValidator.geopoint_validator(valid_option, "hh_geopoint_h_c",))
 
         for invalid_option in invalid_geolocations:
             self.assertEqual(
-                self.KoboProjectImportDataValidator.geopoint_validator(
-                    invalid_option,
-                    "hh_geopoint_h_c",
-                ),
+                self.KoboProjectImportDataValidator.geopoint_validator(invalid_option, "hh_geopoint_h_c",),
                 f"Invalid geopoint {invalid_option} for field hh_geopoint_h_c",
             )
 
@@ -530,14 +518,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 "expected": {"header": "gender_i_c", "message": "Invalid choice YES for field gender_i_c"},
             },
             # DATE
-            {
-                "args": (
-                    "birth_date_i_c",
-                    "2020-05-28T17:13:31.590+02:00",
-                    attachments,
-                ),
-                "expected": None,
-            },
+            {"args": ("birth_date_i_c", "2020-05-28T17:13:31.590+02:00", attachments,), "expected": None,},
             {
                 "args": ("birth_date_i_c", "2020/05/28", attachments),
                 "expected": {
@@ -550,11 +531,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
             # GEOPOINT
             {"args": ("hh_geopoint_h_c", "12.123 13.123", attachments), "expected": None},
             {
-                "args": (
-                    "hh_geopoint_h_c",
-                    "GeoPoint 12.123, 32.123",
-                    attachments,
-                ),
+                "args": ("hh_geopoint_h_c", "GeoPoint 12.123, 32.123", attachments,),
                 "expected": {
                     "header": "hh_geopoint_h_c",
                     "message": "Invalid geopoint GeoPoint 12.123, 32.123 " "for field hh_geopoint_h_c",

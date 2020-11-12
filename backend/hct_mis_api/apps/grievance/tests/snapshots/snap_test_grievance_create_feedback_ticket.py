@@ -16,8 +16,7 @@ snapshots['TestGrievanceCreateFeedbackTicketQuery::test_create_positive_feedback
                     'category': 7,
                     'consent': True,
                     'description': 'Test Feedback',
-                    'language': 'Polish, English',
-                    'status': 1
+                    'language': 'Polish, English'
                 }
             ]
         }

@@ -126,10 +126,10 @@ export function GrievanceDetails(): React.ReactElement {
       value: <span>{renderUserName(ticket.assignedTo)}</span>,
       size: 6,
     },
-    { label: 'ADMIN 2', value: <Missing />, size: 3 },
+    { label: 'ADMIN 2', value: <span>{ticket.admin || '-'}</span>, size: 3 },
     {
       label: 'AREA / VILLAGE / PAY POINT',
-      value: <Missing />,
+      value: <span>{ticket.area || '-'}</span>,
       size: 3,
     },
     {
@@ -156,7 +156,7 @@ export function GrievanceDetails(): React.ReactElement {
             <OverviewContainer>
               <Grid container spacing={6}>
                 {FieldsArray.map((el) => (
-                  <Grid item xs={el.size}>
+                  <Grid key={el.label} item xs={el.size}>
                     <LabelizedField label={el.label}>{el.value}</LabelizedField>
                   </Grid>
                 ))}
@@ -166,7 +166,7 @@ export function GrievanceDetails(): React.ReactElement {
         </Grid>
         <Grid item xs={7}>
           <NotesContainer>
-            <Notes />
+            <Notes notes={ticket.ticketNotes} />
           </NotesContainer>
         </Grid>
         <Grid item xs={5}>

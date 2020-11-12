@@ -17,11 +17,29 @@ export const GrievanceTicket = gql`
       updatedAt
       description
       language
+      admin
+      area
       assignedTo {
         id
         firstName
         lastName
         email
+      }
+      ticketNotes {
+        edges {
+          node {
+            id
+            createdAt
+            updatedAt
+            description
+            createdBy {
+              id
+              firstName
+              lastName
+              email
+            }
+          }
+        }
       }
     }
   }

@@ -6,6 +6,8 @@ from django_filters import CharFilter, FilterSet, ModelMultipleChoiceFilter, Mul
 from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
+
+from program.models import Program
 from targeting.models import HouseholdSelection
 
 from core.extended_connection import ExtendedConnection
@@ -92,7 +94,7 @@ class IndividualFilter(FilterSet):
     )
     age = AgeRangeFilter(field_name="birth_date")
     sex = MultipleChoiceFilter(field_name="sex", choices=SEX_CHOICE)
-    programme = CharFilter(field_name="household__programs__name")
+    programs = ModelMultipleChoiceFilter(field_name="household__programs", queryset=Program.objects.all())
     search = CharFilter(method="search_filter")
     last_registration_date = DateRangeFilter(field_name="last_registration_date")
     admin2 = ModelMultipleChoiceFilter(
@@ -104,7 +106,7 @@ class IndividualFilter(FilterSet):
         model = Individual
         fields = {
             "household__id": ["exact"],
-            "programme": ["exact", "icontains"],
+            "programs": ["exact"],
             "business_area": ["exact"],
             "full_name": ["exact", "icontains"],
             "age": ["range", "lte", "gte"],
