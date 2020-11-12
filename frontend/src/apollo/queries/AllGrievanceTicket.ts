@@ -51,6 +51,9 @@ export const AllGrievanceTicket = gql`
           createdAt
           userModified
           admin
+          household {
+            id
+          }
         }
       }
     }

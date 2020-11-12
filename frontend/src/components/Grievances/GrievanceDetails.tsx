@@ -166,7 +166,7 @@ export function GrievanceDetails(): React.ReactElement {
         </Grid>
         <Grid item xs={7}>
           <NotesContainer>
-            <Notes />
+            <Notes notes={ticket.ticketNotes} />
           </NotesContainer>
         </Grid>
         <Grid item xs={5}>
