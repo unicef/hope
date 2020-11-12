@@ -56,7 +56,7 @@ export function GrievancesTableRow({
       <TableCell align='left'>{renderUserName(ticket.assignedTo)}</TableCell>
       <TableCell align='left'>{categoryChoices[ticket.category]}</TableCell>
       <TableCell align='left'>
-        <Missing />
+        {decodeIdString(ticket.household?.id) || '-'}
       </TableCell>
       <TableCell align='left'>
         <UniversalMoment>{ticket.createdAt}</UniversalMoment>

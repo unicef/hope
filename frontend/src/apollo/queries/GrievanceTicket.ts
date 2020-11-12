@@ -25,6 +25,22 @@ export const GrievanceTicket = gql`
         lastName
         email
       }
+      ticketNotes {
+        edges {
+          node {
+            id
+            createdAt
+            updatedAt
+            description
+            createdBy {
+              id
+              firstName
+              lastName
+              email
+            }
+          }
+        }
+      }
     }
   }
 `;
