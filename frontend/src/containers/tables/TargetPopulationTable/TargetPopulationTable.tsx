@@ -9,6 +9,7 @@ import { UniversalTable } from '../UniversalTable';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { headCells } from './TargetPopulationTableHeadCells';
 import { TargetPopulationTableRow } from './TargetPopulationTableRow';
+import {decodeIdString} from "../../../utils/utils";
 
 const TableWrapper = styled.div`
   padding: 20px;
@@ -22,13 +23,20 @@ export const TargetPopulationTable = ({
   filter,
 }: TargetPopulationProps): ReactElement => {
   const businessArea = useBusinessArea();
-  const initialVariables = {
+  const initialVariables: AllTargetPopulationsQueryVariables = {
     name: filter.name,
     candidateListTotalHouseholdsMin: filter.numIndividuals.min,
     candidateListTotalHouseholdsMax: filter.numIndividuals.max,
     status: filter.status,
     businessArea,
   };
+  if (filter.program) {
+    if (Array.isArray(filter.program)) {
+      initialVariables.program = filter.program.map(programId => decodeIdString(programId));
+    } else {
+      initialVariables.program = [decodeIdString(filter.program)]
+    }
+  }
   return (
     <TableWrapper>
       <UniversalTable<TargetPopulationNode, AllTargetPopulationsQueryVariables>

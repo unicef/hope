@@ -3,7 +3,10 @@ import React from 'react';
 import styled from 'styled-components';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { useHouseholdQuery } from '../../../__generated__/graphql';
+import {
+  useHouseholdQuery,
+  useIndividualQuery,
+} from '../../../__generated__/graphql';
 
 const StyledBox = styled.div`
   border: 1.5px solid #043e91;
@@ -45,8 +48,19 @@ export const LookUpHouseholdIndividualDisplay = ({
     },
   });
 
-  if (loading) return null;
+  const {
+    data: individualData,
+    loading: individualLoading,
+  } = useIndividualQuery({
+    variables: {
+      id: values.selectedIndividual,
+    },
+  });
+
+  if (loading || individualLoading) return null;
   const { household } = data;
+  const { individual } = individualData;
+
   return (
     <StyledBox>
       <Grid container>
@@ -58,7 +72,7 @@ export const LookUpHouseholdIndividualDisplay = ({
             </span>
             <span>
               Individual ID:
-              <BlueText>{values.selectedIndividual || '-'}</BlueText>
+              <BlueText>{individual?.unicefId || '-'}</BlueText>
             </span>
           </Box>
         </Grid>

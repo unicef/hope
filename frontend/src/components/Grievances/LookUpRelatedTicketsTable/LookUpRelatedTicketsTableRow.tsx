@@ -11,7 +11,6 @@ import {
   grievanceTicketStatusToColor,
   renderUserName,
 } from '../../../utils/utils';
-import { Missing } from '../../Missing';
 import { AllGrievanceTicketQuery } from '../../../__generated__/graphql';
 
 const StatusContainer = styled.div`
@@ -71,12 +70,10 @@ export function LookUpRelatedTicketsTableRow({
       </TableCell>
       <TableCell align='left'>{categoryChoices[ticket.category]}</TableCell>
       <TableCell align='left'>
-        <Missing />
+        {decodeIdString(ticket.household?.id) || '-'}
       </TableCell>
       <TableCell align='left'>{renderUserName(ticket.assignedTo)}</TableCell>
-      <TableCell align='left'>
-        <Missing />
-      </TableCell>
+      <TableCell align='left'>{ticket.admin}</TableCell>
     </ClickableTableRow>
   );
 }

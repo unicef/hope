@@ -1,12 +1,10 @@
 import base64
 
 from django.contrib.auth.models import AnonymousUser
-from django.core.management import call_command
 from django.test import RequestFactory, TestCase
 from elasticsearch_dsl import connections
 from graphene.test import Client
 from snapshottest.django import TestCase as SnapshotTestTestCase
-
 
 from household.elasticsearch_utils import rebuild_search_index
 
@@ -14,6 +12,7 @@ from household.elasticsearch_utils import rebuild_search_index
 class APITestCase(SnapshotTestTestCase):
     def setUp(self):
         from hct_mis_api.schema import schema
+
         super().setUp()
         self.client = Client(schema)
 

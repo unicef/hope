@@ -15,7 +15,6 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
     mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
       createGrievanceTicket(input: $input) {
         grievanceTickets{
-          status
           category
           admin
           language
@@ -53,6 +52,12 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
         self.payment_record = PaymentRecordFactory(
             household=self.household,
             full_name=self.individuals[0].full_name,
+            business_area=self.business_area,
+            cash_plan=cash_plan,
+        )
+        self.second_payment_record = PaymentRecordFactory(
+            household=self.household,
+            full_name=f"{self.individuals[0].full_name} second Individual",
             business_area=self.business_area,
             cash_plan=cash_plan,
         )
@@ -108,6 +113,35 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
             request_string=self.CREATE_GRIEVANCE_MUTATION, context={"user": self.user}, variables=input_data,
         )
 
+    def test_create_complaint_ticket_with_two_payment_records(self):
+        input_data = {
+            "input": {
+                "description": "Test Feedback",
+                "assignedTo": self.id_to_base64(self.user.id, "UserNode"),
+                "category": GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
+                "admin": self.admin_area.title,
+                "language": "Polish, English",
+                "consent": True,
+                "businessArea": "afghanistan",
+                "extras": {
+                    "category": {
+                        "grievanceComplaintTicketExtras": {
+                            "household": self.id_to_base64(self.household.id, "HouseholdNode"),
+                            "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
+                            "paymentRecord": [
+                                self.id_to_base64(self.payment_record.id, "PaymentRecordNode"),
+                                self.id_to_base64(self.second_payment_record.id, "PaymentRecordNode"),
+                            ],
+                        }
+                    }
+                },
+            }
+        }
+
+        self.snapshot_graphql_request(
+            request_string=self.CREATE_GRIEVANCE_MUTATION, context={"user": self.user}, variables=input_data,
+        )
+
     def test_create_complaint_ticket_without_household(self):
         input_data = {
             "input": {
@@ -122,7 +156,7 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
                     "category": {
                         "grievanceComplaintTicketExtras": {
                             "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
-                            "paymentRecord": self.id_to_base64(self.payment_record.id, "PaymentRecordNode"),
+                            "paymentRecord": [self.id_to_base64(self.payment_record.id, "PaymentRecordNode")],
                         }
                     }
                 },
@@ -147,7 +181,7 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
                     "category": {
                         "grievanceComplaintTicketExtras": {
                             "household": self.id_to_base64(self.household.id, "HouseholdNode"),
-                            "paymentRecord": self.id_to_base64(self.payment_record.id, "PaymentRecordNode"),
+                            "paymentRecord": [self.id_to_base64(self.payment_record.id, "PaymentRecordNode")],
                         }
                     }
                 },
