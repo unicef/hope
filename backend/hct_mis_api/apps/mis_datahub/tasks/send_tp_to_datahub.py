@@ -97,9 +97,7 @@ class SendTPToDatahubTask:
         target_population_selections = HouseholdSelection.objects.filter(
             target_population__id=target_population.id, final=True
         )
-        households = target_population.final_list.filter(
-            Q(last_sync_at__isnull=True) | Q(last_sync_at__lte=F("updated_at"))
-        )
+        households = target_population.final_list.filter()
         # individuals = Individual.objects.filter(
         #     household__id__in=target_population.households.values_list(
         #         "id", flat=True
@@ -189,13 +187,20 @@ class SendTPToDatahubTask:
 
     def send_household(self, household, program, dh_session, household_ids):
         dh_household_args = self.build_arg_dict(household, SendTPToDatahubTask.MAPPING_HOUSEHOLD_DICT)
-        dh_household = dh_mis_models.Household(**dh_household_args)
-        dh_household.country = household.country.alpha3
-        dh_household.unhcr_id = self.get_unhcr_household_id(household)
-        dh_households = [dh_household]
+        dh_households = []
+        dh_household = None
+        #     Q(last_sync_at__isnull=True)
+        #     | Q(last_sync_at__lte=F("updated_at"))
+        if household.last_sync_at is None or household.last_sync_at <= household.updated_at:
+            dh_household = dh_mis_models.Household(**dh_household_args)
+            dh_household.country = household.country.alpha3
+            dh_household.unhcr_id = self.get_unhcr_household_id(household)
+            dh_households = [dh_household]
+        else:
+            dh_household = dh_mis_models.Household.objects.filter(mis_id=household.id).last()
 
         head_of_household = household.head_of_household
-        collectors_ids = list(household.representatives.values_list("id", flat=True))
+        collectors_ids = list(household.representatives.filter(Q(last_sync_at__isnull=True) | Q(last_sync_at__lte=F("updated_at"))).values_list("id", flat=True))
         collectors_household_ids = list(
             household.representatives.exclude(household_id__in=household_ids)
             .values_list("household_id", flat=True)
@@ -244,13 +249,12 @@ class SendTPToDatahubTask:
                     dh_individual.session = dh_session
                     individuals_to_create.append(dh_individual)
         individuals.update(last_sync_at=timezone.now())
-
         return dh_households, individuals_to_create
 
     def should_send_individual(self, individual, household):
-        is_synced = individual.last_sync_at is None or individual.last_sync_at > individual.updated_at
+        is_not_synced = individual.last_sync_at is None or individual.last_sync_at <= individual.updated_at
         is_allowed_to_share = household.business_area.has_data_sharing_agreement
-        return is_synced and is_allowed_to_share
+        return is_not_synced and is_allowed_to_share
 
     def send_target_entry(self, target_population_selection):
         household_unhcr_id = self.get_unhcr_household_id(target_population_selection.household)
