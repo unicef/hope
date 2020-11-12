@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { UniversalTable } from '../../../containers/tables/UniversalTable';
-import { reduceChoices } from '../../../utils/utils';
+import { decodeIdString, reduceChoices } from '../../../utils/utils';
 import {
   AllGrievanceTicketQuery,
   AllGrievanceTicketQueryVariables,
@@ -30,7 +30,7 @@ export const GrievancesTable = ({
     status: [filter.status],
     fsp: [filter.fsp],
     createdAtRange: JSON.stringify(filter.createdAtRange),
-    admin: [filter.admin],
+    admin: [decodeIdString(filter.admin)],
   };
 
   const {

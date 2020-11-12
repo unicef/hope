@@ -10,6 +10,8 @@ import { TargetPopulationFilters } from '../../components/TargetPopulation/Targe
 import { TargetPopulationTable } from '../tables/TargetPopulationTable';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { TargetingInfoDialog } from '../dialogs/targetPopulation/TargetingInfoDialog';
+import {ProgramNode, useAllProgramsQuery} from "../../__generated__/graphql";
+import {LoadingComponent} from "../../components/LoadingComponent";
 
 const Container = styled.div`
   && {
@@ -33,6 +35,12 @@ export function TargetPopulationPage(): React.ReactElement {
   });
   const [isInfoOpen, toggleInfo] = useState(false);
   const debouncedFilter = useDebounce(filter, 500);
+  const { data, loading } = useAllProgramsQuery({
+    variables: { businessArea },
+  });
+  if (loading) return <LoadingComponent />;
+  const { allPrograms } = data;
+  const programs = allPrograms.edges.map((edge) => edge.node);
 
   const redirectToCreate = (): void => {
     const path = `/${businessArea}/target-population/create`;
@@ -60,6 +68,7 @@ export function TargetPopulationPage(): React.ReactElement {
       <TargetPopulationFilters
         //targetPopulations={targetPopulations as TargetPopulationNode[]}
         filter={filter}
+        programs={programs as ProgramNode[]}
         onFilterChange={setFilter}
       />
       <Container>

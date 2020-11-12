@@ -13,10 +13,10 @@ from core.utils import nested_dict_get, decode_id_string
 from grievance.mutations_extras.data_change import save_data_change_extras
 from grievance.mutations_extras.grievance_complaint import save_grievance_complaint_extras
 from grievance.mutations_extras.main import CreateGrievanceTicketExtrasInput
-from grievance.models import GrievanceTicket
+from grievance.models import GrievanceTicket, TicketNote
 from grievance.mutations_extras.payment_verification import save_payment_verification_extras
 from grievance.mutations_extras.sensitive_grievance import save_sensitive_grievance_extras
-from grievance.schema import GrievanceTicketNode
+from grievance.schema import GrievanceTicketNode, TicketNoteNode
 
 
 class CreateGrievanceTicketInput(graphene.InputObjectType):
@@ -31,6 +31,11 @@ class CreateGrievanceTicketInput(graphene.InputObjectType):
     business_area = graphene.GlobalID(node=BusinessAreaNode, required=True)
     linked_tickets = graphene.List(graphene.ID)
     extras = CreateGrievanceTicketExtrasInput()
+
+
+class CreateTicketNoteInput(graphene.InputObjectType):
+    description = graphene.String(required=True)
+    ticket = graphene.GlobalID(node=GrievanceTicketNode, required=True)
 
 
 class CreateGrievanceTicketMutation(graphene.Mutation):
@@ -92,17 +97,11 @@ class CreateGrievanceTicketMutation(graphene.Mutation):
     ISSUE_TYPE_OPTIONS = {
         GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE: {
             "required": ["extras.issue_type.household_data_update_issue_type_extras"],
-            "not_allowed": [
-                "individual_data_update_issue_type_extras",
-                "individual_delete_issue_type_extras",
-            ],
+            "not_allowed": ["individual_data_update_issue_type_extras", "individual_delete_issue_type_extras",],
         },
         GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE: {
             "required": ["extras.issue_type.individual_data_update_issue_type_extras"],
-            "not_allowed": [
-                "household_data_update_issue_type_extras",
-                "individual_delete_issue_type_extras",
-            ],
+            "not_allowed": ["household_data_update_issue_type_extras", "individual_delete_issue_type_extras",],
         },
         GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL: {
             "required": ["extras.issue_type.add_individual_issue_type_extras"],
@@ -114,10 +113,7 @@ class CreateGrievanceTicketMutation(graphene.Mutation):
         },
         GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: {
             "required": ["extras.issue_type.individual_delete_issue_type_extras"],
-            "not_allowed": [
-                "household_data_update_issue_type_extras",
-                "individual_data_update_issue_type_extras",
-            ],
+            "not_allowed": ["household_data_update_issue_type_extras", "individual_data_update_issue_type_extras",],
         },
         GrievanceTicket.ISSUE_TYPE_DATA_BREACH: {"required": [], "not_allowed": []},
         GrievanceTicket.ISSUE_TYPE_BRIBERY_CORRUPTION_KICKBACK: {"required": [], "not_allowed": []},
@@ -163,7 +159,8 @@ class CreateGrievanceTicketMutation(graphene.Mutation):
         arg = lambda name, default=None: input.get(name, default)
         user = info.context.user
         assigned_to_id = decode_id_string(arg("assigned_to"))
-        linked_tickets = arg("linked_tickets", [])
+        linked_tickets_encoded_ids = arg("linked_tickets", [])
+        linked_tickets = [decode_id_string(encoded_id) for encoded_id in linked_tickets_encoded_ids]
         business_area_slug = arg("business_area")
         extras = arg("extras", {})
         cls._remove_parsed_data_fields(input, ("linked_tickets", "extras", "business_area", "assigned_to"))
@@ -252,6 +249,29 @@ class GrievanceStatusChangeMutation(graphene.Mutation):
         return cls(grievance_ticket=grievance_ticket)
 
 
+class CreateTicketNoteMutation(graphene.Mutation):
+    grievance_ticket_note = graphene.Field(TicketNoteNode)
+
+    class Arguments:
+        note_input = CreateTicketNoteInput(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root, info, note_input, **kwargs):
+        grievance_ticket_id = decode_id_string(note_input["ticket"])
+        grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
+        description = note_input["description"]
+        created_by = info.context.user
+
+        ticket_note = TicketNote.objects.create(
+            ticket=grievance_ticket, description=description, created_by=created_by
+        )
+
+        return cls(grievance_ticket_note=ticket_note)
+
+
 class Mutations(graphene.ObjectType):
     create_grievance_ticket = CreateGrievanceTicketMutation.Field()
     grievance_status_change = GrievanceStatusChangeMutation.Field()
+    create_ticket_note = CreateTicketNoteMutation.Field()

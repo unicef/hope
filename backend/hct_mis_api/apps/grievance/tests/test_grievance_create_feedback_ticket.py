@@ -12,7 +12,6 @@ class TestGrievanceCreateFeedbackTicketQuery(APITestCase):
     mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
       createGrievanceTicket(input: $input) {
         grievanceTickets{
-          status
           category
           admin
           language

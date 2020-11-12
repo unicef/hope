@@ -28,8 +28,7 @@ snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket
                         'paymentRecord': {
                             'fullName': 'John Doe'
                         }
-                    },
-                    'status': 1
+                    }
                 }
             ]
         }
@@ -51,8 +50,7 @@ snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket
                         'household': None,
                         'individual': None,
                         'paymentRecord': None
-                    },
-                    'status': 1
+                    }
                 }
             ]
         }
@@ -78,8 +76,7 @@ snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket
                         'paymentRecord': {
                             'fullName': 'John Doe'
                         }
-                    },
-                    'status': 1
+                    }
                 }
             ]
         }
@@ -105,8 +102,7 @@ snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket
                         'paymentRecord': {
                             'fullName': 'John Doe'
                         }
-                    },
-                    'status': 1
+                    }
                 }
             ]
         }
@@ -132,8 +128,7 @@ snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket
                             'fullName': 'John Doe'
                         },
                         'paymentRecord': None
-                    },
-                    'status': 1
+                    }
                 }
             ]
         }
@@ -178,4 +173,51 @@ snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket
             ]
         }
     ]
+}
+
+snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket_with_two_payment_records 1'] = {
+    'data': {
+        'createGrievanceTicket': {
+            'grievanceTickets': [
+                {
+                    'admin': 'City Test',
+                    'category': 3,
+                    'consent': True,
+                    'description': 'Test Feedback',
+                    'issueType': 12,
+                    'language': 'Polish, English',
+                    'sensitiveTicketDetails': {
+                        'household': {
+                            'size': 1
+                        },
+                        'individual': {
+                            'fullName': 'John Doe'
+                        },
+                        'paymentRecord': {
+                            'fullName': 'John Doe second Individual'
+                        }
+                    }
+                },
+                {
+                    'admin': 'City Test',
+                    'category': 3,
+                    'consent': True,
+                    'description': 'Test Feedback',
+                    'issueType': 12,
+                    'language': 'Polish, English',
+                    'sensitiveTicketDetails': {
+                        'household': {
+                            'size': 1
+                        },
+                        'individual': {
+                            'fullName': 'John Doe'
+                        },
+                        'paymentRecord': {
+                            'fullName': 'John Doe second Individual'
+                        }
+                    }
+                }
+            ]
+        }
+    }
 }
