@@ -311,7 +311,7 @@ export function CreateGrievance(): React.ReactElement {
                           multiline
                           fullWidth
                           variant='outlined'
-                          label='Languages Spoken'
+                          label='Languages Spoken*'
                           component={FormikTextField}
                         />
                       </Grid>

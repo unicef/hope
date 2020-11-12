@@ -113,7 +113,10 @@ export function Notes({
             {mappedNotes}
             <Grid container>
               <Grid item xs={2}>
-                <Avatar src='me' alt={`${'me'} picture`} />
+                <Avatar
+                  src={`${meData.me.firstName || meData.me.email}`}
+                  alt={`${meData.me.firstName || meData.me.email} picture`}
+                />
               </Grid>
               <Grid item xs={10}>
                 <Grid item xs={12}>
