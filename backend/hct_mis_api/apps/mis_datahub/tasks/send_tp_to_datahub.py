@@ -41,6 +41,7 @@ class SendTPToDatahubTask:
         "admin2": "admin_area.parent.title",
         "residence_status": "residence_status",
         "registration_date": "last_registration_date",
+        "country": "country.alpha3",
     }
     MAPPING_INDIVIDUAL_DICT = {
         "mis_id": "id",
@@ -193,14 +194,17 @@ class SendTPToDatahubTask:
         #     | Q(last_sync_at__lte=F("updated_at"))
         if household.last_sync_at is None or household.last_sync_at <= household.updated_at:
             dh_household = dh_mis_models.Household(**dh_household_args)
-            dh_household.country = household.country.alpha3
             dh_household.unhcr_id = self.get_unhcr_household_id(household)
             dh_households = [dh_household]
         else:
             dh_household = dh_mis_models.Household.objects.filter(mis_id=household.id).last()
 
         head_of_household = household.head_of_household
-        collectors_ids = list(household.representatives.filter(Q(last_sync_at__isnull=True) | Q(last_sync_at__lte=F("updated_at"))).values_list("id", flat=True))
+        collectors_ids = list(
+            household.representatives.filter(
+                Q(last_sync_at__isnull=True) | Q(last_sync_at__lte=F("updated_at"))
+            ).values_list("id", flat=True)
+        )
         collectors_household_ids = list(
             household.representatives.exclude(household_id__in=household_ids)
             .values_list("household_id", flat=True)
