@@ -25,10 +25,18 @@ export const GrievanceTicket = gql`
         lastName
         email
       }
+      individual {
+        id
+        unicefId
+      }
       household {
         id
         unicefId
       }
+      paymentRecord {
+        id
+      }
+      issueType
       ticketNotes {
         edges {
           node {
