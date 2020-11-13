@@ -4710,6 +4710,27 @@ export type FinishCashPlanPaymentVerificationMutation = (
   )> }
 );
 
+export type GrievanceTicketStatusChangeMutationVariables = {
+  grievanceTicketId?: Maybe<Scalars['ID']>,
+  status?: Maybe<Scalars['Int']>
+};
+
+
+export type GrievanceTicketStatusChangeMutation = (
+  { __typename?: 'Mutations' }
+  & { grievanceStatusChange: Maybe<(
+    { __typename?: 'GrievanceStatusChangeMutation' }
+    & { grievanceTicket: Maybe<(
+      { __typename?: 'GrievanceTicketNode' }
+      & Pick<GrievanceTicketNode, 'id' | 'status' | 'createdAt' | 'updatedAt'>
+      & { createdBy: Maybe<(
+        { __typename?: 'UserNode' }
+        & Pick<UserNode, 'firstName' | 'lastName' | 'username' | 'email'>
+      )> }
+    )> }
+  )> }
+);
+
 export type ImportXlsxCashPlanVerificationMutationVariables = {
   cashPlanVerificationId: Scalars['ID'],
   file: Scalars['Upload']
@@ -5383,6 +5404,9 @@ export type GrievanceTicketQuery = (
     )>, assignedTo: Maybe<(
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
+    )>, household: Maybe<(
+      { __typename?: 'HouseholdNode' }
+      & Pick<HouseholdNode, 'id' | 'unicefId'>
     )>, ticketNotes: (
       { __typename?: 'TicketNoteNodeConnection' }
       & { edges: Array<Maybe<(
@@ -7514,6 +7538,67 @@ export function useFinishCashPlanPaymentVerificationMutation(baseOptions?: Apoll
 export type FinishCashPlanPaymentVerificationMutationHookResult = ReturnType<typeof useFinishCashPlanPaymentVerificationMutation>;
 export type FinishCashPlanPaymentVerificationMutationResult = ApolloReactCommon.MutationResult<FinishCashPlanPaymentVerificationMutation>;
 export type FinishCashPlanPaymentVerificationMutationOptions = ApolloReactCommon.BaseMutationOptions<FinishCashPlanPaymentVerificationMutation, FinishCashPlanPaymentVerificationMutationVariables>;
+export const GrievanceTicketStatusChangeDocument = gql`
+    mutation GrievanceTicketStatusChange($grievanceTicketId: ID, $status: Int) {
+  grievanceStatusChange(grievanceTicketId: $grievanceTicketId, status: $status) {
+    grievanceTicket {
+      id
+      status
+      createdAt
+      updatedAt
+      createdBy {
+        firstName
+        lastName
+        username
+        email
+      }
+    }
+  }
+}
+    `;
+export type GrievanceTicketStatusChangeMutationFn = ApolloReactCommon.MutationFunction<GrievanceTicketStatusChangeMutation, GrievanceTicketStatusChangeMutationVariables>;
+export type GrievanceTicketStatusChangeComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<GrievanceTicketStatusChangeMutation, GrievanceTicketStatusChangeMutationVariables>, 'mutation'>;
+
+    export const GrievanceTicketStatusChangeComponent = (props: GrievanceTicketStatusChangeComponentProps) => (
+      <ApolloReactComponents.Mutation<GrievanceTicketStatusChangeMutation, GrievanceTicketStatusChangeMutationVariables> mutation={GrievanceTicketStatusChangeDocument} {...props} />
+    );
+    
+export type GrievanceTicketStatusChangeProps<TChildProps = {}> = ApolloReactHoc.MutateProps<GrievanceTicketStatusChangeMutation, GrievanceTicketStatusChangeMutationVariables> & TChildProps;
+export function withGrievanceTicketStatusChange<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  GrievanceTicketStatusChangeMutation,
+  GrievanceTicketStatusChangeMutationVariables,
+  GrievanceTicketStatusChangeProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, GrievanceTicketStatusChangeMutation, GrievanceTicketStatusChangeMutationVariables, GrievanceTicketStatusChangeProps<TChildProps>>(GrievanceTicketStatusChangeDocument, {
+      alias: 'grievanceTicketStatusChange',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useGrievanceTicketStatusChangeMutation__
+ *
+ * To run a mutation, you first call `useGrievanceTicketStatusChangeMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useGrievanceTicketStatusChangeMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [grievanceTicketStatusChangeMutation, { data, loading, error }] = useGrievanceTicketStatusChangeMutation({
+ *   variables: {
+ *      grievanceTicketId: // value for 'grievanceTicketId'
+ *      status: // value for 'status'
+ *   },
+ * });
+ */
+export function useGrievanceTicketStatusChangeMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<GrievanceTicketStatusChangeMutation, GrievanceTicketStatusChangeMutationVariables>) {
+        return ApolloReactHooks.useMutation<GrievanceTicketStatusChangeMutation, GrievanceTicketStatusChangeMutationVariables>(GrievanceTicketStatusChangeDocument, baseOptions);
+      }
+export type GrievanceTicketStatusChangeMutationHookResult = ReturnType<typeof useGrievanceTicketStatusChangeMutation>;
+export type GrievanceTicketStatusChangeMutationResult = ApolloReactCommon.MutationResult<GrievanceTicketStatusChangeMutation>;
+export type GrievanceTicketStatusChangeMutationOptions = ApolloReactCommon.BaseMutationOptions<GrievanceTicketStatusChangeMutation, GrievanceTicketStatusChangeMutationVariables>;
 export const ImportXlsxCashPlanVerificationDocument = gql`
     mutation importXlsxCashPlanVerification($cashPlanVerificationId: ID!, $file: Upload!) {
   importXlsxCashPlanVerification(cashPlanVerificationId: $cashPlanVerificationId, file: $file) {
@@ -9273,6 +9358,10 @@ export const GrievanceTicketDocument = gql`
       firstName
       lastName
       email
+    }
+    household {
+      id
+      unicefId
     }
     ticketNotes {
       edges {
