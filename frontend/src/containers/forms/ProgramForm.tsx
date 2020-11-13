@@ -115,6 +115,9 @@ export function ProgramForm({
 
   if (program) {
     initialValue = selectFields(program, Object.keys(initialValue));
+    initialValue.individualDataNeeded = program.individualDataNeeded
+      ? 'YES'
+      : 'NO';
   }
   if (initialValue.budget === 0) {
     initialValue.budget = '0.00';
