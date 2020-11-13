@@ -5,7 +5,7 @@ import {
   ChoiceObject,
   ProgramStatus,
 } from '../__generated__/graphql';
-import { GRIEVANCE_TICKET_STATES, TARGETING_STATES } from './constants';
+import { TARGETING_STATES } from './constants';
 
 const Gender = new Map([
   ['MALE', 'Male'],
