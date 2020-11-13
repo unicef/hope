@@ -18,10 +18,10 @@ import {
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../LoadingComponent';
 import { useSnackbar } from '../../hooks/useSnackBar';
-import { Consent } from './Consent';
-import { LookUpSection } from './LookUpSection';
 import { FormikAdminAreaAutocomplete } from '../../shared/Formik/FormikAdminAreaAutocomplete';
 import { GRIEVANCE_CATEGORIES } from '../../utils/constants';
+import { Consent } from './Consent';
+import { LookUpSection } from './LookUpSection';
 
 const BoxPadding = styled.div`
   padding: 15px 0;

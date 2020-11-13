@@ -5,7 +5,6 @@ import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
 import { LabelizedField } from '../LabelizedField';
-import { Missing } from '../Missing';
 import { OverviewContainer } from '../OverviewContainer';
 import {
   decodeIdString,
@@ -20,10 +19,9 @@ import {
 } from '../../__generated__/graphql';
 import { StatusBox } from '../StatusBox';
 import { UniversalMoment } from '../UniversalMoment';
+import { MiśTheme } from '../../theme';
 import { Notes } from './Notes';
 import { PastTickets } from './PastTickets';
-import { MiśTheme } from '../../theme';
-
 import { GrievanceDetailsToolbar } from './GrievanceDetailsToolbar';
 
 const NotesContainer = styled.div`
@@ -37,14 +35,6 @@ const Title = styled.div`
 const StatusContainer = styled.div`
   min-width: 120px;
   max-width: 200px;
-`;
-
-const Separator = styled.div`
-  width: 1px;
-  height: 28px;
-  border: 1px solid
-    ${({ theme }: { theme: MiśTheme }) => theme.hctPalette.lightGray};
-  margin: 0 28px;
 `;
 
 const ContentLink = styled.a`
