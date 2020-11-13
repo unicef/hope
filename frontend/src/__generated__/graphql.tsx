@@ -4725,7 +4725,7 @@ export type GrievanceTicketStatusChangeMutation = (
       & Pick<GrievanceTicketNode, 'id' | 'status' | 'createdAt' | 'updatedAt'>
       & { createdBy: Maybe<(
         { __typename?: 'UserNode' }
-        & Pick<UserNode, 'firstName' | 'lastName' | 'username' | 'email'>
+        & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'username' | 'email'>
       )> }
     )> }
   )> }
@@ -5019,7 +5019,7 @@ export type AllGrievanceTicketQuery = (
           & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
         )>, household: Maybe<(
           { __typename?: 'HouseholdNode' }
-          & Pick<HouseholdNode, 'id'>
+          & Pick<HouseholdNode, 'unicefId' | 'id'>
         )> }
       )> }
     )>> }
@@ -7547,6 +7547,7 @@ export const GrievanceTicketStatusChangeDocument = gql`
       createdAt
       updatedAt
       createdBy {
+        id
         firstName
         lastName
         username
@@ -8428,6 +8429,7 @@ export const AllGrievanceTicketDocument = gql`
         userModified
         admin
         household {
+          unicefId
           id
         }
       }
