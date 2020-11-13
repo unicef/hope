@@ -6,12 +6,12 @@ export const TARGETING_STATES = {
 };
 
 export const GRIEVANCE_TICKET_STATES = {
-  NEW: '1',
-  ASSIGNED: '2',
-  IN_PROGRESS: '3',
-  ON_HOLD: '4',
-  FOR_APPROVAL: '5',
-  CLOSED: '6',
+  NEW: 1,
+  ASSIGNED: 2,
+  IN_PROGRESS: 3,
+  ON_HOLD: 4,
+  FOR_APPROVAL: 5,
+  CLOSED: 6,
 };
 
 export const GRIEVANCE_CATEGORIES = {
