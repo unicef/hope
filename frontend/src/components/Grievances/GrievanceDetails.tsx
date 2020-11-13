@@ -8,6 +8,7 @@ import { LabelizedField } from '../LabelizedField';
 import { Missing } from '../Missing';
 import { OverviewContainer } from '../OverviewContainer';
 import {
+  decodeIdString,
   grievanceTicketStatusToColor,
   reduceChoices,
   renderUserName,
@@ -87,6 +88,14 @@ export function GrievanceDetails(): React.ReactElement {
 
   const ticket = data.grievanceTicket;
 
+  const issueType = ticket.issueType
+    ? choicesData.grievanceTicketIssueTypeChoices
+        .filter((el) => el.category === ticket.category.toString())[0]
+        .subCategories.filter(
+          (el) => el.value === ticket.issueType.toString(),
+        )[0].name
+    : '-';
+
   const FieldsArray: {
     label: string;
     value: React.ReactElement;
@@ -110,6 +119,11 @@ export function GrievanceDetails(): React.ReactElement {
       size: 3,
     },
     {
+      label: 'Issue Type',
+      value: <span>{issueType}</span>,
+      size: 6,
+    },
+    {
       label: 'HOUSEHOLD ID',
       value: (
         <span>
@@ -126,7 +140,40 @@ export function GrievanceDetails(): React.ReactElement {
       ),
       size: 3,
     },
-    { label: 'PAYMENT ID', value: <Missing />, size: 3 },
+    {
+      label: 'INDIVIDUAL ID',
+      value: (
+        <span>
+          {ticket.individual?.id ? (
+            <ContentLink
+              href={`/${businessArea}/population/individuals/${ticket.individual.id}`}
+            >
+              {ticket.individual.unicefId}
+            </ContentLink>
+          ) : (
+            '-'
+          )}
+        </span>
+      ),
+      size: 3,
+    },
+    {
+      label: 'PAYMENT ID',
+      value: (
+        <span>
+          {ticket.paymentRecord?.id ? (
+            <ContentLink
+              href={`/${businessArea}/payment-records/${ticket.paymentRecord.id}`}
+            >
+              {decodeIdString(ticket.paymentRecord.id)}
+            </ContentLink>
+          ) : (
+            '-'
+          )}
+        </span>
+      ),
+      size: 6,
+    },
     {
       label: 'CONSENT',
       value: <span>{ticket.consent ? 'Yes' : 'No'}</span>,
@@ -153,7 +200,11 @@ export function GrievanceDetails(): React.ReactElement {
       value: <span>{renderUserName(ticket.assignedTo)}</span>,
       size: 6,
     },
-    { label: 'ADMIN 2', value: <span>{ticket.admin || '-'}</span>, size: 3 },
+    {
+      label: 'ADMINISTRATIVE LEVEL 2',
+      value: <span>{ticket.admin || '-'}</span>,
+      size: 3,
+    },
     {
       label: 'AREA / VILLAGE / PAY POINT',
       value: <span>{ticket.area || '-'}</span>,
