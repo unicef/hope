@@ -5397,16 +5397,22 @@ export type GrievanceTicketQuery = (
   { __typename?: 'Query' }
   & { grievanceTicket: Maybe<(
     { __typename?: 'GrievanceTicketNode' }
-    & Pick<GrievanceTicketNode, 'id' | 'status' | 'category' | 'consent' | 'createdAt' | 'updatedAt' | 'description' | 'language' | 'admin' | 'area'>
+    & Pick<GrievanceTicketNode, 'id' | 'status' | 'category' | 'consent' | 'createdAt' | 'updatedAt' | 'description' | 'language' | 'admin' | 'area' | 'issueType'>
     & { createdBy: Maybe<(
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
     )>, assignedTo: Maybe<(
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
+    )>, individual: Maybe<(
+      { __typename?: 'IndividualNode' }
+      & Pick<IndividualNode, 'id' | 'unicefId'>
     )>, household: Maybe<(
       { __typename?: 'HouseholdNode' }
       & Pick<HouseholdNode, 'id' | 'unicefId'>
+    )>, paymentRecord: Maybe<(
+      { __typename?: 'PaymentRecordNode' }
+      & Pick<PaymentRecordNode, 'id'>
     )>, ticketNotes: (
       { __typename?: 'TicketNoteNodeConnection' }
       & { edges: Array<Maybe<(
@@ -9361,10 +9367,18 @@ export const GrievanceTicketDocument = gql`
       lastName
       email
     }
+    individual {
+      id
+      unicefId
+    }
     household {
       id
       unicefId
     }
+    paymentRecord {
+      id
+    }
+    issueType
     ticketNotes {
       edges {
         node {
