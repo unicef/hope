@@ -3,14 +3,11 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { BreadCrumbsItem } from '../BreadCrumbs';
 import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
 import { LabelizedField } from '../LabelizedField';
 import { Missing } from '../Missing';
 import { OverviewContainer } from '../OverviewContainer';
-import { PageHeader } from '../PageHeader';
 import {
-  decodeIdString,
   grievanceTicketStatusToColor,
   reduceChoices,
   renderUserName,
@@ -24,6 +21,9 @@ import { StatusBox } from '../StatusBox';
 import { UniversalMoment } from '../UniversalMoment';
 import { Notes } from './Notes';
 import { PastTickets } from './PastTickets';
+import { MiśTheme } from '../../theme';
+
+import { GrievanceDetailsToolbar } from './GrievanceDetailsToolbar';
 
 const NotesContainer = styled.div`
   padding: 22px;
@@ -38,6 +38,22 @@ const StatusContainer = styled.div`
   max-width: 200px;
 `;
 
+const Separator = styled.div`
+  width: 1px;
+  height: 28px;
+  border: 1px solid
+    ${({ theme }: { theme: MiśTheme }) => theme.hctPalette.lightGray};
+  margin: 0 28px;
+`;
+
+const ContentLink = styled.a`
+  font-family: ${({ theme }: { theme: MiśTheme }) =>
+    theme.hctTypography.fontFamily};
+  color: #253b46;
+  font-size: 14px;
+  line-height: 19px;
+`;
+
 export function GrievanceDetails(): React.ReactElement {
   const { id } = useParams();
   const { data, loading } = useGrievanceTicketQuery({
@@ -49,6 +65,7 @@ export function GrievanceDetails(): React.ReactElement {
     data: choicesData,
     loading: choicesLoading,
   } = useGrievancesChoiceDataQuery();
+
   if (choicesLoading) {
     return null;
   }
@@ -59,12 +76,6 @@ export function GrievanceDetails(): React.ReactElement {
   if (!data || !choicesData) {
     return null;
   }
-  const breadCrumbsItems: BreadCrumbsItem[] = [
-    {
-      title: 'Grievance and Feedback',
-      to: `/${businessArea}/grievance-and-feedback/`,
-    },
-  ];
 
   const statusChoices: {
     [id: number]: string;
@@ -98,7 +109,23 @@ export function GrievanceDetails(): React.ReactElement {
       value: <span>{categoryChoices[ticket.category]}</span>,
       size: 3,
     },
-    { label: 'HOUSEHOLD ID', value: <Missing />, size: 3 },
+    {
+      label: 'HOUSEHOLD ID',
+      value: (
+        <span>
+          {ticket.household?.id ? (
+            <ContentLink
+              href={`/${businessArea}/population/household/${ticket.household.id}`}
+            >
+              {ticket.household.unicefId}
+            </ContentLink>
+          ) : (
+            '-'
+          )}
+        </span>
+      ),
+      size: 3,
+    },
     { label: 'PAYMENT ID', value: <Missing />, size: 3 },
     {
       label: 'CONSENT',
@@ -143,10 +170,7 @@ export function GrievanceDetails(): React.ReactElement {
 
   return (
     <div>
-      <PageHeader
-        title={`Ticket #${decodeIdString(id)}`}
-        breadCrumbs={breadCrumbsItems}
-      />
+      <GrievanceDetailsToolbar ticket={ticket} />
       <Grid container>
         <Grid item xs={12}>
           <ContainerColumnWithBorder>
