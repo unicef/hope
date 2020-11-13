@@ -17,9 +17,7 @@ import { ContainerWithBorder } from '../../ContainerWithBorder';
 import InputLabel from '../../../shared/InputLabel';
 import Select from '../../../shared/Select';
 import { FieldLabel } from '../../FieldLabel';
-import { HouseholdChoiceDataQuery } from '../../../__generated__/graphql';
 import { AdminAreasAutocomplete } from '../../population/AdminAreaAutocomplete';
-import { Missing } from '../../Missing';
 
 const StyledFormControl = styled(FormControl)`
   width: 232px;
@@ -41,13 +39,11 @@ interface LookUpIndividualFiltersProps {
   onFilterChange;
   filter;
   programs;
-  choicesData: HouseholdChoiceDataQuery;
 }
 export function LookUpIndividualFilters({
   onFilterChange,
   filter,
   programs,
-  choicesData,
 }: LookUpIndividualFiltersProps): React.ReactElement {
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });

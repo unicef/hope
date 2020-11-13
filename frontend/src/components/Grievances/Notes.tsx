@@ -8,7 +8,6 @@ import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { UniversalMoment } from '../UniversalMoment';
 import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
 import { OverviewContainerColumn } from '../OverviewContainerColumn';
-import { Missing } from '../Missing';
 import {
   GrievanceTicketQuery,
   useCreateGrievanceTicketNoteMutation,
