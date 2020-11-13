@@ -202,18 +202,19 @@ export function CreateGrievance(): React.ReactElement {
   return (
     <Formik
       initialValues={initialValues}
-      onSubmit={(values) => {
-        mutate(prepareVariables(values.category, values)).then(
-          (res) => {
-            return showMessage('Grievance Ticket created.', {
-              pathname: `/${businessArea}/grievance-and-feedback/${res.data.createGrievanceTicket.grievanceTickets[0].id}`,
-              historyMethod: 'push',
-            });
-          },
-          () => {
-            return showMessage('Something went wrong.');
-          },
-        );
+      onSubmit={async (values) => {
+        try {
+          await mutate(prepareVariables(values.category, values)).then(
+            (res) => {
+              return showMessage('Grievance Ticket created.', {
+                pathname: `/${businessArea}/grievance-and-feedback/${res.data.createGrievanceTicket.grievanceTickets[0].id}`,
+                historyMethod: 'push',
+              });
+            },
+          );
+        } catch (e) {
+          e.graphQLErrors.map((x) => showMessage(x.message));
+        }
       }}
       validationSchema={validationSchema}
     >
