@@ -1,4 +1,4 @@
-import { Grid, Typography } from '@material-ui/core';
+import { Button, Grid, Typography } from '@material-ui/core';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -24,6 +24,7 @@ import { StatusBox } from '../StatusBox';
 import { UniversalMoment } from '../UniversalMoment';
 import { Notes } from './Notes';
 import { PastTickets } from './PastTickets';
+import { MiśTheme } from '../../theme';
 
 const NotesContainer = styled.div`
   padding: 22px;
@@ -36,6 +37,14 @@ const Title = styled.div`
 const StatusContainer = styled.div`
   min-width: 120px;
   max-width: 200px;
+`;
+
+const ContentLink = styled.a`
+  font-family: ${({ theme }: { theme: MiśTheme }) =>
+    theme.hctTypography.fontFamily};
+  color: #253b46;
+  font-size: 14px;
+  line-height: 19px;
 `;
 
 export function GrievanceDetails(): React.ReactElement {
@@ -98,7 +107,23 @@ export function GrievanceDetails(): React.ReactElement {
       value: <span>{categoryChoices[ticket.category]}</span>,
       size: 3,
     },
-    { label: 'HOUSEHOLD ID', value: <Missing />, size: 3 },
+    {
+      label: 'HOUSEHOLD ID',
+      value: (
+        <span>
+          {ticket.household?.id ? (
+            <ContentLink
+              href={`/${businessArea}/population/household/${ticket.household.id}`}
+            >
+              {ticket.household.unicefId}
+            </ContentLink>
+          ) : (
+            '-'
+          )}
+        </span>
+      ),
+      size: 3,
+    },
     { label: 'PAYMENT ID', value: <Missing />, size: 3 },
     {
       label: 'CONSENT',
@@ -140,6 +165,15 @@ export function GrievanceDetails(): React.ReactElement {
   ];
 
   const tickets: string[] = ['189-19-15311', '183-19-82649'];
+
+  const toolbar = (
+    <PageHeader
+      title={`Ticket #${decodeIdString(id)}`}
+      breadCrumbs={breadCrumbsItems}
+    >
+      <Button>Set to in progress</Button>
+    </PageHeader>
+  );
 
   return (
     <div>
