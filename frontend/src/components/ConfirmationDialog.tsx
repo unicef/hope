@@ -14,6 +14,7 @@ interface ConfirmationDialogProps {
   children?;
   title?;
   content?;
+  continueText?;
 }
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -75,7 +76,7 @@ export class ConfirmationDialog extends React.Component<
   };
 
   render() {
-    const { title, content } = this.props;
+    const { title, content, continueText } = this.props;
     return (
       <>
         {this.props.children(this.show)}
@@ -99,7 +100,7 @@ export class ConfirmationDialog extends React.Component<
                 onClick={() => this.confirm()}
                 data-cy='button-submit'
               >
-                Continue
+                {continueText || 'Continue'}
               </Button>
             </DialogActions>
           </DialogFooter>
