@@ -52,6 +52,7 @@ export const AllGrievanceTicket = gql`
           userModified
           admin
           household {
+            unicefId
             id
           }
         }
