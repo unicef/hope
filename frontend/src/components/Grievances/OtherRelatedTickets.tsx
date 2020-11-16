@@ -4,9 +4,14 @@ import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import { decodeIdString } from '../../utils/utils';
-import { GrievanceTicketQuery } from '../../__generated__/graphql';
+import {
+  GrievanceTicketQuery,
+  useAllGrievanceTicketQuery,
+  useExistingGrievanceTicketsQuery,
+} from '../../__generated__/graphql';
 import { ContentLink } from '../ContentLink';
 import { LabelizedField } from '../LabelizedField';
+import { LoadingComponent } from '../LoadingComponent';
 
 const StyledBox = styled.div`
   border-color: #b1b1b5;
@@ -31,11 +36,26 @@ const BlueBold = styled.div`
 
 export const OtherRelatedTickets = ({
   linkedTickets,
+  ticket,
 }: {
   linkedTickets: GrievanceTicketQuery['grievanceTicket']['linkedTickets']['edges'];
+  ticket: GrievanceTicketQuery['grievanceTicket'];
 }) => {
   const businessArea = useBusinessArea();
   const [show, setShow] = useState(false);
+
+  const { data, loading } = useExistingGrievanceTicketsQuery({
+    variables: {
+      businessArea,
+      category: ticket.category.toString(),
+      household: ticket.household?.id || '',
+    },
+  });
+  if (loading) return <LoadingComponent />;
+  if (!data) return null;
+
+  const householdTickets = data.existingGrievanceTickets.edges;
+  console.log('😎: householdTickets', householdTickets);
 
   const renderIds = (tickets) =>
     tickets.map((edge) => (
@@ -68,7 +88,7 @@ export const OtherRelatedTickets = ({
         <LabelizedField label='Tickets'>
           <>{renderIds(openTickets)}</>
         </LabelizedField>
-        {!show && (
+        {!show && closedTickets.length && (
           <Box mt={3}>
             <BlueBold onClick={() => setShow(true)}>
               SHOW CLOSED TICKETS ({closedTickets.length})
@@ -83,7 +103,7 @@ export const OtherRelatedTickets = ({
             </LabelizedField>
           </Box>
         )}
-        {show && (
+        {show && closedTickets.length && (
           <BlueBold onClick={() => setShow(false)}>
             HIDE CLOSED TICKETS ({closedTickets.length})
           </BlueBold>
