@@ -219,14 +219,20 @@ export function GrievanceDetails(): React.ReactElement {
         <Box display='flex' flexDirection='column'>
           <PaymentIds ids={['34543xx', '44322xx', '12345xx']} />
           <Box mt={6}>
-            <OtherRelatedTickets linkedTickets={ticket.linkedTickets.edges} />
+            <OtherRelatedTickets
+              ticket={ticket}
+              linkedTickets={ticket.linkedTickets.edges}
+            />
           </Box>
         </Box>
       );
     return (
       <PaddingContainer>
         <Box display='flex' flexDirection='column'>
-          <OtherRelatedTickets linkedTickets={ticket.linkedTickets.edges} />
+          <OtherRelatedTickets
+            ticket={ticket}
+            linkedTickets={ticket.linkedTickets.edges}
+          />
         </Box>
       </PaddingContainer>
     );
