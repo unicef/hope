@@ -47,7 +47,10 @@ export const OtherRelatedTickets = ({
     variables: {
       businessArea,
       category: ticket.category.toString(),
-      household: decodeIdString(ticket.household?.id) || '',
+      household:
+        decodeIdString(ticket.household?.id) ||
+        '294cfa7e-b16f-4331-8014-a22ffb2b8b3c',
+      //adding some random ID to get 0 results if there is no household id.
     },
   });
   if (loading) return <LoadingComponent />;
