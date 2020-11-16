@@ -45,6 +45,7 @@ export const theme = {
     red: '#EF4343',
     brown: '#D9D1CE',
     darkBrown: '#715247',
+    navyBlue: '#003C8F',
   },
   hctTypography: {
     fontFamily: FONT,

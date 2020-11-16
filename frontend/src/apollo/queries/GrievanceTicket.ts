@@ -36,6 +36,18 @@ export const GrievanceTicket = gql`
       paymentRecord {
         id
       }
+      linkedTickets {
+        edges {
+          node {
+            id
+            status
+            household {
+              id
+              unicefId
+            }
+          }
+        }
+      }
       issueType
       ticketNotes {
         edges {
