@@ -35,7 +35,7 @@ export const LookUpRelatedTicketsDisplay = ({
   onValueChange,
 }): React.ReactElement => {
   const handleRemove = (): void => {
-    onValueChange('selectedRelatedTickets', '');
+    onValueChange('selectedRelatedTickets', []);
   };
   const renderRelatedTickets = (): React.ReactElement => {
     if (values.selectedRelatedTickets.length) {
