@@ -1,13 +1,11 @@
 import { Box, Typography } from '@material-ui/core';
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { householdDetailed } from '../../apollo/fragments/HouseholdFragments';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import { decodeIdString } from '../../utils/utils';
 import {
   GrievanceTicketQuery,
-  useAllGrievanceTicketQuery,
   useExistingGrievanceTicketsQuery,
 } from '../../__generated__/graphql';
 import { ContentLink } from '../ContentLink';
@@ -49,7 +47,7 @@ export const OtherRelatedTickets = ({
     variables: {
       businessArea,
       category: ticket.category.toString(),
-      household: ticket.household?.id || '',
+      household: decodeIdString(ticket.household?.id) || '',
     },
   });
   if (loading) return <LoadingComponent />;
