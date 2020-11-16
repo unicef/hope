@@ -91,6 +91,7 @@
 * [Kobo Integration](technical-specification/kobo-integration/README.md)
   * [Kobo hosting](technical-specification/kobo-integration/kobo-hosting.md)
   * [Open issues](technical-specification/kobo-integration/open-issues.md)
+  * [Mapping of KoBo fields in HOPE](technical-specification/kobo-integration/mapping-of-kobo-fields-in-hope.md)
 * [Deployment](technical-specification/deployment.md)
 
 ## Project Management
